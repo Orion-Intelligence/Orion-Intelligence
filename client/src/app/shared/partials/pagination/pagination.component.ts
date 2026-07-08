@@ -2,8 +2,10 @@ import { Component, effect, input, output } from '@angular/core';
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { max } from 'rxjs';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
-  selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgClass, NgOptimizedImage]
+  selector: 'app-pagination', templateUrl: './pagination.component.html', imports: [CommonModule, NgClass, NgOptimizedImage, TranslatePipe]
 })
 export class PaginationComponent {
   protected readonly max = max;

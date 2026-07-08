@@ -2,6 +2,7 @@ export class ReportFeedbackCommentModel {
   user_id = '';
   username = '';
   comment = '';
+  is_deleted = false;
   created_at = '';
   updated_at = '';
 

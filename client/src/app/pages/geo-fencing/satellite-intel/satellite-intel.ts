@@ -1,6 +1,7 @@
 import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { parseCoordinates } from '../../../shared/utils/geo-coordinates.utils';
 import { SatelliteIntelService } from './satellite-intel-service';
@@ -8,7 +9,6 @@ import { GeoFencingGeocodeService } from '../shared/services/geo-fencing-geocode
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
-import { EntityDescriptionPopupComponent } from './ui-overlays/entity-description-popup/entity-description-popup.component';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
 import { ThreatLensComponent } from '../threat-lens/threat-lens';
 import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType } from '../models/geo-fencing.models';
@@ -21,11 +21,11 @@ import { MapEntitiesOverlayComponent } from './ui-overlays/map-entities-overlay/
 import { MonthCompareService } from './ui-overlays/month-compare-section/month-compare.service';
 import { DashboardSectionComponent } from './ui-overlays/dashboard-section/dashboard-section.component';
 import { PanelShellComponent } from './ui-overlays/panel-shell/panel-shell.component';
-import { MapEntityDetailsState } from './state/map-entity-details.state';
 import { SatelliteLoadingState } from './state/satellite-loading.state';
 import { SatelliteLocationState } from './state/satellite-location.state';
 import { SatelliteScanState } from './state/satellite-scan.state';
 import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../enums/geo-fencing.enums';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-satellite-intel',
@@ -36,12 +36,10 @@ import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../enums/geo-fenci
     GeocodeModalComponent,
     MapRendererComponent,
     MonthCompareSectionComponent,
-    EntityDescriptionPopupComponent,
     MapEntitiesOverlayComponent,
     DashboardSectionComponent,
     PanelShellComponent,
-    ThreatLensComponent
-  ],
+    ThreatLensComponent, TranslatePipe],
 })
 export class SatelliteIntel implements OnInit, OnDestroy {
   private entityLoader: EntityLoader;
@@ -49,12 +47,12 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private loadingState = new SatelliteLoadingState();
   private locationState = new SatelliteLocationState();
   private scanState: SatelliteScanState;
-  private mapEntityDetailsState: MapEntityDetailsState;
   private initialMapEntityLoadTimer: ReturnType<typeof setTimeout> | null = null;
   private initialMapLoadingId: number | null = null;
   private route: ActivatedRoute;
   private sidebarService: SidebarService;
   @ViewChild(MapRendererComponent) private mapRenderer?: MapRendererComponent;
+  @ViewChild(ThreatLensComponent) private threatLens?: ThreatLensComponent;
 
   satelliteService: SatelliteIntelService;
   readonly panel = SatelliteIntelPanelEnum;
@@ -66,14 +64,17 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   isPanelMenuOpen = false;
   isPanelPopupOpen = true;
   isThreatLensLoading = false;
+  isThreatLensDetailOverlayOpen = false;
+  isFilterOpen$!: Observable<boolean>;
   fetchGeocodeResults = (query: string) => this.geocodeService.fetchGeocodeResults(query);
 
-  @Input() toolbarMode: 'hidden' | 'geo' = 'hidden';
+  @Input() toolbarMode: 'hidden' | 'geo' = 'geo';
 
-  constructor( satelliteService: SatelliteIntelService, private geocodeService: GeoFencingGeocodeService, route: ActivatedRoute, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
+  constructor( satelliteService: SatelliteIntelService, private geocodeService: GeoFencingGeocodeService, route: ActivatedRoute, private router: Router, sidebarService: SidebarService, aircraftTrackingService: SatelliteAircraftTrackingService, shipTrackingService: SatelliteShipTrackingService, facilitiesService: SatelliteFacilitiesService, monthCompareService: MonthCompareService, ) {
     this.satelliteService = satelliteService;
     this.route = route;
     this.sidebarService = sidebarService;
+    this.isFilterOpen$ = this.sidebarService.sidebarState$;
     const loadingBridge = {
       begin: (title: string, message: string) => this.loadingState.begin(title, message),
       end: (id: number) => this.loadingState.end(id),
@@ -85,7 +86,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
       loading: loadingBridge,
     });
     this.mapEntityDashboard = new SatelliteMapEntityDashboardController(facilitiesService, () => this.facilitiesVisible, () => this.facilitiesMapData);
-    this.mapEntityDetailsState = new MapEntityDetailsState(facilitiesService);
     this.scanState = new SatelliteScanState(satelliteService, monthCompareService);
   }
 
@@ -94,8 +94,12 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.initialMapLoadingId = this.loadingState.begin('Loading Satellite Map', 'Rendering satellite map...');
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
+    const requestedView = this.route.snapshot.queryParamMap.get('view') || this.route.snapshot.data['view'];
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
     this.isPanelPopupOpen = true;
+    if (requestedView === 'threat') {
+      this.setActiveView('threat', false);
+    }
     if (q) {
       this.locationState.setInitialQuery(q, parseCoordinates(q));
     }
@@ -112,7 +116,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
     this.entityLoader.destroy();
     this.mapEntityDashboard.destroy();
-    this.mapEntityDetailsState.destroy();
     this.scanState.destroy();
     this.loadingState.clear();
   }
@@ -141,14 +144,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.loadingState.message;
   }
 
-  get entityDescriptionPopupOpen(): boolean {
-    return this.mapEntityDetailsState.isOpen;
-  }
-
-  get entityDescriptionPopupData(): MapEntityDetailsState['data'] {
-    return this.mapEntityDetailsState.data;
-  }
-
   get anomalyResult(): SatelliteScanState['anomalyResult'] {
     return this.scanState.anomalyResult;
   }
@@ -159,10 +154,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   get hasSearched(): boolean {
     return this.scanState.hasSearched;
-  }
-
-  get isMapEntityDetailsLoading(): boolean {
-    return this.mapEntityDetailsState.isLoading;
   }
 
   isScanning(): boolean {
@@ -302,7 +293,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.scanState.resetRequestState();
   }
 
-  setActiveView(view: 'map' | 'threat'): void {
+  setActiveView(view: 'map' | 'threat', syncQuery = true): void {
     if (view === 'threat' && this.isThreatToolbarDisabled) {
       return;
     }
@@ -311,11 +302,20 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     if (view === 'map') {
       this.activePanel = SatelliteIntelPanelEnum.Dashboard;
       this.isPanelPopupOpen = true;
+      this.isThreatLensDetailOverlayOpen = false;
     }
     this.isThreatLensLoading = view === 'threat';
     this.isPanelMenuOpen = false;
     if (view === 'threat') {
       this.isPanelPopupOpen = false;
+    }
+    if (syncQuery) {
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: view === 'map' ? { view, section: this.activePanel } : { view },
+        queryParamsHandling: 'merge',
+        replaceUrl: true,
+      }).then();
     }
   }
 
@@ -325,6 +325,13 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onThreatLensLoadingChange(isLoading: boolean): void {
     this.isThreatLensLoading = isLoading;
+  }
+
+  onThreatLensDetailOverlayOpenChange(isOpen: boolean): void {
+    this.isThreatLensDetailOverlayOpen = isOpen;
+    if (isOpen) {
+      this.isPanelMenuOpen = false;
+    }
   }
 
   onSatelliteMapReady(): void {
@@ -340,14 +347,29 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   }
 
   openThreatFilters(): void {
-    this.sidebarService.openSidebar();
     this.isPanelMenuOpen = false;
+    this.sidebarService.openSidebar();
+  }
+
+  clearAllSelections(): void {
+    this.isPanelMenuOpen = false;
+    this.selectedFeature = null;
+    this.focusedFeature = null;
+    this.mapRenderer?.closeSidebar();
+    this.threatLens?.clearAllSelections();
   }
 
   openPanelPopup(id: SatelliteIntelPanel): void {
+    this.mapRenderer?.closeSidebar();
     this.setPanel(id);
     this.isPanelPopupOpen = true;
     this.isPanelMenuOpen = false;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { section: id },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    }).then();
   }
 
   closePanelPopup(): void {
@@ -483,15 +505,6 @@ export class SatelliteIntel implements OnInit, OnDestroy {
 
   onMapFeatureSelected(feature: OrionSatelliteFeature): void {
     this.selectedFeature = feature;
-    this.focusedFeature = feature;
-  }
-
-  onMapEntityFeatureIdsSelected(ids: string[]): void {
-    this.mapEntityDetailsState.load(ids);
-  }
-
-  closeEntityDescriptionPopup(): void {
-    this.mapEntityDetailsState.close();
   }
 
   private isPanelId(value: string | null): value is SatelliteIntelPanel {

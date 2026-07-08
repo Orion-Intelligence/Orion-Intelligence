@@ -67,7 +67,7 @@ def test_date_priority_filter_include_expected_ranges():
     priority_filter = search_query_generator.build_date_priority_filter(
         "2026-01-01T00:00:00+00:00",
         "2026-01-31T23:59:59+00:00",
-        ["m_leak_date", "m_update_date"],
+        ["m_date", "m_update_date"],
     )
 
     assert priority_filter["bool"]["should"][1]["bool"]["must_not"]

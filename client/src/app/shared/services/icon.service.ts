@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWhatsapp, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
+import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
 const iconMap: Record<string, string> = {
   'x': 'x',
   'twitter': 'x',
@@ -52,7 +52,6 @@ const iconMap: Record<string, string> = {
   'twitch': 'twitch',
   'vimeo': 'vimeo',
   'vk': 'vk',
-  'whatsapp': 'whatsapp',
   'wordpress': 'wordpress',
 };
 const simpleIconPathMap: Record<string, string> = {
@@ -93,7 +92,6 @@ const simpleIconPathMap: Record<string, string> = {
   twitch: siTwitch.path,
   vimeo: siVimeo.path,
   vk: siVk.path,
-  whatsapp: siWhatsapp.path,
   wordpress: siWordpress.path,
 };
 const simpleIconColorMap: Record<string, string> = {
@@ -134,7 +132,6 @@ const simpleIconColorMap: Record<string, string> = {
   twitch: `#${siTwitch.hex}`,
   vimeo: `#${siVimeo.hex}`,
   vk: `#${siVk.hex}`,
-  whatsapp: `#${siWhatsapp.hex}`,
   wordpress: `#${siWordpress.hex}`,
 };
 const fallbackPlatformColorMap: Record<string, string> = {
@@ -161,16 +158,15 @@ export class IconService {
 
   private buildIconSvg(pathData: string, options: IconOptions): string {
     const fillColor = '#e2e8f0';
-    const graphGroup = options.type === 'graph'
-      ? `<g transform="translate(4.2, 4.2) scale(0.65)"><path d="${pathData}"></path></g>`
-      : `<path d="${pathData}"></path>`;
-    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${fillColor}">${graphGroup}</svg>`;
+    const scale = options.type === 'graph' ? 0.65 : 0.72;
+    const offset = (24 - (24 * scale)) / 2;
+    return `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="${fillColor}"><g transform="translate(${offset}, ${offset}) scale(${scale})"><path d="${pathData}"></path></g></svg>`;
   }
 
   private buildFallbackSvg(platformName: string, options: IconOptions): string {
     const firstLetter = platformName.charAt(0).toUpperCase() || '?';
     const fillColor = '#e2e8f0';
-    const fontSize = options.type === 'graph' ? 13 : 20;
+    const fontSize = options.type === 'graph' ? 13 : 16;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><text x="50%" y="50%" dy=".35em" text-anchor="middle" font-family="sans-serif" font-size="${fontSize}" font-weight="bold" fill="${fillColor}">${firstLetter}</text></svg>`;
   }
 

@@ -29,13 +29,7 @@ class PaymentManager:
             email=request.email,
             subject=MailSubject.PRO_SUBSCRIPTION.value,
             lurlHeading=MailUrlHeading.PRO_SUBSCRIPTION.value,
-            url=APP_URL,
-            extra_message=f"""
-                <p><b>Name:</b> {request.name}</p>
-                <p><b>Phone:</b> {request.phone}</p>
-                <p><b>Email:</b> {request.email}</p>
-                <p><b>Plan:</b> {request.plan}</p>
-            """)
+            url=APP_URL)
 
         await mail_manager.get_instance().send_verification_mail_list(
             to_list=[support_email, request.email], subject=MailSubject.PRO_SUBSCRIPTION.value, body=html_content)

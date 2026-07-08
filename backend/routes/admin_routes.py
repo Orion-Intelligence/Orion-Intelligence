@@ -1,30 +1,40 @@
 from fastapi import APIRouter, HTTPException, Query, Request, Depends, UploadFile
 from fastapi.responses import RedirectResponse
 
-from configs.app_dependency import status_required, role_required, get_current_user
+from configs.app_dependency import license_required, status_required, role_required, get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.mail_manager.mail_manager import mail_manager
 
 admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
 
-@admin_routes.get("/admin/api/db_system_model/row-action")
+@admin_routes.get(
+    "/admin/api/db_system_model/row-action",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
 async def block_row_action(name: str = Query(...)):
     if name == "delete":
         raise HTTPException(status_code=403, detail="Deletion of system settings is not allowed")
     return {"message": f"Action '{name}' is not restricted"}
 
 
-@admin_routes.post("/admin/api/db_user_account/edit/{id}")
+@admin_routes.post(
+    "/admin/api/db_user_account/edit/{id}",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
 async def custom_edit_api(id: str, request: Request):
     await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
 
 
-@admin_routes.post("/admin/api/db_user_account/edit/{id}/")
+@admin_routes.post(
+    "/admin/api/db_user_account/edit/{id}/",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
 async def custom_edit_api_trailing(id: str, request: Request):
     await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
@@ -36,7 +46,7 @@ async def custom_edit_api_trailing(id: str, request: Request):
         role_required(
             [user_role.ADMIN])), ], )
 async def update_public_config(param: config_data):
-    return await config_controller.getInstance().update_public_config(param)
+    return await config_controller.getInstance().update_public_config(param, include_email_config=True)
 
 @admin_routes.delete(
     "/api/system/image",
@@ -51,3 +61,20 @@ async def update_user(key: str, current_user=Depends(get_current_user)):
 )
 async def upload_system_image(file: UploadFile,key: str = "logo_url",current_user=Depends(get_current_user)):
     return await config_controller.getInstance().uploadSystemResource(file, current_user, key)
+
+
+@admin_routes.post(
+    "/api/system/mail/verify",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
+        Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN]))],
+)
+async def verify_mail_configuration(current_user=Depends(get_current_user)):
+    try:
+        tenant_id = None if current_user.role == user_role.ADMIN else str(current_user.tenant_uuid)
+        await mail_manager.get_instance().send_test_mail(tenant_id=tenant_id)
+        return {"status": "working"}
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail="Mail configuration is not working") from exc

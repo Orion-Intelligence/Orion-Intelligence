@@ -22,7 +22,7 @@
 .tour-spotlight-svg {
   stroke: color-mix(in srgb, var(--tour-accent) 34%, transparent);
   stroke-width: 1px;
-  opacity: 1;
+  opacity: 100%;
   vector-effect: non-scaling-stroke;
 }
 
@@ -32,7 +32,7 @@
 
 .tour-spotlight-glow-shadow {
   flood-color: var(--tour-accent);
-  flood-opacity: 0.18;
+  flood-opacity: 18%;
 }
 
 .tour-spotlight-reveal-a,
@@ -46,7 +46,7 @@
   bottom: var(--tour-tooltip-bottom, auto);
   width: var(--tour-tooltip-width, 320px);
   max-width: calc(100vw - 24px);
-  opacity: 0;
+  opacity: 0%;
   border-radius: var(--tour-tooltip-radius);
   border-width: 2px;
   background:
@@ -67,7 +67,7 @@
 }
 
 :host(.tour-tooltip-positioned) .tour-tooltip {
-  opacity: 1;
+  opacity: 100%;
 }
 
 .tour-tooltip::before {
@@ -130,7 +130,7 @@
 }
 
 .tour-overlay {
-  opacity: 1;
+  opacity: 100%;
   will-change: opacity;
 }
 
@@ -145,7 +145,7 @@
 }
 
 .tour-state-layer {
-  opacity: 0;
+  opacity: 0%;
   transform: translate3d(0, 6px, 0);
   pointer-events: none;
   transition:
@@ -156,7 +156,7 @@
 }
 
 .tour-state-layer.is-active {
-  opacity: 1;
+  opacity: 100%;
   transform: translate3d(0, 0, 0);
   pointer-events: auto;
 }
@@ -175,7 +175,7 @@
 
 .tour-primary-button[disabled] {
   cursor: default;
-  opacity: 0.65;
+  opacity: 65%;
   transform: none;
   box-shadow: none;
 }
@@ -204,11 +204,11 @@
 
 @keyframes tour-spotlight-reveal {
   from {
-    opacity: 0;
+    opacity: 0%;
   }
 
   to {
-    opacity: 1;
+    opacity: 100%;
   }
 }
 
@@ -237,7 +237,7 @@
 }
 
 :host-context(.light-theme) .tour-overlay {
-  opacity: 0.96;
+  opacity: 96%;
 }
 
 @media (width <= 640px) {

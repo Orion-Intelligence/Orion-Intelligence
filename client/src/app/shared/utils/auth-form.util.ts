@@ -91,13 +91,13 @@ export function evaluatePasswordInput(password: string): PasswordEvaluation {
   const currentUnmetCheck = checkOrder.find(check => !passwordChecks[check.key])?.message || null;
   const allPasswordRequirementsMet = areAllPasswordRequirementsMet(passwordChecks);
 
-  let passwordStrength: PasswordStrength = 'weak';
+  let strengthLevel: PasswordStrength = 'weak';
   if (allPasswordRequirementsMet) {
     if (password.length >= 12 && passwordChecks.specialChar && passwordChecks.number) {
-      passwordStrength = 'strong';
+      strengthLevel = 'strong';
     }
     else if (password.length >= 10) {
-      passwordStrength = 'medium';
+      strengthLevel = 'medium';
     }
   }
 
@@ -105,7 +105,7 @@ export function evaluatePasswordInput(password: string): PasswordEvaluation {
     showPasswordMeter: password.length > 0,
     passwordChecks,
     currentUnmetCheck,
-    passwordStrength,
+    passwordStrength: strengthLevel,
     allPasswordRequirementsMet
   };
 }

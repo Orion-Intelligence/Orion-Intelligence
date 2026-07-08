@@ -6,10 +6,11 @@ import { AppService } from '../../../../../services/core/app/app.service';
 import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-share',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './case-share.component.html',
 })
 export class CaseShareComponent implements OnInit, OnDestroy {

@@ -8,10 +8,13 @@ import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })
@@ -19,12 +22,39 @@ export class ViewTenantComponent implements OnInit {
   protected readonly JSON = JSON;
 
   tenants: any[] = [];
+  tenantSearch = '';
   licenseList = Object.values(LicenseName).filter((license) => license !== LicenseName.FEEDER);
   isLoading = true;
   selectedTenantId: string | null = null;
   TenantStatus = TenantStatusValues;
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService) {
+  }
+
+  get tenantLicenseOptions(): UiDropdownOption[] {
+    return this.licenseList
+      .filter(license => this.licenseService.getLicenseLabel(license) !== 'maintainer')
+      .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
+  }
+
+  get filteredTenants(): any[] {
+    const search = this.tenantSearch.trim().toLowerCase();
+    if (!search) {
+      return this.tenants;
+    }
+    return this.tenants.filter((tenant) => [
+      tenant.companyName,
+      tenant.company,
+      tenant.name,
+      tenant.email,
+      tenant.phone,
+      tenant.country,
+      tenant.city,
+      tenant.status,
+      tenant.subscription ? 'paid' : 'free',
+      tenant.verified ? 'verified' : 'not verified',
+      this.getTenantLicensesLabel(tenant)
+    ].some(value => String(value || '').toLowerCase().includes(search)));
   }
 
   ngOnInit(): void {
@@ -99,6 +129,10 @@ export class ViewTenantComponent implements OnInit {
     else {
       tenant.licenses.push(license);
     }
+  }
+
+  onTenantLicenseDropdownChange(tenant: any, licenses: string[]): void {
+    tenant.licenses = licenses;
   }
 
   getTenantLicensesLabel(tenant: any): string {

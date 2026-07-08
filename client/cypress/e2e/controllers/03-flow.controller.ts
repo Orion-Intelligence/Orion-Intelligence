@@ -8,7 +8,7 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Feed: 'feed',
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
-  'Entity API': 'api',
+  'Entity Lookup': 'api',
 };
 
 const SIDEBAR_SUBITEM_TEST_ID_ALIAS: Record<string, Record<string, string>> = {
@@ -30,35 +30,27 @@ export const DIRECTORY_CONTENT_OPTION = {label: 'Forums', value: 'forums'};
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);
-  if (title === 'Entity API') {
-    cy.get('[data-testid="sidebar-group-stealerlogs"]')
-      .scrollIntoView()
-      .should('be.visible')
-      .click({ force: true });
-  }
   cy.get(`[data-testid="${groupTestId}"]`).then(($group) => {
     cy.wrap($group).scrollIntoView();
     let group = $group.parent('div');
     let sub = group.find('> ul');
+    if (!sub.length) {
+      cy.wrap($group).click({ force: true });
+      return;
+    }
     let isClosed = !sub.length || getComputedStyle(sub[0] as HTMLElement).pointerEvents === 'none';
     if (isClosed) {
       cy.wrap($group).find('img[alt="Drop Down"]').click();
     }
-  });
-
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+    cy.wrap(sub).should(($ul) => {
+      expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+    });
   });
 }
 
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
-  const groupTestId = getSidebarGroupTestId(groupTitle);
   const aliasedTestId = SIDEBAR_SUBITEM_TEST_ID_ALIAS[groupTitle]?.[itemTitle];
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
-
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  });
 
   if (aliasedTestId) {
     cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
@@ -68,7 +60,7 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
     return;
   }
 
-  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
+  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"]`, new RegExp(`^\\s*${itemTitle}\\s*$`))
     .scrollIntoView()
     .should('be.visible')
     .click({ force: true });
@@ -136,6 +128,18 @@ export function waitForDirectoryRequest() {
   });
 }
 
+export function typeVisibleInputSlow(selector: string, value: string, submit = false) {
+  cy.get(selector).filter(':visible').first().should('be.enabled').click({ force: true });
+  cy.get(selector).filter(':visible').first().type('{selectall}{backspace}', { force: true });
+  cy.wait(250);
+  cy.get(selector).filter(':visible').first().type(value, { force: true, delay: 75 });
+  cy.get(selector).filter(':visible').first().should('have.value', value);
+  if (submit) {
+    cy.wait(250);
+    cy.get(selector).filter(':visible').first().type('{enter}', { force: true });
+  }
+}
+
 export function assertDirectoryContentVisible() {
   cy.scrollDashboardToTop();
   cy.get('app-directory').should('be.visible');
@@ -151,7 +155,12 @@ export function assertDirectoryContentVisible() {
 export function openDirectoryFilter() {
   cy.scrollDashboardToTop();
   cy.get('app-directory #top').should('exist').scrollIntoView({duration: 300, offset: {top: -20, left: 0}});
-  cy.contains('button', 'Filter').should('be.visible').scrollIntoView().click();
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="side-filter-close"]:visible').length) {
+      return;
+    }
+    cy.contains('button', 'Filter').should('be.visible').scrollIntoView().click();
+  });
   cy.get('[data-testid="side-filter-close"]').filter(':visible').first().should('be.visible');
 }
 
@@ -168,7 +177,20 @@ export function resetDirectoryFilters() {
 
 export function applyDirectoryDropdown(testId: string, option: { label: string; value: string; }, queryKey: string) {
   openDirectoryFilter();
-  cy.get(`[data-testid="side-filter-select-${testId}"]`).scrollIntoView().select(option.label);
+  cy.get(`[data-testid="side-filter-select-${testId}"]`).scrollIntoView().then(($el) => {
+    if ($el.is('select')) {
+      cy.wrap($el).select(option.label);
+      return;
+    }
+    const menuId = $el.attr('aria-controls');
+    expect(menuId, `side-filter-select-${testId} menu id`).to.exist;
+    cy.wrap($el).click({ force: true });
+    cy.wrap($el).should('have.attr', 'aria-expanded', 'true');
+    cy.get(`#${menuId}`).parent().find('input[type="text"]').should('be.visible').clear();
+    cy.get(`#${menuId}`).parent().find('input[type="text"]').should('be.visible').type(option.label, { force: true }).should('have.value', option.label);
+    cy.contains(`#${menuId} [role="option"]`, option.label, { timeout: 15000 }).click({ force: true });
+    cy.get(`[data-testid="side-filter-select-${testId}"]`).should('have.attr', 'aria-expanded', 'false');
+  });
   cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
   waitForDirectoryRequest();
   cy.location('search').should('include', `${queryKey}=${option.value}`);
@@ -192,6 +214,7 @@ export function applyDateRange(monthsBack: number) {
 
 export function assertFreeModeDashboardChrome() {
   cy.location('pathname').should('eq', '/dashboard/strategic/all');
+  cy.get('[data-testid="dashboard-body"]').should('be.visible');
 
   cy.window().then((win) => {
     expect(win.localStorage.getItem('mobileDemo')).to.equal('true');

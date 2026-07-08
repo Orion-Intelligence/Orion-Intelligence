@@ -2,12 +2,13 @@ import asyncio
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
 from interface import BASE_DIR
-from orion.constants.constant import allowed_keys
+from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
-from orion.management.jobs.alert_job import alert_job
+from orion.management.jobs.alert.alert_job import alert_job
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
+from orion.services.redis_manager.redis_enums import REDIS_KEYS
 
 
 class cronjob_manager:
@@ -40,18 +41,20 @@ class cronjob_manager:
 
     @staticmethod
     async def __init_handles():
-        asyncio.create_task(insight_job.get_instance().update_insights())
+        job = insight_job.get_instance()
+        await job.update_trending_insights(REDIS_KEYS.INSIGHT_OLD_DAY)
+        asyncio.create_task(job.update_insights(run_on_start=False))
 
     async def init_jobs(self):
+        await self.__init_handles()
         asyncio.create_task(cronjob_manager.purge_loop())
         asyncio.create_task(cronjob_manager.iocs_alert_loop())
-        await self.__init_handles()
 
     @staticmethod
     async def iocs_alert_loop():
         tz = ZoneInfo("Australia/Sydney")
         while True:
-            if len(allowed_keys) <= 0:
+            if not allowed_key_titles:
                 await asyncio.sleep(60)
                 continue
 

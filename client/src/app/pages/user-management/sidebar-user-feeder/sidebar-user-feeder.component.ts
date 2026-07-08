@@ -1,6 +1,5 @@
 import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -9,19 +8,26 @@ import { FeederService } from './feeder.service';
 import { SidebarUserFeederAddComponent } from './add/sidebar-user-feeder-add.component';
 import { SidebarUserFeederViewComponent } from './view/sidebar-user-feeder-view.component';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from './feeder-rule.utils';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../../shared/model/social/social-scan.models';
 
 @Component({
   selector: 'app-sidebar-user-feeder',
   standalone: true,
-  imports: [NgClass, FormsModule, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent],
+  imports: [NgClass, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent, TranslatePipe, UiDropdownComponent],
   templateUrl: './sidebar-user-feeder.component.html',
   animations: [fadeInDashboardItem],
 })
 export class SidebarUserFeederComponent implements OnInit {
+  private readonly socialRuleGroupKey = '__social_media__';
+  private readonly supportedSocialRuleKeys = new Set<string>(VERIFIED_SOCIAL_PLATFORM_KEYS);
+
   activeTab: 'add' | 'view' | 'values' = 'add';
   highlightedScript: FeederScriptItem | null = null;
   rules: FeederRuleOption[] = [];
   selectedRuleKey = '';
+  selectedSocialRuleKey = '';
   isCatalogLoading = true;
   formError = '';
 
@@ -33,11 +39,41 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   get selectedRule(): FeederRuleOption | undefined {
-    return this.rules.find((rule) => rule.key === this.selectedRuleKey);
+    return this.rules.find((rule) => rule.key === this.effectiveSelectedRuleKey);
   }
 
   get selectedRuleType(): string {
     return this.selectedRule?.rule_type || '';
+  }
+
+  get isSocialRuleSelected(): boolean {
+    return this.selectedRuleKey === this.socialRuleGroupKey;
+  }
+
+  get effectiveSelectedRuleKey(): string {
+    return this.isSocialRuleSelected ? (this.selectedSocialRuleKey || this.socialRules[0]?.key || '') : this.selectedRuleKey;
+  }
+
+  get socialRules(): FeederRuleOption[] {
+    return this.rules.filter(rule => this.isSupportedSocialRule(rule));
+  }
+
+  get ruleDropdownOptions(): UiDropdownOption[] {
+    const options = this.rules.filter(rule => !this.isSocialRule(rule)).map(rule => ({
+      key: rule.key,
+      label: this.getRuleLabel(rule.key),
+    }));
+    if (this.socialRules.length) {
+      options.push({ key: this.socialRuleGroupKey, label: 'Social Media' });
+    }
+    return options;
+  }
+
+  get socialRuleDropdownOptions(): UiDropdownOption[] {
+    return this.socialRules.map(rule => ({
+      key: rule.key,
+      label: this.getRuleLabel(rule.key),
+    }));
   }
 
   hasScriptTab(): boolean {
@@ -65,6 +101,32 @@ export class SidebarUserFeederComponent implements OnInit {
     this.syncRuleQueryParam();
   }
 
+  onRuleSelect(ruleKey: string | null): void {
+    if (!ruleKey || this.selectedRuleKey === ruleKey) {
+      return;
+    }
+    if (ruleKey === this.socialRuleGroupKey) {
+      this.selectedRuleKey = ruleKey;
+      this.selectedSocialRuleKey = this.selectedSocialRuleKey || this.socialRules[0]?.key || '';
+      this.activeTab = this.hasScriptTab() ? 'view' : this.hasValuesTab() ? 'values' : 'add';
+      this.onRuleChange();
+      return;
+    }
+    this.selectedRuleKey = ruleKey;
+    this.selectedSocialRuleKey = '';
+    this.onRuleChange();
+  }
+
+  onSocialRuleSelect(ruleKey: string | null): void {
+    if (!ruleKey || this.selectedSocialRuleKey === ruleKey) {
+      return;
+    }
+    this.highlightedScript = null;
+    this.selectedSocialRuleKey = ruleKey;
+    this.ensureValidActiveTab();
+    this.syncRuleQueryParam();
+  }
+
   getRuleLabel(ruleKey: string): string {
     return this.humanizeKey(ruleKey);
   }
@@ -78,12 +140,14 @@ export class SidebarUserFeederComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.rules = response?.rules ?? [];
+          this.syncSocialRuleSelectionFromSelectedRule();
           if (!this.selectedRuleKey && this.rules.length > 0) {
-            this.selectedRuleKey = this.rules[0].key;
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || this.socialRuleGroupKey;
           }
-          if (this.selectedRuleKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
-            this.selectedRuleKey = this.rules[0]?.key || '';
+          if (this.selectedRuleKey && this.selectedRuleKey !== this.socialRuleGroupKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || '';
           }
+          this.ensureSocialRuleSelection();
           this.ensureValidActiveTab();
           this.syncRuleQueryParam();
           this.formError = '';
@@ -115,9 +179,40 @@ export class SidebarUserFeederComponent implements OnInit {
   private syncRuleQueryParam(): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { rule: this.selectedRuleKey || null },
+      queryParams: { rule: this.effectiveSelectedRuleKey || null },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
+  }
+
+  private isSocialRule(rule: FeederRuleOption): boolean {
+    return (rule.path || '').toLowerCase() === 'social/platform';
+  }
+
+  private isSupportedSocialRule(rule: FeederRuleOption): boolean {
+    return this.isSocialRule(rule) && this.supportedSocialRuleKeys.has((rule.key || '').toLowerCase());
+  }
+
+  private syncSocialRuleSelectionFromSelectedRule(): void {
+    const selectedSocialRule = this.rules.find(rule => rule.key === this.selectedRuleKey && this.isSocialRule(rule));
+    if (!selectedSocialRule) {
+      return;
+    }
+    this.selectedSocialRuleKey = this.isSupportedSocialRule(selectedSocialRule) ? selectedSocialRule.key : (this.socialRules[0]?.key || '');
+    this.selectedRuleKey = this.socialRuleGroupKey;
+  }
+
+  private ensureSocialRuleSelection(): void {
+    if (!this.isSocialRuleSelected) {
+      return;
+    }
+    if (!this.socialRules.length) {
+      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || '';
+      this.selectedSocialRuleKey = '';
+      return;
+    }
+    if (!this.socialRules.some(rule => rule.key === this.selectedSocialRuleKey)) {
+      this.selectedSocialRuleKey = this.socialRules[0].key;
+    }
   }
 }

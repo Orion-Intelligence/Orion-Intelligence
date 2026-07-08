@@ -2,6 +2,9 @@ import { Component, OnChanges, OnDestroy, SimpleChanges, input } from '@angular/
 import { NgClass, TitleCasePipe } from '@angular/common';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+
 interface TelemetryGroup {
     key: string;
     label: string;
@@ -10,16 +13,22 @@ interface TelemetryGroup {
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
-  imports: [NgClass, TitleCasePipe, TooltipDirective],
+  imports: [NgClass, TitleCasePipe, TooltipDirective, TranslatePipe, ConfirmationPopupComponent],
   templateUrl: './expanded-row.component.html',
+  styleUrls: ['./expanded-row.component.scss'],
 })
 export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private copiedTimer: any = null;
   private telemetryGroupsCache: TelemetryGroup[] = [];
+  private visiblePasswordKeys = new Set<string>();
+  private readonly passwordRevealConfirmKey = 'orion.passwordRevealConfirmed';
+  private passwordRevealConfirmed = false;
+  private pendingPasswordRevealKey: string | null = null;
 
   activeTelemetryKey: string | null = null;
   matchedValues: string[] = [];
   copiedKey: string | null = null;
+  isPasswordRevealConfirmationOpen = false;
   readonly mode = input<'stealer' | 'threat'>('stealer');
   readonly item = input<any>(null);
   readonly result = input<any>(null);
@@ -27,6 +36,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   readonly searchQuery = input<string>('');
 
   constructor(private rowHelper: ResultRowHelperService) {
+    this.passwordRevealConfirmed = this.getPasswordRevealConfirmed();
   }
 
   ngOnDestroy(): void {
@@ -36,12 +46,15 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mode'] || changes['item'] || changes['result'] || changes['index']) {
+    if (changes['mode'] || changes['item'] || changes['result']) {
       this.activeTelemetryKey = null;
+    }
+    if (changes['mode'] || changes['item'] || changes['result'] || changes['index']) {
       this.copiedKey = null;
       if (this.copiedTimer) {
         clearTimeout(this.copiedTimer);
       }
+      this.visiblePasswordKeys.clear();
     }
     if (changes['mode'] || changes['item'] || changes['result']) {
       this.rebuildTelemetryGroups();
@@ -88,10 +101,6 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return String(n);
   }
 
-  get rowTypeLabel(): string {
-    return this.mode() === 'stealer' ? 'Stealer Log' : 'Threats';
-  }
-
   get channelValue(): string {
     const item = this.item();
     const result = this.result();
@@ -134,19 +143,206 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return arr[0] || '-';
   }
 
-  selectTelemetry(key: string, e?: MouseEvent) {
+  get sourceDomainValues(): string[] {
+    const explicitSourceDomains = this.getSourceDomainValues(this.item());
+    if (explicitSourceDomains.length) {
+      return explicitSourceDomains;
+    }
+    return this.getRawDomainValues(this.item());
+  }
+
+  get sourceDomainValueText(): string {
+    return this.sourceDomainValues.length ? this.sourceDomainValues.join(', ') : '-';
+  }
+
+  get domainValues(): string[] {
+    const item = this.item();
+    const domains = this.getRawDomainValues(item);
+    if (domains.length) {
+      return domains;
+    }
+    return this.getSourceDomainValues(item);
+  }
+
+  get domainValueText(): string {
+    return this.domainValues.length ? this.domainValues.join(', ') : '-';
+  }
+
+  confidenceScore(): number {
+    const record = this.mode() === 'stealer' ? this.item() : this.result();
+    if (!record) {
+      return 0;
+    }
+
+    const values = (value: any): string[] => this.rowHelper.normalizeToArray(value);
+    const clean = (value: any): string => String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const term = (value: string): string => {
+      let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
+      if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) {
+        const fieldMatch = text.match(/^[a-z_][a-z0-9_]*:(.+)$/i);
+        if (fieldMatch) {
+          text = fieldMatch[1].trim();
+        }
+      }
+      return clean(text);
+    };
+    const domain = (value: string): string => {
+      let text = clean(value);
+      if (!text || text === '-') {
+        return '';
+      }
+      text = text.replace(/^[a-z][a-z0-9+.-]*:\/\//i, '');
+      text = text.replace(/^[^@/\s]+@/, '');
+      text = text.split(/[/?#]/)[0] ?? '';
+      text = text.split(':')[0] ?? '';
+      text = text.replace(/^\.+|\.+$/g, '').replace(/^www\./, '');
+      return text && text.includes('.') && !/\s/.test(text) && !/^\d{1,3}(\.\d{1,3}){3}$/.test(text) ? text : '';
+    };
+
+    const searchTerms = Array.from(new Set((this.searchQuery() || '')
+      .split(/\s*(?:\|\||&&|\||&)\s*|[\s,;]+/)
+      .map(term)
+      .filter(value => value.length >= 3)));
+    const domains = Array.from(new Set((this.mode() === 'stealer'
+      ? [...values(record?.['domain']), ...values(record?.['source_domain'])]
+      : [...values(record?.m_domain), ...values(record?.m_root_domain), ...values(record?.m_url), ...values(record?.m_base_url), ...values(record?.m_weblink)])
+      .map(domain)
+      .filter(Boolean)));
+    const keys = this.mode() === 'stealer'
+      ? ['email', 'username', 'user', 'domain', 'source_domain', 'raw', 'url', 'ip', 'bin', 'card_type', 'channel', 'file', 'timestamp', 'date']
+      : ['m_email', 'm_username', 'm_user', 'm_domain', 'm_root_domain', 'm_url', 'm_base_url', 'm_weblink', 'm_title', 'm_content', 'm_important_content', 'm_channel', 'm_date', 'm_update_date', 'rank_index', 'm_rank_index'];
+    const searchable = Array.from(new Set([...domains, ...keys.flatMap(key => values(record?.[key]))])).map(clean).filter(value => value.length >= 3);
+    const baseKeys = ['confidence', 'confidence_score', 'score', 'rank_score', 'relevance_score', 'm_score'];
+    let score = baseKeys.reduce((found, key) => {
+      if (found > 0) {
+        return found;
+      }
+      const raw = Number(values(record?.[key])[0]);
+      return Number.isFinite(raw) && raw > 0 ? (raw <= 1 ? raw * 100 : raw) : 0;
+    }, 0) || 50;
+
+    if (searchTerms.some(search => searchable.some(value => value.includes(search) || search.includes(value)))) {
+      score += 18;
+    }
+    const dateValue = ['date', 'm_date', 'm_update_date', 'timestamp', 'created_at', 'updated_at', 'time', 'year']
+      .map(key => values(record?.[key])[0])
+      .find(Boolean);
+    const parsedDate = dateValue ? new Date(dateValue) : null;
+    if (parsedDate && !Number.isNaN(parsedDate.getTime())) {
+      const days = (Date.now() - parsedDate.getTime()) / 86400000;
+      score += days <= 30 ? 12 : days <= 180 ? 8 : days <= 365 ? 5 : 0;
+    }
+    if (domains.length > 1) {
+      score += 8;
+    }
+    if (searchTerms.some(search => {
+      const queryDomain = domain(search) || search;
+      return queryDomain.length >= 3 && domains.some(value => value.includes(queryDomain) || queryDomain.includes(value));
+    })) {
+      score += 15;
+    }
+
+    return Math.max(0, Math.min(100, Math.round(score)));
+  }
+
+  get identityPasswordKey(): string {
+    return `${this.mode()}-identity-password`;
+  }
+
+  isPasswordVisible(key: string): boolean {
+    return this.visiblePasswordKeys.has(key);
+  }
+
+  togglePassword(key: string, value: string, e?: MouseEvent) {
     if (e) {
       e.stopPropagation();
     }
-    this.activeTelemetryKey = this.activeTelemetryKey === key ? null : key;
+    if (!value || value === '-') {
+      return;
+    }
+    if (this.visiblePasswordKeys.has(key)) {
+      return;
+    }
+    if (!this.passwordRevealConfirmed) {
+      this.pendingPasswordRevealKey = key;
+      this.isPasswordRevealConfirmationOpen = true;
+      return;
+    }
+    this.visiblePasswordKeys.add(key);
+  }
+
+  isPasswordMasked(key: string, value: string): boolean {
+    return !!value && value !== '-' && !this.isPasswordVisible(key);
+  }
+
+  passwordTooltip(key: string, value: string): string {
+    if (!value || value === '-') {
+      return 'No password';
+    }
+    return this.isPasswordVisible(key) ? 'Password revealed' : 'Show password';
+  }
+
+  isPasswordGroup(group: TelemetryGroup): boolean {
+    const key = (group?.key || '').toLowerCase();
+    const label = (group?.label || '').toLowerCase();
+    return key.includes('password') || label.includes('password');
+  }
+
+  passwordTelemetryKey(groupKey: string, index: number): string {
+    return `${this.mode()}-${groupKey}-${index}`;
+  }
+
+  isTelemetryPasswordMasked(group: TelemetryGroup, index: number, value: string): boolean {
+    return this.isPasswordGroup(group) && this.isPasswordMasked(this.passwordTelemetryKey(group.key, index), value);
+  }
+
+  telemetryValueTooltip(group: TelemetryGroup, value: string, index: number, copyKey: string): string {
+    if (!this.isPasswordGroup(group)) {
+      return this.isCopied(copyKey) ? 'Copied' : 'Copy';
+    }
+    return this.passwordTooltip(this.passwordTelemetryKey(group.key, index), value);
+  }
+
+  handleTelemetryValueClick(group: TelemetryGroup, value: string, index: number, copyKey: string, e?: MouseEvent) {
+    if (!this.isPasswordGroup(group)) {
+      this.copyText(value, copyKey, e);
+      return;
+    }
+    this.togglePassword(this.passwordTelemetryKey(group.key, index), value, e);
+  }
+
+  handlePasswordRevealConfirmation(confirmed: boolean) {
+    this.isPasswordRevealConfirmationOpen = false;
+    if (confirmed) {
+      this.passwordRevealConfirmed = true;
+      this.setPasswordRevealConfirmed();
+      if (this.pendingPasswordRevealKey) {
+        this.visiblePasswordKeys.add(this.pendingPasswordRevealKey);
+      }
+    }
+    this.pendingPasswordRevealKey = null;
+  }
+
+  private getPasswordRevealConfirmed(): boolean {
+    try {
+      return localStorage.getItem(this.passwordRevealConfirmKey) === 'true';
+    }
+    catch {
+      return false;
+    }
+  }
+
+  private setPasswordRevealConfirmed() {
+    try {
+      localStorage.setItem(this.passwordRevealConfirmKey, 'true');
+    }
+    catch {
+      return;
+    }
   }
 
   get telemetryGroups(): TelemetryGroup[] {
     return this.telemetryGroupsCache;
-  }
-
-  get telemetryCount(): number {
-    return this.telemetryGroups.reduce((acc, g) => acc + (g.values?.length || 0), 0);
   }
 
   get activeTelemetryGroup(): TelemetryGroup | null {
@@ -154,6 +350,13 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return null;
     }
     return this.telemetryGroups.find(g => g.key === this.activeTelemetryKey) || null;
+  }
+
+  selectTelemetry(key: string, e?: MouseEvent) {
+    if (e) {
+      e.stopPropagation();
+    }
+    this.activeTelemetryKey = key;
   }
 
   telemetryIcon(key: string): string {
@@ -226,44 +429,6 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     }, e);
   }
 
-  copyAll(e?: MouseEvent) {
-    const payload = this.getReportPayload(e);
-    if (!payload) {
-      return;
-    }
-    this.rowHelper.copyToClipboard(payload).subscribe((ok) => {
-      if (!ok) {
-        return;
-      }
-      this.copiedTimer = this.rowHelper.setCopiedState('copy-all', this.copiedTimer, (value) => {
-        this.copiedKey = value;
-      });
-    });
-  }
-
-  downloadReport(e?: MouseEvent) {
-    const payload = this.getReportPayload(e);
-    if (!payload) {
-      return;
-    }
-    const blob = new Blob([payload], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const year = this.yearValue && this.yearValue !== '-' ? this.yearValue : 'report';
-    const idx = this.indexValue || '1';
-    a.href = url;
-    a.download = `${year}_${idx}_${this.rowTypeLabel.replace(/\s+/g, '_').toLowerCase()}.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => {
-      URL.revokeObjectURL(url);
-    }, 1500);
-    this.copiedTimer = this.rowHelper.setCopiedState('download', this.copiedTimer, (value) => {
-      this.copiedKey = value;
-    });
-  }
-
   isCopied(key: string): boolean {
     return this.rowHelper.isCopied(this.copiedKey, key);
   }
@@ -272,64 +437,8 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     this.telemetryGroupsCache = this.mode() === 'stealer'
       ? this.buildStealerGroups(this.item())
       : this.buildThreatGroups(this.result());
-  }
-
-  private getReportPayload(e?: MouseEvent): string | null {
-    if (e) {
-      e.stopPropagation();
-    }
-    const payload = this.buildReportText();
-    return payload.trim() ? payload : null;
-  }
-
-  private buildReportText(): string {
-    const lines: string[] = [];
-    lines.push(`Type: ${this.rowTypeLabel}`);
-    lines.push(`Index: ${this.indexValue}`);
-    lines.push(`Channel: ${this.channelValue}`);
-    lines.push(`Year: ${this.yearValue}`);
-    lines.push(`File Type: ${this.fileTypeValue}`);
-    lines.push('');
-    const mode = this.mode();
-    const result = this.result();
-    if (mode === 'stealer') {
-      const email = this.item()?.['email']?.[0] || '-';
-      const domain = this.item()?.['domain']?.[0] || '-';
-      const ip = this.item()?.['ip']?.[0] || '-';
-      const password = this.passwordValue;
-      lines.push('Identity Intelligence');
-      lines.push(`Email: ${email}`);
-      lines.push(`Domain: ${domain}`);
-      lines.push(`IP: ${ip}`);
-      lines.push(`Password: ${password}`);
-      lines.push('');
-    }
-    else {
-      lines.push('Indicator Details');
-      lines.push(`ID: RANK-${this.indexValue}`);
-      lines.push(`Credential: ${result?.rank_index || '-'}`);
-      lines.push(`IOC: ${result?.m_url || '-'}`);
-      lines.push(`Description: ${result?.m_important_content || '-'}`);
-      lines.push('');
-    }
-    lines.push(`Metadata Telemetry Array (${this.telemetryCount})`);
-    for (const g of this.telemetryGroups) {
-      if (!g?.values?.length) {
-        continue;
-      }
-      lines.push(`- ${g.label} (${g.values.length})`);
-      for (const v of g.values) {
-        lines.push(`  • ${v}`);
-      }
-    }
-    lines.push('');
-    const raw = mode === 'stealer' ? this.item()?.['raw'] : result?.['raw'];
-    if (raw != null) {
-      lines.push('Raw Trace Buffer');
-      lines.push(String(raw));
-      lines.push('');
-    }
-    return lines.join('\n');
+    const domainKey = this.mode() === 'stealer' ? 'domain' : 'm_domain';
+    this.activeTelemetryKey = this.telemetryGroupsCache.find(g => g.key === domainKey)?.key || this.telemetryGroupsCache[0]?.key || null;
   }
 
   private buildStealerGroups(item: any): TelemetryGroup[] {
@@ -337,7 +446,11 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return [];
     }
     const emails = this.rowHelper.normalizeToArray(item?.['email']);
-    const domains = this.rowHelper.normalizeToArray(item?.['domain']);
+    const sourceDomains = this.getSourceDomainValues(item);
+    const domains = this.uniqueValues([
+      ...this.getRawDomainValues(item),
+      ...sourceDomains
+    ]);
     const ips = this.rowHelper.normalizeToArray(item?.['ip']);
     const passwords = this.rowHelper.normalizeToArray(item?.['password']);
     const exclude = new Set<string>([
@@ -357,14 +470,16 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       'hash',
       'index',
       'mapping',
-      'delimiter'
+      'delimiter',
+      'domain',
+      'source_domain'
     ]);
     const core: TelemetryGroup[] = [];
     if (emails.length > 1) {
       core.push({ key: 'email', label: 'Email', values: emails });
     }
-    if (domains.length > 1) {
-      core.push({ key: 'domain', label: 'Domain', values: domains });
+    if (domains.length > 0) {
+      core.push({ key: 'domain', label: sourceDomains.length ? 'Domain / Source Domain' : 'Domain', values: domains });
     }
     if (ips.length > 1) {
       core.push({ key: 'ip', label: 'IP', values: ips });
@@ -432,5 +547,17 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     const k = (key || '').toLowerCase();
     const l = (label || '').toLowerCase();
     return k.includes('hash') || k.includes('index') || l.includes('hash') || l.includes('index');
+  }
+
+  private uniqueValues(values: string[]): string[] {
+    return Array.from(new Set(values.map(v => String(v).trim()).filter(Boolean)));
+  }
+
+  private getRawDomainValues(item: any): string[] {
+    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['domain']));
+  }
+
+  private getSourceDomainValues(item: any): string[] {
+    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['source_domain']));
   }
 }

@@ -20,15 +20,15 @@
   } @else if (errorMessage) {
     <div class="ui-page-container w-full max-w-[2400px]">
       <div class="rounded-[10px] border border-rose-400/25 bg-rose-500/10 p-4">
-        <div class="text-[14px] font-medium text-rose-200">Unable to load user activity</div>
+        <div class="text-[14px] font-medium text-rose-200">{{ 'Unable to load user activity' | translate }}</div>
         <p class="mt-1 text-[12px] text-rose-200/80">{{ errorMessage }}</p>
       </div>
     </div>
   } @else if (response?.profile?.hidden) {
     <div class="ui-page-container w-full max-w-[2400px]">
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Profile</div>
-        <div class="ui-section-description">{{ response?.profile?.message || 'Profile hidden by user' }}</div>
+        <div class="ui-section-title">{{ 'Profile' | translate }}</div>
+        <div class="ui-section-description">{{ response?.profile?.message || ('Profile hidden by user' | translate) }}</div>
       </div>
     </div>
   } @else if (response) {
@@ -38,8 +38,8 @@
           <img [src]="profileImageUrl" alt="Profile image" class="h-full w-full rounded-full object-cover">
         </div>
         <div class="pt-1">
-          <h1 class="ui-page-title">{{ response.profile.username || 'Profile' }}</h1>
-          <p class="ui-page-description">All threads where this user reacted or commented.</p>
+          <h1 class="ui-page-title">{{ response.profile.username || ('Profile' | translate) }}</h1>
+          <p class="ui-page-description">{{ 'All threads where this user reacted or commented.' | translate }}</p>
           <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
             {{ response.profile.role || '-' }} · {{ response.profile.tenant_name || '-' }}
           </p>
@@ -47,43 +47,43 @@
       </div>
 
       <div class="mb-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Profile</div>
-        <div class="ui-section-description">User details and assigned access.</div>
+        <div class="ui-section-title">{{ 'Profile' | translate }}</div>
+        <div class="ui-section-description">{{ 'User details and assigned access.' | translate }}</div>
 
         <div class="mt-3 grid gap-3 sm:grid-cols-2">
           <div>
-            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Username</label>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Username' | translate }}</label>
             <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.username || '-' }}</div>
           </div>
           <div>
-            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Role</label>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Role' | translate }}</label>
             <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.role || '-' }}</div>
           </div>
           <div>
-            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Tenant / Location</label>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Tenant / Location' | translate }}</label>
             <div class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.tenant_name || '-' }}</div>
           </div>
           <div>
-            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Email</label>
+            <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Email' | translate }}</label>
             <div class="h-10 w-full truncate rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm leading-10 text-[var(--color-text1)]">{{ response.profile.email || '-' }}</div>
           </div>
         </div>
 
         <div class="mt-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3">
-          <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">Licenses</div>
+          <div class="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Licenses' | translate }}</div>
           <div class="flex flex-wrap gap-2">
             @for (license of response.profile.licenses; track license) {
               <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ license }}</span>
             } @empty {
-              <span class="text-[13px] text-[var(--color-text4)]">No licenses listed.</span>
+              <span class="text-[13px] text-[var(--color-text4)]">{{ 'No licenses listed.' | translate }}</span>
             }
           </div>
         </div>
       </div>
 
       <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-        <div class="ui-section-title">Activity</div>
-        <div class="ui-section-description">Feedback and comment history across report threads.</div>
+        <div class="ui-section-title">{{ 'Activity' | translate }}</div>
+        <div class="ui-section-description">{{ 'Feedback and comment history across report threads.' | translate }}</div>
 
         @if (response.activity.length > 0) {
           <div class="mt-3 space-y-3">
@@ -98,20 +98,20 @@
                   </div>
                   @if (item.route_path) {
                     <button data-testid="user-profile-open-thread" type="button" (click)="openThread(item)" class="inline-flex shrink-0 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35">
-                      Open Thread
+                      {{ 'Open Thread' | translate }}
                     </button>
                   }
                 </div>
 
                 <div class="mt-3 flex flex-wrap gap-2">
                   @if (item.recommended) {
-                    <span class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">Recommended</span>
+                    <span class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">{{ 'Recommended' | translate }}</span>
                   }
                   @if (item.trust_state === 'trust') {
-                    <span class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">Trust</span>
+                    <span class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">{{ 'Trust' | translate }}</span>
                   }
                   @if (item.trust_state === 'untrust') {
-                    <span class="rounded-full border border-rose-400/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300">Untrust</span>
+                    <span class="rounded-full border border-rose-400/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300">{{ 'Untrust' | translate }}</span>
                   }
                   @if (item.comments_count > 0) {
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ item.comments_count }} comment{{ item.comments_count > 1 ? 's' : '' }}</span>
@@ -125,7 +125,7 @@
           </div>
         } @else {
           <div class="mt-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 text-[13px] text-[var(--color-text4)]">
-            No thread activity found for this user.
+            {{ 'No thread activity found for this user.' | translate }}
           </div>
         }
       </div>

@@ -1,5 +1,6 @@
 import asyncio
 from asyncio import sleep
+from pathlib import Path
 from migrations.migration import migration_manager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.helper_manager.env_handler import env_handler
@@ -10,7 +11,7 @@ from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.redis_manager.redis_controller import redis_controller
-from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 
 
 class service_manager:
@@ -30,7 +31,8 @@ class service_manager:
         self.__url = url
         self._is_available = False
 
-    async def init_services(self, build_dir=None):
+    async def init_services(self, build_dir=None, run_migrations: bool = True):
+        build_dir = build_dir or self.default_build_dir()
         while not self._is_available:
             try:
                 _, writer = await asyncio.open_connection("elasticsearch", 9400)
@@ -42,13 +44,15 @@ class service_manager:
 
                 await test_manager.get_instance().reset_test_mongo_and_import_mocks()
 
-                await migration_manager.get_instance().init_migration()
+                if run_migrations:
+                    await migration_manager.get_instance().init_migration()
                 await mongo_controller.get_instance().ensure_indexes()
                 await mongo_controller.get_instance().initialize()
 
                 await test_manager.get_instance().reset_test_elastic_and_import_mocks()
 
                 await redis_controller.getInstance().initialize()
+                await self.clear_test_insight_cache()
                 await self.build_map_assets(build_dir)
                 await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [config_controller.CONFIG_CACHE_KEY])
                 await config_controller.getInstance().load_config()
@@ -75,8 +79,25 @@ class service_manager:
         return self._is_available
 
     @staticmethod
+    async def clear_test_insight_cache():
+        if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
+            return
+
+        for key in (
+            REDIS_KEYS.APP_INSIGHT_KEY,
+            f"{REDIS_KEYS.APP_INSIGHT_KEY}:country_v1",
+            REDIS_KEYS.INSIGHT_STAT,
+            REDIS_KEYS.GRAPH_INSIGHT_STAT,
+        ):
+            await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [key])
+
+    @staticmethod
     async def build_assets(build_dir):
         helper_controller.build_assets(build_dir)
 
     async def build_map_assets(self, build_dir):
         await helper_controller.init_map_entities_task(build_dir)
+
+    @staticmethod
+    def default_build_dir():
+        return Path(__file__).resolve().parents[3] / "build"

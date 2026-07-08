@@ -7,10 +7,12 @@ import { NgClass, NgOptimizedImage, TitleCasePipe } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { SupportComponent } from "../../support/support.component";
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [FormsModule, ProfileComponent, NgClass, TitleCasePipe, NgOptimizedImage, SupportComponent],
+  imports: [FormsModule, ProfileComponent, NgClass, TitleCasePipe, NgOptimizedImage, SupportComponent, TranslatePipe],
   templateUrl: './dashboard-header.component.html',
 })
 export class DashboardHeaderComponent implements OnInit {

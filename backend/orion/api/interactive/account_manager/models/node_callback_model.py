@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
+from orion.services.permission_manager.permission_models import UserPermission
 
 
 class UserDataModel(BaseModel):
@@ -18,6 +19,7 @@ class UserDataModel(BaseModel):
     password_reset_required: bool = False
     password_reset_token: Optional[str] = None
     license: List[LicenseName]
+    permissions: List[UserPermission] = Field(default_factory=list)
     image: Optional[str] = None
     theme: Literal["dark-theme", "light-theme"] = "dark-theme"
     preferences: Optional[Dict[str, object]] = None
@@ -41,6 +43,10 @@ class TenantDataModel(BaseModel):
     image: Optional[str] = None
     profileVisibilityEnabled: bool = True
     eventManagementEnabled: bool = False
+    accountsMailPassword: str = ""
+    accountsMail: str = ""
+    accountsSmtpServer: str = ""
+    accountsSmtpPort: str = ""
 
 
 class NodeCallbackModel(BaseModel):

@@ -4,19 +4,31 @@
     "posts": [
       {
         "id": "mock-post-1",
-        "caption": "Mock post 1",
-        "url": "https://x.com/msmannan00/status/1",
+        "caption": "Patrolling the Metropolis skyline",
+        "post_url": "https://twitter.com/superman0011/status/1",
+        "url": "https://twitter.com/superman0011/status/1",
+        "datetime": "2026-06-13T10:00:00Z",
         "likes": 120,
         "comments": 14,
-        "timestamp": "2026-02-01T10:00:00Z"
+        "shares": 8,
+        "views": 4500,
+        "media_type": "image",
+        "media_url": "",
+        "connections": ["loislane", "dailyplanet"]
       },
       {
         "id": "mock-post-2",
-        "caption": "Mock post 2",
-        "url": "https://x.com/msmannan00/status/2",
+        "caption": "Interview notes from the city desk",
+        "post_url": "https://twitter.com/superman0011/status/2",
+        "url": "https://twitter.com/superman0011/status/2",
+        "datetime": "2026-06-13T11:30:00Z",
         "likes": 95,
         "comments": 10,
-        "timestamp": "2026-02-02T10:00:00Z"
+        "shares": 5,
+        "views": 3200,
+        "media_type": "text",
+        "media_url": "",
+        "connections": ["jimmyolsen", "dailyplanet"]
       }
     ]
   }

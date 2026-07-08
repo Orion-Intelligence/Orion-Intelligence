@@ -1,9 +1,11 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-graph-toolbar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './graph-toolbar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -16,6 +18,7 @@ export class GraphToolbarComponent {
   showImageButton = input(false);
   showClearButton = input(false);
   applyOuterPadding = input(true);
+  actionGroupVariant = input<'default' | 'tabs' | 'actions'>('default');
   viewMode = input<'graph' | 'list'>('graph');
   showViewModeToggle = input(true);
   isPhysicsEnabled = input(false);

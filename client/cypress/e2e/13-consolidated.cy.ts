@@ -1,10 +1,13 @@
 import {
   applyDateRangeFilter,
   applyPasswordSchemeAndValidate,
+  clickConsolidatedSectionToggle,
   clearSideFilters,
+  CONSOLIDATED_TOGGLE_SELECTOR,
   ensureInsightSectionExpanded,
   openFirstReportAndGoBack,
   openHomepageAndSearch,
+  RESULT_CARD_SELECTOR,
   runAdvancedFilterFlow,
   runDomainScannerFlow,
   searchDeepFromTop,
@@ -13,6 +16,25 @@ import {
   switchToDeepSearchTab,
   switchToIocsTab
 } from './controllers/13-consolidated.controller';
+
+function expandIocRows(tableTestId: string, rowTestId: string, toggleTestId: string, maxRows = 3) {
+  const tableSelector = `[data-testid="${tableTestId}"]`;
+  const rowSelector = `[data-testid="${rowTestId}"]`;
+  const toggleSelector = `[data-testid="${toggleTestId}"]`;
+
+  cy.get(tableSelector).find(rowSelector).should('have.length.greaterThan', 0).then(($rows) => {
+    const count = Math.min(maxRows, $rows.length);
+    for (let i = 0; i < count; i += 1) {
+      cy.get(tableSelector)
+        .find(rowSelector)
+        .eq(i)
+        .scrollIntoView()
+        .find(toggleSelector)
+        .first()
+        .click({ force: true });
+    }
+  });
+}
 
 describe('Consolidated - IOC Basic Flow', () => {
   beforeEach(() => {
@@ -33,6 +55,8 @@ describe('Consolidated - IOC Basic Flow', () => {
       .should('be.visible')
       .and('have.attr', 'data-tab', 'Deep Search');
     searchDeepFromTop('data');
+    cy.get('[data-testid="result-card"]').should('exist');
+    cy.docsScreenshot('consolidated-results');
 
     cy.get('body').then(($body) => {
       const hasDefacementReport = $body.find('[data-testid="defacement-report"]').length > 0;
@@ -92,6 +116,7 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid^="insights-coverage-item-"]').should('have.length.greaterThan', 0);
     setAllInsightsExpanded(true);
     cy.get('[data-testid="insights-section-threat-actor"]').scrollIntoView().should('be.visible');
+    cy.docsScreenshot('consolidated-insights');
 
     cy.get('[data-testid="insights-section-threat-actor"]').should('be.visible');
     ensureInsightSectionExpanded('insights-toggle-threat-actor');
@@ -123,44 +148,27 @@ describe('Consolidated - IOC Basic Flow', () => {
     });
 
     consolidatedSections.forEach((sectionId) => {
-      cy.get(`[data-testid="${sectionId}"]`).scrollIntoView().should('be.visible');
-      cy.get(`[data-testid="${sectionId}"]`).within(() => {
-        cy.get(`[data-testid^="consolidated-section-count-"]`).should('be.visible');
+      const sectionSelector = `[data-testid="${sectionId}"]`;
 
-        cy.get('[data-testid="consolidated-section-see-more"]').then(($toggles) => {
-          const hasPagination = $toggles.filter(':visible').length > 0;
-          if (!hasPagination) {
-            return;
-          }
+      cy.get(sectionSelector).scrollIntoView().should('be.visible');
+      cy.get(sectionSelector).find('[data-testid^="consolidated-section-count-"]').should('be.visible');
 
-          cy.get('[data-testid="result-card"]').then(($cardsBefore) => {
-            const before = $cardsBefore.length;
-            cy.get('[data-testid="consolidated-section-see-more"]')
-              .filter(':visible')
-              .first()
-              .scrollIntoView()
-              .click();
+      cy.get(sectionSelector).then(($section) => {
+        const hasPagination = $section.find(CONSOLIDATED_TOGGLE_SELECTOR).length > 0;
+        if (!hasPagination) {
+          return;
+        }
 
-            cy.get('[data-testid="result-card"]').then(($cardsAfterExpand) => {
-              const expanded = $cardsAfterExpand.length;
-              expect(expanded).to.be.at.least(before);
+        cy.get(sectionSelector).find(RESULT_CARD_SELECTOR).then(($cardsBefore) => {
+          const before = $cardsBefore.length;
+          clickConsolidatedSectionToggle(sectionId, /see\s+more/i);
 
-              cy.get('[data-testid="consolidated-section-see-more"]')
-                .filter(':visible')
-                .first()
-                .invoke('text')
-                .then((toggleText) => {
-                  const label = toggleText.trim().toLowerCase();
-                  if (label.includes('less')) {
-                    cy.get('[data-testid="consolidated-section-see-more"]')
-                      .filter(':visible')
-                      .first()
-                      .scrollIntoView()
-                      .click();
-                    cy.get('[data-testid="result-card"]').its('length').should('be.at.most', expanded);
-                  }
-                });
-            });
+          cy.get(sectionSelector).find(RESULT_CARD_SELECTOR).then(($cardsAfterExpand) => {
+            const expanded = $cardsAfterExpand.length;
+            expect(expanded).to.be.at.least(before);
+
+            clickConsolidatedSectionToggle(sectionId, /see\s+less/i);
+            cy.get(sectionSelector).find(RESULT_CARD_SELECTOR).its('length').should('be.at.most', expanded);
           });
         });
       });
@@ -198,16 +206,23 @@ describe('Consolidated - IOC Basic Flow', () => {
     openHomepageAndSearch('{enter}');
     switchToDeepSearchTab();
     cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
-    searchDeepFromTop('example.com');
+    searchDeepFromTop('example.test');
     cy.get('[data-testid="consolidated-scan-title"]').should('contain.text', 'Threats Scans Report:');
 
     cy.get('[data-testid="consolidated-section-social"]').scrollIntoView().should('be.visible');
     openFirstReportAndGoBack();
 
     cy.get('[data-testid="side-filter-open"]').scrollIntoView().click();
-    cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().select('4: clearnet');
+    cy.get('[data-testid="side-filter-select-network"]').scrollIntoView().then(($trigger) => {
+      const menuId = $trigger.attr('aria-controls');
+      expect(menuId, 'side-filter network menu id').to.exist;
+      cy.wrap($trigger).click({ force: true });
+      cy.wrap($trigger).should('have.attr', 'aria-expanded', 'true');
+      cy.contains(`#${menuId} [role="option"]`, /^Clearnet$/i, { timeout: 15000 }).click({ force: true });
+    });
     cy.get('[data-testid="side-filter-apply"]').scrollIntoView().click();
     cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
+
     cy.get('[data-testid="result-card"]').then(($cards) => {
       const cardWithNetwork = [...$cards].find((el) => (el.textContent || '').includes('Network:'));
       expect(cardWithNetwork, 'result card with Network field').to.exist;
@@ -224,36 +239,10 @@ describe('Consolidated - IOC Basic Flow', () => {
     cy.get('[data-testid="ioc-stealer-table"]').should('be.visible');
     cy.get('[data-testid="ioc-threat-table"]').should('be.visible');
 
-    cy.get('[data-testid="ioc-stealer-table"]')
-      .within(() => {
-        cy.get('[data-testid="ioc-stealer-row"]').should('have.length.greaterThan', 0);
-        cy.get('[data-testid="ioc-stealer-row"]').then(($rows) => {
-          const count = Math.min(3, $rows.length);
-          for (let i = 0; i < count; i += 1) {
-            cy.wrap($rows.eq(i))
-              .scrollIntoView()
-              .find('[data-testid="ioc-stealer-row-toggle"]')
-              .first()
-              .click();
-          }
-        });
-      });
+    expandIocRows('ioc-stealer-table', 'ioc-stealer-row', 'ioc-stealer-row-toggle');
 
     cy.get('[data-testid="ioc-threat-table"]').scrollIntoView();
-    cy.get('[data-testid="ioc-threat-table"]')
-      .within(() => {
-        cy.get('[data-testid="ioc-threat-row"]').should('have.length.greaterThan', 0);
-        cy.get('[data-testid="ioc-threat-row"]').then(($rows) => {
-          const count = Math.min(3, $rows.length);
-          for (let i = 0; i < count; i += 1) {
-            cy.wrap($rows.eq(i))
-              .scrollIntoView()
-              .find('[data-testid="ioc-threat-row-toggle"]')
-              .first()
-              .click();
-          }
-        });
-      });
+    expandIocRows('ioc-threat-table', 'ioc-threat-row', 'ioc-threat-row-toggle');
 
     cy.scrollDashboardToTop()
     searchInIocs('ydt.sja@gail.ccmm');
@@ -349,7 +338,7 @@ it('runs Cross Search card in consolidated Deep Search', () => {
 
   openHomepageAndSearch('{enter}');
   switchToDeepSearchTab();
-  searchDeepFromTop('hacking');
+  searchDeepFromTop('hacking', false);
 
   cy.get('[data-testid="dashboard-body"]', { timeout: 60000 }).should('exist');
 

@@ -37,7 +37,7 @@
             <div class="min-w-0">
               <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-blue-640)]" data-testid="demo-tour-step">
                 <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-blue-640)] shadow-[0_0_14px_rgba(87,165,235,0.5)]"></span>
-                Step {{ currentIndex + 1 }} / {{ totalSteps }}
+                {{ 'Step' | translate }} {{ currentIndex + 1 }} / {{ totalSteps }}
               </div>
               <h3 class="text-lg font-semibold leading-tight text-white">
                 {{ step?.title }}
@@ -50,10 +50,10 @@
             <div class="min-w-0">
               <div class="mb-2 inline-flex items-center gap-2 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/80 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--color-blue-640)]">
                 <span class="tour-loader-spinner h-3.5 w-3.5" aria-hidden="true"></span>
-                Loading
+                {{ 'Loading' | translate }}
               </div>
               <h3 class="text-lg font-semibold leading-tight text-white">
-                Loading step
+                {{ 'Loading step' | translate }}
               </h3>
             </div>
           </div>
@@ -77,7 +77,7 @@
         <div class="tour-state-layer tour-state-layer-loading col-start-1 row-start-1" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady">
           <div class="flex items-center gap-3 text-sm leading-6 text-[var(--color-text2)] saturate-[0.96]">
             <span class="tour-loader-spinner" aria-hidden="true"></span>
-            <span>Preparing data and highlight</span>
+            <span>{{ 'Preparing data and highlight' | translate }}</span>
           </div>
         </div>
       </div>
@@ -87,12 +87,12 @@
           <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
             @if (stepReady && (step?.endOnEnter || step?.captureValueOnEnter)) {
               <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase max-[640px]:mr-0">
-                Press Enter
+                {{ 'Press Enter' | translate }}
               </div>
             }
             <div class="flex items-center gap-2 max-[640px]:block max-[640px]:w-full">
               <button type="button" (click)="next()" class="tour-primary-button text-xs" data-testid="demo-tour-next" [disabled]="!stepReady">
-                <span>{{ currentIndex + 1 === totalSteps ? 'Finish' : 'Next' }}</span>
+                <span>{{ (currentIndex + 1 === totalSteps ? 'Finish' : 'Next') | translate }}</span>
                 <span aria-hidden="true">→</span>
               </button>
             </div>
@@ -101,11 +101,11 @@
         <div class="tour-state-layer tour-state-layer-loading col-start-1 row-start-1" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady">
           <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] saturate-[0.96] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
             <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase max-[640px]:mr-0">
-              Loading
+              {{ 'Loading' | translate }}
             </div>
             <div class="flex items-center gap-2 max-[640px]:block max-[640px]:w-full">
               <button type="button" (click)="next()" class="tour-primary-button text-xs" [disabled]="true">
-                <span>{{ currentIndex + 1 === totalSteps ? 'Finish' : 'Next' }}</span>
+                <span>{{ (currentIndex + 1 === totalSteps ? 'Finish' : 'Next') | translate }}</span>
                 <span aria-hidden="true">→</span>
               </button>
             </div>

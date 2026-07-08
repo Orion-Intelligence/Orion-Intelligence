@@ -4,39 +4,42 @@
     <div class="ui-page-container p-5">
       <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 class="ui-page-title">Tenant Users</h1>
-          <p class="ui-page-description">Manage user access, status, and licenses.</p>
+          <h1 class="ui-page-title">{{ 'Tenant Users' | translate }}</h1>
+          <p class="ui-page-description">{{ 'Manage user access, status, and licenses.' | translate }}</p>
         </div>
         <span [appTooltip]="getAddUserTooltip()">
           <button type="button" data-testid="tenant-add-user-button" class="ui-btn" [ngClass]="isAddUserDisabled() ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'ui-btn-primary'" [disabled]="isAddUserDisabled()" (click)="addtenant()">
-            Add User
+            {{ 'Add User' | translate }}
           </button>
         </span>
       </div>
 
       <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
+      <div class="mb-3 flex justify-end">
+        <input data-testid="tenant-user-search-input" type="text" [(ngModel)]="userSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 sm:max-w-[320px]">
+      </div>
 
       <div class="tenant-table-shell m-0 overflow-hidden rounded-none border-0 shadow-none md:rounded-[8px] md:border md:!border-[var(--tenant-line)] md:shadow-none">
         @if (!isLoading) {
           <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
             <table class="w-full min-w-[1120px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
-              @if ((users?.length || 0) > 0) {
+              @if ((filteredUsers?.length || 0) > 0) {
                 <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                   <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
-                    <th class="w-[70px] overflow-clip align-middle px-4 py-3.5">Sr #</th>
-                    <th class="w-[190px] overflow-clip align-middle px-4 py-3.5">User Name</th>
-                    <th class="w-[250px] overflow-clip align-middle px-4 py-3.5">Email</th>
-                    <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">Role</th>
-                    <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">Status</th>
-                    <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">Subscription</th>
-                    <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">Licenses</th>
-                    <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Action</th>
+                    <th class="w-[70px] overflow-clip align-middle px-4 py-3.5">{{ 'Sr #' | translate }}</th>
+                    <th class="w-[190px] overflow-clip align-middle px-4 py-3.5">{{ 'User Name' | translate }}</th>
+                    <th class="w-[250px] overflow-clip align-middle px-4 py-3.5">{{ 'Email' | translate }}</th>
+                    <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">{{ 'Role' | translate }}</th>
+                    <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
+                    <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Subscription' | translate }}</th>
+                    <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{ 'Licenses' | translate }}</th>
+                    <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
                   </tr>
                 </thead>
               }
-              @if ((users?.length || 0) > 0) {
+              @if ((filteredUsers?.length || 0) > 0) {
                 <tbody class="text-[15px] font-normal text-[var(--color-text3)]" @fadeInDashboardItem>
-                  @for (user of users; track user.email || user.username || $index; let i = $index) {
+                  @for (user of filteredUsers; track user.email || user.username || $index; let i = $index) {
                     <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''">
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
@@ -51,32 +54,32 @@
                         <span class="inline-block max-w-full truncate">{{ user.email || '-' }}</span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">
-                        <span class="inline-flex rounded-full bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">
+                        <span class="inline-flex rounded-[6px] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">
                           {{ user.role }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
+                        <span class="mr-0 inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
                           {{ user.status }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
-                          {{ user.subscription ? 'Paid' : 'Free' }}
+                        <span class="mr-0 inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
+                          {{ (user.subscription ? 'Paid' : 'Free') | translate }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="mr-0 block max-w-[290px] truncate rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]" [attr.title]="getUserLicensesLabel(user)">
+                        <span class="mr-0 inline-flex h-7 max-w-[290px] items-center truncate rounded-[6px] bg-slate-500/10 px-2.5 text-[11px] font-semibold text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700" [attr.title]="getUserLicensesLabel(user)">
                           {{ getUserLicensesLabel(user) }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
                         @if (!canEditUser(user)) {
-                          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="View user" (click)="toggleExpandedUser(i)">
+                          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View user' | translate" (click)="toggleExpandedUser(i)">
                             <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon cursor-pointer" />
                           </button>
                         } @else {
-                          <button id="edit-profile" data-testid="tenant-edit-user-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'Edit user'" (click)="toggleExpandedUser(i)">
+                          <button id="edit-profile" data-testid="tenant-edit-user-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="('Edit user') | translate" (click)="toggleExpandedUser(i)">
                             <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
                           </button>
                         }
@@ -87,90 +90,122 @@
                         <td colspan="8" class="overflow-clip align-middle px-4 py-4">
                           <div class="space-y-4">
                             <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
-                              <div class="text-[19px] font-bold text-[var(--color-text1)]">User Information</div>
+                              <div class="text-[19px] font-bold text-[var(--color-text1)]">{{ 'User Information' | translate }}</div>
                               <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
-                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Name</div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Name' | translate }}</div>
                                   <div class="text-sm font-medium text-[var(--color-text1)]">{{ user.username || '-' }}</div>
                                 </div>
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
-                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Email' | translate }}</div>
                                   <div class="break-all text-sm text-[var(--color-text1)]">{{ user.email || '-' }}</div>
                                 </div>
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
-                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
                                   <div class="text-sm capitalize text-[var(--color-text1)]">{{ user.role }}</div>
                                 </div>
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
-                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
                                   <div>
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
+                                    <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
                                       {{ user.status }}
                                     </span>
                                   </div>
                                 </div>
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
-                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Subscription' | translate }}</div>
                                   <div>
-                                    <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
-                                      {{ user.subscription ? 'Paid' : 'Free' }}
+                                    <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
+                                      {{ (user.subscription ? 'Paid' : 'Free') | translate }}
                                     </span>
                                   </div>
                                 </div>
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
-                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
                                   @if (user.licenses?.length) {
                                     <div class="flex flex-wrap gap-1.5">
                                       @for (license of user.licenses; track license) {
-                                        <span class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-1 text-[11px] font-medium text-[var(--color-text2)]">
+                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
                                           {{ licenseService.getLicenseLabel(license) }}
                                         </span>
                                       }
                                     </div>
                                   } @else {
-                                    <div class="text-xs text-[var(--color-text4)]">No licenses assigned.</div>
+                                    <div class="text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
+                                  }
+                                </div>
+                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                  <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Permissions' | translate }}</div>
+                                  @if (user.permissions?.length) {
+                                    <div class="flex flex-wrap gap-1.5">
+                                      @for (permission of user.permissions; track permission) {
+                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
+                                          {{ getPermissionLabel(permission) }}
+                                        </span>
+                                      }
+                                    </div>
+                                  } @else {
+                                    <div class="text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
                                   }
                                 </div>
                               </div>
                             </div>
                             @if (canEditUser(user)) {
                               <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
-                                <div class="text-[19px] font-bold text-[var(--color-text1)]">Edit User</div>
+                                <div class="text-[19px] font-bold text-[var(--color-text1)]">{{ 'Edit User' | translate }}</div>
                                 <div class="mt-2 space-y-3 pt-1">
                                   <div>
-                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                                    <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none transition focus:border-sky-400/40" [disabled]="appService.userSessionData().tenant.quotaExceeded" [(ngModel)]="user.status">
-                                      <option [ngValue]="'active'">Active</option>
-                                      <option [ngValue]="'disable'">Disable</option>
-                                    </select>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</label>
+                                    <app-ui-dropdown class="mt-1" [options]="statusOptions" [selected]="user.status" [searchable]="false" [disabled]="appService.userSessionData().tenant.quotaExceeded" [placeholder]="'Select status' | translate" (valueChange)="setUserStatus(user, $event)"></app-ui-dropdown>
                                   </div>
-                                  <label data-testid="tenant-password-reset-required-toggle" class="flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
-                                    <span class="text-[12px] font-semibold text-[var(--color-text2)]">Require password reset on next login</span>
-                                    <span class="pointer-events-none relative h-5 w-9 shrink-0">
-                                      <input type="checkbox" class="peer h-0 w-0 opacity-0" [(ngModel)]="user.password_reset_required" />
-                                      <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
-                                    </span>
-                                  </label>
                                   <div>
-                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                                    <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
-                                      @for (license of licenseList; track license) {
-                                        @if (canAssignLicense(license)) {
-                                          <div class="license-card flex min-h-[34px] select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="isLicenseDisabled() ? 'cursor-not-allowed border border-[var(--color-border)] bg-[var(--color-blue-820)] opacity-60' : ((user.licenses || []).indexOf(license) > -1 ? 'cursor-pointer border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'cursor-pointer border border-[var(--color-border)] bg-[var(--color-blue-820)]')" (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
-                                            <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(user.licenses || []).indexOf(license) > -1 ? 'text-white' : ''">{{ licenseService.getLicenseLabel(license) }}</span>
-                                            <input type="checkbox" class="hidden" [checked]="(user.licenses || []).indexOf(license) > -1" />
-                                          </div>
-                                        }
-                                      }
-                                    </div>
+                                    <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Password Reset' | translate }}</label>
+                                    <app-ui-dropdown class="mt-1" testId="tenant-password-reset-required-toggle" [options]="passwordResetOptions" [selected]="getPasswordResetValue(user)" [searchable]="false" [placeholder]="'Select password reset' | translate" (valueChange)="setPasswordResetRequired(user, $event)"></app-ui-dropdown>
+                                  </div>
+                                  <div>
+                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
+                                    <app-ui-dropdown
+                                      class="mt-[0.6rem]"
+                                      testId="tenant-edit-user-license"
+                                      [menuId]="'tenant-edit-user-license-menu-' + i"
+                                      [options]="licenseDropdownOptions"
+                                      [selectedValues]="user.licenses || []"
+                                      [multiSelect]="true"
+                                      [showSelectedChips]="true"
+                                      menuPlacement="static"
+                                      [disabled]="isLicenseDisabled()"
+                                      [placeholder]="'Select licenses' | translate"
+                                      [searchPlaceholder]="'Search licenses' | translate"
+                                      (valuesChange)="onUserLicenseDropdownChange(user, $event)"></app-ui-dropdown>
+                                    @if (!user.licenses?.length) {
+                                      <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
+                                    }
+                                  </div>
+                                  <div>
+                                    <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Permissions' | translate }}</div>
+                                    <app-ui-dropdown
+                                      class="mt-[0.6rem]"
+                                      testId="tenant-edit-user-permission"
+                                      [menuId]="'tenant-edit-user-permission-menu-' + i"
+                                      [options]="permissionOptions"
+                                      [selectedValues]="user.permissions || []"
+                                      [multiSelect]="true"
+                                      [showSelectedChips]="true"
+                                      menuPlacement="static"
+                                      [placeholder]="'Select permissions' | translate"
+                                      [searchPlaceholder]="'Search permissions' | translate"
+                                      (valuesChange)="user.permissions = $event"></app-ui-dropdown>
+                                    @if (!user.permissions?.length) {
+                                      <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
+                                    }
                                   </div>
                                 </div>
                                 <div class="mt-3 flex flex-wrap justify-end gap-2">
                                   <button type="button" data-testid="tenant-delete-user-button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">
-                                    Delete User
+                                    {{ 'Delete User' | translate }}
                                   </button>
                                   <button type="button" class="ui-btn ui-btn-primary" (click)="updateUser(user)">
-                                    Save changes
+                                    {{ 'Save changes' | translate }}
                                   </button>
                                 </div>
                               </div>
@@ -182,95 +217,133 @@
                   }
                 </tbody>
               }
-              @if ((users?.length || 0) === 0) {
+              @if ((filteredUsers?.length || 0) === 0) {
                 <tbody>
                   <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
-                    <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">No users available.</td>
+                    <td class="px-4 py-12 text-center text-sm text-[var(--color-text4)]" colspan="8">{{ 'No users available.' | translate }}</td>
                   </tr>
                 </tbody>
               }
             </table>
           </div>
           <div class="space-y-3 p-0 md:hidden" @fadeInDashboardItem>
-            @if ((users?.length || 0) > 0) {
-              @for (user of users; track user.email || user.username || $index; let i = $index) {
+            @if ((filteredUsers?.length || 0) > 0) {
+              @for (user of filteredUsers; track user.email || user.username || $index; let i = $index) {
                 <div class="overflow-hidden rounded-[10px] bg-[var(--tenant-row-bg)]">
                   <div class="flex items-center justify-between px-3 py-2.5">
                     <div class="min-w-0">
                       <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ user.username || '-' }}</div>
                       <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ user.role }}</div>
                     </div>
-                    <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" [attr.aria-label]="canEditUser(user) ? 'Edit user' : 'View user'" (click)="toggleExpandedUser(i)">
+                    <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" [attr.aria-label]="(canEditUser(user) ? 'Edit user' : 'View user') | translate" (click)="toggleExpandedUser(i)">
                       <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" [alt]="canEditUser(user) ? 'edit' : 'view'" class="tenant-action-icon" />
                     </button>
                   </div>
                   <div class="divide-y divide-[var(--tenant-line)] px-3 py-2.5 text-sm text-[var(--color-text2)]">
                     <div class="flex items-center justify-between gap-3 py-2">
-                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</span>
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Email' | translate }}</span>
                       <span class="truncate text-right">{{ user.email || '-' }}</span>
                     </div>
                     <div class="flex items-center justify-between gap-3 py-2">
-                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</span>
-                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">{{ user.status }}</span>
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</span>
+                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">{{ user.status }}</span>
                     </div>
                     <div class="flex items-center justify-between gap-3 py-2">
-                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Subscription</span>
-                      <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">{{ user.subscription ? 'Paid' : 'Free' }}</span>
+                      <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Subscription' | translate }}</span>
+                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">{{ (user.subscription ? 'Paid' : 'Free') | translate }}</span>
                     </div>
                     <div class="py-2">
-                      <div class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                      <div class="rounded-md border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2.5 py-1.5 text-xs">{{ getUserLicensesLabel(user) }}</div>
+                      <div class="mb-1 text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
+                      @if (user.licenses?.length) {
+                        <div class="flex flex-wrap gap-1.5">
+                          @for (license of user.licenses; track license) {
+                            <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
+                              {{ licenseService.getLicenseLabel(license) }}
+                            </span>
+                          }
+                        </div>
+                      } @else {
+                        <div class="text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
+                      }
                     </div>
                   </div>
                   @if (expandedUserIndex === i) {
                     <div class="bg-[var(--tenant-row-bg)] px-3 py-3">
                       <div class="space-y-3">
                         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
-                          <div class="text-base font-bold text-[var(--color-text1)]">User Information</div>
+                          <div class="text-base font-bold text-[var(--color-text1)]">{{ 'User Information' | translate }}</div>
                           <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                             <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
-                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">User Name</div>
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Name' | translate }}</div>
                               <div class="text-sm text-[var(--color-text1)]">{{ user.username || '-' }}</div>
                             </div>
                             <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
-                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Email</div>
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Email' | translate }}</div>
                               <div class="break-all text-sm text-[var(--color-text1)]">{{ user.email || '-' }}</div>
                             </div>
                             <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
-                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Role</div>
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
                               <div class="text-sm text-[var(--color-text1)]">{{ user.role }}</div>
+                            </div>
+                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                              <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Permissions' | translate }}</div>
+                              @if (user.permissions?.length) {
+                                <div class="flex flex-wrap gap-1.5">
+                                  @for (permission of user.permissions; track permission) {
+                                    <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
+                                      {{ getPermissionLabel(permission) }}
+                                    </span>
+                                  }
+                                </div>
+                              } @else {
+                                <div class="text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
+                              }
                             </div>
                           </div>
                         </div>
                         @if (canEditUser(user)) {
                           <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
-                            <div class="text-base font-bold text-[var(--color-text1)]">Edit User</div>
-                            <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Status</label>
-                            <select class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="user.status">
-                              <option [ngValue]="'active'">Active</option>
-                              <option [ngValue]="'disable'">Disable</option>
-                            </select>
-                            <label data-testid="tenant-password-reset-required-toggle" class="mt-3 flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
-                              <span class="text-[12px] font-semibold text-[var(--color-text2)]">Require password reset on next login</span>
-                              <span class="pointer-events-none relative h-5 w-9 shrink-0">
-                                <input type="checkbox" class="peer h-0 w-0 opacity-0" [(ngModel)]="user.password_reset_required" />
-                                <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
-                              </span>
-                            </label>
-                            <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Licenses</div>
-                            <div class="mt-[0.6rem] grid grid-cols-[repeat(auto-fill,minmax(130px,1fr))] gap-[0.55rem]">
-                              @for (license of licenseList; track license) {
-                                @if (canAssignLicense(license)) {
-                                  <div class="license-card flex min-h-[34px] select-none items-center justify-center rounded-[8px] px-[0.5rem] py-[0.45rem] transition-all duration-[140ms] ease-[ease]" [ngClass]="isLicenseDisabled() ? 'cursor-not-allowed border border-[var(--color-border)] bg-[var(--color-blue-820)] opacity-60' : ((user.licenses || []).indexOf(license) > -1 ? 'cursor-pointer border border-[var(--color-blue-630)] bg-[var(--color-blue-640)] text-white' : 'cursor-pointer border border-[var(--color-border)] bg-[var(--color-blue-820)]')" (click)="!isLicenseDisabled() && toggleUserLicense(user, license)">
-                                    <span class="license-label text-center text-[0.78rem] font-semibold whitespace-nowrap" [ngClass]="(user.licenses || []).indexOf(license) > -1 ? 'text-white' : ''">{{ licenseService.getLicenseLabel(license) }}</span>
-                                    <input type="checkbox" class="hidden" [checked]="(user.licenses || []).indexOf(license) > -1" />
-                                  </div>
-                                }
-                              }
-                            </div>
+                            <div class="text-base font-bold text-[var(--color-text1)]">{{ 'Edit User' | translate }}</div>
+                            <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</label>
+                            <app-ui-dropdown class="mt-1" [options]="statusOptions" [selected]="user.status" [searchable]="false" [placeholder]="'Select status' | translate" (valueChange)="setUserStatus(user, $event)"></app-ui-dropdown>
+                            <label class="mt-3 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Password Reset' | translate }}</label>
+                            <app-ui-dropdown class="mt-1" testId="tenant-password-reset-required-toggle" [options]="passwordResetOptions" [selected]="getPasswordResetValue(user)" [searchable]="false" [placeholder]="'Select password reset' | translate" (valueChange)="setPasswordResetRequired(user, $event)"></app-ui-dropdown>
+                            <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
+                            <app-ui-dropdown
+                              class="mt-[0.6rem]"
+                              testId="tenant-edit-user-license"
+                              [menuId]="'tenant-edit-user-license-mobile-menu-' + i"
+                              [options]="licenseDropdownOptions"
+                              [selectedValues]="user.licenses || []"
+                              [multiSelect]="true"
+                              [showSelectedChips]="true"
+                              menuPlacement="static"
+                              [disabled]="isLicenseDisabled()"
+                              [placeholder]="'Select licenses' | translate"
+                              [searchPlaceholder]="'Search licenses' | translate"
+                              (valuesChange)="onUserLicenseDropdownChange(user, $event)"></app-ui-dropdown>
+                            @if (!user.licenses?.length) {
+                              <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
+                            }
+                            <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Permissions' | translate }}</div>
+                            <app-ui-dropdown
+                              class="mt-[0.6rem]"
+                              testId="tenant-edit-user-permission"
+                              [menuId]="'tenant-edit-user-permission-mobile-menu-' + i"
+                              [options]="permissionOptions"
+                              [selectedValues]="user.permissions || []"
+                              [multiSelect]="true"
+                              [showSelectedChips]="true"
+                              menuPlacement="static"
+                              [placeholder]="'Select permissions' | translate"
+                              [searchPlaceholder]="'Search permissions' | translate"
+                              (valuesChange)="user.permissions = $event"></app-ui-dropdown>
+                            @if (!user.permissions?.length) {
+                              <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
+                            }
                             <div class="mt-3 flex flex-wrap justify-end gap-2">
-                              <button type="button" data-testid="tenant-delete-user-button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">Delete User</button>
-                              <button type="button" class="ui-btn ui-btn-primary" (click)="updateUser(user)">Save changes</button>
+                              <button type="button" data-testid="tenant-delete-user-button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">{{ 'Delete User' | translate }}</button>
+                              <button type="button" class="ui-btn ui-btn-primary" (click)="updateUser(user)">{{ 'Save changes' | translate }}</button>
                             </div>
                           </div>
                         }
@@ -281,7 +354,7 @@
               }
             } @else {
               <div class="rounded-[10px] bg-[var(--color-blue-820-light)] px-4 py-10 text-center text-sm text-[var(--color-text4)]">
-                No users available.
+                {{ 'No users available.' | translate }}
               </div>
             }
           </div>
@@ -290,14 +363,14 @@
             <table class="w-full min-w-[1120px] text-left text-sm">
               <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
                 <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
-                  <th class="overflow-clip align-middle px-4 py-3.5">Sr #</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">User Name</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">Email</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">Role</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">Status</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">Subscription</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">Licenses</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">Action</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Sr #' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'User Name' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Email' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Role' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Subscription' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Licenses' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Action' | translate }}</th>
                 </tr>
               </thead>
               <tbody @fadeInDashboardItem>

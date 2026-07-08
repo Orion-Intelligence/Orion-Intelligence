@@ -2,8 +2,9 @@ import { CommonModule, DOCUMENT } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, signal } from '@angular/core';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../services/result-row-helper.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
-type ShareTarget = 'whatsapp' | 'telegram' | 'x' | 'linkedin' | 'reddit' | 'email';
+type ShareTarget = 'telegram' | 'x' | 'linkedin' | 'reddit' | 'email';
 
 interface ShareDestination {
   target: ShareTarget;
@@ -13,7 +14,6 @@ interface ShareDestination {
 }
 
 const SHARE_DESTINATIONS: ShareDestination[] = [
-  { target: 'whatsapp', label: 'WhatsApp', icon: 'bi-whatsapp', iconShellClass: 'border-emerald-400/30 bg-emerald-500/15 text-emerald-200 group-hover:bg-emerald-500/25' },
   { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconShellClass: 'border-sky-400/30 bg-sky-500/15 text-sky-200 group-hover:bg-sky-500/25' },
   { target: 'x', label: 'X', icon: 'bi-twitter-x', iconShellClass: 'border-white/15 bg-white/10 text-white group-hover:bg-white/15' },
   { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconShellClass: 'border-blue-400/30 bg-blue-500/15 text-blue-200 group-hover:bg-blue-500/25' },
@@ -24,7 +24,7 @@ const SHARE_DESTINATIONS: ShareDestination[] = [
 @Component({
   selector: 'app-share-response-dialog',
   standalone: true,
-  imports: [CommonModule, TooltipDirective],
+  imports: [CommonModule, TooltipDirective, TranslatePipe],
   templateUrl: './share-response-dialog.component.html',
 })
 export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
@@ -97,9 +97,6 @@ export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
 
   shareUrl(target: ShareTarget): string {
     const encoded = encodeURIComponent(this.shareText);
-    if (target === 'whatsapp') {
-      return `https://wa.me/?text=${encoded}`;
-    }
     if (target === 'telegram') {
       return `https://t.me/share/url?url=&text=${encoded}`;
     }

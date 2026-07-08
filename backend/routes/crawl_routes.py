@@ -31,12 +31,15 @@ async def index_injection(payload: InjectionBatchRequestModel = Body(...), curre
 
 
 @crawl_routes.get(
-    "/api/feeder/{index_type}")
+    "/api/feeder/{index_type}",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def feeder(index_type: str):
     return await crawl_model.getInstance().invoke_fetch_feeder(index_type)
 
 
-@crawl_routes.get("/api/parser")
+@crawl_routes.get(
+    "/api/parser",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER]))])
 async def parser():
     return await crawl_model.getInstance().invoke_fetch_parser()
 
@@ -164,6 +167,19 @@ async def index_exploit_data(request: Request):
     instance = crawl_model.getInstance()
     return await _index(request, ExploitDataModel, instance.invoke_exploit_index)
 
+
+@crawl_routes.post("/api/index/apt", dependencies=_leak_deps)
+async def index_apt_data(request: Request):
+    instance = crawl_model.getInstance()
+    return await _index(request, AptDataModel, instance.invoke_apt_index)
+
+
+@crawl_routes.post("/api/index/malware", dependencies=_leak_deps)
+async def index_malware_data(request: Request):
+    instance = crawl_model.getInstance()
+    return await _index(request, MalwareDataModel, instance.invoke_malware_index)
+
+
 @crawl_routes.post(
     "/api/index/defacement",
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
@@ -253,12 +269,8 @@ async def index_entities(_: Request, entities: List[entity_model] = Body(...)):
     return results
 
 
-@crawl_routes.post("/api/index/dump", dependencies=[Depends(limiter_dependency)])
-async def index_dump(request: Request):
-    body = await request.json()
-    return await crawl_model.getInstance().invoke_dump_index(DumpModel(**body))
-
-
-@crawl_routes.post("/api/index/stealerlog", dependencies=[Depends(limiter_dependency)])
+@crawl_routes.post(
+    "/api/index/stealerlog",
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER])), Depends(limiter_dependency)])
 async def index_stealerlog(model: LogBatchModel):
     return await crawl_model.getInstance().invoke_stealerlog_index(model)

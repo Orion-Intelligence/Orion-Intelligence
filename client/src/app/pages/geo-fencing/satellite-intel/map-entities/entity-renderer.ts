@@ -23,7 +23,6 @@ type EntityRendererConfig = {
   getOrionData: () => OrionSatelliteFeature[];
   getFocusedFeature: () => OrionSatelliteFeature | null;
   onFeatureSelected: (feature: OrionSatelliteFeature) => void;
-  onFeatureIdsSelected: (ids: string[]) => void;
 };
 
 export class EntityRenderer {
@@ -44,7 +43,6 @@ export class EntityRenderer {
       getData: config.getOrionData,
       getFocusedFeature: config.getFocusedFeature,
       onFeatureSelected: config.onFeatureSelected,
-      onFeatureIdsSelected: config.onFeatureIdsSelected,
     });
     this.anomalyRenderer = new AnomalyMapRenderer(config.L, config.map, this.componentRenderer);
     this.aircraftRenderer = new AircraftMapRenderer({

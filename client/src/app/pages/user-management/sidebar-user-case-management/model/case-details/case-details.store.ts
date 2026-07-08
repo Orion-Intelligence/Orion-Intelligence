@@ -1,4 +1,5 @@
-import { Case, CaseAnalyst, CaseArtifact, CaseClosure, CaseEntity, CaseLink, CaseTask } from '../../../../../shared/model/case-management/case.model';
+import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseEntity, CaseLink, CaseTask } from '../../../../../shared/model/case-management/case.model';
 
 export type CaseDetailsEditSection = 'caseDetails' | 'primaryEntity' | 'relatedEntities' | 'artifacts' | 'tasks' | 'linkedCases';
 
@@ -19,9 +20,29 @@ export abstract class CaseDetailsStore {
   abstract newClosure: CaseClosure | null;
   abstract analysts: CaseAnalyst[];
   abstract accessibleCases: Case[];
+  abstract get editablePrimaryEntity(): CaseEntity | null;
+  abstract isCommentSaving: boolean;
+  abstract isShareCreating: boolean;
+  abstract isShareRevoking: boolean;
+  abstract isPdfExporting: boolean;
+  abstract isArchivingCase: boolean;
+  abstract commentErrorMessage: string;
+
+  abstract canManageCases(): boolean;
+  abstract canUnarchiveCases(): boolean;
+  abstract canEditTasksAndComments(): boolean;
 
   abstract enableEditing(section: CaseDetailsEditSection): void;
   abstract cancelEditing(): void;
+  abstract saveCaseDetails(): void;
+  abstract savePrimaryEntity(): void;
+  abstract exportPdf(): void;
+  abstract openArchiveConfirmation(): void;
+  abstract openUnarchiveConfirmation(): void;
+  abstract openShareConfirmation(): void;
+  abstract openRevokeShareConfirmation(): void;
+  abstract getCaseCommentsFeedback(): ReportFeedbackModel;
+  abstract saveCaseComment(body: string): void;
   abstract openAddRelatedEntity(): void;
   abstract removeRelatedEntity(index: number): void;
   abstract saveRelatedEntities(): void;
@@ -29,12 +50,11 @@ export abstract class CaseDetailsStore {
   abstract openAddArtifact(): void;
   abstract saveArtifacts(): void;
   abstract removeArtifact(index: number): void;
-  abstract uploadArtifactFile(artifact: CaseArtifact, fileInput: HTMLInputElement): void;
-  abstract viewArtifactFile(artifact: CaseArtifact): void;
-  abstract downloadArtifactFile(artifact: CaseArtifact): void;
-  abstract deleteArtifactFile(artifact: CaseArtifact): void;
-  abstract setPendingNewArtifactFile(fileInput: HTMLInputElement): void;
-  abstract getPendingNewArtifactFileName(): string;
+  abstract uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void;
+  abstract downloadArtifactFile(artifact: CaseArtifact, fileId: string): void;
+  abstract deleteArtifactFile(artifact: CaseArtifact, fileId: string): void;
+  abstract setPendingNewArtifactFiles(fileInput: HTMLInputElement): void;
+  abstract getPendingNewArtifactFileNameRows(): string[];
   abstract saveNewArtifact(): void;
   abstract openAddTask(): void;
   abstract saveTasks(): void;
@@ -49,4 +69,19 @@ export abstract class CaseDetailsStore {
   abstract openEditClosure(): void;
   abstract saveClosure(): void;
   abstract cancelSectionMode(): void;
+  abstract loadArtifactReports(source: string, q?: string): void;
+  abstract searchArtifactReports(source: string, q: string): void;
+  abstract scheduleArtifactReportSearch(artifact: CaseArtifact): void;
+  abstract selectArtifactReport(artifact: CaseArtifact, report: ArtifactReportOption): void;
+  abstract clearArtifactReportSelection(artifact: CaseArtifact): void;
+  abstract artifactReports: ArtifactReportOption[];
+  abstract isArtifactReportsLoading: boolean;
+  abstract artifactReportSearchText: string;
+  abstract isArtifactReportDropdownOpen: boolean;
+  abstract viewArtifactReport(artifact: CaseArtifact): void;
+  abstract verifyArtifactFile(artifact: CaseArtifact, fileId: string): void;
+  abstract isArtifactFileIntegrityFailed(artifactFile: CaseArtifactFile): boolean;
+  abstract canAddTasks(): boolean;
+  abstract canEditTask(task?: CaseTask | null): boolean;
+  abstract canEditFullTask(): boolean;
 }

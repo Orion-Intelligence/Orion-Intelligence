@@ -8,6 +8,7 @@ import { NgxPrintModule } from 'ngx-print';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ApiService } from '../../../shared/services/api.service';
 import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 type ScannerResultItem = { label: string; value: string };
 type ScannerResultSection = { title: string; items: ScannerResultItem[] };
@@ -21,8 +22,7 @@ type ScannerResultSection = { title: string; items: ScannerResultItem[] };
     NgxPrintModule,
     NgOptimizedImage,
     TooltipDirective,
-    FormsModule,
-  ],
+    FormsModule, TranslatePipe],
   templateUrl: './file-scanner.component.html'
 })
 export class FileScannerComponent {

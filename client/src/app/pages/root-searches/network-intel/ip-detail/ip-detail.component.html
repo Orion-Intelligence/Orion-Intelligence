@@ -1,24 +1,24 @@
 <div class="mx-4 mt-3 mb-7">
-  <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">General Information</div>
+  <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'General Information' | translate }}</div>
   @if (hasCameraSignals || iotPortCount > 0) {
     <div class="mb-3 flex flex-wrap gap-2">
       @if (hasCameraSignals) {
         <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2.5 py-1 text-[12px] font-bold text-sky-300">Camera Detected{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
       }
       @if (iotPortCount > 0) {
-        <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2.5 py-1 text-[12px] font-bold text-emerald-300">IoT Ports {{ iotPortCount }}</span>
+        <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2.5 py-1 text-[12px] font-bold text-emerald-300">{{ 'IoT Ports' | translate }} {{ iotPortCount }}</span>
       }
     </div>
   }
   <div class="grid grid-cols-2 gap-x-4 gap-y-3 md:grid-cols-4">
     @if (detail.country) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Country</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.country }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'iocTypes.m_country' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.country }}</span></div>
     }
     @if (detail.city) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">City</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.city }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'City' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.city }}</span></div>
     }
     @if (detail.organization) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Org</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.organization }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'Org' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.organization }}</span></div>
     }
     @if (detail.isp) {
       <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">ISP</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.isp }}</span></div>
@@ -27,22 +27,22 @@
       <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">ASN</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.asn }}</span></div>
     }
     @if (detail.hosting_type) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Hosting</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.hosting_type }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'Hosting' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.hosting_type }}</span></div>
     }
     @if (detail.cloud_provider) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Cloud</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_provider }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'Cloud' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_provider }}</span></div>
     }
     @if (detail.cloud_region) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Region</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_region }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'Region' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_region }}</span></div>
     }
     @if (detail.cloud_service) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Service</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_service }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'Service' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.cloud_service }}</span></div>
     }
     @if (detail.web_server) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Web Server</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.web_server }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'Web Server' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.web_server }}</span></div>
     }
     @if (detail.title) {
-      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">Title</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.title }}</span></div>
+      <div class="flex flex-col gap-1"><span class="text-[12px] font-semibold uppercase tracking-[1px] text-[var(--color-text4)]">{{ 'categoryAlerts.form.title' | translate }}</span><span class="text-[15px] font-medium text-[var(--color-text1)] break-words">{{ detail.title }}</span></div>
     }
     @for (entry of generalInfoExtraEntries; track entry[0]) {
       <div class="flex flex-col gap-1">
@@ -55,7 +55,7 @@
 
 @if (ui.hasItems(detail.open_ports)) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Open Ports</div>
+    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Open Ports' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (p of detail.open_ports; track p) {
         <span class="rounded px-2.5 py-1 text-[14px] font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">{{ p }}</span>
@@ -66,7 +66,7 @@
 
 @if (ui.hasItems(detail.ports)) {
   <div class="mx-4 mt-5 mb-7">
-    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Port Details</div>
+    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Port Details' | translate }}</div>
     <div class="flex flex-col gap-3">
       @if (ui.renderablePorts(detail.ports).length) {
         @for (p of ui.renderablePorts(detail.ports); track p) {
@@ -83,10 +83,10 @@
                 <span class="rounded border border-emerald-400/20 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-semibold text-emerald-400">{{ p.service }}</span>
               }
               @if (p['is_camera'] || p['device_type'] === 'camera') {
-                <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold text-sky-300">CAMERA</span>
+                <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold text-sky-300">{{ 'CAMERA' | translate }}</span>
               }
               @if (p['is_iot']) {
-                <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-bold text-emerald-300">IoT</span>
+                <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-bold text-emerald-300">{{ 'IoT' | translate }}</span>
               }
               @if (p.state) {
                 <span class="ml-auto rounded border px-2 py-0.5 text-[12px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>
@@ -95,7 +95,7 @@
             <div class="border-t border-[var(--color-border)] p-3.5 flex flex-col gap-3">
               @if (p.banner) {
                 <div>
-                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text4)]">Banner</div>
+                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text4)]">{{ 'Banner' | translate }}</div>
                   <div class="flex flex-col gap-3 md:flex-row md:items-stretch">
                     @if ((p['is_camera'] || p['device_type'] === 'camera') && detail.ip && p.port) {
                       <iframe [src]="getCameraIframeUrl(detail.ip, p.port)" class="h-56 w-full shrink-0 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] md:w-1/2" loading="eager" referrerpolicy="no-referrer"></iframe>
@@ -106,18 +106,18 @@
               }
               @if (p.tls) {
                 <div>
-                  <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-cyan-400">SSL Certificate</div>
+                  <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-cyan-400">{{ 'SSL Certificate' | translate }}</div>
                   <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
-                    <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Version</span><span class="text-[var(--color-text2)]">{{ p.tls.version }}</span></div>
+                    <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Version' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.version }}</span></div>
                     @if (p.tls.cipher) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Cipher Suite</span><span class="text-[var(--color-text2)]">{{ p.tls.cipher }}{{ p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '' }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Cipher Suite' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.cipher }}{{ p.tls.bits ? ' (' + p.tls.bits + ' bit)' : '' }}</span></div>
                     }
                     @if (p.tls.cert_cn) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Subject CN</span><span class="text-[var(--color-text2)]">{{ p.tls.cert_cn }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Subject CN' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.cert_cn }}</span></div>
                     }
                     @if (p.tls.issuer) {
                       <div class="flex gap-2.5 text-[13px]">
-                        <span class="text-sky-400 font-semibold w-32 flex-shrink-0">Issuer</span>
+                        <span class="text-sky-400 font-semibold w-32 flex-shrink-0">{{ 'Issuer' | translate }}</span>
                         <span class="text-[var(--color-text2)]">
                           {{ p.tls.issuer['commonName'] || '' }}
                           @if (p.tls.issuer['organizationName']) {
@@ -130,57 +130,57 @@
                       </div>
                     }
                     @if (p.tls.not_before) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not Before</span><span class="text-[var(--color-text2)]">{{ p.tls.not_before }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Not Before' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.not_before }}</span></div>
                     }
                     @if (p.tls.not_after || p.tls.cert_expires) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Not After</span><span class="text-[var(--color-text2)]">{{ p.tls.not_after || p.tls.cert_expires }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Not After' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.not_after || p.tls.cert_expires }}</span></div>
                     }
                     @if (p.tls.serial_number) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Serial No.</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.serial_number }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Serial No.' | translate }}</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.serial_number }}</span></div>
                     }
                     @if (p.tls.is_self_signed) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">Self-Signed</span><span class="text-red-400 font-bold">⚠ Yes</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="text-sky-400 font-semibold w-32 flex-shrink-0">{{ 'Self-Signed' | translate }}</span><span class="text-red-400 font-bold">{{ '⚠ Yes' | translate }}</span></div>
                     }
                     @if (p.tls['is_ca'] !== undefined) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Certificate CA</span><span class="text-[var(--color-text2)]">{{ p.tls['is_ca'] ? 'Yes' : 'No' }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Certificate CA' | translate }}</span><span class="text-[var(--color-text2)]">{{ (p.tls['is_ca'] ? 'Yes' : 'No') | translate }}</span></div>
                     }
                     @if (p.tls.signature_algorithm) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Signature Algo</span><span class="text-[var(--color-text2)]">{{ p.tls.signature_algorithm }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Signature Algo' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.signature_algorithm }}</span></div>
                     }
                     @if (p.tls.public_key_algorithm) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Public Key</span><span class="text-[var(--color-text2)]">{{ p.tls.public_key_algorithm }}{{ p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '' }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Public Key' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.public_key_algorithm }}{{ p.tls.public_key_size ? ' (' + p.tls.public_key_size + ' bit)' : '' }}</span></div>
                     }
                     @if (ui.hasItems(p.tls.key_usage)) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.key_usage?.join(', ') }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Key Usage' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.key_usage?.join(', ') }}</span></div>
                     }
                     @if (ui.hasItems(p.tls.extended_key_usage)) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Ext Key Usage</span><span class="text-[var(--color-text2)]">{{ p.tls.extended_key_usage?.join(', ') }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Ext Key Usage' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.extended_key_usage?.join(', ') }}</span></div>
                     }
                     @if (p.tls.fingerprint_sha256) {
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">SHA-256</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.fingerprint_sha256 }}</span></div>
                     }
                     @if (p.tls['subject_key_identifier']) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Subject Key ID</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['subject_key_identifier'] }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Subject Key ID' | translate }}</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['subject_key_identifier'] }}</span></div>
                     }
                     @if (p.tls['authority_key_identifier']) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Authority Key ID</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['authority_key_identifier'] }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Authority Key ID' | translate }}</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['authority_key_identifier'] }}</span></div>
                     }
                     @if (ui.hasItems(p.tls['ca_issuers'])) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">CA Issuers</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['ca_issuers']?.join(', ') }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'CA Issuers' | translate }}</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['ca_issuers']?.join(', ') }}</span></div>
                     }
                     @if (ui.hasItems(p.tls['crl_distribution_points'])) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">CRL Points</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['crl_distribution_points']?.join(', ') }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'CRL Points' | translate }}</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls['crl_distribution_points']?.join(', ') }}</span></div>
                     }
                     @if (ui.hasItems(p.tls['certificate_policies'])) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">Policies</span><span class="text-[var(--color-text2)]">{{ p.tls['certificate_policies']?.join(', ') }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-sky-400">{{ 'Policies' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls['certificate_policies']?.join(', ') }}</span></div>
                     }
                   </div>
                   @if (ui.hasItems(p.tls.supported_versions) || ui.hasItems(p.tls.weak_protocols) || ui.hasItems(p.tls.risk_flags) || renderHeaderEntries(p.tls['ciphers_by_version']).length) {
                     <div class="mt-2">
-                      <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">TLS Configuration</div>
+                      <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">{{ 'TLS Configuration' | translate }}</div>
                       <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
                         @if (ui.hasItems(p.tls.supported_versions)) {
-                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Supported</span><span class="text-[var(--color-text2)]">{{ p.tls.supported_versions?.join(', ') }}</span></div>
+                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">{{ 'Supported' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.supported_versions?.join(', ') }}</span></div>
                         }
                         @if (renderHeaderEntries(p.tls['ciphers_by_version']).length) {
                           @for (entry of renderHeaderEntries(p.tls['ciphers_by_version']); track entry[0]) {
@@ -188,17 +188,17 @@
                           }
                         }
                         @if (ui.hasItems(p.tls.weak_protocols)) {
-                          <div class="flex gap-2.5 text-[13px]"><span class="text-red-400 font-semibold w-32 flex-shrink-0">Weak Protocols</span><span class="text-red-400">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
+                          <div class="flex gap-2.5 text-[13px]"><span class="text-red-400 font-semibold w-32 flex-shrink-0">{{ 'Weak Protocols' | translate }}</span><span class="text-red-400">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
                         }
                         @if (ui.hasItems(p.tls.risk_flags)) {
-                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">Risk Flags</span><span class="text-[var(--color-text2)]">{{ p.tls.risk_flags?.join(', ') }}</span></div>
+                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-violet-400">{{ 'Risk Flags' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.risk_flags?.join(', ') }}</span></div>
                         }
                       </div>
                     </div>
                   }
                   @if (ui.hasItems(p.tls['scts'])) {
                     <div class="mt-2">
-                      <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">Signed Certificate Timestamps</div>
+                      <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-violet-400">{{ 'Signed Certificate Timestamps' | translate }}</div>
                       <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
                         @for (entry of p.tls['scts']; track $index) {
                           <div class="rounded border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
@@ -215,17 +215,17 @@
                   <div class="mb-2 text-[11px] font-bold uppercase tracking-[1.3px] text-emerald-400">HTTP</div>
                   <div class="flex flex-col gap-1 rounded border border-[var(--color-border)] bg-[var(--color-blue-830)] p-2.5">
                     @if (p.http.server) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Server</span><span class="text-[var(--color-text2)]">{{ p.http.server }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">{{ 'Server' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.http.server }}</span></div>
                     }
                     @if (p.http.title) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">Title</span><span class="text-[var(--color-text2)]">{{ p.http.title }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 flex-shrink-0 font-semibold text-emerald-400">{{ 'categoryAlerts.form.title' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.http.title }}</span></div>
                     }
                   </div>
                 </div>
               }
               @if (ui.hasItems(p.risk_flags)) {
                 <div>
-                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-orange-400">Risk Flags</div>
+                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-orange-400">{{ 'Risk Flags' | translate }}</div>
                   <div class="flex flex-wrap gap-1.5">
                     @for (r of p.risk_flags; track r) {
                       <span class="rounded px-2.5 py-1 text-[13px] font-semibold bg-orange-400/12 text-orange-400 border border-orange-400/25">{{ r }}</span>
@@ -238,7 +238,7 @@
         }
       } @else {
         <div class="bg-transparent px-1 pt-0.5 pb-1 text-[15px] font-medium text-[var(--color-text4)]">
-          No result found
+          {{ 'No result found' | translate }}
         </div>
       }
     </div>
@@ -247,7 +247,7 @@
 
 @if (ui.hasItems(detail.web_technologies)) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Web Technologies</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Web Technologies' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (t of detail.web_technologies; track t) {
         <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-sky-400/12 text-sky-400 border border-sky-400/20">{{ t }}</span>
@@ -258,7 +258,7 @@
 
 @if (ui.securityItems(detail.security).length || detail.cdn || detail.waf || detail.hsts || detail.load_balancer) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Security &amp; CDN</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Security & CDN' | translate }}</div>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-2.5">
       @if (detail.cdn) {
         <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">CDN</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ detail.cdn }}</span></div>
@@ -267,15 +267,15 @@
         <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">WAF</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ detail.waf }}</span></div>
       }
       @if (detail.load_balancer) {
-        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Load Balancer</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ detail.load_balancer }}</span></div>
+        <div class="flex flex-col gap-0.5"><span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">{{ 'Load Balancer' | translate }}</span><span class="text-[13px] font-medium text-[var(--color-text1)]">{{ detail.load_balancer }}</span></div>
       }
       <div class="flex flex-col gap-0.5">
         <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">HSTS</span>
-        <span class="text-[13px] font-bold" [ngClass]="detail.hsts ? 'text-green-400' : 'text-[var(--color-text4)]'">{{ detail.hsts ? '✓ Yes' : '✕ No' }}</span>
+        <span class="text-[13px] font-bold" [ngClass]="detail.hsts ? 'text-green-400' : 'text-[var(--color-text4)]'">{{ (detail.hsts ? '✓ Yes' : '✕ No') | translate }}</span>
       </div>
       @if (ui.securityItems(detail.security).length) {
         <div class="col-span-full flex flex-col gap-1.5">
-          <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">Flags</span>
+          <span class="text-[10px] font-semibold uppercase tracking-[0.8px] text-[var(--color-text4)]">{{ 'Flags' | translate }}</span>
           <div class="flex flex-wrap gap-1.5">
             @for (s of ui.securityItems(detail.security); track s) {
               <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-emerald-400/12 text-emerald-400 border border-emerald-400/25">{{ s }}</span>
@@ -289,7 +289,7 @@
 
 @if (ui.hasItems(detail.vulnerabilities)) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-red-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-red-400/30 after:to-transparent">⚠ Vulnerabilities ({{ detail.vulnerabilities!.length }})</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-red-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-red-400/30 after:to-transparent">{{ '⚠ Vulnerabilities (' | translate }}{{ detail.vulnerabilities!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (v of detail.vulnerabilities; track v) {
         @if (formatVulnerability(v)) {
@@ -304,7 +304,7 @@
 
 @if (ui.hasItems(detail.misconfigurations)) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-yellow-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-yellow-400/30 after:to-transparent">⚡ Misconfigurations</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-yellow-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-yellow-400/30 after:to-transparent">{{ '⚡ Misconfigurations' | translate }}</div>
     <div class="flex flex-col gap-1.5">
       @for (m of detail.misconfigurations; track m) {
         <div class="rounded-lg border border-yellow-500/25 bg-yellow-500/8 px-3 py-2 text-[12px] font-medium text-yellow-300">{{ m }}</div>
@@ -315,7 +315,7 @@
 
 @if (renderHeaderEntries(detail.http_headers).length) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">HTTP Headers</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'HTTP Headers' | translate }}</div>
     <div class="flex flex-col gap-1">
       @for (h of renderHeaderEntries(detail.http_headers); track h[0]) {
         <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
@@ -329,7 +329,7 @@
 
 @if (renderHeaderEntries(detail.cache_headers).length) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Cache Headers</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Cache Headers' | translate }}</div>
     <div class="flex flex-col gap-1">
       @for (h of renderHeaderEntries(detail.cache_headers); track h[0]) {
         <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">
@@ -343,7 +343,7 @@
 
 @if (ui.hasItems(detail.allowed_methods)) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Allowed Methods</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Allowed Methods' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (m of detail.allowed_methods; track m) {
         <span class="px-2.5 py-0.5 rounded text-xs font-semibold bg-yellow-400/12 text-yellow-400 border border-yellow-400/25">{{ m }}</span>
@@ -354,7 +354,7 @@
 
 @if (ui.hasItems(detail.hostnames)) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Hostnames ({{ detail.hostnames!.length }})</div>
+    <div class="mb-3 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 after:h-px after:flex-1 after:content-[''] after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Hostnames (' | translate }}{{ detail.hostnames!.length }})</div>
     <div class="flex flex-wrap gap-1.5">
       @for (h of detail.hostnames; track h) {
         <span class="rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[14px] font-mono text-[var(--color-text3)]">{{ h }}</span>
@@ -365,7 +365,7 @@
 
 @if (ui.hasItems(detail.cameras)) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-emerald-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-emerald-400/30 after:to-transparent">📷 Cameras ({{ detail.cameras!.length }})</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-emerald-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-emerald-400/30 after:to-transparent">{{ '📷 Cameras (' | translate }}{{ detail.cameras!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (cam of detail.cameras; track cam) {
         <div class="flex items-center gap-2 flex-wrap border-b border-[var(--color-divider)] py-1.5 last:border-0">
@@ -387,7 +387,7 @@
 
 @if (extraDetailEntries.length) {
   <div class="mx-4 mt-3 mb-7">
-    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">Additional Details</div>
+    <div class="text-[10px] font-bold tracking-[1.2px] uppercase text-sky-400 mb-2.5 flex items-center gap-2 after:content-[''] after:flex-1 after:h-px after:bg-gradient-to-r after:from-sky-400/30 after:to-transparent">{{ 'Additional Details' | translate }}</div>
     <div class="flex flex-col gap-1">
       @for (entry of extraDetailEntries; track entry[0]) {
         <div class="flex flex-wrap gap-3 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[12px]">

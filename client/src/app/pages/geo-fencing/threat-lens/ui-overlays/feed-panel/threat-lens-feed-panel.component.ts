@@ -2,13 +2,13 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component, ElementRef, HostBinding, Input, NgZone, OnChanges, OnDestroy, SimpleChanges, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, ThreatLensFeedRangeOption } from '../../../models/geo-fencing.models';
-
-export type ThreatLensFeedPanelType = 'news' | 'archive';
+import { ThreatLensFeedPanelType } from '../../models/threat-lens-map.types';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-threat-lens-feed-panel',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './threat-lens-feed-panel.component.html',
 })
 export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, OnDestroy {
@@ -39,7 +39,7 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
   get hostClass(): string {
     const sizeClass = this.collapsed
       ? 'h-auto min-h-0'
-      : 'h-[calc(50%-0.375rem)] min-h-[250px] max-[1100px]:h-[360px] max-[1100px]:min-h-[280px] max-[640px]:h-[320px] max-[640px]:min-h-[240px]';
+      : 'h-[calc(50%-0.375rem)] min-h-0 max-[1100px]:h-auto max-[1100px]:min-h-0';
 
     return `block w-full ${sizeClass}`;
   }

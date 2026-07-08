@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { Observable, throwError, timer, EMPTY } from 'rxjs';
-import { catchError, expand, filter, map, retry, switchMap, take, takeWhile, tap } from 'rxjs/operators';
+import { Observable, of, throwError, timer } from 'rxjs';
+import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
-import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost } from '../../../../shared/model/social/social-scan.models';
+import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost, SocialStoredProfile } from '../../../../shared/model/social/social-scan.models';
+import { SocialNormalizationUtil } from '../../social-graph/utils/social-normalization.util';
 interface ApiEnvelope<T> {
     status?: string;
     message?: any;
@@ -14,7 +15,7 @@ interface ApiEnvelope<T> {
 export class SocialScanService {
   constructor(private api: ApiService) { }
 
-  private extractMetadata(platformName: string, data: any): Partial<PlatformResult> {
+  private extractMetadata(data: any): Partial<PlatformResult> {
     if (!data) {
       return { allMetadata: {} };
     }
@@ -95,17 +96,26 @@ export class SocialScanService {
     return platform;
   }
 
+  private isForumLabel(value: any): boolean {
+    const normalized = String(value || '').trim().toLowerCase();
+    return normalized === 'forum' || normalized === 'forums';
+  }
+
   private buildPlatformResult(item: any, keyUsername: string, rawPlatform: string): PlatformResult {
-    const capitalizedPlatform = this.capitalizePlatform(rawPlatform);
-    const extractedData = this.extractMetadata(capitalizedPlatform, item.data);
+    const displayPlatform = item?.metadata?.platform || rawPlatform;
+    const capitalizedPlatform = this.capitalizePlatform(displayPlatform);
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(item?.metadata?.platform_key || rawPlatform || displayPlatform);
+    const extractedData = this.extractMetadata(item.data);
     const rawStatus = item?.metadata?.status ?? item?.data?.status;
     const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : rawStatus;
     const platformResult = {
       keyUsername,
       platform: capitalizedPlatform,
+      platformKey,
       username: item.metadata.username,
       url: item.metadata.url,
       isSelected: false,
+      resultSource: 'normal',
       status: normalizedStatus,
       ...extractedData
     } as PlatformResult;
@@ -157,12 +167,39 @@ export class SocialScanService {
   }
 
   performScan(username: string): Observable<ScanEvent> {
-    return this.runScanFlow({
-      submitStep: 'Submitting job to API...',
-      request: () => this.api.post<any>('social/recon', { query: username }),
-      mapResult: (res) => this.mapScanItems(res.result || [], username, (item: any) => this.inferPlatformName(item, username)),
-      initialDelayMs: 1000,
-      intervalMs: 2000
+    return new Observable(subscriber => {
+      subscriber.next({ type: 'progress', payload: { progress: 10, step: 'Submitting job to API...' } });
+      const pollingSub = this.pollForResult<{
+                data?: any[];
+                result?: any;
+                step?: string;
+                progress?: number;
+            }, PlatformResult[]>({
+              request: () => this.api.post<any>('social/recon', { query: username }),
+              isReady: (res) => !!res && 'result' in (res as any),
+              mapResult: (res) => this.mapScanItems(Array.isArray((res as any).result) ? (res as any).result : [], username, (item: any) => this.inferPlatformName(item, username)),
+              onPending: (res: any) => {
+                this.emitPendingProgress(subscriber, res);
+              },
+              initialDelayMs: 1000,
+              intervalMs: 2000
+            }).pipe(switchMap((platforms) => {
+              subscriber.next({ type: 'progress', payload: { progress: 82, step: 'Searching forum records...' } });
+              return this.fetchForumProfiles(username).pipe(catchError(() => of([])),
+                map(forumProfiles => [...platforms, ...forumProfiles]));
+            })).subscribe({
+              next: (platforms) => {
+                subscriber.next({ type: 'progress', payload: { progress: 90, step: 'Processing results...' } });
+                subscriber.next({ type: 'complete', payload: platforms });
+                subscriber.complete();
+              },
+              error: (err) => {
+                subscriber.error(err);
+              }
+            });
+      return () => {
+        pollingSub.unsubscribe();
+      };
     });
   }
 
@@ -177,87 +214,274 @@ export class SocialScanService {
     });
   }
 
+  private fetchForumProfiles(username: string): Observable<PlatformResult[]> {
+    const queryUsername = username.replace(/"/g, '').trim();
+    const payload = {
+      query: queryUsername || username,
+      max_results: 50,
+    };
+    return this.api.post<any>('social/forum', payload).pipe(map(res => this.mapForumProfiles(this.extractSearchResults(res), username)));
+  }
+
+  private extractSearchResults(res: any): any[] {
+    const sources = [res, res?.message, res?.result, res?.data, res?.message?.data, res?.message?.result, res?.result?.data, res?.data?.result];
+    for (const source of sources) {
+      if (Array.isArray(source?.Result)) {
+        return source.Result;
+      }
+      if (Array.isArray(source?.result)) {
+        return source.result;
+      }
+      if (Array.isArray(source)) {
+        return source;
+      }
+    }
+    return [];
+  }
+
+  private mapForumProfiles(records: any[], keyUsername: string): PlatformResult[] {
+    const matchedRecords = records.filter(record => this.isForumRecord(record) && this.recordMatchesForumUsername(record, keyUsername));
+    const grouped = new Map<string, any[]>();
+    for (const record of matchedRecords) {
+      const domain = this.getForumDomain(record);
+      const key = domain || 'forum';
+      grouped.set(key, [...(grouped.get(key) || []), record]);
+    }
+    return Array.from(grouped.entries()).map(([domain, items]) => this.buildForumPlatformResult(keyUsername, domain, items));
+  }
+
+  private buildForumPlatformResult(keyUsername: string, domain: string, records: any[]): PlatformResult {
+    const first = records[0] || {};
+    const posts = records.map(record => this.normalizeForumPost(record));
+    const authors = Array.from(new Set(records.flatMap(record => this.expandField(record?.m_author || record?.m_sender_name)).filter(Boolean)));
+    const commenters = Array.from(new Set(records.flatMap(record => [
+      ...this.expandField(record?.m_username),
+      ...this.expandField(record?.m_commenters),
+      ...this.getForumCommentUsers(record)
+    ]).filter(Boolean)));
+    const displayUsername = this.getForumDisplayUsername(records, keyUsername);
+    const url = SocialNormalizationUtil.firstValue(first?.m_group_info, first?.m_channel_url, first?.m_url, first?.m_message_sharable_link);
+    const description = `${displayUsername} appears in ${posts.length} forum thread${posts.length !== 1 ? 's' : ''}${domain ? ` on ${domain}` : ''}.`;
+    return {
+      keyUsername,
+      platform: domain || 'Forum',
+      username: displayUsername,
+      url,
+      isSelected: false,
+      resultSource: 'darkweb',
+      status: 'active',
+      description,
+      timestamp: SocialNormalizationUtil.firstValue(first?.m_date, first?.m_creation_date),
+      allMetadata: {
+        source: 'Elastic forum',
+        forum: domain || 'forum',
+        network: SocialNormalizationUtil.firstValue(first?.m_network),
+        threads: posts.length,
+        authors,
+        commenters,
+      },
+      profileDetails: {
+        bio: description,
+        total_posts: String(posts.length),
+        profile_url: url,
+      },
+      posts,
+    };
+  }
+
+  private normalizeForumPost(record: any): SocialPost {
+    return {
+      hash_id: SocialNormalizationUtil.firstValue(record?.m_hash, record?._id, record?.m_message_id),
+      post_url: SocialNormalizationUtil.firstValue(record?.m_message_sharable_link, record?.m_url, record?.m_channel_url),
+      datetime: SocialNormalizationUtil.firstValue(record?.m_date, record?.m_creation_date),
+      caption: SocialNormalizationUtil.firstValue(record?.m_title, record?.m_content),
+      author: SocialNormalizationUtil.firstValue(record?.m_author, record?.m_sender_name),
+      source: this.getForumDomain(record),
+      likes: SocialNormalizationUtil.firstValue(record?.m_likes, record?.m_post_likes),
+      comments: SocialNormalizationUtil.firstValue(record?.m_post_comments_count, record?.m_comment_count, SocialNormalizationUtil.firstArrayCount(record?.m_comments)),
+      comment_items: SocialNormalizationUtil.normalizeCommentItems(record?.m_comments),
+      comment_details: SocialNormalizationUtil.normalizeCommentDetails(record?.m_comments),
+      shares: '',
+      views: '',
+      media_type: '',
+      media_url: '',
+    };
+  }
+
+  private isForumRecord(record: any): boolean {
+    const platform = String(record?.m_platform || '').toLowerCase();
+    return this.isForumLabel(platform);
+  }
+
+  private recordMatchesForumUsername(record: any, username: string): boolean {
+    const normalizedUsername = SocialNormalizationUtil.normalizeUsername(username);
+    if (!normalizedUsername) {
+      return false;
+    }
+    const candidates = [
+      ...this.expandField(record?.m_author),
+      ...this.expandField(record?.m_sender_name),
+      ...this.expandField(record?.m_attacker),
+      ...this.expandField(record?.m_username),
+      ...this.expandField(record?.m_commenters),
+      ...this.getForumCommentUsers(record),
+    ];
+    return candidates.some(candidate => SocialNormalizationUtil.normalizeUsername(candidate) === normalizedUsername);
+  }
+
+  private getForumDisplayUsername(records: any[], fallback: string): string {
+    const normalizedFallback = SocialNormalizationUtil.normalizeUsername(fallback);
+    for (const record of records) {
+      const candidates = [
+        ...this.expandField(record?.m_author),
+        ...this.expandField(record?.m_sender_name),
+        ...this.expandField(record?.m_username),
+        ...this.getForumCommentUsers(record),
+      ];
+      const match = candidates.find(candidate => SocialNormalizationUtil.normalizeUsername(candidate) === normalizedFallback);
+      if (match) {
+        return match;
+      }
+    }
+    return fallback;
+  }
+
+  private getForumDomain(record: any): string {
+    return SocialNormalizationUtil.firstValue(SocialNormalizationUtil.normalizeDomain(record?.m_url),
+      SocialNormalizationUtil.normalizeDomain(record?.m_channel_url),
+      SocialNormalizationUtil.normalizeDomain(record?.m_message_sharable_link),
+      this.expandField(record?.m_domain)[0]);
+  }
+
+  private getForumCommentUsers(record: any): string[] {
+    return Array.isArray(record?.m_comments)
+      ? record.m_comments.flatMap((comment: any) => this.expandField(comment?.m_username || comment?.username || comment?.user))
+      : [];
+  }
+
+  private expandField(value: any): string[] {
+    return SocialNormalizationUtil.expandRecordValue(value).map(item => item.trim()).filter(Boolean);
+  }
+
+  saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false): Observable<any> {
+    return this.api.post<any>('social/data', { profile_username: profileUsername, profiles, replace });
+  }
+
+  fetchStoredSocialProfiles(): Observable<SocialStoredProfile[]> {
+    return this.api.get<ApiEnvelope<SocialStoredProfile[]>>('social/data').pipe(map(res => Array.isArray(res?.result) ? res.result : []));
+  }
+
+  fetchStoredSocialProfile(profileUsername: string): Observable<SocialStoredProfile> {
+    return this.api.get<SocialStoredProfile>(`social/data/${encodeURIComponent(profileUsername)}`);
+  }
+
+  deleteStoredSocialProfiles(profileUsername: string): Observable<any> {
+    return this.api.delete<any>(`social/data/${encodeURIComponent(profileUsername)}`);
+  }
+
   fetchProfileInfo(platform: string, username: string): Observable<{
         profile: ProfileDetails;
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<{
                 profile: ProfileDetails;
-            }>>('social/profile', { platform, username }),
+            }>>('social/profile', { platform: platformKey, username }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => ({ profile: (res.result as any)?.profile ?? {} as ProfileDetails }),
-    }).pipe(retry(3));
+      mapResult: (res) => {
+        const result = res.result as any;
+        const profile = Array.isArray(result) ? result[0] : result?.profile ?? result ?? {};
+        return { profile: profile as ProfileDetails };
+      },
+    });
   }
 
-  fetchPlatformImages(platform: string, username: string): Observable<{
+  fetchPlatformImages(platform: string, username: string, maxImages = 10): Observable<{
         images: SocialImage[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<{
                 images: SocialImage[];
-            }>>('social/online/images', { platform, username }),
+            }>>('social/online/images', { platform: platformKey, username, max_images: maxImages }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ images: (res.result as any)?.images ?? [] }),
-    }).pipe(retry(3));
+    });
   }
 
-  fetchSocialPosts(platform: string, username: string): Observable<{
+  fetchSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 5, socialDataType = 'posts', maxComments = 10, commentOffset = 0): Observable<{
         posts: SocialPost[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 posts: SocialPost[];
-            }>>('social/posts', { platform, username }),
+            }>>('social/posts', { platform: platformKey, username, max_posts: maxPosts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => {
-        const result = res.result;
-        const posts = Array.isArray(result) ? result : (result as any)?.posts;
-        return { posts: Array.isArray(posts) ? posts : [] };
-      },
-    }).pipe(retry(3));
+      mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
+    });
+  }
+
+  fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos = 5, socialDataType = 'videos', maxComments = 10, commentOffset = 0): Observable<{
+        videos: SocialPost[];
+    }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
+                videos: SocialPost[];
+            }>>('social/videos', { platform: platformKey, username, max_videos: maxVideos, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ videos: this.normalizeSocialPosts(res.result, 'videos') }),
+    });
+  }
+
+  fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts = 5, socialDataType = 'shorts', maxComments = 10, commentOffset = 0): Observable<{
+        shorts: SocialPost[];
+    }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
+                shorts: SocialPost[];
+            }>>('social/shorts', { platform: platformKey, username, max_shorts: maxShorts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
+    });
+  }
+
+  fetchSocialPostComments(platform: string, username: string, tabKey: 'posts' | 'videos' | 'shorts', hashId?: string, commentOffset = 0, maxComments = 10): Observable<{
+        posts?: SocialPost[];
+        videos?: SocialPost[];
+        shorts?: SocialPost[];
+    }> {
+    if (tabKey === 'videos') {
+      return this.fetchSocialVideos(platform, username, hashId, 1, 'comments', maxComments, commentOffset);
+    }
+    if (tabKey === 'shorts') {
+      return this.fetchSocialShorts(platform, username, hashId, 1, 'comments', maxComments, commentOffset);
+    }
+    return this.fetchSocialPosts(platform, username, hashId, 1, 'comments', maxComments, commentOffset);
   }
 
   fetchFollowers(platform: string, username: string): Observable<{
         followers: string[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
-      request: () => this.api.post<any>('social/followers', { platform, username, max_followers: 1000 }),
+      request: () => this.api.post<any>('social/followers', { platform: platformKey, username, max_followers: 1000 }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ followers: (res.result as any)?.followers ?? [] }),
-    }).pipe(retry(3));
+    });
   }
 
   fetchFollowing(platform: string, username: string): Observable<{
         following: string[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
-      request: () => this.api.post<any>('social/following', { platform, username, max_following: 1000 }),
+      request: () => this.api.post<any>('social/following', { platform: platformKey, username, max_following: 1000 }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ following: (res.result as any)?.following ?? [] }),
-    }).pipe(retry(3));
-  }
-
-  fetchProfileBreachData(username?: string, email?: string): Observable<any> {
-    const payload = { text: { username: username || '', email: email || '' } };
-    return this.api.post<any>('dynamic/user', payload).pipe(expand((res) => this.shouldContinueDynamicPolling(res)
-      ? timer(2000).pipe(switchMap(() => this.api.post<any>('dynamic/user', payload)))
-      : EMPTY),
-    takeWhile((res) => this.shouldContinueDynamicPolling(res), true),
-    map((res) => {
-      if (!res || this.shouldContinueDynamicPolling(res)) {
-        return { cards_data: [] };
-      }
-      const normalized = (res && typeof res === 'object')
-        ? (res.data ?? res.result ?? res)
-        : res;
-      const cards = Array.isArray(normalized?.cards_data)
-        ? normalized.cards_data
-        : Array.isArray(normalized?.result)
-          ? normalized.result
-          : [];
-      return { cards_data: cards };
-    }),
-    catchError(() => throwError(() => new Error('Failed to fetch breach data'))));
+    });
   }
 
   fetchStealerLogsByIdentity(query: string): Observable<any[]> {
@@ -266,22 +490,87 @@ export class SocialScanService {
       q: '',
       url: '',
       user: query,
-      ioc: '',
+      ioc: `m_search_all:${query}`,
       type: 'c',
       page: 1,
       category: '',
       fullsearch: false
     };
     return this.api.post<any>('search/stealer/ioc', payload).pipe(map((res) => {
-      if (Array.isArray(res?.Result)) {
-        return res.Result;
-      }
-      if (Array.isArray(res?.result?.Result)) {
-        return res.result.Result;
-      }
-      return [];
+      return this.extractStealerLogResults(res);
     }),
     catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
+  }
+
+  fetchPlatformStealerLogs(username: string, domain: string): Observable<any[]> {
+    const payload = {
+      daterange: '',
+      q: '',
+      url: domain || '',
+      user: username,
+      ioc: domain ? `m_username:${username} AND m_domain:${domain}` : `m_search_all:${username}`,
+      type: 'c',
+      page: 1,
+      category: '',
+      fullsearch: false
+    };
+    return this.api.post<any>('search/stealer/ioc', payload).pipe(map((res) => {
+      return this.extractStealerLogResults(res);
+    }),
+    catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
+  }
+
+  fetchWantedList(query: string): Observable<any[]> {
+    return this.api.post<any>('dynamic/wanted', { text: { query } }).pipe(map((res) => {
+      return this.extractWantedResults(res);
+    }),
+    catchError(() => throwError(() => new Error('Failed to fetch wanted list'))));
+  }
+
+  private extractStealerLogResults(res: any): any[] {
+    if (Array.isArray(res?.Result)) {
+      return res.Result;
+    }
+    if (Array.isArray(res?.result?.Result)) {
+      return res.result.Result;
+    }
+    if (Array.isArray(res?.data?.Result)) {
+      return res.data.Result;
+    }
+    return [];
+  }
+
+  private extractWantedResults(res: any): any[] {
+    const sources = [res, res?.data, res?.result, res?.data?.result, res?.result?.data];
+    for (const source of sources) {
+      if (Array.isArray(source?.cards_data)) {
+        return source.cards_data;
+      }
+      if (Array.isArray(source?.result)) {
+        return source.result;
+      }
+      if (Array.isArray(source)) {
+        return source;
+      }
+      if (source && typeof source === 'object' && 'cards_data' in source) {
+        return [];
+      }
+    }
+    const single = res?.data?.result ?? res?.result ?? res?.data ?? res;
+    return single && typeof single === 'object' ? [single] : [];
+  }
+
+  private normalizeSocialPosts(result: any, key: 'posts' | 'videos' | 'shorts'): SocialPost[] {
+    const items = Array.isArray(result)
+      ? result
+      : Array.isArray(result?.[key])
+        ? result[key]
+        : Array.isArray(result?.data)
+          ? result.data
+          : [];
+    return items
+      .filter((post: any) => SocialNormalizationUtil.isUsableSocialPost(post))
+      .map((post: any) => SocialNormalizationUtil.normalizeSocialPost(post));
   }
 
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<{
@@ -311,17 +600,7 @@ export class SocialScanService {
           results: Array.isArray(r?.results) ? r.results : []
         };
       },
-    }).pipe(retry(3));
+    });
   }
 
-  private shouldContinueDynamicPolling(res: any): boolean {
-    const topStatus = (res?.status || '').toLowerCase();
-    const nestedStatus = (res?.result?.status || '').toLowerCase();
-    const isPending = ['pending', 'processing', 'running', 'busy'].includes(topStatus) ||
-      ['pending', 'processing', 'running', 'busy'].includes(nestedStatus);
-    const isFailedPending = (topStatus === 'pending' || nestedStatus === 'pending') &&
-      ((res?.result?.progress ?? res?.progress) === 0) &&
-      ((res?.result?.step ?? res?.step) === 'failed');
-    return isPending && !isFailedPending;
-  }
 }

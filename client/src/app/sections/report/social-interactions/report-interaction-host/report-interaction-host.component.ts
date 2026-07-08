@@ -47,6 +47,13 @@ export class ReportInteractionHostComponent implements OnChanges {
     });
   }
 
+  deleteFeedbackComment(commentCreatedAt: string): void {
+    this.dashboardService.deleteDocumentFeedbackComment(this.docId, commentCreatedAt, this.feedbackModel, {
+      setSaving: this.setCommentSaving.bind(this),
+      setError: this.setCommentErrorMessage.bind(this),
+    });
+  }
+
   private loadFeedback(): void {
     this.dashboardService.loadDocumentFeedback(this.docId, this.feedbackModel);
   }

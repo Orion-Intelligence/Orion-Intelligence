@@ -1,28 +1,28 @@
 @if (isOpen()) {
   <div data-testid="network-intel-geo-overlay" class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" (click)="onClose()">
     <div data-testid="network-intel-geo-modal" class="ui-graph-popup-panel ui-popup-shell relative w-full max-w-[620px] rounded-2xl p-4" (click)="$event.stopPropagation()">
-      <button data-testid="network-intel-geo-close" class="ui-popup-close absolute right-4 top-4 inline-flex items-center justify-center" type="button" aria-label="Close" title="Close" (click)="onClose()">×</button>
+      <button data-testid="network-intel-geo-close" class="ui-popup-close absolute right-4 top-4 inline-flex items-center justify-center" type="button" [attr.aria-label]="'common.actions.close' | translate" [title]="'common.actions.close' | translate" (click)="onClose()">×</button>
       <div class="ui-popup-header flex items-center justify-between px-4 py-3 pr-12">
         <div>
-          <div class="ui-popup-title text-lg font-semibold">Geo IoT</div>
-          <div class="ui-popup-subtitle text-sm">Coordinates scan configuration</div>
+          <div class="ui-popup-title text-lg font-semibold">{{ 'Geo IoT' | translate }}</div>
+          <div class="ui-popup-subtitle text-sm">{{ 'Coordinates scan configuration' | translate }}</div>
         </div>
       </div>
 
       <div class="space-y-4 px-4 py-3">
         <div class="rounded-xl border border-sky-400/15 bg-sky-400/5 px-4 py-3">
-          <div class="text-sm font-medium text-[var(--color-text1)]">Choose the point to scan around</div>
-          <div class="mt-1 text-[12px] leading-relaxed text-[var(--color-text3)]">Choose a point from the world map, or switch to manual entry if you already know the coordinates.</div>
+          <div class="text-sm font-medium text-[var(--color-text1)]">{{ 'Choose the point to scan around' | translate }}</div>
+          <div class="mt-1 text-[12px] leading-relaxed text-[var(--color-text3)]">{{ 'Choose a point from the world map, or switch to manual entry if you already know the coordinates.' | translate }}</div>
         </div>
 
         <div class="flex w-fit items-center gap-1 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] p-1">
           <button data-testid="network-intel-geo-mode-map" type="button" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all" [ngClass]="coordinateInputMode === 'map' ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']" (click)="setCoordinateInputMode('map')">
             <i class="bi bi-globe-americas text-[13px] leading-none"></i>
-            World Map
+            {{ 'World Map' | translate }}
           </button>
           <button data-testid="network-intel-geo-mode-manual" type="button" class="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-[11px] font-bold uppercase tracking-[1.2px] transition-all" [ngClass]="coordinateInputMode === 'manual' ? ['border', 'border-[var(--color-blue-640)]', 'bg-[var(--color-blue-640)]', 'text-white', 'shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]'] : ['border', 'border-transparent', 'text-[var(--color-text3)]', 'hover:bg-[var(--color-blue-720)]', 'hover:text-[var(--color-text1)]']" (click)="setCoordinateInputMode('manual')">
             <i class="bi bi-keyboard text-[13px] leading-none"></i>
-            Manual
+            {{ 'Manual' | translate }}
           </button>
         </div>
 
@@ -30,8 +30,8 @@
           <div class="overflow-hidden rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-790)]">
             <div class="flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
               <div>
-                <div class="text-[11px] font-bold uppercase tracking-[1.4px] text-sky-400">Map Picker</div>
-                <div class="mt-1 text-[12px] text-[var(--color-text3)]">Click anywhere to set coordinates instantly.</div>
+                <div class="text-[11px] font-bold uppercase tracking-[1.4px] text-sky-400">{{ 'Map Picker' | translate }}</div>
+                <div class="mt-1 text-[12px] text-[var(--color-text3)]">{{ 'Click anywhere to set coordinates instantly.' | translate }}</div>
               </div>
               @if (parsedCoordinates; as point) {
                 <div data-testid="network-intel-geo-selected-point" class="rounded-full border border-sky-400/25 bg-sky-400/10 px-3 py-1 text-[11px] font-semibold text-sky-300">
@@ -63,13 +63,13 @@
                 </button>
               </div>
               <div data-testid="network-intel-geo-zoom-label" class="absolute bottom-3 left-3 z-[2] rounded-full border border-[var(--color-border)] bg-[rgba(3,10,20,0.78)] px-3 py-1 text-[11px] font-medium text-[var(--color-text2)] [body.light-theme_&]:bg-white/95 [body.light-theme_&]:text-slate-700">
-                Zoom {{ zoomLevel | number:'1.0-1' }}x
+                {{ 'Zoom' | translate }} {{ zoomLevel | number:'1.0-1' }}x
               </div>
 
               @if (!mapMarkerPoint) {
                 <div class="pointer-events-none absolute inset-0 flex items-center justify-center">
                   <div class="rounded-full border border-[var(--color-border)] bg-[rgba(3,10,20,0.68)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)] [body.light-theme_&]:bg-white/95 [body.light-theme_&]:text-slate-700">
-                    Click map to choose coordinates
+                    {{ 'Click map to choose coordinates' | translate }}
                   </div>
                 </div>
               }
@@ -78,8 +78,8 @@
         } @else {
           <div class="rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-4">
             <div class="mb-1.5 flex items-center justify-between">
-              <label class="ui-popup-label block text-sm font-medium">Coordinates</label>
-              <span class="text-[11px] text-[var(--color-text4)]">Format: latitude, longitude</span>
+              <label class="ui-popup-label block text-sm font-medium">{{ 'Coordinates' | translate }}</label>
+              <span class="text-[11px] text-[var(--color-text4)]">{{ 'Format: latitude, longitude' | translate }}</span>
             </div>
             <input data-testid="network-intel-geo-coordinates-input" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm font-medium" type="text" [ngModel]="coordinates()" (ngModelChange)="coordinatesChange.emit($event)" placeholder="31.48, 74.17" />
           </div>
@@ -88,7 +88,7 @@
         <div class="grid gap-5 md:grid-cols-2">
           <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-4">
             <div class="mb-3">
-              <label class="ui-popup-label block text-sm font-medium">Radius</label>
+              <label class="ui-popup-label block text-sm font-medium">{{ 'Radius' | translate }}</label>
             </div>
             <div class="flex h-[42px] items-stretch overflow-hidden rounded-lg !border-0 !border-none bg-[var(--color-blue-720)] !shadow-none !ring-0">
               <button data-testid="network-intel-geo-radius-decrement" class="w-10 flex-shrink-0 !border-0 !border-none bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" type="button" (click)="onRadiusKmChange(radiusKm() - 5)" [disabled]="isScanning() || radiusKm() <= minRadiusKm">−</button>
@@ -99,7 +99,7 @@
 
           <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] px-4 py-4">
             <div class="mb-3">
-              <label class="ui-popup-label block text-sm font-medium">Max IPs</label>
+              <label class="ui-popup-label block text-sm font-medium">{{ 'Max IPs' | translate }}</label>
             </div>
             <div class="flex h-[42px] items-stretch overflow-hidden rounded-lg !border-0 !border-none bg-[var(--color-blue-720)] !shadow-none !ring-0">
               <button data-testid="network-intel-geo-max-ips-decrement" class="w-10 flex-shrink-0 !border-0 !border-none bg-[var(--color-blue-700)] text-lg text-sky-400 transition-colors hover:bg-sky-400/14 disabled:cursor-default disabled:text-[var(--color-text4)]" type="button" (click)="onMaxIpsChange(maxIps() - 50)" [disabled]="isScanning() || maxIps() <= minMaxIps">−</button>
@@ -111,8 +111,8 @@
       </div>
 
       <div class="ui-popup-footer flex items-center justify-end gap-2 px-4 py-3">
-        <button data-testid="network-intel-geo-cancel" class="ui-popup-btn-secondary px-[24px] text-[14px]" type="button" (click)="onClose()">Cancel</button>
-        <button data-testid="network-intel-geo-start" class="ui-popup-btn-primary px-[24px] text-[14px] font-medium disabled:cursor-not-allowed disabled:bg-[var(--color-blue-810)] disabled:text-[var(--color-text4)]" type="button" (click)="onSearch()" [disabled]="isScanning()">Start Scan</button>
+        <button data-testid="network-intel-geo-cancel" class="ui-popup-btn-secondary px-[24px] text-[14px]" type="button" (click)="onClose()">{{ 'common.actions.cancel' | translate }}</button>
+        <button data-testid="network-intel-geo-start" class="ui-popup-btn-primary px-[24px] text-[14px] font-medium disabled:cursor-not-allowed disabled:bg-[var(--color-blue-810)] disabled:text-[var(--color-text4)]" type="button" (click)="onSearch()" [disabled]="isScanning()">{{ 'Start Scan' | translate }}</button>
       </div>
     </div>
   </div>

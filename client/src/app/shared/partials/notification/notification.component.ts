@@ -1,10 +1,12 @@
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../header/login-header/header.component';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-notification',
   standalone: true,
-  imports: [HeaderComponent],
+  imports: [HeaderComponent, TranslatePipe],
   templateUrl: './notification.component.html'
 })
 export class NotificationComponent {

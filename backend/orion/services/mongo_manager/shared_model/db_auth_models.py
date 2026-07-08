@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import re
 from datetime import datetime
 from enum import Enum
@@ -9,6 +11,7 @@ from passlib.context import CryptContext
 from fastapi import HTTPException
 from pydantic import field_validator, model_validator
 from pydantic_core.core_schema import FieldValidationInfo
+from orion.services.permission_manager.permission_models import UserPermission
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -51,6 +54,8 @@ class db_user_account(Model):
     tenant_uuid: str = Field(default="")
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
+    password_reset_token: Optional[str] = Field(default=None)
+    password_reset_expiry: Optional[datetime] = Field(default=None)
 
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
@@ -61,6 +66,7 @@ class db_user_account(Model):
     preferences: Optional[Dict[str, Any]] = {}
     current_session_id: Optional[str] = Field(default=None)
     licenses: List[LicenseName] = Field(default=[LicenseName.FREE])
+    permissions: Optional[List[UserPermission]] = Field(default_factory=list)
     demo_tour: bool = Field(default=False)
 
     @staticmethod
@@ -106,6 +112,9 @@ class db_user_account(Model):
 
     @model_validator(mode="before")
     def validate_licenses(cls, values):
+        if values.get("permissions") is None:
+            values["permissions"] = []
+
         licenses = values.get("licenses")
 
         if licenses is not None:

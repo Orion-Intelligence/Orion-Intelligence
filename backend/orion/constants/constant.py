@@ -9,7 +9,7 @@ from orion.helper_manager.env_handler import env_handler
 class CONSTANTS:
     S_SETTINGS_INDEX_EXPIRY_TIMEOUT = 5184000
     S_SETTINGS_INDEX_EXPIRY = 15
-    S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT = 15
+    S_SETTINGS_INDEX_STATS_DAILY_TIMEOUT = 86400
     S_SETTINGS_INDEX_STATS_WEEKLY_TIMEOUT = 604800
     S_SETTINGS_SEARCHED_DOCUMENT_SIZE = 10
     S_SETTINGS_SEARCHED_DOCUMENT_SIZE_GENERIC = 10
@@ -41,8 +41,9 @@ class CONSTANTS:
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     }
 
-allowed_keys: set[str] = set()
+allowed_key_titles: dict[str, str] = {}
 mail_template = None
+alert_mail_template = None
 license_rules = {}
 url_rules = {}
 map_entities_data = {}

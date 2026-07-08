@@ -1,6 +1,6 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
-import { finalize } from 'rxjs';
+import { Component, HostListener, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { finalize, forkJoin } from 'rxjs';
 
 import { FeederScriptItem, FeederValueItem } from '../../../../shared/model/profile/feeder.model';
 import { PaginationComponent } from '../../../../shared/partials/pagination/pagination.component';
@@ -10,11 +10,15 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { FeederService } from '../feeder.service';
 import { SidebarUserFeederOwnerDialogComponent } from '../owner-dialog/sidebar-user-feeder-owner-dialog.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
+type SortDirection = 'asc' | 'desc';
+type SortColumn = 'file' | 'owner' | 'path' | 'active' | 'status' | 'lastSuccess' | 'updated';
 
 @Component({
   selector: 'app-sidebar-user-feeder-view',
   standalone: true,
-  imports: [NgClass, DatePipe, PaginationComponent, ConfirmationPopupComponent, ScrollTopComponent, SidebarUserFeederOwnerDialogComponent],
+  imports: [NgClass, DatePipe, PaginationComponent, ConfirmationPopupComponent, ScrollTopComponent, SidebarUserFeederOwnerDialogComponent, TranslatePipe],
   templateUrl: './sidebar-user-feeder-view.component.html',
 })
 export class SidebarUserFeederViewComponent implements OnChanges {
@@ -22,6 +26,9 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   private readonly pageSize = 1000;
   private consumedHighlightedScriptId: string | null = null;
   private scriptTotal = 0;
+  private isSelectingScripts = false;
+  private selectionAnchorScriptId: string | null = null;
+  private dragEnteredScriptIds = new Set<string>();
 
   rawScripts: FeederScriptItem[] = [];
   scripts: FeederScriptItem[] = [];
@@ -32,16 +39,18 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   selectedValueUrl: string | null = null;
   searchText = '';
   selectedScript: FeederScriptItem | null = null;
+  selectedScriptIds = new Set<string>();
   isScriptsLoading = false;
   isOwnerDialogOpen = false;
   ownerDialogScript: FeederScriptItem | null = null;
   isConfirmationOpen = false;
   confirmationMessage = '';
-  pendingAction: { type: 'clear' | 'delete' | 'toggle' | 'enableAll' | 'disableAll' | 'deleteValue'; script?: FeederScriptItem | null; value?: string | null; } | null = null;
+  pendingAction: { type: 'clear' | 'delete' | 'toggle' | 'enableAll' | 'disableAll' | 'deleteValue'; script?: FeederScriptItem | null; value?: string | null; selectedIds?: string[]; } | null = null;
   hasLoadedScripts = false;
   currentPage = 1;
   totalPages = 1;
-  sortStatusDirection: 'asc' | 'desc' | null = null;
+  sortColumn: SortColumn | null = null;
+  sortDirection: SortDirection | null = null;
   readonly shimmerRows = Array.from({ length: 4 }, (_, index) => index);
 
   @Input() active = false;
@@ -63,6 +72,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     if (changes['selectedRuleKey'] || changes['entryType']) {
       this.currentPage = 1;
       this.consumedHighlightedScriptId = null;
+      this.clearScriptSelection();
       if (this.hasLoadedScripts) {
         this.loadScripts();
       }
@@ -92,6 +102,10 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   }
 
   canBulkToggle(): boolean {
+    const selectedScripts = this.getSelectedScripts();
+    if (selectedScripts.length) {
+      return selectedScripts.some((script) => this.canToggleScript(script));
+    }
     return this.scripts.some((script) => this.canToggleScript(script));
   }
 
@@ -141,6 +155,14 @@ export class SidebarUserFeederViewComponent implements OnChanges {
       return 'Stored Rule Values';
     }
     return script?.path || script?.url || 'Unknown Path';
+  }
+
+  getScriptExternalUrl(script: FeederScriptItem | null | undefined): string {
+    const url = (script?.url || '').trim();
+    if (!url) {
+      return '';
+    }
+    return /^https?:\/\//i.test(url) ? url : `https://${url}`;
   }
 
   getSectionTitle(): string {
@@ -193,9 +215,17 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     return value.last_checked_at || value.last_success_date || value.last_failure_date || null;
   }
 
-  toggleStatusSort(): void {
-    this.sortStatusDirection = this.sortStatusDirection === 'asc' ? 'desc' : 'asc';
+  toggleSort(column: SortColumn): void {
+    this.sortDirection = this.sortColumn === column && this.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.sortColumn = column;
     this.applyLocalSearch();
+  }
+
+  getSortIcon(column: SortColumn): string {
+    if (this.sortColumn !== column) {
+      return '';
+    }
+    return this.sortDirection === 'asc' ? '↑' : '↓';
   }
 
   hasValuePreview(value: FeederValueItem): boolean {
@@ -291,7 +321,12 @@ export class SidebarUserFeederViewComponent implements OnChanges {
       });
   }
 
-  clearAllForRule(): void {
+  clearAllForRule(selectedIds: string[] = []): void {
+    if (selectedIds?.length) {
+      this.deleteSelectedScripts(selectedIds);
+      return;
+    }
+
     if (!this.selectedRuleKey) {
       return;
     }
@@ -301,6 +336,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
         next: (response) => {
           this.messageNotificationService.show(response?.message || 'Selected rule entries deleted successfully', 'success');
           this.closeScriptPreview();
+          this.clearScriptSelection();
           this.currentPage = 1;
           this.loadScripts();
         },
@@ -310,7 +346,12 @@ export class SidebarUserFeederViewComponent implements OnChanges {
       });
   }
 
-  setAllForRule(enabled: boolean): void {
+  setAllForRule(enabled: boolean, selectedIds: string[] = []): void {
+    if (selectedIds?.length) {
+      this.setSelectedScripts(enabled, selectedIds);
+      return;
+    }
+
     if (!this.selectedRuleKey) {
       return;
     }
@@ -325,6 +366,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           if (this.selectedScript) {
             this.selectedScript = { ...this.selectedScript, enabled };
           }
+          this.clearScriptSelection();
         },
         error: (error) => {
           this.messageNotificationService.show(error?.error?.detail || `Failed to ${enabled ? 'enable' : 'disable'} selected rule entries`);
@@ -366,6 +408,65 @@ export class SidebarUserFeederViewComponent implements OnChanges {
 
   getRuntimeStatus(script: FeederScriptItem): 'failed' | 'success' | 'warning' | 'unknown' {
     return this.getDateDerivedStatus(script.last_failure_date, script.last_success_date);
+  }
+
+  isScriptSelected(script: FeederScriptItem): boolean {
+    return this.selectedScriptIds.has(script.id);
+  }
+
+  beginScriptSelection(event: MouseEvent, script: FeederScriptItem): void {
+    const usesSelectionModifier = event.shiftKey || event.ctrlKey || event.metaKey;
+    if (this.entryType === 'values' || this.isInteractiveTarget(event.target) || (this.isTextSelectionTarget(event.target) && !usesSelectionModifier)) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (event.shiftKey) {
+      this.selectScriptRange(script);
+      return;
+    }
+
+    if (event.ctrlKey || event.metaKey) {
+      this.toggleScriptSelection(script.id);
+      this.selectionAnchorScriptId = script.id;
+      return;
+    }
+
+    this.isSelectingScripts = true;
+    this.dragEnteredScriptIds = new Set([script.id]);
+    this.selectedScriptIds = this.selectedScriptIds.size === 1 && this.selectedScriptIds.has(script.id) ? new Set<string>() : new Set([script.id]);
+    this.selectionAnchorScriptId = script.id;
+  }
+
+  extendScriptSelection(script: FeederScriptItem): void {
+    if (!this.isSelectingScripts || this.entryType === 'values' || this.dragEnteredScriptIds.has(script.id)) {
+      return;
+    }
+
+    this.dragEnteredScriptIds.add(script.id);
+    this.toggleScriptSelection(script.id);
+  }
+
+  leaveScriptSelection(script: FeederScriptItem): void {
+    if (this.isSelectingScripts) {
+      this.dragEnteredScriptIds.delete(script.id);
+    }
+  }
+
+  @HostListener('document:mousedown', ['$event'])
+  clearSelectionOnDocumentMouseDown(event: MouseEvent): void {
+    const target = event.target;
+    if (!(target instanceof HTMLElement) || target.closest('[data-feeder-script-row="true"], [data-feeder-selection-action="true"]')) {
+      return;
+    }
+    this.clearScriptSelection();
+  }
+
+  @HostListener('document:mouseup')
+  endScriptSelection(): void {
+    this.isSelectingScripts = false;
+    this.dragEnteredScriptIds.clear();
   }
 
   private getDateDerivedStatus(lastFailureDate?: string | null, lastSuccessDate?: string | null): 'failed' | 'success' | 'warning' | 'unknown' {
@@ -410,7 +511,10 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   }
 
   openConfirmation(action: 'clear' | 'delete' | 'toggle' | 'enableAll' | 'disableAll' | 'deleteValue', script?: FeederScriptItem | null, value?: string): void {
-    this.pendingAction = { type: action, script: script || null, value: value || null };
+    const selectedIds = action === 'clear' || action === 'enableAll' || action === 'disableAll'
+      ? this.getSelectedScripts().map((selectedScript) => selectedScript.id)
+      : [];
+    this.pendingAction = { type: action, script: script || null, value: value || null, selectedIds };
     this.confirmationMessage = action === 'clear'
       ? 'Are you sure you want to delete all feeder entries for the selected rule?'
       : action === 'enableAll'
@@ -435,15 +539,15 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     }
 
     if (action.type === 'clear') {
-      this.clearAllForRule();
+      this.clearAllForRule(action.selectedIds);
       return;
     }
     if (action.type === 'enableAll') {
-      this.setAllForRule(true);
+      this.setAllForRule(true, action.selectedIds);
       return;
     }
     if (action.type === 'disableAll') {
-      this.setAllForRule(false);
+      this.setAllForRule(false, action.selectedIds);
       return;
     }
     if (action.type === 'delete' && action.script) {
@@ -478,6 +582,126 @@ export class SidebarUserFeederViewComponent implements OnChanges {
 
   private formatDisplayName(script: FeederScriptItem | null | undefined): string {
     return script ? this.getScriptDisplayName(script) : 'this entry';
+  }
+
+  private getSelectedScripts(selectedIds: Iterable<string> = this.selectedScriptIds): FeederScriptItem[] {
+    const selectedIdSet = new Set(selectedIds);
+    return this.displayedScripts.filter((script) => selectedIdSet.has(script.id));
+  }
+
+  private clearScriptSelection(): void {
+    this.isSelectingScripts = false;
+    this.selectionAnchorScriptId = null;
+    this.dragEnteredScriptIds.clear();
+    this.selectedScriptIds = new Set<string>();
+  }
+
+  private toggleScriptSelection(scriptId: string): void {
+    const selectedIds = new Set(this.selectedScriptIds);
+    if (selectedIds.has(scriptId)) {
+      selectedIds.delete(scriptId);
+    }
+    else {
+      selectedIds.add(scriptId);
+    }
+    this.selectedScriptIds = selectedIds;
+  }
+
+  private selectScriptRange(script: FeederScriptItem): void {
+    const selectedIdList = Array.from(this.selectedScriptIds);
+    const anchorId = this.selectionAnchorScriptId || selectedIdList[selectedIdList.length - 1] || script.id;
+    const anchorIndex = this.displayedScripts.findIndex((item) => item.id === anchorId);
+    const scriptIndex = this.displayedScripts.findIndex((item) => item.id === script.id);
+    if (anchorIndex < 0 || scriptIndex < 0) {
+      this.toggleScriptSelection(script.id);
+      this.selectionAnchorScriptId = script.id;
+      return;
+    }
+
+    const selectedIds = new Set(this.selectedScriptIds);
+    const [fromIndex, toIndex] = [Math.min(anchorIndex, scriptIndex), Math.max(anchorIndex, scriptIndex)];
+    this.displayedScripts.slice(fromIndex, toIndex + 1).forEach((item) => selectedIds.add(item.id));
+    this.selectedScriptIds = selectedIds;
+  }
+
+  private deleteSelectedScripts(selectedIds: string[]): void {
+    const selectedScripts = this.getSelectedScripts(selectedIds);
+    if (!selectedScripts.length) {
+      return;
+    }
+
+    const selectedIdSet = new Set(selectedIds);
+    forkJoin(selectedScripts.map((script) => this.feederService.deleteScript(script.id)))
+      .subscribe({
+        next: () => {
+          if (this.selectedScript && selectedIdSet.has(this.selectedScript.id)) {
+            this.closeScriptPreview();
+          }
+          this.clearScriptSelection();
+          this.currentPage = 1;
+          this.loadScripts();
+        },
+        error: (error) => {
+          this.messageNotificationService.show(error?.error?.detail || 'Failed to delete');
+        }
+      });
+  }
+
+  private setSelectedScripts(enabled: boolean, selectedIds: string[]): void {
+    const selectedScripts = this.getSelectedScripts(selectedIds).filter((script) => this.canToggleScript(script));
+    const targetScripts = selectedScripts.filter((script) => script.enabled !== enabled);
+    if (!selectedScripts.length) {
+      return;
+    }
+
+    if (!targetScripts.length) {
+      this.clearScriptSelection();
+      return;
+    }
+
+    const targetIdSet = new Set(targetScripts.map((script) => script.id));
+    forkJoin(targetScripts.map((script) => this.feederService.toggleScript(script.id)))
+      .subscribe({
+        next: (responses) => {
+          const updatedById = new Map<string, FeederScriptItem>();
+          responses.forEach((response) => {
+            if (response?.script) {
+              updatedById.set(response.script.id, response.script);
+            }
+          });
+          const updateScript = (script: FeederScriptItem): FeederScriptItem => updatedById.get(script.id) || (targetIdSet.has(script.id) ? { ...script, enabled } : script);
+          this.rawScripts = this.rawScripts.map(updateScript);
+          this.scripts = this.scripts.map(updateScript);
+          this.displayedScripts = this.displayedScripts.map(updateScript);
+          if (this.selectedScript) {
+            this.selectedScript = updateScript(this.selectedScript);
+          }
+          this.clearScriptSelection();
+        },
+        error: (error) => {
+          this.messageNotificationService.show(error?.error?.detail || 'Failed to update script status');
+        }
+      });
+  }
+
+  private isInteractiveTarget(target: EventTarget | null): boolean {
+    const element = this.getEventElement(target);
+    return !!element?.closest('button, input, textarea, select, a, [role="button"]');
+  }
+
+  private isTextSelectionTarget(target: EventTarget | null): boolean {
+    const element = this.getEventElement(target);
+    return !!element?.closest('[data-feeder-text-selectable="true"]');
+  }
+
+  private getEventElement(target: EventTarget | null): HTMLElement | null {
+    if (target instanceof HTMLElement) {
+      return target;
+    }
+    if (target instanceof Node && target.parentElement instanceof HTMLElement) {
+      return target.parentElement;
+    }
+    return null;
   }
 
   hasStatusPreview(script: FeederScriptItem | null | undefined): boolean {
@@ -533,10 +757,10 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           || (value.status || '').toLowerCase().includes(query)
           || (value.last_error || '').toLowerCase().includes(query));
       const totalValues = filteredValues.length;
-      const sortedValues = this.sortStatusDirection
+      const sortedValues = this.sortColumn === 'status' && this.sortDirection
         ? [...filteredValues].sort((left, right) => {
           const result = this.getValueStatus(left).localeCompare(this.getValueStatus(right));
-          return this.sortStatusDirection === 'asc' ? result : -result;
+          return this.sortDirection === 'asc' ? result : -result;
         })
         : filteredValues;
       this.totalPages = Math.max(1, Math.ceil(totalValues / this.pageSize));
@@ -553,12 +777,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     this.valuesRecord = null;
     if (!query) {
       this.scripts = [...this.rawScripts];
-      this.displayedScripts = this.sortStatusDirection
-        ? [...this.scripts].sort((left, right) => {
-          const result = this.getRuntimeStatus(left).localeCompare(this.getRuntimeStatus(right));
-          return this.sortStatusDirection === 'asc' ? result : -result;
-        })
-        : [...this.scripts];
+      this.displayedScripts = this.sortScripts(this.scripts);
       this.totalPages = Math.max(1, Math.ceil(this.scriptTotal / this.pageSize));
       return;
     }
@@ -572,13 +791,46 @@ export class SidebarUserFeederViewComponent implements OnChanges {
       ];
       return haystacks.some(value => value.toLowerCase().includes(query));
     });
-    this.displayedScripts = this.sortStatusDirection
-      ? [...this.scripts].sort((left, right) => {
-        const result = this.getRuntimeStatus(left).localeCompare(this.getRuntimeStatus(right));
-        return this.sortStatusDirection === 'asc' ? result : -result;
-      })
-      : [...this.scripts];
+    this.displayedScripts = this.sortScripts(this.scripts);
     this.totalPages = 1;
+  }
+
+  private sortScripts(scripts: FeederScriptItem[]): FeederScriptItem[] {
+    if (!this.sortColumn || !this.sortDirection) {
+      return [...scripts];
+    }
+    return [...scripts].sort((left, right) => {
+      const leftValue = this.getScriptSortValue(left, this.sortColumn as SortColumn);
+      const rightValue = this.getScriptSortValue(right, this.sortColumn as SortColumn);
+      const result = typeof leftValue === 'number' && typeof rightValue === 'number'
+        ? leftValue - rightValue
+        : String(leftValue).localeCompare(String(rightValue));
+      return this.sortDirection === 'asc' ? result : -result;
+    });
+  }
+
+  private getScriptSortValue(script: FeederScriptItem, column: SortColumn): string | number {
+    switch (column) {
+      case 'file':
+        return this.getScriptDisplayName(script).toLowerCase();
+      case 'owner':
+        return this.getOwnerLabel(script).toLowerCase();
+      case 'path':
+        return this.getScriptPathLabel(script).toLowerCase();
+      case 'active':
+        return script.enabled ? 1 : 0;
+      case 'status':
+        return this.getRuntimeStatus(script);
+      case 'lastSuccess':
+        return this.getDateSortValue(script.last_success_date);
+      case 'updated':
+        return this.getDateSortValue(script.updated_at);
+    }
+  }
+
+  private getDateSortValue(value?: string | null): number {
+    const timestamp = value ? Date.parse(value) : NaN;
+    return Number.isNaN(timestamp) ? 0 : timestamp;
   }
 
   private deferStateUpdate(callback: () => void): void {

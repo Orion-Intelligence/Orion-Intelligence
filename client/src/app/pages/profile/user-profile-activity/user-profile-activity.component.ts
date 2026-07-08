@@ -4,11 +4,12 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../../shared/services/api.service';
 import { PublicUserActivityItem, PublicUserActivityResponse } from '../../../sections/report/social-interactions/models/public-user-data.model';
 import { HelperService } from '../../../shared/services/helper.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-profile-activity',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, TranslatePipe],
   templateUrl: './user-profile-activity.component.html',
 })
 export class UserProfileActivityComponent {

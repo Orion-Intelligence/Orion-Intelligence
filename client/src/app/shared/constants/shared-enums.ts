@@ -21,6 +21,17 @@ export const LANGUAGE_MAP: Record<string, {
   pol: { iso1: 'pl', name: 'Polish' },
   ces: { iso1: 'cs', name: 'Czech' }
 };
+
+export type LanguageOption = {
+  code: string;
+  name: string;
+};
+
+export const LANGUAGE_OPTIONS: LanguageOption[] = Object.values(LANGUAGE_MAP).map(language => ({
+  code: language.iso1,
+  name: language.name
+}));
+
 export enum SortType {
     DEFAULT = 'Default',
     NEWEST_FIRST = 'Newest first',

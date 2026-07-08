@@ -1,198 +1,115 @@
-import { Component, ChangeDetectionStrategy, signal, computed, DestroyRef, OnDestroy, PLATFORM_ID, effect, OnInit, viewChild, ElementRef, Inject, inject, ViewEncapsulation } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Inject, OnDestroy, PLATFORM_ID, ViewEncapsulation, computed, inject, signal, viewChild } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { NetworkGraphComponent } from './network-graph/network-graph.component';
-import { MetadataPopupComponent } from './metadata-popup/metadata-popup.component';
-import { ProfileSummaryPopupComponent } from './profile-summary-popup/profile-summary-popup.component';
-import { CustomEntity, Job, PlatformResult, TabState } from '../../../shared/model/social/social-scan.models';
-import { SocialScanService } from '../shared/services/social-scan.service';
-import { TabManagerService } from '../shared/services/tab-manager.service';
-import { HomeMenuComponent } from './home-menu/home-menu.component';
-import { ListViewComponent } from './list-view/list-view.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
-import { TabBarComponent } from '../shared/tab-bar/tab-bar.component';
-import { Position } from 'vis-network';
-import { FollowerScanPopupComponent } from './follower-scan-popup/follower-scan-popup.component';
-import { FetchingStateService } from './services/fetching-state.service';
-import { ManageProfilesModalComponent } from './profile-summary-popup/manage-profiles-modal/manage-profiles-modal.component';
-import { ContextMenuComponent, ContextMenuAction } from './network-graph/context-menu/context-menu.component';
+import { finalize, map } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { Job, PlatformResult, SocialGraphState, SocialResultSource, SocialStealerLogRecord } from '../../../shared/model/social/social-scan.models';
+import { HomeMenuComponent } from './home-menu/home-menu.component';
+import { SocialProfileListingComponent } from './profile-listing/profile-listing.component';
 import { NotificationBarComponent } from './notification-bar/notification-bar.component';
-import { GraphOrchestratorService } from './services/graph-orchestrator.service';
-import { EntityManagerComponent } from './entity-manager/entity-manager.component';
-import { AddEntityModalComponent } from './entity-manager/add-entity-modal/add-entity-modal.component';
-import { SocialMapperStateService } from './services/social-mapper-state.service';
-import { RelationshipConnectionItem } from './services/social-mapper-state.service';
+import { SocialService } from './services/social.service';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
-import { MessagePopupComponent } from '../../../shared/partials/message-popup/message-popup.component';
-import { RelationshipDetailsPopupComponent } from './relationship-details-popup/relationship-details-popup.component';
-import { GraphToolbarComponent } from '../shared/graph-toolbar/graph-toolbar.component';
-import { GraphSearchTriggerComponent } from './graph-search-trigger/graph-search-trigger.component';
-import { SocialScanJobService } from './services/social-scan-job.service';
-import { PlatformFetchService } from './services/platform-fetch.service';
-import { RelationshipResolverService } from './services/relationship-resolver.service';
-import { GraphLoadingComponent } from '../shared/graph-loading/graph-loading.component';
 import { getFirstFileFromInputEvent, readFileAsDataUrl } from '../../../shared/utils/file-input.util';
-import { getEntityRecordEntries, getEntityReportRecords, getScanResultsByUsername, parsePlatformNodeId } from './utils/social-graph-view.util';
+import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
+import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-modal/manage-profiles-modal.component';
+import type { FetchMergeMode, FetchStateKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostContentTabKey, PostCursorFetchRequest, ScanJobOptions } from './models/social-graph.models';
+import { SocialNormalizationUtil } from './utils/social-normalization.util';
+import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.component';
+
+type LatestFetchRequest = PostCursorFetchRequest | ImageCursorFetchRequest;
+
+interface LatestFetchConfirmationData {
+  message: string;
+  request: LatestFetchRequest;
+}
+
 @Component({
   selector: 'app-social-graph',
   templateUrl: './social-mapper.component.html',
+  styleUrls: ['./social-mapper.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
-    NetworkGraphComponent,
-    MetadataPopupComponent,
-    ProfileSummaryPopupComponent,
     HomeMenuComponent,
-    ListViewComponent,
-    TabBarComponent,
-    FollowerScanPopupComponent,
-    ManageProfilesModalComponent,
+    SocialProfileListingComponent,
     ConfirmationPopupComponent,
-    MessagePopupComponent,
-    ContextMenuComponent,
     NotificationBarComponent,
-    EntityManagerComponent,
-    AddEntityModalComponent,
-    RelationshipDetailsPopupComponent,
-    GraphToolbarComponent,
-    GraphSearchTriggerComponent,
-    GraphLoadingComponent
+    ProfileComponent,
+    ManageProfilesModalComponent,
+    SocialBreadcrumbComponent
   ]
 })
-export class SocialMapperComponent implements OnInit, OnDestroy {
-  private activeTabState = computed(() => this.tabManager.activeTab()?.state);
+export class SocialMapperComponent implements OnDestroy {
+  private readonly stateService = inject(SocialService);
+  private readonly router = inject(Router);
+  private readonly graphState = this.stateService.graphState;
   private cancelScanSubjects = new Map<string, Subject<void>>();
   private cancelProfileFetchSubjects = new Map<string, Subject<void>>();
   private cancelPostFetchSubjects = new Map<string, Subject<void>>();
+  private cancelVideoFetchSubjects = new Map<string, Subject<void>>();
+  private cancelShortFetchSubjects = new Map<string, Subject<void>>();
   private cancelPlatformImageFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowersFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
+  private cancelOnlinePresenceFetchSubjects = new Map<string, Subject<void>>();
+  private cancelStealerLogsFetchSubjects = new Map<string, Subject<void>>();
   private mediaQueryList: MediaQueryList | null = null;
-  private readonly mediaQueryListener = (event: MediaQueryListEvent) => this.isSmallScreen.set(event.matches);
+  private readonly mediaQueryListener = (event: MediaQueryListEvent) => {
+    this.isSmallScreen.set(event.matches);
+    if (!event.matches) {
+      this.closeMobileHomeMenu();
+    }
+  };
 
-  public state = inject(SocialMapperStateService);
-  isTailwindReady = signal(true);
-  searchTerm = computed(() => this.activeTabState()?.searchTerm() ?? '');
-  homeMenuSearchTerm = computed(() => this.activeTabState()?.homeMenuSearchTerm() ?? '');
-  jobs = computed(() => this.activeTabState()?.jobs() ?? []);
-  networkData = computed(() => this.activeTabState()?.networkData() ?? { nodes: [], edges: [] });
-  scanResults = computed(() => this.activeTabState()?.scanResults() ?? new Map<string, PlatformResult[]>());
-  activeUsernames = computed(() => this.activeTabState()?.activeUsernames() ?? new Set<string>());
-  customEntities = computed(() => this.activeTabState()?.customEntities() ?? []);
-  isEditMode = computed(() => this.activeTabState()?.isEditMode() ?? false);
-  isHomeMenuCollapsed = computed(() => this.activeTabState()?.isHomeMenuCollapsed() ?? false);
-  isEntityMenuCollapsed = computed(() => this.activeTabState()?.isEntityMenuCollapsed() ?? false);
-  activeHomeMenuTab = computed(() => this.activeTabState()?.activeHomeMenuTab() ?? 'history');
-  isPhysicsEnabled = computed(() => this.activeTabState()?.isPhysicsEnabled() ?? false);
-  viewMode = computed(() => this.activeTabState()?.viewMode() ?? 'graph');
-  expandedPlatformNodeId = signal<string | null>(null);
-  graphSearchTerm = signal('');
-  isGraphSearchExpanded = signal(false);
+  public state = this.stateService;
+  homeMenuSearchTerm = computed(() => this.graphState.homeMenuSearchTerm());
+  jobs = computed(() => this.graphState.jobs());
+  scanResults = computed(() => this.graphState.scanResults());
+  resultUsernames = computed(() => new Set([
+    ...Array.from(this.scanResults().keys()),
+    ...this.jobs().filter(job => job.status === 'completed').map(job => job.username)
+  ]));
+  isHomeMenuCollapsed = computed(() => this.graphState.isHomeMenuCollapsed());
   isSmallScreen = signal(false);
-  userNodeAliases = signal<Record<string, string>>({});
-  platformAliasModalData = signal<{
-        nodeId: string;
-        username: string;
-    } | null>(null);
-  platformAliasInput = signal('');
-  selectedEntityReport = signal<CustomEntity | null>(null);
+  isMobileHomeMenuOpen = signal(false);
+  isInitialLoading = signal(true);
+  profileBreadcrumbLabel = signal<string | null>(null);
+  latestFetchConfirmationData = signal<LatestFetchConfirmationData | null>(null);
+  activeResultSources = signal<Record<string, SocialResultSource>>({});
+  effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
+  activeSourceUsername = computed(() => this.state.activeUsername());
+  activeSourcePlatforms = computed(() => {
+    const username = this.activeSourceUsername();
+    if (!username) {
+      return [];
+    }
+    const results = this.scanResults();
+    const platforms = results.get(username) ?? Array.from(results.entries()).find(([key]) => key.toLowerCase() === username.toLowerCase())?.[1] ?? [];
+    return this.getVisiblePlatforms(platforms);
+  });
+  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().some(platform => this.getResultSource(platform) === 'darkweb'));
+  activeResultSource = computed(() => {
+    const username = this.activeSourceUsername();
+    const platforms = this.activeSourcePlatforms();
+    const preferred = username ? this.activeResultSources()[username] ?? 'normal' : 'normal';
+    if (platforms.some(platform => this.getResultSource(platform) === preferred)) {
+      return preferred;
+    }
+    return platforms.some(platform => this.getResultSource(platform) === 'normal') ? 'normal' : 'darkweb';
+  });
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
-  entityManager = viewChild(EntityManagerComponent);
-  isSearchDisabled = computed(() => this.searchTerm().trim().length === 0);
-  canEditConnections = computed(() => {
-    const connectableNodesCount = this.networkData().nodes.filter(node => !node.id.toString().startsWith('relationship-node-')).length;
-    return connectableNodesCount >= 2;
-  });
-  isUserScanInProgress = computed(() => {
-    return this.isScanInProgressForUsername(this.state.summaryPopupData()?.username);
-  });
-  isMetadataUserScanInProgress = computed(() => {
-    return this.isScanInProgressForUsername(this.state.selectedPlatformData()?.keyUsername);
-  });
-  nodesWithFollows = computed(() => {
-    const nodeIdsWithFollowData = new Set<string>();
-    for (const platformResults of this.scanResults().values()) {
-      for (const platform of platformResults) {
-        const hasData = (platform.followers_list?.length ?? 0) > 0
-          || (platform.following_list?.length ?? 0) > 0
-          || (platform.post_connections?.length ?? 0) > 0;
-        if (hasData) {
-          nodeIdsWithFollowData.add(this.fetchingState.getPlatformUniqueKey(platform));
-        }
-      }
-    }
-    const visibleNodeIdsWithFollows = new Set<string>();
-    for (const node of this.networkData().nodes) {
-      const nodeIdStr = node.id.toString();
-      if (nodeIdsWithFollowData.has(nodeIdStr)) {
-        visibleNodeIdsWithFollows.add(nodeIdStr);
-      }
-    }
-    return visibleNodeIdsWithFollows;
-  });
-  isCustomEntityNode = (nodeId: string): boolean => this.customEntities().some(e => e.id === nodeId);
+  profileListing = viewChild(SocialProfileListingComponent);
 
-  private requireActiveTabState(): TabState {
-    const activeState = this.activeTabState();
-    if (!activeState) {
-      throw new Error('Active tab state is not available');
-    }
-    return activeState;
-  }
-
-  constructor( private scanService: SocialScanService, private destroyRef: DestroyRef, public tabManager: TabManagerService, private fetchingState: FetchingStateService, private graphOrchestrator: GraphOrchestratorService, private scanJobService: SocialScanJobService, private platformFetchService: PlatformFetchService, private relationshipResolver: RelationshipResolverService, @Inject(PLATFORM_ID) private platformId: object ) {
+  constructor( private destroyRef: DestroyRef, @Inject(PLATFORM_ID) private platformId: object ) {
     if (isPlatformBrowser(this.platformId)) {
       this.mediaQueryList = window.matchMedia('(max-width: 1023px)');
       this.isSmallScreen.set(this.mediaQueryList.matches);
       this.mediaQueryList.addEventListener('change', this.mediaQueryListener);
-      effect(() => {
-        if (this.isSmallScreen()) {
-          this.updateState(state => {
-            state.viewMode.set('list');
-            state.activeHomeMenuTab.set('history');
-          }, false);
-        }
-      });
-      effect(() => {
-        const aliases = this.userNodeAliases();
-        const currentData = this.networkData();
-        let hasChanges = false;
-        const updatedNodes = currentData.nodes.map(node => {
-          const nodeId = node.id.toString();
-          if (!nodeId.startsWith('user-')) {
-            return node;
-          }
-          const alias = (aliases[nodeId] || '').trim();
-          if (alias.length > 0) {
-            if (node.label === alias) {
-              return node;
-            }
-            hasChanges = true;
-            return { ...node, label: alias };
-          }
-          const defaultLabel = nodeId.substring('user-'.length);
-          if (!defaultLabel || node.label === defaultLabel) {
-            return node;
-          }
-          hasChanges = true;
-          return { ...node, label: defaultLabel };
-        });
-        if (hasChanges) {
-          this.updateState(state => state.networkData.set({ ...currentData, nodes: updatedNodes }), false);
-        }
-      });
     }
-  }
-
-  ngOnInit(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      this.resumeIncompleteScans();
-      return;
-    }
-    if (!this.isSmallScreen()) {
-      this.updateState(state => state.isEntityMenuCollapsed.set(false), false);
-    }
-    this.resumeIncompleteScans();
+    this.state.loadStoredSocialProfiles().pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.isInitialLoading.set(false))).subscribe();
+    queueMicrotask(() => this.resumeIncompleteScans());
   }
 
   ngOnDestroy(): void {
@@ -201,125 +118,71 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     }
   }
 
-  private isScanInProgressForUsername(username?: string): boolean {
-    if (!username) {
-      return false;
-    }
-    const userJob = this.jobs().find(j => j.username.toLowerCase() === username.toLowerCase());
-    return userJob?.status === 'in_progress' || userJob?.status === 'queued';
+  private updateState(updater: (state: SocialGraphState) => void): void {
+    updater(this.graphState);
   }
 
-  private updateState(updater: (state: TabState) => void, shouldScheduleSave: boolean = true) {
-    const state = this.activeTabState();
-    if (state) {
-      updater(state);
-      if (shouldScheduleSave) {
-        this.tabManager.scheduleSave();
-      }
-    }
+  onHomeMenuSearchChanged(term: string): void {
+    this.updateState(state => state.homeMenuSearchTerm.set(term));
   }
 
-  onSearchChanged(term: string) {
-    this.updateState(state => state.searchTerm.set(term), false);
-  }
-
-  onViewModeChanged(mode: 'graph' | 'list') {
-    this.updateState(state => state.viewMode.set(mode), false);
-  }
-
-  onPhysicsToggled() {
-    this.updateState(state => state.isPhysicsEnabled.update(v => !v), false);
-  }
-
-  onEditModeToggled() {
-    this.updateState(state => state.isEditMode.update(v => !v), false);
-  }
-
-  onHomeMenuSearchChanged(term: string) {
-    this.updateState(state => state.homeMenuSearchTerm.set(term), false);
-  }
-
-  onHomeMenuToggled() {
-    this.updateState(state => state.isHomeMenuCollapsed.update(v => !v), false);
-  }
-
-  onEntityMenuToggled() {
-    this.updateState(state => state.isEntityMenuCollapsed.update(v => !v), false);
-  }
-
-  onHomeMenuTabSelected(tab: 'history' | 'entities') {
-    this.updateState(state => state.activeHomeMenuTab.set(tab), false);
-  }
-
-  onGraphSearchChanged(event: Event) {
+  onDashboardScanInput(event: Event): void {
     const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
-    this.graphSearchTerm.set(nextValue);
+    this.onHomeMenuSearchChanged(nextValue);
   }
 
-  toggleGraphSearch() {
-    this.isGraphSearchExpanded.update(v => !v);
-  }
-
-  expandGraphSearch() {
-    this.isGraphSearchExpanded.set(true);
-  }
-
-  collapseGraphSearch() {
-    if (!this.graphSearchTerm().trim()) {
-      this.isGraphSearchExpanded.set(false);
-    }
-  }
-
-  clearGraphSearch() {
-    this.graphSearchTerm.set('');
-    this.isGraphSearchExpanded.set(false);
-  }
-
-  onPlatformAliasInputChanged(event: Event) {
-    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
-    this.platformAliasInput.set(nextValue);
-  }
-
-  closePlatformAliasModal() {
-    this.platformAliasModalData.set(null);
-    this.platformAliasInput.set('');
-  }
-
-  savePlatformAlias() {
-    const modalData = this.platformAliasModalData();
-    if (!modalData) {
+  onHomeMenuToggled(): void {
+    if (this.isSmallScreen()) {
+      this.isMobileHomeMenuOpen.update(isOpen => !isOpen);
       return;
     }
-    const alias = this.platformAliasInput().trim();
-    this.userNodeAliases.update(current => {
-      const next = { ...current };
-      if (alias.length > 0) {
-        next[modalData.nodeId] = alias;
-      }
-      else {
-        delete next[modalData.nodeId];
-      }
-      return next;
-    });
-    this.closePlatformAliasModal();
+    this.updateState(state => state.isHomeMenuCollapsed.update(v => !v));
   }
 
-  triggerScan() {
-    let username = this.searchTerm().trim();
+  closeMobileHomeMenu(): void {
+    this.isMobileHomeMenuOpen.set(false);
+  }
+
+  onHomeMenuHistoryTabClicked(): void {
+    this.state.setActiveUserIndex(0);
+    if (this.isSmallScreen()) {
+      this.closeMobileHomeMenu();
+    }
+  }
+
+  setResultSource(source: SocialResultSource): void {
+    const username = this.activeSourceUsername();
+    if (!username) {
+      return;
+    }
+    const nextSource: SocialResultSource = this.activeResultSource() === source ? (source === 'normal' ? 'darkweb' : 'normal') : source;
+    if (this.getResultSourceCount(nextSource) === 0) {
+      return;
+    }
+    this.activeResultSources.update(current => ({ ...current, [username]: nextSource }));
+    this.profileListing()?.clearProfileOverview();
+  }
+
+  getResultSourceCount(source: SocialResultSource): number {
+    return this.activeSourcePlatforms().filter(platform => this.getResultSource(platform) === source).length;
+  }
+
+  triggerScan(): void {
+    let username = this.homeMenuSearchTerm().trim();
     if (username.startsWith('@')) {
       username = username.substring(1);
     }
     if (username) {
       this.initiateScan(username);
-      this.updateState(state => state.searchTerm.set(''), false);
+      this.updateState(state => state.homeMenuSearchTerm.set(''));
     }
   }
 
-  triggerImageUpload() {
+  triggerImageUpload(): void {
     this.imageInput()?.nativeElement.click();
   }
 
-  onImageSelected(event: Event) {
+  onImageSelected(event: Event): void {
     const selected = getFirstFileFromInputEvent(event);
     if (!selected) {
       return;
@@ -337,322 +200,348 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
       });
   }
 
-  confirmDeletion() {
+  confirmDeletion(): void {
     const usernameToDelete = this.state.deleteUsername();
-    const entityIdToDelete = this.state.deleteEntityId();
     if (usernameToDelete) {
       this.cancelAllFetchesForUser(usernameToDelete);
       this.removeUserScanData(usernameToDelete);
-    }
-    else if (entityIdToDelete) {
-      this.entityManager()?.deleteCustomEntity(entityIdToDelete);
+      this.state.deleteStoredSocialProfiles(usernameToDelete).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
     this.state.closeDeleteConfirmation();
   }
 
-  onDeleteConfirmation(confirmed: boolean) {
+  onDeleteConfirmation(confirmed: boolean): void {
     if (confirmed) {
       this.confirmDeletion();
+      return;
+    }
+    this.state.closeDeleteConfirmation();
+  }
+
+  handleCompletedJobClick(job: Job): void {
+    if (job.status !== 'completed') {
+      return;
+    }
+    this.profileListing()?.clearProfileOverview();
+    if (job.id.startsWith('stored-') || !this.scanResults().has(job.username)) {
+      this.state.loadStoredSocialProfile(job.username).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        error: () => this.graphState.activeUsername.set(job.username)
+      });
     }
     else {
-      this.state.closeDeleteConfirmation();
+      this.graphState.activeUsername.set(job.username);
+    }
+    if (this.isSmallScreen()) {
+      this.closeMobileHomeMenu();
     }
   }
 
-  onInfoPopupConfirmed(_confirmed: boolean) {
-    this.state.closeInfoModal();
+  private initiateScan(username: string): void {
+    this.state.initiateScan(username, this.buildScanJobOptions());
   }
 
-  handleCompletedJobClick(job: Job) {
-    if (job.status === 'completed') {
-      this.state.openManageProfilesModal(job.username);
-    }
+  private initiateImageScan(base64Image: string, fileName: string): void {
+    this.state.initiateImageScan(base64Image, fileName, this.buildScanJobOptions());
   }
 
-  handleFollowerScan(usernames: string[]) {
-    usernames.forEach(username => {
-      this.initiateScan(username);
-    });
+  cancelScan(jobId: string): void {
+    this.state.cancelScan(jobId, this.buildScanJobOptions());
   }
 
-  openFollowerScanFromNode(nodeId: string) {
-    this.state.openFollowerScanPopup(nodeId);
+  private resumeIncompleteScans(): void {
+    this.state.resumeIncompleteScans(() => this.graphState.jobs(), this.buildScanJobOptions());
   }
 
-  handleRescan(username: string) {
-    this.initiateScan(username); this.state.closeSummaryPopup();
-  }
-
-  private initiateScan(username: string) {
-    this.scanJobService.initiateScan(username, {
-      jobs: () => this.jobs(),
-      updateState: this.updateState.bind(this),
-      state: this.state,
-      scanService: this.scanService,
-      destroyRef: this.destroyRef,
-      cancelScanSubjects: this.cancelScanSubjects
-    });
-  }
-
-  private initiateImageScan(base64Image: string, fileName: string) {
-    this.scanJobService.initiateImageScan(base64Image, fileName, this.buildScanJobOptions());
-  }
-
-  cancelScan(jobId: string) {
-    this.scanJobService.cancelScan(jobId, {
-      jobs: () => this.jobs(),
-      updateState: this.updateState.bind(this),
-      state: this.state,
-      scanService: this.scanService,
-      destroyRef: this.destroyRef,
-      cancelScanSubjects: this.cancelScanSubjects
-    });
-  }
-
-  private resumeIncompleteScans() {
-    this.scanJobService.resumeIncompleteScans(() => this.jobs(), this.buildScanJobOptions());
-  }
-
-  private buildScanJobOptions() {
+  private buildScanJobOptions(): ScanJobOptions {
     return {
       jobs: () => this.jobs(),
       updateState: this.updateState.bind(this),
       state: this.state,
-      scanService: this.scanService,
       destroyRef: this.destroyRef,
-      cancelScanSubjects: this.cancelScanSubjects
+      cancelScanSubjects: this.cancelScanSubjects,
+      persistProfiles: (profileUsername: string, profiles: PlatformResult[]) => {
+        this.state.saveSocialProfiles(profileUsername, profiles).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      }
     };
   }
 
-  private removeUserScanData(username: string) {
-    const normalizedUsername = username.toLowerCase();
+  private removeUserScanData(username: string): void {
+    const normalizedUsername = SocialNormalizationUtil.normalizeUsername(username);
     this.updateState(state => {
-      state.jobs.update(currentJobs => currentJobs.filter(job => job.username.toLowerCase() !== normalizedUsername));
+      state.jobs.update(currentJobs => currentJobs.filter(job => SocialNormalizationUtil.normalizeUsername(job.username) !== normalizedUsername));
       state.scanResults.update(currentMap => {
-        const newMap = new Map(currentMap); newMap.delete(username); return newMap;
+        const newMap = new Map(currentMap);
+        for (const key of newMap.keys()) {
+          if (SocialNormalizationUtil.normalizeUsername(key) === normalizedUsername) {
+            newMap.delete(key);
+          }
+        }
+        return newMap;
       });
     });
-    this.graphOrchestrator.removeUserFromGraph(this.requireActiveTabState(), username);
+    this.state.setActiveUserIndex(0);
   }
 
-  fetchProfileDetails(p: PlatformResult) {
-    this.fetchData(p, 'profile', this.scanService.fetchProfileInfo(p.platform, p.username), this.cancelProfileFetchSubjects);
+  fetchProfileDetails(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'profile', this.state.fetchProfileInfo(p.platform, p.username), this.cancelProfileFetchSubjects);
   }
 
-  handleFetchSocialPosts(p: PlatformResult) {
-    this.fetchData(p, 'posts', this.scanService.fetchSocialPosts(p.platform, p.username), this.cancelPostFetchSubjects);
+  handleFetchSocialPosts(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username), this.cancelPostFetchSubjects);
   }
 
-  handleFetchImagesForPlatform(p: PlatformResult) {
-    this.fetchData(p, 'platformImages', this.scanService.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
+  handleFetchSocialVideos(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username), this.cancelVideoFetchSubjects);
   }
 
-  handleFetchFollowers(p: PlatformResult) {
-    this.fetchData(p, 'followers', this.scanService.fetchFollowers(p.platform, p.username), this.cancelFollowersFetchSubjects);
+  handleFetchSocialShorts(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username), this.cancelShortFetchSubjects);
   }
 
-  handleFetchFollowing(p: PlatformResult) {
-    this.fetchData(p, 'following', this.scanService.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects);
+  handleFetchSocialPostCursor(request: PostCursorFetchRequest): void {
+    if (request.commentsOnly) {
+      const p = request.platformData;
+      this.fetchData(p, request.tabKey, this.state.fetchSocialPostComments(p.platform, p.username, request.tabKey, request.cursorId, request.commentOffset, request.maxComments), this.getPostCancelMap(request.tabKey), 'update');
+      return;
+    }
+    if (request.mergeMode === 'prepend') {
+      this.openLatestFetchConfirmation(request);
+      return;
+    }
+    const p = request.platformData;
+    if (request.tabKey === 'videos') {
+      this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username, undefined, request.limit), this.cancelVideoFetchSubjects, request.mergeMode);
+      return;
+    }
+    if (request.tabKey === 'shorts') {
+      this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username, undefined, request.limit), this.cancelShortFetchSubjects, request.mergeMode);
+      return;
+    }
+    this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username, undefined, request.limit), this.cancelPostFetchSubjects, request.mergeMode);
   }
 
-  private fetchData(platformResult: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', request$: any, cancelMap: Map<string, Subject<void>>) {
-    this.platformFetchService.fetchData({
+  handleFetchImagesForPlatform(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
+  }
+
+  handleFetchImageCursor(request: ImageCursorFetchRequest): void {
+    if (request.mergeMode === 'prepend') {
+      this.openLatestFetchConfirmation(request);
+      return;
+    }
+    const p = request.platformData;
+    this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username, request.limit), this.cancelPlatformImageFetchSubjects, request.mergeMode);
+  }
+
+  onLatestFetchConfirmation(confirmed: boolean): void {
+    const confirmation = this.latestFetchConfirmationData();
+    this.latestFetchConfirmationData.set(null);
+    if (!confirmed || !confirmation) {
+      return;
+    }
+    this.runLatestFetch(confirmation.request);
+  }
+
+  private openLatestFetchConfirmation(request: LatestFetchRequest): void {
+    this.latestFetchConfirmationData.set({
+      request,
+      message: `Fetching latest ${this.getLatestFetchSectionLabel(request)} will delete all existing records in this section and replace them with newly fetched records.`,
+    });
+  }
+
+  private runLatestFetch(request: LatestFetchRequest): void {
+    if (this.isPostCursorFetchRequest(request)) {
+      const p = request.platformData;
+      if (request.tabKey === 'videos') {
+        this.fetchData(p, 'videos', this.state.fetchSocialVideos(p.platform, p.username), this.cancelVideoFetchSubjects);
+        return;
+      }
+      if (request.tabKey === 'shorts') {
+        this.fetchData(p, 'shorts', this.state.fetchSocialShorts(p.platform, p.username), this.cancelShortFetchSubjects);
+        return;
+      }
+      this.fetchData(p, 'posts', this.state.fetchSocialPosts(p.platform, p.username), this.cancelPostFetchSubjects);
+      return;
+    }
+    const p = request.platformData;
+    this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
+  }
+
+  private getLatestFetchSectionLabel(request: LatestFetchRequest): string {
+    if (!this.isPostCursorFetchRequest(request)) {
+      return 'images';
+    }
+    return request.tabKey === 'videos' ? 'videos' : request.tabKey === 'shorts' ? 'shorts' : 'posts';
+  }
+
+  private isPostCursorFetchRequest(request: LatestFetchRequest): request is PostCursorFetchRequest {
+    return 'tabKey' in request;
+  }
+
+  private getPostCancelMap(tabKey: PostContentTabKey): Map<string, Subject<void>> {
+    if (tabKey === 'videos') {
+      return this.cancelVideoFetchSubjects;
+    }
+    if (tabKey === 'shorts') {
+      return this.cancelShortFetchSubjects;
+    }
+    return this.cancelPostFetchSubjects;
+  }
+
+  handleFetchFollowers(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'followers', this.state.fetchFollowers(p.platform, p.username), this.cancelFollowersFetchSubjects);
+  }
+
+  handleFetchFollowing(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'following', this.state.fetchFollowing(p.platform, p.username), this.cancelFollowingFetchSubjects);
+  }
+
+  handleFetchOnlinePresence(request: OnlinePresenceFetchRequest): void {
+    const p = request.platformData;
+    this.cancelAllFetchesForUser(p.keyUsername);
+    const tokens = (request.token || p.platform || '')
+      .split(/[,\s]+/)
+      .map(token => token.trim().toLowerCase())
+      .filter(Boolean);
+    const username = (p.username || p.keyUsername || '').replace(/^@+/, '');
+    this.fetchData(p,
+      'onlinePresence',
+      this.state.fetchProfileMetadataTokens(tokens.length > 0 ? tokens : [p.platform], username).pipe(map(onlinePresence => ({ onlinePresence }))),
+      this.cancelOnlinePresenceFetchSubjects);
+  }
+
+  handleFetchStealerLogs(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    const username = SocialNormalizationUtil.normalizeIdentity(p.username || p.keyUsername);
+    const domain = this.getPlatformDomain(p);
+    this.fetchData(p,
+      'stealerLogs',
+      this.state.fetchPlatformStealerLogs(username, domain).pipe(map(stealerLogs => ({ stealerLogs: this.filterStealerLogRecords(stealerLogs, username, domain) }))),
+      this.cancelStealerLogsFetchSubjects);
+  }
+
+  private fetchData(platformResult: PlatformResult, stateKey: FetchStateKey, request$: any, cancelMap: Map<string, Subject<void>>, mergeMode?: FetchMergeMode): void {
+    this.state.fetchPlatformData({
       platformResult,
       stateKey,
       request$,
       cancelMap,
-      fetchingState: this.fetchingState,
       destroyRef: this.destroyRef,
       updateState: this.updateState.bind(this),
-      state: this.state,
-      graphOrchestrator: this.graphOrchestrator,
-      activeTabState: () => this.activeTabState()
+      mergeMode
     });
   }
 
-  cancelFetchProfileDetails(p: PlatformResult) {
+  cancelFetchProfileDetails(p: PlatformResult): void {
     this.cancelFetch(p, 'profile', this.cancelProfileFetchSubjects);
   }
 
-  handleCancelFetchSocialPosts(p: PlatformResult) {
+  handleCancelFetchSocialPosts(p: PlatformResult): void {
     this.cancelFetch(p, 'posts', this.cancelPostFetchSubjects);
   }
 
-  handleCancelFetchImagesForPlatform(p: PlatformResult) {
+  handleCancelFetchSocialVideos(p: PlatformResult): void {
+    this.cancelFetch(p, 'videos', this.cancelVideoFetchSubjects);
+  }
+
+  handleCancelFetchSocialShorts(p: PlatformResult): void {
+    this.cancelFetch(p, 'shorts', this.cancelShortFetchSubjects);
+  }
+
+  handleCancelFetchImagesForPlatform(p: PlatformResult): void {
     this.cancelFetch(p, 'platformImages', this.cancelPlatformImageFetchSubjects);
   }
 
-  handleCancelFetchFollowers(p: PlatformResult) {
+  handleCancelFetchFollowers(p: PlatformResult): void {
     this.cancelFetch(p, 'followers', this.cancelFollowersFetchSubjects);
   }
 
-  handleCancelFetchFollowing(p: PlatformResult) {
+  handleCancelFetchFollowing(p: PlatformResult): void {
     this.cancelFetch(p, 'following', this.cancelFollowingFetchSubjects);
   }
 
-  private cancelFetch(p: PlatformResult, stateKey: 'profile' | 'posts' | 'platformImages' | 'followers' | 'following', cancelMap: Map<string, Subject<void>>) {
-    this.platformFetchService.cancelFetch(p, stateKey, cancelMap, this.fetchingState);
+  handleCancelFetchOnlinePresence(p: PlatformResult): void {
+    this.cancelFetch(p, 'onlinePresence', this.cancelOnlinePresenceFetchSubjects);
   }
 
-  cancelAllFetchesForUser(username: string) {
-    this.platformFetchService.cancelAllFetchesForUser(username, this.scanResults(), {
-      profile: (p: PlatformResult) => {
-        this.cancelFetchProfileDetails(p);
-      },
-      posts: (p: PlatformResult) => {
-        this.handleCancelFetchSocialPosts(p);
-      },
-      images: (p: PlatformResult) => {
-        this.handleCancelFetchImagesForPlatform(p);
-      },
-      followers: (p: PlatformResult) => {
-        this.handleCancelFetchFollowers(p);
-      },
-      following: (p: PlatformResult) => {
-        this.handleCancelFetchFollowing(p);
-      }
+  handleCancelFetchStealerLogs(p: PlatformResult): void {
+    this.cancelFetch(p, 'stealerLogs', this.cancelStealerLogsFetchSubjects);
+  }
+
+  private cancelFetch(p: PlatformResult, stateKey: FetchStateKey, cancelMap: Map<string, Subject<void>>): void {
+    this.state.cancelPlatformFetch(p, stateKey, cancelMap);
+  }
+
+  cancelAllFetchesForUser(username: string): void {
+    this.state.cancelAllPlatformFetchesForUser(username, this.scanResults(), {
+      profile: (p: PlatformResult) => this.cancelFetchProfileDetails(p),
+      posts: (p: PlatformResult) => this.handleCancelFetchSocialPosts(p),
+      videos: (p: PlatformResult) => this.handleCancelFetchSocialVideos(p),
+      shorts: (p: PlatformResult) => this.handleCancelFetchSocialShorts(p),
+      images: (p: PlatformResult) => this.handleCancelFetchImagesForPlatform(p),
+      followers: (p: PlatformResult) => this.handleCancelFetchFollowers(p),
+      following: (p: PlatformResult) => this.handleCancelFetchFollowing(p),
+      onlinePresence: (p: PlatformResult) => this.handleCancelFetchOnlinePresence(p),
+      stealerLogs: (p: PlatformResult) => this.handleCancelFetchStealerLogs(p)
     });
   }
 
-  private getPlatformIdentityKey(platform: PlatformResult): string {
-    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}`;
+  private getPlatformDomain(platformData: PlatformResult): string {
+    const fromUrl = SocialNormalizationUtil.normalizeDomain(platformData.url);
+    if (fromUrl) {
+      return fromUrl;
+    }
+    const platform = (platformData.platform || '').toLowerCase();
+    const platformDomains: Record<string, string> = {
+      behance: 'behance.net',
+      facebook: 'facebook.com',
+      github: 'github.com',
+      instagram: 'instagram.com',
+      tiktok: 'tiktok.com',
+      twitter: 'twitter.com',
+      vimeo: 'vimeo.com',
+      x: 'x.com',
+      youtube: 'youtube.com'
+    };
+    return platformDomains[platform] || platform;
   }
 
-  onNodeClicked(nodeId: string) {
-    if (!nodeId.startsWith('user-')) {
+  private filterStealerLogRecords(records: any[], username: string, domain: string): SocialStealerLogRecord[] {
+    if (!Array.isArray(records)) {
+      return [];
+    }
+    return records.filter(record => SocialNormalizationUtil.recordMatchesIdentity(record, username) && SocialNormalizationUtil.recordMatchesDomain(record, domain));
+  }
+
+  updateProfilesFromModal(selectedPlatforms: PlatformResult[]): void {
+    const modalData = this.state.manageProfilesModalData();
+    if (!modalData) {
       return;
     }
-    const username = nodeId.replace('user-', '');
-    const allUserPlatforms = getScanResultsByUsername(this.scanResults(), username);
-    if (!allUserPlatforms) {
-      return;
-    }
-    const platformMapByIdentity = new Map<string, PlatformResult>(allUserPlatforms.map(p => [this.getPlatformIdentityKey(p), p]));
-    const platformIdentitiesOnGraph = new Set<string>();
-    this.networkData().edges.forEach(edge => {
-      let otherNodeId = edge.from === nodeId ? edge.to : (edge.to === nodeId ? edge.from : null);
-      if (otherNodeId) {
-        const connectedNode = this.networkData().nodes.find(n => n.id === otherNodeId);
-        if (connectedNode) {
-          if (connectedNode.id.toString().startsWith('group-')) {
-            connectedNode.groupedPlatforms?.forEach(platform => {
-              const identity = this.getPlatformIdentityKey(platform);
-              platformIdentitiesOnGraph.add(identity);
-            });
-          }
-          else if (connectedNode.id.toString().startsWith('platform-')) {
-            const parsed = parsePlatformNodeId(connectedNode.id.toString());
-            if (!parsed) {
-              return;
-            }
-            const normalizedUser = parsed.keyUsername.toLowerCase();
-            const normalizedPlatform = parsed.platformName.toLowerCase();
-            const normalizedPlatformUser = parsed.platformUsername.toLowerCase();
-            const platform = allUserPlatforms.find(p =>
-              (p.keyUsername || '').toLowerCase() === normalizedUser &&
-                            (p.platform || '').toLowerCase() === normalizedPlatform &&
-                            (p.username || '').toLowerCase() === normalizedPlatformUser);
-            if (platform) {
-              platformIdentitiesOnGraph.add(this.getPlatformIdentityKey(platform));
-            }
-          }
-        }
-      }
+    const selectedKeys = new Set(selectedPlatforms.map(platform => this.getPlatformSelectionKey(platform)));
+    this.updateState(state => {
+      state.scanResults.update(currentMap => {
+        const nextMap = new Map(currentMap);
+        const currentPlatforms = nextMap.get(modalData.username) ?? [];
+        nextMap.set(modalData.username, currentPlatforms.map(platform => ({
+          ...platform,
+          isSelected: selectedKeys.has(this.getPlatformSelectionKey(platform)),
+        })));
+        return nextMap;
+      });
     });
-    const platformsToShow = Array.from(platformIdentitiesOnGraph).map(identity => platformMapByIdentity.get(identity)).filter((platform): platform is PlatformResult => !!platform);
-    const email = platformsToShow.find(p => p.email)?.email;
-    this.state.summaryPopupData.set({ username, platforms: platformsToShow, email });
-  }
-
-  onPlatformNodeClicked(nodeId: string) {
-    if (this.isCustomEntityNode(nodeId)) {
-      const selectedEntity = this.customEntities().find(entity => entity.id === nodeId) || null;
-      this.selectedEntityReport.set(selectedEntity);
-      return;
-    }
-    if (!nodeId.startsWith('platform-')) {
-      return;
-    }
-    if (this.viewMode() === 'list') {
-      this.expandedPlatformNodeId.update(currentId => (currentId === nodeId ? null : nodeId));
-      return;
-    }
-    this.state.openPlatformNodePopup(nodeId);
-  }
-
-  closeEntityReportPopup() {
-    this.selectedEntityReport.set(null);
-  }
-
-  getEntityReportRecords(entity: CustomEntity): Record<string, unknown>[] {
-    return getEntityReportRecords(entity);
-  }
-
-  getEntityRecordEntries(record: Record<string, unknown>): { key: string; label: string; values: string[]; }[] {
-    return getEntityRecordEntries(record);
-  }
-
-  onRelationshipNodeClicked(nodeId: string) {
-    const relationshipNode = this.networkData().nodes.find(node => node.id.toString() === nodeId);
-    if (!relationshipNode) {
-      return;
-    }
-    const users = this.resolveRelationshipUsers(nodeId);
-    if (!users) {
-      return;
-    }
-    const [userA, userB] = users;
-    const connections = this.buildRelationshipConnections(userA, userB);
-    const fallbackCount = Number((relationshipNode.relationshipCount ?? relationshipNode.label) || 0);
-    const resolvedCount = connections.length > 0 ? connections.length : fallbackCount;
-    this.state.openRelationshipPopup({
-      userA,
-      userB,
-      count: resolvedCount,
-      connections
-    });
-  }
-
-  private buildRelationshipConnections(userA: string, userB: string): RelationshipConnectionItem[] {
-    return this.relationshipResolver.buildRelationshipConnections(userA, userB, this.scanResults());
-  }
-
-  private resolveRelationshipUsers(nodeId: string): [string, string] | null {
-    const pairKey = nodeId.replace('relationship-node-', '');
-    const activeUsers = Array.from(this.activeUsernames());
-    for (let i = 0; i < activeUsers.length; i++) {
-      for (let j = i + 1; j < activeUsers.length; j++) {
-        const sortedPair = [activeUsers[i], activeUsers[j]].sort((a, b) => a.localeCompare(b));
-        if ([sortedPair[0], sortedPair[1]].join('--') === pairKey) {
-          return [sortedPair[0], sortedPair[1]];
-        }
-      }
-    }
-    const fallback = pairKey.split('--');
-    if (fallback.length === 2) {
-      return [fallback[0], fallback[1]];
-    }
-    return null;
-  }
-
-  async updateGraphFromModal(selectedPlatforms: PlatformResult[]) {
-    const username = this.state.manageProfilesModalData()!.username;
     this.state.closeManageProfilesModal();
-    const MAX_TOTAL_NODES = 300;
-    const otherNodesCount = this.networkData().nodes.filter(n => {
-      const id = n.id.toString();
-      return id !== `user-${username}` && !id.startsWith(`platform-${username}|`) && !id.startsWith(`group-${username}-`);
-    }).length;
-    if (otherNodesCount + (selectedPlatforms.length > 0 ? 1 : 0) + selectedPlatforms.length > MAX_TOTAL_NODES) {
-      this.state.openInfoModal('warning', 'Maximum Node Limit Reached', 'The graph has reached its maximum capacity of 300 nodes. Please remove some nodes before adding more.');
-      return;
-    }
-    await this.graphOrchestrator.updateGraphFromModal(this.requireActiveTabState(), username, selectedPlatforms);
-    this.tabManager.scheduleSave();
   }
 
-  handleImageFlowSearch(username: string) {
-    const normalizedUsername = (username || '').trim();
+  handleImageFlowSearch(username: string): void {
+    const normalizedUsername = username.trim();
     if (!normalizedUsername) {
       return;
     }
@@ -660,79 +549,43 @@ export class SocialMapperComponent implements OnInit, OnDestroy {
     this.initiateScan(normalizedUsername);
   }
 
-  handleContextMenuAction(action: ContextMenuAction) {
-    const { nodeId } = this.state.contextMenuData()!;
-    const username = nodeId.replace('user-', '');
-    const handlers: Record<ContextMenuAction, () => void> = {
-      fetchLinks: () => this.state.openInfoModal('info', 'Feature Coming Soon', "We're hard at work building this feature. Stay tuned for updates!", 'Got it!'),
-      clearConnections: () => {
-        this.graphOrchestrator.removeAllPlatformNodes(this.requireActiveTabState(), username);
-        this.tabManager.scheduleSave();
-      },
-      deleteProfile: () => {
-        this.graphOrchestrator.removeUserFromGraph(this.requireActiveTabState(), username);
-        this.tabManager.scheduleSave();
-      },
-      setAlias: () => {
-        if (!nodeId.startsWith('user-')) {
-          return;
-        }
-        const profileUsername = nodeId.substring('user-'.length);
-        const currentAlias = this.userNodeAliases()[nodeId] || '';
-        this.platformAliasModalData.set({ nodeId, username: profileUsername });
-        this.platformAliasInput.set(currentAlias);
-      },
-      removeNode: () => {
-        this.graphOrchestrator.removeSingleNode(this.requireActiveTabState(), nodeId);
-        this.tabManager.scheduleSave();
-      },
-      deleteEntity: () => {
-        this.deleteCustomEntity(nodeId);
-      },
-      openRelationship: () => {
-        this.onRelationshipNodeClicked(nodeId);
-      },
-    };
-    handlers[action]();
-    this.state.closeContextMenu();
+  onSidebarPlatformClicked(elementId: string): void {
+    this.state.highlightedNodeId.set(elementId);
+    setTimeout(() => {
+      if (this.state.highlightedNodeId() === elementId) {
+        this.state.highlightedNodeId.set(null);
+      }
+    }, 3500);
+
+    const element = document.getElementById(elementId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
 
-  addEntityToGraph(entityId: string) {
-    const entity = this.customEntities().find(current => current.id === entityId);
-    if (entity?.onGraph) {
-      this.state.focusOnNode(entityId);
+  onHeaderBack(): void {
+    const profileListing = this.profileListing();
+    if (profileListing?.hasOpenProfileOverview()) {
+      profileListing.clearProfileOverview();
       return;
     }
-    this.entityManager()?.addEntityToGraph(entityId);
+    void this.router.navigate(['/dashboard/home']);
   }
 
-  deleteCustomEntity(nodeId: string) {
-    const entity = this.customEntities().find(e => e.id === nodeId);
-    this.state.openDeleteEntityConfirmation(nodeId, entity?.label || entity?.value || nodeId);
-    this.state.closeContextMenu();
+  onProfileOverviewLabelChanged(label: string | null): void {
+    this.profileBreadcrumbLabel.set(label);
   }
 
-  handleEdgeAdded( edge: { from: string; to: string; } ) {
-    this.graphOrchestrator.addEdge(this.requireActiveTabState(), edge);
-    this.tabManager.scheduleSave();
+  private getPlatformSelectionKey(platform: PlatformResult): string {
+    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}|${platform.url}`;
   }
 
-  handleEdgeDeleted( { edges }: { edges: string[]; } ) {
-    this.graphOrchestrator.deleteEdges(this.requireActiveTabState(), edges);
-    this.tabManager.scheduleSave();
+  private getResultSource(platformData: PlatformResult): SocialResultSource {
+    return platformData.resultSource ?? 'normal';
   }
 
-  async handleGroupNodeClicked( { nodeId, position }: { nodeId: string; position: Position; } ) {
-    const wasPhysicsEnabled = this.isPhysicsEnabled();
-    if (!wasPhysicsEnabled) {
-      this.updateState(state => state.isPhysicsEnabled.set(true), false);
-    }
-    await this.graphOrchestrator.handleGroupNodeClicked(this.requireActiveTabState(), { nodeId, position });
-    this.tabManager.scheduleSave();
-    if (!wasPhysicsEnabled) {
-      setTimeout(() => {
-        this.updateState(state => state.isPhysicsEnabled.set(false), false);
-      }, 2500);
-    }
+  private getVisiblePlatforms(platforms: PlatformResult[]): PlatformResult[] {
+    const selectedPlatforms = platforms.filter(platform => platform.isSelected);
+    return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
   }
 }

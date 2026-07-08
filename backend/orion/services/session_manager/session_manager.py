@@ -213,7 +213,7 @@ class session_manager:
             "subscription": user.subscription,
             "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
             "password_reset_required": getattr(user, "password_reset_required", False),
-            "password_reset_token": user.verification_token if getattr(user, "password_reset_required", False) else None,
+            "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None,
             "licenses": [user_license.value for user_license in user.licenses],
         }
 
@@ -306,3 +306,33 @@ class session_manager:
     def logout_user(ptoken: str):
         if not ptoken:
             return
+
+    async def invalidate_user_session(self, ptoken: str):
+        if not ptoken:
+            return
+
+        token = ptoken.strip()
+        if token.startswith("Bearer "):
+            token = token[len("Bearer "):].strip()
+
+        try:
+            payload = jwt.decode(
+                token,
+                CONSTANTS.S_AUTH_SECRET_KEY,
+                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+                options={"verify_exp": False}, )
+        except jwt.InvalidTokenError:
+            return
+
+        username = payload.get("sub")
+        session_id = payload.get("sid")
+        if not username or not session_id:
+            return
+
+        user = await self._engine.find_one(db_user_account, db_user_account.username == username)
+        if not user or user.current_session_id != session_id:
+            return
+
+        user.current_session_id = None
+        await self._engine.save(user)
+        await self._redis.invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [f"session:{str(user.id)}"])

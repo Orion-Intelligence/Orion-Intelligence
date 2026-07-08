@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit, inject, input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, input } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
@@ -8,6 +8,8 @@ import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-result-chat',
   imports: [
@@ -16,11 +18,11 @@ import { ProxyController } from '../../../../shared/services/proxy-controller';
     TooltipDirective,
     CommonModule,
     NormalizeUnicodePipe,
-    RouterLink
-  ],
+    RouterLink, TranslatePipe],
   templateUrl: './dashboard-result-chat.component.html'
 })
 export class DashboardResultChatComponent implements OnInit, AfterViewInit {
+  private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly proxied_resource = inject(ProxyController);
 
   currentUrl = '';
@@ -60,11 +62,33 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
     });
   }
 
+  getResultDisplayLimit(): number {
+    return this.isExpandAble() && this.isCollapsed ? 2 : 30;
+  }
+
+  toggleCollapsed(): void {
+    const previousLimit = this.getResultDisplayLimit();
+    const isExpanding = this.isCollapsed;
+    this.isCollapsed = !this.isCollapsed;
+    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+  }
+
   openExternalUrl(url?: string | null) {
     if (!this.authService.getIsMobileDemo() || !url) {
       return;
     }
 
     this.proxied_resource.open(url);
+  }
+
+  private scrollToResultIndex(index: number): void {
+    if (index < 0) {
+      return;
+    }
+    setTimeout(() => {
+      this.elementRef.nativeElement
+        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 0);
   }
 }

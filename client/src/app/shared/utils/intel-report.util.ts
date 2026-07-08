@@ -1,3 +1,38 @@
+export const REPORT_METADATA_HIDDEN_KEYS = new Set<string>([
+  '_id',
+  'id',
+  'rank_index',
+  'm_embedding',
+  'm_title',
+  'm_content',
+  'm_important_content',
+  'm_url',
+  'm_source_url',
+  'm_base_url',
+  'm_hash',
+  'm_hash_content',
+  'm_hash_url',
+  'm_validity_score',
+  'm_crawl_status',
+  'm_last_crawled_at',
+  'm_creation_date',
+  'm_update_date',
+  'm_updation_date',
+  'm_scrap_file',
+  'm_scrape_file',
+  'creation_date',
+  'update_date',
+  'updation_date',
+  'created_at',
+  'updated_at',
+  'scrap_file',
+  'scrape_file'
+]);
+
+export function isHiddenReportMetadataKey(key: string): boolean {
+  return REPORT_METADATA_HIDDEN_KEYS.has(key);
+}
+
 function getDiffInDays(dateString?: string): number | null {
   if (!dateString) {
     return null;

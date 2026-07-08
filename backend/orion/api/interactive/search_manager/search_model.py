@@ -1,18 +1,22 @@
 from typing import List, Optional
 import httpx
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
 from orion.api.interactive.search_manager.search_callback_model import search_callback
+from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_callback_model import grouped_consolidated_search_callback_model
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_data_model.dump.search_stealerlog_callback_model import search_stealerlog_callback_model
 from orion.api.interactive.search_manager.search_data_model.search_callback_model import result_item
+from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
+from orion.services.log_manager.log_controller import log
 from orion.api.interactive.search_manager.search_query_generator import search_query_generator
 from orion.api.interactive.search_manager.search_enums import SEARCH_CONFIG
 
@@ -137,6 +141,12 @@ class search_model:
     async def request_exploit_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
         return await self._request_doc(ELASTIC_INDEX.S_EXPLOIT_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
+    async def request_apt_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        return await self._request_doc(ELASTIC_INDEX.S_APT_INDEX, doc_id, lang, ["m_content"])
+
+    async def request_malware_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
+        return await self._request_doc(ELASTIC_INDEX.S_MALWARE_INDEX, doc_id, lang, ["m_content"])
+
     async def request_leak_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
         return await self._request_doc(ELASTIC_INDEX.S_LEAK_INDEX, doc_id, lang, ["m_content", "m_important_content"])
 
@@ -147,7 +157,15 @@ class search_model:
         return await self._request_doc(ELASTIC_INDEX.S_SOCIAL_INDEX, doc_id, lang, ["m_content"])
 
     async def request_general_doc(self, doc_id, lang: Optional[str]) -> Optional[result_item]:
-        return await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
+        result = await self._request_doc(ELASTIC_INDEX.S_GENERIC_INDEX, doc_id, lang, ["m_content", "m_important_content"])
+        if result:
+            crawl_status = await FeederManager.get_instance().get_value_crawl_status(
+                "_generic__values",
+                result.get("m_base_url") or result.get("m_url") or "",
+            )
+            result["m_crawl_status"] = crawl_status["status"]
+            result["m_last_crawled_at"] = crawl_status["last_checked_at"]
+        return result
 
     @staticmethod
     def _build_ranked_response(response, query, default_size: int, approximate_page_count: bool = False):
@@ -155,6 +173,7 @@ class search_model:
         if response and "hits" in response and "hits" in response["hits"]:
             for rank, hit in enumerate(response["hits"]["hits"]):
                 source = hit.get("_source", {})
+                source["_id"] = hit.get("_id", "")
                 source.pop("m_embedding", None)
                 source["rank_index"] = hit.get("_index")
                 source["_score"] = hit.get("_score", 0)
@@ -176,6 +195,20 @@ class search_model:
         has_next = len(ranked_results) >= size if size > 0 else False
         page_count = current_page + 1 if has_next else (current_page if ranked_results else max(1, current_page - 1))
         return {"Result": ranked_results, "Page_Count": page_count if ranked_results or current_page > 1 else total_pages, "Total_Hits": total}
+
+    @staticmethod
+    def _decrypt_stealer_passwords(response):
+        cipher = None
+        for item in response.Result or []:
+            password = getattr(item, "password", None)
+            if not password:
+                continue
+            try:
+                if cipher is None:
+                    cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+                item.password = cipher.decrypt(str(password).encode()).decode()
+            except Exception as ex:
+                log.g().w(f"Stealer password decrypt skipped: {str(ex)}")
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
@@ -205,6 +238,69 @@ class search_model:
 
         return search_model._build_ranked_response(response, query, 15, approximate_page_count=True)
 
+    @staticmethod
+    async def get_apt_filter_options():
+        data_filter = {
+            "size": 0,
+            "aggs": {
+                "families": {"terms": {"field": "m_family", "size": 10000, "order": {"_key": "asc"}}},
+                "countries": {"terms": {"field": "m_country", "size": 10000, "order": {"_key": "asc"}}},
+                "family_docs": {
+                    "filter": {"term": {"m_entity_type": "family"}},
+                    "aggs": {
+                        "names": {"terms": {"field": "m_name", "size": 10000, "order": {"_key": "asc"}}},
+                        "titles": {"terms": {"field": "m_title.keyword", "size": 10000, "order": {"_key": "asc"}}}
+                    }
+                }
+            }
+        }
+        success, documents = await elastic_controller.get_instance().search_query(ELASTIC_INDEX.S_APT_INDEX, data_filter)
+        if not success:
+            return {"families": [], "countries": []}
+        body = documents.body if hasattr(documents, "body") else documents
+        aggregations = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        family_values = set()
+        for bucket in aggregations.get("families", {}).get("buckets", []):
+            value = str(bucket.get("key") or "").strip()
+            if value:
+                family_values.add(value)
+        country_values = set()
+        for bucket in aggregations.get("countries", {}).get("buckets", []):
+            value = str(bucket.get("key") or "").strip()
+            if value:
+                country_values.add(value)
+        family_docs = aggregations.get("family_docs", {})
+        for agg_key in ("names", "titles"):
+            for bucket in family_docs.get(agg_key, {}).get("buckets", []):
+                value = str(bucket.get("key") or "").strip()
+                if value:
+                    family_values.add(value)
+        return {"families": sorted(family_values, key=str.casefold), "countries": sorted(country_values, key=str.casefold)}
+
+    @staticmethod
+    async def get_malware_filter_options():
+        data_filter = {
+            "size": 0,
+            "aggs": {
+                "countries": {"terms": {"field": "m_country", "size": 10000, "order": {"_key": "asc"}}},
+                "content_types": {"terms": {"field": "m_content_type", "size": 10000, "order": {"_key": "asc"}}},
+                "reporters": {"terms": {"field": "m_reporter", "size": 10000, "order": {"_key": "asc"}}}
+            }
+        }
+        success, documents = await elastic_controller.get_instance().search_query(ELASTIC_INDEX.S_MALWARE_INDEX, data_filter)
+        if not success:
+            return {"countries": [], "content_types": [], "reporters": []}
+        body = documents.body if hasattr(documents, "body") else documents
+        aggregations = body.get("aggregations", {}) if isinstance(body, dict) else {}
+        values = {}
+        for key in ("countries", "content_types", "reporters"):
+            bucket_values = set()
+            for bucket in aggregations.get(key, {}).get("buckets", []):
+                value = str(bucket.get("key") or "").strip()
+                if value:
+                    bucket_values.add(value)
+            values[key] = sorted(bucket_values, key=str.casefold)
+        return values
 
     async def search_stealerlogs_persona_breach(self, param: search_credential_param_model):
         document, data_filter = search_query_generator().on_search_persona(param)
@@ -240,12 +336,15 @@ class search_model:
     @staticmethod
     async def search_consolidated_result(param: search_consolidated_param_model):
         filter_dict = param.entity_filter or {}
-        param.matchtype="full"
+        if param.matchtype != "semantic":
+            param.matchtype="full"
 
         SEARCH_TYPES = [
             "leak_model",
             "generic_model",
             "exploit_model",
+            "apt_model",
+            "malware_model",
             "chat_model",
             "social_model",
             "defacement_model",
@@ -267,17 +366,24 @@ class search_model:
         for label in SEARCH_TYPES:
 
             config = SEARCH_CONFIG[label]
+            query_param = param
+            if label in ("apt_model", "malware_model"):
+                query_param = param.model_copy(deep=True)
+                query_param.category = "all"
 
             indices, query, indices_boost = \
                 search_query_generator().on_search_consolidated_ranked_data(
-                    param,
+                    query_param,
                     filter_dict,
                     config["base_index"],
                     config["blocked_categories"],
                     config["allowed_categories"]
                 )
             response = await elastic_controller.get_instance().search_consolidated_ranked_query(indices,query,indices_boost)
-            results[label] = search_model._build_ranked_response(response, query, 10)
+            ranked_response = search_model._build_ranked_response(response, query, 10)
+            if getattr(param, "sort_latest", False):
+                ranked_response = helper_controller.threat_lens_sort_latest_and_limit_response(ranked_response, 100)
+            results[label] = ranked_response
 
         return grouped_consolidated_search_callback_model(**results)
 
@@ -292,6 +398,7 @@ class search_model:
         response = await self.__search_callback.search_handler( m_status, m_documents,search_stealerlog_callback_model, {}, data_limit=False)
         raw_result_count = len(response.Result or [])
 
+        self._decrypt_stealer_passwords(response)
 
         password_filter = getattr(param, "password_schema", None)
         if password_filter and response and hasattr(response, "Result"):

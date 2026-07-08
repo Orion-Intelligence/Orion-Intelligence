@@ -9,9 +9,11 @@ import { ReportHeaderComponent } from '../../../../shared/partials/report-header
 import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, isHiddenReportMetadataKey, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
@@ -25,8 +27,7 @@ import { ReportInteractionHostComponent } from '../../social-interactions/report
     ResultListComponent,
     NgClass,
     TooltipDirective,
-    ReportInteractionHostComponent
-  ]
+    ReportInteractionHostComponent, TranslatePipe]
 })
 export class ReportDefacementComponent implements OnInit, AfterViewInit {
   defacementData: DefacementResultItem | null = null;
@@ -63,7 +64,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   get filteredArrayKeys(): string[] {
     return this.arrayKeys.filter(key => {
       const val = (this.defacementData as any)?.[key];
-      return val != null && (!Array.isArray(val) || val.length > 0);
+      return !isHiddenReportMetadataKey(key) && val != null && (!Array.isArray(val) || val.length > 0);
     });
   }
 
@@ -90,6 +91,14 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     return formatKeyLabelUtil(key);
   }
 
+  getMetadataCount(key: string): number {
+    if (key === 'm_content') {
+      return this.content ? 1 : 0;
+    }
+    const value = (this.defacementData as any)?.[key];
+    return Array.isArray(value) ? value.length : value ? 1 : 0;
+  }
+
   private prepareMetadata(): void {
     this.content = this.defacementData?.m_content || '';
     this.arrayKeys = [];
@@ -102,7 +111,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     if (this.defacementData) {
       Object.keys(this.defacementData).forEach(key => {
         const value = (this.defacementData as any)[key];
-        if (Array.isArray(value) && value.length > 0 && key !== 'm_section') {
+        if (Array.isArray(value) && value.length > 0 && key !== 'm_section' && !isHiddenReportMetadataKey(key)) {
           this.arrayKeys.push(key);
         }
       });

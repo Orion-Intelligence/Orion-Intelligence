@@ -1,0 +1,31 @@
+.social-result-source-tab--active {
+  color: #fff;
+}
+
+.social-result-source-indicator--normal {
+  animation: social-result-source-indicator-fade-normal 120ms ease-out;
+}
+
+.social-result-source-indicator--darkweb {
+  animation: social-result-source-indicator-fade-darkweb 120ms ease-out;
+}
+
+@keyframes social-result-source-indicator-fade-normal {
+  0% {
+    opacity: 72%;
+  }
+
+  100% {
+    opacity: 95%;
+  }
+}
+
+@keyframes social-result-source-indicator-fade-darkweb {
+  0% {
+    opacity: 72%;
+  }
+
+  100% {
+    opacity: 95%;
+  }
+}

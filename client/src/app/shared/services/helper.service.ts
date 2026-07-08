@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { Injectable, SecurityContext } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 import { franc } from 'franc-min';
 import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
@@ -63,25 +63,26 @@ export class HelperService {
     }).filter((v): v is string => !!v);
   }
 
-  downloadAsCSV(data: any) {
+  downloadAsCSV(data: any, filename: string = 'search_results.csv') {
     const csvContent = this.convertToCSV(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'search_results.csv');
+    link.setAttribute('download', filename.toLowerCase().endsWith('.csv') ? filename : `${filename}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
-  downloadstixJson(data: any) {
+  downloadstixJson(data: any, filename: string = 'stix_report.json') {
     const jsonString = JSON.stringify(data, null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'stix_report.json';
+    a.download = filename.toLowerCase().endsWith('.json') ? filename : `${filename}.json`;
     a.click();
     window.URL.revokeObjectURL(url);
   }
@@ -128,7 +129,7 @@ export class HelperService {
   }
   
 
-  highlightWords(text: string): SafeHtml {
+  highlightWords(text: string): string {
     if (!text) {
       return '';
     }
@@ -155,14 +156,13 @@ export class HelperService {
           const prevEnd = end;
           const nextStart = matches[j].index;
           const betweenText = text.slice(prevEnd, nextStart);
-          const wordGap = betweenText
-            .replace(/<[^>]+>/g, '')
+          const cleanBetween = new DOMParser().parseFromString(betweenText, 'text/html').body.textContent || '';
+          const wordGap = cleanBetween
             .trim()
             .split(/\s+/)
             .filter(Boolean).length;
           if (wordGap <= 2) {
-            const cleanBetween = betweenText.replace(/<[^>]+>/g, '').trim();
-            merged += ` ${cleanBetween} ${matches[j][1]}`;
+            merged += ` ${cleanBetween.trim()} ${matches[j][1]}`;
             end = matches[j].index + matches[j][0].length;
             j++;
           }
@@ -180,13 +180,49 @@ export class HelperService {
     else {
       renderedHtml = escapeHtml(text.length > 500 ? text.substring(0, 500) : text);
     }
-    return this.sanitizer.bypassSecurityTrustHtml(renderedHtml);
+    return this.sanitizer.sanitize(SecurityContext.HTML, renderedHtml) || '';
   }
 
   private convertToCSV(data: any): string {
-    const keys = Object.keys(data);
-    const values = keys.map(key => `"${data[key]}"`).join(',');
-    return `${keys.join(',')}\n${values}`;
+    const rows = this.toCsvRows(data);
+    if (!rows.length) {
+      return '';
+    }
+    const keys = Array.from(rows.reduce((acc, row) => {
+      Object.keys(row).forEach(key => acc.add(key));
+      return acc;
+    }, new Set<string>()));
+    return [
+      keys.map(key => this.escapeCsvValue(key)).join(','),
+      ...rows.map(row => keys.map(key => this.escapeCsvValue(row[key])).join(','))
+    ].join('\n');
+  }
+
+  private toCsvRows(data: any): Record<string, unknown>[] {
+    if (data === null || data === undefined) {
+      return [];
+    }
+    if (Array.isArray(data)) {
+      return data.map((item, index) => {
+        if (item && typeof item === 'object' && !Array.isArray(item)) {
+          return item as Record<string, unknown>;
+        }
+        return { index: index + 1, value: item };
+      });
+    }
+    if (typeof data === 'object') {
+      return [data as Record<string, unknown>];
+    }
+    return [{ value: data }];
+  }
+
+  private escapeCsvValue(value: unknown): string {
+    const text = value === null || value === undefined
+      ? ''
+      : typeof value === 'object'
+        ? JSON.stringify(value)
+        : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   sortByKey<T>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {
@@ -230,6 +266,10 @@ export class HelperService {
         return { path: ['/dashboard', 'breach', 'all', docId], queryParams: { ci: 'leak' } };
       case 'exploit_model':
         return { path: ['/dashboard', 'exploit', 'all', docId], queryParams: { ci: 'exploit' } };
+      case 'apt_model':
+        return { path: ['/dashboard', 'apt-intel', 'apt', docId], queryParams: { ci: 'apt' } };
+      case 'malware_model':
+        return { path: ['/dashboard', 'apt-intel', 'malware', docId], queryParams: { ci: 'malware' } };
       case 'defacement_model':
         return { path: ['/dashboard', 'defacement', 'all', docId], queryParams: { ci: 'defacement' } };
       case 'social_model':

@@ -1,7 +1,9 @@
 import { Component, HostListener, input, output } from '@angular/core';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-message-popup',
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './message-popup.component.html'
 })
 export class MessagePopupComponent {

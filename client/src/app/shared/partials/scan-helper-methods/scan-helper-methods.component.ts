@@ -5,10 +5,12 @@ import { Subscription, Subject } from 'rxjs';
 import { DnsRecord, WaybackSnapshot } from '../../model/scanners/scanner.models';
 import { ScanHelperMethodsService } from './scan-helper-methods-service.service';
 import { AppService } from '../../../services/core/app/app.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-scan-helper',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './scan-helper-methods.component.html'
 })
 export class ScanHelperMethods implements OnDestroy {
@@ -88,13 +90,22 @@ export class ScanHelperMethods implements OnDestroy {
         }
       }
       else if (this.activeTab === 'dns') {
-        if (res.result.result.hostname) {
-          this.dnsRecords = [res.result];
-          this.statusMessage = `Resolved: ${res.result.hostname}`;
-        }
-        else if (res.status === 'error') {
-          this.errorMessage = res.error || 'Resolution failed';
+        const dnsRecord = res?.result?.result ?? res?.result;
+        if (res?.status === 'error' || dnsRecord?.status === 'error') {
+          this.errorMessage = dnsRecord?.message || res?.error || 'Resolution failed';
           this.statusMessage = 'Failed';
+        }
+        else if (dnsRecord?.ip || dnsRecord?.hostname || dnsRecord?.domains?.length) {
+          const domains = Array.isArray(dnsRecord.domains) ? dnsRecord.domains : [];
+          this.dnsRecords = [{
+            ip: dnsRecord.ip || this.domain.trim(),
+            hostname: dnsRecord.hostname || '',
+            domains,
+            error: dnsRecord.error,
+          }];
+          this.statusMessage = domains.length
+            ? `Found ${domains.length} connected domain${domains.length !== 1 ? 's' : ''}`
+            : (dnsRecord.hostname ? `Resolved: ${dnsRecord.hostname}` : 'IP Lookup Complete');
         }
         else {
           this.statusMessage = 'No records found';

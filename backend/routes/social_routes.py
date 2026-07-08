@@ -1,18 +1,19 @@
-import base64
-
-from fastapi import APIRouter, Body, Depends, Query
+from fastapi import APIRouter, Body, Depends
 
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
-from orion.api.interactive.graph_manager.graph_models.search_social_param_model import (
+from orion.api.interactive.social_manager.social_models.search_social_param_model import (
     SocialFollowersRequest,
     SocialFollowingRequest,
+    SocialForumRequest,
     SocialMetadataRequest,
+    SocialPostsRequest,
     SocialOnlineImages,
     SocialProfileRequest,
     SocialReconRequest,
+    SocialShortsRequest,
+    SocialVideosRequest,
 )
-from orion.api.interactive.graph_manager.graphs_model import graphs_model
-from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.social_manager.social_model import social_model
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 
 social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
@@ -23,7 +24,15 @@ social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTI
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(param: SocialReconRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "recon")
+    return await social_model.getInstance().search_recon(param)
+
+
+@social_routes.post(
+    "/api/social/forum",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_social_forum_profiles(param: SocialForumRequest = Body(...)):
+    return await social_model.getInstance().search_forum_profiles(param)
 
 
 @social_routes.post(
@@ -31,7 +40,7 @@ async def search_dynamic_email(param: SocialReconRequest = Body(...)):
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_phone_recon(param: SocialReconRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "phone")
+    return await social_model.getInstance().search_phone_recon(param)
 
 
 @social_routes.post(
@@ -39,7 +48,7 @@ async def search_dynamic_phone_recon(param: SocialReconRequest = Body(...)):
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_profile(param: SocialProfileRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "profile")
+    return await social_model.getInstance().search_profile(param)
 
 
 @social_routes.post(
@@ -47,7 +56,7 @@ async def search_dynamic_profile(param: SocialProfileRequest = Body(...)):
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_online_images(param: SocialOnlineImages = Body(...)):
-    return await search_model.getInstance().social_search(param, "online/images")
+    return await social_model.getInstance().search_online_images(param)
 
 
 @social_routes.post(
@@ -59,16 +68,7 @@ async def search_dynamic_online_images(param: SocialOnlineImages = Body(...)):
     ],
 )
 async def search_dynamic_image(payload: dict = Body(...)):
-    image_base64 = payload.get("image_base64")
-    if not image_base64:
-        return {"status": "error", "message": "image_base64_required"}
-
-    file_bytes = base64.b64decode(image_base64)
-
-    return await search_model.getInstance().social_search(
-        {"file_bytes": file_bytes, "filename": "upload.png"},
-        "recon/image",
-    )
+    return await social_model.getInstance().search_image(payload)
 
 
 @social_routes.post(
@@ -76,7 +76,7 @@ async def search_dynamic_image(payload: dict = Body(...)):
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_followers(param: SocialFollowersRequest = Body(...)):
-    return await graphs_model.getInstance().social_search(param, "followers")
+    return await social_model.getInstance().search_followers(param)
 
 
 @social_routes.post(
@@ -84,15 +84,31 @@ async def search_dynamic_followers(param: SocialFollowersRequest = Body(...)):
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_following(param: SocialFollowingRequest = Body(...)):
-    return await graphs_model.getInstance().social_search(param, "following")
+    return await social_model.getInstance().search_following(param)
 
 
 @social_routes.post(
     "/api/social/posts",
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_posts(param: SocialProfileRequest = Body(...)):
-    return await graphs_model.getInstance().social_search(param, "posts")
+async def search_dynamic_posts(param: SocialPostsRequest = Body(...)):
+    return await social_model.getInstance().search_posts(param)
+
+
+@social_routes.post(
+    "/api/social/videos",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_videos(param: SocialVideosRequest = Body(...)):
+    return await social_model.getInstance().search_videos(param)
+
+
+@social_routes.post(
+    "/api/social/shorts",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def search_dynamic_shorts(param: SocialShortsRequest = Body(...)):
+    return await social_model.getInstance().search_shorts(param)
 
 
 @social_routes.post(
@@ -100,7 +116,7 @@ async def search_dynamic_posts(param: SocialProfileRequest = Body(...)):
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_entity(param: SocialProfileRequest = Body(...)):
-    return await graphs_model.getInstance().social_search(param, "entity")
+    return await social_model.getInstance().search_entity(param)
 
 
 @social_routes.post(
@@ -108,30 +124,39 @@ async def search_dynamic_entity(param: SocialProfileRequest = Body(...)):
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_social_metadata(param: SocialMetadataRequest = Body(...)):
-    return await search_model.getInstance().social_search(param, "metadata")
+    return await social_model.getInstance().search_metadata(param)
 
 
 @social_routes.post(
-    "/api/social/session/upsert",
+    "/api/social/data",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced"]))])
-async def upsert_social_session(data: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
-    gt = (data or {}).get("graph_type") or graph_type or "social"
-    return await graphs_model.getInstance().upsert_data(str(current_user.id), gt, data)
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced"]))])
+async def append_social_data(data: dict = Body(...), current_user=Depends(get_current_user)):
+    profile_username = (data or {}).get("profile_username") or (data or {}).get("root_username") or (data or {}).get("username") or ""
+    profiles = (data or {}).get("profiles") or []
+    replace = bool((data or {}).get("replace"))
+    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, replace=replace)
 
 
 @social_routes.get(
-    "/api/social/session/tabs",
+    "/api/social/data",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced","social_mapper"]))])
-async def get_social_tabs(graph_type: str = Query("social"), current_user=Depends(get_current_user)):
-    return await graphs_model.getInstance().get_tabs_summary(str(current_user.id), graph_type)
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
+async def get_social_data(current_user=Depends(get_current_user)):
+    return await social_model.getInstance().get_social_profiles(str(current_user.id))
 
 
-@social_routes.post(
-    "/api/social/session/tab/add",
+@social_routes.get(
+    "/api/social/data/{profile_username}",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning",bypass_licenses=["osint_advanced"]))])
-async def add_social_tab(tab: dict = Body(...), graph_type: str = Query("social"), current_user=Depends(get_current_user)):
-    gt = (tab or {}).get("graph_type") or graph_type or "social"
-    return await graphs_model.getInstance().add_tab(str(current_user.id), gt, tab)
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
+async def get_social_profiles(profile_username: str, current_user=Depends(get_current_user)):
+    return await social_model.getInstance().get_social_profiles(str(current_user.id), profile_username)
+
+
+@social_routes.delete(
+    "/api/social/data/{profile_username:path}",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced"]))])
+async def delete_social_profiles(profile_username: str, current_user=Depends(get_current_user)):
+    return await social_model.getInstance().delete_social_profiles(str(current_user.id), profile_username)

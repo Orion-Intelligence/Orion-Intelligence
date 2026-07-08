@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { AppService } from '../../../../../services/core/app/app.service';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-geo-coordinates-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './geo-coordinates-modal.component.html',
 })
 export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {

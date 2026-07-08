@@ -4,8 +4,8 @@ SEARCH_CONFIG = {
 
     "leak_model": {
         "base_index": [ELASTIC_INDEX.S_LEAK_INDEX],
-        "allowed_categories": ["leaks","tracking"],
-        "blocked_categories": ["news"]
+        "allowed_categories": ["leaks"],
+        "blocked_categories": ["news", "tracking"]
     },
 
     "tracking_model": {
@@ -17,7 +17,7 @@ SEARCH_CONFIG = {
     "news_model": {
         "base_index": [ELASTIC_INDEX.S_LEAK_INDEX],
         "allowed_categories": ["news"],
-        "blocked_categories": []
+        "blocked_categories": ["tracking"]
     },
 
     "generic_model": {
@@ -28,6 +28,18 @@ SEARCH_CONFIG = {
 
     "exploit_model": {
         "base_index": [ELASTIC_INDEX.S_EXPLOIT_INDEX],
+        "allowed_categories": [],
+        "blocked_categories": []
+    },
+
+    "apt_model": {
+        "base_index": [ELASTIC_INDEX.S_APT_INDEX],
+        "allowed_categories": [],
+        "blocked_categories": []
+    },
+
+    "malware_model": {
+        "base_index": [ELASTIC_INDEX.S_MALWARE_INDEX],
         "allowed_categories": [],
         "blocked_categories": []
     },

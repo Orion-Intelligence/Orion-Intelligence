@@ -206,8 +206,8 @@
     },
     {
       "elementId": "sidebar-entity-api",
-      "title": "Entity API",
-      "description": "This opens the Entity API section in the sidebar so you can access the available API tools.",
+      "title": "Entity Lookup",
+      "description": "This opens the Entity Lookup section in the sidebar so you can access the available lookup tools.",
       "activateSelector": "[data-testid=\"sidebar-group-api\"]",
       "waitForSelector": "#sidebar-entity-api [data-testid^=\"sidebar-subitem-api-\"]",
       "scrollIntoView": true,

@@ -1,3 +1,5 @@
+import secrets
+
 from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
@@ -11,6 +13,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
         self.DEBUG = env_handler.get_instance().env("PRODUCTION", "0") != "1"
 
     async def dispatch(self, request: Request, call_next):
+        request.state.csp_nonce = secrets.token_urlsafe(16)
         response: Response = await call_next(request)
 
         if any(
@@ -19,9 +22,24 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                     "/npm/swagger-ui-dist@5/swagger-ui-bundle.js"]):
             return response
 
-        if self.DEBUG:
+        if request.url.path.startswith("/admin"):
             response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
-                                                           "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+                                                           "script-src 'self' 'unsafe-inline';"
+                                                           "style-src 'self' 'unsafe-inline' *; "
+                                                           "img-src 'self' data: *; "
+                                                           "font-src 'self' *; "
+                                                           "connect-src 'self' *; "
+                                                           "media-src 'self' *; "
+                                                           "frame-src *; "
+                                                           "frame-ancestors *; "
+                                                           "object-src *; "
+                                                           "form-action *; "
+                                                           "base-uri 'self'; "
+                                                           f"{'upgrade-insecure-requests; ' if not self.DEBUG else ''}"
+                                                           "report-to csp-endpoint;")
+        elif self.DEBUG:
+            response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
+                                                           "script-src 'self' 'unsafe-inline' https://js.arcgis.com; "
                                                            "script-src-elem 'self' 'unsafe-inline' https://js.arcgis.com; "
                                                            "script-src-attr 'none'; "
                                                            "style-src 'self' 'unsafe-inline' https://js.arcgis.com; "
@@ -36,21 +54,6 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "object-src 'none'; "
                                                            "form-action 'self'; "
                                                            "base-uri 'self'; "
-                                                           "report-to csp-endpoint;")
-        elif request.url.path.startswith("/admin"):
-            response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
-                                                           "script-src 'self' 'unsafe-inline';"
-                                                           "style-src 'self' 'unsafe-inline' *; "
-                                                           "img-src 'self' data: *; "
-                                                           "font-src 'self' *; "
-                                                           "connect-src 'self' *; "
-                                                           "media-src 'self' *; "
-                                                           "frame-src *; "
-                                                           "frame-ancestors *; "
-                                                           "object-src *; "
-                                                           "form-action *; "
-                                                           "base-uri 'self'; "
-                                                           "upgrade-insecure-requests; "
                                                            "report-to csp-endpoint;")
         elif request.url.path.startswith("/dashboard/social-mapper"):
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "
@@ -74,13 +77,15 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "script-src 'self'; "
                                                            "script-src-elem 'self'; "
                                                            "script-src-attr 'none'; "
-                                                           "style-src 'self'; "
-                                                           "style-src-elem 'self'; "
-                                                           "style-src-attr 'none'; "
-                                                           "img-src 'self' data: https:; "
-                                                           "font-src 'self'; "
-                                                           "connect-src 'self'; "
-                                                           "media-src 'self'; "
+                                                           "style-src 'self' 'unsafe-inline'; "
+                                                           "style-src-elem 'self' 'unsafe-inline'; "
+                                                           "style-src-attr 'unsafe-inline'; "
+                                                           "img-src 'self' data: blob: http: https:; "
+                                                           "font-src 'self' data: http: https:; "
+                                                           "connect-src 'self' http: https: ws: wss:; "
+                                                           "media-src 'self' data: blob: http: https:; "
+                                                           "frame-src http: https:; "
+                                                           "worker-src 'self' blob:; "
                                                            "frame-ancestors 'self'; "
                                                            "object-src 'none'; "
                                                            "form-action 'self'; "
@@ -88,15 +93,15 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "report-to csp-endpoint;")
         else:
             response.headers["Content-Security-Policy"] = ("default-src 'self'; "
-                                                           "script-src 'self' 'wasm-unsafe-eval'; "
+                                                           "script-src 'self' 'wasm-unsafe-eval' https://js.arcgis.com; "
                                                            "script-src-elem 'self' https://js.arcgis.com; "
                                                            "script-src-attr 'none'; "
                                                            "style-src 'self' 'unsafe-inline' https://js.arcgis.com; "
                                                            "style-src-elem 'self' 'unsafe-inline' https://js.arcgis.com; "
-                                                           "style-src-attr 'none'; "
+                                                           "style-src-attr 'unsafe-inline'; "
                                                            "img-src 'self' data: blob: https://try.orionintelligence.org https://*.basemaps.cartocdn.com https://*.arcgis.com https://*.arcgisonline.com; "
                                                            "font-src 'self' data: https://js.arcgis.com; "
-                                                           "connect-src 'self' https://*.arcgis.com https://*.arcgisonline.com; "
+                                                           "connect-src 'self' https://js.arcgis.com https://*.arcgis.com https://*.arcgisonline.com; "
                                                            "media-src 'self'; "
                                                            "worker-src 'self' blob:; "
                                                            "frame-ancestors 'self'; "

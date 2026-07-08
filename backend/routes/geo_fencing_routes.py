@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Body, Depends
+from datetime import date, timedelta
+
+from fastapi import APIRouter, Body, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
@@ -23,9 +25,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus,
 
 geo_fencing_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
-GENERAL_MODULE_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:general"))]
-SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
-SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("osint_advanced", bypass_roles=[user_role.ADMIN]))]
+SATELLITE_INTEL_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("geo_fencing", bypass_roles=[user_role.ADMIN]))]
 SATELLITE_INTEL_SHIPS_TEST_DEPS = SATELLITE_INTEL_DEPS
 
 
@@ -37,11 +37,16 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
 @geo_fencing_routes.post(
     "/api/search/map-entities/stream",
     status_code=200,
-    dependencies=GENERAL_MODULE_DEPS,
+    dependencies=SATELLITE_INTEL_DEPS,
 )
 async def stream_map_entities(param: search_map_entities_param_model = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
-    stream = await geo_fencing_manager.get_instance().stream_map_entities_points(chunk_size=param.size)
+    try:
+        stream = await geo_fencing_manager.get_instance().stream_map_entities_points(chunk_size=param.size)
+    except HTTPException:
+        raise
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Failed to stream map entities") from exc
     return StreamingResponse(
         stream,
         media_type="application/x-ndjson",
@@ -72,13 +77,19 @@ async def get_map_entities_by_ids(param: list[str] = Body(...)):
 )
 async def search_threat_lens_news(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
     _enforce_demo_safe_search(param, current_user)
+    end_date = date.today()
+    param.daterange = f"{(end_date - timedelta(days=240)):%Y-%m-%d},{end_date:%Y-%m-%d}"
+    if param.platform_result_count is None or "platform_result_count" not in param.model_fields_set:
+        param.platform_result_count = 500
+    param.sort_latest = True
+    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
     return await search_model.getInstance().search_consolidated_result(param)
 
 
 @geo_fencing_routes.post(
     "/api/netintel/iot_detect",
     status_code=200,
-    dependencies=SCANNING_DEPS,
+    dependencies=SATELLITE_INTEL_DEPS,
 )
 async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().search_audit(current_user, "iot_detect", param.coordinates)
@@ -88,7 +99,7 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
 @geo_fencing_routes.post(
     "/api/netintel/camera_detect_ranges",
     status_code=200,
-    dependencies=SCANNING_DEPS,
+    dependencies=SATELLITE_INTEL_DEPS,
 )
 async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(...), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().search_audit(current_user, "camera_detect_ranges", ",".join(param.ip_ranges))

@@ -4,10 +4,15 @@ from fastapi import UploadFile, HTTPException
 from fastapi.responses import FileResponse
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys
 
 
 class ResourceManager:
     __instance = None
+    IMAGE_MAX_BYTES = 100 * 1024
+    IMMUTABLE_IMAGE_CACHE_HEADERS = {
+        "Cache-Control": "public, max-age=31536000, immutable"
+    }
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -30,16 +35,21 @@ class ResourceManager:
             ResourceManager.__instance = ResourceManager()
         return ResourceManager.__instance
 
+    async def _read_limited_image(self, file: UploadFile) -> bytes:
+        if getattr(file, "size", None) is not None and file.size > self.IMAGE_MAX_BYTES:
+            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 100 KB")
+        contents = await file.read(self.IMAGE_MAX_BYTES + 1)
+        if len(contents) > self.IMAGE_MAX_BYTES:
+            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 100 KB")
+        return contents
+
     async def get_tenant_image(self, id):
         default_path = self.TENANT_DIR / "logo_url_default.png"
-        image_path = self.TENANT_DIR / f"{id}.png"
-        return FileResponse(image_path if image_path.is_file() else default_path)
+        image_path = next((path for path in self.TENANT_DIR.iterdir() if path.name == f"{id}.png" and path.is_file()), None)
+        return FileResponse(image_path or default_path)
 
     async def uploadTenantImage(self, file: UploadFile, current_user):
-        contents = await file.read()
-
-        if len(contents) > 100 * 1024:
-            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 100 KB")
+        contents = await self._read_limited_image(file)
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type")
@@ -59,14 +69,15 @@ class ResourceManager:
 
     async def get_user_image(self, user_id: str):
         default_path = self.USER_DIR / "default.png"
-        image_path = self.USER_DIR / f"{user_id}.png"
-        return FileResponse(image_path if image_path.is_file() else default_path)
+        image_path = next((path for path in self.USER_DIR.iterdir() if path.name == f"{user_id}.png" and path.is_file()), None)
+        return FileResponse(image_path or default_path)
 
     async def get_system_image(self, user_id: str):
         default_path = self.SYSTEM_DIR / "logo_url_default.png"
-        image_path = self.SYSTEM_DIR / f"{user_id}"
-
-        return FileResponse(image_path if image_path.is_file() else default_path)
+        image_path = next((path for path in self.SYSTEM_DIR.iterdir() if path.name == user_id and path.is_file()), None)
+        response_path = image_path or default_path
+        headers = self.IMMUTABLE_IMAGE_CACHE_HEADERS if response_path.name.endswith("_default.png") else None
+        return FileResponse(response_path, headers=headers)
 
     async def get_favicon(self):
         custom_path = self.SYSTEM_DIR / "logo_url_custom.png"
@@ -75,13 +86,10 @@ class ResourceManager:
         return FileResponse(custom_path if custom_path.is_file() else default_path)
 
     async def _save_image(self, file: UploadFile, file_path, check_admin: bool = False, current_user=None):
-        contents = await file.read()
-
         if check_admin and current_user.role not in ["admin"]:
             return
 
-        if len(contents) > 100 * 1024:
-            raise HTTPException(status_code=400, detail="File too large! Maximum allowed size is 100 KB")
+        contents = await self._read_limited_image(file)
 
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type")
@@ -118,9 +126,17 @@ class ResourceManager:
         return {"tenant_image": "deleted"}
 
     async def delete_system_image(self, current_user, key: str):
-        image_path = self.SYSTEM_DIR / f"{key}_custom.png"
         if current_user.role not in ["admin"]:
             return {"system_image deletion": "failed"}
+        file_name = {
+            AllowedKeys.LOGO_URL.value: "logo_url_custom.png",
+            AllowedKeys.LOGO_WIDE_LIGHT.value: "logo_wide_light_custom.png",
+            AllowedKeys.LOGO_WIDE_DARK.value: "logo_wide_dark_custom.png",
+            AllowedKeys.AUTH_DASHBOARD_ICON.value: "auth_dashboard_icon_custom.png",
+        }.get(key)
+        if file_name is None:
+            return {"system_image deletion": "failed"}
+        image_path = self.SYSTEM_DIR / file_name
 
         if image_path.is_file():
             image_path.unlink()

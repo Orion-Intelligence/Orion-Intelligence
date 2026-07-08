@@ -13,7 +13,7 @@
 
   @if (errorMessage && !isScanning()) {
     <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
-      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">Request Failed</div>
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Request Failed' | translate }}</div>
       <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
     </div>
   }

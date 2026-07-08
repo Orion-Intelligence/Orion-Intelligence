@@ -3,15 +3,62 @@ from datetime import timedelta, timezone
 from datetime import datetime
 from typing import Any
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.constants.constant import CONSTANTS, allowed_keys
+from orion.constants.constant import CONSTANTS, allowed_key_titles
 from orion.helper_manager.country_normalization import expand_country_filter_values
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_SEMANTIC, ELASTIC_ENUMS
 from orion.api.interactive.search_manager.search_semantic_controller import search_semantic_controller
+from orion.services.log_manager.log_controller import log
+
+
+DATE_ONLY_FORMAT = "%Y-%m-%d"
+DATE_START_UTC_FORMAT = "%Y-%m-%dT00:00:00+00:00"
+DATE_END_UTC_FORMAT = "%Y-%m-%dT23:59:59+00:00"
 
 
 class search_query_generator:
+    @staticmethod
+    def _domain_wildcard_clause(field, value):
+        domain = str(value or "").strip().lower()
+        domain = re.sub(r"^[a-z][a-z0-9+.-]*://", "", domain)
+        domain = domain.split("/", 1)[0].split("?", 1)[0].split("#", 1)[0].split(":", 1)[0].strip(".")
+
+        if "." not in domain or "@" in domain:
+            return {
+                "term": {
+                    field: {
+                        "value": domain,
+                        "case_insensitive": True
+                    }
+                }
+            }
+
+        return {
+            "bool": {
+                "should": [
+                    {
+                        "term": {
+                            field: {
+                                "value": domain,
+                                "case_insensitive": True
+                            }
+                        }
+                    },
+                    {
+                        "wildcard": {
+                            field: {
+                                "value": f"*.{domain}",
+                                "case_insensitive": True,
+                                "rewrite": "constant_score"
+                            }
+                        }
+                    }
+                ],
+                "minimum_should_match": 1
+            }
+        }
+
     @staticmethod
     def build_es_from_tagged(parsed, mapping):
         if isinstance(parsed, dict):
@@ -36,7 +83,7 @@ class search_query_generator:
                 return should_clauses[0]
             return {"bool": {"should": should_clauses, "minimum_should_match": 1}}
 
-        tag = parsed.get("tag")
+        tag = str(parsed.get("tag") or "").strip().lower()
         value = parsed.get("value")
         fields = mapping.get(tag, [])
 
@@ -44,18 +91,37 @@ class search_query_generator:
             merged = fields.copy()
             merged += mapping.get("source_domain", [])
             merged += mapping.get("m_source_domain", [])
-            merged += ["source_domain", "source_domain"]
+            merged += ["source_domain.keyword", "source_domain"]
             fields = list(dict.fromkeys([f for f in merged if f]))
 
-            if tag in ("m_search_all", "all") and allowed_keys:
-                fields = list(dict.fromkeys(fields + list(allowed_keys)))
+            if tag in ("m_search_all", "all") and allowed_key_titles:
+                fields = list(dict.fromkeys(fields + list(allowed_key_titles.keys())))
 
         if not fields:
             return {"match_none": {}}
 
+        def make_clause(field):
+            if field in ("domain.keyword", "source_domain.keyword", "source_domain"):
+                return search_query_generator._domain_wildcard_clause(field, value)
+
+            return {
+                "term": {
+                    field: {
+                        "value": value,
+                        "case_insensitive": True
+                    }
+                }
+            }
+
         if len(fields) == 1:
-            return {"term": {fields[0]: value}}
-        return {"bool": {"should": [{"term": {f: value}} for f in fields], "minimum_should_match": 1}}
+            return make_clause(fields[0])
+
+        return {
+            "bool": {
+                "should": [make_clause(f) for f in fields],
+                "minimum_should_match": 1
+            }
+        }
 
     @staticmethod
     def build_ioc_filter_clauses(pfilter):
@@ -76,7 +142,7 @@ class search_query_generator:
 
             if ioc_key == "m_search_all":
                 es_fields = []
-                search_keys = allowed_keys or ELASTIC_ENUMS.ioc_field_mapping.keys()
+                search_keys = allowed_key_titles.keys() or ELASTIC_ENUMS.ioc_field_mapping.keys()
                 for key in search_keys:
                     mapped = ELASTIC_ENUMS.ioc_field_mapping.get(key)
                     if not mapped:
@@ -326,8 +392,8 @@ class search_query_generator:
                     query_statement["query"]["function_score"]["score_mode"] = "sum"
                     query_statement["query"]["function_score"]["boost_mode"] = "replace"
                     query_statement["min_score"] = 0.4
-            except Exception:
-                pass
+            except Exception as ex:
+                log.g().w(f"Semantic score adjustment skipped: {str(ex)}")
 
         return query_statement
 
@@ -345,7 +411,7 @@ class search_query_generator:
             "size": 0,
             "track_total_hits": False,
             "terminate_after": 1000,
-            "timeout": "200ms",
+            "timeout": "25s",
             "aggs": {
                 "channels": {
                     "terms": {
@@ -367,11 +433,11 @@ class search_query_generator:
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
     @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
-            "m_leak_date": (from_date[:10], to_date[:10]),
-            "m_message_date": (from_date, to_date),
+            "m_date": (from_date, to_date),
             "m_update_date": (from_date, to_date),
             "m_creation_date": (from_date, to_date),
         }
@@ -404,7 +470,7 @@ class search_query_generator:
             }
         }
 
-    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories,search_type=""):
+    def on_search_consolidated_ranked_data(self, p_query_model: search_consolidated_param_model, pfilter, base_index, blocked_categories, allowed_categories, search_type=""):
         if p_query_model.matchtype and p_query_model.q:
             p_query_model.q = helper_controller.transform_query_match(p_query_model.q, p_query_model.matchtype)
 
@@ -418,20 +484,24 @@ class search_query_generator:
         m_network = p_query_model.network
         m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
-        m_content_type = p_query_model.content
+        m_content_type = str(getattr(p_query_model, "m_content_type", None) or p_query_model.content or "all").strip().lower()
         m_platform = (p_query_model.platform or "").strip().lower()
+        m_family = (p_query_model.family or "").strip()
+        m_country = (p_query_model.m_country or "").strip()
+        m_selected_content_type = (p_query_model.content_type or "").strip()
+        m_reporter = (p_query_model.m_reporter or "").strip()
         m_safe_search = p_query_model.safe
         result_size = p_query_model.platform_result_count
         must_clauses = []
         must_not_clause = []
         index_set = set(base_index or [])
 
-        if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
-            date_priority_fields = ["m_leak_date", "m_update_date", "m_creation_date"]
-            date_boost_fields = [("m_leak_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
+        if index_set and index_set.issubset({ELASTIC_INDEX.S_EXPLOIT_INDEX, ELASTIC_INDEX.S_APT_INDEX, ELASTIC_INDEX.S_MALWARE_INDEX, ELASTIC_INDEX.S_DEFACEMENT_INDEX, ELASTIC_INDEX.S_LEAK_INDEX}):
+            date_priority_fields = ["m_date", "m_update_date", "m_creation_date"]
+            date_boost_fields = [("m_date", 0), ("m_update_date", 0), ("m_creation_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX}):
-            date_priority_fields = ["m_message_date"]
-            date_boost_fields = [("m_message_date", 0)]
+            date_priority_fields = ["m_date"]
+            date_boost_fields = [("m_date", 0)]
         elif index_set and index_set.issubset({ELASTIC_INDEX.S_GENERIC_INDEX}):
             date_priority_fields = ["m_update_date", "m_creation_date"]
             date_boost_fields = [("m_update_date", 0), ("m_creation_date", 0)]
@@ -443,46 +513,79 @@ class search_query_generator:
             try:
                 parts = m_date_range.split(",")
                 if len(parts) == 2:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
                     must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
         elif m_date_range != "":
-            to_date = datetime.now(timezone.utc).strftime("%Y-%m-%dT23:59:59+00:00")
-            from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime("%Y-%m-%dT00:00:00+00:00")
+            to_date = datetime.now(timezone.utc).strftime(DATE_END_UTC_FORMAT)
+            from_date = (datetime.now(timezone.utc) - timedelta(days=150)).strftime(DATE_START_UTC_FORMAT)
             must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
 
-        if p_query_model.category:
-            m_ctype = p_query_model.category
-        else:
-            m_ctype = "all"
+        m_ctype = str(p_query_model.category or "all").strip().lower()
+        allowed_categories = [
+            str(category).strip().lower()
+            for category in (allowed_categories or [])
+            if category not in (None, "", [], {})
+        ]
+        allowed_categories = list(dict.fromkeys(allowed_categories))
+        blocked_categories = [
+            str(category).strip().lower()
+            for category in (blocked_categories or [])
+            if category not in (None, "", [], {})
+        ]
+        blocked_categories = list(dict.fromkeys(blocked_categories))
 
         if allowed_categories:
-            if p_query_model.category not in allowed_categories:
-                allowed_categories.append(p_query_model.category)
+            selected_categories = allowed_categories
+            if m_ctype != "all":
+                selected_categories = [category for category in allowed_categories if category == m_ctype]
 
-        if m_ctype != "all":
-            allowed_categories = [m_ctype]
+            if selected_categories:
+                category_filters = [
+                    {"bool": {"filter": [
+                        {"exists": {"field": "m_content_type"}},
+                        {"terms": {"m_content_type": selected_categories}}
+                    ]}}
+                ]
+                if "leaks" in selected_categories or "leak" in selected_categories:
+                    category_filters.append({"bool": {"must_not": {"exists": {"field": "m_content_type"}}}})
+                must_clauses.append(
+                    {"bool": {"should": category_filters, "minimum_should_match": 1}})
+            else:
+                must_clauses.append({"match_none": {}})
+        elif m_ctype != "all":
             must_clauses.append(
                 {"bool": {"should": [
                     *([] if m_ctype == "swarm" else [{"bool": {"must_not": {"exists": {"field": "m_content_type"}}}}]),
                     {"bool": {"filter": [{"exists": {"field": "m_content_type"}},
-                        {"terms": {"m_content_type": allowed_categories}}]}}], "minimum_should_match": 1}})
+                        {"terms": {"m_content_type": [m_ctype]}}]}}], "minimum_should_match": 1}})
 
         if blocked_categories:
-            if allowed_categories:
-                must_clauses.append(
-                    {"bool": {"should": [{"terms": {"m_content_type": allowed_categories}},
-                        {"bool": {"must_not": {"terms": {"m_content_type": blocked_categories}}}}], "minimum_should_match": 1}})
-            else:
-                must_not_clause.append({"terms": {"m_content_type": blocked_categories}})
+            must_not_clause.append({"terms": {"m_content_type": blocked_categories}})
 
         if m_network and m_network.lower() not in ("", "all"):
             must_clauses.append({"term": {"m_network": m_network.lower()}})
 
         if m_platform and m_platform not in ("", "all"):
             must_clauses.append({"term": {"m_platform": m_platform}})
+
+        if m_family and m_family.lower() not in ("", "all") and index_set == {ELASTIC_INDEX.S_APT_INDEX}:
+            must_clauses.append({"bool": {"should": [
+                {"term": {"m_family": m_family}},
+                {"term": {"m_name": m_family}},
+                {"term": {"m_title.keyword": m_family}}
+            ], "minimum_should_match": 1}})
+
+        if m_country and m_country.lower() not in ("", "all") and index_set in ({ELASTIC_INDEX.S_APT_INDEX}, {ELASTIC_INDEX.S_MALWARE_INDEX}):
+            must_clauses.append({"term": {"m_country": m_country}})
+
+        if m_selected_content_type and m_selected_content_type.lower() not in ("", "all") and index_set == {ELASTIC_INDEX.S_MALWARE_INDEX}:
+            must_clauses.append({"term": {"m_content_type": m_selected_content_type}})
+
+        if m_reporter and m_reporter.lower() not in ("", "all") and index_set == {ELASTIC_INDEX.S_MALWARE_INDEX}:
+            must_clauses.append({"term": {"m_reporter": m_reporter}})
 
         if m_safe_search and m_safe_search == True:
             must_not_clause.append({"term": {"m_content_type": "adult"}})
@@ -494,7 +597,8 @@ class search_query_generator:
         elif m_content_type == "databases":
             must_not_clause.append({"terms": {"m_ioc_type": ["phishing", "hacked"]}})
 
-        if m_content_type and m_content_type.lower() not in ("", "all"):
+        is_defacement_ioc_filter = search_type == "defacement" and m_content_type in ("phishing", "hacked", "databases")
+        if m_content_type and m_content_type.lower() not in ("", "all") and not is_defacement_ioc_filter:
             if m_content_type.lower() == "swarm":
                 must_clauses.append(
                     {"bool": {"should": [
@@ -506,6 +610,7 @@ class search_query_generator:
                 must_clauses.append(
                     {"bool": {"should": [
                         {"bool": {"filter": [{"exists": {"field": "content_type"}}, {"term": {"content_type": m_content_type.lower()}}]}},
+                        {"bool": {"filter": [{"exists": {"field": "m_content_type"}}, {"term": {"m_content_type": m_content_type.lower()}}]}},
                         {"bool": {"filter": [{"exists": {"field": "m_ioc_type"}}, {"terms": {"m_ioc_type": [m_content_type.lower()]}}]}}
                     ], "minimum_should_match": 1}})
 
@@ -513,12 +618,16 @@ class search_query_generator:
         quoted_value = bool(phrases) and (p_query_model.q or "").strip().startswith('"') and (
                 p_query_model.q or "").strip().endswith('"')
         exact_phrases = phrases
-        if search_type=="defacement":
-            loose_terms=[]
+        if search_type == "defacement":
+            loose_terms = []
         else:
             loose_terms = [] if raw_query in ("*", "") else [t for t in re.findall(r'\w+', raw_query) if t and t.strip('"')]
-        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_sender_name", 2), ("m_base_url", 1),
-            ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4)]
+
+        phrase_fields = [("m_title", 5), ("m_content", 3), ("m_url", 2), ("m_source_url", 2), ("m_sender_name", 2), ("m_author", 2), ("m_username", 2), ("m_base_url", 1),
+            ("m_team", 1), ("m_attacker", 1), ("m_users", 1), ("m_network", 1), ("m_channel_name", 4),
+            ("m_name", 4), ("m_family", 3), ("m_aliases", 3), ("m_actor_names", 3), ("m_references", 1),
+            ("m_sha256_hash", 5), ("m_sha1_hash", 4), ("m_md5_hash", 4), ("m_signature", 4), ("m_tags", 3), ("m_file_name", 3)]
+
         unified_query = self._build_query_block(
             p_query_model=p_query_model,
             pfilter=pfilter,
@@ -543,7 +652,7 @@ class search_query_generator:
 
         query = base_index, unified_query, [b for b in
             [{ELASTIC_INDEX.S_LEAK_INDEX: 2}, {ELASTIC_INDEX.S_GENERIC_INDEX: 0.5},
-                {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4}, {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
+                {ELASTIC_INDEX.S_EXPLOIT_INDEX: 1.4}, {ELASTIC_INDEX.S_APT_INDEX: 1.4}, {ELASTIC_INDEX.S_MALWARE_INDEX: 1.4}, {ELASTIC_INDEX.S_CHATS_INDEX: 1.4},
                 {ELASTIC_INDEX.S_SOCIAL_INDEX: 1.4}, {ELASTIC_INDEX.S_DEFACEMENT_INDEX: 1.4}] if
             next(iter(b)) in base_index]
 
@@ -561,14 +670,13 @@ class search_query_generator:
         if p_query_model.daterange:
             parts = p_query_model.daterange.split(",")
             if len(parts) == 2:
-                from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT00:00:00+00:00")
-                to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%dT23:59:59+00:00")
+                from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+                to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
 
                 must_clauses.append({
                     "bool": {
                         "should": [
-                            {"range": {"m_message_date": {"gte": from_date, "lte": to_date}}},
-                            {"range": {"m_leak_date": {"gte": from_date, "lte": to_date}}},
+                            {"range": {"m_date": {"gte": from_date, "lte": to_date}}},
                             {"range": {"m_creation_date": {"gte": from_date, "lte": to_date}}},
                         ],
                         "minimum_should_match": 1,
@@ -631,8 +739,8 @@ class search_query_generator:
             parts = date_range.split(',')
             if len(parts) == 2:
                 try:
-                    from_date = datetime.strptime(parts[0].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
-                    to_date = datetime.strptime(parts[1].strip(), "%Y-%m-%d").strftime("%Y-%m-%d")
+                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_ONLY_FORMAT)
+                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_ONLY_FORMAT)
                     date_should_clauses = [
                         {"range": {date_field: {"gte": from_date, "lte": to_date}}}
                     ]

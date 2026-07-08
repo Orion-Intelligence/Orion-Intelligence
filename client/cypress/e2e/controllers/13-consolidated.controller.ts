@@ -1,7 +1,19 @@
+import { typeDashboardSearchSlow } from './04-searching.controller';
+
 const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
 const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'bbc.com', 'cnn.com'];
 const DOMAIN_SCANNER_INPUT_SELECTOR = '[data-testid="domain-scanner-input"]';
+export const CONSOLIDATED_TOGGLE_SELECTOR = '[data-testid="consolidated-section-see-more"]';
+export const RESULT_CARD_SELECTOR = '[data-testid="result-card"]';
+
+export function clickConsolidatedSectionToggle(sectionId: string, labelPattern: RegExp) {
+  cy.get(`[data-testid="${sectionId}"]`)
+    .contains(CONSOLIDATED_TOGGLE_SELECTOR, labelPattern)
+    .scrollIntoView({ offset: { top: -120, left: 0 } })
+    .should('be.visible')
+    .click();
+}
 
 function executeIocAdvancedSearch() {
   cy.get('[data-testid="ioc-adv-execute"]')
@@ -13,22 +25,72 @@ function executeIocAdvancedSearch() {
     .click();
 }
 
+function getVisibleIocAdvancedRow(index: number) {
+  return cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(index);
+}
+
+function selectIocAdvancedControl(rowIndex: number, testId: string, nativeValue: string, dropdownLabel: RegExp) {
+  getVisibleIocAdvancedRow(rowIndex).find(`[data-testid="${testId}"]`).scrollIntoView().then(($control) => {
+    const tagName = ($control[0] as HTMLElement).tagName.toLowerCase();
+    if (tagName === 'select') {
+      cy.wrap($control).select(nativeValue);
+      return;
+    }
+
+    cy.wrap($control).click({ force: true });
+    cy.contains('[role="option"]', dropdownLabel).filter(':visible').first().click({ force: true });
+  });
+}
+
+function typeIocAdvancedValue(rowIndex: number, value: string) {
+  getVisibleIocAdvancedRow(rowIndex)
+    .find('[data-testid="ioc-adv-value-input"]')
+    .scrollIntoView()
+    .clear()
+    .type(value);
+}
+
+function clickIocAdvancedRowButton(rowIndex: number, testId: string) {
+  getVisibleIocAdvancedRow(rowIndex)
+    .find(`[data-testid="${testId}"]`)
+    .scrollIntoView()
+    .click({ force: true });
+}
+
+function openIocAdvancedBuilder() {
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="ioc-basic-search-input"]:visible').length > 0) {
+      cy.get('[data-testid="ioc-advanced-toggle"]').filter(':visible').first().scrollIntoView().click();
+    }
+  });
+
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="ioc-adv-expanded-modal"]:visible').length === 0) {
+      cy.get('[data-testid="ioc-adv-expand"]').filter(':visible').first().scrollIntoView().click();
+    }
+  });
+
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
+}
+
 export function openHomepageAndSearch(query = '{enter}') {
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click();
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().should('be.visible').click();
+  cy.startInterceptTracking();
   cy.get('[data-testid="homepage-search-input"]').should('be.visible').click().type(query);
+  cy.waitForIntercepts();
 }
 
 export function switchToDeepSearchTab() {
-  cy.get('[data-testid="consolidated-tab-deep-search"]').scrollIntoView().should('be.visible').click();
+  cy.get('[data-testid="consolidated-tab-deep-search"]').scrollIntoView().should('be.visible').click({ force: true });
 }
 
 export function switchToIocsTab() {
-  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click();
+  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click({ force: true });
 }
 
 export function searchInIocs(query: string) {
-  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().click();
+  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().click({ force: true });
   cy.closeSideFilter()
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
   cy.get('[data-testid="ioc-basic-search-input"]')
@@ -42,6 +104,7 @@ export function searchInIocs(query: string) {
         .click()
         .type('{selectAll}{backspace}');
 
+      cy.startInterceptTracking();
       if (query && query.length > 0) {
         cy.wrap(target)
           .type(query, {delay: 0})
@@ -49,6 +112,7 @@ export function searchInIocs(query: string) {
       } else {
         cy.wrap(target).type('{enter}');
       }
+      cy.waitForIntercepts();
     });
 }
 
@@ -69,19 +133,28 @@ export function ensureDomainScannerModalOpen() {
 export function openFirstReportAndGoBack() {
   cy.get('[data-testid="open-report"]').filter(':visible').first().scrollIntoView().should('be.visible').click();
   cy.url().should('include', '/dashboard/profile/consolidated');
-  cy.get('[data-testid="dashboard-header-back"]')
-    .filter(':visible')
-    .first()
-    .scrollIntoView()
-    .click();
-  cy.get('[data-testid="consolidated-tab-deep-search"]')
-    .scrollIntoView()
-    .should('be.visible')
-    .click();
+  cy.location('search').then((search) => {
+    cy.startInterceptTracking();
+    cy.get('[data-testid="dashboard-header-back"]')
+      .filter(':visible')
+      .first()
+      .scrollIntoView()
+      .click();
+    cy.waitForIntercepts({ timeout: 60000, idleMs: 250 });
+    cy.get('body').then(($body) => {
+      if (!$body.find('[data-testid="consolidated-tab-deep-search"]:visible').length) {
+        cy.visit(`/dashboard/profile/consolidated/all${search || '?tab=Deep%20Search'}`);
+      }
+    });
+    cy.get('[data-testid="consolidated-tab-deep-search"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+  });
 }
 
 export function runDomainScannerFlow() {
-  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click();
+  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click({ force: true });
   ensureDomainScannerModalOpen();
   cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
   cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
@@ -178,9 +251,15 @@ export function clearSideFilters() {
   });
 }
 
-export function searchDeepFromTop(query: string) {
+export function searchDeepFromTop(query: string, waitForNetwork = true) {
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
-  cy.get('[data-testid="dashboard-general-input"]').filter(':visible').first().scrollIntoView().clear().type(`${query}{enter}`);
+  if (waitForNetwork) {
+    cy.intercept('POST', '**/api/search/consolidated').as('consolidatedSearchAfterDeepSearch');
+  }
+  typeDashboardSearchSlow(query);
+  if (waitForNetwork) {
+    cy.wait('@consolidatedSearchAfterDeepSearch', {timeout: 60000});
+  }
 }
 
 export function setAllInsightsExpanded(expand: boolean) {
@@ -207,33 +286,19 @@ export function runAdvancedFilterFlow() {
   cy.log('Advanced: open and test real/fake filters with add/delete');
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
 
-  cy.get('[data-testid="ioc-adv-row"], [data-testid="ioc-basic-search-input"]').then(($els) => {
-    const hasVisibleAdvancedRow = $els.filter('[data-testid="ioc-adv-row"]:visible').length > 0;
-    if (!hasVisibleAdvancedRow) {
-      cy.get('[data-testid="ioc-advanced-toggle"]').filter(':visible').first().scrollIntoView().click();
-    }
-  });
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
-
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
-    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
-    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('ydt.sja@gail.ccmm');
-  });
+  openIocAdvancedBuilder();
+  selectIocAdvancedControl(0, 'ioc-adv-tag-select', 'm_email', /email/i);
+  typeIocAdvancedValue(0, 'ydt.sja@gail.ccmm');
   executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-stealer-table"]').find('[data-testid="ioc-stealer-row"]').should('have.length.greaterThan', 0);
 
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
-    cy.get('[data-testid="ioc-adv-add-filter"]').scrollIntoView().click();
-  });
+  openIocAdvancedBuilder();
+  clickIocAdvancedRowButton(0, 'ioc-adv-add-filter');
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 2);
 
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
-    cy.get('[data-testid="ioc-adv-operator-select"]').scrollIntoView().select('&&');
-    cy.scrollDashboardToTop()
-    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
-    cy.scrollDashboardToTop()
-    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('fake-no-result-value-xyz@gmail.com');
-  });
+  selectIocAdvancedControl(1, 'ioc-adv-operator-select', '&&', /^(AND|&&)$/i);
+  selectIocAdvancedControl(1, 'ioc-adv-tag-select', 'm_email', /email/i);
+  typeIocAdvancedValue(1, 'fake-no-result-value-xyz@gmail.com');
   executeIocAdvancedSearch();
 
   cy.get('[data-testid="ioc-stealer-table"]').should(($shell) => {
@@ -242,11 +307,10 @@ export function runAdvancedFilterFlow() {
     expect(rowCount === 0 || emptyCount > 0).to.eq(true);
   });
 
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
-    cy.get('[data-testid="ioc-adv-delete-filter"]').scrollIntoView().click();
-  });
-  executeIocAdvancedSearch();
+  openIocAdvancedBuilder();
+  clickIocAdvancedRowButton(1, 'ioc-adv-delete-filter');
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
+  executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-stealer-table"]').should(($shell) => {
     const rowCount = $shell.find('[data-testid="ioc-stealer-row"]').length;
     const emptyCount = $shell.find('.ui-ioc-table-empty').length;

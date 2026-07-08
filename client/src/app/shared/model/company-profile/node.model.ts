@@ -27,6 +27,7 @@ export interface UserDataModel {
     password_reset_required?: boolean;
     password_reset_token?: string | null;
     license: string[];
+    permissions?: string[];
     image?: string;
     preferences?: Record<string, any>;
     demo_tour: boolean;
@@ -48,6 +49,10 @@ export interface TenantDataModel {
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
+    accountsMailPassword?: string;
+    accountsMail?: string;
+    accountsSmtpServer?: string;
+    accountsSmtpPort?: string;
 }
 export interface userMetaData {
     username: string;

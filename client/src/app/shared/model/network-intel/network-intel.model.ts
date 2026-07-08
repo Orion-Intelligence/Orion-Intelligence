@@ -1,3 +1,5 @@
+export type NetworkIntelTab = 'dns' | 'shodan' | 'vuln' | 'geo' | 'seo' | 'repo';
+
 export interface IpPortTls {
   version?:              string;
   cipher?:               string;
@@ -142,4 +144,11 @@ export interface GeoLiveStats {
   ips_extracted: number;
   ips_scanned:   number;
   cameras_found: number;
+}
+
+export type VulnerabilityScanDepth = 'low' | 'medium' | 'high';
+
+export interface VulnerabilityTargetSelection {
+  target: string;
+  depth: VulnerabilityScanDepth;
 }

@@ -2,10 +2,11 @@ import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, HostListener,
 import { DemoTourService } from '../../../shared/services/demo.tour.service';
 import { RenderedGeometry } from '../../../shared/model/demo-tour/modal/rendered-geometry.interface';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-demo-tour',
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './demo-tour.component.html'
 })
 export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {

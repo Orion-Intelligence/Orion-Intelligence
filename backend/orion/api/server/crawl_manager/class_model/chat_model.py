@@ -7,7 +7,7 @@ from pydantic import BaseModel, Field
 class chat_model(BaseModel):
     m_content: Optional[str] = None
     m_caption: Optional[str] = None
-    m_message_date: Optional[date] = None
+    m_date: Optional[date] = None
     m_time: Optional[str] = None
     m_message_id: Optional[str] = None
     m_message_sharable_link: Optional[str] = None

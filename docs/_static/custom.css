@@ -39,7 +39,7 @@
 .localtoc ul ul{
   margin-left: .75rem;
   padding-left: .75rem;
-  border-left: 1px solid var(--border, rgba(127,127,127,.25));
+  border-left: 1px solid var(--border, rgb(127 127 127 / 25%));
 }
 
 @media (max-width: 900px){
@@ -80,7 +80,7 @@
   border-radius: .75rem;
 
   text-decoration: none;
-  border: 1px solid var(--sy-c-border, rgba(127,127,127,.25));
+  border: 1px solid var(--sy-c-border, rgb(127 127 127 / 25%));
 
   transition: background-color .15s ease, border-color .15s ease, transform .08s ease;
   -webkit-tap-highlight-color: transparent;
@@ -108,12 +108,12 @@ html.light .orion-shot-btn:hover{
 html.dark .orion-shot-btn{
   background: #0a0a0a;
   color: #fff;
-  border-color: rgba(255,255,255,.14);
+  border-color: rgb(255 255 255 / 14%);
 }
 
 html.dark .orion-shot-btn:hover{
   background: #141414;
-  border-color: rgba(255,255,255,.22);
+  border-color: rgb(255 255 255 / 22%);
 }
 
 .ethical-sidebar{

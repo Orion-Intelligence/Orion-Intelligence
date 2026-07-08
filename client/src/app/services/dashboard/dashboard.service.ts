@@ -48,7 +48,7 @@ export class DashboardService {
   fetchSearchResults<T extends {
         Result?: any[];
         cards_data?: any[];
-    }>(apiEndpoint: string, paramModel: any, semantic = ""): Observable<{
+    }>(apiEndpoint: string, paramModel: any, semantic = "", syncUrl = true): Observable<{
         success: boolean;
         isEmpty: boolean;
         data: T | null;
@@ -58,7 +58,14 @@ export class DashboardService {
     this.cancelOngoingRequest();
     paramModel.page = this.consolidatedParamModel.page;
     let baseParams: any = { ...paramModel, ...this.selectedFilters() };
-    this.syncQueryParamsToUrl(baseParams);
+    if (apiEndpoint === 'search/defacement') {
+      baseParams.category = paramModel.category || 'all';
+      baseParams.content = baseParams.content || paramModel.content || 'all';
+    }
+    if (apiEndpoint === 'search/exploit' || apiEndpoint === 'search/apt-intel') {
+      const resultCount = Number(baseParams.platform_result_count || 0);
+      baseParams.platform_result_count = Math.max(Number.isFinite(resultCount) ? resultCount : 0, 100);
+    }
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     if (semantic) {
       baseParams['matchtype'] = semantic;
@@ -68,7 +75,9 @@ export class DashboardService {
     }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
     baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
-    this.syncQueryParamsToUrl(baseParams);
+    if (syncUrl) {
+      this.syncQueryParamsToUrl(baseParams);
+    }
     if (entityCategories) {
       baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
     }
@@ -133,6 +142,8 @@ export class DashboardService {
     return this.apiService.post<ConsolidatedCallbackModel>(apiEndpoint, payload).pipe(takeUntil(this.cancelRequest$), map((response: ConsolidatedCallbackModel) => {
       const hasAnyResults = !!(response?.leak_model?.Result?.length ||
                 response?.exploit_model?.Result?.length ||
+                response?.apt_model?.Result?.length ||
+                response?.malware_model?.Result?.length ||
                 response?.chat_model?.Result?.length ||
                 response?.generic_model?.Result?.length ||
                 response?.defacement_model?.Result?.length);
@@ -200,6 +211,24 @@ export class DashboardService {
     });
   }
 
+  deleteDocumentFeedbackComment(docId: string, commentCreatedAt: string, feedbackModel: ReportFeedbackModel, handlers?: { setSaving?: (value: boolean) => void; setError?: (value: string) => void }): void {
+    if (!docId || !commentCreatedAt) {
+      return;
+    }
+    handlers?.setError?.('');
+    handlers?.setSaving?.(true);
+    this.apiService.delete<ReportFeedbackModel>(`feedback/comment/${docId}/${encodeURIComponent(commentCreatedAt)}`).subscribe({
+      next: (response) => {
+        this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
+        handlers?.setSaving?.(false);
+      },
+      error: (error) => {
+        handlers?.setError?.(error?.error?.detail || error?.error?.message || 'Unable to delete comment.');
+        handlers?.setSaving?.(false);
+      },
+    });
+  }
+
   private initializeSideFilters() {
     const allowedKeys = [
       "source",
@@ -211,7 +240,19 @@ export class DashboardService {
       "safe",
       "content",
       "mitre",
-      "platform_result_count"
+      "platform",
+      "platform_result_count",
+      "m_cve",
+      "m_cwe",
+      "m_product",
+      "m_severity",
+      "m_risk",
+      "m_remote_type",
+      "m_platform",
+      "m_tags",
+      "family",
+      "m_country",
+      "m_reporter"
     ];
     const params = new URLSearchParams(window.location.search);
     const selected: Record<string, string | null> = {};

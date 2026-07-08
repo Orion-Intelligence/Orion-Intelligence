@@ -1,16 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ReportFeedbackModel } from '../../templates/report_general/models/report-feedback.model';
+import { ReportFeedbackCommentModel, ReportFeedbackModel } from '../../templates/report_general/models/report-feedback.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { getFormattedCaseDateTime } from '../../../../pages/user-management/sidebar-user-case-management/model/case-details/case-details-formatters';
+import { AppService } from '../../../../services/core/app/app.service';
+import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-report-feedback-comments',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe, ConfirmationPopupComponent],
   templateUrl: './report-feedback-comments.component.html',
 })
 export class ReportFeedbackCommentsComponent implements OnChanges {
   draft = '';
+  pendingDeleteCommentCreatedAt = '';
 
   @Input() docId = '';
   @Input() feedback: ReportFeedbackModel = new ReportFeedbackModel();
@@ -19,7 +24,10 @@ export class ReportFeedbackCommentsComponent implements OnChanges {
   @Input() flushSpacing = false;
 
   @Output() saveComment = new EventEmitter<string>();
+  @Output() deleteComment = new EventEmitter<string>();
   @Output() userSelected = new EventEmitter<string>();
+
+  constructor(private appService: AppService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['docId']) {
@@ -41,5 +49,28 @@ export class ReportFeedbackCommentsComponent implements OnChanges {
       return;
     }
     this.userSelected.emit(userId);
+  }
+
+  requestDeleteComment(commentCreatedAt: string): void {
+    if (!commentCreatedAt) {
+      return;
+    }
+    this.pendingDeleteCommentCreatedAt = commentCreatedAt;
+  }
+
+  handleDeleteConfirmation(confirmed: boolean): void {
+    const commentCreatedAt = this.pendingDeleteCommentCreatedAt;
+    this.pendingDeleteCommentCreatedAt = '';
+    if (confirmed && commentCreatedAt) {
+      this.deleteComment.emit(commentCreatedAt);
+    }
+  }
+
+  canDeleteComment(comment: ReportFeedbackCommentModel): boolean {
+    return !comment.is_deleted && !!comment.username && comment.username === this.appService.userSessionData().user.username;
+  }
+
+  getFormattedDateTime(date?: Date | string | null): string {
+    return getFormattedCaseDateTime(date);
   }
 }

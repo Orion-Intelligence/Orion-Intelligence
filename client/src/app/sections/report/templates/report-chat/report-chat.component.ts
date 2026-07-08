@@ -15,9 +15,11 @@ import { DashboardService } from '../../../../services/dashboard/dashboard.servi
 import { ChatWidgetComponent } from '../../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../../services/core/app/app.service';
 import { ScrollService } from '../../../../shared/services/scroll.service';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, getDisplayTitle as getDisplayTitleUtil, isHiddenReportMetadataKey, isLikelyUrl as isLikelyUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
@@ -32,11 +34,12 @@ import { ReportInteractionHostComponent } from '../../social-interactions/report
     TooltipDirective,
     ReportHeaderComponent,
     ChatWidgetComponent,
-    ReportInteractionHostComponent
-  ],
+    ReportInteractionHostComponent, TranslatePipe],
   animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit, AfterViewInit {
+  private readonly commentTabKeys = new Set(['m_comments', 'm_post_comments', 'm_post_comments_list', 'm_post_comment_list', 'm_comment_list', 'm_comments_list', 'comments', 'comment_items', 'comment_details', 'comments_list', 'post_comments_list', 'm_replies', 'replies', 'm_thread_comments', 'thread_comments']);
+
   protected readonly last = last;
 
   resultItem: ChatResultItem | SocialResultItem | null = null;
@@ -67,6 +70,12 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     this.elementRef.nativeElement.scrollIntoView({ block: 'start', behavior: 'auto' });
   }
 
+  langUpdate(result: ChatResultItem | SocialResultItem) {
+    this.resultItem = result;
+    this.processResultItem();
+    this.syncActiveMetadataTab();
+  }
+
   metaadataToggleContent(): void {
     this.isExpandedMetadata = !this.isExpandedMetadata;
     if (this.router.url.split('?')[0] != this.dashboardService.m_current_route) {
@@ -92,6 +101,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
         const value = (this.resultItem as any)[key];
         if (Array.isArray(value) &&
                     value.length > 0 &&
+                    !isHiddenReportMetadataKey(key) &&
                     !addedKeys.has(key)) {
           this.arrayKeys.push(key);
           addedKeys.add(key);
@@ -123,6 +133,27 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     }
   }
 
+  private syncActiveMetadataTab(): void {
+    if (!this.arrayKeys.length) {
+      this.activeTab = '';
+      this.listItems = [];
+      return;
+    }
+    if (!this.activeTab || !this.arrayKeys.includes(this.activeTab)) {
+      this.activeTab = this.arrayKeys[0];
+    }
+    if (this.activeTab === 'm_content' || this.activeTab === 'm_summary') {
+      this.listItems = [];
+      return;
+    }
+    if (this.resultItem && Array.isArray((this.resultItem as any)[this.activeTab])) {
+      this.listItems = this.getMetadataListItems(this.activeTab);
+    }
+    else {
+      this.listItems = [];
+    }
+  }
+
   setActiveTab(tab: string) {
     if (this.activeTab === tab) {
       this.activeTab = '';
@@ -134,7 +165,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
       this.listItems = [];
     }
     else if (this.resultItem && Array.isArray((this.resultItem as any)[tab])) {
-      this.listItems = (this.resultItem as any)[tab].slice(0, 100);
+      this.listItems = this.getMetadataListItems(tab);
     }
     else {
       this.listItems = [];
@@ -168,6 +199,78 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     return formatKeyLabelUtil(key);
   }
 
+  getMetadataCount(key: string): number {
+    if (key === 'm_content') {
+      return this.content ? 1 : 0;
+    }
+    if (key === 'm_summary') {
+      return this.summary ? 1 : 0;
+    }
+    const value = (this.resultItem as any)?.[key];
+    return Array.isArray(value) ? value.length : value ? 1 : 0;
+  }
+
+  private getMetadataListItems(tab: string): string[] {
+    if (!this.resultItem) {
+      return [];
+    }
+    const value = (this.resultItem as any)[tab];
+    if (this.commentTabKeys.has(tab)) {
+      return this.normalizeCommentValues(value).slice(0, 100);
+    }
+    return Array.isArray(value) ? value.map(item => this.toDisplayValue(item)).filter(Boolean).slice(0, 100) : [];
+  }
+
+  private normalizeCommentValues(value: unknown): string[] {
+    if (!value) {
+      return [];
+    }
+    if (Array.isArray(value)) {
+      return value.flatMap(item => this.normalizeCommentValues(item));
+    }
+    if (typeof value === 'string') {
+      const trimmed = value.trim();
+      if (!trimmed) {
+        return [];
+      }
+      if (trimmed.startsWith('[') || trimmed.startsWith('{')) {
+        try {
+          return this.normalizeCommentValues(JSON.parse(trimmed));
+        }
+        catch {
+          return [trimmed];
+        }
+      }
+      return [trimmed];
+    }
+    if (typeof value === 'object') {
+      const comment = value as any;
+      const text = comment.text || comment.comment || comment.comment_text || comment.m_comment_text || comment.m_comment || comment.m_text || comment.content || comment.comment_content || comment.m_content || comment.message || comment.body || comment.m_body || comment.comment_body || comment.reply || comment.reply_content || comment.description;
+      if (text) {
+        const meta = [
+          comment.sender_name || comment.m_sender_name || comment.author || comment.m_author || comment.comment_author || comment.username || comment.user || comment.name || comment.from,
+          comment.m_date || comment.date || comment.datetime || comment.created_at || comment.timestamp || comment.time || comment.m_time
+        ].filter(Boolean).join(' - ');
+        return [meta ? `${meta}: ${text}` : String(text)];
+      }
+      return Array.from(this.commentTabKeys).flatMap(key => this.normalizeCommentValues(comment[key]));
+    }
+    return [String(value)];
+  }
+
+  private toDisplayValue(value: unknown): string {
+    if (value === null || value === undefined) {
+      return '';
+    }
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return String(value);
+  }
+
   private isLikelyUrl(value: string): boolean {
     return isLikelyUrlUtil(value);
   }
@@ -182,6 +285,29 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   normalizeDisplayUrl(url?: string | null): string {
     return normalizeDisplayUrlUtil(url, '-');
+  }
+
+  getDisplayMessageDate(item: ChatResultItem | SocialResultItem | null): string {
+    const rawItem = item as any;
+    const value = this.getFirstRenderableValue(rawItem?.m_date,
+      rawItem?.m_message_date,
+      rawItem?.message_date,
+      rawItem?.date,
+      rawItem?.created_at,
+      rawItem?.m_created_at,
+      rawItem?.m_creation_date,
+      rawItem?.m_update_date,
+      rawItem?.m_time);
+    return this.formatDateValue(value);
+  }
+
+  getDisplayMessageId(item: ChatResultItem | SocialResultItem | null): string {
+    const rawItem = item as any;
+    const messageId = String(rawItem?.m_message_id || '').trim();
+    if (!messageId || this.isSlugLikeMessageId(messageId, rawItem?.m_platform)) {
+      return '';
+    }
+    return messageId;
   }
 
   hasValue(value: unknown): boolean {
@@ -206,11 +332,11 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
       });
     };
 
-    add('Message Date', item.m_message_date);
+    add('Message Date', this.getDisplayMessageDate(item));
     add('Views', item.m_views);
     add('Sender Username', item.m_sender_username);
     add('Sender', item.m_sender_name);
-    add('Message ID', item.m_message_id, true);
+    add('Message ID', this.getDisplayMessageId(item), true);
     add('Platform', item.m_platform);
     add('Network', item.m_network);
     add('Post Likes', item.m_post_likes);
@@ -229,5 +355,43 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   get reportDocId(): string {
     return (this.resultItem as any)?.m_hash || (this.resultItem as any)?._id || '';
+  }
+
+  private getFirstRenderableValue(...values: unknown[]): unknown {
+    return values.find(value => this.hasValue(value));
+  }
+
+  private formatDateValue(value: unknown): string {
+    if (!this.hasValue(value)) {
+      return '';
+    }
+    const rawValue = Array.isArray(value) ? value[0] : value;
+    const rawDate = String(rawValue ?? '').trim();
+    if (!rawDate) {
+      return '';
+    }
+    const parsedDate = new Date(rawDate);
+    if (Number.isNaN(parsedDate.getTime())) {
+      return rawDate;
+    }
+    return parsedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+  }
+
+  private isSlugLikeMessageId(value: string, platform?: string): boolean {
+    const normalizedPlatform = String(platform || '').toLowerCase();
+    const hasPercentEncoding = /%[0-9a-f]{2}/i.test(value);
+    const decodedValue = this.decodeURIComponentSafe(value);
+    const hasSlugSeparator = /[-_/]/.test(decodedValue);
+    return (normalizedPlatform === 'forum' && (hasPercentEncoding || (decodedValue.length > 80 && hasSlugSeparator))) ||
+      (hasPercentEncoding && decodedValue.length > 80);
+  }
+
+  private decodeURIComponentSafe(value: string): string {
+    try {
+      return decodeURIComponent(value);
+    }
+    catch {
+      return value;
+    }
   }
 }

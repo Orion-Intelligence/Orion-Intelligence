@@ -1,0 +1,16 @@
+{
+  "indexes": [
+    {
+      "index": "malware_model",
+      "source": "malware-bazaar-recent.json",
+      "recordsPath": "Result",
+      "idField": "m_hash"
+    },
+    {
+      "index": "apt_model",
+      "source": "apt-recent.json",
+      "recordsPath": "Result",
+      "idField": "m_hash"
+    }
+  ]
+}

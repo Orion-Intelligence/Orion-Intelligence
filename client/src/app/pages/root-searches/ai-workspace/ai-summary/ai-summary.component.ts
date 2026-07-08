@@ -4,9 +4,11 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 import { NexusChatService } from '../nexus-chat.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-ai-summary',
+  imports: [TranslatePipe],
   standalone: true,
   templateUrl: './ai-summary.component.html',
   animations: [fadeInDashboardItem],

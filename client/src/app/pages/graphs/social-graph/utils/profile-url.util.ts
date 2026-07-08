@@ -1,10 +1,12 @@
+import { SocialNormalizationUtil } from './social-normalization.util';
+
 export function buildSocialProfileUrl(platformName: string, username: string, fallbackUrl: string = ''): string {
-  const normalizedUsername = normalizeUsername(username);
+  const normalizedUsername = SocialNormalizationUtil.normalizeProfilePathUsername(username);
   if (!normalizedUsername) {
     return fallbackUrl || '#';
   }
   const platform = (platformName || '').trim().toLowerCase();
-  const known = buildKnownPlatformUrl(platform, normalizedUsername);
+  const known = buildKnownPlatformUrl(platform, normalizedUsername, fallbackUrl);
   if (known) {
     return known;
   }
@@ -13,7 +15,7 @@ export function buildSocialProfileUrl(platformName: string, username: string, fa
       const parsed = new URL(fallbackUrl);
       const pathSegments = parsed.pathname.split('/').filter(Boolean);
       const hasUsernameInPath = pathSegments.some(segment => {
-        const normalizedSegment = normalizeUsername(segment);
+        const normalizedSegment = SocialNormalizationUtil.normalizeProfilePathUsername(segment);
         return normalizedSegment === normalizedUsername;
       });
       if (hasUsernameInPath) {
@@ -32,10 +34,8 @@ export function buildSocialProfileUrl(platformName: string, username: string, fa
   }
   return '#';
 }
-function normalizeUsername(value: string): string {
-  return (value || '').trim().replace(/^@+/, '').replace(/\/+$/, '');
-}
-function buildKnownPlatformUrl(platform: string, username: string): string {
+
+function buildKnownPlatformUrl(platform: string, username: string, fallbackUrl: string = ''): string {
   if (platform === 'twitter' || platform === 'x') {
     return `https://x.com/${username}`;
   }
@@ -64,7 +64,32 @@ function buildKnownPlatformUrl(platform: string, username: string): string {
     return `https://www.linkedin.com/in/${username}`;
   }
   if (platform === 'reddit') {
-    return `https://www.reddit.com/user/${username}`;
+    const cleanUsername = username.replace(/^\/+|\/+$/g, '');
+    const lowerUsername = cleanUsername.toLowerCase();
+    if (lowerUsername.startsWith('r/')) {
+      return `https://www.reddit.com/r/${cleanUsername.slice(2)}`;
+    }
+    if (lowerUsername.startsWith('u/')) {
+      return `https://www.reddit.com/user/${cleanUsername.slice(2)}`;
+    }
+    if (lowerUsername.startsWith('user/')) {
+      return `https://www.reddit.com/user/${cleanUsername.slice(5)}`;
+    }
+    try {
+      const parsed = new URL(fallbackUrl);
+      const pathSegments = parsed.pathname.split('/').filter(Boolean);
+      const accountType = pathSegments[0]?.toLowerCase();
+      if (accountType === 'r') {
+        return `https://www.reddit.com/r/${cleanUsername}`;
+      }
+      if (accountType === 'u' || accountType === 'user') {
+        return `https://www.reddit.com/user/${cleanUsername}`;
+      }
+    }
+    catch {
+      // Fall through to Reddit user URLs for plain handles.
+    }
+    return `https://www.reddit.com/user/${cleanUsername}`;
   }
   return '';
 }

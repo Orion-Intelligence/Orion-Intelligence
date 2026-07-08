@@ -6,15 +6,16 @@ import { MessageNotificationService } from '../../../../services/message_notific
 import { finalize } from 'rxjs';
 import { FeederService } from '../feeder.service';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from '../feeder-rule.utils';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-feeder-add',
   standalone: true,
-  imports: [FormsModule, ConfirmationPopupComponent],
+  imports: [FormsModule, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './sidebar-user-feeder-add.component.html',
 })
 export class SidebarUserFeederAddComponent implements OnChanges {
-  private readonly maxFileSize = 50 * 1024;
+  private readonly maxFileSize = 1024 * 1024;
   private pendingUploadInput: HTMLInputElement | null = null;
 
   sharedRuleScripts: FeederScriptItem[] = [];
@@ -24,6 +25,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   uploadedSessionFileName = '';
   valuesText = '';
   isSubmitting = false;
+  isSelectingFiles = false;
   isSharedScriptStatusLoading = false;
   isValuesLoading = false;
   uploadProgressCurrent = 0;
@@ -92,12 +94,21 @@ export class SidebarUserFeederAddComponent implements OnChanges {
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
+    this.isSelectingFiles = false;
     this.selectedFiles = Array.from(input.files || []);
   }
 
   onSessionFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.selectedSessionFile = input.files?.[0] || null;
+    const file = input.files?.[0] || null;
+    if (file && !file.name.toLowerCase().endsWith('.zip')) {
+      this.formError = 'Only ZIP session files are allowed';
+      input.value = '';
+      this.selectedSessionFile = null;
+      return;
+    }
+    this.formError = '';
+    this.selectedSessionFile = file;
   }
 
   supportsValueUpload(): boolean {
@@ -157,13 +168,17 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       this.formError = 'Python file is required';
       return;
     }
+    if (this.selectedSessionFile && !this.selectedSessionFile.name.toLowerCase().endsWith('.zip')) {
+      this.formError = 'Only ZIP session files are allowed';
+      return;
+    }
     for (const file of this.selectedFiles) {
       if (!file.name.toLowerCase().endsWith('.py')) {
         this.formError = 'Only Python files are allowed';
         return;
       }
       if (file.size > this.maxFileSize) {
-        this.formError = 'File size must be 50 KB or less';
+        this.formError = 'File size must be 1 MB or less';
         return;
       }
     }

@@ -97,7 +97,7 @@ The most important top-level paths are:
 | --- | --- |
 | `client/` | frontend application, Cypress tests, client build config |
 | `backend/` | API, business logic, docs routes, static test fixtures |
-| `docs/` | application docs, API docs, screenshots, docs-side e2e helpers |
+| `docs/` | application docs, API docs, screenshots, docs generation scripts |
 | `nginx/` | NGINX configuration variants |
 | `run.sh` | local orchestration entry point |
 | `docker-compose*.yml` | environment-specific stack definitions |
@@ -176,7 +176,7 @@ The Cypress entry point is the `test` script in `client/package.json`, which map
 Common examples:
 
 - `cd client && npm test run --browser electron`
-- `cd client && npm test run --browser electron --spec cypress/e2e/08-tenant-management.cy.ts`
+- `cd client && npm test run --browser electron --spec cypress/e2e/09-tenant-management.cy.ts`
 - `cd client && npm test run --browser electron --config baseUrl="http://127.0.0.1:8080"`
 
 This is important because `./run.sh build -t` prepares and starts the instrumented application stack, but it does not automatically execute Cypress. The test run is a second explicit step.
@@ -256,7 +256,7 @@ Developers should prefer deterministic fixtures over ad hoc live data when addin
 
 ### Application Docs
 
-Public application documentation lives under `docs/app_docs/`. LLM-only retrieval documentation lives under `docs/llm_docs/` and is excluded from the ReadTheDocs build. These public files describe:
+Public application documentation lives under `docs/app_docs/`. These public files describe:
 
 - the platform
 - major modules
@@ -276,13 +276,13 @@ API documentation lives under `docs/api_docs/` and is closely tied to backend ro
 
 ### Screenshot Generation
 
-The repository includes a docs-focused Cypress screenshot flow for the user manual. The current implementation keeps the docs spec isolated from the regular Cypress discovery pattern and invokes it through the docs generation path.
+The repository includes a docs-focused Cypress screenshot flow for the user manual. The current implementation captures documentation screenshots from the regular Cypress specs through `cy.docsScreenshot()` calls that are enabled only by the docs generation path.
 
 At a high level, that flow:
 
 1. builds the test stack
 2. seeds tenant state
-3. runs the docs screenshot spec
+3. runs the regular Cypress specs with screenshot capture enabled
 4. writes screenshots into `docs/screenshots/`
 
 This keeps documentation images reproducible from the application itself instead of relying on manual capture.

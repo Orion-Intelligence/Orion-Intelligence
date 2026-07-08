@@ -8,17 +8,23 @@ import { popupAnimation, overlayAnimation } from '../../../../shared/animations/
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../../shared/utils/auth-form.util';
+import { PasswordToggleDirective } from '../../../../shared/directives/password-toggle.directive';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+
 @Component({
   selector: 'app-add-tenant',
-  imports: [FormsModule, NgClass],
+  imports: [FormsModule, NgClass, PasswordToggleDirective, TranslatePipe, UiDropdownComponent],
   templateUrl: './add-tenant.component.html',
   animations: [popupAnimation, overlayAnimation]
 })
 export class AddTenantComponent implements OnInit {
   licenseList = Object.values(LicenseName);
   licenses = ['free', 'osint_basic', 'osint_advanced', 'social_mapper', 'pentester', 'maintainer', 'enterprise'];
+  permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
+  statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
   isAdmin: boolean = false;
-  model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [] };
+  model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [], permissions: [] };
   errorText: string = "";
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
   usernameSuggestion: string = "";
@@ -105,6 +111,40 @@ export class AddTenantComponent implements OnInit {
     }
     return this.licenseList.filter(license => this.tenantLicenses.includes(license) &&
           this.licenseService.getLicenseLabel(license) !== 'maintainer').length;
+  }
+
+  get roleOptions(): UiDropdownOption[] {
+    return this.isAdmin
+      ? [{ key: 'analyst', label: 'Analyst' }, { key: 'demo', label: 'Demo' }]
+      : [{ key: 'analyst', label: 'Analyst' }, { key: 'member', label: 'Member' }];
+  }
+
+  get licenseDropdownOptions(): UiDropdownOption[] {
+    return this.licenseList
+      .filter(license => (this.hasFullLicenseAccess || this.tenantLicenses.includes(license)) && license !== LicenseName.MAINTAINER)
+      .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
+  }
+
+  setRole(value: string | null): void {
+    if (value === 'member' || value === 'analyst' || value === 'demo') {
+      this.model.role = value;
+    }
+  }
+
+  setStatus(value: string | null): void {
+    if (value === 'active' || value === 'disable') {
+      this.model.status = value;
+    }
+  }
+
+  onLicenseDropdownChange(nextLicenses: string[]): void {
+    const currentLicenses = this.model.licenses || [];
+    const addedLicense = nextLicenses.find(license => !currentLicenses.includes(license));
+    if (addedLicense) {
+      this.toggleTenantLicense(this.model, addedLicense as LicenseName);
+      return;
+    }
+    this.model.licenses = nextLicenses;
   }
 
   toggleTenantLicense(tenant: any, license: LicenseName): void {

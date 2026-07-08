@@ -8,9 +8,11 @@ import { normalizeEntityId } from '../map-utils/renderer-utils';
 import { CountryBoundaryMapRenderer } from '../map-overlays/country-boundary-map-renderer';
 import { SearchLocationMapRenderer } from '../map-overlays/search-location-map-renderer';
 import { Observable, Subscription } from 'rxjs';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-satellite-map-renderer',
+  imports: [TranslatePipe],
   standalone:  true,
   templateUrl: './map-renderer.component.html',
 })
@@ -55,7 +57,6 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
 
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number; trackingDelta: number }>();
   @Output() featureSelected = new EventEmitter<any>();
-  @Output() featureIdsSelected = new EventEmitter<string[]>();
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<void>();
 
@@ -301,7 +302,6 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         getOrionData: () => this.orionData,
         getFocusedFeature: () => this.focusedFeature,
         onFeatureSelected: (feature: OrionSatelliteFeature) => this.ngZone.run(() => this.featureSelected.emit(feature)),
-        onFeatureIdsSelected: (ids: string[]) => this.ngZone.run(() => this.featureIdsSelected.emit(ids)),
       });
       this.entityRenderer.init(this.facilitiesVisible);
 

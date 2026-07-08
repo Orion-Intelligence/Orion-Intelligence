@@ -4,6 +4,8 @@ import json
 import hashlib
 import locale
 import re
+from pathlib import Path
+from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from jinja2 import Environment
@@ -15,9 +17,10 @@ from starlette.requests import Request
 from stopwords import get_stopwords
 
 from orion.constants import constant
-from orion.constants.constant import CONSTANTS, allowed_keys
+from orion.constants.constant import CONSTANTS, allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_controller import elastic_controller
+from orion.services.elastic_manager.elastic_enums import ELASTIC_ENUMS
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
@@ -192,26 +195,56 @@ class helper_controller:
         with open(entities_file, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        allowed_keys.clear()
+        allowed_key_titles.clear()
         for item in data:
             if "key" in item:
-                allowed_keys.add(item["key"])
+                allowed_key_titles[item["key"]] = item.get("title") or item["key"]
+        ELASTIC_ENUMS.ioc_field_mapping = helper_controller.build_ioc_field_mapping_from_entities(data)
 
-        mail_templete_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"))
+        mail_templete_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "mail_template_data"),
+            autoescape=True
+        )
         constant.mail_template = mail_templete_env.get_template("mail_template.html")
-        license_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"))
+        constant.alert_mail_template = mail_templete_env.get_template("alert_mail_template.html")
+        license_rules_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "licenses"),
+            autoescape=True
+        )
         license_rules_template = license_rules_env.get_template("license_rules.json")
         license_rules_json_str = license_rules_template.render()
         constant.license_rules = json.loads(license_rules_json_str)
-        url_rules_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "url_rules"))
+        url_rules_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "url_rules"),
+            autoescape=True
+        )
         url_rules_template = url_rules_env.get_template("url_rules.json")
         url_rules_json_str = url_rules_template.render()
         constant.url_rules = json.loads(url_rules_json_str)
-        map_entities_env = Environment(loader=FileSystemLoader(build_dir / "assets" / "data" / "satellite"))
+        map_entities_env = Environment(
+            loader=FileSystemLoader(build_dir / "assets" / "data" / "satellite"),
+            autoescape=True
+        )
         satellite_asset = map_entities_env.get_template(CONSTANTS.S_SATELLITE_ASSET_FILE_NAME).render()
         version, data = helper_controller.parse_satellite_asset(satellite_asset)
         constant.map_entities_version = version
         constant.map_entities_data = data
+
+    @staticmethod
+    def build_ioc_field_mapping_from_entities(entities):
+        mapping = {}
+        for item in entities or []:
+            if not isinstance(item, dict):
+                continue
+            key = str(item.get("key") or "").strip()
+            if not key:
+                continue
+            raw_fields = item.get("fields") or [key]
+            if isinstance(raw_fields, str):
+                raw_fields = [raw_fields]
+            fields = [str(field).strip() for field in raw_fields if str(field or "").strip()]
+            mapping[key] = fields or [key]
+        return mapping
 
     @staticmethod
     def parse_satellite_asset(asset_data):
@@ -253,6 +286,11 @@ class helper_controller:
 
     @staticmethod
     async def init_map_entities(build_dir):
+        if build_dir is None:
+            log.g().w("Map entities build directory not configured, file watching disabled")
+            return
+
+        build_dir = Path(build_dir)
         map_entities_file = None
         map_entities_candidates = [
             build_dir / "assets" / "data" / "satellite" / CONSTANTS.S_SATELLITE_ASSET_FILE_NAME,
@@ -427,3 +465,63 @@ class helper_controller:
                 return False
 
         return True
+
+    @staticmethod
+    def threat_lens_sort_latest_and_limit_response(response, limit: int = 100):
+        def coerce_date_timestamp(value):
+            if not value:
+                return 0
+
+            if isinstance(value, datetime):
+                parsed_date = value
+            elif isinstance(value, str):
+                raw_value = value.strip()
+                if not raw_value:
+                    return 0
+
+                try:
+                    if len(raw_value) == 10:
+                        parsed_date = datetime.strptime(raw_value, "%Y-%m-%d").replace(
+                            tzinfo=timezone.utc
+                        )
+                    else:
+                        parsed_date = datetime.fromisoformat(
+                            raw_value.replace("Z", "+00:00")
+                        )
+                except ValueError:
+                    return 0
+            else:
+                return 0
+
+            if parsed_date.tzinfo is None:
+                parsed_date = parsed_date.replace(tzinfo=timezone.utc)
+
+            return parsed_date.timestamp()
+
+        def latest_document_timestamp(document):
+            date_fields = ("m_date", "m_update_date", "m_creation_date")
+            return max(
+                coerce_date_timestamp(document.get(field))
+                for field in date_fields
+            )
+
+        ranked_results = response.get("Result") or []
+
+        ranked_results.sort(
+            key=lambda item: (
+                latest_document_timestamp(item),
+                float(item.get("_score") or 0),
+            ),
+            reverse=True,
+        )
+
+        limited_results = ranked_results[:limit]
+
+        for rank, item in enumerate(limited_results):
+            item["_rank"] = rank + 1
+
+        response["Result"] = limited_results
+        response["Total_Hits"] = len(limited_results)
+        response["Page_Count"] = 1 if limited_results else 0
+
+        return response

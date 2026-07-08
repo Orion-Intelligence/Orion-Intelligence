@@ -2,13 +2,14 @@ import { Component, input } from '@angular/core';
 import { NgClass, NgOptimizedImage } from '@angular/common';
 import { ProfileComponent } from '../../profile/profile.component';
 import { AppService } from '../../../../services/core/app/app.service';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+
 @Component({
   selector: 'app-header',
   imports: [
     ProfileComponent,
     NgOptimizedImage,
-    NgClass,
-  ],
+    NgClass, TranslatePipe],
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {

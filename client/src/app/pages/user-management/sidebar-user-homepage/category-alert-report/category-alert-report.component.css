@@ -1,5 +1,5 @@
 .category_report {
-    font-family: 'Inter', sans-serif;
+    font-family: Inter, sans-serif;
     color: #cfdeef;
     padding: 24px 28px 28px;
     border: 0;
@@ -38,7 +38,7 @@
     align-items: center;
     gap: 8px;
     padding: 6px 8px;
-    border: 1px solid #ffffff15;
+    border: 1px solid rgb(255 255 255 / 8.24%);
     border-radius: 8px;
     background: var(--color-blue-800);
     overflow: visible !important;
@@ -66,7 +66,7 @@
     width: 1px;
     height: 20px;
     margin: 0;
-    background: #ffffff20;
+    background: rgb(255 255 255 / 12.55%);
 }
 
 .category_report_flex-margin {
@@ -290,11 +290,12 @@
 
 @keyframes categoryReportDropdownIn {
     0% {
-        opacity: 0;
+        opacity: 0%;
         transform: translateY(-4px) scale(.98);
     }
+
     100% {
-        opacity: 1;
+        opacity: 100%;
         transform: translateY(0) scale(1);
     }
 }
@@ -326,14 +327,14 @@
 
 .category_report_alert-card .dropdown-divider {
     border-color: var(--color-border);
-    opacity: 1;
+    opacity: 100%;
     margin: 6px 12px;
 }
 
 
 
 .category_report_alert-label-critical {
-    background: rgba(255, 76, 76, 0.1);
+    background: rgb(255 76 76 / 10%);
     color: #ff4c4c;
     padding: 5px 10px;
     border-radius: 50px;
@@ -344,7 +345,7 @@
 }
 
 .category_report_alert-label-high {
-    background: rgba(255, 179, 71, 0.1);
+    background: rgb(255 179 71 / 10%);
     color: #ffb347;
     padding: 5px 10px;
     border-radius: 50px;
@@ -356,7 +357,7 @@
 
 
 .category_report_alert-label-medium {
-    background: rgba(255, 217, 102, 0.1);
+    background: rgb(255 217 102 / 10%);
     color: #ffd966;
     padding: 5px 10px;
     border-radius: 50px;
@@ -368,7 +369,7 @@
 
 
 .category_report_alert-label-low {
-    background: rgba(108, 207, 126, 0.1);
+    background: rgb(108 207 126 / 10%);
     color: #6ccf7e;
     padding: 5px 10px;
     border-radius: 50px;
@@ -411,7 +412,7 @@
     font-size: 12px;
     line-height: 1;
     color: #60a5fa;
-    opacity: .95;
+    opacity: 95%;
 }
 
 .category_report_status-critical i {
@@ -517,8 +518,8 @@
     width: 6px;
     height: 6px;
     margin-top: -1px;
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
+    border-right: 1.5px solid currentcolor;
+    border-bottom: 1.5px solid currentcolor;
     transform: rotate(45deg);
     transition: transform .16s ease;
 }
@@ -696,20 +697,20 @@
 
 :host-context(.light-theme) .category_report_searchbar-input {
     border-color: #cfd9e7;
-    background: #ffffff;
+    background: #fff;
     box-shadow: 0 3px 10px rgb(15 23 42 / 8%);
 }
 
 :host-context(.light-theme) .category_report_flex .report-menu-option-container {
     border-color: #c7d5e6;
-    background: #ffffff;
+    background: #fff;
     box-shadow: none;
 }
 
 :host-context(.light-theme) .category_report_flex .report-menu-divider {
     background: #8ea6c1 !important;
     color: #8ea6c1 !important;
-    opacity: 1 !important;
+    opacity: 100% !important;
     border-left: 1px solid #8ea6c1 !important;
 }
 
@@ -735,17 +736,17 @@
 
 :host-context(.light-theme) .category_report_flex .report-menu-option img {
     filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    opacity: .92;
+    opacity: 92%;
 }
 
 :host-context(.light-theme) .category_report_search-icon,
 :host-context(.light-theme) .category_report_tool-icon {
     filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    opacity: .92;
+    opacity: 92%;
 }
 
 :host-context(.light-theme) .category_report_summary-card {
-    background: #ffffff !important;
+    background: #fff !important;
     border: 1px solid #c5d4e4 !important;
     position: relative;
     z-index: 1;
@@ -760,22 +761,22 @@
 }
 
 :host-context(.light-theme) .category_report_summary-card:nth-child(1) {
-    background: linear-gradient(180deg, #e9f2ff 0%, #ffffff 100%) !important;
+    background: linear-gradient(180deg, #e9f2ff 0%, #fff 100%) !important;
     border-color: #bfd2ea;
 }
 
 :host-context(.light-theme) .category_report_summary-card:nth-child(2) {
-    background: linear-gradient(180deg, #fff4e7 0%, #ffffff 100%) !important;
+    background: linear-gradient(180deg, #fff4e7 0%, #fff 100%) !important;
     border-color: #f2d5ad;
 }
 
 :host-context(.light-theme) .category_report_summary-card:nth-child(3) {
-    background: linear-gradient(180deg, #f2faff 0%, #ffffff 100%) !important;
+    background: linear-gradient(180deg, #f2faff 0%, #fff 100%) !important;
     border-color: #c9dde9;
 }
 
 :host-context(.light-theme) .category_report_summary-card:nth-child(4) {
-    background: linear-gradient(180deg, #edf8ef 0%, #ffffff 100%) !important;
+    background: linear-gradient(180deg, #edf8ef 0%, #fff 100%) !important;
     border-color: #c6e1cc;
 }
 
@@ -794,11 +795,11 @@
     border-radius: 0;
     padding: 0;
     box-shadow: none;
-    opacity: .95;
+    opacity: 95%;
 }
 
 :host-context(.light-theme) .category_report_alert-card {
-    background: linear-gradient(180deg, #ffffff 0%, #f6faff 100%);
+    background: linear-gradient(180deg, #fff 0%, #f6faff 100%);
     border-color: #c6d5e5;
     box-shadow: 0 6px 16px rgb(15 23 42 / 8%);
 }
@@ -866,11 +867,11 @@
 
 :host-context(.light-theme) .category_report_burger-icon img {
     filter: brightness(0) saturate(100%) invert(28%) sepia(15%) saturate(1038%) hue-rotate(176deg) brightness(93%) contrast(90%);
-    opacity: .92;
+    opacity: 92%;
 }
 
 :host-context(.light-theme) .category_report_alert-card .dropdown-menu {
-    background: #ffffff;
+    background: #fff;
     border-color: #d7dee8;
     box-shadow: 0 10px 24px rgb(15 23 42 / 14%);
 }
@@ -887,7 +888,7 @@
     border-color: #d7dee8;
 }
 
-@media (max-width: 1000px) {
+@media (width <= 1000px) {
     .category_report {
         padding: 16px;
     }
@@ -918,7 +919,7 @@
 
 }
 
-@media (max-width: 640px) {
+@media (width <= 640px) {
     .category_report {
         padding: 12px;
         border-radius: 12px;
@@ -958,7 +959,7 @@
     }
 }
 
-@media (max-width: 420px) {
+@media (width <= 420px) {
     .category_report_alert-row > * {
         flex: 1 1 100%;
         max-width: 100%;

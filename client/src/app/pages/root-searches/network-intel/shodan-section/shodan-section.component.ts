@@ -5,11 +5,12 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-network-intel-shodan-section',
   standalone: true,
-  imports: [CommonModule, IpDetailComponent],
+  imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './shodan-section.component.html',
   animations: [fadeInDashboardItem],
 })

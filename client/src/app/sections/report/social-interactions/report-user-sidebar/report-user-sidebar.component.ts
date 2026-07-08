@@ -3,11 +3,12 @@ import { Component, inject, Input } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../../shared/services/api.service';
 import { PublicUserData } from '../models/public-user-data.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-report-user-sidebar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './report-user-sidebar.component.html',
 })
 export class ReportUserSidebarComponent {

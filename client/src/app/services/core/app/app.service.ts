@@ -15,19 +15,26 @@ import licenseRulesData from '../../../../assets/data/licenses/license_rules.jso
 import { firstValueFrom } from 'rxjs';
 import { DemoTourConfig } from '../../../shared/model/demo-tour/demo.tour.model';
 
+export interface EntityOption {
+  title: string;
+  key: string;
+  fields?: string[];
+  alert?: boolean;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AppService {
   private sessionLoad$: Observable<void> | null = null;
   private configLoad$: Observable<void> | null = null;
-  private entitiesCache: any[] | null = null;
+  private entitiesCache: EntityOption[] | null = null;
   private sessionLoadPromise: Promise<void> | null = null;
   private demoTourLoadPromise: Promise<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
-  public entities = signal<any[]>([]);
+  public entities = signal<EntityOption[]>([]);
   public worldJson = signal<any>(null);
   public demoTourConfig = signal<DemoTourConfig>({});
   public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
@@ -50,6 +57,7 @@ export class AppService {
         password_reset_required: false,
         password_reset_token: null,
         license: [],
+        permissions: [],
         demo_tour:false,
       },
       tenant: {
@@ -66,7 +74,11 @@ export class AppService {
         licenses: [],
         assignedQuota: '0',
         quotaExceeded: false,
-        eventManagementEnabled: false
+        eventManagementEnabled: false,
+        accountsMailPassword: '',
+        accountsMail: '',
+        accountsSmtpServer: '',
+        accountsSmtpPort: ''
       },
       alerts: [],
       alert_summary: {
@@ -191,8 +203,10 @@ export class AppService {
   }
 
   private initializeEntities(): void {
-    this.entities.set(entitiesData);
-    for (const e of entitiesData) {
+    const bundledEntities = entitiesData as EntityOption[];
+    const visibleEntities = bundledEntities.filter(e => e.alert !== false);
+    this.entities.set(visibleEntities);
+    for (const e of visibleEntities) {
       const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
       search_filter_labels[key] = e.title;
     }

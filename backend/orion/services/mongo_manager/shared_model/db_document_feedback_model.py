@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import UTC, datetime
 from enum import Enum
 from typing import List, Optional
@@ -14,6 +16,7 @@ class DocumentFeedbackComment(EmbeddedModel):
     user_id: str
     username: str = ""
     comment: str
+    is_deleted: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
 

@@ -4,6 +4,7 @@
 **/.DS_Store
 **/.ssl/
 **/package-lock.json
+!client/package-lock.json
 backend/static/.well-known/parser_files/*
 backend/backend_cov_app/*
 *.bak
@@ -62,6 +63,4 @@ backend/static/resource/**
 !backend/static/resource/**/
 !backend/static/resource/**/*default*
 
-nginx/nginx-prod.conf
-nginx/nginx.conf
 nginx/nginx.conf

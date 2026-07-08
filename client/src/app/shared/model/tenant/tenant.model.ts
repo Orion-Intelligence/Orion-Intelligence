@@ -27,6 +27,10 @@ export interface TenantModel {
     password_reset_required?: boolean;
     profile_visibility_enabled?: boolean;
     event_management_enabled?: boolean;
+    accounts_mail_password?: string;
+    accounts_mail?: string;
+    accounts_smtp_server?: string;
+    accounts_smtp_port?: string;
 }
 export interface User {
     username: string;
@@ -36,6 +40,7 @@ export interface User {
     subscription?: boolean;
     verificationDate: string;
     licenses?: string[] | null;
+    permissions?: string[] | null;
     password_reset_required?: boolean;
 }
 export interface TenantTeamModel {
@@ -46,5 +51,6 @@ export interface TenantTeamModel {
     status: 'active' | 'disable';
     subscription: boolean;
     licenses?: string[] | null;
+    permissions?: string[] | null;
     quotaExceeded?: boolean;
 }

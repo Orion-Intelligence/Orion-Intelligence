@@ -2,11 +2,12 @@ import { CommonModule, UpperCasePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, effect, input } from '@angular/core';
 
 import { AlertModel } from '../../../../shared/model/company-profile/node.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 type AlertStatusClass = 'alert-active' | 'alert-ignore' | 'alert-info';
 type AlertRiskClass = 'risk-critical' | 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-unknown';
 @Component({
   selector: 'app-alert-export-component',
-  imports: [CommonModule, UpperCasePipe, NgClass],
+  imports: [CommonModule, UpperCasePipe, NgClass, TranslatePipe],
   templateUrl: './alert-export-component.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

@@ -9,9 +9,18 @@ import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.ani
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { ExportChoiceOption } from '../../model/report/export-choice.model';
 import { AlertExportService } from '../../services/export/alert-export.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ScanNotificationService } from '../../services/scan-notification.service';
+import { ScanJob } from '../../model/scan-jobs/scan-job.model';
+import { ConfirmationPopupComponent } from '../confirmation-popup/confirmation-popup.component';
+import { Router } from '@angular/router';
+
+type NotificationMode = 'alerts' | 'scans';
+type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
+
 @Component({
   selector: 'app-alert-notification',
-  imports: [CommonModule, NgClass, ExportChoiceModalComponent],
+  imports: [CommonModule, NgClass, ExportChoiceModalComponent, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './alert-notification.component.html',
   animations: [sidebarAnimation, overlayAnimation],
 })
@@ -31,11 +40,16 @@ export class AlertNotificationComponent implements OnChanges {
   isFetchingDetail: boolean = false;
   alertToShowReport: AlertModel | null = null;
   isExportChoiceOpen: boolean = false;
+  isScanDeleteConfirmationOpen: boolean = false;
+  isScanDeleting: boolean = false;
+  scanDeleteTarget: ScanJob | null = null;
+  scanDeleteMode: ScanActionMode | null = null;
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
   readonly isNotificationOpen = input.required<boolean | null>();
+  readonly notificationMode = input<NotificationMode>('alerts');
   readonly closeNotification = output<undefined>();
 
-  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService) {
+  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, public scanNotificationService: ScanNotificationService, private router: Router) {
   }
 
   private decrementUnseenSummary(by: number = 1): void {
@@ -52,13 +66,30 @@ export class AlertNotificationComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isNotificationOpen']) {
       const value = changes['isNotificationOpen'].currentValue;
-      if (value === true && this.alertNotifications.length === 0) {
+      if (value === true && this.isAlertMode() && this.alertNotifications.length === 0) {
         this.fetchNotifications(true);
+      }
+      if (value === true && this.isScanMode()) {
+        this.scanNotificationService.openPanel();
+      }
+      if (value === false && this.isScanMode()) {
+        this.scanNotificationService.closePanel();
       }
     }
   }
 
+  isAlertMode(): boolean {
+    return this.notificationMode() === 'alerts';
+  }
+
+  isScanMode(): boolean {
+    return this.notificationMode() === 'scans';
+  }
+
   canLoadMore(): boolean {
+    if (this.isScanMode()) {
+      return this.scanNotificationService.hasMore();
+    }
     return this.hasMore || this.alertNotifications.length < this.totalCount;
   }
 
@@ -103,6 +134,10 @@ export class AlertNotificationComponent implements OnChanges {
     if (!this.canLoadMore()) {
       return;
     }
+    if (this.isScanMode()) {
+      this.scanNotificationService.loadMore();
+      return;
+    }
     this.isLoadMoreTriggered = true;
     this.fetchNotifications(false);
   }
@@ -139,11 +174,11 @@ export class AlertNotificationComponent implements OnChanges {
     requestAnimationFrame(appendNext);
   }
 
-  timeAgo(date: Date | string): string {
+  timeAgo(date: Date | string | null | undefined): string {
     if (!date) {
       return '';
     }
-    const d = new Date(date);
+    const d = new Date(date + 'Z');
     const now = new Date();
     const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
     if (seconds < 60) {
@@ -211,6 +246,10 @@ export class AlertNotificationComponent implements OnChanges {
     this.isExportChoiceOpen = false;
   }
 
+  exportSelectedNotification(type: string): void {
+    this.exportSelectedAlert(type);
+  }
+
   exportSelectedAlert(_type: string): void {
     if (!this.alertToShowReport) {
       this.closeExportChoice();
@@ -220,7 +259,176 @@ export class AlertNotificationComponent implements OnChanges {
     this.closeExportChoice();
   }
 
+  openScanReport(job: ScanJob): void {
+    if (!this.isScanCompleted(job)) {
+      return;
+    }
+    this.scanNotificationService.markSeen(job);
+    const reportUrl = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan-report', job.scan_id]));
+    const absoluteUrl = `${window.location.origin}${reportUrl}`;
+    const openedWindow = window.open(absoluteUrl, '_blank', 'noopener,noreferrer');
+    if (openedWindow) {
+      openedWindow.opener = null;
+    }
+  }
+
+  requestDeleteScan(job: ScanJob, event?: Event): void {
+    event?.stopPropagation();
+    if (this.isScanPending(job)) {
+      return;
+    }
+    this.scanDeleteTarget = job;
+    this.scanDeleteMode = 'single-delete';
+    this.isScanDeleteConfirmationOpen = true;
+  }
+
+  requestClearAllScans(): void {
+    if (!this.scanNotificationService.jobs().length) {
+      return;
+    }
+    this.scanDeleteTarget = null;
+    this.scanDeleteMode = 'mark-seen-completed';
+    this.isScanDeleteConfirmationOpen = true;
+  }
+
+  requestDeleteAllScans(): void {
+    if (!this.scanNotificationService.jobs().length) {
+      return;
+    }
+    this.scanDeleteTarget = null;
+    this.scanDeleteMode = 'delete-all';
+    this.isScanDeleteConfirmationOpen = true;
+  }
+
+  scanDeleteConfirmationMessage(): string {
+    if (this.scanDeleteMode === 'mark-seen-completed') {
+      return 'Are you sure you want to mark all notifications as seen?';
+    }
+    if (this.scanDeleteMode === 'delete-all') {
+      return 'Are you sure you want to delete all scan notifications?';
+    }
+    return 'Are you sure you want to delete this scan notification?';
+  }
+
+  handleScanDeleteConfirmation(confirmed: boolean): void {
+    if (!confirmed || !this.scanDeleteMode) {
+      this.closeScanDeleteConfirmation();
+      return;
+    }
+    if (this.scanDeleteMode === 'single-delete' && this.scanDeleteTarget) {
+      this.isScanDeleting = true;
+      this.scanNotificationService.deleteScan(this.scanDeleteTarget).subscribe({
+        next: () => {
+          this.messageNotificationService.show('Scan deleted successfully!', 'success');
+          this.closeScanDeleteConfirmation();
+        },
+        error: err => {
+          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scan');
+          this.closeScanDeleteConfirmation();
+        },
+      });
+      return;
+    }
+
+    this.isScanDeleting = true;
+    if (this.scanDeleteMode === 'mark-seen-completed') {
+      this.scanNotificationService.markCompletedScansSeen().subscribe({
+        next: () => {
+          this.messageNotificationService.show('Scans marked as seen!', 'success');
+          this.closeScanDeleteConfirmation();
+        },
+        error: err => {
+          this.messageNotificationService.show(err?.error?.detail || 'Failed to clear scans');
+          this.closeScanDeleteConfirmation();
+        },
+      });
+      return;
+    }
+
+    this.scanNotificationService.deleteAllScans().subscribe({
+      next: response => {
+        const deleted = Number(response?.deleted || 0);
+        if (deleted > 0) {
+          this.messageNotificationService.show('Scans deleted successfully!', 'success');
+        }
+        else {
+          this.messageNotificationService.show('No scans to delete');
+        }
+        this.closeScanDeleteConfirmation();
+      },
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scans');
+        this.closeScanDeleteConfirmation();
+      },
+    });
+  }
+
+  private closeScanDeleteConfirmation(): void {
+    this.isScanDeleteConfirmationOpen = false;
+    this.isScanDeleting = false;
+    this.scanDeleteTarget = null;
+    this.scanDeleteMode = null;
+  }
+
+  statusLabel(job: ScanJob): string {
+    const status = this.scanNotificationService.getStatus(job);
+    if (status === 'done') {
+      return 'Completed';
+    }
+    if (status === 'error') {
+      return 'Failed';
+    }
+    if (status === 'queued') {
+      return 'Queued';
+    }
+    if (status === 'running') {
+      return 'Running';
+    }
+    return status || 'Unknown';
+  }
+
+  isScanCompleted(job: ScanJob): boolean {
+    const status = this.scanNotificationService.getStatus(job);
+    return status === 'done';
+  }
+
+  isScanPending(job: ScanJob): boolean {
+    const status = this.scanNotificationService.getStatus(job);
+    return status === 'running' || status === 'queued';
+  }
+
+  isScanFailed(job: ScanJob): boolean {
+    return this.scanNotificationService.getStatus(job) === 'error';
+  }
+
+  getProgress(job: ScanJob): number {
+    return this.scanNotificationService.getProgress(job);
+  }
+
+  getScanStep(job: ScanJob): string {
+    return this.scanNotificationService.getStep(job);
+  }
+
+  getScanError(job: ScanJob): string {
+    return this.scanNotificationService.getError(job);
+  }
+
+  exportTitle(): string {
+    return 'Export Alert';
+  }
+
+  exportSubtitle(): string {
+    return 'Choose the export format.';
+  }
+
+  exportOptions(): ExportChoiceOption[] {
+    return this.alertExportOptions;
+  }
+
   close() {
+    if (this.isScanMode()) {
+      this.scanNotificationService.closePanel();
+    }
     // TODO: The 'emit' function requires a mandatory void argument
     this.closeNotification.emit(undefined);
   }

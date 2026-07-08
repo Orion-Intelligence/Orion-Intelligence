@@ -1,4 +1,4 @@
-from typing import Optional, List, Dict, Annotated
+from typing import Optional, List, Dict, Annotated, Union
 import json
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
@@ -14,13 +14,29 @@ class search_consolidated_param_model(BaseModel):
     network: str = "all"
     matchtype: Optional[str] = ""
     content: Optional[str] = "all"
+    m_content_type: Optional[str] = "all"
+    family: Optional[str] = "all"
+    m_country: Optional[str] = "all"
+    content_type: Optional[str] = "all"
+    m_reporter: Optional[str] = "all"
     attacker: Optional[str] = ""
     team: Optional[str] = ""
     platform: Optional[str] = ""
     url: Optional[str] = ""
     user: Optional[str] = ""
     ioc: Optional[str] = ""
-    platform_result_count: Optional[int] = 15
+    platform_result_count: int = Field(default=15, ge=1, le=100)
+    sort_latest: Optional[bool] = False
+    m_cve: Optional[Union[str, List[str]]] = ""
+    m_cwe: Optional[Union[str, List[str]]] = ""
+    m_product: Optional[Union[str, List[str]]] = ""
+    m_version: Optional[Union[str, List[str]]] = ""
+    m_platform: Optional[Union[str, List[str]]] = ""
+    m_cvss: Optional[Union[str, List[str]]] = ""
+    m_severity: Optional[Union[str, List[str]]] = ""
+    m_remote_type: Optional[Union[str, List[str]]] = ""
+    m_risk: Optional[Union[str, List[str]]] = ""
+    m_tags: Optional[Union[str, List[str]]] = ""
     daterange: Annotated[str, StringConstraints(pattern=r"^$|^\d{4}-\d{2}-\d{2},\d{4}-\d{2}-\d{2}$")] = ""
     entity_filter: Optional[Dict[str, List[str]]] = Field(
         default=None, examples=[{"m_country": ["pakistan"]}])

@@ -15,22 +15,22 @@
       <form class="space-y-4 p-5 max-[420px]:p-3" (submit)="$event.preventDefault(); onSubmit()">
         <div class="flex gap-2 max-[420px]:flex-col">
           <button data-testid="geocode-modal-mode-search" type="button" class="flex-1 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors" [ngClass]="activeInputMode === 'search' ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:text-[var(--color-text1)]']" (click)="activeInputMode = 'search'">
-            Search location
+            {{ 'Search location' | translate }}
           </button>
           <button data-testid="geocode-modal-mode-coordinates" type="button" class="flex-1 rounded-lg border px-3 py-1.5 text-[12px] font-semibold transition-colors" [ngClass]="activeInputMode === 'coordinates' ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:text-[var(--color-text1)]']" (click)="activeInputMode = 'coordinates'">
-            Coordinates
+            {{ 'Coordinates' | translate }}
           </button>
         </div>
 
         @if (!allowCoverage) {
           <div class="rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2 text-[11px] text-[var(--color-text3)]">
-            Narrow area only
+            {{ 'Narrow area only' | translate }}
           </div>
         }
 
         @if (activeInputMode === 'search') {
           <div>
-            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Location</label>
+            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">{{ 'Location' | translate }}</label>
             <div class="relative">
               <div class="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 [body.light-theme_&]:border-[#c7d5e6]" [ngClass]="searchError ? 'ring-1 ring-red-400/50' : ''">
                 @if (isSearching) {
@@ -38,7 +38,7 @@
                 } @else {
                   <i class="bi bi-search flex-shrink-0 text-[13px] text-[#0e1626]/50"></i>
                 }
-                <input data-testid="geocode-modal-location-search" type="text" [(ngModel)]="searchQuery" name="locationSearch" (ngModelChange)="onSearchInput()" placeholder="City, country, region..." class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
+                <input data-testid="geocode-modal-location-search" type="text" [(ngModel)]="searchQuery" name="locationSearch" (ngModelChange)="onSearchInput()" [placeholder]="'City, country, region...' | translate" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40" autocomplete="off"/>
               </div>
               @if (searchResults.length > 0) {
                 <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-20 max-h-60 overflow-y-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-xl [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_10px_28px_rgba(15,23,42,0.14)]">
@@ -51,7 +51,7 @@
                       <span class="font-mono text-[10px] text-[var(--color-text4)]">
                         {{ result.lat }}, {{ result.lon }}
                         @if (allowCoverage && resultCoverageLabel(result); as coverageLabel) {
-                          <span> · {{ coverageLabel }} coverage</span>
+                          <span> · {{ coverageLabel }} {{ 'coverage' | translate }}</span>
                         }
                       </span>
                     </button>
@@ -67,7 +67,7 @@
 
         @if (activeInputMode === 'coordinates') {
           <div>
-            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Coordinates</label>
+            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">{{ 'Coordinates' | translate }}</label>
             <input data-testid="geocode-modal-coordinates-input" type="text" [(ngModel)]="manualCoords" name="coords" (input)="onManualCoordsChange()" placeholder="31.48, 74.17" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/40 focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]" [ngClass]="coordsError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
             @if (coordsError) {
               <div class="mt-1 text-[11px] text-red-400">{{ coordsError }}</div>
@@ -78,7 +78,7 @@
         @if (allowCoverage) {
           <div>
             <label class="mb-1.5 flex items-center justify-between gap-3 text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">
-              <span>Coverage size</span>
+              <span>{{ 'Coverage size' | translate }}</span>
               <span class="font-mono text-sky-400">{{ coverageLabelValue }}</span>
             </label>
             <input data-testid="geocode-modal-coverage-input" type="number" [(ngModel)]="manualDelta" name="coverageDelta" (input)="onManualCoverageChange()" step="0.005" [attr.min]="minDelta" [attr.max]="effectiveMaxDelta" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]" [ngClass]="coverageError ? 'border-red-400/60 ring-1 ring-red-400/40' : ''"/>
@@ -90,14 +90,14 @@
 
         @if (showMaxIps) {
           <div>
-            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">Max IPs</label>
+            <label class="mb-1.5 block text-[11px] font-semibold uppercase tracking-wider text-[var(--color-text4)]">{{ 'Max IPs' | translate }}</label>
             <input data-testid="geocode-modal-max-ips-input" type="number" [(ngModel)]="manualMaxIps" name="maxIps" (input)="onManualMaxIpsChange()" step="1" min="1" [attr.max]="maxIpsLimit" class="w-full rounded-lg border border-[var(--color-border)] bg-white px-3 py-2 font-mono text-sm text-[#0e1626] outline-none focus:border-[var(--color-blue-640)] focus:ring-1 focus:ring-[var(--color-blue-640)] [body.light-theme_&]:border-[#c7d5e6]"/>
           </div>
         }
 
         <button data-testid="geocode-modal-apply" type="submit" [disabled]="isScanning || !canApplyLocation || !!coordsError || !!coverageError" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2.5 text-[13px] font-semibold text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)] transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40">
           <i class="bi bi-crosshair text-[14px]"></i>
-          Apply Location
+          {{ 'Apply Location' | translate }}
         </button>
       </form>
     </div>

@@ -30,13 +30,14 @@ import { ProxyController } from '../../services/proxy-controller';
 import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-card.component';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
-  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent, ChatWidgetComponent],
+  imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent, ChatWidgetComponent, TranslatePipe],
 })
 export class ResultComponent implements OnInit, OnChanges {
   private readonly proxied_resource = inject(ProxyController);
@@ -89,6 +90,7 @@ export class ResultComponent implements OnInit, OnChanges {
   readonly shrinkmenu = input(false);
   readonly disableScroll = input(false);
   readonly type = input<Category | undefined>(undefined);
+  readonly apiEndpoint = input('');
   readonly discussion = input(false);
   consolidated = false;
   readonly domain = input(false);
@@ -108,10 +110,37 @@ export class ResultComponent implements OnInit, OnChanges {
   get shouldShowCrossSearchOnEmptyState(): boolean {
     return !this.consolidated
       && !this.app_service.isMobileMode()
-      && this.type() !== Category.DUMP
-      && this.type() !== Category.DEFACEMENT
-      && !this.router.url.toLowerCase().includes('/defacement')
+      && !this.isCrossSearchExcludedRoute()
       && !!this.searchQuery.trim();
+  }
+
+  showResultCardShimmer(): boolean {
+    const currentType = String(this.type() || '').toLowerCase();
+    const currentEndpoint = String(this.apiEndpoint() || '').toLowerCase();
+    return currentEndpoint === 'search/defacement'
+      || currentEndpoint === 'search/apt-intel'
+      || currentEndpoint === 'search/exploit'
+      || currentType === Category.DEFACEMENT.toLowerCase()
+      || currentType === Category.APT_INTEL.toLowerCase()
+      || currentType === Category.EXPLOIT.toLowerCase();
+  }
+
+  showDefacementResultShimmer(): boolean {
+    return String(this.apiEndpoint() || '').toLowerCase() === 'search/defacement'
+      || String(this.type() || '').toLowerCase() === Category.DEFACEMENT.toLowerCase();
+  }
+
+  private isCrossSearchExcludedRoute(): boolean {
+    const currentType = String(this.type() || '').toLowerCase();
+    const currentEndpoint = String(this.apiEndpoint() || '').toLowerCase();
+    const currentRoute = this.router.url.toLowerCase();
+    return currentEndpoint === 'search/defacement'
+      || currentEndpoint === 'search/exploit'
+      || currentEndpoint === 'search/apt-intel'
+      || currentType === Category.DEFACEMENT.toLowerCase()
+      || currentType === Category.EXPLOIT.toLowerCase()
+      || currentType === Category.APT_INTEL.toLowerCase()
+      || currentRoute.includes('/defacement');
   }
 
   constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService, protected aiToolRoutingService: AiToolRoutingService ) {
@@ -151,9 +180,10 @@ export class ResultComponent implements OnInit, OnChanges {
       return;
     }
     const tab = tabElement.getAttribute('data-tab') || '';
-    if (!tab || tab === this.activeTab) {
+    if (!tab) {
       return;
     }
+    this.clearSearchInput(false);
     this.onToggleAnalytics(tab);
   }
 
@@ -192,7 +222,6 @@ export class ResultComponent implements OnInit, OnChanges {
     event?.preventDefault();
     this.scrollService.resetOnReload();
     this.dashboardService.consolidatedParamModel.page = 1;
-    this.dashboardService.consolidatedParamModel.tab = "";
     const query = (this.local_query || this.searchQuery || '').trim();
     this.searchInputRef?.nativeElement.blur();
     this.searchQuery = query;
@@ -304,6 +333,10 @@ export class ResultComponent implements OnInit, OnChanges {
     const inputElement = event.target as HTMLInputElement | null;
     if (inputElement) {
       this.local_query = inputElement.value;
+      if (!inputElement.value.trim()) {
+        this.updateQuery.emit('');
+        this.clearQueryParam();
+      }
     }
     this.homeSearchService.handleSearchInput(event);
   }
@@ -319,15 +352,30 @@ export class ResultComponent implements OnInit, OnChanges {
     }
   }
 
-  clearSearchInput(): void {
+  clearSearchInput(focusInput = true): void {
     this.searchQuery = '';
     this.local_query = '';
     const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
     if (inputElement) {
       inputElement.value = '';
-      inputElement.focus();
+      if (focusInput) {
+        inputElement.focus();
+      }
     }
     this.updateQuery.emit('');
+    this.clearQueryParam();
     this.init_domains();
+  }
+
+  private clearQueryParam(): void {
+    if (!this.route.snapshot.queryParamMap.has('q')) {
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { q: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 }

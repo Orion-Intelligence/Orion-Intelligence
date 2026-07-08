@@ -20,9 +20,12 @@ import { PasswordSchemaComponent } from './password-schema/password-schema.compo
 import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { ScanHelperMethods } from '../../../shared/partials/scan-helper-methods/scan-helper-methods.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { CREDENTIAL_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
-import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
+import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index-sidebar.component';
+
 @Component({
   selector: 'app-credential',
   standalone: true,
@@ -36,8 +39,9 @@ import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/r
     IocSearchComponent,
     PasswordSchemaComponent,
     ScanHelperMethods,
-    ExportChoiceModalComponent
-  ],
+    ExportChoiceModalComponent,
+    DomainIndexSidebarComponent,
+    TranslatePipe],
   templateUrl: './credential.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -45,13 +49,15 @@ export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private isSearchLoading = false;
   private isRankedLoading = false;
+  private readonly iocPaginationThreshold = 420;
+  private iocBatchResultCount = 0;
   private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
 
   protected readonly Math = Math;
   protected readonly filters = stealer_filters;
   protected readonly length = length;
 
-  readonly reportExportOptions = REPORT_EXPORT_OPTIONS;
+  readonly reportExportOptions = CREDENTIAL_REPORT_EXPORT_OPTIONS;
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
@@ -85,8 +91,15 @@ export class CredentialComponent implements OnInit {
     return (this.stealerlogCallbackModel?.Result?.length ?? 0) + (this.rankedResult?.result?.length ?? 0);
   }
 
+  get shouldShowPagination(): boolean {
+    return !this.firstTrigger && !this.isLoading && (
+      this.maxPages > 1 ||
+      this.iocBatchResultCount > this.iocPaginationThreshold
+    );
+  }
+
   ngOnInit(): void {
-    this.isStandaloneStealerlogsRoute = this.router.url.includes('/stealerlogs/');
+    this.isStandaloneStealerlogsRoute = this.router.url.includes('/stealerlogs');
     this.stealerlogCallbackModel = { ...this.dashboardService.stealerlogCallbackModel };
     this.dashboardService.consolidatedParamModel.fullsearch = false;
     combineLatest([this.route.queryParams, this.route.url])
@@ -149,6 +162,7 @@ export class CredentialComponent implements OnInit {
         const endTime = performance.now();
         this.breachesApiTime = Math.round(endTime - startTime);
         if (response?.success && response?.data && Array.isArray(response.data.Result)) {
+          this.iocBatchResultCount = response.data.Result.length;
           const seen = new Set<string>();
           response.data.Result = response.data.Result.filter(item => {
             if (!item?.raw) {
@@ -164,6 +178,7 @@ export class CredentialComponent implements OnInit {
           this.dashboardService.stealerlogCallbackModel = response.data;
         }
         else if (response?.success && response?.data) {
+          this.iocBatchResultCount = 0;
           response.data.Result = [];
           this.stealerlogCallbackModel = response.data;
           this.dashboardService.stealerlogCallbackModel = response.data;
@@ -174,7 +189,7 @@ export class CredentialComponent implements OnInit {
   onToggleSort(sort: SortType) {
     let key;
     let order: 'asc' | 'desc' = 'asc';
-    key = 'm_message_date';
+    key = 'm_date';
     if (sort === SortType.NEWEST_FIRST) {
       order = 'desc';
     }
@@ -294,25 +309,26 @@ export class CredentialComponent implements OnInit {
   private exportCombinedResultsPdf(): void {
     const stealerResults = this.stealerlogCallbackModel?.Result ?? [];
     const rankedResults = this.rankedResult?.result ?? [];
+    const exportSearchQuery = this.getExportSearchQuery();
     const tables: GraphReportTableRow[] = [];
 
     if (stealerResults.length) {
-      tables.push(this.buildPdfSection('Stealer Records', this.buildStealerExportRows()));
+      tables.push(this.buildStealerPdfBlocks(stealerResults));
     }
 
     if (rankedResults.length) {
-      tables.push(this.buildPdfSection('Ranked Records', this.buildRankedExportRows()));
+      tables.push(this.buildRankedPdfBlocks(rankedResults));
     }
 
     const payload: GraphReportPayload = {
       graphKind: 'cti',
       title: 'Credentials Export',
-      sessionName: this.searchQuery || 'Stealerlogs Search',
+      sessionName: exportSearchQuery || 'Stealerlogs Search',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
       edges: [],
       summary: {
-        search_query: this.searchQuery || '-',
+        search_query: exportSearchQuery || '-',
         total_records: stealerResults.length + rankedResults.length,
         stealer_records: stealerResults.length,
         ranked_records: rankedResults.length,
@@ -326,7 +342,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private buildCombinedExportRows(): Record<string, string>[] {
-    const searchQuery = this.searchQuery || '-';
+    const searchQuery = this.getExportSearchQuery();
     return [
       ...this.buildStealerExportRows(searchQuery),
       ...this.buildRankedExportRows(searchQuery)
@@ -365,24 +381,204 @@ export class CredentialComponent implements OnInit {
       title: this.toExportValue(item?.['m_title'], 160),
       url: this.toExportValue(item?.['m_url'], 160),
       rank: this.toExportValue(item?.['rank_index']),
-      date: this.toExportValue(item?.['m_leak_date'] || item?.['m_update_date']),
+      date: this.toExportValue(item?.['m_date'] || item?.['m_update_date']),
       team: this.toExportValue(item?.['m_team']),
       summary: this.toExportValue(item?.['m_important_content'] || item?.['m_content'], 240)
     }));
   }
 
-  private buildPdfSection(title: string, rows: Record<string, string>[]): GraphReportTableRow {
+  private buildStealerPdfBlocks(records: any[]): GraphReportTableRow {
+    const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
+      const identity = this.firstAvailableExportValue(item?.['email'], item?.['username'], item?.['user']);
+      const domain = this.firstAvailableExportValue(item?.['domain'], item?.['source_domain'], item?.['ip']);
+      const values: Record<string, string> = {};
+      this.addExportField(values, 'Email', item?.['email'], 180);
+      this.addExportField(values, 'Username', item?.['username'], 180);
+      this.addExportField(values, 'Password', item?.['password'], 220);
+      this.addExportField(values, 'Domain', item?.['domain'], 240);
+      this.addExportField(values, 'Source Domain', item?.['source_domain'], 240);
+      this.addExportField(values, 'IP Address', item?.['ip'], 180);
+      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['channel'], item?.['m_channel'], item?.['source_channel'], item?.['m_source_channel']), 240);
+      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['date'], item?.['timestamp'], item?.['m_date'], item?.['m_update_date']), 160);
+      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.['type'])), 140);
+      this.addExportField(values, 'Source File', this.firstAvailableExportValue(item?.['filename'], item?.['file'], item?.['m_file']), 220);
+      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
+      this.addExportField(values, 'Raw Trace', item?.['raw'], 900);
+      this.appendAdditionalExportFields(values, item, new Set([
+        '_id',
+        'email',
+        'username',
+        'user',
+        'password',
+        'domain',
+        'source_domain',
+        'ip',
+        'channel',
+        'm_channel',
+        'source_channel',
+        'm_source_channel',
+        'date',
+        'timestamp',
+        'm_date',
+        'm_update_date',
+        'file_type',
+        'fileType',
+        'type',
+        'filename',
+        'file',
+        'm_file',
+        'm_hash',
+        'hash',
+        'raw',
+        'index',
+        'm_index',
+        'mapping'
+      ]));
+      return {
+        title: this.buildRecordBlockTitle(index, identity, domain),
+        values
+      };
+    });
     return {
-      title,
-      values: Object.fromEntries(rows.map((row) => [
-        `Record ${row['recordIndex']}`,
-        Object.entries(row)
-          .filter(([key]) => key !== 'recordType' && key !== 'recordIndex' && key !== 'searchQuery')
-          .filter(([_, value]) => value && value !== '-')
-          .map(([key, value]) => `${this.toTitleCase(key)}: ${value}`)
-          .join(' | ')
-      ]))
+      title: `Stealer Records (${recordBlocks.length})`,
+      values: { records: String(recordBlocks.length) },
+      recordBlocks
     };
+  }
+
+  private buildRankedPdfBlocks(records: any[]): GraphReportTableRow {
+    const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
+      const title = this.firstAvailableExportValue(item?.['m_title'], item?.['m_important_content'], item?.['m_url']);
+      const primaryUrl = this.firstAvailableExportValue(item?.['m_url'], item?.['m_base_url'], item?.['m_domain'], item?.['m_weblink']);
+      const values: Record<string, string> = {};
+      this.addExportField(values, 'Title', item?.['m_title'], 260);
+      this.addExportField(values, 'URL', primaryUrl, 320);
+      this.addExportField(values, 'Domain', this.firstAvailableExportValue(item?.['m_domain'], item?.['m_root_domain']), 240);
+      this.addExportField(values, 'Email', item?.['m_email'], 180);
+      this.addExportField(values, 'Username', this.firstAvailableExportValue(item?.['m_username'], item?.['m_user']), 180);
+      this.addExportField(values, 'Password', item?.['m_password'], 220);
+      this.addExportField(values, 'IP Address', item?.['m_ip'], 180);
+      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['m_channel'], item?.['m_source_channel']), 240);
+      this.addExportField(values, 'Rank', this.firstAvailableExportValue(item?.['rank_index'], item?.['m_rank_index']), 160);
+      this.addExportField(values, 'Team', item?.['m_team'], 180);
+      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['m_date'], item?.['m_update_date'], item?.['m_year']), 160);
+      this.addExportField(values, 'Content Type', item?.['m_content_type'], 200);
+      this.addExportField(values, 'Source', this.firstAvailableExportValue(item?.['m_source'], item?.['m_file']), 220);
+      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
+      this.addExportField(values, 'Important Content', item?.['m_important_content'], 900);
+      this.addExportField(values, 'Content', item?.['m_content'], 900);
+      this.appendAdditionalExportFields(values, item, new Set([
+        '_id',
+        'm_title',
+        'm_url',
+        'm_base_url',
+        'm_weblink',
+        'm_domain',
+        'm_root_domain',
+        'm_email',
+        'm_username',
+        'm_user',
+        'm_password',
+        'm_ip',
+        'm_channel',
+        'm_source_channel',
+        'rank_index',
+        'm_rank_index',
+        'm_team',
+        'm_date',
+        'm_update_date',
+        'm_year',
+        'm_content_type',
+        'm_source',
+        'm_file',
+        'm_hash',
+        'hash',
+        'm_important_content',
+        'm_content',
+        'm_index'
+      ]));
+      return {
+        title: this.buildRecordBlockTitle(index, title, primaryUrl),
+        values
+      };
+    });
+    return {
+      title: `Ranked Records (${recordBlocks.length})`,
+      values: { records: String(recordBlocks.length) },
+      recordBlocks
+    };
+  }
+
+  private buildRecordBlockTitle(index: number, ...parts: string[]): string {
+    const detail = parts.filter(part => part && part !== '-').slice(0, 2).join(' | ');
+    return detail ? `Record ${index + 1} | ${detail}` : `Record ${index + 1}`;
+  }
+
+  private firstAvailableExportValue(...values: unknown[]): string {
+    for (const value of values) {
+      const text = this.toExportValue(value, 240);
+      if (text !== '-') {
+        return text;
+      }
+    }
+    return '-';
+  }
+
+  private addExportField(fields: Record<string, string>, label: string, value: unknown, maxLength = 240): void {
+    const text = this.toExportValue(value, maxLength);
+    if (!text || text === '-') {
+      return;
+    }
+    let key = label;
+    let suffix = 2;
+    while (fields[key]) {
+      key = `${label} ${suffix}`;
+      suffix += 1;
+    }
+    fields[key] = text;
+  }
+
+  private appendAdditionalExportFields(fields: Record<string, string>, record: Record<string, unknown>, excludedKeys: Set<string>): void {
+    Object.keys(record ?? {})
+      .filter(key => !excludedKeys.has(key))
+      .filter(key => !this.shouldSkipExportField(key, record[key]))
+      .filter(key => this.isSimpleExportValue(record[key]))
+      .sort((a, b) => this.toExportLabel(a).localeCompare(this.toExportLabel(b)))
+      .forEach(key => this.addExportField(fields, this.toExportLabel(key), record[key], 320));
+  }
+
+  private getExportSearchQuery(): string {
+    return (this.searchQuery || '-').replace(/^m_search_all:/i, '') || '-';
+  }
+
+  private normalizeFileType(value: string): string {
+    return value.toLowerCase() === 'c' ? 'combo' : value;
+  }
+
+  private shouldSkipExportField(key: string, value: unknown): boolean {
+    if (key === 'delimiter') {
+      return true;
+    }
+    return key === 'm_sub_host' && this.toExportValue(value) === '/';
+  }
+
+  private isSimpleExportValue(value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return true;
+    }
+    if (Array.isArray(value)) {
+      return value.every(item => item === null || item === undefined || ['string', 'number', 'boolean'].includes(typeof item));
+    }
+    return ['string', 'number', 'boolean'].includes(typeof value);
+  }
+
+  private toExportLabel(key: string): string {
+    const cleaned = String(key || '')
+      .replace(/^m[_\s-]+/i, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : 'Field';
   }
 
   private toExportValue(value: unknown, maxLength = 120): string {
@@ -402,10 +598,6 @@ export class CredentialComponent implements OnInit {
   private escapeCsvValue(value: string | number): string {
     const text = String(value ?? '');
     return `"${text.replace(/"/g, '""')}"`;
-  }
-
-  private toTitleCase(value: string): string {
-    return value.replace(/([A-Z])/g, ' $1').replace(/^./, match => match.toUpperCase()).trim();
   }
 
   openScheme() {
@@ -440,11 +632,10 @@ export class CredentialComponent implements OnInit {
   }
 
   get maxPages(): number {
+    const currentPage = Number(this.dashboardService.consolidatedParamModel.page || 1);
     if (this.isStandaloneStealerlogsRoute) {
-      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), 1);
+      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), this.iocBatchResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
     }
-    return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0),
-      Number(this.rankedResult.pageCount || 0),
-      1);
+    return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), Number(this.rankedResult.pageCount || 0), this.iocBatchResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
   }
 }

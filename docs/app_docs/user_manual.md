@@ -1956,15 +1956,6 @@ Editable platform settings can include:
 - documentation visibility
 - whistle-blowing visibility
 
-#### Service Status
-
-The page also shows read-only runtime flags such as:
-
-- API allowed
-- AI enabled
-
-Depending on deployment data, this area may also function as a quick verification point for platform version, enabled services, and branding visibility choices.
-
 ```{figure} ../screenshots/system-settings-20260326.png
 :alt: Administrative and system settings workspace
 :width: 100%

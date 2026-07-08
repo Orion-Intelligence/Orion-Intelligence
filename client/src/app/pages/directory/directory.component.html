@@ -4,13 +4,13 @@
   <div class="ui-page-container w-full max-w-[2400px]">
     <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div>
-        <h1 class="ui-page-title">Directory</h1>
-        <p class="ui-page-description">Live onion services and monitoring status.</p>
+        <h1 class="ui-page-title">{{ 'Directory' | translate }}</h1>
+        <p class="ui-page-description">{{ 'Live onion services and monitoring status.' | translate }}</p>
       </div>
 
       <button type="button" (click)="openSidebar()" class="ui-btn ui-btn-secondary gap-2">
         <img alt="Filter Icon" height="16" ngSrc="/assets/images/shared/theme/filter_icon.svg" width="16" class="ui-filter-icon">
-        Filter
+        {{ 'Filter' | translate }}
       </button>
 
       @if (isFilterOpen$ | async) {

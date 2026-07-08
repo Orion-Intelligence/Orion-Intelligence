@@ -1,6 +1,29 @@
 {
   "extends": "stylelint-config-standard",
+  "customSyntax": "postcss-scss",
+  "plugins": [
+    "stylelint-scss"
+  ],
+  "overrides": [
+    {
+      "files": ["src/styles.scss"],
+      "rules": {
+        "import-notation": null,
+        "no-invalid-position-at-import-rule": null,
+        "number-max-precision": null
+      }
+    }
+  ],
   "rules": {
+    "alpha-value-notation": "percentage",
+    "color-function-alias-notation": "without-alpha",
+    "color-function-notation": "modern",
+    "color-hex-length": "short",
+    "media-feature-range-notation": "context",
+    "rule-empty-line-before": ["always", {
+      "except": ["first-nested"],
+      "ignore": ["after-comment"]
+    }],
     "selector-id-pattern": null,
     "selector-class-pattern": null,
     "no-descending-specificity": null,
@@ -10,6 +33,10 @@
     "keyframes-name-pattern": null,
     "declaration-property-value-no-unknown": null,
     "selector-pseudo-class-no-unknown": null,
-    "at-rule-descriptor-no-unknown": null
+    "at-rule-descriptor-no-unknown": null,
+    "at-rule-no-unknown": null,
+    "scss/at-rule-no-unknown": [true, {
+      "ignoreAtRules": ["tailwind", "use"]
+    }]
   }
 }

@@ -4,10 +4,11 @@ import { HeaderComponent } from "../../shared/partials/header/login-header/heade
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../../services/core/app/app.service';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-welcome',
-  imports: [HeaderComponent],
+  imports: [HeaderComponent, TranslatePipe],
   templateUrl: './welcome.component.html',
 })
 export class WelcomeComponent implements OnInit {

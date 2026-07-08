@@ -10,7 +10,6 @@ import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { NotificationGuard } from './shared/guards/notification.guard';
-import { ThreatLensComponent } from './pages/geo-fencing/threat-lens/threat-lens';
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
@@ -21,7 +20,6 @@ const loadDashboardResultContainer = () => import('./pages/intel-panel/dashboard
 const loadReportComponent = () => import('./sections/report/templates/report_general/report.component').then(m => m.ReportComponent);
 const loadReportDefacementComponent = () => import('./sections/report/templates/report-defacement/report-defacement.component').then(m => m.ReportDefacementComponent);
 const loadReportChatComponent = () => import('./sections/report/templates/report-chat/report-chat.component').then(m => m.ReportChatComponent);
-const loadDumpComponent = () => import('./pages/dump/dump.component').then(m => m.DumpComponent);
 const loadCredentialComponent = () => import('./pages/root-searches/credentials/credential.component').then(m => m.CredentialComponent);
 const loadErrorHandlerComponent = () => import('./shared/partials/error-handler/error-handler.component').then(m => m.ErrorHandlerComponent);
 const loadDashboardConsolidatedComponent = () => import('./pages/root-searches/dashboard-consolidated/dashboard-consolidated.component').then(m => m.DashboardConsolidatedComponent);
@@ -34,6 +32,7 @@ const loadResetPasswordComponent = () => import('./shared/partials/forgot-passwo
 const loadSidebarUserStatisticsComponent = () => import('./pages/user-management/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
 const loadSidebarUserIocComponent = () => import('./pages/user-management/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
 const loadSidebarUserEventManagementComponent = () => import('./pages/user-management/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
+const loadSidebarUserLogManagerComponent = () => import('./pages/user-management/sidebar-user-log-manager/sidebar-user-log-manager.component').then(m => m.SidebarUserLogManagerComponent);
 const loadAuditlogComponent = () => import('./pages/user-management/auditlog/auditlog.component').then(m => m.AuditlogComponent);
 const loadNotificationComponent = () => import('./shared/partials/notification/notification.component').then(m => m.NotificationComponent);
 const loadTrailNotificationComponent = () => import('./shared/partials/trail-notification/trail-notification.component').then(m => m.TrailNotificationComponent);
@@ -54,7 +53,9 @@ const loadSidebarUserCaseManagement = () => import('./pages/user-management/side
 const loadUserProfileActivityComponent = () => import('./pages/profile/user-profile-activity/user-profile-activity.component').then(m => m.UserProfileActivityComponent);
 const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-details/case-details').then(m => m.CaseDetails);
 const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
-const loadSatelliteIntelComponent =()=>import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m=>m.SatelliteIntel);
+const loadSatelliteIntelComponent = () => import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m => m.SatelliteIntel);
+const loadCaseTrackingBoardComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-tracking-board/case-tracking-board').then(m => m.CaseTrackingBoard);
+const loadScanReportComponent = () => import('./pages/scan-report/scan-report.component').then(m => m.ScanReportComponent);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
   data: { type: 'consolidated', animation: 'HashPage' }
@@ -92,6 +93,16 @@ const consolidatedChildren: Route[] = [
   },
   {
     path: 'exploit/:m_hash',
+    loadComponent: loadReportComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'apt/:m_hash',
+    loadComponent: loadReportComponent,
+    ...HASH_CONSOLIDATED_ROUTE
+  },
+  {
+    path: 'malware/:m_hash',
     loadComponent: loadReportComponent,
     ...HASH_CONSOLIDATED_ROUTE
   },
@@ -188,6 +199,11 @@ export const routes: Routes = [
         path: 'scan',
         loadComponent: loadSecurityScanComponent,
         data: { animation: 'HomePage' }
+      },
+      {
+        path: 'scan-report/:scanId',
+        loadComponent: loadScanReportComponent,
+        data: { animation: 'ScanReportPage' }
       },
       {
         path: 'home',
@@ -296,7 +312,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'all',
+            redirectTo: 'databases',
             pathMatch: 'full'
           },
           {
@@ -603,6 +619,49 @@ export const routes: Routes = [
         ]
       },
       {
+        path: 'apt-intel',
+        data: { animation: 'AptIntelPage' },
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'APT Intel', animation: 'DataBreach' }
+          },
+          {
+            path: 'apt',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'APT Intel', animation: 'DataBreach' }
+          },
+          {
+            path: 'malware',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'APT Intel', animation: 'DataBreach' }
+          },
+          {
+            path: 'compromised-actors',
+            loadComponent: loadDashboardResultContainer,
+            data: { type: 'Threat Intelligence', animation: 'DataBreach' }
+          },
+          {
+            path: 'compromised-actors/:m_hash',
+            loadComponent: loadReportDefacementComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'Threat Intelligence', animation: 'HashPage' }
+          },
+          {
+            path: ':category/:m_hash',
+            loadComponent: loadReportComponent,
+            resolve: { reportdata: ReportResolver },
+            data: { type: 'APT Intel', animation: 'HashPage' }
+          }
+        ]
+      },
+      {
         canActivate: [subscriptionGuard],
         path: 'consolidated',
         data: { animation: 'ConsolidatedPage' },
@@ -624,16 +683,6 @@ export const routes: Routes = [
             data: { animation: 'CategoryPage' }
           },
           {
-            path: 'repository-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'repo', animation: 'CategoryPage' }
-          },
-          {
-            path: 'seo-scan',
-            loadComponent: loadSecurityScanComponent,
-            data: { type: 'seo', animation: 'CategoryPage' }
-          },
-          {
             path: 'apk-scan',
             loadComponent: loadFileScannerComponent,
             data: {
@@ -646,41 +695,19 @@ export const routes: Routes = [
         ]
       },
       {
-        canActivate: [subscriptionGuard],
-        path: 'dump',
-        data: { animation: 'DumpPage' },
-        children: [
-          {
-            path: '',
-            redirectTo: 'listing',
-            pathMatch: 'full'
-          },
-          {
-            path: 'listing',
-            loadComponent: loadDumpComponent,
-            data: { type: 'listing', animation: 'CategoryPage' }
-          },
-          {
-            path: 'credential',
-            loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
-          }
-        ]
-      },
-      {
         path: 'stealerlogs',
         canActivate: [subscriptionGuard],
         data: { animation: 'StealerlogsPage' },
         children: [
           {
             path: '',
-            redirectTo: 'iocs',
-            pathMatch: 'full'
+            loadComponent: loadCredentialComponent,
+            data: { type: 'credential', animation: 'CategoryPage' }
           },
           {
             path: 'iocs',
-            loadComponent: loadCredentialComponent,
-            data: { type: 'credential', animation: 'CategoryPage' }
+            redirectTo: '',
+            pathMatch: 'full'
           }
         ]
       },
@@ -725,8 +752,8 @@ export const routes: Routes = [
       {
         path: 'threat-lens',
         canActivate: [subscriptionGuard],
-        component: ThreatLensComponent,
-        data: { animation: 'CategoryPage' }
+        loadComponent: loadSatelliteIntelComponent,
+        data: { animation: 'CategoryPage', view: 'threat' }
       },
       {
         path: 'profile',
@@ -802,6 +829,11 @@ export const routes: Routes = [
             data: { type: 'event-management', animation: 'CategoryPage' }
           },
           {
+            path: 'log-manager',
+            loadComponent: loadSidebarUserLogManagerComponent,
+            data: { type: 'log-manager', animation: 'CategoryPage' }
+          },
+          {
             path: 'feeder',
             loadComponent: loadSidebarUserFeederComponent,
             data: { type: 'feeder', animation: 'CategoryPage' }
@@ -838,6 +870,11 @@ export const routes: Routes = [
                 path: 'case-details',
                 loadComponent: loadCaseDetailsComponent,
                 data: { type: 'case-details', animation: 'CaseDetailsPage' }
+              },
+              {
+                path: 'tracking-board',
+                loadComponent: loadCaseTrackingBoardComponent,
+                data: { type: 'case-tracking-board', animation: 'CaseTrackingBoardPage' }
               }
             ]
           },

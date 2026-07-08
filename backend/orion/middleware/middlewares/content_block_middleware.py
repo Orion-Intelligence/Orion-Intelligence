@@ -2,9 +2,11 @@ from fastapi import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response, RedirectResponse
 
+from configs.auth_cookie import token_from_request
+from orion.api.server.config_manager.config_controller import config_controller
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys
 from orion.services.session_manager.session_manager import session_manager
-
-ACCESS_COOKIE = "access_token"
 
 
 class content_block_middleware(BaseHTTPMiddleware):
@@ -14,22 +16,39 @@ class content_block_middleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
+        if path == "/admin" or path.startswith("/admin/") or path == "/dashboard/admin" or path.startswith("/dashboard/admin/"):
+            admin_root_allowed = await config_controller.getInstance().get_cached(AllowedKeys.ADMIN_ROOT_ALLOWED.value, "0")
+            if str(admin_root_allowed).lower() not in ("1", "true"):
+                return RedirectResponse(url="/", status_code=302)
+
         if path.startswith("/api/"):
+            return await call_next(request)
+
+        if path == "/admin" or path.startswith("/admin/"):
+            token = token_from_request(request)
+            if token:
+                try:
+                    session_mgr = session_manager.get_instance()
+                    user = await session_mgr.get_current_user(token)
+                    if user and user.role == user_role.ADMIN.value:
+                        return await call_next(request)
+                except Exception:
+                    return RedirectResponse(url="/login", status_code=302)
+            return RedirectResponse(url="/login", status_code=302)
+
+        if path == "/dashboard/admin" or path.startswith("/dashboard/admin/"):
             return await call_next(request)
 
         if not (path == "/dashboard" or path.startswith("/dashboard/")):
             return await call_next(request)
 
-        auth_header = request.headers.get("Authorization", "")
-        parts = auth_header.split(" ", 1)
-        bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None
-        token = bearer or request.cookies.get(ACCESS_COOKIE)
+        token = token_from_request(request)
 
         user = None
         if token:
             try:
                 user = await session_manager.get_instance().get_current_user(token)
-            except:
+            except Exception:
                 user = None
 
         if not user:

@@ -1,3 +1,4 @@
+---
 exclude_paths:
   - "client/build/**"
   - "client/coverage/**"
@@ -7,9 +8,9 @@ exclude_paths:
   - "client/src/assets/**"
   - "client/*.config.*"
   - "client/cypress/**"
+  - "README.md"
+  - "run.sh"
   - "**/*.html"
-  - "**/*.css"
-  - "**/*.scss"
   - "**/*.md"
   - "**/*.sh"
   - "**/*.yml"
@@ -33,6 +34,12 @@ exclude_paths:
   - "backend/orion/services/elastic_manager/elastic_request_generator.py"
 
 engines:
+  metric:
+    config:
+      languages:
+        - "python"
+        - "typescript"
+        - "javascript"
   duplication:
     exclude_paths:
       - "client/build/**"
@@ -43,9 +50,9 @@ engines:
       - "client/src/assets/**"
       - "client/*.config.*"
       - "client/cypress/**"
+      - "README.md"
+      - "run.sh"
       - "**/*.html"
-      - "**/*.css"
-      - "**/*.scss"
       - "**/__init__.py"
       - "**/eslint.config.js"
       - "docs/**"

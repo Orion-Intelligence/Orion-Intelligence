@@ -1,5 +1,5 @@
 import { AfterViewInit, ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { AsyncPipe, NgClass } from '@angular/common';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { dashboardGlobalAnimation } from '../../shared/animations/dashboard.global.animations';
 import { DashboardSidebarComponent } from './dashboard-sidebar/dashboard-sidebar.component';
@@ -9,19 +9,27 @@ import { ProSubscriptionComponent } from '../../shared/partials/pro-subscription
 import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { AppService } from '../../services/core/app/app.service';
 import { AuthService } from '../../services/authetication/auth.service';
-import { filter } from 'rxjs';
+import { filter, Observable } from 'rxjs';
 import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { SidebarService } from '../../shared/services/sidebar.service';
+import { ScanNotificationService } from '../../shared/services/scan-notification.service';
+import { GenericChoicePopupAction, GenericChoicePopupComponent } from '../../shared/partials/generic-choice-popup/generic-choice-popup.component';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     DashboardSidebarComponent,
     DashboardHeaderComponent,
+    AsyncPipe,
     NgClass,
     RouterOutlet,
     ScrollingModule,
     ProSubscriptionComponent,
-    DemoTourComponent
+    DemoTourComponent,
+    TranslatePipe,
+    GenericChoicePopupComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
@@ -30,8 +38,10 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   isMenuOpen = true;
   demoTourMounted = false;
   dashboardAnimationsReady = false;
+  isFilterOpen$: Observable<boolean>;
 
-  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService: AuthService, protected appService: AppService) {
+  constructor(protected dashboardService: DashboardService, private cdr: ChangeDetectorRef, public router: Router, public authService: AuthService, protected appService: AppService, sidebarService: SidebarService, public scanNotificationService: ScanNotificationService) {
+    this.isFilterOpen$ = sidebarService.sidebarState$;
   }
 
   ngOnInit(): void {
@@ -98,5 +108,17 @@ export class DashboardComponent implements AfterViewInit, OnInit {
       !!user.username &&
       !user.demo_tour &&
       !(user.role == 'admin');
+  }
+
+  handleDuplicateScanChoice(action: GenericChoicePopupAction): void {
+    if (action === 'primary') {
+      this.scanNotificationService.resolveDuplicateScanChoice('previous');
+      return;
+    }
+    if (action === 'secondary') {
+      this.scanNotificationService.resolveDuplicateScanChoice('new');
+      return;
+    }
+    this.scanNotificationService.resolveDuplicateScanChoice('cancel');
   }
 }

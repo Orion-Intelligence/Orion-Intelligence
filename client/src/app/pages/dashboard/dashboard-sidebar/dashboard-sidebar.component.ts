@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, ExploitSubCategory, GeneralSubCategory, FeedSubCategory, SocialSubCategory, StealerlogsSubCategory, ScannerSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -15,10 +15,12 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent],
+  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
@@ -33,14 +35,11 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   mobile_menu_status = false;
   apiCategories = Object.values(ApiSubCategory);
   exploitCategories = Object.values(ExploitSubCategory);
-  dumpCategories = Object.values(DumpSubCategory);
+  aptIntelCategories: string[] = [];
   newsCategories = Object.values(FeedSubCategory);
-  generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
-  stealerlogsCategories = Object.values(StealerlogsSubCategory);
-  scannerCategories = Object.values(ScannerSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   category = Category;
   readonly menuToggle = output<undefined>();
@@ -69,9 +68,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   private handleProfileRoute(url: string) {
     if (url.startsWith('/dashboard/profile/consolidated/') ||
-          url.startsWith('/dashboard/profile/homepage') ||
-          url.startsWith('/dashboard/profile/alerts/general') ||
-          url.startsWith('/dashboard/profile/alerts')) {
+      url.startsWith('/dashboard/profile/homepage') ||
+      url.startsWith('/dashboard/profile/alerts/general') ||
+      url.startsWith('/dashboard/profile/alerts')) {
       this.selectionStore.setSelectedSection('Profile');
       this.selectionStore.setSelectedOption('Homepage');
     }
@@ -108,7 +107,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       let firstSubcategory: string | undefined;
       switch (section) {
         case Category.STRATEGIC:
-          firstSubcategory = this.generalCategories[0];
+          firstSubcategory = 'All';
           break;
         case Category.BREACH:
           firstSubcategory = this.leakCategories[0];
@@ -119,20 +118,17 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.DEFACEMENT:
           firstSubcategory = this.defacementCategories[0];
           break;
-        case Category.DUMP:
-          firstSubcategory = this.dumpCategories[0];
+        case Category.SOCIAL:
+          firstSubcategory = this.socialCategories[0];
+          break;
+        case Category.APT_INTEL:
+          firstSubcategory = this.aptIntelCategories[0];
           break;
         case Category.FEED:
           firstSubcategory = this.newsCategories[0];
           break;
         case Category.TENANT:
           firstSubcategory = this.tenantCategories[0];
-          break;
-        case Category.SCANNER:
-          firstSubcategory = this.scannerCategories[0];
-          break;
-        case Category.STEALERLOGS:
-          firstSubcategory = this.stealerlogsCategories[0];
           break;
         case Category.PROFILE:
           firstSubcategory = this.getProfileCategories()[0];
@@ -197,37 +193,54 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     const categories = Object.values(ProfileSubCategory);
     const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
     const canAccessFeeder = this.licenseService.canUseModule('feeder');
+    const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || (this.isAnalyst() && (this.appService.userSessionData().user.permissions || []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
-              c !== ProfileSubCategory.STATISTICS &&
-              c !== ProfileSubCategory.TENANT_SETTINGS &&
-              (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
-              (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
-              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-              (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+        c !== ProfileSubCategory.STATISTICS &&
+        c !== ProfileSubCategory.TENANT_SETTINGS &&
+        (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+        (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
+        (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
+        (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
-              c !== ProfileSubCategory.SYSTEM_SETTINGS &&
-              (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
-              (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
-              (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-              (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+        c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.LOG_MANAGER &&
+        (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+        (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
+        (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
+        (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+    }
+    if (this.isAnalyst()) {
+      return categories.filter(c => c !== ProfileSubCategory.TENANT &&
+        c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+        c !== ProfileSubCategory.LOG_MANAGER &&
+        c !== ProfileSubCategory.USERS &&
+        c !== ProfileSubCategory.AUDITLOG &&
+        c !== ProfileSubCategory.IOC &&
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
+        c !== ProfileSubCategory.STATISTICS &&
+        c !== ProfileSubCategory.TENANT_SETTINGS);
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
-          c !== ProfileSubCategory.SYSTEM_SETTINGS &&
-          c !== ProfileSubCategory.EVENT_MANAGEMENT &&
-          (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
-          (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
-          (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-          c !== ProfileSubCategory.USERS &&
-          c !== ProfileSubCategory.AUDITLOG &&
-          c !== ProfileSubCategory.IOC &&
-          c !== ProfileSubCategory.CASE_MANAGEMENT &&
-          c !== ProfileSubCategory.STATISTICS &&
-          c !== ProfileSubCategory.TENANT_SETTINGS);
+      c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+      c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+      c !== ProfileSubCategory.LOG_MANAGER &&
+      (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
+      (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
+      (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+      c !== ProfileSubCategory.USERS &&
+      c !== ProfileSubCategory.AUDITLOG &&
+      c !== ProfileSubCategory.IOC &&
+      (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
+      c !== ProfileSubCategory.STATISTICS &&
+      c !== ProfileSubCategory.TENANT_SETTINGS);
   }
 
   isAdmin(): boolean {
@@ -240,5 +253,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   isMember(): boolean {
     return this.licenseService.isMember();
+  }
+
+  isAnalyst(): boolean {
+    return this.licenseService.isAnalyst();
   }
 }

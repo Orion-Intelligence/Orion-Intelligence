@@ -212,7 +212,10 @@ class geo_fencing_manager:
             )
 
             if not m_status:
-                break
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to stream map entities"
+                )
 
             body = docs.body if hasattr(docs, "body") else docs
 

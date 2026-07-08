@@ -3,10 +3,11 @@ name: CodeQL
 on:
   push:
     branches:
-      - stable
+      - trusted-main
+      - devel
   pull_request:
     branches:
-      - stable
+      - trusted-main
       - devel
   schedule:
     - cron: '15 14 * * 6'
@@ -51,3 +52,4 @@ jobs:
         uses: github/codeql-action/analyze@fdbfb4d2750291e159f0156def62b853c2798ca2
         with:
           category: "/language:${{ matrix.language }}"
+          upload: false

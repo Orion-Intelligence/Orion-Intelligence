@@ -17,11 +17,12 @@ import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { IocSearchComponent } from '../../../shared/partials/ioc-search/ioc-search.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-event-management',
   standalone: true,
-  imports: [CommonModule, PaginationComponent, FiltersComponent, EmptyQueryComponent, EmptyResultComponent, LoadingFormComponent, IocSearchComponent],
+  imports: [CommonModule, PaginationComponent, FiltersComponent, EmptyQueryComponent, EmptyResultComponent, LoadingFormComponent, IocSearchComponent, TranslatePipe],
   templateUrl: './sidebar-user-event-management.component.html',
   animations: [fadeInDashboardItem],
   styleUrls: ['./sidebar-user-event-management.component.css'],

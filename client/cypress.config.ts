@@ -32,7 +32,7 @@ export default defineConfig({
             testing4: { username: "testing4", email: "d@gmail.com", password: "1qaz!QAZ", role: "Member", licenses: ["Free", "Pentester"] },
             testing5: { username: 'testing5', email: 'e@hotmail.com', password: '1qaz!QAZ', role: 'Demo', licenses: ['Free']},
             testing6: { username: "testing6", email: "feeder1@samplemail.test", password: "1qaz!QAZ", role: "Member", licenses: ["Feeder"] },
-            testing7: { username: "testing7", email: "feeder2@samplemail.test", password: "1qaz!QAZ", role: "Analyst", licenses: ["Feeder"] },
+            testing7: { username: "testing7", email: "feeder2@samplemail.test", password: "1qaz!QAZ", role: "Analyst", licenses: ["Feeder"], permissions: ["case_management"] },
         },
         DEFAULT_TEST_USER_KEY: "testing5",
         RESET_PASSWORD_EMAIL: "d@hotmail.com",
@@ -105,7 +105,7 @@ export default defineConfig({
             on("before:browser:launch", (browser, launchOptions) => {
                 if (browser.family === "chromium") {
                     launchOptions.args.push("--start-maximized");
-                    launchOptions.args.push("--window-size=1920,1080");
+                    launchOptions.args.push("--window-size=1920,1440");
                     launchOptions.args.push("--force-device-scale-factor=1");
                 }
                 return launchOptions;
@@ -122,7 +122,7 @@ export default defineConfig({
         },
         baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1920,
-        viewportHeight: 1080,
+        viewportHeight: 1440,
         defaultCommandTimeout: 60000,
         requestTimeout: 60000,
         responseTimeout: 60000,

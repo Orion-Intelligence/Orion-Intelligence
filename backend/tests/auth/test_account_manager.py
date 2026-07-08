@@ -216,7 +216,14 @@ def test_delete_user_rejects_maintainer_from_other_tenant(tmp_path):
 
 def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, monkeypatch):
     user = _make_user(status=UserStatus.DISABLE, tenant_uuid="507f1f77bcf86cd799439012")
-    tenant = _make_tenant(id="507f1f77bcf86cd799439012", user_quota=3, is_default=False)
+    tenant_key = Fernet.generate_key()
+    enc = Fernet(tenant_key)
+    tenant = _make_tenant(
+        id="507f1f77bcf86cd799439012",
+        user_quota=3,
+        is_default=False,
+        licenses=[enc.encrypt(LicenseName.OSINT_BASIC.value.encode()).decode()],
+    )
     engine = FakeMongoEngine(find_one_results=[user, tenant])
     engine.count_result = 1
     manager = _make_manager(tmp_path, engine)
@@ -227,6 +234,10 @@ def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, mo
     monkeypatch.setattr(
         "orion.api.interactive.auditlog_manager.audit_log_manager.AuditLogManager.get_instance",
         staticmethod(lambda: audit),
+    )
+    monkeypatch.setattr(
+        "orion.services.encryption_manager.key_manager.KeyManager.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_profile_dek=lambda _tenant_id: asyncio.sleep(0, result=tenant_key))),
     )
 
     result = _run(manager.update_user(request, current_user))

@@ -4,9 +4,11 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { NgClass } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-alert-scan-loading',
-  imports: [NgClass],
+  imports: [NgClass, TranslatePipe],
   templateUrl: './alert-scan-loading.component.html',
   animations: [
     trigger('scanOverlayAnimation', [

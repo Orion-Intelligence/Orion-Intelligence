@@ -8,10 +8,11 @@ import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { AppService } from '../../../services/core/app/app.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ConfirmationPopupComponent } from "../../../shared/partials/confirmation-popup/confirmation-popup.component";
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-sidebar-user-ioc',
-  imports: [NgClass, CommonModule, FormsModule, TooltipDirective, ConfirmationPopupComponent],
+  imports: [NgClass, CommonModule, FormsModule, TooltipDirective, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {

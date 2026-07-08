@@ -4,7 +4,7 @@ export class ChatResultItem {
   m_platform?: string;
   m_caption?: string;
   m_summary!: string[];
-  m_message_date?: string;
+  m_date?: string;
   m_message_id?: string;
   m_channel_url?: string;
   m_message_sharable_link?: string;

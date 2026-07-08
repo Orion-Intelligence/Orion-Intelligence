@@ -1,5 +1,7 @@
+import { NgClass } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../../../enums/geo-fencing.enums';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 const PANEL_TABS: Array<{ id: SatelliteIntelPanel; label: string }> = [
   { id: SatelliteIntelPanelEnum.Dashboard, label: 'Dashboard' },
@@ -8,6 +10,7 @@ const PANEL_TABS: Array<{ id: SatelliteIntelPanel; label: string }> = [
 
 @Component({
   selector: 'app-satellite-panel-shell',
+  imports: [NgClass, TranslatePipe],
   standalone: true,
   templateUrl: './panel-shell.component.html',
 })
@@ -21,6 +24,7 @@ export class PanelShellComponent {
   @Input() activePanel: SatelliteIntelPanel = SatelliteIntelPanelEnum.Dashboard;
 
   @Output() threatFiltersOpened = new EventEmitter<void>();
+  @Output() selectionsCleared = new EventEmitter<void>();
   @Output() panelOpened = new EventEmitter<SatelliteIntelPanel>();
   @Output() panelClosed = new EventEmitter<void>();
 

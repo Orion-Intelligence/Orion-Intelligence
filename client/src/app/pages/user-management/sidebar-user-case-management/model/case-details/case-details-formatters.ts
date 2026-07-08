@@ -31,7 +31,12 @@ export function getFormattedCaseDateTime(date?: Date | string | null): string {
   if (!date) {
     return '-';
   }
-  return new Date(date).toLocaleString('en-US', {
+
+  const utcDate = typeof date === 'string' && !date.endsWith('Z') && !date.includes('+')
+    ? date + 'Z'
+    : date;
+
+  return new Date(utcDate).toLocaleString('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -41,15 +46,36 @@ export function getFormattedCaseDateTime(date?: Date | string | null): string {
   });
 }
 
+export function getFormattedCaseDateOnly(date?: Date | string | null): string {
+  if (!date) {
+    return '-';
+  }
+
+  const dateOnly = typeof date === 'string'
+    ? date.slice(0, 10)
+    : date.toISOString().slice(0, 10);
+
+  const [year, month, day] = dateOnly.split('-');
+
+  return new Date(Number(year), Number(month) - 1, Number(day)).toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric'
+  });
+}
+
 export function getCaseDateInputValue(date?: Date | string | null): string {
   if (!date) {
     return '';
   }
-  return new Date(date).toISOString().slice(0, 10);
+
+  return typeof date === 'string'
+    ? date.slice(0, 10)
+    : date.toISOString().slice(0, 10);
 }
 
 export function setCaseDateInputValue(target: CaseDateTarget, field: CaseDateField, value: string): void {
-  target[field] = value ? new Date(`${value}T00:00:00`).toISOString() : null;
+  target[field] = value || null;
 }
 
 export function getCaseAnalystLabel(analysts: CaseAnalyst[], userId?: string): string {

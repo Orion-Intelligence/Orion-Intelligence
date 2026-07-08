@@ -2,24 +2,24 @@
   <div class="ui-popup-shell relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] p-[30px] font-[Inter] max-[900px]:p-[18px]" @popupAnimation>
     <div>
       <div class="text-[24px] font-semibold leading-none">{{ heading() }}</div>
-      <button class="absolute right-[20px] top-[20px] text-[28px] text-[#ccc] hover:text-white" (click)="cancleAlert(false)">×</button>
+      <button class="absolute right-[20px] top-[20px] text-[28px] text-[#ccc] hover:text-white" [attr.aria-label]="'common.actions.close' | translate" (click)="cancleAlert(false)">×</button>
     </div>
 
     <form>
       <div class="mt-1 text-[12px] font-normal text-[var(--color-text2)]">{{ description() }}</div>
 
-      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Selected Type</label>
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.selectedType' | translate }}</label>
       <button class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-left text-[14px] text-[var(--color-text1)] opacity-80 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" type="button" disabled>
         {{ decodeURIComponent(router.url.split('/').pop() || '') }}
       </button>
 
-      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Title</label>
-      <input data-testid="tenant-alert-title" [(ngModel)]="alert.title" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter title" name="title" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.title' | translate }}</label>
+      <input data-testid="tenant-alert-title" [(ngModel)]="alert.title" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" [placeholder]="'categoryAlerts.form.enterTitle' | translate" name="title" />
 
-      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Description</label>
-      <textarea data-testid="tenant-alert-description" [(ngModel)]="alert.description" class="min-h-[110px] w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" placeholder="Enter description" name="alert_description" rows="4"></textarea>
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.description' | translate }}</label>
+      <textarea data-testid="tenant-alert-description" [(ngModel)]="alert.description" class="min-h-[110px] w-full resize-y rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" [placeholder]="'categoryAlerts.form.enterDescription' | translate" name="alert_description" rows="4"></textarea>
 
-      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Select IOC Type</label>
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.selectIocType' | translate }}</label>
       <div class="relative">
         <button data-testid="tenant-alert-ioc-type-toggle" type="button" class="flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" (click)="toggleIocDropdown($event)">
           <span>{{ getIOCTypeLabel(alert.ioc_type!) }}</span>
@@ -44,14 +44,14 @@
         }
       </div>
 
-      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">Source</label>
-      <input data-testid="tenant-alert-source" [(ngModel)]="alert.source" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter source" name="source" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.fields.source' | translate }}</label>
+      <input data-testid="tenant-alert-source" [(ngModel)]="alert.source" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" [placeholder]="'categoryAlerts.form.enterSource' | translate" name="source" />
 
-      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">URL</label>
-      <input data-testid="tenant-alert-url" [(ngModel)]="alert.url" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter url" name="url" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.fields.url' | translate }}</label>
+      <input data-testid="tenant-alert-url" [(ngModel)]="alert.url" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" [placeholder]="'categoryAlerts.form.enterUrl' | translate" name="url" />
 
-      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">IOC Value</label>
-      <input data-testid="tenant-alert-ioc-value" [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" placeholder="Enter IOC value" name="ioc_value" />
+      <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.iocValue' | translate }}</label>
+      <input data-testid="tenant-alert-ioc-value" [(ngModel)]="alert.ioc_value" (ngModelChange)="onIocValueChange($event)" class="w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[#57718D] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47] [body.light-theme_&]:placeholder:text-[#7390ad]" type="text" [placeholder]="'categoryAlerts.form.enterIocValue' | translate" name="ioc_value" />
     </form>
     @if (formError) {
       <div class="mt-[8px] text-center">
@@ -63,9 +63,9 @@
     }
 
     <div class="mt-[26px] flex items-center justify-between gap-[15px]">
-      <button class="ui-alert-cancel-btn px-[24px] text-[14px]" (click)="cancleAlert(false)">Cancel</button>
+      <button class="ui-alert-cancel-btn px-[24px] text-[14px]" (click)="cancleAlert(false)">{{ 'common.actions.cancel' | translate }}</button>
       <button data-testid="tenant-alert-save" class="h-[42px] rounded-[8px] bg-[#57A5EB] px-[24px] text-[14px] font-medium text-[#0e1626]" (click)="saveAlert()">
-        {{ edit() ? 'Save Alert' : 'Add Alert' }}
+        {{ (edit() ? 'categoryAlerts.form.saveAlert' : 'categoryAlerts.form.addAlert') | translate }}
       </button>
     </div>
 

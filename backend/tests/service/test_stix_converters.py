@@ -37,7 +37,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_channel_name": "alpha",
                 "m_message_sharable_link": "https://t.me/example/1",
                 "m_channel_url": "https://t.me/example",
-                "m_message_date": "2026-04-01T10:11:12Z",
+                "m_date": "2026-04-01T10:11:12Z",
             },
             "Telegram dump",
             "orion:chat",
@@ -48,7 +48,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_content": "defaced homepage",
                 "m_url": "https://defaced.example/",
                 "m_source_url": "https://mirror.example/",
-                "m_leak_date": "2026-04-01",
+                "m_date": "2026-04-01",
             },
             "https://defaced.example/",
             "orion:defacement",
@@ -84,7 +84,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_content": "database leak",
                 "m_url": "https://leak.example/post",
                 "m_base_url": "https://leak.example",
-                "m_leak_date": "2026-04-01",
+                "m_date": "2026-04-01",
             },
             "Leak post",
             "orion:leak",
@@ -96,7 +96,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_content": "account takeover",
                 "m_channel_url": "https://x.example/profile",
                 "m_message_sharable_link": "https://x.example/post/1",
-                "m_message_date": "2026-04-01T10:11:12Z",
+                "m_date": "2026-04-01T10:11:12Z",
             },
             "Social mention",
             "orion:social",
@@ -131,7 +131,7 @@ def test_convert_to_stix_builds_full_relationship_graph_for_general_content():
         "m_team": "APT Demo",
         "m_sender_username": "analyst1",
         "m_network": "onion",
-        "m_platform": "forum",
+        "m_platform": ["forum"],
         "m_language": ["en"],
         "m_content_type": ["leaks"],
     }
@@ -162,7 +162,7 @@ def test_convert_to_stix_builds_full_relationship_graph_for_general_content():
     assert report["lang"] == "en"
     assert report["x_orion_doc_id"] == "abc123"
     assert report["x_orion_network"] == "onion"
-    assert report["x_orion_platform"] == "forum"
+    assert report["x_orion_platform"] == ["forum"]
     assert report["external_references"][0]["url"] == "https://example.com/report"
 
     assert grouped["infrastructure"][0]["infrastructure_types"] == ["anonymization"]

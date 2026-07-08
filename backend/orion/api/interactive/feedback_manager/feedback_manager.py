@@ -85,8 +85,9 @@ class FeedbackManager:
     @staticmethod
     async def _serialize_comment(comment: DocumentFeedbackComment) -> dict:
         decrypted_comment = ""
+        is_deleted = bool(getattr(comment, "is_deleted", False))
         tenant_id = await FeedbackManager._get_tenant_id_for_user_id(str(getattr(comment, "user_id", "") or ""))
-        if tenant_id and comment.comment:
+        if tenant_id and comment.comment and not is_deleted:
             try:
                 dek = await KeyManager.get_instance().get_or_create_dek(tenant_id)
                 decrypted_comment = Fernet(dek).decrypt(comment.comment.encode()).decode()
@@ -96,6 +97,7 @@ class FeedbackManager:
             "user_id": comment.user_id,
             "username": comment.username,
             "comment": decrypted_comment,
+            "is_deleted": is_deleted,
             "created_at": comment.created_at.isoformat(),
             "updated_at": comment.updated_at.isoformat(),
         }
@@ -144,7 +146,7 @@ class FeedbackManager:
 
     @staticmethod
     def _pick_date(data: dict[str, Any]) -> str:
-        for key in ("m_message_date", "m_update_date", "m_creation_date", "m_leak_date"):
+        for key in ("m_date", "m_update_date", "m_creation_date"):
             value = data.get(key)
             if value:
                 return str(value)
@@ -155,6 +157,8 @@ class FeedbackManager:
             ("leak_model", "leak", lambda: search_model.getInstance().request_leak_doc(doc_id, None)),
             ("generic_model", "general", lambda: search_model.getInstance().request_general_doc(doc_id, None)),
             ("exploit_model", "exploit", lambda: search_model.getInstance().request_exploit_doc(doc_id, None)),
+            ("apt_model", "apt", lambda: search_model.getInstance().request_apt_doc(doc_id, None)),
+            ("malware_model", "malware", lambda: search_model.getInstance().request_malware_doc(doc_id, None)),
             ("chat_model", "chat", lambda: search_model.getInstance().request_chat_doc(doc_id, None)),
             ("social_model", "social", lambda: search_model.getInstance().request_social_doc(doc_id, None)),
             ("defacement_model", "defacement", lambda: search_model.getInstance().request_defacement_doc(doc_id)),
@@ -292,6 +296,8 @@ class FeedbackManager:
         current_user_id = str(current_user.id)
         one_hour_ago = now - timedelta(hours=1)
         for existing_comment in doc.comments:
+            if getattr(existing_comment, "is_deleted", False):
+                continue
             created_at = existing_comment.created_at
             if created_at.tzinfo is None:
                 created_at = created_at.replace(tzinfo=UTC)
@@ -313,6 +319,26 @@ class FeedbackManager:
         saved = await self._engine.save(doc)
         return await self._serialize(saved, current_user)
 
+    async def delete_comment(self, doc_id: str, comment_created_at: str, current_user) -> dict:
+        doc = await self._get_or_create(doc_id)
+        current_user_id = str(current_user.id)
+        now = datetime.now(UTC)
+        target = None
+        for comment in doc.comments:
+            if comment.created_at.isoformat() == comment_created_at:
+                target = comment
+                break
+        if target is None:
+            raise HTTPException(status_code=404, detail="Comment not found")
+        if target.user_id != current_user_id:
+            raise HTTPException(status_code=403, detail="You can only delete your own comments")
+        target.is_deleted = True
+        target.comment = ""
+        target.updated_at = now
+        doc.updated_at = now
+        saved = await self._engine.save(doc)
+        return await self._serialize(saved, current_user)
+
     async def get_user_activity(self, user_id: str) -> list[dict]:
         docs = await self._engine.find(
             db_document_feedback_model,
@@ -322,7 +348,7 @@ class FeedbackManager:
         activity = []
         for doc in docs:
             user_reaction = next((reaction for reaction in doc.reactions if reaction.user_id == user_id), None)
-            user_comments = [comment for comment in doc.comments if comment.user_id == user_id]
+            user_comments = [comment for comment in doc.comments if comment.user_id == user_id and not getattr(comment, "is_deleted", False)]
             summary = await self._resolve_doc_summary(doc.doc_id)
 
             latest_reaction_at = user_reaction.updated_at.isoformat() if user_reaction else ""

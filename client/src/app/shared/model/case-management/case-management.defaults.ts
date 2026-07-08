@@ -1,4 +1,4 @@
-import { ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityConfidence, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
+import { ArtifactReportSource, ArtifactType, CaseArtifact, CaseEntity, CaseEntityRequest, CaseLink, CaseRequest, CaseStatus, CaseTag, CaseTask, CaseType, ClosureReason, EntityConfidence, EntityRole, EntityType, IdentifierType, IntakeSource, Priority, Severity, SocialPlatform, SourceType, TaskStatus } from './case.model';
 
 export interface CaseOption<T extends string> {
   value: T;
@@ -36,7 +36,7 @@ export const INTAKE_SOURCE_OPTIONS: CaseOption<IntakeSource>[] = [
   { value: 'customer_report', label: 'Customer Report' },
   { value: 'breach_search', label: 'Breach Search' },
   { value: 'stealer_logs', label: 'Stealer Logs' },
-  { value: 'entity_api', label: 'Entity API' },
+  { value: 'entity_api', label: 'Entity Lookup' },
   { value: 'network_intel', label: 'Network Intel' },
   { value: 'social_intel', label: 'Social Intel' },
   { value: 'cti_graph', label: 'CTI Graph' },
@@ -46,12 +46,12 @@ export const INTAKE_SOURCE_OPTIONS: CaseOption<IntakeSource>[] = [
 
 export const CASE_STATUS_OPTIONS: CaseOption<CaseStatus>[] = [
   { value: 'new', label: 'New' },
-  { value: 'triaged', label: 'Triaged' },
-  { value: 'assigned', label: 'Assigned' },
-  { value: 'investigating', label: 'Investigating' },
-  { value: 'waiting_on_response', label: 'Waiting on Response' },
-  { value: 'remediating', label: 'Remediating' },
-  { value: 'review', label: 'Review' },
+  { value: 'intake_review', label: 'Intake Review' },
+  { value: 'under_investigation', label: 'Under Investigation' },
+  { value: 'evidence_collection', label: 'Evidence Collection' },
+  { value: 'verification', label: 'Verification' },
+  { value: 'regulatory_action', label: 'Regulatory Action' },
+  { value: 'legal_review', label: 'Legal Review' },
   { value: 'resolved', label: 'Resolved' },
   { value: 'closed', label: 'Closed' }
 ];
@@ -61,6 +61,7 @@ export const PRIORITY_OPTIONS: Priority[] = ['low', 'medium', 'high', 'critical'
 export const TASK_STATUS_OPTIONS: CaseOption<TaskStatus>[] = [
   { value: 'open', label: 'Open' },
   { value: 'in_progress', label: 'In Progress' },
+  { value: 'under_review', label: 'Under Review' },
   { value: 'blocked', label: 'Blocked' },
   { value: 'done', label: 'Done' },
   { value: 'cancelled', label: 'Cancelled' }
@@ -154,7 +155,6 @@ export const SOCIAL_PLATFORM_OPTIONS: CaseOption<SocialPlatform>[] = [
   { value: 'x', label: 'X' },
   { value: 'linkedin', label: 'LinkedIn' },
   { value: 'telegram', label: 'Telegram' },
-  { value: 'whatsapp', label: 'WhatsApp' },
   { value: 'discord', label: 'Discord' },
   { value: 'reddit', label: 'Reddit' },
   { value: 'github', label: 'GitHub' },
@@ -240,16 +240,26 @@ export const DEFAULT_CASE_ARTIFACT_TEMPLATE: CaseArtifact = {
   description: '',
   source: 'manual',
   url: '',
-  fileName: '',
-  fileType: '',
-  fileSize: 0,
-  fileResourceId: '',
+  files: [],
   entityIds: [],
   tags: [],
   capturedAt: null,
   artifactTypeOtherValue: '',
-  artifactSourceOtherValue: ''
+  artifactSourceOtherValue: '',
+  linkedReportSource: '',
+  linkedReportId: '',
+  linkedReportTitle: ''
 };
+
+export const ARTIFACT_REPORT_SOURCE_OPTIONS: CaseOption<ArtifactReportSource>[] = [
+  { value: 'strategic', label: 'General Intelligence' },
+  { value: 'breach', label: 'Data Breach' },
+  { value: 'defacement', label: 'Defacement' },
+  { value: 'social', label: 'Social' },
+  { value: 'feed', label: 'Feed' },
+  { value: 'exploit', label: 'Exploit' },
+  { value: 'stealerlogs', label: 'Stealer Logs' }
+];
 
 export const DEFAULT_CASE_TASK_TEMPLATE: CaseTask = {
   taskId: '',

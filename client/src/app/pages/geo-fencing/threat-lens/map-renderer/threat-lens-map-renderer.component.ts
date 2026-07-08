@@ -1,13 +1,14 @@
 import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
 import { loadModules, setDefaultOptions } from 'esri-loader';
-import { ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensLegendItem } from '../../models/geo-fencing.models';
+import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensService } from '../threat-lens.service';
 import { ThreatLensGeoUtils } from '../map-utils/threat-lens-geo.utils';
+import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
 import { ThreatLensArcRenderer } from '../map-overlays/threat-lens-arc.renderer';
 import { ThreatLensCountryLayerRenderer } from '../map-overlays/threat-lens-country-layer.renderer';
 import { ThreatLensIpMarkerRenderer } from '../map-overlays/threat-lens-ip-marker.renderer';
 import { ThreatLensTooltipRenderer } from '../map-overlays/threat-lens-tooltip.renderer';
-import { ThreatLensArcRenderResult, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpRecord, ThreatLensIpViewportScanRequest } from '../models/threat-lens-map.types';
+import { ThreatLensArcBatchStatus, ThreatLensArcRenderResult, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpRecord, ThreatLensIpViewportScanRequest } from '../models/threat-lens-map.types';
 
 @Component({
   selector: 'app-threat-lens-map-renderer',
@@ -21,9 +22,10 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private tooltipRenderer = new ThreatLensTooltipRenderer();
   private arcRenderer: ThreatLensArcRenderer | null = null;
   private ipMarkerRenderer: ThreatLensIpMarkerRenderer | null = null;
+  private geometryEngine: any | null = null;
   private webMercatorUtils: any | null = null;
+  private countryFillGraphicsLayer: any | null = null;
   private arcGraphicsLayer: any | null = null;
-  private arcSurfaceGraphicsLayer: any | null = null;
   private animatedArcGraphicsLayer: any | null = null;
   private ipScanGraphicsLayer: any | null = null;
   private mapClickHandle: { remove: () => void } | null = null;
@@ -36,6 +38,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private viewportDragHandle: { remove: () => void } | null = null;
   private viewportWheelHandle: { remove: () => void } | null = null;
   private mapResizeObserver: ResizeObserver | null = null;
+  private themeObserver: MutationObserver | null = null;
   private mapResizeFrame: number | null = null;
   private viewportIpScanTimer: ReturnType<typeof setTimeout> | null = null;
   private hoverHitTestPending = false;
@@ -46,21 +49,25 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   private hasPendingViewportNavigation = false;
   private destroyed = false;
   private cypressMapFallback = false;
-  private categoryLegend: ThreatLensLegendItem[] = [];
-  private countryNewsCountByKey = new Map<string, number>();
-  private categoryCountryNewsCountByKey = new Map();
-  private readonly threatBasemapId = 'dark-gray-vector';
-  private readonly streetBasemapId = 'streets-night-vector';
+  private readonly darkThreatBasemapId = 'dark-gray-vector';
+  private readonly darkStreetBasemapId = 'streets-night-vector';
+  private readonly lightThreatBasemapId = 'gray-vector';
+  private readonly lightStreetBasemapId = 'streets-vector';
   private readonly streetBasemapMinZoom = 6;
   private readonly hoverHitTestMinIntervalMs = 80;
+  private readonly maxGlobeCanvasAspectRatio = 1.62;
+
+  isMapCursorPointer = false;
 
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<string>();
   @Output() countrySelected = new EventEmitter<ThreatLensCountrySelection>();
   @Output() emptySelection = new EventEmitter<void>();
   @Output() ipSelected = new EventEmitter<string>();
+  @Output() arcSelected = new EventEmitter<ThreatLensArcSelection>();
   @Output() viewportIpScanRequested = new EventEmitter<ThreatLensIpViewportScanRequest>();
   @Output() arcCountChange = new EventEmitter<number>();
+  @Output() arcBatchStatusChange = new EventEmitter<ThreatLensArcBatchStatus | null>();
 
   constructor(private ngZone: NgZone, private threatLensService: ThreatLensService) {}
 
@@ -82,6 +89,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.viewportDragHandle?.remove();
     this.viewportWheelHandle?.remove();
     this.mapResizeObserver?.disconnect();
+    this.themeObserver?.disconnect();
     this.arcRenderer?.destroy();
     this.ipMarkerRenderer?.clear();
     this.countryRenderer.destroy();
@@ -95,6 +103,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     this.view?.destroy();
     this.view = null;
+    this.geometryEngine = null;
     this.webMercatorUtils = null;
   }
 
@@ -106,16 +115,22 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     return this.countryRenderer.getCountryName(countryKey);
   }
 
-  renderThreatData(categoryData: ThreatLensCategoryMapData[], countryCounts: ThreatCountryCount[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
-    this.countryNewsCountByKey = new Map(countryCounts.map((item) => [this.toCountryKey(item.country), item.count]));
-    this.categoryCountryNewsCountByKey = ThreatLensGeoUtils.buildThreatLensCategoryCountryCounts(categoryData, (value) => this.toCountryKey(value));
+  renderThreatData(categoryData: ThreatLensCategoryMapData[], activeCountryFilterKey: string): ThreatLensArcRenderResult {
+    this.countryRenderer.setSelectedCountryKey(activeCountryFilterKey);
     const arcResult = this.arcRenderer?.render(categoryData, activeCountryFilterKey) ?? { totalArcCount: 0, arcCountByCategory: new Map() };
-    this.categoryLegend = ThreatLensGeoUtils.buildThreatLensLegend(categoryData, arcResult.arcCountByCategory);
     return arcResult;
   }
 
-  getSelectedCountryBreakdown(countryKey: string): ThreatLensCountrySelection['breakdown'] {
-    return ThreatLensGeoUtils.getThreatLensSelectedCountryBreakdown(countryKey, this.categoryLegend, this.categoryCountryNewsCountByKey);
+  setArcBatchSize(size: number): void {
+    this.arcRenderer?.setBatchSize(size);
+  }
+
+  setArcRangeIndex(index: number): void {
+    this.arcRenderer?.setSelectedRangeIndex(index);
+  }
+
+  setArcCategoryFilter(categoryKey: ThreatLensCategoryModelKey | null): void {
+    this.arcRenderer?.setActiveCategory(categoryKey);
   }
 
   async focusCountryByKey(countryKey: string): Promise<ThreatLensCountrySelection | null> {
@@ -129,13 +144,21 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     const selection = this.buildCountrySelection(graphic);
+    this.countryRenderer.setSelectedCountryKey(selection.key);
     this.countryRenderer.applyHighlight(graphic);
-    const geometryToFocus = graphic.geometry?.extent ?? graphic.geometry;
+    const center = this.getFeatureAnchorCoordinates(graphic);
 
-    if (geometryToFocus) {
-      await this.view.goTo(geometryToFocus, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
+    if (center) {
+      const target: any = { center: [center.lon, center.lat] };
+      const currentZoom = Number(this.view.zoom);
+      if (Number.isFinite(currentZoom)) {
+        target.zoom = currentZoom;
+      }
+
+      this.clearViewportNavigationRequest();
+      await this.view.goTo(target, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
+      this.clearViewportNavigationRequest();
     }
-
     return selection;
   }
 
@@ -148,6 +171,24 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
   clearIpScanMarkers(): void {
     this.ipMarkerRenderer?.clear();
+  }
+
+  clearSelections(): void {
+    this.countryRenderer.clearHighlight();
+    this.countryRenderer.setSelectedCountryKey('');
+    this.clearHoverHighlight();
+    this.tooltipRenderer.hide();
+  }
+
+  async resetGlobePosition(): Promise<void> {
+    if (!this.view) {
+      return;
+    }
+
+    await this.view.goTo({
+      position: { longitude: 0, latitude: 0, z: 25000000 },
+      tilt: 0,
+    }, { duration: 500 }).then(() => undefined, () => undefined);
   }
 
   requestViewportIpScan(): boolean {
@@ -187,8 +228,14 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
+      this.geometryEngine = geometryEngine;
       this.webMercatorUtils = webMercatorUtils;
       const countryLayer = this.countryRenderer.createLayer(FeatureLayer);
+      this.countryFillGraphicsLayer = new GraphicsLayer({
+        title: 'Threat Lens Country Fills',
+        elevationInfo: { mode: 'on-the-ground' },
+      });
+      this.countryRenderer.setFillGraphicsLayer(this.countryFillGraphicsLayer);
       this.arcGraphicsLayer = new GraphicsLayer({
         title: 'Threat Lens Country Arcs',
         elevationInfo: { mode: 'absolute-height' },
@@ -197,14 +244,16 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         title: 'Threat Lens Animated Arcs',
         elevationInfo: { mode: 'absolute-height' },
       });
-      this.arcSurfaceGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens Country Arc Connectors' });
       this.ipScanGraphicsLayer = new GraphicsLayer({ title: 'Threat Lens IP Scan Markers' });
 
+      const initialBasemapId = this.getThreatBasemapId();
+      this.activeBasemapId = initialBasemapId;
+
       const map = new EsriMap({
-        basemap: this.threatBasemapId,
+        basemap: initialBasemapId,
         layers: [
           countryLayer,
-          this.arcSurfaceGraphicsLayer,
+          this.countryFillGraphicsLayer,
           this.arcGraphicsLayer,
           this.animatedArcGraphicsLayer,
           this.ipScanGraphicsLayer,
@@ -230,10 +279,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
             dragTertiary: 'none',
           },
         },
-        environment: {
-          atmosphereEnabled: false,
-          starsEnabled: true,
-        },
+        environment: this.getSceneEnvironment(),
       });
 
       await this.view.when();
@@ -255,18 +301,19 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.arcRenderer = new ThreatLensArcRenderer(this.ngZone,
         this.countryRenderer,
         this.arcGraphicsLayer,
-        this.arcSurfaceGraphicsLayer,
         this.animatedArcGraphicsLayer,
         geometryEngine,
         webMercatorUtils,
         (value) => this.toCountryKey(value),
-        (count) => this.arcCountChange.emit(count),);
-      this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer, geometryEngine);
+        (count) => this.arcCountChange.emit(count),
+        (status) => this.arcBatchStatusChange.emit(status),);
+      this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer);
 
       this.tooltipRenderer.init();
       this.observeMapResize();
+      this.observeThemeChanges();
       this.scheduleMapResize();
-      window.setTimeout(() => this.view?.resize?.(), 150);
+      [0, 150, 500, 1000, 2000].forEach((delay) => window.setTimeout(() => this.scheduleMapResize(), delay));
       this.registerViewScaleWatcher();
       this.registerBasemapWatcher();
       this.registerViewInteractingWatcher();
@@ -308,7 +355,21 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
-      const hit = await this.view.hitTest(event, { include: [this.ipScanGraphicsLayer, this.countryRenderer.layer].filter(Boolean) });
+      const hit = await this.view.hitTest(event, {
+        include: [
+          this.ipScanGraphicsLayer,
+          this.animatedArcGraphicsLayer,
+          this.arcGraphicsLayer,
+          this.countryRenderer.layer,
+        ].filter(Boolean),
+      });
+      const clusterGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isClusterGraphic(result.graphic))?.graphic;
+      if (clusterGraphic) {
+        this.tooltipRenderer.hide();
+        this.clearHoverHighlight();
+        return;
+      }
+
       const ipGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isMarkerGraphic(result.graphic))?.graphic;
 
       if (ipGraphic) {
@@ -321,22 +382,41 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         return;
       }
 
-      const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryRenderer.layer)?.graphic;
-
-      if (!countryGraphic) {
-        this.countryRenderer.clearHighlight();
-        this.ngZone.run(() => this.emptySelection.emit());
+      const endpointGraphic = hit.results.find((result: any) => this.arcRenderer?.isEndpointGraphic(result.graphic))?.graphic;
+      if (endpointGraphic) {
+        const selection = this.buildArcSelection(endpointGraphic.attributes || {});
+        if (selection) {
+          this.tooltipRenderer.hide();
+          this.clearHoverHighlight();
+          this.ngZone.run(() => this.arcSelected.emit(selection));
+        }
         return;
       }
 
-      const selection = this.buildCountrySelection(countryGraphic);
-      this.ngZone.run(() => this.countrySelected.emit(selection));
-      this.countryRenderer.applyHighlight(countryGraphic);
-      const geometryToFocus = countryGraphic.geometry?.extent ?? countryGraphic.geometry;
+      const countryGraphic = hit.results.find((result: any) => result.graphic?.layer === this.countryRenderer.layer)?.graphic;
 
-      if (geometryToFocus) {
-        await this.view.goTo(geometryToFocus, { duration: 750, easing: 'ease-in-out' }).then(() => undefined, () => undefined);
+      if (countryGraphic) {
+        const selection = this.buildCountrySelection(countryGraphic);
+        this.ngZone.run(() => this.countrySelected.emit(selection));
+        await this.focusCountryByKey(selection.key);
+        this.emitViewportIpScanRequest(true);
+        return;
       }
+
+      const arcGraphic = hit.results.find((result: any) => this.arcRenderer?.isTooltipGraphic(result.graphic))?.graphic;
+      if (arcGraphic) {
+        const selection = this.buildArcSelection(arcGraphic.attributes || {});
+        if (selection) {
+          this.tooltipRenderer.hide();
+          this.clearHoverHighlight();
+          this.ngZone.run(() => this.arcSelected.emit(selection));
+        }
+        return;
+      }
+
+      this.countryRenderer.clearHighlight();
+      this.countryRenderer.setSelectedCountryKey('');
+      this.ngZone.run(() => this.emptySelection.emit());
     });
   }
 
@@ -366,24 +446,43 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.ipScanGraphicsLayer,
           this.animatedArcGraphicsLayer,
           this.arcGraphicsLayer,
-          this.arcSurfaceGraphicsLayer,
           this.countryRenderer.layer,
         ].filter(Boolean),
       }).finally(() => {
         this.hoverHitTestPending = false;
       });
 
+      const clusterGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isClusterGraphic(result.graphic))?.graphic;
+      if (clusterGraphic) {
+        this.clearHoverHighlight();
+        this.setMapCursor('');
+        this.ipMarkerRenderer?.showAccuracyRadius(clusterGraphic);
+        this.tooltipRenderer.showIpCluster(event, clusterGraphic.attributes || {});
+        return;
+      }
+
       const ipGraphic = hit.results.find((result: any) => this.ipMarkerRenderer?.isMarkerGraphic(result.graphic))?.graphic;
       if (ipGraphic) {
         this.clearHoverHighlight();
+        this.setMapCursor('pointer');
+        this.ipMarkerRenderer?.showAccuracyRadius(ipGraphic);
         this.tooltipRenderer.showIpScan(event, ipGraphic.attributes || {});
         return;
       }
 
       const arcGraphic = hit.results.find((result: any) => this.arcRenderer?.isTooltipGraphic(result.graphic))?.graphic;
       if (arcGraphic) {
-        this.clearHoverHighlight();
-        this.tooltipRenderer.showArc(event, arcGraphic.attributes || {});
+        this.clearCountryHoverHighlight();
+        this.ipMarkerRenderer?.clearAccuracyRadius();
+        if (this.arcRenderer?.isEndpointGraphic(arcGraphic)) {
+          this.setMapCursor('pointer');
+          this.arcRenderer.setHoveredEndpointGraphic(arcGraphic);
+        }
+        else {
+          this.setMapCursor('');
+          this.arcRenderer?.clearEndpointHover();
+        }
+        this.tooltipRenderer.hide();
         return;
       }
 
@@ -401,9 +500,10 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       }
 
       this.clearHoverHighlight();
+      this.setMapCursor('pointer');
       this.hoveredCountryKey = selection.key;
       this.countryRenderer.applyHoverHighlight(countryGraphic);
-      this.tooltipRenderer.showCountry(event, selection.name, selection.count, selection.breakdown);
+      this.tooltipRenderer.showCountry(event, selection.name);
     });
   }
 
@@ -450,9 +550,27 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     return {
       name,
       key,
-      count: this.countryNewsCountByKey.get(key) || 0,
-      breakdown: this.getSelectedCountryBreakdown(key),
       ipScanRequest: includeIpScanRequest ? this.getCountryIpScanRequest(countryGraphic) : null,
+    };
+  }
+
+  private buildArcSelection(attributes: Record<string, any>): ThreatLensArcSelection | null {
+    const categoryKey = String(attributes['category'] || '').trim();
+    const countryAKey = String(attributes['country_a'] || '').trim();
+    const countryBKey = String(attributes['country_b'] || '').trim();
+
+    if (!categoryKey || !countryAKey || !countryBKey) {
+      return null;
+    }
+
+    return {
+      categoryKey: categoryKey as ThreatLensCategoryModelKey,
+      categoryLabel: String(attributes['category_label'] || 'Threat').trim(),
+      countryAKey,
+      countryBKey,
+      countryAName: String(attributes['start_country'] || countryAKey).trim(),
+      countryBName: String(attributes['end_country'] || countryBKey).trim(),
+      weight: Number(attributes['weight'] || 0),
     };
   }
 
@@ -464,9 +582,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.viewScaleWatchHandle?.remove();
     this.viewScaleWatchHandle = this.view.watch('scale', () => {
       this.ipMarkerRenderer?.updateSymbols();
-      if (this.view?.interacting) {
-        this.markViewportNavigation();
-      }
+      this.markViewportNavigation();
     });
   }
 
@@ -479,9 +595,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.viewZoomWatchHandle = this.view.watch('zoom', () => {
       this.updateBasemapForZoom();
       this.ipMarkerRenderer?.updateSymbols();
-      if (this.view?.interacting) {
-        this.markViewportNavigation();
-      }
+      this.markViewportNavigation();
     });
   }
 
@@ -541,6 +655,11 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
   }
 
+  private clearViewportNavigationRequest(): void {
+    this.hasPendingViewportNavigation = false;
+    this.clearViewportIpScanTimer();
+  }
+
   private emitViewportIpScanRequest(force = false): boolean {
     const viewport = this.getIpScanViewport();
     if (!viewport) {
@@ -571,7 +690,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
   private getCountryIpScanRequest(countryGraphic: any): ThreatLensIpViewportScanRequest | null {
     const extent = countryGraphic?.geometry?.extent ?? countryGraphic?.geometry;
-    const center = this.toThreatLensCoordinates(extent?.center) ?? this.getExtentCenterCoordinates(extent);
+    const center = this.getFeatureAnchorCoordinates(countryGraphic);
     if (!center) {
       return null;
     }
@@ -659,6 +778,19 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.toThreatLensCoordinates({ x: xmin, y: ymax }),
       this.toThreatLensCoordinates({ x: xmax, y: ymax }),
     ].filter((point): point is ThreatLensCoordinates => Boolean(point));
+  }
+
+  private getFeatureAnchorCoordinates(feature: any): ThreatLensCoordinates | null {
+    const anchor = ThreatLensMapUtils.getFeatureAnchor(feature, this.geometryEngine, this.webMercatorUtils);
+
+    if (!ThreatLensMapUtils.isValidLngLat(anchor)) {
+      return null;
+    }
+
+    return {
+      lat: anchor[1],
+      lon: anchor[0],
+    };
   }
 
   private getViewportCenterCoordinates(): ThreatLensCoordinates | null {
@@ -767,13 +899,61 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       return;
     }
 
-    const nextBasemapId = (this.view.zoom ?? 0) >= this.streetBasemapMinZoom ? this.streetBasemapId : this.threatBasemapId;
+    const nextBasemapId = (this.view.zoom ?? 0) >= this.streetBasemapMinZoom ? this.getStreetBasemapId() : this.getThreatBasemapId();
     if (nextBasemapId === this.activeBasemapId) {
       return;
     }
 
     this.activeBasemapId = nextBasemapId;
     this.view.map.basemap = nextBasemapId;
+  }
+
+  private observeThemeChanges(): void {
+    if (typeof MutationObserver === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
+    this.themeObserver?.disconnect();
+    this.themeObserver = new MutationObserver(() => this.applyThemeMode());
+    this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+  }
+
+  private applyThemeMode(): void {
+    if (!this.view) {
+      return;
+    }
+
+    this.view.environment = this.getSceneEnvironment();
+    this.activeBasemapId = '';
+    this.updateBasemapForZoom();
+    this.view.requestRender?.();
+  }
+
+  private getThreatBasemapId(): string {
+    return this.isLightTheme() ? this.lightThreatBasemapId : this.darkThreatBasemapId;
+  }
+
+  private getStreetBasemapId(): string {
+    return this.isLightTheme() ? this.lightStreetBasemapId : this.darkStreetBasemapId;
+  }
+
+  private getSceneEnvironment(): any {
+    if (this.isLightTheme()) {
+      return {
+        background: { type: 'color', color: [231, 239, 249, 1] },
+        atmosphereEnabled: false,
+        starsEnabled: false,
+      };
+    }
+
+    return {
+      atmosphereEnabled: false,
+      starsEnabled: true,
+    };
+  }
+
+  private isLightTheme(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('light-theme');
   }
 
   private observeMapResize(): void {
@@ -795,12 +975,45 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.mapResizeFrame = requestAnimationFrame(() => {
       this.mapResizeFrame = null;
       this.view?.resize?.();
+      this.syncArcgisCanvasBackingSize();
     });
   }
 
+  private syncArcgisCanvasBackingSize(): void {
+    const element = this.mapContainer?.nativeElement;
+    const canvas = element?.querySelector('canvas');
+    if (!element || !canvas) {
+      return;
+    }
+
+    const renderedBackingHeight = Math.round(element.clientHeight * (window.devicePixelRatio || 1));
+    const aspectBackingHeight = Math.round(canvas.width / this.maxGlobeCanvasAspectRatio);
+    const nextBackingHeight = Math.max(renderedBackingHeight, aspectBackingHeight);
+    if (nextBackingHeight > canvas.height) {
+      canvas.height = nextBackingHeight;
+      this.view?.requestRender?.();
+    }
+  }
+
   private clearHoverHighlight(): void {
+    this.clearCountryHoverHighlight();
+    this.arcRenderer?.clearEndpointHover();
+    this.ipMarkerRenderer?.clearAccuracyRadius();
+    this.setMapCursor('');
+  }
+
+  private clearCountryHoverHighlight(): void {
     this.countryRenderer.clearHoverHighlight();
     this.hoveredCountryKey = '';
+  }
+
+  private setMapCursor(cursor: string): void {
+    const isPointer = cursor === 'pointer';
+    if (this.isMapCursorPointer !== isPointer) {
+      this.ngZone.run(() => {
+        this.isMapCursorPointer = isPointer;
+      });
+    }
   }
 
   private toCountryKey(value: string): string {

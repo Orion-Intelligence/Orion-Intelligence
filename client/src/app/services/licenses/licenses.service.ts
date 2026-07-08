@@ -96,6 +96,9 @@ export class LicenseService {
     if (moduleName === 'Strategic') {
       moduleName = 'general';
     }
+    if (moduleName === 'APT Intel') {
+      moduleName = 'general';
+    }
     const key = moduleName.toLowerCase();
     if (this.subscriptionService.isDemo() && [
       'profile',
@@ -115,12 +118,22 @@ export class LicenseService {
 
   canUseModule(moduleName: string): boolean {
     const rule = this.getCombinedRule();
+    if (this.getLicenses().includes(moduleName)) {
+      return true;
+    }
     if (this.subscriptionService.isDemo() || this.appService.userSessionData().user.role == "admin") {
       return true;
     }
     else {
       return (rule.modules === 'all' || rule.modules.has(moduleName));
     }
+  }
+
+  canUseActorsAndMalware(): boolean {
+    const licenses = this.getLicenses();
+    return licenses.includes(LicenseName.OSINT_BASIC)
+      || licenses.includes(LicenseName.OSINT_ADVANCED)
+      || licenses.includes(LicenseName.ENTERPRISE);
   }
 
   canUseCtiGraph(): boolean {

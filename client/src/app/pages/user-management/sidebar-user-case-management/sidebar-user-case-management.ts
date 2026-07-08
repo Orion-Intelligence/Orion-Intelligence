@@ -2,15 +2,21 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Case } from '../../../shared/model/case-management/case.model';
+import { Case, CaseAnalyst, Priority, Severity } from '../../../shared/model/case-management/case.model';
 import { AddNewCase } from './model/add-new-case/add-new-case';
 import { CaseManagement } from './case-management-service/case-management';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { CaseDialog } from './model/case-dialog/case-dialog';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
+import { finalize } from 'rxjs';
+import { CaseFilterRowComponent, CaseListFilters, DEFAULT_CASE_LIST_FILTERS } from './model/case-filter-row/case-filter-row';
+import { CaseAnalyticsPanel } from './model/case-analytics-panel/case-analytics-panel';
 
 @Component({
   selector: 'app-sidebar-user-case-management',
-  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent],
+  imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe, CaseDialog, CaseFilterRowComponent, CaseAnalyticsPanel],
   templateUrl: './sidebar-user-case-management.html'
 })
 export class SidebarUserCaseManagement implements OnInit {
@@ -19,8 +25,16 @@ export class SidebarUserCaseManagement implements OnInit {
   showAddCasePopup = false;
   isDeleteConfirmationOpen = false;
   selectedDeleteCaseId = '';
+  showArchivedCases = false;
+  isAssignAnalystDialogOpen = false;
+  selectedAssignCase: Case | null = null;
+  analysts: CaseAnalyst[] = [];
+  isAnalystsLoading = false;
+  isAssignAnalystSaving = false;
+  caseFilters: CaseListFilters = { ...DEFAULT_CASE_LIST_FILTERS };
+  caseManagementMode: 'list' | 'analytics' = 'list';
 
-  constructor(private router: Router, private caseService: CaseManagement, private licenseService: LicenseService) { }
+  constructor(private router: Router, private caseService: CaseManagement, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) { }
 
   ngOnInit(): void {
     this.loadCases();
@@ -28,7 +42,7 @@ export class SidebarUserCaseManagement implements OnInit {
 
   loadCases(): void {
     this.isLoading = true;
-    this.caseService.getCases().subscribe({
+    this.caseService.getCases(this.showArchivedCases).subscribe({
       next: (cases) => {
         this.cases = cases;
         this.isLoading = false;
@@ -40,6 +54,9 @@ export class SidebarUserCaseManagement implements OnInit {
   }
 
   addCase(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
     this.showAddCasePopup = true;
   }
 
@@ -52,6 +69,45 @@ export class SidebarUserCaseManagement implements OnInit {
     this.closeAddCasePopup();
   }
 
+  get filteredCases(): Case[] {
+    const search = this.caseFilters.searchText.trim().toLowerCase();
+
+    return this.cases
+      .filter(caseItem => !search || [
+        caseItem.caseId,
+        caseItem.title,
+        caseItem.description,
+        this.formatLabel(caseItem.caseType),
+        caseItem.caseTypeOtherValue
+      ].some(value => String(value || '').toLowerCase().includes(search)))
+      .filter(caseItem => this.caseFilters.status === 'all' || caseItem.status === this.caseFilters.status)
+      .filter(caseItem => this.caseFilters.severity === 'all' || caseItem.severity === this.caseFilters.severity)
+      .filter(caseItem => this.caseFilters.priority === 'all' || caseItem.priority === this.caseFilters.priority)
+      .filter(caseItem => this.caseFilters.caseType === 'all' || caseItem.caseType === this.caseFilters.caseType)
+      .sort((first, second) => this.compareCases(first, second));
+  }
+
+  setArchivedCases(showArchived: boolean): void {
+    if (!this.canManageCases()) {
+      return;
+    }
+
+    if (this.showArchivedCases === showArchived) {
+      return;
+    }
+
+    this.showArchivedCases = showArchived;
+    this.loadCases();
+  }
+
+  onCaseFiltersChange(filters: CaseListFilters): void {
+    this.caseFilters = filters;
+  }
+
+  setCaseManagementMode(mode: 'list' | 'analytics'): void {
+    this.caseManagementMode = mode;
+  }
+
   viewCase(caseId: string): void {
     const url = this.router.createUrlTree(['/dashboard/profile/case-management/case-details'], {
       queryParams: { caseId: caseId }
@@ -61,6 +117,10 @@ export class SidebarUserCaseManagement implements OnInit {
 
   canDeleteCases(): boolean {
     return this.licenseService.isMaintainer();
+  }
+
+  canManageCases(): boolean {
+    return this.licenseService.isMaintainer() || this.licenseService.isAdmin();
   }
 
   openDeleteConfirmation(caseId: string): void {
@@ -89,7 +149,12 @@ export class SidebarUserCaseManagement implements OnInit {
     if (!date) {
       return '-';
     }
-    return new Date(date).toLocaleDateString('en-US', {
+
+    const utcDate = typeof date === 'string' && !date.endsWith('Z') && !date.includes('+')
+      ? date + 'Z'
+      : date;
+
+    return new Date(utcDate).toLocaleDateString('en-US', {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
@@ -100,7 +165,12 @@ export class SidebarUserCaseManagement implements OnInit {
     if (!date) {
       return '';
     }
-    return new Date(date).toLocaleTimeString('en-US', {
+
+    const utcDate = typeof date === 'string' && !date.endsWith('Z') && !date.includes('+')
+      ? date + 'Z'
+      : date;
+
+    return new Date(utcDate).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -113,5 +183,112 @@ export class SidebarUserCaseManagement implements OnInit {
     return value
       .replace(/[_-]/g, ' ')
       .replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  toggleArchivedCases(): void {
+    this.setArchivedCases(!this.showArchivedCases);
+  }
+
+  openTrackingBoard(): void {
+    if (!this.canManageCases()) {
+      return;
+    }
+
+    const url = this.router.createUrlTree([
+      '/dashboard/profile/case-management/tracking-board'
+    ]).toString();
+
+    window.open(url, '_blank');
+  }
+
+  loadAnalysts(): void {
+    this.isAnalystsLoading = true;
+
+    this.caseService.getAnalysts()
+      .pipe(finalize(() => this.isAnalystsLoading = false))
+      .subscribe({
+        next: (analysts) => {
+          this.analysts = analysts || [];
+        },
+        error: (error) => {
+          this.messageNotificationService.show(error?.error?.detail || 'Failed to load analysts');
+          this.closeAssignAnalystDialog();
+        }
+      });
+  }
+
+  openAssignAnalystDialog(caseItem: Case): void {
+    if (!this.canManageCases()) {
+      return;
+    }
+
+    this.selectedAssignCase = caseItem;
+    this.isAssignAnalystDialogOpen = true;
+    this.loadAnalysts();
+  }
+
+  closeAssignAnalystDialog(): void {
+    this.isAssignAnalystDialogOpen = false;
+    this.selectedAssignCase = null;
+    this.analysts = [];
+  }
+
+  onAnalystAssigned(selectedAnalystId: string): void {
+    if (!this.selectedAssignCase) {
+      return;
+    }
+
+    this.isAssignAnalystSaving = true;
+
+    this.caseService.assignCaseAnalyst(this.selectedAssignCase.caseId, {
+      analystId: selectedAnalystId
+    })
+      .pipe(finalize(() => this.isAssignAnalystSaving = false))
+      .subscribe({
+        next: (updatedCase) => {
+          this.messageNotificationService.show('Case analyst assigned successfully', 'success');
+          this.cases = this.cases.map(item =>
+            item.caseId === updatedCase.caseId ? updatedCase : item);
+          this.closeAssignAnalystDialog();
+        },
+        error: (error) => {
+          this.messageNotificationService.show(error?.error?.detail || 'Failed to assign analyst');
+        }
+      });
+  }
+
+  private compareCases(first: Case, second: Case): number {
+    if (this.caseFilters.sort === 'updated_asc') {
+      return this.getCaseTimestamp(first) - this.getCaseTimestamp(second);
+    }
+
+    if (this.caseFilters.sort === 'priority_desc') {
+      return this.getPriorityWeight(second.priority) - this.getPriorityWeight(first.priority);
+    }
+
+    if (this.caseFilters.sort === 'severity_desc') {
+      return this.getSeverityWeight(second.severity) - this.getSeverityWeight(first.severity);
+    }
+
+    return this.getCaseTimestamp(second) - this.getCaseTimestamp(first);
+  }
+
+  private getCaseTimestamp(caseItem: Case): number {
+    const value = caseItem.updatedAt || caseItem.createdAt;
+
+    if (!value) {
+      return 0;
+    }
+
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? 0 : date.getTime();
+  }
+
+  private getPriorityWeight(priority?: Priority | null): number {
+    return { low: 1, medium: 2, high: 3, critical: 4 }[priority || 'low'] || 0;
+  }
+
+  private getSeverityWeight(severity?: Severity | null): number {
+    return { info: 1, low: 2, medium: 3, high: 4, critical: 5 }[severity || 'info'] || 0;
   }
 }

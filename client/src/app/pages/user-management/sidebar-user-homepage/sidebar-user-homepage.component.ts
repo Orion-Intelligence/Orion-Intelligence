@@ -25,9 +25,11 @@ import { ExportChoiceModalComponent } from '../../../shared/partials/export-choi
 import { ExportChoiceOption } from '../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../shared/services/export/alert-export.service';
 import { SidebarHomepageService } from '../../../services/dashboard/sidebar.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-sidebar-user-homepage',
-  imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, ExportChoiceModalComponent],
+  imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './sidebar-user-homepage.component.html',
   animations: [overlayAnimation],
 })

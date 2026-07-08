@@ -1,13 +1,19 @@
+import asyncio
+import ipaddress
+import socket
 from typing import Optional
+from urllib.parse import urlparse
 
-from fastapi import Depends, HTTPException, Request, status
+from fastapi import Depends, HTTPException, Request, UploadFile, status
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, UserStatus
+from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.session_manager.session_manager import session_manager
+from configs.auth_cookie import token_from_request
 # from orion.api.interactive.auth_manager.rules.license_rules import LICENSE_RULES
 from orion.constants import constant
 
@@ -15,6 +21,12 @@ oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="/api/token", auto_error=False)
 
 PASSWORD_RESET_ALLOWED_PATHS = {"/api/get/tenant/node"}
+SCAN_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
+BLOCKED_SCAN_HOSTS = {"localhost", "localhost.localdomain"}
+
+
+def _enum_value(value):
+    return value.value if hasattr(value, "value") else value
 
 
 def enforce_password_reset(user, request: Request):
@@ -22,11 +34,16 @@ def enforce_password_reset(user, request: Request):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Password reset required")
 
 
+def get_request_token(request: Request, token: str | None) -> str | None:
+    return token_from_request(request) or token
+
+
 async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)):
     auth = env_handler.get_instance().env("AUTH")
     if auth == "0":
         return user_role.DEMO
 
+    token = get_request_token(request, token)
     user = await session_manager.get_instance().get_current_user(token)
     enforce_password_reset(user, request)
     role = user.role
@@ -39,6 +56,7 @@ async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)
 
 
 async def get_current_status(request: Request, token: str = Depends(oauth2_scheme)):
+    token = get_request_token(request, token)
     user = await session_manager.get_instance().get_current_user(token)
     enforce_password_reset(user, request)
     user_status = user.status
@@ -61,12 +79,14 @@ def role_required(required_roles: list[user_role]):
 
 async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
     session_mgr = session_manager.get_instance()
+    token = get_request_token(request, token)
     user = await session_mgr.get_current_user(token)
     enforce_password_reset(user, request)
     return user
 
 
-async def get_is_free_token(token: str = Depends(oauth2_scheme)) -> bool:
+async def get_is_free_token(request: Request, token: str = Depends(oauth2_scheme)) -> bool:
+    token = get_request_token(request, token)
     if not token:
         return False
 
@@ -85,6 +105,91 @@ async def get_is_free_token(token: str = Depends(oauth2_scheme)) -> bool:
         return False
 
     return payload.get("free") is True
+
+
+async def admin_or_enterprise_required(current_user=Depends(get_current_user)):
+    role = _enum_value(getattr(current_user, "role", None))
+    licenses = {_enum_value(license_name) for license_name in (getattr(current_user, "licenses", []) or [])}
+    if role == user_role.ADMIN.value or LicenseName.ENTERPRISE.value in licenses:
+        return current_user
+    raise HTTPException(status_code=403, detail="Access forbidden")
+
+
+async def case_management_required(current_user=Depends(get_current_user)):
+    role = _enum_value(getattr(current_user, "role", None))
+    licenses = {_enum_value(license_name) for license_name in (current_user.licenses or [])}
+    if role == user_role.ADMIN.value or LicenseName.MAINTAINER.value in licenses:
+        return True
+
+    permissions = [_enum_value(permission) for permission in (current_user.permissions or [])]
+    if role == user_role.ANALYST.value and UserPermission.CASE_MANAGEMENT.value in permissions:
+        return True
+
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Case management permission required")
+
+
+def _extract_scan_host(target: str) -> str:
+    raw_target = (target or "").strip()
+    if not raw_target:
+        raise HTTPException(status_code=400, detail="Target is required")
+    parsed = urlparse(raw_target if "://" in raw_target else f"//{raw_target}", allow_fragments=False)
+    host = (parsed.hostname or raw_target).strip().strip("[]").rstrip(".").lower()
+    if not host:
+        raise HTTPException(status_code=400, detail="Invalid target")
+    if host in BLOCKED_SCAN_HOSTS or host.endswith(".localhost"):
+        raise HTTPException(status_code=400, detail="Private or internal targets are not allowed")
+    return host
+
+
+def _reject_internal_ip(address: str) -> None:
+    try:
+        ip = ipaddress.ip_address(address)
+    except ValueError:
+        return
+    if (
+        ip.is_private
+        or ip.is_loopback
+        or ip.is_link_local
+        or ip.is_reserved
+        or ip.is_multicast
+        or ip.is_unspecified
+        or not ip.is_global
+    ):
+        raise HTTPException(status_code=400, detail="Private or internal targets are not allowed")
+
+
+async def _validate_public_scan_target(target: str) -> None:
+    host = _extract_scan_host(target)
+    _reject_internal_ip(host)
+    try:
+        resolved = await asyncio.to_thread(socket.getaddrinfo, host, None, type=socket.SOCK_STREAM)
+    except socket.gaierror as exc:
+        raise HTTPException(status_code=400, detail="Unable to resolve target host") from exc
+    for item in resolved:
+        _reject_internal_ip(item[4][0])
+
+
+async def _scan_domain_with_type(payload, user_id: str, scan_type: Optional[str] = None):
+    from orion.api.server.crawl_manager.crawl_model import crawl_model
+
+    await _validate_public_scan_target(payload.domain)
+    if scan_type:
+        payload.scanType = scan_type
+    return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
+
+
+async def _read_scan_upload(file: UploadFile) -> bytes:
+    if getattr(file, "size", None) is not None and file.size > SCAN_UPLOAD_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 10 MB.")
+    content = await file.read()
+    if len(content) > SCAN_UPLOAD_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="File too large! Maximum allowed size is 10 MB.")
+    return content
+
+
+def _enforce_demo_safe_search(param, current_user, is_free: bool = False) -> None:
+    if current_user and getattr(current_user, "role", None) == user_role.DEMO and is_free:
+        param.safe = True
 
 
 def status_required(status_required: list[UserStatus], bypass_roles: Optional[list[user_role]] = None):
@@ -123,7 +228,7 @@ def license_required(feature: str, bypass_roles: Optional[list[user_role]] = Non
 
     return checker
 def get_user_permissions(user):
-    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False}
+    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False, "geo_fencing": False}
 
     for lic in user.licenses:
         rules = constant.license_rules.get(lic, {})
@@ -136,5 +241,5 @@ def get_user_permissions(user):
         final["mapping"] |= rules.get("mapping", False)
         final["scanning"] |= rules.get("scanning", False)
         final["maintainer"] |= rules.get("maintainer", False)
-
+        final["geo_fencing"] |= rules.get("geo_fencing", False)
     return final

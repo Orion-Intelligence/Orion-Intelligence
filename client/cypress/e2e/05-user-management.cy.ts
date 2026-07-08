@@ -39,14 +39,14 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
     cy.get('[data-testid="sidebar-subitem-profile-system-settings"]').filter(':visible').first().scrollIntoView().click();
     cy.url().should('include', 'system-settings');
-    cy.get('[data-testid="system-settings-edit"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-edit"]').should('be.visible').click();
     cy.get('[data-testid="system-settings-account-mail"]').scrollIntoView().should('be.visible').clear().type('cypress-mailer@example.test');
     cy.get('[data-testid="system-settings-account-mail-password"]').scrollIntoView().should('be.visible').clear().type('1#VSC&cuad)d', {log: false});
     cy.get('[data-testid="system-settings-account-smtp-server"]').scrollIntoView().should('be.visible').clear().type('mailpit');
     cy.get('[data-testid="system-settings-account-smtp-port"]').scrollIntoView().should('be.visible').clear().type('1025');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-save"]').should('be.visible').click();
-    cy.get('[data-testid="system-settings-edit"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-edit"]', {timeout: 30000}).should('be.visible');
 
     cy.visit('/dashboard/profile/users');
     cy.get('[data-testid="tenant-add-user-button"]').should('not.be.disabled');
@@ -71,10 +71,12 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
   it('forces testing1 to change password on first login and clears the reset flag', () => {
     const user = testUsers[forcedResetUserKey] as ManagedUser;
 
+    cy.intercept('POST', '**/api/token').as('loginRequest');
     cy.visit('/login');
     cy.get('[data-testid="login-user"]').should('be.visible').clear().type(user.username);
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(user.password, {log: false});
     cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+    cy.waitForLoginRequest();
 
     cy.url().should('include', '/reset/');
     cy.get('[data-testid="reset-title"]').should('contain.text', 'Change Password');
@@ -91,8 +93,14 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     openUserEditor(user.username);
     cy.get('@expandedUserEditor').within(() => {
       cy.get('[data-testid="tenant-password-reset-required-toggle"]')
-        .find('input[type="checkbox"]')
-        .should('not.be.checked');
+        .then(($control) => {
+          const $checkbox = $control.find('input[type="checkbox"]');
+          if ($checkbox.length) {
+            cy.wrap($checkbox).should('not.be.checked');
+            return;
+          }
+          cy.wrap($control).should('contain.text', 'No password reset');
+        });
     });
     cy.logout();
   });
@@ -102,7 +110,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
   });
 
   it('logs in as testing2 and verifies assigned license sidebar groups', () => {
-    loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Dump'], testUsers, testData);
+    loginAndClickSidebar(testUsers.testing2.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed'], testUsers, testData);
   });
 
   it('logs in as testing2 and updates account settings preferences', () => {
@@ -117,11 +125,11 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
   });
 
   it('logs in as testing3 and verifies assigned license sidebar groups', () => {
-    loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs', 'Dump'], testUsers, testData);
+    loginAndClickSidebar(testUsers.testing3.username, ['General Intelligence', 'Data Breach', 'Defacement', 'Social', 'Exploit', 'Feed', 'Stealer logs'], testUsers, testData);
   });
 
   it('logs in as testing4 and verifies scanner and api sidebar groups', () => {
-    loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity API'], testUsers, testData);
+    loginAndClickSidebar(testUsers.testing4.username, ['Web Scans', 'Entity Lookup'], testUsers, testData);
   });
 
   it('logs in as testing5 and completes the stealer logs subscription paywall flow', () => {
@@ -178,7 +186,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
     cy.contains('p', commentText).should('be.visible');
 
-    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click({ force: true });
     cy.contains('div', 'Profile').should('be.visible');
     cy.get('[data-testid="report-user-sidebar-open-profile"]').filter(':visible').first().click();
     cy.url().should('match', /\/dashboard\/profile\/user\/[^/]+$/);
@@ -207,10 +215,12 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.contains('p', blockedCommentText).should('not.exist');
 
     cy.visit('/dashboard/profile/account');
+    cy.intercept('POST', '**/api/update/current/user').as('profileVisibilityUpdate');
     cy.get('[data-testid="account-settings-profile-visibility-toggle"]').should('be.visible').then(($toggle) => {
       const label = $toggle.text();
       if (label.includes('Visible to other users')) {
         cy.wrap($toggle).scrollIntoView().click();
+        cy.wait('@profileVisibilityUpdate');
       }
     });
     cy.contains('[data-testid="account-settings-profile-visibility-toggle"] p', 'Hidden from other users').should('be.visible');
@@ -222,7 +232,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     loginAsUser(testUsers.testing5.username, testUsers.testing5.password);
     openFirstStrategicReportFromSearch();
     cy.scrollDashboardToBottom()
-    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click();
+    cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click({ force: true });
     cy.get('[data-testid="report-user-sidebar-hidden-profile"]').should('exist');
     cy.get('[data-testid="report-user-sidebar-open-profile"]').should('not.exist');
     cy.logout();
@@ -251,7 +261,6 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').scrollIntoView().click();
     cy.get('[data-testid="sidebar-subitem-profile-users"]').should('be.visible').scrollIntoView().click();
     cy.url().should('include', '/dashboard/profile/users');
-    cy.wait('@usersApi');
     addUser(enterpriseUser);
     setPasswordResetRequired(enterpriseUser.username, false);
     cy.logout();

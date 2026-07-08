@@ -7,10 +7,12 @@ import { FilterCategory } from '../../../shared/model/filter/filter.model';
 import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
 import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
 import { HelperService } from '../../../shared/services/helper.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-search-filters',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, TranslatePipe],
   templateUrl: './search-filters.component.html',
   animations: [searchFilterAnimation],
 })

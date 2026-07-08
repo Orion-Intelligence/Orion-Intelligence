@@ -29,7 +29,7 @@ Cypress.on("window:before:load", (win) => {
     };
 
     const originalWindowScrollTo = win.scrollTo.bind(win);
-    win.scrollTo = ((...args: [ScrollToOptions] | [number, number]) => {
+    win.scrollTo = ((...args: [ScrollToOptions?] | [number, number]) => {
         if (typeof args[0] === "object") {
             return originalWindowScrollTo(forceInstantBehavior(args[0]));
         }
@@ -37,7 +37,7 @@ Cypress.on("window:before:load", (win) => {
     }) as typeof win.scrollTo;
 
     const originalElementScrollTo = win.Element.prototype.scrollTo;
-    win.Element.prototype.scrollTo = function (...args: [ScrollToOptions] | [number, number]) {
+    win.Element.prototype.scrollTo = function (...args: [ScrollToOptions?] | [number, number]) {
         if (typeof args[0] === "object") {
             return originalElementScrollTo.call(this, forceInstantBehavior(args[0]));
         }
@@ -121,7 +121,8 @@ Cypress.on("window:before:load", (win) => {
       }
 
       .notif-stagger-item,
-      .alert-card-stagger-item {
+      .alert-card-stagger-item,
+      .ui-social-sidebar-platform-row {
         opacity: 1 !important;
         transform: none !important;
       }

@@ -9,9 +9,10 @@ import { ResultComponent } from '../../../shared/partials/result/result.componen
 import { DashboardResultsGeneralComponent } from '../../intel-panel/dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { DashboardResultExploitComponent } from '../../intel-panel/dashboard-results/dashboard-result-exploit/dashboard-result-exploit.component';
+import { DashboardResultAptComponent } from '../../intel-panel/dashboard-results/dashboard-result-apt/dashboard-result-apt.component';
 import { DashboardResultChatComponent } from '../../intel-panel/dashboard-results/dashboard-result-chat/dashboard-result-chat.component';
 import { SortGroupedResultsPipe } from '../../../shared/pipes/sort-grouped-results.pipe';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, DumpSubCategory, FeedSubCategory, GeneralSubCategory, SocialSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, FeedSubCategory, SocialSubCategory, AptIntelSubCategory } from '../../../shared/constants/pages';
 import { SelectionStoreService } from '../../../services/dashboard/selection.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { DashboardResultSocialComponent } from '../../intel-panel/dashboard-results/dashboard-result-social/dashboard-result-social.component';
@@ -32,10 +33,13 @@ import { applyQueryAndPageFromParams, isRouteChanged } from '../../intel-panel/d
 import { NetworkIntel } from '../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ExternalConsolidatedFeedService } from '../../../services/dashboard/external-consolidated-feed.service';
+
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
-  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel],
+  imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultAptComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
   templateUrl: './dashboard-consolidated.component.html',
   animations: [scanAnimation, fadeInDashboardItem],
 })
@@ -58,12 +62,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
   firstTrigger = true;
-  result_count = 0;
   apiCategories = Object.values(ApiSubCategory);
-  dumpCategories = Object.values(DumpSubCategory);
+  aptIntelCategories = Object.values(AptIntelSubCategory);
   newsCategories = Object.values(FeedSubCategory);
   socialCategories = Object.values(SocialSubCategory);
-  generalCategories = Object.values(GeneralSubCategory);
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
@@ -90,8 +92,20 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return false;
   });
 
-  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected authService: AuthService) {
+  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected authService: AuthService, protected externalConsolidatedFeedService: ExternalConsolidatedFeedService) {
     this.pageCounts = {};
+  }
+
+  get defacementResultCount(): number {
+    return this.consolidatedCallbackModel.defacement_model?.Result?.length ?? 0;
+  }
+
+  get stealerlogResultCount(): number {
+    return this.stealerlogCallbackModel?.Result?.length ?? 0;
+  }
+
+  get hasDefacementOrStealerResults(): boolean {
+    return (this.defacementResultCount + this.stealerlogResultCount) > 0;
   }
 
   ngAfterViewInit(): void {
@@ -148,7 +162,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isStealerLogLoading.set(false);
       this.dashboardService.consolidatedParamModel.q = '';
       this.dashboardService.consolidatedParamModel.ioc='';
-      this.router.navigate([], { queryParams: {}, queryParamsHandling: '' }).then();
+      this.router.navigate([], {
+        relativeTo: this.route,
+        queryParams: { tab: this.getActiveConsolidatedTab() },
+        queryParamsHandling: '',
+        replaceUrl: true,
+      }).then();
     }
     const cleanedParams: any = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
@@ -156,6 +175,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         cleanedParams[key] = value;
       }
     });
+    cleanedParams.tab = this.getActiveConsolidatedTab();
     this.router.navigate([], {
       queryParams: cleanedParams, queryParamsHandling: 'merge', replaceUrl: true, relativeTo: this.route
     }).then(() => {
@@ -172,6 +192,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.isLoading.set(true);
     this.consolidatedCallbackModel.defacement_model = new DefacementCallbackModel();
     this.stealerlogCallbackModel = new StealerLogCallbackModel();
+    this.externalConsolidatedFeedService.resetActorMalware();
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(0).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.response = response.data;
@@ -182,15 +203,20 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       else {
         this.consolidatedCallbackModel = new ConsolidatedCallbackModel();
         this.groupedResults = {};
+        this.externalConsolidatedFeedService.syncActorMalware(this.groupedResults, this.pageCounts);
       }
       this.isLoading.set(false);
     });
+    this.externalConsolidatedFeedService.fetchActorMalware(this.dashboardService.consolidatedParamModel, this.dashboardService.selectedFilters());
     if (this.isEmailOrUrl(this.dashboardService.consolidatedParamModel.q)) {
       this.isStealerLogLoading.set(true);
-      this.dashboardService.consolidatedParamModel.url = this.dashboardService.consolidatedParamModel.q;
-      this.dashboardService.consolidatedParamModel.ioc = `m_search_all:${this.dashboardService.consolidatedParamModel.q}`;
-      this.dashboardService.consolidatedParamModel.category = "credential";
-      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
+      const stealerLogParams = {
+        ...this.dashboardService.consolidatedParamModel,
+        url: this.dashboardService.consolidatedParamModel.q,
+        ioc: `m_search_all:${this.dashboardService.consolidatedParamModel.q}`,
+        category: 'credential',
+      };
+      this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', stealerLogParams, '', false)
         .pipe(switchMap(response => timer(300).pipe(map(() => response))))
         .subscribe(response => {
           if (response.success && response.data) {
@@ -255,6 +281,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       'defacement_model',
       'generic_model',
       'exploit_model',
+      'apt_model',
+      'malware_model',
       'social_model',
       'stealer_model',
       'tracking_model',
@@ -264,19 +292,22 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.groupedResults[model] = this.consolidatedCallbackModel[model]?.Result ?? [];
       this.pageCounts[model] = this.consolidatedCallbackModel[model]?.Page_Count ?? 0;
     });
-    this.result_count = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
+    this.externalConsolidatedFeedService.syncActorMalware(this.groupedResults, this.pageCounts);
   }
 
   onUpdateQuery(query: string) {
     this.dashboardService.consolidatedParamModel.q = query;
+    this.dashboardService.consolidatedParamModel.category = this.route.snapshot.routeConfig?.path || 'all';
+    this.dashboardService.consolidatedParamModel.url = '';
+    this.dashboardService.consolidatedParamModel.user = '';
+    this.dashboardService.consolidatedParamModel.ioc = '';
     this.query = query;
   }
 
   getTotalResultCount(): number {
-    const groupedCount = Object.values(this.groupedResults).reduce((sum, list) => sum + list.length, 0);
     const rankedCount = this.rankedResult.pageCount;
     if (this.isGrouped) {
-      return groupedCount;
+      return this.externalConsolidatedFeedService.getMergedResultCount(this.groupedResults);
     }
     else {
       return rankedCount;
@@ -296,7 +327,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     let second_category = "all";
     switch (section) {
       case Category.STRATEGIC:
-        firstSubcategory = this.generalCategories[0];
+        firstSubcategory = 'All';
         break;
       case Category.BREACH:
         firstSubcategory = this.leakCategories[0];
@@ -307,8 +338,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       case Category.DEFACEMENT:
         firstSubcategory = this.defacementCategories[0];
         break;
-      case Category.DUMP:
-        firstSubcategory = this.dumpCategories[0];
+      case Category.APT_INTEL:
+        firstSubcategory = this.aptIntelCategories[0];
         break;
       case Category.FEED:
         firstSubcategory = this.newsCategories[0];
@@ -321,7 +352,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (firstSubcategory) {
       this.selectionStore.setSelectedOption(firstSubcategory);
     }
-    const routePrefix = '/dashboard/' + section.toLowerCase() + '/' + second_category;
+    const sectionRoute = section === Category.APT_INTEL ? 'apt-intel' : section.toLowerCase();
+    const routePrefix = '/dashboard/' + sectionRoute + '/' + second_category;
     this.router.navigate([routePrefix], {
       queryParams: { page: 1 }, queryParamsHandling: 'merge'
     }).then();
@@ -333,6 +365,9 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         return Category.BREACH;
       case 'exploit_model':
         return Category.EXPLOIT;
+      case 'apt_model':
+      case 'malware_model':
+        return Category.APT_INTEL;
       case 'defacement_model':
         return Category.DEFACEMENT;
       case 'chat_model':
@@ -346,11 +381,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  onToggleMenu(tab: string): void {
+  onToggleMenu(tab: string, clearQuery = false): void {
+    if (clearQuery) {
+      this.query = '';
+      this.dashboardService.consolidatedParamModel.q = '';
+    }
     this.dashboardService.consolidatedParamModel.tab = tab;
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { tab },
+      queryParams: clearQuery ? { tab, q: null } : { tab },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     }).then();
@@ -360,6 +399,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isGrouped = true;
       this.isIOC = false;
       this.isGeoFencing = false;
+      this.restoreDeepSearchQuery();
       if (skipConsolidatedBackFetchOnce) {
         sessionStorage.removeItem('skipConsolidatedBackFetchOnce');
         return;
@@ -391,6 +431,32 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       this.isGrouped = false;
       this.isGeoFencing = true;
     }
+  }
+
+  private getActiveConsolidatedTab(): string {
+    if (this.isNetworkIntel) {
+      return 'Network Intelligence';
+    }
+    if (this.isGeoFencing) {
+      return 'Geo Fencing';
+    }
+    if (this.isGrouped || !this.isIOC) {
+      return 'Deep Search';
+    }
+    return 'IOCs';
+  }
+
+  private restoreDeepSearchQuery(): void {
+    const snapshotParams = this.route.snapshot.queryParams;
+    const querySource = this.dashboardService.consolidatedParamModel.q || this.query || snapshotParams['q'];
+    if (!querySource) {
+      return;
+    }
+    this.query = querySource;
+    this.dashboardService.consolidatedParamModel.q = querySource;
+    this.dashboardService.consolidatedParamModel.url = '';
+    this.dashboardService.consolidatedParamModel.user = '';
+    this.dashboardService.consolidatedParamModel.ioc = '';
   }
 
   checkMember(): boolean {

@@ -1,0 +1,48 @@
+{
+  "__all__": {
+    "disallow": [
+      "connections",
+      "followers",
+      "following"
+    ]
+  },
+  "blogger": {},
+  "bluesky": {},
+  "devto": {},
+  "facebook": {},
+  "habr": {},
+  "hackernoon": {},
+  "hashnode": {},
+  "instagram": {},
+  "mastodon": {},
+  "medium": {},
+  "microblog": {},
+  "misskey": {},
+  "nostr": {},
+  "pleroma": {},
+  "primal": {},
+  "quora": {},
+  "reddit": {},
+  "stackoverflow": {},
+  "substack": {},
+  "threads": {},
+  "tiktok": {
+    "allow": [
+      "shorts"
+    ],
+    "disallow": [
+      "posts"
+    ]
+  },
+  "twitter": {
+    "disallow": [
+      "comments"
+    ]
+  },
+  "youtube": {
+    "allow": [
+      "videos",
+      "shorts"
+    ]
+  }
+}

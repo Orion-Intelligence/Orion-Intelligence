@@ -7,6 +7,6 @@
         <img src="/assets/images/shared/welcom_icon.svg" data-testid="welcome-tick" alt="Tick" class="mx-auto mb-6 block max-[600px]:h-[72px] max-[600px]:w-[72px]">
         <div class="mb-5 text-2xl font-semibold text-white max-[600px]:text-lg">{{ heading }}</div>
         <div class="mb-8 text-lg font-normal leading-[1.6] text-[#A0B8D1] max-[600px]:text-base">{{ message }}</div>
-        <button data-testid="welcome-goto-login" class="mx-auto block h-11 w-[124px] cursor-pointer rounded-lg border-0 bg-[#57A5EB] text-sm font-medium text-[#373637] shadow-[0_1px_2px_#1018280D] transition-all duration-200 ease-in-out hover:bg-[#4591d4]" (click)="goToLogin()">Go to login</button>
+        <button data-testid="welcome-goto-login" class="mx-auto block h-11 w-[124px] cursor-pointer rounded-lg border-0 bg-[#57A5EB] text-sm font-medium text-[#373637] shadow-[0_1px_2px_#1018280D] transition-all duration-200 ease-in-out hover:bg-[#4591d4]" (click)="goToLogin()">{{ 'Go to login' | translate }}</button>
     </div>
 </div>

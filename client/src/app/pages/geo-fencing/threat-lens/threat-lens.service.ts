@@ -11,6 +11,8 @@ const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 
 
 @Injectable({ providedIn: 'root' })
 export class ThreatLensService {
+  private readonly maxThreatLensPages = 30;
+
   constructor(private api: ApiService, private dashboardService: DashboardService) {}
 
   fetchThreatLensData(payload?: Partial<ThreatLensRequestPayload>): Observable<ConsolidatedCallbackModel> {
@@ -70,7 +72,7 @@ export class ThreatLensService {
     const firstResponse = await firstValueFrom(this.fetchThreatLensData({ ...basePayload, page: 1 }));
     responses.push(firstResponse);
 
-    const maxPages = this.getThreatLensPageCount(firstResponse);
+    const maxPages = Math.min(this.getThreatLensPageCount(firstResponse), this.maxThreatLensPages);
     for (let page = 2; page <= maxPages; page += 1) {
       responses.push(await firstValueFrom(this.fetchThreatLensData({ ...basePayload, page })));
     }
@@ -273,10 +275,9 @@ export class ThreatLensService {
 
   private extractDocumentDate(document: any): { isoDate: string; timestamp: number } {
     const candidates = [
-      document?.m_message_date,
+      document?.m_date,
       document?.m_creation_date,
       document?.m_update_date,
-      document?.m_leak_date,
     ];
 
     for (const candidate of candidates) {

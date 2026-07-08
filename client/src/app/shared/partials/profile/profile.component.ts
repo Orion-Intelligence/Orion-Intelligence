@@ -8,21 +8,25 @@ import { AppService } from '../../../services/core/app/app.service';
 import { ConfigSettings } from '../../model/app/config';
 import { AlertNotificationComponent } from "../alert-notification/alert-notification.component";
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
+import { ApiService } from '../../services/api.service';
+import { TranslationService } from '../../services/translation.service';
+import { ScanNotificationService } from '../../services/scan-notification.service';
+
+type ThemeMode = 'dark-theme' | 'light-theme';
+
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [
-    NgOptimizedImage,
-    TooltipDirective,
-    NgClass,
-    AlertNotificationComponent
-  ],
+  imports: [NgOptimizedImage, TooltipDirective, NgClass, AlertNotificationComponent, TranslatePipe],
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy {
   private scrollContainer: HTMLElement | null = null;
   private scrollHandler = () => {
     this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
   };
 
   protected readonly Date = Date;
@@ -30,14 +34,22 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   username = signal<string>('');
   role = signal<string>('');
   isNotificationOpen = signal<boolean>(false);
+  isScanNotificationOpen = signal<boolean>(false);
   profile_image: string = "";
   licences: string = '';
   dropdownOpen = signal(false);
+  languageDropdownOpen = signal(false);
+  selectedLanguage = signal('');
+  selectedTheme = signal<ThemeMode>('dark-theme');
+  languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   readonly openPopup = output<undefined>();
 
-  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, public router: Router, public dashboardService: DashboardService, public appService: AppService, protected licenseService: LicenseService, private apiService: ApiService, private translationService: TranslationService, public scanNotificationService: ScanNotificationService) {
     this.username.set(this.appService.userSessionData()?.user?.username);
     this.role.set(this.appService.userSessionData()?.user?.role);
+    if(this.licenseService.canUseScanning()){
+      this.scanNotificationService.startPendingScans();
+    }
     effect(() => {
       if (this.dropdownOpen()) {
         this.onDropdownOpen();
@@ -45,6 +57,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
       const data = this.appService.userSessionData();
       this.username.set(data?.user?.username ?? '');
       this.role.set(data?.user?.role ?? '');
+      this.selectedLanguage.set(this.getCurrentLanguage(data?.user?.preferences?.['language']));
+      this.selectedTheme.set(this.getCurrentTheme(data?.user?.theme ?? data?.user?.preferences?.['theme']));
     });
   }
 
@@ -79,9 +93,89 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     return this.licenseService.isMember();
   }
 
+  canViewScanNotifications(): boolean {
+    return this.licenseService.canUseScanning();
+  }
+
   toggleDropdown(event: Event) {
     event.stopPropagation();
+    this.languageDropdownOpen.set(false);
     this.dropdownOpen.update(v => !v);
+  }
+
+  toggleLanguageDropdown(event: Event) {
+    event.stopPropagation();
+    this.dropdownOpen.set(true);
+    this.languageDropdownOpen.update(v => !v);
+  }
+
+  selectLanguage(language: string, event: Event) {
+    event.stopPropagation();
+    const selectedLanguage = this.translationService.getSupportedLanguage(language);
+    const currentSession = this.appService.userSessionData();
+    const preferences = {
+      ...(currentSession.user.preferences || {}),
+      language: selectedLanguage
+    };
+    this.selectedLanguage.set(selectedLanguage);
+    this.appService.userSessionData.update(state => {
+      if (!state) {
+        return state;
+      }
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          preferences
+        }
+      };
+    });
+    this.apiService.post('update/current/user', {
+      username: currentSession.user.username,
+      preferences
+    }).subscribe({
+      next: () => void 0,
+      error: () => void 0
+    });
+    this.languageDropdownOpen.set(false);
+  }
+
+  canChangeTheme(): boolean {
+    return !!this.appService.userSessionData()?.user?.username;
+  }
+
+  toggleTheme(event: Event) {
+    event.stopPropagation();
+    const currentSession = this.appService.userSessionData();
+    if (!currentSession?.user) {
+      return;
+    }
+    const selectedTheme: ThemeMode = this.selectedTheme() === 'dark-theme' ? 'light-theme' : 'dark-theme';
+    const preferences = {
+      ...(currentSession.user.preferences || {}),
+      theme: selectedTheme
+    };
+    this.selectedTheme.set(selectedTheme);
+    this.appService.userSessionData.update(state => {
+      if (!state) {
+        return state;
+      }
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          theme: selectedTheme,
+          preferences
+        }
+      };
+    });
+    this.apiService.post('update/current/user', {
+      username: currentSession.user.username,
+      preferences
+    }).subscribe({
+      next: () => void 0,
+      error: () => void 0
+    });
   }
 
   auditlog() {
@@ -97,11 +191,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   }
 
   logout() {
+    this.scanNotificationService.stopAll();
     this.dashboardService.resetParams();
     this.dashboardService.clearCallback();
     this.appService.configData.set(new ConfigSettings({}, {}));
     this.authService.logout();
     this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
   }
 
   @HostListener('document:click', ['$event'])
@@ -109,15 +205,30 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     const eventTargetElement = event.target as HTMLElement;
     if (!eventTargetElement.closest('.profile')) {
       this.dropdownOpen.set(false);
+      this.languageDropdownOpen.set(false);
     }
   }
 
   openNotifications(): void {
+    this.isScanNotificationOpen.set(false);
+    this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
     this.isNotificationOpen.set(true);
   }
 
   closeNotifications(): void {
     this.isNotificationOpen.set(false);
+  }
+
+  openScanNotifications(): void {
+    this.isNotificationOpen.set(false);
+    this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
+    this.isScanNotificationOpen.set(true);
+  }
+
+  closeScanNotifications(): void {
+    this.isScanNotificationOpen.set(false);
   }
 
   getUnseenAlertCount(): number {
@@ -132,5 +243,13 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   openSupportPopup() {
     // TODO: The 'emit' function requires a mandatory void argument
     this.openPopup.emit(undefined);
+  }
+
+  private getCurrentLanguage(userLanguage: string): string {
+    return this.translationService.getSupportedLanguage(userLanguage, this.translationService.getSystemLanguage());
+  }
+
+  private getCurrentTheme(userTheme?: string): ThemeMode {
+    return userTheme === 'light-theme' ? 'light-theme' : 'dark-theme';
   }
 }

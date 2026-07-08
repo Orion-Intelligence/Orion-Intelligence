@@ -7,6 +7,9 @@ import { IconService } from '../../services/icon.service';
   imports: [],
   template: `<span class="block h-full w-full">@if (iconDataUrl()) { <img [src]="iconDataUrl()" [alt]="platformName()" class="h-full w-full object-contain"> }</span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    class: 'block h-full w-full'
+  }
 })
 export class SocialIconComponent {
   private iconService = inject(IconService);

@@ -11,11 +11,12 @@ import { NexusChatService } from '../nexus-chat.service';
 import { AiWorkspaceMessage } from '../../../../shared/model/chat/ai-workspace-message.model';
 import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-actions.component';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-chat-widget',
   standalone: true,
-  imports: [CommonModule, FormsModule, BotMessageActionsComponent, MarkdownPipe],
+  imports: [CommonModule, FormsModule, BotMessageActionsComponent, MarkdownPipe, TranslatePipe],
   templateUrl: './chat-widget.component.html',
   animations: [chatBotAnimation, overlayFadeAnimation]
 })

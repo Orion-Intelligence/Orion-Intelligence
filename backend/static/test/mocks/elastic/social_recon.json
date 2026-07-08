@@ -3,6 +3,54 @@
   "result": [
     {
       "metadata": {
+        "platform": "Twitter",
+        "username": "superman0011",
+        "social_handle": "superman0011",
+        "url": "https://twitter.com/superman0011",
+        "timestamp": "2026-06-14 10:00:00",
+        "status": "active"
+      },
+      "data": {
+        "ids": {
+          "fullname": "Clark Kent",
+          "nickname": "superman0011",
+          "bio": "Daily Planet field reporter",
+          "created_at": "2021-05-18T09:30:00+00:00",
+          "follower_count": "7421"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "platform": "Tiktok",
+        "username": "superman0011",
+        "social_handle": "superman0011",
+        "url": "https://www.tiktok.com/@superman0011",
+        "timestamp": "2026-06-14 10:00:04",
+        "status": "active"
+      },
+      "data": {
+        "ids": {
+          "fullname": "Superman",
+          "nickname": "superman0011",
+          "bio": "Skyline clips and field notes",
+          "follower_count": "3912"
+        }
+      }
+    },
+    {
+      "metadata": {
+        "platform": "Github",
+        "username": "superman0011",
+        "social_handle": "superman0011",
+        "url": "https://github.com/superman0011",
+        "timestamp": "2026-06-14 10:00:08",
+        "status": "suggested"
+      },
+      "data": null
+    },
+    {
+      "metadata": {
         "platform": "Allmylinks",
         "username": "msmannan00",
         "social_handle": "msmannan00",

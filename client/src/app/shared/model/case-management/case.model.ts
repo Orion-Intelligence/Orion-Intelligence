@@ -14,19 +14,33 @@ export type CaseType =
 
 export type CaseStatus =
     'new' |
-    'triaged' |
-    'assigned' |
-    'investigating' |
-    'waiting_on_response' |
-    'remediating' |
-    'review' |
+    'intake_review' |
+    'under_investigation' |
+    'evidence_collection' |
+    'verification' |
+    'regulatory_action' |
+    'legal_review' |
     'resolved' |
     'closed';
+
+export interface CaseStatusReason {
+    status: CaseStatus;
+    reason: string;
+}
+
+export type ArtifactReportSource =
+    'strategic' |
+    'breach' |
+    'defacement' |
+    'social' |
+    'feed' |
+    'exploit' |
+    'stealerlogs';
 
 export type EntityConfidence = 'low' | 'medium' | 'high';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type Priority = 'low' | 'medium' | 'high' | 'critical';
-export type TaskStatus = 'open' | 'in_progress' | 'blocked' | 'done' | 'cancelled';
+export type TaskStatus = 'open' | 'in_progress' | 'under_review' | 'blocked' | 'done' | 'cancelled';
 export type ArtifactType = 'evidence' | 'screenshot' | 'file' | 'url_capture' | 'raw_alert' | 'chat_transcript' | 'email_header' | 'log_excerpt' | 'report' | 'other';
 export type ClosureReason = 'true_positive' | 'false_positive' | 'duplicate' | 'risk_accepted' | 'remediated' | 'no_action_required' | 'inconclusive' | 'other';
 
@@ -113,7 +127,6 @@ export type SocialPlatform =
     'x' |
     'linkedin' |
     'telegram' |
-    'whatsapp' |
     'discord' |
     'reddit' |
     'github' |
@@ -248,6 +261,17 @@ export interface CaseLinkRequest {
     reason: string;
 }
 
+export interface CaseArtifactFile {
+    fileId: string;
+    fileName: string;
+    fileType: string;
+    fileSize: number;
+    fileResourceId: string;
+    fileHash?: string;
+    integrityStatus?: 'unknown' | 'verified' | 'failed';
+    uploadedAt?: Date | string;
+}
+
 export interface CaseArtifact {
     artifactId: string;
     type: ArtifactType;
@@ -257,15 +281,20 @@ export interface CaseArtifact {
     artifactTypeOtherValue?: string;
     artifactSourceOtherValue?: string;
     url?: string;
-    fileName?: string;
-    fileType?: string;
-    fileSize?: number;
-    fileResourceId?: string;
+    files: CaseArtifactFile[];
     entityIds: string[];
     tags: CaseTag[];
+    linkedReportSource?: ArtifactReportSource | '';
+    linkedReportId?: string;
+    linkedReportTitle?: string;
     capturedAt?: Date | string | null;
     createdBy?: string;
     createdAt?: Date | string;
+}
+
+export interface ArtifactReportOption {
+    id: string;
+    title: string;
 }
 
 export interface CaseArtifactRequest {
@@ -277,12 +306,12 @@ export interface CaseArtifactRequest {
     artifactTypeOtherValue?: string;
     artifactSourceOtherValue?: string;
     url?: string;
-    fileName?: string;
-    fileType?: string;
-    fileSize?: number;
-    fileResourceId?: string;
+    files: CaseArtifactFile[];
     entityIds: string[];
     tags: CaseTag[];
+    linkedReportSource?: ArtifactReportSource | '';
+    linkedReportId?: string;
+    linkedReportTitle?: string;
     capturedAt?: Date | string | null;
 }
 
@@ -522,8 +551,17 @@ export interface SharedCaseComment {
     updatedAt?: string;
 }
 
+export interface CaseChartItem {
+    key: string;
+    label: string;
+    count: number;
+}
+
 export interface Case {
     id?: string;
+    viewerId?: string;
+    viewerRole?: string;
+    assignedAnalysts?: CaseAnalyst[];
     caseId: string;
     caseTypeOtherValue?: string;
     intakeSourceOtherValue?: string;
@@ -532,6 +570,7 @@ export interface Case {
     description: string;
     caseType: CaseType;
     status: CaseStatus;
+    statusReasons?: CaseStatusReason[];
     severity: Severity;
     priority: Priority;
     intakeSource: IntakeSource;
@@ -548,4 +587,7 @@ export interface Case {
     tasks: CaseTask[];
     linkedCases: CaseLink[];
     closure?: CaseClosure | null;
+    isArchived?: boolean;
+    archivedAt?: Date | string | null;
+    archivedBy?: string;
 }

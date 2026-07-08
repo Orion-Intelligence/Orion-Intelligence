@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from datetime import timezone
 from enum import Enum
@@ -32,14 +34,24 @@ class CaseType(str, Enum):
 
 class CaseStatus(str, Enum):
     NEW = "new"
-    TRIAGED = "triaged"
-    ASSIGNED = "assigned"
-    INVESTIGATING = "investigating"
-    WAITING_ON_RESPONSE = "waiting_on_response"
-    REMEDIATING = "remediating"
-    REVIEW = "review"
+    INTAKE_REVIEW = "intake_review"
+    UNDER_INVESTIGATION = "under_investigation"
+    EVIDENCE_COLLECTION = "evidence_collection"
+    VERIFICATION = "verification"
+    REGULATORY_ACTION = "regulatory_action"
+    LEGAL_REVIEW = "legal_review"
     RESOLVED = "resolved"
     CLOSED = "closed"
+
+
+class ArtifactReportSource(str, Enum):
+    STRATEGIC = "strategic"
+    BREACH = "breach"
+    DEFACEMENT = "defacement"
+    SOCIAL = "social"
+    FEED = "feed"
+    EXPLOIT = "exploit"
+    STEALER_LOGS = "stealerlogs"
 
 
 class Severity(str, Enum):
@@ -131,7 +143,6 @@ class SocialPlatform(str, Enum):
     X = "x"
     LINKEDIN = "linkedin"
     TELEGRAM = "telegram"
-    WHATSAPP = "whatsapp"
     DISCORD = "discord"
     REDDIT = "reddit"
     GITHUB = "github"
@@ -197,6 +208,7 @@ class SourceType(str, Enum):
 class TaskStatus(str, Enum):
     OPEN = "open"
     IN_PROGRESS = "in_progress"
+    UNDER_REVIEW = "under_review"
     BLOCKED = "blocked"
     DONE = "done"
     CANCELLED = "cancelled"
@@ -276,6 +288,17 @@ class CaseEntity(EmbeddedModel):
     updatedAt: datetime = Field(default_factory=utc_now)
 
 
+class CaseArtifactFile(EmbeddedModel):
+    fileId: str
+    fileName: str = ""
+    fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
+    fileHash: str = ""
+    integrityStatus: str = "unknown"
+    uploadedAt: datetime = Field(default_factory=utc_now)
+
+
 class CaseArtifact(EmbeddedModel):
     artifactId: str
     type: ArtifactType = Field(default=ArtifactType.EVIDENCE)
@@ -285,10 +308,10 @@ class CaseArtifact(EmbeddedModel):
     source: SourceType = Field(default=SourceType.MANUAL)
     artifactSourceOtherValue: str = ""
     url: str = ""
-    fileName: str = ""
-    fileType: str = ""
-    fileSize: int = 0
-    fileResourceId: str = ""
+    files: List[CaseArtifactFile] = Field(default_factory=list)
+    linkedReportSource: str = ""
+    linkedReportId: str = ""
+    linkedReportTitle: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None
@@ -339,6 +362,11 @@ class CaseClosure(BaseModel):
     closedAt: datetime = PydanticField(default_factory=utc_now)
 
 
+class CaseStatusReason(EmbeddedModel):
+    status: CaseStatus
+    reason: str
+
+
 class CaseShare(EmbeddedModel):
     shareId: str
     tokenHash: str
@@ -357,6 +385,7 @@ class db_case_model(Model):
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
+    statusReasons: List[CaseStatusReason] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     tags: List[CaseTag] = Field(default_factory=list)
@@ -370,6 +399,10 @@ class db_case_model(Model):
     createdAt: datetime = Field(default_factory=utc_now)
     updatedAt: datetime = Field(default_factory=utc_now)
     closedAt: Optional[datetime] = None
+    
+    isArchived: bool = Field(default=False, index=True)
+    archivedAt: Optional[datetime] = None
+    archivedBy: str = ""
 
     entities: List[CaseEntity] = Field(default_factory=list)
     artifacts: List[CaseArtifact] = Field(default_factory=list)

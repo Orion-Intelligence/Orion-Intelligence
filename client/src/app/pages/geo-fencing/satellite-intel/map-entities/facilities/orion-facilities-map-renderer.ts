@@ -12,7 +12,6 @@ type OrionFacilitiesMapRendererConfig = {
   getData: () => OrionSatelliteFeature[];
   getFocusedFeature: () => OrionSatelliteFeature | null;
   onFeatureSelected: (feature: OrionSatelliteFeature) => void;
-  onFeatureIdsSelected: (ids: string[]) => void;
 };
 
 export class OrionFacilitiesMapRenderer {
@@ -28,7 +27,6 @@ export class OrionFacilitiesMapRenderer {
   private readonly getData: () => OrionSatelliteFeature[];
   private readonly getFocusedFeature: () => OrionSatelliteFeature | null;
   private readonly onFeatureSelected: (feature: OrionSatelliteFeature) => void;
-  private readonly onFeatureIdsSelected: (ids: string[]) => void;
 
   constructor(config: OrionFacilitiesMapRendererConfig) {
     this.L = config.L;
@@ -37,7 +35,6 @@ export class OrionFacilitiesMapRenderer {
     this.getData = config.getData;
     this.getFocusedFeature = config.getFocusedFeature;
     this.onFeatureSelected = config.onFeatureSelected;
-    this.onFeatureIdsSelected = config.onFeatureIdsSelected;
   }
 
   init(): void {
@@ -158,9 +155,6 @@ export class OrionFacilitiesMapRenderer {
     marker.orionFeature = feature;
     marker.on('click', () => {
       this.onFeatureSelected(feature);
-      if (feature.id) {
-        this.onFeatureIdsSelected([feature.id]);
-      }
     });
     return marker;
   }

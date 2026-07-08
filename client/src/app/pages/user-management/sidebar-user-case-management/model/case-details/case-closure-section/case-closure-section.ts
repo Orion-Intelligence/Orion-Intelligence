@@ -8,10 +8,11 @@ import { caseInlineMotion, caseModeSwapMotion } from '../case-details.animations
 import { getCaseAnalystLabel, getCaseDisplayLabel, getFormattedCaseDateTime } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-closure-section',
-  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent],
+  imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseInlineMotion, caseModeSwapMotion],
   host: { class: 'block' },
   templateUrl: './case-closure-section.html'
@@ -40,6 +41,18 @@ export class CaseClosureSectionComponent {
     return this.store.analysts;
   }
 
+  canCloseCase(): boolean {
+    return this.caseData?.status === 'resolved';
+  }
+
+  getCloseCaseTooltip(): string {
+    if (this.canCloseCase()) {
+      return 'Closure';
+    }
+
+    return 'Case cannot be closed until it reaches Resolved status';
+  }
+
   getDisplayLabel(value?: string | null, otherValue?: string | null): string {
     return getCaseDisplayLabel(value, otherValue);
   }
@@ -50,5 +63,9 @@ export class CaseClosureSectionComponent {
 
   getFormattedDateTime(date?: Date | string | null): string {
     return getFormattedCaseDateTime(date);
+  }
+
+  canManageCases(): boolean {
+    return this.store.canManageCases();
   }
 }

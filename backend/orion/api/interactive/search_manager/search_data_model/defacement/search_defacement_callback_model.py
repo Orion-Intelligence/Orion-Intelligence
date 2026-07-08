@@ -2,7 +2,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
-from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import suggestion
+from orion.api.interactive.social_manager.social_models.search_social_callback_model import suggestion
 
 
 class result_item(BaseModel):
@@ -16,7 +16,7 @@ class result_item(BaseModel):
     m_base_url: Optional[str] = None
     m_url: Optional[str] = None
     m_ip: Optional[List[str]] = None
-    m_leak_date: Optional[str] = None
+    m_date: Optional[str] = None
     m_source_url: Optional[List[str]] = None
     m_screenshot: Optional[str] = None
     m_mirror_links: Optional[List[str]] = Field(default_factory=list)

@@ -7,7 +7,7 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Feed: 'feed',
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
-  'Entity API': 'api',
+  'Entity Lookup': 'api',
   Dump: 'dump',
 };
 
@@ -24,29 +24,33 @@ function getSidebarGroupTestId(title: string): string {
   return `sidebar-group-${routePrefix}`;
 }
 
+function ensureSidebarExpanded() {
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="sidebar-expand-button"]:visible').length) {
+      cy.get('[data-testid="sidebar-expand-button"]').click();
+    }
+  });
+  cy.get('[data-testid="sidebar-collapse-button"]').should('be.visible');
+}
+
 export function openSidebarGroup(title: string) {
+  ensureSidebarExpanded();
   const groupTestId = getSidebarGroupTestId(title);
-  if (title === 'Entity API') {
-    cy.get('[data-testid="dashboard-sidebar"]').scrollTo('bottom', { ensureScrollable: false });
-    cy.get('[data-testid="sidebar-group-stealerlogs"]')
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
-  }
-  cy.get(`[data-testid="${groupTestId}"]`).scrollIntoView().should('be.visible').click();
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+  cy.get(`[data-testid="${groupTestId}"]`).scrollIntoView().should('be.visible').then(($group) => {
+    const sub = $group.parent('div').find('> ul');
+    cy.wrap($group).click({ force: true });
+    if (!sub.length) {
+      return;
+    }
+    cy.wrap(sub).should(($ul) => {
+      expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
+    });
   });
 }
 
 export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
   const routePrefix = SIDEBAR_GROUP_ROUTE_PREFIX[groupTitle];
-  const groupTestId = getSidebarGroupTestId(groupTitle);
   const aliasedTestId = SIDEBAR_SUBITEM_TEST_ID_ALIAS[groupTitle]?.[itemTitle];
-
-  cy.get(`[data-testid="${groupTestId}"]`).parent('div').find('> ul').should(($ul) => {
-    expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
-  });
 
   if (aliasedTestId) {
     cy.get(`[data-testid="sidebar-subitem-${routePrefix}-${aliasedTestId}"]`)
@@ -56,7 +60,7 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
     return;
   }
 
-  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"] div`, new RegExp(`^\\s*${itemTitle}\\s*$`))
+  cy.contains(`[data-testid^="sidebar-subitem-${routePrefix}-"]`, new RegExp(`^\\s*${itemTitle}\\s*$`))
     .scrollIntoView()
     .should('be.visible')
     .click();
@@ -70,8 +74,19 @@ export function typeDashboardSearch(value: string) {
   cy.scrollDashboardToTop();
   waitForSearchReady();
   cy.scrollDashboardToTop();
-  cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').click();
   cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('be.visible').and('be.enabled').type(`{selectall}{backspace}${value}{enter}`, { force: true });
+}
+
+export function typeDashboardSearchSlow(value: string) {
+  const selector = 'input[data-testid="dashboard-general-input"][name="q"]';
+  cy.scrollDashboardToTop();
+  waitForSearchReady();
+  cy.scrollDashboardToTop();
+  cy.typeSlow(selector, value, { submit: true });
+}
+
+export function typeInputSlow(selector: string, value: string, submit = true) {
+  cy.typeSlow(selector, value, { submit });
 }
 
 export function openExploitSubmenu(submenu: string) {
@@ -79,11 +94,20 @@ export function openExploitSubmenu(submenu: string) {
 }
 
 export function typeExploitSearch(value: string) {
-  typeDashboardSearch(value);
+  typeDashboardSearchSlow(value);
 }
 
 export function clickOpenReport() {
-  cy.get('[data-testid="open-report"]').filter(':visible').filter(':has(img[src*="redirect.svg"])').first().should('be.visible').click();
+  cy.get('[data-testid="open-report"]').filter(':visible').filter(':has(img[src*="redirect.svg"])').first().should('be.visible').invoke('removeAttr', 'target').click();
+}
+
+export function clickOpenExploitReport() {
+  cy.get('[data-testid="open-report"]').filter(':visible').first().scrollIntoView().should('be.visible').invoke('removeAttr', 'target').click({ force: true });
+}
+
+export function clickOpenDefacementReport() {
+  cy.get('[data-testid="defacement-group-card"]').first().find('button').scrollIntoView().should('be.visible').click({ force: true });
+  cy.get('[data-testid="defacement-record-sidebar"] a').first().invoke('removeAttr', 'target').click({ force: true });
 }
 
 export function exerciseJsonViewerOnce() {

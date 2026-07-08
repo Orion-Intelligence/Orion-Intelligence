@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnChanges, input, output } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { CalendarCell } from '../../../model/filter/calendar-cell.model';
+import { FilterModel } from '../../../model/filter/filter.model';
+import { TranslatePipe } from '../../../pipes/translate.pipe';
+
+type DatePickerSelectionMode = 'range' | 'single';
 
 @Component({
   selector: 'app-date-picker',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './date-picker.component.html',
 })
 export class DatePickerComponent implements OnChanges {
@@ -18,18 +21,23 @@ export class DatePickerComponent implements OnChanges {
   fromDate: Date | null = null;
   toDate: Date | null = null;
   readonly key = input('');
-  readonly filterModel = input<any>();
-  readonly mSelectedFilters = input<any>();
-  readonly selectedFiltersChange = output<{
-      key: string;
-      value: string;
-  }>();
+  readonly filterModel = input<FilterModel | undefined>(undefined);
+  readonly selectedFilters = input<Record<string, string | null> | undefined>(undefined, { alias: 'mSelectedFilters' });
+  readonly value = input<string | null>('');
+  readonly selectionMode = input<DatePickerSelectionMode>('range');
+  readonly disabled = input(false);
+  readonly allowFutureDates = input(false);
+  readonly toggleTestId = input('side-filter-date-toggle');
   readonly dateSelected = output<{
       key: string;
       value: string;
   }>();
 
   get displayValue(): string {
+    if (this.selectionMode() === 'single') {
+      return this.fromDate ? this.toIso(this.fromDate) : '';
+    }
+
     if (this.fromDate && this.toDate) {
       return `${this.toIso(this.fromDate)},${this.toIso(this.toDate)}`;
     }
@@ -47,28 +55,40 @@ export class DatePickerComponent implements OnChanges {
   }
 
   ngOnChanges(): void {
-    const raw = this.mSelectedFilters()?.[this.key()];
+    const raw = this.selectionMode() === 'single'
+      ? this.value()
+      : this.selectedFilters()?.[this.key()];
+
     if (!raw) {
       this.fromDate = null;
       this.toDate = null;
-      const now = new Date();
-      this.viewYear = now.getFullYear();
-      this.viewMonth = now.getMonth();
+      const maxDate = this.getMaxSelectableDate();
+      this.viewYear = maxDate.getFullYear();
+      this.viewMonth = maxDate.getMonth();
       this.buildCalendar();
       return;
     }
 
     const [start, end] = String(raw).split(',');
-    this.fromDate = this.parseIso(start);
-    this.toDate = this.parseIso(end);
+    this.fromDate = this.clampDate(this.parseIso(start));
+    this.toDate = this.selectionMode() === 'single'
+      ? null
+      : this.clampDate(this.parseIso(end));
 
-    const pivot = this.fromDate || new Date();
+    if (this.fromDate && this.toDate && this.toDate.getTime() < this.fromDate.getTime()) {
+      this.toDate = this.fromDate;
+    }
+
+    const pivot = this.fromDate || this.getMaxSelectableDate();
     this.viewYear = pivot.getFullYear();
     this.viewMonth = pivot.getMonth();
     this.buildCalendar();
   }
 
   togglePicker(): void {
+    if (this.disabled()) {
+      return;
+    }
     this.isOpen = !this.isOpen;
   }
 
@@ -88,6 +108,10 @@ export class DatePickerComponent implements OnChanges {
   }
 
   nextMonth(): void {
+    if (this.isNextMonthDisabled()) {
+      return;
+    }
+
     if (this.viewMonth === 11) {
       this.viewMonth = 0;
       this.viewYear += 1;
@@ -99,7 +123,19 @@ export class DatePickerComponent implements OnChanges {
   }
 
   onSelect(cell: CalendarCell): void {
+    if (this.isDateDisabled(cell)) {
+      return;
+    }
+
     const picked = new Date(cell.date.getFullYear(), cell.date.getMonth(), cell.date.getDate());
+    if (this.selectionMode() === 'single') {
+      this.fromDate = picked;
+      this.toDate = null;
+      this.emitValue(this.toIso(picked));
+      this.closePicker();
+      return;
+    }
+
     if (!this.fromDate || (this.fromDate && this.toDate)) {
       this.fromDate = picked;
       this.toDate = null;
@@ -109,10 +145,7 @@ export class DatePickerComponent implements OnChanges {
     if (picked.getTime() >= this.fromDate.getTime()) {
       this.toDate = picked;
       const value = `${this.toIso(this.fromDate)},${this.toIso(this.toDate)}`;
-      this.mSelectedFilters()[this.key()] = value;
-      const key = this.key();
-      this.selectedFiltersChange.emit({ key: key, value });
-      this.dateSelected.emit({ key: key, value });
+      this.emitValue(value);
       this.closePicker();
       return;
     }
@@ -135,6 +168,33 @@ export class DatePickerComponent implements OnChanges {
     }
     const t = cell.date.getTime();
     return t > this.fromDate.getTime() && t < this.toDate.getTime();
+  }
+
+  isDateDisabled(cell: CalendarCell): boolean {
+    if (this.allowFutureDates()) {
+      return false;
+    }
+
+    return this.toDateOnly(cell.date).getTime() > this.getMaxSelectableDate().getTime();
+  }
+
+  isNextMonthDisabled(): boolean {
+    if (this.allowFutureDates()) {
+      return false;
+    }
+
+    const nextMonth = new Date(this.viewYear, this.viewMonth + 1, 1);
+    const maxDate = this.getMaxSelectableDate();
+    const maxMonth = new Date(maxDate.getFullYear(), maxDate.getMonth(), 1);
+    return nextMonth.getTime() > maxMonth.getTime();
+  }
+
+  clearSelection(event: MouseEvent): void {
+    event.stopPropagation();
+    this.fromDate = null;
+    this.toDate = null;
+    this.emitValue('');
+    this.closePicker();
   }
 
   @HostListener('document:keydown.escape')
@@ -169,6 +229,31 @@ export class DatePickerComponent implements OnChanges {
       return null;
     }
     return new Date(y, m - 1, d);
+  }
+
+  private emitValue(value: string): void {
+    this.dateSelected.emit({ key: this.key(), value });
+  }
+
+  private clampDate(date: Date | null): Date | null {
+    if (!date) {
+      return null;
+    }
+
+    if (this.allowFutureDates()) {
+      return date;
+    }
+
+    const maxDate = this.getMaxSelectableDate();
+    return date.getTime() > maxDate.getTime() ? maxDate : date;
+  }
+
+  private getMaxSelectableDate(): Date {
+    return this.toDateOnly(new Date());
+  }
+
+  private toDateOnly(date: Date): Date {
+    return new Date(date.getFullYear(), date.getMonth(), date.getDate());
   }
 
   private toIso(date: Date): string {

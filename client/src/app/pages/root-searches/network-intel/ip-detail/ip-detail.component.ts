@@ -3,11 +3,12 @@ import { Component, effect, input } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-ip-detail',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   templateUrl: './ip-detail.component.html',
 })
 export class IpDetailComponent {

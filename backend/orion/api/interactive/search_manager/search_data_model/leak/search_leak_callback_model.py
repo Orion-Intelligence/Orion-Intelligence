@@ -2,7 +2,7 @@ from typing import List, Optional, Union
 
 from pydantic import BaseModel, ConfigDict
 
-from orion.api.interactive.graph_manager.graph_models.search_social_callback_model import suggestion
+from orion.api.interactive.social_manager.social_models.search_social_callback_model import suggestion
 
 
 class result_item(BaseModel):
@@ -27,7 +27,7 @@ class result_item(BaseModel):
     m_websites: Optional[List[str]] = None
     m_company_name: Optional[str] = None
     m_logo_or_images: Optional[List[str]] = None
-    m_leak_date: Optional[str] = None
+    m_date: Optional[str] = None
     m_data_size: Optional[str] = None
     m_country_name: Optional[str] = None
     m_revenue: Optional[str] = None

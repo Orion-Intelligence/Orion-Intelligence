@@ -10,6 +10,8 @@ import { directory_filters } from '../../shared/constants/filters';
 import { SidebarService } from '../../shared/services/sidebar.service';
 import { DirectoryService } from '../../services/directory/directory.service';
 import { DirectoryCallbackModel } from '../../shared/model/directory/directory.model';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+
 @Component({
   selector: 'app-directory',
   templateUrl: './directory.component.html',
@@ -19,8 +21,7 @@ import { DirectoryCallbackModel } from '../../shared/model/directory/directory.m
     PaginationComponent,
     NgOptimizedImage,
     AsyncPipe,
-    NgClass
-  ],
+    NgClass, TranslatePipe],
 })
 export class DirectoryComponent implements OnInit {
   directoryData$: Observable<DirectoryCallbackModel | null>;

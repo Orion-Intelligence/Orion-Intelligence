@@ -42,7 +42,7 @@ const COMMON_THREAT_OPTIONS = [
   { key: "zero_day", label: "Zero Day" },
   { key: "rootkit", label: "Rootkit" },
   { key: "apt", label: "APT" },
-  { key: "threat_intel", label: "Threat Intel" },
+  { key: "threat_intel", label: "APT Intel" },
   { key: "darkweb", label: "Dark Web" },
   { key: "rce", label: "RCE" },
   { key: "lpe", label: "LPE" },
@@ -54,6 +54,36 @@ const COMMON_THREAT_OPTIONS = [
   { key: "credentials_common", label: "Credentials (Common)" },
   { key: "war", label: "War" }
 ];
+const GENERAL_CONTENT_OPTIONS = [
+  { key: "all", label: "All" },
+  { key: "general", label: "General" },
+  { key: "swarm", label: "Swarm" },
+  { key: "forums", label: "Forums" },
+  { key: "news", label: "News" },
+  { key: "stolen", label: "Stolen" },
+  { key: "drugs", label: "Drugs" },
+  { key: "hacking", label: "Hacking" },
+  { key: "marketplaces", label: "Marketplaces" },
+  { key: "cryptocurrency", label: "Cryptocurrency" },
+  { key: "leaks", label: "Leaks" }
+];
+const DEFACEMENT_CONTENT_OPTIONS = [
+  { key: "hacked", label: "hacked" },
+  { key: "malicious_redirect", label: "malicious_redirect" },
+  { key: "malware_url", label: "malware_url" },
+  { key: "open_directory", label: "open_directory" },
+  { key: "phishing", label: "phishing" },
+  { key: "phishing_domain", label: "phishing_domain" },
+  { key: "scam", label: "scam" },
+  { key: "spam_url", label: "spam_url" },
+  { key: "typosquatting", label: "typosquatting" }
+];
+const APT_INTEL_CONTENT_OPTIONS = [
+  { key: "all", label: "All" },
+  { key: "apt", label: "APT" },
+  { key: "malware", label: "Malware" },
+  { key: "defacement", label: "Defacement" }
+];
 const BASE_DATERANGE = {
   options: [],
   type: 'daterange' as const,
@@ -63,11 +93,6 @@ const DATERANGE_DEFAULT = {
   ...BASE_DATERANGE,
   title: "Date Range",
   tooltip: "Date Range"
-};
-const DATERANGE_DUMP = {
-  ...BASE_DATERANGE,
-  title: "Date Range",
-  tooltip: "Select Range"
 };
 const DATERANGE_CREATION = {
   ...BASE_DATERANGE,
@@ -83,27 +108,137 @@ function createThreatContent() {
     selected: "attack-pattern"
   };
 }
-const SOURCE_FILTER = {
-  title: "Source",
-  options: [
-    { key: "all", label: "All" },
-    { key: "telegram", label: "Telegram" },
-    { key: "websites", label: "Websites" }
-  ],
-  type: "dropdown" as const,
-  tooltip: "Leak origin sources",
+function createGeneralContent() {
+  return {
+    title: "Content Type",
+    options: GENERAL_CONTENT_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Content Filter",
+    selected: "all"
+  };
+}
+const DEFACEMENT_CONTENT_FILTER = {
+  title: "Type of Content",
+  options: DEFACEMENT_CONTENT_OPTIONS,
+  type: 'dropdown' as const,
+  tooltip: "Type of Content",
+  selected: ""
+};
+const APT_INTEL_CONTENT_FILTER = {
+  title: "Content Type",
+  options: APT_INTEL_CONTENT_OPTIONS,
+  type: 'dropdown' as const,
+  tooltip: "Content Filter",
   selected: "all"
 };
-const STATUS_FILTER = {
-  title: "Status",
-  options: [
-    { key: "all", label: "All" },
-    { key: "parsed", label: "True" },
-    { key: "unparsed", label: "False" }
-  ],
-  type: "dropdown" as const,
-  tooltip: "Status filter (True/False)",
+const EXPLOIT_TYPE_FILTER = {
+  title: "Type",
+  options: COMMON_THREAT_OPTIONS,
+  type: 'dropdown' as const,
+  tooltip: "Type",
   selected: "all"
+};
+const EXPLOIT_SEVERITY_OPTIONS = [
+  { key: "critical", label: "Critical" },
+  { key: "high", label: "High" },
+  { key: "medium", label: "Medium" },
+  { key: "low", label: "Low" },
+  { key: "info", label: "Info" },
+  { key: "unknown", label: "Unknown" }
+];
+const EXPLOIT_RISK_OPTIONS = [
+  { key: "critical", label: "Critical" },
+  { key: "high", label: "High" },
+  { key: "medium", label: "Medium" },
+  { key: "low", label: "Low" },
+  { key: "info", label: "Info" }
+];
+const EXPLOIT_REMOTE_TYPE_OPTIONS = [
+  { key: "remote", label: "Remote" },
+  { key: "local", label: "Local" },
+  { key: "physical", label: "Physical" },
+  { key: "adjacent", label: "Adjacent" },
+  { key: "unknown", label: "Unknown" }
+];
+const EXPLOIT_PLATFORM_OPTIONS = [
+  { key: "windows", label: "Windows" },
+  { key: "linux", label: "Linux" },
+  { key: "macos", label: "macOS" },
+  { key: "android", label: "Android" },
+  { key: "ios", label: "iOS" },
+  { key: "web", label: "Web" },
+  { key: "php", label: "PHP" },
+  { key: "java", label: "Java" },
+  { key: "multiple", label: "Multiple" },
+  { key: "unknown", label: "Unknown" }
+];
+const EXPLOIT_STRICT_FILTERS = {
+  m_severity: {
+    title: "Severity",
+    options: EXPLOIT_SEVERITY_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Severity",
+    selected: ""
+  },
+  m_risk: {
+    title: "Risk",
+    options: EXPLOIT_RISK_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Risk",
+    selected: ""
+  },
+  m_remote_type: {
+    title: "Remote Type",
+    options: EXPLOIT_REMOTE_TYPE_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Remote Type",
+    selected: ""
+  },
+  m_platform: {
+    title: "Platform",
+    options: EXPLOIT_PLATFORM_OPTIONS,
+    type: 'dropdown' as const,
+    tooltip: "Platform",
+    selected: ""
+  }
+};
+const EXPLOIT_TEXT_FILTERS = {
+  m_cve: {
+    title: "CVE",
+    options: [],
+    type: 'dropdown' as const,
+    tooltip: "CVE",
+    selected: "",
+    suggestionSource: "exploit",
+    placeholder: "CVE-2024-12345"
+  },
+  m_cwe: {
+    title: "CWE",
+    options: [],
+    type: 'dropdown' as const,
+    tooltip: "CWE",
+    selected: "",
+    suggestionSource: "exploit",
+    placeholder: "CWE-79"
+  },
+  m_product: {
+    title: "Product",
+    options: [],
+    type: 'dropdown' as const,
+    tooltip: "Product",
+    selected: "",
+    suggestionSource: "exploit",
+    placeholder: "Product name"
+  },
+  m_tags: {
+    title: "Tags",
+    options: [],
+    type: 'dropdown' as const,
+    tooltip: "Tags",
+    selected: "",
+    suggestionSource: "exploit",
+    placeholder: "rce, poc, exploit"
+  }
 };
 const SAFE_FILTER = {
   title: "Safe Search",
@@ -159,9 +294,47 @@ const PLATFORM_FILTER = {
     { key: "generic_model", label: "General Iintelligence" },
     { key: "leak_model", label: "Data Breach" },
     { key: "exploit_model", label: "Exploit" },
+    { key: "apt_model", label: "APT" },
+    { key: "malware_model", label: "Malware Bazaar" },
     { key: "social_model", label: "Social" },
     { key: "chat_model", label: "Chat" },
     { key: "all", label: "All" },
+  ],
+  type: "dropdown" as const,
+  tooltip: "Platform",
+  selected: "all"
+};
+const SOCIAL_PLATFORM_FILTER = {
+  title: "Platform",
+  options: [
+    { key: "all", label: "All" },
+    { key: "telegram", label: "Telegram" },
+    { key: "forum", label: "Forum" },
+    { key: "blogger", label: "Blogger" },
+    { key: "bluesky", label: "Bluesky" },
+    { key: "devto", label: "Dev.to" },
+    { key: "facebook", label: "Facebook" },
+    { key: "habr", label: "Habr" },
+    { key: "hackernoon", label: "HackerNoon" },
+    { key: "hashnode", label: "Hashnode" },
+    { key: "instagram", label: "Instagram" },
+    { key: "linkedin", label: "LinkedIn" },
+    { key: "mastodon", label: "Mastodon" },
+    { key: "medium", label: "Medium" },
+    { key: "microblog", label: "Micro.blog" },
+    { key: "misskey", label: "Misskey" },
+    { key: "nostr", label: "Nostr" },
+    { key: "pastebin", label: "Pastebin" },
+    { key: "pleroma", label: "Pleroma" },
+    { key: "primal", label: "Primal" },
+    { key: "quora", label: "Quora" },
+    { key: "reddit", label: "Reddit" },
+    { key: "stackoverflow", label: "Stack Overflow" },
+    { key: "substack", label: "Substack" },
+    { key: "threads", label: "Threads" },
+    { key: "tiktok", label: "TikTok" },
+    { key: "twitter", label: "Twitter" },
+    { key: "youtube", label: "YouTube" },
   ],
   type: "dropdown" as const,
   tooltip: "Platform",
@@ -172,17 +345,55 @@ const PLATFORM_RESULT_COUNT_FILTER = {
   options: [],
   type: "number" as const,
   tooltip: "Maximum results for per platform",
-  selected: "15",
+  selected: "25",
   min: 1,
-  max: 15,
+  max: 50,
   placeholder: "Enter platforms result count"
 };
-export const dump_filters: FilterModel = {
-  filters: {
-    source: SOURCE_FILTER,
-    daterange: DATERANGE_DUMP,
-    status: STATUS_FILTER
-  }
+const APT_FAMILY_FILTER = {
+  title: "Family",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "APT Family",
+  selected: "all"
+};
+const MALPEDIA_COUNTRY_FILTER = {
+  title: "Country",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Country",
+  selected: "all"
+};
+const MALWARE_BAZAAR_COUNTRY_FILTER = {
+  title: "Country",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Country",
+  selected: "all"
+};
+const MALWARE_CONTENT_TYPE_FILTER = {
+  title: "Content Type",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Content Type",
+  selected: "all"
+};
+const MALWARE_REPORTER_FILTER = {
+  title: "Reporter",
+  options: [
+    { key: "all", label: "All" }
+  ],
+  type: "dropdown" as const,
+  tooltip: "Reporter",
+  selected: "all"
 };
 export const audit_filters: FilterModel = {
   filters: {
@@ -216,7 +427,72 @@ export const general_filters: FilterModel = {
     network: COMMON_NETWORK,
     safe: SAFE_FILTER,
     daterange: DATERANGE_CREATION,
+    m_content_type: createGeneralContent()
+  }
+};
+export const leak_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
     content: createThreatContent()
+  }
+};
+export const feed_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: createThreatContent()
+  }
+};
+export const social_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    platform: SOCIAL_PLATFORM_FILTER,
+    daterange: DATERANGE_CREATION,
+    content: createThreatContent()
+  }
+};
+export const defacement_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: DEFACEMENT_CONTENT_FILTER
+  }
+};
+export const exploit_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: EXPLOIT_TYPE_FILTER,
+    ...EXPLOIT_STRICT_FILTERS,
+    ...EXPLOIT_TEXT_FILTERS
+  }
+};
+export const apt_intel_filters: FilterModel = {
+  filters: {
+    network: COMMON_NETWORK,
+    daterange: DATERANGE_CREATION,
+    content: APT_INTEL_CONTENT_FILTER
+  }
+};
+export const threat_intel_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_CREATION
+  }
+};
+export const threat_intel_apt_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_CREATION,
+    family: APT_FAMILY_FILTER,
+    m_country: MALPEDIA_COUNTRY_FILTER
+  }
+};
+export const threat_intel_malware_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_CREATION,
+    m_country: MALWARE_BAZAAR_COUNTRY_FILTER,
+    content_type: MALWARE_CONTENT_TYPE_FILTER,
+    m_reporter: MALWARE_REPORTER_FILTER
   }
 };
 export const consolidated_filters: FilterModel = {
@@ -250,6 +526,19 @@ export const filter_mapping: Record<string, string> = {
   content_type: "Content Type",
   safe: "Safe Search",
   content: "Content Type",
+  m_content_type: "Content Type",
   mitre: "Mitre TTP",
-  platform_result_count: "Platform Results Count"
+  platform: "Platform",
+  platform_result_count: "Platform Results Count",
+  m_cve: "CVE",
+  m_cwe: "CWE",
+  m_product: "Product",
+  m_severity: "Severity",
+  m_risk: "Risk",
+  m_remote_type: "Remote Type",
+  m_platform: "Platform",
+  m_tags: "Tags",
+  family: "Family",
+  m_country: "Country",
+  m_reporter: "Reporter",
 };

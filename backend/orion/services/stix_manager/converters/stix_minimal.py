@@ -95,7 +95,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_important_content", "m_content"],
         "url": ["m_url", "m_base_url"],
         "base_url": ["m_base_url"],
-        "created": ["m_creation_date", "m_update_date", "m_leak_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:leak",
     },
     "defacement": {
@@ -103,7 +103,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_content", "m_important_content"],
         "url": ["m_url", "m_base_url", "m_source_url"],
         "base_url": ["m_base_url"],
-        "created": ["m_leak_date", "m_creation_date", "m_update_date"],
+        "created": ["m_date", "m_creation_date", "m_update_date"],
         "tag": "orion:defacement",
     },
     "exploit": {
@@ -111,7 +111,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_important_content", "m_content", "m_code_snippet"],
         "url": ["m_url", "m_weblink"],
         "base_url": ["m_base_url"],
-        "created": ["m_creation_date", "m_update_date", "m_leak_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:exploit",
     },
     "chat": {
@@ -119,7 +119,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_content", "m_media_caption"],
         "url": ["m_message_sharable_link", "m_media_url", "m_channel_url"],
         "base_url": ["m_channel_url"],
-        "created": ["m_creation_date", "m_update_date", "m_message_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:chat",
     },
     "social": {
@@ -127,7 +127,7 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "summary": ["m_content", "m_important_content", "m_meta_description"],
         "url": ["m_message_sharable_link", "m_channel_url", "m_url"],
         "base_url": ["m_channel_url", "m_base_url"],
-        "created": ["m_creation_date", "m_update_date", "m_message_date"],
+        "created": ["m_creation_date", "m_update_date", "m_date"],
         "tag": "orion:social",
     },
 }
@@ -210,13 +210,13 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
     url = _first(raw, profile["url"])
     base_url = _first(raw, profile["base_url"])
     network = _get(raw, "m_network")
-    platform = _get(raw, "m_platform")
+    platforms = _clean(_as_list(_get(raw, "m_platform")))
     doc_id = str(_first(raw, ["m_document_id", "m_hash"], url or base_url or title))
     lang_value = _as_list(_get(raw, "m_language"))
     lang = str(lang_value[0]).strip() if len(lang_value) == 1 and str(lang_value[0]).strip() else None
 
     content_types = _clean(_as_list(_get(raw, "m_content_type")) + _as_list(_get(raw, "content_type")))
-    labels = _clean(content_types + ([str(network).strip().lower()] if network else []) + ([f"platform:{str(platform).strip().lower()}"] if platform else []) + [profile["tag"]])
+    labels = _clean(content_types + ([str(network).strip().lower()] if network else []) + [f"platform:{platform.lower()}" for platform in platforms] + [profile["tag"]])
 
     iocs = _extract_iocs(raw, str(url) if url else None)
 
@@ -424,7 +424,7 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
         "object_marking_refs": [tlp_amber_id],
         "x_orion_doc_id": doc_id,
         "x_orion_network": str(network) if network else None,
-        "x_orion_platform": str(platform) if platform else None,
+        "x_orion_platform": platforms or None,
     }
     report = {k: v for k, v in report.items() if v is not None}
     add_obj(report)

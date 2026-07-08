@@ -1,0 +1,229 @@
+const SOCIAL_ROOT = '[data-testid="social-graph-root"]';
+const SOCIAL_LIST_EMPTY = '[data-testid="social-list-empty"]';
+const SOCIAL_PROFILE_EMPTY_CARD = '[data-testid="social-profile-empty-card"]';
+const SOCIAL_PROFILE_EMPTY_OVERVIEW_BUTTON = '[data-testid="social-profile-empty-overview-button"]';
+const SOCIAL_PLATFORM_CARD = '[data-testid="social-platform-card"]';
+const SOCIAL_SCAN_TIMEOUT = 180000;
+const SOCIAL_FETCH_TIMEOUT = 120000;
+
+export const SOCIAL_STEALER_USERNAME = 'superman0011';
+export const SOCIAL_STEALER_PLATFORM = /twitter/i;
+const SOCIAL_STEALER_DOMAIN = 'twitter.com';
+
+function isStealerDomain(value: string) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+  try {
+    const host = new URL(normalized.includes('://') ? normalized : `https://${normalized}`).hostname.replace(/^www\./, '');
+    return host === SOCIAL_STEALER_DOMAIN || host.endsWith(`.${SOCIAL_STEALER_DOMAIN}`);
+  } catch {
+    return false;
+  }
+}
+
+export function visitSocialIntel() {
+  setViewportToCurrentScreen();
+  cy.visit('/dashboard/social-intel');
+  cy.location('pathname').should('include', '/dashboard/social-intel');
+  cy.get(SOCIAL_ROOT).should('be.visible');
+  cy.get('[data-testid="social-header-breadcrumb"]').should('contain.text', 'Social').and('contain.text', 'Intel');
+  cy.get('[data-testid="social-scan-control"]').should('be.visible');
+  cy.get('[data-testid="social-scan-input"]').should('have.attr', 'placeholder', 'Search username or handle...');
+  cy.get('[data-testid="social-scan-submit"]').should('contain.text', 'Search');
+  cy.get('[data-testid="social-list-view"]').should('be.visible');
+}
+
+function setViewportToCurrentScreen() {
+  cy.window({ log: false }).then((win) => {
+    const configuredWidth = Number(Cypress.config('viewportWidth'));
+    const configuredHeight = Number(Cypress.config('viewportHeight'));
+    const screenWidth = Math.floor(win.screen.availWidth || win.screen.width || configuredWidth);
+    const screenHeight = Math.floor(win.screen.availHeight || win.screen.height || configuredHeight);
+    const width = Math.max(screenWidth, configuredWidth);
+    const height = Math.max(screenHeight, configuredHeight);
+
+    cy.viewport(width, height);
+  });
+}
+
+export function scanKnownSocialUsername(username = SOCIAL_STEALER_USERNAME) {
+  cy.get('[data-testid="social-scan-input"]').clear().type(username).should('have.value', username);
+  cy.get('[data-testid="social-scan-submit"]').should('not.be.disabled').click();
+  cy.contains('[data-testid="social-history-job"]', username, { timeout: SOCIAL_SCAN_TIMEOUT })
+    .should('contain.text', 'Completed')
+    .and('contain.text', 'Results Ready')
+    .click();
+  cy.contains(SOCIAL_PLATFORM_CARD, SOCIAL_STEALER_PLATFORM, { timeout: SOCIAL_FETCH_TIMEOUT })
+    .scrollIntoView()
+    .should('be.visible');
+  cy.docsScreenshot('social-intel');
+}
+
+export function assertSocialResultNavigation() {
+  cy.get('[data-testid="social-sidebar-platform-row"]').should('have.length.greaterThan', 0);
+  cy.contains('[data-testid="social-sidebar-platform-row"]', SOCIAL_STEALER_PLATFORM, { timeout: SOCIAL_FETCH_TIMEOUT })
+    .scrollIntoView()
+    .click();
+  cy.contains(SOCIAL_PLATFORM_CARD, SOCIAL_STEALER_PLATFORM, { timeout: SOCIAL_FETCH_TIMEOUT })
+    .scrollIntoView()
+    .should('be.visible');
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="social-list-platform-open-link"]').length > 0) {
+      cy.get('[data-testid="social-list-platform-open-link"]')
+        .first()
+        .should('have.attr', 'target', '_blank')
+        .and('have.attr', 'rel')
+        .and('include', 'noopener');
+    }
+  });
+}
+
+export function assertDashboardStealerExposure() {
+  cy.get('[data-testid="social-stealerlog-section"]').should('be.visible');
+  cy.get('[data-testid="social-dashboard-stealer-exposure"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+    .should('be.visible')
+    .and('contain.text', 'Exposure found');
+  cy.get('[data-testid="social-dashboard-stealer-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+    .should('have.length.greaterThan', 0)
+    .then(($rows) => {
+      const matchingRow = [...$rows].slice(0, 3).find((row) => {
+        const text = row.textContent || '';
+        const domain = row.querySelector('[title]')?.getAttribute('title') || '';
+        return text.includes(SOCIAL_STEALER_USERNAME) && isStealerDomain(domain);
+      });
+      expect(matchingRow, `top 3 stealer rows include ${SOCIAL_STEALER_DOMAIN}`).to.exist;
+    });
+}
+
+export function openConnectionsFromPlatformCard() {
+  cy.contains(SOCIAL_PLATFORM_CARD, SOCIAL_STEALER_PLATFORM, { timeout: SOCIAL_FETCH_TIMEOUT })
+    .scrollIntoView()
+    .then(($card) => {
+      const $connectionsButton = $card.find('[data-testid="social-list-followers-following"]');
+      if ($connectionsButton.length === 0) {
+        return;
+      }
+      cy.wrap($connectionsButton).click();
+      assertTabPanelSettled('social-tab-panel-connections', 'Loading post mentions');
+      cy.get('[data-testid="social-connection-chip"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+        .should('have.length.greaterThan', 0)
+        .and('contain.text', '@dailyplanet');
+      cy.get('[data-testid="social-header-back"]').click();
+    });
+}
+
+export function openProfileOverviewFromPlatformCard() {
+  cy.contains(SOCIAL_PLATFORM_CARD, SOCIAL_STEALER_PLATFORM, { timeout: SOCIAL_FETCH_TIMEOUT })
+    .scrollIntoView()
+    .within(() => {
+      cy.get('[data-testid="social-profile-overview-button"]').click();
+    });
+  cy.get('[data-testid="social-header-back"]').should('be.visible');
+  cy.get('[data-testid="social-fetch-tab"][data-tab-key="details"]').should('exist');
+  cy.get('[data-testid="social-fetch-tab"][data-tab-key="posts"]').should('exist');
+  cy.get('[data-testid="social-fetch-tab"][data-tab-key="stealerLogs"]').should('exist');
+  assertTabPanelSettled('social-tab-panel-details', 'Loading profile details');
+  cy.get('[data-testid="social-tab-panel-details"]').should('contain.text', 'Clark Kent');
+  cy.docsScreenshot('social-summary-popup');
+  cy.docsScreenshot('social-metadata-results');
+}
+
+export function fetchSocialProfileTabs() {
+  clickFetchTab('posts');
+  assertTabPanelSettled('social-tab-panel-posts', 'Loading posts');
+  cy.get('[data-testid="social-post-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+    .should('have.length.greaterThan', 0)
+    .first()
+    .should('contain.text', 'Metropolis skyline');
+
+  clickFetchTabIfPresent('followers', () => {
+    assertTabPanelSettled('social-tab-panel-followers', 'Loading followers');
+    cy.get('[data-testid="social-follower-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+      .should('have.length.greaterThan', 0)
+      .first()
+      .should('contain.text', '@loislane');
+    cy.docsScreenshot('social-followers-popup');
+  });
+
+  clickFetchTabIfPresent('following', () => {
+    assertTabPanelSettled('social-tab-panel-following', 'Loading following');
+    cy.get('[data-testid="social-following-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+      .should('have.length.greaterThan', 0)
+      .first()
+      .should('contain.text', '@loislane');
+  });
+
+  clickFetchTab('stealerLogs');
+  cy.get('[data-testid="social-tab-panel-stealer-logs"]', { timeout: SOCIAL_FETCH_TIMEOUT }).should('be.visible');
+  cy.get('[data-testid="social-stealerlog-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
+    .should('have.length.greaterThan', 0)
+    .then(($rows) => {
+      const matchingRow = [...$rows].find((row) => {
+        const text = row.textContent || '';
+        const domain = row.querySelector('[title]')?.getAttribute('title') || '';
+        return isStealerDomain(domain) && text.includes(SOCIAL_STEALER_USERNAME);
+      });
+      expect(matchingRow, `stealer tab row includes ${SOCIAL_STEALER_DOMAIN} and ${SOCIAL_STEALER_USERNAME}`).to.exist;
+    });
+}
+
+export function assertManageProfilesForScannedResult() {
+  cy.get('[data-testid="social-list-manage-profiles"]').first().click();
+  cy.get('[data-testid="social-manage-profiles-modal"]').should('be.visible');
+  cy.docsScreenshot('social-manage-profiles');
+  cy.get('[data-testid="social-manage-profiles-filter"]').clear().type('twitter');
+  cy.get('[data-testid="social-manage-profile-card"]').should('have.length.greaterThan', 0);
+  cy.get('[data-testid="social-manage-profile-switch"]').first().should('have.attr', 'role', 'switch');
+  cy.get('[data-testid="social-manage-profiles-close"]').click();
+  cy.get('[data-testid="social-manage-profiles-modal"]').should('not.exist');
+}
+
+export function assertSocialSidebarAndBackNavigation() {
+  cy.get('[data-testid="graph-sidebar-collapse"]').should('be.visible').click();
+  cy.get('[data-testid="graph-sidebar-expand"]').should('be.visible');
+  cy.get('[data-testid="graph-sidebar-expand"]').click();
+  cy.get('[data-testid="social-scan-control"]').should('be.visible');
+  cy.get('[data-testid="social-header-back"]').click();
+  cy.location('pathname').should('match', /^\/dashboard\/(home|profile\/homepage)/);
+}
+
+export function assertSocialEmptyStateIfNoResults() {
+  cy.get('body').then(($body) => {
+    const $emptyState = $body.find(SOCIAL_LIST_EMPTY);
+    if ($body.find(SOCIAL_PLATFORM_CARD).length === 0 && $emptyState.length > 0) {
+      cy.wrap($emptyState).within(() => {
+        cy.get(SOCIAL_PROFILE_EMPTY_CARD).should('be.visible');
+        cy.get(SOCIAL_PROFILE_EMPTY_OVERVIEW_BUTTON).should('contain.text', 'Profile Overview').and('be.disabled');
+        cy.get('[data-testid="social-platform-search-empty"]').should('be.disabled');
+        cy.get('[data-testid="social-list-empty-manage-profiles"]').should('be.disabled');
+      });
+    }
+  });
+}
+
+function clickFetchTab(tabKey: string) {
+  cy.get(`[data-testid="social-fetch-tab"][data-tab-key="${tabKey}"]`, { timeout: SOCIAL_FETCH_TIMEOUT })
+    .should('be.visible')
+    .click();
+}
+
+function clickFetchTabIfPresent(tabKey: string, assertions: () => void) {
+  cy.get('body').then(($body) => {
+    if ($body.find(`[data-testid="social-fetch-tab"][data-tab-key="${tabKey}"]`).length === 0) {
+      return;
+    }
+    clickFetchTab(tabKey);
+    assertions();
+  });
+}
+
+function assertTabPanelSettled(panelTestId: string, loadingText: string) {
+  cy.get(`[data-testid="${panelTestId}"]`, { timeout: SOCIAL_FETCH_TIMEOUT }).should('be.visible');
+  cy.get(`[data-testid="${panelTestId}"]`, { timeout: SOCIAL_FETCH_TIMEOUT }).should(($panel) => {
+    const text = ($panel.text() || '').replace(/\s+/g, ' ').trim();
+    expect(text).not.to.include(loadingText);
+    expect(text.length).to.be.greaterThan(0);
+  });
+}

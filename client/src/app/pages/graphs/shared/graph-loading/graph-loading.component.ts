@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   selector: 'app-graph-loading',
   standalone: true,
   template: `
-    <div class="fixed inset-0 overflow-hidden bg-[linear-gradient(180deg,_var(--color-blue-850),_#08111f)]">
+    <div class="fixed inset-0 overflow-hidden bg-[linear-gradient(180deg,_var(--color-blue-850),_var(--color-blue-830))]">
       <div class="absolute inset-0 opacity-30 [background-image:radial-gradient(circle,_rgba(148,163,184,0.18)_1px,_transparent_1px)] [background-size:1.5rem_1.5rem]"></div>
       <div class="relative flex h-full items-center justify-center px-6">
         <div class="w-full max-w-md rounded-2xl border border-[var(--color-border)] bg-[var(--color-blue-800)]/70 p-8 text-center shadow-2xl backdrop-blur-md">

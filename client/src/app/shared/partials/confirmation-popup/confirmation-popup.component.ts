@@ -1,10 +1,12 @@
 import { Component, input, output } from '@angular/core';
 import { FocusDirective } from '../../directive/focus.directive';
 import { popupAnimation } from '../../animations/popup.animations';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 @Component({
   selector: 'app-confirmation-popup',
   imports: [
-    FocusDirective
+    FocusDirective,
+    TranslatePipe
   ],
   templateUrl: './confirmation-popup.component.html',
   animations: [popupAnimation],

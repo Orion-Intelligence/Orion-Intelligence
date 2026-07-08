@@ -1,39 +1,47 @@
-import { AfterViewInit, Component, OnInit, effect, inject, input } from '@angular/core';
-import { CommonModule, DatePipe, NgClass } from '@angular/common';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal } from '@angular/core';
+import { DatePipe, NgClass } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
-import { DefacementResultItem } from '../../../../shared/model/results/defacement/defacement.callback.model';
+import { DefacementGroup, DefacementGroupCallbackItem, DefacementRecord, DefacementResultItem, DefacementRisk, DefacementSummary } from '../../../../shared/model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
-import { AppService } from '../../../../services/core/app/app.service';
-import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
-import { ProxyController } from '../../../../shared/services/proxy-controller';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
+import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
+
+const STAGGER_RENDER_BATCH_SIZE = 10;
+const STAGGER_RENDER_DELAY_MS = 16;
+const RECORD_SIDEBAR_CLOSE_MS = 300;
+
 @Component({
   selector: 'app-dashboard-result-defacement',
-  standalone: true, imports: [RouterLink, NgClass, DatePipe, CommonModule, TooltipDirective],
+  standalone: true, imports: [NgClass, DatePipe, TooltipDirective, TranslatePipe, RecordSidebarComponent],
   templateUrl: './dashboard-result-defacement.component.html',
   animations: [fadeInDashboardItem],
 })
-export class DashboardResultDefacementComponent implements OnInit, AfterViewInit {
-  private readonly proxied_resource = inject(ProxyController);
+export class DashboardResultDefacementComponent implements OnInit, AfterViewInit, OnDestroy {
+  private renderTimer: ReturnType<typeof setTimeout> | null = null;
+  private recordSidebarCloseTimer: ReturnType<typeof setTimeout> | null = null;
+  private renderKey = '';
+  private renderTargetCount = 0;
 
   readonly searchResultsInput = input<DefacementResultItem[]>([], { alias: 'searchResults' });
-  readonly isLoadingInput = input(true, { alias: 'isLoading' });
+  readonly groupedResultsInput = input<DefacementGroupCallbackItem[]>([], { alias: 'groupedResults' });
+  readonly searchQueryInput = input<string>('', { alias: 'searchQuery' });
   currentUrl = '';
-  sortColumn = '';
-  sortDirection: 'asc' | 'desc' = 'asc';
   queryParams: { ci: string; } | undefined;
-  isCollapsed = true;
+  expandedGroupKey: string | null = null;
+  isRecordSidebarVisible = false;
+  visibleGroupCount = signal(0);
   searchResults: DefacementResultItem[] = [];
-  readonly isExpandAble = input<boolean>(false);
-  readonly isList = input<boolean>(true);
-  isLoading: boolean = true;
+  groupedResults: DefacementGroupCallbackItem[] = [];
 
-  constructor(protected authService: AuthService, public appService: AppService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
     effect(() => {
       this.searchResults = this.searchResultsInput();
-      this.isLoading = this.isLoadingInput();
+      this.groupedResults = this.groupedResultsInput();
+      const groups = this.getDefacementGroups();
+      this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
     });
   }
 
@@ -51,61 +59,300 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     this.scrollService.scrollToSavedPosition();
   }
 
-  sortTable(column: string) {
-    if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+  ngOnDestroy() {
+    this.clearRenderTimer();
+    this.clearRecordSidebarCloseTimer();
+  }
+
+  getVisibleResults(): DefacementResultItem[] {
+    return this.searchResults.slice(0, 1000);
+  }
+
+  getGridPlaceholders(groups: DefacementGroup[]): number[] {
+    const remainder = groups.length % 3;
+    const count = remainder === 0 ? 0 : 3 - remainder;
+    return Array.from({ length: count }, (_, index) => index);
+  }
+
+  getDefacementGroups(): DefacementGroup[] {
+    if (this.groupedResults.length) {
+      return this.groupedResults.map(group => {
+        const records = (group.records || []).map(item => this.toDefacementRecord(item));
+        const latestSeen = group.latest_seen || records.reduce((latest, record) => this.getLatestDate(latest, record.leakDate), null as string | null);
+        const affectedSites = group.affected_sites ?? this.countUnique(records.map(record => this.getSiteLabel(record.item)));
+        const ipCount = group.ip_count ?? this.countUnique(records.flatMap(record => record.item.m_ip || []));
+        const servers = group.servers?.length ? group.servers : this.uniqueValues(records.flatMap(record => record.item.m_web_server || [])).slice(0, 6);
+
+        return {
+          key: group.key || this.normalizeGroupKey(group.title),
+          title: group.title || 'Unknown actor',
+          subtitle: group.subtitle || 'Actor / campaign',
+          risk: this.getDefacementRisk(records.length, ipCount),
+          records,
+          affectedSites,
+          ipCount,
+          servers,
+          latestSeen
+        };
+      }).sort((a, b) => this.dateTime(b.latestSeen) - this.dateTime(a.latestSeen));
     }
-    else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
-    this.searchResults.sort((a, b) => {
-      let valueA = this.getColumnValue(a, column);
-      let valueB = this.getColumnValue(b, column);
-      if (column === 'm_leak_date') {
-        if (!valueA || valueA === 'N/A') {
-          return this.sortDirection === 'asc' ? 1 : -1;
-        }
-        if (!valueB || valueB === 'N/A') {
-          return this.sortDirection === 'asc' ? -1 : 1;
-        }
-        valueA = new Date(valueA);
-        valueB = new Date(valueB);
+
+    const groups = new Map<string, DefacementGroup>();
+    this.getVisibleResults().forEach(item => {
+      const actor = this.getActorLabel(item);
+      const key = this.normalizeGroupKey(actor || this.getSiteLabel(item));
+      const record = this.toDefacementRecord(item);
+      const group = groups.get(key) ?? {
+        key,
+        title: actor || this.getSiteLabel(item),
+        subtitle: actor ? 'Campaign / actor cluster' : 'Affected asset cluster',
+        risk: 'Medium',
+        records: [],
+        affectedSites: 0,
+        ipCount: 0,
+        servers: [],
+        latestSeen: null
+      };
+
+      group.records.push(record);
+      group.affectedSites = this.countUnique(group.records.map(r => this.getSiteLabel(r.item)));
+      group.ipCount = this.countUnique(group.records.flatMap(r => r.item.m_ip || []));
+      group.servers = this.uniqueValues(group.records.flatMap(r => r.item.m_web_server || [])).slice(0, 4);
+      group.latestSeen = this.getLatestDate(group.latestSeen, record.leakDate);
+      group.risk = this.getDefacementRisk(group.records.length, group.ipCount);
+      groups.set(key, group);
+    });
+
+    return Array.from(groups.values()).sort((a, b) => {
+      const riskDelta = this.riskWeight(b.risk) - this.riskWeight(a.risk);
+      if (riskDelta !== 0) {
+        return riskDelta;
       }
-      else if (Array.isArray(valueA)) {
-        valueA = valueA.join(', ');
-        valueB = valueB.join(', ');
-      }
-      else if (column === 'm_web_url') {
-        valueA = valueA[0] || '';
-        valueB = valueB[0] || '';
-      }
-      if (valueA < valueB) {
-        return this.sortDirection === 'asc' ? -1 : 1;
-      }
-      if (valueA > valueB) {
-        return this.sortDirection === 'asc' ? 1 : -1;
-      }
-      return 0;
+      return this.dateTime(b.latestSeen) - this.dateTime(a.latestSeen);
     });
   }
 
-  getColumnValue(item: any, column: string) {
-    return item[column];
+  getRenderedDefacementGroups(): DefacementGroup[] {
+    const groups = this.getDefacementGroups();
+    return groups.slice(0, this.visibleGroupCount());
   }
 
-  getSortClass(column: string): string {
-    if (this.sortColumn === column) {
-      return this.sortDirection === 'asc' ? 'sort-asc' : 'sort-desc';
-    }
-    return 'sort-default';
-  }
-
-  openExternalUrl(url?: string | null) {
-    if (!this.authService.getIsMobileDemo() || !url) {
+  toggleGroup(key: string): void {
+    if (this.expandedGroupKey === key && this.isRecordSidebarOpen()) {
+      this.closeRecordSidebar();
       return;
     }
 
-    this.proxied_resource.open(url);
+    this.expandedGroupKey = key;
+    this.openRecordSidebar();
+  }
+
+  isGroupExpanded(key: string): boolean {
+    return this.expandedGroupKey === key && this.isRecordSidebarOpen();
+  }
+
+  isRecordSidebarOpen(): boolean {
+    return this.isRecordSidebarVisible;
+  }
+
+  openRecordSidebar(): void {
+    this.clearRecordSidebarCloseTimer();
+    this.isRecordSidebarVisible = true;
+  }
+
+  closeRecordSidebar(): void {
+    this.isRecordSidebarVisible = false;
+    this.clearRecordSidebarCloseTimer();
+    this.recordSidebarCloseTimer = setTimeout(() => {
+      if (!this.isRecordSidebarVisible) {
+        this.expandedGroupKey = null;
+      }
+      this.recordSidebarCloseTimer = null;
+    }, RECORD_SIDEBAR_CLOSE_MS);
+  }
+
+  getSelectedGroup(): DefacementGroup | null {
+    if (!this.expandedGroupKey) {
+      return null;
+    }
+
+    return this.getDefacementGroups().find(group => group.key === this.expandedGroupKey) ?? null;
+  }
+
+  getSidebarRecords(): DefacementRecord[] {
+    const selectedGroup = this.getSelectedGroup();
+    const records = selectedGroup ? selectedGroup.records : this.getDefacementGroups().flatMap(group => group.records);
+    return [...records].sort((a, b) => this.dateTime(b.leakDate) - this.dateTime(a.leakDate)).slice(0, 1000);
+  }
+
+  getSidebarItems(): RecordSidebarItem[] {
+    return this.getSidebarRecords().map((record, index) => ({
+      id: record.item.m_hash || record.sourceUrl || `${this.normalizeGroupKey(record.title)}-${index}`,
+      title: record.title,
+      subtitle: this.getActorLabel(record.item) || 'Unknown actor',
+      kindLabel: record.item.m_ioc_type?.[0],
+      date: record.leakDate,
+      tags: [record.ipSummary, record.webServerSummary].filter(value => value && value !== '-'),
+      sourceLabel: record.sourceUrl,
+      routerLink: [this.currentUrl, record.item.m_hash],
+      queryParams: this.queryParams,
+      searchText: this.getRecordSearchText(record.item),
+      savePositionId: record.item.m_hash,
+    }));
+  }
+
+  getSidebarSubtitle(): string {
+    const selectedGroup = this.getSelectedGroup();
+    if (selectedGroup) {
+      return `${selectedGroup.records.length} records / ${selectedGroup.title}`;
+    }
+    const suffix = this.searchQueryInput() ? ` / ${this.searchQueryInput()}` : '';
+    return `${this.getSidebarRecords().length} records${suffix}`;
+  }
+
+  getActorLabel(item: DefacementResultItem): string {
+    const attackers = item.m_attacker?.filter(Boolean) || [];
+    if (attackers.length) {
+      return attackers.join(', ');
+    }
+    return item.m_team || '';
+  }
+
+  getSiteLabel(item: DefacementResultItem): string {
+    return (item.m_url || item.m_base_url || item.m_source_url?.[0] || '-').replace('https://', '').replace('http://', '');
+  }
+
+  getFirstSourceUrl(item: DefacementResultItem): string {
+    return item.m_source_url?.[0] || '';
+  }
+
+  getDefacementRisk(records: number, ipCount: number): DefacementRisk {
+    if (records >= 5 || ipCount >= 5) {
+      return 'High';
+    }
+    if (records >= 2 || ipCount >= 2) {
+      return 'Medium';
+    }
+    return 'Low';
+  }
+
+  getDefacementSummary(groups: DefacementGroup[]): DefacementSummary {
+    const records = groups.flatMap(group => group.records.map(record => record.item));
+
+    return {
+      campaigns: groups.length,
+      records: records.length,
+      affectedSites: this.countUnique(records.map(item => this.getSiteLabel(item))),
+      latestSeen: records.reduce((latest, item) => this.getLatestDate(latest, item.m_date || null), null as string | null)
+    };
+  }
+
+  getPrimarySite(group: DefacementGroup): string {
+    return group.records[0]?.title || '-';
+  }
+
+  private toDefacementRecord(item: DefacementResultItem): DefacementRecord {
+    return {
+      item,
+      title: this.getSiteLabel(item),
+      ipSummary: item.m_ip?.length ? item.m_ip.join(', ') : '-',
+      webServerSummary: item.m_web_server?.length ? item.m_web_server.join(', ') : '-',
+      sourceUrl: this.getFirstSourceUrl(item),
+      leakDate: item.m_date || null
+    };
+  }
+
+  private normalizeGroupKey(value: string): string {
+    return String(value || 'unknown').trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  private buildRenderKey(groups: DefacementGroup[]): string {
+    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen || ''}`).join('|');
+  }
+
+  private startStaggeredRender(targetCount: number, key: string): void {
+    if (this.renderKey === key && this.renderTargetCount === targetCount) {
+      return;
+    }
+    this.clearRenderTimer();
+    this.renderKey = key;
+    this.renderTargetCount = targetCount;
+    this.visibleGroupCount.set(Math.min(targetCount, STAGGER_RENDER_BATCH_SIZE));
+    this.revealNextGroupBatch();
+  }
+
+  private revealNextGroupBatch(): void {
+    if (this.visibleGroupCount() >= this.renderTargetCount) {
+      return;
+    }
+    this.renderTimer = setTimeout(() => {
+      this.visibleGroupCount.update(count => Math.min(count + STAGGER_RENDER_BATCH_SIZE, this.renderTargetCount));
+      this.revealNextGroupBatch();
+    }, STAGGER_RENDER_DELAY_MS);
+  }
+
+  private clearRenderTimer(): void {
+    if (this.renderTimer) {
+      clearTimeout(this.renderTimer);
+      this.renderTimer = null;
+    }
+  }
+
+  private clearRecordSidebarCloseTimer(): void {
+    if (this.recordSidebarCloseTimer) {
+      clearTimeout(this.recordSidebarCloseTimer);
+      this.recordSidebarCloseTimer = null;
+    }
+  }
+
+  private uniqueValues(values: string[]): string[] {
+    return Array.from(new Set(values.filter(value => !!String(value || '').trim())));
+  }
+
+  private countUnique(values: string[]): number {
+    return this.uniqueValues(values).length;
+  }
+
+  private getRecordSearchText(item: DefacementResultItem): string {
+    return [
+      this.getSiteLabel(item),
+      this.getActorLabel(item),
+      item.m_team,
+      ...(item.m_ip || []),
+      ...(item.m_web_server || []),
+      ...(item.m_source_url || []),
+      ...(item.m_ioc_type || []),
+    ].filter(Boolean).join(' ').toLowerCase();
+  }
+
+  private getLatestDate(current: string | null, next: string | null): string | null {
+    if (!current) {
+      return next;
+    }
+    if (!next) {
+      return current;
+    }
+    return this.dateTime(next) > this.dateTime(current) ? next : current;
+  }
+
+  private dateTime(value: string | null): number {
+    if (!value) {
+      return 0;
+    }
+    const parsed = new Date(value).getTime();
+    return Number.isNaN(parsed) ? 0 : parsed;
+  }
+
+  private riskWeight(risk: DefacementRisk): number {
+    switch (risk) {
+      case 'High':
+        return 3;
+      case 'Medium':
+        return 2;
+      case 'Low':
+        return 1;
+      default:
+        return 0;
+    }
   }
 }

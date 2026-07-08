@@ -50,25 +50,6 @@ export interface OrionSatelliteFeature {
   properties?: Record<string, unknown>;
 }
 
-export interface MapEntityByIdItem {
-  id: string;
-  name?: string;
-  country?: string;
-  type?: string;
-  capacity?: number;
-  source?: string;
-  location?: {
-    lat?: number;
-    lon?: number;
-  };
-  location_point?: string;
-}
-
-export interface MapEntitiesByIdsResponse {
-  Result: MapEntityByIdItem[];
-  Count: number;
-}
-
 export interface OrionSatelliteFilterOption {
   key: OrionSatelliteFeatureType;
   label: string;
@@ -180,8 +161,7 @@ export interface AnimatedArcDescriptor {
   categoryLabel: string;
   color: [number, number, number];
   weight: number;
-  arcPoints: [number, number, number][];
-  arcPaths: [number, number, number][][];
+  arcPoints: [number, number][];
   surfacePaths: [number, number][][];
   countryAKey: string;
   countryBKey: string;
@@ -201,4 +181,10 @@ export type ThreatLensDisplayFeedItem = ThreatLensFeedItem & {
 export interface ThreatLensFeedRangeOption {
   key: ThreatLensFeedRange;
   label: string;
+}
+
+export interface ArcDrawState {
+  arc: AnimatedArcDescriptor;
+  graphic: any;
+  completed: boolean;
 }

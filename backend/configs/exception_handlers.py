@@ -1,3 +1,4 @@
+import logging
 import re
 import traceback
 
@@ -10,6 +11,8 @@ from starlette_admin.exceptions import FormValidationError
 
 from configs import config
 from orion.shared_models.expection_handlers.expection_handlers_models import ErrorResponseModel, ValidationErrorDetail, ValidationErrorResponseModel
+
+logger = logging.getLogger("uvicorn.error")
 
 
 def clean_traceback(exc: Exception):
@@ -29,14 +32,22 @@ async def global_exception_handler(_: Request, exc: Exception):
     return RedirectResponse(url=f"/{status_code}")
 
 
-async def validation_exception_handler(_: Request, exc: Exception):
+async def validation_exception_handler(request: Request, exc: Exception):
     if not isinstance(exc, RequestValidationError):
         return RedirectResponse(url=f"/{HTTP_500_INTERNAL_SERVER_ERROR}")
 
+    errors = [ValidationErrorDetail(
+        field=".".join(str(loc) for loc in error["loc"][1:]), message=error["msg"], type=error["type"]) for error in
+        exc.errors()]
+    logger.warning(
+        "Request validation failed: %s %s content_type=%s errors=%s",
+        request.method,
+        request.url.path,
+        request.headers.get("content-type", ""),
+        [error.model_dump() for error in errors],
+    )
+
     if config.DEBUG:
-        errors = [ValidationErrorDetail(
-            field=".".join(str(loc) for loc in error["loc"][1:]), message=error["msg"], type=error["type"]) for error in
-            exc.errors()]
         error_response = ValidationErrorResponseModel(
             validation_errors=errors, traceback=clean_traceback(exc))
         return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_CONTENT, content=error_response.model_dump())

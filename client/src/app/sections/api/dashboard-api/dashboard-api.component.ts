@@ -13,6 +13,9 @@ import { GraphReportPayload } from '../../../shared/model/report/report-export.m
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../services/core/app/app.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { ScanNotificationService } from '../../../shared/services/scan-notification.service';
 
 const API_CHAT_TOOL_TYPES: Record<string, string> = {
   user: '/api/dynamic/user',
@@ -26,7 +29,7 @@ const API_CHAT_TOOL_TYPES: Record<string, string> = {
 
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
@@ -53,7 +56,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   cryptoSummaryExpanded = false;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService) {
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService, private scanNotifications: ScanNotificationService) {
     super();
   }
 
@@ -406,6 +409,27 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
+    const apiReference = apiEndpoint.replace(/^\/api\//, '');
+    const trackedReferences = new Set([
+      'dynamic/user',
+      'dynamic/social',
+      'dynamic/cracked',
+      'dynamic/software',
+      'dynamic/national-identity',
+      'crypto/scan',
+    ]);
+    if (trackedReferences.has(apiReference)) {
+      return this.scanNotifications.runScanAsResponse<any>({
+        apiReference,
+        payload: paramModel,
+        metadata: {
+          title: `${(this.apiType || apiReference).replace('-', ' ')} Scan`,
+          target: this.q1 || this.q2 || apiReference,
+          section: this.apiType || apiReference,
+        },
+        pollDelayMs: 2000,
+      }).pipe(catchError(_ => of(null)));
+    }
     return this.http.post<any>(apiEndpoint, paramModel).pipe(expand(res => this.shouldContinuePolling(res)
       ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, paramModel)))
       : EMPTY), takeWhile(res => this.shouldContinuePolling(res), true), catchError(_ => of(null)));
@@ -420,8 +444,8 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
   private isFailedPendingResponse(res: any): boolean {
     return (res?.status === 'pending' || res?.result?.status === 'pending') &&
-            ((res?.result?.progress ?? res?.progress) === 0) &&
-            ((res?.result?.step ?? res?.step) === 'failed');
+      ((res?.result?.progress ?? res?.progress) === 0) &&
+      ((res?.result?.step ?? res?.step) === 'failed');
   }
 
   private isFailedDoneResponse(res: any): boolean {
@@ -464,7 +488,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
       const payload: GraphReportPayload = {
         graphKind: 'cti',
-        title: `Entity API Report - ${this.displayFieldLabel(apiLabel)}`,
+        title: `Entity Lookup Report - ${this.displayFieldLabel(apiLabel)}`,
         sessionName: `${this.apiType || 'api'}-${query || 'query'}`.slice(0, 80),
         generatedAtIso: now,
         nodes: Object.keys(values).map((k, i) => ({ id: `field-${i + 1}`, label: k, type: 'field' })),
@@ -506,7 +530,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
     const payload: GraphReportPayload = {
       graphKind: (this.apiType === 'social' || this.apiType === 'wanted' || this.apiType === 'national-identity') ? 'social' : 'cti',
-      title: `Entity API Report - ${this.displayFieldLabel(apiLabel)}`,
+      title: `Entity Lookup Report - ${this.displayFieldLabel(apiLabel)}`,
       sessionName: `${this.apiType || 'api'}-${query || 'query'}`.slice(0, 80),
       generatedAtIso: now,
       nodes: items.slice(0, 200).map((item, idx) => ({

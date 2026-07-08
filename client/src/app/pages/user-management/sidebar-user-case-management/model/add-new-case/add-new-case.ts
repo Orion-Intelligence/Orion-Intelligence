@@ -7,10 +7,11 @@ import { EntityDetailsComponent } from '../entity-details/entity-details';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { CaseEditDrawerComponent } from '../case-details/case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-add-new-case',
-  imports: [CommonModule, FormsModule, EntityDetailsComponent, CaseEditDrawerComponent],
+  imports: [CommonModule, FormsModule, EntityDetailsComponent, CaseEditDrawerComponent, TranslatePipe],
   templateUrl: './add-new-case.html'
 })
 export class AddNewCase {

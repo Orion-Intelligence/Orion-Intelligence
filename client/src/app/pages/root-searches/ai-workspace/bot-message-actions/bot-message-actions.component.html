@@ -1,11 +1,11 @@
 <ul class="flex justify-start gap-2 px-4 pt-1.5">
-  <li (click)="copyMessage($event)" class="ui-ai-action-button relative flex h-[30px] w-[30px] list-none cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" title="Copy message" aria-label="Copy message">
+  <li (click)="copyMessage($event)" class="ui-ai-action-button relative flex h-[30px] w-[30px] list-none cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" [title]="'Copy message' | translate" [attr.aria-label]="'Copy message' | translate">
     <i class="bi bi-copy text-[12px] leading-none"></i>
     @if (copied()) {
-      <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">Copied!</span>
+      <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">{{ 'Copied!' | translate }}</span>
     }
   </li>
-  <li (click)="shareDialog.open($event)" class="ui-ai-action-button relative flex h-[30px] w-[30px] list-none cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" title="Share message" aria-label="Share message">
+  <li (click)="shareDialog.open($event)" class="ui-ai-action-button relative flex h-[30px] w-[30px] list-none cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" [title]="'Share message' | translate" [attr.aria-label]="'Share message' | translate">
     <i class="bi bi-share-fill text-[12px] leading-none"></i>
   </li>
 </ul>

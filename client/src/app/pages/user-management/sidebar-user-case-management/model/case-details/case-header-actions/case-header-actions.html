@@ -1,0 +1,38 @@
+<div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+    <div class="min-w-0">
+        <h1 class="ui-page-title">{{ caseData.title || ('Case ' + caseData.caseId) }}</h1>
+        <p class="ui-page-description">
+            {{ caseData.caseId }} · {{ getDisplayLabel(caseData.caseType, caseData.caseTypeOtherValue) }}
+        </p>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-2 sm:justify-end">
+        @if (!isEditing) {
+        <div class="inline-flex overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)]">
+        @if (canManageCases() && caseData.closure && !caseData.isArchived) {
+        <button @caseInlineMotion (click)="store.openArchiveConfirmation()" type="button" [attr.aria-label]="'Archive case' | translate" [appTooltip]="'Archive case' | translate" class="inline-flex h-9 w-9 items-center justify-center border-0 border-r border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 last:border-r-0" data-testid="case-details-archive" [disabled]="isArchivingCase">
+            <i class="bi bi-folder-fill text-[15px] leading-none"></i>
+        </button>
+        }
+        @if (canUnarchiveCases() && caseData.isArchived) {
+        <button @caseInlineMotion (click)="store.openUnarchiveConfirmation()" type="button" [attr.aria-label]="'Unarchive case' | translate" [appTooltip]="'Unarchive case' | translate" class="inline-flex h-9 w-9 items-center justify-center border-0 border-r border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 last:border-r-0" data-testid="case-details-unarchive" [disabled]="isArchivingCase">
+            <i class="bi bi-arrow-clockwise text-[16px] leading-none"></i>
+        </button>
+        }
+        <button @caseInlineMotion (click)="store.exportPdf()" type="button" aria-label="Export PDF | translate" appTooltip="Export PDF | translate" class="inline-flex h-9 w-9 items-center justify-center border-0 border-r border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 last:border-r-0" data-testid="case-details-export-pdf" [disabled]="isPdfExporting">
+            <i class="bi text-sm leading-none" [ngClass]="isPdfExporting ? 'bi-arrow-repeat animate-spin' : 'bi-download'"></i>
+        </button>
+        @if (canManageCases()) {
+        <button @caseInlineMotion (click)="store.openShareConfirmation()" type="button" [attr.aria-label]="'Create share link' | translate" [appTooltip]="'Create share link' | translate" class="inline-flex h-9 w-9 items-center justify-center border-0 border-r border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 last:border-r-0" data-testid="case-details-share" [disabled]="isShareCreating">
+            <i class="bi text-[15px] leading-none [&_.ui-bootstrap-icon]:overflow-visible" [ngClass]="isShareCreating ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'"></i>
+        </button>
+        }
+        @if (canManageCases()) {
+        <button @caseInlineMotion (click)="store.openRevokeShareConfirmation()" type="button" [attr.aria-label]="'Revoke all share links' | translate" [appTooltip]="'Revoke all share links' | translate" class="inline-flex h-9 w-9 items-center justify-center border-0 border-r border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 last:border-r-0" data-testid="case-details-revoke-shares" [disabled]="isShareRevoking">
+            <i class="bi text-sm leading-none" [ngClass]="isShareRevoking ? 'bi-arrow-repeat animate-spin' : 'bi-trash3'"></i>
+        </button>
+        }
+        </div>
+        }
+    </div>
+</div>

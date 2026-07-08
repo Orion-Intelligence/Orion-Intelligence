@@ -15,6 +15,29 @@ from orion.middleware.middlewares.service_ready_middleware import service_ready_
 
 class EnforceHTTPSMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
+        forwarded_host = request.headers.get("x-forwarded-host", "").split(",", 1)[0].strip()
+        if config.DEBUG and forwarded_host.endswith(":4200"):
+            request.scope["scheme"] = "http"
+            forwarded_host_bytes = forwarded_host.encode("latin-1")
+            headers = []
+            has_host = False
+            has_proto = False
+            for key, value in request.scope.get("headers", []):
+                if key == b"host":
+                    headers.append((key, forwarded_host_bytes))
+                    has_host = True
+                elif key == b"x-forwarded-proto":
+                    headers.append((key, b"http"))
+                    has_proto = True
+                else:
+                    headers.append((key, value))
+            if not has_host:
+                headers.append((b"host", forwarded_host_bytes))
+            if not has_proto:
+                headers.append((b"x-forwarded-proto", b"http"))
+            request.scope["headers"] = headers
+            return await call_next(request)
+
         if request.scope.get("scheme") != "https":
             request.scope["scheme"] = "https"
         return await call_next(request)

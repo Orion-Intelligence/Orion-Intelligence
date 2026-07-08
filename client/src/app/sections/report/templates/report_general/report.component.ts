@@ -18,13 +18,14 @@ import { ReportHeaderComponent } from '../../../../shared/partials/report-header
 import { ChatWidgetComponent } from '../../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-block.component';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
-import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isHiddenReportMetadataKey, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
-  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent],
+  imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit, AfterViewInit {
@@ -96,6 +97,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   langUpdate(result: any) {
     this.resultItem = result;
     this.processResultItem();
+    this.syncActiveMetadataTab();
     if (this.resultItem?.m_screenshot) {
       this.loadImage(this.resultItem.m_screenshot);
     }
@@ -122,26 +124,67 @@ export class ReportComponent implements OnInit, AfterViewInit {
       }
       Object.keys(this.resultItem).forEach((key) => {
         const value = (this.resultItem)[key];
-        if (Array.isArray(value) && value.length > 0 && key !== 'm_section') {
+        if (key !== 'm_section' && this.shouldShowMetadataKey(key, value)) {
           this.arrayKeys.push(key);
         }
       });
     }
   }
 
-  setActiveTab(tab: string) {
-    if (this.activeTab === tab) {
+  private shouldShowMetadataKey(key: string, value: unknown): boolean {
+    if (isHiddenReportMetadataKey(key)) {
+      return false;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    if (value == null || typeof value === 'object') {
+      return false;
+    }
+    return String(value).trim().length > 0;
+  }
+
+  private getMetadataListItems(key: string): string[] {
+    const value = this.resultItem?.[key];
+    if (Array.isArray(value)) {
+      return value.map(item => String(item));
+    }
+    if (value == null) {
+      return [];
+    }
+    return [String(value)];
+  }
+
+  getMetadataCount(key: string): number {
+    if (key === 'm_content') {
+      return this.content ? 1 : 0;
+    }
+    return this.getMetadataListItems(key).length;
+  }
+
+  private syncActiveMetadataTab(): void {
+    const keys = this.filteredArrayKeys;
+    if (!keys.length) {
       this.activeTab = '';
       this.listItems = [];
       return;
     }
-    this.activeTab = tab;
-    if (this.resultItem && Array.isArray((this.resultItem)[tab])) {
-      this.listItems = (this.resultItem)[tab];
+    if (!this.activeTab || !keys.includes(this.activeTab)) {
+      this.activeTab = keys[0];
     }
-    else {
+    if (this.activeTab === 'm_content') {
       this.listItems = [];
+      return;
     }
+    this.listItems = this.getMetadataListItems(this.activeTab);
+  }
+
+  setActiveTab(tab: string) {
+    if (this.activeTab === tab) {
+      return;
+    }
+    this.activeTab = tab;
+    this.listItems = this.getMetadataListItems(tab);
     this.cdr.detectChanges();
   }
 
@@ -193,6 +236,22 @@ export class ReportComponent implements OnInit, AfterViewInit {
 
   normalizeDisplayUrl(url?: string | null): string {
     return normalizeDisplayUrlUtil(url, '-');
+  }
+
+  getReportUrl(): string {
+    return this.resultItem?.m_url || this.resultItem?.m_source_url || this.resultItem?.m_base_url || '';
+  }
+
+  getReportDescription(): string {
+    return this.resultItem?.m_important_content || this.resultItem?.m_content || '';
+  }
+
+  getReportDate(): string {
+    return this.resultItem?.m_date || this.resultItem?.m_published_date || this.resultItem?.m_first_seen || '';
+  }
+
+  getStatusDate(): string {
+    return this.resultItem?.m_creation_date || this.resultItem?.m_update_date || this.getReportDate();
   }
 
   get reportDocId(): string {

@@ -1,5 +1,5 @@
-import { SelectedCountryCategoryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
-import { ThreatLensCoordinates, ThreatLensIpRecord } from '../models/threat-lens-map.types';
+import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
+import { ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensIpRecord } from '../models/threat-lens-map.types';
 
 export class ThreatLensGeoUtils {
   static getThreatLensDistanceKm(a: ThreatLensCoordinates, b: ThreatLensCoordinates): number {
@@ -29,31 +29,6 @@ export class ThreatLensGeoUtils {
     return `#${color.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   }
 
-  static buildThreatLensCategoryCountryCounts( categoryData: ThreatLensCategoryMapData[], toCountryKey: (value: string) => string, ): Map<ThreatLensCategoryModelKey, Map<string, number>> {
-    const categoryCountryNewsCountByKey = new Map<ThreatLensCategoryModelKey, Map<string, number>>();
-
-    for (const category of categoryData) {
-      const countsByCountry = new Map<string, number>();
-      for (const item of category.countryCounts) {
-        countsByCountry.set(toCountryKey(item.country), item.count);
-      }
-      categoryCountryNewsCountByKey.set(category.categoryKey, countsByCountry);
-    }
-
-    return categoryCountryNewsCountByKey;
-  }
-
-  static getThreatLensSelectedCountryBreakdown( countryKey: string, categoryLegend: ThreatLensLegendItem[], categoryCountryNewsCountByKey: Map<ThreatLensCategoryModelKey, Map<string, number>>, ): SelectedCountryCategoryCount[] {
-    return categoryLegend
-      .map((category) => ({
-        label: category.label,
-        colorHex: category.colorHex,
-        count: categoryCountryNewsCountByKey.get(category.categoryKey)?.get(countryKey) || 0,
-      }))
-      .filter((item) => item.count > 0)
-      .sort((a, b) => b.count - a.count);
-  }
-
   static buildThreatLensLegend( categoryData: ThreatLensCategoryMapData[], arcCountByCategory: Map<ThreatLensCategoryModelKey, number>, ): ThreatLensLegendItem[] {
     return categoryData.map((category) => ({
       categoryKey: category.categoryKey,
@@ -65,8 +40,83 @@ export class ThreatLensGeoUtils {
     }));
   }
 
+  static isThreatLensPointInBoundary(point: ThreatLensCoordinates, boundary: ThreatLensCountryBoundary | null | undefined): boolean {
+    if (!boundary?.rings?.length) {
+      return true;
+    }
+
+    const lon = ThreatLensGeoUtils.normalizeThreatLensLongitude(point.lon);
+    if (point.lat < boundary.extent.minLat || point.lat > boundary.extent.maxLat || lon < boundary.extent.minLon || lon > boundary.extent.maxLon) {
+      return false;
+    }
+
+    return boundary.rings.some((ring) => ThreatLensGeoUtils.isThreatLensPointInRing(point.lat, lon, ring));
+  }
+
   static extractThreatLensIpScanRecords(payload: any): ThreatLensIpRecord[] {
     const records = new Map<string, ThreatLensIpRecord>();
+    const readCoordinate = (source: any, keys: string[]): number | undefined => {
+      if (!source || typeof source !== 'object') {
+        return undefined;
+      }
+      for (const key of keys) {
+        const value = source[key];
+        if (value === null || value === undefined || value === '') {
+          continue;
+        }
+        const coordinate = Number(value);
+        if (Number.isFinite(coordinate)) {
+          return coordinate;
+        }
+      }
+      return undefined;
+    };
+    const readCoordinates = (value: any): Pick<ThreatLensIpRecord, 'lat' | 'lon'> => {
+      const sources = [value, value?.ip_info, value?.geo, value?.location, value?.data];
+      for (const source of sources) {
+        const lat = readCoordinate(source, ['lat', 'latitude', 'geo_lat']);
+        const lon = readCoordinate(source, ['lon', 'lng', 'longitude', 'geo_lon', 'geo_lng']);
+        if (lat !== undefined && lon !== undefined && lat >= -90 && lat <= 90) {
+          return { lat, lon };
+        }
+      }
+      return {};
+    };
+    const readString = (value: any, keys: string[]): string => {
+      const sources = [value, value?.ip_info, value?.geo, value?.location, value?.data];
+      for (const source of sources) {
+        if (!source || typeof source !== 'object') {
+          continue;
+        }
+        for (const key of keys) {
+          const text = String(source[key] ?? '').trim();
+          if (text) {
+            return text;
+          }
+        }
+      }
+      return '';
+    };
+    const readNumber = (value: any, keys: string[]): number | undefined => {
+      const sources = [value, value?.ip_info, value?.geo, value?.location, value?.data];
+      for (const source of sources) {
+        const numericValue = readCoordinate(source, keys);
+        if (numericValue !== undefined) {
+          return numericValue;
+        }
+      }
+      return undefined;
+    };
+    const readMetadata = (value: any): Partial<ThreatLensIpRecord> => {
+      const network = readString(value, ['network', 'cidr', 'ip_range']);
+      const accuracyRadius = readNumber(value, ['accuracyRadius', 'accuracy_radius', 'accuracy_km']);
+      const distanceKm = readNumber(value, ['distanceKm', 'distance_km']);
+      return {
+        ...(network ? { network } : {}),
+        ...(accuracyRadius !== undefined ? { accuracyRadius } : {}),
+        ...(distanceKm !== undefined ? { distanceKm } : {}),
+      };
+    };
     const addRecord = (value: any) => {
       if (typeof value === 'string') {
         const ip = value.trim();
@@ -81,17 +131,24 @@ export class ThreatLensGeoUtils {
       }
 
       const ip = String(value.ip || value.ip_address || value.host || '').trim();
-      if (!ip || records.has(ip)) {
+      if (!ip) {
         return;
       }
 
-      records.set(ip, { ip });
+      records.set(ip, {
+        ...(records.get(ip) ?? { ip }),
+        ...readCoordinates(value),
+        ...readMetadata(value),
+      });
     };
 
     [
+      payload?.ip_locations,
       payload?.ips,
       payload?.ip_addresses,
+      payload?.data?.ip_locations,
       payload?.data?.ips,
+      payload?.result?.ip_locations,
       payload?.result?.ips,
       payload?.cameras,
       payload?.result?.cameras,
@@ -103,5 +160,21 @@ export class ThreatLensGeoUtils {
     });
 
     return Array.from(records.values()).slice(0, 500);
+  }
+
+  private static isThreatLensPointInRing(lat: number, lon: number, ring: ThreatLensCoordinates[]): boolean {
+    let inside = false;
+    for (let index = 0, previousIndex = ring.length - 1; index < ring.length; previousIndex = index, index += 1) {
+      const current = ring[index];
+      const previous = ring[previousIndex];
+      const currentLon = ThreatLensGeoUtils.normalizeThreatLensLongitude(current.lon);
+      const previousLon = ThreatLensGeoUtils.normalizeThreatLensLongitude(previous.lon);
+      const intersects = ((current.lat > lat) !== (previous.lat > lat))
+        && (lon < ((previousLon - currentLon) * (lat - current.lat) / ((previous.lat - current.lat) || Number.EPSILON)) + currentLon);
+      if (intersects) {
+        inside = !inside;
+      }
+    }
+    return inside;
   }
 }

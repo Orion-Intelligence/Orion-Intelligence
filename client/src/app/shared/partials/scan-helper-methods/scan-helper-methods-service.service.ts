@@ -3,8 +3,11 @@ import { EMPTY, Observable, Subject, Subscription, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeUntil, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from '../../services/api.service';
 import { DnsResponse, SubdomainResponse, WaybackResponse } from '../../model/scanners/scanner.models';
+import { ScanNotificationService } from '../../services/scan-notification.service';
 @Injectable({ providedIn: 'root' })
 export class ScanHelperMethodsService {
+  private readonly baseScanNotifications = inject(ScanNotificationService);
+
   protected readonly pollDelayMs = 4000;
   protected currentCancel$?: Subject<boolean> = undefined;
   protected api = inject(ApiService);
@@ -112,21 +115,37 @@ export class ScanHelperMethodsService {
   }
 
   scanSubdomains(resolved: string, checkLive: boolean): Subscription {
-    const call = () => this.api.post<SubdomainResponse>('urlscan/subdomains', { domain: resolved, scanType: 'subdomains', checkLive });
+    const call = () => this.baseScanNotifications.runApiScanAsResponse<SubdomainResponse>({
+      apiReference: 'urlscan/subdomains',
+      payload: { domain: resolved, scanType: 'subdomains', checkLive },
+      metadata: { title: 'Subdomain Scan', target: resolved },
+      pollDelayMs: this.pollDelayMs,
+    });
     const getStatus = (res: SubdomainResponse) => this.getPendingStatus(res);
     const getProgress = (res: SubdomainResponse) => (res as any)?.progress;
     return this.runPollingScan<SubdomainResponse>(call, getStatus, getProgress);
   }
 
   scanDns(ip: string): Subscription {
-    const call = () => this.api.post<DnsResponse>('urlscan/dns', { domain: ip, scanType: 'dns' });
+    const call = () => this.baseScanNotifications.runApiScanAsResponse<DnsResponse>({
+      apiReference: 'urlscan/dns',
+      payload: { domain: ip, scanType: 'dns' },
+      metadata: { title: 'DNS Scan', target: ip },
+      pollDelayMs: this.pollDelayMs,
+      forceNew: true,
+    });
     const getStatus = (res: DnsResponse) => res?.status;
     const getProgress = (res: DnsResponse) => res?.progress;
     return this.runPollingScan<DnsResponse>(call, getStatus, getProgress);
   }
 
   scanWayback(resolved: string): Subscription {
-    const call = () => this.api.post<WaybackResponse>('urlscan/wayback', { domain: resolved, scanType: 'wayback' });
+    const call = () => this.baseScanNotifications.runApiScanAsResponse<WaybackResponse>({
+      apiReference: 'urlscan/wayback',
+      payload: { domain: resolved, scanType: 'wayback' },
+      metadata: { title: 'Wayback Scan', target: resolved },
+      pollDelayMs: this.pollDelayMs,
+    });
     const getStatus = (res: WaybackResponse) => this.getPendingStatus(res);
     const getProgress = (res: WaybackResponse) => (res as any)?.progress;
     return this.runPollingScan<WaybackResponse>(call, getStatus, getProgress);

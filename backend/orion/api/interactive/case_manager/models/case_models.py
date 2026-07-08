@@ -35,6 +35,11 @@ class CaseRequestModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+class ArtifactReportOption(BaseModel):
+    id: str
+    title: str
+
+
 class SocialMediaProfileModel(CaseRequestModel):
     platform: SocialPlatform
     platformOtherValue: str = ""
@@ -89,7 +94,16 @@ class CaseEntityModel(CaseRequestModel):
         validate_other_value(self.type, self.entityTypeOtherValue, "Entity type")
         validate_other_value(self.source, self.entitySourceOtherValue, "Entity source")
         return self
-
+    
+class CaseArtifactFileModel(CaseRequestModel):
+    fileId: str = ""
+    fileName: str = ""
+    fileType: str = ""
+    fileSize: int = 0
+    fileResourceId: str = ""
+    fileHash: str = ""
+    integrityStatus: str = "unknown"
+    uploadedAt: Optional[datetime] = None
 
 class CaseArtifactModel(CaseRequestModel):
     artifactId: str = ""
@@ -100,10 +114,10 @@ class CaseArtifactModel(CaseRequestModel):
     source: SourceType = Field(default=SourceType.MANUAL)
     artifactSourceOtherValue: str = ""
     url: str = ""
-    fileName: str = ""
-    fileType: str = ""
-    fileSize: int = 0
-    fileResourceId: str = ""
+    files: List[CaseArtifactFileModel] = Field(default_factory=list)
+    linkedReportSource: str = ""
+    linkedReportId: str = ""
+    linkedReportTitle: str = ""
     entityIds: List[str] = Field(default_factory=list)
     tags: List[CaseTag] = Field(default_factory=list)
     capturedAt: Optional[datetime] = None
@@ -267,13 +281,17 @@ class UpdateCaseRequest(CaseRequestModel):
 
 class CaseResponse(BaseModel):
     id: str
+    viewerId: str = ""
+    viewerRole: str = ""
     caseId: str
     tenant_uuid: str
+    assignedAnalysts: List[dict] = Field(default_factory=list)
     title: str
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
     status: CaseStatus = Field(default=CaseStatus.NEW)
+    statusReasons: List[dict] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
@@ -285,6 +303,9 @@ class CaseResponse(BaseModel):
     createdAt: datetime
     updatedAt: datetime
     closedAt: Optional[datetime] = None
+    isArchived: bool = False
+    archivedAt: Optional[datetime] = None
+    archivedBy: str = ""
     artifacts: List[dict] = Field(default_factory=list)
     entities: List[dict] = Field(default_factory=list)
     comments: List[dict] = Field(default_factory=list)
@@ -302,3 +323,28 @@ class CaseShareResponse(BaseModel):
     token: str
     path: str
     expiresAt: datetime
+
+
+class UpdateCaseStatusRequest(CaseRequestModel):
+    status: CaseStatus
+    reason: str
+
+    @field_validator("reason")
+    @classmethod
+    def validate_reason(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Status change reason is required")
+        return value
+
+
+class AssignCaseAnalystRequest(CaseRequestModel):
+    analystId: str
+
+    @field_validator("analystId")
+    @classmethod
+    def validate_analyst_id(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("Analyst ID is required")
+        return value

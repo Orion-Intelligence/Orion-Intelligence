@@ -13,6 +13,7 @@ class DomainScanRequest(BaseModel):
 
 class UrlVulnerabilityScanRequest(BaseModel):
     domain: str
+    depth: str
 
     model_config = ConfigDict(
-        json_schema_extra={"example": {"domain": "example.com"}})
+        json_schema_extra={"example": {"domain": "example.com", "depth": "low"}})

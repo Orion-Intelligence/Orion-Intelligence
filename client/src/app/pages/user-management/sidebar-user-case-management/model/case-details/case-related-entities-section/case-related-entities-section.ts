@@ -7,10 +7,11 @@ import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../ca
 import { formatCaseConfidence, formatCaseLabel, getCaseDisplayLabel, getFormattedCaseDateTime, getLinkableCaseEntities, getLinkedCaseEntityDisplayLabel, getRelatedCaseEntities } from '../case-details-formatters';
 import { CaseDetailsStore } from '../case-details.store';
 import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-related-entities-section',
-  imports: [CommonModule, EntityDetailsComponent, TooltipDirective, CaseEditDrawerComponent],
+  imports: [CommonModule, EntityDetailsComponent, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
   templateUrl: './case-related-entities-section.html'
@@ -20,6 +21,7 @@ export class CaseRelatedEntitiesSectionComponent {
 
   editingRelatedEntityId: string | null = null;
   readonly store = inject(CaseDetailsStore);
+  $index: any;
 
   get caseData(): Case {
     return this.store.caseData as Case;
@@ -99,5 +101,9 @@ export class CaseRelatedEntitiesSectionComponent {
 
   getFormattedDateTime(date?: Date | string | null): string {
     return getFormattedCaseDateTime(date);
+  }
+
+  canManageCases(): boolean {
+    return this.store.canManageCases();
   }
 }

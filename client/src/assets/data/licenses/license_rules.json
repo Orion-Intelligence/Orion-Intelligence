@@ -6,6 +6,7 @@
         "cti_graph": false,
         "mapping": false,
         "scanning": false,
+        "geo_fencing": false,
         "maintainer": false
     },
     "feeder": {
@@ -15,6 +16,7 @@
         "cti_graph": false,
         "mapping": false,
         "scanning": false,
+        "geo_fencing": false,
         "maintainer": false
     },
     "osint_basic": {
@@ -31,6 +33,7 @@
         "cti_graph": false,
         "mapping": false,
         "scanning": false,
+        "geo_fencing": false,
         "maintainer": false
     },
     "osint_advanced": {
@@ -48,6 +51,7 @@
         "cti_graph": true,
         "mapping": true,
         "scanning": false,
+        "geo_fencing": true,
         "maintainer": false
     },
     "social_mapper": {
@@ -56,12 +60,14 @@
             "social_mapper"
         ],
         "scanning": false,
+        "geo_fencing": false,
         "cti_graph": false,
         "maintainer": false
     },
     "pentester": {
         "modules": [],
         "scanning": true,
+        "geo_fencing": false,
         "cti_graph": false,
         "maintainer": false
     },
@@ -70,6 +76,7 @@
             "event_management"
         ],
         "scanning": false,
+        "geo_fencing": false,
         "cti_graph": false,
         "mapping": false,
         "maintainer": true
@@ -77,6 +84,7 @@
     "enterprise": {
         "modules": "all",
         "scanning": true,
+        "geo_fencing": true,
         "cti_graph": true,
         "mapping": true,
         "maintainer": false

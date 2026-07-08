@@ -1,9 +1,9 @@
 <div class="p-6 text-[var(--color-text1)]">
-  <h1 class="text-2xl font-semibold">Alert Report</h1>
+  <h1 class="text-2xl font-semibold">{{ 'categoryAlerts.export.alertReport' | translate }}</h1>
 
   <div class="mt-2 flex flex-wrap gap-4 text-sm text-[var(--color-text3)]">
-    <div><strong>Total Alerts:</strong> {{ viewAlerts.length }}</div>
-    <div><strong>Printed:</strong> {{ printedNow }}</div>
+    <div><strong>{{ 'categoryAlerts.export.totalAlerts' | translate }}:</strong> {{ viewAlerts.length }}</div>
+    <div><strong>{{ 'categoryAlerts.export.printed' | translate }}:</strong> {{ printedNow }}</div>
   </div>
 
   @if (viewAlerts.length) {
@@ -12,37 +12,37 @@
         <header class="flex flex-wrap items-center justify-between gap-3">
           <div class="text-sm font-semibold text-[var(--color-text1)]">
             <span class="mr-2 text-[var(--color-text4)]">{{ i + 1 }}.</span>
-            <span>{{ alert.title || 'Untitled Alert' }}</span>
+            <span>{{ alert.title || ('categoryAlerts.export.untitledAlert' | translate) }}</span>
           </div>
           <div class="flex items-center gap-2">
             <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="riskClass(alert.type)">
               {{ getRiskLevel(alert.type) }}
             </span>
             <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="statusClass(alert.status)">
-              {{ alert.status || 'info' | uppercase }}
+              {{ (alert.status || ('info' | translate)) | uppercase }}
             </span>
           </div>
         </header>
         <div class="mt-3 space-y-2 text-sm text-[var(--color-text3)]">
-          <div><span class="text-[var(--color-text4)]">Type:</span> {{ alert.type || '—' }}</div>
-          <div><span class="text-[var(--color-text4)]">IOC:</span> {{ alert.ioc_type }} → {{ alert.ioc_value }}</div>
-          <div><span class="text-[var(--color-text4)]">Source:</span> {{ alert.source || '—' }}</div>
-          <div><span class="text-[var(--color-text4)]">URL:</span> {{ alert.url || '—' }}</div>
+          <div><span class="text-[var(--color-text4)]">{{ 'categoryAlerts.export.type' | translate }}:</span> {{ alert.type || '—' }}</div>
+          <div><span class="text-[var(--color-text4)]">{{ 'categoryAlerts.export.ioc' | translate }}:</span> {{ alert.ioc_type }} → {{ alert.ioc_value }}</div>
+          <div><span class="text-[var(--color-text4)]">{{ 'categoryAlerts.fields.source' | translate }}:</span> {{ alert.source || '—' }}</div>
+          <div><span class="text-[var(--color-text4)]">{{ 'categoryAlerts.fields.url' | translate }}:</span> {{ alert.url || '—' }}</div>
         </div>
         @if (alert.description) {
           <div class="mt-3 text-sm">
-            <span class="text-[var(--color-text4)]">Description:</span>
+            <span class="text-[var(--color-text4)]">{{ 'categoryAlerts.form.description' | translate }}:</span>
             <div class="mt-1 whitespace-pre-wrap text-[var(--color-text3)]">{{ alert.description }}</div>
           </div>
         }
         <div class="mt-4 flex flex-wrap gap-4 text-xs text-[var(--color-text4)]">
-          <div><strong>First Seen:</strong> {{ formatDate(alert.first_seen) }}</div>
-          <div><strong>Last Seen:</strong> {{ formatDate(alert.last_seen) }}</div>
+          <div><strong>{{ 'categoryAlerts.export.firstSeen' | translate }}:</strong> {{ formatDate(alert.first_seen) }}</div>
+          <div><strong>{{ 'categoryAlerts.export.lastSeen' | translate }}:</strong> {{ formatDate(alert.last_seen) }}</div>
         </div>
       </section>
     }
   } @else {
-    <div class="mt-4 text-sm text-[var(--color-text4)]">No alerts available.</div>
+    <div class="mt-4 text-sm text-[var(--color-text4)]">{{ 'categoryAlerts.export.noAlertsAvailable' | translate }}</div>
   }
 
 </div>

@@ -2,7 +2,9 @@ import { initCallbackModel } from '../callback.init';
 export class GeneralResultItem {
   m_title!: string;
   m_url?: string;
+  m_source_url?: string;
   m_base_url?: string;
+  m_platform?: string;
   m_content!: string;
   m_screenshot!: string;
   m_ref_html?: string | null;
@@ -14,11 +16,14 @@ export class GeneralResultItem {
   m_section!: string[];
   m_clearnet_links!: string[];
   m_weblink!: string[];
-  m_leak_date?: string | null;
+  m_date?: string | null;
   m_dumplink!: string[];
   m_update_date!: string;
+  m_crawl_status?: string | null;
+  m_last_crawled_at?: string | null;
   m_hash!: string;
   m_creation_date!: string;
+  rank_index?: string;
 
   constructor(init?: Partial<GeneralResultItem>) {
     this.m_title = '';

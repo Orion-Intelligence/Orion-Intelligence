@@ -11,6 +11,9 @@ from orion.management.jobs.insight_generator import insight_generator
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
+HOMEPAGE_DISPLAY_DATE_FORMAT = "%B %d, %Y"
+
+
 class homepage_model:
     __instance = None
 
@@ -194,6 +197,7 @@ class homepage_model:
             "leak": ELASTIC_INDEX.S_LEAK_INDEX,
             "generic": ELASTIC_INDEX.S_GENERIC_INDEX,
             "exploit": ELASTIC_INDEX.S_EXPLOIT_INDEX,
+            "apt": ELASTIC_INDEX.S_APT_INDEX,
             "chat": ELASTIC_INDEX.S_CHATS_INDEX,
             "social": ELASTIC_INDEX.S_SOCIAL_INDEX,
             "defacement": ELASTIC_INDEX.S_DEFACEMENT_INDEX,
@@ -230,7 +234,7 @@ class homepage_model:
         title = item.get("m_title") or item.get("m_name") or item.get("m_caption") or item.get("m_url") or "Untitled"
         display_title = title if len(title) > 20 else title
 
-        date_fields = ["m_update_date", "m_leak_date", "m_message_date", "m_leak_date"]
+        date_fields = ["m_update_date", "m_date"]
         raw_date = next((item.get(f) for f in date_fields if item.get(f)), None)
 
         display_date = homepage_model.parse_date_fallback(raw_date)
@@ -276,5 +280,5 @@ class homepage_model:
         for fmt in formats:
             with suppress(ValueError):
                 dt = datetime.strptime(raw_date, fmt)
-                return dt.strftime("%B %d, %Y")
+                return dt.strftime(HOMEPAGE_DISPLAY_DATE_FORMAT)
         return None
