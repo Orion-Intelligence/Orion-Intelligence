@@ -614,16 +614,8 @@ export class CredentialComponent implements OnInit {
   get maxPages(): number {
     const currentPage = Number(this.dashboardService.consolidatedParamModel.page || 1);
     if (this.isStandaloneStealerlogsRoute) {
-      return Math.max(
-        Number(this.stealerlogCallbackModel.Page_Count || 0),
-        this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage,
-        1
-      );
+      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
     }
-    return Math.max(
-      Number(this.stealerlogCallbackModel.Page_Count || 0),
-      Number(this.rankedResult.pageCount || 0),
-      this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage,
-      1);
+    return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), Number(this.rankedResult.pageCount || 0), this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
   }
 }
