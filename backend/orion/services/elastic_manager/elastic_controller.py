@@ -14,6 +14,10 @@ ELASTIC_SEARCH_REQUEST_TIMEOUT = 120
 ELASTIC_WRITE_REQUEST_TIMEOUT = 220
 
 
+def _with_timeout(conn, timeout: int):
+    return conn.options(request_timeout=timeout)
+
+
 class elastic_controller:
     __instance = None
     __m_core_connection = None
@@ -82,10 +86,9 @@ class elastic_controller:
     @staticmethod
     async def __put_mapping_safe(conn, index: str, properties: dict):
         try:
-            await conn.indices.put_mapping(
+            await _with_timeout(conn, ELASTIC_WRITE_REQUEST_TIMEOUT).indices.put_mapping(
                 index=index,
                 body={"properties": properties},
-                request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
             )
         except ApiError as ex:
             log.g().w(f"Skipping mapping update for Elasticsearch index {index}: {str(ex)}")
@@ -96,10 +99,9 @@ class elastic_controller:
             if not indices:
                 continue
             try:
-                await conn.indices.refresh(
+                await _with_timeout(conn, ELASTIC_WRITE_REQUEST_TIMEOUT).indices.refresh(
                     index=",".join(sorted(indices)),
                     ignore_unavailable=True,
-                    request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
                 )
             except Exception as ex:
                 log.g().w(f"ELASTIC : refresh skipped after index write : {str(ex)}")
@@ -333,10 +335,9 @@ class elastic_controller:
     async def get_doc(self, index, doc_id: str):
         try:
             conn = self.__conn_for_index(index)
-            result = await conn.get(
+            result = await _with_timeout(conn, ELASTIC_SEARCH_REQUEST_TIMEOUT).get(
                 index=index,
                 id=doc_id,
-                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
             )
             return [result["_source"]] if result and "_source" in result else []
         except Exception:
@@ -345,11 +346,10 @@ class elastic_controller:
     async def search_query(self, document, data_filter):
         try:
             conn = self.__conn_for_index(document)
-            m_data = await conn.search(
+            m_data = await _with_timeout(conn, ELASTIC_SEARCH_REQUEST_TIMEOUT).search(
                 index=document,
                 body=data_filter,
                 allow_partial_search_results=False,
-                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
             )
             return True, m_data
         except Exception as ex:
@@ -389,44 +389,40 @@ class elastic_controller:
             none_stealer = all(i != ELASTIC_INDEX.S_STEALERLOGS_INDEX for i in indices)
 
             if only_stealer:
-                return await self.__m_dump_connection.search(
+                return await _with_timeout(self.__m_dump_connection, ELASTIC_SEARCH_REQUEST_TIMEOUT).search(
                     index=",".join(read_indices),
                     body=query,
                     allow_no_indices=True,
                     ignore_unavailable=True,
                     allow_partial_search_results=False,
-                    request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
                 )
 
             if none_stealer:
-                return await self.__m_core_connection.search(
+                return await _with_timeout(self.__m_core_connection, ELASTIC_SEARCH_REQUEST_TIMEOUT).search(
                     index=",".join(read_indices),
                     body=query,
                     allow_no_indices=True,
                     ignore_unavailable=True,
                     allow_partial_search_results=False,
-                    request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
                 )
 
             core_indices = [self._read_index(i) for i in indices if i != ELASTIC_INDEX.S_STEALERLOGS_INDEX]
             dump_indices = ["stealer_model,stealer_model-*"]
 
-            core_res = await self.__m_core_connection.search(
+            core_res = await _with_timeout(self.__m_core_connection, ELASTIC_SEARCH_REQUEST_TIMEOUT).search(
                 index=",".join(core_indices),
                 body=query,
                 allow_no_indices=True,
                 ignore_unavailable=True,
                 allow_partial_search_results=False,
-                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
             ) if core_indices else {"hits": {"hits": []}}
 
-            dump_res = await self.__m_dump_connection.search(
+            dump_res = await _with_timeout(self.__m_dump_connection, ELASTIC_SEARCH_REQUEST_TIMEOUT).search(
                 index=",".join(dump_indices),
                 body=query,
                 allow_no_indices=True,
                 ignore_unavailable=True,
                 allow_partial_search_results=False,
-                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
             )
 
             merged = core_res if core_indices else dump_res
@@ -447,11 +443,10 @@ class elastic_controller:
         for index, query in zip(indices, queries):
             try:
                 conn = self.__conn_for_index(index)
-                res = await conn.search(
+                res = await _with_timeout(conn, ELASTIC_SEARCH_REQUEST_TIMEOUT).search(
                     index=index,
                     body=query,
                     allow_partial_search_results=False,
-                    request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
                 )
                 results.append(res)
             except Exception as ex:
@@ -497,10 +492,10 @@ class elastic_controller:
 
                     index = entry[ELASTIC_KEYS.S_DOCUMENT]
                     conn = self.__conn_for_index(index)
-                    exists = await conn.exists(
+                    timed_conn = _with_timeout(conn, ELASTIC_WRITE_REQUEST_TIMEOUT)
+                    exists = await timed_conn.exists(
                         index=index,
                         id=doc_id,
-                        request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
                     )
 
                     if not exists and not bypass_empty_embedding and index != ELASTIC_INDEX.S_CHATS_INDEX:
@@ -508,11 +503,10 @@ class elastic_controller:
                         if not (isinstance(emb, list) and len(emb) > 0):
                             continue
 
-                    await conn.update(
+                    await timed_conn.update(
                         index=index,
                         id=doc_id,
                         body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
-                        request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
                     )
                     touched_indices.setdefault(id(conn), (conn, set()))[1].add(index)
 
@@ -525,10 +519,10 @@ class elastic_controller:
 
                 index = p_data[ELASTIC_KEYS.S_DOCUMENT]
                 conn = self.__conn_for_index(index)
-                exists = await conn.exists(
+                timed_conn = _with_timeout(conn, ELASTIC_WRITE_REQUEST_TIMEOUT)
+                exists = await timed_conn.exists(
                     index=index,
                     id=doc_id,
-                    request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
                 )
 
                 if not exists and index != ELASTIC_INDEX.S_CHATS_INDEX:
@@ -536,11 +530,10 @@ class elastic_controller:
                     if not (isinstance(emb, list) and len(emb) > 0):
                         return False, "Missing non-empty m_embedding for new document"
 
-                await conn.update(
+                await timed_conn.update(
                     index=index,
                     id=doc_id,
                     body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
-                    request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
                 )
                 touched_indices.setdefault(id(conn), (conn, set()))[1].add(index)
 
@@ -562,10 +555,9 @@ class elastic_controller:
                             idx = meta.get("_index")
                             if idx:
                                 target_indices.add(idx)
-            response = await self.__m_dump_connection.bulk(
+            response = await _with_timeout(self.__m_dump_connection, ELASTIC_WRITE_REQUEST_TIMEOUT).bulk(
                 body=p_data,
                 refresh="wait_for",
-                request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
             )
             return response
         except Exception as ex:
@@ -573,8 +565,7 @@ class elastic_controller:
             raise HTTPException(status_code=500, detail="Failed to index dump data")
         
     async def mget_docs(self, index, body):
-        return await self.__m_core_connection.mget(
+        return await _with_timeout(self.__m_core_connection, ELASTIC_SEARCH_REQUEST_TIMEOUT).mget(
             index=self._read_index(index),
             body=body,
-            request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
         )
