@@ -214,6 +214,10 @@ export class ScanNotificationService {
       }));
     }
 
+    if (this.shouldRetryIncompleteUrlScanResponse(response, request)) {
+      return timer(request.pollDelayMs || this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
+    }
+
     const job = this.trackApiScanResponse(response, request);
     if (!job) {
       if (this.isPendingResponse(response)) {
@@ -419,7 +423,7 @@ export class ScanNotificationService {
   }
 
   private statusFromResponse(response: any): ScanJobStatus {
-    const raw = String(response?.result?.status || response?.status || '').toLowerCase();
+    const raw = String(response?.result?.status || response?.status || response?.scan_status || '').toLowerCase();
     const progress = Number(response?.result?.progress ?? response?.progress);
     const step = String(response?.result?.step || response?.step || '').toLowerCase();
     if (raw === 'error' || raw === 'failed' || raw === 'failure') {
@@ -533,7 +537,7 @@ export class ScanNotificationService {
   }
 
   private isPendingResponse(response: any): boolean {
-    const status = String(response?.result?.status || response?.status || '').toLowerCase();
+    const status = String(response?.result?.status || response?.status || response?.scan_status || '').toLowerCase();
     const progress = Number(response?.result?.progress ?? response?.progress);
     const step = String(response?.result?.step || response?.step || '').toLowerCase();
     if (progress >= 100 && (step.includes('done') || step.includes('complete') || step.includes('success'))) {
@@ -541,6 +545,19 @@ export class ScanNotificationService {
     }
     return ['pending', 'busy', 'queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].includes(status) ||
       ['queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].some(value => step.includes(value));
+  }
+
+  private shouldRetryIncompleteUrlScanResponse(response: any, request: ScanJobStartRequest): boolean {
+    const apiReference = String(request.apiReference || '').replace(/^\/?api\//, '');
+    const scanType = String(request.payload?.['scanType'] || '').toLowerCase();
+    const status = String(response?.result?.status || response?.status || response?.scan_status || '').toLowerCase();
+    if (apiReference !== 'urlscan/domain' || !['seo', 'repo'].includes(scanType)) {
+      return false;
+    }
+    if (['error', 'failed', 'failure'].includes(status) || response?.error || response?.detail) {
+      return false;
+    }
+    return !response?.result?.meta;
   }
 
   private createQueuedJob(job: ScanJobIncompleteResponse): ScanJob {
