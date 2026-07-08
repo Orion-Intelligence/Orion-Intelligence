@@ -59,6 +59,14 @@ class FeederHelper:
             return base_dir
         return base_dir / subcategory_key
 
+    def parser_file_path(self, target_path: Path) -> Path | None:
+        try:
+            parser_root = self._parser_root.resolve()
+            resolved_path = target_path.resolve()
+        except OSError:
+            return None
+        return resolved_path if resolved_path.is_file() and parser_root in resolved_path.parents else None
+
     def rule_path_parts(self, rule_path: str | None) -> tuple[str, str]:
         if not rule_path:
             raise HTTPException(status_code=400, detail="Selected rule has no upload path")
@@ -349,8 +357,7 @@ class FeederHelper:
             return None
         category_key, subcategory_key = self.rule_path_parts(rule_path)
         target_dir = self.resolve_target_dir(category_key, subcategory_key)
-        target_path = target_dir / f"_{rule_key}.py"
-        return target_path if target_path.is_file() else None
+        return self.parser_file_path(target_dir / self.sanitize_file_name(f"{rule_key}.py"))
 
     def shared_content_path(self, record: db_feeder_script_model) -> Path | None:
         if record.entry_kind == "values":
@@ -361,11 +368,13 @@ class FeederHelper:
 
     def item_content(self, record: db_feeder_script_model, has_file: bool, target_path: Path) -> str | None:
         if has_file:
-            return self.decrypt_script_content(target_path.read_bytes().decode())
+            safe_target_path = self.parser_file_path(target_path)
+            return self.decrypt_script_content(safe_target_path.read_bytes().decode()) if safe_target_path else None
 
         shared_target_path = self.shared_content_path(record)
         if shared_target_path:
-            return self.decrypt_script_content(shared_target_path.read_bytes().decode())
+            safe_shared_target_path = self.parser_file_path(shared_target_path)
+            return self.decrypt_script_content(safe_shared_target_path.read_bytes().decode()) if safe_shared_target_path else None
 
         return None
 
