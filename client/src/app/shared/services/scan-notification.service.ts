@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { EMPTY, Observable, Subject, Subscription, of, timer } from 'rxjs';
+import { concat, EMPTY, Observable, Subject, Subscription, of, timer } from 'rxjs';
 import { catchError, filter, finalize, map, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { DuplicateScanChoice, DuplicateScanPrompt, ScanJob, ScanJobCreateApiResponse, ScanJobDetailResponse, ScanJobDuplicateChoiceResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobPollResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
@@ -216,6 +216,10 @@ export class ScanNotificationService {
 
     const job = this.trackApiScanResponse(response, request);
     if (!job) {
+      if (this.isPendingResponse(response)) {
+        const retry$ = timer(request.pollDelayMs || this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
+        return concat(of(response as T), retry$);
+      }
       return of(response as T);
     }
     return this.watchTrackedJob<T>(job, request.pollDelayMs);
@@ -535,7 +539,8 @@ export class ScanNotificationService {
     if (progress >= 100 && (step.includes('done') || step.includes('complete') || step.includes('success'))) {
       return false;
     }
-    return status === 'pending' || status === 'busy' || status === 'queued' || status === 'running';
+    return ['pending', 'busy', 'queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].includes(status) ||
+      ['queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].some(value => step.includes(value));
   }
 
   private createQueuedJob(job: ScanJobIncompleteResponse): ScanJob {

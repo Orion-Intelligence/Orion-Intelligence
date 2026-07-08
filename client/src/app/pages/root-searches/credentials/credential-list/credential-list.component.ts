@@ -71,12 +71,10 @@ export class CredentialListComponent {
       return [];
     }
     const domains = this.normalizeValues(item['domain']);
-    if (domains.length) {
-      return domains;
-    }
     const sourceDomains = this.normalizeValues(item['source_domain']);
-    if (sourceDomains.length) {
-      return sourceDomains;
+    const mergedDomains = this.mergeUniqueValues(domains, sourceDomains);
+    if (mergedDomains.length) {
+      return mergedDomains;
     }
     return this.normalizeValues(item['ip']);
   }
@@ -109,5 +107,19 @@ export class CredentialListComponent {
   private normalizeValues(value: any): string[] {
     const values = Array.isArray(value) ? value : [value];
     return Array.from(new Set(values.map(v => v == null ? '' : String(v).trim()).filter(Boolean)));
+  }
+
+  private mergeUniqueValues(...groups: string[][]): string[] {
+    const seen = new Set<string>();
+    const merged: string[] = [];
+    groups.flat().forEach(value => {
+      const key = value.toLowerCase();
+      if (seen.has(key)) {
+        return;
+      }
+      seen.add(key);
+      merged.push(value);
+    });
+    return merged;
   }
 }

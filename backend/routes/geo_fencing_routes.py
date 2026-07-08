@@ -1,9 +1,10 @@
 from datetime import date, timedelta
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Query
 from fastapi.responses import StreamingResponse
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.map_entities.search_map_entities_param_model import search_map_entities_param_model
 from orion.api.interactive.search_manager.search_model import search_model
@@ -91,9 +92,16 @@ async def search_threat_lens_news(param: search_consolidated_param_model = Body(
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
-async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_user=Depends(get_current_user)):
+async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), force_new: bool = Query(False), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().search_audit(current_user, "iot_detect", param.coordinates)
-    return await search_model.getInstance().network_intel(param, "iot_detect", user_id=str(current_user.id))
+    return await ScanJobManager.get_instance().run_tracked_scan(
+        current_user=current_user,
+        api_reference="netintel/iot_detect",
+        payload=param.model_dump(),
+        metadata={"title": "Geo Camera Scan", "target": param.coordinates},
+        runner=lambda: search_model.getInstance().network_intel(param, "iot_detect", user_id=str(current_user.id)),
+        force_new=force_new,
+    )
 
 
 @geo_fencing_routes.post(
@@ -101,9 +109,16 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), current_u
     status_code=200,
     dependencies=SATELLITE_INTEL_DEPS,
 )
-async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(...), current_user=Depends(get_current_user)):
+async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(...), force_new: bool = Query(False), current_user=Depends(get_current_user)):
     await AuditLogManager.get_instance().search_audit(current_user, "camera_detect_ranges", ",".join(param.ip_ranges))
-    return await search_model.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id))
+    return await ScanJobManager.get_instance().run_tracked_scan(
+        current_user=current_user,
+        api_reference="netintel/camera_detect_ranges",
+        payload=param.model_dump(),
+        metadata={"title": "Geo Camera Range Scan", "target": ", ".join(param.ip_ranges[:3])},
+        runner=lambda: search_model.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id)),
+        force_new=force_new,
+    )
 
 
 @geo_fencing_routes.post(
