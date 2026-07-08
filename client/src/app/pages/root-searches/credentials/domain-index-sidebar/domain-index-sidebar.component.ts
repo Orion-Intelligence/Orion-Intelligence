@@ -9,9 +9,10 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   templateUrl: './domain-index-sidebar.component.html',
 })
 export class DomainIndexSidebarComponent {
+  private uniqueDomains: string[] = [];
+
   domainSidebarSearch = '';
   domainIndexExpanded = false;
-  private uniqueDomains: string[] = [];
 
   @Input() set stealerData(value: StealerLogCallbackModel | null) {
     this.uniqueDomains = this.collectUniqueDomains(value?.Result ?? []);
