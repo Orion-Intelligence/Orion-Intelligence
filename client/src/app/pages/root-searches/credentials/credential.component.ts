@@ -49,7 +49,8 @@ export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private isSearchLoading = false;
   private isRankedLoading = false;
-  private readonly iocPaginationThreshold = 400;
+  private readonly iocPaginationThreshold = 420;
+  private iocBatchResultCount = 0;
   private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
 
   protected readonly Math = Math;
@@ -93,7 +94,7 @@ export class CredentialComponent implements OnInit {
   get shouldShowPagination(): boolean {
     return !this.firstTrigger && !this.isLoading && (
       this.maxPages > 1 ||
-      this.currentResultCount > this.iocPaginationThreshold
+      this.iocBatchResultCount > this.iocPaginationThreshold
     );
   }
 
@@ -161,6 +162,7 @@ export class CredentialComponent implements OnInit {
         const endTime = performance.now();
         this.breachesApiTime = Math.round(endTime - startTime);
         if (response?.success && response?.data && Array.isArray(response.data.Result)) {
+          this.iocBatchResultCount = response.data.Result.length;
           const seen = new Set<string>();
           response.data.Result = response.data.Result.filter(item => {
             if (!item?.raw) {
@@ -176,6 +178,7 @@ export class CredentialComponent implements OnInit {
           this.dashboardService.stealerlogCallbackModel = response.data;
         }
         else if (response?.success && response?.data) {
+          this.iocBatchResultCount = 0;
           response.data.Result = [];
           this.stealerlogCallbackModel = response.data;
           this.dashboardService.stealerlogCallbackModel = response.data;
@@ -614,8 +617,8 @@ export class CredentialComponent implements OnInit {
   get maxPages(): number {
     const currentPage = Number(this.dashboardService.consolidatedParamModel.page || 1);
     if (this.isStandaloneStealerlogsRoute) {
-      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
+      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), this.iocBatchResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
     }
-    return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), Number(this.rankedResult.pageCount || 0), this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
+    return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), Number(this.rankedResult.pageCount || 0), this.iocBatchResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage, 1);
   }
 }
