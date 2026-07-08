@@ -10,6 +10,10 @@ from orion.services.elastic_manager.elastic_enums import (ELASTIC_CONNECTIONS, M
 from orion.services.log_manager.log_controller import log
 
 
+ELASTIC_SEARCH_REQUEST_TIMEOUT = 120
+ELASTIC_WRITE_REQUEST_TIMEOUT = 220
+
+
 class elastic_controller:
     __instance = None
     __m_core_connection = None
@@ -81,10 +85,24 @@ class elastic_controller:
             await conn.indices.put_mapping(
                 index=index,
                 body={"properties": properties},
-                request_timeout=220,
+                request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
             )
         except ApiError as ex:
             log.g().w(f"Skipping mapping update for Elasticsearch index {index}: {str(ex)}")
+
+    @staticmethod
+    async def __refresh_touched_indices(touched_indices: dict[int, tuple[AsyncElasticsearch, set[str]]]):
+        for conn, indices in touched_indices.values():
+            if not indices:
+                continue
+            try:
+                await conn.indices.refresh(
+                    index=",".join(sorted(indices)),
+                    ignore_unavailable=True,
+                    request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
+                )
+            except Exception as ex:
+                log.g().w(f"ELASTIC : refresh skipped after index write : {str(ex)}")
 
     async def __initialize_mappings(self):
         try:
@@ -315,7 +333,11 @@ class elastic_controller:
     async def get_doc(self, index, doc_id: str):
         try:
             conn = self.__conn_for_index(index)
-            result = await conn.get(index=index, id=doc_id)
+            result = await conn.get(
+                index=index,
+                id=doc_id,
+                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
+            )
             return [result["_source"]] if result and "_source" in result else []
         except Exception:
             return []
@@ -323,7 +345,12 @@ class elastic_controller:
     async def search_query(self, document, data_filter):
         try:
             conn = self.__conn_for_index(document)
-            m_data = await conn.search(index=document, body=data_filter)
+            m_data = await conn.search(
+                index=document,
+                body=data_filter,
+                allow_partial_search_results=False,
+                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
+            )
             return True, m_data
         except Exception as ex:
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
@@ -367,6 +394,8 @@ class elastic_controller:
                     body=query,
                     allow_no_indices=True,
                     ignore_unavailable=True,
+                    allow_partial_search_results=False,
+                    request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
                 )
 
             if none_stealer:
@@ -375,6 +404,8 @@ class elastic_controller:
                     body=query,
                     allow_no_indices=True,
                     ignore_unavailable=True,
+                    allow_partial_search_results=False,
+                    request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
                 )
 
             core_indices = [self._read_index(i) for i in indices if i != ELASTIC_INDEX.S_STEALERLOGS_INDEX]
@@ -385,6 +416,8 @@ class elastic_controller:
                 body=query,
                 allow_no_indices=True,
                 ignore_unavailable=True,
+                allow_partial_search_results=False,
+                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
             ) if core_indices else {"hits": {"hits": []}}
 
             dump_res = await self.__m_dump_connection.search(
@@ -392,6 +425,8 @@ class elastic_controller:
                 body=query,
                 allow_no_indices=True,
                 ignore_unavailable=True,
+                allow_partial_search_results=False,
+                request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
             )
 
             merged = core_res if core_indices else dump_res
@@ -412,7 +447,12 @@ class elastic_controller:
         for index, query in zip(indices, queries):
             try:
                 conn = self.__conn_for_index(index)
-                res = await conn.search(index=index, body=query)
+                res = await conn.search(
+                    index=index,
+                    body=query,
+                    allow_partial_search_results=False,
+                    request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
+                )
                 results.append(res)
             except Exception as ex:
                 log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
@@ -445,6 +485,8 @@ class elastic_controller:
 
                 return p_entry
 
+            touched_indices: dict[int, tuple[AsyncElasticsearch, set[str]]] = {}
+
             if isinstance(p_data, list):
                 for entry in p_data:
                     entry = ensure_creation_date(entry)
@@ -455,7 +497,11 @@ class elastic_controller:
 
                     index = entry[ELASTIC_KEYS.S_DOCUMENT]
                     conn = self.__conn_for_index(index)
-                    exists = await conn.exists(index=index, id=doc_id)
+                    exists = await conn.exists(
+                        index=index,
+                        id=doc_id,
+                        request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
+                    )
 
                     if not exists and not bypass_empty_embedding and index != ELASTIC_INDEX.S_CHATS_INDEX:
                         emb = entry[ELASTIC_KEYS.S_VALUE].get("m_embedding")
@@ -465,7 +511,10 @@ class elastic_controller:
                     await conn.update(
                         index=index,
                         id=doc_id,
-                        body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True})
+                        body={"doc": entry[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
+                        request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
+                    )
+                    touched_indices.setdefault(id(conn), (conn, set()))[1].add(index)
 
             else:
                 p_data = ensure_creation_date(p_data)
@@ -476,7 +525,11 @@ class elastic_controller:
 
                 index = p_data[ELASTIC_KEYS.S_DOCUMENT]
                 conn = self.__conn_for_index(index)
-                exists = await conn.exists(index=index, id=doc_id)
+                exists = await conn.exists(
+                    index=index,
+                    id=doc_id,
+                    request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
+                )
 
                 if not exists and index != ELASTIC_INDEX.S_CHATS_INDEX:
                     emb = p_data[ELASTIC_KEYS.S_VALUE].get("m_embedding")
@@ -486,7 +539,12 @@ class elastic_controller:
                 await conn.update(
                     index=index,
                     id=doc_id,
-                    body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True})
+                    body={"doc": p_data[ELASTIC_KEYS.S_VALUE], "doc_as_upsert": True},
+                    request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
+                )
+                touched_indices.setdefault(id(conn), (conn, set()))[1].add(index)
+
+            await self.__refresh_touched_indices(touched_indices)
 
             return True, None
 
@@ -504,7 +562,11 @@ class elastic_controller:
                             idx = meta.get("_index")
                             if idx:
                                 target_indices.add(idx)
-            response = await self.__m_dump_connection.bulk(body=p_data)
+            response = await self.__m_dump_connection.bulk(
+                body=p_data,
+                refresh="wait_for",
+                request_timeout=ELASTIC_WRITE_REQUEST_TIMEOUT,
+            )
             return response
         except Exception as ex:
             log.g().e(f"{MANAGE_ELASTIC_MESSAGES.S_INSERT_FAILURE} : {str(ex)}")
@@ -514,4 +576,5 @@ class elastic_controller:
         return await self.__m_core_connection.mget(
             index=self._read_index(index),
             body=body,
+            request_timeout=ELASTIC_SEARCH_REQUEST_TIMEOUT,
         )

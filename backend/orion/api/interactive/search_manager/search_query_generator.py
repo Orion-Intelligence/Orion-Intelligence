@@ -411,7 +411,7 @@ class search_query_generator:
             "size": 0,
             "track_total_hits": False,
             "terminate_after": 1000,
-            "timeout": "200ms",
+            "timeout": "25s",
             "aggs": {
                 "channels": {
                     "terms": {

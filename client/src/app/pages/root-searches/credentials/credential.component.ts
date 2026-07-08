@@ -49,6 +49,7 @@ export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
   private isSearchLoading = false;
   private isRankedLoading = false;
+  private readonly iocPaginationThreshold = 400;
   private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
 
   protected readonly Math = Math;
@@ -87,6 +88,13 @@ export class CredentialComponent implements OnInit {
 
   get currentResultCount(): number {
     return (this.stealerlogCallbackModel?.Result?.length ?? 0) + (this.rankedResult?.result?.length ?? 0);
+  }
+
+  get shouldShowPagination(): boolean {
+    return !this.firstTrigger && !this.isLoading && (
+      this.maxPages > 1 ||
+      this.currentResultCount > this.iocPaginationThreshold
+    );
   }
 
   ngOnInit(): void {
@@ -604,11 +612,18 @@ export class CredentialComponent implements OnInit {
   }
 
   get maxPages(): number {
+    const currentPage = Number(this.dashboardService.consolidatedParamModel.page || 1);
     if (this.isStandaloneStealerlogsRoute) {
-      return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0), 1);
+      return Math.max(
+        Number(this.stealerlogCallbackModel.Page_Count || 0),
+        this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage,
+        1
+      );
     }
-    return Math.max(Number(this.stealerlogCallbackModel.Page_Count || 0),
+    return Math.max(
+      Number(this.stealerlogCallbackModel.Page_Count || 0),
       Number(this.rankedResult.pageCount || 0),
+      this.currentResultCount > this.iocPaginationThreshold ? currentPage + 1 : currentPage,
       1);
   }
 }

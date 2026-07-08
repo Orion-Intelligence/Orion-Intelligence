@@ -57,6 +57,22 @@ function clickIocAdvancedRowButton(rowIndex: number, testId: string) {
     .click({ force: true });
 }
 
+function openIocAdvancedBuilder() {
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="ioc-basic-search-input"]:visible').length > 0) {
+      cy.get('[data-testid="ioc-advanced-toggle"]').filter(':visible').first().scrollIntoView().click();
+    }
+  });
+
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="ioc-adv-expanded-modal"]:visible').length === 0) {
+      cy.get('[data-testid="ioc-adv-expand"]').filter(':visible').first().scrollIntoView().click();
+    }
+  });
+
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
+}
+
 export function openHomepageAndSearch(query = '{enter}') {
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click();
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().should('be.visible').click();
@@ -270,19 +286,13 @@ export function runAdvancedFilterFlow() {
   cy.log('Advanced: open and test real/fake filters with add/delete');
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
 
-  cy.get('[data-testid="ioc-adv-row"], [data-testid="ioc-basic-search-input"]').then(($els) => {
-    const hasVisibleAdvancedRow = $els.filter('[data-testid="ioc-adv-row"]:visible').length > 0;
-    if (!hasVisibleAdvancedRow) {
-      cy.get('[data-testid="ioc-advanced-toggle"]').filter(':visible').first().scrollIntoView().click();
-    }
-  });
-  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
-
+  openIocAdvancedBuilder();
   selectIocAdvancedControl(0, 'ioc-adv-tag-select', 'm_email', /email/i);
   typeIocAdvancedValue(0, 'ydt.sja@gail.ccmm');
   executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-stealer-table"]').find('[data-testid="ioc-stealer-row"]').should('have.length.greaterThan', 0);
 
+  openIocAdvancedBuilder();
   clickIocAdvancedRowButton(0, 'ioc-adv-add-filter');
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 2);
 
@@ -297,9 +307,10 @@ export function runAdvancedFilterFlow() {
     expect(rowCount === 0 || emptyCount > 0).to.eq(true);
   });
 
+  openIocAdvancedBuilder();
   clickIocAdvancedRowButton(1, 'ioc-adv-delete-filter');
-  executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
+  executeIocAdvancedSearch();
   cy.get('[data-testid="ioc-stealer-table"]').should(($shell) => {
     const rowCount = $shell.find('[data-testid="ioc-stealer-row"]').length;
     const emptyCount = $shell.find('.ui-ioc-table-empty').length;
