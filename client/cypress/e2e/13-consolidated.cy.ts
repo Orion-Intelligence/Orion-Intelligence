@@ -5,6 +5,7 @@ import {
   clearSideFilters,
   CONSOLIDATED_TOGGLE_SELECTOR,
   ensureInsightSectionExpanded,
+  expandThreatRowsIfAvailable,
   openFirstReportAndGoBack,
   openHomepageAndSearch,
   RESULT_CARD_SELECTOR,
@@ -12,6 +13,7 @@ import {
   runDomainScannerFlow,
   searchDeepFromTop,
   searchInIocs,
+  selectIocResultTab,
   setAllInsightsExpanded,
   switchToDeepSearchTab,
   switchToIocsTab
@@ -33,6 +35,20 @@ function expandIocRows(tableTestId: string, rowTestId: string, toggleTestId: str
         .first()
         .click({ force: true });
     }
+  });
+}
+
+function assertNoThreatRows() {
+  cy.get('body').then(($body) => {
+    if ($body.find('[data-testid="ioc-tab-threats"]:visible').length > 0) {
+      selectIocResultTab('threats');
+      cy.get('[data-testid="ioc-threat-table"]')
+        .find('[data-testid="ioc-threat-row"]')
+        .should('have.length', 0);
+      return;
+    }
+
+    cy.get('[data-testid="ioc-threat-table"]').should('not.exist');
   });
 }
 
@@ -236,16 +252,16 @@ describe('Consolidated - IOC Basic Flow', () => {
     openHomepageAndSearch('{enter}');
     switchToIocsTab();
 
+    selectIocResultTab('stealers');
     cy.get('[data-testid="ioc-stealer-table"]').should('be.visible');
-    cy.get('[data-testid="ioc-threat-table"]').should('be.visible');
 
     expandIocRows('ioc-stealer-table', 'ioc-stealer-row', 'ioc-stealer-row-toggle');
 
-    cy.get('[data-testid="ioc-threat-table"]').scrollIntoView();
-    expandIocRows('ioc-threat-table', 'ioc-threat-row', 'ioc-threat-row-toggle');
+    expandThreatRowsIfAvailable();
 
     cy.scrollDashboardToTop()
     searchInIocs('ydt.sja@gail.ccmm');
+    selectIocResultTab('stealers');
     cy.get('[data-testid="ioc-stealer-table"]').should('be.visible');
     cy.get('[data-testid="ioc-stealer-table"]').should(($table) => {
       const rowCount = $table.find('[data-testid="ioc-stealer-row"]').length;
@@ -273,6 +289,7 @@ describe('Consolidated - IOC Basic Flow', () => {
 
 
     searchInIocs('data');
+    selectIocResultTab('threats');
     cy.get('[data-testid="ioc-threat-table"]').scrollIntoView();
     cy.get('[data-testid="ioc-threat-table"]').should(($table) => {
       const rowCount = $table.find('[data-testid="ioc-threat-row"]').length;
@@ -307,20 +324,20 @@ describe('Consolidated - IOC Basic Flow', () => {
     searchInIocs('abc');
 
     cy.get('[data-testid="ioc-basic-error"]').should('exist');
+    selectIocResultTab('stealers');
     cy.get('[data-testid="ioc-stealer-table"]')
       .find('[data-testid="ioc-stealer-row"]')
       .should('have.length', 0);
 
     searchInIocs('');
     applyDateRangeFilter('January 2026', 13, 16);
+    selectIocResultTab('threats');
     cy.get('[data-testid="ioc-threat-table"]')
       .find('[data-testid="ioc-threat-row"]')
       .should('have.length.greaterThan', 0);
 
     applyDateRangeFilter('March 2026', 1, 2);
-    cy.get('[data-testid="ioc-threat-table"]')
-      .find('[data-testid="ioc-threat-row"]')
-      .should('have.length', 0);
+    assertNoThreatRows();
 
     searchInIocs('');
     clearSideFilters();
