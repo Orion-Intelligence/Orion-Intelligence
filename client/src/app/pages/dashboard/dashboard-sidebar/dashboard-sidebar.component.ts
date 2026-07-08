@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, output } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit, output } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -17,6 +17,7 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
+import { NexusChatService } from '../../root-searches/ai-workspace/nexus-chat.service';
 
 @Component({
   selector: 'app-dashboard-sidebar',
@@ -30,7 +31,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       this.onToggleSidebar(this.mobile_menu_status);
     }
   };
-  private readonly aiChatStorageKey = 'nexus-ai-chat-sessions';
   private readonly aiHistoryUpdatedHandler = () => this.loadAiChatSessions();
 
   sidebar_default = true;
@@ -49,8 +49,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   readonly menuToggle = output<undefined>();
   aiChatSessions: AiChatSession[] = [];
   activeAiChatId: string | null = null;
+  openedAiChatMenuId: string | null = null;
 
-  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor( protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService, private readonly nexusChatService: NexusChatService ) {
   }
 
   ngOnInit() {
@@ -256,12 +257,13 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   startNewAiChat(): void {
+    this.closeAiChatMenu();
     window.dispatchEvent(new CustomEvent('nexus-ai-new-chat'));
-    setTimeout(() => this.loadAiChatSessions());
   }
 
   selectAiChat(chat: AiChatSession): void {
     this.activeAiChatId = chat.id;
+    this.closeAiChatMenu();
 
     window.dispatchEvent(new CustomEvent('nexus-ai-select-chat', {
       detail: chat.id,
@@ -272,12 +274,13 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
   }
 
-  renameAiChat(chat: AiChatSession, event: MouseEvent): void {
+  renameAiChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
 
     const title = window.prompt('Rename chat', chat.title)?.trim();
 
     if (!title) {
+      this.closeAiChatMenu();
       return;
     }
 
@@ -288,40 +291,51 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       },
     }));
 
-    setTimeout(() => this.loadAiChatSessions());
+    this.closeAiChatMenu();
   }
 
-  deleteAiChat(chat: AiChatSession, event: MouseEvent): void {
+  deleteAiChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
+
+    const ok = window.confirm(`Delete "${chat.title}"?`);
+
+    if (!ok) {
+      this.closeAiChatMenu();
+      return;
+    }
 
     window.dispatchEvent(new CustomEvent('nexus-ai-delete-chat', {
       detail: chat.id,
     }));
 
-    setTimeout(() => this.loadAiChatSessions());
+    this.closeAiChatMenu();
   }
 
   private loadAiChatSessions(): void {
-    const raw = localStorage.getItem(this.aiChatStorageKey);
-
-    if (!raw) {
-      this.aiChatSessions = [];
-      this.activeAiChatId = null;
+    if (!this.isAiWorkspaceRoute) {
       return;
     }
 
-    try {
-      this.aiChatSessions = JSON.parse(raw) as AiChatSession[];
-    }
-    catch {
-      this.aiChatSessions = [];
-    }
+    this.nexusChatService.listChats().subscribe({
+      next: (sessions) => {
+        this.aiChatSessions = sessions.map(session => ({
+          id: session.id,
+          title: session.title,
+          updatedAt: session.updated_at,
+          messages: [],
+        }));
 
-    const activeStillExists = this.aiChatSessions.some(chat => chat.id === this.activeAiChatId);
+        const activeStillExists = this.aiChatSessions.some(chat => chat.id === this.activeAiChatId);
 
-    if (!activeStillExists) {
-      this.activeAiChatId = this.aiChatSessions[0]?.id ?? null;
-    }
+        if (!activeStillExists) {
+          this.activeAiChatId = this.aiChatSessions[0]?.id ?? null;
+        }
+      },
+      error: () => {
+        this.aiChatSessions = [];
+        this.activeAiChatId = null;
+      },
+    });
   }
 
   isAdmin(): boolean {
@@ -338,5 +352,21 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   isAnalyst(): boolean {
     return this.licenseService.isAnalyst();
+  }
+
+  toggleAiChatMenu(chat: AiChatSession, event: Event): void {
+    event.stopPropagation();
+
+    this.openedAiChatMenuId =
+      this.openedAiChatMenuId === chat.id ? null : chat.id;
+  }
+
+  closeAiChatMenu(): void {
+    this.openedAiChatMenuId = null;
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.closeAiChatMenu();
   }
 }

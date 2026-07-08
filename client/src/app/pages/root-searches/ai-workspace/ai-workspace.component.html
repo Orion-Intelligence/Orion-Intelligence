@@ -7,9 +7,6 @@
         <div class="chat-support__window ui-ai-chat-surface-pattern flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
           <div class="shrink-0 px-5 pt-4 max-[640px]:px-4">
             <div class="flex flex-wrap gap-2">
-              <button type="button" (click)="startNewChat()" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
-                {{ 'New Chat' | translate }}
-              </button>
               <button type="button" (click)="shareChat()" [disabled]="isChatShareCreating() || !messages.length" class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-50">
                 <i [ngClass]="isChatShareCreating() ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'" class="bi text-[12px] leading-none"></i>
                 {{ 'Share' | translate }}

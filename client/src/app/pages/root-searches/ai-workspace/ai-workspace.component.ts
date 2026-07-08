@@ -1,12 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiService } from '../../../shared/services/api.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
@@ -59,7 +58,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   activeChatId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
-  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
+  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
   }
 
@@ -100,8 +99,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       this.streamingMessageId.set(null);
       this.nexusStep.set('Thinking');
 
-      this.scrollToBottom();
-
       this.nexusChatService.sendMessageToChat(chatId, text).subscribe({
         next: (response) => {
           const userMessage = this.mapMessage(response.user_message);
@@ -125,10 +122,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
           this.chatSessions = [...this.chatSessions].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 
+          this.notifyAiChatHistoryUpdated();
           this.isSending.set(false);
+          this.isStreamingReply.set(false);
+          this.streamingMessageId.set(null);
           this.nexusStep.set('');
 
-          window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
           this.scrollToBottom();
         },
         error: () => {
@@ -158,8 +157,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.messages = [];
 
         sendToChat(mappedSession.id);
-
-        window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
       },
       error: () => {
         this.messages = [...this.messages, this.createErrorMessage(text)];
@@ -202,12 +199,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.stoppedRequestIds.add(this.chatRequestId);
     this.chatRequestId += 1;
     this.cancelActiveNexusRequest();
-    this.messages = [...this.messages, this.createCancelledMessage()];
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
     this.nexusStep.set('');
-    this.persistChatHistory();
     this.scrollToBottom();
   }
 
@@ -229,15 +224,19 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       next: (session) => {
         const mappedSession = this.mapSession(session);
 
-        this.chatSessions = [mappedSession, ...this.chatSessions];
+        this.chatSessions = [
+          mappedSession,
+          ...this.chatSessions.filter(chat => chat.id !== mappedSession.id),
+        ];
+
         this.activeChatId = mappedSession.id;
         this.messages = [];
         this.messageDraft = '';
+        this.notifyAiChatHistoryUpdated();
 
         this.cancelMessageEdit();
         this.queueComposerResize();
-
-        window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
+        this.scrollToBottom();
       },
     });
   }
@@ -259,17 +258,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       },
       error: () => this.isChatShareCreating.set(false),
     });
-  }
-
-  private clearChatView(): void {
-    this.messages = [];
-    this.messageDraft = '';
-    this.cancelMessageEdit();
-    this.queueComposerResize();
-    this.router.navigate(['/dashboard/profile/ai'], {
-      queryParams: { q: this.contextQuery() || null },
-      queryParamsHandling: 'merge',
-    }).then();
   }
 
   trackMessage(_index: number, message: AiWorkspaceMessage): string {
@@ -370,15 +358,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return this.editDraftTokenOverflow > 0;
   }
 
-  private createMessage(sender: AiWorkspaceMessage['sender'], text: string): AiWorkspaceMessage {
-    return {
-      id: crypto.randomUUID(),
-      sender,
-      text,
-      time: new Date(),
-    };
-  }
-
   private cancelActiveNexusRequest(): void {
     if (this.activeChatRequest || this.isSending() || this.isStreamingReply()) {
       this.nexusChatService.cancelNexusChat();
@@ -400,62 +379,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       time: new Date(),
       retryPayload: text,
     };
-  }
-
-  private createCancelledMessage(): AiWorkspaceMessage {
-    return {
-      id: crypto.randomUUID(),
-      sender: 'error',
-      text: 'Message canceled.',
-      time: new Date(),
-    };
-  }
-
-  private restoreChatHistory(): void {
-    this.messages = [];
-  }
-
-  private persistChatHistory(): void {
-    const history = this.buildChatHistoryPayload();
-    this.api.post('update/current/user/chat-history', {
-      chat_history: history,
-    }).subscribe();
-  }
-
-  private loadChatHistory(): void {
-    this.api.post<{ chat_history?: ChatHistoryMessage[] }>('get/current/user/chat-history', {}).subscribe({
-      next: (response) => {
-        const history = response?.chat_history || [];
-        const messages = history
-          .filter((message) => message.sender === 'user' || message.sender === 'bot' || message.sender === 'error')
-          .map((message) => ({
-            id: crypto.randomUUID(),
-            sender: message.sender,
-            text: message.text,
-            time: new Date(message.time),
-          }));
-        this.messages = this.addMissingAiFailureMessages(messages);
-        this.isLoadingHistory.set(false);
-        this.scrollToBottom();
-        this.resumeActiveNexusStream();
-      },
-      error: () => {
-        this.isLoadingHistory.set(false);
-        this.restoreChatHistory();
-      }
-    });
-  }
-
-  private addMissingAiFailureMessages(messages: AiWorkspaceMessage[]): AiWorkspaceMessage[] {
-    const result: AiWorkspaceMessage[] = [];
-    messages.forEach((message, index) => {
-      result.push(message);
-      const nextSender = messages[index + 1]?.sender;
-      if (message.sender === 'user' && index < messages.length - 1 && nextSender !== 'bot' && nextSender !== 'error') {
-        result.push(this.createErrorMessage(message.text));
-      }
-    });
-    return result;
   }
 
   private buildChatHistoryPayload(): ChatHistoryMessage[] {
@@ -524,89 +447,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  private resumeActiveNexusStream(): void {
-    if (this.activeChatRequest || this.messages.at(-1)?.sender !== 'user') {
-      return;
-    }
-
-    const requestId = ++this.chatRequestId;
-    let reply = '';
-    let receivedReply = false;
-    const retryPayload = this.messages.at(-1)?.sender === 'user' ? this.messages.at(-1)!.text : '';
-    let botMessage: AiWorkspaceMessage | undefined;
-    this.isSending.set(true);
-    this.isStreamingReply.set(false);
-    this.streamingMessageId.set(null);
-    this.nexusStep.set('');
-
-    const updateReply = (value: string) => {
-      if (requestId !== this.chatRequestId) {
-        return;
-      }
-      receivedReply = true;
-      if (!botMessage) {
-        botMessage = this.createMessage('bot', '');
-        this.messages = [...this.messages, botMessage];
-        this.isStreamingReply.set(true);
-        this.streamingMessageId.set(botMessage.id);
-      }
-      this.messages = this.messages.map(message => message.id === botMessage?.id ? { ...message, text: value } : message);
-    };
-    this.activeChatRequest = this.nexusChatService.resumeNexusChat().subscribe({
-      next: (chunk) => {
-        if (requestId !== this.chatRequestId) {
-          return;
-        }
-        if (chunk.status) {
-          this.nexusStep.set(chunk.status);
-        }
-        if (chunk.error) {
-          reply = chunk.response || chunk.delta || 'Something went wrong. Try again.';
-          this.isStreamingReply.set(false);
-          this.streamingMessageId.set(null);
-          this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
-          if (retryPayload) {
-            this.messages = [...this.messages, this.createErrorMessage(retryPayload, reply)];
-          }
-          return;
-        }
-        if (chunk.delta) {
-          reply += chunk.delta;
-          updateReply(reply);
-        }
-        if (chunk.response) {
-          reply = chunk.response;
-          updateReply(reply);
-        }
-      },
-      complete: () => {
-        if (requestId !== this.chatRequestId) {
-          return;
-        }
-        this.activeChatRequest = undefined;
-        this.isSending.set(false);
-        this.isStreamingReply.set(false);
-        this.streamingMessageId.set(null);
-        this.nexusStep.set('');
-        if (receivedReply && reply.trim()) {
-          this.persistChatHistory();
-        }
-        this.scrollToBottom();
-      },
-      error: () => {
-        if (requestId !== this.chatRequestId) {
-          return;
-        }
-        this.activeChatRequest = undefined;
-        this.isSending.set(false);
-        this.isStreamingReply.set(false);
-        this.streamingMessageId.set(null);
-        this.nexusStep.set('');
-        this.scrollToBottom();
-      },
-    });
-  }
-
   queueComposerResize(): void {
     requestAnimationFrame(() => this.resizeComposer());
   }
@@ -656,15 +496,15 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           this.loadChat(firstChat.id);
         }
         else {
+          this.activeChatId = null;
+          this.messages = [];
           this.isLoadingHistory.set(false);
-          this.startNewChat();
         }
-
-        window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
       },
       error: () => {
         this.chatSessions = [];
         this.messages = [];
+        this.activeChatId = null;
         this.isLoadingHistory.set(false);
       },
     });
@@ -692,8 +532,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.cancelMessageEdit();
         this.queueComposerResize();
         this.scrollToBottom();
-
-        window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
       },
       error: () => {
         this.isLoadingHistory.set(false);
@@ -701,38 +539,33 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  private notifyAiChatHistoryUpdated(): void {
+    window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
+  }
+
   selectChat(session: AiChatSession): void {
     if (this.isSending() || this.isStreamingReply()) {
+      return;
+    }
+
+    if (this.activeChatId === session.id) {
       return;
     }
 
     this.loadChat(session.id);
   }
 
-  renameChat(session: AiChatSession): void {
-    const title = window.prompt('Rename chat', session.title)?.trim();
+  deleteChat(session: AiChatSession, event?: Event, askConfirmation = true): void {
+    event?.stopPropagation();
 
-    if (!title) {
-      return;
+    if (askConfirmation) {
+      const ok = window.confirm(`Delete "${session.title}"?`);
+
+      if (!ok) {
+        return;
+      }
     }
 
-    this.nexusChatService.renameChatSession(session.id, title).subscribe({
-      next: (updated) => {
-        this.chatSessions = this.chatSessions.map(chat =>
-          chat.id === updated.id
-            ? {
-              ...chat,
-              title: updated.title,
-              updatedAt: updated.updated_at,
-            }
-            : chat);
-
-        window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
-      },
-    });
-  }
-
-  deleteChat(session: AiChatSession): void {
     this.nexusChatService.deleteChatSession(session.id).subscribe({
       next: () => {
         this.chatSessions = this.chatSessions.filter(chat => chat.id !== session.id);
@@ -746,21 +579,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           else {
             this.activeChatId = null;
             this.messages = [];
-            this.startNewChat();
+            this.messageDraft = '';
           }
         }
 
-        window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
+        this.notifyAiChatHistoryUpdated();
       },
     });
-  }
-
-  private ensureActiveChat(): void {
-    if (this.activeChatId) {
-      return;
-    }
-
-    this.startNewChat();
   }
 
   @HostListener('window:nexus-ai-new-chat')
@@ -804,7 +629,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const chat = this.chatSessions.find(item => item.id === chatId);
 
     if (chat) {
-      this.deleteChat(chat);
+      this.deleteChat(chat, undefined, false);
     }
   }
 }
