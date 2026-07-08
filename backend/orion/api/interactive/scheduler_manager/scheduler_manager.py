@@ -12,15 +12,11 @@ from pymongo.errors import DuplicateKeyError
 
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_scheduler_model import (
-    SchedulerMailStatus,
-    SchedulerRunStatus,
-    db_scheduler_model,
-)
+from orion.services.mongo_manager.shared_model.db_scheduler_model import (SchedulerMailStatus, SchedulerRunStatus, db_scheduler_model)
 
 
 @dataclass(frozen=True)
-class DailyJobConfig:
+class DailySchedulerConfig:
     job_key: str
     hour: int
     minute: int
@@ -30,61 +26,54 @@ class DailyJobConfig:
     heartbeat_interval: timedelta = timedelta(seconds=60)
 
 
-class MongoDailyScheduler:
+class SchedulerManager:
+    __instance = None
+
     def __init__(self):
         self._engine = mongo_controller.get_instance().get_engine()
         self._collection = self._engine.get_collection(db_scheduler_model)
 
     @staticmethod
-    def scheduled_for_today(config: DailyJobConfig, now_utc: datetime | None = None) -> datetime:
+    def get_instance():
+        if SchedulerManager.__instance is None:
+            SchedulerManager.__instance = SchedulerManager()
+        return SchedulerManager.__instance
+
+    @staticmethod
+    def scheduled_for_today(config: DailySchedulerConfig, now_utc: datetime | None = None) -> datetime:
         tz = ZoneInfo(config.timezone_name)
         now_utc = now_utc or datetime.now(timezone.utc)
         now_local = now_utc.astimezone(tz)
-        scheduled_local = datetime.combine(
-            now_local.date(),
-            time(config.hour, config.minute, tzinfo=tz),
-        )
+        scheduled_local = datetime.combine(now_local.date(),time(config.hour, config.minute, tzinfo=tz))
         return scheduled_local.astimezone(timezone.utc)
 
     @staticmethod
-    def next_scheduled_for(config: DailyJobConfig, now_utc: datetime | None = None) -> datetime:
+    def next_scheduled_for(config: DailySchedulerConfig, now_utc: datetime | None = None) -> datetime:
         tz = ZoneInfo(config.timezone_name)
         now_utc = now_utc or datetime.now(timezone.utc)
         now_local = now_utc.astimezone(tz)
-        scheduled_local = datetime.combine(
-            now_local.date(),
-            time(config.hour, config.minute, tzinfo=tz),
-        )
+        scheduled_local = datetime.combine(now_local.date(),time(config.hour, config.minute, tzinfo=tz))
         if now_local >= scheduled_local:
             scheduled_local += timedelta(days=1)
         return scheduled_local.astimezone(timezone.utc)
 
-    async def run_due_daily_job(self, config: DailyJobConfig, reason: str = "scheduled") -> bool:
+    async def run_due_daily_job(self, config: DailySchedulerConfig, reason: str = "scheduled") -> bool:
         now_utc = datetime.now(timezone.utc)
         scheduled_for = self.scheduled_for_today(config, now_utc)
         if now_utc < scheduled_for:
             return False
 
         if await self._has_successful_run(config.job_key, scheduled_for):
-            log.g().i(
-                f"Scheduler job already completed: job_key={config.job_key}, "
-                f"scheduled_for={scheduled_for.isoformat()}"
-            )
+            log.g().i(f"Scheduler job already completed: job_key={config.job_key}, "f"scheduled_for={scheduled_for.isoformat()}")
             return False
 
         run_doc = await self._acquire_run(config, scheduled_for)
         if not run_doc:
-            log.g().i(
-                f"Scheduler job lock not acquired: job_key={config.job_key}, "
-                f"scheduled_for={scheduled_for.isoformat()}"
-            )
+            log.g().i(f"Scheduler job lock not acquired: job_key={config.job_key}, "f"scheduled_for={scheduled_for.isoformat()}")
             return False
 
         run_id = run_doc.get("_id")
-        log.g().i(
-            f"Scheduler job started: job_key={config.job_key}, reason={reason}, "
-            f"scheduled_for={scheduled_for.isoformat()}, run_id={run_id}"
-        )
+        log.g().i(f"Scheduler job started: job_key={config.job_key}, reason={reason}, "f"scheduled_for={scheduled_for.isoformat()}, run_id={run_id}")
 
         heartbeat_task = asyncio.create_task(self._heartbeat(config.job_key, run_id, config.heartbeat_interval))
         try:
@@ -93,12 +82,7 @@ class MongoDailyScheduler:
             return True
         except Exception as exc:
             log.g().e(f"Scheduler job failed: job_key={config.job_key}, error={exc}")
-            await self._fail_run(
-                config.job_key,
-                run_id,
-                SchedulerMailStatus.FAILED,
-                str(exc),
-            )
+            await self._fail_run(config.job_key,run_id,SchedulerMailStatus.FAILED,str(exc))
             return True
         finally:
             heartbeat_task.cancel()
@@ -115,7 +99,7 @@ class MongoDailyScheduler:
         })
         return run is not None
 
-    async def _acquire_run(self, config: DailyJobConfig, scheduled_for: datetime) -> dict[str, Any] | None:
+    async def _acquire_run(self, config: DailySchedulerConfig, scheduled_for: datetime) -> dict[str, Any] | None:
         now_utc = datetime.now(timezone.utc)
         stale_before = now_utc - config.stale_after
 
@@ -136,10 +120,7 @@ class MongoDailyScheduler:
             },
         )
         if stale_result.modified_count:
-            log.g().e(
-                f"Scheduler stale run recovered: job_key={config.job_key}, "
-                f"scheduled_for={scheduled_for.isoformat()}, count={stale_result.modified_count}"
-            )
+            log.g().e(f"Scheduler stale run recovered: job_key={config.job_key}, "f"scheduled_for={scheduled_for.isoformat()}, count={stale_result.modified_count}")
 
         try:
             await self._collection.update_one(
@@ -203,10 +184,7 @@ class MongoDailyScheduler:
 
         error_message = result.get("error_message") or result.get("message") or "Scheduled job did not complete successfully."
         await self._finish_run(job_key, run_id, SchedulerRunStatus.FAILED, mail_status, str(error_message))
-        log.g().e(
-            f"Scheduler job completed with failure status: job_key={job_key}, "
-            f"run_id={run_id}, scan_status={scan_status}, mail_status={mail_status.value}"
-        )
+        log.g().e(f"Scheduler job completed with failure status: job_key={job_key}, "f"run_id={run_id}, scan_status={scan_status}, mail_status={mail_status.value}")
 
     async def _fail_run(
             self,
@@ -216,13 +194,7 @@ class MongoDailyScheduler:
             error_message: str):
         await self._finish_run(job_key, run_id, SchedulerRunStatus.FAILED, mail_status, error_message)
 
-    async def _finish_run(
-            self,
-            job_key: str,
-            run_id: ObjectId,
-            status: SchedulerRunStatus,
-            mail_status: SchedulerMailStatus,
-            error_message: str | None):
+    async def _finish_run(self, job_key: str, run_id: ObjectId, status: SchedulerRunStatus, mail_status: SchedulerMailStatus, error_message: str | None):
         now_utc = datetime.now(timezone.utc)
         await self._collection.update_one(
             {

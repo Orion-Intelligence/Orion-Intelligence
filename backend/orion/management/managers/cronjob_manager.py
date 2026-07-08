@@ -6,7 +6,7 @@ from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
 from orion.management.jobs.alert.alert_job import alert_job
-from orion.management.scheduler import DailyJobConfig, MongoDailyScheduler, IntervalJobConfig
+from orion.api.interactive.scheduler_manager.scheduler_manager import DailySchedulerConfig, SchedulerManager
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_enums import REDIS_KEYS
@@ -53,10 +53,8 @@ class cronjob_manager:
 
     @staticmethod
     async def iocs_alert_loop():
-        print("1"*100)
         timezone_name = "Australia/Sydney"
-        scheduler = MongoDailyScheduler()
-        job_config = DailyJobConfig(
+        job_config = DailySchedulerConfig(
             job_key="auto_alert_scan",
             hour=2,
             minute=0,
@@ -65,18 +63,15 @@ class cronjob_manager:
             stale_after=timedelta(minutes=15),
             heartbeat_interval=timedelta(seconds=60),
         )
-        
 
         tz = ZoneInfo(timezone_name)
         while True:
             if not allowed_key_titles:
-                print("2"*100)
                 await asyncio.sleep(60)
                 continue
 
             try:
-                print("3"*100)
-                await scheduler.run_due_daily_job(job_config, reason="startup_or_schedule_check")
+                await SchedulerManager.get_instance().run_due_daily_job(job_config, reason="startup_or_schedule_check")
             except Exception as e:
                 log.g().e(f"IOC alert loop failed: {e}")
 
