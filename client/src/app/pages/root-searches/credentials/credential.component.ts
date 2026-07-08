@@ -309,6 +309,7 @@ export class CredentialComponent implements OnInit {
   private exportCombinedResultsPdf(): void {
     const stealerResults = this.stealerlogCallbackModel?.Result ?? [];
     const rankedResults = this.rankedResult?.result ?? [];
+    const exportSearchQuery = this.getExportSearchQuery();
     const tables: GraphReportTableRow[] = [];
 
     if (stealerResults.length) {
@@ -322,12 +323,12 @@ export class CredentialComponent implements OnInit {
     const payload: GraphReportPayload = {
       graphKind: 'cti',
       title: 'Credentials Export',
-      sessionName: this.searchQuery || 'Stealerlogs Search',
+      sessionName: exportSearchQuery || 'Stealerlogs Search',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
       edges: [],
       summary: {
-        search_query: this.searchQuery || '-',
+        search_query: exportSearchQuery || '-',
         total_records: stealerResults.length + rankedResults.length,
         stealer_records: stealerResults.length,
         ranked_records: rankedResults.length,
@@ -341,7 +342,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private buildCombinedExportRows(): Record<string, string>[] {
-    const searchQuery = this.searchQuery || '-';
+    const searchQuery = this.getExportSearchQuery();
     return [
       ...this.buildStealerExportRows(searchQuery),
       ...this.buildRankedExportRows(searchQuery)
@@ -399,7 +400,7 @@ export class CredentialComponent implements OnInit {
       this.addExportField(values, 'IP Address', item?.['ip'], 180);
       this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['channel'], item?.['m_channel'], item?.['source_channel'], item?.['m_source_channel']), 240);
       this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['date'], item?.['timestamp'], item?.['m_date'], item?.['m_update_date']), 160);
-      this.addExportField(values, 'File Type', this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.['type']), 140);
+      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.['type'])), 140);
       this.addExportField(values, 'Source File', this.firstAvailableExportValue(item?.['filename'], item?.['file'], item?.['m_file']), 220);
       this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
       this.addExportField(values, 'Raw Trace', item?.['raw'], 900);
@@ -540,9 +541,25 @@ export class CredentialComponent implements OnInit {
   private appendAdditionalExportFields(fields: Record<string, string>, record: Record<string, unknown>, excludedKeys: Set<string>): void {
     Object.keys(record ?? {})
       .filter(key => !excludedKeys.has(key))
+      .filter(key => !this.shouldSkipExportField(key, record[key]))
       .filter(key => this.isSimpleExportValue(record[key]))
       .sort((a, b) => this.toExportLabel(a).localeCompare(this.toExportLabel(b)))
       .forEach(key => this.addExportField(fields, this.toExportLabel(key), record[key], 320));
+  }
+
+  private getExportSearchQuery(): string {
+    return (this.searchQuery || '-').replace(/^m_search_all:/i, '') || '-';
+  }
+
+  private normalizeFileType(value: string): string {
+    return value.toLowerCase() === 'c' ? 'combo' : value;
+  }
+
+  private shouldSkipExportField(key: string, value: unknown): boolean {
+    if (key === 'delimiter') {
+      return true;
+    }
+    return key === 'm_sub_host' && this.toExportValue(value) === '/';
   }
 
   private isSimpleExportValue(value: unknown): boolean {
