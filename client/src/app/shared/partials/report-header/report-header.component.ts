@@ -16,6 +16,7 @@ import { AiSummaryComponent } from '../../../pages/root-searches/ai-workspace/ai
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
 import { TranslationService } from '../../services/translation.service';
+import { ReportRouteUtil } from '../../utils/report-route.util';
 
 @Component({
   selector: 'app-report-header',
@@ -198,13 +199,7 @@ export class ReportHeaderComponent {
     const selectedLanguage = this.translationService.getSupportedLanguage(language);
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('lang', selectedLanguage);
-    const segments = currentUrl.pathname.split('/').filter(Boolean);
-    let type = segments[segments.length - 2];
-    if(type=='leak'){
-      type = 'breach';
-    }
-    const reportId = segments[segments.length - 1];
-    const apiUrl = `search/${type}/${reportId}`;
+    const apiUrl = ReportRouteUtil.getReportDetailEndpointFromUrl(currentUrl);
     this.selectedLanguage.set(selectedLanguage);
     this.isLanguageDropdownOpen.set(false);
     window.history.pushState({}, '', currentUrl.toString());

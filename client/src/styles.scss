@@ -1727,7 +1727,12 @@ body.demo-tour-scroll-locked {
   z-index: 9999 !important;
   background: rgb(2 6 23 / 64%) !important;
   backdrop-filter: blur(4px);
+  overflow-y: auto;
   animation: uiModalOverlayFade 200ms ease-out both;
+}
+
+.ui-graph-popup-overlay.items-center {
+  align-items: safe center !important;
 }
 
 .ui-graph-popup-panel {
