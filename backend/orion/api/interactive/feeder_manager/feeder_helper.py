@@ -30,6 +30,7 @@ class FeederHelper:
         r"m_rule_type[ \t]*=[ \t]*RuleType\.(?P<rule_type>[A-Z0-9_]+)",
         re.MULTILINE,
     )
+    SAFE_PATH_PART_PATTERN = re.compile(r"^[A-Za-z0-9_.-]+$")
 
     def __init__(self, engine, parser_root: Path):
         self._engine = engine
@@ -59,18 +60,45 @@ class FeederHelper:
             return base_dir
         return base_dir / subcategory_key
 
+    def safe_relative_path(self, target_path: Path) -> Path | None:
+        parser_root = self._parser_root.resolve()
+        try:
+            relative_path = target_path.relative_to(self._parser_root)
+        except ValueError:
+            if target_path.is_absolute():
+                try:
+                    relative_path = target_path.relative_to(parser_root)
+                except ValueError:
+                    return None
+            else:
+                relative_path = target_path
+
+        if not relative_path.parts:
+            return None
+        if any(part in {"", ".", ".."} or not self.SAFE_PATH_PART_PATTERN.fullmatch(part) for part in relative_path.parts):
+            return None
+        return Path(*relative_path.parts)
+
     def parser_file_path(self, target_path: Path) -> Path | None:
+        relative_path = self.safe_relative_path(target_path)
+        if relative_path is None:
+            return None
         try:
             parser_root = self._parser_root.resolve()
-            resolved_path = target_path.resolve()
-        except OSError:
+            resolved_path = (parser_root / relative_path).resolve()
+            resolved_path.relative_to(parser_root)
+        except (OSError, ValueError):
             return None
-        return resolved_path if resolved_path.is_file() and parser_root in resolved_path.parents else None
+        return resolved_path if resolved_path.is_file() else None
 
     def rule_path_parts(self, rule_path: str | None) -> tuple[str, str]:
         if not rule_path:
             raise HTTPException(status_code=400, detail="Selected rule has no upload path")
         parts = Path(rule_path).parts
+        if Path(rule_path).is_absolute() or not parts:
+            raise HTTPException(status_code=400, detail="Invalid upload path")
+        if any(part in {"", ".", ".."} or not self.SAFE_PATH_PART_PATTERN.fullmatch(part) for part in parts):
+            raise HTTPException(status_code=400, detail="Invalid upload path")
         return parts[0], parts[1] if len(parts) > 1 else self.ROOT_SUBCATEGORY
 
     def extract_seed_url(self, content: str) -> str:
@@ -373,8 +401,7 @@ class FeederHelper:
 
         shared_target_path = self.shared_content_path(record)
         if shared_target_path:
-            safe_shared_target_path = self.parser_file_path(shared_target_path)
-            return self.decrypt_script_content(safe_shared_target_path.read_bytes().decode()) if safe_shared_target_path else None
+            return self.decrypt_script_content(shared_target_path.read_bytes().decode())
 
         return None
 
