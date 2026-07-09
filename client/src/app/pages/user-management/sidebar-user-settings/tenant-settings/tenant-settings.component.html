@@ -209,14 +209,7 @@
           <div role="button" [attr.tabindex]="privacyEditing ? 0 : -1" class="relative flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition outline-none focus:outline-none focus:ring-0" [ngClass]="privacyEditing ? 'cursor-pointer hover:brightness-[0.98]' : 'cursor-not-allowed opacity-60'" (click)="openAlertRunTimePicker(alertRunTimeInput)" (keydown.enter)="openAlertRunTimePicker(alertRunTimeInput)" (keydown.space)="openAlertRunTimePicker(alertRunTimeInput)">
             <span class="truncate" [ngClass]="normalizedAlertRunTime() ? '' : 'text-[var(--color-text4)]'">{{ getAlertRunTimeDisplay() | translate }}</span>
             <i class="bi bi-clock h-4 w-4 shrink-0 text-[16px] leading-4 text-[var(--color-text4)]"></i>
-            <input
-              #alertRunTimeInput
-              type="time"
-              [(ngModel)]="userSessionData.tenant.alertRunTime"
-              name="tenant_alert_run_time"
-              class="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
-              [disabled]="!privacyEditing"
-              (click)="$event.stopPropagation(); openAlertRunTimePicker(alertRunTimeInput)" />
+            <input #alertRunTimeInput type="time" [(ngModel)]="userSessionData.tenant.alertRunTime" name="tenant_alert_run_time" class="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed" [disabled]="!privacyEditing" (click)="$event.stopPropagation(); openAlertRunTimePicker(alertRunTimeInput)" />
           </div>
         </div>
 
