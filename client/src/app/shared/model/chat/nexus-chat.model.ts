@@ -3,6 +3,7 @@ export interface NexusChatPayload {
   report?: string;
   tool?: string;
   type?: string;
+  history?: Array<{ role: string; content: string }>;
 }
 
 export interface NexusSummaryPayload {

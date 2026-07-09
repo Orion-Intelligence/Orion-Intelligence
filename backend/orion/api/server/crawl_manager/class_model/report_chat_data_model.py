@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ReportChatRequest(BaseModel):
@@ -7,6 +7,7 @@ class ReportChatRequest(BaseModel):
     report: str = ""
     tool: str = "open_chat"
     type: str = "default"
+    history: list[dict[str, str]] = Field(default_factory=list)
 
 
 class NexusTextAnalysisRequest(BaseModel):

@@ -107,6 +107,14 @@ export class ResultComponent implements OnInit, OnChanges {
   readonly updateQuery = output<string>();
   readonly onToggleSort = output<SortType>();
 
+  get aiToolType(): string {
+    return this.aiToolRoutingService.getTypeForEndpoint(this.apiEndpoint());
+  }
+
+  get aiWelcomeMessage(): string {
+    return this.aiToolRoutingService.getMessageForEndpoint(this.apiEndpoint());
+  }
+
   get shouldShowCrossSearchOnEmptyState(): boolean {
     return !this.consolidated
       && !this.app_service.isMobileMode()

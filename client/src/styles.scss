@@ -4622,6 +4622,31 @@ app-demo-tour .demo-tour-active {
 
 .ui-ai-chat-bubble {
   background: color-mix(in srgb, var(--color-text1) 4%, transparent);
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ui-ai-chat-row,
+.ui-ai-chat-agent-turn,
+.ui-ai-markdown,
+.ui-ai-markdown * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.ui-ai-markdown {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.ui-ai-markdown a,
+.ui-ai-markdown code,
+.ui-ai-markdown li,
+.ui-ai-markdown p,
+.ui-ai-markdown strong,
+.ui-ai-markdown em {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .ui-ai-chat-surface-pattern {
@@ -4658,17 +4683,6 @@ app-demo-tour .demo-tour-active {
 
 .light-theme .ui-ai-chat-bubble-user {
   background: color-mix(in srgb, var(--color-blue-640) 14%, var(--color-consolidated-primary));
-}
-
-.light-theme .ui-home-ai-button {
-  border-color: var(--color-border) !important;
-  background: var(--color-blue-720) !important;
-  box-shadow: none !important;
-}
-
-.light-theme .ui-home-ai-button:hover {
-  border-color: color-mix(in srgb, var(--color-blue-640) 18%, var(--color-border)) !important;
-  background: color-mix(in srgb, var(--color-blue-640) 8%, var(--color-blue-720)) !important;
 }
 
 .orion-comment-input-surface,

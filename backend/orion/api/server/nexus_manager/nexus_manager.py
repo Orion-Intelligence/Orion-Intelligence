@@ -22,10 +22,11 @@ class nexus_manager:
         if type(self).__instance is None:
             type(self).__instance = self
 
-    async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None, recoverable: bool = False):
+    async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None, recoverable: bool = False, auth_token: str = ""):
         try:
-            history = await self.stream_manager.get_recent_history(current_user, model.message, session_id=model.session_id or None) if current_user is not None else []
-            return StreamingResponse(self.stream_manager.stream_response(model.message, user_id, tool=model.tool or "open_chat", type_name=model.type or "default", history=history, recoverable=recoverable), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
+            stored_history = await self.stream_manager.get_recent_history(current_user, model.message, session_id=model.session_id or None) if current_user is not None else []
+            history = [*stored_history, *(model.history or [])]
+            return StreamingResponse(self.stream_manager.stream_response(model.message, user_id, tool=model.tool or "open_chat", type_name=model.type or "default", history=history, recoverable=recoverable, auth_token=auth_token), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Something happened while calling api/chat"})
 

@@ -12,6 +12,7 @@ import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/c
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
 
 interface SharedSearchAdvancedFilter { id: string; tag: string; value: string; operator: '&&' | '||' }
 interface SharedSearchAdvancedChip { id: string; label: string }
@@ -46,7 +47,7 @@ export class IocSearchComponent implements OnInit {
   advancedFilters: SharedSearchAdvancedFilter[] = [{ id: this.generateId(), tag: this.defaultAdvancedTag(), value: '', operator: '&&' }];
   readonly searchTriggered = output<string>();
 
-  constructor(protected sidebarService: SidebarService, private route: ActivatedRoute, protected licenseService: LicenseService, protected appService: AppService) { }
+  constructor(protected sidebarService: SidebarService, private route: ActivatedRoute, protected licenseService: LicenseService, protected appService: AppService, protected aiToolRoutingService: AiToolRoutingService) { }
 
   ngOnInit(): void {
     this.selectedTag = this.defaultBasicTag();

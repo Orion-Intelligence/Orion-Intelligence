@@ -51,7 +51,7 @@ class NexusStreamManager:
         except Exception:
             return []
 
-    async def _stream(self, client: httpx.AsyncClient, endpoint: str, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, payload: NexusRpcPayloadModel | None = None, recoverable: bool = False) -> AsyncGenerator[tuple[str, str, bool], None]:
+    async def _stream(self, client: httpx.AsyncClient, endpoint: str, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, payload: NexusRpcPayloadModel | None = None, recoverable: bool = False, auth_token: str = "") -> AsyncGenerator[tuple[str, str, bool], None]:
         response = None
         answer = ""
         try:
@@ -69,6 +69,8 @@ class NexusStreamManager:
                     arguments["recoverable"] = True
                 if selected_tool == "api_payload":
                     arguments["api_name"] = type_name or "default"
+                    if auth_token:
+                        arguments["_auth_token"] = auth_token
                 if history:
                     arguments["history"] = history
                 payload = NexusRpcPayloadModel.tool_call(request_id=user_id if recoverable else "nexus-chat", name=selected_tool, arguments=arguments)
@@ -116,14 +118,14 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, recoverable: bool = False) -> AsyncGenerator[str, None]:
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, recoverable: bool = False, auth_token: str = "") -> AsyncGenerator[str, None]:
         endpoint = f"{self.base_url}/mcp"
         client = httpx.AsyncClient(timeout=30 * 60)
         current_task = asyncio.current_task()
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
         try:
-            async for line, answer, failed in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, history=history, recoverable=recoverable):
+            async for line, answer, failed in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, history=history, recoverable=recoverable, auth_token=auth_token):
                 if line:
                     yield line
                 if failed:

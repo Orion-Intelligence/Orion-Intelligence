@@ -10,6 +10,7 @@ import { ValuePresentationBase } from '../../../shared/utils/value-presentation.
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 
 type TextAnalysisResult = {
   title: string;
@@ -51,8 +52,16 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
   errorMessage = '';
   trackByIndex = (index: number) => index;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router, protected appService: AppService) {
+  constructor(private http: HttpClient, private route: ActivatedRoute, private router: Router, protected appService: AppService, private aiToolRoutingService: AiToolRoutingService) {
     super();
+  }
+
+  get aiToolType(): string {
+    return this.aiToolRoutingService.getTypeForApiType('text-analysis');
+  }
+
+  get aiWelcomeMessage(): string {
+    return this.aiToolRoutingService.getMessageForApiType('text-analysis');
   }
 
   ngOnInit(): void {

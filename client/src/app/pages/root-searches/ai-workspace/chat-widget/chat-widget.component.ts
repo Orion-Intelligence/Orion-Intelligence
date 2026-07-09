@@ -46,6 +46,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly showLauncher = input(true);
   readonly tool = input('open_chat');
   readonly type = input('default');
+  readonly welcomeMessage = input('Hi there! How can I help you today?');
 
   constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService) { }
 
@@ -54,7 +55,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chatMessages.push({
         id: crypto.randomUUID(),
         sender: 'bot',
-        text: 'Hi there! How can I help you today?',
+        text: this.defaultWelcomeMessage(),
         time: new Date()
       });
     }
@@ -109,7 +110,8 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     const payload = {
       message: report ? `${report}\n\n${userMessage}` : userMessage,
       tool: this.resolveTool(report),
-      type: this.type() || 'default'
+      type: this.type() || 'default',
+      history: this.localHistoryForRequest(userMessage)
     };
     const requestId = ++this.chatRequestId;
     this.stoppedRequestIds.delete(requestId);
@@ -324,7 +326,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chatMessages = [{
       id: crypto.randomUUID(),
       sender: 'bot',
-      text: 'Hi there! How can I help you today?',
+      text: this.defaultWelcomeMessage(),
       time: new Date()
     }];
     this.newMessage = '';
@@ -347,6 +349,24 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private countMessageTokens(value: string): number {
     return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
+  }
+
+  private defaultWelcomeMessage(): string {
+    return this.welcomeMessage().trim() || 'Hi there! How can I help you today?';
+  }
+
+  private localHistoryForRequest(userMessage: string): Array<{ role: string; content: string }> {
+    const welcome = this.defaultWelcomeMessage();
+    return this.chatMessages
+      .slice(0, -1)
+      .filter(message => message.sender === 'user' || message.sender === 'bot')
+      .filter(message => message.text.trim() && message.text.trim() !== welcome)
+      .map(message => ({
+        role: message.sender === 'bot' ? 'assistant' : 'user',
+        content: message.text.trim()
+      }))
+      .filter(message => message.content !== userMessage.trim())
+      .slice(-8);
   }
 
   private scrollToNewMessage(): void {
