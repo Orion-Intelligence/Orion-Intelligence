@@ -489,17 +489,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.nexusChatService.listChats().subscribe({
       next: (sessions) => {
         this.chatSessions = sessions.map(session => this.mapSession(session));
-
-        const firstChat = this.chatSessions[0];
-
-        if (firstChat) {
-          this.loadChat(firstChat.id);
-        }
-        else {
-          this.activeChatId = null;
-          this.messages = [];
-          this.isLoadingHistory.set(false);
-        }
+        this.activeChatId = null;
+        this.messages = [];
+        this.isLoadingHistory.set(false);
       },
       error: () => {
         this.chatSessions = [];

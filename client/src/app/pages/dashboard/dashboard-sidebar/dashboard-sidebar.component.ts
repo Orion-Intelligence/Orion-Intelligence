@@ -51,7 +51,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   activeAiChatId: string | null = null;
   openedAiChatMenuId: string | null = null;
 
-  constructor( protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService, private readonly nexusChatService: NexusChatService ) {
+  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService, private readonly nexusChatService: NexusChatService) {
   }
 
   ngOnInit() {
@@ -328,7 +328,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         const activeStillExists = this.aiChatSessions.some(chat => chat.id === this.activeAiChatId);
 
         if (!activeStillExists) {
-          this.activeAiChatId = this.aiChatSessions[0]?.id ?? null;
+          this.activeAiChatId = null;
         }
       },
       error: () => {
