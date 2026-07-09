@@ -50,6 +50,7 @@ export interface TenantDataModel {
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
     alertsVisibleToAdmin?: boolean;
+    alertRunTime?: string | null;
     accountsMailPassword?: string;
     accountsMail?: string;
     accountsSmtpServer?: string;

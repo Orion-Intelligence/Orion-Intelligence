@@ -95,8 +95,16 @@ class alert_job:
 
         return summary
 
-    async def run_all_categories(self):
-        all_tenants = await self._tenant_manager.get_all_tenant()
+    @staticmethod
+    def tenant_alert_run_time(tenant: Any) -> str | None:
+        value = alert_job._value(tenant, "alert_run_time", None)
+        if value is None:
+            return None
+        value = str(value).strip()
+        return value or None
+
+    async def run_tenant_batch(self, all_tenants: list[Any] | None = None, tenant_filter=None):
+        all_tenants = all_tenants if all_tenants is not None else await self._tenant_manager.get_all_tenant()
         if not all_tenants:
             return {
                 "status": "success",
@@ -115,10 +123,14 @@ class alert_job:
         error_count = 0
         mail_sent_count = 0
         mail_failed_count = 0
+        compromised_tenants = []
 
         for tenant in all_tenants:
             tenant_id = self._tenant_key(self._value(tenant, "id", ""))
             if self._value(tenant, "is_default", False):
+                skipped_tenant_count += 1
+                continue
+            if tenant_filter is not None and not tenant_filter(tenant):
                 skipped_tenant_count += 1
                 continue
 
@@ -142,6 +154,13 @@ class alert_job:
             finally:
                 self._cancellation_service.clear(tenant_id)
                 await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
+                total_alerts = int(scan_summary.get("total", 0) or 0)
+                if total_alerts > 0:
+                    compromised_tenants.append({
+                        "tenant_id": tenant_id,
+                        "tenant_name": self._value(tenant, "name", tenant_id) or tenant_id,
+                        "alert_count": total_alerts,
+                    })
                 mail_sent = await self._alert_manager.send_scan_completed_mail(
                     tenant_id=tenant_id,
                     scan_status=scan_status,
@@ -152,6 +171,10 @@ class alert_job:
                     mail_sent_count += 1
                 else:
                     mail_failed_count += 1
+
+        admin_mail_sent = await self._alert_manager.send_admin_scan_summary_mail(compromised_tenants)
+        if not admin_mail_sent:
+            mail_failed_count += 1
 
         if mail_failed_count and mail_sent_count:
             mail_status = "partial"
@@ -171,7 +194,23 @@ class alert_job:
             "error_count": error_count,
             "mail_sent_count": mail_sent_count,
             "mail_failed_count": mail_failed_count,
+            "compromised_tenant_count": len(compromised_tenants),
+            "admin_mail_sent": admin_mail_sent,
         }
+
+    async def run_all_categories(self):
+        return await self.run_tenant_batch()
+
+    async def run_default_scheduled_categories(self):
+        return await self.run_tenant_batch(
+            tenant_filter=lambda tenant: self.tenant_alert_run_time(tenant) is None
+        )
+
+    async def run_tenant_categories(self, tenant):
+        return await self.run_tenant_batch(
+            all_tenants=[tenant],
+            tenant_filter=None,
+        )
 
     def get_additional_result_keys(self, result: Any) -> list[tuple[str, Any]]:
         return ResultMetadataMapper.get_additional_result_keys(result)

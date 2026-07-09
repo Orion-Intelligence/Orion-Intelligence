@@ -1,10 +1,26 @@
 from __future__ import annotations
 
+import re
 from enum import Enum
 from typing import List, Optional
 
 from odmantic import Model, EmbeddedModel
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel, field_validator, model_validator
+
+
+ALERT_RUN_TIME_PATTERN = r"^([01]\d|2[0-3]):[0-5]\d$"
+
+
+def normalize_alert_run_time(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    value = str(value).strip()
+    if not value:
+        return None
+
+    if not re.match(ALERT_RUN_TIME_PATTERN, value):
+        raise ValueError("alert_run_time must be in HH:mm 24-hour format")
+    return value
 
 
 class IocCategory(EmbeddedModel):
@@ -34,6 +50,7 @@ class db_tenant_model(Model):
     profile_visibility_enabled: bool = True
     event_management_enabled: bool = False
     alerts_visible_to_admin: bool = True
+    alert_run_time: Optional[str] = None
     accounts_mail_password: Optional[str] = None
     accounts_mail: Optional[str] = None
     accounts_smtp_server: Optional[str] = None
@@ -43,6 +60,11 @@ class db_tenant_model(Model):
     @classmethod
     def validate_all(cls, values):
         return values
+
+    @field_validator("alert_run_time", mode="before")
+    @classmethod
+    def validate_alert_run_time(cls, value):
+        return normalize_alert_run_time(value)
 
 class TenantRequest(BaseModel):
     id: str = "-1"
@@ -60,8 +82,14 @@ class TenantRequest(BaseModel):
     profile_visibility_enabled: Optional[bool] = None
     event_management_enabled: Optional[bool] = None
     alerts_visible_to_admin: Optional[bool] = None
+    alert_run_time: Optional[str] = None
     password_reset_required: Optional[bool] = None
     accounts_mail_password: Optional[str] = None
     accounts_mail: Optional[str] = None
     accounts_smtp_server: Optional[str] = None
     accounts_smtp_port: Optional[str] = None
+
+    @field_validator("alert_run_time", mode="before")
+    @classmethod
+    def validate_alert_run_time(cls, value):
+        return normalize_alert_run_time(value)

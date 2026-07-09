@@ -250,6 +250,7 @@ class TenantManager:
             profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True),
             event_management_enabled=getattr(tenant, "event_management_enabled", False),
             alerts_visible_to_admin=getattr(tenant, "alerts_visible_to_admin", True),
+            alert_run_time=getattr(tenant, "alert_run_time", None),
             accounts_mail_password=None,
             accounts_mail=enc.decrypt(getattr(tenant, "accounts_mail", "").encode()).decode() if getattr(tenant, "accounts_mail", "") else "",
             accounts_smtp_server=enc.decrypt(getattr(tenant, "accounts_smtp_server", "").encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else "",
@@ -345,6 +346,9 @@ class TenantManager:
 
         if data.alerts_visible_to_admin is not None:
             tenant.alerts_visible_to_admin = data.alerts_visible_to_admin
+
+        if "alert_run_time" in data.model_fields_set:
+            tenant.alert_run_time = data.alert_run_time
 
         if data.iocs is not None:
             tenant.iocs = [IocCategory(

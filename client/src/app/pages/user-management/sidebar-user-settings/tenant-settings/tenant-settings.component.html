@@ -200,6 +200,26 @@
           </div>
         </div>
 
+        <div class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition" [ngClass]="privacyEditing ? 'hover:border-sky-400/35' : 'opacity-80'">
+          <label class="mb-1 flex items-center gap-2 text-sm font-semibold text-[var(--color-text1)]">
+            <i class="bi bi-clock text-[13px] text-[#7fb8ec]"></i>
+            <span>{{ 'Auto Alert Run Time' | translate }}</span>
+          </label>
+          <p class="mb-3 text-xs text-[var(--color-text4)]">{{ 'Times are scheduled in Australia/Sydney. Leave empty to use the default schedule.' | translate }}</p>
+          <div role="button" [attr.tabindex]="privacyEditing ? 0 : -1" class="relative flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition outline-none focus:outline-none focus:ring-0" [ngClass]="privacyEditing ? 'cursor-pointer hover:brightness-[0.98]' : 'cursor-not-allowed opacity-60'" (click)="openAlertRunTimePicker(alertRunTimeInput)" (keydown.enter)="openAlertRunTimePicker(alertRunTimeInput)" (keydown.space)="openAlertRunTimePicker(alertRunTimeInput)">
+            <span class="truncate" [ngClass]="normalizedAlertRunTime() ? '' : 'text-[var(--color-text4)]'">{{ getAlertRunTimeDisplay() | translate }}</span>
+            <i class="bi bi-clock h-4 w-4 shrink-0 text-[16px] leading-4 text-[var(--color-text4)]"></i>
+            <input
+              #alertRunTimeInput
+              type="time"
+              [(ngModel)]="userSessionData.tenant.alertRunTime"
+              name="tenant_alert_run_time"
+              class="absolute inset-0 h-full w-full cursor-pointer opacity-0 disabled:cursor-not-allowed"
+              [disabled]="!privacyEditing"
+              (click)="$event.stopPropagation(); openAlertRunTimePicker(alertRunTimeInput)" />
+          </div>
+        </div>
+
         <div class="mt-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition" [ngClass]="privacyEditing ? 'cursor-pointer hover:border-sky-400/35' : 'cursor-not-allowed opacity-80'" (click)="privacyEditing && (userSessionData.tenant.profileVisibilityEnabled = !userSessionData.tenant.profileVisibilityEnabled)">
           <div class="flex items-center justify-between gap-3">
             <div>

@@ -14,7 +14,7 @@ from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mail_manager.mail_enums import AlertMailLabel, AlertMailMessage, AlertMailSubject, AlertMailTitle
 from orion.services.mail_manager.mail_manager import mail_manager
-from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, db_user_account
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs.app_dependency import get_user_permissions
@@ -76,10 +76,6 @@ class AlertManager:
         return normalized.replace("-", " ").replace("_", " ").title()
 
     @staticmethod
-    def _pluralize_alert(count: int) -> str:
-        return "alert" if count == 1 else "alerts"
-
-    @staticmethod
     def _alert_action_url(category: str = "") -> str:
         app_url = (env_handler.get_instance().env("APP_URL", "") or "").rstrip("/")
         if not app_url:
@@ -88,6 +84,13 @@ class AlertManager:
         if normalized_category:
             return f"{app_url}/dashboard/profile/alerts/{normalized_category}"
         return f"{app_url}/dashboard/profile/alerts"
+
+    @staticmethod
+    def _admin_alert_action_url() -> str:
+        app_url = (env_handler.get_instance().env("APP_URL", "") or "").rstrip("/")
+        if not app_url:
+            return ""
+        return f"{app_url}/dashboard/profile/case-management?mode=alerts"
 
     async def _get_alert_mail_recipient(self, tenant_id: str, current_user=None) -> tuple[str, str]:
         if current_user is not None:
@@ -134,6 +137,55 @@ class AlertManager:
         except Exception:
             return False
 
+    async def send_admin_scan_summary_mail(self, compromised_tenants: list[dict[str, Any]] | None):
+        compromised_tenants = compromised_tenants or []
+        if not compromised_tenants:
+            return True
+        try:
+            if constant.alert_mail_template is None:
+                return False
+
+            admin = await self._engine.find_one(db_user_account,(db_user_account.role == user_role.ADMIN) & (db_user_account.status == UserStatus.ACTIVE.value))
+            recipient = admin.email if admin else None
+            if not recipient:
+                return False
+
+            total_tenants = len(compromised_tenants)
+            total_alerts = sum(int(item.get("alert_count", 0) or 0) for item in compromised_tenants)
+            tenant_word = "tenant" if total_tenants == 1 else "tenants"
+            friendly_message = AlertMailMessage.ADMIN_SCAN_SUMMARY.value.format(count=total_tenants, tenant_word=tenant_word)
+            module_rows = [
+                {
+                    "label": AlertMailMessage.TENANT_COUNT.value.format(
+                        tenant_name=item.get("tenant_name") or item.get("tenant_id") or "Tenant"
+                    ),
+                    "count": int(item.get("alert_count", 0) or 0),
+                }
+                for item in sorted(compromised_tenants, key=lambda row: str(row.get("tenant_name") or ""))
+            ]
+            html_content = constant.alert_mail_template.render(
+                email_title=AlertMailTitle.ADMIN_SCAN_SUMMARY.value,
+                preheader=friendly_message,
+                recipient_name="Admin",
+                friendly_message=friendly_message,
+                summary_label="Tenant Summary",
+                scan_status="Completed",
+                total_alerts=total_alerts,
+                total_alerts_label="Total Alerts Found",
+                event_date=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC"),
+                module_rows=module_rows,
+                module_rows_heading="Compromised Tenants",
+                ioc_rows=[],
+                action_url=self._admin_alert_action_url(),
+                action_label="View Tenant Alerts",
+                closing_message=AlertMailMessage.ADMIN_SCAN_SUMMARY_CLOSING.value,
+            )
+            subject = AlertMailSubject.ADMIN_SCAN_SUMMARY.value.format(count=total_tenants, tenant_word=tenant_word)
+            await mail_manager.get_instance().send_verification_mail(to=recipient, subject=subject, body=html_content)
+            return True
+        except Exception:
+            return False
+
     async def send_scan_completed_mail(self, tenant_id: str, scan_status: str, summary: dict[str, Any], current_user=None, tenant=None):
         counts_by_category = summary.get("counts_by_category", {}) if summary else {}
         ioc_values = summary.get("ioc_values", []) if summary else []
@@ -146,7 +198,7 @@ class AlertManager:
             display_name = self._display_alert_label(category)
             count = int(count or 0)
             module_rows.append({
-                "label": AlertMailMessage.MODULE_COUNT.value.format(category=display_name, count=count, alert_word=self._pluralize_alert(count)), "count": count,
+                "label": AlertMailMessage.MODULE_COUNT.value.format(category=display_name, count=count, alert_word="alert" if count == 1 else "alerts"), "count": count,
             })
 
         ioc_rows = []
@@ -157,7 +209,7 @@ class AlertManager:
                 ioc_rows.append({"type":  allowed_key_titles.get(ioc_type,"ioc_type" or AlertMailLabel.IOC_FALLBACK.value), "value": item.get("value") or "",
                 })
 
-        alert_word = self._pluralize_alert(total_alerts)
+        alert_word = "alert" if total_alerts == 1 else "alerts"
         friendly_message = AlertMailMessage.SCAN_COMPLETED.value.format(count=total_alerts,alert_word=alert_word)
         subject = AlertMailSubject.SCAN_COMPLETED.value.format(count=total_alerts,alert_word=alert_word)
 
