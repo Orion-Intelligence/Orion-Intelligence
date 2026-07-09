@@ -11,6 +11,7 @@ from orion.api.server.crawl_manager.class_model.report_chat_data_model import (
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.nexus_manager.nexus_manager import nexus_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 
 ai_routes = APIRouter()
 
@@ -123,3 +124,93 @@ async def clear_nexus_chat_session(current_user=Depends(get_current_user)):
 )
 async def nexus_analyze_text(payload: NexusTextAnalysisRequest,current_user=Depends(get_current_user)):
     return await nexus_manager.getInstance().analyze_text(payload, user_id=str(current_user.id))
+
+
+@ai_routes.post(
+    "/api/nexus/chats",
+    status_code=201,
+    include_in_schema=False,
+    dependencies=[
+        Depends(ai_enabled_required),
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+        Depends(limiter_dependency),
+    ],
+)
+async def create_nexus_chat(payload: dict = Body(default={"title": "New Chat"}), current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().create_chat(payload, current_user)
+
+
+@ai_routes.get(
+    "/api/nexus/chats",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(ai_enabled_required),
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+        Depends(limiter_dependency),
+    ],
+)
+async def list_nexus_chats(current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().list_chats(current_user)
+
+
+@ai_routes.get(
+    "/api/nexus/chats/{chat_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(ai_enabled_required),
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+        Depends(limiter_dependency),
+    ],
+)
+async def get_nexus_chat(chat_id: str, current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().get_chat(chat_id, current_user)
+
+
+@ai_routes.post(
+    "/api/nexus/chats/{chat_id}/messages",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(ai_enabled_required),
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+        Depends(limiter_dependency),
+    ],
+)
+async def send_nexus_chat_message(chat_id: str, payload: dict = Body(...), current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().send_message(chat_id, payload, current_user)
+
+
+@ai_routes.put(
+    "/api/nexus/chats/{chat_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(ai_enabled_required),
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+        Depends(limiter_dependency),
+    ],
+)
+async def rename_nexus_chat(chat_id: str, payload: dict = Body(...), current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().rename_chat(chat_id, payload, current_user)
+
+
+@ai_routes.delete(
+    "/api/nexus/chats/{chat_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(ai_enabled_required),
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+        Depends(limiter_dependency),
+    ],
+)
+async def delete_nexus_chat(chat_id: str, current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().delete_chat(chat_id, current_user)
