@@ -47,6 +47,46 @@ export default defineConfig({
             email: "tenant1@gmail.com",
             password: "1qaz!QAZ",
         },
+        CASE_ALERT_TENANTS: [
+            {
+                username: "casealert1",
+                email: "casealert1@orionintelligence.org",
+                password: "1qaz!QAZ",
+                companyName: "Case Alert Tenant One",
+            },
+            {
+                username: "casealert2",
+                email: "casealert2@xorionintelligence.org",
+                password: "1qaz!QAZ",
+                companyName: "Case Alert Tenant Two",
+            },
+            {
+                username: "casealert3",
+                email: "casealert3@zorionintelligence.org",
+                password: "1qaz!QAZ",
+                companyName: "Case Alert Tenant Three",
+            },
+        ],
+        CASE_ALERT_USERS: {
+            limited: {
+                username: "case_alert_user1",
+                email: "case.alert.user1@samplemail.test",
+                password: "1qaz!QAZ",
+                role: "Analyst",
+                licenses: ["Free"],
+                permissions: ["case_management"],
+                alertAllowedTenants: ["Case Alert Tenant One", "Case Alert Tenant Two"],
+            },
+            all: {
+                username: "case_alert_user2",
+                email: "case.alert.user2@samplemail.test",
+                password: "1qaz!QAZ",
+                role: "Analyst",
+                licenses: ["Free"],
+                permissions: ["case_management"],
+                alertAllowedTenants: "all",
+            },
+        },
         TEST_DATA: {
             stealer_ioc_email: "nora.keen@samplemail.test",
             stealer_upgrade_name: "Avery Stone",
@@ -120,7 +160,6 @@ export default defineConfig({
             });
             return config;
         },
-        baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1920,
         viewportHeight: 1440,
         defaultCommandTimeout: 60000,
