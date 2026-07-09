@@ -19,7 +19,7 @@ class ChatManager:
         client = httpx.AsyncClient(timeout=30 * 60)
         try:
             payload = NexusRpcPayloadModel.tool_resume(request_id=user_id, user_id=user_id)
-            async for line, answer, failed, _ in self._stream(client, endpoint, "", user_id, payload=payload):
+            async for line, answer, failed in self._stream(client, endpoint, "", user_id, payload=payload):
                 if line:
                     yield line
                 if failed:
@@ -38,10 +38,7 @@ class ChatManager:
             local_task.cancel()
         try:
             async with httpx.AsyncClient(timeout=30) as client:
-                response = await client.post(
-                    f"{self.base_url}/mcp",
-                    json=NexusRpcPayloadModel.tool_cancel(request_id=user_id, user_id=user_id).model_dump(),
-                )
+                response = await client.post(f"{self.base_url}/mcp", json=NexusRpcPayloadModel.tool_cancel(request_id=user_id, user_id=user_id).model_dump())
                 payload = response.json() if response.status_code == 200 else {}
                 result = payload.get("result") if isinstance(payload, dict) else {}
                 nexus_cancelled = bool(result.get("cancelled")) if isinstance(result, dict) else False

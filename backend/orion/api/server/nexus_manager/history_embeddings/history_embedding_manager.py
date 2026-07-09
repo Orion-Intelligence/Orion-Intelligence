@@ -35,11 +35,7 @@ class HistoryEmbeddingManager:
 
     @staticmethod
     def _history_key(message: dict[str, Any]) -> tuple[str, str, str]:
-        return (
-            str(message.get("sender") or ""),
-            str(message.get("text") or ""),
-            str(message.get("time") or ""),
-        )
+        return (str(message.get("sender") or ""), str(message.get("text") or ""), str(message.get("time") or ""))
 
     @classmethod
     def _normalize_embedding(cls, value: Any) -> list[float]:
@@ -110,12 +106,7 @@ class HistoryEmbeddingManager:
         }
 
     @classmethod
-    async def prepare_for_storage(
-        cls,
-        chat_history,
-        existing_history: list[dict[str, Any]],
-        user_name: str = "",
-    ) -> list[dict[str, Any]]:
+    async def prepare_for_storage(cls, chat_history, existing_history: list[dict[str, Any]], user_name: str = "") -> list[dict[str, Any]]:
         raw_history = [
             cls._message_for_storage(cls._as_dict(message), user_name)
             for message in chat_history.chat_history
@@ -126,9 +117,7 @@ class HistoryEmbeddingManager:
         missing_indices: list[int] = []
         missing_texts: list[str] = []
         for index, message in enumerate(capped_history):
-            embedding = existing_embeddings.get(cls._history_key(message)) or cls._normalize_embedding(
-                message.get(cls.EMBED_FIELD)
-            )
+            embedding = existing_embeddings.get(cls._history_key(message)) or cls._normalize_embedding(message.get(cls.EMBED_FIELD))
             if embedding:
                 message[cls.EMBED_FIELD] = embedding
                 continue
@@ -227,10 +216,7 @@ class HistoryEmbeddingManager:
 
         scored_indexes: list[tuple[float, int]] = []
         for index, turn in enumerate(turns[:recent_start]):
-            score = max(
-                cls._cosine_similarity(query_embedding, turn.get("message_embedding") or []),
-                cls._cosine_similarity(query_embedding, turn.get("response_embedding") or []),
-            )
+            score = max(cls._cosine_similarity(query_embedding, turn.get("message_embedding") or []), cls._cosine_similarity(query_embedding, turn.get("response_embedding") or []))
             if score > 0:
                 scored_indexes.append((score, index))
 

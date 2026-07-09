@@ -2,10 +2,7 @@ import httpx
 from fastapi.responses import StreamingResponse
 from starlette.responses import JSONResponse
 
-from orion.api.server.crawl_manager.class_model.report_chat_data_model import (
-    NexusTextAnalysisRequest,
-    ReportChatRequest,
-)
+from orion.api.server.crawl_manager.class_model.report_chat_data_model import NexusTextAnalysisRequest, ReportChatRequest
 from orion.api.server.nexus_manager.stream_manager import NexusStreamManager
 from orion.helper_manager.env_handler import env_handler
 
@@ -27,23 +24,8 @@ class nexus_manager:
 
     async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None, recoverable: bool = False):
         try:
-            history = await self.stream_manager.get_recent_history(
-                current_user,
-                model.message,
-                session_id=model.session_id or None,
-            ) if current_user is not None else []
-            return StreamingResponse(
-                self.stream_manager.stream_response(
-                    model.message,
-                    user_id,
-                    tool=model.tool or "open_chat",
-                    type_name=model.type or "default",
-                    history=history,
-                    recoverable=recoverable,
-                ),
-                media_type="application/x-ndjson",
-                headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-            )
+            history = await self.stream_manager.get_recent_history(current_user, model.message, session_id=model.session_id or None) if current_user is not None else []
+            return StreamingResponse(self.stream_manager.stream_response(model.message, user_id, tool=model.tool or "open_chat", type_name=model.type or "default", history=history, recoverable=recoverable), media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Something happened while calling api/chat"})
 
@@ -52,11 +34,7 @@ class nexus_manager:
 
     async def resume_chat(self, user_id: str = "system"):
         stream = self.stream_manager.chat_manager.resume_chat(user_id=user_id)
-        return StreamingResponse(
-            stream,
-            media_type="application/x-ndjson",
-            headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
-        )
+        return StreamingResponse(stream, media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
 
     async def clear_chat_session(self, current_user):
         return await self.stream_manager.chat_manager.clear_chat_session(current_user)
