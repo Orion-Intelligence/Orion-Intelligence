@@ -435,6 +435,15 @@ class elastic_controller:
             merged["hits"]["hits"] = merged_hits
             return merged
         except Exception as ex:
+            ex_text = f"{str(ex)} {getattr(ex, 'body', '')}"
+            if "unknown field [m_update_date]" in ex_text:
+                function_score = query.get("query", {}).get("function_score", {})
+                functions = function_score.get("functions", [])
+                if isinstance(functions, list):
+                    filtered = [fn for fn in functions if "m_update_date" not in fn.get("gauss", {})]
+                    if len(filtered) != len(functions):
+                        function_score["functions"] = filtered
+                        return await self.search_consolidated_ranked_query(indices, query, None)
             log.g().e(f"ELASTIC : {MANAGE_ELASTIC_MESSAGES.S_READ_FAILURE} : {str(ex)}")
             return None
 
