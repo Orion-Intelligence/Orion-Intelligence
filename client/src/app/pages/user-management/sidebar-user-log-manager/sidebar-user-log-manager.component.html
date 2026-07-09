@@ -1,4 +1,6 @@
 <div class="mb-[200px] w-full px-[32px] max-[1200px]:px-[15px] max-[943px]:px-[10px]" @fadeInDashboardItem>
+  <app-chat-widget tool="api_payload" [type]="aiToolRoutingService.getTypeForApiType('log-manager')" [welcomeMessage]="aiToolRoutingService.getMessageForApiType('log-manager')"></app-chat-widget>
+
   @if (isFlushAllConfirmationOpen) {
     <app-confirmation-popup [message]="'Delete all log files?' | translate" (confirmed)="confirmFlushLogs($event)"></app-confirmation-popup>
   }

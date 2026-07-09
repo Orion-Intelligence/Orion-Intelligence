@@ -10,11 +10,13 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { SystemLogFile, SystemLogResponse } from './model/system-log.models';
+import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 
 @Component({
   selector: 'app-sidebar-user-log-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, ConfirmationPopupComponent],
+  imports: [CommonModule, FormsModule, TranslatePipe, ConfirmationPopupComponent, ChatWidgetComponent],
   templateUrl: './sidebar-user-log-manager.component.html',
   animations: [fadeInDashboardItem],
 })
@@ -29,7 +31,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
   isFlushAllConfirmationOpen = false;
   response: SystemLogResponse = { entries: [], total: 0, page: 1, limit: 100, page_count: 0, available_dates: [], files: [] };
 
-  constructor(private apiService: ApiService, private licenseService: LicenseService, private router: Router) {
+  constructor(private apiService: ApiService, private licenseService: LicenseService, private router: Router, protected aiToolRoutingService: AiToolRoutingService) {
   }
 
   ngOnInit(): void {

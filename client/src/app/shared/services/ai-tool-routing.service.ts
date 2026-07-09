@@ -6,38 +6,51 @@ type AiToolRouteConfig = {
   message: string;
 };
 
+const DEFAULT_MESSAGE = 'Ask me what to check and I will use the active Orion route.';
+const ROUTE_MAPPINGS: Array<{ pattern: RegExp } & AiToolRouteConfig> = [
+  { pattern: /\/dashboard\/strategic\b/, type: '/api/search/strategic', message: 'Search strategic intelligence by topic, organization, asset, country, network, date range, or advanced entity filters.' },
+  { pattern: /\/dashboard\/breach\b/, type: '/api/search/breach', message: 'Search breach intelligence by email, username, domain, leak source, database, country, network, date range, or filters.' },
+  { pattern: /\/dashboard\/social\b/, type: '/api/search/social', message: 'Search social intelligence by handle, username, platform, forum, Telegram source, country, date range, or filters.' },
+  { pattern: /\/dashboard\/exploit\b/, type: '/api/search/exploit', message: 'Search exploit intelligence by CVE, product, vendor, version, platform, severity, CVSS, tags, date range, or filters.' },
+  { pattern: /\/dashboard\/(?:apt-intel|threat-intel)\b/, type: '/api/search/apt-intel', message: 'Search APT and malware intelligence by actor, campaign, family, tool, country, sector, tag, date range, or filters.' },
+  { pattern: /\/dashboard\/defacement\b/, type: '/api/search/defacement', message: 'Search defacement intelligence by domain, URL, actor, hacked page, phishing, malware URL, country, date range, or filters.' },
+  { pattern: /\/dashboard\/consolidated\b/, type: '/api/search/consolidated', message: 'Search all intelligence categories by topic, entity, indicator, category, network, country, date range, or advanced filters.' },
+  { pattern: /\/dashboard\/profile\/consolidated\b/, type: '/api/search/consolidated', message: 'Search all intelligence categories by topic, entity, indicator, category, network, country, date range, or advanced filters.' },
+  { pattern: /\/dashboard\/stealerlogs\b/, type: '/api/search/stealer/ioc', message: 'Search stealer IoCs by IP, domain, URL, hash, email, username, malware phrase, date range, or filter details.' },
+  { pattern: /\/dashboard\/profile\/ioc\b/, type: '/api/search/consolidated/ioc', message: 'Search IoCs across consolidated intelligence by IP, domain, URL, hash, email, username, host, date range, or filters.' },
+  { pattern: /\/dashboard\/profile\/event-management\b/, type: '/api/profile/event-management/siem/search', message: 'Search Event Manager SIEM logs by text, asset, service, event type, source, host, user, indicator, severity, or date range.' },
+  { pattern: /\/dashboard\/profile\/log-manager\b/, type: '/api/profile/system-logs', message: 'Inspect Orion system logs by log type, date, source file, caller, module, error text, page, or entry limit.' },
+  { pattern: /\/dashboard\/profile\/auditlog\b/, type: '/api/audit/logs', message: 'Search audit logs by username, actor, tenant activity, action, event, date range, or page.' },
+  { pattern: /\/dashboard\/api\/email-breach\b/, type: '/api/dynamic/user', message: 'Check exposed account records by email, username, account identifier, domain, breach source, or dataset phrase.' },
+  { pattern: /\/dashboard\/api\/social-scanner\b/, type: '/api/dynamic/social', message: 'Check public social presence and exposure by handle, username, profile URL, platform, account ID, or impersonation phrase.' },
+  { pattern: /\/dashboard\/api\/wanted-list\b/, type: '/api/dynamic/wanted', message: 'Search wanted, watchlist, sanctions, and law-enforcement records by person name, alias, identity phrase, or country context.' },
+  { pattern: /\/dashboard\/api\/national-identity\b/, type: '/api/dynamic/national-identity', message: 'Run Pakistan identity lookup by CNIC, phone number, family number, SIM context, address phrase, or FIR context.' },
+  { pattern: /\/dashboard\/api\/playstore-scanner\b/, type: '/api/dynamic/cracked', message: 'Check redistributed Android app records by Google Play URL, package name, app title, APK reference, mirror, or modified app phrase.' },
+  { pattern: /\/dashboard\/api\/software-scanner\b/, type: '/api/dynamic/software', message: 'Check unofficial software records by software, game, tool, package, release title, version, leak, crack, mirror, mod, or repack phrase.' },
+  { pattern: /\/dashboard\/api\/text-analysis\b/, type: '/api/nexus/analyze-text', message: 'Analyze pasted messages, emails, chat text, URLs, snippets, phishing language, spam, and safety verdicts.' },
+  { pattern: /\/dashboard\/api\/crypto-scanner\b/, type: '/api/crypto/scan', message: 'Check blockchain risk by wallet address, transaction hash, chain/network phrase, scam context, or ransomware payment context.' },
+];
+const API_TYPE_MAPPINGS: Record<string, AiToolRouteConfig> = {
+  user: { type: '/api/dynamic/user', message: 'Check exposed account records by email, username, account identifier, domain, breach source, or dataset phrase.' },
+  social: { type: '/api/dynamic/social', message: 'Check public social presence and exposure by handle, username, profile URL, platform, account ID, or impersonation phrase.' },
+  wanted: { type: '/api/dynamic/wanted', message: 'Search wanted, watchlist, sanctions, and law-enforcement records by person name, alias, identity phrase, or country context.' },
+  'national-identity': { type: '/api/dynamic/national-identity', message: 'Run Pakistan identity lookup by CNIC, phone number, family number, SIM context, address phrase, or FIR context.' },
+  cracked: { type: '/api/dynamic/cracked', message: 'Check redistributed Android app records by Google Play URL, package name, app title, APK reference, mirror, or modified app phrase.' },
+  software: { type: '/api/dynamic/software', message: 'Check unofficial software records by software, game, tool, package, release title, version, leak, crack, mirror, mod, or repack phrase.' },
+  crypto: { type: '/api/crypto/scan', message: 'Check blockchain risk by wallet address, transaction hash, chain/network phrase, scam context, or ransomware payment context.' },
+  'text-analysis': { type: '/api/nexus/analyze-text', message: 'Analyze pasted messages, emails, chat text, URLs, snippets, phishing language, spam, and safety verdicts.' },
+  'stealer-ioc': { type: '/api/search/stealer/ioc', message: 'Search stealer IoCs by IP, domain, URL, hash, email, username, malware phrase, date range, or filter details.' },
+  'consolidated-ioc': { type: '/api/search/consolidated/ioc', message: 'Search IoCs across consolidated intelligence by IP, domain, URL, hash, email, username, host, date range, or filters.' },
+  'event-management': { type: '/api/profile/event-management/siem/search', message: 'Search Event Manager SIEM logs by text, asset, service, event type, source, host, user, indicator, severity, or date range.' },
+  'log-manager': { type: '/api/profile/system-logs', message: 'Inspect Orion system logs by log type, date, source file, caller, module, error text, page, or entry limit.' },
+  auditlog: { type: '/api/audit/logs', message: 'Search audit logs by username, actor, tenant activity, action, event, date range, or page.' },
+};
+
 @Injectable({ providedIn: 'root' })
 export class AiToolRoutingService {
-  private readonly defaultMessage = 'Ask me what to check and I will use the active Orion route.';
-  private readonly routeMappings: Array<{ pattern: RegExp } & AiToolRouteConfig> = [
-    { pattern: /\/dashboard\/strategic\b/, type: '/api/search/strategic', message: 'Ask me to search strategic intelligence reports. You can refine the query, filters, network, country, or date range.' },
-    { pattern: /\/dashboard\/breach\b/, type: '/api/search/breach', message: 'Ask me to search breach intelligence. You can refine the target, leak category, filters, country, network, or date range.' },
-    { pattern: /\/dashboard\/social\b/, type: '/api/search/social', message: 'Ask me to search social intelligence. You can refine usernames, platforms, forums, Telegram, filters, or date range.' },
-    { pattern: /\/dashboard\/exploit\b/, type: '/api/search/exploit', message: 'Ask me to search exploit intelligence. You can refine CVE, product, severity, platform, tags, or date range.' },
-    { pattern: /\/dashboard\/(?:apt-intel|threat-intel)\b/, type: '/api/search/apt-intel', message: 'Ask me to search APT and malware intelligence. You can refine actor, malware family, country, tags, or date range.' },
-    { pattern: /\/dashboard\/defacement\b/, type: '/api/search/defacement', message: 'Ask me to search defacement intelligence. You can refine domains, hacked pages, phishing, malware URLs, country, or date range.' },
-    { pattern: /\/dashboard\/consolidated\b/, type: '/api/search/consolidated', message: 'Ask me to search across consolidated intelligence. You can refine the query, category, filters, network, country, or date range.' },
-    { pattern: /\/dashboard\/stealerlogs\b/, type: '/api/search/stealer/ioc', message: 'Ask me to search stealer IoCs. You can provide an IP, domain, URL, hash, username, or filter details.' },
-    { pattern: /\/dashboard\/api\/email-breach\b/, type: '/api/dynamic/user', message: 'Send an email address or username to check for exposed account records.' },
-    { pattern: /\/dashboard\/api\/social-scanner\b/, type: '/api/dynamic/social', message: 'Send a social handle or account identifier to check public social presence and exposure records.' },
-    { pattern: /\/dashboard\/api\/wanted-list\b/, type: '/api/dynamic/wanted', message: 'Send a person name or alias to search wanted and watchlist records.' },
-    { pattern: /\/dashboard\/api\/national-identity\b/, type: '/api/dynamic/national-identity', message: 'Send a CNIC, phone number, or family number to run the Pakistan identity lookup.' },
-    { pattern: /\/dashboard\/api\/playstore-scanner\b/, type: '/api/dynamic/cracked', message: 'Send a Google Play URL or Android package name to check redistributed or modified app records.' },
-    { pattern: /\/dashboard\/api\/software-scanner\b/, type: '/api/dynamic/software', message: 'Send a software, game, tool, or package name to check unofficial software records.' },
-    { pattern: /\/dashboard\/api\/text-analysis\b/, type: '/api/nexus/analyze-text', message: 'Paste text to analyze spam, phishing, URLs, and safety verdicts.' },
-    { pattern: /\/dashboard\/api\/crypto-scanner\b/, type: '/api/crypto/scan', message: 'Send a wallet address or transaction hash to check blockchain risk context.' },
-  ];
-  private readonly apiTypeMappings: Record<string, AiToolRouteConfig> = {
-    user: { type: '/api/dynamic/user', message: 'Send an email address or username to check for exposed account records.' },
-    social: { type: '/api/dynamic/social', message: 'Send a social handle or account identifier to check public social presence and exposure records.' },
-    wanted: { type: '/api/dynamic/wanted', message: 'Send a person name or alias to search wanted and watchlist records.' },
-    'national-identity': { type: '/api/dynamic/national-identity', message: 'Send a CNIC, phone number, or family number to run the Pakistan identity lookup.' },
-    cracked: { type: '/api/dynamic/cracked', message: 'Send a Google Play URL or Android package name to check redistributed or modified app records.' },
-    software: { type: '/api/dynamic/software', message: 'Send a software, game, tool, or package name to check unofficial software records.' },
-    crypto: { type: '/api/crypto/scan', message: 'Send a wallet address or transaction hash to check blockchain risk context.' },
-    'text-analysis': { type: '/api/nexus/analyze-text', message: 'Paste text to analyze spam, phishing, URLs, and safety verdicts.' },
-    'stealer-ioc': { type: '/api/search/stealer/ioc', message: 'Send an IP, domain, URL, hash, username, or IoC filter to search stealer intelligence.' },
-  };
+  private readonly defaultMessage = DEFAULT_MESSAGE;
+  private readonly routeMappings = ROUTE_MAPPINGS;
+  private readonly apiTypeMappings = API_TYPE_MAPPINGS;
 
   constructor(private router: Router) {}
 

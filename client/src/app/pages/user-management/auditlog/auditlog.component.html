@@ -1,6 +1,8 @@
 <ng-container>
   <span id="top"></span>
   <div class="w-full p-3 pb-[100px] md:p-4 md:pb-[100px]">
+    <app-chat-widget tool="api_payload" [type]="aiToolRoutingService.getTypeForApiType('auditlog')" [welcomeMessage]="aiToolRoutingService.getMessageForApiType('auditlog')"></app-chat-widget>
+
     <div class="ui-page-container w-full max-w-[2400px]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>

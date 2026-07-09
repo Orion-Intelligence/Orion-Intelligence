@@ -4649,6 +4649,28 @@ app-demo-tour .demo-tour-active {
   word-break: break-word;
 }
 
+.ui-ai-markdown pre {
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ui-ai-markdown pre code {
+  display: block;
+  max-width: 100%;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.ui-ai-markdown table {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .ui-ai-chat-surface-pattern {
   background-image:
     linear-gradient(rgb(255 255 255 / 1.1%) 1px, transparent 1px),

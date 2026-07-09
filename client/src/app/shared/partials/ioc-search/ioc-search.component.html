@@ -32,9 +32,10 @@
 </div>
 
 <div class="mt-4">
+  <app-chat-widget [showLauncher]="appService.configData().appSettings.ai_endpoint_enabled" tool="api_payload" [type]="resolvedAiType" [welcomeMessage]="resolvedAiWelcomeMessage"></app-chat-widget>
+
   @if (!isAdvanced) {
     <div class="w-full">
-      <app-chat-widget [showLauncher]="appService.configData().appSettings.ai_endpoint_enabled" tool="api_payload" [type]="aiToolRoutingService.getTypeForApiType('stealer-ioc')" [welcomeMessage]="aiToolRoutingService.getMessageForApiType('stealer-ioc')"></app-chat-widget>
       <form (submit)="$event.preventDefault(); triggerSearch()" @fadeInDashboardItem class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="isBasicInvalid() ? 'ring-1 ring-[var(--color-border-red)]' : ''">
         <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
         <input data-testid="ioc-basic-search-input" [(ngModel)]="basicQuery" (ngModelChange)="onBasicQueryChange($event)" (input)="filterBasicInput($event)" name="searchQuery" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45" [ngClass]="isBasicInvalid() ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" type="text" [placeholder]="'common.actions.search' | translate" />

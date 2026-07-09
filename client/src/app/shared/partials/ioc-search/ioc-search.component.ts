@@ -38,6 +38,8 @@ export class IocSearchComponent implements OnInit {
   readonly useRouteQuery = input<boolean>(true);
   readonly advancedTitle = input<string>('Advanced Filter Builder');
   readonly advancedSubtitle = input<string>('Combine multiple filters with AND/OR for precise results');
+  readonly aiType = input<string>('');
+  readonly aiWelcomeMessage = input<string>('');
   isAdvanced = false;
   isAdvancedBuilderExpanded = false;
   basicSubmitted = false;
@@ -48,6 +50,14 @@ export class IocSearchComponent implements OnInit {
   readonly searchTriggered = output<string>();
 
   constructor(protected sidebarService: SidebarService, private route: ActivatedRoute, protected licenseService: LicenseService, protected appService: AppService, protected aiToolRoutingService: AiToolRoutingService) { }
+
+  get resolvedAiType(): string {
+    return this.aiType() || this.aiToolRoutingService.getTypeForApiType('stealer-ioc');
+  }
+
+  get resolvedAiWelcomeMessage(): string {
+    return this.aiWelcomeMessage() || this.aiToolRoutingService.getMessageForApiType('stealer-ioc');
+  }
 
   ngOnInit(): void {
     this.selectedTag = this.defaultBasicTag();

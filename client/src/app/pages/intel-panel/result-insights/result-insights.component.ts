@@ -217,7 +217,9 @@ export class ResultInsightsComponent implements OnInit {
           (consolidated.malware_model?.Result?.length || 0) +
           (consolidated.generic_model?.Result?.length || 0) +
           (consolidated.defacement_model?.Result?.length || 0) +
-          (consolidated.social_model?.Result?.length || 0));
+          (consolidated.social_model?.Result?.length || 0) +
+          (consolidated.tracking_model?.Result?.length || 0) +
+          (consolidated.news_model?.Result?.length || 0));
   }
 
   getActiveModelCount(consolidated: ConsolidatedCallbackModel, rankedData: any[], isGrouped: boolean): number {
@@ -232,7 +234,9 @@ export class ResultInsightsComponent implements OnInit {
       consolidated.chat_model,
       consolidated.generic_model,
       consolidated.social_model,
-      consolidated.defacement_model
+      consolidated.defacement_model,
+      consolidated.tracking_model,
+      consolidated.news_model
     ];
     return models.filter(model => model?.Result && model.Result.length > 0).length;
   }
@@ -254,7 +258,9 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.chat_model?.Result || []),
         ...(consolidated.exploit_model?.Result || []),
         ...(consolidated.apt_model?.Result || []),
-        ...(consolidated.malware_model?.Result || [])
+        ...(consolidated.malware_model?.Result || []),
+        ...(consolidated.tracking_model?.Result || []),
+        ...(consolidated.news_model?.Result || [])
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
     items.forEach(item => {
@@ -318,7 +324,9 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.exploit_model?.Result || []),
         ...(consolidated.apt_model?.Result || []),
         ...(consolidated.malware_model?.Result || []),
-        ...(consolidated.chat_model?.Result || [])
+        ...(consolidated.chat_model?.Result || []),
+        ...(consolidated.tracking_model?.Result || []),
+        ...(consolidated.news_model?.Result || [])
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
     items.forEach(item => {
@@ -359,7 +367,9 @@ export class ResultInsightsComponent implements OnInit {
         ...(consolidated.apt_model?.Result || []),
         ...(consolidated.malware_model?.Result || []),
         ...(consolidated.social_model?.Result || []),
-        ...(consolidated.defacement_model?.Result || [])
+        ...(consolidated.defacement_model?.Result || []),
+        ...(consolidated.tracking_model?.Result || []),
+        ...(consolidated.news_model?.Result || [])
       ]
       : (Array.isArray(rankedData) ? rankedData : []);
     total = allResults.length;
@@ -422,7 +432,9 @@ export class ResultInsightsComponent implements OnInit {
       chat_model: ['m_weblink'],
       exploit_model: ['m_url'],
       apt_model: ['m_source_url', 'm_references'],
-      malware_model: ['m_source_url', 'm_references']
+      malware_model: ['m_source_url', 'm_references'],
+      tracking_model: ['m_url'],
+      news_model: ['m_url']
     };
     Object.entries(fieldMap).forEach(([modelKey, fields]) => {
       const results = (consolidated as any)[modelKey]?.Result || [];

@@ -244,10 +244,6 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeChat() {
-    this.chatRequestId += 1;
-    this.cancelActiveNexusRequest();
-    this.isBotTyping = false;
-    this.botStep = '';
     this.chatOpen = false;
     this.composerExpanded = false;
     this.composerRows = 1;

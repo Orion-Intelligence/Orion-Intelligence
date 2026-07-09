@@ -12,16 +12,19 @@ import { HelperService } from '../../../shared/services/helper.service';
 import { take } from 'rxjs/operators';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 
 @Component({
   selector: 'app-auditlog',
-  imports: [FormsModule, PaginationComponent, AsyncPipe, AuditlogListComponent, FiltersComponent, NgOptimizedImage, NgClass, TranslatePipe],
+  imports: [FormsModule, PaginationComponent, AsyncPipe, AuditlogListComponent, FiltersComponent, NgOptimizedImage, NgClass, TranslatePipe, ChatWidgetComponent],
   templateUrl: './auditlog.component.html'
 })
 export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackModel> {
   private auditService = inject(AuditlogService);
   private helperService = inject(HelperService);
   private sidebarService = inject(SidebarService);
+  protected aiToolRoutingService = inject(AiToolRoutingService);
 
   protected data$ = this.auditService.auditData$;
   protected service = this.auditService;

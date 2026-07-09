@@ -1,1 +1,3 @@
-<img (click)="scrollToTop()" alt="scroll to top" class="fixed right-[40px] bottom-[40px] z-40 cursor-pointer transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110" height="40" src="/assets/images/shared/scroller.svg" width="40">
+<button type="button" (click)="scrollToTop()" [attr.aria-label]="'scroll to top' | translate" class="fixed right-[84px] bottom-6 z-[1170] flex h-12 w-12 items-center justify-center rounded-full transition-transform duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] hover:scale-110">
+  <img alt="" height="40" src="/assets/images/shared/scroller.svg" width="40">
+</button>
