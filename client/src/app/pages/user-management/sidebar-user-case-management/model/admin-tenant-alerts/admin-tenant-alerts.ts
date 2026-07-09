@@ -34,19 +34,19 @@ export class AdminTenantAlerts implements OnInit {
   constructor(private apiService: ApiService, private sidebarHomepageService: SidebarHomepageService, private licenseService: LicenseService, private router: Router, private alertExportService: AlertExportService, private messageNotificationService: MessageNotificationService) { }
 
   ngOnInit(): void {
-    if (this.licenseService.isAdmin()) {
+    if (this.licenseService.canViewTenantAlerts()) {
       this.loadTenantAlerts();
     }
   }
 
   loadTenantAlerts(): void {
-    if (!this.licenseService.isAdmin()) {
+    if (!this.licenseService.canViewTenantAlerts()) {
       this.tenantAlertGroups = [];
       return;
     }
 
     this.isLoading = true;
-    this.apiService.post<AdminTenantAlertsResponse[]>('tenants/admin/alerts/summary', {})
+    this.apiService.get<AdminTenantAlertsResponse[]>('tenants/alerts/summary')
       .pipe(finalize(() => this.isLoading = false))
       .subscribe({
         next: (response) => {
@@ -183,7 +183,7 @@ export class AdminTenantAlerts implements OnInit {
   }
 
   private fetchTenantAlertsPage(tenantId: string, page: number, accumulated: AlertModel[], done: (alerts: AlertModel[]) => void): void {
-    const endpoint = `tenants/admin/${encodeURIComponent(tenantId)}/alerts?paginate=true&page=${page}&limit=20`;
+    const endpoint = `tenants/${encodeURIComponent(tenantId)}/alerts?paginate=true&page=${page}&limit=20`;
     this.apiService.get<AdminTenantAlertsPage>(endpoint).subscribe({
       next: (response) => {
         const nextAlerts = [...accumulated, ...(response?.items || [])];

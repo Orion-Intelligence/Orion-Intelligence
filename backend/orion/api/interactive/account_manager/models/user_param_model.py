@@ -1,7 +1,7 @@
 from typing import List, Optional, Dict, Any
 from enum import Enum
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
 from orion.services.permission_manager.permission_models import UserPermission
@@ -20,5 +20,7 @@ class user_param_model(BaseModel):
     subscription: Optional[bool] = None
     licenses: Optional[List[LicenseName]] = None
     permissions: Optional[List[UserPermission]] = None
+    alerts_allowed_all: bool = False
+    alerts_allowed_tenant_ids: Optional[List[str]] = Field(default_factory=list)
     password_reset_required: Optional[bool] = None
     preferences: Optional[Dict[str, Any]] = None

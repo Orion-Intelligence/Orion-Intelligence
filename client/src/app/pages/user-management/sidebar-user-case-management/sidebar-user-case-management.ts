@@ -135,7 +135,7 @@ export class SidebarUserCaseManagement implements OnInit {
   }
 
   canViewAdminAlerts(): boolean {
-    return this.licenseService.isAdmin();
+    return this.licenseService.canViewTenantAlerts();
   }
 
   openDeleteConfirmation(caseId: string): void {

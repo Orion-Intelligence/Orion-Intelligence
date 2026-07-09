@@ -4,7 +4,7 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { HttpHeaders } from '@angular/common/http';
 
 import { FormsModule } from '@angular/forms';
-import { User } from '../../../../shared/model/tenant/tenant.model';
+import { AlertAllowedTenantOption, User } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { AddTenantComponent } from "../add-tenant/add-tenant.component";
@@ -24,12 +24,15 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/compon
   templateUrl: './manage-profile.component.html',
 })
 export class ManageProfileComponent implements OnInit {
+  private readonly allAlertsOption = 'all';
+
   protected readonly JSON = JSON;
 
   users: User[] = [];
   userSearch = '';
   licenseList = Object.values(LicenseName);
   permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
+  alertTenantOptions: AlertAllowedTenantOption[] = [];
   statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
   passwordResetOptions: UiDropdownOption[] = [{ key: 'false', label: 'No password reset' }, { key: 'true', label: 'Require password reset' }];
   isLoading = true;
@@ -44,6 +47,9 @@ export class ManageProfileComponent implements OnInit {
 
   ngOnInit(): void {
     const headers = new HttpHeaders({});
+    if (this.appService.userSessionData().user.role === 'admin') {
+      this.loadAlertTenantOptions();
+    }
     this.apiService.post<User[]>('users', headers).subscribe({
       next: (data) => {
         this.users = data;
@@ -63,8 +69,9 @@ export class ManageProfileComponent implements OnInit {
     if (!user.licenses || user.licenses.length === 0) {
       user.licenses = [LicenseName.FREE];
     }
+    const payload = this.buildUserUpdatePayload(user);
     this.isLoading = true;
-    this.apiService.post('update/user', user).pipe(switchMap(() => this.nodeResolver.resolve()), finalize(() => (this.isLoading = false))).subscribe({
+    this.apiService.post('update/user', payload).pipe(switchMap(() => this.nodeResolver.resolve()), finalize(() => (this.isLoading = false))).subscribe({
       next: (_) => void 0,
       error: () => void 0
     });
@@ -96,6 +103,16 @@ export class ManageProfileComponent implements OnInit {
     return this.licenseList
       .filter(license => this.canAssignLicense(license))
       .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
+  }
+
+  get alertAllowedOptions(): UiDropdownOption[] {
+    return [
+      { key: this.allAlertsOption, label: 'All' },
+      ...this.alertTenantOptions.map(tenant => ({
+        key: tenant.id,
+        label: tenant.name || tenant.email || tenant.id
+      }))
+    ];
   }
 
   get filteredUsers(): User[] {
@@ -136,6 +153,75 @@ export class ManageProfileComponent implements OnInit {
       return;
     }
     user.licenses = nextLicenses;
+  }
+
+  showAlertsAllowed(user: User): boolean {
+    return this.appService.userSessionData().user.role === 'admin' && (user.permissions || []).includes('case_management');
+  }
+
+  selectedAlertAllowedValues(user: User): string[] {
+    if (user.alerts_allowed_all) {
+      return [this.allAlertsOption];
+    }
+    return user.alerts_allowed_tenant_ids || [];
+  }
+
+  onUserPermissionChange(user: User, permissions: string[]): void {
+    user.permissions = permissions;
+    if (!this.showAlertsAllowed(user)) {
+      this.clearAlertAccess(user);
+    }
+  }
+
+  onUserAlertsAllowedChange(user: User, values: string[]): void {
+    if (values.includes(this.allAlertsOption)) {
+      user.alerts_allowed_all = true;
+      user.alerts_allowed_tenant_ids = [];
+      return;
+    }
+    const allowedTenantIds = new Set(this.alertTenantOptions.map(tenant => tenant.id));
+    user.alerts_allowed_all = false;
+    user.alerts_allowed_tenant_ids = values.filter(value => allowedTenantIds.has(value));
+  }
+
+  private loadAlertTenantOptions(): void {
+    this.apiService.get<AlertAllowedTenantOption[]>('tenants/alerts/allowed-options').subscribe({
+      next: (options) => {
+        this.alertTenantOptions = options || [];
+      },
+      error: () => {
+        this.alertTenantOptions = [];
+      }
+    });
+  }
+
+  private clearAlertAccess(user: User): void {
+    user.alerts_allowed_all = false;
+    user.alerts_allowed_tenant_ids = [];
+  }
+
+  private applyAlertAccessPayload(user: User): void {
+    if (!this.showAlertsAllowed(user)) {
+      this.clearAlertAccess(user);
+      return;
+    }
+    if (user.alerts_allowed_all) {
+      user.alerts_allowed_tenant_ids = [];
+      return;
+    }
+    const allowedTenantIds = new Set(this.alertTenantOptions.map(tenant => tenant.id));
+    user.alerts_allowed_tenant_ids = (user.alerts_allowed_tenant_ids || []).filter(id => allowedTenantIds.has(id));
+  }
+
+  private buildUserUpdatePayload(user: User): User {
+    if (this.appService.userSessionData().user.role !== 'admin') {
+      const payload = { ...user };
+      delete payload.alerts_allowed_all;
+      delete payload.alerts_allowed_tenant_ids;
+      return payload;
+    }
+    this.applyAlertAccessPayload(user);
+    return user;
   }
 
   toggleUserLicense(user: any, license: LicenseName) {
@@ -248,5 +334,4 @@ export class ManageProfileComponent implements OnInit {
   clossAddTenant() {
     this.showAddTenantPopup = false;
   }
-
 }

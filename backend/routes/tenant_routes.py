@@ -67,13 +67,38 @@ async def get_all_tenants():
     return await TenantManager.get_instance().get_all_tenant()
 
 
-@tenant_routes.post(
-    "/api/tenants/admin/alerts/summary",
+@tenant_routes.get(
+    "/api/tenants/alerts/summary",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_alerts_summary(current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alerts_summary(current_user)
+
+
+@tenant_routes.get(
+    "/api/tenants/alerts/allowed-options",
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def get_admin_tenant_alerts():
-    return await TenantManager.get_instance().get_admin_visible_tenant_alerts_summary()
+async def get_alert_allowed_tenant_options():
+    return await TenantManager.get_instance().get_alert_allowed_tenant_options()
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/alerts",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_category_alerts(tenant_id: str, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False), current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alerts(
+        tenant_id,
+        current_user,
+        page=page,
+        limit=limit,
+        alert_type=alert_type,
+        paginate=paginate,
+    )
 
 
 @tenant_routes.get(

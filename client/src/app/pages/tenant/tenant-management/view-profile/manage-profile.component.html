@@ -194,11 +194,28 @@
                                       menuPlacement="static"
                                       [placeholder]="'Select permissions' | translate"
                                       [searchPlaceholder]="'Search permissions' | translate"
-                                      (valuesChange)="user.permissions = $event"></app-ui-dropdown>
+                                      (valuesChange)="onUserPermissionChange(user, $event)"></app-ui-dropdown>
                                     @if (!user.permissions?.length) {
                                       <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
                                     }
                                   </div>
+                                  @if (showAlertsAllowed(user)) {
+                                    <div>
+                                      <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Alerts Allowed' | translate }}</div>
+                                      <app-ui-dropdown
+                                        class="mt-[0.6rem]"
+                                        testId="tenant-edit-user-alerts-allowed"
+                                        [menuId]="'tenant-edit-user-alerts-allowed-menu-' + i"
+                                        [options]="alertAllowedOptions"
+                                        [selectedValues]="selectedAlertAllowedValues(user)"
+                                        [multiSelect]="true"
+                                        [showSelectedChips]="true"
+                                        menuPlacement="static"
+                                        [placeholder]="'Select tenants' | translate"
+                                        [searchPlaceholder]="'Search tenants' | translate"
+                                        (valuesChange)="onUserAlertsAllowedChange(user, $event)"></app-ui-dropdown>
+                                    </div>
+                                  }
                                 </div>
                                 <div class="mt-3 flex flex-wrap justify-end gap-2">
                                   <button type="button" data-testid="tenant-delete-user-button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">
@@ -337,9 +354,24 @@
                               menuPlacement="static"
                               [placeholder]="'Select permissions' | translate"
                               [searchPlaceholder]="'Search permissions' | translate"
-                              (valuesChange)="user.permissions = $event"></app-ui-dropdown>
+                              (valuesChange)="onUserPermissionChange(user, $event)"></app-ui-dropdown>
                             @if (!user.permissions?.length) {
                               <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
+                            }
+                            @if (showAlertsAllowed(user)) {
+                              <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Alerts Allowed' | translate }}</div>
+                              <app-ui-dropdown
+                                class="mt-[0.6rem]"
+                                testId="tenant-edit-user-alerts-allowed"
+                                [menuId]="'tenant-edit-user-alerts-allowed-mobile-menu-' + i"
+                                [options]="alertAllowedOptions"
+                                [selectedValues]="selectedAlertAllowedValues(user)"
+                                [multiSelect]="true"
+                                [showSelectedChips]="true"
+                                menuPlacement="static"
+                                [placeholder]="'Select tenants' | translate"
+                                [searchPlaceholder]="'Search tenants' | translate"
+                                (valuesChange)="onUserAlertsAllowedChange(user, $event)"></app-ui-dropdown>
                             }
                             <div class="mt-3 flex flex-wrap justify-end gap-2">
                               <button type="button" data-testid="tenant-delete-user-button" class="ui-btn ui-btn-danger" (click)="deleteUser(user)">{{ 'Delete User' | translate }}</button>

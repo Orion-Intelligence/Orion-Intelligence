@@ -67,6 +67,8 @@ class db_user_account(Model):
     current_session_id: Optional[str] = Field(default=None)
     licenses: List[LicenseName] = Field(default=[LicenseName.FREE])
     permissions: Optional[List[UserPermission]] = Field(default_factory=list)
+    alerts_allowed_all: bool = False
+    alerts_allowed_tenant_ids: List[str] = []
     demo_tour: bool = Field(default=False)
 
     @staticmethod

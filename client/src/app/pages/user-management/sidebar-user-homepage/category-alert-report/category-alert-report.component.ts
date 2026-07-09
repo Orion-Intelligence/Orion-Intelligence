@@ -203,7 +203,7 @@ export class CategoryAlertReportComponent implements OnInit {
       if (!this.adminTenantId) {
         return null;
       }
-      return `tenants/admin/${encodeURIComponent(this.adminTenantId)}/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
+      return `tenants/${encodeURIComponent(this.adminTenantId)}/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
     }
 
     return `profile/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;

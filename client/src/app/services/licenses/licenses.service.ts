@@ -157,6 +157,11 @@ export class LicenseService {
     return this.getCombinedRule().maintainer;
   }
 
+  canViewTenantAlerts(): boolean {
+    const permissions = this.appService.userSessionData().user.permissions || [];
+    return this.isAdmin() || (this.isAnalyst() && permissions.includes('case_management') && this.appService.userSessionData().tenant.isDefault);
+  }
+
   getLicenseLabel(license: LicenseName | string): string {
     switch (license) {
       case LicenseName.MAINTAINER:

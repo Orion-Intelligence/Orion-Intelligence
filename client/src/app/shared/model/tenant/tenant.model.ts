@@ -42,6 +42,8 @@ export interface User {
     verificationDate: string;
     licenses?: string[] | null;
     permissions?: string[] | null;
+    alerts_allowed_all?: boolean;
+    alerts_allowed_tenant_ids?: string[] | null;
     password_reset_required?: boolean;
 }
 export interface TenantTeamModel {
@@ -53,5 +55,12 @@ export interface TenantTeamModel {
     subscription: boolean;
     licenses?: string[] | null;
     permissions?: string[] | null;
+    alerts_allowed_all?: boolean;
+    alerts_allowed_tenant_ids?: string[] | null;
     quotaExceeded?: boolean;
+}
+export interface AlertAllowedTenantOption {
+    id: string;
+    name: string;
+    email: string;
 }

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -15,3 +15,5 @@ class user_model(BaseModel):
     subscription: bool
     licenses: List[LicenseName]
     permissions: List[UserPermission] = Field(default_factory=list)
+    alerts_allowed_all: bool = False
+    alerts_allowed_tenant_ids: Optional[List[str]] = Field(default_factory=list)

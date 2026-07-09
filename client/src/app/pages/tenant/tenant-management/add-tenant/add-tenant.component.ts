@@ -2,7 +2,7 @@ import { Component, OnInit, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
-import { TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
+import { AlertAllowedTenantOption, TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
 import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -19,12 +19,15 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/compon
   animations: [popupAnimation, overlayAnimation]
 })
 export class AddTenantComponent implements OnInit {
+  private readonly allAlertsOption = 'all';
+
   licenseList = Object.values(LicenseName);
   licenses = ['free', 'osint_basic', 'osint_advanced', 'social_mapper', 'pentester', 'maintainer', 'enterprise'];
   permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
+  alertTenantOptions: AlertAllowedTenantOption[] = [];
   statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
   isAdmin: boolean = false;
-  model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [], permissions: [] };
+  model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [], permissions: [], alerts_allowed_all: false, alerts_allowed_tenant_ids: [] };
   errorText: string = "";
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
   usernameSuggestion: string = "";
@@ -42,6 +45,9 @@ export class AddTenantComponent implements OnInit {
   ngOnInit(): void {
     this.isAdmin = this.appService.userSessionData().user.role === 'admin';
     this.isAdmin ? (this.model.role = 'analyst') : (this.model.role = 'member');
+    if (this.isAdmin) {
+      this.loadAlertTenantOptions();
+    }
   }
 
   onSubmit() {
@@ -69,6 +75,7 @@ export class AddTenantComponent implements OnInit {
     if (!this.model.licenses || this.model.licenses.length === 0) {
       this.model.licenses = [LicenseName.FREE];
     }
+    this.applyAlertAccessPayload();
     const endpoint = this.isAdmin ? 'tenant/create/user' : 'tenant/create/user';
     this.apiService.post(endpoint, this.model).subscribe({
       next: () => {
@@ -135,6 +142,74 @@ export class AddTenantComponent implements OnInit {
     if (value === 'active' || value === 'disable') {
       this.model.status = value;
     }
+  }
+
+  get showAlertsAllowed(): boolean {
+    return this.isAdmin && (this.model.permissions || []).includes('case_management');
+  }
+
+  get alertAllowedOptions(): UiDropdownOption[] {
+    return [
+      { key: this.allAlertsOption, label: 'All' },
+      ...this.alertTenantOptions.map(tenant => ({
+        key: tenant.id,
+        label: tenant.name || tenant.email || tenant.id
+      }))
+    ];
+  }
+
+  get selectedAlertAllowedValues(): string[] {
+    if (this.model.alerts_allowed_all) {
+      return [this.allAlertsOption];
+    }
+    return this.model.alerts_allowed_tenant_ids || [];
+  }
+
+  onPermissionChange(permissions: string[]): void {
+    this.model.permissions = permissions;
+    if (!this.showAlertsAllowed) {
+      this.clearAlertAccess();
+    }
+  }
+
+  onAlertsAllowedChange(values: string[]): void {
+    if (values.includes(this.allAlertsOption)) {
+      this.model.alerts_allowed_all = true;
+      this.model.alerts_allowed_tenant_ids = [];
+      return;
+    }
+    const allowedTenantIds = new Set(this.alertTenantOptions.map(tenant => tenant.id));
+    this.model.alerts_allowed_all = false;
+    this.model.alerts_allowed_tenant_ids = values.filter(value => allowedTenantIds.has(value));
+  }
+
+  private loadAlertTenantOptions(): void {
+    this.apiService.get<AlertAllowedTenantOption[]>('tenants/alerts/allowed-options').subscribe({
+      next: (options) => {
+        this.alertTenantOptions = options || [];
+      },
+      error: () => {
+        this.alertTenantOptions = [];
+      }
+    });
+  }
+
+  private clearAlertAccess(): void {
+    this.model.alerts_allowed_all = false;
+    this.model.alerts_allowed_tenant_ids = [];
+  }
+
+  private applyAlertAccessPayload(): void {
+    if (!this.showAlertsAllowed) {
+      this.clearAlertAccess();
+      return;
+    }
+    if (this.model.alerts_allowed_all) {
+      this.model.alerts_allowed_tenant_ids = [];
+      return;
+    }
+    const allowedTenantIds = new Set(this.alertTenantOptions.map(tenant => tenant.id));
+    this.model.alerts_allowed_tenant_ids = (this.model.alerts_allowed_tenant_ids || []).filter(id => allowedTenantIds.has(id));
   }
 
   onLicenseDropdownChange(nextLicenses: string[]): void {
