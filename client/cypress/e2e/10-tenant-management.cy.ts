@@ -214,6 +214,41 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.docsScreenshot('tenant-homepage');
   });
 
+  it('uploads IOC values from a CSV file', () => {
+    const suffix = Date.now();
+    const domainIoc = `tenant-upload-${suffix}.example.com`;
+    const emailIoc = `tenant-upload-${suffix}@mail.com`;
+    const urlIoc = `https://tenant-upload-${suffix}.example.com/login`;
+    const iocCsv = [
+      'key,value',
+      `m_domain,${domainIoc}`,
+      `m_email,${emailIoc}`,
+      `m_url,${urlIoc}`
+    ].join('\n');
+
+    loginTenant(tenant);
+    openManageIOCs();
+    cy.get('[data-testid="tenant-ioc-upload-csv-button"]').scrollIntoView().should('be.visible').and('not.be.disabled');
+
+    cy.intercept('POST', '**/api/update/tenants').as('uploadTenantIocCsv');
+    cy.get('input[type="file"][accept=".csv,text/csv"]')
+      .first()
+      .selectFile({
+        contents: Cypress.Buffer.from(iocCsv),
+        fileName: 'tenant-ioc-upload.csv',
+        mimeType: 'text/csv',
+      }, {force: true});
+
+    cy.get('[data-testid="message-notification-text"]').should('contain.text', '3 IOC values imported.');
+    cy.wait('@uploadTenantIocCsv', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
+    cy.contains(domainIoc).should('be.visible');
+    cy.contains(emailIoc).should('be.visible');
+    cy.contains(urlIoc).should('be.visible');
+    cy.logout();
+  });
+
   it('saves tenant network configuration after failed SMTP validation', () => {
     loginTenant(tenant);
     openTenantSettings();
