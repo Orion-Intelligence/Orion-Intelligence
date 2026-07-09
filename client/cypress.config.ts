@@ -160,6 +160,7 @@ export default defineConfig({
             });
             return config;
         },
+        baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1920,
         viewportHeight: 1440,
         defaultCommandTimeout: 60000,
