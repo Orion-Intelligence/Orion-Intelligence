@@ -42,19 +42,19 @@
       </button>
 
       <button type="button" (click)="toggleAiChatMenu(chat, $event)" class="absolute right-[8px] top-1/2 flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[6px] text-[#A0B8D1] opacity-0 transition hover:bg-white/10 hover:text-white group-hover:opacity-100 max-[900px]:opacity-100" [title]="'Options' | translate">
-        <i class="bi bi-three-dots text-[16px] leading-none"></i>
+        <i class="bi bi-three-dots-vertical"></i>
       </button>
 
       @if (openedAiChatMenuId === chat.id) {
       <div (click)="$event.stopPropagation()" class="absolute right-[8px] top-[42px] z-[999] w-[140px] overflow-hidden rounded-[8px] border border-white/10 bg-[#102236] shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
 
         <button type="button" (click)="renameAiChat(chat, $event)" class="flex w-full items-center gap-[8px] px-[12px] py-[9px] text-left text-[13px] text-[#A0B8D1] transition hover:bg-white/10 hover:text-white">
-          <i class="bi bi-pencil text-[12px]"></i>
+          <i class="bi bi-pencil-square"></i>
           <span>{{ 'Rename' | translate }}</span>
         </button>
 
         <button type="button" (click)="deleteAiChat(chat, $event)" class="flex w-full items-center gap-[8px] px-[12px] py-[9px] text-left text-[13px] text-red-300 transition hover:bg-red-500/10 hover:text-red-200">
-          <i class="bi bi-trash text-[12px]"></i>
+          <i class="bi bi-trash3"></i>
           <span>{{ 'Delete' | translate }}</span>
         </button>
       </div>
