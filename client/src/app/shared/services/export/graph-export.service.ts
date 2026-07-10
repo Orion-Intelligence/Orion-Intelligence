@@ -12,6 +12,9 @@ interface PlainTableThemeOptions {
   overflow?: 'linebreak';
   valign?: 'middle' | 'top';
   textColor?: [number, number, number];
+  rowFillColor?: [number, number, number];
+  alternateRowFillColor?: [number, number, number];
+  lineColor?: [number, number, number];
 }
 
 interface PlainTableThemeConfig {
@@ -45,10 +48,10 @@ export class GraphExportService {
   private loadedAutoTable: unknown = null;
 
   protected readonly SECTION_RADIUS = 4;
-  protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [51, 64, 84];
-  protected readonly TABLE_ROW_BG_RGB: [number, number, number] = [236, 242, 250];
-  protected readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [224, 233, 245];
-  protected readonly TABLE_BORDER_RGB: [number, number, number] = [194, 212, 238];
+  protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [127, 29, 29];
+  protected readonly TABLE_ROW_BG_RGB: [number, number, number] = [255, 251, 251];
+  protected readonly TABLE_ROW_ALT_BG_RGB: [number, number, number] = [254, 247, 247];
+  protected readonly TABLE_BORDER_RGB: [number, number, number] = [229, 199, 199];
   protected readonly TABLE_BORDER_WIDTH = 0.2;
 
   exportByType(payload: GraphReportPayload, type: GraphReportExportType): void {
@@ -188,9 +191,13 @@ export class GraphExportService {
           this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
         });
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
+        const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
         const reportSectionDidDrawPage = (data: any) => {
           this.makeSectionHeaderCallback(sectionsByPage, 'Report Sections', 'Metadata, screenshot, and related reports')(data);
-          this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info');
+          const pageNo = data?.pageNumber ?? (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? sectionStartPage;
+          if (pageNo !== sectionStartPage) {
+            this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info');
+          }
         };
         autoTable(doc, {
           startY: markerY + 12,
@@ -250,13 +257,15 @@ export class GraphExportService {
   private drawGraphCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta): void {
     this.drawReportBackgroundPattern(doc);
     const W = this.drawDarkTopBand(doc, 168, false);
+    doc.setFillColor(185, 28, 28);
+    doc.rect(0, 0, W, 5, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(26);
     doc.text(this.fitSingleLine(doc, payload.title || 'Graph Intelligence Report', W - 80), 40, 64);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
-    doc.setTextColor(219, 234, 254);
+    doc.setTextColor(254, 202, 202);
     doc.text(`${meta.kindLabel} • Graph-Centric Report`, 40, 92);
     this.drawSessionBlock(doc, payload.sessionName || '—', meta.generatedAt, 40, 116, W - 80, 14);
   }
@@ -277,7 +286,7 @@ export class GraphExportService {
     doc.text('Click any section to jump directly to that page.', 40, 230);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.setTextColor(37, 99, 235);
+    doc.setTextColor(185, 28, 28);
     const sectionItems: {
             label: string;
             page: number;
@@ -322,7 +331,7 @@ export class GraphExportService {
       doc.link(labelX, rowTop + 2, tocW - pageColW - 4, rowH - 4, { pageNumber: item.page });
 
       doc.setFont('helvetica', 'bold');
-      doc.setTextColor(37, 99, 235);
+      doc.setTextColor(185, 28, 28);
       const pageText = `Page ${String(item.page).padStart(2, '0')}`;
       doc.text(pageText, pageX, baselineY);
       doc.link(pageX, rowTop + 2, pageColW, rowH - 4, { pageNumber: item.page });
@@ -397,7 +406,7 @@ export class GraphExportService {
     doc.text('Graph Analysis', 56, 104);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(219, 234, 254);
+    doc.setTextColor(254, 202, 202);
     const compactSession = this.truncateWithEllipsis(this.compactSession(payload.sessionName || '-'), 15);
     const subtitle = this.fitSingleLineStrict(doc, `${meta.kindLabel} | Session: ${compactSession}`, 250, 48, 0.84);
     this.drawClippedText(doc, subtitle, W - 56, 104, 56, 84, W - 112, 30, 'right');
@@ -413,7 +422,7 @@ export class GraphExportService {
     doc.text(title, 56, 104);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    doc.setTextColor(219, 234, 254);
+    doc.setTextColor(254, 202, 202);
     this.drawClippedText(doc, this.fitSingleLineStrict(doc, subtitle, 260, 58, 0.86), W - 56, 104, 56, 84, W - 112, 30, 'right');
   }
 
@@ -431,7 +440,7 @@ export class GraphExportService {
       cellPadding: options.cellPadding,
       textColor: options.textColor ?? [30, 41, 59],
       lineWidth: this.TABLE_BORDER_WIDTH,
-      lineColor: this.TABLE_BORDER_RGB
+      lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.font) {
       styles.font = options.font;
@@ -444,9 +453,9 @@ export class GraphExportService {
     }
 
     const bodyStyles: PlainTableThemeConfig['bodyStyles'] = {
-      fillColor: this.TABLE_ROW_BG_RGB,
+      fillColor: options.rowFillColor ?? this.TABLE_ROW_BG_RGB,
       lineWidth: this.TABLE_BORDER_WIDTH,
-      lineColor: this.TABLE_BORDER_RGB
+      lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.textColor) {
       bodyStyles.textColor = options.textColor;
@@ -456,9 +465,9 @@ export class GraphExportService {
       styles,
       bodyStyles,
       alternateRowStyles: {
-        fillColor: this.TABLE_ROW_ALT_BG_RGB,
+        fillColor: options.alternateRowFillColor ?? this.TABLE_ROW_ALT_BG_RGB,
         lineWidth: this.TABLE_BORDER_WIDTH,
-        lineColor: this.TABLE_BORDER_RGB
+        lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
       },
       theme: 'plain'
     };
@@ -482,16 +491,16 @@ export class GraphExportService {
     };
   }
 
-  protected makeHeaderAndFirstColumnDidParse(): (data: any) => void {
+  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = [207, 220, 236], firstColumnFillColor: [number, number, number] = [214, 226, 240]): (data: any) => void {
     return (data: any) => {
       if (data.row.index === 0) {
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.fillColor = [207, 220, 236];
+        data.cell.styles.fillColor = headerFillColor;
         return;
       }
       if (data.column.index === 0) {
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.fillColor = [214, 226, 240];
+        data.cell.styles.fillColor = firstColumnFillColor;
       }
     };
   }
@@ -592,14 +601,15 @@ export class GraphExportService {
 
   protected makeMeta(payload: GraphReportPayload): GraphReportMeta {
     const generatedAt = new Date(payload.generatedAtIso).toLocaleString();
-    const isAlertReport = payload.nodes.length > 0 && payload.nodes.every(node => String(node.type || '').toLowerCase() === 'alert');
+    const title = String(payload.title || '').trim().toLowerCase();
+    const isAlertReport = title === 'brand alerts' || (payload.nodes.length > 0 && payload.nodes.every(node => String(node.type || '').toLowerCase() === 'alert'));
     const kindLabel = isAlertReport ? 'Brand Alerts' : (payload.graphKind === 'cti' ? 'CTI Network' : 'Social Network');
     return { generatedAt, kindLabel };
   }
 
   private drawDarkTopBand(doc: jsPDF, height: number, rounded: boolean = false): number {
     const W = this.getPageW(doc);
-    doc.setFillColor(15, 23, 42);
+    doc.setFillColor(24, 24, 27);
     if (rounded) {
       doc.roundedRect(40, 84, W - 80, height, this.SECTION_RADIUS, this.SECTION_RADIUS, 'F');
     }
@@ -633,11 +643,11 @@ export class GraphExportService {
     return { x, y, w: maxW, h: maxH };
   }
 
-  protected drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number): void {
+  protected drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number, accentRgb: [number, number, number] = [185, 28, 28]): void {
     const W = this.getPageW(doc);
     doc.setFillColor(248, 250, 252);
     doc.rect(0, 0, W, barBottom, 'F');
-    doc.setFillColor(59, 130, 246);
+    doc.setFillColor(...accentRgb);
     doc.rect(0, 0, W, 5, 'F');
     doc.setDrawColor(226, 232, 240);
     doc.line(40, barBottom, W - 40, barBottom);
@@ -700,7 +710,7 @@ export class GraphExportService {
     void endY;
   }
 
-  protected drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string): void {
+  protected drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string, fillRgb: [number, number, number] = this.INTERNAL_HEADER_RGB): void {
     const x = 40;
     const normalizedLabel = String(label || '').trim();
     const text = this.fitSingleLine(doc, normalizedLabel || 'Info', Math.max(110, width - 24));
@@ -708,9 +718,9 @@ export class GraphExportService {
     const badgeX = x;
     // Keep the section badge close to table content with no separator rule below.
     const badgeTopY = y - 4;
-    doc.setFillColor(...this.INTERNAL_HEADER_RGB);
+    doc.setFillColor(...fillRgb);
     doc.roundedRect(badgeX, badgeTopY, badgeWidth, 16, 4, 4, 'F');
-    doc.setFillColor(...this.INTERNAL_HEADER_RGB);
+    doc.setFillColor(...fillRgb);
     doc.rect(badgeX, badgeTopY + 8, badgeWidth, 8, 'F');
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(8);
@@ -778,6 +788,22 @@ export class GraphExportService {
       return String(input ?? '');
     }
     const normalizedKey = key.toLowerCase();
+    if (raw.includes('\n')) {
+      return raw
+        .split('\n')
+        .map(line => {
+          const trimmed = line.trim().replace(/\s+/g, ' ');
+          const numberedUrl = trimmed.match(/^(\d+\.\s*)(https?:\/\/.*)$/i);
+          if (numberedUrl) {
+            return `${numberedUrl[1]}${numberedUrl[2].replace(/\s+/g, '')}`;
+          }
+          return /^https?:\/\//i.test(trimmed)
+            ? trimmed.replace(/\s+/g, '')
+            : trimmed;
+        })
+        .filter(Boolean)
+        .join('\n');
+    }
     if (normalizedKey.includes('date')) {
       const asDate = new Date(raw);
       if (!Number.isNaN(asDate.getTime())) {

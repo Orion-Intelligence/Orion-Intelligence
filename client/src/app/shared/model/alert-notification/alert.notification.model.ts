@@ -53,6 +53,8 @@ export interface CategoryAlerts {
     entity: string;
     allIOC: AlertAllIoc[];
     detectedOn: Date;
+    resultDate?: Date | null;
+    password?: string;
 }
 
 export function createAlertCategorySummary(categoryName: string, iocCount: number, getRiskLevel: (categoryName: string) => string): AlertCategorySummary {
