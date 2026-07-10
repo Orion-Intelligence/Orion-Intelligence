@@ -19,8 +19,22 @@ def make_alert_job(alert_manager, tenants):
     job = object.__new__(alert_job)
     job._tenant_manager = SimpleNamespace(get_all_tenant=get_all_tenant)
     job._alert_manager = alert_manager
+    job._alert_buffer = _FakeAlertBuffer()
     job._cancellation_service = SimpleNamespace(clear=lambda tenant_id: None, ensure_tenant=lambda tenant_id: str(tenant_id),is_cancelled=lambda tenant_id: False)
     return job
+
+
+class _FakeAlertBuffer:
+    def __init__(self):
+        self.clear_calls = []
+        self.flush_calls = []
+
+    def clear(self, tenant_id):
+        self.clear_calls.append(tenant_id)
+
+    async def flush(self, tenant_id):
+        self.flush_calls.append(tenant_id)
+        return {"total": 0}
 
 
 class _FakeAlertManager:
