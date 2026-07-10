@@ -33,4 +33,4 @@ def token_from_request(request: Request) -> str | None:
             cookie_token = COOKIE_CIPHER.decrypt(cookie_token.encode()).decode()
         except InvalidToken:
             pass
-    return cookie_token or bearer
+    return bearer or cookie_token

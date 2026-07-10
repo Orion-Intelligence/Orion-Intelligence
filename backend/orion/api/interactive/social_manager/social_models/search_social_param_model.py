@@ -46,14 +46,23 @@ class SocialProfileRequest(PlatformUsernameRequest):
     platform: str = Field(..., min_length=1, examples=["tiktok"])
     username: str = Field(..., min_length=1, examples=["@msmannan00"])
     social_data_type: Optional[str] = None
+    use_extension: bool = False
+    max_posts: int = Field(default=10, ge=1, le=100)
+    max_comments: int = Field(default=25, ge=1, le=100)
+    max_followers: int = Field(default=1000, ge=1, le=5000)
+    max_following: int = Field(default=1000, ge=1, le=5000)
 
 
 class SocialPostsRequest(PlatformUsernameRequest):
     max_posts: int = Field(default=5, ge=1, le=100)
     max_comments: int = Field(default=10, ge=1, le=100)
+    post_offset: int = Field(default=0, ge=0, le=1000)
+    existing_posts_count: int = Field(default=0, ge=0, le=1000)
+    existing_post_urls: List[str] = Field(default_factory=list)
     comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
+    use_extension: bool = False
 
 
 class SocialVideosRequest(PlatformUsernameRequest):
@@ -62,6 +71,7 @@ class SocialVideosRequest(PlatformUsernameRequest):
     comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
+    use_extension: bool = False
 
 
 class SocialShortsRequest(PlatformUsernameRequest):
@@ -70,6 +80,7 @@ class SocialShortsRequest(PlatformUsernameRequest):
     comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
+    use_extension: bool = False
 
 
 class SocialFollowersRequest(PlatformUsernameRequest):
@@ -79,6 +90,7 @@ class SocialFollowersRequest(PlatformUsernameRequest):
 class SocialOnlineImages(PlatformUsernameRequest):
     max_images: int = Field(default=10, ge=1, le=100)
     max_followers: int = Field(default=50, ge=1, le=5000)
+    use_extension: bool = False
 
 
 class SocialFollowingRequest(PlatformUsernameRequest):

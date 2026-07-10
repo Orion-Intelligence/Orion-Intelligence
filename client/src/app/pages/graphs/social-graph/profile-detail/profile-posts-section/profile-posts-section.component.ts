@@ -13,6 +13,10 @@ import { SocialProfilePostContentSectionComponent } from '../profile-post-conten
 export class SocialProfilePostsSectionComponent {
   platformData = input.required<PlatformResult>();
   isLoading = input(false);
+  showFetchLatest = input(true);
+  showLoadMoreWhenDone = input(false);
+  displayLimit = input<number | null>(null);
+  allowCommentFetch = input(true);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
 }

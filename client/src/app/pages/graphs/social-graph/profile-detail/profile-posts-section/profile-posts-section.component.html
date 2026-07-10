@@ -2,6 +2,10 @@
   [platformData]="platformData()"
   contentType="posts"
   [isLoading]="isLoading()"
+  [showFetchLatest]="showFetchLatest()"
+  [showLoadMoreWhenDone]="showLoadMoreWhenDone()"
+  [displayLimit]="displayLimit()"
+  [allowCommentFetch]="allowCommentFetch()"
   (refetch)="refetch.emit($event)"
   (cursorFetch)="cursorFetch.emit($event)">
 </app-social-profile-post-content-section>

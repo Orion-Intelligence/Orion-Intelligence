@@ -3,14 +3,18 @@
     <div [attr.data-testid]="'social-tab-panel-' + contentType" class="px-[13px] pt-[11px] pb-[13px]">
       <div class="mb-3 flex items-center justify-between gap-3">
         <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ getPostContentTabLabel(contentType) }}</p>
-        @if (canFetchRemote(platformData)) {
+        @if (canFetchRemote(platformData) && (showFetchLatest() || shouldShowLoadMorePosts(platformData, contentType))) {
           <div class="inline-flex flex-shrink-0 items-center overflow-hidden rounded-[6px] border border-[#e2e8f0] bg-[#f1f5f9] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc]">
-            <button type="button" (click)="fetchNew(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center border-0 bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
-              Fetch Latest
-            </button>
-            <button type="button" (click)="loadMore(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center border-0 border-l border-[#d6dee8] bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
-              Load More
-            </button>
+            @if (showFetchLatest()) {
+              <button type="button" (click)="fetchNew(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center border-0 bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                Fetch Latest
+              </button>
+            }
+            @if (shouldShowLoadMorePosts(platformData, contentType)) {
+              <button type="button" (click)="loadMore(platformData, contentType)" [disabled]="isLoading() || !canLoadMorePosts(platformData, contentType)" [class.border-l]="showFetchLatest()" class="inline-flex h-8 items-center border-0 border-[#d6dee8] bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                Load More
+              </button>
+            }
           </div>
         }
       </div>
@@ -46,7 +50,7 @@
         </div>
       } @else {
         <div class="flex flex-col gap-2.5">
-          @for (post of getUniquePosts(platformData, contentType); track post.post_url || $index) {
+          @for (post of getVisiblePosts(platformData, contentType); track post.post_url || $index) {
             <div data-testid="social-post-row" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
@@ -96,13 +100,13 @@
                 @if (areCommentsAllowed(platformData)) {
                   <span class="tabular-nums">{{ formatPostMetric(post.comments) }} comments</span>
                 }
-                @if (areCommentsAllowed(platformData) && canLoadComments(post)) {
-                  <button type="button" (click)="loadComments(platformData, contentType, post)" [disabled]="isLoading()" class="inline-flex h-6 items-center rounded-[6px] border border-[rgba(125,211,252,0.20)] bg-[rgba(125,211,252,0.07)] px-2 text-[10px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-[rgba(125,211,252,0.12)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#eef5fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#e5eff8]">{{ getCommentFetchLabel(post) }}</button>
+                @if (shouldShowCommentAction(platformData, post)) {
+                  <button type="button" (click)="handleCommentAction(platformData, contentType, post)" [disabled]="isLoading()" class="inline-flex h-6 items-center rounded-[6px] border border-[rgba(125,211,252,0.20)] bg-[rgba(125,211,252,0.07)] px-2 text-[10px] font-semibold text-[var(--color-text2)] transition-colors hover:bg-[rgba(125,211,252,0.12)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#eef5fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#e5eff8]">{{ getCommentFetchLabel(post) }}</button>
                 }
                 <span class="tabular-nums">{{ formatPostMetric(post.shares) }} shares</span>
                 <span class="tabular-nums">{{ formatPostMetric(post.views) }} views</span>
               </div>
-              @if (areCommentsAllowed(platformData) && getPostComments(post).length > 0) {
+              @if (areCommentsAllowed(platformData) && arePostCommentsVisible(post) && getPostComments(post).length > 0) {
                 <div data-testid="social-post-comments" class="mt-3 border-l border-[rgba(125,211,252,0.20)] pl-3">
                   <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Comments</p>
                   <div class="flex flex-col gap-2">

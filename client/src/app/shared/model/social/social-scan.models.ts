@@ -60,6 +60,12 @@ export interface SocialOnlinePresenceResult {
 export interface SocialStealerLogRecord {
     [key: string]: any;
 }
+export interface SocialExtensionFetchError {
+    error_code?: string | null;
+    message?: string | null;
+    login_url?: string | null;
+    platform?: string | null;
+}
 export interface SocialStoredProfile {
     user_id?: string;
     profile_username: string;
@@ -85,6 +91,14 @@ export interface PlatformResult {
     posts?: SocialPost[] | null;
     videos?: SocialPost[] | null;
     shorts?: SocialPost[] | null;
+    extensionProfileDetails?: ProfileDetails | null;
+    extensionPosts?: SocialPost[] | null;
+    extensionVideos?: SocialPost[] | null;
+    extensionShorts?: SocialPost[] | null;
+    extensionImages?: SocialImage[] | null;
+    extensionFollowers?: string[] | null;
+    extensionFollowing?: string[] | null;
+    extensionError?: SocialExtensionFetchError | null;
     post_connections?: string[] | null;
     images?: SocialImage[] | null;
     followers_list?: string[] | null;

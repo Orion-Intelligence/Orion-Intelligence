@@ -51,6 +51,8 @@ export class SocialMapperComponent implements OnDestroy {
   private cancelVideoFetchSubjects = new Map<string, Subject<void>>();
   private cancelShortFetchSubjects = new Map<string, Subject<void>>();
   private cancelPlatformImageFetchSubjects = new Map<string, Subject<void>>();
+  private cancelExtensionProfileFetchSubjects = new Map<string, Subject<void>>();
+  private cancelExtensionPostFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowersFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
   private cancelOnlinePresenceFetchSubjects = new Map<string, Subject<void>>();
@@ -329,6 +331,21 @@ export class SocialMapperComponent implements OnDestroy {
     this.fetchData(p, 'platformImages', this.state.fetchPlatformImages(p.platform, p.username), this.cancelPlatformImageFetchSubjects);
   }
 
+  handleFetchExtensionDetails(p: PlatformResult): void {
+    this.cancelAllFetchesForUser(p.keyUsername);
+    this.fetchData(p, 'extensionProfile', this.state.fetchExtensionBundle(p.platform, p.username), this.cancelExtensionProfileFetchSubjects);
+  }
+
+  handleFetchExtensionPostCursor(request: PostCursorFetchRequest): void {
+    const p = request.platformData;
+    const existingPosts = p.extensionPosts || p.posts || [];
+    const postOffset = existingPosts.length;
+    const postLimit = request.limit || (postOffset > 0 ? 5 : 20);
+    const mergeMode = postOffset > 0 ? 'append' : undefined;
+    const existingPostUrls = existingPosts.map(post => post.post_url || (post as any).url || '').filter(Boolean);
+    this.fetchData(p, 'extensionPosts', this.state.fetchExtensionSocialPosts(p.platform, p.username, undefined, postLimit, postOffset, existingPostUrls, postOffset), this.cancelExtensionPostFetchSubjects, mergeMode);
+  }
+
   handleFetchImageCursor(request: ImageCursorFetchRequest): void {
     if (request.mergeMode === 'prepend') {
       this.openLatestFetchConfirmation(request);
@@ -490,6 +507,10 @@ export class SocialMapperComponent implements OnDestroy {
       following: (p: PlatformResult) => this.handleCancelFetchFollowing(p),
       onlinePresence: (p: PlatformResult) => this.handleCancelFetchOnlinePresence(p),
       stealerLogs: (p: PlatformResult) => this.handleCancelFetchStealerLogs(p)
+    });
+    this.scanResults().get(username)?.forEach((p: PlatformResult) => {
+      this.cancelFetch(p, 'extensionProfile', this.cancelExtensionProfileFetchSubjects);
+      this.cancelFetch(p, 'extensionPosts', this.cancelExtensionPostFetchSubjects);
     });
   }
 

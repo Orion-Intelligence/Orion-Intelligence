@@ -16,12 +16,17 @@ export class SocialProfilePostContentSectionComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
   private postMediaLoading = signal<Record<string, boolean>>({});
+  private postCommentsVisible = signal<Record<string, boolean>>({});
   private pendingScrollToBottom = false;
   private sawLoadingForScroll = false;
 
   platformData = input.required<PlatformResult>();
   contentType = input.required<PostContentTabKey>();
   isLoading = input(false);
+  showFetchLatest = input(true);
+  showLoadMoreWhenDone = input(false);
+  displayLimit = input<number | null>(null);
+  allowCommentFetch = input(true);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
 
@@ -65,7 +70,8 @@ export class SocialProfilePostContentSectionComponent {
   }
 
   getPostMediaUrl(post: SocialPost | null | undefined): string {
-    return normalizeRedditClearnetUrl(post?.media_url || '');
+    const url = normalizeRedditClearnetUrl(post?.media_url || '');
+    return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
   }
 
   getPostMediaTypeLabel(post: SocialPost | null | undefined): string {
@@ -112,14 +118,48 @@ export class SocialProfilePostContentSectionComponent {
     });
   }
 
+  getVisiblePosts(platformData: PlatformResult, tabKey: PostContentTabKey): SocialPost[] {
+    const posts = this.getUniquePosts(platformData, tabKey);
+    const limit = this.displayLimit();
+    return limit === null ? posts : posts.slice(0, Math.max(0, limit));
+  }
+
+  canLoadMorePosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
+    return this.canRevealCachedPosts(platformData, tabKey) || this.canRequestRemoteMorePosts(platformData, tabKey);
+  }
+
+  canRevealCachedPosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
+    const limit = this.displayLimit();
+    if (limit === null) {
+      return true;
+    }
+    return this.getUniquePosts(platformData, tabKey).length > limit;
+  }
+
+  canRequestRemoteMorePosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
+    return this.showLoadMoreWhenDone() && this.getUniquePosts(platformData, tabKey).length > 0 && !this.canRevealCachedPosts(platformData, tabKey);
+  }
+
+  shouldShowLoadMorePosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
+    return this.canLoadMorePosts(platformData, tabKey);
+  }
+
   fetchNew(platformData: PlatformResult, tabKey: PostContentTabKey): void {
     this.cursorFetch.emit({ platformData, tabKey, mergeMode: 'prepend' });
   }
 
   loadMore(platformData: PlatformResult, tabKey: PostContentTabKey): void {
+    if (!this.canLoadMorePosts(platformData, tabKey)) {
+      return;
+    }
     const posts = this.getUniquePosts(platformData, tabKey);
     this.prepareScrollAfterFetch();
-    this.cursorFetch.emit({ platformData, tabKey, limit: Math.min(posts.length + 5, 100), mergeMode: 'append' });
+    const visibleCount = this.displayLimit() ?? posts.length;
+    if (this.canRevealCachedPosts(platformData, tabKey)) {
+      this.cursorFetch.emit({ platformData, tabKey, limit: Math.min(visibleCount + 5, 100), mergeMode: 'append' });
+      return;
+    }
+    this.cursorFetch.emit({ platformData, tabKey, limit: 5, mergeMode: 'append', remoteFetch: true });
   }
 
   formatPostMetric(value: string | number | null | undefined): string {
@@ -146,14 +186,41 @@ export class SocialProfilePostContentSectionComponent {
   }
 
   canLoadComments(post: SocialPost | null | undefined): boolean {
-    return this.platformData().resultSource !== 'darkweb' && !!this.getPostCursorId(post);
+    return this.allowCommentFetch() && this.platformData().resultSource !== 'darkweb' && !!this.getPostCursorId(post);
+  }
+
+  shouldShowCommentAction(platformData: PlatformResult, post: SocialPost | null | undefined): boolean {
+    return this.areCommentsAllowed(platformData) && (this.canLoadComments(post) || this.getPostComments(post).length > 0);
+  }
+
+  arePostCommentsVisible(post: SocialPost | null | undefined): boolean {
+    const key = this.getPostCommentStateKey(post);
+    return !!key && !!this.postCommentsVisible()[key];
   }
 
   getCommentFetchLabel(post: SocialPost | null | undefined): string {
-    return this.getPostComments(post).length > 0 ? 'Load more comments' : 'Load comments';
+    if (!this.arePostCommentsVisible(post)) {
+      return this.getPostComments(post).length > 0 ? 'Show comments' : 'Load comments';
+    }
+    return this.canLoadComments(post) ? 'Load more comments' : 'Hide comments';
   }
 
-  loadComments(platformData: PlatformResult, tabKey: PostContentTabKey, post: SocialPost): void {
+  handleCommentAction(platformData: PlatformResult, tabKey: PostContentTabKey, post: SocialPost): void {
+    if (!this.arePostCommentsVisible(post)) {
+      this.setPostCommentsVisible(post, true);
+      if (this.getPostComments(post).length === 0 && this.canLoadComments(post)) {
+        this.loadComments(platformData, tabKey, post);
+      }
+      return;
+    }
+    if (this.canLoadComments(post)) {
+      this.loadComments(platformData, tabKey, post);
+      return;
+    }
+    this.setPostCommentsVisible(post, false);
+  }
+
+  private loadComments(platformData: PlatformResult, tabKey: PostContentTabKey, post: SocialPost): void {
     const cursorId = this.getPostCursorId(post);
     if (!cursorId) {
       return;
@@ -180,6 +247,18 @@ export class SocialProfilePostContentSectionComponent {
     return mediaUrl ? `${this.getPostUrl(post)}|${mediaUrl}` : '';
   }
 
+  private setPostCommentsVisible(post: SocialPost | null | undefined, visible: boolean): void {
+    const key = this.getPostCommentStateKey(post);
+    if (!key) {
+      return;
+    }
+    this.postCommentsVisible.update(current => ({ ...current, [key]: visible }));
+  }
+
+  private getPostCommentStateKey(post: SocialPost | null | undefined): string {
+    return this.getPostCursorId(post) || this.getPostUrl(post) || this.getPostMediaUrl(post) || this.getPostCaption(post);
+  }
+
   private getPostCursorId(post: SocialPost | null | undefined): string | undefined {
     const cursorId = post?.hash_id || post?.post_url;
     return cursorId ? String(cursorId) : undefined;
@@ -187,6 +266,12 @@ export class SocialProfilePostContentSectionComponent {
 
   private getPostItemKey(post: SocialPost): string {
     return SocialNormalizationUtil.getPostItemKey(post);
+  }
+
+  private isBlockedInstagramProfileImageUrl(url: string): boolean {
+    return /\/t51\.[^/]+-19\//i.test(url)
+      || /[?&]efg=[^&]*profile/i.test(url)
+      || /profile_pic/i.test(url);
   }
 
   private prepareScrollAfterFetch(): void {

@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output, signal } from '@angular/core';
-import { PlatformResult, SocialOnlinePresenceResult, SocialStealerLogRecord } from '../../../../../shared/model/social/social-scan.models';
+import { PlatformResult, SocialExtensionFetchError, SocialOnlinePresenceResult, SocialStealerLogRecord } from '../../../../../shared/model/social/social-scan.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../../shared/utils/formatters';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
-import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, PostCursorFetchRequest } from '../../models/social-graph.models';
+import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, PostCursorFetchRequest, SocialExtensionStatus } from '../../models/social-graph.models';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
 import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
+import { SocialService } from '../../services/social.service';
 import { SocialProfilePostsSectionComponent } from '../profile-posts-section/profile-posts-section.component';
 import { SocialProfileVideosSectionComponent } from '../profile-videos-section/profile-videos-section.component';
 import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/profile-shorts-section.component';
@@ -20,11 +21,19 @@ import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/p
 })
 export class SocialProfileTabsSectionComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
+  private readonly socialService = inject(SocialService);
   private readonly stealerLogExportColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private pendingImageScrollToBottom = false;
   private sawImageLoadingForScroll = false;
+  private loadedExtensionStatus = false;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
+  private extensionPostDisplayLimits = signal<Record<string, number>>({});
+  private readonly extensionInitialPostLimit = 10;
+  private readonly extensionPostPageSize = 5;
 
+  extensionStatus = signal<SocialExtensionStatus | null>(null);
+  extensionStatusLoading = signal(false);
+  extensionStatusError = signal('');
   user = input.required<FeedUser>();
   platformData = input.required<PlatformResult>();
   fetchTabs = input.required<FetchTab[]>();
@@ -34,6 +43,7 @@ export class SocialProfileTabsSectionComponent {
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
   postCursorFetch = output<PostCursorFetchRequest>();
+  extensionPostCursorFetch = output<PostCursorFetchRequest>();
   imageCursorFetch = output<ImageCursorFetchRequest>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
@@ -59,6 +69,12 @@ export class SocialProfileTabsSectionComponent {
       this.sawImageLoadingForScroll = false;
       setTimeout(() => this.scrollToImageBottom(), 0);
     });
+    effect(() => {
+      if (!this.activeTab().startsWith('extension') || this.loadedExtensionStatus) {
+        return;
+      }
+      queueMicrotask(() => this.refreshExtensionStatus());
+    });
   }
 
   getTabIcon(tab: FetchTab): string {
@@ -68,11 +84,117 @@ export class SocialProfileTabsSectionComponent {
     if (tab.key === 'shorts') {
       return 'bi bi-phone';
     }
+    if (tab.key.startsWith('extension')) {
+      return 'bi bi-plugin';
+    }
     return tab.icon;
   }
 
   isTabLoading(tabKey: FetchTabKey): boolean {
     return !!this.loadingStates()[tabKey];
+  }
+
+  isAnyExtensionLoading(): boolean {
+    return !!(this.loadingStates().extensionDetails
+      || this.loadingStates().extensionPosts);
+  }
+
+  refreshExtensionStatus(): void {
+    this.loadedExtensionStatus = true;
+    this.extensionStatusLoading.set(true);
+    this.extensionStatusError.set('');
+    this.socialService.fetchExtensionStatus().subscribe({
+      next: status => {
+        this.extensionStatus.set(status);
+        this.extensionStatusError.set(this.formatExtensionStatusError(status));
+        this.extensionStatusLoading.set(false);
+      },
+      error: () => {
+        this.extensionStatus.set({ online: 0, extensions: [] });
+        this.extensionStatusError.set('Unable to reach the extension manager.');
+        this.extensionStatusLoading.set(false);
+      }
+    });
+  }
+
+  getExtensionPlatformStatus(platformData: PlatformResult): 'ready' | 'offline' | 'unsupported' {
+    const status = this.extensionStatus();
+    const platform = this.normalizeExtensionPlatform(platformData.platform);
+    const extensions = status?.extensions || [];
+    if (!extensions.some(extension => (extension.platforms || []).includes(platform))) {
+      return this.isKnownExtensionPlatform(platform) ? 'offline' : 'unsupported';
+    }
+    return 'ready';
+  }
+
+  getExtensionStatusLabel(platformData: PlatformResult): string {
+    const state = this.getExtensionPlatformStatus(platformData);
+    if (state === 'ready') {
+      return 'Extension ready';
+    }
+    if (state === 'offline') {
+      return 'Extension offline';
+    }
+    return 'Legacy executor';
+  }
+
+  getExtensionStatusDescription(platformData: PlatformResult): string {
+    const state = this.getExtensionPlatformStatus(platformData);
+    if (state === 'ready') {
+      return 'Supported jobs for this profile can run through the connected browser extension.';
+    }
+    if (state === 'offline') {
+      return 'This platform is extension-capable, but no matching extension is online. Orion will use legacy fallback when enabled.';
+    }
+    return 'This platform is not configured for extension execution yet. Orion will use the existing backend executor.';
+  }
+
+  getExtensionIds(status: SocialExtensionStatus | null): string {
+    const ids = (status?.extensions || []).map(extension => extension.extension_id).filter(Boolean);
+    return ids.length ? ids.join(', ') : 'none';
+  }
+
+  getExtensionPlatformList(status: SocialExtensionStatus | null): string {
+    const platforms = new Set<string>();
+    for (const extension of status?.extensions || []) {
+      for (const platform of extension.platforms || []) {
+        platforms.add(platform);
+      }
+    }
+    return platforms.size ? Array.from(platforms).sort().join(', ') : 'none';
+  }
+
+  getActiveExtensionJob(status: SocialExtensionStatus | null): string {
+    const job = (status?.extensions || []).map(extension => extension.active_job_id).find(Boolean);
+    return job || 'none';
+  }
+
+  getExtensionBackendUrl(status: SocialExtensionStatus | null): string {
+    return status?.backend_url || 'not reached';
+  }
+
+  private formatExtensionStatusError(status: SocialExtensionStatus | null): string {
+    const detail = status?.detail;
+    const error = status?.error;
+    if (typeof detail === 'string' && detail.trim()) {
+      return detail;
+    }
+    if (detail && typeof detail === 'object') {
+      return JSON.stringify(detail);
+    }
+    if (typeof error === 'string' && error.trim()) {
+      return error;
+    }
+    return '';
+  }
+
+  private normalizeExtensionPlatform(platform: string): string {
+    const value = (platform || '').toLowerCase();
+    return value === 'twitter' ? 'x' : value;
+  }
+
+  private isKnownExtensionPlatform(platform: string): boolean {
+    return ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook'].includes(platform);
   }
 
   onOnlinePresenceInput(event: Event): void {
@@ -108,16 +230,130 @@ export class SocialProfileTabsSectionComponent {
     return normalizeRedditClearnetUrl(this.formatMetadataValue(value));
   }
 
+  getDisplayImageUrl(value: any): string {
+    const url = this.getDisplayUrl(value);
+    return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
+  }
+
   getSocialImageHref(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
     return normalizeRedditClearnetUrl(image?.image_url || image?.thumbnail || '');
   }
 
   getSocialImageSrc(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
-    return normalizeRedditClearnetUrl(image?.thumbnail || image?.image_url || '');
+    const url = normalizeRedditClearnetUrl(image?.thumbnail || image?.image_url || '');
+    return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
+  }
+
+  getDisplayableSocialImages<T extends { image_url?: string; thumbnail?: string }>(images: T[] | null | undefined): T[] {
+    return (images || []).filter(image => !!this.getSocialImageSrc(image));
+  }
+
+  private isBlockedInstagramProfileImageUrl(url: string): boolean {
+    return /\/t51\.[^/]+-19\//i.test(url)
+      || /[?&]efg=[^&]*profile/i.test(url)
+      || /profile_pic/i.test(url);
   }
 
   getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
     return getProfileDetailEntries(platformData);
+  }
+
+  getExtensionPlatformData(platformData: PlatformResult): PlatformResult {
+    return {
+      ...platformData,
+      profileDetails: platformData.extensionProfileDetails ?? null,
+      posts: platformData.extensionPosts ?? null,
+      videos: platformData.extensionVideos ?? null,
+      shorts: platformData.extensionShorts ?? null,
+      images: platformData.extensionImages ?? null,
+      followers_list: platformData.extensionFollowers ?? null,
+      following_list: platformData.extensionFollowing ?? null,
+    };
+  }
+
+  getExtensionPostDisplayLimit(platformData: PlatformResult): number {
+    return this.extensionPostDisplayLimits()[this.getExtensionPostDisplayKey(platformData)] ?? this.extensionInitialPostLimit;
+  }
+
+  handleExtensionPostCursorFetch(request: PostCursorFetchRequest): void {
+    if (request.commentsOnly) {
+      this.extensionPostCursorFetch.emit(request);
+      return;
+    }
+    const platformData = this.platformData();
+    const key = this.getExtensionPostDisplayKey(platformData);
+    const totalPosts = platformData.extensionPosts?.length || 0;
+    const currentLimit = this.getExtensionPostDisplayLimit(platformData);
+    if (request.remoteFetch) {
+      const nextLimit = Math.min(100, Math.max(currentLimit, totalPosts) + this.extensionPostPageSize);
+      this.extensionPostDisplayLimits.update(current => ({ ...current, [key]: nextLimit }));
+      this.extensionPostCursorFetch.emit({
+        ...request,
+        platformData,
+        limit: this.extensionPostPageSize,
+        mergeMode: 'append',
+      });
+      return;
+    }
+    const nextLimit = Math.min(totalPosts, Math.max(currentLimit + this.extensionPostPageSize, request.limit || 0));
+    this.extensionPostDisplayLimits.update(current => ({ ...current, [key]: nextLimit }));
+  }
+
+  private getExtensionPostDisplayKey(platformData: PlatformResult): string {
+    return [
+      platformData.keyUsername,
+      platformData.platform,
+      platformData.username,
+    ].join('|').toLowerCase();
+  }
+
+  getExtensionError(platformData: PlatformResult): SocialExtensionFetchError | null {
+    return platformData.extensionError ?? null;
+  }
+
+  getExtensionErrorTitle(platformData: PlatformResult): string {
+    const error = this.getExtensionError(platformData);
+    if (error?.error_code === 'AUTH_EXPIRED') {
+      return 'Extension session expired';
+    }
+    return error?.error_code === 'AUTH_REQUIRED' ? 'Browser login required' : 'Extension job failed';
+  }
+
+  getExtensionErrorMessage(platformData: PlatformResult): string {
+    const error = this.getExtensionError(platformData);
+    if (!error) {
+      return '';
+    }
+    if (error.error_code === 'AUTH_EXPIRED') {
+      return error.message || 'The browser extension session expired while scraping. Log in to the extension again and retry.';
+    }
+    return error.message || 'The browser extension could not complete this request.';
+  }
+
+  getExtensionLoginUrl(platformData: PlatformResult): string {
+    const error = this.getExtensionError(platformData);
+    const url = error?.login_url || '';
+    return isUrl(url) && this.isPlatformLoginUrl(url, error?.platform || platformData.platform) ? url : '';
+  }
+
+  private isPlatformLoginUrl(url: string, platform: string | null | undefined): boolean {
+    try {
+      const hostname = new URL(url).hostname.toLowerCase();
+      const allowedHosts: Record<string, string[]> = {
+        instagram: ['instagram.com'],
+        facebook: ['facebook.com'],
+        x: ['x.com', 'twitter.com'],
+        twitter: ['x.com', 'twitter.com'],
+        linkedin: ['linkedin.com'],
+        reddit: ['reddit.com'],
+        github: ['github.com'],
+      };
+      const hosts = allowedHosts[this.normalizeExtensionPlatform(platform || '')] || [];
+      return hosts.length > 0 && hosts.some(host => hostname === host || hostname.endsWith(`.${host}`));
+    }
+    catch {
+      return false;
+    }
   }
 
   formatMetadataValue(value: any): string {

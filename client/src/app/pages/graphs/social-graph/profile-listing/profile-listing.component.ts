@@ -24,7 +24,8 @@ import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tab
 })
 export class SocialProfileListingComponent {
   private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
-  private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
+  private readonly EXTENSION_PLATFORMS = ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook'];
+  private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'extension', label: 'Extension Details', icon: 'bi bi-plugin' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
   private readonly mappedFetchTabs: Partial<Record<FetchTabKey, FetchTab>> = { videos: { key: 'videos', label: 'Videos', icon: 'bi bi-play-btn' }, shorts: { key: 'shorts', label: 'Shorts', icon: 'bi bi-play-circle' } };
   private readonly followerFetchTabs: FetchTab[] = [ { key: 'followers', label: 'Followers', icon: 'bi bi-people' }, { key: 'following', label: 'Following', icon: 'bi bi-person-plus' } ];
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
@@ -42,6 +43,8 @@ export class SocialProfileListingComponent {
   fetchShortsInline = output<PlatformResult>();
   fetchPostCursorInline = output<PostCursorFetchRequest>();
   fetchImagesInline = output<PlatformResult>();
+  fetchExtensionDetailsInline = output<PlatformResult>();
+  fetchExtensionPostCursorInline = output<PostCursorFetchRequest>();
   fetchImageCursorInline = output<ImageCursorFetchRequest>();
   fetchFollowersInline = output<PlatformResult>();
   fetchFollowingInline = output<PlatformResult>();
@@ -94,7 +97,7 @@ export class SocialProfileListingComponent {
 
   setActiveTab(platformId: string, tabKey: FetchTabKey, platformData?: PlatformResult): void {
     this.activeTabs.update(current => ({ ...current, [platformId]: tabKey }));
-    if (platformData) {
+    if (platformData && this.shouldAutoFetchTab(tabKey)) {
       this.fetchTabData(platformData, tabKey);
     }
   }
@@ -128,16 +131,17 @@ export class SocialProfileListingComponent {
   }
 
   getFetchTabs(platformData: PlatformResult): FetchTab[] {
+    const baseTabs = this.getBaseFetchTabs(platformData);
     if (this.getResultSource(platformData) === 'darkweb') {
       return [
-        ...this.baseFetchTabs.filter(tab => tab.key === 'details' || tab.key === 'posts' || tab.key === 'images'),
+        ...baseTabs.filter(tab => tab.key === 'details' || tab.key === 'posts' || tab.key === 'extension' || tab.key === 'images'),
         this.onlinePresenceTab,
         this.stealerLogsTab
       ];
     }
-    const sharedTabs = [...this.baseFetchTabs, this.onlinePresenceTab, this.stealerLogsTab];
+    const sharedTabs = [...baseTabs, this.onlinePresenceTab, this.stealerLogsTab];
     const tabs = this.isPriorityPlatform(platformData.platform)
-      ? [...this.baseFetchTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
+      ? [...baseTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
       : sharedTabs;
     const globalCapability = this.platformCapabilities['__all__'];
     const capability = this.platformCapabilities[platformData.platform.toLowerCase()];
@@ -149,6 +153,18 @@ export class SocialProfileListingComponent {
     }
     const disabledTabs = new Set([...(globalCapability?.disallow ?? []), ...(capability?.disallow ?? [])]);
     return tabs.filter(tab => !disabledTabs.has(tab.key));
+  }
+
+  private getBaseFetchTabs(platformData: PlatformResult): FetchTab[] {
+    if (this.isExtensionSupportedPlatform(platformData.platform)) {
+      return this.baseFetchTabs;
+    }
+    return this.baseFetchTabs.filter(tab => !tab.key.startsWith('extension'));
+  }
+
+  private isExtensionSupportedPlatform(platformName?: string): boolean {
+    const platform = (platformName || '').toLowerCase();
+    return this.EXTENSION_PLATFORMS.includes(platform === 'twitter' ? 'x' : platform);
   }
 
   isFetchTabAllowed(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
@@ -166,6 +182,10 @@ export class SocialProfileListingComponent {
     this.refetchTabData(platformData, tabKey);
   }
 
+  private shouldAutoFetchTab(tabKey: FetchTabKey): boolean {
+    return !tabKey.startsWith('extension');
+  }
+
   refetchTabData(platformData: PlatformResult, tabKey: FetchTabKey): void {
     if (this.getResultSource(platformData) === 'darkweb' && (tabKey === 'details' || tabKey === 'posts')) {
       return;
@@ -176,6 +196,10 @@ export class SocialProfileListingComponent {
         break;
       case 'posts':
         this.fetchPostsInline.emit(platformData);
+        break;
+      case 'extension':
+      case 'extensionDetails':
+        this.fetchExtensionDetailsInline.emit(platformData);
         break;
       case 'videos':
         this.fetchVideosInline.emit(platformData);
@@ -230,10 +254,16 @@ export class SocialProfileListingComponent {
   }
 
   getLoadingStates(platformData: PlatformResult): Partial<Record<FetchTabKey, boolean>> {
-    return this.getFetchTabs(platformData).reduce<Partial<Record<FetchTabKey, boolean>>>((states, tab) => {
-      states[tab.key] = this.isTabLoading(platformData, tab.key);
-      return states;
+    const states = this.getFetchTabs(platformData).reduce<Partial<Record<FetchTabKey, boolean>>>((currentStates, tab) => {
+      currentStates[tab.key] = this.isTabLoading(platformData, tab.key);
+      return currentStates;
     }, {});
+    if (this.isExtensionSupportedPlatform(platformData.platform)) {
+      states.extensionDetails = this.isTabLoading(platformData, 'extensionDetails');
+      states.extensionPosts = this.isTabLoading(platformData, 'extensionPosts');
+      states.extension = !!(states.extensionDetails || states.extensionPosts);
+    }
+    return states;
   }
 
   private hasTabData(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
@@ -242,6 +272,12 @@ export class SocialProfileListingComponent {
         return this.getProfileDetailEntries(platformData).length > 0;
       case 'posts':
         return this.getUniquePosts(platformData, 'posts').length > 0;
+      case 'extension':
+        return this.hasExtensionData(platformData);
+      case 'extensionDetails':
+        return this.getProfileDetailEntries(this.getExtensionPlatformData(platformData)).length > 0;
+      case 'extensionPosts':
+        return this.getUniquePosts(this.getExtensionPlatformData(platformData), 'posts').length > 0;
       case 'videos':
         return this.getUniquePosts(platformData, 'videos').length > 0;
       case 'shorts':
@@ -380,6 +416,29 @@ export class SocialProfileListingComponent {
 
   getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
     return getProfileDetailEntries(platformData);
+  }
+
+  private getExtensionPlatformData(platformData: PlatformResult): PlatformResult {
+    return {
+      ...platformData,
+      profileDetails: platformData.extensionProfileDetails ?? null,
+      posts: platformData.extensionPosts ?? null,
+      videos: platformData.extensionVideos ?? null,
+      shorts: platformData.extensionShorts ?? null,
+      images: platformData.extensionImages ?? null,
+      followers_list: platformData.extensionFollowers ?? null,
+      following_list: platformData.extensionFollowing ?? null,
+    };
+  }
+
+  private hasExtensionData(platformData: PlatformResult): boolean {
+    return this.getProfileDetailEntries(this.getExtensionPlatformData(platformData)).length > 0
+      || this.getUniquePosts(this.getExtensionPlatformData(platformData), 'posts').length > 0
+      || this.getUniquePosts(this.getExtensionPlatformData(platformData), 'videos').length > 0
+      || this.getUniquePosts(this.getExtensionPlatformData(platformData), 'shorts').length > 0
+      || (platformData.extensionImages || []).length > 0
+      || (platformData.extensionFollowers || []).length > 0
+      || (platformData.extensionFollowing || []).length > 0;
   }
 
   private getFallbackStatValue(platformData: PlatformResult, key: keyof NonNullable<PlatformResult['profileDetails']>): string | number | null {
@@ -552,6 +611,9 @@ export class SocialProfileListingComponent {
   }
 
   private getAllowedTabKey(platformData: PlatformResult, tabKey: FetchTabKey): FetchTabKey {
+    if (tabKey.startsWith('extension') && this.isExtensionSupportedPlatform(platformData.platform)) {
+      return 'extension';
+    }
     return this.getFetchTabs(platformData).some(tab => tab.key === tabKey) ? tabKey : 'details';
   }
 }

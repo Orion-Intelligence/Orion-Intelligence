@@ -20,7 +20,8 @@ COOKIE_CIPHER = auth_cookie_config.COOKIE_CIPHER
 
 @auth_router.post("/api/token")
 async def token(form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
-    result = await auth_manager.login(form_data.username, form_data.password)
+    client = "extension" if any(scope in {"extension", "orion_extension"} for scope in form_data.scopes) else "web"
+    result = await auth_manager.login(form_data.username, form_data.password, client=client)
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
 

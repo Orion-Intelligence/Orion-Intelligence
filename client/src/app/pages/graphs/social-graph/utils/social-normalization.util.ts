@@ -152,7 +152,7 @@ export class SocialNormalizationUtil {
       return parsed ? this.normalizeCommentItem(parsed) : this.normalizeRecordValue(value);
     }
     if (typeof value === 'object') {
-      const author = this.firstValue(value.username, value.user, value.author, value.m_username, value.m_sender_name, value.name);
+      const author = this.firstValue(value.sender_name, value.username, value.user, value.author, value.m_username, value.m_sender_name, value.name);
       const time = this.firstValue(value.time, value.m_time, value.datetime, value.date, value.m_date);
       const likes = this.firstValue(value.likes, value.m_likes);
       const text = this.firstValue(value.text, value.comment, value.content, value.m_text, value.m_content, value.message, value.body);
@@ -177,7 +177,7 @@ export class SocialNormalizationUtil {
       return { text: this.normalizeRecordValue(value) };
     }
     const comment = {
-      sender_name: this.firstValue(value.username, value.user, value.author, value.m_username, value.m_sender_name, value.name),
+      sender_name: this.firstValue(value.sender_name, value.username, value.user, value.author, value.m_username, value.m_sender_name, value.name),
       date: this.firstValue(value.time, value.m_time, value.datetime, value.date, value.m_date),
       likes: this.firstValue(value.likes, value.m_likes),
       text: this.firstValue(value.text, value.comment, value.content, value.m_text, value.m_content, value.message, value.body),
@@ -216,32 +216,32 @@ export class SocialNormalizationUtil {
       return false;
     }
     const hashId = this.firstValue(post?.hash_id, post?.m_hash_id, post?.id, post?.m_message_id);
-    const mediaUrl = this.firstValue(post?.media_url, post?.m_img_src, post?.m_coverpage);
+    const mediaUrl = this.firstValue(post?.media_url, post?.image_url, post?.thumbnail, post?.video_url, post?.m_img_src, post?.m_coverpage);
     return !!mediaUrl || (!!hashId && hashId !== 'menu');
   }
 
   static normalizeSocialPost(post: any): SocialPost {
-    const mediaUrl = this.firstValue(post?.media_url, post?.m_img_src, post?.m_coverpage);
+    const mediaUrl = this.firstValue(post?.media_url, post?.image_url, post?.thumbnail, post?.video_url, post?.m_img_src, post?.m_coverpage);
     const directComments = Array.isArray(post?.comments) ? '' : post?.comments;
-    const arrayCommentCount = this.firstArrayCount(post?.comments, post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list);
+    const arrayCommentCount = this.firstArrayCount(post?.comment_details, post?.comments, post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list);
     const commentCount = this.firstValue(directComments, post?.comments_count, post?.comment_count, post?.m_post_comments_count, post?.m_comment_count, post?.m_comments_count, arrayCommentCount);
-    const commentSources = [Array.isArray(post?.comments) ? post.comments : [], post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list, post?.m_post_comments];
+    const commentSources = [post?.comment_details, Array.isArray(post?.comments) ? post.comments : [], post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list, post?.m_post_comments];
     const commentItems = this.normalizeCommentItems(...commentSources);
     const commentDetails = this.normalizeCommentDetails(...commentSources);
     return {
       hash_id: this.firstValue(post?.hash_id, post?.m_hash_id, post?.id, post?.m_message_id),
-      post_url: this.firstValue(post?.post_url, post?.m_url, post?.url, post?.m_message_sharable_link, post?.m_weblink),
-      datetime: this.firstValue(post?.datetime, post?.date, post?.m_date, post?.timestamp),
-      caption: this.firstValue(post?.caption, post?.m_content, post?.m_title, post?.title),
+      post_url: this.firstValue(post?.post_url, post?.m_url, post?.url, post?.source_url, post?.m_message_sharable_link, post?.m_weblink),
+      datetime: this.firstValue(post?.datetime, post?.created_at, post?.date, post?.m_date, post?.timestamp),
+      caption: this.firstValue(post?.caption, post?.text, post?.m_content, post?.m_title, post?.title),
       author: this.firstValue(post?.author, post?.m_author, post?.m_sender_name),
       source: this.firstValue(post?.source, post?.m_domain, post?.m_platform, post?.m_scrap_file),
-      likes: this.firstValue(post?.likes, post?.m_post_likes, post?.m_likes),
+      likes: this.firstValue(post?.likes, post?.likes_count, post?.m_post_likes, post?.m_likes),
       comments: commentCount,
       comment_items: commentItems,
       comment_details: commentDetails,
       shares: this.firstValue(post?.shares, post?.m_post_shares, post?.m_retweets),
-      views: this.firstValue(post?.views, post?.m_post_views, post?.m_views),
-      media_type: this.firstValue(post?.media_type, mediaUrl ? 'image' : ''),
+      views: this.firstValue(post?.views, post?.views_count, post?.m_post_views, post?.m_views),
+      media_type: this.firstValue(post?.media_type, post?.video_url ? 'video' : mediaUrl ? 'image' : ''),
       media_url: mediaUrl,
     };
   }
