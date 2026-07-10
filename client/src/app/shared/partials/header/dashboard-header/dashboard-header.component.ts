@@ -51,10 +51,6 @@ export class DashboardHeaderComponent implements OnInit {
         return;
       }
     }
-    if (this.router.url.includes('/profile/ai')) {
-      this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
-      return;
-    }
     if (this.router.url.includes('profile/consolidated/all') || this.router.url.includes('profile/alerts')) {
       this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
       return;

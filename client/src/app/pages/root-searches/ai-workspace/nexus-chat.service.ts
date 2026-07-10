@@ -4,6 +4,7 @@ import { expand, switchMap, takeWhile } from 'rxjs/operators';
 import { ChatApiResponse } from '../../../shared/model/chat/chat-api-response.model';
 import { NexusChatPayload, NexusChatStreamChunk, NexusSummaryPayload } from '../../../shared/model/chat/nexus-chat.model';
 import { ApiService } from '../../../shared/services/api.service';
+import { NexusChatDetail, NexusChatSession, NexusSendMessageResponse } from '../../../shared/model/nexus/ai-chat-session.model';
 
 @Injectable({ providedIn: 'root' })
 export class NexusChatService {
@@ -11,7 +12,7 @@ export class NexusChatService {
   private readonly recoverableStreamTtlMs = 600000;
   private activeStream?: { type: 'chat' | 'resume'; subject: ReplaySubject<NexusChatStreamChunk>; controller: AbortController; completed: boolean; emitted: boolean; completedAt: number | null; timeoutId: number; };
 
-  constructor(private readonly api: ApiService) {}
+  constructor(private readonly api: ApiService) { }
 
   streamNexusChat(payload: NexusChatPayload, options: { recoverable?: boolean } = {}): Observable<NexusChatStreamChunk> {
     if (!options.recoverable) {
@@ -363,5 +364,37 @@ export class NexusChatService {
       return this.streamValueToText(record['response'] ?? record['result'] ?? record['text'] ?? JSON.stringify(record));
     }
     return String(value);
+  }
+
+  listChats(): Observable<NexusChatSession[]> {
+    return this.api.get<NexusChatSession[]>('nexus/chats');
+  }
+
+  createChat(title = 'New Chat'): Observable<NexusChatSession> {
+    return this.api.post<NexusChatSession>('nexus/chats', { title });
+  }
+
+  getChat(chatId: string): Observable<NexusChatDetail> {
+    return this.api.get<NexusChatDetail>(`nexus/chats/${chatId}`);
+  }
+
+  sendMessageToChat(chatId: string, text: string): Observable<NexusSendMessageResponse> {
+    return this.api.post<NexusSendMessageResponse>(`nexus/chats/${chatId}/messages`, { text });
+  }
+
+  renameChatSession(chatId: string, title: string): Observable<NexusChatSession> {
+    return this.api.put<NexusChatSession>(`nexus/chats/${chatId}`, { title });
+  }
+
+  deleteChatSession(chatId: string): Observable<{ success: boolean }> {
+    return this.api.delete<{ success: boolean }>(`nexus/chats/${chatId}`);
+  }
+
+  updateChatSession(chatId: string, payload: { title?: string; is_pinned?: boolean }): Observable<NexusChatSession> {
+    return this.api.put<NexusChatSession>(`nexus/chats/${chatId}`, payload);
+  }
+
+  pinChatSession(chatId: string, isPinned: boolean): Observable<NexusChatSession> {
+    return this.updateChatSession(chatId, { is_pinned: isPinned });
   }
 }
