@@ -12,7 +12,7 @@ from cryptography.fernet import Fernet
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.helper_manager.helper_controller import helper_controller
-from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model
+from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, visible_alerts
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName
@@ -421,7 +421,7 @@ class TenantManager:
         alert_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant.id))
         alerts_data = []
         if alert_doc:
-            alerts_data = alert_doc.model_dump().get("alerts") or []
+            alerts_data = [alert.model_dump() for alert in visible_alerts(alert_doc.alerts)]
 
         return {"message": "Tenant updated", "user": current_user.username, "company": tenant_data[
             "name"], "tenant": tenant_data, "alerts": alerts_data}
@@ -496,7 +496,7 @@ class TenantManager:
                 }
             return []
 
-        alerts = alerts_data.alerts or []
+        alerts = visible_alerts(alerts_data.alerts)
         if alert_type:
             normalized_type = alert_type.strip().lower()
             alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
@@ -537,7 +537,7 @@ class TenantManager:
                 }
             return []
 
-        alerts = alerts_data.alerts or []
+        alerts = visible_alerts(alerts_data.alerts)
         if alert_type:
             normalized_type = alert_type.strip().lower()
             alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]

@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from fastapi import HTTPException
 
-from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, AlertModel
+from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, db_alert_model, visible_alerts
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 
@@ -79,7 +79,7 @@ class AlertSummaryHelper:
             raise HTTPException(status_code=500, detail=f"Redis cache read failed: {ex}")
 
         alerts_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant_id))
-        alerts = alerts_doc.alerts if alerts_doc and alerts_doc.alerts else []
+        alerts = visible_alerts(alerts_doc.alerts if alerts_doc and alerts_doc.alerts else [])
         summary = self.build_alert_summary(alerts)
 
         try:

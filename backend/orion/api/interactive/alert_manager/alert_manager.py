@@ -15,7 +15,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.services.mail_manager.mail_enums import AlertMailLabel, AlertMailMessage, AlertMailSubject, AlertMailTitle
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
-from orion.services.mongo_manager.shared_model.db_alert_model import alert_all_ioc, alert_status, db_alert_model, AlertModel
+from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status, db_alert_model, visible_alerts
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs.app_dependency import get_user_permissions
 
@@ -49,7 +49,10 @@ class AlertManager:
 
 
     async def get_user_alerts(self, user_id: str) -> db_alert_model | None:
-        return await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == user_id)
+        alerts_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == user_id)
+        if alerts_doc:
+            alerts_doc.alerts = visible_alerts(alerts_doc.alerts)
+        return alerts_doc
 
     def _smart_hash(*parts) -> str:
         base = "|".join(str(p).strip().lower() for p in parts if p is not None)
@@ -315,7 +318,7 @@ class AlertManager:
         alert_updated = False
 
         if existing_doc and existing_doc.alerts:
-            for alert in existing_doc.alerts:
+            for alert in visible_alerts(existing_doc.alerts):
                 if (
                     (alert.data_hash or "") == data_hash
                     and (alert.type or "") == category
@@ -386,7 +389,7 @@ class AlertManager:
         existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_uuid)
 
         if existing_doc and existing_doc.alerts:
-            for alert in existing_doc.alerts:
+            for alert in visible_alerts(existing_doc.alerts):
                 if (alert.data_hash or "") == new_alert.data_hash:
                     alert.title = new_alert.title
                     alert.description = new_alert.description
@@ -425,7 +428,7 @@ class AlertManager:
         _iocValue = alert_to_update.ioc_value
         updated = False
         updated_alert = None
-        for stored_alert in existing_doc.alerts:
+        for stored_alert in visible_alerts(existing_doc.alerts):
             if stored_alert.data_hash == hash_to_find:
                 stored_alert.type = _type
                 stored_alert.ioc_type = _iocType
@@ -456,7 +459,7 @@ class AlertManager:
             hash_to_find = update_alert.data_hash
             _seen = update_alert.report_seen
 
-            for stored_alert in existing_doc.alerts:
+            for stored_alert in visible_alerts(existing_doc.alerts):
                 if stored_alert.data_hash == hash_to_find:
                     stored_alert.report_seen = _seen
 
@@ -480,12 +483,15 @@ class AlertManager:
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=404, detail="No alerts found for this user")
 
-        updated_alerts = [alert for alert in existing_doc.alerts if alert.alert_id != id]
+        deleted_alert = None
+        for alert in visible_alerts(existing_doc.alerts):
+            if alert.alert_id == id:
+                alert.is_deleted = True
+                deleted_alert = alert
+                break
 
-        if len(updated_alerts) == len(existing_doc.alerts):
+        if deleted_alert is None:
             raise HTTPException(status_code=404, detail="Alert not found")
-
-        existing_doc.alerts = updated_alerts
 
         await self._engine.save(existing_doc)
         await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
@@ -550,7 +556,7 @@ class AlertManager:
                 return response
             return []
 
-        alerts = alerts_data.alerts or []
+        alerts = visible_alerts(alerts_data.alerts)
 
         if alert_type:
             _type = alert_type.strip().lower()
@@ -601,10 +607,12 @@ class AlertManager:
         if not existing_doc:
             raise HTTPException(status_code=400, detail="No alerts to delete")
 
-        if not existing_doc.alerts or len(existing_doc.alerts) == 0:
+        alerts_to_delete = visible_alerts(existing_doc.alerts)
+        if len(alerts_to_delete) == 0:
             raise HTTPException(status_code=400, detail="No alerts to delete")
 
-        existing_doc.alerts = []
+        for alert in alerts_to_delete:
+            alert.is_deleted = True
         await self._engine.save(existing_doc)
         await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
 
@@ -618,9 +626,11 @@ class AlertManager:
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=400, detail="No alerts to delete")
 
-        initial_count = len(existing_doc.alerts)
-        existing_doc.alerts = [alert for alert in existing_doc.alerts if alert.type != alert_type]
-        deleted_count = initial_count - len(existing_doc.alerts)
+        deleted_count = 0
+        for alert in visible_alerts(existing_doc.alerts):
+            if alert.type == alert_type:
+                alert.is_deleted = True
+                deleted_count += 1
 
         if deleted_count == 0:
             raise HTTPException(

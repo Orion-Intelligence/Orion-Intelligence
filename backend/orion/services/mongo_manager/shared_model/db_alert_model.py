@@ -22,6 +22,7 @@ class AlertModel(EmbeddedModel):
     alert_id: str = ''
     report_seen: bool = False
     custom_alert: bool = False
+    is_deleted: bool = False
     type: str = ''
     ioc_type: str = ''
     ioc_value: str = ''
@@ -52,3 +53,7 @@ class db_alert_model(Model):
     tenant_id: str = ''
     scan_running: bool = False
     alerts: List[AlertModel] = Field(default_factory=list)
+
+
+def visible_alerts(alerts: List[AlertModel] | None) -> List[AlertModel]:
+    return [alert for alert in (alerts or []) if not bool(getattr(alert, "is_deleted", False))]
