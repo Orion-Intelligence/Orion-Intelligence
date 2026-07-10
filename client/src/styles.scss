@@ -1,6 +1,5 @@
 
 @use 'assets/styles/fonts.scss';
-@use "app/pages/root-searches/credentials/expanded-row/expanded-row.component.scss";
 @use "app/pages/root-searches/network-intel/modal/geo-coordinates-modal/geo-coordinates-modal.component.scss";
 @use "./app/pages/tenant/tenant-management/view-tenant.component-shared.scss";
 @use "app/pages/user-management/sidebar-user-homepage/category-alert-report/category-alert-report.component.scss";
@@ -1728,7 +1727,12 @@ body.demo-tour-scroll-locked {
   z-index: 9999 !important;
   background: rgb(2 6 23 / 64%) !important;
   backdrop-filter: blur(4px);
+  overflow-y: auto;
   animation: uiModalOverlayFade 200ms ease-out both;
+}
+
+.ui-graph-popup-overlay.items-center {
+  align-items: safe center !important;
 }
 
 .ui-graph-popup-panel {
@@ -2164,6 +2168,10 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   border-color: #cbd5e1 !important;
   background-color: #f1f5f9 !important;
   color: #334155 !important;
+}
+
+.cdk-overlay-container {
+  z-index: 10010 !important;
 }
 
 html.light-theme .cdk-overlay-container .ui-dropdown-menu,

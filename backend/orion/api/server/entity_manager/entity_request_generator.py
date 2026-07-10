@@ -74,11 +74,13 @@ class EntityRequestGenerator:
 
             LET cluster_data = (
               FOR cluster_id IN clusters
+                LET start_cluster = DOCUMENT(cluster_id)
                 LET docs = (
-                  FOR v, e, p IN {depth_level}..{depth_level} ANY cluster_id GRAPH 'cti_graph'
-                    OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                    FILTER v.type == 'document'
+                  FOR e IN cti_edges
+                    FILTER e._from == cluster_id AND e.type == 'cluster_to_doc'
                     LIMIT {per_cluster_limit}
+                    LET v = DOCUMENT(e._to)
+                    FILTER v != null AND v.type == 'document'
                     LET current_label = FIRST(
                       FOR candidate IN [v.display_value, v.label, v.title, v.doc_id, v.m_document_id, v._key]
                         FILTER candidate != null AND TRIM(TO_STRING(candidate)) != ''
@@ -86,7 +88,7 @@ class EntityRequestGenerator:
                     )
                     LET fallback_label = FIRST(
                       FOR label_edge IN cti_edges
-                        FILTER label_edge._from == v._id AND STARTS_WITH(label_edge.type, 'has_')
+                        FILTER label_edge._from == v._id AND label_edge.type IN @document_label_edge_types
                         LET label_vertex = DOCUMENT(label_edge._to)
                         FILTER label_vertex.type IN @document_label_property_keys
                         LET label_value = FIRST(
@@ -105,7 +107,10 @@ class EntityRequestGenerator:
                     RETURN {{
                       vertex: display_vertex,
                       edge: e,
-                      path: p
+                      path: {{
+                        vertices: [start_cluster, display_vertex],
+                        edges: [e]
+                      }}
                     }}
                 )
                 RETURN docs
@@ -122,10 +127,10 @@ class EntityRequestGenerator:
               FOR doc_id IN document_ids
                 FOR e IN cti_edges
                   FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  FOR cluster IN cti_vertices
-                    FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                  FOR cluster_vertex IN cti_vertices
+                    FILTER cluster_vertex._id == e._from AND cluster_vertex.type == 'cluster'
                     RETURN {{
-                      vertex: cluster,
+                      vertex: cluster_vertex,
                       edge: e,
                       path: null
                     }}
@@ -142,16 +147,20 @@ class EntityRequestGenerator:
             """
             return queried_id, query_str, {
                 "cluster_ids": list(DEFAULT_CLUSTER_IDS),
+                "document_label_edge_types": [f"has_{key}" for key in EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS],
                 "document_label_property_keys": list(EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS),
             }
         else:
             queried_id = f"cti_vertices/{normalized_value}"
             query_str = f"""
+            LET start_cluster = DOCUMENT(@cluster_id)
+
             LET doc_nodes = (
-              FOR v, e, p IN {depth_level}..{depth_level} ANY @cluster_id GRAPH 'cti_graph'
-                OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                FILTER v.type == 'document'
+              FOR e IN cti_edges
+                FILTER e._from == @cluster_id AND e.type == 'cluster_to_doc'
                 LIMIT {document_limit}
+                LET v = DOCUMENT(e._to)
+                FILTER v != null AND v.type == 'document'
                 LET current_label = FIRST(
                   FOR candidate IN [v.display_value, v.label, v.title, v.doc_id, v.m_document_id, v._key]
                     FILTER candidate != null AND TRIM(TO_STRING(candidate)) != ''
@@ -159,7 +168,7 @@ class EntityRequestGenerator:
                 )
                 LET fallback_label = FIRST(
                   FOR label_edge IN cti_edges
-                    FILTER label_edge._from == v._id AND STARTS_WITH(label_edge.type, 'has_')
+                    FILTER label_edge._from == v._id AND label_edge.type IN @document_label_edge_types
                     LET label_vertex = DOCUMENT(label_edge._to)
                     FILTER label_vertex.type IN @document_label_property_keys
                     LET label_value = FIRST(
@@ -178,7 +187,10 @@ class EntityRequestGenerator:
                 RETURN {{
                   vertex: display_vertex,
                   edge: e,
-                  path: p
+                  path: {{
+                    vertices: [start_cluster, display_vertex],
+                    edges: [e]
+                  }}
                 }}
             )
 
@@ -191,10 +203,10 @@ class EntityRequestGenerator:
               FOR doc_id IN document_ids
                 FOR e IN cti_edges
                   FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  FOR cluster IN cti_vertices
-                    FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                  FOR cluster_vertex IN cti_vertices
+                    FILTER cluster_vertex._id == e._from AND cluster_vertex.type == 'cluster'
                     RETURN {{
-                      vertex: cluster,
+                      vertex: cluster_vertex,
                       edge: e,
                       path: null
                     }}
@@ -211,6 +223,7 @@ class EntityRequestGenerator:
             """
             bind_vars = {
                 "cluster_id": queried_id,
+                "document_label_edge_types": [f"has_{key}" for key in EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS],
                 "document_label_property_keys": list(EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS),
             }
             return queried_id, query_str, bind_vars
@@ -469,7 +482,7 @@ class EntityRequestGenerator:
 
         LET doc_nodes = (
           FOR e IN cti_edges
-            FILTER e._to == @start_vertex AND STARTS_WITH(e.type, "has_")
+            FILTER e._to == @start_vertex AND e.type == @edge_type
             LIMIT {document_limit}
             LET doc = DOCUMENT(e._from)
             FILTER doc != null AND doc.type == "document"
@@ -516,6 +529,7 @@ class EntityRequestGenerator:
 
         bind_vars = {
             "default_clusters": list(DEFAULT_CLUSTER_KEYS),
+            "edge_type": f"has_{normalized_type}",
             "start_vertex": start_vertex,
         }
         return queried_id, query_str, bind_vars
