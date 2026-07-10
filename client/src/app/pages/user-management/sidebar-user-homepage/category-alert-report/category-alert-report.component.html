@@ -16,7 +16,7 @@
               <img alt="" height="20" src="assets/images/shared/theme/add_icon.svg" width="20" class="category_report_tool-icon" />
             </button>
           }
-          @if (this.alerts.length>0 || (licenseService.isMaintainer() && !isAdminTenantAlertReport)) {
+          @if (canExportCategoryAlerts() && licenseService.isMaintainer() && !isAdminTenantAlertReport) {
             <div class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
           }
           @if (canExportCategoryAlerts()) {
@@ -25,7 +25,7 @@
             </button>
           }
           <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
-          @if (canExportstix() && licenseService.isMaintainer() && !isAdminTenantAlertReport) {
+          @if (canExportCategoryAlerts() && this.alerts.length>0 && licenseService.isMaintainer() && !isAdminTenantAlertReport) {
             <div class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
           }
           @if (this.alerts.length>0 &&licenseService.isMaintainer() && !isAdminTenantAlertReport) {
@@ -33,7 +33,7 @@
               <img alt="" height="20" src="assets/images/shared/theme/bin.svg" width="20" class="category_report_tool-icon" />
             </button>
           }
-          @if (licenseService.isMaintainer() && !isAdminTenantAlertReport) {
+          @if (canExportCategoryAlerts() || (licenseService.isMaintainer() && !isAdminTenantAlertReport)) {
             <div class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
           }
           <button data-testid="tenant-alert-open-sidebar" (click)="sidebarService.openSidebar()" [appTooltip]="'categoryAlerts.actions.openSidebar' | translate" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('sidebar')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='sidebar' ? 'bg-[#cfe0f4]' : ''">
