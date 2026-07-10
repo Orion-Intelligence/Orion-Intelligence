@@ -6,22 +6,17 @@ from orion.api.server.crawl_manager.class_model.domain_scan_request_model import
     DomainScanRequest,
     UrlVulnerabilityScanRequest,
 )
+from orion.management.jobs.alert.alert_buffer import AlertScanBuffer
 from orion.management.jobs.alert.cancellation_service import CancellationService
 from orion.management.jobs.alert.response_parser import ResponseParser
 from orion.management.jobs.alert.result_mappers import ScanResultMapper, VulnerabilityScanResultMapper
 
 
 class ScanningAlertProcessor:
-    def __init__(
-        self,
-        alert_manager: Any,
-        crawl_model: Any,
-        cancellation_service: CancellationService,
-        search_model: Any | None = None,
-    ):
-        self._alert_manager = alert_manager
+    def __init__(self, crawl_model: Any, cancellation_service: CancellationService, alert_buffer: AlertScanBuffer, search_model: Any | None = None):
         self._crawl_model = crawl_model
         self._cancellation_service = cancellation_service
+        self._alert_buffer = alert_buffer
         self._search_model = search_model
 
     @staticmethod
@@ -90,21 +85,8 @@ class ScanningAlertProcessor:
             if not alert_fields:
                 return None
 
-            upsert_result = await self._alert_manager.upsert_alert(
-                tenantId=tenant_id,
-                category=alert_fields["category"],
-                ioc_type=alert_fields["ioc_type"],
-                ioc_value=alert_fields["ioc_value"],
-                title=alert_fields["title"],
-                description=alert_fields["description"],
-                url=alert_fields["url"],
-                source=alert_fields["source"],
-                content_types=alert_fields["content_types"],
-                all_ioc=alert_fields["all_ioc"],
-            )
-            return AlertSummaryHelper.scan_result_summary(
-                alert_fields["category"], ioc_type, ioc_value, upsert_result
-            )
+            self._alert_buffer.add_alert(tenant_id, alert_fields)
+            return AlertSummaryHelper.new_scan_summary()
 
         except Exception:
             return AlertSummaryHelper.new_scan_summary()
@@ -147,26 +129,7 @@ class ScanningAlertProcessor:
                 if not alert_fields:
                     continue
 
-                upsert_result = await self._alert_manager.upsert_alert(
-                    tenantId=tenant_id,
-                    category=alert_fields["category"],
-                    ioc_type=alert_fields["ioc_type"],
-                    ioc_value=alert_fields["ioc_value"],
-                    title=alert_fields["title"],
-                    description=alert_fields["description"],
-                    url=alert_fields["url"],
-                    source=alert_fields["source"],
-                    content_types=alert_fields["content_types"],
-                    all_ioc=alert_fields["all_ioc"],
-                    data_hash=alert_fields["data_hash"],
-                )
-
-                AlertSummaryHelper.merge_scan_summary(
-                    summary,
-                    AlertSummaryHelper.scan_result_summary(
-                        alert_fields["category"], ioc_type, ioc_value, upsert_result
-                    ),
-                )
+                self._alert_buffer.add_alert(tenant_id, alert_fields)
 
             return summary
 

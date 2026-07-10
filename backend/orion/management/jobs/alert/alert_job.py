@@ -8,6 +8,7 @@ from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummar
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.api.server.crawl_manager.crawl_model import crawl_model
+from orion.management.jobs.alert.alert_buffer import AlertScanBuffer
 from orion.management.jobs.alert.cancellation_service import CancellationService
 from orion.management.jobs.alert.category_processor import CategoryAlertProcessor
 from orion.management.jobs.alert.config import ALERT_CATEGORIES
@@ -39,10 +40,10 @@ class alert_job:
         self._cancellation_service = CancellationService()
         self._cancel_scan_flags = self._cancellation_service._cancel_scan_flags
         self._tenant_ioc_service = TenantIocService()
-        self._category_processor = CategoryAlertProcessor(self._alert_manager, self._search_model)
-        self._scanning_processor = ScanningAlertProcessor(self._alert_manager,self._crawl_model, self._cancellation_service,self._search_model,
-    )
-        self._dynamic_scanning_processor = DynamicScanningProcessor(self._alert_manager, self._search_model, self._cancellation_service)
+        self._alert_buffer = AlertScanBuffer(self._alert_manager)
+        self._category_processor = CategoryAlertProcessor(self._alert_buffer, self._search_model)
+        self._scanning_processor = ScanningAlertProcessor(self._crawl_model, self._cancellation_service, self._alert_buffer, self._search_model)
+        self._dynamic_scanning_processor = DynamicScanningProcessor(self._search_model, self._cancellation_service, self._alert_buffer)
 
     @staticmethod
     def _tenant_key(tenant_id) -> str:
@@ -142,14 +143,23 @@ class alert_job:
             scan_summary = AlertSummaryHelper.new_scan_summary()
             scan_status = "success"
             processed_tenant_count += 1
+            self._alert_buffer.clear(tenant_id)
             await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
             try:
                 for category in ALERT_CATEGORIES:
                     category_summary = await self._process_tenant_alerts(tenant, category)
                     AlertSummaryHelper.merge_scan_summary(scan_summary, category_summary)
+                if self._cancellation_service.is_cancelled(tenant_id):
+                    scan_status = "cancelled"
+                    error_count += 1
+                    self._alert_buffer.clear(tenant_id)
+                else:
+                    flush_summary = await self._alert_buffer.flush(tenant_id)
+                    AlertSummaryHelper.merge_scan_summary(scan_summary, flush_summary)
             except Exception:
                 scan_status = "completed_with_errors"
                 error_count += 1
+                self._alert_buffer.clear(tenant_id)
                 log.g().e(f"Alert category run failed for tenant={tenant_id}")
             finally:
                 self._cancellation_service.clear(tenant_id)
@@ -223,6 +233,8 @@ class alert_job:
         await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
         current_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         start_time = datetime.now(timezone.utc)
+        tenant_key = str(tenant_id)
+        self._alert_buffer.clear(tenant_key)
 
         try:
             if not current_tenant:
@@ -264,8 +276,15 @@ class alert_job:
 
                 category_statuses.append(category_status)
 
+            if self._cancellation_service.is_cancelled(tenant_key):
+                response_status = "cancelled"
+                self._alert_buffer.clear(tenant_key)
+            else:
+                flush_summary = await self._alert_buffer.flush(tenant_key)
+                AlertSummaryHelper.merge_scan_summary(scan_summary, flush_summary)
+                response_status = "success" if overall_success else "completed_with_errors"
+
             end_time = datetime.now(timezone.utc)
-            response_status = "success" if overall_success else "completed_with_errors"
             await self._alert_manager.send_scan_completed_mail(
                 tenant_id=str(tenant_id),
                 scan_status=response_status,
@@ -282,8 +301,10 @@ class alert_job:
                 "results": category_statuses,
             }
         except Exception as exc:
+            self._alert_buffer.clear(tenant_key)
             log.error(f"Alert generation job failed for tenant {tenant_id}: {exc}")
         finally:
+            self._cancellation_service.clear(tenant_key)
             await self._alert_manager.getInstance().set_scan_running(tenant_id, False)
 
     async def cancel_tenant_scan(self, tenant_id: str):

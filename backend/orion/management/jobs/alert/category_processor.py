@@ -1,6 +1,7 @@
 from typing import Any
 
 from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
+from orion.management.jobs.alert.alert_buffer import AlertScanBuffer
 from orion.management.jobs.alert.config import CATEGORY_SEARCH_CONFIG, CategorySearchConfig
 from orion.management.jobs.alert.response_parser import ResponseParser
 from orion.management.jobs.alert.result_mappers import ElasticsearchResultMapper
@@ -8,8 +9,8 @@ from orion.services.log_manager.log_controller import log
 
 
 class CategoryAlertProcessor:
-    def __init__(self, alert_manager: Any, search_model: Any):
-        self._alert_manager = alert_manager
+    def __init__(self, alert_buffer: AlertScanBuffer, search_model: Any):
+        self._alert_buffer = alert_buffer
         self._search_model = search_model
 
     @staticmethod
@@ -72,12 +73,8 @@ class CategoryAlertProcessor:
                     ElasticsearchResultMapper.to_alert_payload(category, ioc_type_name, ioc_value, result)
                 )
 
-                if len(bulk_alerts) >= 200:
-                    await self._flush_bulk_alerts(tenant_id, category, ioc_type_name, ioc_value, summary, bulk_alerts)
-                    bulk_alerts = []
-
             if bulk_alerts:
-                await self._flush_bulk_alerts(tenant_id, category, ioc_type_name, ioc_value, summary, bulk_alerts)
+                self._alert_buffer.add_alerts(tenant_id, bulk_alerts)
 
         except Exception:
             log.g().e(
@@ -96,23 +93,4 @@ class CategoryAlertProcessor:
             config.base_index,
             config.blocked_categories or [],
             config.allowed_categories or [],
-        )
-
-    async def _flush_bulk_alerts(
-        self,
-        tenant_id: str,
-        category: str,
-        ioc_type_name: str,
-        ioc_value: str,
-        summary: dict,
-        bulk_alerts: list[dict[str, Any]],
-    ) -> None:
-        upsert_result = await self._alert_manager.upsert_alerts_bulk(
-            tenantId=tenant_id,
-            alerts_payload=bulk_alerts,
-            chunk_size=200,
-        )
-        AlertSummaryHelper.merge_scan_summary(
-            summary,
-            AlertSummaryHelper.scan_result_summary(category, ioc_type_name, ioc_value, upsert_result),
         )
