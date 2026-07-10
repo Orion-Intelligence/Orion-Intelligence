@@ -149,7 +149,10 @@ class AlertManager:
                 return False
 
             admin = await self._engine.find_one(db_user_account,(db_user_account.role == user_role.ADMIN) & (db_user_account.status == UserStatus.ACTIVE.value))
-            recipient = admin.email if admin else None
+            recipient = (admin.email or "").strip() if admin else ""
+            if not recipient:
+                meta_info = mail_manager.get_instance()._global_mail_config()
+                recipient = (meta_info.get("ACCOUNTS_MAIL") or "").strip()
             if not recipient:
                 return False
 
