@@ -389,4 +389,12 @@ export class NexusChatService {
   deleteChatSession(chatId: string): Observable<{ success: boolean }> {
     return this.api.delete<{ success: boolean }>(`nexus/chats/${chatId}`);
   }
+
+  updateChatSession(chatId: string, payload: { title?: string; is_pinned?: boolean }): Observable<NexusChatSession> {
+    return this.api.put<NexusChatSession>(`nexus/chats/${chatId}`, payload);
+  }
+
+  pinChatSession(chatId: string, isPinned: boolean): Observable<NexusChatSession> {
+    return this.updateChatSession(chatId, { is_pinned: isPinned });
+  }
 }

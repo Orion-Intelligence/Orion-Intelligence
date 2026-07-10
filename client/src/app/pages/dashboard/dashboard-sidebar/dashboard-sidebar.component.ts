@@ -2,6 +2,7 @@ import { Component, HostListener, OnDestroy, OnInit, output } from '@angular/cor
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
 import { SidebarSectionComponent } from './dashboard-collapsed-sidebar/dashboard-sidebar-collapsed.component';
@@ -18,11 +19,13 @@ import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widge
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
 import { NexusChatService } from '../../root-searches/ai-workspace/nexus-chat.service';
+import { ApiService } from '../../../shared/services/api.service';
+import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
+  imports: [NgOptimizedImage, NgClass, RouterLink, FormsModule, AsyncPipe, FormsModule, DashboardSidebarItemsComponent, SidebarSectionComponent, ConfirmationPopupComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
@@ -50,9 +53,14 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   aiChatSessions: AiChatSession[] = [];
   activeAiChatId: string | null = null;
   openedAiChatMenuId: string | null = null;
+  deleteAiChatTarget: AiChatSession | null = null;
+  renameAiChatTarget: AiChatSession | null = null;
+  renameAiChatDraft = '';
+  aiChatSearchOpen = false;
+  aiChatSearchQuery = '';
+  sharingAiChatId: string | null = null;
 
-  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService, private readonly nexusChatService: NexusChatService) {
-  }
+  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly api: ApiService) { }
 
   ngOnInit() {
     const hasSavedSidebarPreference = typeof window !== 'undefined' && localStorage.getItem('isSidebarOpen') !== null;
@@ -277,38 +285,137 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   renameAiChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
 
-    const title = window.prompt('Rename chat', chat.title)?.trim();
+    this.renameAiChatTarget = chat;
+    this.renameAiChatDraft = chat.title;
+    this.closeAiChatMenu();
+  }
 
-    if (!title) {
-      this.closeAiChatMenu();
+  closeRenameAiChatPopup(): void {
+    this.renameAiChatTarget = null;
+    this.renameAiChatDraft = '';
+  }
+
+  confirmRenameAiChat(): void {
+    const title = this.renameAiChatDraft.trim();
+
+    if (!this.renameAiChatTarget || !title) {
       return;
     }
 
     window.dispatchEvent(new CustomEvent('nexus-ai-rename-chat', {
       detail: {
-        id: chat.id,
+        id: this.renameAiChatTarget.id,
         title,
       },
     }));
 
-    this.closeAiChatMenu();
+    this.closeRenameAiChatPopup();
+  }
+
+  onRenameBackdrop(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+
+    if (target?.dataset?.['role'] === 'backdrop') {
+      this.closeRenameAiChatPopup();
+    }
   }
 
   deleteAiChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
 
-    const ok = window.confirm(`Delete "${chat.title}"?`);
+    this.deleteAiChatTarget = chat;
+    this.closeAiChatMenu();
+  }
 
-    if (!ok) {
-      this.closeAiChatMenu();
+  confirmDeleteAiChat(confirmed: boolean): void {
+    const chat = this.deleteAiChatTarget;
+
+    this.deleteAiChatTarget = null;
+
+    if (!confirmed || !chat) {
       return;
     }
 
     window.dispatchEvent(new CustomEvent('nexus-ai-delete-chat', {
       detail: chat.id,
     }));
+  }
 
-    this.closeAiChatMenu();
+  toggleAiChatSearch(event?: Event): void {
+    event?.stopPropagation();
+    this.aiChatSearchOpen = !this.aiChatSearchOpen;
+
+    if (!this.aiChatSearchOpen) {
+      this.aiChatSearchQuery = '';
+    }
+  }
+
+  togglePinAiChat(chat: AiChatSession, event: Event): void {
+    event.stopPropagation();
+
+    this.nexusChatService.pinChatSession(chat.id, !chat.isPinned).subscribe({
+      next: (updated) => {
+        this.aiChatSessions = this.sortAiChatSessions(this.aiChatSessions.map(item =>
+          item.id === updated.id
+            ? {
+              ...item,
+              title: updated.title,
+              updatedAt: updated.updated_at,
+              isPinned: updated.is_pinned ?? false,
+              pinnedAt: updated.pinned_at ?? null,
+            }
+            : item));
+
+        window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
+        this.closeAiChatMenu();
+      },
+    });
+  }
+
+  shareAiChat(chat: AiChatSession, event: Event): void {
+    event.stopPropagation();
+
+    if (this.sharingAiChatId) {
+      return;
+    }
+
+    this.sharingAiChatId = chat.id;
+
+    this.nexusChatService.getChat(chat.id).subscribe({
+      next: (chatDetail) => {
+        const messages = chatDetail.messages.map(message => ({
+          sender: message.sender,
+          text: message.text,
+          time: message.created_at,
+        }));
+
+        if (!messages.length) {
+          this.sharingAiChatId = null;
+          this.closeAiChatMenu();
+          return;
+        }
+
+        this.api.post<{ path: string }>('profile/chat-shares', {
+          messages,
+          expiresInHours: 168,
+        }).subscribe({
+          next: (share) => {
+            const url = new URL(share.path, window.location.origin).toString();
+            window.open(url, '_blank', 'noopener');
+            this.sharingAiChatId = null;
+            this.closeAiChatMenu();
+          },
+          error: () => {
+            this.sharingAiChatId = null;
+            this.closeAiChatMenu();
+          },
+        });
+      },
+      error: () => {
+        this.sharingAiChatId = null;
+        this.closeAiChatMenu();
+      },
+    });
   }
 
   private loadAiChatSessions(): void {
@@ -318,12 +425,14 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
     this.nexusChatService.listChats().subscribe({
       next: (sessions) => {
-        this.aiChatSessions = sessions.map(session => ({
+        this.aiChatSessions = this.sortAiChatSessions(sessions.map(session => ({
           id: session.id,
           title: session.title,
           updatedAt: session.updated_at,
+          isPinned: session.is_pinned ?? false,
+          pinnedAt: session.pinned_at ?? null,
           messages: [],
-        }));
+        })));
 
         const activeStillExists = this.aiChatSessions.some(chat => chat.id === this.activeAiChatId);
 
@@ -335,6 +444,22 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         this.aiChatSessions = [];
         this.activeAiChatId = null;
       },
+    });
+  }
+
+  private sortAiChatSessions(chats: AiChatSession[]): AiChatSession[] {
+    return [...chats].sort((a, b) => {
+      if (a.isPinned !== b.isPinned) {
+        return a.isPinned ? -1 : 1;
+      }
+
+      if (a.isPinned && b.isPinned) {
+        return new Date(b.pinnedAt || b.updatedAt).getTime() -
+          new Date(a.pinnedAt || a.updatedAt).getTime();
+      }
+
+      return new Date(b.updatedAt).getTime() -
+        new Date(a.updatedAt).getTime();
     });
   }
 
@@ -363,6 +488,17 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   closeAiChatMenu(): void {
     this.openedAiChatMenuId = null;
+  }
+
+  get filteredAiChatSessions(): AiChatSession[] {
+    const query = this.aiChatSearchQuery.trim().toLowerCase();
+
+    if (!query) {
+      return this.aiChatSessions;
+    }
+
+    return this.aiChatSessions.filter(chat =>
+      chat.title.toLowerCase().includes(query));
   }
 
   @HostListener('document:click')
