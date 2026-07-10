@@ -43,13 +43,6 @@ class nexus_chat_gateway:
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Something happened while calling Nexus chat service"})
 
-    async def _request_json(self, method: str, path: str, current_user, json_body: dict[str, Any] | None = None) -> dict[str, Any]:
-        try:
-            status_code, content = await self._call(method, path, current_user, json_body=json_body)
-            return content if 200 <= status_code < 300 and isinstance(content, dict) else {}
-        except Exception:
-            return {}
-
     async def create_chat(self, payload: dict[str, Any], current_user):
         return await self._request("POST", "/v1/chats", current_user, json_body=payload)
 
