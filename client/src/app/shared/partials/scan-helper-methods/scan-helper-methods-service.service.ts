@@ -28,7 +28,7 @@ export class ScanHelperMethodsService {
   }
 
   protected isPendingOrBusy(status: string | undefined): boolean {
-    return ['pending', 'busy', 'queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].includes(String(status || '').toLowerCase());
+    return status === 'pending' || status === 'busy';
   }
 
   protected getPendingStatus<T extends { status?: string; result?: { status?: string } | null }>(res: T): string | undefined {

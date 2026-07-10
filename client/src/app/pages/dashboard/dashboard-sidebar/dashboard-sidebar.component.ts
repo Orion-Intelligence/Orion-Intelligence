@@ -192,7 +192,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
     const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
-    const canAccessFeeder = this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
+    const canAccessFeeder = this.licenseService.canUseModule('feeder');
     const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || (this.isAnalyst() && (this.appService.userSessionData().user.permissions || []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
 
@@ -224,7 +224,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         c !== ProfileSubCategory.USERS &&
         c !== ProfileSubCategory.AUDITLOG &&
         c !== ProfileSubCategory.IOC &&
-        (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
         (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
         c !== ProfileSubCategory.STATISTICS &&
         c !== ProfileSubCategory.TENANT_SETTINGS);

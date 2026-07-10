@@ -24,9 +24,9 @@
           @if (this.alerts.length>0 || (licenseService.isMaintainer() && !isAdminTenantAlertReport)) {
             <div class="vr report-menu-divider" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] text-[#a9bbd0] opacity-100' : ''"></div>
           }
-          @if (canExportCategoryAlerts()) {
-            <button type="button" data-testid="tenant-alert-print-alerts" (click)="openCategoryExportChoice()" [appTooltip]="'categoryAlerts.export.title' | translate" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('export')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='export' ? 'bg-[#cfe0f4]' : ''">
-              <img alt="" height="30" width="30" src="assets/images/shared/theme/print.svg" class="category_report_tool-icon" />
+          @if (canExportstix()&& licenseService.isMaintainer() && !isAdminTenantAlertReport) {
+            <button type="button" (click)="fileInput.click()" [appTooltip]="'categoryAlerts.actions.importAlert' | translate" class="p-0 report-menu-option" (mouseenter)="setReportToolHover('import')" (mouseleave)="setReportToolHover(null)" [ngClass]="isLightTheme() && hoveredReportTool==='import' ? 'bg-[#cfe0f4]' : ''">
+              <img alt="" height="30" width="30" src="assets/images/shared/theme/print.svg" class="rotate-180 category_report_tool-icon" />
             </button>
           }
           <input #fileInput type="file" accept=".json" hidden (change)="onFileUpload($event)" />
@@ -185,7 +185,7 @@
                 </div>
                 {{ item.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
               </span>
-              <span class="category_report_alert-date">{{ getAlertCardDate(item) | date:'MM/dd/yyyy' }}</span>
+              <span class="category_report_alert-date">{{ item.detectedOn| date:'MM/dd/yyyy' }}</span>
             </div>
             @if (canExportstix() || licenseService.isMaintainer()) {
               <div class="category_report_alert-actions">
@@ -226,16 +226,10 @@
                   <span class="category_report_alert-field-value">{{ sliceString(item.entity,15) }}</span>
                 </div>
                 <div class="category_report_alert-field">
-                  <span class="category_report_alert-field-heading">Result Date</span>
-                  <span class="category_report_alert-field-value">{{ getAlertCardDate(item) | date:'MM/dd/yyyy' }}</span>
+                  <span class="category_report_alert-field-heading">{{ 'categoryAlerts.fields.detectedOn' | translate }}</span>
+                  <span class="category_report_alert-field-value">{{ item.detectedOn| date:'MM/dd/yyyy' }}</span>
                 </div>
               </div>
-              @if (item.password) {
-                <div class="category_report_alert-field category_report_alert-url">
-                  <span class="category_report_alert-field-heading">Password</span>
-                  <span class="category_report_alert-field-value">{{ sliceString(item.password,120) }}</span>
-                </div>
-              }
               <div class="category_report_alert-iocs">
                 <span class="category_report_alert-iocs-heading">{{ 'categoryAlerts.fields.iocs' | translate }}</span>
                 <div class="category_report_alert-iocs-tags">

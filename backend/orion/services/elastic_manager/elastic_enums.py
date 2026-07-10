@@ -169,13 +169,13 @@ class ELASTIC_ENUMS:
     }
 
     mapping_stealer_log_field = {
-        "m_domain": ["domain.keyword", "domain"],
+        "m_domain": ["domain.keyword"],
         "m_url": ["url.keyword"],
         "m_username": ["username.keyword"],
         "m_email": ["email.keyword"],
         "m_ip": ["ip.keyword"],
         "m_creditcard": ["credit_card.keyword", "bin.keyword"],
-        "m_search_all": ["domain.keyword", "domain", "username.keyword", "email.keyword", "bin.keyword"]
+        "m_search_all": ["domain.keyword", "username.keyword", "email.keyword", "bin.keyword"]
     }
 
     mapping_consolidated_iocs = {
