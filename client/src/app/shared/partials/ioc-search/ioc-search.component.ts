@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { advancedRowMotionAnimation } from '../../../shared/animations/advanced.row.motion.animation';
+import { popupAnimation } from '../../animations/popup.animations';
 import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
@@ -13,12 +14,13 @@ import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 interface SharedSearchAdvancedFilter { id: string; tag: string; value: string; operator: '&&' | '||' }
+interface SharedSearchAdvancedChip { id: string; label: string }
 
 @Component({
   selector: 'app-ioc-search',
   imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, ChatWidgetComponent, TranslatePipe],
   templateUrl: './ioc-search.component.html',
-  animations: [fadeInDashboardItem, advancedRowMotionAnimation],
+  animations: [fadeInDashboardItem, advancedRowMotionAnimation, popupAnimation],
 })
 export class IocSearchComponent implements OnInit {
   private readonly DEFAULT_VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^(?:\d{6}|\d{13,19})$/ ];
@@ -36,6 +38,7 @@ export class IocSearchComponent implements OnInit {
   readonly advancedTitle = input<string>('Advanced Filter Builder');
   readonly advancedSubtitle = input<string>('Combine multiple filters with AND/OR for precise results');
   isAdvanced = false;
+  isAdvancedBuilderExpanded = false;
   basicSubmitted = false;
   basicTouched = false;
   selectedTag = this.defaultBasicTag();
@@ -60,6 +63,55 @@ export class IocSearchComponent implements OnInit {
 
   toggleAdvanced(): void {
     this.isAdvanced = !this.isAdvanced;
+    if (!this.isAdvanced) {
+      this.closeAdvancedBuilder();
+    }
+  }
+
+  openAdvancedBuilder(): void {
+    this.isAdvancedBuilderExpanded = true;
+  }
+
+  closeAdvancedBuilder(): void {
+    this.isAdvancedBuilderExpanded = false;
+  }
+
+  onAdvancedBuilderBackdrop(event: MouseEvent): void {
+    const eventTargetElement = event.target as HTMLElement | null;
+    if (eventTargetElement?.dataset?.['role'] === 'backdrop') {
+      this.closeAdvancedBuilder();
+    }
+  }
+
+  clearAdvancedBuilder(): void {
+    this.advancedFilters = [{ id: this.generateId(), tag: this.defaultAdvancedTag(), value: '', operator: '&&' }];
+  }
+
+  hasAdvancedBuilderState(): boolean {
+    if (this.advancedFilters.length !== 1) {
+      return true;
+    }
+    const filter = this.advancedFilters[0];
+    return Boolean(filter?.value.trim() || filter?.tag !== this.defaultAdvancedTag());
+  }
+
+  getAdvancedFilterChips(): SharedSearchAdvancedChip[] {
+    return this.advancedFilters.reduce<SharedSearchAdvancedChip[]>((chips, filter, index) => {
+      const value = filter.value.trim();
+      if (!value) {
+        return chips;
+      }
+      const operator = index === 0 ? 'WHERE' : (this.advancedFilters[index - 1].operator === '&&' ? 'AND' : 'OR');
+      const label = this.filterLabels()[filter.tag] || filter.tag;
+      chips.push({ id: filter.id, label: `${operator} ${label}: ${value}` });
+      return chips;
+    }, []);
+  }
+
+  executeAdvancedBuilder(): void {
+    if (this.triggerSearch()) {
+      this.closeAdvancedBuilder();
+    }
   }
 
   selectBasicTag(tag: string): void {
@@ -85,14 +137,14 @@ export class IocSearchComponent implements OnInit {
     }
   }
 
-  triggerSearch(): void {
+  triggerSearch(): boolean {
     this.basicSubmitted = true;
     let finalQuery = '';
     if (this.isAdvanced) {
       this.advancedFilters = this.advancedFilters.map(f => ({ ...f, value: this.stripUrlPrefixes(f.value) }));
       const invalidFilter = this.advancedFilters.find(f => f.value && !this.validateValue(f.tag, f.value));
       if (invalidFilter) {
-        return;
+        return false;
       }
       finalQuery = this.advancedFilters
         .filter(f => f.value.trim() !== '')
@@ -104,11 +156,12 @@ export class IocSearchComponent implements OnInit {
     }
     else {
       if (this.isBasicInvalid()) {
-        return;
+        return false;
       }
       finalQuery = this.normalizeBasicQuery(this.selectedTag, this.basicQuery);
     }
     this.searchTriggered.emit(finalQuery);
+    return true;
   }
 
   isBasicInvalid(): boolean {
