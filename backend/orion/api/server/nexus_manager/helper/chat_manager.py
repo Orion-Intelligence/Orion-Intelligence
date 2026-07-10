@@ -4,8 +4,8 @@ from typing import Any, AsyncGenerator
 
 import httpx
 
-from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.server.nexus_manager.model.rpc_payload_model import NexusRpcPayloadModel
+from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 
 
 class ChatManager:
@@ -46,5 +46,5 @@ class ChatManager:
             nexus_cancelled = False
         return {"cancelled": local_task is not None or nexus_cancelled}
 
-    async def clear_chat_session(self, current_user):
-        return await AccountManager.get_instance().clear_current_user_chat_history(current_user)
+    async def clear_chat_session(self, current_user, session_id: str | None = None):
+        return await nexus_chat_gateway.getInstance().clear_chat_history({"session_id": session_id or ""}, current_user)

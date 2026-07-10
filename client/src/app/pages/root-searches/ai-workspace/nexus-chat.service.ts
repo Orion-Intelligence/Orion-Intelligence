@@ -262,8 +262,8 @@ export class NexusChatService {
     }
   }
 
-  clearNexusSession(): Observable<{ cleared?: boolean; }> {
-    return this.api.post<{ cleared?: boolean; }>('nexus/chat/clear-session', {});
+  clearNexusSession(payload: { session_id?: string } = {}): Observable<{ cleared?: boolean; }> {
+    return this.api.post<{ cleared?: boolean; }>('nexus/chat/clear-session', payload);
   }
 
   pollNexusReportChat(payload: NexusChatPayload) {

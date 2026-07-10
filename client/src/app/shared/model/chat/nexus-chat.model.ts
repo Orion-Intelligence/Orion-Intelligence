@@ -1,9 +1,10 @@
 export interface NexusChatPayload {
+  session_id?: string;
+  session_type?: 'persistent' | 'temporary';
   message: string;
   report?: string;
   tool?: string;
   type?: string;
-  history?: Array<{ role: string; content: string }>;
 }
 
 export interface NexusSummaryPayload {

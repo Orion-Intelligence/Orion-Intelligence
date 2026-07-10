@@ -4,8 +4,6 @@ from typing import Any, AsyncGenerator
 
 import httpx
 
-from orion.api.interactive.account_manager.account_manager import AccountManager
-from orion.api.server.nexus_manager.history_embeddings.history_embedding_manager import HistoryEmbeddingManager
 from orion.api.server.nexus_manager.helper.chat_manager import ChatManager
 from orion.api.server.nexus_manager.model.rpc_payload_model import NexusRpcPayloadModel
 
@@ -44,13 +42,6 @@ class NexusStreamManager:
                 return structured_content
         return parsed_line
 
-    async def get_recent_history(self, current_user, prompt: str = "", session_id: str | None = None) -> list[dict[str, str]]:
-        try:
-            stored_history = await AccountManager.get_instance().get_current_user_chat_history(current_user, include_embeddings=True, session_id=session_id)
-            return await HistoryEmbeddingManager.select_turns(prompt, stored_history.get("history") or [])
-        except Exception:
-            return []
-
     async def _stream(self, client: httpx.AsyncClient, endpoint: str, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, payload: NexusRpcPayloadModel | None = None, recoverable: bool = False, auth_token: str = "") -> AsyncGenerator[tuple[str, str, bool], None]:
         response = None
         answer = ""
@@ -62,15 +53,7 @@ class NexusStreamManager:
                 arguments: dict[str, Any] = {
                     "prompt": prompt,
                     "user_id": user_id,
-                    "tool": selected_tool,
-                    "type": type_name or "default",
                 }
-                if recoverable:
-                    arguments["recoverable"] = True
-                if selected_tool == "api_payload":
-                    arguments["api_name"] = type_name or "default"
-                    if auth_token:
-                        arguments["_auth_token"] = auth_token
                 if history:
                     arguments["history"] = history
                 payload = NexusRpcPayloadModel.tool_call(request_id=user_id if recoverable else "nexus-chat", name=selected_tool, arguments=arguments)

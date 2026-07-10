@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { chatBotAnimation } from '../../../../shared/animations/chat.bot.animation';
@@ -25,6 +26,8 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   private chatRequestId = 0;
   private stoppedRequestIds = new Set<number>();
   private userNearBottom = true;
+  private routeSubscription?: Subscription;
+  private activeTempSessionId = '';
   private io?: IntersectionObserver;
   private mo?: MutationObserver;
   @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
@@ -48,9 +51,28 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly type = input('default');
   readonly welcomeMessage = input('Hi there! How can I help you today?');
 
-  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService) { }
+  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService, private router: Router) { }
 
   ngOnInit(): void {
+    this.activeTempSessionId = this.temporarySessionId();
+    this.routeSubscription = this.router.events.subscribe(event => {
+      if (!(event instanceof NavigationEnd)) {
+        return;
+      }
+      const nextSessionId = this.temporarySessionId();
+      if (nextSessionId === this.activeTempSessionId) {
+        return;
+      }
+      const previousSessionId = this.activeTempSessionId;
+      this.activeTempSessionId = nextSessionId;
+      this.chatRequestId += 1;
+      this.stoppedRequestIds.clear();
+      this.cancelActiveNexusRequest();
+      this.clearTemporarySession(previousSessionId);
+      this.isBotTyping = false;
+      this.botStep = '';
+      this.resetChatView();
+    });
     if (this.chatMessages.length === 0) {
       this.chatMessages.push({
         id: crypto.randomUUID(),
@@ -68,7 +90,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cancelActiveNexusRequest();
+    this.clearTemporarySession(this.activeTempSessionId);
     this.stoppedRequestIds.clear();
+    this.routeSubscription?.unsubscribe();
     this.io?.disconnect();
     this.mo?.disconnect();
   }
@@ -108,10 +132,11 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     const report = (this.report() || this.reportText() || '').trim();
     const payload = {
+      session_id: this.temporarySessionId(),
+      session_type: 'temporary' as const,
       message: report ? `${report}\n\n${userMessage}` : userMessage,
       tool: this.resolveTool(report),
       type: this.type() || 'default',
-      history: this.localHistoryForRequest(userMessage)
     };
     const requestId = ++this.chatRequestId;
     this.stoppedRequestIds.delete(requestId);
@@ -225,7 +250,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cancelActiveNexusRequest();
     this.isBotTyping = false;
     this.botStep = '';
-    this.nexusChatService.clearNexusSession().subscribe({
+    this.nexusChatService.clearNexusSession({ session_id: this.temporarySessionId() }).subscribe({
       next: () => this.resetChatView(),
       error: () => this.resetChatView(),
     });
@@ -351,18 +376,23 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.welcomeMessage().trim() || 'Hi there! How can I help you today?';
   }
 
-  private localHistoryForRequest(userMessage: string): Array<{ role: string; content: string }> {
-    const welcome = this.defaultWelcomeMessage();
-    return this.chatMessages
-      .slice(0, -1)
-      .filter(message => message.sender === 'user' || message.sender === 'bot')
-      .filter(message => message.text.trim() && message.text.trim() !== welcome)
-      .map(message => ({
-        role: message.sender === 'bot' ? 'assistant' : 'user',
-        content: message.text.trim()
-      }))
-      .filter(message => message.content !== userMessage.trim())
-      .slice(-8);
+  private temporarySessionId(): string {
+    return `temp:${this.routeHash(this.router.url.split('#')[0] || '/')}`;
+  }
+
+  private clearTemporarySession(sessionId: string): void {
+    if (!sessionId) {
+      return;
+    }
+    this.nexusChatService.clearNexusSession({ session_id: sessionId }).subscribe({ error: () => undefined });
+  }
+
+  private routeHash(value: string): string {
+    let hash = 0;
+    for (let index = 0; index < value.length; index += 1) {
+      hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
+    }
+    return Math.abs(hash).toString(36);
   }
 
   private scrollToNewMessage(): void {

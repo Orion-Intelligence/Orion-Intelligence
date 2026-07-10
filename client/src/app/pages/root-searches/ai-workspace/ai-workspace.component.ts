@@ -102,9 +102,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     const payload = {
+      session_id: 'default',
+      session_type: 'persistent' as const,
       message: text,
       report: this.contextQuery() || '',
       tool: 'open_chat',
+      type: 'default',
     };
 
     const requestId = ++this.chatRequestId;
@@ -424,6 +427,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   private persistChatHistory(): void {
     const history = this.buildChatHistoryPayload();
     this.api.post('update/current/user/chat-history', {
+      session_id: 'default',
+      session_type: 'persistent',
       chat_history: history,
     }).subscribe();
   }
