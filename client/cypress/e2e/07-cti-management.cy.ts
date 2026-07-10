@@ -39,10 +39,6 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     visitCtiGraph();
 
     cy.get('[data-testid="cti-graph-advanced-toggle"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-graph-adv-empty-state"]').filter(':visible').should('contain', 'No builder values selected');
-    cy.get('[data-testid="cti-graph-adv-clear-all"]').filter(':visible').first().should('be.disabled');
-    cy.get('[data-testid="cti-graph-adv-expand"]').filter(':visible').first().should('contain', 'Show filters').click();
-    cy.get('[data-testid="cti-graph-adv-expanded-modal"]').filter(':visible').first().should('be.visible');
     cy.get('[data-testid="cti-graph-adv-row"]').filter(':visible').first().should('exist');
     cy.get('[data-testid="cti-graph-adv-field-select"]').filter(':visible').first().click();
     cy.get('.ui-dropdown-menu input').filter(':visible').first().clear().type('Country');
@@ -53,10 +49,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="cti-graph-adv-operator-select"]').filter(':visible').eq(1).click();
     cy.contains('[role="option"]', 'OR').filter(':visible').first().click();
     cy.get('[data-testid="cti-graph-adv-value-input"]').filter(':visible').eq(1).clear().type('8.8.8.8');
-    cy.get('[data-testid="cti-graph-adv-expanded-execute"]').filter(':visible').first().click();
-    cy.get('[data-testid="cti-graph-adv-filter-chip"]').filter(':visible').should('have.length.at.least', 1);
-    cy.get('[data-testid="cti-graph-adv-clear-all"]').filter(':visible').first().should('not.be.disabled').click();
-    cy.get('[data-testid="cti-graph-adv-empty-state"]').filter(':visible').should('contain', 'No builder values selected');
+    cy.get('[data-testid="cti-graph-adv-execute"]').filter(':visible').first().click();
     waitForCtiGraphReady();
     cy.get('[data-testid="graph-sidebar-collapse"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-sidebar-expand"]').filter(':visible').first().click();

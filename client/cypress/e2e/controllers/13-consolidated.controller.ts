@@ -4,8 +4,6 @@ const DOMAIN_SCANNER_MODAL_TIMEOUT = 90000;
 const DOMAIN_SCANNER_SELECTOR = '[data-testid="domain-scanner-modal"]';
 const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'bbc.com', 'cnn.com'];
 const DOMAIN_SCANNER_INPUT_SELECTOR = '[data-testid="domain-scanner-input"]';
-const IOC_ADVANCED_MODAL_SELECTOR = '[data-testid="ioc-adv-expanded-modal"]';
-const IOC_ADVANCED_ROW_SELECTOR = `${IOC_ADVANCED_MODAL_SELECTOR}:visible [data-testid="ioc-adv-row"]:not(.ng-animating)`;
 export const CONSOLIDATED_TOGGLE_SELECTOR = '[data-testid="consolidated-section-see-more"]';
 export const RESULT_CARD_SELECTOR = '[data-testid="result-card"]';
 
@@ -27,56 +25,6 @@ function executeIocAdvancedSearch() {
     .click();
 }
 
-function getVisibleIocAdvancedRow(index: number) {
-  return cy.get(IOC_ADVANCED_ROW_SELECTOR).eq(index);
-}
-
-function selectIocAdvancedControl(rowIndex: number, testId: string, nativeValue: string, dropdownLabel: RegExp) {
-  getVisibleIocAdvancedRow(rowIndex).find(`[data-testid="${testId}"]`).scrollIntoView().then(($control) => {
-    const tagName = ($control[0] as HTMLElement).tagName.toLowerCase();
-    if (tagName === 'select') {
-      cy.wrap($control).select(nativeValue);
-      return;
-    }
-
-    cy.wrap($control).click({ force: true });
-    cy.contains('[role="option"]', dropdownLabel).filter(':visible').first().click({ force: true });
-  });
-}
-
-function typeIocAdvancedValue(rowIndex: number, value: string) {
-  getVisibleIocAdvancedRow(rowIndex)
-    .find('[data-testid="ioc-adv-value-input"]')
-    .scrollIntoView()
-    .clear()
-    .type(value);
-}
-
-function clickIocAdvancedRowButton(rowIndex: number, testId: string) {
-  getVisibleIocAdvancedRow(rowIndex)
-    .find(`[data-testid="${testId}"]`)
-    .scrollIntoView()
-    .should('be.visible')
-    .and('not.be.disabled')
-    .click({ force: true });
-}
-
-function openIocAdvancedBuilder() {
-  cy.get('body').then(($body) => {
-    if ($body.find('[data-testid="ioc-basic-search-input"]:visible').length > 0) {
-      cy.get('[data-testid="ioc-advanced-toggle"]').filter(':visible').first().scrollIntoView().click();
-    }
-  });
-
-  cy.get('body').then(($body) => {
-    if ($body.find(IOC_ADVANCED_ROW_SELECTOR).length === 0) {
-      cy.get('[data-testid="ioc-adv-expand"]').filter(':visible').first().scrollIntoView().click({ force: true });
-    }
-  });
-
-  cy.get(IOC_ADVANCED_ROW_SELECTOR).should('have.length.at.least', 1);
-}
-
 export function openHomepageAndSearch(query = '{enter}') {
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').click();
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().should('be.visible').click();
@@ -91,38 +39,6 @@ export function switchToDeepSearchTab() {
 
 export function switchToIocsTab() {
   cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click({ force: true });
-}
-
-export function selectIocResultTab(tab: 'stealers' | 'threats') {
-  const selector = `[data-testid="ioc-tab-${tab}"]`;
-  cy.get('body').then(($body) => {
-    if ($body.find(`${selector}:visible`).length > 0) {
-      cy.get(selector).filter(':visible').first().scrollIntoView().click({ force: true });
-    }
-  });
-}
-
-export function expandThreatRowsIfAvailable(maxRows = 3) {
-  cy.get('body').then(($body) => {
-    if ($body.find('[data-testid="ioc-tab-threats"]:visible').length === 0) {
-      return;
-    }
-
-    selectIocResultTab('threats');
-    cy.get('[data-testid="ioc-threat-table"]').scrollIntoView();
-    cy.get('[data-testid="ioc-threat-table"]').find('[data-testid="ioc-threat-row"]').should('have.length.greaterThan', 0).then(($rows) => {
-      const count = Math.min(maxRows, $rows.length);
-      for (let i = 0; i < count; i += 1) {
-        cy.get('[data-testid="ioc-threat-table"]')
-          .find('[data-testid="ioc-threat-row"]')
-          .eq(i)
-          .scrollIntoView()
-          .find('[data-testid="ioc-threat-row-toggle"]')
-          .first()
-          .click({ force: true });
-      }
-    });
-  });
 }
 
 export function searchInIocs(query: string) {
@@ -190,16 +106,9 @@ export function openFirstReportAndGoBack() {
 }
 
 export function runDomainScannerFlow() {
-  cy.get('body').then(($body) => {
-    if ($body.find('[data-testid="consolidated-tab-iocs"]').length === 0) {
-      cy.visit('/dashboard/profile/consolidated/all?page=1&tab=IOCs');
-      return;
-    }
-
-    cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click({ force: true });
-  });
+  cy.get('[data-testid="consolidated-tab-iocs"]').scrollIntoView().should('be.visible').click({ force: true });
   ensureDomainScannerModalOpen();
-  cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click({ force: true });
+  cy.get('[data-testid="domain-scanner-tab-subdomains"]').scrollIntoView().should('be.visible').click();
   cy.get('[data-testid="domain-scanner-live-toggle"]').should('exist').parents('label').first().click();
   cy.get(DOMAIN_SCANNER_INPUT_SELECTOR).scrollIntoView().should('be.visible').clear().type('abcderfghh');
   cy.get('[data-testid="domain-scanner-search-subdomains"]').click();
@@ -211,13 +120,13 @@ export function runDomainScannerFlow() {
     cy.get('[data-testid="domain-scanner-search-subdomains"]').should('not.be.disabled');
   });
 
-  cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click({ force: true });
+  cy.get('[data-testid="domain-scanner-tab-ip-lookup"]').scrollIntoView().should('be.visible').click();
   cy.get(DOMAIN_SCANNER_INPUT_SELECTOR).clear().type('1.1.1.1');
   cy.get('[data-testid="domain-scanner-lookup-ip"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
   cy.get('[data-testid="domain-scanner-lookup-ip"]').should('not.be.disabled');
 
   ensureDomainScannerModalOpen();
-  cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click({ force: true });
+  cy.get('[data-testid="domain-scanner-tab-wayback"]').scrollIntoView().should('be.visible').click();
   ensureDomainScannerModalOpen();
   cy.get(DOMAIN_SCANNER_INPUT_SELECTOR).should('be.visible').clear().type('example.com');
   cy.get('[data-testid="domain-scanner-search-wayback"]').scrollIntoView().should('be.visible').click();
@@ -239,7 +148,6 @@ export function applyPasswordSchemeAndValidate() {
   cy.get('[data-testid="password-scheme-search"]').scrollIntoView().click();
   cy.get('[data-testid="password-scheme-modal"]').should('not.exist');
 
-  selectIocResultTab('threats');
   cy.get('[data-testid="ioc-threat-table"]').scrollIntoView();
   cy.get('[data-testid="ioc-threat-table"]').find('[data-testid="ioc-threat-row"]').should('have.length.greaterThan', 0);
 }
@@ -330,35 +238,46 @@ export function runAdvancedFilterFlow() {
   cy.log('Advanced: open and test real/fake filters with add/delete');
   cy.get('[data-testid="dashboard-body"]').scrollTo('top', {ensureScrollable: false});
 
-  openIocAdvancedBuilder();
-  selectIocAdvancedControl(0, 'ioc-adv-tag-select', 'm_email', /email/i);
-  typeIocAdvancedValue(0, 'ydt.sja@gail.ccmm');
+  cy.get('[data-testid="ioc-adv-row"], [data-testid="ioc-basic-search-input"]').then(($els) => {
+    const hasVisibleAdvancedRow = $els.filter('[data-testid="ioc-adv-row"]:visible').length > 0;
+    if (!hasVisibleAdvancedRow) {
+      cy.get('[data-testid="ioc-advanced-toggle"]').filter(':visible').first().scrollIntoView().click();
+    }
+  });
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
+
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
+    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
+    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('ydt.sja@gail.ccmm');
+  });
   executeIocAdvancedSearch();
-  selectIocResultTab('stealers');
   cy.get('[data-testid="ioc-stealer-table"]').find('[data-testid="ioc-stealer-row"]').should('have.length.greaterThan', 0);
 
-  openIocAdvancedBuilder();
-  clickIocAdvancedRowButton(0, 'ioc-adv-add-filter');
-  cy.get(IOC_ADVANCED_ROW_SELECTOR).should('have.length.at.least', 2);
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').first().within(() => {
+    cy.get('[data-testid="ioc-adv-add-filter"]').scrollIntoView().click();
+  });
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 2);
 
-  selectIocAdvancedControl(1, 'ioc-adv-operator-select', '&&', /^(AND|&&)$/i);
-  selectIocAdvancedControl(1, 'ioc-adv-tag-select', 'm_email', /email/i);
-  typeIocAdvancedValue(1, 'fake-no-result-value-xyz@gmail.com');
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
+    cy.get('[data-testid="ioc-adv-operator-select"]').scrollIntoView().select('&&');
+    cy.scrollDashboardToTop()
+    cy.get('[data-testid="ioc-adv-tag-select"]').scrollIntoView().select('m_email');
+    cy.scrollDashboardToTop()
+    cy.get('[data-testid="ioc-adv-value-input"]').scrollIntoView().clear().type('fake-no-result-value-xyz@gmail.com');
+  });
   executeIocAdvancedSearch();
 
-  selectIocResultTab('stealers');
   cy.get('[data-testid="ioc-stealer-table"]').should(($shell) => {
     const rowCount = $shell.find('[data-testid="ioc-stealer-row"]').length;
     const emptyCount = $shell.find('.ui-ioc-table-empty').length;
     expect(rowCount === 0 || emptyCount > 0).to.eq(true);
   });
 
-  openIocAdvancedBuilder();
-  cy.get(IOC_ADVANCED_ROW_SELECTOR).should('have.length.at.least', 2);
-  clickIocAdvancedRowButton(1, 'ioc-adv-delete-filter');
-  cy.get(IOC_ADVANCED_ROW_SELECTOR).should('have.length', 1);
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').eq(1).within(() => {
+    cy.get('[data-testid="ioc-adv-delete-filter"]').scrollIntoView().click();
+  });
   executeIocAdvancedSearch();
-  selectIocResultTab('stealers');
+  cy.get('[data-testid="ioc-adv-row"]').filter(':visible').should('have.length.at.least', 1);
   cy.get('[data-testid="ioc-stealer-table"]').should(($shell) => {
     const rowCount = $shell.find('[data-testid="ioc-stealer-row"]').length;
     const emptyCount = $shell.find('.ui-ioc-table-empty').length;
@@ -366,6 +285,6 @@ export function runAdvancedFilterFlow() {
   });
 
   cy.get('[data-testid="ioc-advanced-toggle"]').filter(':visible').first().scrollIntoView().click();
-  cy.get(IOC_ADVANCED_MODAL_SELECTOR).should('not.exist');
+  cy.get('[data-testid="ioc-adv-row"]:visible').should('have.length', 0);
   cy.get('[data-testid="ioc-basic-search-input"]').filter(':visible').first().should('be.visible');
 }

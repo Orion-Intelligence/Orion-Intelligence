@@ -14,14 +14,6 @@ export interface GraphReportEdge {
 export interface GraphReportTableRow {
   title: string;
   values: Record<string, string>;
-  columns?: string[];
-  rows?: Record<string, string>[];
-  recordBlocks?: GraphReportRecordBlock[];
-}
-
-export interface GraphReportRecordBlock {
-  title: string;
-  values: Record<string, string>;
 }
 
 export interface GraphReportPayload {
