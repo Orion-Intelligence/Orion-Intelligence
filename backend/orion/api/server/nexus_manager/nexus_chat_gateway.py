@@ -76,9 +76,3 @@ class nexus_chat_gateway:
 
     async def clear_chat_history(self, payload: dict[str, Any], current_user):
         return await self._request("POST", "/v1/chats/history/clear", current_user, json_body=payload)
-
-    async def select_chat_context(self, payload: dict[str, Any], current_user) -> dict[str, Any]:
-        return await self._request_json("POST", "/v1/chats/history/context", current_user, json_body=payload)
-
-    async def append_chat_turn(self, payload: dict[str, Any], current_user) -> dict[str, Any]:
-        return await self._request_json("POST", "/v1/chats/history/append-turn", current_user, json_body=payload)
