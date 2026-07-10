@@ -20,11 +20,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
 import { NexusChatService } from '../../root-searches/ai-workspace/nexus-chat.service';
 import { ApiService } from '../../../shared/services/api.service';
+import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, FormsModule ,DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
+  imports: [NgOptimizedImage, NgClass, RouterLink, FormsModule, AsyncPipe, FormsModule, DashboardSidebarItemsComponent, SidebarSectionComponent, ConfirmationPopupComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
@@ -52,11 +53,14 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   aiChatSessions: AiChatSession[] = [];
   activeAiChatId: string | null = null;
   openedAiChatMenuId: string | null = null;
+  deleteAiChatTarget: AiChatSession | null = null;
+  renameAiChatTarget: AiChatSession | null = null;
+  renameAiChatDraft = '';
   aiChatSearchOpen = false;
   aiChatSearchQuery = '';
   sharingAiChatId: string | null = null;
 
-  constructor( protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly api: ApiService ) { }
+  constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly api: ApiService) { }
 
   ngOnInit() {
     const hasSavedSidebarPreference = typeof window !== 'undefined' && localStorage.getItem('isSidebarOpen') !== null;
@@ -281,38 +285,60 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   renameAiChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
 
-    const title = window.prompt('Rename chat', chat.title)?.trim();
+    this.renameAiChatTarget = chat;
+    this.renameAiChatDraft = chat.title;
+    this.closeAiChatMenu();
+  }
 
-    if (!title) {
-      this.closeAiChatMenu();
+  closeRenameAiChatPopup(): void {
+    this.renameAiChatTarget = null;
+    this.renameAiChatDraft = '';
+  }
+
+  confirmRenameAiChat(): void {
+    const title = this.renameAiChatDraft.trim();
+
+    if (!this.renameAiChatTarget || !title) {
       return;
     }
 
     window.dispatchEvent(new CustomEvent('nexus-ai-rename-chat', {
       detail: {
-        id: chat.id,
+        id: this.renameAiChatTarget.id,
         title,
       },
     }));
 
-    this.closeAiChatMenu();
+    this.closeRenameAiChatPopup();
+  }
+
+  onRenameBackdrop(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+
+    if (target?.dataset?.['role'] === 'backdrop') {
+      this.closeRenameAiChatPopup();
+    }
   }
 
   deleteAiChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
 
-    const ok = window.confirm(`Delete "${chat.title}"?`);
+    this.deleteAiChatTarget = chat;
+    this.closeAiChatMenu();
+  }
 
-    if (!ok) {
-      this.closeAiChatMenu();
+  confirmDeleteAiChat(confirmed: boolean): void {
+    const chat = this.deleteAiChatTarget;
+
+    this.deleteAiChatTarget = null;
+
+    if (!confirmed || !chat) {
       return;
     }
 
     window.dispatchEvent(new CustomEvent('nexus-ai-delete-chat', {
       detail: chat.id,
     }));
-
-    this.closeAiChatMenu();
   }
 
   toggleAiChatSearch(event?: Event): void {
