@@ -124,6 +124,7 @@ class arango_controller:
                 ["type"],
                 ["_from", "type"],
                 ["_to", "type"],
+                ["_from", "_to", "type"],
                 ["edge_type"],
                 ["entity_role"],
                 ["derived"],
