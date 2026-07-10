@@ -57,6 +57,8 @@ class NexusStreamManager:
                     "session_id": session_id,
                     "session_type": session_type or "persistent",
                 }
+                if auth_token:
+                    arguments["_auth_token"] = auth_token
                 if history:
                     arguments["history"] = history
                 payload = NexusRpcPayloadModel.tool_call(request_id=user_id if recoverable else "nexus-chat", name=selected_tool, arguments=arguments)

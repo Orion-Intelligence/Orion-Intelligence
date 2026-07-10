@@ -23,7 +23,6 @@ export class AiChatSidebarComponent {
   readonly chatSelected = output<AiChatSession>();
   readonly sessionUpdated = output<AiChatSession>();
   readonly chatDeleted = output<string>();
-
   openedChatMenuId: string | null = null;
   deleteChatTarget: AiChatSession | null = null;
   renameChatTarget: AiChatSession | null = null;

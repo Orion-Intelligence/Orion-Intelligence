@@ -24,8 +24,8 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
   private auditService = inject(AuditlogService);
   private helperService = inject(HelperService);
   private sidebarService = inject(SidebarService);
-  protected aiToolRoutingService = inject(AiToolRoutingService);
 
+  protected aiToolRoutingService = inject(AiToolRoutingService);
   protected data$ = this.auditService.auditData$;
   protected service = this.auditService;
 

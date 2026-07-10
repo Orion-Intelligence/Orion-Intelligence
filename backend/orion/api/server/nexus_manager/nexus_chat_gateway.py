@@ -88,6 +88,15 @@ class nexus_chat_gateway:
             current_user=current_user,
         )
 
+    async def get_chat_history(self, payload: dict[str, Any], current_user):
+        return await self._request(method="POST", path="/v1/chats/history/get", current_user=current_user, json_body=payload)
+
+    async def update_chat_history(self, payload: dict[str, Any], current_user):
+        return await self._request(method="POST", path="/v1/chats/history/update", current_user=current_user, json_body=payload)
+
+    async def clear_chat_history(self, payload: dict[str, Any], current_user):
+        return await self._request(method="POST", path="/v1/chats/history/clear", current_user=current_user, json_body=payload)
+
     async def send_message(self, chat_id: str, payload: dict[str, Any], current_user):
         return await self._request(
             method="POST",

@@ -272,9 +272,9 @@ fi
 docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" pull --include-deps --ignore-buildable --policy missing "${compose_up_services[@]}"
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --pull missing --force-recreate "${compose_up_services[@]}"
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up --pull missing --force-recreate "${compose_up_services[@]}"
 else
-    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up -d --pull missing "${compose_up_services[@]}"
+    docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" up --pull missing "${compose_up_services[@]}"
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
