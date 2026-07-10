@@ -5,14 +5,6 @@
 
       <div class="flex h-full min-h-0 items-stretch overflow-hidden">
         <div class="chat-support__window ui-ai-chat-surface-pattern flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
-          <div class="shrink-0 px-5 pt-4 max-[640px]:px-4">
-            <div class="flex flex-wrap gap-2">
-              <button type="button" (click)="shareChat()" [disabled]="isChatShareCreating() || !messages.length" class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-50">
-                <i [ngClass]="isChatShareCreating() ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'" class="bi text-[12px] leading-none"></i>
-                {{ 'Share' | translate }}
-              </button>
-            </div>
-          </div>
           <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
           <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
             @if (isLoadingHistory()) {

@@ -3,7 +3,6 @@ import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, comp
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ApiService } from '../../../shared/services/api.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
@@ -15,12 +14,6 @@ import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
-
-type ChatHistoryMessage = {
-  sender: AiWorkspaceMessage['sender'];
-  text: string;
-  time: string;
-};
 
 @Component({
   selector: 'app-ai-workspace',
@@ -40,7 +33,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly isSending = signal(false);
   protected readonly isLoadingHistory = signal(true);
   protected readonly isStreamingReply = signal(false);
-  protected readonly isChatShareCreating = signal(false);
   protected readonly streamingMessageId = signal<string | null>(null);
   protected readonly copiedMessageId = signal<string | null>(null);
   protected readonly nexusStep = signal('');
@@ -58,7 +50,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   activeChatId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
-  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
+  constructor(protected readonly appService: AppService, private readonly route: ActivatedRoute, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
   }
 
@@ -116,11 +108,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
                 ...session,
                 title: response.chat.title,
                 updatedAt: response.chat.updated_at,
+                isPinned: response.chat.is_pinned ?? false,
+                pinnedAt: response.chat.pinned_at ?? null,
                 messages: this.messages,
               }
               : session);
 
-          this.chatSessions = [...this.chatSessions].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+          this.chatSessions = this.sortChatSessions(this.chatSessions);
 
           this.notifyAiChatHistoryUpdated();
           this.isSending.set(false);
@@ -152,7 +146,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       next: (session) => {
         const mappedSession = this.mapSession(session);
 
-        this.chatSessions = [mappedSession, ...this.chatSessions];
+        this.chatSessions = this.sortChatSessions([
+          mappedSession,
+          ...this.chatSessions,
+        ]);
         this.activeChatId = mappedSession.id;
         this.messages = [];
 
@@ -224,10 +221,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       next: (session) => {
         const mappedSession = this.mapSession(session);
 
-        this.chatSessions = [
+        this.chatSessions = this.sortChatSessions([
           mappedSession,
           ...this.chatSessions.filter(chat => chat.id !== mappedSession.id),
-        ];
+        ]);
 
         this.activeChatId = mappedSession.id;
         this.messages = [];
@@ -238,25 +235,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.queueComposerResize();
         this.scrollToBottom();
       },
-    });
-  }
-
-  shareChat(): void {
-    const messages = this.buildChatHistoryPayload();
-    if (this.isChatShareCreating() || !messages.length) {
-      return;
-    }
-    this.isChatShareCreating.set(true);
-    this.api.post<{ path: string; }>('profile/chat-shares', {
-      messages,
-      expiresInHours: 168,
-    }).subscribe({
-      next: (share) => {
-        this.isChatShareCreating.set(false);
-        const url = new URL(share.path, window.location.origin).toString();
-        window.open(url, '_blank', 'noopener');
-      },
-      error: () => this.isChatShareCreating.set(false),
     });
   }
 
@@ -381,50 +359,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     };
   }
 
-  private buildChatHistoryPayload(): ChatHistoryMessage[] {
-    const filtered = this.messages.filter((message) => this.shouldPersistHistoryMessage(message));
-    let userOverflow = 0;
-    let botOverflow = 0;
-
-    for (const message of filtered) {
-      if (message.sender === 'user') {
-        userOverflow += 1;
-      }
-      else if (message.sender === 'bot') {
-        botOverflow += 1;
-      }
-    }
-
-    userOverflow = Math.max(0, userOverflow - 100);
-    botOverflow = Math.max(0, botOverflow - 100);
-
-    const kept: AiWorkspaceMessage[] = [];
-    for (const message of filtered) {
-      if (message.sender === 'user' && userOverflow > 0) {
-        userOverflow -= 1;
-        continue;
-      }
-      if (message.sender === 'bot' && botOverflow > 0) {
-        botOverflow -= 1;
-        continue;
-      }
-      kept.push(message);
-    }
-
-    return kept.map((message) => ({
-      sender: message.sender,
-      text: message.text,
-      time: message.time.toISOString(),
-    }));
-  }
-
-  private shouldPersistHistoryMessage(message: AiWorkspaceMessage): boolean {
-    if (message.sender === 'user' || message.sender === 'bot') {
-      return true;
-    }
-    return message.sender === 'error' && message.text.trim() === 'Message canceled.';
-  }
-
   private scrollToBottom(): void {
     requestAnimationFrame(() => {
       const container = this.messagesContainer?.nativeElement;
@@ -470,6 +404,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       id: session.id,
       title: session.title,
       updatedAt: session.updated_at,
+      isPinned: session.is_pinned ?? false,
+      pinnedAt: session.pinned_at ?? null,
       messages: [],
     };
   }
@@ -488,7 +424,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     this.nexusChatService.listChats().subscribe({
       next: (sessions) => {
-        this.chatSessions = sessions.map(session => this.mapSession(session));
+        this.chatSessions = this.sortChatSessions(sessions.map(session => this.mapSession(session)));
         this.activeChatId = null;
         this.messages = [];
         this.isLoadingHistory.set(false);
@@ -516,10 +452,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
               ...session,
               title: chat.title,
               updatedAt: chat.updated_at,
+              isPinned: chat.is_pinned ?? false,
+              pinnedAt: chat.pinned_at ?? null,
               messages: this.messages,
             }
             : session);
 
+        this.chatSessions = this.sortChatSessions(this.chatSessions);
         this.isLoadingHistory.set(false);
         this.cancelMessageEdit();
         this.queueComposerResize();
@@ -533,6 +472,22 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private notifyAiChatHistoryUpdated(): void {
     window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
+  }
+
+  private sortChatSessions(chats: AiChatSession[]): AiChatSession[] {
+    return [...chats].sort((a, b) => {
+      if (a.isPinned !== b.isPinned) {
+        return a.isPinned ? -1 : 1;
+      }
+
+      if (a.isPinned && b.isPinned) {
+        return new Date(b.pinnedAt || b.updatedAt).getTime() -
+          new Date(a.pinnedAt || a.updatedAt).getTime();
+      }
+
+      return new Date(b.updatedAt).getTime() -
+        new Date(a.updatedAt).getTime();
+    });
   }
 
   selectChat(session: AiChatSession): void {
@@ -607,8 +562,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       next: (updated) => {
         this.chatSessions = this.chatSessions.map(chat =>
           chat.id === updated.id
-            ? { ...chat, title: updated.title, updatedAt: updated.updated_at }
+            ? {
+              ...chat,
+              title: updated.title,
+              updatedAt: updated.updated_at,
+              isPinned: updated.is_pinned ?? false,
+              pinnedAt: updated.pinned_at ?? null,
+            }
             : chat);
+
+        this.chatSessions = this.sortChatSessions(this.chatSessions);
 
         window.dispatchEvent(new CustomEvent('nexus-ai-chat-history-updated'));
       },
