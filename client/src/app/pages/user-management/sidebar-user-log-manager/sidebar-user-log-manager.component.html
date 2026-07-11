@@ -1,15 +1,17 @@
-<div class="mb-[200px] w-full px-[32px] max-[1200px]:px-[15px] max-[943px]:px-[10px]" @fadeInDashboardItem>
+<div class="w-full px-[32px] pb-[100px] pt-3 max-[1200px]:px-[15px] max-[943px]:px-[10px] md:pt-4" @fadeInDashboardItem>
   @if (isFlushAllConfirmationOpen) {
     <app-confirmation-popup [message]="'Delete all log files?' | translate" (confirmed)="confirmFlushLogs($event)"></app-confirmation-popup>
   }
 
-  <section class="rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-760)] p-[15px]">
-    <div class="flex flex-wrap items-center justify-between gap-4">
+  <div class="ui-page-container w-full max-w-[2400px]">
+    <div class="flex flex-wrap items-center justify-between gap-3">
       <div>
-        <h1 class="text-[18px] font-semibold text-[var(--color-text1)]">{{ 'Log Manager' | translate }}</h1>
-        <div class="mt-1 text-[12px] text-[var(--color-text4)]">{{ response.total }} {{ 'entries' | translate }} - {{ response.files.length }} {{ 'files' | translate }}</div>
+        <h1 class="ui-page-title">{{ 'Log Manager' | translate }}</h1>
+        <p class="ui-page-description">{{ response.total }} {{ 'entries' | translate }} - {{ response.files.length }} {{ 'files' | translate }}</p>
       </div>
-      <div class="flex flex-wrap gap-2">
+      <div class="flex flex-wrap items-center justify-end gap-2 max-[760px]:w-full">
+        <app-ui-dropdown class="w-[180px] max-[760px]:w-full" testId="log-manager-type-filter" menuId="log-manager-type-filter-menu" [options]="typeOptions" [selected]="logType" [searchable]="false" [placeholder]="'All' | translate" (valueChange)="onLogTypeChange($event)"></app-ui-dropdown>
+        <app-ui-dropdown class="w-[180px] max-[760px]:w-full" testId="log-manager-date-filter" menuId="log-manager-date-filter-menu" [options]="dateOptions" [selected]="logDate" [searchable]="false" [placeholder]="'All dates' | translate" (valueChange)="onLogDateChange($event)"></app-ui-dropdown>
         <button type="button" class="inline-flex h-10 items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-[13px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="loadLogs()">
           <i class="bi bi-arrow-clockwise text-[13px]"></i>
           {{ 'Refresh' | translate }}
@@ -21,93 +23,69 @@
       </div>
     </div>
 
-    <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[180px_180px_auto]">
-      <label class="block">
-        <span class="mb-1 block text-[11px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Type' | translate }}</span>
-        <select class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[13px] text-[var(--color-text1)] outline-none" [(ngModel)]="logType" (change)="applyFilters()">
-          @for (type of typeOptions; track type) {
-            <option [value]="type">{{ type || ('All' | translate) }}</option>
-          }
-        </select>
-      </label>
-      <label class="block">
-        <span class="mb-1 block text-[11px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Date' | translate }}</span>
-        <select class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[13px] text-[var(--color-text1)] outline-none" [(ngModel)]="logDate" (change)="applyFilters()">
-          <option value="">{{ 'All dates' | translate }}</option>
-          @for (date of response.available_dates; track date) {
-            <option [value]="date">{{ date }}</option>
-          }
-        </select>
-      </label>
-      <div class="flex items-end gap-2">
-        <button type="button" class="h-10 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-[13px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="clearFilters()">{{ 'Clear' | translate }}</button>
+    @if (errorMessage) {
+      <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+        {{ errorMessage }}
       </div>
-    </div>
-  </section>
+    }
 
-  @if (errorMessage) {
-    <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
-      {{ errorMessage }}
-    </div>
-  }
-
-  <div class="mt-4">
-    <section class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] font-[Inter]">
-      <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-divider)] px-4 py-3">
-        <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Entries' | translate }}</div>
-        <div class="flex items-center gap-2 text-[12px] text-[var(--color-text4)]">
-          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page <= 1 || loading" (click)="previousPage()" aria-label="Previous page">
-            <i class="bi bi-chevron-left text-[11px]"></i>
-          </button>
-          <span>{{ page }} / {{ response.page_count || 1 }}</span>
-          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page >= response.page_count || loading" (click)="nextPage()" aria-label="Next page">
-            <i class="bi bi-chevron-right text-[11px]"></i>
-          </button>
-        </div>
-      </div>
-
-      @if (loading) {
-        <div class="overflow-x-auto" @fadeInDashboardItem>
-          <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
-            <div>{{ 'Type' | translate }}</div>
-            <div>{{ 'Time' | translate }}</div>
-            <div>{{ 'File' | translate }}</div>
-            <div>{{ 'Message' | translate }}</div>
-            <div>{{ 'Source' | translate }}</div>
+    <div class="mt-4">
+      <section class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] font-[Inter]">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-divider)] px-4 py-3">
+          <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Entries' | translate }}</div>
+          <div class="flex items-center gap-2 text-[12px] text-[var(--color-text4)]">
+            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page <= 1 || loading" (click)="previousPage()" aria-label="Previous page">
+              <i class="bi bi-chevron-left text-[11px]"></i>
+            </button>
+            <span>{{ page }} / {{ response.page_count || 1 }}</span>
+            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page >= response.page_count || loading" (click)="nextPage()" aria-label="Next page">
+              <i class="bi bi-chevron-right text-[11px]"></i>
+            </button>
           </div>
-          @for (row of [1,2,3,4,5,6]; track row) {
-            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[15px]">
-              <div class="ui-shimmer h-[18px] w-[58px] rounded-full bg-[var(--color-blue-720)]"></div>
-              <div class="ui-shimmer h-3 w-[92px] rounded bg-[var(--color-blue-720)]"></div>
-              <div class="ui-shimmer h-3 w-[112px] rounded bg-[var(--color-blue-720)]"></div>
-              <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
-              <div class="ui-shimmer h-[24px] w-[82%] rounded-[6px] bg-[var(--color-blue-720)]"></div>
-            </div>
-          }
         </div>
-      } @else if (!response.entries.length) {
-        <div class="px-4 py-8 text-center text-[13px] text-[var(--color-text4)]">{{ 'No logs found' | translate }}</div>
-      } @else {
-        <div class="overflow-x-auto" @fadeInDashboardItem>
-          <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
-            <div>{{ 'Type' | translate }}</div>
-            <div>{{ 'Time' | translate }}</div>
-            <div>{{ 'File' | translate }}</div>
-            <div>{{ 'Message' | translate }}</div>
-            <div>{{ 'Source' | translate }}</div>
-          </div>
-          @for (entry of response.entries; track entry.id) {
-            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[11px] text-[13px] leading-5 text-[var(--color-text1)] transition-colors hover:bg-[rgba(87,165,235,0.06)]">
-              <div class="flex min-h-[28px] items-center"><span class="inline-flex items-center rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase leading-none" [ngClass]="getTypeClass(entry.type)">{{ entry.type }}</span></div>
-              <div class="flex min-h-[28px] items-center text-[12.5px] font-medium text-[var(--color-text3)]">{{ entry.timestamp }}</div>
-              <div class="flex min-h-[28px] min-w-0 items-center truncate text-[12.5px] font-medium text-[var(--color-text3)]" [title]="entry.date + '/' + entry.file + ':' + entry.line">{{ entry.date }}/{{ entry.file }}:{{ entry.line }}</div>
-              <div class="min-w-0 break-words text-[13px] font-medium leading-[1.45] text-[var(--color-text2)]">{{ entry.message }}</div>
-              <div class="flex min-h-[28px] min-w-0 items-center truncate rounded-[6px] bg-[var(--color-blue-720)] px-2 py-1 text-[12px] font-medium text-[var(--color-text3)]" [title]="entry.caller">{{ entry.caller || '-' }}</div>
-            </div>
-          }
-        </div>
-      }
-    </section>
 
+        @if (loading) {
+          <div class="overflow-x-auto" @fadeInDashboardItem>
+            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
+              <div>{{ 'Type' | translate }}</div>
+              <div>{{ 'Time' | translate }}</div>
+              <div>{{ 'File' | translate }}</div>
+              <div>{{ 'Message' | translate }}</div>
+              <div>{{ 'Source' | translate }}</div>
+            </div>
+            @for (row of [1,2,3,4,5,6]; track row) {
+              <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[15px]">
+                <div class="ui-shimmer h-[18px] w-[58px] rounded-full bg-[var(--color-blue-720)]"></div>
+                <div class="ui-shimmer h-3 w-[92px] rounded bg-[var(--color-blue-720)]"></div>
+                <div class="ui-shimmer h-3 w-[112px] rounded bg-[var(--color-blue-720)]"></div>
+                <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
+                <div class="ui-shimmer h-[24px] w-[82%] rounded-[6px] bg-[var(--color-blue-720)]"></div>
+              </div>
+            }
+          </div>
+        } @else if (!response.entries.length) {
+          <div class="px-4 py-8 text-center text-[13px] text-[var(--color-text4)]">{{ 'No logs found' | translate }}</div>
+        } @else {
+          <div class="overflow-x-auto" @fadeInDashboardItem>
+            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
+              <div>{{ 'Type' | translate }}</div>
+              <div>{{ 'Time' | translate }}</div>
+              <div>{{ 'File' | translate }}</div>
+              <div>{{ 'Message' | translate }}</div>
+              <div>{{ 'Source' | translate }}</div>
+            </div>
+            @for (entry of response.entries; track entry.id) {
+              <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[11px] text-[13px] leading-5 text-[var(--color-text1)] transition-colors hover:bg-[rgba(87,165,235,0.06)]">
+                <div class="flex min-h-[28px] items-center"><span class="inline-flex items-center rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase leading-none" [ngClass]="getTypeClass(entry.type)">{{ entry.type }}</span></div>
+                <div class="flex min-h-[28px] items-center text-[12.5px] font-medium text-[var(--color-text3)]">{{ entry.timestamp }}</div>
+                <div class="flex min-h-[28px] min-w-0 items-center truncate text-[12.5px] font-medium text-[var(--color-text3)]" [title]="entry.date + '/' + entry.file + ':' + entry.line">{{ entry.date }}/{{ entry.file }}:{{ entry.line }}</div>
+                <div class="min-w-0 break-words text-[13px] font-medium leading-[1.45] text-[var(--color-text2)]">{{ entry.message }}</div>
+                <div class="flex min-h-[28px] min-w-0 items-center truncate rounded-[6px] bg-[var(--color-blue-720)] px-2 py-1 text-[12px] font-medium text-[var(--color-text3)]" [title]="entry.caller">{{ entry.caller || '-' }}</div>
+              </div>
+            }
+          </div>
+        }
+      </section>
+    </div>
   </div>
 </div>
