@@ -28,6 +28,7 @@ export interface TenantModel {
     profile_visibility_enabled?: boolean;
     event_management_enabled?: boolean;
     alerts_visible_to_admin?: boolean;
+    privileged_ioc?: boolean;
     alert_run_time?: string | null;
     accounts_mail_password?: string;
     accounts_mail?: string;

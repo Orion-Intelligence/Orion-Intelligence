@@ -6,15 +6,17 @@ import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
-import { TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
+import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { search_filter_labels } from '../../../../shared/constants/shared-enums';
+import { TenantIocSelectorComponent } from '../../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
 
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent],
+  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent, TenantIocSelectorComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })
@@ -27,6 +29,9 @@ export class ViewTenantComponent implements OnInit {
   isLoading = true;
   selectedTenantId: string | null = null;
   TenantStatus = TenantStatusValues;
+  isIocSelectorOpen = false;
+  activeIocTenant: any | null = null;
+  iocDraft: IocCategory[] = [];
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService) {
   }
@@ -64,6 +69,8 @@ export class ViewTenantComponent implements OnInit {
         this.tenants = (data || []).map((tenant: any) => ({
           ...tenant,
           verified: tenant.verified ?? false,
+          privileged_ioc: tenant.privileged_ioc ?? false,
+          _saved_privileged_ioc: tenant.privileged_ioc ?? false,
           user_quota: tenant.user_quota ?? 0,
           status: tenant.status === TenantStatusValues.ONBOARDING ||
                         tenant.status === TenantStatusValues.ACTIVE ||
@@ -95,13 +102,22 @@ export class ViewTenantComponent implements OnInit {
     }
   }
 
+  isAdmin(): boolean {
+    return this.licenseService.isAdmin();
+  }
+
   updateTenant(tenant: any): void {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];
     }
     this.isLoading = true;
-    this.apiService.post('update/tenants', tenant).subscribe({
-      next: () => {
+    this.apiService.post<any>('update/tenants', tenant).subscribe({
+      next: (res) => {
+        if (res?.tenant) {
+          tenant.iocs = res.tenant.iocs ?? tenant.iocs;
+          tenant.privileged_ioc = res.tenant.privileged_ioc ?? tenant.privileged_ioc;
+          tenant._saved_privileged_ioc = tenant.privileged_ioc ?? false;
+        }
         this.isLoading = false;
       },
       error: (_) => {
@@ -133,6 +149,75 @@ export class ViewTenantComponent implements OnInit {
 
   onTenantLicenseDropdownChange(tenant: any, licenses: string[]): void {
     tenant.licenses = licenses;
+  }
+
+  canManageTenantIocs(tenant: any): boolean {
+    return this.isAdmin() && tenant?.privileged_ioc !== true && tenant?._saved_privileged_ioc !== true;
+  }
+
+  getTenantIocCount(tenant: any): number {
+    return (tenant?.iocs || []).reduce((total: number, ioc: IocCategory) => total + (ioc.values?.length || 0), 0);
+  }
+
+  openIocSelector(tenant: any, event?: Event): void {
+    event?.stopPropagation();
+    if (!this.canManageTenantIocs(tenant)) {
+      return;
+    }
+    this.activeIocTenant = tenant;
+    this.iocDraft = this.buildIocDraft(tenant.iocs || []);
+    this.isIocSelectorOpen = true;
+  }
+
+  closeIocSelector(): void {
+    this.isIocSelectorOpen = false;
+    this.activeIocTenant = null;
+    this.iocDraft = [];
+  }
+
+  buildIocDraft(existingIocs: IocCategory[]): IocCategory[] {
+    const existingById = new Map<string, IocCategory>();
+    for (const ioc of existingIocs || []) {
+      existingById.set(ioc.ioc_id, ioc);
+    }
+    const keys = [...Object.keys(search_filter_labels)];
+    for (const ioc of existingIocs || []) {
+      if (ioc.ioc_id && !keys.includes(ioc.ioc_id)) {
+        keys.push(ioc.ioc_id);
+      }
+    }
+    return keys.map(key => {
+      const existing = existingById.get(key);
+      return {
+        ioc_id: key,
+        name: search_filter_labels[key] || existing?.name || key,
+        values: [...new Set((existing?.values || []).map(value => String(value).trim()).filter(Boolean))]
+      };
+    });
+  }
+
+  saveIocSelector(): void {
+    if (!this.activeIocTenant) {
+      return;
+    }
+    const selectedIocs = this.iocDraft.filter(ioc => ioc.values?.length > 0);
+    const payload = {
+      ...this.activeIocTenant,
+      iocs: selectedIocs
+    };
+    this.isLoading = true;
+    this.apiService.post<any>('update/tenants', payload).subscribe({
+      next: (res) => {
+        this.activeIocTenant.iocs = res?.tenant?.iocs ?? selectedIocs;
+        this.activeIocTenant.privileged_ioc = res?.tenant?.privileged_ioc ?? this.activeIocTenant.privileged_ioc;
+        this.activeIocTenant._saved_privileged_ioc = this.activeIocTenant.privileged_ioc ?? false;
+        this.isLoading = false;
+        this.closeIocSelector();
+      },
+      error: () => {
+        this.isLoading = false;
+      },
+    });
   }
 
   getTenantLicensesLabel(tenant: any): string {

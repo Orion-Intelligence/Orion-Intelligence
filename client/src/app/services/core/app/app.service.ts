@@ -77,6 +77,7 @@ export class AppService {
         profileVisibilityEnabled: true,
         eventManagementEnabled: false,
         alertsVisibleToAdmin: true,
+        privilegedIoc: false,
         alertRunTime: null,
         accountsMailPassword: '',
         accountsMail: '',

@@ -30,7 +30,7 @@
                       </button>
                     }
                     @if (licenseService.isMaintainer()) {
-                      <button data-testid="tenant-home-scan-all" (click)="scanIOCs()" [appTooltip]="'scan all' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('scan')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='scan' ? 'bg-[#cfe0f4]' : ''">
+                      <button data-testid="tenant-home-scan-all" (click)="scanIOCs()" [appTooltip]="isPrivilegedIoc() ? iocPermissionWarning : ('scan all' | translate)" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent" [disabled]="isPrivilegedIoc()" (mouseenter)="setHomeToolHover('scan')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='scan' ? 'bg-[#cfe0f4]' : ''">
                         <img alt="scan" height="20" ngSrc="../../../../assets/images/sidebar/theme/scanner.svg" width="20" class="ioc-action-icon" />
                       </button>
                     }
@@ -56,6 +56,11 @@
                   </button>
                 </div>
               </div>
+              @if (isPrivilegedIoc()) {
+                <div class="mt-3 rounded-[8px] border border-[#f59e0b55] bg-[#f59e0b14] px-3 py-2 text-[12px] font-medium text-[#f8c77e] [body.light-theme_&]:border-[#d7a44266] [body.light-theme_&]:bg-[#fff7e6] [body.light-theme_&]:text-[#805c16]">
+                  {{ iocPermissionWarning | translate }}
+                </div>
+              }
             }
             <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[12px]">
               <div class="risk-summary-card risk-summary-card--critical rounded-[8px] border border-[var(--color-border)] px-[16px] py-[14px]" [ngClass]="'bg-[#ff4c4c1a]'">

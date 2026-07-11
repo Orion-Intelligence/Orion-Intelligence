@@ -50,6 +50,7 @@ class db_tenant_model(Model):
     profile_visibility_enabled: bool = True
     event_management_enabled: bool = False
     alerts_visible_to_admin: bool = True
+    privileged_ioc: bool = False
     alert_run_time: Optional[str] = None
     accounts_mail_password: Optional[str] = None
     accounts_mail: Optional[str] = None
@@ -82,6 +83,7 @@ class TenantRequest(BaseModel):
     profile_visibility_enabled: Optional[bool] = None
     event_management_enabled: Optional[bool] = None
     alerts_visible_to_admin: Optional[bool] = None
+    privileged_ioc: Optional[bool] = None
     alert_run_time: Optional[str] = None
     password_reset_required: Optional[bool] = None
     accounts_mail_password: Optional[str] = None

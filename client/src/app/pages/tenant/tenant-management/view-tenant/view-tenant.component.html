@@ -195,6 +195,21 @@
                                       <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
                                     </span>
                                   </label>
+                                @if (isAdmin()) {
+                                  <label data-testid="tenant-privileged-ioc-toggle" class="flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
+                                    <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Privileged IOC' | translate }}</span>
+                                    <span class="pointer-events-none relative h-5 w-9 shrink-0">
+                                      <input type="checkbox" class="peer h-0 w-0 opacity-0" [(ngModel)]="tenant.privileged_ioc" />
+                                      <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
+                                    </span>
+                                  </label>
+                                }
+                                @if (canManageTenantIocs(tenant)) {
+                                  <button data-testid="tenant-ioc-selector-open" type="button" class="flex items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 text-left transition hover:border-sky-400/35" (click)="openIocSelector(tenant, $event)">
+                                    <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Add IOCs' | translate }}</span>
+                                    <span class="rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-2 py-0.5 text-[11px] font-semibold text-[#8bc6f7]">{{ getTenantIocCount(tenant) }}</span>
+                                  </button>
+                                }
                               </div>
                               <div class="mt-3 flex justify-end gap-2">
                                 <button data-testid="tenant-save-changes" type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">
@@ -308,6 +323,21 @@
                                       <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
                                     </span>
                                   </label>
+                          @if (isAdmin()) {
+                            <label data-testid="tenant-privileged-ioc-toggle" class="flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
+                                    <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Privileged IOC' | translate }}</span>
+                                    <span class="pointer-events-none relative h-5 w-9 shrink-0">
+                                      <input type="checkbox" class="peer h-0 w-0 opacity-0" [(ngModel)]="tenant.privileged_ioc" />
+                                      <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-200 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[2px] before:left-[2px] before:h-4 before:w-4 before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-200 peer-checked:before:translate-x-4"></span>
+                                    </span>
+                                  </label>
+                          }
+                          @if (canManageTenantIocs(tenant)) {
+                            <button data-testid="tenant-ioc-selector-open" type="button" class="mt-3 flex w-full items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 text-left transition hover:border-sky-400/35" (click)="openIocSelector(tenant, $event)">
+                              <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Add IOCs' | translate }}</span>
+                              <span class="rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-2 py-0.5 text-[11px] font-semibold text-[#8bc6f7]">{{ getTenantIocCount(tenant) }}</span>
+                            </button>
+                          }
                           <div class="mt-3 flex justify-end">
                             <button type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">{{ 'Save changes' | translate }}</button>
                           </div>
@@ -371,5 +401,17 @@
       </div>
     </div>
   </div>
+  @if (isIocSelectorOpen && activeIocTenant) {
+    <div data-testid="tenant-ioc-selector-overlay" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-4" (click)="closeIocSelector()">
+      <div data-testid="tenant-ioc-selector-modal" class="ui-popup-shell relative w-full max-w-[1000px] rounded-[16px] border border-[#fcfcfc12] bg-[#172235] p-8 shadow-2xl max-[1024px]:p-6" (click)="$event.stopPropagation()">
+        <app-tenant-ioc-selector [iocs]="iocDraft"></app-tenant-ioc-selector>
+
+        <div class="mt-4 flex justify-end gap-2 border-t border-[#fcfcfc0d] pt-3">
+          <button data-testid="tenant-ioc-selector-cancel" type="button" class="ui-btn ui-btn-secondary" (click)="closeIocSelector()">{{ 'common.actions.cancel' | translate }}</button>
+          <button data-testid="tenant-ioc-selector-save" type="button" class="ui-btn ui-btn-primary" (click)="saveIocSelector()">{{ 'Save changes' | translate }}</button>
+        </div>
+      </div>
+    </div>
+  }
   <span id="bottom"></span>
 </ng-container>

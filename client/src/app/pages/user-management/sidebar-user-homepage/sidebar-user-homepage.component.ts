@@ -46,6 +46,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   noIocPopup = signal(false);
   showAlertScanLoading = signal(false);
   isExportChoiceOpen = false;
+  readonly iocPermissionWarning = "You don't have permission to manage IOCs outside your domain. Ask your network administrator.";
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for alerts.', testId: 'home-alert-export-option-report' }];
 
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService) {
@@ -144,6 +145,13 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     return countFilterValues(categories);
   }
 
+  isPrivilegedIoc(): boolean {
+    const tenantPrivileged = this.appService.tenantData().privileged_ioc;
+    return tenantPrivileged === undefined
+      ? this.appService.userSessionData().tenant.privilegedIoc !== true
+      : tenantPrivileged !== true;
+  }
+
   editIocs() {
     this.router.navigate(['/dashboard/profile/ioc']).then();
   }
@@ -157,6 +165,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   scanIOCs() {
+    if (this.isPrivilegedIoc()) {
+      this.messageNotificationService.show(this.iocPermissionWarning);
+      return;
+    }
     const iocs = this.appService.tenantData().iocs;
     if (!iocs || iocs.length === 0) {
       this.noIocPopup.set(true);

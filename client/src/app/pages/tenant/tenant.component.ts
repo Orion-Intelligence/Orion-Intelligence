@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgClass } from '@angular/common';
 import { TenantModel, TenantStatusValues } from '../../shared/model/tenant/tenant.model';
@@ -6,32 +6,22 @@ import { search_filter_labels } from '../../shared/constants/shared-enums';
 import { Router } from '@angular/router';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../../services/core/app/app.service';
-import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
-import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { HeaderComponent } from '../../shared/partials/header/login-header/header.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
-import { getFirstFileFromInputEvent, readFileAsText } from '../../shared/utils/file-input.util';
-import { downloadIocCsvTemplate, IOC_CSV_MAX_FILE_SIZE_BYTES, isCsvFile, mergeIocCsvValues, parseIocCsv } from '../../shared/utils/ioc-csv.util';
-import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
+import { TenantIocSelectorComponent } from '../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
 
 @Component({
   selector: 'app-tenant',
-  imports: [FormsModule, CommonModule, TooltipDirective, ConfirmationPopupComponent, NgClass, HeaderComponent, TranslatePipe],
+  imports: [FormsModule, CommonModule, NgClass, HeaderComponent, TranslatePipe, TenantIocSelectorComponent],
   templateUrl: './tenant.component.html'
 })
 export class TenantComponent implements OnInit {
-  @ViewChild('categoryScroll', { static: false }) categoryScroll!: ElementRef;
   onboardingData: TenantModel = { id: '', name: '', iocs: [], phone: '', country: '', city: '', postal_code: '' };
   currentStep = 1;
-  showLeftFade = false;
-  showRightFade = false;
-  selectedCategoryId = '';
-  isConfirmationOpen: boolean = false;
-  iocSearchText: string = '';
   categories: Record<string, string[]> = {};
-  isIocCsvUploading = false;
+  readonly iocPermissionWarning = "You don't have permission to manage IOCs outside your domain. Ask your network administrator.";
 
-  constructor(private router: Router, public apiService: ApiService, public appService: AppService, private messageNotificationService: MessageNotificationService) {
+  constructor(private router: Router, public apiService: ApiService, public appService: AppService) {
   }
 
   ngOnInit(): void {
@@ -45,86 +35,13 @@ export class TenantComponent implements OnInit {
       name: search_filter_labels[key] || key,
       values: []
     }));
-    this.selectedCategoryId = this.onboardingData.iocs[0]?.ioc_id;
   }
 
-  onCategoryClick(categoryId: string): void {
-    this.selectedCategoryId = categoryId;
-  }
-
-  addIoc(value: string): void {
-    if (!value.trim() || !this.selectedCategoryId) {
-      return;
-    }
-    const category = this.onboardingData.iocs.find(c => c.ioc_id === this.selectedCategoryId);
-    if (category && !category.values.includes(value.trim())) {
-      category.values.push(value.trim());
-    }
-  }
-
-  async onIocCsvSelected(event: Event): Promise<void> {
-    const selectedFile = getFirstFileFromInputEvent(event);
-    if (!selectedFile) {
-      return;
-    }
-
-    selectedFile.input.value = '';
-
-    if (!isCsvFile(selectedFile.file)) {
-      this.messageNotificationService.show('Only CSV files are allowed.');
-      return;
-    }
-
-    if (selectedFile.file.size > IOC_CSV_MAX_FILE_SIZE_BYTES) {
-      this.messageNotificationService.show('IOC CSV file size must be 1 MB or less.');
-      return;
-    }
-
-    this.isIocCsvUploading = true;
-    void readFileAsText(selectedFile.file)
-      .then((content) => {
-        try {
-          const parsedCsv = parseIocCsv(content);
-          const addedCount = mergeIocCsvValues(this.onboardingData.iocs, parsedCsv);
-          if (addedCount === 0) {
-            this.messageNotificationService.show('No new IOC values found in the uploaded file.');
-            this.isIocCsvUploading = false;
-            return;
-          }
-
-          if (!this.selectedCategoryId && this.onboardingData.iocs.length) {
-            this.selectedCategoryId = this.onboardingData.iocs[0].ioc_id;
-          }
-
-          this.messageNotificationService.show(`${addedCount} IOC value${addedCount === 1 ? '' : 's'} imported.`, 'success');
-        }
-        catch(error) {
-          this.messageNotificationService.show(error instanceof Error ? error.message : 'Failed to import IOC CSV file.');
-          this.isIocCsvUploading = false;
-        }
-      })
-      .finally(() => {
-        this.isIocCsvUploading = false;
-      });
-  }
-
-  downloadIocTemplate(): void {
-    downloadIocCsvTemplate();
-  }
-
-  removeIoc(iocId: string, value: string): void {
-    const ioc = this.onboardingData.iocs.find(i => i.ioc_id === iocId);
-    if (ioc) {
-      ioc.values = ioc.values.filter(v => v !== value);
-    }
-  }
-
-  scrollLeft() {
-    this.categoryScroll.nativeElement.scrollBy({ left: -250, behavior: 'smooth' });
-  }
-
-  scrollRight() {
-    this.categoryScroll.nativeElement.scrollBy({ left: 250, behavior: 'smooth' });
+  isPrivilegedIoc(): boolean {
+    const tenantPrivileged = this.onboardingData.privileged_ioc ?? this.appService.tenantData().privileged_ioc;
+    return tenantPrivileged === undefined
+      ? this.appService.userSessionData().tenant.privilegedIoc !== true
+      : tenantPrivileged !== true;
   }
 
   goNext() {
@@ -143,19 +60,24 @@ export class TenantComponent implements OnInit {
     return this.onboardingData?.iocs?.some(ioc => ioc.values.length > 0) ?? false;
   }
 
-  getFilteredIocs() {
-    if (!this.iocSearchText) {
-      return this.onboardingData.iocs;
+  removeIoc(iocId: string, value: string): void {
+    if (this.isPrivilegedIoc()) {
+      return;
     }
-    return this.onboardingData.iocs.filter(ioc => ioc.name.toLowerCase().includes(this.iocSearchText.toLowerCase()));
+    const ioc = this.onboardingData.iocs.find(item => item.ioc_id === iocId);
+    if (ioc) {
+      ioc.values = ioc.values.filter(item => item !== value);
+    }
   }
 
   confirm() {
-    const filteredOnboardingData: TenantModel = {
+    const filteredOnboardingData = {
       name: this.onboardingData.name,
-      status: TenantStatusValues.ACTIVE,
-      iocs: this.onboardingData.iocs.filter(ioc => ioc.values && ioc.values.length > 0)
-    };
+      status: TenantStatusValues.ACTIVE
+    } as TenantModel;
+    if (!this.isPrivilegedIoc()) {
+      filteredOnboardingData.iocs = this.onboardingData.iocs.filter(ioc => ioc.values && ioc.values.length > 0);
+    }
     this.categories = {};
     this.onboardingData.iocs.forEach(ioc => {
       this.categories[ioc.ioc_id] = ioc.values;
@@ -174,7 +96,8 @@ export class TenantComponent implements OnInit {
           };
           this.appService.tenantData.set({
             name: (res.tenant?.name ?? this.appService.tenantData().name) || '',
-            iocs: (res.tenant?.iocs ?? this.appService.tenantData().iocs) || []
+            iocs: (res.tenant?.iocs ?? this.appService.tenantData().iocs) || [],
+            privileged_ioc: res.tenant?.privileged_ioc ?? this.appService.tenantData().privileged_ioc
           });
           this.appService.setOnboardingStatus(false);
           this.router.navigate(['/dashboard']).then();
@@ -182,28 +105,5 @@ export class TenantComponent implements OnInit {
         });
       },
     });
-  }
-
-  clearAllIocs(value: boolean): void {
-    if (value) {
-      if (this.onboardingData?.iocs) {
-        this.onboardingData.iocs.forEach(ioc => {
-          ioc.values = [];
-        });
-      }
-      const filteredOnboardingData: TenantModel = {
-        name: this.onboardingData?.name || '',
-        iocs: []
-      };
-      this.appService.tenantData.set({ ...filteredOnboardingData });
-      this.isConfirmationOpen = false;
-    }
-    else {
-      this.isConfirmationOpen = false;
-    }
-  }
-
-  openConfirmationPopup() {
-    this.isConfirmationOpen = true;
   }
 }
