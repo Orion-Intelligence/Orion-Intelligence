@@ -302,7 +302,7 @@ class alert_job:
             }
         except Exception as exc:
             self._alert_buffer.clear(tenant_key)
-            log.error(f"Alert generation job failed for tenant {tenant_id}: {exc}")
+            log.g().e(f"Alert generation job failed for tenant {tenant_id}: {exc}")
         finally:
             self._cancellation_service.clear(tenant_key)
             await self._alert_manager.getInstance().set_scan_running(tenant_id, False)

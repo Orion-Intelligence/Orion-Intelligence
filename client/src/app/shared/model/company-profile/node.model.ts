@@ -86,6 +86,7 @@ export interface AlertModel {
     risk?: string;
     all_ioc?: AlertAllIoc[];
     content_types?: string[];
+    raw_findings?: Record<string, unknown>;
     status?: 'ignore' | 'active';
     first_seen?: Date;
     last_seen?: Date;

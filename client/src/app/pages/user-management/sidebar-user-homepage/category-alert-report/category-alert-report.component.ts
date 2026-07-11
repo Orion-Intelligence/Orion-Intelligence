@@ -24,10 +24,11 @@ import { ExportChoiceOption } from '../../../../shared/model/report/export-choic
 import { AlertExportService } from '../../../../shared/services/export/alert-export.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { CategoryAlertDetailDrawerComponent } from './alert-detail-drawer/category-alert-detail-drawer.component';
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent, TranslatePipe, CategoryAlertDetailDrawerComponent],
   templateUrl: './category-alert-report.component.html',
 })
 export class CategoryAlertReportComponent implements OnInit {
@@ -574,6 +575,7 @@ export class CategoryAlertReportComponent implements OnInit {
       url: alert.url || 'N/A',
       entity: entity,
       contentTypes: alert.content_types || [],
+      rawFindings: alert.raw_findings || {},
 
       allIOC: alert.all_ioc || [],
       detectedOn: alert.first_seen || new Date(),
@@ -810,8 +812,7 @@ export class CategoryAlertReportComponent implements OnInit {
     const contentTypeFilter = this.normalizeFilterValue(this.activeAlertFilters['content_type']);
     if (contentTypeFilter && contentTypeFilter !== 'all') {
       result = result.filter(alert => (alert.contentTypes || []).some(value =>
-        this.normalizeFilterValue(value).includes(contentTypeFilter)
-      ));
+        this.normalizeFilterValue(value).includes(contentTypeFilter)));
     }
 
     const riskFilter = this.normalizeFilterValue(this.activeAlertFilters['risk']);
@@ -865,14 +866,13 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   private toDropdownOptions(values: unknown[]): { key: string; label: string }[] {
-    const uniqueValues = Array.from(new Set(
-      values
-        .map(value => String(value ?? '').trim())
-        .filter(value => value && !['-', 'n/a', 'none', 'null', 'undefined'].includes(value.toLowerCase()))
-    )).sort((left, right) => left.localeCompare(right));
+    const uniqueValues = Array.from(new Set(values
+      .map(value => String(value ?? '').trim())
+      .filter(value => value && !['-', 'n/a', 'none', 'null', 'undefined'].includes(value.toLowerCase())))).sort((left, right) => left.localeCompare(right));
 
     return uniqueValues.map(value => ({ key: value, label: value }));
   }
+
   private getAlertSearchText(alert: CategoryAlerts): string {
     const iocText = (alert.allIOC || [])
       .flatMap(ioc => [ioc.name, this.iocTypes[ioc.name], ...(ioc.values || [])])

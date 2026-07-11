@@ -10,7 +10,6 @@ from orion.api.interactive.search_manager.search_data_model.dump.search_credenti
 )
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import (
     search_dynamic_crack_model,
-    search_dynamic_param_model,
     search_dynamic_social_model,
 )
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
@@ -23,6 +22,7 @@ ALERT_CATEGORIES = [
     "social",
     "discussion",
     "stealerlogs",
+    "email-breach",
     "feed",
     "scanning",
 ]
@@ -36,6 +36,7 @@ class CategorySearchConfig:
     search_data_category: str = "all"
     blocked_categories: list[str] | None = None
     allowed_categories: list[str] | None = None
+    allowed_ioc_types: list[str] | None = None
 
 
 CATEGORY_SEARCH_CONFIG: dict[str, CategorySearchConfig] = {
@@ -82,6 +83,11 @@ CATEGORY_SEARCH_CONFIG: dict[str, CategorySearchConfig] = {
         param_model=search_credential_param_model,
         search_method="search_stealer_iocs",
     ),
+    "email-breach": CategorySearchConfig(
+        param_model=search_credential_param_model,
+        search_method="search_stealer_iocs",
+        allowed_ioc_types=["m_email"],
+    ),
 }
 
 
@@ -94,12 +100,10 @@ class DynamicScanRule:
     build_payload: Callable[[str], dict[str, Any]]
 
 
-def _is_email(ioc_type: str, ioc_value: str) -> bool:
-    return ioc_type == "m_email" and "@" in ioc_value
-
-
 def _is_playstore_url(ioc_type: str, ioc_value: str) -> bool:
-    return ioc_type == "m_url" and bool(
+    if ioc_type == "m_software":
+        return True
+    return ioc_type == "m_playstore_url" and bool(
         re.search(r"play\.google\.com\/store\/apps\/details", ioc_value, re.IGNORECASE)
     )
 
@@ -109,17 +113,10 @@ def _is_social_ioc(ioc_type: str, _: str) -> bool:
 
 
 def _is_company_name(ioc_type: str, _: str) -> bool:
-    return ioc_type == "m_company_name"
+    return ioc_type in ["m_company_name", "m_software"]
 
 
 DYNAMIC_SCAN_RULES: tuple[DynamicScanRule, ...] = (
-    DynamicScanRule(
-        scan_type="email-breach",
-        category="user",
-        model=search_dynamic_param_model,
-        matches=_is_email,
-        build_payload=lambda value: {"username": value.split("@")[0], "email": value},
-    ),
     DynamicScanRule(
         scan_type="playstore-scanning",
         category="cracked",

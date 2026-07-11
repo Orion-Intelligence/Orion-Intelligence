@@ -52,6 +52,7 @@ export interface CategoryAlerts {
     url: string;
     entity: string;
     contentTypes: string[];
+    rawFindings?: Record<string, unknown>;
     allIOC: AlertAllIoc[];
     detectedOn: Date;
     resultDate?: Date | null;
