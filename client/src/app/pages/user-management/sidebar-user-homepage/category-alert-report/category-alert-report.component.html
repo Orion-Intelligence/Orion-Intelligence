@@ -166,7 +166,7 @@
     }
 
     @if (!isLoadingMoreAlerts && !isInitialLoading && visibleFilteredAlerts.length==0) {
-      <app-empty-result class="category_report_empty-result p-0 m-0"></app-empty-result>
+      <app-empty-result class="category_report_empty-result p-0 m-0 [&_.empty-result-card]:max-w-none"></app-empty-result>
     }
 
     <div class="alert-card-stagger-list category_report_alerts mt-3 grid grid-cols-[repeat(auto-fill,minmax(460px,1fr))] gap-[14px]">
@@ -174,11 +174,11 @@
         <div data-testid="tenant-alert-report-card" class="alert-card-stagger-item category_report_alert-card">
           <div class="category_report_alert-header">
             <div class="category_report_alert-card-top">
-              <span class="category_report_flex" [ngClass]="'category_report_alert-label-' + (item.risk.toLowerCase())">
+              <span class="category_report_flex" [ngClass]="getRiskLabelClass(item.risk)">
                 <div class="category_report_status-icon" [ngClass]="getRiskIconColorClass(item.risk)">
                   <i class="bi" [ngClass]="getRiskIcon(item.risk)" aria-hidden="true"></i>
                 </div>
-                {{ item.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
+                {{ item.risk === 'Not Found' ? item.risk : item.risk + ' ' + ('categoryAlerts.fields.risk' | translate) }}
               </span>
               <span class="category_report_alert-date">{{ getAlertCardDate(item) | date:'MM/dd/yyyy' }}</span>
             </div>
@@ -254,9 +254,9 @@
         </div>
       }
     </div>
-    @if (canLoadMoreAlerts()) {
-      <div class="mt-3 flex w-full items-center justify-center">
-        <button type="button" [disabled]="isLoadingMoreAlerts" (click)="loadMoreAlerts()" class="rounded-md border border-[var(--color-border)] bg-transparent px-4 py-2 text-[12px] font-semibold text-[var(--color-text3)] transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-70">
+    @if (canLoadMoreAlerts() && visibleFilteredAlerts.length > 0) {
+      <div class="mb-5 mt-5 flex w-full items-center justify-center">
+        <button type="button" [disabled]="isLoadingMoreAlerts" (click)="loadMoreAlerts()" class="min-h-14 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-3 text-[13px] font-bold uppercase tracking-[0.08em] text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] transition-[background-color,color] duration-200 hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:bg-[var(--color-blue-700)] disabled:text-[var(--color-text4)] disabled:shadow-none">
           {{ (isLoadingMoreAlerts ? 'common.actions.loading' : 'common.actions.loadMore') | translate }}
         </button>
       </div>
@@ -279,7 +279,7 @@
 
   @if (filterModel) {
     <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%]': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
-      <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel" dropdownSurface="alert" (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+      <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel" (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }
 

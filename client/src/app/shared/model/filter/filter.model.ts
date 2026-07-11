@@ -11,6 +11,8 @@ export interface FilterOption {
     max?: number;
     placeholder?: string;
     suggestionSource?: string;
+    suggestionEndpoint?: string;
+    suggestionParams?: Record<string, string>;
 }
 export interface FilterModel {
     filters: Record<string, FilterOption>;

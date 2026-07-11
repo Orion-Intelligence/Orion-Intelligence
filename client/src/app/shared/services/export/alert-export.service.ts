@@ -67,7 +67,7 @@ export class AlertExportService {
   private buildAlertRecordBlock(alert: AlertModel, index: number): GraphReportRecordBlock {
     const title = this.firstText(alert.title, alert.ioc_value, alert.type, `Alert ${index + 1}`);
     const values: Record<string, string> = {};
-    this.addField(values, 'Risk', this.getRiskLevel(alert.type || ''));
+    this.addField(values, 'Risk', this.getRiskLevel(alert.type || '', alert.risk));
     this.addField(values, 'Category', alert.type);
     this.addField(values, 'Title', alert.title, 260);
     this.addField(values, 'Description', alert.description, 700);
@@ -281,8 +281,16 @@ export class AlertExportService {
       .replace(/\b\w/g, c => c.toUpperCase());
   }
 
-  private getRiskLevel(type: string): string {
-    switch ((type || '').toLowerCase().trim()) {
+  private getRiskLevel(type: string, risk?: string): string {
+    const alertRisk = this.formatRisk(risk);
+    if (alertRisk) {
+      return alertRisk;
+    }
+    const normalized = (type || '').toLowerCase().trim();
+    if (normalized === 'vulnerability-scanning') {
+      return 'Not Found';
+    }
+    switch (normalized) {
       case 'breach':
       case 'exploit':
       case 'malware':
@@ -306,5 +314,13 @@ export class AlertExportService {
       default:
         return 'Unknown';
     }
+  }
+
+  private formatRisk(value?: string): string {
+    const normalized = (value || '').trim().toLowerCase();
+    if (!normalized) {
+      return '';
+    }
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
   }
 }

@@ -19,7 +19,24 @@ export class SuggestionService {
       .pipe(tap(data => this.cache = data));
   }
 
-  loadSuggestion(source: string, field: string, query: string): Observable<string[]> {
+  loadSuggestion(source: string | undefined, field: string, query: string, endpoint?: string, extraParams?: Record<string, string>): Observable<string[]> {
+    if (endpoint) {
+      let params = new HttpParams()
+        .set('field', field)
+        .set('q', query.trim())
+        .set('limit', query.trim() ? '25' : '50');
+      Object.entries(extraParams || {}).forEach(([key, value]) => {
+        if (value) {
+          params = params.set(key, value);
+        }
+      });
+      return this.apiService.get<{ values: string[] }>(endpoint, { params })
+        .pipe(map(response => response.values || []));
+    }
+
+    if (!source) {
+      return of([]);
+    }
     const suggestionSource = this.suggestionSources[source];
     if (!suggestionSource || !suggestionSource.fields.has(field)) {
       return of([]);

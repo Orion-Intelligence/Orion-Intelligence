@@ -158,8 +158,6 @@ class VulnerabilityScanResultMapper:
         source = finding.get("source") or "Orion Network Intel"
 
         content_types = [str(finding_category)]
-        if risk:
-            content_types.append(str(risk).lower())
 
         all_ioc = [
             alert_all_ioc(name=ioc_type, values=[ioc_value]),
@@ -190,6 +188,7 @@ class VulnerabilityScanResultMapper:
             "description": description,
             "url": url,
             "source": source,
+            "risk": str(risk).strip(),
             "content_types": content_types,
             "all_ioc": all_ioc,
             "data_hash": data_hash,

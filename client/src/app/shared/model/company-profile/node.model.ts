@@ -83,6 +83,7 @@ export interface AlertModel {
     description?: string;
     url?: string;
     source?: string;
+    risk?: string;
     all_ioc?: AlertAllIoc[];
     content_types?: string[];
     status?: 'ignore' | 'active';

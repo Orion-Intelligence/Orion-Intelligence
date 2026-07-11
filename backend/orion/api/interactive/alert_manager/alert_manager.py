@@ -273,6 +273,8 @@ class AlertManager:
 
                 existing_alert = existing_index.get(key)
                 if existing_alert:
+                    if payload.get("risk"):
+                        existing_alert.risk = payload.get("risk", "")
                     existing_alert.last_seen = now
                     updated_count += 1
                     continue
@@ -287,6 +289,7 @@ class AlertManager:
                     description=payload.get("description", ""),
                     url=payload.get("url", ""),
                     source=payload.get("source", ""),
+                    risk=payload.get("risk", ""),
                     content_types=payload.get("content_types", []),
                     status=alert_status.ACTIVE,
                     first_seen=now,
@@ -312,7 +315,8 @@ class AlertManager:
             source: str,
             all_ioc: List[alert_all_ioc],
             content_types: List[str],
-            data_hash=''):
+            data_hash='',
+            risk: str = ''):
 
         if (data_hash == ''):
             data_hash = self._smart_hash(category, ioc_type, ioc_value, source, url)
@@ -343,6 +347,7 @@ class AlertManager:
                 description=description,
                 url=url,
                 source=source,
+                risk=risk,
                 content_types=content_types,
                 status=alert_status.ACTIVE,
                 first_seen=datetime.now(timezone.utc),
@@ -383,6 +388,7 @@ class AlertManager:
             description=data.description or '',
             source=data.source or '',
             url=data.url or '',
+            risk=data.risk or '',
             all_ioc=all_ioc,
             content_types=data.content_types or [],
             status=data.status or alert_status.ACTIVE,
@@ -398,6 +404,7 @@ class AlertManager:
                     alert.description = new_alert.description
                     alert.source = new_alert.source
                     alert.url = new_alert.url
+                    alert.risk = new_alert.risk
                     alert.all_ioc = new_alert.all_ioc
                     alert.content_types = new_alert.content_types
                     alert.status = new_alert.status
@@ -502,18 +509,7 @@ class AlertManager:
         return {"message": "Alert deleted successfully", "id": id}
 
     def _to_notification_item(self, alert: AlertModel) -> dict[str, Any]:
-        normalized = (alert.type or "").lower()
-        if normalized in {"general", "seo scanning"}:
-            risk = "Low"
-        elif normalized in {"breach", "exploit", "malware", "feed", "playstore-scanning", "social-scanner",
-            "email-breach", "stealerlogs", "software-scanning", "vulnerability-scanning"}:
-            risk = "Critical"
-        elif normalized in {"defacement", "advanced scanning", "repo scanning"}:
-            risk = "High"
-        elif normalized in {"social", "discussion"}:
-            risk = "Medium"
-        else:
-            risk = "Unknown"
+        risk = AlertSummaryHelper.risk_from_alert(alert).title()
 
         return {
             "categoryName": alert.type or "",
@@ -526,6 +522,52 @@ class AlertManager:
             "type": alert.type or "",
             "reportSeen": bool(alert.report_seen),
         }
+
+    @staticmethod
+    def filter_option_values(alerts: list[AlertModel], field: str, query: str = "", limit: int = 25) -> list[str]:
+        field = str(field or "").strip()
+        query = str(query or "").strip().lower()
+        try:
+            limit = min(max(int(limit or 25), 1), 50)
+        except (TypeError, ValueError):
+            limit = 25
+        if field != "content_type":
+            return []
+
+        values: list[str] = []
+        for alert in alerts or []:
+            values.extend(str(value) for value in (alert.content_types or []))
+
+        seen: set[str] = set()
+        filtered_values: list[str] = []
+        for value in values:
+            clean_value = value.strip()
+            normalized = clean_value.lower()
+            if not clean_value or normalized in {"-", "n/a", "none", "null", "undefined"}:
+                continue
+            if query and query not in normalized:
+                continue
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            filtered_values.append(clean_value)
+
+        return sorted(filtered_values, key=str.lower)[:limit]
+
+    async def get_alert_filter_options(
+            self,
+            current_user,
+            field: str,
+            query: str = "",
+            limit: int = 25,
+            alert_type: str | None = None) -> dict[str, list[str]]:
+        alerts_data = await self._engine.find_one(
+            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
+        alerts = visible_alerts(alerts_data.alerts if alerts_data and alerts_data.alerts else [])
+        if alert_type:
+            normalized_type = alert_type.strip().lower()
+            alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
+        return {"values": self.filter_option_values(alerts, field, query, limit)}
 
     async def getAllAlerts(
             self,

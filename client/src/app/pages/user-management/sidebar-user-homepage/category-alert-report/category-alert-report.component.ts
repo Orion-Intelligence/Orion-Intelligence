@@ -34,7 +34,7 @@ export class CategoryAlertReportComponent implements OnInit {
   private appendTimer: ReturnType<typeof setTimeout> | null = null;
   private alertLookupById = new Map<string, AlertModel>();
 
-  filterModel: FilterModel = alert_filters;
+  filterModel: FilterModel = structuredClone(alert_filters);
   alerts: CategoryAlerts[] = []
   filteredAlerts: CategoryAlerts[] = []
   visibleFilteredAlerts: CategoryAlerts[] = [];
@@ -45,6 +45,7 @@ export class CategoryAlertReportComponent implements OnInit {
   isLoadingMoreAlerts: boolean = false;
   isInitialLoading: boolean = false;
   activeDateRange: string | null = null;
+  activeAlertFilters: Record<string, string | null> = {};
   searchText: string = '';
   category: string = '';
   iocTypes: Record<string, string> = { ...search_filter_labels };
@@ -169,6 +170,7 @@ export class CategoryAlertReportComponent implements OnInit {
         this.currentPage = response?.page || nextPage;
         this.hasMoreAlerts = !!response?.has_more;
         this.alerts = reset ? convertedItems : [...this.alerts, ...convertedItems];
+        this.refreshAlertFilterOptions();
         this.isInitialLoading = false;
 
         if (this.activeDateRange || this.searchText.trim()) {
@@ -354,6 +356,7 @@ export class CategoryAlertReportComponent implements OnInit {
     this.alerts = [];
     this.filteredAlerts = [];
     this.visibleFilteredAlerts = [];
+    this.refreshAlertFilterOptions();
     this.loadAlertsPage(true);
   }
 
@@ -562,7 +565,7 @@ export class CategoryAlertReportComponent implements OnInit {
       id: alert.alert_id || '',
       seen: alert.report_seen || false,
       custom: alert.custom_alert || false,
-      risk: this.getRiskLevel(alert.type!),
+      risk: this.getRiskLevel(alert.type!, alert.risk),
       category: alert.type || 'unknown',
       title: alert.title || 'No Title',
       description: alert.description || 'No description provided.',
@@ -570,6 +573,7 @@ export class CategoryAlertReportComponent implements OnInit {
       source: alert.source || 'N/A',
       url: alert.url || 'N/A',
       entity: entity,
+      contentTypes: alert.content_types || [],
 
       allIOC: alert.all_ioc || [],
       detectedOn: alert.first_seen || new Date(),
@@ -618,8 +622,8 @@ export class CategoryAlertReportComponent implements OnInit {
     return ['-', 'n/a', 'none', 'null', 'undefined'].includes(text.toLowerCase()) ? '' : text;
   }
 
-  getRiskLevel(type: string): string {
-    return this.sidebarHomepageService.getRiskLevel(type);
+  getRiskLevel(type: string, risk?: string): string {
+    return this.sidebarHomepageService.getRiskLevel(type, risk);
   }
 
   getRiskIcon(risk: string): string {
@@ -648,8 +652,15 @@ export class CategoryAlertReportComponent implements OnInit {
       case 'low':
         return 'category_report_status-low';
       default:
-        return 'category_report_status-low';
+        return '';
     }
+  }
+
+  getRiskLabelClass(risk: string): string {
+    const normalized = (risk || '').toLowerCase();
+    return ['critical', 'high', 'medium', 'low'].includes(normalized)
+      ? `category_report_alert-label-${normalized}`
+      : '';
   }
 
   sliceString(text: string, maxLength: number): string {
@@ -772,6 +783,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   applyFilter(filters: Record<string, string | null>) {
+    this.activeAlertFilters = { ...filters };
     const range = filters['daterange'];
     this.activeDateRange = range || null;
     this.applyCurrentFilters();
@@ -795,6 +807,18 @@ export class CategoryAlertReportComponent implements OnInit {
       });
     }
 
+    const contentTypeFilter = this.normalizeFilterValue(this.activeAlertFilters['content_type']);
+    if (contentTypeFilter && contentTypeFilter !== 'all') {
+      result = result.filter(alert => (alert.contentTypes || []).some(value =>
+        this.normalizeFilterValue(value).includes(contentTypeFilter)
+      ));
+    }
+
+    const riskFilter = this.normalizeFilterValue(this.activeAlertFilters['risk']);
+    if (riskFilter && riskFilter !== 'all') {
+      result = result.filter(alert => this.normalizeFilterValue(alert.risk) === riskFilter);
+    }
+
     const query = this.searchText.trim().toLowerCase();
     if (query) {
       result = result.filter(alert => this.getAlertSearchText(alert).includes(query));
@@ -804,6 +828,51 @@ export class CategoryAlertReportComponent implements OnInit {
     this.visibleFilteredAlerts = [...result];
   }
 
+  private normalizeFilterValue(value: unknown): string {
+    return String(value ?? '').trim().toLowerCase();
+  }
+
+  private refreshAlertFilterOptions(): void {
+    const suggestionEndpoint = this.getAlertFilterOptionsEndpoint();
+    const suggestionParams: Record<string, string> | undefined = this.category
+      ? { alert_type: this.category }
+      : undefined;
+    this.filterModel = {
+      ...this.filterModel,
+      filters: {
+        ...this.filterModel.filters,
+        content_type: {
+          ...this.filterModel.filters['content_type'],
+          options: this.toDropdownOptions(this.collectContentTypes()),
+          suggestionEndpoint,
+          suggestionParams
+        },
+      }
+    };
+  }
+
+  private getAlertFilterOptionsEndpoint(): string | undefined {
+    if (this.isAdminTenantAlertReport) {
+      return this.adminTenantId
+        ? `tenants/${encodeURIComponent(this.adminTenantId)}/alerts/filter-options`
+        : undefined;
+    }
+    return 'profile/alerts/filter-options';
+  }
+
+  private collectContentTypes(): string[] {
+    return this.alerts.flatMap(alert => alert.contentTypes || []);
+  }
+
+  private toDropdownOptions(values: unknown[]): { key: string; label: string }[] {
+    const uniqueValues = Array.from(new Set(
+      values
+        .map(value => String(value ?? '').trim())
+        .filter(value => value && !['-', 'n/a', 'none', 'null', 'undefined'].includes(value.toLowerCase()))
+    )).sort((left, right) => left.localeCompare(right));
+
+    return uniqueValues.map(value => ({ key: value, label: value }));
+  }
   private getAlertSearchText(alert: CategoryAlerts): string {
     const iocText = (alert.allIOC || [])
       .flatMap(ioc => [ioc.name, this.iocTypes[ioc.name], ...(ioc.values || [])])

@@ -57,9 +57,9 @@
           @case (2) {
             <div class="text-white">
               <h2 class="mb-1 text-[20px] font-bold">{{ 'Add IOCs' | translate }}</h2>
-              <div class="flex items-center justify-between gap-2 max-[760px]:flex-wrap">
-                <p class="text-[14px] font-normal text-[#a0b8d1]">{{ 'Manage and organize IOC values used by your tenant searches.' | translate }}</p>
-                <div class="flex items-center gap-2 max-[760px]:w-full max-[760px]:justify-between">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="max-w-full shrink-0 overflow-hidden text-ellipsis whitespace-nowrap text-[14px] font-normal text-[#a0b8d1]">{{ 'Manage and organize IOC values used by your tenant searches.' | translate }}</p>
+                <div class="ml-auto flex items-center gap-2 max-[760px]:ml-0 max-[760px]:w-full max-[760px]:justify-between">
                   <div class="relative max-[760px]:flex-1">
                     <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" class="pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300" />
                     <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" [placeholder]="'Search IOCs...' | translate" [(ngModel)]="iocSearchText" />

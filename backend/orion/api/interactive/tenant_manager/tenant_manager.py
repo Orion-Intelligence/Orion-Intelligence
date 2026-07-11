@@ -561,6 +561,38 @@ class TenantManager:
             "has_more": end < total,
         }
 
+    async def get_visible_tenant_alert_filter_options(
+            self,
+            tenant_id: str,
+            current_user,
+            field: str,
+            query: str = "",
+            limit: int = 25,
+            alert_type: str | None = None) -> dict[str, list[str]]:
+        from orion.api.interactive.alert_manager.alert_manager import AlertManager
+        alerts = await self.get_visible_tenant_alerts(
+            tenant_id,
+            current_user,
+            alert_type=alert_type,
+            paginate=False,
+        )
+        return {"values": AlertManager.filter_option_values(alerts, field, query, limit)}
+
+    async def get_admin_tenant_alert_filter_options(
+            self,
+            tenant_id: str,
+            field: str,
+            query: str = "",
+            limit: int = 25,
+            alert_type: str | None = None) -> dict[str, list[str]]:
+        from orion.api.interactive.alert_manager.alert_manager import AlertManager
+        alerts = await self.get_admin_tenant_alerts(
+            tenant_id,
+            alert_type=alert_type,
+            paginate=False,
+        )
+        return {"values": AlertManager.filter_option_values(alerts, field, query, limit)}
+
     async def create_tenant_user(self, data: user_model, current_user):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
         from orion.services.mongo_manager.mongo_controller import mongo_controller
