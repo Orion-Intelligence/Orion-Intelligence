@@ -20,6 +20,7 @@ const ALL_TENANTS_OPTION = 'all';
 @Component({
   selector: 'app-admin-tenant-alerts',
   imports: [CommonModule, ExportChoiceModalComponent, TranslatePipe, UiDropdownComponent],
+  host: { class: 'block mb-[100px]' },
   templateUrl: './admin-tenant-alerts.html'
 })
 export class AdminTenantAlerts implements OnInit {

@@ -12,6 +12,13 @@ from orion.management.jobs.alert.response_parser import ResponseParser
 from orion.management.jobs.alert.result_mappers import ScanResultMapper, VulnerabilityScanResultMapper
 
 
+SCAN_TYPE_ALERT_CATEGORIES = {
+    "advanced": "advanced scanning",
+    "seo": "seo scanning",
+    "repo": "repo scanning",
+}
+
+
 class ScanningAlertProcessor:
     def __init__(self, crawl_model: Any, cancellation_service: CancellationService, alert_buffer: AlertScanBuffer, search_model: Any | None = None):
         self._crawl_model = crawl_model
@@ -27,7 +34,7 @@ class ScanningAlertProcessor:
             return ["repo"]
         return []
 
-    async def process_ioc(self, tenant_id: str, ioc_type: str, values: list[str]) -> dict:
+    async def process_ioc(self, tenant_id: str, ioc_type: str, values: list[str], allowed_alert_categories: set[str] | None = None) -> dict:
         summary = AlertSummaryHelper.new_scan_summary()
 
         if ioc_type not in ["m_domain", "m_url"]:
@@ -38,11 +45,15 @@ class ScanningAlertProcessor:
                 return summary
 
             for scan_type in self.scan_types_for_ioc(ioc_type, ioc_value):
+                alert_category = SCAN_TYPE_ALERT_CATEGORIES.get(scan_type)
+                if allowed_alert_categories is not None and alert_category not in allowed_alert_categories:
+                    continue
                 scan_summary = await self.handle_scanning_alert(tenant_id, ioc_value, ioc_type, scan_type)
                 AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
 
-            vulnerability_summary = await self.handle_vulnerability_scanning_alert(tenant_id, ioc_value, ioc_type)
-            AlertSummaryHelper.merge_scan_summary(summary, vulnerability_summary)
+            if allowed_alert_categories is None or "vulnerability-scanning" in allowed_alert_categories:
+                vulnerability_summary = await self.handle_vulnerability_scanning_alert(tenant_id, ioc_value, ioc_type)
+                AlertSummaryHelper.merge_scan_summary(summary, vulnerability_summary)
 
         return summary
 

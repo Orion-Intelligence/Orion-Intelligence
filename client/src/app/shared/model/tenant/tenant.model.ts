@@ -30,6 +30,7 @@ export interface TenantModel {
     alerts_visible_to_admin?: boolean;
     privileged_ioc?: boolean;
     alert_run_time?: string | null;
+    allowed_alert_categories?: string[] | null;
     accounts_mail_password?: string;
     accounts_mail?: string;
     accounts_smtp_server?: string;

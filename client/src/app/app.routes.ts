@@ -42,6 +42,7 @@ const loadSidebarUserFeederComponent = () => import('./pages/user-management/sid
 const loadSidebarUserHomepageComponent = () => import('./pages/user-management/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
 const loadCategoryAlertReportComponent = () => import('./pages/user-management/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
 const loadAddCustomAlertComponent = () => import('./pages/user-management/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
+const loadAlertScannerSettingsComponent = () => import('./pages/user-management/sidebar-user-homepage/alert-scanner-settings/alert-scanner-settings.component').then(m => m.AlertScannerSettingsComponent);
 const loadManageProfileComponent = () => import('./pages/tenant/tenant-management/view-profile/manage-profile.component').then(m => m.ManageProfileComponent);
 const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/user-management/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
@@ -792,6 +793,11 @@ export const routes: Routes = [
             path: 'homepage',
             loadComponent: loadSidebarUserHomepageComponent,
             data: { type: 'homepage', animation: 'HomepagePage' },
+          },
+          {
+            path: 'alert-scanners',
+            loadComponent: loadAlertScannerSettingsComponent,
+            data: { type: 'settings', animation: 'ProfilePage' }
           },
           {
             path: 'monitoring',

@@ -52,6 +52,7 @@ class db_tenant_model(Model):
     alerts_visible_to_admin: bool = True
     privileged_ioc: bool = False
     alert_run_time: Optional[str] = None
+    allowed_alert_categories: Optional[List[str]] = None
     accounts_mail_password: Optional[str] = None
     accounts_mail: Optional[str] = None
     accounts_smtp_server: Optional[str] = None
@@ -85,6 +86,7 @@ class TenantRequest(BaseModel):
     alerts_visible_to_admin: Optional[bool] = None
     privileged_ioc: Optional[bool] = None
     alert_run_time: Optional[str] = None
+    allowed_alert_categories: Optional[List[str]] = None
     password_reset_required: Optional[bool] = None
     accounts_mail_password: Optional[str] = None
     accounts_mail: Optional[str] = None

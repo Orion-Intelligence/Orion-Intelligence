@@ -19,14 +19,18 @@ class DynamicScanningProcessor:
     def matching_rules(ioc_type: str, ioc_value: str) -> list[DynamicScanRule]:
         return [rule for rule in DYNAMIC_SCAN_RULES if rule.matches(ioc_type, ioc_value)]
 
-    async def process_ioc(self, tenant_id: str, ioc_type: str, values: list[str]) -> dict:
+    async def process_ioc(self, tenant_id: str, ioc_type: str, values: list[str], allowed_alert_categories: set[str] | None = None) -> dict:
         summary = AlertSummaryHelper.new_scan_summary()
         scans: list[tuple[DynamicScanRule, dict[str, Any]]] = []
         selected_ioc_value = ""
 
         for ioc_value in values or []:
             selected_ioc_value = ioc_value
-            scans = [(rule, rule.build_payload(ioc_value)) for rule in self.matching_rules(ioc_type, ioc_value)]
+            scans = [
+                (rule, rule.build_payload(ioc_value))
+                for rule in self.matching_rules(ioc_type, ioc_value)
+                if allowed_alert_categories is None or rule.scan_type in allowed_alert_categories
+            ]
 
         for rule, payload in scans:
             scan_summary = await self.handle_dynamic_scanning_alert(

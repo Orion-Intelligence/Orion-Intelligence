@@ -27,6 +27,16 @@ ALERT_CATEGORIES = [
     "scanning",
 ]
 
+SCANNING_ALERT_CATEGORIES = {
+    "advanced scanning",
+    "playstore-scanning",
+    "social-scanner",
+    "software-scanning",
+    "vulnerability-scanning",
+    "repo scanning",
+    "seo scanning",
+}
+
 
 @dataclass(frozen=True)
 class CategorySearchConfig:

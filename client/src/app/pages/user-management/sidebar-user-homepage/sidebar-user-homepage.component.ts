@@ -36,7 +36,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   private scanStatusSub?: Subscription;
 
-  hoveredHomeTool: 'print' | 'flush' | 'scan' | null = null;
+  hoveredHomeTool: 'print' | 'flush' | 'settings' | 'scan' | null = null;
   alertCategories: AlertCategorySummary[] = [];
   criticalRisks: number = 0;
   highRisks: number = 0;
@@ -157,6 +157,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard/profile/ioc']).then();
   }
 
+  openAlertScannerSettings() {
+    this.router.navigate(['/dashboard/profile/alert-scanners']).then();
+  }
+
   openAlerts(type: string) {
     const cat = this.alertCategories.find(c => c.categoryName === type);
     if (!cat) {
@@ -229,7 +233,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     return document.body.classList.contains('light-theme');
   }
 
-  setHomeToolHover(tool: 'print' | 'flush' | 'scan' | null): void {
+  setHomeToolHover(tool: 'print' | 'flush' | 'settings' | 'scan' | null): void {
     this.hoveredHomeTool = tool;
   }
 

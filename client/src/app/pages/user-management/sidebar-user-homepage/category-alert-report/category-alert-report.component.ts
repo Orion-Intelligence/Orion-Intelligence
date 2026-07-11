@@ -59,6 +59,7 @@ export class CategoryAlertReportComponent implements OnInit {
   selectedDeleteAlertId: string = '';
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
+  activeDetailAlert: CategoryAlerts | null = null;
   alertExportScope: 'selected' | 'category' = 'selected';
   isExportChoiceOpen: boolean = false;
   isAdminTenantAlertReport: boolean = false;

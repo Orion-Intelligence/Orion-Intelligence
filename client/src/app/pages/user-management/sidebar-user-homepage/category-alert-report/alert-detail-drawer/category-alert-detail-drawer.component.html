@@ -69,26 +69,23 @@
           </div>
         </section>
         @if (hasRawFindings(selectedDetailAlert)) {
-          <section class="rounded-[10px] border border-[var(--color-border)] p-4" [ngClass]="isLightTheme() ? '!bg-[#f7fbff]' : '!bg-[#101A2B]'">
-            <div class="mb-3 text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">Raw Findings</div>
-            <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-900)]">
-              @for (row of getRawFindingRows(selectedDetailAlert.rawFindings); track $index) {
-                <div class="border-b border-[var(--color-divider)] px-3 py-3 last:border-b-0">
-                  <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ row.label }}</div>
-                  <div class="min-w-0 text-[13px] leading-5 text-[var(--color-text2)]">
-                    @for (block of getRawFindingValueBlocks(row); track $index; let blockIndex = $index) {
-                      <div [ngClass]="(row.valueBlocks?.length || 0) > 1 ? (blockIndex === 0 ? 'rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]' : 'mt-3 rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]') : (blockIndex === 0 ? '' : 'mt-3 border-t border-[#22304a] pt-3 [body.light-theme_&]:border-[#c2cfdd]')">
-                        @if ((row.valueBlocks?.length || 0) > 1) {
-                          <div class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--color-text3)] [body.light-theme_&]:text-[#50657a]">Section {{ blockIndex + 1 }}</div>
-                        }
-                        <div class="whitespace-pre-wrap break-words" [ngClass]="(row.valueBlocks?.length || 0) > 1 ? 'opacity-80' : ''">{{ block }}</div>
-                      </div>
-                    }
-                  </div>
+          <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-900)]">
+            @for (row of getRawFindingRows(selectedDetailAlert.rawFindings); track $index) {
+              <div class="border-b border-[var(--color-divider)] px-3 py-3 last:border-b-0">
+                <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ row.label }}</div>
+                <div class="min-w-0 text-[13px] leading-5 text-[var(--color-text2)]">
+                  @for (block of getRawFindingValueBlocks(row); track $index; let blockIndex = $index) {
+                    <div [ngClass]="(row.valueBlocks?.length || 0) > 1 ? (blockIndex === 0 ? 'rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]' : 'mt-3 rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]') : (blockIndex === 0 ? '' : 'mt-3 border-t border-[#22304a] pt-3 [body.light-theme_&]:border-[#c2cfdd]')">
+                      @if ((row.valueBlocks?.length || 0) > 1) {
+                        <div class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--color-text3)] [body.light-theme_&]:text-[#50657a]">Section {{ blockIndex + 1 }}</div>
+                      }
+                      <div class="whitespace-pre-wrap break-words" [ngClass]="(row.valueBlocks?.length || 0) > 1 ? 'opacity-80' : ''">{{ block }}</div>
+                    </div>
+                  }
                 </div>
-              }
-            </div>
-          </section>
+              </div>
+            }
+          </div>
         }
       </div>
 

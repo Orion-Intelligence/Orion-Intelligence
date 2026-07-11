@@ -31,7 +31,7 @@
         </div>
 
         @for (group of visibleTenantAlertGroups; track group.tenant.id || $index) {
-        <section class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-4" data-testid="case-admin-alert-tenant">
+        <section class="rounded-[10px] border border-[var(--tenant-line)] p-4 [background-color:color-mix(in_srgb,var(--tenant-row-bg)_50%,transparent)]" data-testid="case-admin-alert-tenant">
             <div class="mb-4 flex flex-col gap-3 border-b border-[var(--tenant-line)] pb-4 md:flex-row md:items-start md:justify-between">
                 <div class="min-w-0">
                     <h2 class="mb-1 truncate text-[18px] font-semibold text-[var(--color-text1)]" data-testid="case-admin-alert-tenant-name">{{ group.tenant.name || '-' }}</h2>
@@ -85,7 +85,7 @@
                             <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="category-alert-icon h-[24px] w-[24px]">
                             {{ getCategoryLabel(category.categoryName) }}
                         </div>
-                        <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] category-risk-badge--critical': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] category-risk-badge--high': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] category-risk-badge--medium': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] category-risk-badge--low': category.risk.toLowerCase() === 'low' }">
+                        <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] category-risk-badge--critical': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] category-risk-badge--high': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] category-risk-badge--medium': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] category-risk-badge--low': category.risk.toLowerCase() === 'low', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700 category-risk-badge--unknown': !['critical', 'high', 'medium', 'low'].includes(category.risk.toLowerCase()) }">
                             {{ category.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
                         </div>
                     </div>

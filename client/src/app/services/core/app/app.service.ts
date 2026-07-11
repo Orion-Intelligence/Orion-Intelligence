@@ -79,6 +79,7 @@ export class AppService {
         alertsVisibleToAdmin: true,
         privilegedIoc: false,
         alertRunTime: null,
+        allowedAlertCategories: null,
         accountsMailPassword: '',
         accountsMail: '',
         accountsSmtpServer: '',

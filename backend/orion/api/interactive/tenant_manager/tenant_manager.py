@@ -58,6 +58,20 @@ class TenantManager:
         return email.split("@")[1].lower()
 
     @staticmethod
+    def normalize_alert_categories(categories: Optional[List[str]]) -> Optional[List[str]]:
+        if categories is None:
+            return None
+        normalized = []
+        seen = set()
+        for category in categories:
+            value = str(category or "").strip().lower()
+            if not value or value in seen:
+                continue
+            seen.add(value)
+            normalized.append(value)
+        return normalized
+
+    @staticmethod
     def build_privileged_iocs(email: str) -> List[IocCategory]:
         normalized_email = (email or "").strip().lower()
         if not normalized_email or "@" not in normalized_email:
@@ -271,6 +285,7 @@ class TenantManager:
             alerts_visible_to_admin=getattr(tenant, "alerts_visible_to_admin", True),
             privileged_ioc=getattr(tenant, "privileged_ioc", False),
             alert_run_time=getattr(tenant, "alert_run_time", None),
+            allowed_alert_categories=getattr(tenant, "allowed_alert_categories", None),
             accounts_mail_password=None,
             accounts_mail=enc.decrypt(getattr(tenant, "accounts_mail", "").encode()).decode() if getattr(tenant, "accounts_mail", "") else "",
             accounts_smtp_server=enc.decrypt(getattr(tenant, "accounts_smtp_server", "").encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else "",
@@ -382,6 +397,9 @@ class TenantManager:
 
         if "alert_run_time" in data.model_fields_set:
             tenant.alert_run_time = data.alert_run_time
+
+        if "allowed_alert_categories" in data.model_fields_set:
+            tenant.allowed_alert_categories = self.normalize_alert_categories(data.allowed_alert_categories)
 
         if "iocs" in data.model_fields_set and data.iocs is not None and not privileged_ioc_changed:
             if not is_admin and not getattr(tenant, "privileged_ioc", False):

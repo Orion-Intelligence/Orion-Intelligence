@@ -434,6 +434,7 @@ class AccountManager:
                 "alertsVisibleToAdmin": getattr(tenant, "alerts_visible_to_admin", True),
                 "privilegedIoc": getattr(tenant, "privileged_ioc", False),
                 "alertRunTime": getattr(tenant, "alert_run_time", None),
+                "allowedAlertCategories": getattr(tenant, "allowed_alert_categories", None),
                 "accountsMailPassword": "",
                 "accountsMail": self.safe_decrypt(enc, getattr(tenant, "accounts_mail", "")),
                 "accountsSmtpServer": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_server", "")),

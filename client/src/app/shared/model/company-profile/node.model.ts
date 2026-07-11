@@ -52,6 +52,7 @@ export interface TenantDataModel {
     alertsVisibleToAdmin?: boolean;
     privilegedIoc?: boolean;
     alertRunTime?: string | null;
+    allowedAlertCategories?: string[] | null;
     accountsMailPassword?: string;
     accountsMail?: string;
     accountsSmtpServer?: string;

@@ -4284,6 +4284,11 @@ app-sidebar-user-homepage app-home-search.homepage-search-no-margin form {
   opacity: 92%;
 }
 
+app-sidebar-user-homepage .ioc-action-icon--settings {
+  filter: brightness(0) invert(1);
+  opacity: 100%;
+}
+
 .light-theme app-sidebar-user-homepage .ioc-action-toolbar {
   border-color: #d3deeb !important;
   background: #f7fbff !important;

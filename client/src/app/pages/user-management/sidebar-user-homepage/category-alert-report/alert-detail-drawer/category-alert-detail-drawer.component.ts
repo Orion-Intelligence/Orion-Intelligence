@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CategoryAlerts } from '../../../../../shared/model/alert-notification/alert.notification.model';
 import { RawFindingRow } from '../../../../../shared/model/alert-notification/raw-finding-row.model';
@@ -23,6 +23,8 @@ export class CategoryAlertDetailDrawerComponent {
   selectedDetailAlert: CategoryAlerts | null = null;
   isAlertDetailDrawerOpen: boolean = false;
 
+  @Output() detailAlertChange = new EventEmitter<CategoryAlerts | null>();
+
   constructor(private sidebarService: SidebarService, private cdr: ChangeDetectorRef) {
   }
 
@@ -36,6 +38,7 @@ export class CategoryAlertDetailDrawerComponent {
     }
     this.selectedDetailAlert = alert;
     this.isAlertDetailDrawerOpen = false;
+    this.detailAlertChange.emit(alert);
     this.cdr.detectChanges();
     this.alertDetailOpenTimer = setTimeout(() => {
       this.isAlertDetailDrawerOpen = true;
@@ -57,6 +60,7 @@ export class CategoryAlertDetailDrawerComponent {
     this.cdr.detectChanges();
     this.alertDetailCloseTimer = setTimeout(() => {
       this.selectedDetailAlert = null;
+      this.detailAlertChange.emit(null);
       this.cdr.detectChanges();
     }, 300);
   }
