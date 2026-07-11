@@ -179,7 +179,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   }
 
   auditlog() {
-    this.router.navigate(['/dashboard/profile/auditlog']).then();
+    this.router.navigate(['/dashboard/profile/monitoring'], { queryParams: { tab: 'auditlog' } }).then();
   }
 
   manageIocs() {

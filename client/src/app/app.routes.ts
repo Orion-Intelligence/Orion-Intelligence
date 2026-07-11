@@ -31,6 +31,7 @@ const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').t
 const loadResetPasswordComponent = () => import('./shared/partials/forgot-password/reset-password.component').then(m => m.ResetPasswordComponent);
 const loadSidebarUserStatisticsComponent = () => import('./pages/user-management/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
 const loadSidebarUserIocComponent = () => import('./pages/user-management/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
+const loadSidebarUserMonitoringComponent = () => import('./pages/user-management/sidebar-user-monitoring/sidebar-user-monitoring.component').then(m => m.SidebarUserMonitoringComponent);
 const loadSidebarUserEventManagementComponent = () => import('./pages/user-management/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
 const loadSidebarUserLogManagerComponent = () => import('./pages/user-management/sidebar-user-log-manager/sidebar-user-log-manager.component').then(m => m.SidebarUserLogManagerComponent);
 const loadAuditlogComponent = () => import('./pages/user-management/auditlog/auditlog.component').then(m => m.AuditlogComponent);
@@ -791,6 +792,11 @@ export const routes: Routes = [
             path: 'homepage',
             loadComponent: loadSidebarUserHomepageComponent,
             data: { type: 'homepage', animation: 'HomepagePage' },
+          },
+          {
+            path: 'monitoring',
+            loadComponent: loadSidebarUserMonitoringComponent,
+            data: { type: 'monitoring', animation: 'CategoryPage' }
           },
           {
             path: 'statistics',
