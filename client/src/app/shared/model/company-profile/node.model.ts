@@ -86,6 +86,7 @@ export interface AlertModel {
     source?: string;
     risk?: string;
     all_ioc?: AlertAllIoc[];
+    licenses?: string[];
     content_types?: string[];
     raw_findings?: Record<string, unknown>;
     status?: 'ignore' | 'active';

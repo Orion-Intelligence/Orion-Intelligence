@@ -3,6 +3,8 @@ import hashlib
 import threading
 from typing import Any, List
 
+from bson import ObjectId
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 
 from orion.api.interactive.alert_manager.alert_mail_helper import AlertMailHelper
@@ -14,8 +16,10 @@ from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mail_manager.mail_enums import AlertMailLabel, AlertMailMessage, AlertMailSubject, AlertMailTitle
 from orion.services.mail_manager.mail_manager import mail_manager
+from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status, db_alert_model, visible_alerts
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs.app_dependency import get_user_permissions
 
@@ -515,6 +519,7 @@ class AlertManager:
             "iocValue": alert.ioc_value or "",
             "type": alert.type or "",
             "reportSeen": bool(alert.report_seen),
+            "licenses": list(alert.licenses or []),
         }
 
     @staticmethod
@@ -552,6 +557,7 @@ class AlertManager:
         alerts_data = await self._engine.find_one(
             db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
         alerts = visible_alerts(alerts_data.alerts if alerts_data and alerts_data.alerts else [])
+        alerts = await self.filter_alerts_by_license(alerts, current_user)
         if alert_type:
             normalized_type = alert_type.strip().lower()
             alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
@@ -581,6 +587,8 @@ class AlertManager:
             return []
 
         alerts = visible_alerts(alerts_data.alerts)
+        if not compact:
+            alerts = await self.filter_alerts_by_license(alerts, current_user)
 
         if alert_type:
             _type = alert_type.strip().lower()
@@ -701,33 +709,62 @@ class AlertManager:
         return {"scan_running": False}
 
     @staticmethod
-    def get_allowed_alert_types(user) -> set[str]:
-        permissions = get_user_permissions(user)
+    def get_alert_permissions(licenses: set[str]) -> dict[str, Any]:
+        permissions: dict[str, Any] = {"modules": set(), "scanning": False}
+        for license_value in licenses:
+            rules = constant.license_rules.get(license_value, {})
+            if rules.get("modules") == "all":
+                permissions["modules"] = "all"
+            elif permissions["modules"] != "all":
+                permissions["modules"].update(rules.get("modules", []))
+            permissions["scanning"] |= rules.get("scanning", False)
+        return permissions
+
+    @staticmethod
+    def get_allowed_alert_types(user, licenses: set[str] | None = None) -> set[str]:
+        permissions = AlertManager.get_alert_permissions(licenses) if licenses is not None else get_user_permissions(user)
 
         allowed = set()
         if permissions["modules"] == "all":
             allowed.update(MODULE_ALERT_TYPE_MAP.keys())
         else:
-            for module in permissions["modules"]:
-                if module in MODULE_ALERT_TYPE_MAP:
-                    allowed.add(module)
+            for alert_type, module in MODULE_ALERT_TYPE_MAP.items():
+                if module in permissions["modules"] or alert_type in permissions["modules"]:
+                    allowed.add(alert_type)
 
         if permissions.get("scanning", False):
             allowed.update(SCANNING_ALERT_TYPES)
 
         return allowed
 
-    def filter_alerts_by_license(self, alerts: list[AlertModel], user) -> list[AlertModel]:
-        permissions = get_user_permissions(user)
-        if permissions.get("maintainer", False):
-            return alerts
+    async def get_alert_access_licenses(self, user) -> set[str]:
+        licenses = {license_value.value if hasattr(license_value, "value") else str(license_value) for license_value in (getattr(user, "licenses", []) or [])}
+        try:
+            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(user.tenant_uuid)))
+            if tenant:
+                dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
+                enc = Fernet(dek)
+                for tenant_license in tenant.licenses or []:
+                    try:
+                        licenses.add(enc.decrypt(tenant_license.encode()).decode())
+                    except Exception:
+                        licenses.add(str(tenant_license))
+        except Exception:
+            pass
+        return licenses
 
-        allowed_types = self.get_allowed_alert_types(user)
+    async def filter_alerts_by_license(self, alerts: list[AlertModel], user) -> list[AlertModel]:
+        user_licenses = await self.get_alert_access_licenses(user)
+        allowed_types = self.get_allowed_alert_types(user, user_licenses)
 
         filtered = []
         for alert in alerts:
-            alert_type = alert.type.lower().strip()
+            alert_licenses = {str(license_value) for license_value in (getattr(alert, "licenses", []) or [])}
+            if alert_licenses and alert_licenses.intersection(user_licenses):
+                filtered.append(alert)
+                continue
 
+            alert_type = alert.type.lower().strip()
             if alert_type in allowed_types:
                 filtered.append(alert)
 

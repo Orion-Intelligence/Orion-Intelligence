@@ -38,6 +38,7 @@ export interface AlertNotification {
     iocValue?: string;
     type?: string;
     reportSeen?: boolean;
+    licenses?: string[];
 }
 export interface CategoryAlerts {
     id: string;

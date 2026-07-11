@@ -930,6 +930,7 @@ export class CategoryAlertReportComponent implements OnInit {
         }
 
         this.importedAlert = this.validateAlert(jsonData);
+        this.importedAlert.licenses = this.licenseService.getAlertLicenses(this.category || this.importedAlert.type);
 
         this.apiService.post('alert/add', this.importedAlert).subscribe({
           next: () => {
@@ -1005,4 +1006,5 @@ export class CategoryAlertReportComponent implements OnInit {
       content_types: report.labels ?? [],
     };
   }
+
 }

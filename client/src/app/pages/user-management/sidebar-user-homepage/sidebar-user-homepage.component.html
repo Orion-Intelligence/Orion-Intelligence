@@ -98,7 +98,7 @@
             </div>
             <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-[16px] max-[760px]:grid-cols-1">
               @for (category of alertCategories; track category.categoryName) {
-                <div data-testid="tenant-home-alert-category-card" class="category-alert-card flex cursor-pointer flex-col gap-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[16px] hover:bg-[var(--color-blue-810)] max-[640px]:p-[12px]" (click)="openAlerts(category.categoryName)">
+                <div data-testid="tenant-home-alert-category-card" class="category-alert-card flex cursor-pointer flex-col gap-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[16px] hover:bg-[var(--color-blue-810)] max-[640px]:p-[12px]" [class.opacity-60]="!licenseService.canViewAlert(category.categoryName)" (click)="openAlerts(category.categoryName)">
                   <div class="flex items-center justify-between gap-[8px] max-[640px]:flex-wrap">
                     <div class="flex items-center gap-[6px] text-[16px] font-semibold max-[640px]:text-[14px]">
                       <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="category-alert-icon h-[24px] w-[24px]">

@@ -47,6 +47,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   showAlertScanLoading = signal(false);
   isExportChoiceOpen = false;
   readonly iocPermissionWarning = "You don't have permission to manage IOCs outside your domain. Ask your network administrator.";
+  readonly alertLicenseWarning = "You don't have license to view this";
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for alerts.', testId: 'home-alert-export-option-report' }];
 
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService) {
@@ -159,6 +160,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   openAlerts(type: string) {
     const cat = this.alertCategories.find(c => c.categoryName === type);
     if (!cat) {
+      return;
+    }
+    if (!this.licenseService.canViewAlert(type)) {
+      this.messageNotificationService.show(this.alertLicenseWarning);
       return;
     }
     this.router.navigate([`/dashboard/profile/alerts/${type}`]).then();

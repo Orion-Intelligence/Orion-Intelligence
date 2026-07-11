@@ -32,6 +32,7 @@ class AlertModel(EmbeddedModel):
     source: str = ''
     url: str = ''
     risk: str = ''
+    licenses: List[str] = Field(default_factory=list)
     all_ioc: List[alert_all_ioc] = Field(default_factory=list)
     content_types: List[str] = Field(default_factory=list)
     raw_findings: dict[str, Any] = Field(default_factory=dict)
