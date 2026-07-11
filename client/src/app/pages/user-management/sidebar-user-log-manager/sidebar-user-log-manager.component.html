@@ -44,47 +44,46 @@
           </div>
         </div>
 
-        @if (loading) {
-          <div class="overflow-x-auto" @fadeInDashboardItem>
-            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
-              <div>{{ 'Type' | translate }}</div>
-              <div>{{ 'Time' | translate }}</div>
-              <div>{{ 'File' | translate }}</div>
-              <div>{{ 'Message' | translate }}</div>
-              <div>{{ 'Source' | translate }}</div>
-            </div>
-            @for (row of [1,2,3,4,5,6]; track row) {
-              <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[15px]">
-                <div class="ui-shimmer h-[18px] w-[58px] rounded-full bg-[var(--color-blue-720)]"></div>
-                <div class="ui-shimmer h-3 w-[92px] rounded bg-[var(--color-blue-720)]"></div>
-                <div class="ui-shimmer h-3 w-[112px] rounded bg-[var(--color-blue-720)]"></div>
-                <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
-                <div class="ui-shimmer h-[24px] w-[82%] rounded-[6px] bg-[var(--color-blue-720)]"></div>
-              </div>
-            }
-          </div>
-        } @else if (!response.entries.length) {
-          <div class="px-4 py-8 text-center text-[13px] text-[var(--color-text4)]">{{ 'No logs found' | translate }}</div>
-        } @else {
-          <div class="overflow-x-auto" @fadeInDashboardItem>
-            <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[11px] font-semibold uppercase text-[var(--color-text4)]">
-              <div>{{ 'Type' | translate }}</div>
-              <div>{{ 'Time' | translate }}</div>
-              <div>{{ 'File' | translate }}</div>
-              <div>{{ 'Message' | translate }}</div>
-              <div>{{ 'Source' | translate }}</div>
-            </div>
-            @for (entry of response.entries; track entry.id) {
-              <div class="grid min-w-[1020px] grid-cols-[96px_150px_130px_minmax(0,1fr)_280px] items-center gap-3 border-b border-[var(--color-divider)] px-4 py-[11px] text-[13px] leading-5 text-[var(--color-text1)] transition-colors hover:bg-[rgba(87,165,235,0.06)]">
-                <div class="flex min-h-[28px] items-center"><span class="inline-flex items-center rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase leading-none" [ngClass]="getTypeClass(entry.type)">{{ entry.type }}</span></div>
-                <div class="flex min-h-[28px] items-center text-[12.5px] font-medium text-[var(--color-text3)]">{{ entry.timestamp }}</div>
-                <div class="flex min-h-[28px] min-w-0 items-center truncate text-[12.5px] font-medium text-[var(--color-text3)]" [title]="entry.date + '/' + entry.file + ':' + entry.line">{{ entry.date }}/{{ entry.file }}:{{ entry.line }}</div>
-                <div class="min-w-0 break-words text-[13px] font-medium leading-[1.45] text-[var(--color-text2)]">{{ entry.message }}</div>
-                <div class="flex min-h-[28px] min-w-0 items-center truncate rounded-[6px] bg-[var(--color-blue-720)] px-2 py-1 text-[12px] font-medium text-[var(--color-text3)]" [title]="entry.caller">{{ entry.caller || '-' }}</div>
-              </div>
-            }
-          </div>
-        }
+        <div class="ui-table-shell !mt-0 !rounded-none !border-0" @fadeInDashboardItem>
+          <table class="ui-table">
+            <thead>
+              <tr>
+                <th>{{ 'Type' | translate }}</th>
+                <th>{{ 'Time' | translate }}</th>
+                <th>{{ 'File' | translate }}</th>
+                <th>{{ 'Message' | translate }}</th>
+                <th>{{ 'Source' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (loading) {
+                @for (row of [1,2,3,4,5,6]; track row) {
+                  <tr>
+                    <td><div class="ui-shimmer h-[18px] w-[58px] rounded-full bg-[var(--color-blue-720)]"></div></td>
+                    <td><div class="ui-shimmer h-3 w-[92px] rounded bg-[var(--color-blue-720)]"></div></td>
+                    <td><div class="ui-shimmer h-3 w-[112px] rounded bg-[var(--color-blue-720)]"></div></td>
+                    <td><div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div></td>
+                    <td><div class="ui-shimmer h-[24px] w-[82%] rounded-[6px] bg-[var(--color-blue-720)]"></div></td>
+                  </tr>
+                }
+              } @else if (!response.entries.length) {
+                <tr>
+                  <td colspan="5" class="py-8 text-center text-[13px] text-[var(--color-text4)]">{{ 'No logs found' | translate }}</td>
+                </tr>
+              } @else {
+                @for (entry of response.entries; track entry.id) {
+                  <tr>
+                    <td [attr.data-label]="'Type' | translate"><span class="inline-flex items-center rounded-full border px-2 py-[3px] text-[10px] font-semibold uppercase leading-none" [ngClass]="getTypeClass(entry.type)">{{ entry.type }}</span></td>
+                    <td [attr.data-label]="'Time' | translate" class="text-[12.5px] font-medium text-[var(--color-text3)]">{{ entry.timestamp }}</td>
+                    <td [attr.data-label]="'File' | translate" class="max-w-[180px] truncate text-[12.5px] font-medium text-[var(--color-text3)]" [title]="entry.date + '/' + entry.file + ':' + entry.line">{{ entry.date }}/{{ entry.file }}:{{ entry.line }}</td>
+                    <td [attr.data-label]="'Message' | translate" class="min-w-[320px] !whitespace-normal break-words text-[13px] font-medium leading-[1.45] text-[var(--color-text2)]">{{ entry.message }}</td>
+                    <td [attr.data-label]="'Source' | translate" class="max-w-[280px] truncate text-[12px] font-medium text-[var(--color-text3)]" [title]="entry.caller">{{ entry.caller || '-' }}</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
       </section>
     </div>
   </div>
