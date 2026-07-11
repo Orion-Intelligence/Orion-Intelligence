@@ -1,4 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -9,10 +10,9 @@ import { ReportHeaderComponent } from '../../../../shared/partials/report-header
 import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, isHiddenReportMetadataKey, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
-import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-report-defacement',
@@ -27,18 +27,24 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     ResultListComponent,
     NgClass,
     TooltipDirective,
-    ReportInteractionHostComponent, TranslatePipe]
+    ReportInteractionHostComponent
+  ]
 })
+/* eslint-disable local/class-field-group-spacing */
 export class ReportDefacementComponent implements OnInit, AfterViewInit {
   defacementData: DefacementResultItem | null = null;
-  lang = 'en';
-  isExpandedMetadata = true;
-  activeTab = '';
-  content = '';
+  lang: string = 'en';
+  isExpandedMetadata: boolean = true;
+  activeTab: string = '';
+  content: string = '';
   listItems: any[] = [];
   arrayKeys: string[] = [];
+  isTakingDown: boolean = false;
+  showTakedownModal: boolean = false;
+  pollingInterval: any = null;
+  actionResult: any = null;
 
-  constructor(private route: ActivatedRoute, private appService: AppService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
+  constructor(private route: ActivatedRoute, private appService: AppService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>, private http: HttpClient) {
     this.lang = this.appService.getConfig().appSettings.language_allowed;
   }
 
@@ -64,11 +70,11 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   get filteredArrayKeys(): string[] {
     return this.arrayKeys.filter(key => {
       const val = (this.defacementData as any)?.[key];
-      return !isHiddenReportMetadataKey(key) && val != null && (!Array.isArray(val) || val.length > 0);
+      return val != null && (!Array.isArray(val) || val.length > 0);
     });
   }
 
-  metaadataToggleContent(): void {
+  metadataToggleContent(): void {
     this.isExpandedMetadata = !this.isExpandedMetadata;
   }
 
@@ -91,14 +97,6 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     return formatKeyLabelUtil(key);
   }
 
-  getMetadataCount(key: string): number {
-    if (key === 'm_content') {
-      return this.content ? 1 : 0;
-    }
-    const value = (this.defacementData as any)?.[key];
-    return Array.isArray(value) ? value.length : value ? 1 : 0;
-  }
-
   private prepareMetadata(): void {
     this.content = this.defacementData?.m_content || '';
     this.arrayKeys = [];
@@ -111,7 +109,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     if (this.defacementData) {
       Object.keys(this.defacementData).forEach(key => {
         const value = (this.defacementData as any)[key];
-        if (Array.isArray(value) && value.length > 0 && key !== 'm_section' && !isHiddenReportMetadataKey(key)) {
+        if (Array.isArray(value) && value.length > 0 && key !== 'm_section') {
           this.arrayKeys.push(key);
         }
       });
@@ -133,5 +131,130 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
 
   get reportDocId(): string {
     return (this.defacementData as any)?.m_hash || (this.defacementData as any)?._id || '';
+  }
+
+  initiateTakedown(): void {
+    if (!this.defacementData?.m_url) {
+      return;
+    }
+
+    this.showTakedownModal = true;
+    this.isTakingDown = true;
+    this.actionResult = null;
+
+    const user: any = this.appService.userSessionData()?.user;
+    const userId = user?.id || user?._id || 'test_user';
+
+    const baseUrl = window.location.hostname === 'localhost'
+      ? 'http://localhost:8010'
+      : 'https://api.orionintelligence.org/microservices';
+
+    const apiUrl = `${baseUrl}/evidence/capture/${userId}`;
+    const payload = { target_url: this.defacementData.m_url };
+
+    this.http.post(apiUrl, payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'pending') {
+          this.startPolling(apiUrl, payload);
+        }
+        else if (res.status === 'done') {
+          this.handleSuccess(res.result);
+        }
+      },
+      error: (err) => {
+        this.isTakingDown = false;
+        console.error(err);
+        alert('Failed to connect to Microservice.');
+      }
+    });
+  }
+
+  startPolling(apiUrl: string, payload: any): void {
+    let attempts = 0;
+    const maxAttempts = 30;
+
+    this.pollingInterval = setInterval(() => {
+      attempts++;
+      this.http.post(apiUrl, payload).subscribe({
+        next: (res: any) => {
+          if (res.status === 'done') {
+            clearInterval(this.pollingInterval);
+            this.handleSuccess(res.result);
+          }
+          else if (attempts >= maxAttempts) {
+            clearInterval(this.pollingInterval);
+            this.isTakingDown = false;
+            alert('Takedown process timed out.');
+          }
+        },
+        error: (err) => {
+          clearInterval(this.pollingInterval);
+          this.isTakingDown = false;
+          console.error(err);
+        }
+      });
+    }, 4000);
+  }
+
+  handleSuccess(result: any): void {
+    this.isTakingDown = false;
+    this.actionResult = {
+      screenshot_path: result.screenshot_path,
+      html_path: result.html_path,
+      abuse_email: result.abuse_email_found || 'Not found automatically'
+    };
+  }
+
+  closeTakedownModal(): void {
+    this.showTakedownModal = false;
+    if (this.isTakingDown && this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.isTakingDown = false;
+    }
+  }
+
+  getEvidenceUrl(fullPath: string): string {
+    if (!fullPath) {
+      return '';
+    }
+    const filename = fullPath.split('/').pop();
+    const baseUrl = window.location.hostname === 'localhost'
+      ? 'http://localhost:8010'
+      : 'https://api.orionintelligence.org/microservices';
+    return `${baseUrl}/evidence/view/image/${filename}`;
+  }
+
+  sendActualEmail(): void {
+    if (!this.actionResult) {
+      return;
+    }
+
+    const apiUrl = `/api/evidence/dispatch`;
+
+    let domain = this.defacementData?.m_url || '';
+    domain = domain.replace(/^https?:\/\//, '').split(/[/?#]/)[0];
+
+    const payload = {
+      abuse_email: this.actionResult.abuse_email,
+      target_domain: domain,
+      screenshot_path: this.actionResult.screenshot_path,
+      html_path: this.actionResult.html_path
+    };
+
+    this.http.post(apiUrl, payload).subscribe({
+      next: (res: any) => {
+        if (res.status === 'done') {
+          alert('✅ Takedown Email Dispatched Successfully to ' + payload.abuse_email);
+          this.closeTakedownModal();
+        }
+        else {
+          alert('❌ Failed to send email. Check logs.');
+        }
+      },
+      error: (err) => {
+        console.error(err);
+        alert('Error connecting to email dispatcher.');
+      }
+    });
   }
 }

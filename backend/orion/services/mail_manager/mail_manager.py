@@ -5,7 +5,10 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import ssl
-
+from email.mime.image import MIMEImage
+from email.mime.application import MIMEApplication
+import urllib.request
+import os
 from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
@@ -115,6 +118,78 @@ class mail_manager:
         msg.attach(MIMEText(body, "html"))
         return sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg
 
+    async def send_takedown_mail(self, to_email: str, target_domain: str, screenshot_filename: str, html_filename: str,
+                                 tenant_id: str | None = None, config=None):
+        from orion.services.mail_manager.mail_enums import MailSubject
+
+        subject = getattr(MailSubject, "TAKEDOWN_REQUEST", "URGENT: Abuse/Takedown Request for {domain}")
+        if "{domain}" in subject:
+            subject = subject.replace("{domain}", target_domain)
+
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        template_path = os.path.join(current_dir, "takedown_template.html")
+        try:
+            with open(template_path, "r", encoding="utf-8") as file:
+                body = file.read()
+        except Exception as e:
+            log.g().e(f"Template not found: {e}")
+            body = f"<p>Malicious activity detected on {target_domain}. Evidence attached.</p>"
+
+        body = body.replace("{{domain}}", target_domain)
+
+        sender_email, password, smtp_server, smtp_port, msg = await self._prepare_verification_message(
+            to_email, subject, body, tenant_id, config
+        )
+
+        def fetch_and_attach():
+            hosts_to_try = ["http://trusted-micros-api:8010", "http://localhost:8010"]
+
+
+            safe_screenshot = os.path.basename(screenshot_filename) if screenshot_filename else None
+            safe_html = os.path.basename(html_filename) if html_filename else None
+
+            if safe_screenshot:
+                for host in hosts_to_try:
+                    try:
+                        req = urllib.request.Request(f"{host}/evidence/view/image/{safe_screenshot}")
+                        with urllib.request.urlopen(req, timeout=10) as resp:
+                            img_bytes = resp.read()
+                            image_part = MIMEImage(img_bytes, name=f"screenshot_{target_domain}.png")
+                            msg.attach(image_part)
+                            break
+                    except Exception:
+                        continue
+
+            if safe_html:
+                for host in hosts_to_try:
+                    try:
+
+                        req = urllib.request.Request(f"{host}/evidence/view/html/{safe_html}")
+                        with urllib.request.urlopen(req, timeout=10) as resp:
+                            html_bytes = resp.read()
+                            html_part = MIMEApplication(html_bytes, Name=f"source_{target_domain}.html")
+                            html_part['Content-Disposition'] = f'attachment; filename="source_{target_domain}.html"'
+                            msg.attach(html_part)
+                            break
+                    except Exception as e:
+
+                        try:
+                            req_alt = urllib.request.Request(f"{host}/evidence/view/source/{safe_html}")
+                            with urllib.request.urlopen(req_alt, timeout=10) as resp:
+                                html_bytes = resp.read()
+                                html_part = MIMEApplication(html_bytes, Name=f"source_{target_domain}.html")
+                                html_part['Content-Disposition'] = f'attachment; filename="source_{target_domain}.html"'
+                                msg.attach(html_part)
+                                break
+                        except Exception as e_alt:
+                            
+                            log.g().e(f"Failed to fetch HTML evidence. Error 1: {e} | Error 2: {e_alt}")
+                            continue
+
+        await asyncio.to_thread(fetch_and_attach)
+
+        await asyncio.to_thread(self._send_sync_email, sender_email, password, to_email, msg, smtp_server, smtp_port)
+
     async def send_verification_mail(self, to: str, subject: str, body: str, tenant_id: str | None = None, config=None):
         sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg = await self._prepare_verification_message(to, subject, body, tenant_id, config)
         await asyncio.to_thread(self._send_sync_email, sender_email, ACCOUNTS_MAIL_PASSWORD, to, msg, smtp_server, smtp_port)
@@ -193,7 +268,6 @@ class mail_manager:
                     context=context,
                     timeout=10
                 ) as server:
-
                     server.login(sender_email, password)
 
             else:
@@ -202,7 +276,6 @@ class mail_manager:
                     smtp_port,
                     timeout=10
                 ) as server:
-
                     try:
                         server.starttls(context=context)
                         server.login(sender_email, password)

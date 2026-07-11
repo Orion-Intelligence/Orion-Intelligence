@@ -45,6 +45,13 @@ from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 from orion.services.stix_manager.stix_manager import stix_manager
 from routes.docs.docs import CRYPTO_DOCS, CROSS_SEARCH_DOCS, DYNAMIC_DOCS, REPORT_DOCS, SEARCH_DOCS, SUPPORT_METHOD_DOCS, SYSTEM_INFO_DOCS
+from pydantic import BaseModel
+
+class TakedownEmailPayload(BaseModel):
+    abuse_email: str
+    target_domain: str
+    screenshot_path: str
+    html_path: str
 
 api_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SCAN_ROLE_DEPS = [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]
@@ -1040,3 +1047,31 @@ async def delete_completed_scan_jobs(current_user=Depends(get_current_user)):
 )
 async def delete_scan_job(scan_id: str, current_user=Depends(get_current_user)):
     return await ScanJobManager.get_instance().delete_job(scan_id, current_user)
+
+
+@api_routes.post(
+    "/api/evidence/dispatch",
+    summary="Dispatch Takedown Evidence Email via Mail Manager",
+    tags=["Reports"],
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))],
+)
+async def dispatch_takedown_email(payload: TakedownEmailPayload = Body(...), current_user=Depends(get_current_user)):
+    from orion.services.mail_manager.mail_manager import mail_manager
+    import os
+
+    screenshot_filename = os.path.basename(payload.screenshot_path) if payload.screenshot_path else ""
+    html_filename = os.path.basename(payload.html_path) if payload.html_path else ""
+    tenant_id = str(current_user.tenant_uuid) if current_user else None
+
+    try:
+        await mail_manager.get_instance().send_takedown_mail(
+            to_email=payload.abuse_email,
+            target_domain=payload.target_domain,
+            screenshot_filename=screenshot_filename,
+            html_filename=html_filename,
+            tenant_id=tenant_id
+        )
+        return {"status": "done", "message": "Email sent successfully via Mail Manager"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
