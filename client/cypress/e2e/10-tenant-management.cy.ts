@@ -1,23 +1,32 @@
 import {
   addIOCForAllTabs,
+  assertOnlyGeneralHasAlertFindings,
   applyAuditLogDateRange,
   assertAlertScanCompletedMailPresent,
   closeFilterSidebar,
   closeNotificationSidebar,
+  ensureGeneralAlertIoc,
   exportFromModal,
   fillTenantNetworkConfiguration,
+  flushTenantAlertsIfPresent,
   loginTenant,
+  openAlertScannerSettings,
   openFilterSidebar,
   openAuditLogPage,
   openManageIOCs,
+  openTenantHomepage,
   openTenantEditor,
   openTenantSettings,
   openTenantsPage,
   resetAuditLogFilters,
+  runTenantAlertScan,
   saveTenantEditor,
+  setOnlyGeneralAlertScanner,
   setTenantEditorToggle,
   setTenantLicense,
+  setTenantLicenses,
   submitLogin,
+  waitForTenantAlertScanComplete,
   waitForBlockingOverlayToClose
 } from './controllers/10-tenant-management.controller';
 
@@ -38,6 +47,27 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .scrollIntoView()
       .should('be.enabled')
       .click();
+  };
+
+  const enableTenantPrivilegedIocIfInputDisabled = () => {
+    cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 60000}).should('be.visible').then(($input) => {
+      if (!$input.is(':disabled')) {
+        return;
+      }
+
+      cy.wrap($input).should('be.disabled');
+      cy.logout();
+      cy.loginAsAdmin();
+      openTenantsPage();
+      openTenantEditor(tenant);
+      setTenantEditorToggle('tenant-privileged-ioc-toggle', true);
+      saveTenantEditor('saveTenantPrivilegedIoc');
+      cy.logout();
+      submitLogin(tenant.username, tenant.password);
+      openManageIOCs();
+    });
+
+    cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 60000}).should('be.visible').and('not.be.disabled');
   };
 
   before(() => {
@@ -101,7 +131,8 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="tenant-onboarding-confirm"]').should('be.visible').click();
 
     openManageIOCs();
-    cy.get('[data-testid="tenant-ioc-value-input"], [data-testid^="tenant-ioc-tab-"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid^="tenant-ioc-tab-"]').should('have.length.greaterThan', 0);
+    enableTenantPrivilegedIocIfInputDisabled();
     cy.docsScreenshot('tenant-manage-iocs');
     addIOCForAllTabs();
 
@@ -210,8 +241,63 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     loginTenant(tenant);
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
     cy.location('pathname').should('include', '/dashboard/profile/homepage');
-    cy.get('app-alert-scan-loading').should('not.exist');
+    waitForTenantAlertScanComplete();
     cy.docsScreenshot('tenant-homepage');
+  });
+
+  it('blocks alert access after free license downgrade and restores enterprise', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(tenant);
+    setTenantLicenses(['free']);
+    saveTenantEditor('saveTenantFreeLicense');
+    cy.logout();
+
+    loginTenant(tenant);
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
+    cy.contains('[data-testid="tenant-home-alert-category-card"]', 'Defacement', {timeout: 30000})
+      .scrollIntoView()
+      .should('be.visible')
+      .and('have.class', 'opacity-60')
+      .click();
+    cy.get('[data-testid="message-notification-text"]').should('contain.text', "You don't have license to view this");
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
+    cy.logout();
+
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(tenant);
+    setTenantLicenses(['enterprise']);
+    saveTenantEditor('saveTenantEnterpriseLicense');
+    cy.logout();
+
+    loginTenant(tenant);
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+    cy.contains('[data-testid="tenant-home-alert-category-card"]', 'Defacement', {timeout: 30000})
+      .scrollIntoView()
+      .should('be.visible')
+      .and('not.have.class', 'opacity-60');
+    cy.logout();
+  });
+
+  it('runs only the General alert scanner from scanner settings', () => {
+    loginTenant(tenant);
+    ensureGeneralAlertIoc();
+    openTenantHomepage();
+    waitForTenantAlertScanComplete();
+    openAlertScannerSettings();
+    setOnlyGeneralAlertScanner();
+    cy.contains('button', 'Back').scrollIntoView().click();
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
+
+    flushTenantAlertsIfPresent();
+    runTenantAlertScan();
+    cy.reload();
+    openTenantHomepage();
+    waitForTenantAlertScanComplete();
+    assertOnlyGeneralHasAlertFindings();
+    cy.logout();
   });
 
   it('uploads IOC values from a CSV file', () => {

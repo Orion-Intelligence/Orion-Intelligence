@@ -8,7 +8,7 @@
         <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" [placeholder]="'Search IOCs...' | translate" [(ngModel)]="iocSearchText" />
       </div>
       <input type="file" accept=".csv,text/csv" class="hidden" #iocCsvInput (change)="onIocCsvSelected($event)" />
-      <button data-testid="tenant-onboarding-ioc-upload-csv-button" type="button" [appTooltip]="disabled ? permissionWarning : ('Upload IOC CSV' | translate)" class="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 max-[560px]:px-2" [disabled]="isIocCsvUploading || disabled" (click)="iocCsvInput.click()">
+      <button data-testid="tenant-ioc-upload-csv-button" type="button" [appTooltip]="disabled ? permissionWarning : ('Upload IOC CSV' | translate)" class="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 max-[560px]:px-2" [disabled]="isIocCsvUploading || disabled" (click)="iocCsvInput.click()">
         <i class="bi text-[14px]" [ngClass]="isIocCsvUploading ? 'bi-arrow-repeat animate-spin' : 'bi-upload'" aria-hidden="true"></i>
         <span class="max-[560px]:hidden">{{ (isIocCsvUploading ? 'Uploading' : 'Upload CSV') | translate }}</span>
       </button>
@@ -33,7 +33,7 @@
     <div class="flex h-full flex-1 items-center gap-[8px] overflow-x-auto px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" #categoryScroll>
       @if (getFilteredIocs().length > 0) {
         @for (category of getFilteredIocs(); track category.ioc_id) {
-          <div class="cursor-pointer whitespace-nowrap rounded-full border px-4 py-1.5 font-[Inter] text-xs font-semibold transition-colors" [ngClass]="category.ioc_id === selectedCategoryId ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
+          <div [attr.data-testid]="'tenant-ioc-tab-' + category.ioc_id" class="cursor-pointer whitespace-nowrap rounded-full border px-4 py-1.5 font-[Inter] text-xs font-semibold transition-colors" [ngClass]="category.ioc_id === selectedCategoryId ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
             {{ category.name }}
           </div>
         }
@@ -50,8 +50,8 @@
   <div class="mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]"></div>
   <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">{{ 'Enter IOCs' | translate }}</label>
   <div class="relative w-full">
-    <input type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none disabled:cursor-not-allowed disabled:opacity-70" [disabled]="disabled" [placeholder]="'categoryAlerts.export.type' | translate" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-    <button type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="disabled" (click)="addIoc(inputEl.value); inputEl.value=''">
+    <input data-testid="tenant-ioc-value-input" type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none disabled:cursor-not-allowed disabled:opacity-70" [disabled]="disabled" [placeholder]="'categoryAlerts.export.type' | translate" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
+    <button data-testid="tenant-ioc-add-button" type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" [disabled]="disabled" (click)="addIoc(inputEl.value); inputEl.value=''">
       {{ 'common.actions.add' | translate }}
     </button>
   </div>

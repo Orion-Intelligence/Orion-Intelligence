@@ -405,7 +405,10 @@ class FeederManager:
 
         now = datetime.now(timezone.utc)
         status = data.status.strip().lower()
-        message = (data.message or "").strip() or None
+        message = (data.message or "").strip()
+        if len(message) > 300:
+            message = message[:300]
+        message = message or None
 
         if status not in {"success", "failure"}:
             raise HTTPException(status_code=400, detail="Status must be success or failure")

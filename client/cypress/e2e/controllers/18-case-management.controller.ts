@@ -1,3 +1,6 @@
+import { type CaseAlertTenant } from './10-tenant-management.controller';
+import { openTenantEditor } from './10-tenant-management.controller';
+
 export const CASE_MOVE_STATUS_IDS: Record<string, string> = {
   'Intake Review': 'intake_review',
   'Under Investigation': 'under_investigation',
@@ -179,6 +182,44 @@ export function setCaseAlertTenantQuota(value: string) {
       scrollCaseTenantControlIntoView(input);
       cy.wrap($input).should('be.visible').clear().type(value);
     });
+}
+
+export function configureTenantForCaseAlerts(tenant: CaseAlertTenant) {
+  openTenantEditor(tenant);
+  setCaseAlertTenantEditorToggle('tenant-verified-toggle', true);
+  setCaseAlertTenantEditorToggle('tenant-status-toggle', true);
+  setCaseAlertTenantLicense('free', false);
+  setCaseAlertTenantLicense('maintainer', true);
+  setCaseAlertTenantLicense('enterprise', true);
+  setCaseAlertTenantQuota('2');
+  saveCaseAlertTenantEditor(`saveCaseAlertTenant${tenant.username}`);
+}
+
+export function openCaseAlertsView() {
+  openCaseManagement();
+  cy.get(selector('case-mode-alerts-button')).scrollIntoView().should('be.visible').click({force: true});
+  cy.get(selector('case-admin-alerts-view')).should('be.visible');
+  cy.get(selector('case-admin-alerts-loading'), {timeout: 80000}).should('not.exist');
+}
+
+export function assertVisibleTenantAlertEmails(visibleTenants: CaseAlertTenant[], hiddenTenants: CaseAlertTenant[]) {
+  cy.get(selector('case-admin-alert-tenant-email'), {timeout: 80000})
+    .should('have.length.greaterThan', 0)
+    .then(($emails) => {
+      const renderedEmails = $emails.toArray().map((email) => (email.textContent || '').trim());
+      visibleTenants.forEach((tenant) => {
+        expect(renderedEmails, `${tenant.email} should be visible`).to.include(tenant.email);
+      });
+      hiddenTenants.forEach((tenant) => {
+        expect(renderedEmails, `${tenant.email} should be hidden`).not.to.include(tenant.email);
+      });
+    });
+
+  visibleTenants.forEach((tenant) => {
+    cy.contains(selector('case-admin-alert-tenant-email'), tenant.email)
+      .scrollIntoView()
+      .should('be.visible');
+  });
 }
 
 function caseListSelector(id: string): string {

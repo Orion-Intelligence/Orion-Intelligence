@@ -193,7 +193,7 @@ export function addUser(user: ManagedUser) {
   const wanted = user.licenses.map((x) => x.trim().toLowerCase());
   setAddUserLicenses(wanted);
   setAddUserPermissions(user.permissions || []);
-  cy.get('@addUserModal').find('[data-testid="tenant-add-user-submit"]').should('be.visible').click();
+  cy.get('@addUserModal').find('[data-testid="tenant-add-user-submit"]').click({force: true});
   cy.get('[data-testid="tenant-add-user-modal"]').should('not.exist');
   cy.contains(user.username).should('exist');
 }

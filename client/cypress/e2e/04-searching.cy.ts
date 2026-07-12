@@ -240,7 +240,8 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Event Management search flow and reads the first record', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Profile');
-    cy.get('[data-testid="sidebar-subitem-profile-event-management"]').scrollIntoView().should('be.visible').click({ force: true });
+    cy.get('[data-testid="sidebar-subitem-profile-monitoring"]').scrollIntoView().should('be.visible').click({ force: true });
+    cy.get('[data-testid="monitoring-tab-event-management"]').should('be.visible').click();
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
 
     typeInputSlow('[data-testid="ioc-basic-search-input"]', '10.10.0.9');

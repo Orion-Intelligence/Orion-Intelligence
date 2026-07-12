@@ -46,6 +46,10 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
     FLOW_ADMIN_SECTIONS.forEach((section) => {
       clickSidebarSubItem('admin', section);
+      if (section === 'Monitoring') {
+        cy.get('[data-testid="monitoring-tab-auditlog"]').should('be.visible').click();
+        cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
+      }
     });
 
     cy.get('[data-testid="sidebar-collapse-button"]').should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
