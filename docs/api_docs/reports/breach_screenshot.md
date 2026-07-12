@@ -14,6 +14,6 @@ No request body is required.
 WebP screenshot image that visually represents the breached website or resource described in the associated breach report. The service automatically appends the `.webp` extension, and the response payload is the raw image bytes.
 
 Example:
-- Request: `GET /api/search/breach/screenshot/69993154316451142028569605097804`
-- Effective file retrieved: `69993154316451142028569605097804.webp`
+- Request: `GET /api/search/breach/screenshot/{filename}`
+- Effective file retrieved: `{filename}.webp`
 - Response headers: `Content-Type: image/webp` with the binary image data in the body.

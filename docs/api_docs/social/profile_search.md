@@ -1,9 +1,9 @@
-# Socail: profile_search
+# Social: profile_search
 
 ## Description
 
 Scrape public profile information for a requested social media account by platform and username; returns structured profile metadata for the specified account.
-This endpoint corresponds to /api/search/social_profile and expects a JSON body containing the target platform and username.
+This endpoint corresponds to `POST /api/social/profile` and expects a JSON body containing the target platform and username.
 
 Supported request fields:
 

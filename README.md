@@ -57,7 +57,7 @@ visual pivots that help analysts move quickly from overview to deeper investigat
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/data-breach-tracking-20260326.png" alt="Data Breach Tracking" width="260"><br><sub>Data Breach Tracking</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/defacement-report-20260326.png" alt="Defacement Report" width="260"><br><sub>Defacement Report</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/directory-monitoring-20260326.png" alt="Directory Monitoring" width="260"><br><sub>Directory Monitoring</sub></td>
-      <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/dump-listing-20260326.png" alt="Dump Listing" width="260"><br><sub>Dump Listing</sub></td>
+      <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/leak-listing-20260326.png" alt="Leak Listing" width="260"><br><sub>Leak Listing</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/entity-api-email-breach-20260326.png" alt="Entity Api Email Breach" width="260"><br><sub>Entity Api Email Breach</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/exploit-results-20260326.png" alt="Exploit Results" width="260"><br><sub>Exploit Results</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/feed-report-20260326.png" alt="Feed Report" width="260"><br><sub>Feed Report</sub></td>
@@ -75,7 +75,6 @@ visual pivots that help analysts move quickly from overview to deeper investigat
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-chatbot-20260326.png" alt="Report Chatbot" width="260"><br><sub>Report Chatbot</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-json-viewer-20260326.png" alt="Report Json Viewer" width="260"><br><sub>Report Json Viewer</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/search-filters-20260326.png" alt="Search Filters" width="260"><br><sub>Search Filters</sub></td>
-      <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-followers-popup-20260326.png" alt="Social Followers Popup" width="260"><br><sub>Social Followers Popup</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-list-view-20260326.png" alt="Social Intel List View" width="260"><br><sub>Social Intel List View</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-20260326.png" alt="Social Intel" width="260"><br><sub>Social Intel</sub></td>
       <td align="center" valign="top"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-manage-profiles-20260326.png" alt="Social Manage Profiles" width="260"><br><sub>Social Manage Profiles</sub></td>
@@ -141,7 +140,7 @@ is the list of libraries and frameworks used:
 ![Celery](https://badgen.net/badge/crawler/Celery/red)
 ![Python](https://badgen.net/badge/search-crawler/Python/blue)
 ![Tor](https://badgen.net/badge/search-crawler/Tor/purple)
-![Traefik](https://badgen.net/badge/search/Traefik/orange)
+![NGINX](https://badgen.net/badge/search/NGINX/green)
 ![elastic](https://badgen.net/badge/search/elastic/pink)
 ![java](https://badgen.net/badge/browser/java/cyan)
 ![kotlin](https://badgen.net/badge/browser/kotlin/yellow)

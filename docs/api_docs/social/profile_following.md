@@ -1,4 +1,4 @@
-# Socail: profile_following
+# Social: profile_following
 
 ## Description
 
@@ -9,7 +9,7 @@ Supported request fields:
 
 - **platform** — The target social media network
 - **username** — The profile handle to scrape
-- **max_following** - The maximum number of **following** records to retriev
+- **max_following** - The maximum number of **following** records to retrieve
 
 Example request payload:
 
@@ -17,7 +17,7 @@ Example request payload:
 {
   "platform": "Instagram",
   "username": "sarcaxxm",
-  "max_followers": 1000
+  "max_following": 1000
 }
 ```
 

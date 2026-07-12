@@ -1,4 +1,4 @@
-# Socail: profile_followers
+# Social: profile_followers
 
 ## Description
 

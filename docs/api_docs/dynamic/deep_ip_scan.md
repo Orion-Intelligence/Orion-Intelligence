@@ -594,22 +594,3 @@ If the scan fails, the response will contain:
   }
 }
 ```
-
-## Status Polling
-
-For long-running scans, poll the scan status endpoint:
-
-```
-GET /api/scan/status?ip=52.211.48.174
-```
-
-Response:
-```json
-{
-  "status": "pending",
-  "progress": 60,
-  "step": "scanning_ports"
-}
-```
-
-Status values: `idle`, `pending`, `done`, `error`

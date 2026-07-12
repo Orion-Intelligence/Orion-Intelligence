@@ -17,7 +17,6 @@ This page highlights APIs that are publicly exposed for external use, enabling s
 :caption: System Info
 
 system-info/directory
-system-info/dumps
 system-info/insight
 ```
 ---
@@ -51,7 +50,7 @@ search/defacement
 search/exploit
 search/breach
 search/social
-search/telegram
+search/apt_intel
 search/consolidated
 search/consolidated_ranked
 search/strategic
@@ -108,8 +107,8 @@ social/profile_search
 social/profile_images
 social/profile_metadata
 social/profile_posts
-social/profile_ followers
-social/profile_ following
+social/profile_followers
+social/profile_following
 social/profile_global_presence
 social/recon_image_search
 ```

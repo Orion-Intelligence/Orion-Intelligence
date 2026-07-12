@@ -148,10 +148,10 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
 @api_routes.post(
     "/api/search/social",
     summary="Search social reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["social"]["description"],
     tags=["Search"],
     operation_id="searchSocialReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
 async def search_social(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -183,10 +183,10 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
 @api_routes.post(
     "/api/search/exploit",
     summary="Search exploit reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["exploit"]["description"],
     tags=["Search"],
     operation_id="searchExploitReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["exploit"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:exploit", bypass_licenses=["maintainer"]))], )
 async def search_exploit(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -209,10 +209,10 @@ async def get_exploit_filter_suggestions(field: str = Query(...), q: str = Query
 @api_routes.post(
     "/api/search/apt-intel",
     summary="Search APT Intel reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["apt_intel"]["description"],
     tags=["Search"],
     operation_id="searchAptIntelReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["apt_intel"]["response_description"],
     status_code=200,
     dependencies=APT_INTEL_DEPS, )
 async def search_apt_intel(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -234,10 +234,10 @@ async def get_malware_filter_options():
 @api_routes.post(
     "/api/search/defacement",
     summary="Search defacement reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["defacement"]["description"],
     tags=["Search"],
     operation_id="searchDefacementReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
 async def search_defacement(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -513,11 +513,11 @@ async def get_chat_document(doc_id: str, lang: Optional[str] = Query(None, alias
 
 @api_routes.get(
     "/api/search/social/{doc_id}",
-    summary="Get social_models media intelligence report",
-    description=REPORT_DOCS["social_models"]["description"],
+    summary="Get social media intelligence report",
+    description=REPORT_DOCS["social"]["description"],
     tags=["Reports"],
     operation_id="getSocialReport",
-    response_description=REPORT_DOCS["social_models"]["response_description"],
+    response_description=REPORT_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
 async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
@@ -663,7 +663,7 @@ async def scrape_social(payload: SocialScrapeRequest, current_user=Depends(get_c
 
 @api_routes.post(
     "/api/dynamic/social",
-    summary="Dynamic social_models identifier exposure search",
+    summary="Dynamic social identifier exposure search",
     description=DYNAMIC_DOCS["dynamic_social"]["description"],
     tags=["Entity Scans"],
     operation_id="dynamicSocialIdentifierExposureSearch",
@@ -769,7 +769,7 @@ async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(Non
 
 @api_routes.get(
     "/api/search/social/stix/{doc_id}",
-    summary="Get social_models media intelligence report in stix format",
+    summary="Get social media intelligence report in stix format",
     description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getSocialStixReport",
@@ -782,10 +782,10 @@ async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(None
 
 @api_routes.get(
     "/api/search/chat/stix/{doc_id}",
-    summary="Get social_models media intelligence report in stix format",
+    summary="Get chat intelligence report in stix format",
     description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
-    operation_id="getSocialStixReport",
+    operation_id="getChatStixReport",
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[*STIX_MEMBER_DEPS, Depends(license_required("module:chat", bypass_licenses=["maintainer"]))], )
