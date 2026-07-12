@@ -53,7 +53,7 @@ class insight_generator:
                 }
             },
             "sort": [
-                {"m_update_date": {"order": "desc", "missing": "_last", "unmapped_type": "date"}}
+                {"_doc": {"order": "asc"}}
             ],
             "track_total_hits": False
         }

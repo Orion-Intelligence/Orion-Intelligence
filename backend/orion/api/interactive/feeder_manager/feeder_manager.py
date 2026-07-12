@@ -406,8 +406,8 @@ class FeederManager:
         now = datetime.now(timezone.utc)
         status = data.status.strip().lower()
         message = (data.message or "").strip()
-        if len(message) > 300:
-            message = message[:300]
+        if len(message) > 5826:
+            message = message[:5826]
         message = message or None
 
         if status not in {"success", "failure"}:
