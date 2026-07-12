@@ -178,6 +178,16 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('exist');
   });
 
+  it('runs Actors & Malware search flow', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Actors & Malware');
+    waitForSearchReady();
+    typeDashboardSearchSlow('malware');
+    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]', { timeout: 60000 })
+      .should('have.length.greaterThan', 0);
+    cy.docsScreenshot('actors-malware-results');
+  });
+
   it('runs Feed search flow and opens a report', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Feed');
@@ -256,6 +266,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.contains('Dummy SIEM log record', { timeout: 60000 }).should('be.visible');
     cy.contains('10.10.0.9', { timeout: 60000 }).should('be.visible');
+    cy.docsScreenshot('event-management-expanded-row');
   });
 
   it('runs Web Scans flow for Basic, Port, Repository, and SEO', () => {

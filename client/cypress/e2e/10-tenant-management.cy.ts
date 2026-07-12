@@ -88,11 +88,14 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.clearAllEmails();
     cy.visit('/signup');
 
+    cy.get('[data-testid="signup-username"]').should('be.visible');
+    cy.docsScreenshot('signup-page');
     cy.get('[data-testid="signup-username"]').type(tenant.username);
     cy.get('[data-testid="signup-companymail"]').type(tenant.email);
     cy.get('[data-testid="signup-password"]').type(tenant.password, {log: false});
     cy.get('[data-testid="signup-submit"]').should('be.visible').click();
     cy.get('[data-testid="welcome-tick"]').should('exist');
+    cy.docsScreenshot('welcome-verification');
     cy.get('[data-testid="welcome-goto-login"]').click();
 
     cy.openLastMailAndGetUrl().then((url) => {
@@ -125,8 +128,12 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="login-button"]').click();
     cy.waitForLoginRequest('tenantLogin');
 
-    cy.get('[data-testid="tenant-company-input"]').should('be.visible').clear().type('orion intelligence');
+    cy.get('[data-testid="tenant-company-input"]').should('be.visible');
+    cy.docsScreenshot('tenant-onboarding-company');
+    cy.get('[data-testid="tenant-company-input"]').clear().type('orion intelligence');
     cy.get('[data-testid="tenant-onboarding-next-step1"]').should('be.visible').click();
+    cy.get('[data-testid="tenant-onboarding-next-step2"]').should('be.visible');
+    cy.docsScreenshot('tenant-onboarding-iocs');
     cy.get('[data-testid="tenant-onboarding-next-step2"]').should('be.visible').click();
     cy.get('[data-testid="tenant-onboarding-confirm"]').should('be.visible').click();
 
@@ -287,6 +294,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     openTenantHomepage();
     waitForTenantAlertScanComplete();
     openAlertScannerSettings();
+    cy.docsScreenshot('alert-scanner-settings');
     setOnlyGeneralAlertScanner();
     cy.contains('button', 'Back').scrollIntoView().click();
     cy.location('pathname').should('include', '/dashboard/profile/homepage');
@@ -459,16 +467,23 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
 
     cy.get('[data-testid="profile-notification-bell"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-notification-sidebar"]').should('be.visible');
+    cy.docsScreenshot('tenant-notification-sidebar');
     cy.get('[data-testid="tenant-notification-see-details"]').first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="notification-alert-export-modal"]').should('be.visible');
+    cy.docsScreenshot('tenant-notification-alert-detail');
     exportFromModal('notification-alert-export-modal', 'notification-alert-export-option-report');
     closeNotificationSidebar();
 
     cy.get('[data-testid="tenant-home-alert-category-card"]').first().scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-report-see-details"]').first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
+    cy.docsScreenshot('tenant-alert-detail');
     exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
 
     cy.get('[data-testid="tenant-alert-add-button"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-modal"]').should('be.visible');
+    cy.docsScreenshot('custom-alert-modal');
     cy.get('[data-testid="tenant-alert-title"]').should('be.visible').clear().type('Test Alert');
     cy.get('[data-testid="tenant-alert-description"]').clear().type('Test description');
     cy.get('[data-testid="tenant-alert-ioc-type-toggle"]').click();

@@ -49,6 +49,66 @@ describe('System Settings - Admin Update Flow', () => {
     cy.logout();
   });
 
+  it('shows log manager filters and entries', () => {
+    cy.loginAsAdmin();
+
+    cy.intercept('GET', '**/api/profile/system-logs*', {
+      statusCode: 200,
+      body: {
+        entries: [
+          {
+            id: 'log-entry-1',
+            date: '2026-07-12',
+            file: 'orion.log',
+            line: 42,
+            type: 'INFO',
+            timestamp: '2026-07-12 09:15:00',
+            message: 'Scheduled scan completed for monitored indicators.',
+            caller: 'scan.scheduler',
+            raw: '2026-07-12 09:15:00 INFO scan.scheduler Scheduled scan completed for monitored indicators.'
+          },
+          {
+            id: 'log-entry-2',
+            date: '2026-07-12',
+            file: 'orion.log',
+            line: 77,
+            type: 'ERROR',
+            timestamp: '2026-07-12 09:18:33',
+            message: 'Webhook delivery failed after retries.',
+            caller: 'notification.dispatcher',
+            raw: '2026-07-12 09:18:33 ERROR notification.dispatcher Webhook delivery failed after retries.'
+          }
+        ],
+        total: 2,
+        page: 1,
+        limit: 100,
+        page_count: 1,
+        available_dates: ['2026-07-12'],
+        files: [
+          {
+            date: '2026-07-12',
+            file: 'orion.log',
+            size: 2048,
+            modified_at: '2026-07-12T09:19:00Z'
+          }
+        ],
+        generated_at: '2026-07-12T09:20:00Z',
+        log_roots: ['/var/log/orion']
+      }
+    }).as('systemLogs');
+
+    cy.visit('/dashboard/profile/log-manager');
+    cy.wait('@systemLogs');
+    cy.contains('h1', 'Log Manager').should('be.visible');
+    cy.get('[data-testid="log-manager-type-filter"]').should('be.visible');
+    cy.get('[data-testid="log-manager-date-filter"]').should('be.visible');
+    cy.contains('td', 'Scheduled scan completed for monitored indicators.').should('be.visible');
+    cy.contains('td', 'Webhook delivery failed after retries.').should('be.visible');
+    cy.docsScreenshot('log-manager');
+
+    cy.logout();
+  });
+
   it('updates network configuration fields from system settings', () => {
     cy.loginAsAdmin();
 

@@ -30,3 +30,33 @@ describe('Chatbot - General Intelligence Report Flow', () => {
     cy.docsScreenshot('report-chatbot');
   });
 });
+
+describe('Chatbot - Shared Chat Public View', () => {
+  it('renders shared chat transcript', () => {
+    cy.intercept('GET', '**/api/public/chat-shares/shared-chat-doc*', {
+      statusCode: 200,
+      body: {
+        messages: [
+          {
+            sender: 'user',
+            text: 'Summarize this alert for handoff.',
+            time: '2026-07-12T09:00:00Z'
+          },
+          {
+            sender: 'bot',
+            text: '**Summary:** The alert needs review before escalation.',
+            time: '2026-07-12T09:00:03Z'
+          }
+        ],
+        expiresAt: '2026-07-19T09:00:00Z'
+      }
+    }).as('sharedChat');
+
+    cy.visit('/chat-share/shared-chat-doc?token=test-token');
+    cy.wait('@sharedChat');
+    cy.contains('Shared Chat').should('be.visible');
+    cy.contains('Summarize this alert for handoff.').should('be.visible');
+    cy.contains('The alert needs review before escalation.').should('be.visible');
+    cy.docsScreenshot('chat-share-public-view');
+  });
+});

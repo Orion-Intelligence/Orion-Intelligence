@@ -148,9 +148,12 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.get('app-world-heatmap').should('be.visible');
     cy.get('[data-testid="ioc-basic-tag-AI"]').filter(':visible').first().should('be.visible').click();
     cy.location('pathname').should('include', '/dashboard/profile/ai');
+    cy.contains('How can Nexus help?').should('be.visible');
+    cy.docsScreenshot('ai-workspace');
     typeVisibleInputSlow('[data-testid="chat-widget-input"]', 'hello from basic flow', true);
     cy.wait('@nexusChat');
     cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().should('contain.text', 'hello from basic flow');
+    cy.docsScreenshot('ai-workspace-chat');
     typeVisibleInputSlow('[data-testid="chat-widget-input"]', 'send with button');
     cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();
     cy.wait('@nexusChat');
@@ -267,7 +270,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     resetDirectoryFilters();
 
     applyDirectoryDropdown('content_type', DIRECTORY_CONTENT_OPTION, 'content_type');
-    cy.docsScreenshot('dump-listing');
     resetDirectoryFilters();
 
     applyDateRange(14);

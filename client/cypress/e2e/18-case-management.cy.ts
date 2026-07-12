@@ -73,6 +73,7 @@ describe('Case Management - Add View Edit Flow', () => {
       assertCaseVisibleInList(caseId);
       assertCaseHiddenInList(linkedCaseId);
     });
+    cy.docsScreenshot('case-management-filters');
 
     selectCaseFilterDropdown('case-filter-status', 'New');
     cy.then(() => assertCaseVisibleInList(caseId));
@@ -104,8 +105,11 @@ describe('Case Management - Add View Edit Flow', () => {
 
   it('toggles case list and analytics views', () => {
     openCaseManagement();
-    cy.get(selector('case-mode-analytics-button')).click({ force: true }); cy.get(selector('case-analytics-panel')).should('be.visible');
-    cy.get(selector('case-mode-list-button')).click({ force: true }); cy.get(selector('case-management-table')).should('be.visible');
+    cy.get(selector('case-mode-analytics-button')).click({ force: true });
+    cy.get(selector('case-analytics-panel')).should('be.visible');
+    cy.docsScreenshot('case-management-analytics');
+    cy.get(selector('case-mode-list-button')).click({ force: true });
+    cy.get(selector('case-management-table')).should('be.visible');
   });
 
   it('edits case details and primary entity', () => {
@@ -184,6 +188,7 @@ describe('Case Management - Add View Edit Flow', () => {
     assertNotification('File integrity verified');
 
     cy.get(selector('case-artifact-file-integrity-0')).should('contain.text', 'Verified');
+    cy.docsScreenshot('case-artifact-integrity');
 
     cy.get(selector('case-artifact-edit-0')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
     cy.get(selector('case-artifact-edit-drawer')).filter(':visible').first().within(() => {
@@ -212,6 +217,9 @@ describe('Case Management - Add View Edit Flow', () => {
 
     cy.get(selector('case-artifact-report-empty')).should('not.exist');
 
+    cy.get(selector('case-artifact-report-option-0')).filter(':visible').first()
+      .should('be.visible');
+    cy.docsScreenshot('case-linked-report-artifact-search');
     cy.get(selector('case-artifact-report-option-0')).filter(':visible').first()
       .click({ force: true });
 
@@ -335,6 +343,13 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'anyone with the link');
     cy.get(selector('confirmation-yes-button')).should('be.visible').click();
     cy.get('@caseShareWindowOpen').should('have.been.calledWithMatch', /\/case-share\/.+token=/, '_blank');
+    cy.get('@caseShareWindowOpen').its('firstCall.args.0').then((shareUrl) => {
+      cy.visit(String(shareUrl));
+      cy.get(selector('case-share-export-pdf'), { timeout: 60000 }).should('be.visible');
+      cy.docsScreenshot('case-share-public-view');
+      cy.visit(`/dashboard/profile/case-management/case-details?caseId=${caseId}`);
+      cy.get(selector('case-details-page')).should('be.visible');
+    });
 
     clickHeaderAction('case-details-revoke-shares');
     cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'expire all previously shared links');
@@ -374,6 +389,9 @@ describe('Case Management - Add View Edit Flow', () => {
           cy.get(selector(`case-board-card-${createdCaseId}`), { timeout: 60000 })
             .should('exist')
             .scrollIntoView();
+          if (statusLabel === 'Intake Review') {
+            cy.docsScreenshot('case-tracking-board');
+          }
 
           cy.get(selector(`case-board-move-${createdCaseId}-${CASE_MOVE_STATUS_IDS[statusLabel]}`))
             .scrollIntoView()
@@ -384,6 +402,9 @@ describe('Case Management - Add View Edit Flow', () => {
             .should('be.visible')
             .clear()
             .type(`Moving case to ${statusLabel}`);
+          if (statusLabel === 'Intake Review') {
+            cy.docsScreenshot('case-tracking-board-move-reason');
+          }
 
           cy.get(selector('case-move-save'))
             .should('be.visible')
@@ -430,6 +451,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-artifact-add')).should('not.exist');
     cy.get(selector('case-task-add')).should('not.exist');
     cy.get(selector('case-linked-case-add')).should('not.exist');
+    cy.docsScreenshot('case-closure-read-only');
   });
 
   it('archives closed case and shows archived list', () => {
@@ -449,6 +471,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.then(() => {
       assertCaseVisibleInList(caseId);
     });
+    cy.docsScreenshot('case-management-archived-list');
   });
 });
 

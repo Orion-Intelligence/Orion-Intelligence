@@ -4,6 +4,7 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Defacement: 'defacement',
   Social: 'social',
   Exploit: 'exploit',
+  'Actors & Malware': 'apt-intel',
   Feed: 'feed',
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
