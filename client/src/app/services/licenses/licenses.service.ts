@@ -244,6 +244,12 @@ export class LicenseService {
     return this.isAdmin() || (this.isAnalyst() && permissions.includes('case_management') && this.appService.userSessionData().tenant.isDefault);
   }
 
+  canReviewTakedowns(): boolean {
+    const tenant = this.appService.userSessionData().tenant;
+    const isRootTenant = tenant.isDefault;
+    return this.isAdmin() && isRootTenant;
+  }
+
   getLicenseLabel(license: LicenseName | string): string {
     switch (license) {
       case LicenseName.MAINTAINER:

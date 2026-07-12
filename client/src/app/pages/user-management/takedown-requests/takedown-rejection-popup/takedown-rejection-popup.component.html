@@ -1,0 +1,44 @@
+<div class="ui-graph-popup-overlay fixed inset-0 z-[1400] flex items-center justify-center p-4" @popupAnimation data-role="backdrop" (click)="onBackdrop($event)">
+  <div data-testid="takedown-rejection-popup" class="ui-graph-popup-panel ui-popup-shell relative w-full max-w-[520px] rounded-xl p-6">
+    <div class="pr-8">
+      <div class="ui-popup-title text-lg font-semibold">Reject takedown request</div>
+      <div class="mt-2 text-sm leading-6 text-[var(--color-text3)]">Provide the reason admins will see in the request history.</div>
+    </div>
+
+    <button type="button" class="absolute right-5 top-5 text-[26px] leading-none text-[#ccc] hover:text-white disabled:cursor-not-allowed disabled:opacity-50" aria-label="Close" [disabled]="isSubmitting()" (click)="cancel()">&times;</button>
+
+    @if (target()) {
+      <div class="mt-5 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd]">
+        <div class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Target</div>
+        <div class="mt-1 truncate text-[13px] font-medium text-[var(--color-text1)]" [title]="target()">{{ target() }}</div>
+      </div>
+    }
+
+    <label class="mt-5 mb-2 block text-[13px] font-semibold text-[var(--color-text2)]" for="takedown-rejection-reason">Rejection reason</label>
+    <textarea
+      triggerAutoFocus
+      id="takedown-rejection-reason"
+      data-testid="takedown-rejection-reason"
+      name="takedown-rejection-reason"
+      [(ngModel)]="reason"
+      maxlength="500"
+      rows="5"
+      class="min-h-[132px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-[14px] leading-6 text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]"
+      placeholder="Why is this takedown request being rejected?"
+      [disabled]="isSubmitting()"></textarea>
+
+    <div class="mt-2 flex items-center justify-between gap-3">
+      <span class="text-[12px] text-[var(--color-text4)]">{{ reason.length }}/500</span>
+      @if (!trimmedReason && reason.length > 0) {
+        <span class="text-[12px] text-[#ff8a8a]">Reason cannot be blank.</span>
+      }
+    </div>
+
+    <div class="mt-6 flex flex-wrap justify-end gap-2">
+      <button type="button" class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" [disabled]="isSubmitting()" (click)="cancel()">Cancel</button>
+      <button type="button" data-testid="takedown-rejection-submit" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50" [disabled]="!canSubmit" (click)="submit()">
+        {{ isSubmitting() ? 'Rejecting...' : 'Reject request' }}
+      </button>
+    </div>
+  </div>
+</div>

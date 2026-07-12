@@ -20,6 +20,7 @@ from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
 from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
+from orion.api.interactive.takedown_manager.takedown_manager import TakedownManager
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
@@ -37,6 +38,7 @@ from orion.api.server.crawl_manager.class_model.ip_scan_request_model import IPS
 from orion.api.server.crawl_manager.class_model.log_model import SiemSearchRequestModel, SiemSearchResponseModel
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
 from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobCreateRequest, ScanJobDetailResponse, ScanJobListResponse, ScanJobSeenRequest
+from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest, TakedownDecisionRequest, TakedownListResponse
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityGraphBatchQueryModel, EntityQueryModel
@@ -416,8 +418,9 @@ async def search_consolidated_iocs(param: search_consolidated_param_model = Body
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
 async def get_defacement_document(doc_id: str):
-
-    return await search_model.getInstance().request_defacement_doc(doc_id)
+    report = await search_model.getInstance().request_defacement_doc(doc_id)
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.enrich_report(report)
 
 
 @api_routes.get(
@@ -970,6 +973,57 @@ async def convert_stix_batch(kind: str, payloads: list[dict] = Body(...)):
     if kind_normalized not in STIX_KIND_VALUES:
         return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
     return {"items": [convert_to_stix(kind_normalized, payload) for payload in payloads]}
+
+@api_routes.post(
+    "/api/takedowns",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))],
+)
+async def create_takedown_request(request: TakedownCreateRequest = Body(...), current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.create_request(request, current_user)
+
+
+@api_routes.get(
+    "/api/takedowns",
+    response_model=TakedownListResponse,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))],
+)
+async def list_takedown_requests(status: Optional[str] = Query(None), q: str = Query(""), daterange: str = Query(""), page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100), current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.list_requests(
+        current_user,
+        status=status,
+        q=q,
+        page=page,
+        limit=limit,
+        daterange=daterange,
+    )
+
+
+@api_routes.post(
+    "/api/takedowns/{request_id}/accept",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def accept_takedown_request(request_id: str, current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.accept_request(request_id, current_user)
+
+
+@api_routes.post(
+    "/api/takedowns/{request_id}/reject",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def reject_takedown_request(request_id: str, decision: Optional[TakedownDecisionRequest] = Body(None), current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.deny_request(
+        request_id,
+        decision or TakedownDecisionRequest(),
+        current_user,
+    )
 
 @api_routes.post(
     "/api/scan-jobs/create",

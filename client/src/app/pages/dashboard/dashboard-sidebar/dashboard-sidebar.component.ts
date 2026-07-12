@@ -69,10 +69,12 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   private handleProfileRoute(url: string) {
     if (url.startsWith('/dashboard/profile/consolidated/') ||
       url.startsWith('/dashboard/profile/homepage') ||
+      url.startsWith('/dashboard/profile/take-down') ||
       url.startsWith('/dashboard/profile/alerts/general') ||
       url.startsWith('/dashboard/profile/alerts')) {
       this.selectionStore.setSelectedSection('Profile');
-      this.selectionStore.setSelectedOption('Homepage');
+      const selectedOption = url.startsWith('/dashboard/profile/take-down') ? ProfileSubCategory.TAKEDOWN : 'Homepage';
+      this.selectionStore.setSelectedOption(selectedOption);
     }
   }
 
@@ -205,11 +207,13 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
         (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
         (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
+        (this.licenseService.canReviewTakedowns() || c !== ProfileSubCategory.TAKEDOWN) &&
         (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.TAKEDOWN &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
         c !== ProfileSubCategory.AUDITLOG &&
@@ -221,6 +225,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.isAnalyst()) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.TAKEDOWN &&
         c !== ProfileSubCategory.MONITORING &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
@@ -234,6 +239,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
       c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+      c !== ProfileSubCategory.TAKEDOWN &&
       c !== ProfileSubCategory.MONITORING &&
       c !== ProfileSubCategory.EVENT_MANAGEMENT &&
       c !== ProfileSubCategory.LOG_MANAGER &&

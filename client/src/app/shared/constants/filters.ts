@@ -408,6 +408,24 @@ export const audit_filters: FilterModel = {
     daterange: DATERANGE_DEFAULT
   }
 };
+export const takedown_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_DEFAULT,
+    status: {
+      title: "Status",
+      options: [
+        { key: "all", label: "All" },
+        { key: "pending", label: "Pending" },
+        { key: "accepted", label: "Accepted" },
+        { key: "denied", label: "Denied" },
+        { key: "failed", label: "Failed" }
+      ],
+      type: "dropdown" as const,
+      tooltip: "Status",
+      selected: "all"
+    }
+  }
+};
 export const event_management_filters: FilterModel = {
   filters: {
     daterange: {

@@ -40,6 +40,7 @@ const loadTrailNotificationComponent = () => import('./shared/partials/trail-not
 const loadAccountSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
 const loadSidebarUserFeederComponent = () => import('./pages/user-management/sidebar-user-feeder/sidebar-user-feeder.component').then(m => m.SidebarUserFeederComponent);
 const loadSidebarUserHomepageComponent = () => import('./pages/user-management/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
+const loadTakedownRequestsComponent = () => import('./pages/user-management/takedown-requests/takedown-requests.component').then(m => m.TakedownRequestsComponent);
 const loadCategoryAlertReportComponent = () => import('./pages/user-management/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
 const loadAddCustomAlertComponent = () => import('./pages/user-management/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
 const loadAlertScannerSettingsComponent = () => import('./pages/user-management/sidebar-user-homepage/alert-scanner-settings/alert-scanner-settings.component').then(m => m.AlertScannerSettingsComponent);
@@ -803,6 +804,11 @@ export const routes: Routes = [
             path: 'monitoring',
             loadComponent: loadSidebarUserMonitoringComponent,
             data: { type: 'monitoring', animation: 'CategoryPage' }
+          },
+          {
+            path: 'take-down',
+            loadComponent: loadTakedownRequestsComponent,
+            data: { type: 'take-down', animation: 'CategoryPage' }
           },
           {
             path: 'statistics',
