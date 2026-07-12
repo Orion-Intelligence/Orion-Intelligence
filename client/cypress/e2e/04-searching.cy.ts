@@ -6,6 +6,8 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
   });
 
+  beforeEach(() => cy.intercept('GET', '**/assets/data/entities_data/entity_filter_suggestions.json', { statusCode: 200, body: {} }));
+
   after(() => {
     cy.logout();
   });
@@ -183,7 +185,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     openSidebarGroup('Actors & Malware');
     waitForSearchReady();
     typeDashboardSearchSlow('malware');
-    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]', { timeout: 60000 })
+    cy.get('[data-testid="apt-intel-result-card"], [data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]', { timeout: 60000 })
       .should('have.length.greaterThan', 0);
     cy.docsScreenshot('actors-malware-results');
   });

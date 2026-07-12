@@ -829,7 +829,7 @@ function selectSidebarFilterOption16(selectTestId: string, option: string) {
             cy.wrap($input.first()).clear({ force: true }).type(option, { force: true });
           }
         });
-      cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000 }).click({ force: true });
+      cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000, matchCase: false }).click({ force: true });
     });
 }
 
