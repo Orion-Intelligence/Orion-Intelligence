@@ -39,7 +39,7 @@ The Orion module set is easiest to understand in ten groups:
 | Geo-fencing and map intelligence | inspect map entities, facilities, transportation overlays, imagery, and country-linked threats | Satellite Intel, Threat Lens |
 | Relationship analysis | map entities and pivots visually | CTI Graph, Social Intel |
 | Profile productivity | manage analyst workspaces and case records | AI Workspace, Case Management, Tracking Board, Feeder |
-| Tenant and administration | manage users, alerts, quotas, branding, settings | Users, Tenants, Tenant Homepage, Manage IOCs, Audit Logs, Account Settings, Tenant Settings, System Settings |
+| Tenant and administration | manage users, alerts, quotas, branding, settings, and takedown review | Users, Tenants, Tenant Homepage, Manage IOCs, Takedown Requests, Audit Logs, Account Settings, Tenant Settings, System Settings |
 
 ## Visibility And Licensing
 
@@ -55,6 +55,7 @@ The most important access patterns are:
 - CTI Graph and Social Intel have separate graph and social-mapper gates
 - Case Management requires case-management access and is more restricted for analyst users than for admins or maintainers
 - tenant alert visibility depends on alert type, tenant licenses, user licenses, and configured scanner categories
+- Takedown Requests is a root-tenant administrator review surface; defacement-module users can initiate takedown evidence requests from eligible compromise reports, but only root administrators can accept or reject those requests
 
 If a module is described here but not visible in the application, check license assignment, user role, tenant status, and deployment feature toggles before assuming the feature is unavailable.
 
@@ -400,6 +401,8 @@ Report pages consolidate the record content, metadata, export actions, sharing a
 
 Comments, public user activity, and profile sidebars support collaboration around reports where those controls are enabled. Use these workflows when a record needs review context before it is exported, linked to a case, or shared for handoff.
 
+Compromise Monitoring reports can also expose an `Initiate Takedown` action when the report has a target URL and the user has the required defacement-module access. That action captures public abuse-contact evidence and creates an administrator review entry instead of immediately dispatching an abuse message. Once a request exists for the target domain, the report shows the current public takedown state, such as `Takedown in progress`, `Takedown denied`, `Takedown reported`, or `Takedown failed`.
+
 ## Support And External Modules
 
 ### Directory
@@ -505,6 +508,19 @@ Current tenant alert workflows can include category summaries, category-specific
 
 Tenant alert scanner settings control the tenant's allowed scanner categories for future scans. Admin-side tenant controls can also set alert visibility, allowed alert access, alert run time, and allowed scanner categories.
 
+### Take Down
+
+Take Down is the root-administrator review workspace for abuse/takedown evidence requests created from compromised-site reports or from a manual target URL. The sidebar label maps to `Takedown Requests`, and the route is `/dashboard/profile/take-down`.
+
+Use Take Down when:
+
+- a defacement or compromise-monitoring report needs abuse-provider follow-up
+- a root administrator needs to review captured evidence before email dispatch
+- the team needs to search, filter, accept, or reject takedown requests
+- a manually supplied target URL needs the same abuse-contact capture and review flow
+
+The workspace lists target domain, target URL, captured abuse email, requester, status, and available action buttons. Root administrators can accept a pending request, which dispatches the takedown email using captured evidence, or reject it with a reason. Non-root users do not see this review page, even though eligible users can still create requests from report pages when their role and module license allow it.
+
 ### Manage IOCs
 
 Manage IOCs is the tenant-maintained list of monitored values used in alerting and related search workflows. This module matters because tenant monitoring quality depends directly on the IOC set being maintained correctly.
@@ -584,6 +600,7 @@ Use:
 - `Audit Logs`
 - `Tenant Settings`
 - `System Settings`
+- `Take Down` for root-administrator takedown review
 - `Case Management`
 - `Feeder`
 

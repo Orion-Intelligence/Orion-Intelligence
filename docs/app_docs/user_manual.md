@@ -1998,6 +1998,44 @@ Alert detail drawers can show the alert risk, title, description, URL, category,
 
 Admins with case-management visibility can also open tenant alert views inside case management. That workflow is used when tenant alerts need administrative review alongside cases and tracked investigation work.
 
+### Take Down
+
+The `Take Down` page is the root-administrator review workspace for abuse/takedown evidence requests. It appears in the profile area as `Takedown Requests` for root-tenant administrators and opens at `/dashboard/profile/take-down`.
+
+The feature has two user-visible entry points:
+
+- `Initiate Takedown` on eligible Compromise Monitoring or defacement reports
+- `Report Takedown` on the Take Down review page for a manually entered target URL
+
+When a user initiates a takedown from a report, Orion uses the report target URL and captures abuse-contact evidence before creating the review entry. The modal shows the captured abuse email when one is found and confirms that evidence has been saved for administrator review. If no public abuse contact is exposed for the target, no evidence entry is saved and the modal shows that the request was not created.
+
+The review page supports:
+
+- searching by target, abuse email, user, or report identifier
+- date-range filtering
+- status filtering for `All`, `Pending`, `Accepted`, `Denied`, or `Failed`
+- pagination
+- accepting pending requests
+- rejecting pending or failed requests with a reason
+- manually creating a request from a target URL
+
+Request statuses are shown with the same meaning across reports and the review page:
+
+| Stored status | Report label | Meaning |
+| --- | --- | --- |
+| `pending` | `Takedown in progress` | Evidence was captured and the request is waiting for root-admin review. |
+| `accepted` | `Takedown reported` | A root administrator accepted the request and the abuse email was dispatched. |
+| `denied` | `Takedown denied` | A root administrator rejected the request, optionally with a reason. |
+| `failed` | `Takedown failed` | The request is in a failed state and can be reviewed or rejected. |
+
+Accepting a request sends the abuse/takedown email to the captured abuse contact using the saved evidence. Rejecting a request closes the review path and stores the rejection reason when one is supplied. After a request exists for a target domain, the source report disables duplicate initiation and shows the current takedown label.
+
+```{admonition} Access and scope
+:class: note
+
+Creating a takedown request requires an eligible role and defacement-module access. Reviewing, accepting, or rejecting takedown requests requires root-tenant administrator access.
+```
+
 ### Manage IOCs
 
 The IOC management page allows tenants to maintain the set of monitored values used in searches and alerting.

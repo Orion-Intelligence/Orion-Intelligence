@@ -6,6 +6,7 @@ Welcome to the Orion Platform Documentation.
 :maxdepth: 4
 :caption: Application Docs:
 
+app_docs/company_and_product_scope
 app_docs/introduction_to_platform
 app_docs/introduction_to_modules
 app_docs/user_manual

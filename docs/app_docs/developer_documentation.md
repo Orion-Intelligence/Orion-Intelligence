@@ -53,7 +53,7 @@ The current application is not only a search UI. Developers should treat the rep
 | Entity lookup and scans | `/dashboard/api/*`, `/dashboard/scanner/*`, `/dashboard/netint`, `/dashboard/scan-report/:scanId` | `/api/dynamic/*`, `/api/urlscan/*`, `/api/netintel/*`, `/api/scan-jobs/*` | Many long-running operations use tracked scan jobs and can reopen existing results. Network Intel vulnerability scans also expose per-target scan depth. |
 | Geo-fencing | `/dashboard/satellite-intel`, `/dashboard/threat-lens` | `/api/search/map-entities/*`, `/api/threat/lens`, `/api/satellite/*`, geo camera scan APIs | License-gated map, facility, imagery, aircraft, ship, and threat-lens workflows. |
 | Graphs and social intelligence | `/dashboard/ctigraph`, `/dashboard/social-intel` | `/api/graph`, `/api/social/*` | Graph modules often open in a separate workspace or tab and depend on license gates. CTI Graph includes the Advanced Graph Builder in addition to the basic graph filters. |
-| Tenant and profile operations | `/dashboard/profile/*`, `/dashboard/tenant/*` | profile, tenant, IOC, alert, SIEM, case, audit, feeder, system log, and settings APIs | Visibility depends heavily on role, tenant state, permissions, and licenses. AI Workspace, chat sharing, case analytics, artifact files, and tenant-alert review are part of this surface. |
+| Tenant and profile operations | `/dashboard/profile/*`, `/dashboard/tenant/*` | profile, tenant, IOC, alert, SIEM, case, audit, feeder, takedown, system log, and settings APIs | Visibility depends heavily on role, tenant state, permissions, and licenses. AI Workspace, chat sharing, case analytics, artifact files, tenant-alert review, and takedown review are part of this surface. |
 
 When a feature changes one of these surfaces, check both route wiring and written docs. For example, adding a new scan API usually touches backend route metadata, the Angular route or component, scan-job behavior, API docs, and user-facing module documentation.
 
@@ -379,7 +379,7 @@ Before calling documentation complete for a release, confirm that the following 
 | Geo-fencing | Satellite Intel, Threat Lens, map entities, facilities, tracking, imagery comparison, anomaly review, geo camera scans |
 | Graphs and social intelligence | CTI Graph, CTI Advanced Graph Builder, Social Intel, social mapper aliases, profile storage, metadata and relationship pivots |
 | Profile operations | Account, public user activity, AI Workspace conversation controls, AI chat sharing, Monitoring, Event Management, Log Manager, Feeder, IOC management, Statistics |
-| Tenant and alerts | Tenant Homepage, category alerts, custom alerts, alert scanner settings, alert exports, scan-all/flush-all, Tenant Settings |
+| Tenant and alerts | Tenant Homepage, category alerts, custom alerts, alert scanner settings, alert exports, scan-all/flush-all, Tenant Settings, Takedown Requests |
 | Administration | Users, Tenants, Audit Logs, System Settings, tenant alert administration, profile visibility, quotas, licenses |
 | Case management | case list filters, analytics, case details, case assistant, tracking board, analyst assignment, artifacts/files, linked report artifacts, artifact integrity verification, comments, linked cases, closure, shares, PDF export, admin tenant alerts |
 
@@ -402,6 +402,24 @@ When changing Case Management, update user docs for all user-visible changes in 
 - tracking-board status movement, reason capture, closure prerequisites, archive behavior, and read-only states
 
 Private case APIs are not currently part of the published `api_docs` reference set. If they are promoted to an external API surface later, add endpoint reference pages at the same time as the user-facing workflow docs.
+
+### Takedown Documentation Notes
+
+Take Down is a profile-area review workflow, not a public integration API. The user-facing route is `/dashboard/profile/take-down`, and the sidebar category maps `Take-Down` to `Takedown Requests`.
+
+When changing takedown behavior, keep these user-visible details documented:
+
+- `Initiate Takedown` appears on eligible defacement/compromise reports with a report ID and target URL.
+- `Report Takedown` on the review page lets a root administrator create the same kind of request from a manual URL.
+- request creation captures public abuse-contact evidence before saving the review entry.
+- if no abuse contact is found, the request is not saved and the user sees an error state.
+- stored statuses are `pending`, `accepted`, `denied`, and `failed`; report labels are `Takedown in progress`, `Takedown reported`, `Takedown denied`, and `Takedown failed`.
+- duplicate target-domain requests return the existing request state when an abuse email is already known.
+- report enrichment disables duplicate initiation and adds `m_takedown_status`, `m_takedown_label`, and `m_takedown_disabled`.
+- accepting dispatches the abuse/takedown email with captured evidence; rejecting stores an optional denial reason.
+- the review page supports free-text search, status filtering, date-range filtering, pagination, accept, reject, and manual request creation.
+
+The backend routes `/api/takedowns`, `/api/takedowns/{request_id}/accept`, and `/api/takedowns/{request_id}/reject` are currently marked `include_in_schema=False`. Keep them out of the published Swagger/API reference unless the product decision changes and they become supported external API operations.
 
 ### AI Workspace Documentation Notes
 

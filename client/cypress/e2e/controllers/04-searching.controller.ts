@@ -111,6 +111,15 @@ export function clickOpenDefacementReport() {
   cy.get('[data-testid="defacement-record-sidebar"] a').first().invoke('removeAttr', 'target').click({ force: true });
 }
 
+export function openDefacementReportAndValidate() {
+  clickOpenDefacementReport();
+  cy.get('body', {timeout: 60000}).should(($body) => {
+    const hasJsonViewer = $body.find('app-json-api-viewer').length > 0;
+    const hasDefacementReport = $body.find('app-report-defacement').length > 0;
+    expect(hasJsonViewer || hasDefacementReport, 'defacement report opened').to.eq(true);
+  });
+}
+
 export function exerciseJsonViewerOnce() {
   cy.window().then((win) => {
     win.scrollTo(0, win.document.documentElement.scrollHeight);

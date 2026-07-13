@@ -411,10 +411,10 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.contains('div', 'Profile').should('be.visible');
     cy.contains('div', 'Contacts').should('be.visible');
     cy.contains('div', 'Users').should('be.visible');
+    cy.contains('div', 'Address').should('be.visible');
     cy.docsScreenshot('tenant-settings');
     cy.scrollDashboardToBottom()
     cy.contains('div', 'Privacy').should('be.visible');
-    cy.contains('div', 'Address').should('be.visible');
 
     cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
     cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);

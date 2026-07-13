@@ -7,8 +7,9 @@ DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$DOCS_DIR/.." && pwd)"
 CLIENT_DIR="$REPO_ROOT/client"
 TARGET_DIR="$DOCS_DIR/screenshots"
-FRONTEND_URL="${DOC_FRONTEND_URL:-http://127.0.0.1:8080}"
+FRONTEND_URL="${DOC_FRONTEND_URL:-https://127.0.0.1:8443}"
 DOC_SCREENSHOT_SPECS=(
+    "cypress/e2e/01-init.cy.ts"
     "cypress/e2e/02-login.cy.ts"
     "cypress/e2e/03-flow.cy.ts"
     "cypress/e2e/04-searching.cy.ts"
@@ -18,12 +19,16 @@ DOC_SCREENSHOT_SPECS=(
     "cypress/e2e/08-social-management.cy.ts"
     "cypress/e2e/09-system-management.cy.ts"
     "cypress/e2e/10-tenant-management.cy.ts"
+    "cypress/e2e/11-Pagination.cy.ts"
     "cypress/e2e/12-chatbot.cy.ts"
     "cypress/e2e/13-consolidated.cy.ts"
     "cypress/e2e/14-scans-management.cy.ts"
+    "cypress/e2e/15-search-api-validation.cy.ts"
+    "cypress/e2e/16-feeder-management.cy.ts"
     "cypress/e2e/17-network-intel.cy.ts"
     "cypress/e2e/18-case-management.cy.ts"
     "cypress/e2e/19-geo-fencing.cy.ts"
+    "cypress/e2e/20-takedown-requests.cy.ts"
 )
 
 clear_docs_screenshots() {

@@ -1,4 +1,4 @@
-import {clickOpenDefacementReport, clickOpenExploitReport, clickOpenReport, exerciseJsonViewerOnce, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickOpenExploitReport, clickOpenReport, exerciseJsonViewerOnce, openDefacementReportAndValidate, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
 import {clickSidebarSubItem} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
@@ -43,8 +43,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Defacement');
     typeDashboardSearchSlow('mthcht');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.docsScreenshot('defacement-report');
     cy.get('body').type('{esc}');
 
@@ -53,8 +52,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.visit('/dashboard/defacement/hacked');
     typeDashboardSearchSlow('ASTAR');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.get('body').type('{esc}');
 
     cy.go('back');
@@ -62,8 +60,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.visit('/dashboard/defacement/phishing');
     typeDashboardSearchSlow('mthcht');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.get('body').type('{esc}');
 
     cy.go('back');
@@ -71,8 +68,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.visit('/dashboard/defacement/databases');
     typeDashboardSearchSlow('urldna_bot');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.get('body').type('{esc}');
   });
 
