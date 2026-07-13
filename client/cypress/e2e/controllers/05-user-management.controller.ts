@@ -5,6 +5,7 @@ export interface ManagedUser {
   role: 'Member' | 'Analyst' | 'Demo';
   licenses: string[];
   permissions?: string[];
+  alertAllowedTenants?: string[] | 'all';
 }
 
 const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
@@ -180,6 +181,38 @@ function setAddUserPermissions(wanted: string[]) {
   });
 }
 
+function setAddUserAlertAllowedTenants(wanted?: string[] | 'all') {
+  if (!wanted) {
+    return;
+  }
+
+  cy.get('@addUserModal').then(($modal) => {
+    const $trigger = $modal.find('[data-testid="tenant-add-user-alerts-allowed"]').first();
+    expect($trigger.length, 'tenant-add-user-alerts-allowed trigger').to.be.greaterThan(0);
+    const menuId = $trigger.attr('aria-controls');
+    expect(menuId, 'tenant-add-user-alerts-allowed menu id').to.exist;
+    const normalizedWanted = wanted === 'all'
+      ? ['all']
+      : wanted.map(normalizeDropdownValue);
+
+    cy.wrap($trigger).click({force: true});
+    cy.wrap($trigger).should('have.attr', 'aria-expanded', 'true');
+    cy.get(`#${menuId} [role="option"]`, {timeout: 10000})
+      .should('have.length.greaterThan', 0)
+      .each(($option) => {
+        const label = normalizeDropdownValue($option.text());
+        const shouldBeSelected = normalizedWanted.includes(label);
+        const isSelected = $option.attr('aria-selected') === 'true';
+        if (shouldBeSelected !== isSelected) {
+          cy.wrap($option).click({force: true});
+        }
+      })
+      .then(() => {
+        cy.wrap($trigger).click({force: true});
+      });
+  });
+}
+
 export function addUser(user: ManagedUser) {
   cy.url().should('include', '/dashboard/profile/users');
   cy.get('[data-testid="tenant-add-user-button"]').should('be.visible').scrollIntoView().click();
@@ -193,6 +226,7 @@ export function addUser(user: ManagedUser) {
   const wanted = user.licenses.map((x) => x.trim().toLowerCase());
   setAddUserLicenses(wanted);
   setAddUserPermissions(user.permissions || []);
+  setAddUserAlertAllowedTenants(user.alertAllowedTenants);
   cy.get('@addUserModal').find('[data-testid="tenant-add-user-submit"]').click({force: true});
   cy.get('[data-testid="tenant-add-user-modal"]').should('not.exist');
   cy.contains(user.username).should('exist');

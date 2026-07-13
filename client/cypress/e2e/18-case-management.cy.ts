@@ -454,7 +454,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.docsScreenshot('case-closure-read-only');
   });
 
-  it('archives closed case and shows archived list', () => {
+  it('archives closed case and shows .then list', () => {
     openCreatedCaseDetails();
 
     clickHeaderAction('case-details-archive');
@@ -475,71 +475,71 @@ describe('Case Management - Add View Edit Flow', () => {
   });
 });
 
-// describe('Case Management - Tenant Alert Visibility', () => {
-//   let caseAlertTenants: CaseAlertTenant[] = [];
-//   let caseAlertUsers: {limited: ManagedUser; all: ManagedUser};
-//
-//   before(() => {
-//     cy.env(['CASE_ALERT_TENANTS', 'CASE_ALERT_USERS']).then(({CASE_ALERT_TENANTS, CASE_ALERT_USERS}) => {
-//       caseAlertTenants = CASE_ALERT_TENANTS || [];
-//       caseAlertUsers = CASE_ALERT_USERS || {};
-//       if (caseAlertTenants.length !== 3 || !caseAlertUsers.limited?.username || !caseAlertUsers.all?.username) {
-//         throw new Error('Missing CASE_ALERT_TENANTS or CASE_ALERT_USERS in cypress.config.ts');
-//       }
-//     });
-//   });
-//
-//   after(() => {
-//     cy.logout();
-//   });
-//
-//   it('limits admin tenant alerts by analyst allowed tenants and tenant visibility settings', () => {
-//     cy.logout();
-//     caseAlertTenants.forEach((tenant) => {
-//       createTenantAccount(tenant);
-//       cy.loginAsAdmin();
-//       openTenantsPage();
-//       configureTenantForCaseAlerts(tenant);
-//       cy.logout();
-//     });
-//
-//     caseAlertTenants.forEach((tenant) => onboardTenantForCaseAlerts(tenant));
-//
-//     cy.loginAsAdmin();
-//     cy.visit('/dashboard/profile/users');
-//     cy.get('[data-testid="tenant-add-user-button"]').should('be.visible');
-//     addUser(caseAlertUsers.limited);
-//     addUser(caseAlertUsers.all);
-//     cy.logout();
-//
-//     loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(
-//       [caseAlertTenants[0], caseAlertTenants[1]],
-//       [caseAlertTenants[2]]
-//     );
-//     cy.logout();
-//
-//     loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(caseAlertTenants, []);
-//     cy.logout();
-//
-//     setTenantAlertVisibility(caseAlertTenants[0], false);
-//
-//     loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(
-//       [caseAlertTenants[1]],
-//       [caseAlertTenants[0], caseAlertTenants[2]]
-//     );
-//     cy.logout();
-//
-//     loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(
-//       [caseAlertTenants[1], caseAlertTenants[2]],
-//       [caseAlertTenants[0]]
-//     );
-//   });
-// });
+describe('Case Management - Tenant Alert Visibility', () => {
+  let caseAlertTenants: CaseAlertTenant[] = [];
+  let caseAlertUsers: {limited: ManagedUser; all: ManagedUser};
+
+  before(() => {
+    cy.env(['CASE_ALERT_TENANTS', 'CASE_ALERT_USERS']).then(({CASE_ALERT_TENANTS, CASE_ALERT_USERS}) => {
+      caseAlertTenants = CASE_ALERT_TENANTS || [];
+      caseAlertUsers = CASE_ALERT_USERS || {};
+      if (caseAlertTenants.length !== 3 || !caseAlertUsers.limited?.username || !caseAlertUsers.all?.username) {
+        throw new Error('Missing CASE_ALERT_TENANTS or CASE_ALERT_USERS in cypress.config.ts');
+      }
+    });
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('limits admin tenant alerts by analyst allowed tenants and tenant visibility settings', () => {
+    cy.logout();
+    caseAlertTenants.forEach((tenant) => {
+      createTenantAccount(tenant);
+      cy.loginAsAdmin();
+      openTenantsPage();
+      configureTenantForCaseAlerts(tenant);
+      cy.logout();
+    });
+
+    caseAlertTenants.forEach((tenant) => onboardTenantForCaseAlerts(tenant));
+
+    cy.loginAsAdmin();
+    cy.visit('/dashboard/profile/users');
+    cy.get('[data-testid="tenant-add-user-button"]').should('be.visible');
+    addUser(caseAlertUsers.limited);
+    addUser(caseAlertUsers.all);
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[0], caseAlertTenants[1]],
+      [caseAlertTenants[2]]
+    );
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(caseAlertTenants, []);
+    cy.logout();
+
+    setTenantAlertVisibility(caseAlertTenants[0], false);
+
+    loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[1]],
+      [caseAlertTenants[0], caseAlertTenants[2]]
+    );
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[1], caseAlertTenants[2]],
+      [caseAlertTenants[0]]
+    );
+  });
+});
