@@ -33,6 +33,7 @@ def load_caption_map() -> dict[str, str]:
                 j += 1
             if filename and filename not in captions:
                 captions[filename] = caption or filename.rsplit(".", 1)[0].replace("-", " ").title()
+                captions[Path(filename).name] = captions[filename]
             i = j
         i += 1
     return captions
