@@ -280,17 +280,18 @@ export function setPasswordResetRequired(username: string, required: boolean) {
 
 export function loginAsUser(username: string, password: string) {
   cy.intercept('POST', '**/api/token').as('loginRequest');
+  cy.intercept('POST', '**/api/get/tenant/node').as('tenantNodeRequest');
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').filter(':visible').first().should('be.visible').click({ force: true });
   cy.waitForLoginRequest();
-  cy.visit('/dashboard');
-  cy.scrollDashboardToBottom();
+  cy.wait('@tenantNodeRequest', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 201]);
 
   cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
     .filter(':visible')
     .should('have.length.greaterThan', 0);
+  cy.scrollDashboardToBottom();
 }
 
 export function openFirstStrategicReportFromSearch(searchTerm = 'data') {
