@@ -953,39 +953,3 @@ Platform services are validated after recovery
 Orion Intelligence uses Hostinger weekly backups to support recovery from system failure, data corruption, infrastructure disruption, or other operational issues.
 
 Backups provide recovery points for restoring critical platform data and system state. Recovery activities are performed by authorized administrators or infrastructure personnel, and backup access is restricted to authorized personnel only.
-
-## 3.7 SOC 2 Security Compliance Readiness
-
-### Overview
-
-This section summarizes the current readiness of the Orion Intelligence security documentation for the SOC 2 Security trust service category. It is intended as an internal audit-readiness note and does not represent a formal compliance opinion.
-
-### Current Readiness Assessment
-
-The current Security Documentation provides a good security overview, but it is not enough for full SOC 2 Security audit readiness as-is.
-
-The documentation covers useful areas, including authentication, multi-factor authentication, sessions, role-based access control, tenant isolation, encryption, logging, audit logs, and backups. These areas provide a solid foundation for the SOC 2 Security trust service category.
-
-### Required SOC 2 Additions
-
-The main issue is that SOC 2 expects documented controls plus evidence, not only a security narrative. The documentation should be expanded to include the following items:
-
-SOC 2 criteria mapping, especially CC1 through CC9.
-
-Control owner, frequency, evidence, and review cadence for each control.
-
-Access provisioning, approval, offboarding, and periodic access reviews.
-
-Vulnerability management, patching, dependency scanning, and penetration testing.
-
-Incident response process, severity levels, notifications, and post-incident reviews.
-
-Change management, including code review, approvals, testing, deployment, and rollback.
-
-Vendor and subservice provider controls, especially Hostinger and hosting or database dependencies.
-
-Backup details, including recovery point objectives, recovery time objectives, retention, encryption, and restore testing evidence.
-
-Key management details, including key storage, rotation, access restrictions, and backup key handling.
-
-Log review process, alerting, retention period, and tamper protection.
