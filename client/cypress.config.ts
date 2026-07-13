@@ -1,5 +1,7 @@
 import { defineConfig } from "cypress";
 import registerCodeCoverageTasks from "@cypress/code-coverage/task";
+import fs from "node:fs";
+import path from "node:path";
 
 const isCi =
     process.env["CI"] === "true" ||
@@ -9,6 +11,8 @@ const isCi =
 export default defineConfig({
     allowCypressEnv: false,
     video: false,
+    screenshotsFolder: "cypress/error",
+    screenshotOnRunFailure: true,
     numTestsKeptInMemory: 0,
     watchForFileChanges: false,
     trashAssetsBeforeRuns: false,
@@ -137,13 +141,31 @@ export default defineConfig({
     e2e: {
         specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
         supportFile: "cypress/support/e2e.ts",
-        screenshotsFolder: "cypress/error",
         testIsolation: true,
         setupNodeEvents(on, config) {
             const takeScreenshots = config.env["takeScreenshots"];
             if (takeScreenshots === true || takeScreenshots === "true") {
                 config.screenshotsFolder = "../docs/screenshots";
             }
+            on("after:screenshot", (details) => {
+                if (!details.testFailure) {
+                    return;
+                }
+                const screenshotsFolder =
+                    typeof config.screenshotsFolder === "string" ? config.screenshotsFolder : "cypress/error";
+                const screenshotRoot = path.resolve(config.projectRoot, screenshotsFolder);
+                const relativePath = path.relative(screenshotRoot, details.path);
+                const targetPath = path.resolve(config.projectRoot, "cypress", "error", relativePath);
+
+                if (details.path === targetPath) {
+                    return;
+                }
+
+                fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+                fs.renameSync(details.path, targetPath);
+
+                return { path: targetPath };
+            });
             if (isCi) {
                 registerCodeCoverageTasks(on, config);
             }
@@ -176,7 +198,6 @@ export default defineConfig({
         taskTimeout: 60000,
         waitForAnimations: true,
         animationDistanceThreshold: 5,
-        screenshotOnRunFailure: true,
     },
     component: {
         devServer: {
