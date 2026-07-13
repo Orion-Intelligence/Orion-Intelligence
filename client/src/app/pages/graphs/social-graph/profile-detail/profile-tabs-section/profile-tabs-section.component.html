@@ -313,6 +313,8 @@
                     [isLoading]="isTabLoading('extensionPosts')"
                     [showFetchLatest]="false"
                     [showLoadMoreWhenDone]="true"
+                    [showHeader]="false"
+                    [compactMedia]="true"
                     [displayLimit]="getExtensionPostDisplayLimit(platformData)"
                     [allowCommentFetch]="false"
                     (refetch)="refetchTab.emit('extension')"

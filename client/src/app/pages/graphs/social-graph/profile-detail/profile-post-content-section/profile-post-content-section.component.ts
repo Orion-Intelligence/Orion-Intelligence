@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { PlatformResult, SocialPost, SocialPostComment } from '../../../../../shared/model/social/social-scan.models';
 import { formatFollowers } from '../../../../../shared/utils/formatters';
 import type { PostContentTabKey, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../../models/social-graph.models';
@@ -10,6 +11,7 @@ import socialPlatformCapabilities from '../../../../../../assets/data/social-gra
   selector: 'app-social-profile-post-content-section',
   templateUrl: './profile-post-content-section.component.html',
   standalone: true,
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfilePostContentSectionComponent {
@@ -25,6 +27,8 @@ export class SocialProfilePostContentSectionComponent {
   isLoading = input(false);
   showFetchLatest = input(true);
   showLoadMoreWhenDone = input(false);
+  showHeader = input(true);
+  compactMedia = input(false);
   displayLimit = input<number | null>(null);
   allowCommentFetch = input(true);
   refetch = output<PostContentTabKey>();
