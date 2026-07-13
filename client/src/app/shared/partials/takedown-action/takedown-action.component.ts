@@ -30,6 +30,7 @@ export class TakedownActionComponent implements OnChanges {
   @Input() actionLabel: string = 'Initiate Takedown';
   @Input() buttonClass: string = '';
   @Input() buttonIcon: string = '';
+
   @Output() requestCreated = new EventEmitter<TakedownActionResponse>();
 
   ngOnChanges(_: SimpleChanges): void {

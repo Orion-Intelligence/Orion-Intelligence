@@ -15,7 +15,6 @@ export class TakedownRejectionPopupComponent {
   readonly isSubmitting = input(false);
   readonly submitted = output<string>();
   readonly cancelled = output<void>();
-
   reason = '';
 
   get trimmedReason(): string {

@@ -74,7 +74,7 @@
     "autoprefixer": "^10.5.0",
     "babel-loader": "10.1.1",
     "babel-plugin-istanbul": "^8.0.0",
-    "cypress": "^15.15.0",
+    "cypress": "^15.18.1",
     "eslint": "^10.4.0",
     "lighthouse": "12.6.1",
     "postcss": "^8.5.15",

@@ -15,17 +15,7 @@
     }
 
     <label class="mt-5 mb-2 block text-[13px] font-semibold text-[var(--color-text2)]" for="takedown-rejection-reason">Rejection reason</label>
-    <textarea
-      triggerAutoFocus
-      id="takedown-rejection-reason"
-      data-testid="takedown-rejection-reason"
-      name="takedown-rejection-reason"
-      [(ngModel)]="reason"
-      maxlength="500"
-      rows="5"
-      class="min-h-[132px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-[14px] leading-6 text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]"
-      placeholder="Why is this takedown request being rejected?"
-      [disabled]="isSubmitting()"></textarea>
+    <textarea triggerAutoFocus id="takedown-rejection-reason" data-testid="takedown-rejection-reason" name="takedown-rejection-reason" [(ngModel)]="reason" maxlength="500" rows="5" class="min-h-[132px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-[14px] leading-6 text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" placeholder="Why is this takedown request being rejected?" [disabled]="isSubmitting()"></textarea>
 
     <div class="mt-2 flex items-center justify-between gap-3">
       <span class="text-[12px] text-[var(--color-text4)]">{{ reason.length }}/500</span>
