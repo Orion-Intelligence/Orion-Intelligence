@@ -989,33 +989,3 @@ Backup details, including recovery point objectives, recovery time objectives, r
 Key management details, including key storage, rotation, access restrictions, and backup key handling.
 
 Log review process, alerting, retention period, and tamper protection.
-
-### SOC 2 Type I and Type II Readiness
-
-For SOC 2 Type I, the current content could be turned into an acceptable draft after adding a control matrix and evidence references.
-
-For SOC 2 Type II, the current content is not enough because operating evidence is required across the audit period.
-
-### Recommended Control Format
-
-A SOC 2-ready control entry should identify the control, criteria mapping, owner, frequency, evidence, and review cadence.
-
-Control ID: SEC-01
-
-SOC 2 Criteria: CC6.1, CC6.2
-
-Control: MFA is required for all administrative and user accounts.
-
-Owner: Security / Platform Admin
-
-Frequency: Continuous
-
-Evidence: MFA configuration screenshot, user access export, login audit logs
-
-Review Cadence: Quarterly
-
-### Reference
-
-AICPA identifies the 2017 Trust Services Criteria with revised 2022 points of focus as the criteria used for evaluating controls over security, availability, processing integrity, confidentiality, and privacy.
-
-Reference URL: https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022
