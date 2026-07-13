@@ -11,6 +11,7 @@ export default defineConfig({
     video: false,
     numTestsKeptInMemory: 0,
     watchForFileChanges: false,
+    trashAssetsBeforeRuns: false,
     experimentalMemoryManagement: true,
     experimentalFastVisibility: true,
     retries: 0,
@@ -136,9 +137,13 @@ export default defineConfig({
     e2e: {
         specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
         supportFile: "cypress/support/e2e.ts",
-        screenshotsFolder: "../docs/screenshots",
+        screenshotsFolder: "cypress/error",
         testIsolation: true,
         setupNodeEvents(on, config) {
+            const takeScreenshots = config.env["takeScreenshots"];
+            if (takeScreenshots === true || takeScreenshots === "true") {
+                config.screenshotsFolder = "../docs/screenshots";
+            }
             if (isCi) {
                 registerCodeCoverageTasks(on, config);
             }
@@ -171,7 +176,7 @@ export default defineConfig({
         taskTimeout: 60000,
         waitForAnimations: true,
         animationDistanceThreshold: 5,
-        screenshotOnRunFailure: false,
+        screenshotOnRunFailure: true,
     },
     component: {
         devServer: {
