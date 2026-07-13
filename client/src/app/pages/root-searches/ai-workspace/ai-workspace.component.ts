@@ -71,11 +71,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      window.history.back();
-      return;
-    }
-    this.router.navigate(['/dashboard/home']).then();
+    this.router.navigate(['/dashboard/profile/homepage']).then();
   }
 
   sendMessage(): void {
@@ -120,6 +116,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
                 updatedAt: response.chat.updated_at,
                 isPinned: response.chat.is_pinned ?? false,
                 pinnedAt: response.chat.pinned_at ?? null,
+                messageCount: response.chat.message_count ?? this.messages.length,
                 messages: this.messages,
               }
               : session);
@@ -212,6 +209,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.scrollToBottom();
   }
 
+  private findEmptyChat(): AiChatSession | undefined {
+    return this.chatSessions.find(chat =>
+      (chat.messageCount ?? chat.messages?.length ?? 0) === 0);
+  }
+
   startNewChat(): void {
     if (this.isSending() || this.isStreamingReply()) {
       return;
@@ -225,6 +227,19 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
     this.nexusStep.set('');
+
+    const emptyChat = this.findEmptyChat();
+
+    if (emptyChat) {
+      this.activeChatId = emptyChat.id;
+      this.messages = [];
+      this.messageDraft = '';
+
+      this.cancelMessageEdit();
+      this.queueComposerResize();
+      this.loadChat(emptyChat.id);
+      return;
+    }
 
     this.nexusChatService.createChat('New Chat').subscribe({
       next: (session) => {
@@ -414,6 +429,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       updatedAt: session.updated_at,
       isPinned: session.is_pinned ?? false,
       pinnedAt: session.pinned_at ?? null,
+      messageCount: session.message_count ?? 0,
       messages: [],
     };
   }
@@ -462,6 +478,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
               updatedAt: chat.updated_at,
               isPinned: chat.is_pinned ?? false,
               pinnedAt: chat.pinned_at ?? null,
+              messageCount: chat.message_count ?? chat.messages.length,
               messages: this.messages,
             }
             : session);
