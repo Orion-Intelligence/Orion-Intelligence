@@ -9,6 +9,7 @@ import ssl
 from email.mime.image import MIMEImage
 from email.mime.application import MIMEApplication
 import urllib.request
+from urllib.parse import urlparse
 import os
 from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
@@ -144,7 +145,9 @@ class mail_manager:
             hosts_to_try = []
             configured_base_url = env_handler.get_instance().env("TRUSTED_MICROS_API_BASE")
             if configured_base_url:
-                hosts_to_try.append(str(configured_base_url).rstrip("/"))
+                parsed_base_url = urlparse(str(configured_base_url).rstrip("/"))
+                if parsed_base_url.scheme in {"http", "https"} and parsed_base_url.netloc:
+                    hosts_to_try.append(str(configured_base_url).rstrip("/"))
             hosts_to_try.extend(["http://trusted-micros-api:8010", "http://localhost:8010"])
             hosts_to_try = list(dict.fromkeys(hosts_to_try))
 
@@ -178,19 +181,19 @@ class mail_manager:
                 for host in hosts_to_try:
                     try:
                         req = urllib.request.Request(f"{host}/evidence/view/image/{safe_screenshot}")
-                        with urllib.request.urlopen(req, timeout=10) as resp:
+                        with urllib.request.urlopen(req, timeout=10) as resp:  # nosec B310
                             img_bytes = resp.read()
                             image_part = MIMEImage(img_bytes, name=f"screenshot_{target_domain}.png")
                             msg.attach(image_part)
                             break
-                    except Exception:
-                        continue
+                    except Exception as exc:
+                        raise HTTPException(status_code=500, detail="Failed to fetch screenshot evidence") from exc
 
             if safe_html and not attached_html:
                 for host in hosts_to_try:
                     try:
                         req = urllib.request.Request(f"{host}/evidence/view/html/{safe_html}")
-                        with urllib.request.urlopen(req, timeout=10) as resp:
+                        with urllib.request.urlopen(req, timeout=10) as resp:  # nosec B310
                             html_bytes = resp.read()
                             html_part = MIMEApplication(html_bytes, Name=f"source_{target_domain}.html")
                             html_part['Content-Disposition'] = f'attachment; filename="source_{target_domain}.html"'
@@ -199,7 +202,7 @@ class mail_manager:
                     except Exception as e:
                         try:
                             req_alt = urllib.request.Request(f"{host}/evidence/view/source/{safe_html}")
-                            with urllib.request.urlopen(req_alt, timeout=10) as resp:
+                            with urllib.request.urlopen(req_alt, timeout=10) as resp:  # nosec B310
                                 html_bytes = resp.read()
                             html_part = MIMEApplication(html_bytes, Name=f"source_{target_domain}.html")
                             html_part['Content-Disposition'] = f'attachment; filename="source_{target_domain}.html"'
@@ -207,7 +210,7 @@ class mail_manager:
                             break
                         except Exception as e_alt:
                             log.g().e(f"Failed to fetch HTML evidence. Error 1: {e} | Error 2: {e_alt}")
-                            continue
+                            raise HTTPException(status_code=500, detail="Failed to fetch HTML evidence") from e_alt
 
         await asyncio.to_thread(fetch_and_attach)
 

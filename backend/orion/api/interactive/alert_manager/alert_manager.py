@@ -749,8 +749,8 @@ class AlertManager:
                         licenses.add(enc.decrypt(tenant_license.encode()).decode())
                     except Exception:
                         licenses.add(str(tenant_license))
-        except Exception:
-            pass
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail="Failed to load alert access licenses") from exc
         return licenses
 
     async def filter_alerts_by_license(self, alerts: list[AlertModel], user) -> list[AlertModel]:

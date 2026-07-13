@@ -1368,13 +1368,6 @@ The tested CTI workflow also confirms the following operator-visible actions:
 - exporting report options such as JSON and graph PDF
 - opening canvas context-menu actions
 
-```{figure} ../screenshots/cti-list-view-20260326.png
-:alt: CTI list view
-:width: 100%
-
-CTI list-view mode used when investigators want structured row-based review instead of the graph canvas.
-```
-
 ```{figure} ../screenshots/cti-export-modal-20260326.png
 :alt: CTI export modal
 :width: 100%
