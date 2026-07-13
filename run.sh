@@ -98,7 +98,7 @@ disable_maintenance_mode() {
 }
 
 wait_for_test_service() {
-    local url="https://127.0.0.1:8443/api/public"
+    local url="https://127.0.0.1:8443/api/test/ready"
     echo "Waiting for test service to become ready..."
     until curl -fksS -o /dev/null "$url" >/dev/null 2>&1; do
         sleep 2

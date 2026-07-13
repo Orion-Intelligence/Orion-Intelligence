@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 
 from configs.app_dependency import get_current_user, license_required, role_required
 from configs.limiter_dependency import limiter_dependency
@@ -8,6 +8,7 @@ from orion.api.interactive.auth_manager.models.forgot_password_request import Fo
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, NetIntelDeepScanRequest, ResolveIPRequest
+from orion.management.managers.service_manager import service_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest
 from routes.helper.route_test_helper import TestRouteHelper
@@ -33,6 +34,14 @@ test_routes = APIRouter(
         Depends(TestRouteHelper.require_testing_enabled),
     ]
 )
+
+
+@test_routes.get("/api/test/ready", include_in_schema=False)
+async def test_ready():
+    if not service_manager.get_instance().check_status():
+        raise HTTPException(status_code=503, detail="Test services are not ready")
+    return {"ready": True}
+
 
 @test_routes.post(
     "/api/scan-jobs/{scan_id}/poll",
