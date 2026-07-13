@@ -58,6 +58,36 @@ class TenantManager:
         return email.split("@")[1].lower()
 
     @staticmethod
+    def normalize_alert_categories(categories: Optional[List[str]]) -> Optional[List[str]]:
+        if categories is None:
+            return None
+        normalized = []
+        seen = set()
+        for category in categories:
+            value = str(category or "").strip().lower()
+            if not value or value in seen:
+                continue
+            seen.add(value)
+            normalized.append(value)
+        return normalized
+
+    @staticmethod
+    def build_privileged_iocs(email: str) -> List[IocCategory]:
+        normalized_email = (email or "").strip().lower()
+        if not normalized_email or "@" not in normalized_email:
+            return []
+
+        domain = TenantManager.get_email_domain(normalized_email)
+        email_values = [normalized_email]
+        if domain:
+            email_values.append(domain)
+
+        return [
+            IocCategory(ioc_id="m_domain", name="Domains", values=[domain] if domain else []),
+            IocCategory(ioc_id="m_email", name="Emails", values=list(dict.fromkeys(email_values))),
+        ]
+
+    @staticmethod
     def get_company_from_email(email: str) -> str:
         parts = email.split("@")
         if len(parts) < 2:
@@ -216,6 +246,9 @@ class TenantManager:
 
     async def create_tenant(self, data: db_tenant_model):
         try:
+            data.privileged_ioc = False
+            if not data.iocs and data.email:
+                data.iocs = self.build_privileged_iocs(data.email)
             await self.encrypt_tenant(data)
             data.status = TenantStatus.ONBOARDING
             await self._engine.save(data)
@@ -250,7 +283,9 @@ class TenantManager:
             profile_visibility_enabled=getattr(tenant, "profile_visibility_enabled", True),
             event_management_enabled=getattr(tenant, "event_management_enabled", False),
             alerts_visible_to_admin=getattr(tenant, "alerts_visible_to_admin", True),
+            privileged_ioc=getattr(tenant, "privileged_ioc", False),
             alert_run_time=getattr(tenant, "alert_run_time", None),
+            allowed_alert_categories=getattr(tenant, "allowed_alert_categories", None),
             accounts_mail_password=None,
             accounts_mail=enc.decrypt(getattr(tenant, "accounts_mail", "").encode()).decode() if getattr(tenant, "accounts_mail", "") else "",
             accounts_smtp_server=enc.decrypt(getattr(tenant, "accounts_smtp_server", "").encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else "",
@@ -278,6 +313,7 @@ class TenantManager:
             raise HTTPException(status_code=401, detail="Default account cant be updated")
 
         previous_alerts_visible_to_admin = getattr(tenant, "alerts_visible_to_admin", True)
+        previous_privileged_ioc = getattr(tenant, "privileged_ioc", False)
 
         if data.password_reset_required is not None:
             maintainer = await self._engine.find_one(db_user_account,(db_user_account.tenant_uuid == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
@@ -347,10 +383,27 @@ class TenantManager:
         if data.alerts_visible_to_admin is not None:
             tenant.alerts_visible_to_admin = data.alerts_visible_to_admin
 
+        if data.privileged_ioc is not None and not is_admin:
+            raise HTTPException(status_code=403, detail="Only admin can change privileged IOC")
+
+        privileged_ioc_changed = data.privileged_ioc is not None and bool(data.privileged_ioc) != bool(previous_privileged_ioc)
+        if privileged_ioc_changed:
+            tenant.privileged_ioc = bool(data.privileged_ioc)
+            tenant_email = enc.decrypt(tenant.email.encode()).decode() if tenant.email else ""
+            tenant.iocs = [IocCategory(
+                ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
+                name=enc.encrypt(ioc.name.encode()).decode(),
+                values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in self.build_privileged_iocs(tenant_email)]
+
         if "alert_run_time" in data.model_fields_set:
             tenant.alert_run_time = data.alert_run_time
 
-        if data.iocs is not None:
+        if "allowed_alert_categories" in data.model_fields_set:
+            tenant.allowed_alert_categories = self.normalize_alert_categories(data.allowed_alert_categories)
+
+        if "iocs" in data.model_fields_set and data.iocs is not None and not privileged_ioc_changed:
+            if not is_admin and not getattr(tenant, "privileged_ioc", False):
+                raise HTTPException(status_code=403, detail="You don't have permission to manage IOCs outside your domain. Ask your network administrator.")
             tenant.iocs = [IocCategory(
                 ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
                 name=enc.encrypt(ioc.name.encode()).decode(),
@@ -560,6 +613,25 @@ class TenantManager:
             "limit": limit,
             "has_more": end < total,
         }
+
+    async def get_visible_tenant_alert_filter_options(self, tenant_id: str, current_user, field: str, query: str = "", limit: int = 25, alert_type: str | None = None) -> dict[str, list[str]]:
+        from orion.api.interactive.alert_manager.alert_manager import AlertManager
+        alerts = await self.get_visible_tenant_alerts(
+            tenant_id,
+            current_user,
+            alert_type=alert_type,
+            paginate=False,
+        )
+        return {"values": AlertManager.filter_option_values(alerts, field, query, limit)}
+
+    async def get_admin_tenant_alert_filter_options(self, tenant_id: str, field: str, query: str = "", limit: int = 25, alert_type: str | None = None) -> dict[str, list[str]]:
+        from orion.api.interactive.alert_manager.alert_manager import AlertManager
+        alerts = await self.get_admin_tenant_alerts(
+            tenant_id,
+            alert_type=alert_type,
+            paginate=False,
+        )
+        return {"values": AlertManager.filter_option_values(alerts, field, query, limit)}
 
     async def create_tenant_user(self, data: user_model, current_user):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager

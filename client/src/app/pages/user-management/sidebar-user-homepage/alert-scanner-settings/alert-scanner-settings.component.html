@@ -1,0 +1,29 @@
+<div class="w-full p-3 pb-[150px] md:p-4 md:pb-[150px]">
+  <div class="ui-page-container w-full max-w-[2400px]">
+    <div class="mb-4 flex items-center justify-between gap-3 max-[640px]:flex-col max-[640px]:items-start">
+      <div>
+        <h1 class="ui-page-title">{{ 'Alert Scanners' | translate }}</h1>
+        <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Enable or disable alert scanners from running during tenant scans.' | translate }}</p>
+      </div>
+      <button type="button" class="inline-flex h-9 items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-[13px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" (click)="backToHome()">
+        <i class="bi bi-arrow-left text-[14px]"></i>
+        {{ 'Back' | translate }}
+      </button>
+    </div>
+
+    <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)]">
+      @for (category of scannerCategories; track category) {
+        <div class="flex min-h-[62px] items-center justify-between gap-4 border-b border-[var(--color-border)] px-[14px] py-[10px] transition-colors last:border-b-0 max-[640px]:px-[12px]" [class.opacity-60]="!isEnabled(category)" [ngClass]="!isReady() || isSaving() || !licenseService.isMaintainer() ? 'cursor-not-allowed' : 'cursor-pointer hover:bg-[var(--color-blue-810)]'" (click)="toggleScanner(category)">
+          <div class="min-w-0">
+            <div class="truncate text-[14px] font-semibold text-[var(--color-text1)]">{{ displayName(category) }}</div>
+            <div class="mt-[3px] truncate text-[11px] font-medium text-[var(--color-text4)]">{{ scannerLabel(category) }}</div>
+          </div>
+          <label class="pointer-events-none relative h-6 w-11 shrink-0">
+            <input type="checkbox" class="peer h-0 w-0 opacity-0" [checked]="isEnabled(category)" />
+            <span class="absolute inset-0 rounded-[20px] bg-[var(--color-button-secondary)] transition-[background-color] duration-300 peer-checked:bg-[var(--color-button-primary)] before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:content-[''] before:transition-transform before:duration-300 peer-checked:before:translate-x-[20px]"></span>
+          </label>
+        </div>
+      }
+    </div>
+  </div>
+</div>

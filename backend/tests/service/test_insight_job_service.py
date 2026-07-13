@@ -118,7 +118,7 @@ def test_country_insight_sort_tolerates_indices_without_update_date_mapping():
     assert ELASTIC_INDEX.S_CHATS_INDEX in indices
     assert ELASTIC_INDEX.S_SOCIAL_INDEX in indices
     assert query["sort"] == [
-        {"m_update_date": {"order": "desc", "missing": "_last", "unmapped_type": "date"}}
+        {"_doc": {"order": "asc"}}
     ]
 
 

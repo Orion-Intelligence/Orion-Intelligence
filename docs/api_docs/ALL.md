@@ -48,57 +48,6 @@ Example response:
 
 ---
 
-## dumps
-
-### Description
-
-Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites.
-
-Supported filters:
-- **page:** page number of the result set
-- **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites)
-- **group:** leak group or channel name derived from the source (e.g., Telegram channel name)
-- **status:** all, parsed, unparsed
-- **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`)
-- **q:** free-text search query applied to `leak_url`, `source`, `group`, and other indexed fields (default: `*`)
-
-Common use-cases include identifying newly leaked dumps, retrieving unparsed dumps for analysis, or filtering dumps from specific threat groups or Telegram channels.
-
-
-### Response
-
-Paginated dump catalog response containing:
-- **total_count** — total number of dumps matching filters
-- **page** — current page number
-- **mDumpCallbackLinks** — list of dump entries, each containing:
-  - **leak_url** — raw dump reference or asset URL
-  - **source** — origin of the leak (e.g., telegram, websites)
-  - **group** — associated leak group or channel name derived from the source (e.g., Telegram channel name)
-  - **link** — direct reference link to the dump message or file
-  - **parsed_status** — whether the dump has been parsed/processed
-  - **created_at** — first-seen timestamp of the dump
-
-Example response:
-```json
-{
-  "total_count": 152,
-  "page": 1,
-  "mDumpCallbackLinks": [
-    {
-      "leak_url": "https://t.me/example_leaks/1234",
-      "source": "telegram",
-      "group": "example_leak_group",
-      "link": "https://t.me/example_leaks/1234",
-      "parsed_status": "parsed",
-      "created_at": "2025-12-03T21:15:23Z"
-    }
-  ]
-}
-```
-
-
----
-
 ## insight
 
 ### Description
@@ -1345,6 +1294,49 @@ Supported IOC / enrichment fields:
 
 ---
 
+## apt_intel
+
+### Description
+
+Search APT actor and malware intelligence reports across the Actors & Malware data set.
+
+This endpoint corresponds to `/api/search/apt-intel` and expects a JSON body matching the consolidated search request model used by indexed investigation modules.
+
+Supported request fields include:
+
+- **q** - free-text query over actor names, malware families, aliases, report titles, descriptions, IOCs, and related metadata.
+- **category** - high-level selector. Use `all` for actor and malware results together, `apt` for actor reports, or `malware` / `malware-bazaar` for malware records.
+- **page** - page number for paginated results.
+- **network** - network scope when applicable.
+- **daterange** - optional date range in `YYYY-MM-DD,YYYY-MM-DD` format.
+- **content** - content or report-type selector where supported by the active category.
+- **entity** - primary IOC/entity dimension for the query.
+- **matchtype** - logical operator for combining query and filters.
+- **must** - when true, values under **entity_filter** must be present in matched documents.
+- **entity_filter** - structured IOC/entity filters, such as family, country, reporter, hashes, domains, IPs, CVEs, URLs, or aliases depending on the selected data source.
+
+### Response
+
+APT Intel search results containing actor, malware, and related threat-intelligence records.
+
+The response is a paginated result object. Result rows can include:
+
+- **doc_id** - document identifier for the report detail endpoint.
+- **rank_index** - source index, usually APT or malware.
+- **m_title** - actor, malware family, signature, or report title.
+- **m_content** - normalized report body or description.
+- **m_family** - malware or actor family where present.
+- **m_signature** - malware signature where present.
+- **m_country** - associated countries where present.
+- **m_reporter** - reporting source where present.
+- **m_url** - source URLs or references.
+- **m_hash** - internal content hash or malware hash fields where present.
+- **m_creation_date / m_update_date** - ingestion and update timestamps.
+
+Use `GET /api/search/apt/{doc_id}` for actor report details and `GET /api/search/malware/{doc_id}` for malware report details.
+
+---
+
 ## social
 
 ### Description
@@ -1481,8 +1473,8 @@ No request body is required.
 WebP screenshot image that visually represents the breached website or resource described in the associated breach report. The service automatically appends the `.webp` extension, and the response payload is the raw image bytes.
 
 Example:
-- Request: `GET /api/search/breach/screenshot/69993154316451142028569605097804`
-- Effective file retrieved: `69993154316451142028569605097804.webp`
+- Request: `GET /api/search/breach/screenshot/{filename}`
+- Effective file retrieved: `{filename}.webp`
 - Response headers: `Content-Type: image/webp` with the binary image data in the body.
 
 
@@ -2020,119 +2012,6 @@ Example response:
   ],
   "Suggestions": [],
   "Page_Count": 278.1
-}
-```
-
-
----
-
-## telegram
-
-### Description
-
-Search Telegram-based chat intelligence and return metadata for matching chat reports.
-
-This endpoint executes a keyword and IOC-aware search over Telegram chat collections (channels, groups, and supergroups) ingested by Orion.
-
-The request is an HTTP POST and expects a JSON body matching the `search_chat_param_model` schema.
-
-Typical request payload:
-
-```json
-{
-  "q": "ransomware leak",
-  "page": 1,
-  "content": "all",
-  "category": "all",
-  "network": "all",
-  "daterange": "2025-12-01,2025-12-08",
-  "entity": "",
-  "matchtype": "or",
-  "platform": "telegram",
-  "must": false,
-  "messagedate": "",
-  "entity_filter": {
-    "m_team": ["example_team"],
-    "m_domain": ["example.com"]
-  }
-}
-```
-
-Field semantics (request):
-- **q** — free-text query string matched against message text, caption and selected metadata.
-- **page** — result page number for pagination (1-based).
-- **content** — logical content category of chat documents (for example `all`, `text`, `media`).
-- **category** — high-level ML category (for example `all`, `leak`, `exploit`, `general`).
-- **network** — network selector, typically `all` or `clearnet` for Telegram web endpoints.
-- **daterange** — ingestion/update date range in `YYYY-MM-DD,YYYY-MM-DD` format.
-- **entity** — free-text IOC / entity string to match across enriched fields (domains, hashes, emails, etc.).
-- **matchtype** — logical operator used when combining query and filters (`or` or `and`).
-- **platform** — platform name; for this endpoint it is usually `telegram`.
-- **must** — when `true`, entities specified in **entity**/**entity_filter** must be present in results.
-- **messagedate** — explicit message date filter in `YYYY-MM-DD` format (platform message date).
-- **entity_filter** — structured IOC filter (e.g. `m_team`, `m_domain`, `m_hashtag`) where each key is an
-  enriched field and the value is a list of required values.
-
-
-### Response
-
-Telegram chat search results containing paginated metadata for matching chat intelligence reports.
-
-Typical response fields:
-- **total** — total number of chat records matching the query and filters.
-- **page** — current result page number.
-- **results** — list of chat message objects, each summarizing one Telegram message or small thread.
-
-Each element under **results** commonly includes:
-- **m_message_id** — platform-specific message identifier.
-- **m_channel_id** — internal or platform channel identifier.
-- **m_channel_name** — human-readable channel name.
-- **m_sender_name** — display name of the sender.
-- **m_sender_username** — sender username/handle.
-- **m_message_date** — message date in `YYYY-MM-DD` format.
-- **m_content** — normalized message text.
-- **m_caption** — media caption (if applicable).
-- **m_message_sharable_link** — deep link to the message (e.g. `https://t.me/...`).
-- **m_media_url** — URL of attached media (if present).
-- **m_message_type** — list of message types (e.g. `["text"]`, `["photo"]`).
-- **m_views** — view/impression count (if available).
-- **m_network** — network classification (typically `clearnet`).
-- **m_content_type** — internal classification labels for the chat item.
-- **m_language** — detected language(s) of the message.
-- **m_domain, m_hashtag, m_mention, m_team, m_location** — enriched IOCs/entities when present.
-
-Example response:
-```json
-{
-  "total": 42,
-  "page": 1,
-  "results": [
-    {
-      "m_message_id": 123456,
-      "m_channel_id": 987654321,
-      "m_channel_name": "Example Ransomware Channel",
-      "m_sender_name": "Example Threat Actor",
-      "m_sender_username": "example_actor",
-      "m_message_date": "2025-12-07",
-      "m_message_sharable_link": "https://t.me/example_channel/123456",
-      "m_content": "New victim announced: ExampleCorp. Data will be leaked in 7 days.",
-      "m_caption": "",
-      "m_media_url": "",
-      "m_message_type": ["text"],
-      "m_views": 10543,
-      "m_network": "clearnet",
-      "m_content_type": ["text"],
-      "m_language": ["en"],
-      "m_team": ["example_ransom_group"],
-      "m_domain": ["examplecorp.com"],
-      "m_location": ["US"],
-      "m_hashtag": ["#ransomware"],
-      "m_mention": [],
-      "m_social_media_profiles": [],
-      "m_hash": "abc123...",
-      "m_creation_date": "2025-12-07T09:15:00Z"
-    }
-  ]
 }
 ```
 

@@ -53,6 +53,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="cti-graph-adv-operator-select"]').filter(':visible').eq(1).click();
     cy.contains('[role="option"]', 'OR').filter(':visible').first().click();
     cy.get('[data-testid="cti-graph-adv-value-input"]').filter(':visible').eq(1).clear().type('8.8.8.8');
+    cy.docsScreenshot('cti-advanced-graph-builder');
     cy.get('[data-testid="cti-graph-adv-expanded-execute"]').filter(':visible').first().click();
     cy.get('[data-testid="cti-graph-adv-filter-chip"]').filter(':visible').should('have.length.at.least', 1);
     cy.get('[data-testid="cti-graph-adv-clear-all"]').filter(':visible').first().should('not.be.disabled').click();

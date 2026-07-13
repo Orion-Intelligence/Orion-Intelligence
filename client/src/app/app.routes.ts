@@ -31,6 +31,7 @@ const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').t
 const loadResetPasswordComponent = () => import('./shared/partials/forgot-password/reset-password.component').then(m => m.ResetPasswordComponent);
 const loadSidebarUserStatisticsComponent = () => import('./pages/user-management/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
 const loadSidebarUserIocComponent = () => import('./pages/user-management/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
+const loadSidebarUserMonitoringComponent = () => import('./pages/user-management/sidebar-user-monitoring/sidebar-user-monitoring.component').then(m => m.SidebarUserMonitoringComponent);
 const loadSidebarUserEventManagementComponent = () => import('./pages/user-management/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
 const loadSidebarUserLogManagerComponent = () => import('./pages/user-management/sidebar-user-log-manager/sidebar-user-log-manager.component').then(m => m.SidebarUserLogManagerComponent);
 const loadAuditlogComponent = () => import('./pages/user-management/auditlog/auditlog.component').then(m => m.AuditlogComponent);
@@ -39,8 +40,10 @@ const loadTrailNotificationComponent = () => import('./shared/partials/trail-not
 const loadAccountSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
 const loadSidebarUserFeederComponent = () => import('./pages/user-management/sidebar-user-feeder/sidebar-user-feeder.component').then(m => m.SidebarUserFeederComponent);
 const loadSidebarUserHomepageComponent = () => import('./pages/user-management/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
+const loadTakedownRequestsComponent = () => import('./pages/user-management/takedown-requests/takedown-requests.component').then(m => m.TakedownRequestsComponent);
 const loadCategoryAlertReportComponent = () => import('./pages/user-management/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
 const loadAddCustomAlertComponent = () => import('./pages/user-management/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
+const loadAlertScannerSettingsComponent = () => import('./pages/user-management/sidebar-user-homepage/alert-scanner-settings/alert-scanner-settings.component').then(m => m.AlertScannerSettingsComponent);
 const loadManageProfileComponent = () => import('./pages/tenant/tenant-management/view-profile/manage-profile.component').then(m => m.ManageProfileComponent);
 const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/user-management/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
@@ -791,6 +794,21 @@ export const routes: Routes = [
             path: 'homepage',
             loadComponent: loadSidebarUserHomepageComponent,
             data: { type: 'homepage', animation: 'HomepagePage' },
+          },
+          {
+            path: 'alert-scanners',
+            loadComponent: loadAlertScannerSettingsComponent,
+            data: { type: 'settings', animation: 'ProfilePage' }
+          },
+          {
+            path: 'monitoring',
+            loadComponent: loadSidebarUserMonitoringComponent,
+            data: { type: 'monitoring', animation: 'CategoryPage' }
+          },
+          {
+            path: 'take-down',
+            loadComponent: loadTakedownRequestsComponent,
+            data: { type: 'take-down', animation: 'CategoryPage' }
           },
           {
             path: 'statistics',

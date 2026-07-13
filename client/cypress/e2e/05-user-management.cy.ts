@@ -159,6 +159,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.wait('@trialSession');
     cy.get('[data-testid="trial-subscription-banner"]').should('be.visible');
     cy.contains('[data-testid="trial-subscription-banner"]', 'Your subscription is about to expire in 10 days.').should('be.visible');
+    cy.docsScreenshot('trial-subscription-banner');
     cy.logout();
   });
 
@@ -185,6 +186,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.get('[data-testid="report-feedback-comment-input"]').filter(':visible').first().scrollIntoView().should('be.visible').type(commentText);
     cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
     cy.contains('p', commentText).should('be.visible');
+    cy.docsScreenshot('report-feedback-comments');
 
     cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click({ force: true });
     cy.contains('div', 'Profile').should('be.visible');
@@ -198,6 +200,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.contains('span', 'Recommended').should('exist');
     cy.contains('span', 'Trust').should('exist');
     cy.contains('span', /comment/i).should('exist');
+    cy.docsScreenshot('public-user-activity');
 
     cy.window().then((win) => {
       cy.stub(win, 'open').as('profileWindowOpen');
@@ -235,6 +238,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click({ force: true });
     cy.get('[data-testid="report-user-sidebar-hidden-profile"]').should('exist');
     cy.get('[data-testid="report-user-sidebar-open-profile"]').should('not.exist');
+    cy.docsScreenshot('public-user-hidden-profile');
     cy.logout();
   });
 

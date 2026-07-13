@@ -28,6 +28,8 @@ class CategoryAlertProcessor:
         try:
             for ioc in iocs:
                 ioc_type_name = self._value(ioc, "ioc_id", "")
+                if config.allowed_ioc_types and ioc_type_name not in config.allowed_ioc_types:
+                    continue
 
                 for ioc_value in self._value(ioc, "values", []) or []:
                     await self._process_ioc_value(tenant_id, category, config, summary, ioc_type_name, ioc_value)
@@ -36,15 +38,7 @@ class CategoryAlertProcessor:
 
         return summary
 
-    async def _process_ioc_value(
-        self,
-        tenant_id: str,
-        category: str,
-        config: CategorySearchConfig,
-        summary: dict,
-        ioc_type_name: str,
-        ioc_value: str,
-    ) -> None:
+    async def _process_ioc_value(self, tenant_id: str, category: str, config: CategorySearchConfig, summary: dict, ioc_type_name: str, ioc_value: str) -> None:
         search_data = {
             "entity_filter": {ioc_type_name: [ioc_value]},
             "category": config.search_data_category,
@@ -85,7 +79,7 @@ class CategoryAlertProcessor:
     async def _search(self, category: str, config: CategorySearchConfig, search_param: Any) -> Any:
         search_func = getattr(self._search_model, config.search_method)
 
-        if category == "stealerlogs":
+        if config.search_method == "search_stealer_iocs":
             return await search_func(search_param)
 
         return await search_func(

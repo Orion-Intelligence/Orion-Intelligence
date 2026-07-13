@@ -55,90 +55,7 @@
             </div>
           }
           @case (2) {
-            <div class="text-white">
-              <h2 class="mb-1 text-[20px] font-bold">{{ 'Add IOCs' | translate }}</h2>
-              <div class="flex items-center justify-between gap-2 max-[760px]:flex-wrap">
-                <p class="text-[14px] font-normal text-[#a0b8d1]">{{ 'Manage and organize IOC values used by your tenant searches.' | translate }}</p>
-                <div class="flex items-center gap-2 max-[760px]:w-full max-[760px]:justify-between">
-                  <div class="relative max-[760px]:flex-1">
-                    <img src="assets/images/shared/theme/magnifyingglasswhite.svg" alt="Search" class="pointer-events-none absolute left-3 top-1/2 h-[13px] w-[13px] -translate-y-1/2 opacity-70 transition-all duration-300" />
-                    <input type="text" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full" [placeholder]="'Search IOCs...' | translate" [(ngModel)]="iocSearchText" />
-                  </div>
-                  <input type="file" accept=".csv,text/csv" class="hidden" #iocCsvInput (change)="onIocCsvSelected($event)" />
-                  <button data-testid="tenant-onboarding-ioc-upload-csv-button" type="button" [appTooltip]="'Upload IOC CSV' | translate" class="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 max-[560px]:px-2" [disabled]="isIocCsvUploading" (click)="iocCsvInput.click()">
-                    <i class="bi text-[14px]" [ngClass]="isIocCsvUploading ? 'bi-arrow-repeat animate-spin' : 'bi-upload'" aria-hidden="true"></i>
-                    <span class="max-[560px]:hidden">{{ (isIocCsvUploading ? 'Uploading' : 'Upload CSV') | translate }}</span>
-                  </button>
-                  <button data-testid="tenant-onboarding-ioc-template-csv-button" type="button" [appTooltip]="'Download IOC CSV template' | translate" class="inline-flex h-10 items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] max-[560px]:px-2" (click)="downloadIocTemplate()">
-                    <i class="bi bi-download text-[14px]" aria-hidden="true"></i>
-                    <span class="max-[560px]:hidden">{{ 'Template' | translate }}</span>
-                  </button>
-                  <button [appTooltip]="'clear all' | translate" class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="openConfirmationPopup()">
-                    <img alt="scan" src="assets/images/shared/theme/bin.svg" class="h-[16px] w-[16px]" />
-                  </button>
-                </div>
-              </div>
-              <div class="relative mt-[21px] flex h-10 items-center gap-[15px] overflow-hidden">
-                @if (showLeftFade) {
-                  <div class="pointer-events-none absolute left-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-r from-[#172235] to-transparent"></div>
-                }
-                <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollLeft()" [disabled]="getFilteredIocs().length === 0">
-                  <img src="assets/images/shared/onboarding_leftButton.svg" alt="filter icon" class="h-4 w-4" />
-                </button>
-                <div class="flex h-full flex-1 items-center gap-[8px] overflow-x-auto px-[10px] [mask-image:linear-gradient(to_right,transparent,black_0.8%,black_92%,transparent)] [mask-repeat:no-repeat] [mask-size:100%_100%] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" #categoryScroll>
-                  @if (getFilteredIocs().length > 0) {
-                    @for (category of getFilteredIocs(); track category.ioc_id) {
-                      <div class="cursor-pointer whitespace-nowrap rounded-full border px-4 py-1.5 font-[Inter] text-xs font-semibold transition-colors" [ngClass]="category.ioc_id === selectedCategoryId ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)]'" (click)="$event.stopPropagation();onCategoryClick(category.ioc_id)">
-                        {{ category.name }}
-                      </div>
-                    }
-                  } @else {
-                    <div class="flex h-full w-full min-w-full items-center justify-start rounded-[8px] bg-[var(--color-blue-810)]/35 px-3 text-left font-[Inter] text-[12px] text-[var(--color-text4)]">
-                      {{ 'No entity filters available.' | translate }}
-                    </div>
-                  }
-                </div>
-                <button class="relative z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] opacity-75 transition-all duration-150 hover:bg-[var(--color-blue-710)] hover:opacity-100 disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--color-blue-720)]" (click)="scrollRight()" [disabled]="getFilteredIocs().length === 0">
-                  <img src="assets/images/shared/onboarding_rightButton.svg" alt="filter" class="h-4 w-4" />
-                </button>
-                @if (showRightFade) {
-                  <div class="pointer-events-none absolute right-0 top-0 z-[1] h-full w-[100px] bg-gradient-to-l from-[#172235] to-transparent"></div>
-                }
-              </div>
-              <div class="mb-[16px] mt-[10px] h-[2px] w-full bg-[var(--color-border)]"></div>
-              <label class="mb-[8px] block font-[Inter] text-[14px] font-normal text-white">{{ 'Enter IOCs' | translate }}</label>
-              <div class="relative w-full">
-                <input type="text" class="h-[44px] w-full max-w-full rounded-[8px] border border-[#D0D5DD] bg-white px-[16px] py-[10px] pr-[56px] font-[Inter] text-[14px] text-[#0E1626] shadow-[0_1px_2px_0_#1018280d] outline-none" [placeholder]="'categoryAlerts.export.type' | translate" (keyup.enter)="addIoc(inputEl.value); inputEl.value=''" #inputEl />
-                <button type="button" class="absolute right-[8px] top-1/2 inline-flex h-[35px] w-[80px] -translate-y-1/2 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-[12px] text-[13px] font-medium text-white transition hover:brightness-110" (click)="addIoc(inputEl.value); inputEl.value=''">
-                  {{ 'common.actions.add' | translate }}
-                </button>
-              </div>
-              <div class="my-[16px] h-[2px] w-full bg-[var(--color-border)]"></div>
-              <p class="mb-[8px] font-[Inter] text-[14px] font-medium text-[#a0b8d1]">{{ 'Added IOCs' | translate }}</p>
-              <div class="max-h-[500px] min-h-[20px] space-y-3 overflow-y-auto max-[1024px]:max-h-[100px]">
-                @if (hasIocsWithValues()) {
-                  <div>
-                    @for (ioc of onboardingData.iocs; track ioc.ioc_id) {
-                      <div>
-                        @if (ioc.values.length > 0) {
-                          <p class="my-[12px] mb-[8px] font-[Inter] text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
-                          <div class="flex flex-wrap gap-[8px]">
-                            @for (value of ioc.values; track value) {
-                              <div class="flex cursor-pointer items-center gap-[8px] rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-[4px] font-[Inter] text-[12px] font-normal text-[var(--color-text1)] transition hover:bg-[#FCFCFC20]">
-                                <span>{{ value }}</span>
-                                <span (click)="removeIoc(ioc.ioc_id, value)">✕</span>
-                              </div>
-                            }
-                          </div>
-                        }
-                      </div>
-                    }
-                  </div>
-                } @else {
-                  <p class="text-[14px] text-[var(--color-text1)]">{{ 'No IOCs added yet' | translate }}</p>
-                }
-              </div>
-            </div>
+            <app-tenant-ioc-selector [iocs]="onboardingData.iocs" [disabled]="isPrivilegedIoc()" [permissionWarning]="iocPermissionWarning"></app-tenant-ioc-selector>
           }
           @case (3) {
             <div>
@@ -160,7 +77,9 @@
                             @for (value of ioc.values; track value) {
                               <div class="flex cursor-pointer items-center gap-2 rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-1 text-[12px] font-normal text-[var(--color-text1)] hover:bg-[#FCFCFC20]">
                                 <span>{{ value }}</span>
-                                <span (click)="removeIoc(ioc.ioc_id, value)">✕</span>
+                                @if (!isPrivilegedIoc()) {
+                                  <span (click)="removeIoc(ioc.ioc_id, value)">✕</span>
+                                }
                               </div>
                             }
                           </div>
@@ -203,9 +122,3 @@
     </div>
   </div>
 </div>
-
-@if (isConfirmationOpen) {
-  <app-confirmation-popup
-    [message]="('Are you sure you want to clear all of your iocs?') | translate"
-  (confirmed)="clearAllIocs($event)"></app-confirmation-popup>
-}

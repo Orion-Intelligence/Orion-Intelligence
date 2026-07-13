@@ -153,6 +153,14 @@ const EXPLOIT_RISK_OPTIONS = [
   { key: "low", label: "Low" },
   { key: "info", label: "Info" }
 ];
+const ALERT_RISK_OPTIONS = [
+  { key: "critical", label: "Critical" },
+  { key: "high", label: "High" },
+  { key: "medium", label: "Medium" },
+  { key: "low", label: "Low" },
+  { key: "informational", label: "Informational" },
+  { key: "unknown", label: "Unknown" }
+];
 const EXPLOIT_REMOTE_TYPE_OPTIONS = [
   { key: "remote", label: "Remote" },
   { key: "local", label: "Local" },
@@ -400,6 +408,24 @@ export const audit_filters: FilterModel = {
     daterange: DATERANGE_DEFAULT
   }
 };
+export const takedown_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_DEFAULT,
+    status: {
+      title: "Status",
+      options: [
+        { key: "all", label: "All" },
+        { key: "pending", label: "Pending" },
+        { key: "accepted", label: "Accepted" },
+        { key: "denied", label: "Denied" },
+        { key: "failed", label: "Failed" }
+      ],
+      type: "dropdown" as const,
+      tooltip: "Status",
+      selected: "all"
+    }
+  }
+};
 export const event_management_filters: FilterModel = {
   filters: {
     daterange: {
@@ -515,6 +541,22 @@ export const threat_lens_filters: FilterModel = {
 export const alert_filters: FilterModel = {
   filters: {
     daterange: DATERANGE_DEFAULT,
+    content_type: {
+      title: "Content Type",
+      options: [],
+      type: "dropdown",
+      tooltip: "Content Type",
+      selected: "",
+      placeholder: "Headers, PII, vulnerability"
+    },
+    risk: {
+      title: "Risk",
+      options: ALERT_RISK_OPTIONS,
+      type: "dropdown",
+      tooltip: "Risk",
+      selected: "",
+      placeholder: "Risk"
+    },
   }
 };
 export const filter_mapping: Record<string, string> = {

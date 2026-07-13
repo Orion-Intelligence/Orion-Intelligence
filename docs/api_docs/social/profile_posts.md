@@ -1,4 +1,4 @@
-# Socail: profile_posts
+# Social: profile_posts
 
 ## Description
 

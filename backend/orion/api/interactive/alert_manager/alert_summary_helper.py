@@ -50,6 +50,15 @@ class AlertSummaryHelper:
             return "medium"
         return "unknown"
 
+    @staticmethod
+    def risk_from_alert(alert: AlertModel) -> str:
+        root_risk = str(getattr(alert, "risk", "") or "").strip().lower()
+        if root_risk:
+            return root_risk
+        if (alert.type or "").strip().lower() == "vulnerability-scanning":
+            return "not found"
+        return AlertSummaryHelper.risk_from_alert_type(alert.type or "")
+
     def build_alert_summary(self, alerts_list: list[AlertModel]) -> Dict[str, Dict[str, int] | int]:
         counts_by_type: Dict[str, int] = {}
         counts_by_risk: Dict[str, int] = {"critical": 0, "high": 0, "medium": 0, "low": 0}
@@ -63,7 +72,7 @@ class AlertSummaryHelper:
             if not bool(alert.report_seen):
                 unseen_total += 1
 
-            risk = self.risk_from_alert_type(alert.type or "")
+            risk = self.risk_from_alert(alert)
             if risk in counts_by_risk:
                 counts_by_risk[risk] += 1
 

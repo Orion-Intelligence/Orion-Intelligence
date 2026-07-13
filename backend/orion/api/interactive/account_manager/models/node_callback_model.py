@@ -44,7 +44,9 @@ class TenantDataModel(BaseModel):
     profileVisibilityEnabled: bool = True
     eventManagementEnabled: bool = False
     alertsVisibleToAdmin: bool = True
+    privilegedIoc: bool = False
     alertRunTime: Optional[str] = None
+    allowedAlertCategories: Optional[List[str]] = None
     accountsMailPassword: str = ""
     accountsMail: str = ""
     accountsSmtpServer: str = ""

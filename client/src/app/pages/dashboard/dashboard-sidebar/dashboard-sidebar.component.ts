@@ -69,10 +69,12 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   private handleProfileRoute(url: string) {
     if (url.startsWith('/dashboard/profile/consolidated/') ||
       url.startsWith('/dashboard/profile/homepage') ||
+      url.startsWith('/dashboard/profile/take-down') ||
       url.startsWith('/dashboard/profile/alerts/general') ||
       url.startsWith('/dashboard/profile/alerts')) {
       this.selectionStore.setSelectedSection('Profile');
-      this.selectionStore.setSelectedOption('Homepage');
+      const selectedOption = url.startsWith('/dashboard/profile/take-down') ? ProfileSubCategory.TAKEDOWN : 'Homepage';
+      this.selectionStore.setSelectedOption(selectedOption);
     }
   }
 
@@ -191,34 +193,40 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
-    const eventManagementEnabled = this.appService.userSessionData().tenant.eventManagementEnabled === true;
     const canAccessFeeder = this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
     const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || (this.isAnalyst() && (this.appService.userSessionData().user.permissions || []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
+        c !== ProfileSubCategory.EVENT_MANAGEMENT &&
+        c !== ProfileSubCategory.LOG_MANAGER &&
+        c !== ProfileSubCategory.AUDITLOG &&
         c !== ProfileSubCategory.STATISTICS &&
         c !== ProfileSubCategory.TENANT_SETTINGS &&
         (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
         (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
         (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
-        (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+        (this.licenseService.canReviewTakedowns() || c !== ProfileSubCategory.TAKEDOWN) &&
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.TAKEDOWN &&
+        c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
+        c !== ProfileSubCategory.AUDITLOG &&
         (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&
         (!isMobileDemo || c !== ProfileSubCategory.ACCOUNT) &&
         (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
-        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
-        (eventManagementEnabled || c !== ProfileSubCategory.EVENT_MANAGEMENT));
+        (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT));
     }
     if (this.isAnalyst()) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.TAKEDOWN &&
+        c !== ProfileSubCategory.MONITORING &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
         c !== ProfileSubCategory.USERS &&
@@ -231,6 +239,8 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
       c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+      c !== ProfileSubCategory.TAKEDOWN &&
+      c !== ProfileSubCategory.MONITORING &&
       c !== ProfileSubCategory.EVENT_MANAGEMENT &&
       c !== ProfileSubCategory.LOG_MANAGER &&
       (!isMobileDemo || c !== ProfileSubCategory.FEEDER) &&

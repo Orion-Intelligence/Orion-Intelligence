@@ -3,6 +3,8 @@ import hashlib
 import threading
 from typing import Any, List
 
+from bson import ObjectId
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 
 from orion.api.interactive.alert_manager.alert_mail_helper import AlertMailHelper
@@ -14,8 +16,10 @@ from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mail_manager.mail_enums import AlertMailLabel, AlertMailMessage, AlertMailSubject, AlertMailTitle
 from orion.services.mail_manager.mail_manager import mail_manager
+from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status, db_alert_model, visible_alerts
+from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs.app_dependency import get_user_permissions
 
@@ -119,9 +123,7 @@ class AlertManager:
                     rows.append(row)
         return rows[:10]
 
-    async def _send_alert_mail(self, *, tenant_id: str, subject: str, email_title: str, preheader: str, friendly_message: str,
-            scan_status: str, total_alerts: int, module_rows: list[dict[str, Any]], ioc_rows: list[dict[str, str]], current_user=None,
-            action_url: str = "", closing_message: str = AlertMailMessage.DEFAULT_CLOSING.value):
+    async def _send_alert_mail(self, *, tenant_id: str, subject: str, email_title: str, preheader: str, friendly_message: str, scan_status: str, total_alerts: int, module_rows: list[dict[str, Any]], ioc_rows: list[dict[str, str]], current_user=None, action_url: str = "", closing_message: str = AlertMailMessage.DEFAULT_CLOSING.value):
         try:
             if constant.alert_mail_template is None:
                 return False
@@ -273,25 +275,31 @@ class AlertManager:
 
                 existing_alert = existing_index.get(key)
                 if existing_alert:
+                    if payload.get("risk"):
+                        existing_alert.risk = payload.get("risk", "")
+                    if payload.get("raw_findings"):
+                        existing_alert.raw_findings = payload.get("raw_findings", {})
                     existing_alert.last_seen = now
                     updated_count += 1
                     continue
 
                 new_alert = AlertModel(
                     alert_id=f"{data_hash}-{ioc_value}",
-                    type=category,
-                    ioc_type=ioc_type,
-                    ioc_value=ioc_value,
+                    type=category or "",
+                    ioc_type=ioc_type or "",
+                    ioc_value=ioc_value or "",
                     data_hash=data_hash,
-                    title=payload.get("title", ""),
-                    description=payload.get("description", ""),
-                    url=payload.get("url", ""),
-                    source=payload.get("source", ""),
-                    content_types=payload.get("content_types", []),
+                    title=payload.get("title") or "",
+                    description=payload.get("description") or "",
+                    url=payload.get("url") or "",
+                    source=payload.get("source") or "",
+                    risk=payload.get("risk") or "",
+                    content_types=payload.get("content_types") or [],
+                    raw_findings=payload.get("raw_findings") or {},
                     status=alert_status.ACTIVE,
                     first_seen=now,
                     last_seen=now,
-                    all_ioc=payload.get("all_ioc", []), )
+                    all_ioc=payload.get("all_ioc") or [], )
                 existing_doc.alerts.append(new_alert)
                 existing_index[key] = new_alert
                 created_count += 1
@@ -301,18 +309,7 @@ class AlertManager:
         await self._summary_helper.invalidate_alert_summary_cache(tenantId)
         return {"created": created_count, "updated": updated_count}
 
-    async def upsert_alert(self,
-            tenantId: str,
-            category: str,
-            ioc_type: str,
-            ioc_value: str,
-            title: str,
-            url: str,
-            description: str,
-            source: str,
-            all_ioc: List[alert_all_ioc],
-            content_types: List[str],
-            data_hash=''):
+    async def upsert_alert(self, tenantId: str, category: str, ioc_type: str, ioc_value: str, title: str, url: str, description: str, source: str, all_ioc: List[alert_all_ioc], content_types: List[str], data_hash='', risk: str = '', raw_findings: dict[str, Any] | None = None):
 
         if (data_hash == ''):
             data_hash = self._smart_hash(category, ioc_type, ioc_value, source, url)
@@ -327,6 +324,8 @@ class AlertManager:
                     and (alert.type or "") == category
                     and (alert.ioc_value or "") == ioc_value
                 ):
+                    if raw_findings:
+                        alert.raw_findings = raw_findings
                     alert.last_seen = datetime.now(timezone.utc)
 
                     alert_updated = True
@@ -343,7 +342,9 @@ class AlertManager:
                 description=description,
                 url=url,
                 source=source,
+                risk=risk,
                 content_types=content_types,
+                raw_findings=raw_findings or {},
                 status=alert_status.ACTIVE,
                 first_seen=datetime.now(timezone.utc),
                 last_seen=datetime.now(timezone.utc),
@@ -383,8 +384,10 @@ class AlertManager:
             description=data.description or '',
             source=data.source or '',
             url=data.url or '',
+            risk=data.risk or '',
             all_ioc=all_ioc,
             content_types=data.content_types or [],
+            raw_findings=data.raw_findings or {},
             status=data.status or alert_status.ACTIVE,
             first_seen=datetime.now(timezone.utc),
             last_seen=datetime.now(timezone.utc), )
@@ -398,8 +401,10 @@ class AlertManager:
                     alert.description = new_alert.description
                     alert.source = new_alert.source
                     alert.url = new_alert.url
+                    alert.risk = new_alert.risk
                     alert.all_ioc = new_alert.all_ioc
                     alert.content_types = new_alert.content_types
+                    alert.raw_findings = new_alert.raw_findings
                     alert.status = new_alert.status
                     alert.last_seen = datetime.now(timezone.utc)
                     await self._engine.save(existing_doc)
@@ -502,18 +507,7 @@ class AlertManager:
         return {"message": "Alert deleted successfully", "id": id}
 
     def _to_notification_item(self, alert: AlertModel) -> dict[str, Any]:
-        normalized = (alert.type or "").lower()
-        if normalized in {"general", "seo scanning"}:
-            risk = "Low"
-        elif normalized in {"breach", "exploit", "malware", "feed", "playstore-scanning", "social-scanner",
-            "email-breach", "stealerlogs", "software-scanning", "vulnerability-scanning"}:
-            risk = "Critical"
-        elif normalized in {"defacement", "advanced scanning", "repo scanning"}:
-            risk = "High"
-        elif normalized in {"social", "discussion"}:
-            risk = "Medium"
-        else:
-            risk = "Unknown"
+        risk = AlertSummaryHelper.risk_from_alert(alert).title()
 
         return {
             "categoryName": alert.type or "",
@@ -525,18 +519,51 @@ class AlertManager:
             "iocValue": alert.ioc_value or "",
             "type": alert.type or "",
             "reportSeen": bool(alert.report_seen),
+            "licenses": list(alert.licenses or []),
         }
 
-    async def getAllAlerts(
-            self,
-            current_user,
-            page: int = 1,
-            limit: int = 20,
-            alert_type: str | None = None,
-            paginate: bool = False,
-            compact: bool = False,
-            unseen_only: bool = False,
-            include_counts: bool = False):
+    @staticmethod
+    def filter_option_values(alerts: list[AlertModel], field: str, query: str = "", limit: int = 25) -> list[str]:
+        field = str(field or "").strip()
+        query = str(query or "").strip().lower()
+        try:
+            limit = min(max(int(limit or 25), 1), 50)
+        except (TypeError, ValueError):
+            limit = 25
+        if field != "content_type":
+            return []
+
+        values: list[str] = []
+        for alert in alerts or []:
+            values.extend(str(value) for value in (alert.content_types or []))
+
+        seen: set[str] = set()
+        filtered_values: list[str] = []
+        for value in values:
+            clean_value = value.strip()
+            normalized = clean_value.lower()
+            if not clean_value or normalized in {"-", "n/a", "none", "null", "undefined"}:
+                continue
+            if query and query not in normalized:
+                continue
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            filtered_values.append(clean_value)
+
+        return sorted(filtered_values, key=str.lower)[:limit]
+
+    async def get_alert_filter_options(self, current_user, field: str, query: str = "", limit: int = 25, alert_type: str | None = None) -> dict[str, list[str]]:
+        alerts_data = await self._engine.find_one(
+            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
+        alerts = visible_alerts(alerts_data.alerts if alerts_data and alerts_data.alerts else [])
+        alerts = await self.filter_alerts_by_license(alerts, current_user)
+        if alert_type:
+            normalized_type = alert_type.strip().lower()
+            alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
+        return {"values": self.filter_option_values(alerts, field, query, limit)}
+
+    async def getAllAlerts(self, current_user, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False, compact: bool = False, unseen_only: bool = False, include_counts: bool = False):
         alerts_data = await self._engine.find_one(
             db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
 
@@ -560,6 +587,8 @@ class AlertManager:
             return []
 
         alerts = visible_alerts(alerts_data.alerts)
+        if not compact:
+            alerts = await self.filter_alerts_by_license(alerts, current_user)
 
         if alert_type:
             _type = alert_type.strip().lower()
@@ -680,33 +709,62 @@ class AlertManager:
         return {"scan_running": False}
 
     @staticmethod
-    def get_allowed_alert_types(user) -> set[str]:
-        permissions = get_user_permissions(user)
+    def get_alert_permissions(licenses: set[str]) -> dict[str, Any]:
+        permissions: dict[str, Any] = {"modules": set(), "scanning": False}
+        for license_value in licenses:
+            rules = constant.license_rules.get(license_value, {})
+            if rules.get("modules") == "all":
+                permissions["modules"] = "all"
+            elif permissions["modules"] != "all":
+                permissions["modules"].update(rules.get("modules", []))
+            permissions["scanning"] |= rules.get("scanning", False)
+        return permissions
+
+    @staticmethod
+    def get_allowed_alert_types(user, licenses: set[str] | None = None) -> set[str]:
+        permissions = AlertManager.get_alert_permissions(licenses) if licenses is not None else get_user_permissions(user)
 
         allowed = set()
         if permissions["modules"] == "all":
             allowed.update(MODULE_ALERT_TYPE_MAP.keys())
         else:
-            for module in permissions["modules"]:
-                if module in MODULE_ALERT_TYPE_MAP:
-                    allowed.add(module)
+            for alert_type, module in MODULE_ALERT_TYPE_MAP.items():
+                if module in permissions["modules"] or alert_type in permissions["modules"]:
+                    allowed.add(alert_type)
 
         if permissions.get("scanning", False):
             allowed.update(SCANNING_ALERT_TYPES)
 
         return allowed
 
-    def filter_alerts_by_license(self, alerts: list[AlertModel], user) -> list[AlertModel]:
-        permissions = get_user_permissions(user)
-        if permissions.get("maintainer", False):
-            return alerts
+    async def get_alert_access_licenses(self, user) -> set[str]:
+        licenses = {license_value.value if hasattr(license_value, "value") else str(license_value) for license_value in (getattr(user, "licenses", []) or [])}
+        try:
+            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(user.tenant_uuid)))
+            if tenant:
+                dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
+                enc = Fernet(dek)
+                for tenant_license in tenant.licenses or []:
+                    try:
+                        licenses.add(enc.decrypt(tenant_license.encode()).decode())
+                    except Exception:
+                        licenses.add(str(tenant_license))
+        except Exception:
+            pass
+        return licenses
 
-        allowed_types = self.get_allowed_alert_types(user)
+    async def filter_alerts_by_license(self, alerts: list[AlertModel], user) -> list[AlertModel]:
+        user_licenses = await self.get_alert_access_licenses(user)
+        allowed_types = self.get_allowed_alert_types(user, user_licenses)
 
         filtered = []
         for alert in alerts:
-            alert_type = alert.type.lower().strip()
+            alert_licenses = {str(license_value) for license_value in (getattr(alert, "licenses", []) or [])}
+            if alert_licenses and alert_licenses.intersection(user_licenses):
+                filtered.append(alert)
+                continue
 
+            alert_type = alert.type.lower().strip()
             if alert_type in allowed_types:
                 filtered.append(alert)
 

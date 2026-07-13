@@ -1,4 +1,4 @@
-# Socail: recon_image_search
+# Social: recon_image_search
 
 ## Description
 

@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -10,16 +9,17 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { SystemLogFile, SystemLogResponse } from './model/system-log.models';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-sidebar-user-log-manager',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslatePipe, ConfirmationPopupComponent],
+  imports: [CommonModule, TranslatePipe, ConfirmationPopupComponent, UiDropdownComponent],
   templateUrl: './sidebar-user-log-manager.component.html',
   animations: [fadeInDashboardItem],
 })
 export class SidebarUserLogManagerComponent implements OnInit {
-  readonly typeOptions = ['', 'INFO', 'WARNING', 'ERROR'];
+  readonly typeOptions: UiDropdownOption[] = [{ key: '', label: 'All' }, { key: 'INFO', label: 'INFO' }, { key: 'WARNING', label: 'WARNING' }, { key: 'ERROR', label: 'ERROR' }];
   logType = '';
   logDate = '';
   page = 1;
@@ -70,11 +70,21 @@ export class SidebarUserLogManagerComponent implements OnInit {
     this.loadLogs();
   }
 
-  clearFilters(): void {
-    this.logType = '';
-    this.logDate = '';
-    this.page = 1;
-    this.loadLogs();
+  onLogTypeChange(value: string | null): void {
+    this.logType = value ?? '';
+    this.applyFilters();
+  }
+
+  onLogDateChange(value: string | null): void {
+    this.logDate = value ?? '';
+    this.applyFilters();
+  }
+
+  get dateOptions(): UiDropdownOption[] {
+    return [
+      { key: '', label: 'All dates' },
+      ...this.response.available_dates.map(date => ({ key: date, label: date })),
+    ];
   }
 
   nextPage(): void {

@@ -11,7 +11,7 @@ from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.management.jobs.alert.alert_buffer import AlertScanBuffer
 from orion.management.jobs.alert.cancellation_service import CancellationService
 from orion.management.jobs.alert.category_processor import CategoryAlertProcessor
-from orion.management.jobs.alert.config import ALERT_CATEGORIES
+from orion.management.jobs.alert.config import ALERT_CATEGORIES, SCANNING_ALERT_CATEGORIES
 from orion.management.jobs.alert.dynamic_scanning_processor import DynamicScanningProcessor
 from orion.management.jobs.alert.result_mappers import ResultMetadataMapper
 from orion.management.jobs.alert.scanning_processor import ScanningAlertProcessor
@@ -55,13 +55,32 @@ class alert_job:
             return data.get(field, default)
         return getattr(data, field, default)
 
+    @staticmethod
+    def _normalize_alert_category(category: Any) -> str:
+        return str(category or "").strip().lower()
+
+    @classmethod
+    def _allowed_alert_categories(cls, tenant: Any) -> set[str] | None:
+        allowed = cls._value(tenant, "allowed_alert_categories", None)
+        if allowed is None:
+            return None
+        return {cls._normalize_alert_category(category) for category in allowed if cls._normalize_alert_category(category)}
+
+    @classmethod
+    def _can_run_category(cls, category: str, allowed_categories: set[str] | None) -> bool:
+        if allowed_categories is None:
+            return True
+        if category == "scanning":
+            return bool(allowed_categories.intersection(SCANNING_ALERT_CATEGORIES))
+        return cls._normalize_alert_category(category) in allowed_categories
+
     async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
         return await self._scanning_processor.handle_scanning_alert(tenant_id, ioc_value, ioc_type, scan_type)
 
     async def _handle_dynamic_scanning_alert( self, tenant_id: str, ioc_type: str, ioc_value: str, scan_type: str, search_payload: dict, dynamic_search_category: str, model_cls):
         return await self._dynamic_scanning_processor.handle_dynamic_scanning_alert( tenant_id, ioc_type, ioc_value, scan_type, search_payload, dynamic_search_category, model_cls,)
 
-    async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str):
+    async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str, allowed_categories: set[str] | None = None):
         tenant_key = self._cancellation_service.ensure_tenant(self._value(tenant, "id", ""))
         summary = AlertSummaryHelper.new_scan_summary()
 
@@ -71,14 +90,14 @@ class alert_job:
                 return summary
 
             if category == "scanning":
-                return await self._process_scanning_category(tenant_key, iocs)
+                return await self._process_scanning_category(tenant_key, iocs, allowed_categories)
 
             return await self._category_processor.process_tenant_category(tenant_key, iocs, category)
         except Exception as e:
             log.g().e(f"Tenant alert processing failed for tenant={tenant_key}, category={category}: {e}")
         return summary
 
-    async def _process_scanning_category(self, tenant_id: str, iocs: list[Any]) -> dict:
+    async def _process_scanning_category(self, tenant_id: str, iocs: list[Any], allowed_categories: set[str] | None = None) -> dict:
         summary = AlertSummaryHelper.new_scan_summary()
 
         for ioc in iocs:
@@ -88,10 +107,10 @@ class alert_job:
             ioc_type_name = self._value(ioc, "ioc_id", "")
             ioc_values = self._value(ioc, "values", []) or []
 
-            scan_summary = await self._scanning_processor.process_ioc(tenant_id, ioc_type_name, ioc_values)
+            scan_summary = await self._scanning_processor.process_ioc(tenant_id, ioc_type_name, ioc_values, allowed_categories)
             AlertSummaryHelper.merge_scan_summary(summary, scan_summary)
 
-            dynamic_summary = await self._dynamic_scanning_processor.process_ioc(tenant_id, ioc_type_name, ioc_values)
+            dynamic_summary = await self._dynamic_scanning_processor.process_ioc(tenant_id, ioc_type_name, ioc_values, allowed_categories)
             AlertSummaryHelper.merge_scan_summary(summary, dynamic_summary)
 
         return summary
@@ -146,8 +165,11 @@ class alert_job:
             self._alert_buffer.clear(tenant_id)
             await self._alert_manager.getInstance().set_scan_running(tenant_id, True)
             try:
+                allowed_categories = self._allowed_alert_categories(tenant)
                 for category in ALERT_CATEGORIES:
-                    category_summary = await self._process_tenant_alerts(tenant, category)
+                    if not self._can_run_category(category, allowed_categories):
+                        continue
+                    category_summary = await self._process_tenant_alerts(tenant, category, allowed_categories)
                     AlertSummaryHelper.merge_scan_summary(scan_summary, category_summary)
                 if self._cancellation_service.is_cancelled(tenant_id):
                     scan_status = "cancelled"
@@ -251,10 +273,13 @@ class alert_job:
             overall_success = True
             scan_summary = AlertSummaryHelper.new_scan_summary()
 
+            allowed_categories = self._allowed_alert_categories(current_tenant)
             for category in ALERT_CATEGORIES:
+                if not self._can_run_category(category, allowed_categories):
+                    continue
                 category_start_time = datetime.now(timezone.utc)
                 try:
-                    category_summary = await self._process_tenant_alerts(current_tenant, category)
+                    category_summary = await self._process_tenant_alerts(current_tenant, category, allowed_categories)
                     AlertSummaryHelper.merge_scan_summary(scan_summary, category_summary)
 
                     category_status = {
@@ -302,7 +327,7 @@ class alert_job:
             }
         except Exception as exc:
             self._alert_buffer.clear(tenant_key)
-            log.error(f"Alert generation job failed for tenant {tenant_id}: {exc}")
+            log.g().e(f"Alert generation job failed for tenant {tenant_id}: {exc}")
         finally:
             self._cancellation_service.clear(tenant_key)
             await self._alert_manager.getInstance().set_scan_running(tenant_id, False)

@@ -38,6 +38,7 @@ export interface AlertNotification {
     iocValue?: string;
     type?: string;
     reportSeen?: boolean;
+    licenses?: string[];
 }
 export interface CategoryAlerts {
     id: string;
@@ -51,6 +52,8 @@ export interface CategoryAlerts {
     source: string;
     url: string;
     entity: string;
+    contentTypes: string[];
+    rawFindings?: Record<string, unknown>;
     allIOC: AlertAllIoc[];
     detectedOn: Date;
     resultDate?: Date | null;

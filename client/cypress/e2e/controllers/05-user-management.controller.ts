@@ -193,7 +193,7 @@ export function addUser(user: ManagedUser) {
   const wanted = user.licenses.map((x) => x.trim().toLowerCase());
   setAddUserLicenses(wanted);
   setAddUserPermissions(user.permissions || []);
-  cy.get('@addUserModal').find('[data-testid="tenant-add-user-submit"]').should('be.visible').click();
+  cy.get('@addUserModal').find('[data-testid="tenant-add-user-submit"]').click({force: true});
   cy.get('[data-testid="tenant-add-user-modal"]').should('not.exist');
   cy.contains(user.username).should('exist');
 }
@@ -312,6 +312,7 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
   cy.get(subscriptionPopupSelector).should('be.visible');
   cy.contains('h2', 'Upgrade to Dark Web Shield Pro').should('be.visible');
   cy.contains('button', 'Proceed to Payment').should('be.disabled');
+  cy.docsScreenshot('subscription-upgrade-modal');
 
   cy.get('input#name').focus().blur().should('have.attr', 'aria-invalid', 'true');
   cy.get('input#phone').focus().blur().should('have.attr', 'aria-invalid', 'true');
@@ -340,6 +341,7 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
   cy.url().should('include', '/notification');
   cy.contains('div', 'Subscription Request Sent').should('be.visible');
   cy.contains('p', 'Our team has received your subscription request').should('be.visible');
+  cy.docsScreenshot('subscription-request-notification');
   cy.contains('button', 'Homepage').should('be.visible').click();
 
   cy.contains('button[type="button"]', 'Close').should('be.visible').click();

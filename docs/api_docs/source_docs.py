@@ -39,50 +39,6 @@ SYSTEM_INFO_DOCS = {
             "```\n"
         ),
     },
-
-    "dumps": {
-        "description": (
-            "Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites.\n\n"
-            "Supported filters:\n"
-            "- **page:** page number of the result set\n"
-            "- **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites)\n"
-            "- **group:** leak group or channel name derived from the source (e.g., Telegram channel name)\n"
-            "- **status:** all, parsed, unparsed\n"
-            "- **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`)\n"
-            "- **q:** free-text search query applied to `leak_url`, `source`, `group`, and other indexed fields (default: `*`)\n\n"
-            "Common use-cases include identifying newly leaked dumps, retrieving unparsed dumps for analysis, "
-            "or filtering dumps from specific threat groups or Telegram channels."
-        ),
-        "response_description": (
-            "Paginated dump catalog response containing:\n"
-            "- **total_count** — total number of dumps matching filters\n"
-            "- **page** — current page number\n"
-            "- **mDumpCallbackLinks** — list of dump entries, each containing:\n"
-            "  - **leak_url** — raw dump reference or asset URL\n"
-            "  - **source** — origin of the leak (e.g., telegram, websites)\n"
-            "  - **group** — associated leak group or channel name derived from the source (e.g., Telegram channel name)\n"
-            "  - **link** — direct reference link to the dump message or file\n"
-            "  - **parsed_status** — whether the dump has been parsed/processed\n"
-            "  - **created_at** — first-seen timestamp of the dump"
-            "\n\nExample response:\n"
-            "```json\n"
-            "{\n"
-            '  "total_count": 152,\n'
-            '  "page": 1,\n'
-            '  "mDumpCallbackLinks": [\n'
-            "    {\n"
-            '      "leak_url": "https://t.me/example_leaks/1234",\n'
-            '      "source": "telegram",\n'
-            '      "group": "example_leak_group",\n'
-            '      "link": "https://t.me/example_leaks/1234",\n'
-            '      "parsed_status": "parsed",\n'
-            '      "created_at": "2025-12-03T21:15:23Z"\n'
-            "    }\n"
-            "  ]\n"
-            "}\n"
-            "```\n"
-        ),
-    },
     "insight": {
         "description": (
             "Retrieve system-wide analytics and high-level intelligence metrics across all monitored data sources.\n\n"
@@ -1148,8 +1104,8 @@ REPORT_DOCS = {
             "associated breach report. The service automatically appends the `.webp` extension, and the response "
             "payload is the raw image bytes."
             "\n\nExample:\n"
-            "- Request: `GET /api/search/breach/screenshot/69993154316451142028569605097804`\n"
-            "- Effective file retrieved: `69993154316451142028569605097804.webp`\n"
+            "- Request: `GET /api/search/breach/screenshot/{filename}`\n"
+            "- Effective file retrieved: `{filename}.webp`\n"
             "- Response headers: `Content-Type: image/webp` with the binary image data in the body."
         ),
     },
@@ -1941,106 +1897,6 @@ SEARCH_DOCS = {
             "```\n"
         ),
     },
-    "telegram": {
-        "description": (
-            "Search Telegram-based chat intelligence and return metadata for matching chat reports.\n\n"
-            "This endpoint executes a keyword and IOC-aware search over Telegram chat collections (channels, groups, and "
-            "supergroups) ingested by Orion.\n\n"
-            "The request is an HTTP POST and expects a JSON body matching the `search_chat_param_model` schema.\n\n"
-            "Typical request payload:\n\n"
-            "```json\n"
-            "{\n"
-            "  \"q\": \"ransomware leak\",\n"
-            "  \"page\": 1,\n"
-            "  \"content\": \"all\",\n"
-            "  \"category\": \"all\",\n"
-            "  \"network\": \"all\",\n"
-            "  \"daterange\": \"2025-12-01,2025-12-08\",\n"
-            "  \"entity\": \"\",\n"
-            "  \"matchtype\": \"or\",\n"
-            "  \"platform\": \"telegram\",\n"
-            "  \"must\": false,\n"
-            "  \"messagedate\": \"\",\n"
-            "  \"entity_filter\": {\n"
-            "    \"m_team\": [\"example_team\"],\n"
-            "    \"m_domain\": [\"example.com\"]\n"
-            "  }\n"
-            "}\n"
-            "```\n\n"
-            "Field semantics (request):\n"
-            "- **q** — free-text query string matched against message text, caption and selected metadata.\n"
-            "- **page** — result page number for pagination (1-based).\n"
-            "- **content** — logical content category of chat documents (for example `all`, `text`, `media`).\n"
-            "- **category** — high-level ML category (for example `all`, `leak`, `exploit`, `general`).\n"
-            "- **network** — network selector, typically `all` or `clearnet` for Telegram web endpoints.\n"
-            "- **daterange** — ingestion/update date range in `YYYY-MM-DD,YYYY-MM-DD` format.\n"
-            "- **entity** — free-text IOC / entity string to match across enriched fields (domains, hashes, emails, etc.).\n"
-            "- **matchtype** — logical operator used when combining query and filters (`or` or `and`).\n"
-            "- **platform** — platform name; for this endpoint it is usually `telegram`.\n"
-            "- **must** — when `true`, entities specified in **entity**/**entity_filter** must be present in results.\n"
-            "- **messagedate** — explicit message date filter in `YYYY-MM-DD` format (platform message date).\n"
-            "- **entity_filter** — structured IOC filter (e.g. `m_team`, `m_domain`, `m_hashtag`) where each key is an\n"
-            "  enriched field and the value is a list of required values."
-        ),
-        "response_description": (
-            "Telegram chat search results containing paginated metadata for matching chat intelligence reports.\n\n"
-            "Typical response fields:\n"
-            "- **total** — total number of chat records matching the query and filters.\n"
-            "- **page** — current result page number.\n"
-            "- **results** — list of chat message objects, each summarizing one Telegram message or small thread.\n\n"
-            "Each element under **results** commonly includes:\n"
-            "- **m_message_id** — platform-specific message identifier.\n"
-            "- **m_channel_id** — internal or platform channel identifier.\n"
-            "- **m_channel_name** — human-readable channel name.\n"
-            "- **m_sender_name** — display name of the sender.\n"
-            "- **m_sender_username** — sender username/handle.\n"
-            "- **m_message_date** — message date in `YYYY-MM-DD` format.\n"
-            "- **m_content** — normalized message text.\n"
-            "- **m_caption** — media caption (if applicable).\n"
-            "- **m_message_sharable_link** — deep link to the message (e.g. `https://t.me/...`).\n"
-            "- **m_media_url** — URL of attached media (if present).\n"
-            "- **m_message_type** — list of message types (e.g. `[\"text\"]`, `[\"photo\"]`).\n"
-            "- **m_views** — view/impression count (if available).\n"
-            "- **m_network** — network classification (typically `clearnet`).\n"
-            "- **m_content_type** — internal classification labels for the chat item.\n"
-            "- **m_language** — detected language(s) of the message.\n"
-            "- **m_domain, m_hashtag, m_mention, m_team, m_location** — enriched IOCs/entities when present.\n\n"
-            "Example response:\n"
-            "```json\n"
-            "{\n"
-            "  \"total\": 42,\n"
-            "  \"page\": 1,\n"
-            "  \"results\": [\n"
-            "    {\n"
-            "      \"m_message_id\": 123456,\n"
-            "      \"m_channel_id\": 987654321,\n"
-            "      \"m_channel_name\": \"Example Ransomware Channel\",\n"
-            "      \"m_sender_name\": \"Example Threat Actor\",\n"
-            "      \"m_sender_username\": \"example_actor\",\n"
-            "      \"m_message_date\": \"2025-12-07\",\n"
-            "      \"m_message_sharable_link\": \"https://t.me/example_channel/123456\",\n"
-            "      \"m_content\": \"New victim announced: ExampleCorp. Data will be leaked in 7 days.\",\n"
-            "      \"m_caption\": \"\",\n"
-            "      \"m_media_url\": \"\",\n"
-            "      \"m_message_type\": [\"text\"],\n"
-            "      \"m_views\": 10543,\n"
-            "      \"m_network\": \"clearnet\",\n"
-            "      \"m_content_type\": [\"text\"],\n"
-            "      \"m_language\": [\"en\"],\n"
-            "      \"m_team\": [\"example_ransom_group\"],\n"
-            "      \"m_domain\": [\"examplecorp.com\"],\n"
-            "      \"m_location\": [\"US\"],\n"
-            "      \"m_hashtag\": [\"#ransomware\"],\n"
-            "      \"m_mention\": [],\n"
-            "      \"m_social_media_profiles\": [],\n"
-            "      \"m_hash\": \"abc123...\",\n"
-            "      \"m_creation_date\": \"2025-12-07T09:15:00Z\"\n"
-            "    }\n"
-            "  ]\n"
-            "}\n"
-            "```\n"
-        ),
-    },
     "consolidated": {
         "description": (
             "Search across all report types (breach/leak, exploit, generic/strategic, chat, social, etc.) and return a\n"
@@ -2485,4 +2341,3 @@ SEARCH_DOCS = {
         ),
     }
 }
-

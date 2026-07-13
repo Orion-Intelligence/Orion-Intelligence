@@ -49,20 +49,20 @@ export default defineConfig({
         },
         CASE_ALERT_TENANTS: [
             {
-                username: "casealert1",
-                email: "casealert1@orionintelligence.org",
+                username: "dcasealert1",
+                email: "dcasealert1@dcaseorionintelligence.org",
                 password: "1qaz!QAZ",
                 companyName: "Case Alert Tenant One",
             },
             {
-                username: "casealert2",
-                email: "casealert2@xorionintelligence.org",
+                username: "ecasealert2",
+                email: "ecasealert2@ecaseorionintelligence.org",
                 password: "1qaz!QAZ",
                 companyName: "Case Alert Tenant Two",
             },
             {
-                username: "casealert3",
-                email: "casealert3@zorionintelligence.org",
+                username: "fcasealert3",
+                email: "fcasealert3@fcaseorionintelligence.org",
                 password: "1qaz!QAZ",
                 companyName: "Case Alert Tenant Three",
             },

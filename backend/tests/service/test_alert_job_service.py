@@ -126,7 +126,7 @@ def test_alert_batch_reruns_tenant_and_sends_tenant_and_admin_mail(monkeypatch):
     alert_manager = _FakeAlertManager(running=False)
     job = make_alert_job(alert_manager, [tenant])
 
-    async def process_tenant_alerts(_tenant, category):
+    async def process_tenant_alerts(_tenant, category, _allowed_categories=None):
         return {"total": 1} if category == "scanning" else {"total": 0}
 
     monkeypatch.setattr(
@@ -159,7 +159,7 @@ def test_default_alert_batch_only_runs_tenants_without_custom_alert_time(monkeyp
     alert_manager = _FakeAlertManager(running=False)
     job = make_alert_job(alert_manager, [default_tenant, custom_tenant_1, custom_tenant_2])
 
-    async def process_tenant_alerts(_tenant, _category):
+    async def process_tenant_alerts(_tenant, _category, _allowed_categories=None):
         return {"total": 0}
 
     monkeypatch.setattr(
@@ -182,7 +182,7 @@ def test_custom_alert_batch_runs_selected_tenant_with_custom_alert_time(monkeypa
     alert_manager = _FakeAlertManager(running=False)
     job = make_alert_job(alert_manager, [])
 
-    async def process_tenant_alerts(_tenant, _category):
+    async def process_tenant_alerts(_tenant, _category, _allowed_categories=None):
         return {"total": 0}
 
     monkeypatch.setattr(

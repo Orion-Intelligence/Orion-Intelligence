@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import Any, List
 
 from odmantic import Model, EmbeddedModel, Field
 from pydantic import field_validator
@@ -31,9 +31,13 @@ class AlertModel(EmbeddedModel):
     description: str = ''
     source: str = ''
     url: str = ''
+    risk: str = ''
+    licenses: List[str] = Field(default_factory=list)
     all_ioc: List[alert_all_ioc] = Field(default_factory=list)
     content_types: List[str] = Field(default_factory=list)
+    raw_findings: dict[str, Any] = Field(default_factory=dict)
     status: alert_status = Field(default=alert_status.ACTIVE)
+
     first_seen: datetime = Field(default_factory=datetime.utcnow)
     last_seen: datetime = Field(default_factory=datetime.utcnow)
 

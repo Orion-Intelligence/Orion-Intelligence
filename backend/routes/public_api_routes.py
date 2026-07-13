@@ -6,12 +6,16 @@ from orion.api.interactive.resource_manager.resource_manager import ResourceMana
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
-from configs.app_dependency import _enum_value, admin_or_enterprise_required
+from configs.app_dependency import _enum_value
 from configs.auth_cookie import token_from_request
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
 
 public_routes = APIRouter()
+STEALERLOG_SEARCH_LIMIT = 5
+STEALERLOG_SEARCH_TTL_SECONDS = 86400
 
 
 def cookie_required(request: Request):
@@ -74,13 +78,33 @@ async def open_chat_share(share_id: str, token: str = Query(...)):
 async def robots_txt():
     return await ResourceManager.get_instance().get_robots_txt()
 
+
+def _request_ip(request: Request) -> str:
+    forwarded_for = request.headers.get("x-forwarded-for", "")
+    if forwarded_for:
+        return forwarded_for.split(",", 1)[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
 @public_routes.get(
     "/api/search/stealerlogs",
     include_in_schema=False,
     status_code=200,
-    dependencies=[Depends(admin_or_enterprise_required)],
 )
-async def search_stealerlog(q: str = Query(...)):
+async def search_stealerlog(request: Request, q: str = Query(...)):
+    redis_key = f"search:stealerlogs:ip:{_request_ip(request)}"
+    redis_instance = redis_controller.getInstance()
+    search_count = await redis_instance.invoke_trigger(
+        REDIS_COMMANDS.S_GET_INT,
+        [redis_key, 0, STEALERLOG_SEARCH_TTL_SECONDS]
+    )
+    if int(search_count or 0) >= STEALERLOG_SEARCH_LIMIT:
+        raise HTTPException(status_code=429, detail="Search limit reached for this IP")
+    await redis_instance.invoke_trigger(
+        REDIS_COMMANDS.S_SET_INT,
+        [redis_key, int(search_count or 0) + 1, STEALERLOG_SEARCH_TTL_SECONDS]
+    )
+
     param = search_credential_param_model(q=q)
     try:
         return await search_model.getInstance().search_stealerlogs_persona_breach(param)

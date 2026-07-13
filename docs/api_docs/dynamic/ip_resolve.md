@@ -90,25 +90,6 @@ The resolver executes DNS queries with progress updates:
 - If neither exist, an empty `ips` array is returned
 - All discovered IPs are included (no deduplication)
 
-## Status Polling
-
-For tracking resolution progress:
-
-```
-GET /api/dns/status?domain=www.bbc.com
-```
-
-Response:
-```json
-{
-  "status": "pending",
-  "progress": 30,
-  "step": "resolving_A"
-}
-```
-
-Status values: `idle`, `pending`, `done`, `error`
-
 ## Error Handling
 
 ### Domain Not Found

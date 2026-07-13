@@ -7,6 +7,7 @@ class MailSubject(str, Enum):
     PRO_SUBSCRIPTION = "Pro Subscription Request"
     SUPPORT = "Support Request Received"
     ACCOUNT_CREATED = "Welcome to Our Platform"
+    TAKEDOWN_REQUEST = "URGENT: Abuse/Takedown Request for {domain}"
 
 
 class MailMessage(str, Enum):
