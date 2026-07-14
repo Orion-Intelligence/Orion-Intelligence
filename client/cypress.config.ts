@@ -184,6 +184,22 @@ export default defineConfig({
                 table(_) {
                     return null;
                 },
+                writeDocScreenshot({ data, name, specName }) {
+                    const screenshotsFolder =
+                        typeof config.screenshotsFolder === "string" ? config.screenshotsFolder : "cypress/error";
+                    const screenshotRoot = path.resolve(config.projectRoot, screenshotsFolder);
+                    const safeSpecName = String(specName || "unknown-spec").replace(/[\\/]/g, "_");
+                    const safeName = String(name || "screenshot").replace(/\\/g, "/").replace(/^\/+/, "");
+                    const targetPath = path.resolve(screenshotRoot, safeSpecName, "user-manual", `${safeName}.png`);
+
+                    if (!targetPath.startsWith(`${screenshotRoot}${path.sep}`)) {
+                        throw new Error(`Refusing to write docs screenshot outside screenshots folder: ${targetPath}`);
+                    }
+
+                    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+                    fs.writeFileSync(targetPath, Buffer.from(String(data), "base64"));
+                    return null;
+                },
             });
             return config;
         },

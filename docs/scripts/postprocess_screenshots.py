@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import sys
+import re
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFont
@@ -34,12 +35,24 @@ def load_caption_map() -> dict[str, str]:
             if filename and filename not in captions:
                 captions[filename] = caption or filename.rsplit(".", 1)[0].replace("-", " ").title()
                 captions[Path(filename).name] = captions[filename]
+                undated_name = re.sub(r"-\d{8}(\.[^.]+)$", r"\1", Path(filename).name)
+                captions[undated_name] = captions[filename]
             i = j
         i += 1
     return captions
 
 
 CAPTION_MAP = load_caption_map()
+
+
+def label_for_path(path: Path) -> str:
+    label = CAPTION_MAP.get(path.name)
+    if label:
+        return label
+
+    undated_name = re.sub(r"-\d{8}(\.[^.]+)$", r"\1", path.name)
+    stem = Path(undated_name).stem
+    return re.sub(r"\s+", " ", stem.replace("-", " ")).strip().title()
 
 
 def rounded_mask(size: tuple[int, int], radius: int) -> Image.Image:
@@ -95,14 +108,14 @@ def normalize_canvas(
     target_width, target_height = target_size
     width, height = image.size
 
-    scale = min(target_width / max(1, width), target_height / max(1, height))
+    scale = max(target_width / max(1, width), target_height / max(1, height))
     resized_width = max(1, round(width * scale))
     resized_height = max(1, round(height * scale))
     resized = image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
 
     canvas = Image.new("RGBA", target_size, (0, 0, 0, 0))
-    offset_x = max(0, (target_width - resized_width) // 2)
-    offset_y = max(0, (target_height - resized_height) // 2)
+    offset_x = 0 if resized_width >= target_width else (target_width - resized_width) // 2
+    offset_y = 0 if resized_height >= target_height else (target_height - resized_height) // 2
     canvas.alpha_composite(resized, (offset_x, offset_y))
     return canvas
 
@@ -120,8 +133,9 @@ def add_label(image: Image.Image, label: str) -> Image.Image:
     while draw.textlength(text, font=font) > max_text_width and len(text) > 12:
         text = text[:-4].rstrip(". ") + "..."
 
-    left = 18
-    bottom_margin = 18
+    left = 26
+    right_margin = 26
+    bottom_margin = 26
     padding_x = 10
     padding_y = 7
 
@@ -129,8 +143,9 @@ def add_label(image: Image.Image, label: str) -> Image.Image:
     text_w = bbox[2] - bbox[0]
     text_h = bbox[3] - bbox[1]
 
-    top = height - bottom_margin - text_h - (padding_y * 2)
-    right = left + text_w + (padding_x * 2)
+    max_right = width - right_margin
+    top = max(26, height - bottom_margin - text_h - (padding_y * 2))
+    right = min(max_right, left + text_w + (padding_x * 2))
     bottom = height - bottom_margin
 
     draw.rounded_rectangle(
@@ -152,41 +167,46 @@ def process_image(
     crop_top: int = 3,
     crop_right: int = 18,
     crop_bottom: int = 22,
-    radius: int = 18,
+    radius: int = 42,
     final_trim: int = 2,
     border_width: int = 3,
     target_size: tuple[int, int] = (1418, 871),
 ) -> None:
     image = Image.open(path).convert("RGBA")
+    label = label_for_path(path)
+    if image.size == target_size:
+        return
+
     width, height = image.size
 
     new_width = max(1, width - crop_right)
     new_height = max(1, height - crop_top - crop_bottom)
     image = image.crop((0, crop_top, new_width, crop_top + new_height))
-    image = add_label(image, CAPTION_MAP.get(path.name, ""))
 
     effective_radius = max(1, radius - final_trim)
     if final_trim > 0 and image.size[0] > final_trim * 2 and image.size[1] > final_trim * 2:
         image = image.crop((final_trim, final_trim, image.size[0] - final_trim, image.size[1] - final_trim))
 
-    mask = rounded_mask(image.size, effective_radius)
+    old_scale = min(target_size[0] / max(1, image.size[0]), target_size[1] / max(1, image.size[1]))
+    final_radius = max(1, round(effective_radius * old_scale))
 
-    rounded = Image.new("RGBA", image.size, (0, 0, 0, 0))
-    rounded.paste(image, (0, 0), mask)
+    canvas = normalize_canvas(image, target_size)
+    canvas = add_label(canvas, label)
 
-    canvas = Image.new("RGBA", rounded.size, (0, 0, 0, 0))
-    canvas.paste(rounded, (0, 0), rounded)
+    mask = rounded_mask(canvas.size, final_radius)
+    rounded = Image.new("RGBA", canvas.size, (7, 15, 26, 255))
+    rounded.paste(canvas, (0, 0), mask)
+    canvas = rounded
 
     if border_width > 0:
         accent = render_border(
             size=canvas.size,
-            radius=effective_radius,
+            radius=final_radius,
             border_width=border_width,
             color=(255, 255, 255, 255),
         )
         canvas.alpha_composite(accent)
 
-    canvas = normalize_canvas(canvas, target_size)
     canvas.save(path)
 
 

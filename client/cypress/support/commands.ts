@@ -69,15 +69,45 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
             return cy.wrap<void>(undefined, { log: false });
         }
 
-        cy.viewport(1920, 1080);
-        cy.wait(300, { log: false });
-        cy.screenshot(`user-manual/${name}`, {
-            capture: "viewport",
-            overwrite: true,
-            disableTimersAndAnimations: false,
-            ...options,
-        });
-        return cy.wrap<void>(undefined, { log: false });
+        void options;
+        let clip: { x: number; y: number; width: number; height: number; scale: number } | undefined;
+
+        return cy.window({ log: false }).then((win) => {
+            try {
+                const topWindow = win.top || win;
+                const iframe = topWindow.document.querySelector("iframe.aut-iframe, iframe[data-cy='aut-iframe'], iframe");
+                const rect = iframe?.getBoundingClientRect();
+                if (rect && rect.width > 0 && rect.height > 0) {
+                    clip = {
+                        x: Math.max(0, rect.left),
+                        y: Math.max(0, rect.top),
+                        width: rect.width,
+                        height: rect.height,
+                        scale: 1,
+                    };
+                }
+            } catch {
+                clip = undefined;
+            }
+        }).then({ log: false }, () => (
+            (Cypress as any).automation("remote:debugger:protocol", {
+                command: "Page.captureScreenshot",
+                params: {
+                    captureBeyondViewport: false,
+                    ...(clip ? { clip } : {}),
+                    format: "png",
+                    fromSurface: true,
+                },
+            })
+        )).then((result: any) => {
+            const data = typeof result === "string" ? result : result?.data;
+            expect(data, `docs screenshot ${name}`).to.be.a("string").and.not.be.empty;
+            return cy.task("writeDocScreenshot", {
+                data,
+                name,
+                specName: Cypress.spec.name,
+            }, { log: false });
+        }).then(() => cy.wrap<void>(undefined, { log: false }));
     });
 });
 
