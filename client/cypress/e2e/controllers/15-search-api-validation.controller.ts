@@ -822,14 +822,35 @@ function selectSidebarFilterOption16(selectTestId: string, option: string) {
       expect(menuId, `${selectTestId} menu id`).to.exist;
       cy.wrap($select).click({ force: true });
       cy.wrap($select).should('have.attr', 'aria-expanded', 'true');
-      cy.get(`#${menuId}`).parent()
+      const typeOption = () => cy.get(`#${menuId}`).parent()
         .find('input')
         .then(($input) => {
           if ($input.length > 0) {
             cy.wrap($input.first()).clear({ force: true }).type(option, { force: true });
           }
         });
-      cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000, matchCase: false }).click({ force: true });
+
+      typeOption();
+      if (selectTestId !== 'side-filter-select-m_cve') {
+        cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000, matchCase: false }).click({ force: true });
+        return;
+      }
+
+      const optionSelector = `#${menuId} [role="option"]`;
+      const clickOption = (attempt = 1): Cypress.Chainable => cy.wait(2000).then(() => {
+        const options = Cypress.$(optionSelector).toArray();
+        const match = options
+          .find(element => (element.textContent || '').toLowerCase().includes(option.toLowerCase()));
+        if (match) {
+          return cy.wrap(match).click({ force: true });
+        }
+        const noResults = options.some(element => (element.textContent || '').toLowerCase().includes('no results'));
+        if (!noResults || attempt >= 3) {
+          throw new Error(`Expected ${option} in ${optionSelector} after ${attempt} attempts`);
+        }
+        return typeOption().then(() => clickOption(attempt + 1));
+      });
+      clickOption();
     });
 }
 

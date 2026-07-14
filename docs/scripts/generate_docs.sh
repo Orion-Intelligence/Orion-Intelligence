@@ -97,7 +97,7 @@ elif [ -x "/snap/chromium/3390/usr/lib/chromium-browser/chrome" ]; then
     chromium_binary="/snap/chromium/3390/usr/lib/chromium-browser/chrome"
 fi
 
-if [ -n "$chromium_binary" ]; then
+if [ -n "$chromium_binary" ] && [ "${DOC_SCREENSHOT_USE_CHROMIUM:-0}" = "1" ] && [ -z "${DOC_SCREENSHOT_BROWSER:-}" ]; then
     browser="$chromium_binary"
 fi
 
@@ -114,16 +114,28 @@ npm test -- run --browser "$browser" \
     --env takeScreenshots=true \
     --spec "$npm_test_specs"
 
-screenshot_count=0
+copied=0
 while IFS= read -r -d '' screenshot_path; do
-    screenshot_count=$((screenshot_count + 1))
+    cp "$screenshot_path" "$TARGET_DIR"/
+    copied=$((copied + 1))
 done < <(find "$TARGET_DIR" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -print0)
 
-if [ "$screenshot_count" -eq 0 ]; then
+if [ "$copied" -eq 0 ]; then
     echo "No docs screenshots were produced."
     exit 1
 fi
 
-find "$TARGET_DIR" -path "*/user-manual/*.png" -print0 | xargs -0 "$postprocess_python" "$SCRIPT_DIR/postprocess_screenshots.py"
+(
+    cd "$TARGET_DIR" || exit 1
+    rm -f *-20260326.png
+    for f in *.png; do
+        [ -e "$f" ] || continue
+        cp "$f" "${f%.png}-20260326.png"
+    done
+    "$postprocess_python" "$SCRIPT_DIR/postprocess_screenshots.py" *-20260326.png
+    find . -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
+)
+
+find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} +
 trap - EXIT
 cleanup
