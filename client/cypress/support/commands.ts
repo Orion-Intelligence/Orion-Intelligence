@@ -10,6 +10,7 @@ declare global {
         interface Chainable {
             loginAsAdmin(): Chainable<void>;
             loginAsTest1(): Chainable<void>;
+            visitLoginWithCleanAuthState(): Chainable<void>;
             waitForLoginRequest(alias?: string): Chainable<void>;
             logout(): Chainable<void>;
             typeSlow(selector: string, value: string, options?: SlowTypeOptions): Chainable<void>;
@@ -38,6 +39,22 @@ Cypress.Commands.add("waitForIntercepts", () => {
 const loginRequestAlias = (alias = "loginRequest"): `@${string}` => (
     alias.startsWith("@") ? alias : `@${alias}`
 ) as `@${string}`;
+
+const visitLoginWithCleanAuthState = () => {
+    cy.clearCookies({ log: false });
+    cy.clearLocalStorage(undefined, { log: false });
+    cy.visit("/login", {
+        onBeforeLoad(win) {
+            win.localStorage.clear();
+            win.sessionStorage.clear();
+        },
+    });
+};
+
+Cypress.Commands.add("visitLoginWithCleanAuthState", () => {
+    visitLoginWithCleanAuthState();
+    return cy.wrap<void>(undefined, { log: false });
+});
 
 Cypress.Commands.add("waitForLoginRequest", (alias = "loginRequest") => {
     return cy.wait(loginRequestAlias(alias), { timeout: 60000 })
@@ -98,7 +115,7 @@ Cypress.Commands.add("loginAsAdmin", () => {
     cy.env(["ADMIN_USERNAME", "ADMIN_PASSWORD"]).then(({ ADMIN_USERNAME, ADMIN_PASSWORD }) => {
         cy.intercept("POST", "**/api/token").as("loginRequest");
         cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
-        cy.visit("/login");
+        cy.visitLoginWithCleanAuthState();
         cy.get('[data-testid="login-user"]').type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
@@ -119,7 +136,7 @@ Cypress.Commands.add("loginAsTest1", () => {
         }
         cy.intercept("POST", "**/api/token").as("loginRequest");
         cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
-        cy.visit("/login");
+        cy.visitLoginWithCleanAuthState();
         cy.get('[data-testid="login-user"]').type(user.username);
         cy.get('[data-testid="login-pass"]').type(user.password, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
@@ -142,6 +159,13 @@ Cypress.Commands.add("logout", () => {
             if (!profileMenu.length) {
                 return;
             }
+            cy.intercept("GET", "**/api/insight", {
+                statusCode: 200,
+                body: {
+                    insights: { general: {}, leak: {}, defacement: {} },
+                    latestDocument: { generic_model: [], leak_model: [], defacement_model: [], chat_model: [], exploit_model: [] },
+                },
+            });
             cy.intercept("POST", "**/api/logout").as("logoutRequest");
             cy.scrollTo("top", { ensureScrollable: false });
             cy.wrap(profileMenu).scrollIntoView().should('be.visible').click();
@@ -150,6 +174,12 @@ Cypress.Commands.add("logout", () => {
                 .its("response.statusCode")
                 .should("be.oneOf", [200, 204]);
             cy.get('[data-testid="login-user"]').should('exist');
+            cy.clearCookies({ log: false });
+            cy.clearLocalStorage(undefined, { log: false });
+            cy.window({ log: false }).then((win) => {
+                win.localStorage.clear();
+                win.sessionStorage.clear();
+            });
         });
     });
 });
@@ -226,9 +256,10 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
             return cy.request("GET", `http://localhost:8025/api/v1/message/${id}`);
         })
             .then((r: any) => {
-            const text = (r.body.Text as string) ||
-                (r.body.HTML as string) ||
-                (r.body.Snippet as string) ||
+            const body = r.body || {};
+            const text = (body.Text as string) ||
+                (body.HTML as string) ||
+                (body.Snippet as string) ||
                 "";
             const match = text.match(/https?:\/\/[^\s*]+/);
             if (!match) {

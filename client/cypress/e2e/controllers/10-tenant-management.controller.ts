@@ -73,7 +73,7 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
 
 export function submitLogin(username: string, password: string) {
   cy.intercept('POST', '**/api/token').as('loginRequest');
-  cy.visit('/login');
+  cy.visitLoginWithCleanAuthState();
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
@@ -553,7 +553,11 @@ export function openTenantHomepage() {
 }
 
 export function ensureGeneralAlertIoc() {
+  cy.intercept('POST', '**/api/get/tenant').as('loadGeneralAlertIocs');
   openManageIOCs();
+  cy.wait('@loadGeneralAlertIocs', {timeout: 60000})
+    .its('response.statusCode')
+    .should('be.oneOf', [200, 201]);
   cy.contains('[data-testid^="tenant-ioc-tab-"]', 'Domains', {timeout: 30000})
     .scrollIntoView()
     .should('be.visible')

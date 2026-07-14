@@ -16,6 +16,22 @@ stop_docker() {
     docker rm trusted-web-nginx 2>/dev/null || true
 }
 
+stop_ng_serve() {
+    local url="http://127.0.0.1:4200/"
+    local pid_file="/tmp/orion-ng-serve.pid"
+
+    if [ -f "$pid_file" ]; then
+        kill "$(cat "$pid_file")" 2>/dev/null || true
+        rm -f "$pid_file"
+    fi
+    pkill -f "ng serve.*--port 4200" 2>/dev/null || true
+    pkill -f "npm run serve -- --host 127.0.0.1 --port 4200" 2>/dev/null || true
+
+    while curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
+        sleep 1
+    done
+}
+
 pull_image_if_missing() {
     local image="$1"
 
@@ -131,6 +147,23 @@ run_test_task() {
     exit 0
 }
 
+restart_ng_serve() {
+    local url="http://127.0.0.1:4200/"
+    local pid_file="/tmp/orion-ng-serve.pid"
+
+    stop_ng_serve
+
+    (
+        cd client || exit
+        nohup npm run serve -- --host 127.0.0.1 --port 4200 >/tmp/orion-ng-serve.log 2>&1 &
+        echo $! > "$pid_file"
+    )
+
+    until curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
+        sleep 2
+    done
+}
+
 set_testing_enabled() {
     sed -i '/^TESTING_ENABLED=/d' "$ENV_FILE" 2>/dev/null || true
     if [ "$1" = "-t" ] || [ "$1" = "-tb" ]; then
@@ -162,6 +195,7 @@ if [ "$1" = "-ip" ]; then
 fi
 
 if [ "$1" = "stop" ]; then
+    stop_ng_serve
     stop_docker
     echo "Orion Intelligence service stopped"
     exit 0
@@ -169,12 +203,14 @@ fi
 
 if [ "$1" = "-doc" ]; then
     "$0" build -t
+    restart_ng_serve
     bash docs/scripts/generate_docs.sh --clear
     exit 0
 fi
 
 if [ "$1" = "-docs" ]; then
     "$0" build -t
+    restart_ng_serve
     bash docs/scripts/generate_docs.sh
     exit 0
 fi

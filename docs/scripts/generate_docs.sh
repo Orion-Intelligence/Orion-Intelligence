@@ -7,7 +7,7 @@ DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$DOCS_DIR/.." && pwd)"
 CLIENT_DIR="$REPO_ROOT/client"
 TARGET_DIR="$DOCS_DIR/screenshots"
-FRONTEND_URL="${DOC_FRONTEND_URL:-https://127.0.0.1:8443}"
+FRONTEND_URL="${DOC_FRONTEND_URL:-http://127.0.0.1:4200}"
 DOC_SCREENSHOT_SPECS=(
     "cypress/e2e/01-init.cy.ts"
     "cypress/e2e/02-login.cy.ts"
