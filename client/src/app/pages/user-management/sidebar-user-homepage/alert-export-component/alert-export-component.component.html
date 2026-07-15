@@ -15,8 +15,8 @@
             <span>{{ alert.title || ('categoryAlerts.export.untitledAlert' | translate) }}</span>
           </div>
           <div class="flex items-center gap-2">
-            <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="riskClass(alert.type)">
-              {{ getRiskLevel(alert.type) }}
+            <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="riskClass(alert.type, alert.risk)">
+              {{ getRiskLevel(alert.type, alert.risk) }}
             </span>
             <span class="rounded-full px-3 py-1 text-xs font-semibold" [ngClass]="statusClass(alert.status)">
               {{ (alert.status || ('info' | translate)) | uppercase }}

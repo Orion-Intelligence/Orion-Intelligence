@@ -20,6 +20,7 @@ from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
 from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
+from orion.api.interactive.takedown_manager.takedown_manager import TakedownManager
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
@@ -37,9 +38,10 @@ from orion.api.server.crawl_manager.class_model.ip_scan_request_model import IPS
 from orion.api.server.crawl_manager.class_model.log_model import SiemSearchRequestModel, SiemSearchResponseModel
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
 from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobCreateRequest, ScanJobDetailResponse, ScanJobListResponse, ScanJobSeenRequest
+from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest, TakedownDecisionRequest, TakedownListResponse
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
-from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.api.server.entity_manager.modal.EntityQueryModel import EntityGraphBatchQueryModel, EntityQueryModel
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
@@ -155,10 +157,10 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
 @api_routes.post(
     "/api/search/social",
     summary="Search social reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["social"]["description"],
     tags=["Search"],
     operation_id="searchSocialReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
 async def search_social(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -190,10 +192,10 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
 @api_routes.post(
     "/api/search/exploit",
     summary="Search exploit reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["exploit"]["description"],
     tags=["Search"],
     operation_id="searchExploitReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["exploit"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:exploit", bypass_licenses=["maintainer"]))], )
 async def search_exploit(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -216,10 +218,10 @@ async def get_exploit_filter_suggestions(field: str = Query(...), q: str = Query
 @api_routes.post(
     "/api/search/apt-intel",
     summary="Search APT Intel reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["apt_intel"]["description"],
     tags=["Search"],
     operation_id="searchAptIntelReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["apt_intel"]["response_description"],
     status_code=200,
     dependencies=APT_INTEL_DEPS, )
 async def search_apt_intel(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -241,10 +243,10 @@ async def get_malware_filter_options():
 @api_routes.post(
     "/api/search/defacement",
     summary="Search defacement reports",
-    description=SEARCH_DOCS["strategic"]["description"],
+    description=SEARCH_DOCS["defacement"]["description"],
     tags=["Search"],
     operation_id="searchDefacementReports",
-    response_description=SEARCH_DOCS["strategic"]["response_description"],
+    response_description=SEARCH_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
 async def search_defacement(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
@@ -423,8 +425,9 @@ async def search_consolidated_iocs(param: search_consolidated_param_model = Body
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
 async def get_defacement_document(doc_id: str):
-
-    return await search_model.getInstance().request_defacement_doc(doc_id)
+    report = await search_model.getInstance().request_defacement_doc(doc_id)
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.enrich_report(report)
 
 
 @api_routes.get(
@@ -520,11 +523,11 @@ async def get_chat_document(doc_id: str, lang: Optional[str] = Query(None, alias
 
 @api_routes.get(
     "/api/search/social/{doc_id}",
-    summary="Get social_models media intelligence report",
-    description=REPORT_DOCS["social_models"]["description"],
+    summary="Get social media intelligence report",
+    description=REPORT_DOCS["social"]["description"],
     tags=["Reports"],
     operation_id="getSocialReport",
-    response_description=REPORT_DOCS["social_models"]["response_description"],
+    response_description=REPORT_DOCS["social"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
 async def get_social_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
@@ -670,7 +673,7 @@ async def scrape_social(payload: SocialScrapeRequest, current_user=Depends(get_c
 
 @api_routes.post(
     "/api/dynamic/social",
-    summary="Dynamic social_models identifier exposure search",
+    summary="Dynamic social identifier exposure search",
     description=DYNAMIC_DOCS["dynamic_social"]["description"],
     tags=["Entity Scans"],
     operation_id="dynamicSocialIdentifierExposureSearch",
@@ -776,7 +779,7 @@ async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(Non
 
 @api_routes.get(
     "/api/search/social/stix/{doc_id}",
-    summary="Get social_models media intelligence report in stix format",
+    summary="Get social media intelligence report in stix format",
     description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
     operation_id="getSocialStixReport",
@@ -789,10 +792,10 @@ async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(None
 
 @api_routes.get(
     "/api/search/chat/stix/{doc_id}",
-    summary="Get social_models media intelligence report in stix format",
+    summary="Get chat intelligence report in stix format",
     description=REPORT_DOCS["stix"]["description"],
     tags=["Stix"],
-    operation_id="getSocialStixReport",
+    operation_id="getChatStixReport",
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[*STIX_MEMBER_DEPS, Depends(license_required("module:chat", bypass_licenses=["maintainer"]))], )
@@ -808,6 +811,16 @@ async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(None, 
 async def get_entity_relations(query: EntityQueryModel = Depends()):
     manager = entity_manager.get_instance()
     return await manager.get_entity_relations(query)
+
+
+@api_routes.post(
+    "/api/graph",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(license_required("cti_graph", bypass_roles=[user_role.ADMIN], bypass_licenses=["maintainer"]))], )
+async def post_entity_relations(query: EntityGraphBatchQueryModel = Body(...)):
+    manager = entity_manager.get_instance()
+    return await manager.get_entity_relations_batch(query)
 
 
 @api_routes.get(
@@ -967,6 +980,57 @@ async def convert_stix_batch(kind: str, payloads: list[dict] = Body(...)):
     if kind_normalized not in STIX_KIND_VALUES:
         return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
     return {"items": [convert_to_stix(kind_normalized, payload) for payload in payloads]}
+
+@api_routes.post(
+    "/api/takedowns",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))],
+)
+async def create_takedown_request(request: TakedownCreateRequest = Body(...), current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.create_request(request, current_user)
+
+
+@api_routes.get(
+    "/api/takedowns",
+    response_model=TakedownListResponse,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))],
+)
+async def list_takedown_requests(status: Optional[str] = Query(None), q: str = Query(""), daterange: str = Query(""), page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100), current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.list_requests(
+        current_user,
+        status=status,
+        q=q,
+        page=page,
+        limit=limit,
+        daterange=daterange,
+    )
+
+
+@api_routes.post(
+    "/api/takedowns/{request_id}/accept",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def accept_takedown_request(request_id: str, current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.accept_request(request_id, current_user)
+
+
+@api_routes.post(
+    "/api/takedowns/{request_id}/reject",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def reject_takedown_request(request_id: str, decision: Optional[TakedownDecisionRequest] = Body(None), current_user=Depends(get_current_user)):
+    takedown_manager = TakedownManager.get_instance()
+    return await takedown_manager.deny_request(
+        request_id,
+        decision or TakedownDecisionRequest(),
+        current_user,
+    )
 
 @api_routes.post(
     "/api/scan-jobs/create",

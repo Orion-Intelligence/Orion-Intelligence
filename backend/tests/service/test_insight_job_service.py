@@ -5,9 +5,10 @@ import json
 
 import pytest
 
+from orion.management.jobs.insight_generator import insight_generator
 from orion.management.jobs.insight_job import insight_job
 from orion.management.models.insight_model import InsightData
-from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
+from orion.services.elastic_manager.elastic_enums import ELASTIC_ENUMS, ELASTIC_INDEX, ELASTIC_KEYS
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
 from tests.fake_model.fakes import FakeRedis
 
@@ -96,6 +97,35 @@ def test_generate_insight_queries_count_optional_metric_fields_by_document_prese
     assert aggs_by_label[(ELASTIC_INDEX.S_DEFACEMENT_INDEX, "Top Actor")] == {
         "terms": {"field": "m_attacker", "size": 1}
     }
+
+
+def test_insight_leak_query_collapses_on_mapped_domain_keyword_field():
+    index, query = insight_generator.on_insight_leakdata()
+
+    assert index == ELASTIC_INDEX.S_LEAK_INDEX
+    assert query["collapse"] == {"field": "m_domain"}
+    assert {"exists": {"field": "m_domain"}} in query["query"]["bool"]["must"]
+    assert query["query"]["bool"]["must"][1]["script"]["script"]["source"] == "doc['m_domain'].size()==1"
+    assert "m_domain.keyword" not in json.dumps(query)
+    assert query["sort"] == [
+        {"m_update_date": {"order": "desc", "missing": "_last", "unmapped_type": "date"}}
+    ]
+
+
+def test_country_insight_sort_tolerates_indices_without_update_date_mapping():
+    indices, query = insight_generator.on_insight_consolidated_country()
+
+    assert ELASTIC_INDEX.S_CHATS_INDEX in indices
+    assert ELASTIC_INDEX.S_SOCIAL_INDEX in indices
+    assert query["sort"] == [
+        {"_doc": {"order": "asc"}}
+    ]
+
+
+def test_leak_mapping_declares_domain_for_collapse():
+    properties = ELASTIC_ENUMS.mapping_leakdatamodel["mappings"]["properties"]
+
+    assert properties["m_domain"] == {"type": "keyword"}
 
 
 @pytest.mark.anyio

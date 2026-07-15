@@ -55,6 +55,10 @@ export class DashboardHeaderComponent implements OnInit {
       this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
       return;
     }
+    if (this.router.url.includes('/profile/case-management/admin-alerts/')) {
+      this.router.navigate(['/dashboard/profile/case-management'], { queryParams: { mode: 'alerts' } }).then();
+      return;
+    }
     if (this.router.url.includes('profile/consolidated/all') || this.router.url.includes('profile/alerts')) {
       this.router.navigate(['/dashboard/profile/homepage'], { queryParams }).then();
       return;
@@ -90,6 +94,10 @@ export class DashboardHeaderComponent implements OnInit {
       const currentUrlTree: UrlTree = this.router.parseUrl(this.router.url);
       const queryParams = currentUrlTree.queryParams;
       const basePath = '/dashboard/' + this.breadcrumb.slice(0, index + 1).map((crumb) => crumb.path).join('/');
+      if (this.router.url.includes('/profile/case-management/admin-alerts/') && basePath.includes('/profile/case-management')) {
+        this.router.navigate(['/dashboard/profile/case-management'], { queryParams: { mode: 'alerts' } }).then();
+        return;
+      }
       if (basePath.includes('/consolidated/all')) {
         sessionStorage.setItem('skipConsolidatedBackFetchOnce', '1');
       }

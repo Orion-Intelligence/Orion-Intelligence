@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
 
-from configs.app_dependency import get_current_user, license_required, role_required, status_required
+from configs.app_dependency import get_current_user, license_required, role_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
@@ -8,7 +8,9 @@ from orion.api.interactive.auth_manager.models.forgot_password_request import Fo
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, NetIntelDeepScanRequest, ResolveIPRequest
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.management.managers.service_manager import service_manager
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest
 from routes.helper.route_test_helper import TestRouteHelper
 
 
@@ -29,10 +31,17 @@ ANALYST_SCAN_DEPS = [
 
 test_routes = APIRouter(
     dependencies=[
-        Depends(status_required([UserStatus.ACTIVE])),
         Depends(TestRouteHelper.require_testing_enabled),
     ]
 )
+
+
+@test_routes.get("/api/test/ready", include_in_schema=False)
+async def test_ready():
+    if not service_manager.get_instance().check_status():
+        raise HTTPException(status_code=503, detail="Test services are not ready")
+    return {"ready": True}
+
 
 @test_routes.post(
     "/api/scan-jobs/{scan_id}/poll",
@@ -56,6 +65,44 @@ async def test_get_tenant_node(current_user=Depends(get_current_user)):
         response.user.demo_tour = True
 
     return response
+
+
+@test_routes.post(
+    "/api/test/takedown-visibility/setup",
+    include_in_schema=False,
+)
+async def test_setup_takedown_visibility():
+    return await TestRouteHelper.setup_takedown_visibility_fixture()
+
+
+@test_routes.post(
+    "/api/takedowns",
+    include_in_schema=False,
+)
+async def test_create_takedown_request(request: TakedownCreateRequest = Body(...)):
+    return await TestRouteHelper.create_test_takedown_request(request)
+
+
+@test_routes.get(
+    "/api/takedowns",
+    include_in_schema=False,
+)
+async def test_list_takedown_requests(
+    viewer: str = Query("initiator"),
+    status: str | None = Query(None),
+    q: str = Query(""),
+    daterange: str = Query(""),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+):
+    return await TestRouteHelper.list_test_takedown_requests(
+        viewer,
+        status=status,
+        q=q,
+        page=page,
+        limit=limit,
+        daterange=daterange,
+    )
 
 
 @test_routes.post(

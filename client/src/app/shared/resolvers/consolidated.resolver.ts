@@ -3,6 +3,7 @@ import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@a
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
+import { ReportRouteUtil } from '../utils/report-route.util';
 @Injectable({
   providedIn: 'root'
 })
@@ -14,41 +15,10 @@ export class ReportConsolidatedResolver implements Resolve<any> {
     const index = route.queryParamMap.get('ci') || '';
     const hash = route.paramMap.get('m_hash');
     const lang = route.queryParamMap.get('lang');
-    let category = index.replace('_model', '').toLowerCase();
-    let apiUrl = '';
-    switch (category) {
-      case 'leak':
-      case 'tracking':
-      case 'news':
-        apiUrl = hash ? `search/breach/${hash}` : `search/breach`;
-        break;
-      case 'defacement':
-        apiUrl = hash ? `search/defacement/${hash}` : `search/defacement`;
-        break;
-      case 'general':
-        apiUrl = hash ? `search/strategic/${hash}` : `search/strategic`;
-        break;
-      case 'exploit':
-        apiUrl = hash ? `search/exploit/${hash}` : `search/exploit`;
-        break;
-      case 'apt':
-        apiUrl = hash ? `search/apt/${hash}` : `search/apt`;
-        break;
-      case 'malware':
-        apiUrl = hash ? `search/malware/${hash}` : `search/malware`;
-        break;
-      case 'social':
-        apiUrl = hash ? `search/social/${hash}` : `search/chat`;
-        break;
-      case 'chat':
-        apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
-        break;
-      case 'credential':
-        apiUrl = hash ? `search/chat/${hash}` : `search/chat`;
-        break;
-      default:
-        this.router.navigate(['/']).then();
-        return of(null);
+    let apiUrl = ReportRouteUtil.getConsolidatedReportDetailEndpoint(index, hash);
+    if (!apiUrl) {
+      this.router.navigate(['/']).then();
+      return of(null);
     }
     if (lang) {
       apiUrl += `?lang=${lang}`;

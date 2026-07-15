@@ -82,22 +82,42 @@ export class TenantSettingsComponent implements OnInit {
     return getTenantLocationDisplay(this.userSessionData.tenant);
   }
 
+  normalizedAlertRunTime(): string | null {
+    const value = (this.userSessionData.tenant.alertRunTime || '').trim();
+    return value || null;
+  }
+
+  getAlertRunTimeDisplay(): string {
+    return this.normalizedAlertRunTime() || 'Use default schedule';
+  }
+
+  openAlertRunTimePicker(input: HTMLInputElement): void {
+    if (!this.privacyEditing || input.disabled) {
+      return;
+    }
+    input.focus();
+    if (typeof input.showPicker === 'function') {
+      input.showPicker();
+    }
+  }
+
   updateUser(includeMailSettings = false) {
     let route = "update/tenants";
     if (includeMailSettings) {
       this.mailErrorState = false;
     }
-    const tenantData: TenantModel = {
+    const tenantData = {
       id: '',
       name: this.userSessionData.tenant.name,
       phone: this.userSessionData.tenant.phone,
       country: this.userSessionData.tenant.country,
       city: this.userSessionData.tenant.city,
       postal_code: this.userSessionData.tenant.postalCode,
-      iocs: [],
       profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
       event_management_enabled: this.userSessionData.tenant.eventManagementEnabled === true,
-    };
+      alerts_visible_to_admin: this.userSessionData.tenant.alertsVisibleToAdmin !== false,
+      alert_run_time: this.normalizedAlertRunTime(),
+    } as TenantModel;
     if (includeMailSettings) {
       tenantData.accounts_mail_password = this.mailForm.accounts_mail_password;
       tenantData.accounts_mail = this.mailForm.accounts_mail;

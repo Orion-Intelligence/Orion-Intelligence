@@ -115,7 +115,6 @@ async def clear_nexus_chat_session(current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[
-        Depends(ai_enabled_required),
         Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:ai", bypass_roles=[user_role.ADMIN])),
         Depends(limiter_dependency),

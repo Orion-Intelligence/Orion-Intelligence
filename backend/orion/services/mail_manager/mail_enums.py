@@ -26,18 +26,23 @@ class MailUrlHeading(str, Enum):
 
 class AlertMailSubject(str, Enum):
     SCAN_COMPLETED = "Alert scan completed - {count} new {alert_word} found"
+    ADMIN_SCAN_SUMMARY = "Tenant alert summary - {count} compromised {tenant_word}"
     CUSTOM_CREATED = "Custom Alert Created"
     ALERT_UPDATED = "Alert Updated"
 
 
 class AlertMailTitle(str, Enum):
     SCAN_COMPLETED = "Alert Scan Completed"
+    ADMIN_SCAN_SUMMARY = "Tenant Alert Summary"
     CUSTOM_CREATED = "Custom Alert Created"
     ALERT_UPDATED = "Alert Updated"
 
 
 class AlertMailMessage(str, Enum):
     SCAN_COMPLETED = "Your alert scan has finished. We found {count} new {alert_word} across your monitored IOC values."
+    ADMIN_SCAN_SUMMARY = "Automated alert scans have completed. We found alerts for {count} {tenant_word}."
+    ADMIN_SCAN_SUMMARY_CLOSING = "Open the tenant alert dashboard to review tenant-level findings. IOC details are intentionally omitted from this summary."
+    TENANT_COUNT = "{tenant_name}"
     CUSTOM_CREATED = "A custom alert has been created for your workspace."
     ALERT_UPDATED = "An alert in your workspace has been updated with the latest details."
     DEFAULT_CLOSING = "Please review these alerts when you have a moment. The alert view contains the full context, source details, and IOC history."

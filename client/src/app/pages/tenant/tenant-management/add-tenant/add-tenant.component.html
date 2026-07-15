@@ -97,9 +97,26 @@
         surface="alert"
         [placeholder]="'Select permissions' | translate"
         [searchPlaceholder]="'Search permissions' | translate"
-        (valuesChange)="model.permissions = $event"></app-ui-dropdown>
+        (valuesChange)="onPermissionChange($event)"></app-ui-dropdown>
       @if (!model.permissions?.length) {
         <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No permissions assigned.' | translate }}</div>
+      }
+
+      @if (showAlertsAllowed) {
+        <div class="ui-popup-label mb-[6px] mt-[18px] block text-[14px] font-semibold leading-[1.25] text-[var(--color-text2)]">{{ 'Alerts Allowed' | translate }}</div>
+        <app-ui-dropdown
+          class="mt-[0.6rem]"
+          testId="tenant-add-user-alerts-allowed"
+          menuId="tenant-add-user-alerts-allowed-menu"
+          [options]="alertAllowedOptions"
+          [selectedValues]="selectedAlertAllowedValues"
+          [multiSelect]="true"
+          [showSelectedChips]="true"
+          menuPlacement="static"
+          surface="alert"
+          [placeholder]="'Select tenants' | translate"
+          [searchPlaceholder]="'Search tenants' | translate"
+          (valuesChange)="onAlertsAllowedChange($event)"></app-ui-dropdown>
       }
 
       @if (errorText) {

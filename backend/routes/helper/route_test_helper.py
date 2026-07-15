@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
 
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
@@ -10,6 +11,11 @@ from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 
 from orion.helper_manager.env_handler import env_handler
+from orion.api.interactive.takedown_manager.takedown_manager import TakedownManager
+from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
+from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest, TakedownRequestStatus, db_takedown_request_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
 
 
 class TestRouteHelper:
@@ -18,6 +24,16 @@ class TestRouteHelper:
     MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "api"
     ELASTIC_MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "elastic"
     STATIC_TEST_CHAT_RESPONSE = "how may i help you"
+    TAKEDOWN_TEST_PASSWORD = "1qaz!QAZ"
+    TAKEDOWN_TEST_TARGET_URL = "https://example.com/takedown-test"
+    TAKEDOWN_TEST_TARGET_DOMAIN = "example.com"
+    TAKEDOWN_TEST_ABUSE_EMAIL = "abuse@example.com"
+    TAKEDOWN_TEST_TENANT_NAME = "cypress-takedown-tenant"
+    TAKEDOWN_TEST_USERS = {
+        "initiator": "tdinitiator01",
+        "member": "tdmember01",
+        "other": "tdother01",
+    }
 
     @classmethod
     def mock_step(cls, key: str):
@@ -138,6 +154,152 @@ class TestRouteHelper:
             cls.static_test_chat_stream(),
             media_type="application/x-ndjson",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+        )
+
+    @classmethod
+    async def setup_takedown_visibility_fixture(cls):
+        engine = mongo_controller.get_instance().get_engine()
+        tenant_collection = engine.get_collection(db_tenant_model)
+        user_collection = engine.get_collection(db_user_account)
+        takedown_collection = engine.get_collection(db_takedown_request_model)
+
+        await takedown_collection.delete_many({"target_domain": cls.TAKEDOWN_TEST_TARGET_DOMAIN})
+        await user_collection.delete_many({"username": {"$in": list(cls.TAKEDOWN_TEST_USERS.values())}})
+        await tenant_collection.delete_many({"name": cls.TAKEDOWN_TEST_TENANT_NAME})
+
+        tenant = db_tenant_model(
+            id=ObjectId(),
+            name=cls.TAKEDOWN_TEST_TENANT_NAME,
+            email=f"{cls.TAKEDOWN_TEST_TENANT_NAME}@example.com",
+            phone="",
+            country="",
+            city="",
+            postal_code="",
+            verified=True,
+            status=TenantStatus.ACTIVE,
+            subscription=True,
+            user_quota=-1,
+            licenses=[LicenseName.ENTERPRISE.value, LicenseName.MAINTAINER.value],
+            is_default=False,
+            iocs=[],
+            profile_visibility_enabled=True,
+            event_management_enabled=False,
+            alerts_visible_to_admin=True,
+            privileged_ioc=False,
+        )
+        await engine.save(tenant)
+
+        now = datetime.now(timezone.utc)
+        tenant_uuid = str(tenant.id)
+
+        async def create_user(key: str, role: user_role, licenses: list[LicenseName]):
+            username = cls.TAKEDOWN_TEST_USERS[key]
+            user = db_user_account(
+                username=username,
+                email=f"{username}@example.com",
+                password=db_user_account.hash_password(cls.TAKEDOWN_TEST_PASSWORD),
+                role=role,
+                status=UserStatus.ACTIVE,
+                subscription=True,
+                licenses=licenses,
+                tenant_uuid=tenant_uuid,
+                account_verify_at=now,
+                password_reset_required=False,
+            )
+            await engine.save(user)
+            return user
+
+        await create_user("initiator", user_role.ANALYST, [LicenseName.ENTERPRISE])
+        await create_user("member", user_role.MEMBER, [LicenseName.ENTERPRISE, LicenseName.MAINTAINER])
+        await create_user("other", user_role.ANALYST, [LicenseName.ENTERPRISE])
+
+        return {
+            "target_url": cls.TAKEDOWN_TEST_TARGET_URL,
+            "target_domain": cls.TAKEDOWN_TEST_TARGET_DOMAIN,
+            "abuse_email": cls.TAKEDOWN_TEST_ABUSE_EMAIL,
+        }
+
+    @classmethod
+    async def takedown_fixture_user(cls, viewer: str):
+        takedown_manager = TakedownManager.get_instance()
+        viewer_key = str(viewer or "").strip().lower().replace("_", " ")
+
+        if viewer_key == "admin":
+            root_tenant_uuid = await takedown_manager._root_tenant_uuid()
+            return SimpleNamespace(id="", tenant_uuid=root_tenant_uuid, username="admin", role=user_role.ADMIN)
+
+        user_keys = {
+            "initiator": "initiator",
+            "member": "member",
+            "tenant member": "member",
+            "other": "other",
+            "other user": "other",
+        }
+        user_key = user_keys.get(viewer_key)
+        if not user_key:
+            raise HTTPException(status_code=400, detail="Invalid takedown test viewer")
+
+        user = await takedown_manager._engine.find_one(
+            db_user_account,
+            db_user_account.username == cls.TAKEDOWN_TEST_USERS[user_key],
+        )
+        if not user:
+            raise HTTPException(status_code=404, detail="Takedown test fixture was not created")
+        return user
+
+    @classmethod
+    async def create_test_takedown_request(cls, request: TakedownCreateRequest):
+        takedown_manager = TakedownManager.get_instance()
+        target_url = takedown_manager._normalize_target_url(request.target_url)
+        target_domain = takedown_manager._target_domain(target_url)
+        if target_domain != cls.TAKEDOWN_TEST_TARGET_DOMAIN:
+            raise HTTPException(status_code=400, detail="Unsupported takedown test target")
+
+        existing = await takedown_manager._engine.find_one(
+            db_takedown_request_model,
+            db_takedown_request_model.target_domain == target_domain,
+        )
+        if existing:
+            return takedown_manager._existing_record_response(existing)
+
+        root_tenant_uuid = await takedown_manager._root_tenant_uuid()
+        now = datetime.now(timezone.utc)
+        current_user = await cls.takedown_fixture_user("initiator")
+        evidence = {
+            "status": "done",
+            "result": {
+                "abuse_email_found": cls.TAKEDOWN_TEST_ABUSE_EMAIL,
+                "html_path": "",
+                "screenshot_path": "",
+            },
+        }
+        record = db_takedown_request_model(
+            tenant_uuid=root_tenant_uuid,
+            requester_tenant_uuid=str(getattr(current_user, "tenant_uuid", "") or ""),
+            user_uuid=str(getattr(current_user, "id", "") or ""),
+            username=str(getattr(current_user, "username", "") or ""),
+            report_id=request.report_id or "",
+            target_url=target_url,
+            target_domain=target_domain,
+            abuse_email=cls.TAKEDOWN_TEST_ABUSE_EMAIL,
+            status=TakedownRequestStatus.PENDING,
+            evidence=evidence,
+            created_at=now,
+            updated_at=now,
+        )
+        await takedown_manager._engine.save(record)
+        return takedown_manager._serialize_record(record)
+
+    @classmethod
+    async def list_test_takedown_requests(cls, viewer: str, status: str | None = None, q: str = "", page: int = 1, limit: int = 20, daterange: str = ""):
+        current_user = await cls.takedown_fixture_user(viewer)
+        return await TakedownManager.get_instance().list_requests(
+            current_user,
+            status=status,
+            q=q,
+            page=page,
+            limit=limit,
+            daterange=daterange,
         )
 
     @staticmethod

@@ -83,6 +83,8 @@ export enum SatelliteIntelSubCategory {
 }
 export enum ProfileSubCategory {
     HOMEPAGE = 'Homepage',
+    MONITORING = 'Monitoring',
+    TAKEDOWN = 'Take-Down',
     EVENT_MANAGEMENT = 'Event-Management',
     LOG_MANAGER = 'Log-Manager',
     FEEDER = 'Feeder',

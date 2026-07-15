@@ -7,24 +7,6 @@ DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$DOCS_DIR/.." && pwd)"
 CLIENT_DIR="$REPO_ROOT/client"
 TARGET_DIR="$DOCS_DIR/screenshots"
-FRONTEND_URL="${DOC_FRONTEND_URL:-http://127.0.0.1:8080}"
-DOC_SCREENSHOT_SPECS=(
-    "cypress/e2e/02-login.cy.ts"
-    "cypress/e2e/03-flow.cy.ts"
-    "cypress/e2e/04-searching.cy.ts"
-    "cypress/e2e/05-user-management.cy.ts"
-    "cypress/e2e/06-account-management.cy.ts"
-    "cypress/e2e/07-cti-management.cy.ts"
-    "cypress/e2e/08-social-management.cy.ts"
-    "cypress/e2e/09-system-management.cy.ts"
-    "cypress/e2e/10-tenant-management.cy.ts"
-    "cypress/e2e/12-chatbot.cy.ts"
-    "cypress/e2e/13-consolidated.cy.ts"
-    "cypress/e2e/14-scans-management.cy.ts"
-    "cypress/e2e/17-network-intel.cy.ts"
-    "cypress/e2e/18-case-management.cy.ts"
-    "cypress/e2e/19-geo-fencing.cy.ts"
-)
 
 clear_docs_screenshots() {
     mkdir -p "$TARGET_DIR"
@@ -51,9 +33,6 @@ if [ "$#" -gt 0 ]; then
     echo "usage: $0 [--clear]"
     exit 1
 fi
-
-browser="${DOC_SCREENSHOT_BROWSER:-electron}"
-chromium_binary=""
 
 python_has_pillow() {
     "$1" -c 'import PIL' >/dev/null 2>&1
@@ -86,16 +65,6 @@ if [ -z "$postprocess_python" ]; then
     exit 1
 fi
 
-if [ -x "/snap/chromium/current/usr/lib/chromium-browser/chrome" ]; then
-    chromium_binary="/snap/chromium/current/usr/lib/chromium-browser/chrome"
-elif [ -x "/snap/chromium/3390/usr/lib/chromium-browser/chrome" ]; then
-    chromium_binary="/snap/chromium/3390/usr/lib/chromium-browser/chrome"
-fi
-
-if [ -n "$chromium_binary" ]; then
-    browser="$chromium_binary"
-fi
-
 trap cleanup EXIT
 
 cd "$CLIENT_DIR" || exit 1
@@ -103,11 +72,7 @@ mkdir -p "$TARGET_DIR"
 find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} +
 rm -f "$TARGET_DIR"/*-20260326.png
 
-npm_test_specs="$(IFS=,; echo "${DOC_SCREENSHOT_SPECS[*]}")"
-npm test -- run --browser "$browser" \
-    --config "baseUrl=$FRONTEND_URL" \
-    --env takeScreenshots=true \
-    --spec "$npm_test_specs"
+CYPRESS_takeScreenshots=true npm test run
 
 copied=0
 while IFS= read -r -d '' screenshot_path; do

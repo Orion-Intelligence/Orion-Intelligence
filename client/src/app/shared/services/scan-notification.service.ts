@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { EMPTY, Observable, Subject, Subscription, of, timer } from 'rxjs';
+import { concat, EMPTY, Observable, Subject, Subscription, of, timer } from 'rxjs';
 import { catchError, filter, finalize, map, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { ApiService } from './api.service';
 import { DuplicateScanChoice, DuplicateScanPrompt, ScanJob, ScanJobCreateApiResponse, ScanJobDetailResponse, ScanJobDuplicateChoiceResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobPollResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
@@ -214,8 +214,16 @@ export class ScanNotificationService {
       }));
     }
 
+    if (this.shouldRetryIncompleteUrlScanResponse(response, request)) {
+      return timer(request.pollDelayMs || this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
+    }
+
     const job = this.trackApiScanResponse(response, request);
     if (!job) {
+      if (this.isPendingResponse(response)) {
+        const retry$ = timer(request.pollDelayMs || this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
+        return concat(of(response as T), retry$);
+      }
       return of(response as T);
     }
     return this.watchTrackedJob<T>(job, request.pollDelayMs);
@@ -415,7 +423,7 @@ export class ScanNotificationService {
   }
 
   private statusFromResponse(response: any): ScanJobStatus {
-    const raw = String(response?.result?.status || response?.status || '').toLowerCase();
+    const raw = String(response?.result?.status || response?.status || response?.scan_status || '').toLowerCase();
     const progress = Number(response?.result?.progress ?? response?.progress);
     const step = String(response?.result?.step || response?.step || '').toLowerCase();
     if (raw === 'error' || raw === 'failed' || raw === 'failure') {
@@ -529,13 +537,27 @@ export class ScanNotificationService {
   }
 
   private isPendingResponse(response: any): boolean {
-    const status = String(response?.result?.status || response?.status || '').toLowerCase();
+    const status = String(response?.result?.status || response?.status || response?.scan_status || '').toLowerCase();
     const progress = Number(response?.result?.progress ?? response?.progress);
     const step = String(response?.result?.step || response?.step || '').toLowerCase();
     if (progress >= 100 && (step.includes('done') || step.includes('complete') || step.includes('success'))) {
       return false;
     }
-    return status === 'pending' || status === 'busy' || status === 'queued' || status === 'running';
+    return ['pending', 'busy', 'queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].includes(status) ||
+      ['queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].some(value => step.includes(value));
+  }
+
+  private shouldRetryIncompleteUrlScanResponse(response: any, request: ScanJobStartRequest): boolean {
+    const apiReference = String(request.apiReference || '').replace(/^\/?api\//, '');
+    const scanType = String(request.payload?.['scanType'] || '').toLowerCase();
+    const status = String(response?.result?.status || response?.status || response?.scan_status || '').toLowerCase();
+    if (apiReference !== 'urlscan/domain' || !['seo', 'repo'].includes(scanType)) {
+      return false;
+    }
+    if (['error', 'failed', 'failure'].includes(status) || response?.error || response?.detail) {
+      return false;
+    }
+    return !response?.result?.meta;
   }
 
   private createQueuedJob(job: ScanJobIncompleteResponse): ScanJob {

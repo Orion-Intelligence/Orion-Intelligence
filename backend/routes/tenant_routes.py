@@ -67,6 +67,86 @@ async def get_all_tenants():
     return await TenantManager.get_instance().get_all_tenant()
 
 
+@tenant_routes.get(
+    "/api/tenants/alerts/summary",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_alerts_summary(current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alerts_summary(current_user)
+
+
+@tenant_routes.get(
+    "/api/tenants/alerts/allowed-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_alert_allowed_tenant_options():
+    return await TenantManager.get_instance().get_alert_allowed_tenant_options()
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/alerts",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_category_alerts(tenant_id: str, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False), current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alerts(
+        tenant_id,
+        current_user,
+        page=page,
+        limit=limit,
+        alert_type=alert_type,
+        paginate=paginate,
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/alerts/filter-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_alert_filter_options(tenant_id: str, field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50), alert_type: str | None = Query(None), current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alert_filter_options(
+        tenant_id,
+        current_user,
+        field=field,
+        query=q,
+        limit=limit,
+        alert_type=alert_type,
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/admin/{tenant_id}/alerts",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_admin_tenant_category_alerts(tenant_id: str, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False)):
+    return await TenantManager.get_instance().get_admin_tenant_alerts(
+        tenant_id,
+        page=page,
+        limit=limit,
+        alert_type=alert_type,
+        paginate=paginate,
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/admin/{tenant_id}/alerts/filter-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_admin_tenant_alert_filter_options(tenant_id: str, field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50), alert_type: str | None = Query(None)):
+    return await TenantManager.get_instance().get_admin_tenant_alert_filter_options(
+        tenant_id,
+        field=field,
+        query=q,
+        limit=limit,
+        alert_type=alert_type,
+    )
+
+
 @tenant_routes.post(
     "/api/update/user",
     include_in_schema=False,
@@ -283,6 +363,21 @@ async def get_user_alerts(current_user=Depends(get_current_user), page: int = Qu
         compact=compact,
         unseen_only=unseen_only,
         include_counts=include_counts,
+    )
+
+
+@tenant_routes.get(
+    "/api/profile/alerts/filter-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
+async def get_user_alert_filter_options(current_user=Depends(get_current_user), field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50), alert_type: str | None = Query(None)):
+    return await AlertManager.getInstance().get_alert_filter_options(
+        current_user,
+        field=field,
+        query=q,
+        limit=limit,
+        alert_type=alert_type,
     )
 
 

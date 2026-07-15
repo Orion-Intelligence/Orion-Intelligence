@@ -1,5 +1,7 @@
 import { defineConfig } from "cypress";
 import registerCodeCoverageTasks from "@cypress/code-coverage/task";
+import fs from "node:fs";
+import path from "node:path";
 
 const isCi =
     process.env["CI"] === "true" ||
@@ -9,8 +11,11 @@ const isCi =
 export default defineConfig({
     allowCypressEnv: false,
     video: false,
+    screenshotsFolder: "cypress/error",
+    screenshotOnRunFailure: true,
     numTestsKeptInMemory: 0,
     watchForFileChanges: false,
+    trashAssetsBeforeRuns: false,
     experimentalMemoryManagement: true,
     experimentalFastVisibility: true,
     retries: 0,
@@ -46,6 +51,46 @@ export default defineConfig({
             username: "tenant_user_1",
             email: "tenant1@gmail.com",
             password: "1qaz!QAZ",
+        },
+        CASE_ALERT_TENANTS: [
+            {
+                username: "dcasealert1",
+                email: "dcasealert1@dcaseorionintelligence.org",
+                password: "1qaz!QAZ",
+                companyName: "Case Alert Tenant One",
+            },
+            {
+                username: "ecasealert2",
+                email: "ecasealert2@ecaseorionintelligence.org",
+                password: "1qaz!QAZ",
+                companyName: "Case Alert Tenant Two",
+            },
+            {
+                username: "fcasealert3",
+                email: "fcasealert3@fcaseorionintelligence.org",
+                password: "1qaz!QAZ",
+                companyName: "Case Alert Tenant Three",
+            },
+        ],
+        CASE_ALERT_USERS: {
+            limited: {
+                username: "case_alert_user1",
+                email: "case.alert.user1@samplemail.test",
+                password: "1qaz!QAZ",
+                role: "Analyst",
+                licenses: ["Free"],
+                permissions: ["case_management"],
+                alertAllowedTenants: ["Case Alert Tenant One", "Case Alert Tenant Two"],
+            },
+            all: {
+                username: "case_alert_user2",
+                email: "case.alert.user2@samplemail.test",
+                password: "1qaz!QAZ",
+                role: "Analyst",
+                licenses: ["Free"],
+                permissions: ["case_management"],
+                alertAllowedTenants: "all",
+            },
         },
         TEST_DATA: {
             stealer_ioc_email: "nora.keen@samplemail.test",
@@ -96,16 +141,38 @@ export default defineConfig({
     e2e: {
         specPattern: "cypress/e2e/**/*.{cy,spec}.{ts,js}",
         supportFile: "cypress/support/e2e.ts",
-        screenshotsFolder: "../docs/screenshots",
         testIsolation: true,
         setupNodeEvents(on, config) {
+            const takeScreenshots = config.env["takeScreenshots"];
+            if (takeScreenshots === true || takeScreenshots === "true") {
+                config.screenshotsFolder = "../docs/screenshots";
+            }
+            on("after:screenshot", (details) => {
+                if (!details.testFailure) {
+                    return;
+                }
+                const screenshotsFolder =
+                    typeof config.screenshotsFolder === "string" ? config.screenshotsFolder : "cypress/error";
+                const screenshotRoot = path.resolve(config.projectRoot, screenshotsFolder);
+                const relativePath = path.relative(screenshotRoot, details.path);
+                const targetPath = path.resolve(config.projectRoot, "cypress", "error", relativePath);
+
+                if (details.path === targetPath) {
+                    return;
+                }
+
+                fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+                fs.renameSync(details.path, targetPath);
+
+                return { path: targetPath };
+            });
             if (isCi) {
                 registerCodeCoverageTasks(on, config);
             }
             on("before:browser:launch", (browser, launchOptions) => {
                 if (browser.family === "chromium") {
                     launchOptions.args.push("--start-maximized");
-                    launchOptions.args.push("--window-size=1920,1440");
+                    launchOptions.args.push("--window-size=1920,1080");
                     launchOptions.args.push("--force-device-scale-factor=1");
                 }
                 return launchOptions;
@@ -117,12 +184,28 @@ export default defineConfig({
                 table(_) {
                     return null;
                 },
+                writeDocScreenshot({ data, name, specName }) {
+                    const screenshotsFolder =
+                        typeof config.screenshotsFolder === "string" ? config.screenshotsFolder : "cypress/error";
+                    const screenshotRoot = path.resolve(config.projectRoot, screenshotsFolder);
+                    const safeSpecName = String(specName || "unknown-spec").replace(/[\\/]/g, "_");
+                    const safeName = String(name || "screenshot").replace(/\\/g, "/").replace(/^\/+/, "");
+                    const targetPath = path.resolve(screenshotRoot, safeSpecName, "user-manual", `${safeName}.png`);
+
+                    if (!targetPath.startsWith(`${screenshotRoot}${path.sep}`)) {
+                        throw new Error(`Refusing to write docs screenshot outside screenshots folder: ${targetPath}`);
+                    }
+
+                    fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+                    fs.writeFileSync(targetPath, Buffer.from(String(data), "base64"));
+                    return null;
+                },
             });
             return config;
         },
         baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1920,
-        viewportHeight: 1440,
+        viewportHeight: 1080,
         defaultCommandTimeout: 60000,
         requestTimeout: 60000,
         responseTimeout: 60000,
@@ -131,7 +214,6 @@ export default defineConfig({
         taskTimeout: 60000,
         waitForAnimations: true,
         animationDistanceThreshold: 5,
-        screenshotOnRunFailure: false,
     },
     component: {
         devServer: {

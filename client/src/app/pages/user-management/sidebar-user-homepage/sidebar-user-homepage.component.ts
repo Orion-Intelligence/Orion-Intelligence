@@ -5,7 +5,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { Router } from '@angular/router';
 import { HomeSearchComponent } from "../../homepage/home-search/home-search.component";
-import { AlertCategorySummary } from '../../../shared/model/alert-notification/alert.notification.model';
+import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../shared/model/alert-notification/alert.notification.model';
 import { AlertModel } from '../../../shared/model/company-profile/node.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ApiService } from '../../../shared/services/api.service';
@@ -36,7 +36,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   private scanStatusSub?: Subscription;
 
-  hoveredHomeTool: 'print' | 'flush' | 'scan' | null = null;
+  hoveredHomeTool: 'print' | 'flush' | 'settings' | 'scan' | null = null;
   alertCategories: AlertCategorySummary[] = [];
   criticalRisks: number = 0;
   highRisks: number = 0;
@@ -46,6 +46,8 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   noIocPopup = signal(false);
   showAlertScanLoading = signal(false);
   isExportChoiceOpen = false;
+  readonly iocPermissionWarning = "You don't have permission to manage IOCs outside your domain. Ask your network administrator.";
+  readonly alertLicenseWarning = "You don't have license to view this";
   readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for alerts.', testId: 'home-alert-export-option-report' }];
 
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService) {
@@ -114,40 +116,11 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   convertCountsToCategories(countsByType: Record<string, number>): AlertCategorySummary[] {
     const summaries: AlertCategorySummary[] = Object.entries(countsByType).map(([category, count]) => {
-      return {
-        categoryName: category,
-        risk: this.getRiskLevel(category),
-        iocCount: Number(count || 0),
-        detectedDate: null,
-        tags: []
-      };
+      return createAlertCategorySummary(category, count, this.getRiskLevel.bind(this));
     });
-    const ALL_CATEGORIES = [
-      "general",
-      "defacement",
-      "breach",
-      "exploit",
-      "social",
-      "discussion",
-      "stealerlogs",
-      "feed",
-      "advanced scanning",
-      "playstore-scanning",
-      "social-scanner",
-      "email-breach",
-      "software-scanning",
-      "repo scanning",
-      "seo scanning"
-    ];
-    for (const cat of ALL_CATEGORIES) {
+    for (const cat of ALERT_CATEGORY_NAMES) {
       if (!summaries.find(s => s.categoryName === cat)) {
-        summaries.push({
-          categoryName: cat,
-          risk: this.getRiskLevel(cat),
-          iocCount: 0,
-          detectedDate: null,
-          tags: []
-        });
+        summaries.push(createAlertCategorySummary(cat, 0, this.getRiskLevel.bind(this)));
       }
     }
     return summaries;
@@ -173,8 +146,19 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     return countFilterValues(categories);
   }
 
+  isPrivilegedIoc(): boolean {
+    const tenantPrivileged = this.appService.tenantData().privileged_ioc;
+    return tenantPrivileged === undefined
+      ? this.appService.userSessionData().tenant.privilegedIoc !== true
+      : tenantPrivileged !== true;
+  }
+
   editIocs() {
     this.router.navigate(['/dashboard/profile/ioc']).then();
+  }
+
+  openAlertScannerSettings() {
+    this.router.navigate(['/dashboard/profile/alert-scanners']).then();
   }
 
   openAlerts(type: string) {
@@ -182,10 +166,18 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     if (!cat) {
       return;
     }
+    if (!this.licenseService.canViewAlert(type)) {
+      this.messageNotificationService.show(this.alertLicenseWarning);
+      return;
+    }
     this.router.navigate([`/dashboard/profile/alerts/${type}`]).then();
   }
 
   scanIOCs() {
+    if (this.isPrivilegedIoc()) {
+      this.messageNotificationService.show(this.iocPermissionWarning);
+      return;
+    }
     const iocs = this.appService.tenantData().iocs;
     if (!iocs || iocs.length === 0) {
       this.noIocPopup.set(true);
@@ -241,7 +233,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     return document.body.classList.contains('light-theme');
   }
 
-  setHomeToolHover(tool: 'print' | 'flush' | 'scan' | null): void {
+  setHomeToolHover(tool: 'print' | 'flush' | 'settings' | 'scan' | null): void {
     this.hoveredHomeTool = tool;
   }
 

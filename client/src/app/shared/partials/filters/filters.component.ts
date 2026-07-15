@@ -73,7 +73,7 @@ export class FiltersComponent implements OnInit {
 
   onDropdownSearch(key: string, query: string) {
     const filter = this.filterModel.filters[key];
-    if (!filter?.suggestionSource) {
+    if (!filter?.suggestionSource && !filter?.suggestionEndpoint) {
       return;
     }
 
@@ -86,7 +86,7 @@ export class FiltersComponent implements OnInit {
     }
 
     this.dropdownLoading = { ...this.dropdownLoading, [key]: true };
-    this.suggestionService.loadSuggestion(filter.suggestionSource, key, trimmedQuery).subscribe({
+    this.suggestionService.loadSuggestion(filter.suggestionSource, key, trimmedQuery, filter.suggestionEndpoint, filter.suggestionParams).subscribe({
       next: values => {
         if (this.suggestionRequestIds[key] !== requestId) {
           return;

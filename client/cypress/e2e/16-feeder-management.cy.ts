@@ -30,12 +30,14 @@ describe('Orion Intelligence - Feeder Management', () => {
   it('validates feeder fixture operations across all rules', () => {
     openFeederAsAdmin();
     assertFeederRuleOptions();
+    cy.docsScreenshot('feeder-workspace');
     validateFixtureOperationsForAllFeederRules();
   });
 
   it('grants defacement script access to the first feeder user', () => {
     openFeederAsAdmin();
     openFeederRule('defacement');
+    cy.docsScreenshot('feeder-defacement-rule');
     transferFirstVisibleScriptOwner(testUsers.testing6.username);
   });
 

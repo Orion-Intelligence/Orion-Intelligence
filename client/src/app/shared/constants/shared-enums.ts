@@ -96,6 +96,7 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Wanted-List': 'Wanted List',
   'Cracked': 'Cracked',
   'View': 'View',
+  'Take-Down': 'Takedown Requests',
   'Auditlog': 'Audit Logs',
   'Basic-Scan': 'Basic Scan',
   'Port-Scan': 'Port Scan',

@@ -86,6 +86,16 @@ export class SidebarComponent implements OnInit, OnChanges {
     return String(this.filters()?.maxDepth ?? 1);
   }
 
+  onMaxEdgeChange(value: unknown): void {
+    this.localMaxEdge = this.clampNumber(value, 20, 800, 25);
+    this.applyGraphSize();
+  }
+
+  onMaxDepthChange(value: unknown): void {
+    this.localMaxDepth = this.clampNumber(value, 1, 5, 1);
+    this.applyGraphSize();
+  }
+
   applyGraphSize(): void {
     const filters = this.filters();
     if (!filters) {

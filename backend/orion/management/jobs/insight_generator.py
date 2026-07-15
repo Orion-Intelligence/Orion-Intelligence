@@ -14,25 +14,26 @@ class insight_generator:
     def on_insight_leakdata():
         from_ = 0
         size = CONSTANTS.S_SETTINGS_COUNTRY_DOCUMENT_SIZE
+        domain_field = "m_domain"
         query_statement = {
             "query": {
                 "bool": {
                     "must": [
-                        {"exists": {"field": "m_domain.keyword"}},
-                        {"script": {"script": {"lang": "painless", "source": "doc['m_domain.keyword'].size()==1"}}},
+                        {"exists": {"field": domain_field}},
+                        {"script": {"script": {"lang": "painless", "source": f"doc['{domain_field}'].size()==1"}}},
                     ],
                     "must_not": [
                         {"terms": {"m_content_type": ["news", "tracking"]}}
                     ],
                 }
             },
-            "sort": [{"m_update_date": {"order": "desc"}}],
+            "sort": [{"m_update_date": {"order": "desc", "missing": "_last", "unmapped_type": "date"}}],
             "from": from_,
             "size": size,
             "track_total_hits": True,
-            "collapse": {"field": "m_domain.keyword"},
+            "collapse": {"field": domain_field},
         }
-        return "leak_model", query_statement
+        return ELASTIC_INDEX.S_LEAK_INDEX, query_statement
 
     @staticmethod
     def on_insight_consolidated_country():
@@ -52,7 +53,7 @@ class insight_generator:
                 }
             },
             "sort": [
-                {"m_update_date": {"order": "desc"}}
+                {"_doc": {"order": "asc"}}
             ],
             "track_total_hits": False
         }
@@ -76,7 +77,7 @@ class insight_generator:
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
 
         query_statement = {"query": {"match_all": {}}, "sort": [
-            {"m_update_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
+            {"m_update_date": {"order": "desc", "missing": "_last", "unmapped_type": "date"}}], "from": from_, "size": size, "track_total_hits": True}
         return query_statement
 
     @staticmethod

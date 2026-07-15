@@ -27,7 +27,7 @@ export const SAFE_SEARCH_OPTIONS = ['Yes', 'No'];
 export const NETWORK_OPTIONS = ['All', 'Onion'];
 export const CONTENT_TYPES = ['All', 'Leaks', 'Cryptocurrency', 'Marketplaces'];
 
-export const FLOW_ADMIN_SECTIONS = ['Homepage', 'Account', 'Users', 'Auditlog', 'Tenant', 'System Settings'];
+export const FLOW_ADMIN_SECTIONS = ['Homepage', 'Account', 'Users', 'Monitoring', 'Tenant', 'System Settings'];
 export const FLOW_GENERAL_INTELLIGENCE_SECTIONS = ['All', 'General', 'Forums', 'News', 'Stolen', 'Drugs', 'Hacking', 'Marketplaces', 'Cryptocurrency', 'Leaks'];
 export const FLOW_DATA_BREACH_SECTIONS = ['All', 'Databases', 'Tracking'];
 export const FLOW_DEFACEMENT_SECTIONS = ['All', 'Hacked', 'Phishing', 'Databases'];

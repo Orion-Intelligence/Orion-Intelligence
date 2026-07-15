@@ -10,7 +10,7 @@ from fastapi.concurrency import run_in_threadpool
 from orion.api.server.crawl_manager.class_model.entity_model import entity_model
 from orion.api.server.entity_manager.constants import enums as graph_enums
 from orion.api.server.entity_manager.entity_request_generator import EntityRequestGenerator
-from orion.api.server.entity_manager.modal.EntityQueryModel import EntityQueryModel
+from orion.api.server.entity_manager.modal.EntityQueryModel import EntityGraphBatchQueryModel, EntityQueryModel
 from orion.constants.constant import allowed_key_titles
 from orion.constants.cti_graph_schema import (
     CLUSTER_ALIASES as CTI_CLUSTER_ALIASES,
@@ -47,6 +47,7 @@ class entity_manager:
     ENTITY_CLASS_BY_KEY = graph_enums.ENTITY_CLASS_BY_KEY
     EDGE_TYPE_BY_KEY = graph_enums.EDGE_TYPE_BY_KEY
     DEFAULT_HIDDEN_KEYS = graph_enums.DEFAULT_HIDDEN_KEYS
+    GRAPH_BATCH_LIST_KEYS = {"m_country", "m_origin_country"}
 
     @staticmethod
     def get_instance():
@@ -812,13 +813,19 @@ class entity_manager:
 
             query_str = ""
             bind_vars = {}
+            scope_cluster = ""
+            raw_scope_cluster = self._clean_text(getattr(query, "scope_cluster", ""))
+            if raw_scope_cluster:
+                candidate_scope_cluster = self._canonical_cluster_id(raw_scope_cluster)
+                if candidate_scope_cluster in self.CLUSTER_LABELS:
+                    scope_cluster = candidate_scope_cluster
 
             if query.data_point_type == "cluster" and normalized_type == "cluster":
                 queried_id, query_str, bind_vars = EntityRequestGenerator.get_cluster_documents_query(
                     normalized_value=normalized_value, depth_level=1, document_limit=document_limit)
             elif query.data_point_type == "property" and normalized_type == "all":
                 queried_id, query_str, bind_vars = EntityRequestGenerator.build_property_search_query(
-                    normalized_value, depth_level, document_limit)
+                    normalized_value, depth_level, document_limit, scope_cluster)
             else:
                 queried_id, query_str, bind_vars = EntityRequestGenerator.get_document_or_property_query(
                     normalized_value=normalized_value,
@@ -850,6 +857,650 @@ class entity_manager:
         except Exception as ex:
             log.g().e(f"ARANGO ENTITY RELATION FETCH ERROR: {ex}")
             return {"results": [], "limit_reached": False, "queried_id": None, "matched_vertex_ids": []}
+
+    @classmethod
+    def _graph_query_values(cls, query_values: list[Any] | None, query_value: Any) -> list[str]:
+        raw_values = query_values if query_values else [query_value]
+        values: list[str] = []
+        seen: set[str] = set()
+        for value in raw_values:
+            cleaned = cls._clean_text(value)
+            if not cleaned:
+                continue
+            normalized = cls._sanitize(cls._normalize_key(cleaned))
+            if normalized in seen:
+                continue
+            seen.add(normalized)
+            values.append(cleaned)
+        return values
+
+    @classmethod
+    def _merge_graph_query_values(cls, first: list[str], second: list[str]) -> list[str]:
+        values: list[str] = []
+        seen: set[str] = set()
+        for value in [*first, *second]:
+            cleaned = cls._clean_text(value)
+            normalized = cls._sanitize(cls._normalize_key(cleaned))
+            if not cleaned or normalized in seen:
+                continue
+            seen.add(normalized)
+            values.append(cleaned)
+        return values
+
+    @classmethod
+    def _graph_batch_items(cls, request_items: list[Any], query: EntityGraphBatchQueryModel) -> list[dict[str, Any]]:
+        normalized_items: list[dict[str, Any]] = []
+
+        for item in request_items:
+            data_point_type = getattr(item, "data_point_type", query.data_point_type)
+            model_type = getattr(item, "model_type", query.model_type)
+            scope_cluster = getattr(item, "scope_cluster", "") or query.scope_cluster
+            values = cls._graph_query_values(
+                getattr(item, "query_values", []),
+                getattr(item, "query_value", ""),
+            )
+            if not values:
+                continue
+
+            raw_operator = getattr(item, "operator", "||")
+            operator = "&&" if raw_operator in {"&&", "AND", "and"} else "||"
+            normalized_item = {
+                "data_point_type": data_point_type,
+                "model_type": model_type,
+                "query_values": values,
+                "operator": operator,
+                "scope_cluster": scope_cluster,
+            }
+
+            if data_point_type == "property" and model_type in cls.GRAPH_BATCH_LIST_KEYS:
+                previous = normalized_items[-1] if normalized_items else None
+                can_merge_with_previous = (
+                    operator != "&&"
+                    and previous is not None
+                    and previous["data_point_type"] == data_point_type
+                    and previous["model_type"] == model_type
+                    and previous["scope_cluster"] == scope_cluster
+                    and previous["operator"] != "&&"
+                )
+                if can_merge_with_previous:
+                    previous["query_values"] = cls._merge_graph_query_values(previous["query_values"], values)
+                    continue
+
+            normalized_items.append(normalized_item)
+
+        return normalized_items
+
+    @staticmethod
+    def _graph_document_limit(edge: Any) -> int:
+        try:
+            document_limit = int(edge)
+        except (TypeError, ValueError):
+            document_limit = 25
+        if document_limit < 20:
+            document_limit = 20
+        if document_limit > 800:
+            document_limit = 800
+        return document_limit
+
+    @staticmethod
+    def _graph_and_candidate_scan_limit(document_limit: int) -> int:
+        return min(max(document_limit * 200, 5000), 50000)
+
+    @classmethod
+    def _conjunctive_graph_groups(cls, request_items: list[dict[str, Any]]) -> dict[str, Any] | None:
+        if len(request_items) < 2:
+            return None
+
+        scope_cluster = request_items[0]["scope_cluster"]
+        match_groups: list[dict[str, Any]] = []
+        for index, item in enumerate(request_items):
+            if index > 0 and item["operator"] != "&&":
+                return None
+            if item["scope_cluster"] != scope_cluster:
+                return None
+
+            data_point_type = item["data_point_type"]
+            model_type = item["model_type"]
+            group: list[str] = []
+            seen_group_ids: set[str] = set()
+
+            if data_point_type == "cluster" and model_type == "cluster":
+                for value in item["query_values"]:
+                    normalized_value = cls._sanitize(cls._normalize_key(value))
+                    if normalized_value == "all":
+                        cluster_ids = [f"cti_vertices/{cluster_key}" for cluster_key in cls.CLUSTER_LABELS]
+                    else:
+                        cluster_key = cls._canonical_cluster_id(normalized_value)
+                        cluster_ids = [f"cti_vertices/{cluster_key}"] if cluster_key in cls.CLUSTER_LABELS else []
+                    for cluster_id in cluster_ids:
+                        if cluster_id in seen_group_ids:
+                            continue
+                        seen_group_ids.add(cluster_id)
+                        group.append(cluster_id)
+                group_kind = "cluster"
+            elif data_point_type == "property" and model_type not in {"", "all"}:
+                normalized_type = cls._sanitize(cls._normalize_key(model_type))
+                for value in item["query_values"]:
+                    normalized_value = cls._sanitize(cls._normalize_key(value))
+                    if not normalized_type or not normalized_value:
+                        continue
+                    property_id = f"cti_vertices/{normalized_type}:{normalized_value}"
+                    if property_id in seen_group_ids:
+                        continue
+                    seen_group_ids.add(property_id)
+                    group.append(property_id)
+                group_kind = "property"
+                edge_type = f"has_{normalized_type}"
+            else:
+                return None
+
+            if not group:
+                return None
+            match_group = {"kind": group_kind, "ids": group}
+            if group_kind == "property":
+                match_group["edge_type"] = edge_type
+            match_groups.append(match_group)
+
+        return {
+            "match_groups": match_groups,
+            "queried_ids": [match_id for group in match_groups for match_id in group["ids"]],
+            "scope_cluster": scope_cluster,
+        }
+
+    @classmethod
+    def _dedupe_graph_results(cls, results: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        merged: dict[str, dict[str, Any]] = {}
+        for item in results:
+            edge = item.get("edge") or {}
+            vertex = item.get("vertex") or {}
+            key = f"{edge.get('_id', '')}:{vertex.get('_id', '')}:{vertex.get('_key', '')}"
+            if not key.strip(":"):
+                key = repr(item)
+            if key not in merged:
+                merged[key] = item
+        return list(merged.values())
+
+    @classmethod
+    def _extract_document_ids_from_graph_result(cls, item: dict[str, Any]) -> list[str]:
+        ids: set[str] = set()
+
+        def add_document_id(value: Any):
+            doc_id = cls._clean_text(value)
+            if not doc_id:
+                return
+            cluster_key = doc_id.replace("cti_vertices/", "", 1)
+            if cluster_key in cls.CLUSTER_LABELS:
+                return
+            ids.add(doc_id)
+
+        def inspect_edge(edge: Any):
+            if not isinstance(edge, dict):
+                return
+            edge_type = cls._clean_text(edge.get("type"))
+            if edge_type == "cluster_to_doc":
+                add_document_id(edge.get("_to"))
+            elif edge_type.startswith("has_"):
+                add_document_id(edge.get("_from"))
+
+        def inspect_vertex(vertex: Any):
+            if not isinstance(vertex, dict):
+                return
+            if cls._clean_text(vertex.get("type")).lower() == "document":
+                add_document_id(vertex.get("_id"))
+
+        inspect_vertex(item.get("vertex"))
+        inspect_edge(item.get("edge"))
+        path = item.get("path") or {}
+        if isinstance(path, dict):
+            for vertex in path.get("vertices") or []:
+                inspect_vertex(vertex)
+            for edge in path.get("edges") or []:
+                inspect_edge(edge)
+        return list(ids)
+
+    @classmethod
+    def _extract_document_ids_from_graph_results(cls, results: list[dict[str, Any]]) -> set[str]:
+        ids: set[str] = set()
+        for item in results:
+            ids.update(cls._extract_document_ids_from_graph_result(item))
+        return ids
+
+    @staticmethod
+    def _union_sets(first: set[str], second: set[str]) -> set[str]:
+        return first | second
+
+    @staticmethod
+    def _intersect_sets(first: set[str], second: set[str]) -> set[str]:
+        return first & second
+
+    @classmethod
+    def _merge_graph_result_groups(cls, response_groups: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        if not response_groups:
+            return []
+
+        aggregate = response_groups[0].get("results") or []
+        aggregate_document_ids = cls._extract_document_ids_from_graph_results(aggregate)
+        for group in response_groups[1:]:
+            current = group.get("results") or []
+            operator = group.get("operator") or "||"
+            if operator != "&&":
+                aggregate = cls._dedupe_graph_results([*aggregate, *current])
+                aggregate_document_ids = cls._union_sets(
+                    aggregate_document_ids,
+                    cls._extract_document_ids_from_graph_results(current),
+                )
+                continue
+
+            current_document_ids = cls._extract_document_ids_from_graph_results(current)
+            if not aggregate_document_ids or not current_document_ids:
+                aggregate = []
+                aggregate_document_ids = set()
+                break
+
+            shared_document_ids = cls._intersect_sets(aggregate_document_ids, current_document_ids)
+            aggregate = cls._dedupe_graph_results([
+                item
+                for item in [*aggregate, *current]
+                if any(document_id in shared_document_ids for document_id in cls._extract_document_ids_from_graph_result(item))
+            ])
+            aggregate_document_ids = shared_document_ids
+
+        return cls._dedupe_graph_results(aggregate)
+
+    @classmethod
+    def _group_graph_results_by_document(cls, results: list[dict[str, Any]]) -> list[list[dict[str, Any]]]:
+        grouped: dict[str, list[dict[str, Any]]] = {}
+        ordered_document_ids: list[str] = []
+        unscoped_results: list[list[dict[str, Any]]] = []
+
+        for item in results:
+            document_ids = cls._extract_document_ids_from_graph_result(item)
+            document_id = document_ids[0] if document_ids else ""
+            if not document_id:
+                unscoped_results.append([item])
+                continue
+            if document_id not in grouped:
+                grouped[document_id] = []
+                ordered_document_ids.append(document_id)
+            grouped[document_id].append(item)
+
+        return [grouped[document_id] for document_id in ordered_document_ids] + unscoped_results
+
+    @classmethod
+    def _interleave_graph_result_sets_by_document(cls, result_sets: list[list[dict[str, Any]]]) -> list[dict[str, Any]]:
+        grouped_sets = [cls._group_graph_results_by_document(results) for results in result_sets if results]
+        if not grouped_sets:
+            return []
+
+        interleaved: list[dict[str, Any]] = []
+        max_group_count = max(len(groups) for groups in grouped_sets)
+        for group_index in range(max_group_count):
+            for groups in grouped_sets:
+                if group_index < len(groups):
+                    interleaved.extend(groups[group_index])
+        return cls._dedupe_graph_results(interleaved)
+
+    @classmethod
+    def _limit_graph_results_by_documents(cls, results: list[dict[str, Any]], document_limit: int) -> list[dict[str, Any]]:
+        if document_limit < 1:
+            return cls._dedupe_graph_results(results)
+
+        ordered_document_ids: list[str] = []
+        seen_document_ids: set[str] = set()
+        for item in results:
+            for document_id in cls._extract_document_ids_from_graph_result(item):
+                if document_id in seen_document_ids:
+                    continue
+                seen_document_ids.add(document_id)
+                ordered_document_ids.append(document_id)
+
+        if len(ordered_document_ids) <= document_limit:
+            return cls._dedupe_graph_results(results)
+
+        allowed_document_ids = set(ordered_document_ids[:document_limit])
+        limited_results = [
+            item
+            for item in results
+            if any(document_id in allowed_document_ids for document_id in cls._extract_document_ids_from_graph_result(item))
+        ]
+        return cls._dedupe_graph_results(limited_results)
+
+    async def _get_conjunctive_property_only_relations(self, conjunctive_groups: dict[str, Any], document_limit: int):
+        scope_cluster = ""
+        raw_scope_cluster = self._clean_text(conjunctive_groups["scope_cluster"])
+        if raw_scope_cluster:
+            candidate_scope_cluster = self._canonical_cluster_id(raw_scope_cluster)
+            if candidate_scope_cluster in self.CLUSTER_LABELS:
+                scope_cluster = f"cti_vertices/{candidate_scope_cluster}"
+
+        query_str = """
+        LET group_doc_matches = (
+          FOR group_index IN 0..(LENGTH(@match_groups) - 1)
+            LET group = @match_groups[group_index]
+            LET group_doc_ids = UNIQUE(FLATTEN(
+              FOR property_id IN group.ids
+                RETURN (
+                  FOR edge IN cti_edges
+                    FILTER edge._to == property_id AND edge.type == group.edge_type
+                    LIMIT @candidate_scan_limit
+                    RETURN edge._from
+                )
+            ))
+            FOR doc_id IN group_doc_ids
+              RETURN {
+                doc_id: doc_id,
+                group_index: group_index
+              }
+        )
+
+        LET matched_doc_ids = (
+          FOR match IN group_doc_matches
+            COLLECT doc_id = match.doc_id INTO grouped
+            LET matched_group_indexes = UNIQUE(grouped[*].match.group_index)
+            FILTER LENGTH(matched_group_indexes) == LENGTH(@match_groups)
+            LET in_scope = @scope_cluster_id == "" ? true : LENGTH(
+              FOR scope_edge IN cti_edges
+                FILTER scope_edge._from == @scope_cluster_id
+                  AND scope_edge._to == doc_id
+                  AND scope_edge.type == "cluster_to_doc"
+                LIMIT 1
+                RETURN 1
+            ) > 0
+            FILTER in_scope
+            LIMIT @document_limit
+            RETURN doc_id
+        )
+
+        LET property_edges = (
+          FOR doc_id IN matched_doc_ids
+            LET doc = DOCUMENT(doc_id)
+            FILTER doc != null AND doc.type == "document"
+            FOR group IN @match_groups
+              FOR property_id IN group.ids
+                FOR edge IN cti_edges
+                  FILTER edge._from == doc_id
+                    AND edge._to == property_id
+                    AND edge.type == group.edge_type
+                  LET property = DOCUMENT(edge._to)
+                  FILTER property != null
+                  RETURN {
+                    vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
+                    edge: edge,
+                    path: {
+                      vertices: [property, doc],
+                      edges: [edge]
+                    }
+                  }
+        )
+
+        LET cluster_edges = (
+          FOR doc_id IN matched_doc_ids
+            FOR edge IN cti_edges
+              FILTER edge._to == doc_id AND edge.type == "cluster_to_doc"
+              LET cluster_key = PARSE_IDENTIFIER(edge._from).key
+              FILTER cluster_key IN @default_clusters
+              LET cluster = DOCUMENT(edge._from)
+              FILTER cluster != null
+              RETURN {
+                vertex: cluster,
+                edge: edge,
+                path: null
+              }
+        )
+
+        RETURN {
+          depth1: APPEND(property_edges, cluster_edges),
+          limit_hit_depth1: LENGTH(matched_doc_ids) >= @document_limit,
+          matched_ids: @queried_ids
+        }
+        """
+
+        bind_vars = {
+            "candidate_scan_limit": self._graph_and_candidate_scan_limit(document_limit),
+            "default_clusters": list(self.CLUSTER_LABELS.keys()),
+            "document_limit": document_limit,
+            "match_groups": conjunctive_groups["match_groups"],
+            "queried_ids": conjunctive_groups["queried_ids"],
+            "scope_cluster_id": scope_cluster,
+        }
+        result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
+        result_obj = result_obj[0] if result_obj else {}
+        results = self._dedupe_graph_results(result_obj.get("depth1", []) or [])
+        queried_ids = conjunctive_groups["queried_ids"]
+        return {
+            "results": results,
+            "limit_reached": bool(result_obj.get("limit_hit_depth1")),
+            "queried_id": queried_ids[0] if queried_ids else None,
+            "queried_ids": queried_ids,
+            "matched_vertex_ids": result_obj.get("matched_ids", []) or [],
+        }
+
+    async def _get_conjunctive_graph_relations(self, request_items: list[dict[str, Any]], document_limit: int):
+        conjunctive_groups = self._conjunctive_graph_groups(request_items)
+        if conjunctive_groups is None:
+            return None
+
+        if all(group["kind"] == "property" for group in conjunctive_groups["match_groups"]):
+            return await self._get_conjunctive_property_only_relations(conjunctive_groups, document_limit)
+
+        scope_cluster = ""
+        raw_scope_cluster = self._clean_text(conjunctive_groups["scope_cluster"])
+        if raw_scope_cluster:
+            candidate_scope_cluster = self._canonical_cluster_id(raw_scope_cluster)
+            if candidate_scope_cluster in self.CLUSTER_LABELS:
+                scope_cluster = f"cti_vertices/{candidate_scope_cluster}"
+
+        query_str = """
+        LET ordered_match_groups = (
+          FOR group IN @match_groups
+            LET cluster_count = group.kind == "cluster" ? SUM(
+              FOR match_id IN group.ids
+                RETURN LENGTH(
+                  FOR seed_edge IN cti_edges
+                    FILTER seed_edge._from == match_id AND seed_edge.type == "cluster_to_doc"
+                    LIMIT @seed_probe_limit
+                    RETURN 1
+                )
+            ) : 0
+            LET property_count = group.kind == "property" ? SUM(
+              FOR match_id IN group.ids
+                RETURN LENGTH(
+                  FOR seed_edge IN cti_edges
+                    FILTER seed_edge._to == match_id AND seed_edge.type == group.edge_type
+                    LIMIT @seed_probe_limit
+                    RETURN 1
+                )
+            ) : 0
+            LET capped_count = cluster_count + property_count
+            SORT capped_count ASC
+            RETURN group
+        )
+
+        LET seed_group = FIRST(ordered_match_groups)
+
+        LET cluster_seed_doc_ids = seed_group.kind == "cluster" ? UNIQUE(FLATTEN(
+          FOR match_id IN seed_group.ids
+            RETURN (
+              FOR seed_edge IN cti_edges
+                FILTER seed_edge._from == match_id AND seed_edge.type == "cluster_to_doc"
+                LIMIT @candidate_scan_limit
+                RETURN seed_edge._to
+            )
+        )) : []
+
+        LET property_seed_doc_ids = seed_group.kind == "property" ? UNIQUE(FLATTEN(
+          FOR match_id IN seed_group.ids
+            RETURN (
+              FOR seed_edge IN cti_edges
+                FILTER seed_edge._to == match_id AND seed_edge.type == seed_group.edge_type
+                LIMIT @candidate_scan_limit
+                RETURN seed_edge._from
+            )
+        )) : []
+
+        LET seed_doc_ids = APPEND(cluster_seed_doc_ids, property_seed_doc_ids)
+
+        LET matched_doc_ids = (
+          FOR doc_id IN seed_doc_ids
+            LET matched_group_count = LENGTH(
+              FOR group IN ordered_match_groups
+                LET cluster_group_matches = group.kind == "cluster" ? (
+                  FOR match_id IN group.ids
+                    FOR candidate_edge IN cti_edges
+                      FILTER candidate_edge._from == match_id
+                        AND candidate_edge._to == doc_id
+                        AND candidate_edge.type == "cluster_to_doc"
+                      LIMIT 1
+                      RETURN 1
+                ) : []
+                LET property_group_matches = group.kind == "property" ? (
+                  FOR match_id IN group.ids
+                    FOR candidate_edge IN cti_edges
+                      FILTER candidate_edge._from == doc_id
+                        AND candidate_edge._to == match_id
+                        AND candidate_edge.type == group.edge_type
+                      LIMIT 1
+                      RETURN 1
+                ) : []
+                LET group_matches = APPEND(cluster_group_matches, property_group_matches)
+                FILTER LENGTH(group_matches) > 0
+                RETURN 1
+            )
+            FILTER matched_group_count == LENGTH(ordered_match_groups)
+            LET in_scope = @scope_cluster_id == "" ? true : LENGTH(
+              FOR scope_edge IN cti_edges
+                FILTER scope_edge._from == @scope_cluster_id
+                  AND scope_edge._to == doc_id
+                  AND scope_edge.type == "cluster_to_doc"
+                LIMIT 1
+                RETURN 1
+            ) > 0
+            FILTER in_scope
+            LIMIT @document_limit
+            RETURN doc_id
+        )
+
+        LET property_edges = (
+          FOR doc_id IN matched_doc_ids
+            LET doc = DOCUMENT(doc_id)
+            FILTER doc != null AND doc.type == "document"
+            FOR group IN ordered_match_groups
+              FILTER group.kind == "property"
+              FOR property_id IN group.ids
+                FOR edge IN cti_edges
+                  FILTER edge._from == doc_id
+                    AND edge._to == property_id
+                    AND edge.type == group.edge_type
+                  LET property = DOCUMENT(edge._to)
+                  FILTER property != null
+                  RETURN {
+                    vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
+                    edge: edge,
+                    path: {
+                      vertices: [property, doc],
+                      edges: [edge]
+                    }
+                  }
+        )
+
+        LET cluster_edges = (
+          FOR doc_id IN matched_doc_ids
+            FOR edge IN cti_edges
+              FILTER edge._to == doc_id AND edge.type == "cluster_to_doc"
+              LET cluster_key = PARSE_IDENTIFIER(edge._from).key
+              FILTER cluster_key IN @default_clusters
+              LET cluster = DOCUMENT(edge._from)
+              FILTER cluster != null
+              RETURN {
+                vertex: cluster,
+                edge: edge,
+                path: null
+              }
+        )
+
+        RETURN {
+          depth1: APPEND(property_edges, cluster_edges),
+          limit_hit_depth1: LENGTH(matched_doc_ids) >= @document_limit OR LENGTH(seed_doc_ids) >= @candidate_scan_limit,
+          matched_ids: @queried_ids
+        }
+        """
+
+        bind_vars = {
+            "candidate_scan_limit": self._graph_and_candidate_scan_limit(document_limit),
+            "default_clusters": list(self.CLUSTER_LABELS.keys()),
+            "document_limit": document_limit,
+            "match_groups": conjunctive_groups["match_groups"],
+            "queried_ids": conjunctive_groups["queried_ids"],
+            "scope_cluster_id": scope_cluster,
+            "seed_probe_limit": min(document_limit * 20, 1000),
+        }
+        result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
+        result_obj = result_obj[0] if result_obj else {}
+        results = self._dedupe_graph_results(result_obj.get("depth1", []) or [])
+        queried_ids = conjunctive_groups["queried_ids"]
+        return {
+            "results": results,
+            "limit_reached": bool(result_obj.get("limit_hit_depth1")),
+            "queried_id": queried_ids[0] if queried_ids else None,
+            "queried_ids": queried_ids,
+            "matched_vertex_ids": result_obj.get("matched_ids", []) or [],
+        }
+
+    async def get_entity_relations_batch(self, query: EntityGraphBatchQueryModel):
+        try:
+            response_groups: list[dict[str, Any]] = []
+            queried_ids: list[str] = []
+            matched_vertex_ids: list[str] = []
+            limit_reached = False
+            request_items = self._graph_batch_items(query.requests or [query], query)
+            document_limit = self._graph_document_limit(query.edge)
+
+            if getattr(self, "_entity_manager__db", None) is not None:
+                conjunctive_response = await self._get_conjunctive_graph_relations(request_items, document_limit)
+                if conjunctive_response is not None:
+                    return conjunctive_response
+
+            for item in request_items:
+                group_result_sets: list[list[dict[str, Any]]] = []
+                for value in item["query_values"]:
+                    relation_query = EntityQueryModel(
+                        data_point_type=item["data_point_type"],
+                        model_type=item["model_type"],
+                        query_value=value,
+                        edge=query.edge,
+                        depth=query.depth,
+                        scope_cluster=item["scope_cluster"],
+                    )
+                    response = await self.get_entity_relations(relation_query)
+                    group_result_sets.append(response.get("results") or [])
+                    limit_reached = limit_reached or bool(response.get("limit_reached"))
+                    queried_id = response.get("queried_id")
+                    if queried_id and queried_id not in queried_ids:
+                        queried_ids.append(queried_id)
+                    for matched_id in response.get("matched_vertex_ids") or []:
+                        if matched_id not in matched_vertex_ids:
+                            matched_vertex_ids.append(matched_id)
+
+                response_groups.append({
+                    "operator": item["operator"],
+                    "results": self._interleave_graph_result_sets_by_document(group_result_sets),
+                })
+
+            merged_results = self._merge_graph_result_groups(response_groups)
+            limited_results = self._limit_graph_results_by_documents(
+                merged_results,
+                document_limit,
+            )
+            return {
+                "results": limited_results,
+                "limit_reached": limit_reached,
+                "queried_id": queried_ids[0] if queried_ids else None,
+                "queried_ids": queried_ids,
+                "matched_vertex_ids": matched_vertex_ids,
+            }
+        except Exception as ex:
+            log.g().e(f"ARANGO ENTITY RELATION BATCH FETCH ERROR: {ex}")
+            return {"results": [], "limit_reached": False, "queried_id": None, "queried_ids": [], "matched_vertex_ids": []}
 
     async def create_or_update_entity_nodes(self, entity: entity_model):
         try:

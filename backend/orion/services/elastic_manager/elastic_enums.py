@@ -65,7 +65,7 @@ class MANAGE_ELASTIC_MESSAGES:
 
 class ELASTIC_ENUMS:
     mapping_leakdatamodel = {"settings": {"number_of_shards": 1, "number_of_replicas": 0, "max_result_window": 1000000}, "mappings": {"dynamic_templates": [
-        {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_hash": {"type": "keyword"}, "m_title": {"type": "text"}, "m_ref_html": {"type": "text"}, "m_url": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_content": {"type": "text"}, "m_important_content": {"type": "text"}, "m_network": {"type": "keyword"}, "m_content_type": {"type": "keyword"}, "m_weblink": {"type": "keyword"}, "m_dumplink": {"type": "keyword"}, "m_name": {"type": "text"}, "m_email": {"type": "keyword"}, "m_industry": {"type": "keyword"}, "m_phone_numbers": {"type": "keyword"}, "m_addresses": {"type": "keyword"}, "m_social_media_profiles": {"type": "keyword"}, "m_websites": {"type": "keyword"}, "m_company_name": {"type": "keyword"}, "m_logo_or_images": {"type": "keyword"}, "m_date": {"type": "date"}, "m_data_size": {"type": "keyword"}, "m_country_name": {"type": "keyword"}, "m_revenue": {"type": "keyword"}, "m_update_date": {"type": "date"}, "m_creation_date": {"type": "date"},
+        {"strings_as_keywords": {"match_mapping_type": "string", "mapping": {"type": "keyword"}}}], "properties": {"m_hash": {"type": "keyword"}, "m_title": {"type": "text"}, "m_ref_html": {"type": "text"}, "m_url": {"type": "keyword"}, "m_base_url": {"type": "keyword"}, "m_content": {"type": "text"}, "m_important_content": {"type": "text"}, "m_network": {"type": "keyword"}, "m_content_type": {"type": "keyword"}, "m_weblink": {"type": "keyword"}, "m_dumplink": {"type": "keyword"}, "m_name": {"type": "text"}, "m_email": {"type": "keyword"}, "m_industry": {"type": "keyword"}, "m_phone_numbers": {"type": "keyword"}, "m_addresses": {"type": "keyword"}, "m_social_media_profiles": {"type": "keyword"}, "m_websites": {"type": "keyword"}, "m_domain": {"type": "keyword"}, "m_company_name": {"type": "keyword"}, "m_logo_or_images": {"type": "keyword"}, "m_date": {"type": "date"}, "m_data_size": {"type": "keyword"}, "m_country_name": {"type": "keyword"}, "m_revenue": {"type": "keyword"}, "m_update_date": {"type": "date"}, "m_creation_date": {"type": "date"},
 
         "m_embedding": {"type": "dense_vector", "dims": 384, "element_type": "float", "similarity": "cosine", "index": True}}}}
 
@@ -169,13 +169,13 @@ class ELASTIC_ENUMS:
     }
 
     mapping_stealer_log_field = {
-        "m_domain": ["domain.keyword"],
+        "m_domain": ["domain.keyword", "domain"],
         "m_url": ["url.keyword"],
         "m_username": ["username.keyword"],
         "m_email": ["email.keyword"],
         "m_ip": ["ip.keyword"],
         "m_creditcard": ["credit_card.keyword", "bin.keyword"],
-        "m_search_all": ["domain.keyword", "username.keyword", "email.keyword", "bin.keyword"]
+        "m_search_all": ["domain.keyword", "domain", "username.keyword", "email.keyword", "bin.keyword"]
     }
 
     mapping_consolidated_iocs = {

@@ -9,6 +9,7 @@ import { map } from 'rxjs';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { overlayAnimation, popupAnimation } from '../../../../shared/animations/popup.animations';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-add-custom-alert',
   imports: [CommonModule, FormsModule, TranslatePipe],
@@ -28,7 +29,7 @@ export class AddCustomAlertComponent implements OnInit {
   readonly editAlertData = input<AlertModel | null>(null);
   readonly cancle = output<boolean>();
 
-  constructor(public appService: AppService, public apiService: ApiService, public router: Router, public route: ActivatedRoute, private messageNotificationService: MessageNotificationService) { }
+  constructor(public appService: AppService, public apiService: ApiService, public router: Router, public route: ActivatedRoute, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService) { }
 
   get allowedIocTypes() {
     return this.appService.entities();
@@ -140,6 +141,7 @@ export class AddCustomAlertComponent implements OnInit {
     if (this.formError) {
       return;
     }
+    this.alert.licenses = this.licenseService.getAlertLicenses(this.alert.type);
     const endpoint = this.edit() ? 'alert/update' : 'alert/add';
     this.apiService.post(endpoint, this.alert).subscribe({
       next: () => {
@@ -180,4 +182,5 @@ export class AddCustomAlertComponent implements OnInit {
     const item = this.allowedIocTypes.find(x => x.key === selectedKey);
     return item ? item.title : 'Select IOC Type';
   }
+
 }

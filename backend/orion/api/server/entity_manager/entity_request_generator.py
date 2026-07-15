@@ -74,11 +74,13 @@ class EntityRequestGenerator:
 
             LET cluster_data = (
               FOR cluster_id IN clusters
+                LET start_cluster = DOCUMENT(cluster_id)
                 LET docs = (
-                  FOR v, e, p IN {depth_level}..{depth_level} ANY cluster_id GRAPH 'cti_graph'
-                    OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                    FILTER v.type == 'document'
+                  FOR e IN cti_edges
+                    FILTER e._from == cluster_id AND e.type == 'cluster_to_doc'
                     LIMIT {per_cluster_limit}
+                    LET v = DOCUMENT(e._to)
+                    FILTER v != null AND v.type == 'document'
                     LET current_label = FIRST(
                       FOR candidate IN [v.display_value, v.label, v.title, v.doc_id, v.m_document_id, v._key]
                         FILTER candidate != null AND TRIM(TO_STRING(candidate)) != ''
@@ -86,7 +88,7 @@ class EntityRequestGenerator:
                     )
                     LET fallback_label = FIRST(
                       FOR label_edge IN cti_edges
-                        FILTER label_edge._from == v._id AND STARTS_WITH(label_edge.type, 'has_')
+                        FILTER label_edge._from == v._id AND label_edge.type IN @document_label_edge_types
                         LET label_vertex = DOCUMENT(label_edge._to)
                         FILTER label_vertex.type IN @document_label_property_keys
                         LET label_value = FIRST(
@@ -105,7 +107,10 @@ class EntityRequestGenerator:
                     RETURN {{
                       vertex: display_vertex,
                       edge: e,
-                      path: p
+                      path: {{
+                        vertices: [start_cluster, display_vertex],
+                        edges: [e]
+                      }}
                     }}
                 )
                 RETURN docs
@@ -122,10 +127,10 @@ class EntityRequestGenerator:
               FOR doc_id IN document_ids
                 FOR e IN cti_edges
                   FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  FOR cluster IN cti_vertices
-                    FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                  FOR cluster_vertex IN cti_vertices
+                    FILTER cluster_vertex._id == e._from AND cluster_vertex.type == 'cluster'
                     RETURN {{
-                      vertex: cluster,
+                      vertex: cluster_vertex,
                       edge: e,
                       path: null
                     }}
@@ -142,16 +147,20 @@ class EntityRequestGenerator:
             """
             return queried_id, query_str, {
                 "cluster_ids": list(DEFAULT_CLUSTER_IDS),
+                "document_label_edge_types": [f"has_{key}" for key in EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS],
                 "document_label_property_keys": list(EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS),
             }
         else:
             queried_id = f"cti_vertices/{normalized_value}"
             query_str = f"""
+            LET start_cluster = DOCUMENT(@cluster_id)
+
             LET doc_nodes = (
-              FOR v, e, p IN {depth_level}..{depth_level} ANY @cluster_id GRAPH 'cti_graph'
-                OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-                FILTER v.type == 'document'
+              FOR e IN cti_edges
+                FILTER e._from == @cluster_id AND e.type == 'cluster_to_doc'
                 LIMIT {document_limit}
+                LET v = DOCUMENT(e._to)
+                FILTER v != null AND v.type == 'document'
                 LET current_label = FIRST(
                   FOR candidate IN [v.display_value, v.label, v.title, v.doc_id, v.m_document_id, v._key]
                     FILTER candidate != null AND TRIM(TO_STRING(candidate)) != ''
@@ -159,7 +168,7 @@ class EntityRequestGenerator:
                 )
                 LET fallback_label = FIRST(
                   FOR label_edge IN cti_edges
-                    FILTER label_edge._from == v._id AND STARTS_WITH(label_edge.type, 'has_')
+                    FILTER label_edge._from == v._id AND label_edge.type IN @document_label_edge_types
                     LET label_vertex = DOCUMENT(label_edge._to)
                     FILTER label_vertex.type IN @document_label_property_keys
                     LET label_value = FIRST(
@@ -178,7 +187,10 @@ class EntityRequestGenerator:
                 RETURN {{
                   vertex: display_vertex,
                   edge: e,
-                  path: p
+                  path: {{
+                    vertices: [start_cluster, display_vertex],
+                    edges: [e]
+                  }}
                 }}
             )
 
@@ -191,10 +203,10 @@ class EntityRequestGenerator:
               FOR doc_id IN document_ids
                 FOR e IN cti_edges
                   FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
-                  FOR cluster IN cti_vertices
-                    FILTER cluster._id == e._from AND cluster.type == 'cluster'
+                  FOR cluster_vertex IN cti_vertices
+                    FILTER cluster_vertex._id == e._from AND cluster_vertex.type == 'cluster'
                     RETURN {{
-                      vertex: cluster,
+                      vertex: cluster_vertex,
                       edge: e,
                       path: null
                     }}
@@ -211,42 +223,68 @@ class EntityRequestGenerator:
             """
             bind_vars = {
                 "cluster_id": queried_id,
+                "document_label_edge_types": [f"has_{key}" for key in EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS],
                 "document_label_property_keys": list(EntityRequestGenerator.DOCUMENT_LABEL_PROPERTY_KEYS),
             }
             return queried_id, query_str, bind_vars
 
     @staticmethod
-    def build_property_search_query(normalized_value: str, depth_level: int, document_limit: int):
+    def build_property_search_query(normalized_value: str, depth_level: int, document_limit: int, scope_cluster: str = ""):
+        if scope_cluster and scope_cluster != "all":
+            return EntityRequestGenerator.build_scoped_property_search_query(
+                normalized_value=normalized_value,
+                document_limit=document_limit,
+                scope_cluster=scope_cluster,
+            )
+
         queried_id = "all_properties"
         query_str = f"""
         LET props = (
           FOR property IN cti_vertices
+            FILTER property.normalized_value == @search_value
             FILTER property.type NOT IN ['document', 'cluster']
-            FILTER CONTAINS(LOWER(TO_STRING(property.label)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.display_value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property.normalized_value)), @search_value)
-              || CONTAINS(LOWER(TO_STRING(property._key)), @search_value)
             RETURN property._id
         )
-        LET raw_depth1 = (
-          FOR id IN props
-            FOR v, e, p IN {depth_level}..{depth_level} ANY id GRAPH 'cti_graph'
-              FILTER v.type == 'document'
+
+        LET doc_matches = (
+          FOR property_id IN props
+            FOR property_edge IN cti_edges
+              FILTER property_edge._to == property_id AND STARTS_WITH(property_edge.type, "has_")
+              COLLECT matched_doc_id = property_edge._from INTO grouped = {{
+                property_id: property_id,
+                property_edge: property_edge
+              }}
+              LET score = LENGTH(grouped)
+              SORT score DESC
               LIMIT {document_limit}
-              RETURN {{vertex: v, edge: e, path: p}}
+              RETURN {{
+                doc_id: matched_doc_id,
+                property_edges: SLICE(grouped, 0, 4)
+              }}
         )
-        LET document_ids = UNIQUE(
-          FOR item IN raw_depth1
-            FILTER item.vertex.type == 'document'
-            RETURN item.vertex._id
+
+        LET raw_depth1 = (
+          FOR match IN doc_matches
+            LET doc = DOCUMENT(match.doc_id)
+            FILTER doc != null AND doc.type == "document"
+            FOR relation IN match.property_edges
+              LET property = DOCUMENT(relation.property_id)
+              FILTER property != null
+              RETURN {{
+                vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
+                edge: relation.property_edge,
+                path: {{
+                  vertices: [property, doc],
+                  edges: [relation.property_edge]
+                }}
+              }}
         )
 
         LET default_clusters = @default_clusters
         LET filtered_cluster_edges = (
-          FOR doc_id IN document_ids
+          FOR match IN doc_matches
             FOR e IN cti_edges
-              FILTER e._to == doc_id AND e.type == 'cluster_to_doc'
+              FILTER e._to == match.doc_id AND e.type == 'cluster_to_doc'
               LET cluster_key = PARSE_IDENTIFIER(e._from).key
               FILTER cluster_key IN default_clusters
               LET cluster = DOCUMENT(e._from)
@@ -254,7 +292,7 @@ class EntityRequestGenerator:
         )
 
         LET depth1 = APPEND(raw_depth1, filtered_cluster_edges)
-        LET limit_hit_depth1 = false
+        LET limit_hit_depth1 = LENGTH(doc_matches) >= {document_limit}
 
         RETURN {{
           depth1,
@@ -265,6 +303,97 @@ class EntityRequestGenerator:
 
         bind_vars = {
             "default_clusters": list(DEFAULT_CLUSTER_KEYS),
+            "search_value": normalized_value.lower(),
+        }
+
+        return queried_id, query_str, bind_vars
+
+    @staticmethod
+    def build_scoped_property_search_query(normalized_value: str, document_limit: int, scope_cluster: str):
+        queried_id = f"cti_vertices/{scope_cluster}"
+        query_str = f"""
+        LET props = (
+          FOR property IN cti_vertices
+            FILTER property.normalized_value == @search_value
+            FILTER property.type NOT IN ['document', 'cluster']
+            RETURN property._id
+        )
+
+        LET scoped_doc_matches = (
+          FOR property_id IN props
+            FOR property_edge IN cti_edges
+              FILTER property_edge._to == property_id AND STARTS_WITH(property_edge.type, "has_")
+              LET doc_id = property_edge._from
+              FILTER LENGTH(
+                FOR candidate_edge IN cti_edges
+                  FILTER candidate_edge._from == @scope_cluster_id
+                    AND candidate_edge._to == doc_id
+                    AND candidate_edge.type == "cluster_to_doc"
+                  LIMIT 1
+                  RETURN 1
+              ) > 0
+              COLLECT matched_doc_id = doc_id INTO grouped = {{
+                property_id: property_id,
+                property_edge: property_edge
+              }}
+              LET score = LENGTH(grouped)
+              SORT score DESC
+              LIMIT {document_limit}
+              RETURN {{
+                doc_id: matched_doc_id,
+                property_edges: SLICE(grouped, 0, 4)
+              }}
+        )
+
+        LET raw_depth1 = (
+          FOR match IN scoped_doc_matches
+            LET doc = DOCUMENT(match.doc_id)
+            FILTER doc != null AND doc.type == "document"
+            FOR relation IN match.property_edges
+              LET property = DOCUMENT(relation.property_id)
+              FILTER property != null
+              RETURN {{
+                vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
+                edge: relation.property_edge,
+                path: {{
+                  vertices: [property, doc],
+                  edges: [relation.property_edge]
+                }}
+              }}
+        )
+
+        LET cluster_edges = (
+          FOR match IN scoped_doc_matches
+            LET cluster = DOCUMENT(@scope_cluster_id)
+            FILTER cluster != null
+            LET cluster_edge = FIRST(
+              FOR candidate_edge IN cti_edges
+                FILTER candidate_edge._from == @scope_cluster_id
+                  AND candidate_edge._to == match.doc_id
+                  AND candidate_edge.type == "cluster_to_doc"
+                LIMIT 1
+                RETURN candidate_edge
+            )
+            FILTER cluster_edge != null
+            RETURN {{
+              vertex: cluster,
+              edge: cluster_edge,
+              path: null
+            }}
+        )
+
+        LET depth1 = APPEND(raw_depth1, cluster_edges)
+        LET limit_hit_depth1 = LENGTH(scoped_doc_matches) >= {document_limit}
+
+        RETURN {{
+          depth1,
+          limit_hit_depth1,
+          matched_ids: APPEND(props, [@scope_cluster_id])
+        }}
+        """
+
+        bind_vars = {
+            "scope_cluster_id": queried_id,
             "search_value": normalized_value.lower(),
         }
 
@@ -349,81 +478,27 @@ class EntityRequestGenerator:
             }
 
         query_str = f"""
-        LET depth1_nodes = (
-          FOR v, e, p IN {depth_level}..{depth_level} ANY @start_vertex GRAPH 'cti_graph'
-            OPTIONS {{ bfs: true, uniqueVertices: "global" }}
+        LET start_property = DOCUMENT(@start_vertex)
+
+        LET doc_nodes = (
+          FOR e IN cti_edges
+            FILTER e._to == @start_vertex AND e.type == @edge_type
+            LIMIT {document_limit}
+            LET doc = DOCUMENT(e._from)
+            FILTER doc != null AND doc.type == "document"
             RETURN {{
-              vertex: v,
+              vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
               edge: e,
-              path: p
+              path: {{
+                vertices: [start_property, doc],
+                edges: [e]
+              }}
             }}
         )
 
-        LET depth2_nodes = (
-          FOR v, e, p IN {secondary_depth_level}..{secondary_depth_level} ANY @start_vertex GRAPH 'cti_graph'
-            OPTIONS {{ bfs: true, uniqueVertices: "global" }}
-            FILTER v.type == "cluster"
-            RETURN {{
-              vertex: v,
-              edge: e,
-              path: p
-            }}
-        )
-
-        LET raw_depth1 = APPEND(depth1_nodes, depth2_nodes)
-
-        LET property_ids = UNIQUE(
-          FOR item IN raw_depth1
-            FILTER item.vertex.type NOT IN ['document', 'cluster']
-            LET property_key = SPLIT(PARSE_IDENTIFIER(item.vertex._id).key, ":")[0]
-            FILTER property_key IN @strong_related_property_types
+        LET document_ids = UNIQUE(
+          FOR item IN doc_nodes
             RETURN item.vertex._id
-        )
-
-        LET raw_per_property_document_limit = LENGTH(property_ids) == 0 ? 0 : FLOOR({document_limit} / LENGTH(property_ids))
-        LET per_property_document_limit = raw_per_property_document_limit < 1 ? 1 : raw_per_property_document_limit
-
-        LET related_doc_candidates = (
-          FOR pid IN property_ids
-            LET docs_for_property = (
-              FOR e IN cti_edges
-                FILTER e._to == pid AND STARTS_WITH(e.type, "has_")
-                FILTER e._from != @start_vertex
-                COLLECT doc_id = e._from WITH COUNT INTO score
-                SORT score DESC
-                RETURN doc_id
-            )
-            RETURN SLICE(docs_for_property, 0, per_property_document_limit)
-        )
-
-        LET doc_counts = UNIQUE(FLATTEN(related_doc_candidates))
-
-        LET related_docs = (
-          FOR doc_id IN doc_counts
-            FOR e IN cti_edges
-              FILTER e._from == doc_id AND STARTS_WITH(e.type, "has_")
-              FILTER e._to IN property_ids
-              FOR doc IN cti_vertices
-                FILTER doc._id == doc_id AND doc.type == "document"
-                RETURN {{
-                  vertex: KEEP(doc, "_id", "_key", "_rev", "type", "node_class", "doc_id", "m_document_id", "cluster_id", "module", "label", "display_value", "title", "summary", "published", "source", "source_reliability"),
-                  edge: e,
-                  path: null
-                }}
-        )
-
-        LET related_doc_ids = (
-          FOR doc_id IN doc_counts
-            RETURN doc_id
-        )
-
-        LET document_ids = UNION(
-          UNIQUE(
-            FOR item IN raw_depth1
-              FILTER item.vertex.type == 'document'
-              RETURN item.vertex._id
-          ),
-          related_doc_ids
         )
 
         LET default_clusters = @default_clusters
@@ -442,20 +517,8 @@ class EntityRequestGenerator:
               }}
         )
 
-        LET start_doc_properties = (
-            FOR e IN cti_edges
-              FILTER e._from == @start_vertex AND STARTS_WITH(e.type, "has_")
-            FOR prop IN cti_vertices
-              FILTER prop._id == e._to
-              RETURN {{
-                vertex: prop,
-                edge: e,
-                path: null
-              }}
-        )
-
-        LET depth1 = APPEND(APPEND(APPEND(raw_depth1, cluster_edges), related_docs), start_doc_properties)
-        LET limit_hit_depth1 = LENGTH(related_docs) >= {document_limit}
+        LET depth1 = APPEND(doc_nodes, cluster_edges)
+        LET limit_hit_depth1 = LENGTH(doc_nodes) >= {document_limit}
 
         RETURN {{
           depth1,
@@ -466,7 +529,7 @@ class EntityRequestGenerator:
 
         bind_vars = {
             "default_clusters": list(DEFAULT_CLUSTER_KEYS),
-            "strong_related_property_types": list(EntityRequestGenerator.STRONG_RELATED_PROPERTY_KEYS),
+            "edge_type": f"has_{normalized_type}",
             "start_vertex": start_vertex,
         }
         return queried_id, query_str, bind_vars

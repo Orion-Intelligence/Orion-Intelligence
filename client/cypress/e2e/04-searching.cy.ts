@@ -1,10 +1,12 @@
-import {clickOpenDefacementReport, clickOpenExploitReport, clickOpenReport, exerciseJsonViewerOnce, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickOpenExploitReport, clickOpenReport, exerciseJsonViewerOnce, openDefacementReportAndValidate, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
 import {clickSidebarSubItem} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
   before(() => {
     cy.loginAsAdmin();
   });
+
+  beforeEach(() => cy.intercept('GET', '**/assets/data/entities_data/entity_filter_suggestions.json', { statusCode: 200, body: {} }));
 
   after(() => {
     cy.logout();
@@ -41,8 +43,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Defacement');
     typeDashboardSearchSlow('mthcht');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.docsScreenshot('defacement-report');
     cy.get('body').type('{esc}');
 
@@ -51,8 +52,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.visit('/dashboard/defacement/hacked');
     typeDashboardSearchSlow('ASTAR');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.get('body').type('{esc}');
 
     cy.go('back');
@@ -60,8 +60,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.visit('/dashboard/defacement/phishing');
     typeDashboardSearchSlow('mthcht');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.get('body').type('{esc}');
 
     cy.go('back');
@@ -69,8 +68,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.visit('/dashboard/defacement/databases');
     typeDashboardSearchSlow('urldna_bot');
-    clickOpenDefacementReport();
-    cy.get('app-json-api-viewer').should('exist').scrollIntoView().and('be.visible');
+    openDefacementReportAndValidate();
     cy.get('body').type('{esc}');
   });
 
@@ -146,8 +144,9 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Exploit');
     typeDashboardSearchSlow('exploit');
-    clickOpenExploitReport();
+    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]').should('have.length.greaterThan', 0);
     cy.docsScreenshot('exploit-results');
+    clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);
@@ -176,6 +175,16 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     waitForSearchReady();
     cy.get('input[data-testid="dashboard-general-input"][name="q"]').first().should('exist');
+  });
+
+  it('runs Actors & Malware search flow', () => {
+    cy.loginAsAdmin();
+    openSidebarGroup('Actors & Malware');
+    waitForSearchReady();
+    typeDashboardSearchSlow('malware');
+    cy.get('[data-testid="apt-intel-result-card"], [data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]', { timeout: 60000 })
+      .should('have.length.greaterThan', 0);
+    cy.docsScreenshot('actors-malware-results');
   });
 
   it('runs Feed search flow and opens a report', () => {
@@ -240,7 +249,8 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs Event Management search flow and reads the first record', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Profile');
-    cy.get('[data-testid="sidebar-subitem-profile-event-management"]').scrollIntoView().should('be.visible').click({ force: true });
+    cy.get('[data-testid="sidebar-subitem-profile-monitoring"]').scrollIntoView().should('be.visible').click({ force: true });
+    cy.get('[data-testid="monitoring-tab-event-management"]').should('be.visible').click();
     cy.get('app-loading-form', { timeout: 60000 }).should('not.exist');
 
     typeInputSlow('[data-testid="ioc-basic-search-input"]', '10.10.0.9');
@@ -255,6 +265,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
 
     cy.contains('Dummy SIEM log record', { timeout: 60000 }).should('be.visible');
     cy.contains('10.10.0.9', { timeout: 60000 }).should('be.visible');
+    cy.docsScreenshot('event-management-expanded-row');
   });
 
   it('runs Web Scans flow for Basic, Port, Repository, and SEO', () => {

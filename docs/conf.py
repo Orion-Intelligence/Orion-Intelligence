@@ -1,6 +1,6 @@
 project = "Orion Documentation"
 author = "Abdul Mannan"
-release = "1.0.3.1"
+release = "1.0.3.8"
 
 extensions = [
     "myst_parser",

@@ -2,6 +2,7 @@ import asyncio
 import re
 from typing import List
 from pathlib import Path
+from types import SimpleNamespace
 
 from bson import ObjectId
 from cryptography.fernet import Fernet
@@ -16,6 +17,7 @@ from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, UserStatus, LicenseName, user_role
+from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
@@ -117,6 +119,8 @@ class AccountManager:
                 subscription=data.subscription,
                 licenses=data.licenses,
                 permissions=data.permissions,
+                alerts_allowed_all=False,
+                alerts_allowed_tenant_ids=[],
                 password_reset_required=True, )
 
             await engine.save(user)
@@ -212,6 +216,30 @@ class AccountManager:
             user.licenses = request.licenses
         if request.permissions is not None:
             user.permissions = request.permissions
+            if UserPermission.CASE_MANAGEMENT not in (user.permissions or []):
+                user.alerts_allowed_all = False
+                user.alerts_allowed_tenant_ids = []
+
+        alert_fields_requested = (
+            "alerts_allowed_all" in request.model_fields_set
+            or "alerts_allowed_tenant_ids" in request.model_fields_set
+        )
+        alert_access_requested = bool(request.alerts_allowed_all) or bool(request.alerts_allowed_tenant_ids or [])
+        if alert_fields_requested and current_user.role != user_role.ADMIN:
+            if alert_access_requested:
+                raise HTTPException(status_code=403, detail="Only admin can assign alert access")
+        elif alert_fields_requested and UserPermission.CASE_MANAGEMENT in (user.permissions or []):
+            from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+            alert_request = SimpleNamespace(
+                permissions=user.permissions,
+                alerts_allowed_all=bool(request.alerts_allowed_all),
+                alerts_allowed_tenant_ids=list(request.alerts_allowed_tenant_ids or []),
+            )
+            user.alerts_allowed_all, user.alerts_allowed_tenant_ids = await TenantManager.get_instance().validate_alert_access_assignment(alert_request, current_user)
+        elif alert_fields_requested:
+            user.alerts_allowed_all = False
+            user.alerts_allowed_tenant_ids = []
+
         if request.password_reset_required is not None:
             user.password_reset_required = request.password_reset_required
         await self._engine.save(user)
@@ -403,6 +431,10 @@ class AccountManager:
                 assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
                 "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
                 "eventManagementEnabled": getattr(tenant, "event_management_enabled", False),
+                "alertsVisibleToAdmin": getattr(tenant, "alerts_visible_to_admin", True),
+                "privilegedIoc": getattr(tenant, "privileged_ioc", False),
+                "alertRunTime": getattr(tenant, "alert_run_time", None),
+                "allowedAlertCategories": getattr(tenant, "allowed_alert_categories", None),
                 "accountsMailPassword": "",
                 "accountsMail": self.safe_decrypt(enc, getattr(tenant, "accounts_mail", "")),
                 "accountsSmtpServer": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_server", "")),

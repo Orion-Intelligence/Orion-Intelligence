@@ -1,3 +1,41 @@
+export const ALERT_SCANNER_CATEGORIES = [
+  'general',
+  'defacement',
+  'breach',
+  'exploit',
+  'social',
+  'discussion',
+  'stealerlogs',
+  'feed',
+  'advanced scanning',
+  'playstore-scanning',
+  'social-scanner',
+  'email-breach',
+  'software-scanning',
+  'vulnerability-scanning',
+  'repo scanning',
+  'seo scanning',
+] as const;
+
+const GENERAL_ALERT_DOMAIN_IOC = 'bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion';
+const HOME_ALERT_CARD_SELECTOR = '[data-testid="tenant-home-alert-category-card"]';
+
+type AlertScannerCategory = typeof ALERT_SCANNER_CATEGORIES[number];
+
+export interface CaseAlertTenant {
+  username: string;
+  email: string;
+  password: string;
+  companyName: string;
+}
+
+function setConfiguredViewport() {
+  cy.viewport(
+    Number(Cypress.config('viewportWidth')) || 1920,
+    Number(Cypress.config('viewportHeight')) || 1080
+  );
+}
+
 function scrollTenantTableToBottomLeft() {
   cy.get('[data-testid="tenant-page-header"]').should('be.visible');
 
@@ -42,7 +80,7 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
 
 export function submitLogin(username: string, password: string) {
   cy.intercept('POST', '**/api/token').as('loginRequest');
-  cy.visit('/login');
+  cy.visitLoginWithCleanAuthState();
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
@@ -52,6 +90,84 @@ export function submitLogin(username: string, password: string) {
 export function loginTenant(tenant: any) {
   submitLogin(tenant.username, tenant.password);
   cy.get('[data-testid="dashboard-main"]').should('be.visible');
+}
+
+export function createTenantAccount(tenant: CaseAlertTenant) {
+  cy.clearAllEmails();
+  cy.visit('/signup');
+  cy.get('[data-testid="signup-username"]').should('be.visible').clear().type(tenant.username);
+  cy.get('[data-testid="signup-companymail"]').should('be.visible').clear().type(tenant.email);
+  cy.get('[data-testid="signup-password"]').should('be.visible').clear().type(tenant.password, {log: false});
+  cy.get('[data-testid="signup-submit"]').should('be.visible').and('not.be.disabled').click();
+  cy.get('[data-testid="welcome-tick"]').should('exist');
+
+  cy.openLastMailAndGetUrl().then((url) => {
+    cy.visit(url);
+  });
+}
+
+export function completeTenantOnboardingIfNeeded(tenant: CaseAlertTenant) {
+  cy.get('body').then(($body) => {
+    if (!$body.find('[data-testid="tenant-company-input"]').length) {
+      return;
+    }
+
+    cy.get('[data-testid="tenant-company-input"]').should('be.visible').clear().type(tenant.companyName);
+    cy.get('[data-testid="tenant-onboarding-next-step1"]').should('be.visible').click();
+    cy.get('[data-testid="tenant-onboarding-next-step2"]').should('be.visible').click();
+    cy.get('[data-testid="tenant-onboarding-confirm"]').should('be.visible').click();
+  });
+}
+
+export function setCurrentTenantAlertVisibility(tenant: CaseAlertTenant, visible: boolean) {
+  cy.visit('/dashboard/profile/tenant-settings');
+  cy.contains('h1', 'Tenant Data').should('be.visible');
+  cy.scrollDashboardToBottom();
+  cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
+  cy.contains('label', 'Allow Admin Alert Visibility')
+    .scrollIntoView()
+    .closest('div.rounded-lg')
+    .then(($toggle) => {
+      const isVisible = ($toggle.text() || '').includes('Tenant alerts are visible to admin');
+      if (isVisible !== visible) {
+        cy.wrap($toggle).click({force: true});
+      }
+
+      if (isVisible === visible) {
+        cy.get('button[aria-label="Cancel privacy edit"]').scrollIntoView().should('be.visible').click({force: true});
+        return;
+      }
+
+      cy.intercept('POST', '**/api/update/tenants').as(`saveAlertVisibility${tenant.username}`);
+      cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click({force: true});
+      cy.wait(`@saveAlertVisibility${tenant.username}`, {timeout: 60000})
+        .its('response.statusCode')
+        .should('be.oneOf', [200, 201]);
+    });
+}
+
+export function setTenantAlertVisibility(tenant: CaseAlertTenant, visible: boolean) {
+  submitLogin(tenant.username, tenant.password);
+  cy.get('[data-testid="dashboard-main"]').should('be.visible');
+  setCurrentTenantAlertVisibility(tenant, visible);
+  cy.logout();
+}
+
+export function loginCaseAlertUser(username: string, password: string) {
+  submitLogin(username, password);
+  cy.get('[data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container', {timeout: 60000})
+    .filter(':visible')
+    .should('have.length.greaterThan', 0);
+}
+
+export function onboardTenantForCaseAlerts(tenant: CaseAlertTenant) {
+  submitLogin(tenant.username, tenant.password);
+  cy.get('[data-testid="dashboard-main"], [data-testid="tenant-company-input"]')
+    .filter(':visible')
+    .should('have.length.greaterThan', 0);
+  completeTenantOnboardingIfNeeded(tenant);
+  setCurrentTenantAlertVisibility(tenant, true);
+  cy.logout();
 }
 
 export function openTenantEditor(tenant: any) {
@@ -116,6 +232,13 @@ function setTenantLicenseSelection(license: string, checked: boolean, changedAli
 
 export function setTenantLicense(license: string, checked: boolean) {
   setTenantLicenseSelection(license, checked);
+}
+
+export function setTenantLicenses(licenses: string[]) {
+  const selected = new Set(licenses);
+  ['free', 'osint_basic', 'osint_advanced', 'social_mapper', 'pentester', 'enterprise'].forEach((license) => {
+    setTenantLicenseSelection(license, selected.has(license));
+  });
 }
 
 export function saveTenantEditor(alias: string) {
@@ -384,7 +507,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 }
 
 export function openTenantsPage() {
-  cy.viewport(1440, 900);
+  setConfiguredViewport();
   cy.get('[data-testid="sidebar-subitem-profile-tenant"]').filter(':visible').first().scrollIntoView().click();
   cy.location('pathname').then((path) => {
     if (!path.includes('/dashboard/profile/tenant')) {
@@ -395,7 +518,7 @@ export function openTenantsPage() {
 }
 
 export function openAuditLogPage() {
-  cy.viewport(1440, 900);
+  setConfiguredViewport();
   cy.visit('/dashboard/profile/auditlog');
   cy.location('pathname').should('include', '/dashboard/profile/auditlog');
   cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
@@ -431,6 +554,44 @@ export function openManageIOCs() {
   cy.location('pathname').should('include', '/dashboard/profile/ioc');
 }
 
+export function openTenantHomepage() {
+  cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+  cy.location('pathname').should('include', '/dashboard/profile/homepage');
+}
+
+export function ensureGeneralAlertIoc() {
+  cy.intercept('POST', '**/api/get/tenant').as('loadGeneralAlertIocs');
+  openManageIOCs();
+  cy.wait('@loadGeneralAlertIocs', {timeout: 60000})
+    .its('response.statusCode')
+    .should('be.oneOf', [200, 201]);
+  cy.contains('[data-testid^="tenant-ioc-tab-"]', 'Domains', {timeout: 30000})
+    .scrollIntoView()
+    .should('be.visible')
+    .click();
+  cy.get('[data-testid="tenant-ioc-value-input"]')
+    .should('be.visible')
+    .and('not.be.disabled');
+  cy.get('body').then(($body) => {
+    if ($body.text().includes(GENERAL_ALERT_DOMAIN_IOC)) {
+      return;
+    }
+
+    cy.intercept('POST', '**/api/update/tenants').as('saveGeneralAlertIoc');
+    cy.get('[data-testid="tenant-ioc-value-input"]')
+      .clear()
+      .type(GENERAL_ALERT_DOMAIN_IOC);
+    cy.get('[data-testid="tenant-ioc-add-button"]')
+      .should('be.visible')
+      .and('not.be.disabled')
+      .click();
+    cy.wait('@saveGeneralAlertIoc', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
+    cy.contains(GENERAL_ALERT_DOMAIN_IOC).should('be.visible');
+  });
+}
+
 export function addIOCForAllTabs() {
   cy.get('[data-testid^="tenant-ioc-tab-"]').then(($tabs) => {
     const tabs = Cypress._.take($tabs.toArray(), 5);
@@ -455,6 +616,129 @@ export function addIOCForAllTabs() {
   cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
   cy.clearAllEmails();
   cy.get('[data-testid="tenant-home-scan-all"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+}
+
+function getAlertScannerRow(category: AlertScannerCategory): Cypress.Chainable<JQuery<HTMLElement>> {
+  return cy.contains('div', `Scanner key: ${category}`, {timeout: 30000})
+    .should('be.visible')
+    .then(($label) => {
+      const row = $label.parents().toArray().find((element) => {
+        const $element = Cypress.$(element);
+        return $element.text().includes(`Scanner key: ${category}`) && $element.find('input[type="checkbox"]').length > 0;
+      });
+      expect(row, `scanner row ${category}`).to.exist;
+      return cy.wrap(row as HTMLElement);
+    });
+}
+
+export function openAlertScannerSettings() {
+  cy.get('[data-testid="tenant-home-alert-scanner-settings"]')
+    .scrollIntoView()
+    .should('be.visible')
+    .click({force: true});
+  cy.location('pathname').should('include', '/dashboard/profile/alert-scanners');
+  cy.contains('h1', 'Alert Scanners').should('be.visible');
+}
+
+export function setOnlyGeneralAlertScanner() {
+  ALERT_SCANNER_CATEGORIES.forEach((category) => {
+    const shouldEnable = category === 'general';
+    const alias = `saveAlertScanner${category.replace(/[^a-z0-9]/gi, '')}`;
+
+    getAlertScannerRow(category).then(($row) => {
+      const isChecked = $row.find('input[type="checkbox"]').prop('checked') === true;
+      if (isChecked === shouldEnable) {
+        return;
+      }
+
+      cy.intercept('POST', '**/api/update/tenants').as(alias);
+      cy.wrap($row).scrollIntoView().click({force: true});
+      cy.wait(`@${alias}`, {timeout: 60000})
+        .its('response.statusCode')
+        .should('be.oneOf', [200, 201]);
+      getAlertScannerRow(category)
+        .find('input[type="checkbox"]')
+        .should(shouldEnable ? 'be.checked' : 'not.be.checked');
+    });
+  });
+}
+
+export function flushTenantAlertsIfPresent() {
+  cy.get('body').then(($body) => {
+    const $flushButton = $body.find('[data-testid="tenant-home-flush-all"]:visible').first();
+    if (!$flushButton.length) {
+      return;
+    }
+
+    cy.intercept('POST', '**/api/profile/alerts/delete/all').as('flushTenantAlerts');
+    cy.wrap($flushButton).scrollIntoView().click({force: true});
+    cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click({force: true});
+    cy.wait('@flushTenantAlerts', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
+    cy.get('app-alert-scan-loading', {timeout: 60000}).should('not.exist');
+  });
+}
+
+export function waitForTenantAlertScanComplete(timeoutMs = 180000) {
+  const startedAt = Date.now();
+  let observedRunning = false;
+
+  const poll = (): Cypress.Chainable<unknown> => {
+    return cy.request('POST', '/api/profile/alert/scan/status', {}).then((response) => {
+      expect(response.status).to.eq(200);
+      if (response.body?.scan_running) {
+        observedRunning = true;
+      }
+      if (!response.body?.scan_running && (observedRunning || Date.now() - startedAt > 3000)) {
+        return cy.wrap(null);
+      }
+      if (Date.now() - startedAt > timeoutMs) {
+        throw new Error('Tenant alert scan did not finish');
+      }
+      return cy.wait(1000, {log: false}).then(() => poll());
+    });
+  };
+
+  return poll().then(() => {
+    cy.get('app-alert-scan-loading', {timeout: 60000}).should('not.exist');
+  });
+}
+
+export function runTenantAlertScan() {
+  cy.intercept('POST', '**/api/profile/alert/scan').as('tenantAlertScanStart');
+  cy.get('[data-testid="tenant-home-scan-all"]')
+    .scrollIntoView()
+    .should('be.visible')
+    .and('not.be.disabled')
+    .click({force: true});
+  cy.wait('@tenantAlertScanStart', {timeout: 60000})
+    .its('response.statusCode')
+    .should('be.oneOf', [200, 202]);
+  waitForTenantAlertScanComplete();
+}
+
+function alertCardDisplayName(category: string) {
+  return category.charAt(0).toUpperCase() + category.slice(1);
+}
+
+export function assertOnlyGeneralHasAlertFindings() {
+  ALERT_SCANNER_CATEGORIES.forEach((category) => {
+    cy.contains(HOME_ALERT_CARD_SELECTOR, alertCardDisplayName(category), {timeout: 30000})
+      .scrollIntoView()
+      .should('be.visible')
+      .invoke('text')
+      .then((text) => {
+        const match = text.replace(/\s+/g, ' ').match(/IOC.s found\s*(\d+)/i);
+        expect(match, `${category} IOC count`).to.not.be.null;
+        const count = Number(match![1]);
+        if (category === 'general') {
+          expect(count, 'general findings').to.be.greaterThan(0);
+          return;
+        }
+        expect(count, `${category} findings`).to.eq(0);
+      });
+  });
 }
 
 export function assertAlertScanCompletedMailPresent() {

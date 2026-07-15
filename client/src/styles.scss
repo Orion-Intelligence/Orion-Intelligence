@@ -1,6 +1,5 @@
 
 @use 'assets/styles/fonts.scss';
-@use "app/pages/root-searches/credentials/expanded-row/expanded-row.component.scss";
 @use "app/pages/root-searches/network-intel/modal/geo-coordinates-modal/geo-coordinates-modal.component.scss";
 @use "./app/pages/tenant/tenant-management/view-tenant.component-shared.scss";
 @use "app/pages/user-management/sidebar-user-homepage/category-alert-report/category-alert-report.component.scss";
@@ -1728,7 +1727,12 @@ body.demo-tour-scroll-locked {
   z-index: 9999 !important;
   background: rgb(2 6 23 / 64%) !important;
   backdrop-filter: blur(4px);
+  overflow-y: auto;
   animation: uiModalOverlayFade 200ms ease-out both;
+}
+
+.ui-graph-popup-overlay.items-center {
+  align-items: safe center !important;
 }
 
 .ui-graph-popup-panel {
@@ -2164,6 +2168,10 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   border-color: #cbd5e1 !important;
   background-color: #f1f5f9 !important;
   color: #334155 !important;
+}
+
+.cdk-overlay-container {
+  z-index: 10010 !important;
 }
 
 html.light-theme .cdk-overlay-container .ui-dropdown-menu,
@@ -4276,6 +4284,11 @@ app-sidebar-user-homepage app-home-search.homepage-search-no-margin form {
   opacity: 92%;
 }
 
+app-sidebar-user-homepage .ioc-action-icon--settings {
+  filter: brightness(0) invert(1);
+  opacity: 100%;
+}
+
 .light-theme app-sidebar-user-homepage .ioc-action-toolbar {
   border-color: #d3deeb !important;
   background: #f7fbff !important;
@@ -4661,4 +4674,47 @@ app-demo-tour .demo-tour-active {
 .light-theme .ui-home-ai-button:hover {
   border-color: color-mix(in srgb, var(--color-blue-640) 18%, var(--color-border)) !important;
   background: color-mix(in srgb, var(--color-blue-640) 8%, var(--color-blue-720)) !important;
+}
+
+.orion-comment-input-surface,
+#TipCommentsInputBox.orion-comment-input-surface {
+  background: #172235 !important;
+  border-color: color-mix(in srgb, var(--color-border) 82%, var(--color-blue-640) 18%) !important;
+}
+
+.orion-comment-input-surface .form-control,
+.orion-comment-input-surface .orion-comment-input-field,
+#TipCommentsInputBox textarea {
+  background: #172235 !important;
+  color: var(--color-text1) !important;
+  border-color: color-mix(in srgb, var(--color-border) 88%, var(--color-blue-640) 12%) !important;
+}
+
+.orion-comment-input-surface .orion-comment-input-footer,
+#TipCommentsInputBox .orion-comment-input-footer {
+  background: #172235 !important;
+}
+
+.orion-comment-input-surface .write-message-label,
+.orion-comment-input-surface .orion-comment-footer-copy,
+#TipCommentsInputBox .write-message-label,
+#TipCommentsInputBox .orion-comment-footer-copy {
+  color: var(--color-text4) !important;
+}
+
+html.orion-rendered
+  body.orion-sidebar-ready.orion-recipient-shell:not(.orion-split-shell)
+  #Content
+  .reveal[class*="report-status-"]
+  #TipCommentsBox.orion-report-comments-card
+  #TipCommentsInputBox {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) auto !important;
+  gap: 10px !important;
+  visibility: visible !important;
+  opacity: 100% !important;
+  padding: 12px !important;
+  border: 1px solid rgb(160 184 209 / 14%) !important;
+  border-radius: 8px !important;
+  background: #172235 !important;
 }

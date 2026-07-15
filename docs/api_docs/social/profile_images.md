@@ -1,4 +1,4 @@
-# Socail: profile_images
+# Social: profile_images
 
 ## Description
 

@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, signal } from '@angular/core';
-import { switchMap, takeWhile, tap, timer } from 'rxjs';
+import { EMPTY, catchError, finalize, switchMap, takeWhile, tap, timer } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../core/app/app.service';
 import { Subscription } from 'rxjs';
@@ -24,6 +24,7 @@ export class AlertService implements OnDestroy {
     this.setPendingScanFlag(true);
     this.scanStartSub?.unsubscribe();
     this.scanStatusSub?.unsubscribe();
+    this.isCheckingStatus = false;
     this.scanStartSub = this.apiService.post<any>('profile/alert/scan', null).subscribe({
       next: () => {
         const stream = this.autoCheckScanStatus();
@@ -38,11 +39,13 @@ export class AlertService implements OnDestroy {
           },
           error: (_) => {
             this.isAlertScanLoading.set(false);
+            this.setPendingScanFlag(false);
           }
         });
       },
       error: (_) => {
         this.isAlertScanLoading.set(false);
+        this.setPendingScanFlag(false);
       },
     });
   }
@@ -51,6 +54,7 @@ export class AlertService implements OnDestroy {
     this.isAlertScanLoading.set(false);
     this.setPendingScanFlag(false);
     this.scanStatusSub?.unsubscribe();
+    this.isCheckingStatus = false;
     this.apiService.post<any>('profile/alert/scan/cancel', null).subscribe({
       next: (_) => {
         this.isAlertScanLoading.set(false);
@@ -102,13 +106,22 @@ export class AlertService implements OnDestroy {
       return;
     }
     this.isCheckingStatus = true;
-    return timer(0, intervalMs).pipe(switchMap(() => this.getScanStatus()), takeWhile((res: any) => res?.scan_running === true, true), tap((res) => {
-      if (!res?.scan_running) {
-        this.isCheckingStatus = false;
+    return timer(0, intervalMs).pipe(switchMap(() => this.getScanStatus()),
+      takeWhile((res: any) => res?.scan_running === true, true),
+      tap((res) => {
+        if (!res?.scan_running) {
+          this.isAlertScanLoading.set(false);
+          this.setPendingScanFlag(false);
+        }
+      }),
+      catchError(() => {
         this.isAlertScanLoading.set(false);
         this.setPendingScanFlag(false);
-      }
-    }));
+        return EMPTY;
+      }),
+      finalize(() => {
+        this.isCheckingStatus = false;
+      }));
   }
 
   private getPendingScanFlag(): boolean {
@@ -126,5 +139,6 @@ export class AlertService implements OnDestroy {
   ngOnDestroy(): void {
     this.scanStartSub?.unsubscribe();
     this.scanStatusSub?.unsubscribe();
+    this.isCheckingStatus = false;
   }
 }

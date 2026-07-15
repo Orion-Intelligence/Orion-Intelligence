@@ -8,4 +8,11 @@ To report a vulnerability, please use the private reporting form:
 
 We aim to acknowledge reports within 8 hours and address any critical issues with short-term fixes within 2 days,
 whenever possible.
-si
+
+## Uptime Monitoring
+
+We track uptime for multiple Orion Intelligence system components using UptimeRobot:
+
+[Orion Intelligence uptime status](https://stats.uptimerobot.com/xV0BS3KMq7)
+
+Uptime alerts are delivered automatically by email and Slack webhook so maintainers can respond to outages or degraded availability.

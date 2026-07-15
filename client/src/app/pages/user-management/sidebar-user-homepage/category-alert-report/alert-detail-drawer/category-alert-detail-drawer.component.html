@@ -1,0 +1,100 @@
+@if (selectedDetailAlert) {
+  <div class="fixed inset-0 z-[1500]" data-testid="tenant-alert-detail-drawer">
+    <div class="absolute inset-0 bg-black/50 transition-opacity duration-300" [ngClass]="isAlertDetailDrawerOpen ? 'opacity-100' : 'pointer-events-none opacity-0'" (click)="closeAlertDetails()"></div>
+    <aside class="absolute right-0 top-0 flex h-full w-full max-w-2xl transform-gpu flex-col overflow-y-auto border-l border-[var(--color-border)] bg-[var(--color-blue-830)] shadow-[-18px_0_40px_rgba(0,0,0,0.34)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]" [class.translate-x-0]="isAlertDetailDrawerOpen" [class.translate-x-[102%]]="!isAlertDetailDrawerOpen">
+      <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-830)] px-6 py-4">
+        <div class="flex items-start justify-between gap-4">
+          <div class="min-w-0">
+            <div class="mb-2 inline-flex items-center gap-2 rounded-full px-2.5 py-1 text-[12px] font-semibold" [ngClass]="getRiskLabelClass(selectedDetailAlert.risk)">
+              <span class="category_report_status-icon h-[18px] w-[18px]" [ngClass]="getRiskIconColorClass(selectedDetailAlert.risk)">
+                <i class="bi text-[13px]" [ngClass]="getRiskIcon(selectedDetailAlert.risk)" aria-hidden="true"></i>
+              </span>
+              {{ selectedDetailAlert.risk === 'Not Found' ? selectedDetailAlert.risk : selectedDetailAlert.risk + ' ' + ('categoryAlerts.fields.risk' | translate) }}
+            </div>
+            <h2 class="m-0 text-[18px] font-semibold leading-snug text-[var(--color-text1)]">{{ selectedDetailAlert.title }}</h2>
+            <p class="mb-0 mt-2 whitespace-pre-line text-[13px] leading-6 text-[var(--color-text4)]" [ngClass]="isDetailDescriptionExpanded(selectedDetailAlert) ? '' : 'max-h-24 overflow-hidden'">{{ selectedDetailAlert.description }}</p>
+            @if (shouldShowDescriptionToggle(selectedDetailAlert.description)) {
+              <button type="button" class="mt-2 inline-flex border-0 bg-transparent p-0 text-[12px] font-bold text-[var(--color-text1)] transition hover:text-[var(--color-text2)]" (click)="toggleDetailDescription(selectedDetailAlert)">
+                {{ isDetailDescriptionExpanded(selectedDetailAlert) ? 'Show less' : 'Load more' }}
+              </button>
+            }
+          </div>
+          <button type="button" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)]" [attr.aria-label]="'common.actions.close' | translate" (click)="closeAlertDetails()">
+            <img alt="" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon" />
+          </button>
+        </div>
+      </div>
+
+      <div class="space-y-5 px-6 py-5">
+        <section class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            @if (hasAlertUrl(selectedDetailAlert.url)) {
+              <div class="sm:col-span-2">
+                <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">{{ 'categoryAlerts.fields.url' | translate }}</div>
+                <div class="mt-1 break-all text-[13px] font-medium text-[var(--color-text1)]">{{ selectedDetailAlert.url }}</div>
+              </div>
+            }
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">{{ 'categoryAlerts.fields.category' | translate }}</div>
+              <div class="mt-1 break-words text-[13px] font-medium text-[var(--color-text1)]">{{ selectedDetailAlert.category }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">{{ 'categoryAlerts.fields.source' | translate }}</div>
+              <div class="mt-1 break-words text-[13px] font-medium text-[var(--color-text1)]">{{ selectedDetailAlert.source }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">{{ 'categoryAlerts.fields.entity' | translate }}</div>
+              <div class="mt-1 break-all text-[13px] font-medium text-[var(--color-text1)]">{{ selectedDetailAlert.entity }}</div>
+            </div>
+            <div>
+              <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">Result Date</div>
+              <div class="mt-1 text-[13px] font-medium text-[var(--color-text1)]">{{ getAlertCardDate(selectedDetailAlert) | date:'MM/dd/yyyy' }}</div>
+            </div>
+            @if (selectedDetailAlert.contentTypes.length) {
+              <div class="sm:col-span-2">
+                <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">Content Type</div>
+                <div class="mt-2 flex flex-wrap gap-2">
+                  @for (contentType of selectedDetailAlert.contentTypes; track contentType) {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">{{ contentType }}</span>
+                  }
+                </div>
+              </div>
+            }
+            @if (selectedDetailAlert.password) {
+              <div class="sm:col-span-2">
+                <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">Password</div>
+                <div class="mt-1 break-all text-[13px] font-medium text-[var(--color-text1)]">{{ selectedDetailAlert.password }}</div>
+              </div>
+            }
+          </div>
+        </section>
+        @if (hasRawFindings(selectedDetailAlert)) {
+          <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-900)]">
+            @for (row of getRawFindingRows(selectedDetailAlert.rawFindings); track $index) {
+              <div class="border-b border-[var(--color-divider)] px-3 py-3 last:border-b-0">
+                <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ row.label }}</div>
+                <div class="min-w-0 text-[13px] leading-5 text-[var(--color-text2)]">
+                  @for (block of getRawFindingValueBlocks(row); track $index; let blockIndex = $index) {
+                    <div [ngClass]="(row.valueBlocks?.length || 0) > 1 ? (blockIndex === 0 ? 'rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]' : 'mt-3 rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]') : (blockIndex === 0 ? '' : 'mt-3 border-t border-[#22304a] pt-3 [body.light-theme_&]:border-[#c2cfdd]')">
+                      @if ((row.valueBlocks?.length || 0) > 1) {
+                        <div class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--color-text3)] [body.light-theme_&]:text-[#50657a]">Section {{ blockIndex + 1 }}</div>
+                      }
+                      <div class="whitespace-pre-wrap break-words" [ngClass]="(row.valueBlocks?.length || 0) > 1 ? 'opacity-80' : ''">{{ block }}</div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="sticky bottom-0 mt-auto flex justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-4 backdrop-blur">
+        <ng-content select="[alertDetailFooterActions]"></ng-content>
+        <button type="button" class="inline-flex h-10 items-center rounded-[8px] bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition hover:brightness-110" (click)="closeAlertDetails()">
+          {{ 'common.actions.close' | translate }}
+        </button>
+      </div>
+    </aside>
+  </div>
+}

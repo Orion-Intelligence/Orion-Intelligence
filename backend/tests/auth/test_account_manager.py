@@ -61,6 +61,7 @@ def _make_tenant(**overrides):
         "is_default": False,
         "user_quota": 5,
         "profile_visibility_enabled": True,
+        "alert_run_time": None,
         "name": "",
         "phone": "",
         "country": "",
@@ -340,6 +341,7 @@ def test_get_node_builds_response_with_decrypted_tenant_data(tmp_path, monkeypat
         city=enc.encrypt(b"NYC").decode(),
         postal_code=enc.encrypt(b"10001").decode(),
         licenses=[enc.encrypt(b"enterprise").decode()],
+        alert_run_time="09:30",
     )
     user = _make_user(tenant_uuid=tenant.id)
     engine = FakeMongoEngine(find_one_results=[tenant])
@@ -367,6 +369,8 @@ def test_get_node_builds_response_with_decrypted_tenant_data(tmp_path, monkeypat
     assert node.tenant.phone == "+1-555"
     assert node.tenant.licenses == ["enterprise"]
     assert node.tenant.quotaExceeded is False
+    assert node.tenant.alertsVisibleToAdmin is True
+    assert node.tenant.alertRunTime == "09:30"
     assert node.alert_summary["unseen_total"] == 3
 
 

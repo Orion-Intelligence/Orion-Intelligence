@@ -31,7 +31,7 @@
                     <tr>
                         <td style="padding:0 28px 8px 28px">
                             <div style="display:inline-block;background:#e0f2fe;color:#075985;font:700 11px/1 Arial,Helvetica,sans-serif;border:1px solid #bae6fd;border-radius:9999px;padding:6px 10px;margin:10px 0 0 0">
-                                Alert Summary
+                                {{summary_label | default('Alert Summary')}}
                             </div>
                         </td>
                     </tr>
@@ -41,7 +41,7 @@
                                 <tr>
                                     <td style="padding:16px 18px;font:14px/1.7 Arial,Helvetica,sans-serif;color:#111827">
                                         <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:130px;color:#64748b">Status</span><strong>{{scan_status}}</strong></div>
-                                        <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:130px;color:#64748b">Total Alerts</span><strong>{{total_alerts}}</strong></div>
+                                        <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:130px;color:#64748b">{{total_alerts_label | default('Total Alerts')}}</span><strong>{{total_alerts}}</strong></div>
                                         <div style="margin:0"><span style="display:inline-block;min-width:130px;color:#64748b">Date</span><strong>{{event_date}}</strong></div>
                                     </td>
                                 </tr>
@@ -52,7 +52,7 @@
                     <tr>
                         <td style="padding:0 28px 8px 28px">
                             <div style="display:inline-block;background:#eef2ff;color:#3730a3;font:700 11px/1 Arial,Helvetica,sans-serif;border:1px solid #c7d2fe;border-radius:9999px;padding:6px 10px">
-                                Counts by Source / Module
+                                {{module_rows_heading | default('Counts by Source / Module')}}
                             </div>
                         </td>
                     </tr>

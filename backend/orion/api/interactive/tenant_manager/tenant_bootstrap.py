@@ -23,6 +23,7 @@ async def create_default_tenant(engine):
         verified=True,
         subscription=True,
         user_quota=-1,
+        privileged_ioc=False,
         iocs=[], )
 
     enc = await TenantManager.encrypt_tenant(data)
