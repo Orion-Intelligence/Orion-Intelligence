@@ -51,6 +51,28 @@ const visitLoginWithCleanAuthState = () => {
     });
 };
 
+const waitForLoginForm = (reloaded = false, attempts = 0): Cypress.Chainable<void> => {
+    return cy.document({ log: false }).then((doc) => {
+        if (doc.querySelector('[data-testid="login-user"]')) {
+            cy.get('[data-testid="login-page"]', { timeout: 60000 }).should('be.visible');
+            cy.get('[data-testid="login-user"]', { timeout: 60000 }).should('be.visible');
+            cy.get('[data-testid="login-pass"]', { timeout: 60000 }).should('be.visible');
+            return cy.wrap<void>(undefined, { log: false });
+        }
+
+        if (attempts < 20) {
+            return cy.wait(500, { log: false }).then(() => waitForLoginForm(reloaded, attempts + 1));
+        }
+
+        if (!reloaded) {
+            cy.reload();
+            return waitForLoginForm(true);
+        }
+
+        throw new Error("Login form did not render after visiting /login");
+    });
+};
+
 Cypress.Commands.add("visitLoginWithCleanAuthState", () => {
     visitLoginWithCleanAuthState();
     return cy.wrap<void>(undefined, { log: false });
@@ -187,8 +209,9 @@ Cypress.Commands.add("loginAsAdmin", () => {
         cy.intercept("POST", "**/api/token").as("loginRequest");
         cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
         cy.visitLoginWithCleanAuthState();
-        cy.get('[data-testid="login-user"]').type(ADMIN_USERNAME);
-        cy.get('[data-testid="login-pass"]').type(ADMIN_PASSWORD, { log: false });
+        waitForLoginForm();
+        cy.get('[data-testid="login-user"]').clear().type(ADMIN_USERNAME);
+        cy.get('[data-testid="login-pass"]').clear().type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
         cy.waitForLoginRequest();
         cy.wait("@tenantNodeRequest", { timeout: 60000 }).its("response.statusCode").should("be.oneOf", [200, 201]);
@@ -208,8 +231,9 @@ Cypress.Commands.add("loginAsTest1", () => {
         cy.intercept("POST", "**/api/token").as("loginRequest");
         cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
         cy.visitLoginWithCleanAuthState();
-        cy.get('[data-testid="login-user"]').type(user.username);
-        cy.get('[data-testid="login-pass"]').type(user.password, { log: false });
+        waitForLoginForm();
+        cy.get('[data-testid="login-user"]').clear().type(user.username);
+        cy.get('[data-testid="login-pass"]').clear().type(user.password, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
         cy.waitForLoginRequest();
         cy.wait("@tenantNodeRequest", { timeout: 60000 }).its("response.statusCode").should("be.oneOf", [200, 201]);
