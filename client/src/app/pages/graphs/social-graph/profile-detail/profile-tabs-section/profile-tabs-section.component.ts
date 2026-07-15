@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, 
 import { PlatformResult, SocialExtensionFetchError, SocialOnlinePresenceResult, SocialStealerLogRecord } from '../../../../../shared/model/social/social-scan.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../../shared/utils/formatters';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
-import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, PostCursorFetchRequest, SocialExtensionStatus } from '../../models/social-graph.models';
+import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, PostContentTabKey, PostCursorFetchRequest, SocialExtensionStatus } from '../../models/social-graph.models';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
@@ -38,6 +38,7 @@ export class SocialProfileTabsSectionComponent {
   platformData = input.required<PlatformResult>();
   fetchTabs = input.required<FetchTab[]>();
   activeTab = input.required<FetchTabKey>();
+  extensionStatusData = input<SocialExtensionStatus | null>(null);
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
   tabSelected = output<FetchTabKey>();
@@ -70,7 +71,10 @@ export class SocialProfileTabsSectionComponent {
       setTimeout(() => this.scrollToImageBottom(), 0);
     });
     effect(() => {
-      if (!this.activeTab().startsWith('extension') || this.loadedExtensionStatus) {
+      const platformData = this.platformData();
+      const shouldLoadStatus = this.activeTab().startsWith('extension')
+        || (this.activeTab() === 'posts' && this.isKnownExtensionPlatform(this.normalizeExtensionPlatform(platformData.platform)));
+      if (!shouldLoadStatus || this.loadedExtensionStatus || this.extensionStatusData()) {
         return;
       }
       queueMicrotask(() => this.refreshExtensionStatus());
@@ -118,13 +122,11 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getExtensionPlatformStatus(platformData: PlatformResult): 'ready' | 'offline' | 'unsupported' {
-    const status = this.extensionStatus();
     const platform = this.normalizeExtensionPlatform(platformData.platform);
-    const extensions = status?.extensions || [];
-    if (!extensions.some(extension => (extension.platforms || []).includes(platform))) {
-      return this.isKnownExtensionPlatform(platform) ? 'offline' : 'unsupported';
+    if (!this.isKnownExtensionPlatform(platform)) {
+      return 'unsupported';
     }
-    return 'ready';
+    return this.hasReadyExtension(platformData) ? 'ready' : 'offline';
   }
 
   getExtensionStatusLabel(platformData: PlatformResult): string {
@@ -173,6 +175,46 @@ export class SocialProfileTabsSectionComponent {
     return status?.backend_url || 'not reached';
   }
 
+  currentExtensionStatus(): SocialExtensionStatus | null {
+    return this.extensionStatusData() ?? this.extensionStatus();
+  }
+
+  isExtensionPostExecutorReady(platformData: PlatformResult): boolean {
+    return this.hasReadyExtension(platformData, 'posts');
+  }
+
+  getPostsTabPlatformData(platformData: PlatformResult): PlatformResult {
+    return this.isExtensionPostExecutorReady(platformData) ? this.getExtensionPlatformData(platformData) : platformData;
+  }
+
+  isPostsTabLoading(platformData: PlatformResult): boolean {
+    return this.isExtensionPostExecutorReady(platformData)
+      ? this.isTabLoading('extensionPosts')
+      : this.isTabLoading('posts');
+  }
+
+  getPostsTabDisplayLimit(platformData: PlatformResult): number | null {
+    return this.isExtensionPostExecutorReady(platformData) ? this.getExtensionPostDisplayLimit(platformData) : null;
+  }
+
+  handlePostsTabRefetch(tabKey: PostContentTabKey): void {
+    const platformData = this.platformData();
+    if (this.isExtensionPostExecutorReady(platformData)) {
+      this.extensionPostCursorFetch.emit({ platformData, tabKey, limit: 20, mergeMode: 'prepend', remoteFetch: true });
+      return;
+    }
+    this.refetchTab.emit(tabKey);
+  }
+
+  handlePostsTabCursorFetch(request: PostCursorFetchRequest): void {
+    const platformData = this.platformData();
+    if (this.isExtensionPostExecutorReady(platformData)) {
+      this.handleExtensionPostCursorFetch({ ...request, platformData });
+      return;
+    }
+    this.postCursorFetch.emit(request);
+  }
+
   private formatExtensionStatusError(status: SocialExtensionStatus | null): string {
     const detail = status?.detail;
     const error = status?.error;
@@ -195,6 +237,22 @@ export class SocialProfileTabsSectionComponent {
 
   private isKnownExtensionPlatform(platform: string): boolean {
     return ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook'].includes(platform);
+  }
+
+  private hasReadyExtension(platformData: PlatformResult, command?: string): boolean {
+    const status = this.currentExtensionStatus();
+    if (!status?.online) {
+      return false;
+    }
+    const platform = this.normalizeExtensionPlatform(platformData.platform);
+    return (status.extensions || []).some(extension => {
+      const isOnline = !extension.status || extension.status === 'online';
+      const platforms = extension.platforms || [];
+      const commands = extension.commands || [];
+      return isOnline
+        && platforms.includes(platform)
+        && (!command || commands.length === 0 || commands.includes(command));
+    });
   }
 
   onOnlinePresenceInput(event: Event): void {
@@ -282,6 +340,17 @@ export class SocialProfileTabsSectionComponent {
     }
     const platformData = this.platformData();
     const key = this.getExtensionPostDisplayKey(platformData);
+    if (request.mergeMode === 'prepend') {
+      this.extensionPostDisplayLimits.update(current => ({ ...current, [key]: this.extensionInitialPostLimit }));
+      this.extensionPostCursorFetch.emit({
+        ...request,
+        platformData,
+        limit: request.limit || 20,
+        mergeMode: 'prepend',
+        remoteFetch: true,
+      });
+      return;
+    }
     const totalPosts = platformData.extensionPosts?.length || 0;
     const currentLimit = this.getExtensionPostDisplayLimit(platformData);
     if (request.remoteFetch) {

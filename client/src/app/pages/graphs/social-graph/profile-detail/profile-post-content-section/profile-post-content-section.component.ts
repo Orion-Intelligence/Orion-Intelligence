@@ -157,12 +157,13 @@ export class SocialProfilePostContentSectionComponent {
       return;
     }
     const posts = this.getUniquePosts(platformData, tabKey);
-    this.prepareScrollAfterFetch();
     const visibleCount = this.displayLimit() ?? posts.length;
     if (this.canRevealCachedPosts(platformData, tabKey)) {
       this.cursorFetch.emit({ platformData, tabKey, limit: Math.min(visibleCount + 5, 100), mergeMode: 'append' });
+      setTimeout(() => this.scrollToPostBottom(), 0);
       return;
     }
+    this.prepareScrollAfterFetch();
     this.cursorFetch.emit({ platformData, tabKey, limit: 5, mergeMode: 'append', remoteFetch: true });
   }
 

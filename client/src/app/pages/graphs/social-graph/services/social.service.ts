@@ -111,8 +111,8 @@ export class SocialService {
     return this.scanService.fetchSocialPosts(platform, username, hashId, maxPosts);
   }
 
-  fetchExtensionSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 20, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0): ReturnType<SocialScanService['fetchExtensionSocialPosts']> {
-    return this.scanService.fetchExtensionSocialPosts(platform, username, hashId, maxPosts, 'posts', 25, 0, postOffset, existingPostUrls, existingPostsCount);
+  fetchExtensionSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 20, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0, socialDataType = 'posts', maxComments = 25, commentOffset = 0): ReturnType<SocialScanService['fetchExtensionSocialPosts']> {
+    return this.scanService.fetchExtensionSocialPosts(platform, username, hashId, maxPosts, socialDataType, maxComments, commentOffset, postOffset, existingPostUrls, existingPostsCount);
   }
 
   fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos?: number): ReturnType<SocialScanService['fetchSocialVideos']> {

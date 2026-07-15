@@ -7,7 +7,7 @@ import { SocialService } from '../services/social.service';
 import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 import { WantedListSectionComponent } from '../wanted-list-section/wanted-list-section.component';
-import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
+import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, OnlinePresenceFetchRequest, PostCursorFetchRequest, SocialExtensionStatus, SocialPlatformCapabilityMap } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
@@ -56,6 +56,7 @@ export class SocialProfileListingComponent {
   activeTabs = signal<Record<string, FetchTabKey | null>>({});
   profileOverviewIds = signal<Set<string>>(new Set<string>());
   activeResultSources = input<Record<string, SocialResultSource>>({});
+  extensionStatus = signal<SocialExtensionStatus | null>(null);
   platformSearchTerm = signal('');
   onlinePresenceSearchTerms = signal<Record<string, string>>({});
   activeUsers = computed<FeedUser[]>(() => {
@@ -93,11 +94,16 @@ export class SocialProfileListingComponent {
       this.activeUsers();
       queueMicrotask(() => this.openProfileOverviewFromQuery());
     });
+    queueMicrotask(() => this.refreshExtensionStatus());
   }
 
   setActiveTab(platformId: string, tabKey: FetchTabKey, platformData?: PlatformResult): void {
     this.activeTabs.update(current => ({ ...current, [platformId]: tabKey }));
     if (platformData && this.shouldAutoFetchTab(tabKey)) {
+      if (tabKey === 'posts' && this.isExtensionSupportedPlatform(platformData.platform)) {
+        this.refreshExtensionStatus(() => this.fetchTabData(platformData, tabKey));
+        return;
+      }
       this.fetchTabData(platformData, tabKey);
     }
   }
@@ -167,6 +173,44 @@ export class SocialProfileListingComponent {
     return this.EXTENSION_PLATFORMS.includes(platform === 'twitter' ? 'x' : platform);
   }
 
+  private refreshExtensionStatus(afterRefresh?: () => void): void {
+    this.state.fetchExtensionStatus().subscribe({
+      next: status => {
+        this.extensionStatus.set(status);
+        afterRefresh?.();
+      },
+      error: () => {
+        this.extensionStatus.set({ online: 0, extensions: [] });
+        afterRefresh?.();
+      }
+    });
+  }
+
+  private isExtensionPostExecutorReady(platformData: PlatformResult): boolean {
+    return this.hasReadyExtension(platformData, 'posts');
+  }
+
+  private hasReadyExtension(platformData: PlatformResult, command?: string): boolean {
+    const status = this.extensionStatus();
+    if (!status?.online) {
+      return false;
+    }
+    const platform = this.normalizeExtensionPlatform(platformData.platform);
+    return (status.extensions || []).some(extension => {
+      const isOnline = !extension.status || extension.status === 'online';
+      const platforms = extension.platforms || [];
+      const commands = extension.commands || [];
+      return isOnline
+        && platforms.includes(platform)
+        && (!command || commands.length === 0 || commands.includes(command));
+    });
+  }
+
+  private normalizeExtensionPlatform(platform: string): string {
+    const value = (platform || '').toLowerCase();
+    return value === 'twitter' ? 'x' : value;
+  }
+
   isFetchTabAllowed(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
     return this.getFetchTabs(platformData).some(tab => tab.key === tabKey);
   }
@@ -195,6 +239,10 @@ export class SocialProfileListingComponent {
         this.fetchMetadataInline.emit(platformData);
         break;
       case 'posts':
+        if (this.isExtensionPostExecutorReady(platformData)) {
+          this.fetchExtensionPostCursorInline.emit({ platformData, tabKey: 'posts', limit: 20, mergeMode: 'prepend', remoteFetch: true });
+          break;
+        }
         this.fetchPostsInline.emit(platformData);
         break;
       case 'extension':
@@ -233,6 +281,10 @@ export class SocialProfileListingComponent {
   }
 
   onProfileTabRefetch(platformData: PlatformResult, tabKey: FetchTabKey): void {
+    if (tabKey === 'posts' && this.isExtensionSupportedPlatform(platformData.platform)) {
+      this.refreshExtensionStatus(() => this.refetchTabData(platformData, tabKey));
+      return;
+    }
     this.refetchTabData(platformData, tabKey);
   }
 
@@ -259,6 +311,9 @@ export class SocialProfileListingComponent {
       return currentStates;
     }, {});
     if (this.isExtensionSupportedPlatform(platformData.platform)) {
+      if (this.isExtensionPostExecutorReady(platformData)) {
+        states.posts = this.isTabLoading(platformData, 'extensionPosts');
+      }
       states.extensionDetails = this.isTabLoading(platformData, 'extensionDetails');
       states.extensionPosts = this.isTabLoading(platformData, 'extensionPosts');
       states.extension = !!(states.extensionDetails || states.extensionPosts);
@@ -271,6 +326,9 @@ export class SocialProfileListingComponent {
       case 'details':
         return this.getProfileDetailEntries(platformData).length > 0;
       case 'posts':
+        if (this.isExtensionPostExecutorReady(platformData)) {
+          return this.getUniquePosts(this.getExtensionPlatformData(platformData), 'posts').length > 0;
+        }
         return this.getUniquePosts(platformData, 'posts').length > 0;
       case 'extension':
         return this.hasExtensionData(platformData);

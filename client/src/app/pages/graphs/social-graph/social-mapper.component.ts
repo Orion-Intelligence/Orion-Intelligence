@@ -338,10 +338,14 @@ export class SocialMapperComponent implements OnDestroy {
 
   handleFetchExtensionPostCursor(request: PostCursorFetchRequest): void {
     const p = request.platformData;
-    const existingPosts = p.extensionPosts || p.posts || [];
-    const postOffset = existingPosts.length;
+    if (request.commentsOnly) {
+      this.fetchData(p, 'extensionPosts', this.state.fetchExtensionSocialPosts(p.platform, p.username, request.cursorId, 1, 0, [], 0, 'comments', request.maxComments || 10, request.commentOffset || 0), this.cancelExtensionPostFetchSubjects, 'update');
+      return;
+    }
+    const existingPosts = request.mergeMode === 'prepend' ? [] : p.extensionPosts || p.posts || [];
+    const postOffset = request.mergeMode === 'prepend' ? 0 : existingPosts.length;
     const postLimit = request.limit || (postOffset > 0 ? 5 : 20);
-    const mergeMode = postOffset > 0 ? 'append' : undefined;
+    const mergeMode = request.mergeMode === 'prepend' ? undefined : postOffset > 0 ? 'append' : undefined;
     const existingPostUrls = existingPosts.map(post => post.post_url || (post as any).url || '').filter(Boolean);
     this.fetchData(p, 'extensionPosts', this.state.fetchExtensionSocialPosts(p.platform, p.username, undefined, postLimit, postOffset, existingPostUrls, postOffset), this.cancelExtensionPostFetchSubjects, mergeMode);
   }

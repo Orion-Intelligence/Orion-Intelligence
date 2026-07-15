@@ -301,10 +301,8 @@ class social_model:
             normalized_browser = browser.strip().lower()
             if normalized_browser in {"firefox", "mozilla"}:
                 path = "extensions/download/firefox"
-                filename = "Orion-Extension-Firefox.zip"
             else:
                 path = "extensions/download/chrome"
-                filename = "Orion-Extension-Chrome.zip"
             for base_url in self._social_api_base_urls():
                 try:
                     async with httpx.AsyncClient() as client:
@@ -316,8 +314,11 @@ class social_model:
                     return JSONResponse(status_code=response.status_code, content={"detail": "Extension download failed"})
                 return Response(
                     content=response.content,
-                    media_type="application/zip",
-                    headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+                    media_type=response.headers.get("content-type", "application/octet-stream"),
+                    headers={
+                        "Content-Disposition": response.headers.get("content-disposition", f'attachment; filename="{normalized_browser}-extension"'),
+                        "Cache-Control": "no-store",
+                    },
                 )
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Extension download failed"})
