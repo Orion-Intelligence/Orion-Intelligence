@@ -49,7 +49,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   composerExpanded = false;
   composerRows = 1;
   composerScrollable = false;
-  activeChatId: string | null = null;
+  activeSessionId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
   constructor(protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
@@ -92,7 +92,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.cancelMessageEdit();
     this.detachActiveNexusRequest();
 
-    const sendToChat = (chatId: string) => {
+    const sendToSession = (sessionId: string) => {
       this.messageDraft = '';
       this.queueComposerResize();
 
@@ -101,7 +101,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       this.streamingMessageId.set(null);
       this.nexusStep.set('Thinking');
 
-      this.nexusChatService.sendMessageToChat(chatId, text).subscribe({
+      this.nexusChatService.sendMessageToChat(sessionId, text).subscribe({
         next: (response) => {
           const userMessage = this.mapMessage(response.user_message);
           const assistantMessage = this.mapMessage(response.assistant_message);
@@ -113,7 +113,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           ];
 
           this.chatSessions = this.chatSessions.map(session =>
-            session.id === response.chat.id
+            session.sessionId === response.chat.session_id
               ? {
                 ...session,
                 title: response.chat.title,
@@ -146,8 +146,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       });
     };
 
-    if (this.activeChatId) {
-      sendToChat(this.activeChatId);
+    if (this.activeSessionId) {
+      sendToSession(this.activeSessionId);
       return;
     }
 
@@ -159,10 +159,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           mappedSession,
           ...this.chatSessions,
         ]);
-        this.activeChatId = mappedSession.id;
+        this.activeSessionId = mappedSession.sessionId;
         this.messages = [];
 
-        sendToChat(mappedSession.id);
+        sendToSession(mappedSession.sessionId);
       },
       error: () => {
         this.messages = [...this.messages, this.createErrorMessage(text)];
@@ -232,10 +232,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
         this.chatSessions = this.sortChatSessions([
           mappedSession,
-          ...this.chatSessions.filter(chat => chat.id !== mappedSession.id),
+          ...this.chatSessions.filter(chat => chat.sessionId !== mappedSession.sessionId),
         ]);
 
-        this.activeChatId = mappedSession.id;
+        this.activeSessionId = mappedSession.sessionId;
         this.messages = [];
         this.messageDraft = '';
 
@@ -409,7 +409,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private mapSession(session: any): AiChatSession {
     return {
-      id: session.id,
+      sessionId: session.session_id,
       title: session.title,
       updatedAt: session.updated_at,
       isPinned: session.is_pinned ?? false,
@@ -433,29 +433,29 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.nexusChatService.listChats().subscribe({
       next: (sessions) => {
         this.chatSessions = this.sortChatSessions(sessions.map(session => this.mapSession(session)));
-        this.activeChatId = null;
+        this.activeSessionId = null;
         this.messages = [];
         this.isLoadingHistory.set(false);
       },
       error: () => {
         this.chatSessions = [];
         this.messages = [];
-        this.activeChatId = null;
+        this.activeSessionId = null;
         this.isLoadingHistory.set(false);
       },
     });
   }
 
-  private loadChat(chatId: string): void {
+  private loadChat(sessionId: string): void {
     this.isLoadingHistory.set(true);
 
-    this.nexusChatService.getChat(chatId).subscribe({
+    this.nexusChatService.getChat(sessionId).subscribe({
       next: (chat) => {
-        this.activeChatId = chat.id;
+        this.activeSessionId = chat.session_id;
         this.messages = chat.messages.map(message => this.mapMessage(message));
 
         this.chatSessions = this.chatSessions.map(session =>
-          session.id === chat.id
+          session.sessionId === chat.session_id
             ? {
               ...session,
               title: chat.title,
@@ -499,28 +499,28 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.activeChatId === session.id) {
+    if (this.activeSessionId === session.sessionId) {
       return;
     }
 
-    this.loadChat(session.id);
+    this.loadChat(session.sessionId);
   }
 
   onSidebarSessionUpdated(session: AiChatSession): void {
-    this.chatSessions = this.sortChatSessions(this.chatSessions.map(chat => chat.id === session.id ? { ...chat, ...session } : chat));
+    this.chatSessions = this.sortChatSessions(this.chatSessions.map(chat => chat.sessionId === session.sessionId ? { ...chat, ...session } : chat));
   }
 
-  onSidebarChatDeleted(chatId: string): void {
-    this.chatSessions = this.chatSessions.filter(chat => chat.id !== chatId);
-    if (this.activeChatId !== chatId) {
+  onSidebarSessionDeleted(sessionId: string): void {
+    this.chatSessions = this.chatSessions.filter(chat => chat.sessionId !== sessionId);
+    if (this.activeSessionId !== sessionId) {
       return;
     }
     const nextChat = this.chatSessions[0];
     if (nextChat) {
-      this.loadChat(nextChat.id);
+      this.loadChat(nextChat.sessionId);
     }
     else {
-      this.activeChatId = null;
+      this.activeSessionId = null;
       this.messages = [];
       this.messageDraft = '';
     }

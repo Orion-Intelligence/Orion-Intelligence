@@ -155,7 +155,7 @@ async def list_nexus_chats(current_user=Depends(get_current_user)):
 
 
 @ai_routes.get(
-    "/api/nexus/chats/{chat_id}",
+    "/api/nexus/chats/{session_id}",
     status_code=200,
     include_in_schema=False,
     dependencies=[
@@ -165,12 +165,12 @@ async def list_nexus_chats(current_user=Depends(get_current_user)):
         Depends(limiter_dependency),
     ],
 )
-async def get_nexus_chat(chat_id: str, current_user=Depends(get_current_user)):
-    return await nexus_chat_gateway.getInstance().get_chat(chat_id, current_user)
+async def get_nexus_chat(session_id: str, current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().get_chat(session_id, current_user)
 
 
 @ai_routes.post(
-    "/api/nexus/chats/{chat_id}/messages",
+    "/api/nexus/chats/{session_id}/messages",
     status_code=200,
     include_in_schema=False,
     dependencies=[
@@ -180,12 +180,12 @@ async def get_nexus_chat(chat_id: str, current_user=Depends(get_current_user)):
         Depends(limiter_dependency),
     ],
 )
-async def send_nexus_chat_message(chat_id: str, payload: dict = Body(...), current_user=Depends(get_current_user)):
-    return await nexus_chat_gateway.getInstance().send_message(chat_id, payload, current_user)
+async def send_nexus_chat_message(session_id: str, payload: dict = Body(...), current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().send_message(session_id, payload, current_user)
 
 
 @ai_routes.put(
-    "/api/nexus/chats/{chat_id}",
+    "/api/nexus/chats/{session_id}",
     status_code=200,
     include_in_schema=False,
     dependencies=[
@@ -195,12 +195,12 @@ async def send_nexus_chat_message(chat_id: str, payload: dict = Body(...), curre
         Depends(limiter_dependency),
     ],
 )
-async def rename_nexus_chat(chat_id: str, payload: dict = Body(...), current_user=Depends(get_current_user)):
-    return await nexus_chat_gateway.getInstance().rename_chat(chat_id, payload, current_user)
+async def rename_nexus_chat(session_id: str, payload: dict = Body(...), current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().rename_chat(session_id, payload, current_user)
 
 
 @ai_routes.delete(
-    "/api/nexus/chats/{chat_id}",
+    "/api/nexus/chats/{session_id}",
     status_code=200,
     include_in_schema=False,
     dependencies=[
@@ -210,5 +210,5 @@ async def rename_nexus_chat(chat_id: str, payload: dict = Body(...), current_use
         Depends(limiter_dependency),
     ],
 )
-async def delete_nexus_chat(chat_id: str, current_user=Depends(get_current_user)):
-    return await nexus_chat_gateway.getInstance().delete_chat(chat_id, current_user)
+async def delete_nexus_chat(session_id: str, current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().delete_chat(session_id, current_user)

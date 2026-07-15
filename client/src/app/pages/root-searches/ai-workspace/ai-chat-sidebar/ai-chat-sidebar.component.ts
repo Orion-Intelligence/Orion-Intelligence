@@ -17,19 +17,19 @@ import { NexusChatService } from '../nexus-chat.service';
 })
 export class AiChatSidebarComponent {
   readonly sessions = input<AiChatSession[]>([]);
-  readonly activeChatId = input<string | null>(null);
+  readonly activeSessionId = input<string | null>(null);
   readonly isBusy = input(false);
   readonly newChat = output<void>();
   readonly chatSelected = output<AiChatSession>();
   readonly sessionUpdated = output<AiChatSession>();
-  readonly chatDeleted = output<string>();
-  openedChatMenuId: string | null = null;
+  readonly sessionDeleted = output<string>();
+  openedSessionMenuId: string | null = null;
   deleteChatTarget: AiChatSession | null = null;
   renameChatTarget: AiChatSession | null = null;
   renameChatDraft = '';
   searchOpen = false;
   searchQuery = '';
-  sharingChatId: string | null = null;
+  sharingSessionId: string | null = null;
   isCollapsed = false;
 
   constructor(private readonly nexusChatService: NexusChatService, private readonly api: ApiService) {}
@@ -64,12 +64,12 @@ export class AiChatSidebarComponent {
 
   toggleChatMenu(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
-    this.openedChatMenuId = this.openedChatMenuId === chat.id ? null : chat.id;
+    this.openedSessionMenuId = this.openedSessionMenuId === chat.sessionId ? null : chat.sessionId;
   }
 
   togglePinChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
-    this.nexusChatService.pinChatSession(chat.id, !chat.isPinned).subscribe({
+    this.nexusChatService.pinChatSession(chat.sessionId, !chat.isPinned).subscribe({
       next: updated => {
         this.sessionUpdated.emit(this.updatedSession(chat, updated));
         this.closeChatMenu();
@@ -79,11 +79,11 @@ export class AiChatSidebarComponent {
 
   shareChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
-    if (this.sharingChatId) {
+    if (this.sharingSessionId) {
       return;
     }
-    this.sharingChatId = chat.id;
-    this.nexusChatService.getChat(chat.id).subscribe({
+    this.sharingSessionId = chat.sessionId;
+    this.nexusChatService.getChat(chat.sessionId).subscribe({
       next: chatDetail => {
         const messages = chatDetail.messages.map(message => ({
           sender: message.sender,
@@ -119,7 +119,7 @@ export class AiChatSidebarComponent {
     if (!chat || !title) {
       return;
     }
-    this.nexusChatService.renameChatSession(chat.id, title).subscribe({
+    this.nexusChatService.renameChatSession(chat.sessionId, title).subscribe({
       next: updated => {
         this.sessionUpdated.emit(this.updatedSession(chat, updated));
         this.closeRenameChatPopup();
@@ -151,13 +151,13 @@ export class AiChatSidebarComponent {
     if (!confirmed || !chat) {
       return;
     }
-    this.nexusChatService.deleteChatSession(chat.id).subscribe({
-      next: () => this.chatDeleted.emit(chat.id),
+    this.nexusChatService.deleteChatSession(chat.sessionId).subscribe({
+      next: () => this.sessionDeleted.emit(chat.sessionId),
     });
   }
 
   closeChatMenu(): void {
-    this.openedChatMenuId = null;
+    this.openedSessionMenuId = null;
   }
 
   get filteredSessions(): AiChatSession[] {
@@ -182,14 +182,14 @@ export class AiChatSidebarComponent {
   }
 
   private finishSharing(): void {
-    this.sharingChatId = null;
+    this.sharingSessionId = null;
     this.closeChatMenu();
   }
 
   private updatedSession(current: AiChatSession, updated: NexusChatSession): AiChatSession {
     return {
       ...current,
-      id: updated.id,
+      sessionId: updated.session_id,
       title: updated.title,
       updatedAt: updated.updated_at,
       isPinned: updated.is_pinned ?? false,

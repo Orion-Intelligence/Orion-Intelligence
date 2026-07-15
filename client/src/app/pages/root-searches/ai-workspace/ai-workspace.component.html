@@ -2,7 +2,7 @@
   <main class="relative min-h-0 flex-grow">
     <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
       <div class="relative flex min-h-0 flex-grow flex-row">
-        <app-ai-chat-sidebar class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]" [sessions]="chatSessions" [activeChatId]="activeChatId" [isBusy]="isSending() || isStreamingReply()" (newChat)="startNewChat()" (chatSelected)="selectChat($event)" (sessionUpdated)="onSidebarSessionUpdated($event)" (chatDeleted)="onSidebarChatDeleted($event)"></app-ai-chat-sidebar>
+        <app-ai-chat-sidebar class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]" [sessions]="chatSessions" [activeSessionId]="activeSessionId" [isBusy]="isSending() || isStreamingReply()" (newChat)="startNewChat()" (chatSelected)="selectChat($event)" (sessionUpdated)="onSidebarSessionUpdated($event)" (sessionDeleted)="onSidebarSessionDeleted($event)"></app-ai-chat-sidebar>
 
         <main class="ui-social-dashboard-shell relative flex min-h-0 min-w-0 flex-grow flex-col bg-transparent">
           <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">

@@ -81,10 +81,10 @@ class nexus_chat_gateway:
             current_user=current_user,
         )
 
-    async def get_chat(self, chat_id: str, current_user):
+    async def get_chat(self, session_id: str, current_user):
         return await self._request(
             method="GET",
-            path=f"/v1/chats/{chat_id}",
+            path=f"/v1/chats/{session_id}",
             current_user=current_user,
         )
 
@@ -97,25 +97,25 @@ class nexus_chat_gateway:
     async def clear_chat_history(self, payload: dict[str, Any], current_user):
         return await self._request(method="POST", path="/v1/chats/history/clear", current_user=current_user, json_body=payload)
 
-    async def send_message(self, chat_id: str, payload: dict[str, Any], current_user):
+    async def send_message(self, session_id: str, payload: dict[str, Any], current_user):
         return await self._request(
             method="POST",
-            path=f"/v1/chats/{chat_id}/messages",
+            path=f"/v1/chats/{session_id}/messages",
             current_user=current_user,
             json_body=payload,
         )
 
-    async def rename_chat(self, chat_id: str, payload: dict[str, Any], current_user):
+    async def rename_chat(self, session_id: str, payload: dict[str, Any], current_user):
         return await self._request(
             method="PUT",
-            path=f"/v1/chats/{chat_id}",
+            path=f"/v1/chats/{session_id}",
             current_user=current_user,
             json_body=payload,
         )
 
-    async def delete_chat(self, chat_id: str, current_user):
+    async def delete_chat(self, session_id: str, current_user):
         return await self._request(
             method="DELETE",
-            path=f"/v1/chats/{chat_id}",
+            path=f"/v1/chats/{session_id}",
             current_user=current_user,
         )

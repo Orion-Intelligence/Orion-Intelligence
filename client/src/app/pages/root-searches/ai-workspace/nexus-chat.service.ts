@@ -371,30 +371,30 @@ export class NexusChatService {
   }
 
   createChat(title = 'New Chat'): Observable<NexusChatSession> {
-    return this.api.post<NexusChatSession>('nexus/chats', { title });
+    return this.api.post<NexusChatSession>('nexus/chats', { title, session_id: crypto.randomUUID() });
   }
 
-  getChat(chatId: string): Observable<NexusChatDetail> {
-    return this.api.get<NexusChatDetail>(`nexus/chats/${chatId}`);
+  getChat(sessionId: string): Observable<NexusChatDetail> {
+    return this.api.get<NexusChatDetail>(`nexus/chats/${sessionId}`);
   }
 
-  sendMessageToChat(chatId: string, text: string): Observable<NexusSendMessageResponse> {
-    return this.api.post<NexusSendMessageResponse>(`nexus/chats/${chatId}/messages`, { text });
+  sendMessageToChat(sessionId: string, text: string): Observable<NexusSendMessageResponse> {
+    return this.api.post<NexusSendMessageResponse>(`nexus/chats/${sessionId}/messages`, { text });
   }
 
-  renameChatSession(chatId: string, title: string): Observable<NexusChatSession> {
-    return this.api.put<NexusChatSession>(`nexus/chats/${chatId}`, { title });
+  renameChatSession(sessionId: string, title: string): Observable<NexusChatSession> {
+    return this.api.put<NexusChatSession>(`nexus/chats/${sessionId}`, { title });
   }
 
-  deleteChatSession(chatId: string): Observable<{ success: boolean }> {
-    return this.api.delete<{ success: boolean }>(`nexus/chats/${chatId}`);
+  deleteChatSession(sessionId: string): Observable<{ success: boolean }> {
+    return this.api.delete<{ success: boolean }>(`nexus/chats/${sessionId}`);
   }
 
-  updateChatSession(chatId: string, payload: { title?: string; is_pinned?: boolean }): Observable<NexusChatSession> {
-    return this.api.put<NexusChatSession>(`nexus/chats/${chatId}`, payload);
+  updateChatSession(sessionId: string, payload: { title?: string; is_pinned?: boolean }): Observable<NexusChatSession> {
+    return this.api.put<NexusChatSession>(`nexus/chats/${sessionId}`, payload);
   }
 
-  pinChatSession(chatId: string, isPinned: boolean): Observable<NexusChatSession> {
-    return this.updateChatSession(chatId, { is_pinned: isPinned });
+  pinChatSession(sessionId: string, isPinned: boolean): Observable<NexusChatSession> {
+    return this.updateChatSession(sessionId, { is_pinned: isPinned });
   }
 }

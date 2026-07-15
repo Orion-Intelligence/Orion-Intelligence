@@ -1,7 +1,7 @@
 import { AiWorkspaceMessage } from "../chat/ai-workspace-message.model";
 
 export interface AiChatSession {
-    id: string;
+    sessionId: string;
     title: string;
     updatedAt: string;
     messages: AiWorkspaceMessage[];
@@ -10,7 +10,7 @@ export interface AiChatSession {
 }
 
 export interface NexusChatSession {
-    id: string;
+    session_id: string;
     title: string;
     created_at: string;
     updated_at: string;

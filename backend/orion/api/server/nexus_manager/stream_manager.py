@@ -57,6 +57,8 @@ class NexusStreamManager:
                     "session_id": session_id,
                     "session_type": session_type or "persistent",
                 }
+                if type_name and type_name != "default":
+                    arguments["type"] = type_name
                 if auth_token:
                     arguments["_auth_token"] = auth_token
                 if history:
