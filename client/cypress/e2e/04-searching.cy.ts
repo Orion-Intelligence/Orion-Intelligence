@@ -144,8 +144,9 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Exploit');
     typeDashboardSearchSlow('exploit');
-    clickOpenExploitReport();
+    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]').should('have.length.greaterThan', 0);
     cy.docsScreenshot('exploit-results');
+    clickOpenExploitReport();
 
     cy.get('[data-testid="dashboard-header-back"]').click();
     cy.location('pathname').should('not.match', /\/dashboard\/[^/]+\/[^/]+\/[a-f0-9]{32,}/);

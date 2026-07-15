@@ -21,11 +21,12 @@ stop_ng_serve() {
     local pid_file="/tmp/orion-ng-serve.pid"
 
     if [ -f "$pid_file" ]; then
-        kill "$(cat "$pid_file")" 2>/dev/null || true
+        kill -9 "$(cat "$pid_file")" 2>/dev/null || true
         rm -f "$pid_file"
     fi
-    pkill -f "ng serve.*--port 4200" 2>/dev/null || true
-    pkill -f "npm run serve -- --host 127.0.0.1 --port 4200" 2>/dev/null || true
+    pkill -9 -f '(^|[[:space:]/])ng([[:space:]].*)? serve([[:space:]]|$)' 2>/dev/null || true
+    pkill -9 -f 'node .*@angular/cli/bin/ng serve' 2>/dev/null || true
+    pkill -9 -f "npm run serve -- --host 127.0.0.1 --port 4200" 2>/dev/null || true
 
     while curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
         sleep 1
@@ -202,6 +203,7 @@ if [ "$1" = "stop" ]; then
 fi
 
 if [ "$1" = "-doc" ]; then
+    docker compose -p "$PROJECT_NAME" -f docker-compose-testing.yml down -v --remove-orphans
     "$0" build -t
     restart_ng_serve
     bash docs/scripts/generate_docs.sh --clear
@@ -209,6 +211,7 @@ if [ "$1" = "-doc" ]; then
 fi
 
 if [ "$1" = "-docs" ]; then
+    docker compose -p "$PROJECT_NAME" -f docker-compose-testing.yml down -v --remove-orphans
     "$0" build -t
     restart_ng_serve
     bash docs/scripts/generate_docs.sh
@@ -219,7 +222,7 @@ COMMAND=$1
 FLAG=$2
 EXTRA_FLAG=$3
 
-if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ]; then
+if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ] || [ "$FLAG" != "-docs" ]; then
     stop_docker
 fi
 

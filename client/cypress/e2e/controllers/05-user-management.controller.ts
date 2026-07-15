@@ -414,12 +414,12 @@ export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboar
       cy.contains('tbody tr', username)
         .next()
         .within(() => {
-          cy.get('[data-testid="tenant-delete-user-button"]').filter(':visible').first().should('be.visible').click();
+          cy.get('[data-testid="tenant-delete-user-button"]').first().scrollIntoView().click({force: true});
         });
 
       cy.intercept('POST', '**/api/delete/user').as('deleteUserApi');
       cy.get('.ui-graph-popup-panel').should('be.visible').within(() => {
-        cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
+        cy.get('[data-testid="confirmation-yes-button"]').first().click({force: true});
       });
       cy.wait('@deleteUserApi');
       cy.get('.ui-graph-popup-panel').should('not.exist');

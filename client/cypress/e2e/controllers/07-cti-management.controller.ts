@@ -20,8 +20,15 @@ export function waitForCtiGraphReady() {
   cy.get('[data-testid="cti-network-container"] canvas').should('exist');
 }
 
+function setConfiguredViewport() {
+  cy.viewport(
+    Number(Cypress.config('viewportWidth')) || 1920,
+    Number(Cypress.config('viewportHeight')) || 1080
+  );
+}
+
 export function visitCtiGraph() {
-  cy.viewport(1440, 900);
+  setConfiguredViewport();
   cy.visit('/dashboard/ctigraph');
   cy.location('pathname').should('include', '/dashboard/ctigraph');
   cy.get('[data-testid="cti-graph-root"]').should('be.visible');

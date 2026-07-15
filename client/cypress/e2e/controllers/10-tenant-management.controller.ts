@@ -29,6 +29,13 @@ export interface CaseAlertTenant {
   companyName: string;
 }
 
+function setConfiguredViewport() {
+  cy.viewport(
+    Number(Cypress.config('viewportWidth')) || 1920,
+    Number(Cypress.config('viewportHeight')) || 1080
+  );
+}
+
 function scrollTenantTableToBottomLeft() {
   cy.get('[data-testid="tenant-page-header"]').should('be.visible');
 
@@ -500,7 +507,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 }
 
 export function openTenantsPage() {
-  cy.viewport(1440, 900);
+  setConfiguredViewport();
   cy.get('[data-testid="sidebar-subitem-profile-tenant"]').filter(':visible').first().scrollIntoView().click();
   cy.location('pathname').then((path) => {
     if (!path.includes('/dashboard/profile/tenant')) {
@@ -511,7 +518,7 @@ export function openTenantsPage() {
 }
 
 export function openAuditLogPage() {
-  cy.viewport(1440, 900);
+  setConfiguredViewport();
   cy.visit('/dashboard/profile/auditlog');
   cy.location('pathname').should('include', '/dashboard/profile/auditlog');
   cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');

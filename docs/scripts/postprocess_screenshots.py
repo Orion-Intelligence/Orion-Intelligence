@@ -5,11 +5,13 @@ import sys
 import re
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFont
+from PIL import Image, ImageChops, ImageDraw, ImageFont, PngImagePlugin
 
 
 ROOT = Path(__file__).resolve().parents[2]
 USER_MANUAL = ROOT / "docs" / "app_docs" / "user_manual.md"
+POSTPROCESS_MARKER_KEY = "orion_docs_postprocessed"
+POSTPROCESS_MARKER_VALUE = "1920x1080-v1"
 
 
 def load_caption_map() -> dict[str, str]:
@@ -108,7 +110,7 @@ def normalize_canvas(
     target_width, target_height = target_size
     width, height = image.size
 
-    scale = max(target_width / max(1, width), target_height / max(1, height))
+    scale = min(target_width / max(1, width), target_height / max(1, height), 1)
     resized_width = max(1, round(width * scale))
     resized_height = max(1, round(height * scale))
     resized = image.resize((resized_width, resized_height), Image.Resampling.LANCZOS)
@@ -164,18 +166,20 @@ def add_label(image: Image.Image, label: str) -> Image.Image:
 
 def process_image(
     path: Path,
-    crop_top: int = 3,
-    crop_right: int = 18,
-    crop_bottom: int = 22,
+    crop_top: int = 0,
+    crop_right: int = 0,
+    crop_bottom: int = 0,
     radius: int = 42,
-    final_trim: int = 2,
+    final_trim: int = 0,
     border_width: int = 3,
-    target_size: tuple[int, int] = (1418, 871),
+    target_size: tuple[int, int] = (1920, 1080),
 ) -> None:
-    image = Image.open(path).convert("RGBA")
-    label = label_for_path(path)
-    if image.size == target_size:
+    source = Image.open(path)
+    if source.size == target_size and source.info.get(POSTPROCESS_MARKER_KEY) == POSTPROCESS_MARKER_VALUE:
         return
+
+    image = source.convert("RGBA")
+    label = label_for_path(path)
 
     width, height = image.size
 
@@ -207,7 +211,9 @@ def process_image(
         )
         canvas.alpha_composite(accent)
 
-    canvas.save(path)
+    metadata = PngImagePlugin.PngInfo()
+    metadata.add_text(POSTPROCESS_MARKER_KEY, POSTPROCESS_MARKER_VALUE)
+    canvas.save(path, pnginfo=metadata)
 
 
 def main() -> int:

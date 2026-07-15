@@ -172,7 +172,7 @@ export default defineConfig({
             on("before:browser:launch", (browser, launchOptions) => {
                 if (browser.family === "chromium") {
                     launchOptions.args.push("--start-maximized");
-                    launchOptions.args.push("--window-size=1920,1440");
+                    launchOptions.args.push("--window-size=1920,1080");
                     launchOptions.args.push("--force-device-scale-factor=1");
                 }
                 return launchOptions;
@@ -205,7 +205,7 @@ export default defineConfig({
         },
         baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1920,
-        viewportHeight: 1440,
+        viewportHeight: 1080,
         defaultCommandTimeout: 60000,
         requestTimeout: 60000,
         responseTimeout: 60000,
