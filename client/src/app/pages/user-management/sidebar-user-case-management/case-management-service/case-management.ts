@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusReason, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
+import { CaseStatusBoardConfig } from '../../../../shared/model/case-management/status-board-config.model';
 
 type ArtifactFileIntegrityResult = {
   fileId: string;
@@ -35,6 +36,18 @@ export class CaseManagement {
 
   getCases(archived = false): Observable<Case[]> {
     return this.api.get<Case[]>(`profile/cases?archived=${archived}`);
+  }
+
+  getStatusBoardConfig(): Observable<CaseStatusBoardConfig> {
+    return this.api.get<CaseStatusBoardConfig>('profile/cases/status-board-config');
+  }
+
+  updateSystemStatusBoardConfig(payload: CaseStatusBoardConfig): Observable<CaseStatusBoardConfig> {
+    return this.api.put<CaseStatusBoardConfig>('profile/cases/status-board-config/system', payload);
+  }
+
+  updateTenantStatusBoardConfig(payload: CaseStatusBoardConfig): Observable<CaseStatusBoardConfig> {
+    return this.api.put<CaseStatusBoardConfig>('profile/cases/status-board-config/tenant', payload);
   }
 
   createCase(caseData: CaseRequest): Observable<Case> {

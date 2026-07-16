@@ -58,6 +58,7 @@ const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-u
 const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
 const loadSatelliteIntelComponent = () => import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m => m.SatelliteIntel);
 const loadCaseTrackingBoardComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-tracking-board/case-tracking-board').then(m => m.CaseTrackingBoard);
+const loadCaseTrackingBoardSettingsComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-tracking-board-settings/case-tracking-board-settings').then(m => m.CaseTrackingBoardSettings);
 const loadScanReportComponent = () => import('./pages/scan-report/scan-report.component').then(m => m.ScanReportComponent);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
@@ -893,6 +894,11 @@ export const routes: Routes = [
                 path: 'tracking-board',
                 loadComponent: loadCaseTrackingBoardComponent,
                 data: { type: 'case-tracking-board', animation: 'CaseTrackingBoardPage' }
+              },
+              {
+                path: 'tracking-board/settings',
+                loadComponent: loadCaseTrackingBoardSettingsComponent,
+                data: { type: 'case-tracking-board-settings', animation: 'CaseTrackingBoardSettingsPage' }
               },
               {
                 path: 'admin-alerts/:tenantId/:type',

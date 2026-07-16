@@ -1,16 +1,12 @@
 from datetime import datetime
+import re
 from typing import List
 from typing import Optional
 
-from pydantic import BaseModel
-from pydantic import ConfigDict
-from pydantic import Field
-from pydantic import field_validator
-from pydantic import model_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from orion.services.mongo_manager.shared_model.db_case_model import ArtifactType
 from orion.services.mongo_manager.shared_model.db_case_model import CaseLinkRelationship
-from orion.services.mongo_manager.shared_model.db_case_model import CaseStatus
 from orion.services.mongo_manager.shared_model.db_case_model import CaseTag
 from orion.services.mongo_manager.shared_model.db_case_model import CaseType
 from orion.services.mongo_manager.shared_model.db_case_model import ClosureReason
@@ -176,7 +172,7 @@ class CreateCaseRequest(CaseRequestModel):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: CaseStatus = Field(default=CaseStatus.NEW)
+    status: str = Field(default="new")
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
@@ -230,7 +226,7 @@ class UpdateCaseRequest(CaseRequestModel):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: CaseStatus = Field(default=CaseStatus.NEW)
+    status: str = Field(default="new")
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
@@ -290,7 +286,7 @@ class CaseResponse(BaseModel):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: CaseStatus = Field(default=CaseStatus.NEW)
+    status: str = Field(default="new")
     statusReasons: List[dict] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
@@ -326,8 +322,16 @@ class CaseShareResponse(BaseModel):
 
 
 class UpdateCaseStatusRequest(CaseRequestModel):
-    status: CaseStatus
+    status: str
     reason: str
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, value: str) -> str:
+        value = (value or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if not value:
+            raise ValueError("Status is required")
+        return value
 
     @field_validator("reason")
     @classmethod
@@ -348,3 +352,48 @@ class AssignCaseAnalystRequest(CaseRequestModel):
         if not value:
             raise ValueError("Analyst ID is required")
         return value
+
+
+class CaseStatusBoardItem(BaseModel):
+    value: str
+    label: str = ""
+    enabled: bool = True
+    skippable: bool = False
+    custom: bool = False
+    order: int = 0
+
+    @field_validator("value")
+    @classmethod
+    def validate_value(cls, value: str) -> str:
+        value = (value or "").strip().lower().replace("-", "_").replace(" ", "_")
+        STATUS_KEY_PATTERN = re.compile(r"^[a-z][a-z0-9_]{1,63}$")
+        if not STATUS_KEY_PATTERN.match(value):
+            raise ValueError("Status key must use lowercase letters, numbers, and underscores")
+        return value
+
+    @field_validator("label")
+    @classmethod
+    def validate_label(cls, value: str) -> str:
+        value = (value or "").strip()
+        if len(value) > 80:
+            raise ValueError("Status display name is too long")
+        return value
+    
+class CaseStatusBoardConfig(BaseModel):
+    supportsOrdering: bool = True
+    statuses: List[CaseStatusBoardItem] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def validate_statuses(self):
+        if not self.statuses:
+            raise ValueError("At least one status is required")
+
+        values = [item.value.lower() for item in self.statuses]
+        labels = [(item.label or (item.value).replace("_", " ").replace("-", " ").title()).strip().lower() for item in self.statuses]
+        if len(values) != len(set(values)):
+            raise ValueError("Duplicate status keys are not allowed")
+        if len(labels) != len(set(labels)):
+            raise ValueError("Duplicate status display names are not allowed")
+        if "new" not in values or "closed" not in values:
+            raise ValueError("New and Closed statuses are required")
+        return self

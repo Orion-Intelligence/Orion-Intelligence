@@ -363,7 +363,7 @@ class CaseClosure(BaseModel):
 
 
 class CaseStatusReason(EmbeddedModel):
-    status: CaseStatus
+    status: str
     reason: str
 
 
@@ -376,6 +376,7 @@ class CaseShare(EmbeddedModel):
     revokedAt: Optional[datetime] = None
 
 
+
 class db_case_model(Model):
     caseId: str = Field(index=True)
     tenant_uuid: str = Field(index=True)
@@ -384,7 +385,7 @@ class db_case_model(Model):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: CaseStatus = Field(default=CaseStatus.NEW)
+    status: str = Field(default=CaseStatus.NEW.value)
     statusReasons: List[CaseStatusReason] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
