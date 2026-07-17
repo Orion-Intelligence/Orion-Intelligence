@@ -27,8 +27,6 @@ export class SocialProfileTabsSectionComponent {
   private sawImageLoadingForScroll = false;
   private loadedExtensionStatus = false;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
-  private extensionPostDisplayLimits = signal<Record<string, number>>({});
-  private readonly extensionInitialPostLimit = 10;
   private readonly extensionPostPageSize = 5;
 
   extensionStatus = signal<SocialExtensionStatus | null>(null);
@@ -193,10 +191,6 @@ export class SocialProfileTabsSectionComponent {
       : this.isTabLoading('posts');
   }
 
-  getPostsTabDisplayLimit(platformData: PlatformResult): number | null {
-    return this.isExtensionPostExecutorReady(platformData) ? this.getExtensionPostDisplayLimit(platformData) : null;
-  }
-
   handlePostsTabRefetch(tabKey: PostContentTabKey): void {
     const platformData = this.platformData();
     if (this.isExtensionPostExecutorReady(platformData)) {
@@ -329,19 +323,13 @@ export class SocialProfileTabsSectionComponent {
     };
   }
 
-  getExtensionPostDisplayLimit(platformData: PlatformResult): number {
-    return this.extensionPostDisplayLimits()[this.getExtensionPostDisplayKey(platformData)] ?? this.extensionInitialPostLimit;
-  }
-
   handleExtensionPostCursorFetch(request: PostCursorFetchRequest): void {
     if (request.commentsOnly) {
       this.extensionPostCursorFetch.emit(request);
       return;
     }
     const platformData = this.platformData();
-    const key = this.getExtensionPostDisplayKey(platformData);
     if (request.mergeMode === 'prepend') {
-      this.extensionPostDisplayLimits.update(current => ({ ...current, [key]: this.extensionInitialPostLimit }));
       this.extensionPostCursorFetch.emit({
         ...request,
         platformData,
@@ -351,29 +339,13 @@ export class SocialProfileTabsSectionComponent {
       });
       return;
     }
-    const totalPosts = platformData.extensionPosts?.length || 0;
-    const currentLimit = this.getExtensionPostDisplayLimit(platformData);
-    if (request.remoteFetch) {
-      const nextLimit = Math.min(100, Math.max(currentLimit, totalPosts) + this.extensionPostPageSize);
-      this.extensionPostDisplayLimits.update(current => ({ ...current, [key]: nextLimit }));
-      this.extensionPostCursorFetch.emit({
-        ...request,
-        platformData,
-        limit: this.extensionPostPageSize,
-        mergeMode: 'append',
-      });
-      return;
-    }
-    const nextLimit = Math.min(totalPosts, Math.max(currentLimit + this.extensionPostPageSize, request.limit || 0));
-    this.extensionPostDisplayLimits.update(current => ({ ...current, [key]: nextLimit }));
-  }
-
-  private getExtensionPostDisplayKey(platformData: PlatformResult): string {
-    return [
-      platformData.keyUsername,
-      platformData.platform,
-      platformData.username,
-    ].join('|').toLowerCase();
+    this.extensionPostCursorFetch.emit({
+      ...request,
+      platformData,
+      limit: request.limit || this.extensionPostPageSize,
+      mergeMode: 'append',
+      remoteFetch: true,
+    });
   }
 
   getExtensionError(platformData: PlatformResult): SocialExtensionFetchError | null {

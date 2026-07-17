@@ -29,7 +29,6 @@ export class SocialProfilePostContentSectionComponent {
   showLoadMoreWhenDone = input(false);
   showHeader = input(true);
   compactMedia = input(false);
-  displayLimit = input<number | null>(null);
   allowCommentFetch = input(true);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
@@ -122,26 +121,8 @@ export class SocialProfilePostContentSectionComponent {
     });
   }
 
-  getVisiblePosts(platformData: PlatformResult, tabKey: PostContentTabKey): SocialPost[] {
-    const posts = this.getUniquePosts(platformData, tabKey);
-    const limit = this.displayLimit();
-    return limit === null ? posts : posts.slice(0, Math.max(0, limit));
-  }
-
   canLoadMorePosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
-    return this.canRevealCachedPosts(platformData, tabKey) || this.canRequestRemoteMorePosts(platformData, tabKey);
-  }
-
-  canRevealCachedPosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
-    const limit = this.displayLimit();
-    if (limit === null) {
-      return true;
-    }
-    return this.getUniquePosts(platformData, tabKey).length > limit;
-  }
-
-  canRequestRemoteMorePosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
-    return this.showLoadMoreWhenDone() && this.getUniquePosts(platformData, tabKey).length > 0 && !this.canRevealCachedPosts(platformData, tabKey);
+    return this.showLoadMoreWhenDone() && this.getUniquePosts(platformData, tabKey).length > 0;
   }
 
   shouldShowLoadMorePosts(platformData: PlatformResult, tabKey: PostContentTabKey): boolean {
@@ -154,13 +135,6 @@ export class SocialProfilePostContentSectionComponent {
 
   loadMore(platformData: PlatformResult, tabKey: PostContentTabKey): void {
     if (!this.canLoadMorePosts(platformData, tabKey)) {
-      return;
-    }
-    const posts = this.getUniquePosts(platformData, tabKey);
-    const visibleCount = this.displayLimit() ?? posts.length;
-    if (this.canRevealCachedPosts(platformData, tabKey)) {
-      this.cursorFetch.emit({ platformData, tabKey, limit: Math.min(visibleCount + 5, 100), mergeMode: 'append' });
-      setTimeout(() => this.scrollToPostBottom(), 0);
       return;
     }
     this.prepareScrollAfterFetch();

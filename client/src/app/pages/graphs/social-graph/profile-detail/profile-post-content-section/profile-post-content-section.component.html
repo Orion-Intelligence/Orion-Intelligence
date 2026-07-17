@@ -57,7 +57,7 @@
         </div>
       } @else {
         <div class="flex flex-col gap-2.5">
-          @for (post of getVisiblePosts(platformData, contentType); track post.post_url || $index) {
+          @for (post of getUniquePosts(platformData, contentType); track post.post_url || $index) {
             <div data-testid="social-post-row" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">

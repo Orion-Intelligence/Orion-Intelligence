@@ -116,7 +116,6 @@
               [platformData]="getPostsTabPlatformData(platformData)"
               [isLoading]="isPostsTabLoading(platformData)"
               [showLoadMoreWhenDone]="isExtensionPostExecutorReady(platformData)"
-              [displayLimit]="getPostsTabDisplayLimit(platformData)"
               (refetch)="handlePostsTabRefetch($event)"
               (cursorFetch)="handlePostsTabCursorFetch($event)">
             </app-social-profile-posts-section>
@@ -317,7 +316,6 @@
                     [showLoadMoreWhenDone]="true"
                     [showHeader]="false"
                     [compactMedia]="true"
-                    [displayLimit]="getExtensionPostDisplayLimit(platformData)"
                     [allowCommentFetch]="false"
                     (refetch)="refetchTab.emit('extension')"
                     (cursorFetch)="handleExtensionPostCursorFetch($event)">

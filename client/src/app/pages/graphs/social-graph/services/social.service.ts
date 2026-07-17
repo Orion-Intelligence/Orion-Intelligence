@@ -407,9 +407,9 @@ export class SocialService {
     if (stateKey === 'extensionProfile' && data && typeof data === 'object' && ('profile' in data || 'posts' in data || 'images' in data)) {
       return {
         extensionProfileDetails: data.profile ?? null,
-        extensionPosts: this.normalizeFetchedPosts(data.posts),
-        extensionVideos: this.normalizeFetchedPosts(data.videos),
-        extensionShorts: this.normalizeFetchedPosts(data.shorts),
+        extensionPosts: Array.isArray(data.posts) ? data.posts : [],
+        extensionVideos: Array.isArray(data.videos) ? data.videos : [],
+        extensionShorts: Array.isArray(data.shorts) ? data.shorts : [],
         extensionImages: this.normalizeFetchedImages(data.images),
         extensionFollowers: this.normalizeFetchedUsernames(data.followers),
         extensionFollowing: this.normalizeFetchedUsernames(data.following),
@@ -457,12 +457,6 @@ export class SocialService {
 
   private isExtensionStateKey(stateKey: FetchStateKey): boolean {
     return stateKey.startsWith('extension');
-  }
-
-  private normalizeFetchedPosts(value: any): any[] {
-    return Array.isArray(value)
-      ? value.filter((post: any) => SocialNormalizationUtil.isUsableSocialPost(post)).map((post: any) => SocialNormalizationUtil.normalizeSocialPost(post))
-      : [];
   }
 
   private normalizeFetchedImages(value: any): any[] {

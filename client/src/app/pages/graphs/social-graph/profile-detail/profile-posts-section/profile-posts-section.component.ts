@@ -17,7 +17,6 @@ export class SocialProfilePostsSectionComponent {
   showLoadMoreWhenDone = input(false);
   showHeader = input(true);
   compactMedia = input(false);
-  displayLimit = input<number | null>(null);
   allowCommentFetch = input(true);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
