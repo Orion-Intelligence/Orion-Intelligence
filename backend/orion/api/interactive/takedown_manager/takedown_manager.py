@@ -226,6 +226,8 @@ class TakedownManager:
     async def create_request(self, request: TakedownCreateRequest, current_user) -> Dict[str, Any]:
         report_id = (request.report_id or "").strip()
         raw_target_url = request.target_url.strip()
+        custom_msg = getattr(request, "custom_message", "").strip()
+
         if not raw_target_url:
             raise HTTPException(status_code=400, detail="Target URL is required")
         target_url = self._normalize_target_url(raw_target_url)
@@ -252,7 +254,8 @@ class TakedownManager:
         evidence = self._extract_micro_evidence(evidence_response)
         evidence_status = str(evidence.get("status") or evidence_response.get("status") or "").lower()
         if evidence_status in {"error", "failed", "failure"}:
-            detail = str(evidence.get("error_message") or evidence_response.get("error_message") or "Unable to capture takedown evidence")
+            detail = str(evidence.get("error_message") or evidence_response.get(
+                "error_message") or "Unable to capture takedown evidence")
             raise HTTPException(status_code=424, detail=detail)
         abuse_email = self._extract_abuse_email(evidence_response)
         if not abuse_email:
@@ -267,6 +270,7 @@ class TakedownManager:
             existing.target_url = target_url
             existing.target_domain = target_domain
             existing.abuse_email = abuse_email
+            existing.custom_message = custom_msg
             existing.status = TakedownRequestStatus.PENDING
             existing.evidence = evidence_response
             existing.updated_at = now
@@ -283,6 +287,7 @@ class TakedownManager:
             target_url=target_url,
             target_domain=target_domain,
             abuse_email=abuse_email,
+            custom_message=custom_msg,
             status=TakedownRequestStatus.PENDING,
             evidence=evidence_response,
             created_at=now,
@@ -299,6 +304,7 @@ class TakedownManager:
                 existing.report_id = report_id or existing.report_id
                 existing.target_url = target_url
                 existing.abuse_email = existing.abuse_email or abuse_email
+                existing.custom_message = custom_msg
                 existing.evidence = existing.evidence or evidence_response
                 existing.updated_at = now
                 await self._engine.save(existing)
@@ -307,7 +313,8 @@ class TakedownManager:
         await self._update_elastic_status(record)
         return self._serialize_record(record)
 
-    async def list_requests(self, current_user, status: Optional[str] = None, q: str = "", page: int = 1, limit: int = 20, daterange: str = "") -> TakedownListResponse:
+    async def list_requests(self, current_user, status: Optional[str] = None, q: str = "", page: int = 1,
+                            limit: int = 20, daterange: str = "") -> TakedownListResponse:
         page = max(page, 1)
         limit = min(max(limit, 1), 100)
         root_tenant_uuid = await self._root_tenant_uuid()
@@ -385,6 +392,7 @@ class TakedownManager:
             screenshot_base64=str(evidence.get("screenshot_base64") or ""),
             html_content=str(evidence.get("html_content") or ""),
             screenshot_mime_type=str(evidence.get("screenshot_mime_type") or "image/png"),
+            custom_message=getattr(record, "custom_message", "")
         )
 
         now = datetime.now(timezone.utc)
