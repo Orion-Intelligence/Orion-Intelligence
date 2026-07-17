@@ -46,25 +46,28 @@ class NexusStreamManager:
         response = None
         answer = ""
         try:
+            headers: dict[str, str] = {}
             if payload is None:
                 selected_tool = tool or "open_chat"
                 if selected_tool == "default":
                     selected_tool = "open_chat"
-                arguments: dict[str, Any] = {
+                request_body: dict[str, Any] = {
                     "prompt": prompt,
-                    "user_id": user_id,
-                    "tenant_id": tenant_id,
+                    "tool": selected_tool,
                     "session_id": session_id,
                     "session_type": session_type or "persistent",
+                    "recoverable": recoverable,
                 }
                 if type_name and type_name != "default":
-                    arguments["type"] = type_name
-                if auth_token:
-                    arguments["_auth_token"] = auth_token
+                    request_body["type"] = type_name
                 if history:
-                    arguments["history"] = history
-                payload = NexusRpcPayloadModel.tool_call(request_id=user_id if recoverable else "nexus-chat", name=selected_tool, arguments=arguments)
-            request = client.build_request("POST", endpoint, json=payload.model_dump())
+                    request_body["history"] = history
+                headers = {"X-User-Id": user_id, "X-Tenant-Id": tenant_id or "default"}
+                if auth_token:
+                    headers["Authorization"] = auth_token
+            else:
+                request_body = payload.model_dump()
+            request = client.build_request("POST", endpoint, json=request_body, headers=headers)
             response = await client.send(request, stream=True)
             if response.status_code != 200:
                 yield json.dumps({"output": {"response": (await response.aread()).decode("utf-8", errors="ignore")}, "done": True, "error": True}, ensure_ascii=True) + "\n", "", True
@@ -109,7 +112,7 @@ class NexusStreamManager:
                 await response.aclose()
 
     async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, recoverable: bool = False, auth_token: str = "", session_id: str = "", session_type: str = "persistent", tenant_id: str = "") -> AsyncGenerator[str, None]:
-        endpoint = f"{self.base_url}/mcp"
+        endpoint = f"{self.base_url}/v1/chats/stream"
         client = httpx.AsyncClient(timeout=30 * 60)
         current_task = asyncio.current_task()
         if current_task is not None:
