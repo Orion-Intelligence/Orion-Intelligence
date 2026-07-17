@@ -25,6 +25,7 @@ class db_takedown_request_model(Model):
     target_url: str = ""
     target_domain: str = ""
     abuse_email: str = ""
+    custom_message: str = ""
 
     status: TakedownRequestStatus = TakedownRequestStatus.PENDING
     evidence: Dict[str, Any] = Field(default_factory=dict)
@@ -42,6 +43,7 @@ class db_takedown_request_model(Model):
 class TakedownCreateRequest(BaseModel):
     report_id: str = ""
     target_url: str
+    custom_message: str = ""
 
 
 class TakedownDecisionRequest(BaseModel):

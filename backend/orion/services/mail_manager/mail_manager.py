@@ -121,7 +121,7 @@ class mail_manager:
         msg.attach(MIMEText(body, "html"))
         return sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg
 
-    async def send_takedown_mail(self, to_email: str, target_domain: str, screenshot_filename: str, html_filename: str, tenant_id: str | None = None, config=None, screenshot_base64: str = "", html_content: str = "", screenshot_mime_type: str = "image/png"):
+    async def send_takedown_mail(self, to_email: str, target_domain: str, screenshot_filename: str, html_filename: str, tenant_id: str | None = None, config=None, screenshot_base64: str = "", html_content: str = "", screenshot_mime_type: str = "image/png", custom_message: str = ""):
         subject = MailSubject.TAKEDOWN_REQUEST.value.format(domain=target_domain)
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -137,9 +137,97 @@ class mail_manager:
 
         body = body.replace("{{domain}}", target_domain)
 
+
+        if custom_message and custom_message.strip():
+
+            note_html = f"""
+            <div style="margin-top: 24px; padding: 16px; background-color: #f8fafc; border-left: 4px solid #0284c7; border-radius: 4px;">
+                <strong style="color: #0f172a; display: block; margin-bottom: 8px;">Additional Analyst Note:</strong>
+                <span style="color: #334155; white-space: pre-wrap; font-family: inherit;">{custom_message.strip()}</span>
+            </div>
+            """
+            body = body.replace("{{custom_message}}", note_html)
+        else:
+            body = body.replace("{{custom_message}}", "")
+
         sender_email, password, smtp_server, smtp_port, msg = await self._prepare_verification_message(
             to_email, subject, body, tenant_id, config
         )
+
+        def fetch_and_attach():
+            hosts_to_try = []
+            configured_base_url = env_handler.get_instance().env("TRUSTED_MICROS_API_BASE")
+            if configured_base_url:
+                parsed_base_url = urlparse(str(configured_base_url).rstrip("/"))
+                if parsed_base_url.scheme in {"http", "https"} and parsed_base_url.netloc:
+                    hosts_to_try.append(str(configured_base_url).rstrip("/"))
+            hosts_to_try.extend(["http://trusted-micros-api:8010", "http://localhost:8010"])
+            hosts_to_try = list(dict.fromkeys(hosts_to_try))
+
+            attached_screenshot = False
+            attached_html = False
+
+            if screenshot_base64:
+                try:
+                    encoded_screenshot = screenshot_base64.split(",", 1)[-1].strip()
+                    image_part = MIMEImage(base64.b64decode(encoded_screenshot), name=f"screenshot_{target_domain}.png")
+                    if screenshot_mime_type:
+                        image_part.replace_header("Content-Type", screenshot_mime_type)
+                    msg.attach(image_part)
+                    attached_screenshot = True
+                except Exception as e:
+                    log.g().e(f"Failed to attach inline screenshot evidence: {e}")
+
+            if html_content:
+                try:
+                    html_part = MIMEApplication(html_content.encode("utf-8"), Name=f"source_{target_domain}.html")
+                    html_part['Content-Disposition'] = f'attachment; filename="source_{target_domain}.html"'
+                    msg.attach(html_part)
+                    attached_html = True
+                except Exception as e:
+                    log.g().e(f"Failed to attach inline HTML evidence: {e}")
+
+            safe_screenshot = os.path.basename(screenshot_filename) if screenshot_filename else None
+            safe_html = os.path.basename(html_filename) if html_filename else None
+
+            if safe_screenshot and not attached_screenshot:
+                for host in hosts_to_try:
+                    try:
+                        req = urllib.request.Request(f"{host}/evidence/view/image/{safe_screenshot}")
+                        with urllib.request.urlopen(req, timeout=10) as resp:
+                            img_bytes = resp.read()
+                            image_part = MIMEImage(img_bytes, name=f"screenshot_{target_domain}.png")
+                            msg.attach(image_part)
+                            break
+                    except Exception as exc:
+                        raise HTTPException(status_code=500, detail="Failed to fetch screenshot evidence") from exc
+
+            if safe_html and not attached_html:
+                for host in hosts_to_try:
+                    try:
+                        req = urllib.request.Request(f"{host}/evidence/view/html/{safe_html}")
+                        with urllib.request.urlopen(req, timeout=10) as resp:
+                            html_bytes = resp.read()
+                            html_part = MIMEApplication(html_bytes, Name=f"source_{target_domain}.html")
+                            html_part['Content-Disposition'] = f'attachment; filename="source_{target_domain}.html"'
+                            msg.attach(html_part)
+                            break
+                    except Exception as e:
+                        try:
+                            req_alt = urllib.request.Request(f"{host}/evidence/view/source/{safe_html}")
+                            with urllib.request.urlopen(req_alt, timeout=10) as resp:
+                                html_bytes = resp.read()
+                            html_part = MIMEApplication(html_bytes, Name=f"source_{target_domain}.html")
+                            html_part['Content-Disposition'] = f'attachment; filename="source_{target_domain}.html"'
+                            msg.attach(html_part)
+                            break
+                        except Exception as e_alt:
+                            log.g().e(f"Failed to fetch HTML evidence. Error 1: {e} | Error 2: {e_alt}")
+                            raise HTTPException(status_code=500, detail="Failed to fetch HTML evidence") from e_alt
+
+        await asyncio.to_thread(fetch_and_attach)
+
+        await asyncio.to_thread(self._send_sync_email, sender_email, password, to_email, msg, smtp_server, smtp_port)
 
         def fetch_and_attach():
             hosts_to_try = []

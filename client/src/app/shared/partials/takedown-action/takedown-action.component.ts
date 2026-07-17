@@ -16,11 +16,13 @@ export class TakedownActionComponent implements OnChanges {
 
   isTakingDown: boolean = false;
   showTakedownModal: boolean = false;
+  isReviewing: boolean = false;
   actionResult: TakedownActionResult | null = null;
   takedownLabel: string = '';
   takedownDisabled: boolean = false;
   manualTargetUrl = '';
   manualUrlError = '';
+  customMessage = '';
 
   @Input() reportId: string = '';
   @Input() targetUrl: string | null | undefined = '';
@@ -147,23 +149,30 @@ export class TakedownActionComponent implements OnChanges {
     this.showTakedownModal = true;
     this.actionResult = null;
     this.manualUrlError = '';
+    this.customMessage = '';
+    this.isReviewing = true;
 
     if (this.manualUrlMode) {
       this.manualTargetUrl = '';
-      return;
     }
-
-    this.createTakedownRequest(String(this.targetUrl || ''));
   }
 
-  submitManualTakedown(): void {
-    const targetUrl = this.manualTargetUrl.trim();
-    this.manualUrlError = '';
-    if (!targetUrl) {
-      this.manualUrlError = 'Target URL is required.';
-      return;
+  submitTakedown(): void {
+    let target = '';
+    if (this.manualUrlMode) {
+      target = this.manualTargetUrl.trim();
+      this.manualUrlError = '';
+      if (!target) {
+        this.manualUrlError = 'Target URL is required.';
+        return;
+      }
     }
-    this.createTakedownRequest(targetUrl);
+    else {
+      target = String(this.targetUrl || '');
+    }
+
+    this.isReviewing = false;
+    this.createTakedownRequest(target);
   }
 
   private createTakedownRequest(targetUrl: string): void {
@@ -172,7 +181,8 @@ export class TakedownActionComponent implements OnChanges {
 
     const payload = {
       report_id: this.reportId || '',
-      target_url: targetUrl
+      target_url: targetUrl,
+      custom_message: this.customMessage.trim()
     };
 
     this.http.post<TakedownActionResponse>('/api/takedowns', payload).subscribe({
@@ -189,6 +199,7 @@ export class TakedownActionComponent implements OnChanges {
   closeTakedownModal(): void {
     this.showTakedownModal = false;
     this.isTakingDown = false;
+    this.isReviewing = false;
   }
 
   private applyTakedownStatus(status: string | null, label: string = ''): void {
