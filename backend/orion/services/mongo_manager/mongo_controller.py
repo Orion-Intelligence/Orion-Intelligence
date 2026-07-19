@@ -11,7 +11,6 @@ from orion.services.mongo_manager.shared_model.db_document_feedback_model import
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
-from orion.services.mongo_manager.shared_model.db_chat_session_model import db_chat_session_model
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
 from orion.services.mongo_manager.shared_model.db_scheduler_model import db_scheduler_model
 from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
@@ -72,7 +71,6 @@ class mongo_controller:
             name="unique_maintainer_per_company", )
 
         await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
-        await self.__engine.get_collection(db_chat_session_model).create_index("user_id", unique=True)
         await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
         await self.__engine.get_collection(db_scan_job_model).create_index([("user_uuid", 1), ("created_at", -1)])
         await self.__engine.get_collection(db_takedown_request_model).create_index("target_domain", unique=True)

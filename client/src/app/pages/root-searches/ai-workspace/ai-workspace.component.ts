@@ -1,12 +1,10 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { ApiService } from '../../../shared/services/api.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { SubscriptionService } from '../../../services/dashboard/subscription.service';
 import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
@@ -15,17 +13,14 @@ import { BotMessageActionsComponent } from './bot-message-actions/bot-message-ac
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-
-type ChatHistoryMessage = {
-  sender: AiWorkspaceMessage['sender'];
-  text: string;
-  time: string;
-};
+import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
+import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
+import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, RouterLink, BotMessageActionsComponent, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
+  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, MarkdownPipe, ProfileComponent, TranslatePipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -40,7 +35,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly isSending = signal(false);
   protected readonly isLoadingHistory = signal(true);
   protected readonly isStreamingReply = signal(false);
-  protected readonly isChatShareCreating = signal(false);
   protected readonly streamingMessageId = signal<string | null>(null);
   protected readonly copiedMessageId = signal<string | null>(null);
   protected readonly nexusStep = signal('');
@@ -55,13 +49,15 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   composerExpanded = false;
   composerRows = 1;
   composerScrollable = false;
+  activeSessionId: string | null = null;
+  chatSessions: AiChatSession[] = [];
 
-  constructor(private readonly api: ApiService, protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, private readonly subscriptionService: SubscriptionService, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
+  constructor(protected readonly appService: AppService, private readonly route: ActivatedRoute, private readonly router: Router, protected readonly licenseService: LicenseService, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService) {
     this.queryContext = (this.route.snapshot.queryParamMap.get('q') || '').trim();
   }
 
   ngOnInit(): void {
-    this.loadChatHistory();
+    this.loadBackendChatSessions();
   }
 
   ngOnDestroy(): void {
@@ -74,118 +70,104 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.detachActiveNexusRequest();
   }
 
+  goBack(): void {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
+      window.history.back();
+      return;
+    }
+    this.router.navigate(['/dashboard/home']).then();
+  }
+
   sendMessage(): void {
     if (this.isSending()) {
       return;
     }
 
     const text = this.messageDraft.trim();
+
     if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
     this.cancelMessageEdit();
     this.detachActiveNexusRequest();
-    this.messages = [...this.messages, this.createMessage('user', text)];
-    this.persistChatHistory();
-    this.messageDraft = '';
-    this.queueComposerResize();
-    this.isSending.set(true);
-    this.nexusStep.set('');
-    this.scrollToBottom();
 
-    if (!this.subscriptionService.accountExpirable()) {
-      this.messages = [...this.messages, this.createErrorMessage(text)];
-      this.isSending.set(false);
-      this.scrollToBottom();
+    const sendToSession = (sessionId: string) => {
+      this.messageDraft = '';
+      this.queueComposerResize();
+
+      this.isSending.set(true);
+      this.isStreamingReply.set(false);
+      this.streamingMessageId.set(null);
+      this.nexusStep.set('Thinking');
+
+      this.nexusChatService.sendMessageToChat(sessionId, text).subscribe({
+        next: (response) => {
+          const userMessage = this.mapMessage(response.user_message);
+          const assistantMessage = this.mapMessage(response.assistant_message);
+
+          this.messages = [
+            ...this.messages,
+            userMessage,
+            assistantMessage,
+          ];
+
+          this.chatSessions = this.chatSessions.map(session =>
+            session.sessionId === response.chat.session_id
+              ? {
+                ...session,
+                title: response.chat.title,
+                updatedAt: response.chat.updated_at,
+                isPinned: response.chat.is_pinned ?? false,
+                pinnedAt: response.chat.pinned_at ?? null,
+                messages: this.messages,
+              }
+              : session);
+
+          this.chatSessions = this.sortChatSessions(this.chatSessions);
+
+          this.isSending.set(false);
+          this.isStreamingReply.set(false);
+          this.streamingMessageId.set(null);
+          this.nexusStep.set('');
+
+          this.scrollToBottom();
+        },
+        error: () => {
+          this.messages = [...this.messages, this.createErrorMessage(text)];
+
+          this.isSending.set(false);
+          this.isStreamingReply.set(false);
+          this.streamingMessageId.set(null);
+          this.nexusStep.set('');
+
+          this.scrollToBottom();
+        },
+      });
+    };
+
+    if (this.activeSessionId) {
+      sendToSession(this.activeSessionId);
       return;
     }
 
-    const payload = {
-      message: text,
-      report: this.contextQuery() || '',
-      tool: 'open_chat',
-    };
+    this.nexusChatService.createChat('New Chat').subscribe({
+      next: (session) => {
+        const mappedSession = this.mapSession(session);
 
-    const requestId = ++this.chatRequestId;
-    this.stoppedRequestIds.delete(requestId);
-    let reply = '';
-    let botMessage: AiWorkspaceMessage | undefined;
-    const updateReply = (value: string) => {
-      if (requestId !== this.chatRequestId) {
-        return;
-      }
-      if (!botMessage) {
-        botMessage = this.createMessage('bot', '');
-        this.messages = [...this.messages, botMessage];
-        this.isStreamingReply.set(true);
-        this.streamingMessageId.set(botMessage.id);
-      }
-      this.messages = this.messages.map(message => message.id === botMessage?.id ? { ...message, text: value } : message);
-    };
-    const finishStream = () => {
-      if (requestId !== this.chatRequestId) {
-        return;
-      }
-      this.activeChatRequest = undefined;
-      this.isStreamingReply.set(false);
-      this.streamingMessageId.set(null);
-      this.isSending.set(false);
-      this.nexusStep.set('');
-      if (!reply.trim()) {
-        this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
-        this.messages = [...this.messages, this.createErrorMessage(text)];
-      }
-      else {
-        this.persistChatHistory();
-      }
-      this.scrollToBottom();
-    };
+        this.chatSessions = this.sortChatSessions([
+          mappedSession,
+          ...this.chatSessions,
+        ]);
+        this.activeSessionId = mappedSession.sessionId;
+        this.messages = [];
 
-    this.activeChatRequest = this.nexusChatService.streamNexusChat(payload, { recoverable: true }).subscribe({
-      next: (chunk) => {
-        if (requestId !== this.chatRequestId) {
-          return;
-        }
-        if (chunk.status) {
-          this.nexusStep.set(chunk.status);
-        }
-        if (chunk.error) {
-          reply = chunk.response || chunk.delta || 'Something went wrong. Try again.';
-          this.isStreamingReply.set(false);
-          this.streamingMessageId.set(null);
-          this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
-          this.messages = [...this.messages, this.createErrorMessage(text, reply)];
-          return;
-        }
-        if (chunk.delta) {
-          reply += chunk.delta;
-          updateReply(reply);
-        }
-        if (chunk.response) {
-          reply = chunk.response;
-          updateReply(reply);
-        }
-      },
-      complete: () => {
-        if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
-          return;
-        }
-        finishStream();
+        sendToSession(mappedSession.sessionId);
       },
       error: () => {
-        if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
-          return;
-        }
-        this.activeChatRequest = undefined;
-        this.isStreamingReply.set(false);
-        this.streamingMessageId.set(null);
-        this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
         this.messages = [...this.messages, this.createErrorMessage(text)];
         this.isSending.set(false);
-        this.nexusStep.set('');
-        this.scrollToBottom();
-      }
+      },
     });
   }
 
@@ -223,12 +205,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.stoppedRequestIds.add(this.chatRequestId);
     this.chatRequestId += 1;
     this.cancelActiveNexusRequest();
-    this.messages = [...this.messages, this.createCancelledMessage()];
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
     this.nexusStep.set('');
-    this.persistChatHistory();
     this.scrollToBottom();
   }
 
@@ -236,46 +216,34 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     if (this.isSending() || this.isStreamingReply()) {
       return;
     }
+
     this.chatRequestId += 1;
     this.stoppedRequestIds.clear();
     this.detachActiveNexusRequest();
+
     this.isSending.set(false);
     this.isStreamingReply.set(false);
     this.streamingMessageId.set(null);
-    this.nexusChatService.clearNexusSession().subscribe({
-      next: () => this.clearChatView(),
-      error: () => this.clearChatView(),
-    });
-  }
+    this.nexusStep.set('');
 
-  shareChat(): void {
-    const messages = this.buildChatHistoryPayload();
-    if (this.isChatShareCreating() || !messages.length) {
-      return;
-    }
-    this.isChatShareCreating.set(true);
-    this.api.post<{ path: string; }>('profile/chat-shares', {
-      messages,
-      expiresInHours: 168,
-    }).subscribe({
-      next: (share) => {
-        this.isChatShareCreating.set(false);
-        const url = new URL(share.path, window.location.origin).toString();
-        window.open(url, '_blank', 'noopener');
+    this.nexusChatService.createChat('New Chat').subscribe({
+      next: (session) => {
+        const mappedSession = this.mapSession(session);
+
+        this.chatSessions = this.sortChatSessions([
+          mappedSession,
+          ...this.chatSessions.filter(chat => chat.sessionId !== mappedSession.sessionId),
+        ]);
+
+        this.activeSessionId = mappedSession.sessionId;
+        this.messages = [];
+        this.messageDraft = '';
+
+        this.cancelMessageEdit();
+        this.queueComposerResize();
+        this.scrollToBottom();
       },
-      error: () => this.isChatShareCreating.set(false),
     });
-  }
-
-  private clearChatView(): void {
-    this.messages = [];
-    this.messageDraft = '';
-    this.cancelMessageEdit();
-    this.queueComposerResize();
-    this.router.navigate(['/dashboard/profile/ai'], {
-      queryParams: { q: this.contextQuery() || null },
-      queryParamsHandling: 'merge',
-    }).then();
   }
 
   trackMessage(_index: number, message: AiWorkspaceMessage): string {
@@ -376,15 +344,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return this.editDraftTokenOverflow > 0;
   }
 
-  private createMessage(sender: AiWorkspaceMessage['sender'], text: string): AiWorkspaceMessage {
-    return {
-      id: crypto.randomUUID(),
-      sender,
-      text,
-      time: new Date(),
-    };
-  }
-
   private cancelActiveNexusRequest(): void {
     if (this.activeChatRequest || this.isSending() || this.isStreamingReply()) {
       this.nexusChatService.cancelNexusChat();
@@ -406,106 +365,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       time: new Date(),
       retryPayload: text,
     };
-  }
-
-  private createCancelledMessage(): AiWorkspaceMessage {
-    return {
-      id: crypto.randomUUID(),
-      sender: 'error',
-      text: 'Message canceled.',
-      time: new Date(),
-    };
-  }
-
-  private restoreChatHistory(): void {
-    this.messages = [];
-  }
-
-  private persistChatHistory(): void {
-    const history = this.buildChatHistoryPayload();
-    this.api.post('update/current/user/chat-history', {
-      chat_history: history,
-    }).subscribe();
-  }
-
-  private loadChatHistory(): void {
-    this.api.post<{ chat_history?: ChatHistoryMessage[] }>('get/current/user/chat-history', {}).subscribe({
-      next: (response) => {
-        const history = response?.chat_history || [];
-        const messages = history
-          .filter((message) => message.sender === 'user' || message.sender === 'bot' || message.sender === 'error')
-          .map((message) => ({
-            id: crypto.randomUUID(),
-            sender: message.sender,
-            text: message.text,
-            time: new Date(message.time),
-          }));
-        this.messages = this.addMissingAiFailureMessages(messages);
-        this.isLoadingHistory.set(false);
-        this.scrollToBottom();
-        this.resumeActiveNexusStream();
-      },
-      error: () => {
-        this.isLoadingHistory.set(false);
-        this.restoreChatHistory();
-      }
-    });
-  }
-
-  private addMissingAiFailureMessages(messages: AiWorkspaceMessage[]): AiWorkspaceMessage[] {
-    const result: AiWorkspaceMessage[] = [];
-    messages.forEach((message, index) => {
-      result.push(message);
-      const nextSender = messages[index + 1]?.sender;
-      if (message.sender === 'user' && index < messages.length - 1 && nextSender !== 'bot' && nextSender !== 'error') {
-        result.push(this.createErrorMessage(message.text));
-      }
-    });
-    return result;
-  }
-
-  private buildChatHistoryPayload(): ChatHistoryMessage[] {
-    const filtered = this.messages.filter((message) => this.shouldPersistHistoryMessage(message));
-    let userOverflow = 0;
-    let botOverflow = 0;
-
-    for (const message of filtered) {
-      if (message.sender === 'user') {
-        userOverflow += 1;
-      }
-      else if (message.sender === 'bot') {
-        botOverflow += 1;
-      }
-    }
-
-    userOverflow = Math.max(0, userOverflow - 100);
-    botOverflow = Math.max(0, botOverflow - 100);
-
-    const kept: AiWorkspaceMessage[] = [];
-    for (const message of filtered) {
-      if (message.sender === 'user' && userOverflow > 0) {
-        userOverflow -= 1;
-        continue;
-      }
-      if (message.sender === 'bot' && botOverflow > 0) {
-        botOverflow -= 1;
-        continue;
-      }
-      kept.push(message);
-    }
-
-    return kept.map((message) => ({
-      sender: message.sender,
-      text: message.text,
-      time: message.time.toISOString(),
-    }));
-  }
-
-  private shouldPersistHistoryMessage(message: AiWorkspaceMessage): boolean {
-    if (message.sender === 'user' || message.sender === 'bot') {
-      return true;
-    }
-    return message.sender === 'error' && message.text.trim() === 'Message canceled.';
   }
 
   private scrollToBottom(): void {
@@ -530,89 +389,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  private resumeActiveNexusStream(): void {
-    if (this.activeChatRequest || this.messages.at(-1)?.sender !== 'user') {
-      return;
-    }
-
-    const requestId = ++this.chatRequestId;
-    let reply = '';
-    let receivedReply = false;
-    const retryPayload = this.messages.at(-1)?.sender === 'user' ? this.messages.at(-1)!.text : '';
-    let botMessage: AiWorkspaceMessage | undefined;
-    this.isSending.set(true);
-    this.isStreamingReply.set(false);
-    this.streamingMessageId.set(null);
-    this.nexusStep.set('');
-
-    const updateReply = (value: string) => {
-      if (requestId !== this.chatRequestId) {
-        return;
-      }
-      receivedReply = true;
-      if (!botMessage) {
-        botMessage = this.createMessage('bot', '');
-        this.messages = [...this.messages, botMessage];
-        this.isStreamingReply.set(true);
-        this.streamingMessageId.set(botMessage.id);
-      }
-      this.messages = this.messages.map(message => message.id === botMessage?.id ? { ...message, text: value } : message);
-    };
-    this.activeChatRequest = this.nexusChatService.resumeNexusChat().subscribe({
-      next: (chunk) => {
-        if (requestId !== this.chatRequestId) {
-          return;
-        }
-        if (chunk.status) {
-          this.nexusStep.set(chunk.status);
-        }
-        if (chunk.error) {
-          reply = chunk.response || chunk.delta || 'Something went wrong. Try again.';
-          this.isStreamingReply.set(false);
-          this.streamingMessageId.set(null);
-          this.messages = botMessage ? this.messages.filter(message => message.id !== botMessage?.id) : this.messages;
-          if (retryPayload) {
-            this.messages = [...this.messages, this.createErrorMessage(retryPayload, reply)];
-          }
-          return;
-        }
-        if (chunk.delta) {
-          reply += chunk.delta;
-          updateReply(reply);
-        }
-        if (chunk.response) {
-          reply = chunk.response;
-          updateReply(reply);
-        }
-      },
-      complete: () => {
-        if (requestId !== this.chatRequestId) {
-          return;
-        }
-        this.activeChatRequest = undefined;
-        this.isSending.set(false);
-        this.isStreamingReply.set(false);
-        this.streamingMessageId.set(null);
-        this.nexusStep.set('');
-        if (receivedReply && reply.trim()) {
-          this.persistChatHistory();
-        }
-        this.scrollToBottom();
-      },
-      error: () => {
-        if (requestId !== this.chatRequestId) {
-          return;
-        }
-        this.activeChatRequest = undefined;
-        this.isSending.set(false);
-        this.isStreamingReply.set(false);
-        this.streamingMessageId.set(null);
-        this.nexusStep.set('');
-        this.scrollToBottom();
-      },
-    });
-  }
-
   queueComposerResize(): void {
     requestAnimationFrame(() => this.resizeComposer());
   }
@@ -631,4 +407,122 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
   }
 
+  private mapSession(session: any): AiChatSession {
+    return {
+      sessionId: session.session_id,
+      title: session.title,
+      updatedAt: session.updated_at,
+      isPinned: session.is_pinned ?? false,
+      pinnedAt: session.pinned_at ?? null,
+      messages: [],
+    };
+  }
+
+  private mapMessage(message: any): AiWorkspaceMessage {
+    return {
+      id: message.id,
+      sender: message.sender === 'bot' ? 'bot' : 'user',
+      text: message.text,
+      time: new Date(message.created_at),
+    };
+  }
+
+  private loadBackendChatSessions(): void {
+    this.isLoadingHistory.set(true);
+
+    this.nexusChatService.listChats().subscribe({
+      next: (sessions) => {
+        this.chatSessions = this.sortChatSessions(sessions.map(session => this.mapSession(session)));
+        this.activeSessionId = null;
+        this.messages = [];
+        this.isLoadingHistory.set(false);
+      },
+      error: () => {
+        this.chatSessions = [];
+        this.messages = [];
+        this.activeSessionId = null;
+        this.isLoadingHistory.set(false);
+      },
+    });
+  }
+
+  private loadChat(sessionId: string): void {
+    this.isLoadingHistory.set(true);
+
+    this.nexusChatService.getChat(sessionId).subscribe({
+      next: (chat) => {
+        this.activeSessionId = chat.session_id;
+        this.messages = chat.messages.map(message => this.mapMessage(message));
+
+        this.chatSessions = this.chatSessions.map(session =>
+          session.sessionId === chat.session_id
+            ? {
+              ...session,
+              title: chat.title,
+              updatedAt: chat.updated_at,
+              isPinned: chat.is_pinned ?? false,
+              pinnedAt: chat.pinned_at ?? null,
+              messages: this.messages,
+            }
+            : session);
+
+        this.chatSessions = this.sortChatSessions(this.chatSessions);
+        this.isLoadingHistory.set(false);
+        this.cancelMessageEdit();
+        this.queueComposerResize();
+        this.scrollToBottom();
+      },
+      error: () => {
+        this.isLoadingHistory.set(false);
+      },
+    });
+  }
+
+  private sortChatSessions(chats: AiChatSession[]): AiChatSession[] {
+    return [...chats].sort((a, b) => {
+      if (a.isPinned !== b.isPinned) {
+        return a.isPinned ? -1 : 1;
+      }
+
+      if (a.isPinned && b.isPinned) {
+        return new Date(b.pinnedAt || b.updatedAt).getTime() -
+          new Date(a.pinnedAt || a.updatedAt).getTime();
+      }
+
+      return new Date(b.updatedAt).getTime() -
+        new Date(a.updatedAt).getTime();
+    });
+  }
+
+  selectChat(session: AiChatSession): void {
+    if (this.isSending() || this.isStreamingReply()) {
+      return;
+    }
+
+    if (this.activeSessionId === session.sessionId) {
+      return;
+    }
+
+    this.loadChat(session.sessionId);
+  }
+
+  onSidebarSessionUpdated(session: AiChatSession): void {
+    this.chatSessions = this.sortChatSessions(this.chatSessions.map(chat => chat.sessionId === session.sessionId ? { ...chat, ...session } : chat));
+  }
+
+  onSidebarSessionDeleted(sessionId: string): void {
+    this.chatSessions = this.chatSessions.filter(chat => chat.sessionId !== sessionId);
+    if (this.activeSessionId !== sessionId) {
+      return;
+    }
+    const nextChat = this.chatSessions[0];
+    if (nextChat) {
+      this.loadChat(nextChat.sessionId);
+    }
+    else {
+      this.activeSessionId = null;
+      this.messages = [];
+      this.messageDraft = '';
+    }
+  }
 }

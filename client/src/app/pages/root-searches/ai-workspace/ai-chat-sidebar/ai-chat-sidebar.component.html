@@ -1,0 +1,132 @@
+<div [class]="isCollapsed ? 'dark-theme flex h-full w-[70px] min-w-[70px] flex-col overflow-hidden bg-[var(--color-blue-900)] px-[7px] py-[8px] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]' : 'dark-theme flex h-full w-[300px] min-w-[300px] flex-col overflow-y-auto bg-[var(--color-blue-900)] p-0 transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]'">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" (toggleClicked)="toggleCollapsed()">
+    <div sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
+      <div class="flex shrink-0 flex-col bg-[var(--color-blue-820-light)]/95 pt-1 backdrop-blur-sm">
+        <button type="button" (click)="startNewChat()" [disabled]="isBusy()" class="mx-2 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-50">
+          <span class="min-w-0">
+            <span class="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ 'Workspace' | translate }}</span>
+            <span class="mt-0.5 block truncate text-sm font-semibold text-[var(--color-text1)]">{{ 'Nexus Chat' | translate }}</span>
+          </span>
+          <i class="bi bi-plus-lg text-[15px] text-[var(--color-blue-640)]"></i>
+        </button>
+        <div class="mx-3 h-px bg-white/5"></div>
+      </div>
+
+      <div class="flex shrink-0 flex-col gap-2 px-3 py-3">
+        <button type="button" (click)="toggleSearch($event)" class="flex h-10 w-full items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-left text-sm font-semibold text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+          <i class="bi bi-search text-[14px]"></i>
+          <span>{{ 'Search Chats' | translate }}</span>
+        </button>
+
+        @if (searchOpen) {
+          <input type="text" [(ngModel)]="searchQuery" [placeholder]="'Search chats...' | translate" class="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)]" />
+        }
+      </div>
+
+      <div class="flex-grow overflow-y-auto px-3 pb-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+        <div class="mb-2 px-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text4)]">
+          {{ 'Recent Chats' | translate }}
+        </div>
+
+        @if (!sessions().length) {
+          <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)]/35 px-4 py-8 text-center shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+            <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+              <i class="bi bi-chat-dots text-base"></i>
+            </div>
+            <p class="mb-0 mt-3 text-sm font-semibold text-[var(--color-text2)]">{{ 'No chats yet' | translate }}</p>
+          </div>
+        }
+
+        @for (chat of filteredSessions; track chat.sessionId) {
+          <div class="group relative my-[6px] rounded-[10px] select-none">
+            <button type="button" (click)="selectChat(chat)" [disabled]="isBusy()" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" class="ui-social-history-job flex min-h-[48px] w-full cursor-pointer items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 pr-[42px] text-left shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-50">
+              @if (chat.isPinned) {
+                <i class="bi bi-pin-fill shrink-0 text-[12px] text-[var(--color-blue-640)]"></i>
+              }
+              <span class="min-w-0 flex-1 truncate text-sm font-semibold text-[var(--color-text1)]">
+                {{ chat.title }}
+              </span>
+            </button>
+
+            <button type="button" (click)="toggleChatMenu(chat, $event)" class="absolute right-[8px] top-1/2 flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[8px] text-[var(--color-text4)] opacity-0 transition hover:bg-white/10 hover:text-[var(--color-text1)] group-hover:opacity-100" [title]="'Options' | translate">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+
+            @if (openedSessionMenuId === chat.sessionId) {
+              <div (click)="$event.stopPropagation()" class="absolute right-[8px] top-[44px] z-[999] w-[150px] overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-[0_12px_32px_rgba(0,0,0,0.35)]">
+                <button type="button" (click)="togglePinChat(chat, $event)" class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] text-[var(--color-text3)] transition hover:bg-white/10 hover:text-[var(--color-text1)]">
+                  <i [ngClass]="chat.isPinned ? 'bi-pin-fill' : 'bi-pin'" class="bi shrink-0 text-[14px]"></i>
+                  <span>{{ chat.isPinned ? ('Unpin Chat' | translate) : ('Pin Chat' | translate) }}</span>
+                </button>
+
+                <button type="button" (click)="shareChat(chat, $event)" class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] text-[var(--color-text3)] transition hover:bg-white/10 hover:text-[var(--color-text1)]">
+                  <i [ngClass]="sharingSessionId === chat.sessionId ? 'bi-arrow-repeat animate-spin' : 'bi-share-fill'" class="bi"></i>
+                  <span>{{ 'Share Chat' | translate }}</span>
+                </button>
+
+                <button type="button" (click)="renameChat(chat, $event)" class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] text-[var(--color-text3)] transition hover:bg-white/10 hover:text-[var(--color-text1)]">
+                  <i class="bi bi-pencil-square"></i>
+                  <span>{{ 'Rename' | translate }}</span>
+                </button>
+
+                <button type="button" (click)="deleteChat(chat, $event)" class="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] text-red-300 transition hover:bg-red-500/10 hover:text-red-200">
+                  <i class="bi bi-trash3"></i>
+                  <span>{{ 'Delete' | translate }}</span>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
+      <div class="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <button type="button" (click)="startNewChat()" [disabled]="isBusy()" [appTooltip]="'New Chat' | translate" [attr.aria-label]="'New Chat' | translate" class="my-[6px] flex h-[46px] w-[54px] shrink-0 items-center justify-center rounded-[8px] border border-transparent p-0 text-[18px] text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-50">
+          <i class="bi bi-plus-lg"></i>
+        </button>
+
+        @for (chat of filteredSessions; track chat.sessionId) {
+          <div class="my-[6px] rounded-[8px] select-none">
+            <button type="button" (click)="selectChat(chat)" [disabled]="isBusy()" [appTooltip]="getChatTooltip(chat)" [attr.aria-label]="getChatTooltip(chat)" [class.ui-social-collapsed-job-selected]="activeSessionId() === chat.sessionId" class="ui-social-collapsed-job relative flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-visible rounded-[8px] border border-transparent p-0 font-[Inter] text-[14px] font-semibold text-[var(--color-text4)] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)] disabled:cursor-not-allowed disabled:opacity-50">
+              {{ getChatInitial(chat) }}
+              @if (chat.isPinned) {
+                <span class="absolute right-[9px] top-[8px] h-2 w-2 rounded-full border border-[var(--color-blue-820-light)] bg-[var(--color-blue-640)]"></span>
+              }
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </app-graph-sidebar-shell>
+</div>
+
+@if (deleteChatTarget) {
+  <app-confirmation-popup [message]="'Are you sure you want to delete this chat?' | translate" (confirmed)="confirmDeleteChat($event)"></app-confirmation-popup>
+}
+
+@if (renameChatTarget) {
+  <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" data-role="backdrop" (click)="onRenameBackdrop($event)">
+    <div class="ui-graph-popup-panel ui-popup-shell w-full max-w-[420px] rounded-xl p-6" (click)="$event.stopPropagation()">
+      <div class="ui-popup-title text-lg font-semibold">
+        {{ 'Rename Chat' | translate }}
+      </div>
+
+      <div class="mt-3 text-sm text-[var(--color-text3)]">
+        {{ 'Update the chat name below.' | translate }}
+      </div>
+
+      <input type="text" [(ngModel)]="renameChatDraft" class="mt-4 h-[40px] w-full rounded-[8px] border border-white/10 bg-[#102236] px-3 text-sm text-white outline-none placeholder:text-[#A0B8D1]" [placeholder]="'Chat name' | translate" (keydown.enter)="confirmRenameChat()" autofocus />
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button type="button" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold" [disabled]="!renameChatDraft.trim()" (click)="confirmRenameChat()">
+          {{ 'confirmation.yesConfirm' | translate }}
+        </button>
+
+        <button type="button" class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" (click)="closeRenameChatPopup()">
+          {{ 'common.actions.cancel' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

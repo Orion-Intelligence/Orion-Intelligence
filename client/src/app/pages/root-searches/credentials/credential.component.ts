@@ -25,6 +25,7 @@ import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from 
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index-sidebar.component';
 import { ScrollTopComponent } from '../../../shared/partials/scroll-top/scroll-top.component';
+import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 
 type IocResultTab = 'stealers' | 'threats';
 
@@ -87,8 +88,16 @@ export class CredentialComponent implements OnInit {
     this.isLoading = this.pendingRequests > 0;
   }
 
-  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService) {
+  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService, private aiToolRoutingService: AiToolRoutingService) {
     this.type = this.route.snapshot.data['type'];
+  }
+
+  get aiToolType(): string {
+    return this.aiToolRoutingService.getTypeForApiType(this.router.url.includes('/consolidated') ? 'consolidated-ioc' : 'stealer-ioc');
+  }
+
+  get aiWelcomeMessage(): string {
+    return this.aiToolRoutingService.getMessageForApiType(this.router.url.includes('/consolidated') ? 'consolidated-ioc' : 'stealer-ioc');
   }
 
   get currentResultCount(): number {

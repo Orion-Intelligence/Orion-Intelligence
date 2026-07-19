@@ -1,6 +1,6 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 pb-4 lg:px-8">
   @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
-    <app-chat-widget tool="api_payload" [type]="aiToolApiName"></app-chat-widget>
+    <app-chat-widget tool="api_payload" [type]="aiToolApiName" [welcomeMessage]="aiWelcomeMessage"></app-chat-widget>
   }
 
   <form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">

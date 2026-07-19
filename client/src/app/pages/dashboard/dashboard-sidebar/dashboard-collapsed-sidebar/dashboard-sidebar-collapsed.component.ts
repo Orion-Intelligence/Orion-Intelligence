@@ -41,7 +41,14 @@ export class SidebarSectionComponent {
     this.sidebarHomepageService.requestSubscription(moduleName);
   }
 
+  visibleItems(): string[] {
+    return this.items().filter(item => item.toLowerCase() !== 'national-identity');
+  }
+
   getItemTooltip(item: string): string {
+    if (item.toLowerCase() === 'national-identity') {
+      return 'Pakistan Identity Finder';
+    }
     const mapped = this.itemTooltips[item];
     if (mapped) {
       return mapped;

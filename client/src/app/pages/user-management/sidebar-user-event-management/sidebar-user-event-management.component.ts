@@ -18,6 +18,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { IocSearchComponent } from '../../../shared/partials/ioc-search/ioc-search.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 
 @Component({
   selector: 'app-sidebar-user-event-management',
@@ -47,7 +48,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   sidebarReady = false;
   trackByIndex = (index: number) => index;
 
-  constructor(private apiService: ApiService, private appService: AppService, private licenseService: LicenseService, private router: Router, private dashboardService: DashboardService, public sidebarService: SidebarService) {
+  constructor(private apiService: ApiService, private appService: AppService, private licenseService: LicenseService, private router: Router, private dashboardService: DashboardService, public sidebarService: SidebarService, protected aiToolRoutingService: AiToolRoutingService) {
     super();
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }

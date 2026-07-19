@@ -25,6 +25,7 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert.alert_job import alert_job
 from orion.api.interactive.account_manager.models.user_model import user_model
+from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 
 tenant_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 SYSTEM_LOG_FLUSHED_AT_KEY = "SYSTEM_LOG_FLUSHED_AT"
@@ -167,8 +168,8 @@ async def update_user(user: user_meta_model, current_user=Depends(get_current_us
     "/api/get/current/user/chat-history",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
-async def get_current_user_chat_history(current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().get_current_user_chat_history(current_user)
+async def get_current_user_chat_history(data: dict | None = Body(default=None), current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().get_chat_history(data or {}, current_user)
 
 
 @tenant_routes.post(
@@ -176,7 +177,7 @@ async def get_current_user_chat_history(current_user=Depends(get_current_user)):
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def update_current_user_chat_history(data: chat_history_model, current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().update_current_user_chat_history(data, current_user)
+    return await nexus_chat_gateway.getInstance().update_chat_history(data.model_dump(), current_user)
 
 
 @tenant_routes.post(

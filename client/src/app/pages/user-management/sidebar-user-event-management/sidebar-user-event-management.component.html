@@ -11,6 +11,8 @@
       [useRouteQuery]="false"
       [advancedTitle]="'Advanced Filter Builder' | translate"
       [advancedSubtitle]="'Combine multiple filters with AND/OR for precise SIEM results' | translate"
+      [aiType]="aiToolRoutingService.getTypeForApiType('event-management')"
+      [aiWelcomeMessage]="aiToolRoutingService.getMessageForApiType('event-management')"
       (searchTriggered)="triggerSearch($event)"
     ></app-ioc-search>
 

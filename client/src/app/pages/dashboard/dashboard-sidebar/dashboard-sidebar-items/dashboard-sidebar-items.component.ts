@@ -40,9 +40,16 @@ export class DashboardSidebarItemsComponent {
     this.sidebarHomepageService.requestSubscription(moduleName);
   }
 
+  visibleItems(): string[] {
+    return this.items().filter(item => item.toLowerCase() !== 'national-identity');
+  }
+
   replaceDashWithSpace(value: string): string {
     if (!value) {
       return '';
+    }
+    if (value.toLowerCase() === 'national-identity') {
+      return 'Pakistan Identity Finder';
     }
     return value.replace(/-/g, ' ');
   }

@@ -229,6 +229,12 @@ export const routes: Routes = [
         data: { animation: 'SocialMapper' }
       },
       {
+        path: 'ai',
+        canActivate: [subscriptionGuard],
+        loadComponent: loadAiWorkspaceComponent,
+        data: { type: 'ai', animation: 'CategoryPage' }
+      },
+      {
         path: 'social-mapper',
         redirectTo: 'social-intel',
         pathMatch: 'full'
@@ -771,8 +777,8 @@ export const routes: Routes = [
           },
           {
             path: 'ai',
-            loadComponent: loadAiWorkspaceComponent,
-            data: { type: 'ai', animation: 'CategoryPage' }
+            redirectTo: '/dashboard/ai',
+            pathMatch: 'full'
           },
           {
             canActivate: [subscriptionGuard],

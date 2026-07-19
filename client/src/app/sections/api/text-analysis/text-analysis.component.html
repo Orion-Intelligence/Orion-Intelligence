@@ -1,6 +1,6 @@
 <div class="mx-auto w-full max-w-[2400px] px-5 pb-[200px] lg:px-8">
   @if (appService.getConfig().appSettings.ai_endpoint_enabled) {
-    <app-chat-widget tool="api_payload" type="/api/nexus/analyze-text"></app-chat-widget>
+    <app-chat-widget tool="api_payload" [type]="aiToolType" [welcomeMessage]="aiWelcomeMessage"></app-chat-widget>
   }
 
   <form #analysisForm="ngForm" (submit)="analyzeText($event)" class="mt-6">
