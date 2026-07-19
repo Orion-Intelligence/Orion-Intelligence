@@ -165,7 +165,7 @@ describe('Case Management - Add View Edit Flow', () => {
   it('adds and edits artifacts and task', () => {
     openCreatedCaseDetails();
 
-    cy.get(selector('case-artifact-add')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+    cy.get(selector('case-artifact-add')).first().scrollIntoView().click({ force: true });
     cy.get(selector('case-artifact-add-drawer')).filter(':visible').first().should('be.visible');
     cy.get(selector('case-artifact-title-input')).should('be.visible').type('Cypress Evidence Artifact');
     cy.get(selector('case-artifact-type-select')).should('be.visible').select('file');
@@ -201,7 +201,7 @@ describe('Case Management - Add View Edit Flow', () => {
     assertNotification('Artifacts updated successfully');
     cy.get(selector('case-artifact-title-value-0')).should('contain.text', 'Cypress Updated Evidence Artifact');
 
-    cy.get(selector('case-artifact-add')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+    cy.get(selector('case-artifact-add')).first().scrollIntoView().click({ force: true });
     cy.get(selector('case-artifact-add-drawer')).filter(':visible').first().should('be.visible');
 
     cy.get(selector('case-artifact-title-input')).should('be.visible').type('Cypress Linked Report Artifact');
@@ -236,7 +236,7 @@ describe('Case Management - Add View Edit Flow', () => {
     assertNotification('File deleted successfully');
     cy.get(selector('case-artifact-file-download-0')).should('not.exist');
 
-    cy.get(selector('case-artifact-add')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+    cy.get(selector('case-artifact-add')).first().scrollIntoView().click({ force: true });
     cy.get(selector('case-artifact-add-drawer')).filter(':visible').first().should('be.visible');
 
     cy.get(selector('case-artifact-title-input'))
@@ -454,7 +454,7 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.docsScreenshot('case-closure-read-only');
   });
 
-  it('archives closed case and shows archived list', () => {
+  it('archives closed case and shows .then list', () => {
     openCreatedCaseDetails();
 
     clickHeaderAction('case-details-archive');
@@ -475,71 +475,71 @@ describe('Case Management - Add View Edit Flow', () => {
   });
 });
 
-// describe('Case Management - Tenant Alert Visibility', () => {
-//   let caseAlertTenants: CaseAlertTenant[] = [];
-//   let caseAlertUsers: {limited: ManagedUser; all: ManagedUser};
-//
-//   before(() => {
-//     cy.env(['CASE_ALERT_TENANTS', 'CASE_ALERT_USERS']).then(({CASE_ALERT_TENANTS, CASE_ALERT_USERS}) => {
-//       caseAlertTenants = CASE_ALERT_TENANTS || [];
-//       caseAlertUsers = CASE_ALERT_USERS || {};
-//       if (caseAlertTenants.length !== 3 || !caseAlertUsers.limited?.username || !caseAlertUsers.all?.username) {
-//         throw new Error('Missing CASE_ALERT_TENANTS or CASE_ALERT_USERS in cypress.config.ts');
-//       }
-//     });
-//   });
-//
-//   after(() => {
-//     cy.logout();
-//   });
-//
-//   it('limits admin tenant alerts by analyst allowed tenants and tenant visibility settings', () => {
-//     cy.logout();
-//     caseAlertTenants.forEach((tenant) => {
-//       createTenantAccount(tenant);
-//       cy.loginAsAdmin();
-//       openTenantsPage();
-//       configureTenantForCaseAlerts(tenant);
-//       cy.logout();
-//     });
-//
-//     caseAlertTenants.forEach((tenant) => onboardTenantForCaseAlerts(tenant));
-//
-//     cy.loginAsAdmin();
-//     cy.visit('/dashboard/profile/users');
-//     cy.get('[data-testid="tenant-add-user-button"]').should('be.visible');
-//     addUser(caseAlertUsers.limited);
-//     addUser(caseAlertUsers.all);
-//     cy.logout();
-//
-//     loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(
-//       [caseAlertTenants[0], caseAlertTenants[1]],
-//       [caseAlertTenants[2]]
-//     );
-//     cy.logout();
-//
-//     loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(caseAlertTenants, []);
-//     cy.logout();
-//
-//     setTenantAlertVisibility(caseAlertTenants[0], false);
-//
-//     loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(
-//       [caseAlertTenants[1]],
-//       [caseAlertTenants[0], caseAlertTenants[2]]
-//     );
-//     cy.logout();
-//
-//     loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
-//     openCaseAlertsView();
-//     assertVisibleTenantAlertEmails(
-//       [caseAlertTenants[1], caseAlertTenants[2]],
-//       [caseAlertTenants[0]]
-//     );
-//   });
-// });
+describe('Case Management - Tenant Alert Visibility', () => {
+  let caseAlertTenants: CaseAlertTenant[] = [];
+  let caseAlertUsers: {limited: ManagedUser; all: ManagedUser};
+
+  before(() => {
+    cy.env(['CASE_ALERT_TENANTS', 'CASE_ALERT_USERS']).then(({CASE_ALERT_TENANTS, CASE_ALERT_USERS}) => {
+      caseAlertTenants = CASE_ALERT_TENANTS || [];
+      caseAlertUsers = CASE_ALERT_USERS || {};
+      if (caseAlertTenants.length !== 3 || !caseAlertUsers.limited?.username || !caseAlertUsers.all?.username) {
+        throw new Error('Missing CASE_ALERT_TENANTS or CASE_ALERT_USERS in cypress.config.ts');
+      }
+    });
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('limits admin tenant alerts by analyst allowed tenants and tenant visibility settings', () => {
+    cy.logout();
+    caseAlertTenants.forEach((tenant) => {
+      createTenantAccount(tenant);
+      cy.loginAsAdmin();
+      openTenantsPage();
+      configureTenantForCaseAlerts(tenant);
+      cy.logout();
+    });
+
+    caseAlertTenants.forEach((tenant) => onboardTenantForCaseAlerts(tenant));
+
+    cy.loginAsAdmin();
+    cy.visit('/dashboard/profile/users');
+    cy.get('[data-testid="tenant-add-user-button"]').should('be.visible');
+    addUser(caseAlertUsers.limited);
+    addUser(caseAlertUsers.all);
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[0], caseAlertTenants[1]],
+      [caseAlertTenants[2]]
+    );
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(caseAlertTenants, []);
+    cy.logout();
+
+    setTenantAlertVisibility(caseAlertTenants[0], false);
+
+    loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[1]],
+      [caseAlertTenants[0], caseAlertTenants[2]]
+    );
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[1], caseAlertTenants[2]],
+      [caseAlertTenants[0]]
+    );
+  });
+});

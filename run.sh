@@ -16,6 +16,23 @@ stop_docker() {
     docker rm trusted-web-nginx 2>/dev/null || true
 }
 
+stop_ng_serve() {
+    local url="http://127.0.0.1:4200/"
+    local pid_file="/tmp/orion-ng-serve.pid"
+
+    if [ -f "$pid_file" ]; then
+        kill -9 "$(cat "$pid_file")" 2>/dev/null || true
+        rm -f "$pid_file"
+    fi
+    pkill -9 -f '(^|[[:space:]/])ng([[:space:]].*)? serve([[:space:]]|$)' 2>/dev/null || true
+    pkill -9 -f 'node .*@angular/cli/bin/ng serve' 2>/dev/null || true
+    pkill -9 -f "npm run serve -- --host 127.0.0.1 --port 4200" 2>/dev/null || true
+
+    while curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
+        sleep 1
+    done
+}
+
 pull_image_if_missing() {
     local image="$1"
 
@@ -98,7 +115,7 @@ disable_maintenance_mode() {
 }
 
 wait_for_test_service() {
-    local url="https://127.0.0.1:8443/api/public"
+    local url="https://127.0.0.1:8443/api/test/ready"
     echo "Waiting for test service to become ready..."
     until curl -fksS -o /dev/null "$url" >/dev/null 2>&1; do
         sleep 2
@@ -129,6 +146,23 @@ run_test_task() {
     npm test run
     cd ..
     exit 0
+}
+
+restart_ng_serve() {
+    local url="http://127.0.0.1:4200/"
+    local pid_file="/tmp/orion-ng-serve.pid"
+
+    stop_ng_serve
+
+    (
+        cd client || exit
+        nohup npm run serve -- --host 127.0.0.1 --port 4200 >/tmp/orion-ng-serve.log 2>&1 &
+        echo $! > "$pid_file"
+    )
+
+    until curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
+        sleep 2
+    done
 }
 
 set_testing_enabled() {
@@ -162,19 +196,24 @@ if [ "$1" = "-ip" ]; then
 fi
 
 if [ "$1" = "stop" ]; then
+    stop_ng_serve
     stop_docker
     echo "Orion Intelligence service stopped"
     exit 0
 fi
 
 if [ "$1" = "-doc" ]; then
+    docker compose -p "$PROJECT_NAME" -f docker-compose-testing.yml down -v --remove-orphans
     "$0" build -t
+    restart_ng_serve
     bash docs/scripts/generate_docs.sh --clear
     exit 0
 fi
 
 if [ "$1" = "-docs" ]; then
+    docker compose -p "$PROJECT_NAME" -f docker-compose-testing.yml down -v --remove-orphans
     "$0" build -t
+    restart_ng_serve
     bash docs/scripts/generate_docs.sh
     exit 0
 fi
@@ -183,7 +222,7 @@ COMMAND=$1
 FLAG=$2
 EXTRA_FLAG=$3
 
-if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ]; then
+if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ] || [ "$FLAG" != "-docs" ]; then
     stop_docker
 fi
 

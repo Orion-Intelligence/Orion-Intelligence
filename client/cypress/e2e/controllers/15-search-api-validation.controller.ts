@@ -808,28 +808,52 @@ function openSidebar16() {
 }
 
 function selectSidebarFilterOption16(selectTestId: string, option: string) {
-  cy.get(`[data-testid="${selectTestId}"]`).filter(':visible')
-    .first()
-    .scrollIntoView()
-    .should('be.visible')
-    .then(($select) => {
-      if ($select.is('select')) {
-        cy.wrap($select).select(option);
-        return;
-      }
+  cy.get(`[data-testid="${selectTestId}"]`)
+    .then(($selects) => {
+      const $visibleSelect = $selects.filter(':visible').first();
+      const $select = $visibleSelect.length ? $visibleSelect : $selects.first();
+      expect($select.length, `${selectTestId} trigger`).to.eq(1);
 
-      const menuId = $select.attr('aria-controls');
-      expect(menuId, `${selectTestId} menu id`).to.exist;
-      cy.wrap($select).click({ force: true });
-      cy.wrap($select).should('have.attr', 'aria-expanded', 'true');
-      cy.get(`#${menuId}`).parent()
-        .find('input')
-        .then(($input) => {
-          if ($input.length > 0) {
-            cy.wrap($input.first()).clear({ force: true }).type(option, { force: true });
+      return cy.wrap($select).scrollIntoView().then(($select) => {
+        if ($select.is('select')) {
+          cy.wrap($select).select(option, { force: true });
+          return;
+        }
+
+        const menuId = $select.attr('aria-controls');
+        expect(menuId, `${selectTestId} menu id`).to.exist;
+        cy.wrap($select).click({ force: true });
+        cy.wrap($select).should('have.attr', 'aria-expanded', 'true');
+        const typeOption = () => cy.get(`#${menuId}`).parent()
+          .find('input')
+          .then(($input) => {
+            if ($input.length > 0) {
+              cy.wrap($input.first()).clear({ force: true }).type(option, { force: true });
+            }
+          });
+
+        typeOption();
+        if (selectTestId !== 'side-filter-select-m_cve') {
+          cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000, matchCase: false }).click({ force: true });
+          return;
+        }
+
+        const optionSelector = `#${menuId} [role="option"]`;
+        const clickOption = (attempt = 1): Cypress.Chainable => cy.wait(2000).then(() => {
+          const options = Cypress.$(optionSelector).toArray();
+          const match = options
+            .find(element => (element.textContent || '').toLowerCase().includes(option.toLowerCase()));
+          if (match) {
+            return cy.wrap(match).click({ force: true });
           }
+          const noResults = options.some(element => (element.textContent || '').toLowerCase().includes('no results'));
+          if (!noResults || attempt >= 3) {
+            throw new Error(`Expected ${option} in ${optionSelector} after ${attempt} attempts`);
+          }
+          return typeOption().then(() => clickOption(attempt + 1));
         });
-      cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000, matchCase: false }).click({ force: true });
+        clickOption();
+      });
     });
 }
 

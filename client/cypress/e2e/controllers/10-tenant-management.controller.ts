@@ -29,6 +29,13 @@ export interface CaseAlertTenant {
   companyName: string;
 }
 
+function setConfiguredViewport() {
+  cy.viewport(
+    Number(Cypress.config('viewportWidth')) || 1920,
+    Number(Cypress.config('viewportHeight')) || 1080
+  );
+}
+
 function scrollTenantTableToBottomLeft() {
   cy.get('[data-testid="tenant-page-header"]').should('be.visible');
 
@@ -73,7 +80,7 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
 
 export function submitLogin(username: string, password: string) {
   cy.intercept('POST', '**/api/token').as('loginRequest');
-  cy.visit('/login');
+  cy.visitLoginWithCleanAuthState();
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
@@ -500,7 +507,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 }
 
 export function openTenantsPage() {
-  cy.viewport(1440, 900);
+  setConfiguredViewport();
   cy.get('[data-testid="sidebar-subitem-profile-tenant"]').filter(':visible').first().scrollIntoView().click();
   cy.location('pathname').then((path) => {
     if (!path.includes('/dashboard/profile/tenant')) {
@@ -511,7 +518,7 @@ export function openTenantsPage() {
 }
 
 export function openAuditLogPage() {
-  cy.viewport(1440, 900);
+  setConfiguredViewport();
   cy.visit('/dashboard/profile/auditlog');
   cy.location('pathname').should('include', '/dashboard/profile/auditlog');
   cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
@@ -553,7 +560,11 @@ export function openTenantHomepage() {
 }
 
 export function ensureGeneralAlertIoc() {
+  cy.intercept('POST', '**/api/get/tenant').as('loadGeneralAlertIocs');
   openManageIOCs();
+  cy.wait('@loadGeneralAlertIocs', {timeout: 60000})
+    .its('response.statusCode')
+    .should('be.oneOf', [200, 201]);
   cy.contains('[data-testid^="tenant-ioc-tab-"]', 'Domains', {timeout: 30000})
     .scrollIntoView()
     .should('be.visible')

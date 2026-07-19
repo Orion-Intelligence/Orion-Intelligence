@@ -41,6 +41,8 @@ db.sqlite3
 
 client/cypress/downloads/*
 client/cypress/screenshots/*
+client/cypress/error/*
+!client/cypress/error/.gitkeep
 client/coverage/*
 .coverage
 .coverage.*

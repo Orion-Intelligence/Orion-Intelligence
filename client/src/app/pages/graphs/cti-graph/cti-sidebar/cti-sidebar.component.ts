@@ -5,7 +5,7 @@ import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../../../../
   selector: 'app-cti-sidebar',
   standalone: true,
   imports: [SidebarComponent],
-  template: `<graph-sidebar
+  template: `<graph-sidebar class="block h-full min-h-0"
     [filters]="filters()"
     [stats]="stats()"
     [legendItems]="legendItems()"
