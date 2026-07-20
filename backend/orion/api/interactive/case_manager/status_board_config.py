@@ -7,9 +7,7 @@ from bson import ObjectId
 from fastapi import HTTPException
 
 from orion.api.interactive.case_manager.case_config import CASE_STATUS_FLOW
-from orion.api.server.config_manager.config_controller import config_controller
 from orion.services.mongo_manager.mongo_controller import mongo_controller
-from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 from orion.api.interactive.case_manager.models.case_models import CaseStatusBoardConfig, CaseStatusBoardItem
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 
