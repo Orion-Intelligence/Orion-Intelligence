@@ -33,7 +33,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   sidebar_default = true;
   min_detected = false;
   mobile_menu_status = false;
-  apiCategories = Object.values(ApiSubCategory);
+  apiCategories = Object.values(ApiSubCategory).filter(category => category !== ApiSubCategory.NATIONAL_IDENTITY);
   exploitCategories = Object.values(ExploitSubCategory);
   aptIntelCategories: string[] = [];
   newsCategories = Object.values(FeedSubCategory);
