@@ -32,7 +32,7 @@ export class AiChatSidebarComponent {
   sharingSessionId: string | null = null;
   isCollapsed = false;
 
-  constructor(private readonly nexusChatService: NexusChatService, private readonly api: ApiService) {}
+  constructor(private readonly nexusChatService: NexusChatService, private readonly api: ApiService) { }
 
   toggleCollapsed(): void {
     this.isCollapsed = !this.isCollapsed;
@@ -189,11 +189,11 @@ export class AiChatSidebarComponent {
   private updatedSession(current: AiChatSession, updated: NexusChatSession): AiChatSession {
     return {
       ...current,
-      sessionId: updated.session_id,
-      title: updated.title,
-      updatedAt: updated.updated_at,
-      isPinned: updated.is_pinned ?? false,
-      pinnedAt: updated.pinned_at ?? null,
+      sessionId: updated.session_id || current.sessionId,
+      title: updated.title || current.title,
+      updatedAt: updated.updated_at || current.updatedAt,
+      isPinned: updated.is_pinned ?? current.isPinned,
+      pinnedAt: updated.pinned_at ?? current.pinnedAt ?? null,
     };
   }
 }

@@ -112,8 +112,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
             assistantMessage,
           ];
 
+          const responseSessionId = response.chat.session_id;
+
           this.chatSessions = this.chatSessions.map(session =>
-            session.sessionId === response.chat.session_id
+            session.sessionId === responseSessionId
               ? {
                 ...session,
                 title: response.chat.title,
@@ -409,7 +411,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private mapSession(session: any): AiChatSession {
     return {
-      sessionId: session.session_id,
+      sessionId: session.session_id || session.id,
       title: session.title,
       updatedAt: session.updated_at,
       isPinned: session.is_pinned ?? false,
@@ -451,11 +453,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     this.nexusChatService.getChat(sessionId).subscribe({
       next: (chat) => {
-        this.activeSessionId = chat.session_id;
+        const chatSessionId = chat.session_id;
+
+        this.activeSessionId = chatSessionId;
         this.messages = chat.messages.map(message => this.mapMessage(message));
 
         this.chatSessions = this.chatSessions.map(session =>
-          session.sessionId === chat.session_id
+          session.sessionId === chatSessionId
             ? {
               ...session,
               title: chat.title,
