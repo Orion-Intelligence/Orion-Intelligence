@@ -1,0 +1,107 @@
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { CaseManagement } from '../../case-management-service/case-management';
+import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
+import { AppService } from '../../../../../services/core/app/app.service';
+import { CaseStatusBoardConfig, CaseStatusBoardItem, DEFAULT_CASE_STATUS_BOARD_CONFIG } from '../../../../../shared/model/case-management/status-board-config.model';
+
+@Component({
+  selector: 'app-case-tracking-board-settings',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './case-tracking-board-settings.html'
+})
+export class CaseTrackingBoardSettings implements OnInit {
+  config: CaseStatusBoardConfig = structuredClone(DEFAULT_CASE_STATUS_BOARD_CONFIG);
+  isLoading = false;
+  isSaving = false;
+  errorText = '';
+
+  constructor( private router: Router, private caseService: CaseManagement, private appService: AppService, private messageNotificationService: MessageNotificationService ) { }
+
+  ngOnInit(): void {
+    this.loadConfig();
+  }
+
+  loadConfig(): void {
+    this.isLoading = true;
+    this.caseService.getStatusBoardConfig().subscribe({
+      next: config => {
+        this.config = this.normalizeConfig(config);
+        this.isLoading = false;
+      },
+      error: err => {
+        this.isLoading = false;
+        this.messageNotificationService.show(err?.error?.detail || 'Failed to load status board settings');
+      }
+    });
+  }
+
+  save(): void {
+    this.errorText = this.validate();
+    if (this.errorText || this.isSaving) {
+      return;
+    }
+
+    this.isSaving = true;
+    const request = this.caseService.updateStatusBoardConfig(this.config);
+
+    request.subscribe({
+      next: config => {
+        this.config = this.normalizeConfig(config);
+        this.isSaving = false;
+        this.messageNotificationService.show('Status board settings saved', 'success');
+      },
+      error: err => {
+        this.isSaving = false;
+        this.errorText = err?.error?.detail || 'Failed to save status board settings';
+      }
+    });
+  }
+
+  goBack(): void {
+    this.router.navigate(['/dashboard/profile/case-management/tracking-board']);
+  }
+
+  isRequiredStatus(status: CaseStatusBoardItem): boolean {
+    return status.value === 'new' || status.value === 'closed';
+  }
+
+  get scopeLabel(): string {
+    return this.appService.userSessionData()?.tenant?.isDefault ? 'System configuration' : 'Tenant configuration';
+  }
+
+  private normalizeConfig(config?: CaseStatusBoardConfig | null): CaseStatusBoardConfig {
+  const source = config?.statuses?.length ? config : DEFAULT_CASE_STATUS_BOARD_CONFIG;
+
+  return {
+    statuses: source.statuses.map(status => ({
+      ...status,
+      label: status.label || this.formatLabel(status.value),
+    })),
+  };
+}
+
+  validate(): string {
+    const names = this.config.statuses.map(status => (status.label || '').trim().toLowerCase());
+    const values = this.config.statuses.map(status => status.value.trim().toLowerCase());
+    if (this.config.statuses.some(status => !status.label.trim())) {
+      return 'Every status needs a display name';
+    }
+    if (new Set(names).size !== names.length) {
+      return 'Duplicate status display names are not allowed';
+    }
+    if (new Set(values).size !== values.length) {
+      return 'Duplicate status keys are not allowed';
+    }
+    if (!this.config.statuses.some(status => status.value === 'new') || !this.config.statuses.some(status => status.value === 'closed')) {
+      return 'New and Closed statuses are required';
+    }
+    return '';
+  }
+
+  private formatLabel(value: string): string {
+    return value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+  }
+}

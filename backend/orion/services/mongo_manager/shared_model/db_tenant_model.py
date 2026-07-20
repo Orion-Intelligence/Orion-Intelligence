@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 from enum import Enum
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from odmantic import Model, EmbeddedModel
 from pydantic import BaseModel, field_validator, model_validator
@@ -57,6 +57,7 @@ class db_tenant_model(Model):
     accounts_mail: Optional[str] = None
     accounts_smtp_server: Optional[str] = None
     accounts_smtp_port: Optional[str] = None
+    case_status_tracking_board: Optional[dict[str, Any]] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -92,6 +93,7 @@ class TenantRequest(BaseModel):
     accounts_mail: Optional[str] = None
     accounts_smtp_server: Optional[str] = None
     accounts_smtp_port: Optional[str] = None
+    case_status_tracking_board: Optional[dict[str, Any]] = None
 
     @field_validator("alert_run_time", mode="before")
     @classmethod

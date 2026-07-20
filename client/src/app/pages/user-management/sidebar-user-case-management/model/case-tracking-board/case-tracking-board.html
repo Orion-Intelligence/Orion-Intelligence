@@ -20,10 +20,16 @@
                         <span class="font-bold tabular-nums text-emerald-300 [body.light-theme_&]:text-emerald-700">{{ getCompletedCaseCount() }}</span>
                     </div>
                 </div>
-                <button type="button" class="ui-btn ui-btn-secondary inline-flex h-10 items-center gap-2 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-tracking-board-refresh" [disabled]="isLoading" (click)="loadCases()">
-                    <i class="bi bi-arrow-clockwise text-sm" [ngClass]="isLoading ? 'animate-spin' : ''"></i>
-                    {{ isLoading ? 'Refreshing' : 'Refresh' }}
-                </button>
+                <div class="inline-flex h-10 max-w-full overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-xs shadow-[0_8px_18px_var(--color-shadow-light)]">
+                    <button type="button" class="flex items-center justify-center border-r border-[var(--tenant-line)] px-3 transition-colors hover:bg-[var(--tenant-hover)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-tracking-board-refresh" [appTooltip]="'Refresh' | translate" [disabled]="isLoading" (click)="loadCases()" [attr.aria-label]="isLoading ? 'Refreshing' : 'Refresh'">
+                        <i class="bi bi-arrow-clockwise text-sm text-white" [ngClass]="isLoading ? 'animate-spin' : ''"></i>
+                    </button>
+                    @if (canManageBoardSettings()) {
+                        <button type="button" class="flex items-center justify-center px-3 transition-colors hover:bg-[var(--tenant-hover)]" data-testid="case-tracking-board-settings" [appTooltip]="'Settings' | translate" (click)="openBoardSettings()" aria-label="Settings">
+                            <img src="assets/images/shared/settings.svg" alt="Settings" class="h-[18px] w-[18px] brightness-0 invert" />
+                        </button>
+                    }
+                </div>
             </div>
         </div>
 
@@ -59,7 +65,7 @@
                 <div cdkDropList [cdkDropListData]="column.value" [cdkDropListEnterPredicate]="canDropIntoAllowedStatus" (cdkDropListDropped)="dropCase($event, column.value)" class="case-board-lane min-h-0 flex-1 space-y-3 overflow-y-auto p-3 transition-colors duration-200 ease-out [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[var(--tenant-chip-bg)] [&::-webkit-scrollbar-track]:bg-transparent">
                     @if (draggedCase && getAllowedStatuses(draggedCase.status).includes(column.value)) {
                     <div class="flex min-h-[36px] items-center justify-between rounded-[8px] bg-[var(--tenant-chip-bg)]/55 px-3 text-[11px] font-medium text-[var(--color-text4)]">
-                        <span class="truncate">Drop to {{ formatLabel(column.value) }}</span>
+                        <span class="truncate">Drop to {{ column.label }}</span>
                         <span class="shrink-0 text-[10px] uppercase tracking-wide">Release</span>
                     </div>
                     }
@@ -199,9 +205,9 @@
                 <div class="p-5">
                     <div class="mb-4 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-2.5">
                         <div class="flex min-w-0 items-center gap-2 text-sm">
-                            <span class="min-w-0 truncate font-semibold text-[var(--color-text3)]">{{ formatLabel(selectedCase?.status) }}</span>
+                            <span class="min-w-0 truncate font-semibold text-[var(--color-text3)]">{{ getStatusLabel(selectedCase?.status) }}</span>
                             <span class="shrink-0 text-xs text-[var(--color-text4)]">to</span>
-                            <span class="min-w-0 truncate font-bold text-[var(--color-text1)]">{{ formatLabel(targetStatus) }}</span>
+                            <span class="min-w-0 truncate font-bold text-[var(--color-text1)]">{{ getStatusLabel(targetStatus) }}</span>
                         </div>
                     </div>
 

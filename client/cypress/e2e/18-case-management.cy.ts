@@ -141,6 +141,48 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-primary-entity-value')).should('contain.text', 'Cypress Updated Entity');
   });
 
+  it('applies status board settings to tracking board', () => {
+    const setStatusToggle = (testId: string, checked: boolean) => {
+      cy.get(selector(testId)).then(($input) => {
+        if ($input.is(':checked') !== checked) {
+          cy.wrap($input).click({ force: true });
+        }
+      });
+    };
+
+    const saveStatusBoardSettings = () => {
+      cy.intercept('PUT', '**/api/profile/cases/status-board-config/*').as('saveStatusBoardSettings');
+      cy.contains('button', 'Save').scrollIntoView().should('be.visible').click({ force: true });
+      cy.wait('@saveStatusBoardSettings', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
+    };
+
+    cy.then(() => {
+      expect(caseId, 'created case id').not.to.equal('');
+    });
+
+    cy.visit('/dashboard/profile/case-management/tracking-board/settings');
+    cy.get(selector('case-tracking-board-settings-page')).should('be.visible');
+    cy.get(selector('status-board-label-intake_review')).clear().type('Triage');
+    setStatusToggle('status-board-skippable-intake_review', true);
+    setStatusToggle('status-board-enabled-evidence_collection', false);
+    saveStatusBoardSettings();
+
+    cy.visit('/dashboard/profile/case-management/tracking-board');
+    cy.get(selector('case-tracking-board-page')).should('be.visible');
+    cy.get(selector('tracking-column-intake_review')).should('contain.text', 'Triage');
+    cy.get(selector('tracking-column-shell-evidence_collection')).should('not.exist');
+    cy.get(selector(`case-board-card-${caseId}`), { timeout: 60000 }).scrollIntoView().should('exist');
+    cy.get(selector(`case-board-move-${caseId}-under_investigation`)).should('exist');
+    cy.get(selector(`case-board-move-${caseId}-evidence_collection`)).should('not.exist');
+
+    cy.visit('/dashboard/profile/case-management/tracking-board/settings');
+    cy.get(selector('case-tracking-board-settings-page')).should('be.visible');
+    cy.get(selector('status-board-label-intake_review')).clear().type('Intake Review');
+    setStatusToggle('status-board-skippable-intake_review', false);
+    setStatusToggle('status-board-enabled-evidence_collection', true);
+    saveStatusBoardSettings();
+  });
+
   it('adds and edits related entity', () => {
     openCreatedCaseDetails();
 
