@@ -8,10 +8,12 @@ import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { getEnabledStatusWorkflow } from '../../../../../shared/model/case-management/status-board-config.model';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
+import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-tracking-board',
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, TooltipDirective, TranslatePipe],
   templateUrl: './case-tracking-board.html',
   styleUrls: ['./case-tracking-board.css']
 })

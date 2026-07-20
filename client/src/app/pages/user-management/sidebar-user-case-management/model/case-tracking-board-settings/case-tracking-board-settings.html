@@ -37,18 +37,18 @@
             <span class="rounded-[6px] bg-[var(--tenant-chip-bg)] px-2 py-1 text-xs font-semibold">{{ status.value }}</span>
           </div>
 
-          <input class="h-10 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" [(ngModel)]="status.label" (ngModelChange)="errorText = validate()" />
+          <input class="h-10 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" [attr.data-testid]="'status-board-label-' + status.value" [(ngModel)]="status.label" (ngModelChange)="errorText = validate()" />
 
           <label class="inline-flex items-center gap-3 text-sm font-semibold text-[var(--color-text3)]">
             <span class="relative h-6 w-11 shrink-0">
-              <input type="checkbox" class="peer sr-only" [(ngModel)]="status.enabled" [disabled]="isRequiredStatus(status)" />
+              <input type="checkbox" class="peer sr-only" [attr.data-testid]="'status-board-enabled-' + status.value" [(ngModel)]="status.enabled" [disabled]="isRequiredStatus(status)" />
               <span class="absolute inset-0 cursor-pointer rounded-[20px] bg-[var(--color-button-secondary)] transition-colors duration-300 peer-checked:bg-[var(--color-button-primary)] peer-disabled:cursor-not-allowed peer-disabled:opacity-50 before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:transition-transform before:duration-300 before:content-[''] peer-checked:before:translate-x-[20px]"></span>
             </span>
             <span>Enabled</span>
           </label>
             <label class="inline-flex items-center gap-3 text-sm font-semibold text-[var(--color-text3)]">
               <span class="relative h-6 w-11 shrink-0">
-                <input type="checkbox" class="peer sr-only" [(ngModel)]="status.skippable" [disabled]="status.value === 'new' || status.value === 'closed'" />
+                <input type="checkbox" class="peer sr-only" [attr.data-testid]="'status-board-skippable-' + status.value" [(ngModel)]="status.skippable" [disabled]="status.value === 'new' || status.value === 'closed'" />
                 <span class="absolute inset-0 cursor-pointer rounded-full bg-[var(--color-button-secondary)] transition-colors duration-300 peer-checked:bg-[var(--color-button-primary)] peer-disabled:cursor-not-allowed peer-disabled:opacity-50 before:absolute before:bottom-[3px] before:left-[3px] before:h-[18px] before:w-[18px] before:rounded-full before:bg-white before:transition-transform before:duration-300 before:content-[''] peer-checked:before:translate-x-[20px]"></span>
               </span>
               <span>Skippable</span>

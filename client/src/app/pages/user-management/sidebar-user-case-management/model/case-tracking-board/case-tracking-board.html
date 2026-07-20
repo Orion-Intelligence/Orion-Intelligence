@@ -20,16 +20,16 @@
                         <span class="font-bold tabular-nums text-emerald-300 [body.light-theme_&]:text-emerald-700">{{ getCompletedCaseCount() }}</span>
                     </div>
                 </div>
-                <button type="button" class="ui-btn ui-btn-secondary inline-flex h-10 items-center gap-2 whitespace-nowrap disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-tracking-board-refresh" [disabled]="isLoading" (click)="loadCases()">
-                    <i class="bi bi-arrow-clockwise text-sm" [ngClass]="isLoading ? 'animate-spin' : ''"></i>
-                    {{ isLoading ? 'Refreshing' : 'Refresh' }}
-                </button>
-                @if (canManageBoardSettings()) {
-                <button type="button" class="ui-btn ui-btn-secondary inline-flex h-10 items-center gap-2 whitespace-nowrap" data-testid="case-tracking-board-settings" (click)="openBoardSettings()">
-                    <img src="assets/images/shared/settings.svg" alt="Settings" class="h-[18px] w-[18px] brightness-0 invert" />
-                    Settings
-                </button>
-                }
+                <div class="inline-flex h-10 max-w-full overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-xs shadow-[0_8px_18px_var(--color-shadow-light)]">
+                    <button type="button" class="flex items-center justify-center border-r border-[var(--tenant-line)] px-3 transition-colors hover:bg-[var(--tenant-hover)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-tracking-board-refresh" [appTooltip]="'Refresh' | translate" [disabled]="isLoading" (click)="loadCases()" [attr.aria-label]="isLoading ? 'Refreshing' : 'Refresh'">
+                        <i class="bi bi-arrow-clockwise text-sm text-white" [ngClass]="isLoading ? 'animate-spin' : ''"></i>
+                    </button>
+                    @if (canManageBoardSettings()) {
+                        <button type="button" class="flex items-center justify-center px-3 transition-colors hover:bg-[var(--tenant-hover)]" data-testid="case-tracking-board-settings" [appTooltip]="'Settings' | translate" (click)="openBoardSettings()" aria-label="Settings">
+                            <img src="assets/images/shared/settings.svg" alt="Settings" class="h-[18px] w-[18px] brightness-0 invert" />
+                        </button>
+                    }
+                </div>
             </div>
         </div>
 
