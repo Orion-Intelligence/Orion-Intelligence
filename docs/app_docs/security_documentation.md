@@ -11,7 +11,7 @@ This page documents Orion Intelligence security controls, operational safeguards
 :::{admonition} Relationship to Organizational Policies
 :class: note
 
-Genesis Technologies maintains its organizational security requirements in the company policy set. This page and the related Developer Documentation, User Manual, API Documentation, and operational records describe the implementation procedures, technical controls, system architecture, and operational safeguards that support those policies.
+Genesis Technologies maintains its organizational security requirements in the {ref}`organizational-security-policies`. Those policies are the governing requirements; this page and the related Developer Documentation, User Manual, API Documentation, and operational records describe the implementation procedures, technical controls, system architecture, and operational safeguards that support them.
 
 The policy and control documentation primarily supports readiness for the SOC 2 Security and Availability Trust Services Categories. Additional Trust Services Criteria apply only when they are included in the formally approved examination scope. This documentation supports readiness and evidence collection; it does not represent a claim of SOC 2 certification without an independent examination.
 :::
