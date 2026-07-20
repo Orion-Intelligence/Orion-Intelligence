@@ -20,6 +20,8 @@ Orion is an investigation and monitoring platform that combines indexed intellig
 
 This document is organized around those tasks.
 
+For concise, task-based instructions with navigation and troubleshooting, see the [Orion Help Manual](./help_manual.md).
+
 ```{contents}
 :local:
 :depth: 2

@@ -11,6 +11,7 @@ app_docs/introduction_to_platform
 app_docs/security_documentation
 app_docs/introduction_to_modules
 app_docs/user_manual
+app_docs/help_manual
 app_docs/developer_documentation
 ```
 

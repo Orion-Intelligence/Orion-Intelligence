@@ -24,7 +24,7 @@ class StatusBoardConfigManager:
                 enabled=True,
                 skippable=False,
             )
-            for status in enumerate(CASE_STATUS_FLOW)
+            for status in CASE_STATUS_FLOW
         ]
         return CaseStatusBoardConfig(statuses=statuses)
 
