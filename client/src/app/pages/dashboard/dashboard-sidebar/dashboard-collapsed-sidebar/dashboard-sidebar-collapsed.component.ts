@@ -42,13 +42,10 @@ export class SidebarSectionComponent {
   }
 
   visibleItems(): string[] {
-    return this.items().filter(item => item.toLowerCase() !== 'national-identity');
+    return this.items();
   }
 
   getItemTooltip(item: string): string {
-    if (item.toLowerCase() === 'national-identity') {
-      return 'Pakistan Identity Finder';
-    }
     const mapped = this.itemTooltips[item];
     if (mapped) {
       return mapped;
