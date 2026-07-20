@@ -42,12 +42,8 @@ export class CaseManagement {
     return this.api.get<CaseStatusBoardConfig>('profile/cases/status-board-config');
   }
 
-  updateSystemStatusBoardConfig(payload: CaseStatusBoardConfig): Observable<CaseStatusBoardConfig> {
-    return this.api.put<CaseStatusBoardConfig>('profile/cases/status-board-config/system', payload);
-  }
-
-  updateTenantStatusBoardConfig(payload: CaseStatusBoardConfig): Observable<CaseStatusBoardConfig> {
-    return this.api.put<CaseStatusBoardConfig>('profile/cases/status-board-config/tenant', payload);
+  updateStatusBoardConfig(payload: CaseStatusBoardConfig): Observable<CaseStatusBoardConfig> {
+    return this.api.put<CaseStatusBoardConfig>('profile/cases/status-board-config/update', payload);
   }
 
   createCase(caseData: CaseRequest): Observable<Case> {

@@ -12,7 +12,16 @@ export type CaseType =
     'dark_web_mention' |
     'other';
 
-export type CaseStatus = string;
+export type CaseStatus = 
+    'new' |
+    'intake_review' |
+    'under_investigation' |
+    'evidence_collection' |
+    'verification' |
+    'regulatory_action' |
+    'legal_review' |
+    'resolved' |
+    'closed';
 
 export interface CaseStatusReason {
     status: CaseStatus;

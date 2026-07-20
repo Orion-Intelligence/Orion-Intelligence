@@ -224,7 +224,7 @@ class CaseManager:
             title=data.title,
             description=data.description,
             caseType=data.caseType,
-            status=CaseStatus.NEW.value,
+            status=CaseStatus.NEW,
             severity=data.severity,
             priority=data.priority,
             intakeSource=data.intakeSource,
@@ -522,7 +522,7 @@ class CaseManager:
         if closure_provided and not analyst_limited_update and (data.closure is not None or record.closure is not None) and not CaseHelperMethods.can_close_case(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can close cases")
         
-        if closure_provided and data.closure is not None and record.status != CaseStatus.RESOLVED.value:
+        if closure_provided and data.closure is not None and record.status != CaseStatus.RESOLVED:
             raise HTTPException(status_code=400, detail="Case cannot be closed until it reaches resolved status")
         
         existing_entities = {
@@ -546,8 +546,8 @@ class CaseManager:
             )
 
         is_closing_from_details = (
-            data.status == CaseStatus.CLOSED.value
-            and record.status != CaseStatus.CLOSED.value
+            data.status == CaseStatus.CLOSED
+            and record.status != CaseStatus.CLOSED
             and data.closure is not None
         )
 
@@ -636,7 +636,7 @@ class CaseManager:
                 )
         if closure_provided and data.closure is not None:
             record.closure = CaseClosure(**data.closure.model_dump(), closedBy=current_actor_id, closedAt=server_now)
-            record.status = CaseStatus.CLOSED.value
+            record.status = CaseStatus.CLOSED
             record.closedAt = server_now
         elif closure_provided:
             record.closure = None
@@ -1171,13 +1171,13 @@ class CaseManager:
         if current_status not in active_statuses or next_status not in active_statuses:
             raise HTTPException(status_code=400, detail="Status is not enabled for this tracking board")
 
-        if next_status == CaseStatus.NEW.value:
+        if next_status == CaseStatus.NEW:
             raise HTTPException(
                 status_code=400,
                 detail="Case cannot be moved back to new"
             )
 
-        if next_status == CaseStatus.CLOSED.value:
+        if next_status == CaseStatus.CLOSED:
             raise HTTPException(
                 status_code=400,
                 detail="Case must be closed from the case details closure section"

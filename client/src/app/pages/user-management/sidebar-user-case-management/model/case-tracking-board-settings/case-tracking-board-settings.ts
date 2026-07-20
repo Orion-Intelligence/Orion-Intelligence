@@ -45,9 +45,7 @@ export class CaseTrackingBoardSettings implements OnInit {
     }
 
     this.isSaving = true;
-    const request = this.appService.userSessionData()?.tenant?.isDefault
-      ? this.caseService.updateSystemStatusBoardConfig(this.config)
-      : this.caseService.updateTenantStatusBoardConfig(this.config);
+    const request = this.caseService.updateStatusBoardConfig(this.config);
 
     request.subscribe({
       next: config => {
@@ -75,15 +73,15 @@ export class CaseTrackingBoardSettings implements OnInit {
   }
 
   private normalizeConfig(config?: CaseStatusBoardConfig | null): CaseStatusBoardConfig {
-    const source = config?.statuses?.length ? config : DEFAULT_CASE_STATUS_BOARD_CONFIG;
-    return {
-      supportsOrdering: source.supportsOrdering !== false,
-      statuses: source.statuses
-        .map((status, index) => ({ ...status, label: status.label || this.formatLabel(status.value), order: index }))
-        .sort((a, b) => a.order - b.order)
-        .map((status, index) => ({ ...status, order: index }))
-    };
-  }
+  const source = config?.statuses?.length ? config : DEFAULT_CASE_STATUS_BOARD_CONFIG;
+
+  return {
+    statuses: source.statuses.map(status => ({
+      ...status,
+      label: status.label || this.formatLabel(status.value),
+    })),
+  };
+}
 
   validate(): string {
     const names = this.config.statuses.map(status => (status.label || '').trim().toLowerCase());

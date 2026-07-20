@@ -363,7 +363,7 @@ class CaseClosure(BaseModel):
 
 
 class CaseStatusReason(EmbeddedModel):
-    status: str
+    status: CaseStatus
     reason: str
 
 
@@ -385,7 +385,7 @@ class db_case_model(Model):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: str = Field(default=CaseStatus.NEW.value)
+    status: CaseStatus = Field(default=CaseStatus.NEW)
     statusReasons: List[CaseStatusReason] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)

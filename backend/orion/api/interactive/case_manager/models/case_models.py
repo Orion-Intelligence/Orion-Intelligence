@@ -11,6 +11,7 @@ from orion.services.mongo_manager.shared_model.db_case_model import CaseTag
 from orion.services.mongo_manager.shared_model.db_case_model import CaseType
 from orion.services.mongo_manager.shared_model.db_case_model import ClosureReason
 from orion.services.mongo_manager.shared_model.db_case_model import EntityRole
+from orion.services.mongo_manager.shared_model.db_case_model import CaseStatus
 from orion.services.mongo_manager.shared_model.db_case_model import EntityType
 from orion.services.mongo_manager.shared_model.db_case_model import IdentifierType
 from orion.services.mongo_manager.shared_model.db_case_model import IntakeSource
@@ -172,7 +173,7 @@ class CreateCaseRequest(CaseRequestModel):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: str = Field(default="new")
+    status: CaseStatus = Field(default=CaseStatus.NEW)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
@@ -226,7 +227,7 @@ class UpdateCaseRequest(CaseRequestModel):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: str = Field(default="new")
+    status: CaseStatus = Field(default=CaseStatus.NEW)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
     intakeSource: IntakeSource = Field(default=IntakeSource.MANUAL)
@@ -286,7 +287,7 @@ class CaseResponse(BaseModel):
     description: str = ""
     caseType: CaseType = Field(default=CaseType.OTHER)
     caseTypeOtherValue: str = ""
-    status: str = Field(default="new")
+    status: CaseStatus = Field(default=CaseStatus.NEW)
     statusReasons: List[dict] = Field(default_factory=list)
     severity: Severity = Field(default=Severity.LOW)
     priority: Priority = Field(default=Priority.LOW)
@@ -322,16 +323,8 @@ class CaseShareResponse(BaseModel):
 
 
 class UpdateCaseStatusRequest(CaseRequestModel):
-    status: str
+    status: CaseStatus
     reason: str
-
-    @field_validator("status")
-    @classmethod
-    def validate_status(cls, value: str) -> str:
-        value = (value or "").strip().lower().replace("-", "_").replace(" ", "_")
-        if not value:
-            raise ValueError("Status is required")
-        return value
 
     @field_validator("reason")
     @classmethod
@@ -359,8 +352,6 @@ class CaseStatusBoardItem(BaseModel):
     label: str = ""
     enabled: bool = True
     skippable: bool = False
-    custom: bool = False
-    order: int = 0
 
     @field_validator("value")
     @classmethod
@@ -380,7 +371,6 @@ class CaseStatusBoardItem(BaseModel):
         return value
     
 class CaseStatusBoardConfig(BaseModel):
-    supportsOrdering: bool = True
     statuses: List[CaseStatusBoardItem] = Field(default_factory=list)
 
     @model_validator(mode="after")

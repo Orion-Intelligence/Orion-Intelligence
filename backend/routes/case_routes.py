@@ -39,17 +39,9 @@ async def get_status_board_config(current_user=Depends(get_current_user)):
 
 
 @case_routes.put(
-    "/api/profile/cases/status-board-config/system",
+    "/api/profile/cases/status-board-config/update",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN]))])
-async def update_system_status_board_config(payload: CaseStatusBoardConfig = Body(...)):
-    return await StatusBoardConfigManager.save_system_config(payload)
-
-
-@case_routes.put(
-    "/api/profile/cases/status-board-config/tenant",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.MEMBER])), Depends(license_required("maintainer"))]
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(license_required("maintainer"))]
 )
 async def update_tenant_status_board_config(payload: CaseStatusBoardConfig = Body(...), current_user=Depends(get_current_user)):
     return await StatusBoardConfigManager.save_tenant_config(str(current_user.tenant_uuid), payload)
