@@ -5,7 +5,7 @@ describe('Orion Intelligence - Report Takedown UI Flow', () => {
     cy.logout();
   });
 
-  it('initiates takedown from a compromised monitoring report and reflects accepted status on the report', () => {
+  it('submits a takedown with an analyst note and reflects accepted status on the report', () => {
     cy.loginAsAdmin();
     stubTakedownReportFlow();
 

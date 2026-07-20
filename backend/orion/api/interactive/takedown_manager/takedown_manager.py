@@ -226,6 +226,8 @@ class TakedownManager:
     async def create_request(self, request: TakedownCreateRequest, current_user) -> Dict[str, Any]:
         report_id = (request.report_id or "").strip()
         raw_target_url = request.target_url.strip()
+        custom_msg = getattr(request, "custom_message", "").strip()
+
         if not raw_target_url:
             raise HTTPException(status_code=400, detail="Target URL is required")
         target_url = self._normalize_target_url(raw_target_url)
@@ -249,6 +251,7 @@ class TakedownManager:
 
         now = datetime.now(timezone.utc)
         evidence_response = await self._capture_evidence(target_url, user_uuid)
+        evidence_response["custom_message"] = custom_msg
         evidence = self._extract_micro_evidence(evidence_response)
         evidence_status = str(evidence.get("status") or evidence_response.get("status") or "").lower()
         if evidence_status in {"error", "failed", "failure"}:
@@ -385,6 +388,7 @@ class TakedownManager:
             screenshot_base64=str(evidence.get("screenshot_base64") or ""),
             html_content=str(evidence.get("html_content") or ""),
             screenshot_mime_type=str(evidence.get("screenshot_mime_type") or "image/png"),
+            custom_message=str((record.evidence or {}).get("custom_message") or ""),
         )
 
         now = datetime.now(timezone.utc)

@@ -25,13 +25,21 @@
             <span class="animate-spin h-10 w-10 border-4 border-[var(--color-blue-640)] border-t-transparent rounded-full mb-4"></span>
             <p class="text-center text-[14px] font-medium text-[var(--color-text2)] animate-pulse">Capturing evidence and creating the admin review request...</p>
           </div>
-        } @else if (manualUrlMode && !actionResult) {
+        } @else if (isReviewing && !actionResult) {
+          @if (manualUrlMode) {
+            <div class="mb-4">
+              <label class="ui-popup-label mb-1.5 block text-sm font-medium" for="manual-takedown-target-url">Target URL</label>
+              <input id="manual-takedown-target-url" data-testid="manual-takedown-target-url" type="url" name="manual-takedown-target-url" [(ngModel)]="manualTargetUrl" (keyup.enter)="submitTakedown()" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': manualUrlError }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" placeholder="https://example.com/path" />
+              @if (manualUrlError) {
+                <p class="mt-1.5 text-xs text-rose-300" role="alert">{{ manualUrlError }}</p>
+              }
+            </div>
+          }
+
           <div>
-            <label class="ui-popup-label mb-1.5 block text-sm font-medium" for="manual-takedown-target-url">Target URL</label>
-            <input id="manual-takedown-target-url" data-testid="manual-takedown-target-url" type="url" name="manual-takedown-target-url" [(ngModel)]="manualTargetUrl" (keyup.enter)="submitManualTakedown()" [ngClass]="{ 'ring-rose-500 focus:ring-rose-500': manualUrlError }" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm" placeholder="https://example.com/path" />
-            @if (manualUrlError) {
-              <p class="mt-1.5 text-xs text-rose-300" role="alert">{{ manualUrlError }}</p>
-            }
+            <label class="ui-popup-label mb-1.5 block text-sm font-medium" for="takedown-custom-message">Custom Email Note (Optional)</label>
+            <textarea id="takedown-custom-message" data-testid="takedown-custom-message" name="takedown-custom-message" [(ngModel)]="customMessage" rows="3" class="ui-popup-input block w-full rounded-lg px-3 py-2.5 text-sm resize-none" placeholder="Add specific details or instructions for the hosting provider..."></textarea>
+            <p class="mt-1.5 text-[11px] text-[var(--color-text4)]">This note will be included in the abuse report email sent to the provider.</p>
           </div>
         } @else if (actionResult) {
           @if (actionResult.error) {
@@ -64,8 +72,8 @@
         <button type="button" (click)="closeTakedownModal()" class="ui-popup-btn-secondary px-[24px] text-[14px]">
           {{ actionResult ? 'Close' : 'Cancel' }}
         </button>
-        @if (manualUrlMode && !isTakingDown && !actionResult) {
-          <button type="button" data-testid="manual-takedown-submit" class="ui-popup-btn-primary px-[24px] text-[14px] font-medium disabled:cursor-not-allowed disabled:bg-[var(--color-blue-810)] disabled:text-[var(--color-text4)]" [disabled]="!manualTargetUrl.trim()" (click)="submitManualTakedown()">
+        @if (isReviewing && !isTakingDown && !actionResult) {
+          <button type="button" data-testid="takedown-submit" class="ui-popup-btn-primary px-[24px] text-[14px] font-medium disabled:cursor-not-allowed disabled:bg-[var(--color-blue-810)] disabled:text-[var(--color-text4)]" [disabled]="manualUrlMode && !manualTargetUrl.trim()" (click)="submitTakedown()">
             Report takedown
           </button>
         }

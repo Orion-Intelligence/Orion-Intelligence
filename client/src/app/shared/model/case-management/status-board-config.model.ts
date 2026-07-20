@@ -23,9 +23,7 @@ export const DEFAULT_CASE_STATUS_BOARD_CONFIG: CaseStatusBoardConfig = {
   }))
 };
 
-export function getEnabledStatusWorkflow(
-  config?: CaseStatusBoardConfig | null
-): { value: CaseStatus; label: string; skippable: boolean }[] {
+export function getEnabledStatusWorkflow(config?: CaseStatusBoardConfig | null): { value: CaseStatus; label: string; skippable: boolean }[] {
   const source = config?.statuses?.length
     ? config.statuses
     : DEFAULT_CASE_STATUS_BOARD_CONFIG.statuses;

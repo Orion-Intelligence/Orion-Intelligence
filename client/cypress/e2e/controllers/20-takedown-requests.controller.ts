@@ -23,6 +23,7 @@ export const TAKEDOWN_FIXTURE = {
   targetUrl: 'https://compromised-monitoring.example/takedown-test',
   targetDomain: 'compromised-monitoring.example',
   abuseEmail: 'abuse@compromised-monitoring.example',
+  customMessage: 'Please prioritize this confirmed compromise.',
   username: 'admin',
 };
 
@@ -97,6 +98,7 @@ export function stubTakedownReportFlow() {
     expect(req.body).to.deep.equal({
       report_id: REPORT_HASH,
       target_url: TAKEDOWN_FIXTURE.targetUrl,
+      custom_message: TAKEDOWN_FIXTURE.customMessage,
     });
     currentRecord = takedownRecord();
     req.reply({
@@ -104,6 +106,7 @@ export function stubTakedownReportFlow() {
       body: {
         ...currentRecord,
         evidence: {
+          custom_message: TAKEDOWN_FIXTURE.customMessage,
           result: {
             abuse_email_found: TAKEDOWN_FIXTURE.abuseEmail,
           },
@@ -131,6 +134,12 @@ export function openCompromisedMonitoringReport() {
 
 export function initiateTakedownFromReport() {
   cy.contains('button', 'Initiate Takedown').should('be.visible').and('not.be.disabled').click();
+  cy.get(takedownSelector('takedown-custom-message'))
+    .should('be.visible')
+    .and('have.value', '')
+    .type(TAKEDOWN_FIXTURE.customMessage)
+    .should('have.value', TAKEDOWN_FIXTURE.customMessage);
+  cy.get(takedownSelector('takedown-submit')).should('be.visible').and('not.be.disabled').click();
   cy.wait('@createTakedown').its('response.statusCode').should('eq', 200);
   cy.get(takedownSelector('takedown-action-modal')).should('contain.text', TAKEDOWN_FIXTURE.abuseEmail);
   cy.get(takedownSelector('takedown-action-modal')).should('contain.text', 'Takedown in progress');

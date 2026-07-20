@@ -197,11 +197,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get sourceDomainValues(): string[] {
-    const explicitSourceDomains = this.getSourceDomainValues(this.item());
-    if (explicitSourceDomains.length) {
-      return explicitSourceDomains;
-    }
-    return this.getRawDomainValues(this.item());
+    return this.getSourceDomainValues(this.item());
   }
 
   get sourceDomainValueText(): string {

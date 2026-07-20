@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import html
 from fastapi import HTTPException
 import json
 import smtplib
@@ -121,7 +122,7 @@ class mail_manager:
         msg.attach(MIMEText(body, "html"))
         return sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port, msg
 
-    async def send_takedown_mail(self, to_email: str, target_domain: str, screenshot_filename: str, html_filename: str, tenant_id: str | None = None, config=None, screenshot_base64: str = "", html_content: str = "", screenshot_mime_type: str = "image/png"):
+    async def send_takedown_mail(self, to_email: str, target_domain: str, screenshot_filename: str, html_filename: str, tenant_id: str | None = None, config=None, screenshot_base64: str = "", html_content: str = "", screenshot_mime_type: str = "image/png", custom_message: str = ""):
         subject = MailSubject.TAKEDOWN_REQUEST.value.format(domain=target_domain)
 
         current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -136,6 +137,16 @@ class mail_manager:
             body = f"<p>Malicious activity detected on {target_domain}. Evidence attached.</p>"
 
         body = body.replace("{{domain}}", target_domain)
+        if custom_message and custom_message.strip():
+            note_html = f"""
+            <div style="margin-top: 24px; padding: 16px; background-color: #f8fafc; border-left: 4px solid #0284c7; border-radius: 4px;">
+                <strong style="color: #0f172a; display: block; margin-bottom: 8px;">Additional Analyst Note:</strong>
+                <span style="color: #334155; white-space: pre-wrap; font-family: inherit;">{html.escape(custom_message.strip())}</span>
+            </div>
+            """
+            body = body.replace("{{custom_message}}", note_html)
+        else:
+            body = body.replace("{{custom_message}}", "")
 
         sender_email, password, smtp_server, smtp_port, msg = await self._prepare_verification_message(
             to_email, subject, body, tenant_id, config

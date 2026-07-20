@@ -42,6 +42,7 @@ class db_takedown_request_model(Model):
 class TakedownCreateRequest(BaseModel):
     report_id: str = ""
     target_url: str
+    custom_message: str = ""
 
 
 class TakedownDecisionRequest(BaseModel):

@@ -73,15 +73,15 @@ export class CaseTrackingBoardSettings implements OnInit {
   }
 
   private normalizeConfig(config?: CaseStatusBoardConfig | null): CaseStatusBoardConfig {
-  const source = config?.statuses?.length ? config : DEFAULT_CASE_STATUS_BOARD_CONFIG;
+    const source = config?.statuses?.length ? config : DEFAULT_CASE_STATUS_BOARD_CONFIG;
 
-  return {
-    statuses: source.statuses.map(status => ({
-      ...status,
-      label: status.label || this.formatLabel(status.value),
-    })),
-  };
-}
+    return {
+      statuses: source.statuses.map(status => ({
+        ...status,
+        label: status.label || this.formatLabel(status.value),
+      })),
+    };
+  }
 
   validate(): string {
     const names = this.config.statuses.map(status => (status.label || '').trim().toLowerCase());
