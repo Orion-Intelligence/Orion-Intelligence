@@ -293,6 +293,23 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     return value.filter(item => Boolean(item.url));
   }
 
+  async downloadTrigger(trigger: AiWorkspaceTrigger, event?: Event): Promise<void> {
+    event?.preventDefault();
+    event?.stopPropagation();
+    try {
+      await this.nexusChatService.downloadTrigger(trigger);
+    }
+    catch {
+      this.chatMessages.push({
+        id: crypto.randomUUID(),
+        sender: 'error',
+        text: 'Unable to download file. Please try again.',
+        time: new Date()
+      });
+      this.scrollToNewMessage();
+    }
+  }
+
   trackByIndex(index: number): number {
     return index;
   }

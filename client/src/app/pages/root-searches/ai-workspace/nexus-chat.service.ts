@@ -70,6 +70,26 @@ export class NexusChatService {
     }).catch(() => undefined);
   }
 
+  async downloadTrigger(trigger: AiWorkspaceTrigger): Promise<void> {
+    const downloadUrl = this.normalizedDownloadUrl(trigger.url);
+    if (!downloadUrl) {
+      return;
+    }
+    const response = await fetch(downloadUrl, { credentials: 'include' });
+    if (!response.ok) {
+      throw new Error(await response.text() || response.statusText);
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this.downloadName(downloadUrl, response.headers.get('content-disposition'));
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
+  }
+
   private streamDirectNexusChat(payload: NexusChatPayload): Observable<NexusChatStreamChunk> {
     return new Observable<NexusChatStreamChunk>((observer) => {
       const controller = new AbortController();
@@ -369,6 +389,23 @@ export class NexusChatService {
       return this.streamValueToText(record['response'] ?? record['result'] ?? record['text'] ?? JSON.stringify(record));
     }
     return String(value);
+  }
+
+  private downloadName(url: string, disposition: string | null): string {
+    const match = /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i.exec(disposition || '');
+    const name = match?.[1] || match?.[2] || url.split('/').pop() || 'download';
+    return decodeURIComponent(name);
+  }
+
+  private normalizedDownloadUrl(url: string | undefined): string {
+    if (!url) {
+      return '';
+    }
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.pathname.startsWith('/v1/users/downloads/')) {
+      return `/api/nexus/downloads/${parsed.pathname.slice('/v1/users/downloads/'.length)}${parsed.search}`;
+    }
+    return parsed.toString();
   }
 
   listChats(): Observable<NexusChatSession[]> {
