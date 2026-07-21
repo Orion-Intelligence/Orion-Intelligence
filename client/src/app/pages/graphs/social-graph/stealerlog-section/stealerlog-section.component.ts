@@ -3,10 +3,13 @@ import { Subscription } from 'rxjs';
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialService } from '../services/social.service';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
+import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { STEALERLOG_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
 
 @Component({
   selector: 'app-social-stealerlog-section',
   standalone: true,
+  imports: [ExportChoiceModalComponent],
   templateUrl: './stealerlog-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -20,6 +23,8 @@ export class StealerlogSectionComponent {
   records = signal<any[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
+  isExportChoiceOpen = signal(false);
+  readonly reportExportOptions = STEALERLOG_EXPORT_OPTIONS;
   searchIdentity = computed(() => SocialNormalizationUtil.normalizeIdentity(this.username()));
   hasRecords = computed(() => this.records().length > 0);
   visibleRecords = computed(() => this.records().slice(0, 3));
@@ -80,8 +85,23 @@ export class StealerlogSectionComponent {
     });
   }
 
-  downloadRecords(event: Event): void {
+  openExportChoice(event: Event): void {
     event.stopPropagation();
+    this.isExportChoiceOpen.set(true);
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen.set(false);
+  }
+
+  selectExport(type: string): void {
+    if (type === 'csv') {
+      this.downloadRecords();
+    }
+    this.closeExportChoice();
+  }
+
+  private downloadRecords(): void {
     const rows = this.records().map((item, index) => ({
       recordType: 'stealer',
       recordIndex: String(index + 1),

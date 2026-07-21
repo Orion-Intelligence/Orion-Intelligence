@@ -9,6 +9,8 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
 import { ApiService } from '../../../shared/services/api.service';
 import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { FILE_SCAN_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 
 type ScannerResultItem = { label: string; value: string };
 type ScannerResultSection = { title: string; items: ScannerResultItem[] };
@@ -22,7 +24,7 @@ type ScannerResultSection = { title: string; items: ScannerResultItem[] };
     NgxPrintModule,
     NgOptimizedImage,
     TooltipDirective,
-    FormsModule, TranslatePipe],
+    FormsModule, TranslatePipe, ExportChoiceModalComponent],
   templateUrl: './file-scanner.component.html'
 })
 export class FileScannerComponent {
@@ -43,6 +45,8 @@ export class FileScannerComponent {
   progress = signal(0);
   currentStep = '';
   copiedValue = signal<string | null>(null);
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = FILE_SCAN_EXPORT_OPTIONS;
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {
     this.route.data.subscribe(data => {
@@ -192,7 +196,22 @@ export class FileScannerComponent {
       .filter((item, index, items) => index === items.findIndex(match => match.label === item.label && match.value === item.value));
   }
 
-  exportReport(): void {
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'json') {
+      this.exportReport();
+    }
+    this.closeExportChoice();
+  }
+
+  private exportReport(): void {
     if (!this.scanResult) {
       return;
     }

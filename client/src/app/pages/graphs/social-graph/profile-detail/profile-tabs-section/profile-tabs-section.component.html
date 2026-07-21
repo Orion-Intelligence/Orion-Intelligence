@@ -310,7 +310,7 @@
                 </div>
                 <div class="flex flex-shrink-0 items-center gap-2">
                   @if (getStealerLogs(platformData).length > 0) {
-                    <button data-testid="social-stealerlog-download" type="button" (click)="downloadStealerLogs(platformData)" title="Download records" aria-label="Download stealer log records" class="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+                    <button data-testid="social-stealerlog-download" type="button" (click)="openStealerLogExportChoice($event, platformData)" title="Download records" aria-label="Download stealer log records" class="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
                       <i class="bi bi-download text-xs"></i>
                     </button>
                   }
@@ -371,6 +371,17 @@
                     </div>
                   }
                 </div>
+                <app-export-choice-modal
+                  [visible]="!!selectedStealerLogPlatform()"
+                  title="Export Records"
+                  subtitle="Choose the export format."
+                  [options]="stealerLogExportOptions"
+                  overlayTestId="social-stealerlog-export-overlay"
+                  modalTestId="social-stealerlog-export-modal"
+                  closeTestId="social-stealerlog-export-close"
+                  (closed)="closeStealerLogExportChoice()"
+                  (optionSelected)="selectStealerLogExport($event)">
+                </app-export-choice-modal>
               }
             </div>
           }

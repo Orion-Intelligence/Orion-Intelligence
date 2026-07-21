@@ -50,4 +50,91 @@ export const CREDENTIAL_REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
   }
 ];
 
+export const ALERT_REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'report', 
+    title: '1. Export Report (PDF)', 
+    description: 'Generate PDF export for selected alert.', 
+    testId: 'notification-alert-export-option-report'
+  }
+];
+
+export const AUDITLOG_REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'report', 
+    title: '1. Export CSV', 
+    description: 'Download this report as a CSV file.', 
+    testId: 'auditlog-export-option-csv'
+  }
+];
+
+export const PROFILE_STEALERLOG_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'csv',
+    title: '1. Export CSV',
+    description: 'Download stealer log records as a CSV file.',
+    testId: 'social-stealerlog-export-csv'
+  }
+];
+
+export const STEALERLOG_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'csv',
+    title: '1. Export CSV',
+    description: 'Download stealer log records as a CSV file.',
+    testId: 'social-dashboard-stealer-export-csv'
+  }
+];
+
+export const NETWORK_INTEL_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'report',
+    title: '1. Export Report (PDF)',
+    description: 'Generate consistent network intelligence PDF export.',
+    testId: 'network-intel-export-report'
+  }
+];
+
+export const SECURITY_SCAN_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'report',
+    title: '1. Export Report (PDF)',
+    description: 'Generate consistent scan report PDF export.',
+    testId: 'security-scan-export-report'
+  },
+  {
+    value: 'print',
+    title: '2. Print',
+    description: 'Print the current scan report view.',
+    testId: 'security-scan-export-print'
+  }
+];
+
+export const CASE_SHARE_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'report',
+    title: '1. Export Report (PDF)',
+    description: 'Download the shared case report as a PDF file.',
+    testId: 'case-share-export-option-report'
+  }
+];
+
+export const DASHBOARD_API_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'report',
+    title: '1. Export Report (PDF)',
+    description: 'Generate consistent report PDF export.',
+    testId: 'dashboard-api-export-report'
+  }
+];
+
+export const FILE_SCAN_EXPORT_OPTIONS: ExportChoiceOption[] = [
+  {
+    value: 'json',
+    title: '1. JSON',
+    description: 'Download machine-readable scan report data.',
+    testId: 'file-scan-export-json'
+  }
+];
+
 export const RESULT_REPORT_EXPORT_OPTIONS = REPORT_EXPORT_OPTIONS;
