@@ -1,11 +1,12 @@
 [
   {
-    "context": ["/api", "/admin", "/static"],
-    "pathFilter": ["/api", "/admin", "/static"],
+    "context": ["/api", "/admin", "/static", "/v1"],
+    "pathFilter": ["/api", "/admin", "/static", "/v1"],
     "router": {
       "/api": "https://127.0.0.1:8443",
       "/admin": "https://127.0.0.1:8443",
-      "/static": "https://127.0.0.1:8443"
+      "/static": "https://127.0.0.1:8443",
+      "/v1": "https://127.0.0.1:8443"
     },
     "secure": false,
     "changeOrigin": true,

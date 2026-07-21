@@ -100,6 +100,11 @@ class NexusStreamManager:
 
                     if output.get("response") is not None:
                         response_value = output["response"]
+                        triggers = output.get("triggers") or parsed_line.get("triggers")
+                        if triggers:
+                            response_text = str(response_value)
+                            yield json.dumps({"output": {"response": response_text, "triggers": triggers}, "done": True, "error": False}, ensure_ascii=True) + "\n", "", False
+                            return
                         if response_type == "finished":
                             yield "", str(response_value), False
                             return

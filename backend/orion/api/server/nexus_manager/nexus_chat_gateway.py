@@ -1,7 +1,8 @@
 from typing import Any, Optional
+from urllib.parse import quote
 
 import httpx
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from orion.helper_manager.env_handler import env_handler
 
@@ -119,3 +120,20 @@ class nexus_chat_gateway:
             path=f"/v1/chats/{session_id}",
             current_user=current_user,
         )
+
+    async def download_user_file(self, file_name: str, current_user):
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(
+                    f"{self._base_url()}/v1/users/downloads/{quote(file_name, safe='')}",
+                    headers=self._headers(current_user),
+                    timeout=120,
+                )
+            if response.status_code != 200:
+                return JSONResponse(status_code=response.status_code, content={"detail": response.text or "File not found."})
+            headers = {}
+            if response.headers.get("content-disposition"):
+                headers["content-disposition"] = response.headers["content-disposition"]
+            return Response(content=response.content, media_type=response.headers.get("content-type") or "application/octet-stream", headers=headers)
+        except Exception:
+            return JSONResponse(status_code=500, content={"detail": "Something happened while downloading Nexus file"})

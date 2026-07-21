@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { EMPTY, Observable, ReplaySubject, timer } from 'rxjs';
 import { expand, switchMap, takeWhile } from 'rxjs/operators';
 import { ChatApiResponse } from '../../../shared/model/chat/chat-api-response.model';
+import { AiWorkspaceTrigger } from '../../../shared/model/chat/ai-workspace-message.model';
 import { NexusChatPayload, NexusChatStreamChunk, NexusSummaryPayload } from '../../../shared/model/chat/nexus-chat.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { NexusChatDetail, NexusChatSession, NexusSendMessageResponse } from '../../../shared/model/nexus/ai-chat-session.model';
@@ -332,8 +333,12 @@ export class NexusChatService {
         continue;
       }
       const output = this.asRecord(parsed?.output);
-      const delta = output?.['delta'];
-      const response = output?.['response'];
+      const delta = output?.['delta'] ?? parsed?.delta;
+      const response = output?.['response'] ?? parsed?.response;
+      const rawTriggers = output?.['triggers'] ?? parsed?.triggers;
+      const triggers = Array.isArray(rawTriggers)
+        ? rawTriggers.filter((item: unknown) => Boolean(this.asRecord(item)?.['url'])) as AiWorkspaceTrigger[]
+        : undefined;
       const status = this.asRecord(parsed?.status);
       const statusMessage = status?.['message'] ?? parsed?.status_message;
       const isError = Boolean(parsed?.error);
@@ -349,7 +354,7 @@ export class NexusChatService {
         observer.next({ delta: this.streamValueToText(delta) });
       }
       if (response !== undefined) {
-        observer.next({ response: this.streamValueToText(response), error: isError || undefined });
+        observer.next({ response: this.streamValueToText(response), error: isError || undefined, triggers });
       }
       else if (detail !== undefined) {
         observer.next({ response: this.streamValueToText(detail), error: isError || undefined });

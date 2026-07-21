@@ -1,3 +1,5 @@
+import { AiWorkspaceTrigger } from './ai-workspace-message.model';
+
 export interface NexusChatPayload {
   session_id?: string;
   session_type?: 'persistent' | 'temporary';
@@ -16,4 +18,5 @@ export interface NexusChatStreamChunk {
   response?: string;
   status?: string;
   error?: boolean;
+  triggers?: AiWorkspaceTrigger[];
 }

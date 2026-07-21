@@ -9,7 +9,7 @@ import { overlayFadeAnimation } from '../../../../shared/animations/chat.overlay
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { NexusChatService } from '../nexus-chat.service';
-import { AiWorkspaceMessage } from '../../../../shared/model/chat/ai-workspace-message.model';
+import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../../../../shared/model/chat/ai-workspace-message.model';
 import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-actions.component';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -141,6 +141,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     const requestId = ++this.chatRequestId;
     this.stoppedRequestIds.delete(requestId);
     let reply = '';
+    let pendingTriggers: AiWorkspaceTrigger[] = [];
     let botMessage: AiWorkspaceMessage | undefined;
     const updateReply = (value: string) => {
       if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
@@ -151,6 +152,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chatMessages.push(botMessage);
       }
       botMessage.text = value;
+      if (pendingTriggers.length) {
+        botMessage.triggers = pendingTriggers;
+      }
       this.scrollToNewMessage();
     };
     const finishStream = () => {
@@ -182,6 +186,12 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
           this.showErrorMessage(userMessage, reply);
           this.scrollToNewMessage();
           return;
+        }
+        if (chunk.triggers?.length) {
+          pendingTriggers = this.validTriggers(chunk.triggers);
+          if (botMessage) {
+            botMessage.triggers = pendingTriggers;
+          }
         }
         if (chunk.delta) {
           reply += chunk.delta;
@@ -277,6 +287,10 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mo?.disconnect();
     this.io = undefined;
     this.mo = undefined;
+  }
+
+  private validTriggers(value: AiWorkspaceTrigger[]): AiWorkspaceTrigger[] {
+    return value.filter(item => Boolean(item.url));
   }
 
   trackByIndex(index: number): number {
