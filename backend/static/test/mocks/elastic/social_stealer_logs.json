@@ -1,0 +1,31 @@
+{
+  "Result": [
+    {
+      "m_index": "stealer_model",
+      "m_username": "superman0011",
+      "m_email": "superman0011@example.test",
+      "m_password": "********",
+      "m_domain": "twitter.com",
+      "m_url": "https://twitter.com",
+      "m_source": "mock-stealer-feed",
+      "m_date": "2026-06-18T10:00:00Z",
+      "m_hash": "mock-stealer-1",
+      "type": "credential"
+    },
+    {
+      "m_index": "stealer_model",
+      "m_username": "superman0011",
+      "m_email": "clark.kent@example.test",
+      "m_password": "********",
+      "m_domain": "dailyplanet.example",
+      "m_url": "https://dailyplanet.example",
+      "m_source": "mock-stealer-feed",
+      "m_date": "2026-06-19T12:30:00Z",
+      "m_hash": "mock-stealer-2",
+      "type": "credential"
+    }
+  ],
+  "total": 2,
+  "page": 1,
+  "status": "done"
+}

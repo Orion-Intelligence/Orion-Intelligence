@@ -1,0 +1,39 @@
+{
+  "job_id": "mock-social-shorts",
+  "result": {
+    "shorts": [
+      {
+        "id": "mock-short-1",
+        "caption": "Quick skyline update",
+        "title": "Skyline update",
+        "post_url": "https://twitter.com/superman0011/status/short-1",
+        "url": "https://twitter.com/superman0011/status/short-1",
+        "datetime": "2026-06-16T08:05:00Z",
+        "likes": 145,
+        "comments": 12,
+        "shares": 7,
+        "views": 5100,
+        "media_type": "short",
+        "media_url": "https://cdn.example.test/social/short-1.mp4",
+        "thumbnail": "https://cdn.example.test/social/short-1.jpg",
+        "connections": ["dailyplanet"]
+      },
+      {
+        "id": "mock-short-2",
+        "caption": "Thirty second field note",
+        "title": "Field note",
+        "post_url": "https://twitter.com/superman0011/status/short-2",
+        "url": "https://twitter.com/superman0011/status/short-2",
+        "datetime": "2026-06-17T18:20:00Z",
+        "likes": 167,
+        "comments": 15,
+        "shares": 9,
+        "views": 6400,
+        "media_type": "short",
+        "media_url": "https://cdn.example.test/social/short-2.mp4",
+        "thumbnail": "https://cdn.example.test/social/short-2.jpg",
+        "connections": ["metropoliswatch"]
+      }
+    ]
+  }
+}

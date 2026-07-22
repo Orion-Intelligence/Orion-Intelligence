@@ -279,10 +279,15 @@ export class SocialNormalizationUtil {
   static getIdentityCandidates(record: any): string[] {
     return [
       ...this.expandRecordValue(record?.email),
+      ...this.expandRecordValue(record?.m_email),
       ...this.expandRecordValue(record?.username),
+      ...this.expandRecordValue(record?.m_username),
       ...this.expandRecordValue(record?.user),
+      ...this.expandRecordValue(record?.m_user),
       ...this.expandRecordValue(record?.login),
+      ...this.expandRecordValue(record?.m_login),
       ...this.expandRecordValue(record?.credential),
+      ...this.expandRecordValue(record?.m_credential),
       ...this.expandRecordValue(record?.raw),
     ];
   }
@@ -290,10 +295,15 @@ export class SocialNormalizationUtil {
   static getDomainCandidates(record: any): string[] {
     return [
       ...this.expandRecordValue(record?.source_domain),
+      ...this.expandRecordValue(record?.m_source_domain),
       ...this.expandRecordValue(record?.domain),
+      ...this.expandRecordValue(record?.m_domain),
       ...this.expandRecordValue(record?.host),
+      ...this.expandRecordValue(record?.m_host),
       ...this.expandRecordValue(record?.url),
+      ...this.expandRecordValue(record?.m_url),
       ...this.expandRecordValue(record?.base_url),
+      ...this.expandRecordValue(record?.m_base_url),
       ...this.expandRecordValue(record?.raw),
     ];
   }

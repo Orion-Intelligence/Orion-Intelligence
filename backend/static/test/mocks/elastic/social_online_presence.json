@@ -1,0 +1,34 @@
+{
+  "job_id": "mock-social-online-presence",
+  "result": {
+    "query": "superman0011",
+    "total_found": 4,
+    "timestamp": "2026-07-21T00:00:00Z",
+    "results": [
+      {
+        "title": "superman0011 on GitHub",
+        "url": "https://github.com/superman0011",
+        "snippet": "Public profile associated with superman0011.",
+        "timestamp": "2026-07-21T00:00:00Z"
+      },
+      {
+        "title": "superman0011 on Bitbucket",
+        "url": "https://bitbucket.org/superman0011",
+        "snippet": "Developer profile discovered for the requested username.",
+        "timestamp": "2026-07-21T00:00:00Z"
+      },
+      {
+        "title": "superman0011 on Docker Hub",
+        "url": "https://hub.docker.com/u/superman0011",
+        "snippet": "Container registry profile matching the username.",
+        "timestamp": "2026-07-21T00:00:00Z"
+      },
+      {
+        "title": "superman0011 on ArtStation",
+        "url": "https://www.artstation.com/superman0011",
+        "snippet": "Creative portfolio profile matching the username.",
+        "timestamp": "2026-07-21T00:00:00Z"
+      }
+    ]
+  }
+}

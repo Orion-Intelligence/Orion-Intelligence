@@ -1,0 +1,39 @@
+{
+  "job_id": "mock-social-videos",
+  "result": {
+    "videos": [
+      {
+        "id": "mock-video-1",
+        "caption": "Metropolis press briefing highlights",
+        "title": "Press briefing highlights",
+        "post_url": "https://twitter.com/superman0011/status/video-1",
+        "url": "https://twitter.com/superman0011/status/video-1",
+        "datetime": "2026-06-14T09:15:00Z",
+        "likes": 210,
+        "comments": 23,
+        "shares": 17,
+        "views": 9200,
+        "media_type": "video",
+        "media_url": "https://cdn.example.test/social/video-1.mp4",
+        "thumbnail": "https://cdn.example.test/social/video-1.jpg",
+        "connections": ["dailyplanet", "metropoliswatch"]
+      },
+      {
+        "id": "mock-video-2",
+        "caption": "City rescue interview clip",
+        "title": "City rescue interview",
+        "post_url": "https://twitter.com/superman0011/status/video-2",
+        "url": "https://twitter.com/superman0011/status/video-2",
+        "datetime": "2026-06-15T13:45:00Z",
+        "likes": 188,
+        "comments": 19,
+        "shares": 11,
+        "views": 7800,
+        "media_type": "video",
+        "media_url": "https://cdn.example.test/social/video-2.mp4",
+        "thumbnail": "https://cdn.example.test/social/video-2.jpg",
+        "connections": ["loislane", "jimmyolsen"]
+      }
+    ]
+  }
+}

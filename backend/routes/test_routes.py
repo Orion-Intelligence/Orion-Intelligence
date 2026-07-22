@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
+from fastapi.responses import Response
 
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from configs.limiter_dependency import limiter_dependency
@@ -112,7 +113,7 @@ async def test_search_dynamic_social(param: search_dynamic_social_model = Body(.
     dependencies=SCAN_DEPS,
 )
 async def test_search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
-    return TestRouteHelper.pending_or_api_mock("dynamic_wanted", "dynamic_wanted.json")
+    return TestRouteHelper.load_api_mock("dynamic_wanted.json")
 
 
 @test_routes.post(
@@ -328,6 +329,164 @@ async def test_social_online_images(payload: dict = Body(...)):
 )
 async def test_social_posts(payload: dict = Body(...)):
     return TestRouteHelper.pending_or_elastic_mock("social_posts", "social_posts.json")
+
+
+@test_routes.post(
+    "/api/social/videos",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_videos(payload: dict = Body(...)):
+    return TestRouteHelper.pending_or_elastic_mock("social_videos", "social_videos.json")
+
+
+@test_routes.post(
+    "/api/social/shorts",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_shorts(payload: dict = Body(...)):
+    return TestRouteHelper.pending_or_elastic_mock("social_shorts", "social_shorts.json")
+
+
+@test_routes.post(
+    "/api/social/metadata",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_metadata(payload: dict = Body(...)):
+    return TestRouteHelper.pending_or_elastic_mock("social_online_presence", "social_online_presence.json")
+
+
+@test_routes.post(
+    "/api/search/stealer/ioc",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_stealer_ioc(payload: dict = Body(...)):
+    return TestRouteHelper.load_elastic_mock("social_stealer_logs.json")
+
+
+def _test_social_extension_result(data: dict):
+    return {
+        "job_id": "mock-social-extension",
+        "status": "done",
+        "result": {
+            "platform": "extension",
+            "executor": "extension",
+            "source": "browser_extension",
+            "trusted": False,
+            "untrusted": True,
+            "validation_status": "sanitized",
+            "data": data,
+        },
+    }
+
+
+@test_routes.get(
+    "/api/social/extensions/status",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_extension_status():
+    return TestRouteHelper.load_elastic_mock("social_extensions.json")["status_response"]
+
+
+@test_routes.get(
+    "/api/social/extensions/download/chrome",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_extension_download_chrome():
+    mock = TestRouteHelper.load_elastic_mock("social_extensions.json")["download"]["chrome"]
+    return Response(
+        content=b"orion social scraper chrome test package\n",
+        media_type=mock["media_type"],
+        headers={"Content-Disposition": f'attachment; filename="{mock["filename"]}"'},
+    )
+
+
+@test_routes.get(
+    "/api/social/extensions/download/firefox",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_extension_download_firefox():
+    mock = TestRouteHelper.load_elastic_mock("social_extensions.json")["download"]["firefox"]
+    return Response(
+        content=b"orion social scraper firefox test package\n",
+        media_type=mock["media_type"],
+        headers={"Content-Disposition": f'attachment; filename="{mock["filename"]}"'},
+    )
+
+
+@test_routes.post(
+    "/api/social/extensions/profile",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_extension_profile(payload: dict = Body(...)):
+    profile = TestRouteHelper.load_elastic_mock("social_profile.json").get("result", {}).get("profile", {})
+    posts = TestRouteHelper.load_elastic_mock("social_posts.json").get("result", {}).get("posts", [])
+    videos = TestRouteHelper.load_elastic_mock("social_videos.json").get("result", {}).get("videos", [])
+    shorts = TestRouteHelper.load_elastic_mock("social_shorts.json").get("result", {}).get("shorts", [])
+    images = TestRouteHelper.load_elastic_mock("social_online_images.json").get("result", {}).get("images", [])
+    followers = TestRouteHelper.load_elastic_mock("social_followers.json").get("result", {}).get("followers", [])
+    following = TestRouteHelper.load_elastic_mock("social_following.json").get("result", {}).get("following", [])
+    return _test_social_extension_result(
+        {
+            "platform": str((payload or {}).get("platform") or "").lower(),
+            "requested_username": (payload or {}).get("username"),
+            "profile": profile,
+            "posts": posts,
+            "videos": videos,
+            "shorts": shorts,
+            "images": images,
+            "followers": followers,
+            "following": following,
+        }
+    )
+
+
+@test_routes.post(
+    "/api/social/extensions/posts",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_extension_posts(payload: dict = Body(...)):
+    posts = TestRouteHelper.load_elastic_mock("social_posts.json").get("result", {}).get("posts", [])
+    post_offset = int((payload or {}).get("post_offset") or 0)
+    max_posts = int((payload or {}).get("max_posts") or 20)
+    existing_urls = set((payload or {}).get("existing_post_urls") or [])
+    filtered_posts = [
+        post
+        for post in posts
+        if (post.get("url") or post.get("post_url") or post.get("hash_id")) not in existing_urls
+    ]
+    return _test_social_extension_result({"posts": filtered_posts[post_offset:post_offset + max_posts]})
+
+
+@test_routes.post(
+    "/api/social/data",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_data_save(payload: dict = Body(...)):
+    return {"status": "done", "result": payload}
+
+
+@test_routes.get(
+    "/api/social/data",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_data_list():
+    return {"status": "done", "result": []}
+
+
+@test_routes.get(
+    "/api/social/data/{profile_username}",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_data_detail(profile_username: str):
+    return {"profile_username": profile_username, "profiles": [], "count": 0}
+
+
+@test_routes.delete(
+    "/api/social/data/{profile_username:path}",
+    dependencies=SCAN_DEPS,
+)
+async def test_social_data_delete(profile_username: str):
+    return {"status": "done", "profile_username": profile_username}
 
 
 @test_routes.post(

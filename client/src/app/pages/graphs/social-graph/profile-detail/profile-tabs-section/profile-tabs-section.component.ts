@@ -490,15 +490,15 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getStealerRecordHost(record: SocialStealerLogRecord): string {
-    return SocialNormalizationUtil.firstValue(record?.['source_domain'], record?.['domain'], record?.['ip'], record?.['url'], record?.['host'], record?.['raw']) || '-';
+    return SocialNormalizationUtil.firstValue(record?.['source_domain'], record?.['m_source_domain'], record?.['domain'], record?.['m_domain'], record?.['ip'], record?.['m_ip'], record?.['url'], record?.['m_url'], record?.['host'], record?.['m_host'], record?.['raw']) || '-';
   }
 
   getStealerRecordIdentity(record: SocialStealerLogRecord): string {
-    return SocialNormalizationUtil.firstValue(record?.['email'], record?.['username'], record?.['user'], record?.['login'], record?.['credential'], record?.['raw']) || '-';
+    return SocialNormalizationUtil.firstValue(record?.['email'], record?.['m_email'], record?.['username'], record?.['m_username'], record?.['user'], record?.['m_user'], record?.['login'], record?.['m_login'], record?.['credential'], record?.['m_credential'], record?.['raw']) || '-';
   }
 
   getStealerRecordDate(record: SocialStealerLogRecord): string {
-    return SocialNormalizationUtil.firstValue(record?.['date'], record?.['timestamp'], record?.['created_at'], record?.['updated_at']) || '-';
+    return SocialNormalizationUtil.firstValue(record?.['date'], record?.['m_date'], record?.['timestamp'], record?.['m_timestamp'], record?.['created_at'], record?.['m_created_at'], record?.['updated_at'], record?.['m_updated_at']) || '-';
   }
 
   getStealerRecordTrackKey(index: number, record: SocialStealerLogRecord): string {
@@ -510,15 +510,15 @@ export class SocialProfileTabsSectionComponent {
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: `${platformData.username || platformData.keyUsername} ${this.getPlatformStealerDomain(platformData)}`.trim(),
-      email: SocialNormalizationUtil.toExportValue(item?.['email']),
-      username: SocialNormalizationUtil.toExportValue(item?.['username']),
-      domain: SocialNormalizationUtil.toExportValue(item?.['domain']),
-      source: SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
+      email: SocialNormalizationUtil.toExportValue(item?.['email'] || item?.['m_email']),
+      username: SocialNormalizationUtil.toExportValue(item?.['username'] || item?.['m_username']),
+      domain: SocialNormalizationUtil.toExportValue(item?.['domain'] || item?.['m_domain']),
+      source: SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file'] || item?.['m_source'] || item?.['m_scrap_file']),
       hash: SocialNormalizationUtil.toExportValue(item?.['m_hash']),
       title: '-',
-      url: '-',
+      url: SocialNormalizationUtil.toExportValue(item?.['url'] || item?.['m_url']),
       rank: '-',
-      date: SocialNormalizationUtil.toExportValue(item?.['date']),
+      date: SocialNormalizationUtil.toExportValue(item?.['date'] || item?.['m_date']),
       team: '-',
       summary: '-'
     }));

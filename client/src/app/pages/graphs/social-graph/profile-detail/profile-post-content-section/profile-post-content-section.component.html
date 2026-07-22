@@ -12,12 +12,12 @@
           @if (canFetchRemote(platformData) && (showFetchLatest() || shouldShowLoadMorePosts(platformData, contentType))) {
           <div class="inline-flex flex-shrink-0 items-center overflow-hidden rounded-[6px] border border-[#e2e8f0] bg-[#f1f5f9] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc]">
             @if (showFetchLatest()) {
-              <button type="button" (click)="fetchNew(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center border-0 bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+              <button [attr.data-testid]="'social-' + contentType + '-fetch-latest'" type="button" (click)="fetchNew(platformData, contentType)" [disabled]="isLoading()" class="inline-flex h-8 items-center border-0 bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
                 Fetch Latest
               </button>
             }
             @if (shouldShowLoadMorePosts(platformData, contentType)) {
-              <button type="button" (click)="loadMore(platformData, contentType)" [disabled]="isLoading() || !canLoadMorePosts(platformData, contentType)" [class.border-l]="showFetchLatest()" class="inline-flex h-8 items-center border-0 border-[#d6dee8] bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+              <button [attr.data-testid]="'social-' + contentType + '-load-more'" type="button" (click)="loadMore(platformData, contentType)" [disabled]="isLoading() || !canLoadMorePosts(platformData, contentType)" [class.border-l]="showFetchLatest()" class="inline-flex h-8 items-center border-0 border-[#d6dee8] bg-transparent px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
                 Load More
               </button>
             }

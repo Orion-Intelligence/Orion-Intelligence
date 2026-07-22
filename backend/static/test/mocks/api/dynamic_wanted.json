@@ -1,5 +1,21 @@
 {
   "result": {
+    "cards_data": [
+      {
+        "name": "Johnathan Andrew Doe",
+        "status": "red_notice",
+        "authority": "International Criminal Police Organization",
+        "description": "Suspected involvement in cross-border financial fraud and laundering activities.",
+        "source_url": "https://interpol.example.test/notices/mock-johnathan-andrew-doe"
+      },
+      {
+        "name": "Jane Alexandra Roe",
+        "status": "watchlist",
+        "authority": "Global Sanctions Watchlist",
+        "description": "Mock watchlist record used by the Social Intel Cypress flow.",
+        "source_url": "https://sanctions.example.test/watchlist/mock-jane-alexandra-roe"
+      }
+    ],
     "input_name": "John Doe",
     "match_found": true,
     "person_details": {

@@ -73,6 +73,14 @@ class TestRouteHelper:
             return cls.pending_or_dynamic_scan(payload.get("scanType"))
         if normalized_api == "netintel/url_vulnerability_scan":
             return cls.pending_or_dynamic_scan("vulnerability")
+        if normalized_api == "social/videos":
+            return cls.pending_or_elastic_mock("social_videos", "social_videos.json")
+        if normalized_api == "social/shorts":
+            return cls.pending_or_elastic_mock("social_shorts", "social_shorts.json")
+        if normalized_api == "social/metadata":
+            return cls.pending_or_elastic_mock("social_online_presence", "social_online_presence.json")
+        if normalized_api == "search/stealer/ioc":
+            return cls.load_elastic_mock("social_stealer_logs.json")
 
         mock_routes = {
             "dynamic/user": ("dynamic_user", "dynamic_user_done.json"),
