@@ -149,14 +149,39 @@ export class MarkdownPipe implements PipeTransform {
 
     const thead = `<thead><tr>${headers.map(cell => `<th>${this.renderInline(cell)}</th>`).join('')}</tr></thead>`;
     const tbody = rows.length
-      ? `<tbody>${rows.map(row => `<tr>${headers.map((_, cellIndex) => `<td>${this.renderInline(row[cellIndex] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>`
+      ? `<tbody>${rows.map(row => `<tr>${headers.map((header, cellIndex) => `<td data-label="${this.escapeAttribute(header)}">${this.renderInline(row[cellIndex] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>`
       : '';
 
-    return { html: `<table>${thead}${tbody}</table>`, endIndex };
+    const wideClass = headers.length > 3 ? ' ui-ai-table-shell-wide' : '';
+    return { html: `<div class="ui-ai-table-shell${wideClass}" role="region" aria-label="Result table" tabindex="0"><table>${thead}${tbody}</table></div>`, endIndex };
   }
 
   private parseTableCells(line: string): string[] {
-    return line.replace(/^\|/, '').replace(/\|$/, '').split('|').map(cell => cell.trim());
+    let content = line.startsWith('|') ? line.slice(1) : line;
+    if (content.endsWith('|') && !content.endsWith('\\|')) {
+      content = content.slice(0, -1);
+    }
+    const cells: string[] = [];
+    let cell = '';
+    let escaped = false;
+    for (const character of content) {
+      if (escaped) {
+        cell += character === '|' ? '|' : `\\${character}`;
+        escaped = false;
+      }
+      else if (character === '\\') {
+        escaped = true;
+      }
+      else if (character === '|') {
+        cells.push(cell.trim());
+        cell = '';
+      }
+      else {
+        cell += character;
+      }
+    }
+    cells.push(`${cell}${escaped ? '\\' : ''}`.trim());
+    return cells;
   }
 
   private renderInline(value: string): string {
@@ -168,6 +193,7 @@ export class MarkdownPipe implements PipeTransform {
     };
 
     let text = value
+      .replace(/\\([\\`*_\[\]<>|])/g, (_match, literal: string) => token(this.escapeHtml(literal)))
       .replace(/`([^`]+)`/g, (_match, code: string) => token(`<code>${this.escapeHtml(code)}</code>`))
       .replace(/\[([^\]]+)]\(([^)\s]+)\)/g, (_match, label: string, href: string) => {
         const url = this.escapeAttribute(this.sanitizeHref(href));
@@ -176,9 +202,9 @@ export class MarkdownPipe implements PipeTransform {
 
     text = this.escapeHtml(text)
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+      .replace(/(?<!\w)__([^_\n]+)__(?!\w)/g, '<strong>$1</strong>')
       .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-      .replace(/_([^_]+)_/g, '<em>$1</em>')
+      .replace(/(?<!\w)_([^_\n]+)_(?!\w)/g, '<em>$1</em>')
       .replace(/~~([^~]+)~~/g, '<del>$1</del>');
 
     tokens.forEach((html, index) => {
