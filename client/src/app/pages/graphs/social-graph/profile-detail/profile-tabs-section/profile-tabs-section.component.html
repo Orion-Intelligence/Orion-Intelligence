@@ -123,9 +123,9 @@
 
           @if (activeTab() === 'extension') {
             <div data-testid="social-tab-panel-extension" class="px-[13px] pt-[11px] pb-[13px]">
-              <div class="mb-3 flex items-center justify-between gap-3">
+              <div class="mb-3 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
                 <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Extension Executor</p>
-                <div class="flex flex-shrink-0 items-center gap-2">
+                <div class="flex flex-shrink-0 flex-wrap items-center gap-2">
                   <a data-testid="social-extension-download-chrome" href="/api/social/extensions/download/chrome" download="orion-social-scraper-chrome.zip" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
                     <i class="bi bi-download text-[11px]"></i>
                     Chrome
@@ -153,12 +153,48 @@
                 </div>
               </div>
 
+              <div data-testid="social-extension-install-guide" class="mb-3 grid gap-3 lg:grid-cols-3">
+                <div data-testid="social-extension-install-guide-chrome" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-2 flex items-center gap-2">
+                    <i class="bi bi-download text-[13px] text-[var(--color-blue-640)]"></i>
+                    <p class="mb-0 text-sm font-bold text-[var(--color-text1)]">Chrome install</p>
+                  </div>
+                  <ol class="mb-0 list-decimal space-y-1 pl-5 text-xs leading-5 text-[var(--color-text4)]">
+                    <li>Download Chrome ZIP.</li>
+                    <li>Unzip it on your computer.</li>
+                    <li>Open <span class="font-mono text-[var(--color-text2)]">chrome://extensions</span>, enable Developer mode, then Load unpacked.</li>
+                  </ol>
+                </div>
+
+                <div data-testid="social-extension-install-guide-firefox" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-2 flex items-center gap-2">
+                    <i class="bi bi-download text-[13px] text-[var(--color-blue-640)]"></i>
+                    <p class="mb-0 text-sm font-bold text-[var(--color-text1)]">Firefox install</p>
+                  </div>
+                  <ol class="mb-0 list-decimal space-y-1 pl-5 text-xs leading-5 text-[var(--color-text4)]">
+                    <li>Download Firefox XPI.</li>
+                    <li>Open the downloaded file.</li>
+                    <li>Approve the add-on prompt and pin Orion if needed.</li>
+                  </ol>
+                </div>
+
+                <div data-testid="social-extension-install-guide-use" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-2 flex items-center gap-2">
+                    <i class="bi bi-play-circle text-[13px] text-[var(--color-blue-640)]"></i>
+                    <p class="mb-0 text-sm font-bold text-[var(--color-text1)]">Use it</p>
+                  </div>
+                  <ol class="mb-0 list-decimal space-y-1 pl-5 text-xs leading-5 text-[var(--color-text4)]">
+                    <li>Open the extension popup and log in with Orion.</li>
+                    <li>Keep the social platform logged in in the same browser.</li>
+                    <li>Click Refresh here; when status is Ready, use Fetch All or load more posts.</li>
+                  </ol>
+                </div>
+              </div>
+
               <div class="grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
                 <div class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-4">
                   <div class="flex items-start gap-3">
-                    <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
-                      <i class="bi bi-plugin text-base"></i>
-                    </div>
+                    <i class="bi bi-plugin mt-0.5 flex-shrink-0 text-base text-[var(--color-blue-640)]"></i>
                     <div class="min-w-0 flex-1">
                       <div class="flex min-w-0 flex-wrap items-center gap-2">
                         <p data-testid="social-extension-status-label" class="mb-0 text-sm font-bold text-[var(--color-text1)]">{{ getExtensionStatusLabel(platformData) }}</p>

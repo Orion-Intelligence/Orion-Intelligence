@@ -178,6 +178,7 @@
                 (refetchTab)="onProfileTabRefetch(platformData, $event)"
                 (postCursorFetch)="fetchPostCursorInline.emit($event)"
                 (extensionPostCursorFetch)="fetchExtensionPostCursorInline.emit($event)"
+                (extensionStatusRefreshed)="onExtensionStatusRefreshed($event)"
                 (imageCursorFetch)="fetchImageCursorInline.emit($event)"
                 (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
                 (onlinePresenceSearch)="searchOnlinePresence(platformData)">

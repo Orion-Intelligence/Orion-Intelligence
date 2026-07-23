@@ -186,6 +186,10 @@ export class SocialProfileListingComponent {
     });
   }
 
+  onExtensionStatusRefreshed(status: SocialExtensionStatus): void {
+    this.extensionStatus.set(status);
+  }
+
   private isExtensionPostExecutorReady(platformData: PlatformResult): boolean {
     return this.hasReadyExtension(platformData, 'posts');
   }

@@ -43,6 +43,7 @@ export class SocialProfileTabsSectionComponent {
   refetchTab = output<FetchTabKey>();
   postCursorFetch = output<PostCursorFetchRequest>();
   extensionPostCursorFetch = output<PostCursorFetchRequest>();
+  extensionStatusRefreshed = output<SocialExtensionStatus>();
   imageCursorFetch = output<ImageCursorFetchRequest>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
@@ -108,11 +109,14 @@ export class SocialProfileTabsSectionComponent {
     this.socialService.fetchExtensionStatus().subscribe({
       next: status => {
         this.extensionStatus.set(status);
+        this.extensionStatusRefreshed.emit(status);
         this.extensionStatusError.set(this.formatExtensionStatusError(status));
         this.extensionStatusLoading.set(false);
       },
       error: () => {
-        this.extensionStatus.set({ online: 0, extensions: [] });
+        const fallbackStatus = { online: 0, extensions: [] };
+        this.extensionStatus.set(fallbackStatus);
+        this.extensionStatusRefreshed.emit(fallbackStatus);
         this.extensionStatusError.set('Unable to reach the extension manager.');
         this.extensionStatusLoading.set(false);
       }
@@ -174,7 +178,7 @@ export class SocialProfileTabsSectionComponent {
   }
 
   currentExtensionStatus(): SocialExtensionStatus | null {
-    return this.extensionStatusData() ?? this.extensionStatus();
+    return this.extensionStatus() ?? this.extensionStatusData();
   }
 
   isExtensionPostExecutorReady(platformData: PlatformResult): boolean {
