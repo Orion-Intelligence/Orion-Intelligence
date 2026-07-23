@@ -9,23 +9,28 @@ import { ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { SmtpSettingsBlockComponent } from '../../../shared/components/smtp-settings-block/smtp-settings-block.component';
+import { AlertWebhookSettingsBlockComponent } from '../../../shared/components/alert-webhook-settings-block/alert-webhook-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
+import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/model/alert-webhook-settings/alert-webhook-settings.model';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TranslatePipe],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
   configurationEditing = false;
   mailEditing = false;
+  webhookEditing = false;
   configurationError = '';
   mailErrorState = false;
+  webhookErrorState = false;
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
+  webhookForm: AlertWebhookSettingsForm = this.createWebhookForm();
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
@@ -37,6 +42,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadSettings();
+    this.loadAlertConnectorSettings();
   }
 
   loadSettings() {
@@ -68,6 +74,16 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.accounts_smtp_port = typeof metaInfo['ACCOUNTS_SMTP_PORT'] === 'string' ? metaInfo['ACCOUNTS_SMTP_PORT'] : '';
     this.configurationError = '';
     this.mailErrorState = false;
+    this.webhookErrorState = false;
+  }
+
+  loadAlertConnectorSettings() {
+    this.apiService.get<AlertConnectorSettingsResponse>('alert-connectors/settings').subscribe({
+      next: (response) => this.applyAlertConnectorSettings(response),
+      error: () => {
+        this.webhookErrorState = true;
+      }
+    });
   }
 
   toggleConfigurationEdit() {
@@ -78,6 +94,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       return;
     }
     this.mailEditing = false;
+    this.webhookEditing = false;
     this.configurationEditing = true;
   }
 
@@ -94,12 +111,30 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       return;
     }
     this.configurationEditing = false;
+    this.webhookEditing = false;
     this.mailEditing = true;
   }
 
   cancelMailEdit() {
     this.loadSettings();
     this.mailEditing = false;
+  }
+
+  toggleWebhookEdit() {
+    if (this.webhookEditing) {
+      if (this.save('webhooks')) {
+        this.webhookEditing = false;
+      }
+      return;
+    }
+    this.configurationEditing = false;
+    this.mailEditing = false;
+    this.webhookEditing = true;
+  }
+
+  cancelWebhookEdit() {
+    this.loadAlertConnectorSettings();
+    this.webhookEditing = false;
   }
 
   updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
@@ -148,12 +183,15 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     });
   }
 
-  save(section: 'configuration' | 'mail'): boolean {
+  save(section: 'configuration' | 'mail' | 'webhooks'): boolean {
     if (section === 'configuration') {
       this.configurationError = '';
     }
-    else {
+    else if (section === 'mail') {
       this.mailErrorState = false;
+    }
+    else {
+      this.webhookErrorState = false;
     }
     const configurationFields = [
       { key: 'app_name', label: 'App Name' },
@@ -168,7 +206,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       { key: 'accounts_smtp_server', label: 'Account SMTP Server' },
       { key: 'accounts_smtp_port', label: 'Account SMTP Port' }
     ] as const;
-    const requiredFields = section === 'configuration' ? configurationFields : mailFields;
+    const requiredFields = section === 'configuration' ? configurationFields : section === 'mail' ? mailFields : [];
     for (const field of requiredFields) {
       const value = this.form[field.key];
       if (typeof value !== 'string' || !value.trim()) {
@@ -214,6 +252,10 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       this.mailErrorState = true;
       return false;
     }
+    if (section === 'webhooks') {
+      this.saveAlertConnectorSettings();
+      return true;
+    }
     const settings: Record<string, string> = section === 'configuration'
       ? {
         language: this.form.language,
@@ -224,7 +266,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
       }
       : {
-        meta_info: JSON.stringify(this.buildMetaInfo('mail'))
+        meta_info: JSON.stringify(this.buildMetaInfo(section))
       };
     this.apiService.post<any>('public/update', { settings }).subscribe({
       next: (response) => {
@@ -270,7 +312,64 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     return metaInfo;
   }
 
+  private saveAlertConnectorSettings() {
+    const payload = {
+      slack_client_id: this.webhookForm.slack_client_id,
+      slack_client_secret: this.webhookForm.slack_client_secret,
+      jira_client_id: this.webhookForm.jira_client_id,
+      jira_client_secret: this.webhookForm.jira_client_secret
+    };
+    this.apiService.post<AlertConnectorSettingsResponse>('alert-connectors/settings', payload).subscribe({
+      next: (response) => {
+        this.applyAlertConnectorSettings(response);
+      },
+      error: () => {
+        this.webhookErrorState = true;
+        this.webhookEditing = true;
+      }
+    });
+  }
+
+  private applyAlertConnectorSettings(response: AlertConnectorSettingsResponse) {
+    this.webhookForm = {
+      slack_client_id: response?.app?.slack_client_id || '',
+      slack_client_secret: '',
+      slack_configured: response?.app?.slack_configured === true,
+      jira_client_id: response?.app?.jira_client_id || '',
+      jira_client_secret: '',
+      jira_configured: response?.app?.jira_configured === true,
+      alert_slack_connected: response?.tenant?.slack_connected === true,
+      alert_slack_channel: response?.tenant?.slack_channel || '',
+      alert_slack_team: response?.tenant?.slack_team || '',
+      alert_jira_connected: response?.tenant?.jira_connected === true,
+      alert_jira_site_url: response?.tenant?.jira_site_url || '',
+      alert_jira_site_name: response?.tenant?.jira_site_name || ''
+    };
+    this.webhookErrorState = false;
+  }
+
+  private createWebhookForm(): AlertWebhookSettingsForm {
+    return {
+      slack_client_id: '',
+      slack_client_secret: '',
+      slack_configured: false,
+      jira_client_id: '',
+      jira_client_secret: '',
+      jira_configured: false,
+      alert_slack_connected: false,
+      alert_slack_channel: '',
+      alert_slack_team: '',
+      alert_jira_connected: false,
+      alert_jira_site_url: '',
+      alert_jira_site_name: ''
+    };
+  }
+
   get displayVersion(): string {
     return (this.form.version || '').replaceAll('_', '.');
+  }
+
+  get isAdmin(): boolean {
+    return this.appService.userSessionData()?.user?.role === 'admin';
   }
 }

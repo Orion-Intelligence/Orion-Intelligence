@@ -18,6 +18,7 @@ class config_controller:
     __instance = None
     CONFIG_CACHE_KEY = "system_config"
     EMAIL_META_KEYS = {"ACCOUNTS_MAIL_PASSWORD", "ACCOUNTS_MAIL", "ACCOUNTS_SMTP_SERVER", "ACCOUNTS_SMTP_PORT"}
+    LEGACY_ALERT_CONNECTOR_META_KEYS = {"ALERT_SLACK_WEBHOOK_URL", "ALERT_SLACK_CHANNEL", "ALERT_SLACK_CHANNEL_ID", "ALERT_SLACK_CONFIGURATION_URL", "ALERT_SLACK_TEAM_ID", "ALERT_SLACK_TEAM_NAME", "ALERT_JIRA_ACCESS_TOKEN", "ALERT_JIRA_REFRESH_TOKEN", "ALERT_JIRA_EXPIRES_AT", "ALERT_JIRA_CLOUD_ID", "ALERT_JIRA_SITE_URL", "ALERT_JIRA_SITE_NAME", "ALERT_JIRA_BASE_URL", "ALERT_JIRA_EMAIL", "ALERT_JIRA_API_TOKEN", "ALERT_JIRA_PROJECT_KEY", "ALERT_JIRA_ISSUE_TYPE"}
 
     @staticmethod
     def getInstance():
@@ -100,15 +101,18 @@ class config_controller:
             return False
         return 1 <= smtp_port <= 65535
 
-    def _redact_email_config(self, meta_info_raw: str) -> str:
+    def _redact_sensitive_meta_info(self, meta_info_raw: str, include_email_config: bool = False) -> str:
         try:
             meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
         except (TypeError, ValueError):
             return meta_info_raw
         if not isinstance(meta_info, dict):
             return meta_info_raw
-        for key in self.EMAIL_META_KEYS:
+        for key in self.LEGACY_ALERT_CONNECTOR_META_KEYS:
             meta_info.pop(key, None)
+        if not include_email_config:
+            for key in self.EMAIL_META_KEYS:
+                meta_info.pop(key, None)
         return json.dumps(meta_info)
 
     def _build_system_info_from_cache(self, include_email_config: bool = False) -> config_data:
@@ -130,7 +134,7 @@ class config_controller:
             "S_HOME_HEADER_PRICING": "https://www.orionintelligence.org/pricing",
             "S_HOME_HEADER_PRICING_ALLOWED": True
         })
-        fresh_config["meta_info"] = meta_info if include_email_config else self._redact_email_config(meta_info)
+        fresh_config["meta_info"] = self._redact_sensitive_meta_info(meta_info, include_email_config=include_email_config)
         fresh_config["smtp_configured"] = "1" if self._is_smtp_configured(meta_info) else "0"
         return config_data(settings=fresh_config)
 
@@ -162,6 +166,10 @@ class config_controller:
         meta_info_raw = data.settings.get("meta_info")
         if meta_info_raw:
             submitted_meta_info = json.loads(meta_info_raw)
+            if not isinstance(submitted_meta_info, dict):
+                raise HTTPException(status_code=400, detail="meta_info must be a JSON object")
+            for key in self.LEGACY_ALERT_CONNECTOR_META_KEYS:
+                submitted_meta_info.pop(key, None)
             existing_record = await self._engine.find_one(db_system_model, db_system_model.key == AllowedKeys.META_INFO)
             existing_meta_info = {}
             if existing_record and existing_record.value:

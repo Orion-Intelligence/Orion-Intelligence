@@ -17,6 +17,7 @@ from orion.management.managers.test_manager import test_manager
 from orion.middleware.middleware_setup import setup_middlewares
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from routes.admin_routes import admin_routes
+from routes.alert_connector_routes import alert_connector_routes
 from routes.ai_routes import ai_routes
 from routes.api_micros import micro_routes
 from routes.api_routes import api_routes
@@ -84,6 +85,7 @@ configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
+app.include_router(alert_connector_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
 if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
     app.include_router(test_routes, include_in_schema=False)

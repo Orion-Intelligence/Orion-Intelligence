@@ -1,6 +1,9 @@
 import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings} from './controllers/09-system-management.controller';
+import {TEST_DATA} from '../support/constants';
 
 describe('System Settings - Admin Update Flow', () => {
+  const alertSlackClientId = TEST_DATA.alert_slack_client_id;
+
   after(() => {
     cy.logout();
   });
@@ -144,6 +147,69 @@ describe('System Settings - Admin Update Flow', () => {
 
     cy.contains('app-smtp-settings-block button', 'Verify Configuration').scrollIntoView().should('be.visible').click();
     cy.contains('app-smtp-settings-block', 'Mail configuration is working', {timeout: 60000}).should('be.visible');
+
+    cy.logout();
+  });
+
+  it('configures only Slack alert integration from system settings', () => {
+    cy.loginAsAdmin();
+
+    cy.intercept('GET', '**/api/alert-connectors/settings', {
+      statusCode: 200,
+      body: {
+        app: {
+          slack_client_id: '',
+          slack_configured: false,
+          jira_client_id: '',
+          jira_configured: false
+        },
+        tenant: {
+          slack_connected: false,
+          slack_channel: '',
+          slack_team: '',
+          jira_connected: false,
+          jira_site_url: '',
+          jira_site_name: ''
+        }
+      }
+    }).as('loadAlertConnectors');
+
+    cy.intercept('POST', '**/api/alert-connectors/settings', {
+      statusCode: 200,
+      body: {
+        app: {
+          slack_client_id: alertSlackClientId,
+          slack_configured: true,
+          jira_client_id: '',
+          jira_configured: false
+        },
+        tenant: {
+          slack_connected: false,
+          slack_channel: '',
+          slack_team: '',
+          jira_connected: false,
+          jira_site_url: '',
+          jira_site_name: ''
+        }
+      }
+    }).as('saveAlertConnectors');
+
+    openSystemSettings();
+    cy.wait('@loadAlertConnectors');
+    cy.get('[data-testid="tenant-settings-connect-slack"]').should('not.exist');
+    cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
+
+    cy.get('[data-testid="system-settings-alert-integrations-edit"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-slack-client-id"]').should('be.visible').clear().type(alertSlackClientId);
+    cy.get('[data-testid="system-settings-slack-client-secret"]').should('be.visible').clear().type('slack-secret-for-cypress', {log: false});
+    cy.get('[data-testid="system-settings-alert-integrations-save"]').should('be.visible').click();
+
+    cy.wait('@saveAlertConnectors').then(({request}) => {
+      expect(request.body.slack_client_id).to.eq(alertSlackClientId);
+      expect(request.body.slack_client_secret).to.eq('slack-secret-for-cypress');
+      expect(request.body.jira_client_id).to.eq('');
+      expect(request.body.jira_client_secret).to.eq('');
+    });
 
     cy.logout();
   });

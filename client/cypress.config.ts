@@ -105,6 +105,7 @@ export default defineConfig({
             scans_social_username: "atlasnode",
             scans_wanted_name: "Mason Hale",
             support_email: "support.agent@samplemail.test",
+            alert_slack_client_id: "111111111111.222222222222",
         },
         field_types: [
             "Single-line text input",
@@ -136,6 +137,7 @@ export default defineConfig({
             scans_social_username: "atlasnode",
             scans_wanted_name: "Mason Hale",
             support_email: "support.agent@samplemail.test",
+            alert_slack_client_id: "111111111111.222222222222",
         },
     },
     e2e: {

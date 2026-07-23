@@ -228,6 +228,17 @@
         (cancel)="cancelMailEdit()"
         (save)="toggleMailEdit()">
       </app-smtp-settings-block>
+
+      <app-alert-webhook-settings-block
+        [form]="webhookForm"
+        context="system"
+        [isEditing]="webhookEditing"
+        [isAdmin]="isAdmin"
+        [errorState]="webhookErrorState"
+        (edit)="toggleWebhookEdit()"
+        (cancel)="cancelWebhookEdit()"
+        (save)="toggleWebhookEdit()">
+      </app-alert-webhook-settings-block>
     </div>
   </div>
 </div>
