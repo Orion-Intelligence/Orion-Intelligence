@@ -199,18 +199,22 @@ export class TakedownActionComponent implements OnChanges {
   private handleSuccess(record: TakedownActionResponse): void {
     this.isTakingDown = false;
     const evidence = (record.evidence?.result || record.evidence || {}) as Record<string, unknown>;
+
     const abuseEmail = record.abuse_email || String(evidence['abuse_email_found'] || '');
-    if (!abuseEmail) {
-      this.actionResult = { error: 'No public abuse contact was exposed for this site.' };
-      return;
-    }
+    const takedownType = evidence['takedown_type'] as string;
+    const actionUrl = evidence['action_url'] as string;
+
     if (!this.manualUrlMode) {
       this.applyTakedownStatus(record.public_status || null, record.status_label || '');
     }
+
     this.actionResult = {
       abuse_email: abuseEmail,
-      status_label: record.status_label || this.takedownLabel || 'Takedown request created'
-    };
+      status_label: record.status_label || this.takedownLabel || 'Takedown request created',
+      takedown_type: takedownType,
+      action_url: actionUrl
+    } as any;
+
     this.requestCreated.emit(record);
   }
 }
