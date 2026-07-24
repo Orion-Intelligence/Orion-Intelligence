@@ -17,26 +17,33 @@ class migration_1_0_3_13:
 
     @staticmethod
     async def migrate_alerts(engine):
-        documents = await engine.find(db_alert_model)
-        for document in documents:
-            changed = False
-
-            for alert in document.alerts:
-                if not hasattr(alert, "licenses"):
-                    alert.licenses = []
-                    changed = True
-                if not hasattr(alert, "raw_findings"):
-                    alert.raw_findings = {}
-                    changed = True
-                if not hasattr(alert, "risk"):
-                    alert.risk = ""
-                    changed = True
-                if not hasattr(alert, "is_deleted"):
-                    alert.is_deleted = False
-                    changed = True
-
-            if changed:
-                await engine.save(document)
+        alert_collection = engine.get_collection(db_alert_model)
+        await alert_collection.update_many(
+            {"alerts": {"$type": "array"}},
+            [
+                {
+                    "$set": {
+                        "alerts": {
+                            "$map": {
+                                "input": "$alerts",
+                                "as": "alert",
+                                "in": {
+                                    "$mergeObjects": [
+                                        {
+                                            "licenses": [],
+                                            "raw_findings": {},
+                                            "risk": "",
+                                            "is_deleted": False,
+                                        },
+                                        "$$alert",
+                                    ]
+                                },
+                            }
+                        }
+                    }
+                }
+            ],
+        )
 
     @staticmethod
     async def update_version(engine, version):
