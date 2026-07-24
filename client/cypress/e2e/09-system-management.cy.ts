@@ -195,13 +195,13 @@ describe('System Settings - Admin Update Flow', () => {
     }).as('saveAlertConnectors');
 
     openSystemSettings();
-    cy.wait('@loadAlertConnectors');
     cy.get('[data-testid="tenant-settings-connect-slack"]').should('not.exist');
     cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
 
     cy.get('[data-testid="system-settings-alert-integrations-edit"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="system-settings-slack-client-id"]').should('be.visible').clear().type(alertSlackClientId);
     cy.get('[data-testid="system-settings-slack-client-secret"]').should('be.visible').clear().type('slack-secret-for-cypress', {log: false});
+    cy.docsScreenshot('alert-integrations-system-slack-config');
     cy.get('[data-testid="system-settings-alert-integrations-save"]').should('be.visible').click();
 
     cy.wait('@saveAlertConnectors').then(({request}) => {

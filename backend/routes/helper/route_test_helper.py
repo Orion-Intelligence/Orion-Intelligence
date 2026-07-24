@@ -96,7 +96,6 @@ class TestRouteHelper:
             "dynamic/wanted": ("dynamic_wanted", "dynamic_wanted.json"),
             "dynamic/cracked": ("dynamic_cracked", "dynamic_cracked.json"),
             "dynamic/software": ("dynamic_software", "dynamic_software.json"),
-            "dynamic/national-identity": ("dynamic_national_identity", "dynamic_national_identity.json"),
             "crypto/scan": ("dynamic_crypto_scan", "dynamic_crypto_scan.json"),
             "ioc/extract": ("ioc_file_extract", "ioc_file_extract.json"),
             "apk/scan": ("ioc_apk_extract", "ioc_apk_extract.json"),

@@ -46,7 +46,7 @@ describe('Scans Management - Entity Lookup Flow', () => {
     cy.logout();
   });
 
-  it('runs Email, Social, Wanted, National Identity, Playstore, Software, File, Text Analysis, and Crypto scans', () => {
+  it('runs Email, Social, Wanted, Playstore, Software, File, Text Analysis, and Crypto scans', () => {
     cy.visit('/dashboard');
 
     cy.visit('/dashboard/api/email-breach');
@@ -66,12 +66,6 @@ describe('Scans Management - Entity Lookup Flow', () => {
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
     cy.docsScreenshot('wanted-list-report');
-
-    cy.visit('/dashboard/api/national-identity');
-    fillPrimaryScanInput('92301234567');
-    clickSearch();
-    cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
-    cy.docsScreenshot('national-identity-report');
 
     cy.visit('/dashboard/api/playstore-scanner');
     fillPrimaryScanInput('https://play.google.com/store/apps/details?id=com.jrzheng.supervpnfree');

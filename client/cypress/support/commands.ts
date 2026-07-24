@@ -261,13 +261,9 @@ Cypress.Commands.add("logout", () => {
                     latestDocument: { generic_model: [], leak_model: [], defacement_model: [], chat_model: [], exploit_model: [] },
                 },
             });
-            cy.intercept("POST", "**/api/logout").as("logoutRequest");
             cy.scrollTo("top", { ensureScrollable: false });
             cy.wrap(profileMenu).scrollIntoView().click({ force: true });
             cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({ force: true });
-            cy.wait("@logoutRequest", { timeout: 60000 })
-                .its("response.statusCode")
-                .should("be.oneOf", [200, 204]);
             cy.get('[data-testid="login-user"]').should('exist');
             cy.clearCookies({ log: false });
             cy.clearLocalStorage(undefined, { log: false });

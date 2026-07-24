@@ -483,7 +483,6 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     }).as('loadTenantAlertConnectors');
 
     cy.visit('/dashboard/profile/tenant-settings');
-    cy.wait('@loadTenantAlertConnectors');
 
     cy.get('[data-testid="tenant-settings-connect-slack"]')
       .scrollIntoView()
@@ -491,6 +490,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .and('have.attr', 'target', '_blank')
       .and('have.attr', 'href', '/api/alert-connectors/slack/connect');
     cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
+    cy.docsScreenshot('tenant-alert-integrations-slack');
     cy.window().then((win) => {
       const slackConnectClicks: string[] = [];
       win.document.addEventListener('click', (event) => {

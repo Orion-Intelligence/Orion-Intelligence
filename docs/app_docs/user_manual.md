@@ -2359,6 +2359,17 @@ Depending on permissions, users can:
 
 Some fields remain read-only depending on role. The page also acts as a tenant overview by summarizing the tenant name, status-style badges, location, assigned quota, and current license list.
 
+#### Tenant Alert Integrations
+
+Tenant Settings also shows tenant alert integrations that an administrator has configured at the platform level. Tenants use the visible Connect or Reconnect action to authorize their own Slack or Jira destination in a new tab. Providers that are not configured by an administrator are hidden from the tenant page.
+
+```{figure} ../screenshots/tenant-alert-integrations-slack-20260326.png
+:alt: Tenant Slack alert integration
+:width: 100%
+
+Tenant alert integrations showing Slack as the only available configured connector.
+```
+
 ```{figure} ../screenshots/tenant-settings-20260326.png
 :alt: Tenant settings page
 :width: 100%
@@ -2506,6 +2517,17 @@ Editable platform settings can include:
 - account email and SMTP settings for platform mail delivery
 - version and platform metadata
 - logo and authentication dashboard image URLs
+
+#### Alert Integrations
+
+Administrators configure platform OAuth credentials for alert integrations from System Settings. System Settings stores the Slack and Jira app credentials and redirect URI notes only; tenants connect their own alert destinations from Tenant Settings.
+
+```{figure} ../screenshots/alert-integrations-system-slack-config-20260326.png
+:alt: System Slack alert integration configuration
+:width: 100%
+
+System alert integration settings for configuring Slack OAuth credentials.
+```
 
 ```{figure} ../screenshots/system-settings-20260326.png
 :alt: Administrative and system settings workspace
