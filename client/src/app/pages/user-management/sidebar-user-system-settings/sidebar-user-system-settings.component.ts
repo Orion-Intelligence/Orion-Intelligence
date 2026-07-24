@@ -18,7 +18,6 @@ import { UserImagePickerComponent } from '../sidebar-user-settings/user-image-pi
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
 type SystemSettingsTab = 'branding' | 'platform';
-type SystemSettingsSection = 'configuration' | 'mail';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
@@ -409,7 +408,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.appService.updateFavicon(updated.logo_url);
     document.title = updated.app_name?.trim() || DEFAULT_APP_NAME;
   }
-  
+
   get isAdmin(): boolean {
     return this.appService.userSessionData()?.user?.role === 'admin';
   }
