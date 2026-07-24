@@ -19,6 +19,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import (
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
+from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from tests.fake_model.fakes import FakeEngine, FakeRedis
 
 
@@ -102,6 +103,35 @@ def test_get_current_user_allows_crawler_without_session_checks():
 
     assert current_user is user
     assert manager._redis.calls == []
+
+
+def test_get_current_user_rejects_token_for_other_tenant():
+    user = _make_user(tenant_uuid="tenant-a")
+    manager = _make_manager(user=user)
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.get_current_user(f"Bearer {_token({'sub': 'alice', 'sid': 'sid-123'})}", tenant_id="tenant-b"))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Tenant access forbidden"
+
+
+def test_auth_login_rejects_user_on_wrong_tenant_url(monkeypatch):
+    user = _make_user(tenant_uuid="tenant-a")
+
+    class _FakeAuthManager:
+        async def authenticate_user(self, mail, password):
+            assert mail == "alice"
+            assert password == "secret"
+            return user
+
+    monkeypatch.setattr(auth_manager, "get_instance", staticmethod(lambda: _FakeAuthManager()))
+
+    with pytest.raises(HTTPException) as exc:
+        _run(auth_manager.login("alice", "secret", tenant_id=SimpleNamespace(id="tenant-b")))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Tenant access forbidden"
 
 
 def test_get_current_role_and_status_return_enum_values():
