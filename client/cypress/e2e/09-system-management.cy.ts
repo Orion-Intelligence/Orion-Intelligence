@@ -1,4 +1,24 @@
 import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings, openTenantBrandingSettings} from './controllers/09-system-management.controller';
+import {
+  createTenantAccount,
+  openTenantEditor,
+  openTenantsPage,
+  saveTenantEditor,
+  setTenantEditorToggle,
+} from './controllers/10-tenant-management.controller';
+
+const WHITE_LABEL_TENANT = {
+  username: 'wltenant1',
+  email: 'wltenant1@whitelabelorion.org',
+  password: '1qaz!QAZ',
+  companyName: 'White Label Orion',
+  slug: 'whitelabelorion',
+};
+
+function tenantUrl(path: string): string {
+  const baseUrl = new URL(Cypress.config('baseUrl') || 'http://localhost:4200');
+  return `${baseUrl.protocol}//${WHITE_LABEL_TENANT.slug}.localhost:${baseUrl.port || '4200'}${path}`;
+}
 
 describe('System Settings - Admin Update Flow', () => {
   after(() => {
@@ -147,5 +167,50 @@ describe('System Settings - Admin Update Flow', () => {
     cy.contains('app-smtp-settings-block', 'Mail configuration is working', {timeout: 60000}).should('be.visible');
 
     cy.logout();
+  });
+
+  it('enforces tenant white-label URL login isolation', () => {
+    createTenantAccount(WHITE_LABEL_TENANT);
+
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(WHITE_LABEL_TENANT);
+    setTenantEditorToggle('tenant-verified-toggle', true);
+    setTenantEditorToggle('tenant-status-toggle', true);
+    setTenantEditorToggle('tenant-password-reset-required-toggle', false);
+    saveTenantEditor('saveWhiteLabelTenant');
+    cy.logout();
+
+    cy.intercept('POST', '**/api/token').as('mainDomainTenantLogin');
+    cy.visit('/login');
+    cy.get('[data-testid="login-user"]').should('be.visible').clear().type(WHITE_LABEL_TENANT.username);
+    cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(WHITE_LABEL_TENANT.password, {log: false});
+    cy.get('[data-testid="login-button"]').should('be.visible').click();
+    cy.wait('@mainDomainTenantLogin', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [401, 403]);
+
+    const subdomainOrigin = new URL(tenantUrl('/login')).origin;
+    cy.intercept('POST', '**/api/token').as('tenantSubdomainLogin');
+    cy.visit(tenantUrl('/login'));
+    cy.origin(subdomainOrigin, {args: WHITE_LABEL_TENANT}, (tenant) => {
+      cy.contains('Sign Up').should('not.exist');
+      cy.get('[data-testid="login-user"]').should('be.visible').clear().type(tenant.username);
+      cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(tenant.password, {log: false});
+      cy.get('[data-testid="login-button"]').should('be.visible').click();
+      cy.get('[data-testid="dashboard-main"], [data-testid="tenant-company-input"]')
+        .filter(':visible')
+        .should('have.length.greaterThan', 0);
+      cy.clearCookies({log: false});
+      cy.clearLocalStorage({log: false});
+    });
+    cy.wait('@tenantSubdomainLogin', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
+
+    cy.visit(tenantUrl('/signup'));
+    cy.origin(subdomainOrigin, () => {
+      cy.location('pathname').should('eq', '/login');
+    });
   });
 });
