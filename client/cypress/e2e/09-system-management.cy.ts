@@ -1,4 +1,4 @@
-import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings} from './controllers/09-system-management.controller';
+import {ensureSystemSettingsEditing, fillSystemMailConfiguration, openSystemSettings, openTenantBrandingSettings} from './controllers/09-system-management.controller';
 
 describe('System Settings - Admin Update Flow', () => {
   after(() => {
@@ -9,13 +9,14 @@ describe('System Settings - Admin Update Flow', () => {
     cy.loginAsAdmin();
 
     openSystemSettings();
+    openTenantBrandingSettings();
 
     cy.intercept('PUT', '**/api/system/image?key=auth_dashboard_icon', {
       statusCode: 400,
       body: {detail: 'File too large! Maximum allowed size is 1 MB.'}
     }).as('uploadAuthDashboardIcon');
 
-    cy.contains('div', 'Auth Dashboard Icon')
+    cy.contains('div', 'Login Image')
       .parent()
       .find('input[type="file"]')
       .selectFile({

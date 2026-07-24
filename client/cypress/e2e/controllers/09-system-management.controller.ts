@@ -3,6 +3,10 @@ export function openSystemSettings() {
   cy.url().should('include', 'system-settings');
 }
 
+export function openTenantBrandingSettings() {
+  cy.get('[data-testid="system-settings-tab-branding"]').should('be.visible').click();
+}
+
 export function fillSystemMailConfiguration(server: string, port: string) {
   cy.get('[data-testid="system-settings-account-mail"]')
     .scrollIntoView()

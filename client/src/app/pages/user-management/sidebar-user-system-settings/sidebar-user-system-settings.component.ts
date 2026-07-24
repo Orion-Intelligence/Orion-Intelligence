@@ -196,17 +196,17 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       return false;
     }
     const settings: Record<string, string> = section === 'configuration'
-        ? {
-          language: this.form.language,
-          app_name: this.form.app_name,
-          ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
-          admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
-          s_onion: this.form.s_onion,
-          meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
-        }
-        : {
-          meta_info: JSON.stringify(this.buildMetaInfo('mail'))
-        };
+      ? {
+        language: this.form.language,
+        app_name: this.form.app_name,
+        ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
+        admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
+        s_onion: this.form.s_onion,
+        meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
+      }
+      : {
+        meta_info: JSON.stringify(this.buildMetaInfo('mail'))
+      };
     this.apiService.post<any>('public/update', { settings }).subscribe({
       next: (response) => {
         if (response?.settings) {
