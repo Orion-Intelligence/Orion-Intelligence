@@ -70,7 +70,6 @@ class mongo_controller:
             partialFilterExpression={"licenses": ["maintainer"]},
             name="unique_maintainer_per_company", )
 
-        await self.__engine.get_collection(db_system_model).create_index("key", unique=True)
         await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
         await self.__engine.get_collection(db_scan_job_model).create_index([("user_uuid", 1), ("created_at", -1)])
         await self.__engine.get_collection(db_takedown_request_model).create_index("target_domain", unique=True)

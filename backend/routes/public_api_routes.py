@@ -43,7 +43,8 @@ async def _request_has_admin_account(request: Request) -> bool:
 )
 async def get_public_config(request: Request):
     return await config_controller.getInstance().get_system_info(
-        include_email_config=await _request_has_admin_account(request)
+        include_email_config=await _request_has_admin_account(request),
+        tenant_id=str(request.state.tenant.id),
     )
 
 
@@ -58,12 +59,12 @@ async def get_user_resource(id: str):
 
 
 @public_routes.get("/api/s/static/favicon", include_in_schema=False)
-async def get_system_resource():
-    return await ResourceManager.get_instance().get_favicon()
+async def get_favicon_resource(request: Request):
+    return await ResourceManager.get_instance().get_favicon(request.state.tenant)
 
 @public_routes.get("/api/s/static/system/{id}", include_in_schema=False)
 async def get_system_resource(request: Request, id: str):
-    return await ResourceManager.get_instance().get_system_image(id)
+    return await ResourceManager.get_instance().get_system_image(id, request.state.tenant)
 
 
 @public_routes.get("/api/public/case-shares/{share_id}", include_in_schema=False)

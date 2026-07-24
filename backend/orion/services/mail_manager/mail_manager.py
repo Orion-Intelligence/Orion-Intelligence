@@ -1,6 +1,7 @@
 import asyncio
 import base64
 import html
+from contextvars import ContextVar
 from fastapi import HTTPException
 import json
 import smtplib
@@ -15,9 +16,9 @@ import os
 from orion.helper_manager.env_handler import env_handler
 from orion.services.log_manager.log_controller import log
 from orion.services.mail_manager.mail_enums import MailSubject
-from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 
 MAIL_CONFIGURATION_FAILED_STATUS = 424
+_mail_tenant_id: ContextVar[str | None] = ContextVar("mail_tenant_id", default=None)
 
 
 class mail_manager:
@@ -34,12 +35,11 @@ class mail_manager:
             raise Exception("This class is a singleton!")
         mail_manager.__instance = self
 
-    async def process_app_variables(self, subject: str, body: str):
-        from orion.services.mongo_manager.mongo_controller import mongo_controller
-        engine = mongo_controller.get_instance().get_engine()
-        record = await engine.find_one(
-            db_system_model, db_system_model.key == "app_name")
-        app_name = record.value if record and record.value else "Orion Intelligence"
+    async def process_app_variables(self, subject: str, body: str, tenant_id: str | None = None):
+        from orion.api.server.config_manager.config_controller import config_controller
+        tenant_id = tenant_id or _mail_tenant_id.get()
+        app_name = await config_controller.getInstance().get_cached("app_name", "Orion Intelligence", tenant_id=tenant_id)
+        app_name = str(app_name)
 
         subject = subject.replace("appname", app_name)
         body = body.replace("appname", app_name)
@@ -49,8 +49,11 @@ class mail_manager:
     @staticmethod
     def _global_mail_config():
         from orion.api.server.config_manager.config_controller import config_controller
-        config = config_controller.getInstance()._config
-        meta_info_raw = config.get("meta_info", "{}")
+        controller = config_controller.getInstance()
+        if hasattr(controller, "get"):
+            meta_info_raw = controller.get("meta_info", "{}")
+        else:
+            meta_info_raw = getattr(controller, "_config", {}).get("meta_info", "{}")
         try:
             meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
         except (TypeError, ValueError):
@@ -72,47 +75,30 @@ class mail_manager:
             raise HTTPException(status_code=400, detail="SMTP configuration is incomplete")
         return sender_email, password, smtp_server, smtp_port
 
-    @staticmethod
-    def _decrypt_tenant_value(enc, value):
-        if not value:
-            return ""
-        try:
-            return enc.decrypt(value.encode()).decode()
-        except Exception:
-            return ""
-
-    async def _tenant_mail_config(self, tenant_id: str | None):
+    async def _tenant_system_mail_config(self, tenant_id: str | None):
+        """Read SMTP fallback values from the tenant's system settings."""
         if not tenant_id:
             return None
-        from bson import ObjectId
-        from cryptography.fernet import Fernet
-        from orion.services.encryption_manager.key_manager import KeyManager
-        from orion.services.mongo_manager.mongo_controller import mongo_controller
-        from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+        try:
+            from orion.api.server.config_manager.config_controller import config_controller
 
-        if not ObjectId.is_valid(str(tenant_id)):
+            controller = config_controller.getInstance()
+            await controller.load_config(tenant_id=tenant_id)
+            meta_info_raw = controller.get("meta_info", "{}", tenant_id=tenant_id)
+            meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
+            return meta_info if isinstance(meta_info, dict) and meta_info else None
+        except Exception:
             return None
-        engine = mongo_controller.get_instance().get_engine()
-        tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_id)))
-        if not tenant:
-            return None
-        dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
-        if not dek:
-            return None
-        enc = Fernet(dek)
-        config = {
-            "ACCOUNTS_MAIL_PASSWORD": self._decrypt_tenant_value(enc, getattr(tenant, "accounts_mail_password", "")),
-            "ACCOUNTS_MAIL": self._decrypt_tenant_value(enc, getattr(tenant, "accounts_mail", "")),
-            "ACCOUNTS_SMTP_SERVER": self._decrypt_tenant_value(enc, getattr(tenant, "accounts_smtp_server", "")),
-            "ACCOUNTS_SMTP_PORT": self._decrypt_tenant_value(enc, getattr(tenant, "accounts_smtp_port", "")),
-        }
-        return config if all(config.values()) else None
 
     async def _selected_mail_config(self, tenant_id: str | None):
-        return await self._tenant_mail_config(tenant_id) or self._global_mail_config()
+        return (await self._tenant_system_mail_config(tenant_id) or self._global_mail_config())
 
     async def _prepare_verification_message(self, to_header: str, subject: str, body: str, tenant_id: str | None = None, config=None):
-        subject, body = await self.process_app_variables(subject, body)
+        tenant_context = _mail_tenant_id.set(str(tenant_id) if tenant_id else None)
+        try:
+            subject, body = await self.process_app_variables(subject, body)
+        finally:
+            _mail_tenant_id.reset(tenant_context)
         sender_email, ACCOUNTS_MAIL_PASSWORD, smtp_server, smtp_port = self._normalize_mail_config(
             config or await self._selected_mail_config(tenant_id))
         msg = MIMEMultipart("alternative")
@@ -276,9 +262,9 @@ class mail_manager:
 
     async def validate_mail_configuration(self, tenant_id: str | None = None):
         if tenant_id:
-            tenant_config = await self._tenant_mail_config(tenant_id)
-            if tenant_config:
-                sender_email, password, smtp_server, smtp_port = self._normalize_mail_config(tenant_config)
+            tenant_system_config = await self._tenant_system_mail_config(tenant_id)
+            if tenant_system_config:
+                sender_email, password, smtp_server, smtp_port = self._normalize_mail_config(tenant_system_config)
                 await asyncio.to_thread(
                     mail_manager._validate_connection_sync, sender_email, password, smtp_server, smtp_port
                 )

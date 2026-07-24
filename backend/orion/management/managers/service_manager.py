@@ -54,8 +54,7 @@ class service_manager:
                 await redis_controller.getInstance().initialize()
                 await self.clear_test_insight_cache()
                 await self.build_map_assets(build_dir)
-                await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [config_controller.CONFIG_CACHE_KEY])
-                await config_controller.getInstance().load_config()
+                await config_controller.getInstance().load_config(force_db=True)
                 await asyncio.sleep(5)
 
                 await arango_controller.get_instance().link_connection()

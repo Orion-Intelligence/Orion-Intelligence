@@ -14,8 +14,8 @@ from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 ai_routes = APIRouter()
 
 
-async def ai_enabled_required():
-    if await config_controller.getInstance().get_cached("ai_endpoint_enabled", "1") != "1":
+async def ai_enabled_required(request: Request):
+    if await config_controller.getInstance().get_cached("ai_endpoint_enabled", "1", tenant_id=str(request.state.tenant.id),) != "1":
         raise HTTPException(status_code=403, detail="AI is disabled")
 
 
@@ -106,6 +106,7 @@ async def cancel_nexus_chat(current_user=Depends(get_current_user)):
     ],
 )
 async def clear_nexus_chat_session(payload: dict | None = Body(default=None), current_user=Depends(get_current_user)):
+    return True
     return await nexus_manager.getInstance().clear_chat_session(current_user, session_id=str((payload or {}).get("session_id") or ""))
 
 

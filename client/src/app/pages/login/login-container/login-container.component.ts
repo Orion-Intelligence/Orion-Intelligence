@@ -35,10 +35,14 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   isMobile = false;
   autoDemoLogin = false;
   brandingResolved = false;
+  isSubdomainLogin = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
 
   ngOnInit() {
+    const hostname = window.location.hostname.toLowerCase();
+    this.isSubdomainLogin = hostname.endsWith('.localhost') || hostname.split('.').length > 2;
+
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
     });
@@ -77,19 +81,11 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     if (!this.brandingResolved) {
       return '';
     }
-    const logo = this.appService.getConfig().appSettings.logo_wide_light;
-    if (!logo || logo === '/api/s/static/system/logo_wide_light_default.png') {
-      return LoginContainerComponent.DEFAULT_LOGO_SRC;
-    }
-    return logo;
+    return this.appService.getConfig().appSettings.logo_wide_light || LoginContainerComponent.DEFAULT_LOGO_SRC;
   }
 
   getDashboardPreviewSrc(): string {
-    const authDashboardIcon = this.appService.getConfig().appSettings.auth_dashboard_icon;
-    if (!authDashboardIcon || authDashboardIcon === '/api/s/static/system/auth_dashboard_icon_default.png') {
-      return LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
-    }
-    return authDashboardIcon;
+    return this.appService.getConfig().appSettings.auth_dashboard_icon || LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
   }
 
   copyToClipboard(text: string): void {

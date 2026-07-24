@@ -19,8 +19,8 @@ COOKIE_CIPHER = auth_cookie_config.COOKIE_CIPHER
 
 
 @auth_router.post("/api/token")
-async def token(form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
-    result = await auth_manager.login(form_data.username, form_data.password)
+async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
+    result = await auth_manager.login(form_data.username, form_data.password, tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
 
@@ -31,11 +31,11 @@ async def token(form_data: OAuth2PasswordRequestForm = Depends(), response: Resp
 
 
 @auth_router.post("/api/token/demo")
-async def token_demo(response: Response = None):
+async def token_demo(request: Request, response: Response = None):
     DEMO_USERNAME = env_handler.get_instance().env("DEMO_USERNAME")
     DEMO_PASSWORD = env_handler.get_instance().env("DEMO_PASSWORD")
 
-    result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD, True)
+    result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD, True, tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
 
@@ -46,8 +46,8 @@ async def token_demo(response: Response = None):
 
 
 @auth_router.post("/api/token/2fa/verify")
-async def verify_2fa(code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None):
-    result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code)
+async def verify_2fa(request: Request, code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None):
+    result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code, tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
     if access_token:
         set_access_cookie(response, access_token)
@@ -59,7 +59,7 @@ async def refresh_token(request: Request, response: Response = None):
     token = token_from_request(request)
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
-    result = await session_manager.get_instance().refresh_token(token)
+    result = await session_manager.get_instance().refresh_token(token,tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
     if access_token:
         set_access_cookie(response, access_token)
@@ -69,7 +69,7 @@ async def refresh_token(request: Request, response: Response = None):
 @auth_router.post("/api/logout")
 async def logout(request: Request):
     token = token_from_request(request)
-    await session_manager.get_instance().invalidate_user_session(ptoken=token)
+    await session_manager.get_instance().invalidate_user_session(ptoken=token, tenant_id=getattr(request.state, "tenant", None))
     resp = JSONResponse(content={"detail": "Logged out"})
     resp.delete_cookie(ACCESS_COOKIE, path="/")
     resp.delete_cookie(ACCESS_COOKIE, path="/admin")
@@ -77,8 +77,8 @@ async def logout(request: Request):
 
 
 @auth_router.post("/api/signup")
-async def signup(data: SignupRequest):
-    return await SignupManager.signup_user(data)
+async def signup(data: SignupRequest, request: Request):
+    return await SignupManager.signup_user(data, tenant_id=request.state.tenant.id)
 
 
 @auth_router.post("/api/signup/verificaion")

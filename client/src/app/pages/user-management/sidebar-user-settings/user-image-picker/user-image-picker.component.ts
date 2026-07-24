@@ -66,7 +66,8 @@ export class UserImagePickerComponent {
       '/default',
       'logo_url_default.png',
       'logo_wide_light_default.png',
-      'logo_wide_dark_default.png'
+      'logo_wide_dark_default.png',
+      'auth_dashboard_icon_default.png'
     ];
     return !defaults.some(token => image.endsWith(token));
   }

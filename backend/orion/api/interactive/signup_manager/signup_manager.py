@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta, timezone
 
+from bson import ObjectId
 from fastapi import HTTPException
 
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
@@ -21,9 +22,13 @@ from orion.helper_manager.env_handler import env_handler
 
 class SignupManager:
     @staticmethod
-    async def signup_user(data: SignupRequest):
-        await mail_manager.get_instance().validate_mail_configuration()
+    async def signup_user(data: SignupRequest, tenant_id: str = ""):
         engine = mongo_controller.get_instance().get_engine()
+        tenant_object_id = ObjectId(tenant_id)
+        tenant = await engine.find_one(db_tenant_model, (db_tenant_model.id == tenant_object_id))
+        if not tenant.is_default:
+            raise HTTPException(status_code=400, detail="Signup is only allowed from default url")
+        await mail_manager.get_instance().validate_mail_configuration()
         username, email, password = helper_controller.extract_user_mail_fields(data)
 
         TenantManager.validate_signup_username(username)

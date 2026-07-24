@@ -32,6 +32,12 @@ export class SignupComponent implements OnInit {
   constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute, protected appService: AppService) { }
 
   ngOnInit(): void {
+    const hostname = window.location.hostname.toLowerCase();
+    if (hostname.endsWith('.localhost') || hostname.split('.').length > 2) {
+      this.router.navigate(['/login'], { replaceUrl: true }).then();
+      return;
+    }
+
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
     });
@@ -44,19 +50,11 @@ export class SignupComponent implements OnInit {
     if (!this.brandingResolved) {
       return '';
     }
-    const logo = this.appService.getConfig().appSettings.logo_wide_light;
-    if (!logo || logo === '/api/s/static/system/logo_wide_light_default.png') {
-      return SignupComponent.DEFAULT_LOGO_SRC;
-    }
-    return logo;
+    return this.appService.getConfig().appSettings.logo_wide_light || SignupComponent.DEFAULT_LOGO_SRC;
   }
 
   getDashboardPreviewSrc(): string {
-    const authDashboardIcon = this.appService.getConfig().appSettings.auth_dashboard_icon;
-    if (!authDashboardIcon || authDashboardIcon === '/api/s/static/system/auth_dashboard_icon_default.png') {
-      return SignupComponent.DEFAULT_AUTH_DASHBOARD_SRC;
-    }
-    return authDashboardIcon;
+    return this.appService.getConfig().appSettings.auth_dashboard_icon || SignupComponent.DEFAULT_AUTH_DASHBOARD_SRC;
   }
 
   validateUsername(): boolean {

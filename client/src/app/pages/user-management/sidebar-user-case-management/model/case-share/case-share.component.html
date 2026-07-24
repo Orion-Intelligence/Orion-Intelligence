@@ -2,7 +2,7 @@
   <div class="relative z-[1] border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
     <header class="mx-auto flex h-[64px] w-full max-w-[1280px] items-center justify-between gap-4 px-3 sm:px-5">
       <div class="flex min-w-0 items-center gap-3">
-        <img [src]="getLogoSrc()" alt="Orion" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
+        <img [src]="getLogoSrc()" [alt]="getAppName()" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
         <div class="hidden h-7 w-px bg-white/10 sm:block"></div>
         <div class="hidden min-w-0 text-sm font-semibold text-[var(--color-text2)] sm:block">{{ 'Shared Intelligence Report' | translate }}
         </div>

@@ -1,4 +1,6 @@
+import json
 import re
+import shutil
 import threading
 from datetime import datetime, timezone
 from pathlib import Path
@@ -14,7 +16,8 @@ from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, visible_alerts
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
-from orion.services.mongo_manager.shared_model.db_tenant_model import IocCategory, db_tenant_model, TenantRequest, TenantStatus
+from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import (IocCategory, TenantRequest, TenantStatus, db_tenant_model, normalize_tenant_slug)
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
@@ -93,6 +96,14 @@ class TenantManager:
         if len(parts) < 2:
             return ""
         return parts[1].split(".")[0]
+
+    @staticmethod
+    def build_tenant_slug(email: str, fallback: str = "tenant") -> str:
+        if email and "@" in email:
+            domain = email.split("@", 1)[1]
+            slug = domain.split(".", 1)[0]
+            return normalize_tenant_slug(slug) or fallback
+        return fallback
 
     @staticmethod
     def validate_signup_username(username: str):
@@ -233,10 +244,6 @@ class TenantManager:
         data.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
         data.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
         data.email = enc.encrypt((data.email or "").encode()).decode()
-        data.accounts_mail_password = enc.encrypt((data.accounts_mail_password or "").encode()).decode()
-        data.accounts_mail = enc.encrypt((data.accounts_mail or "").encode()).decode()
-        data.accounts_smtp_server = enc.encrypt((data.accounts_smtp_server or "").encode()).decode()
-        data.accounts_smtp_port = enc.encrypt((data.accounts_smtp_port or "").encode()).decode()
 
         data.iocs = [IocCategory(
             ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
@@ -244,17 +251,51 @@ class TenantManager:
             values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (data.iocs or [])]
         return enc
 
+    async def copy_default_system_settings(self, tenant: db_tenant_model):
+        default_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
+        if not default_tenant or str(default_tenant.id) == str(tenant.id):
+            return
+
+        default_settings = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(default_tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        if default_settings:
+            system_settings = json.loads(default_settings.value or "{}")
+            for key in (
+                AllowedKeys.VERSION.value,
+                AllowedKeys.LANGUAGE_ALLOWED.value,
+                AllowedKeys.AI_ENDPOINT_ENABLED.value,
+                AllowedKeys.ADMIN_ROOT_ALLOWED.value,
+                AllowedKeys.S_ONION.value,
+            ):
+                system_settings.pop(key, None)
+            await self._engine.save(db_system_model(tenant_id=str(tenant.id), key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
+        from orion.api.interactive.resource_manager.resource_manager import ResourceManager
+
+        resources = ResourceManager.get_instance()
+        target_dir = resources.get_tenant_system_dir(tenant)
+        if target_dir is None:
+            return
+        target_dir.mkdir(parents=True, exist_ok=True)
+        for file_name in resources.SYSTEM_RESOURCE_FILES:
+            if not file_name.endswith("_custom.png"):
+                continue
+            source_path = resources.system_resource_path(file_name, default_tenant)
+            if source_path.name == file_name and source_path.is_file():
+                shutil.copy2(source_path, target_dir / file_name)
+
     async def create_tenant(self, data: db_tenant_model):
         try:
             data.privileged_ioc = False
             if not data.iocs and data.email:
                 data.iocs = self.build_privileged_iocs(data.email)
+            data.slug = self.build_tenant_slug(data.email)
             await self.encrypt_tenant(data)
             data.status = TenantStatus.ONBOARDING
             await self._engine.save(data)
+            await self.copy_default_system_settings(data)
         except Exception as _:
             await self._engine.remove(db_user_account, db_user_account.tenant_uuid == str(data.id))
             await self._engine.remove(db_keys, db_keys.id == str(data.id))
+            await self._engine.remove(db_system_model, db_system_model.tenant_id == str(data.id))
             await self._engine.delete(data)
             raise
 
@@ -287,9 +328,17 @@ class TenantManager:
             alert_run_time=getattr(tenant, "alert_run_time", None),
             allowed_alert_categories=getattr(tenant, "allowed_alert_categories", None),
             accounts_mail_password=None,
-            accounts_mail=enc.decrypt(getattr(tenant, "accounts_mail", "").encode()).decode() if getattr(tenant, "accounts_mail", "") else "",
-            accounts_smtp_server=enc.decrypt(getattr(tenant, "accounts_smtp_server", "").encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else "",
-            accounts_smtp_port=enc.decrypt(getattr(tenant, "accounts_smtp_port", "").encode()).decode() if getattr(tenant, "accounts_smtp_port", "") else "")
+            accounts_mail="",
+            accounts_smtp_server="",
+            accounts_smtp_port="")
+
+        settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        if settings_record and settings_record.value:
+            system_settings = json.loads(settings_record.value)
+            meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
+            tenant_request.accounts_mail = meta_info.get("ACCOUNTS_MAIL") or ""
+            tenant_request.accounts_smtp_server = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
+            tenant_request.accounts_smtp_port = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
 
         return tenant_request
 
@@ -323,33 +372,43 @@ class TenantManager:
         dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
         enc = Fernet(dek)
 
-        if any((value or "").strip() for value in [
-            data.accounts_mail_password,
-            data.accounts_mail,
-            data.accounts_smtp_server,
-            data.accounts_smtp_port
-        ]):
-            await mail_manager.get_instance().send_test_mail(config={
-                "ACCOUNTS_MAIL_PASSWORD": data.accounts_mail_password,
-                "ACCOUNTS_MAIL": data.accounts_mail,
-                "ACCOUNTS_SMTP_SERVER": data.accounts_smtp_server,
-                "ACCOUNTS_SMTP_PORT": data.accounts_smtp_port,
-            })
+        smtp_fields = {
+            "accounts_mail_password": "ACCOUNTS_MAIL_PASSWORD",
+            "accounts_mail": "ACCOUNTS_MAIL",
+            "accounts_smtp_server": "ACCOUNTS_SMTP_SERVER",
+            "accounts_smtp_port": "ACCOUNTS_SMTP_PORT",
+        }
+        smtp_submitted = any(field in data.model_fields_set for field in smtp_fields)
+        if smtp_submitted:
+            settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+            system_settings = json.loads(settings_record.value) if settings_record and settings_record.value else {}
+            meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
+            for field, meta_key in smtp_fields.items():
+                if field in data.model_fields_set:
+                    value = getattr(data, field)
+                    if value is not None:
+                        meta_info[meta_key] = value
+            if any((meta_info.get(key) or "").strip() for key in smtp_fields.values()):
+                await mail_manager.get_instance().send_test_mail(config={
+                    "ACCOUNTS_MAIL_PASSWORD": meta_info.get("ACCOUNTS_MAIL_PASSWORD"),
+                    "ACCOUNTS_MAIL": meta_info.get("ACCOUNTS_MAIL"),
+                    "ACCOUNTS_SMTP_SERVER": meta_info.get("ACCOUNTS_SMTP_SERVER"),
+                    "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
+                })
+            system_settings[AllowedKeys.META_INFO.value] = json.dumps(meta_info)
+            if settings_record:
+                settings_record.value = json.dumps(system_settings)
+                await self._engine.save(settings_record)
+            else:
+                await self._engine.save(db_system_model(tenant_id=tenant_id, key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
+            from orion.api.server.config_manager.config_controller import config_controller
+            await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
 
         tenant.name = enc.encrypt((data.name or "").encode()).decode()
         tenant.phone = enc.encrypt((data.phone or "").encode()).decode()
         tenant.country = enc.encrypt((data.country or "").encode()).decode()
         tenant.city = enc.encrypt((data.city or "").encode()).decode()
         tenant.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
-        if data.accounts_mail_password is not None:
-            tenant.accounts_mail_password = enc.encrypt((data.accounts_mail_password or "").encode()).decode()
-        if data.accounts_mail is not None:
-            tenant.accounts_mail = enc.encrypt((data.accounts_mail or "").encode()).decode()
-        if data.accounts_smtp_server is not None:
-            tenant.accounts_smtp_server = enc.encrypt((data.accounts_smtp_server or "").encode()).decode()
-        if data.accounts_smtp_port is not None:
-            tenant.accounts_smtp_port = enc.encrypt((data.accounts_smtp_port or "").encode()).decode()
-
         is_admin = current_user.role in ["admin"]
 
         if is_admin and data.verified is not None:
@@ -463,9 +522,16 @@ class TenantManager:
             (tenant_data.get("postal_code") or "").encode()).decode() if tenant_data.get("postal_code") else ""
         tenant_data["licenses"] = [enc.decrypt(x.encode()).decode() for x in (tenant_data.get("licenses") or [])]
         tenant_data["accounts_mail_password"] = None
-        tenant_data["accounts_mail"] = enc.decrypt((tenant_data.get("accounts_mail") or "").encode()).decode() if tenant_data.get("accounts_mail") else ""
-        tenant_data["accounts_smtp_server"] = enc.decrypt((tenant_data.get("accounts_smtp_server") or "").encode()).decode() if tenant_data.get("accounts_smtp_server") else ""
-        tenant_data["accounts_smtp_port"] = enc.decrypt((tenant_data.get("accounts_smtp_port") or "").encode()).decode() if tenant_data.get("accounts_smtp_port") else ""
+        tenant_data["accounts_mail"] = ""
+        tenant_data["accounts_smtp_server"] = ""
+        tenant_data["accounts_smtp_port"] = ""
+        settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        if settings_record and settings_record.value:
+            system_settings = json.loads(settings_record.value)
+            meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
+            tenant_data["accounts_mail"] = meta_info.get("ACCOUNTS_MAIL") or ""
+            tenant_data["accounts_smtp_server"] = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
+            tenant_data["accounts_smtp_port"] = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
         tenant_data["iocs"] = [{**ioc, "ioc_id": enc.decrypt((ioc.get("ioc_id") or "").encode()).decode() if ioc.get(
             "ioc_id") else "", "name": enc.decrypt((ioc.get("name") or "").encode()).decode() if ioc.get(
             "name") else "", "values": [enc.decrypt(v.encode()).decode() for v in (ioc.get("values") or [])], } for ioc
@@ -498,11 +564,6 @@ class TenantManager:
                 tenant.email = enc.decrypt(tenant.email.encode()).decode()
             else:
                 tenant.email = ""
-            tenant.accounts_mail_password = None
-            tenant.accounts_mail = enc.decrypt(tenant.accounts_mail.encode()).decode() if getattr(tenant, "accounts_mail", "") else ""
-            tenant.accounts_smtp_server = enc.decrypt(tenant.accounts_smtp_server.encode()).decode() if getattr(tenant, "accounts_smtp_server", "") else ""
-            tenant.accounts_smtp_port = enc.decrypt(tenant.accounts_smtp_port.encode()).decode() if getattr(tenant, "accounts_smtp_port", "") else ""
-
             tenant.iocs = [IocCategory(
                 ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
                 name=enc.decrypt(ioc.name.encode()).decode(),
@@ -510,6 +571,17 @@ class TenantManager:
 
             tenant_data = tenant.model_dump()
             tenant_data["id"] = str(tenant.id)
+            tenant_data["accounts_mail_password"] = None
+            tenant_data["accounts_mail"] = ""
+            tenant_data["accounts_smtp_server"] = ""
+            tenant_data["accounts_smtp_port"] = ""
+            settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+            if settings_record and settings_record.value:
+                system_settings = json.loads(settings_record.value)
+                meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
+                tenant_data["accounts_mail"] = meta_info.get("ACCOUNTS_MAIL") or ""
+                tenant_data["accounts_smtp_server"] = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
+                tenant_data["accounts_smtp_port"] = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
             maintainer = maintainer_by_tenant_id.get(str(tenant.id))
             tenant_data["password_reset_required"] = getattr(maintainer, "password_reset_required", False)
             result.append(tenant_data)

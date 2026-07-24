@@ -2,25 +2,29 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { FormsModule } from '@angular/forms';
-import { UserImagePickerComponent } from "../sidebar-user-settings/user-image-picker/user-image-picker.component";
 import { AppService } from '../../../services/core/app/app.service';
-import { AuthService } from '../../../services/authetication/auth.service';
-import { ConfigSettings } from '../../../shared/model/app/config';
+import { AppSettingsModel, ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { SmtpSettingsBlockComponent } from '../../../shared/components/smtp-settings-block/smtp-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
+import { ActivatedRoute } from '@angular/router';
+import { LicenseService } from '../../../services/licenses/licenses.service';
+import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
+type SystemSettingsTab = 'branding' | 'platform';
+type SystemSettingsSection = 'configuration' | 'mail';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TranslatePipe],
+  imports: [FormsModule, CommonModule, SmtpSettingsBlockComponent, TranslatePipe, TenantBrandingSettingsComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
+  activeTab: SystemSettingsTab = 'branding';
   configurationEditing = false;
   mailEditing = false;
   configurationError = '';
@@ -32,10 +36,31 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   smtpServerPattern = /^(?=.{1,253}$)(localhost|[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?|([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}|(\d{1,3}\.){3}\d{1,3})$/;
 
-  constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService,private messageNotificationService: MessageNotificationService) {
+  constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
   }
 
   ngOnInit(): void {
+    this.activeTab = this.getInitialTab();
+    this.loadSettings();
+  }
+
+  canEditTenantBranding(): boolean {
+    const role = this.appService.userSessionData().user.role;
+    return role === 'admin' || (role === 'member' && this.licenseService.isMaintainer());
+  }
+
+  canManagePlatformSettings(): boolean {
+    return this.appService.userSessionData().user.role === 'admin';
+  }
+
+  selectTab(tab: SystemSettingsTab): void {
+    if ((tab === 'branding' && !this.canEditTenantBranding()) ||
+      (tab === 'platform' && !this.canManagePlatformSettings())) {
+      return;
+    }
+    this.activeTab = tab;
+    this.configurationEditing = false;
+    this.mailEditing = false;
     this.loadSettings();
   }
 
@@ -102,53 +127,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.mailEditing = false;
   }
 
-  updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.apiService
-      .put<any>(`system/image?key=${key}`, formData)
-      .subscribe({
-        next: (res) => {
-          if (res?.logo_url) {
-            (this.appService.getConfig().appSettings as any).logo_url = res.logo_url;
-          }
-          if (res?.logo_wide_light) {
-            (this.appService.getConfig().appSettings as any).logo_wide_light = res.logo_wide_light;
-          }
-          if (res?.logo_wide_dark) {
-            (this.appService.getConfig().appSettings as any).logo_wide_dark = res.logo_wide_dark;
-          }
-          if(res?.auth_dashboard_icon){
-            (this.appService.getConfig().appSettings as any).auth_dashboard_icon = res.auth_dashboard_icon;
-          }
-          if ((this.appService.getConfig().appSettings as any).logo_url) {
-            this.appService.updateFavicon((this.appService.getConfig().appSettings as any).logo_url);
-          }
-        },
-        error: (err) => {
-          const message = err?.error?.detail || 'Failed to upload image';
-          this.messageNotificationService.show(message);
-        }
-      });
-  }
-
-  deleteUserResource(key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
-    return this.apiService.delete<any>(`system/image?key=${key}`).subscribe(() => {
-      const fallbackMap: Record<string, string> = {
-        logo_url: '/api/s/static/system/logo_url_default.png',
-        logo_wide_light: '/api/s/static/system/logo_wide_light_default.png',
-        logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png',
-        login_page_image: '/api/s/static/system/auth_dashboard_icon_default.png'
-      };
-      const fallback = fallbackMap[key];
-      (this.appService.getConfig().appSettings as any)[key] = fallback;
-      if (key === 'logo_url') {
-        this.appService.updateFavicon(fallback);
-      }
-    });
-  }
-
-  save(section: 'configuration' | 'mail'): boolean {
+  save(section: SystemSettingsSection): boolean {
     if (section === 'configuration') {
       this.configurationError = '';
     }
@@ -168,11 +147,13 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       { key: 'accounts_smtp_server', label: 'Account SMTP Server' },
       { key: 'accounts_smtp_port', label: 'Account SMTP Port' }
     ] as const;
-    const requiredFields = section === 'configuration' ? configurationFields : mailFields;
+    const requiredFields = section === 'configuration'
+      ? configurationFields
+      : mailFields;
     for (const field of requiredFields) {
       const value = this.form[field.key];
       if (typeof value !== 'string' || !value.trim()) {
-        if (String(field.key).startsWith('accounts_')) {
+        if (section === 'mail') {
           this.mailErrorState = true;
         }
         else {
@@ -215,25 +196,23 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       return false;
     }
     const settings: Record<string, string> = section === 'configuration'
-      ? {
-        language: this.form.language,
-        app_name: this.form.app_name,
-        ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
-        admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
-        s_onion: this.form.s_onion,
-        meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
-      }
-      : {
-        meta_info: JSON.stringify(this.buildMetaInfo('mail'))
-      };
+        ? {
+          language: this.form.language,
+          app_name: this.form.app_name,
+          ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
+          admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
+          s_onion: this.form.s_onion,
+          meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
+        }
+        : {
+          meta_info: JSON.stringify(this.buildMetaInfo('mail'))
+        };
     this.apiService.post<any>('public/update', { settings }).subscribe({
       next: (response) => {
         if (response?.settings) {
-          const current = this.appService.configData();
-          this.appService.configData.set(new ConfigSettings(response.settings, current.localSettings));
+          this.applySettings(response.settings);
           const s = this.appService.configData()?.appSettings;
           if (s) {
-            document.title = s.app_name?.trim() || DEFAULT_APP_NAME;
             this.loadSettings();
           }
         }
@@ -272,5 +251,22 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   get displayVersion(): string {
     return (this.form.version || '').replaceAll('_', '.');
+  }
+
+  private getInitialTab(): SystemSettingsTab {
+    const requestedTab = this.route.snapshot.queryParamMap.get('tab');
+    if (requestedTab === 'branding' && this.canEditTenantBranding()) {
+      return 'branding';
+    }
+    return this.canManagePlatformSettings() ? 'platform' : 'branding';
+  }
+
+  private applySettings(settings: Partial<AppSettingsModel>): void {
+    const current = this.appService.configData();
+    const appSettings = { ...current.appSettings, ...settings };
+    this.appService.configData.set(new ConfigSettings(appSettings, current.localSettings));
+    const updated = this.appService.configData().appSettings;
+    this.appService.updateFavicon(updated.logo_url);
+    document.title = updated.app_name?.trim() || DEFAULT_APP_NAME;
   }
 }

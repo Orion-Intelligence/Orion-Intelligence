@@ -214,7 +214,7 @@
     </button>
     <div class="mt-1 flex w-full items-center justify-center px-2 py-2 text-[24px] font-medium">
       <a href="" [attr.aria-label]="'Go to homepage' | translate" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[8px]">
-        <img alt="Logo" height="30" ngSrc="assets/images/shared/logo-min.svg" priority width="30" />
+        <img alt="Logo" height="30" [src]="appService.getConfig().appSettings.logo_url || '/api/s/static/system/logo_url_default.png'" width="30" />
       </a>
     </div>
     <div class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">

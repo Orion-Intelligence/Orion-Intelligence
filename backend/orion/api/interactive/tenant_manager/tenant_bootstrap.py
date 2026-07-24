@@ -12,6 +12,7 @@ async def create_default_tenant(engine):
     data = db_tenant_model(
         id=ObjectId(),
         name="default",
+        slug="default",
         is_default=True,
         event_management_enabled=True,
         status=TenantStatus.ACTIVE,

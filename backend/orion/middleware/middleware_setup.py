@@ -1,3 +1,5 @@
+from urllib.parse import urlsplit
+
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
@@ -11,6 +13,7 @@ from orion.middleware.middlewares.content_block_middleware import content_block_
 from orion.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
 from orion.middleware.middlewares.security_headers_middleware import security_headers_middleware
 from orion.middleware.middlewares.service_ready_middleware import service_ready_middleware
+from orion.middleware.middlewares.tenant_resolution_middleware import tenant_resolution_middleware
 
 
 class EnforceHTTPSMiddleware(BaseHTTPMiddleware):
@@ -43,6 +46,16 @@ class EnforceHTTPSMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
+def trusted_host_patterns(production_domain) -> list[str]:
+    raw_domain = str(production_domain or "").strip().lower().rstrip(".")
+    if "://" in raw_domain:
+        raw_domain = urlsplit(raw_domain).hostname or ""
+    host = raw_domain.removeprefix("*.")
+    if not host or host == "*":
+        return ["*"]
+    return [host, f"*.{host}"]
+
+
 def setup_middlewares(app):
     app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
     app.add_middleware(EnforceHTTPSMiddleware)
@@ -60,9 +73,9 @@ def setup_middlewares(app):
         allow_headers=["Authorization", "Content-Type"])
 
     if not config.DEBUG:
-        app.add_middleware(
-            TrustedHostMiddleware, allowed_hosts=PRODUCTION_DOMAIN)
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=trusted_host_patterns(PRODUCTION_DOMAIN))
 
     app.add_middleware(security_headers_middleware)
     app.add_middleware(content_block_middleware)
     app.add_middleware(cache_admin)
+    app.add_middleware(tenant_resolution_middleware)
