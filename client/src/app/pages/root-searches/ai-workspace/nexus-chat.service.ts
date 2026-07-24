@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { EMPTY, Observable, ReplaySubject, timer } from 'rxjs';
 import { expand, switchMap, takeWhile } from 'rxjs/operators';
 import { ChatApiResponse } from '../../../shared/model/chat/chat-api-response.model';
+import { AiWorkspaceTrigger } from '../../../shared/model/chat/ai-workspace-message.model';
 import { NexusChatPayload, NexusChatStreamChunk, NexusSummaryPayload } from '../../../shared/model/chat/nexus-chat.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { NexusChatDetail, NexusChatSession, NexusSendMessageResponse } from '../../../shared/model/nexus/ai-chat-session.model';
@@ -67,6 +68,26 @@ export class NexusChatService {
       credentials: 'include',
       keepalive: true,
     }).catch(() => undefined);
+  }
+
+  async downloadTrigger(trigger: AiWorkspaceTrigger): Promise<void> {
+    const downloadUrl = this.normalizedDownloadUrl(trigger.url);
+    if (!downloadUrl) {
+      return;
+    }
+    const response = await fetch(downloadUrl, { credentials: 'include' });
+    if (!response.ok) {
+      throw new Error(await response.text() || response.statusText);
+    }
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = this.downloadName(downloadUrl, response.headers.get('content-disposition'));
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   private streamDirectNexusChat(payload: NexusChatPayload): Observable<NexusChatStreamChunk> {
@@ -332,8 +353,12 @@ export class NexusChatService {
         continue;
       }
       const output = this.asRecord(parsed?.output);
-      const delta = output?.['delta'];
-      const response = output?.['response'];
+      const delta = output?.['delta'] ?? parsed?.delta;
+      const response = output?.['response'] ?? parsed?.response;
+      const rawTriggers = output?.['triggers'] ?? parsed?.triggers;
+      const triggers = Array.isArray(rawTriggers)
+        ? rawTriggers.filter((item: unknown) => Boolean(this.asRecord(item)?.['url'])) as AiWorkspaceTrigger[]
+        : undefined;
       const status = this.asRecord(parsed?.status);
       const statusMessage = status?.['message'] ?? parsed?.status_message;
       const isError = Boolean(parsed?.error);
@@ -349,7 +374,7 @@ export class NexusChatService {
         observer.next({ delta: this.streamValueToText(delta) });
       }
       if (response !== undefined) {
-        observer.next({ response: this.streamValueToText(response), error: isError || undefined });
+        observer.next({ response: this.streamValueToText(response), error: isError || undefined, triggers });
       }
       else if (detail !== undefined) {
         observer.next({ response: this.streamValueToText(detail), error: isError || undefined });
@@ -364,6 +389,23 @@ export class NexusChatService {
       return this.streamValueToText(record['response'] ?? record['result'] ?? record['text'] ?? JSON.stringify(record));
     }
     return String(value);
+  }
+
+  private downloadName(url: string, disposition: string | null): string {
+    const match = /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i.exec(disposition || '');
+    const name = match?.[1] || match?.[2] || url.split('/').pop() || 'download';
+    return decodeURIComponent(name);
+  }
+
+  private normalizedDownloadUrl(url: string | undefined): string {
+    if (!url) {
+      return '';
+    }
+    const parsed = new URL(url, window.location.origin);
+    if (parsed.pathname.startsWith('/v1/users/downloads/')) {
+      return `/api/nexus/downloads/${parsed.pathname.slice('/v1/users/downloads/'.length)}${parsed.search}`;
+    }
+    return parsed.toString();
   }
 
   listChats(): Observable<NexusChatSession[]> {

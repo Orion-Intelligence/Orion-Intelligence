@@ -29,11 +29,13 @@ import {
   waitForTenantAlertScanComplete,
   waitForBlockingOverlayToClose
 } from './controllers/10-tenant-management.controller';
+import {TEST_DATA} from '../support/constants';
 
 describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenant: any;
   let tenantSubUser: any;
   const tenantResetNewPassword = '2wsx@WSX2026';
+  const alertSlackClientId = TEST_DATA.alert_slack_client_id;
 
   const selectEnabledCurrentMonthDate = (day: number) => {
     cy.get(`[data-testid="side-filter-date-day-${day}"]`)
@@ -454,6 +456,58 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .scrollIntoView()
       .closest('div.rounded-lg')
       .should('contain.text', 'User profile visibility is disabled for this tenant');
+    cy.logout();
+  });
+
+  it('shows only admin-configured Slack connector in tenant settings', () => {
+    loginTenant(tenant);
+
+    cy.intercept('GET', '**/api/alert-connectors/settings', {
+      statusCode: 200,
+      body: {
+        app: {
+          slack_client_id: alertSlackClientId,
+          slack_configured: true,
+          jira_client_id: '',
+          jira_configured: false
+        },
+        tenant: {
+          slack_connected: false,
+          slack_channel: '',
+          slack_team: '',
+          jira_connected: false,
+          jira_site_url: '',
+          jira_site_name: ''
+        }
+      }
+    }).as('loadTenantAlertConnectors');
+
+    cy.visit('/dashboard/profile/tenant-settings');
+
+    cy.get('[data-testid="tenant-settings-connect-slack"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .and('have.attr', 'target', '_blank')
+      .and('have.attr', 'href', '/api/alert-connectors/slack/connect');
+    cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
+    cy.docsScreenshot('tenant-alert-integrations-slack');
+    cy.window().then((win) => {
+      const slackConnectClicks: string[] = [];
+      win.document.addEventListener('click', (event) => {
+        const link = (event.target as Element).closest('[data-testid="tenant-settings-connect-slack"]') as HTMLAnchorElement | null;
+        if (!link) {
+          return;
+        }
+        event.preventDefault();
+        slackConnectClicks.push(link.href);
+      }, {capture: true, once: true});
+      cy.wrap(slackConnectClicks).as('slackConnectClicks');
+    });
+    cy.get('[data-testid="tenant-settings-connect-slack"]').click();
+    cy.get<string[]>('@slackConnectClicks').should((clicks) => {
+      expect(clicks[0]).to.include('/api/alert-connectors/slack/connect');
+    });
+
     cy.logout();
   });
 

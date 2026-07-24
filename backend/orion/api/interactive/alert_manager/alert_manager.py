@@ -16,6 +16,7 @@ from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.env_handler import env_handler
 from orion.services.mail_manager.mail_enums import AlertMailLabel, AlertMailMessage, AlertMailSubject, AlertMailTitle
 from orion.services.mail_manager.mail_manager import mail_manager
+from orion.services.alert_webhook_manager.alert_webhook_manager import AlertWebhookManager
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status, db_alert_model, visible_alerts
@@ -138,6 +139,17 @@ class AlertManager:
                 module_rows=module_rows, ioc_rows=ioc_rows, action_url=action_url, action_label=AlertMailLabel.ACTION_LABEL.value,closing_message=closing_message)
 
             await mail_manager.get_instance().send_verification_mail(to=to_email, subject=subject, body=html_content)
+            await AlertWebhookManager.get_instance().send_alert(
+                tenant_id=tenant_id,
+                subject=subject,
+                email_title=email_title,
+                friendly_message=friendly_message,
+                scan_status=scan_status,
+                total_alerts=total_alerts,
+                module_rows=module_rows,
+                ioc_rows=ioc_rows,
+                action_url=action_url,
+            )
             return True
         except Exception:
             return False

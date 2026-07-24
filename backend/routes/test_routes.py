@@ -163,14 +163,6 @@ async def test_search_dynamic_wanted(param: search_dynamic_social_model = Body(.
 
 
 @test_routes.post(
-    "/api/dynamic/national-identity",
-    dependencies=SCAN_DEPS,
-)
-async def test_search_dynamic_national_identity(param: search_dynamic_crack_model = Body(...)):
-    return TestRouteHelper.pending_or_api_mock("dynamic_national_identity", "dynamic_national_identity.json")
-
-
-@test_routes.post(
     "/api/urlscan/domain",
     dependencies=SCAN_LIMITED_DEPS,
 )

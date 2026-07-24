@@ -24,7 +24,36 @@ export function openAiWorkspace() {
 }
 
 export function sendDummyAiMessage(message = 'Cypress dummy AI message') {
-    cy.intercept('POST', '**/chats/*/messages').as('sendAiMessage');
+    cy.intercept('POST', '**/chats/*/messages', (req) => {
+        const sessionId = req.url.match(/\/chats\/([^/]+)\/messages/)?.[1] || 'cypress-ai-chat';
+        const now = new Date().toISOString();
+        req.reply({
+            statusCode: 200,
+            body: {
+                chat: {
+                    session_id: sessionId,
+                    title: 'New Chat',
+                    created_at: now,
+                    updated_at: now,
+                    message_count: 2,
+                    is_pinned: false,
+                    pinned_at: null,
+                },
+                user_message: {
+                    id: 'cypress-user-message',
+                    sender: 'user',
+                    text: message,
+                    created_at: now,
+                },
+                assistant_message: {
+                    id: 'cypress-assistant-message',
+                    sender: 'bot',
+                    text: 'Cypress AI response',
+                    created_at: now,
+                },
+            },
+        });
+    }).as('sendAiMessage');
 
     cy.get(selector('chat-widget-input'))
         .should('be.visible')
