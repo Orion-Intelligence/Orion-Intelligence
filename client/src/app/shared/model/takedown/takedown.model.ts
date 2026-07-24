@@ -31,4 +31,6 @@ export interface TakedownActionResult {
   abuse_email?: string;
   error?: string;
   status_label?: string;
+  takedown_type?: string;
+  action_url?: string;
 }
