@@ -1321,9 +1321,9 @@ If public profile remains hidden, check both user profile visibility and tenant 
 
 ### Overview
 
-Current-tenant profile configuration, tenant logo, tenant image, tenant overview, assigned licenses, quota, phone, country, city, state, tenant profile visibility, Event Management toggle, editable tenant fields, read-only tenant fields, and maintainer/member tenant settings.
+Current-tenant profile configuration, tenant logo, tenant image, tenant overview, assigned licenses, quota, phone, country, city, state, tenant profile visibility, tenant alert webhook connections, Event Management toggle, editable tenant fields, read-only tenant fields, and maintainer/member tenant settings.
 
-**Search terms:** tenant settings, tenant logo, tenant data, user profile visibility, event management toggle, tenant quota.
+**Search terms:** tenant settings, tenant logo, tenant data, user profile visibility, event management toggle, tenant quota, alert webhook, Slack webhook, Jira webhook.
 
 ### Navigation
 
@@ -1340,8 +1340,9 @@ Open Profile > Tenant Settings, edit allowed tenant fields/toggles, upload logo 
   3. Toggle edit if available.
   4. Update phone/country/city/state where allowed.
   5. Upload or delete tenant logo if needed.
-  6. Toggle profile visibility or event management where available.
-  7. Save changes.
+  6. Connect or reconnect configured Slack/Jira alert webhooks where available.
+  7. Toggle profile visibility or event management where available.
+  8. Save changes.
 
 ### Troubleshooting
 
@@ -1568,9 +1569,9 @@ Case access depends on role and case-management permission. Analysts have narrow
 
 ### Overview
 
-Privileged app-wide configuration, branding images, logos, app name, language, data-source URLs, adversary URLs, pricing URLs, account mail, SMTP host, SMTP port, SMTP password, AI toggle, documentation toggle, help toggle, whistle blowing toggle, network behavior toggles, login imagery, email-flow prerequisites, and system branding changes.
+Privileged app-wide configuration, branding images, logos, app name, language, data-source URLs, adversary URLs, pricing URLs, account mail, SMTP host, SMTP port, SMTP password, alert webhook OAuth credentials, AI toggle, documentation toggle, help toggle, whistle blowing toggle, network behavior toggles, login imagery, email-flow prerequisites, and system branding changes.
 
-**Search terms:** system settings, SMTP settings, account mail, branding, app logo, AI toggle, documentation toggle, whistle blowing, pricing URL.
+**Search terms:** system settings, SMTP settings, account mail, branding, app logo, AI toggle, documentation toggle, whistle blowing, pricing URL, alert webhook, Slack OAuth, Jira OAuth.
 
 ### Navigation
 
@@ -1589,7 +1590,8 @@ Open Profile > System Settings, select Edit, update required configuration/brand
   5. Configure Account Mail Password.
   6. Configure Account SMTP Server.
   7. Configure Account SMTP Port.
-  8. Save settings.
+  8. Configure Slack/Jira alert webhook OAuth credentials if tenants will connect those providers.
+  9. Save settings.
 
 ### Troubleshooting
 
