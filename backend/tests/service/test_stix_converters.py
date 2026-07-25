@@ -40,7 +40,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_date": "2026-04-01T10:11:12Z",
             },
             "Telegram dump",
-            "orion:chat",
+            "tenant:chat",
         ),
         (
             defacement_converter,
@@ -51,7 +51,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_date": "2026-04-01",
             },
             "https://defaced.example/",
-            "orion:defacement",
+            "tenant:defacement",
         ),
         (
             exploit_converter,
@@ -63,7 +63,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_creation_date": "2026-04-01T00:00:00Z",
             },
             "RCE advisory",
-            "orion:exploit",
+            "tenant:exploit",
         ),
         (
             general_converter,
@@ -75,7 +75,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_creation_date": "2026-04-01T00:00:00Z",
             },
             "General report",
-            "orion:general",
+            "tenant:general",
         ),
         (
             leak_converter,
@@ -87,7 +87,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_date": "2026-04-01",
             },
             "Leak post",
-            "orion:leak",
+            "tenant:leak",
         ),
         (
             social_converter,
@@ -99,7 +99,7 @@ def _single(bundle: dict, object_type: str) -> dict:
                 "m_date": "2026-04-01T10:11:12Z",
             },
             "Social mention",
-            "orion:social",
+            "tenant:social",
         ),
     ],
 )
@@ -136,7 +136,7 @@ def test_convert_to_stix_builds_full_relationship_graph_for_general_content():
         "m_content_type": ["leaks"],
     }
 
-    bundle = convert_to_stix("general", raw)
+    bundle = convert_to_stix("general", raw, "Acme Labs")
     grouped = _objects_by_type(bundle)
 
     report = _single(bundle, "report")
@@ -160,9 +160,12 @@ def test_convert_to_stix_builds_full_relationship_graph_for_general_content():
     assert report["published"] == "2026-04-01T10:11:12.000Z"
     assert report["modified"] == "2026-04-02T11:12:13.000Z"
     assert report["lang"] == "en"
-    assert report["x_orion_doc_id"] == "abc123"
-    assert report["x_orion_network"] == "onion"
-    assert report["x_orion_platform"] == ["forum"]
+    assert bundle["x_tenant_name"] == "Acme Labs"
+    assert report["x_tenant_name"] == "Acme Labs"
+    assert "acme-labs:general" in report["labels"]
+    assert report["x_tenant_doc_id"] == "abc123"
+    assert report["x_tenant_network"] == "onion"
+    assert report["x_tenant_platform"] == ["forum"]
     assert report["external_references"][0]["url"] == "https://example.com/report"
 
     assert grouped["infrastructure"][0]["infrastructure_types"] == ["anonymization"]

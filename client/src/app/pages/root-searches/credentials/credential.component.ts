@@ -54,7 +54,6 @@ export class CredentialComponent implements OnInit {
   private isRankedLoading = false;
   private stealerIocPage = 1;
   private threatIocPage = 1;
-  private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
 
   protected readonly filters = stealer_filters;
 
@@ -424,20 +423,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private downloadCombinedResultsCsv(): void {
-    const rows = this.buildCombinedExportRows();
-    const csvLines = [
-      this.exportCsvColumns.join(','),
-      ...rows.map(row => this.exportCsvColumns.map(column => this.escapeCsvValue(row[column] ?? '-')).join(','))
-    ];
-    const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'credentials_export.csv';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    this.helperService.downloadAsCSV(this.buildCombinedExportRows(), 'credentials_export.csv');
   }
 
   private exportCombinedResultsPdf(): void {
@@ -727,11 +713,6 @@ export class CredentialComponent implements OnInit {
       return '-';
     }
     return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
-  }
-
-  private escapeCsvValue(value: string | number): string {
-    const text = String(value ?? '');
-    return `"${text.replace(/"/g, '""')}"`;
   }
 
   private appendStealerLoadMoreResults(response: { success: boolean; data: StealerLogCallbackModel | null }): number {

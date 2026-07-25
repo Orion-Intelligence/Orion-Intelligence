@@ -3,6 +3,7 @@ import { Subscription } from 'rxjs';
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialService } from '../services/social.service';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
+import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
 
 @Component({
   selector: 'app-social-stealerlog-section',
@@ -11,8 +12,9 @@ import { SocialNormalizationUtil } from '../utils/social-normalization.util';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StealerlogSectionComponent {
-  private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
+  private readonly exportCsvColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly state = inject(SocialService);
+  private readonly exportBranding = inject(ExportBrandingService);
   private requestId = 0;
 
   username = input.required<string>();
@@ -83,13 +85,14 @@ export class StealerlogSectionComponent {
   downloadRecords(event: Event): void {
     event.stopPropagation();
     const rows = this.records().map((item, index) => ({
+      tenant_name: this.exportBranding.getTenantName(),
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: this.searchIdentity() || '-',
       email: SocialNormalizationUtil.toExportValue(item?.['email']),
       username: SocialNormalizationUtil.toExportValue(item?.['username']),
       domain: SocialNormalizationUtil.toExportValue(item?.['domain']),
-      source: SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
+      source: String(this.exportBranding.replaceSystemBrand(SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']))),
       hash: SocialNormalizationUtil.toExportValue(item?.['m_hash']),
       title: '-',
       url: '-',

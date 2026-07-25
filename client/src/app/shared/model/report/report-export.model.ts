@@ -50,4 +50,6 @@ export interface UnifiedReportPayloadInput {
 export interface GraphReportMeta {
   generatedAt: string;
   kindLabel: string;
+  tenantName: string;
+  tenantLogoDataUrl: string | null;
 }

@@ -88,7 +88,6 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "url": ["m_url", "m_base_url"],
         "base_url": ["m_base_url"],
         "created": ["m_creation_date", "m_update_date"],
-        "tag": "orion:general",
     },
     "leak": {
         "title": ["m_title", "m_url", "m_base_url"],
@@ -96,7 +95,6 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "url": ["m_url", "m_base_url"],
         "base_url": ["m_base_url"],
         "created": ["m_creation_date", "m_update_date", "m_date"],
-        "tag": "orion:leak",
     },
     "defacement": {
         "title": ["m_title", "m_url", "m_base_url", "m_content"],
@@ -104,7 +102,6 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "url": ["m_url", "m_base_url", "m_source_url"],
         "base_url": ["m_base_url"],
         "created": ["m_date", "m_creation_date", "m_update_date"],
-        "tag": "orion:defacement",
     },
     "exploit": {
         "title": ["m_title", "m_url", "m_name"],
@@ -112,7 +109,6 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "url": ["m_url", "m_weblink"],
         "base_url": ["m_base_url"],
         "created": ["m_creation_date", "m_update_date", "m_date"],
-        "tag": "orion:exploit",
     },
     "chat": {
         "title": ["m_caption", "m_content", "m_channel_name"],
@@ -120,7 +116,6 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "url": ["m_message_sharable_link", "m_media_url", "m_channel_url"],
         "base_url": ["m_channel_url"],
         "created": ["m_creation_date", "m_update_date", "m_date"],
-        "tag": "orion:chat",
     },
     "social": {
         "title": ["m_title", "m_url", "m_channel_url"],
@@ -128,7 +123,6 @@ PROFILES: Dict[str, Dict[str, Any]] = {
         "url": ["m_message_sharable_link", "m_channel_url", "m_url"],
         "base_url": ["m_channel_url", "m_base_url"],
         "created": ["m_creation_date", "m_update_date", "m_date"],
-        "tag": "orion:social",
     },
 }
 
@@ -191,8 +185,14 @@ def _indicator_patterns(iocs: Dict[str, List[str]]) -> List[tuple[str, str]]:
     return patterns
 
 
-def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
+def _tenant_slug(tenant_name: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "-", str(tenant_name).strip().lower()).strip("-") or "tenant"
+
+
+def convert_to_stix(kind: str, raw: Any, tenant_name: str = "Tenant") -> Dict[str, Any]:
     profile = PROFILES[kind]
+    tenant_name = str(tenant_name).strip() or "Tenant"
+    tenant_tag = f"{_tenant_slug(tenant_name)}:{kind}"
 
     created = _now_ts()
     for key in profile["created"]:
@@ -216,7 +216,7 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
     lang = str(lang_value[0]).strip() if len(lang_value) == 1 and str(lang_value[0]).strip() else None
 
     content_types = _clean(_as_list(_get(raw, "m_content_type")) + _as_list(_get(raw, "content_type")))
-    labels = _clean(content_types + ([str(network).strip().lower()] if network else []) + [f"platform:{platform.lower()}" for platform in platforms] + [profile["tag"]])
+    labels = _clean(content_types + ([str(network).strip().lower()] if network else []) + [f"platform:{platform.lower()}" for platform in platforms] + [tenant_tag])
 
     iocs = _extract_iocs(raw, str(url) if url else None)
 
@@ -350,7 +350,7 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
             "last_seen": modified,
             "labels": labels,
             "object_marking_refs": [tlp_amber_id],
-            "x_orion_network": str(network) if network else None,
+            "x_tenant_network": str(network) if network else None,
         })
 
     if actor_ref and infra_ref:
@@ -422,9 +422,10 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
         "external_references": external_refs or None,
         "object_refs": object_refs,
         "object_marking_refs": [tlp_amber_id],
-        "x_orion_doc_id": doc_id,
-        "x_orion_network": str(network) if network else None,
-        "x_orion_platform": platforms or None,
+        "x_tenant_name": tenant_name,
+        "x_tenant_doc_id": doc_id,
+        "x_tenant_network": str(network) if network else None,
+        "x_tenant_platform": platforms or None,
     }
     report = {k: v for k, v in report.items() if v is not None}
     add_obj(report)
@@ -433,5 +434,6 @@ def convert_to_stix(kind: str, raw: Any) -> Dict[str, Any]:
         "type": "bundle",
         "id": _stix_id("bundle", report["id"]),
         "spec_version": "2.1",
+        "x_tenant_name": tenant_name,
         "objects": objects,
     }

@@ -1,9 +1,10 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import type jsPDF from 'jspdf';
 import type { RowInput } from 'jspdf-autotable';
-import { from, Observable } from 'rxjs';
+import { forkJoin, from, Observable } from 'rxjs';
 import { map, shareReplay, tap } from 'rxjs/operators';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
+import { ExportBrandingService } from './export-branding.service';
 
 interface PlainTableThemeOptions {
   font?: string;
@@ -47,6 +48,7 @@ export class GraphExportService {
   private pdfLibs$: Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
   private loadedAutoTable: unknown = null;
 
+  protected readonly exportBranding = inject(ExportBrandingService);
   protected readonly SECTION_RADIUS = 4;
   protected readonly INTERNAL_HEADER_RGB: [number, number, number] = [127, 29, 29];
   protected readonly TABLE_ROW_BG_RGB: [number, number, number] = [255, 251, 251];
@@ -88,20 +90,23 @@ export class GraphExportService {
   }
 
   private exportGraphPdf(payload: GraphReportPayload): void {
-    this.getPdfLibs().subscribe((libs) => {
-      const bytes = this.buildGraphPdfBytes(payload, libs.jsPDF, libs.autoTable);
+    forkJoin({
+      libs: this.getPdfLibs(),
+      tenantLogoDataUrl: from(this.exportBranding.loadTenantLogoDataUrl())
+    }).subscribe(({ libs, tenantLogoDataUrl }) => {
+      const bytes = this.buildGraphPdfBytes(payload, libs.jsPDF, libs.autoTable, tenantLogoDataUrl);
       this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
     });
   }
 
   private exportGraphJson(payload: GraphReportPayload): void {
-    const jsonString = JSON.stringify(payload, null, 2);
+    const jsonString = JSON.stringify(this.exportBranding.addTenantJsonMetadata(payload), null, 2);
     this.downloadText(jsonString, 'application/json', `${this.buildSafeFilename(payload)}-graph.json`);
   }
 
-  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default): Uint8Array {
+  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null = null): Uint8Array {
     const doc = new JsPdfCtor({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
-    const meta = this.makeMeta(payload);
+    const meta = this.makeMeta(payload, tenantLogoDataUrl);
     const sectionsByPage: Record<number, string> = { 1: 'Overview' };
     this.drawGraphCover(doc, payload, meta);
     if (this.isJpegDataUrl(payload.graphImageDataUrl)) {
@@ -262,12 +267,13 @@ export class GraphExportService {
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(26);
-    doc.text(this.fitSingleLine(doc, payload.title || 'Graph Intelligence Report', W - 80), 40, 64);
+    doc.text(this.fitSingleLine(doc, payload.title || 'Graph Intelligence Report', W - 300), 40, 64);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(12);
     doc.setTextColor(254, 202, 202);
     doc.text(`${meta.kindLabel} • Graph-Centric Report`, 40, 92);
     this.drawSessionBlock(doc, payload.sessionName || '—', meta.generatedAt, 40, 116, W - 80, 14);
+    this.drawTenantBrand(doc, meta, W - 40, 22, 150, 30, [255, 255, 255]);
   }
 
   private drawGraphToc( doc: jsPDF, payload: GraphReportPayload, pages: { graphPage: number | null; analysisPage: number; platformPage: number | null; reportsPage: number | null; edgesPage: number; } ): void {
@@ -529,7 +535,7 @@ export class GraphExportService {
     doc.setFontSize(9);
     doc.setTextColor(51, 65, 85);
     const compactSession = this.compactSession(sessionName || '—');
-    doc.text(this.fitSingleLine(doc, `${meta.kindLabel} • ${compactSession} • ${meta.generatedAt}`, W - 170), 40, H - textOffset);
+    doc.text(this.fitSingleLine(doc, `${meta.tenantName} • ${meta.kindLabel} • ${compactSession} • ${meta.generatedAt}`, W - 170), 40, H - textOffset);
     doc.text(`Page ${pageNo} of ${totalPages}`, W - 40, H - textOffset, { align: 'right' });
   }
 
@@ -599,12 +605,38 @@ export class GraphExportService {
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name));
   }
 
-  protected makeMeta(payload: GraphReportPayload): GraphReportMeta {
+  protected makeMeta(payload: GraphReportPayload, tenantLogoDataUrl: string | null = null): GraphReportMeta {
     const generatedAt = new Date(payload.generatedAtIso).toLocaleString();
     const title = String(payload.title || '').trim().toLowerCase();
     const isAlertReport = title === 'brand alerts' || (payload.nodes.length > 0 && payload.nodes.every(node => String(node.type || '').toLowerCase() === 'alert'));
     const kindLabel = isAlertReport ? 'Brand Alerts' : (payload.graphKind === 'cti' ? 'CTI Network' : 'Social Network');
-    return { generatedAt, kindLabel };
+    return {
+      generatedAt,
+      kindLabel,
+      tenantName: this.exportBranding.getTenantName(),
+      tenantLogoDataUrl
+    };
+  }
+
+  protected drawTenantBrand(doc: jsPDF, meta: GraphReportMeta, rightX: number, topY: number, maxWidth: number, maxHeight: number, textRgb: [number, number, number]): void {
+    let textY = topY + 10;
+    if (meta.tenantLogoDataUrl) {
+      try {
+        const image = doc.getImageProperties(meta.tenantLogoDataUrl);
+        const ratio = Math.min(maxWidth / image.width, maxHeight / image.height);
+        const width = image.width * ratio;
+        const height = image.height * ratio;
+        doc.addImage(meta.tenantLogoDataUrl, this.getImageTypeFromDataUrl(meta.tenantLogoDataUrl), rightX - width, topY, width, height, undefined, 'FAST');
+        textY = topY + height + 11;
+      }
+      catch {
+        textY = topY + 10;
+      }
+    }
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...textRgb);
+    doc.text(this.fitSingleLine(doc, meta.tenantName, maxWidth), rightX, textY, { align: 'right' });
   }
 
   private drawDarkTopBand(doc: jsPDF, height: number, rounded: boolean = false): number {
@@ -857,11 +889,11 @@ export class GraphExportService {
     return /^data:image\/(png|jpe?g|webp);base64,/i.test(this.normalizeDataUrl(value));
   }
 
-  private normalizeDataUrl(value: string): string {
+  protected normalizeDataUrl(value: string): string {
     return String(value || '').replace(/\s+/g, '').trim();
   }
 
-  private getImageTypeFromDataUrl(dataUrl: string): 'PNG' | 'JPEG' | 'WEBP' {
+  protected getImageTypeFromDataUrl(dataUrl: string): 'PNG' | 'JPEG' | 'WEBP' {
     const normalized = this.normalizeDataUrl(dataUrl).toLowerCase();
     if (normalized.startsWith('data:image/png')) {
       return 'PNG';

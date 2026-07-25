@@ -7,5 +7,5 @@ from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 
 
 class general_converter:
-    def convert(self, raw: GeneralResultItem) -> Dict[str, Any]:
-        return convert_to_stix("general", raw)
+    def convert(self, raw: GeneralResultItem, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return convert_to_stix("general", raw, tenant_name)

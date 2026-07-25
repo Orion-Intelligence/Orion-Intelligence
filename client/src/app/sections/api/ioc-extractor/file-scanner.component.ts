@@ -9,6 +9,7 @@ import { TooltipDirective } from '../../../shared/directive/tooltip-directive.di
 import { ApiService } from '../../../shared/services/api.service';
 import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
 
 type ScannerResultItem = { label: string; value: string };
 type ScannerResultSection = { title: string; items: ScannerResultItem[] };
@@ -44,7 +45,7 @@ export class FileScannerComponent {
   currentStep = '';
   copiedValue = signal<string | null>(null);
 
-  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {
+  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private exportBranding: ExportBrandingService) {
     this.route.data.subscribe(data => {
       this.type = data['type'] ?? this.type;
       this.title = data['title'] ?? this.title;
@@ -196,7 +197,11 @@ export class FileScannerComponent {
     if (!this.scanResult) {
       return;
     }
-    const blob = new Blob([JSON.stringify({ ...this.scanResult, exported_at: new Date().toISOString() }, null, 2)], { type: 'application/json' });
+    const exportData = this.exportBranding.addTenantJsonMetadata({
+      ...this.scanResult,
+      exported_at: new Date().toISOString()
+    });
+    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     const filenameBase = (this.getDisplayFileName() || 'report').replace(/[^a-z0-9.-]/gi, '_');
     const mode = this.getDisplayFileType().toLowerCase() || 'file';

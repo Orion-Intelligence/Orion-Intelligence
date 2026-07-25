@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core';
 import { AlertAllIoc, AlertModel } from '../../model/company-profile/node.model';
 import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from '../../model/report/report-export.model';
 import { DocumentExportService } from './document-export.service';
+import { ExportBrandingService } from './export-branding.service';
 
 @Injectable({ providedIn: 'root' })
 export class AlertExportService {
-  constructor(private documentExport: DocumentExportService) {
+  constructor(private documentExport: DocumentExportService, private exportBranding: ExportBrandingService) {
   }
 
   exportPdf(alerts: AlertModel[] | null | undefined, title: string = 'Brand Alerts'): void {
@@ -28,7 +29,7 @@ export class AlertExportService {
       baseSummary['title'] = this.getText(first.title);
       baseSummary['ioc_type'] = this.getText(first.ioc_type);
       baseSummary['ioc_value'] = this.getText(first.ioc_value);
-      baseSummary['source'] = this.getText(first.source);
+      baseSummary['source'] = this.getText(this.exportBranding.replaceSystemBrand(first.source));
       baseSummary['url'] = this.getText(first.url);
       baseSummary['result_date'] = this.getDateText(this.extractAlertResultDate(first.all_ioc || []));
       baseSummary['first_seen'] = this.getDateText(first.first_seen);
@@ -73,7 +74,7 @@ export class AlertExportService {
     this.addField(values, 'Description', alert.description, 700);
     this.addField(values, 'Entity', alert.ioc_value, 240);
     this.addField(values, 'IOC Type', alert.ioc_type, 160);
-    this.addField(values, 'Source', alert.source, 220);
+    this.addField(values, 'Source', this.exportBranding.replaceSystemBrand(alert.source), 220);
     this.addField(values, 'URL', alert.url, 320);
     this.addField(values, 'Result Date', this.getDateText(this.extractAlertResultDate(alert.all_ioc || [])));
     this.addField(values, 'Alert First Seen', this.getDateText(alert.first_seen));

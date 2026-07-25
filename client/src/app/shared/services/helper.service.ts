@@ -6,12 +6,13 @@ import { ConsolidatedParamModel } from '../model/results/consolidated/consolidat
 import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 import { PublicUserActivityItem } from '../../sections/report/social-interactions/models/public-user-data.model';
+import { ExportBrandingService } from './export/export-branding.service';
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
-  constructor(private sanitizer: DomSanitizer, private appService: AppService, private messageNotificationService: MessageNotificationService) {
+  constructor(private sanitizer: DomSanitizer, private appService: AppService, private messageNotificationService: MessageNotificationService, private exportBranding: ExportBrandingService) {
   }
 
   detectLanguageName(text: string): string {
@@ -77,7 +78,7 @@ export class HelperService {
   }
 
   downloadstixJson(data: any, filename: string = 'stix_report.json') {
-    const jsonString = JSON.stringify(data, null, 2);
+    const jsonString = JSON.stringify(this.exportBranding.addTenantJsonMetadata(data), null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -199,21 +200,29 @@ export class HelperService {
   }
 
   private toCsvRows(data: any): Record<string, unknown>[] {
+    const tenantName = this.exportBranding.getTenantName();
     if (data === null || data === undefined) {
       return [];
     }
     if (Array.isArray(data)) {
       return data.map((item, index) => {
         if (item && typeof item === 'object' && !Array.isArray(item)) {
-          return item as Record<string, unknown>;
+          return { tenant_name: tenantName, ...this.brandCsvRow(item as Record<string, unknown>) };
         }
-        return { index: index + 1, value: item };
+        return { tenant_name: tenantName, index: index + 1, value: this.exportBranding.replaceSystemBrand(item) };
       });
     }
     if (typeof data === 'object') {
-      return [data as Record<string, unknown>];
+      return [{ tenant_name: tenantName, ...this.brandCsvRow(data as Record<string, unknown>) }];
     }
-    return [{ value: data }];
+    return [{ tenant_name: tenantName, value: this.exportBranding.replaceSystemBrand(data) }];
+  }
+
+  private brandCsvRow(row: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(row).map(([key, value]) => [
+      key,
+      this.exportBranding.replaceSystemBrand(value)
+    ]));
   }
 
   private escapeCsvValue(value: unknown): string {

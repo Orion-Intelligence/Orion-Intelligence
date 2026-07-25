@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import type jsPDF from 'jspdf';
 import type { RowInput } from 'jspdf-autotable';
+import { forkJoin, from } from 'rxjs';
 import { GraphReportMeta, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 import { GraphExportService } from './graph-export.service';
 
@@ -27,15 +28,18 @@ export class DocumentExportService extends GraphExportService {
   }
 
   private exportDocumentPdfStream(payload: GraphReportPayload): void {
-    this.getPdfLibs().subscribe((libs) => {
-      const bytes = this.buildDocPdfBytes(payload, libs.jsPDF, libs.autoTable);
+    forkJoin({
+      libs: this.getPdfLibs(),
+      tenantLogoDataUrl: from(this.exportBranding.loadTenantLogoDataUrl())
+    }).subscribe(({ libs, tenantLogoDataUrl }) => {
+      const bytes = this.buildDocPdfBytes(payload, libs.jsPDF, libs.autoTable, tenantLogoDataUrl);
       this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-doc-report.pdf`);
     });
   }
 
-  private buildDocPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default): Uint8Array {
+  private buildDocPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null): Uint8Array {
     const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
-    const meta = this.makeMeta(payload);
+    const meta = this.makeMeta(payload, tenantLogoDataUrl);
     const theme = this.getDocumentTheme();
     const tableTheme = this.getTableTheme(theme);
     const hooks = this.makeHeaderFooterHooks(payload, meta, theme);
@@ -264,8 +268,8 @@ export class DocumentExportService extends GraphExportService {
 
     this.drawCoverPill(doc, contentX, 30, subtitle.toUpperCase(), theme.headerAccentRgb, [255, 255, 255]);
     const kindText = String(meta.kindLabel || '').toUpperCase();
-    const kindW = Math.max(82, doc.getTextWidth(kindText) + 22);
-    this.drawCoverPill(doc, W - contentX - kindW, 30, kindText, theme.coverPanelRgb, theme.coverLabelRgb, theme.coverPanelBorderRgb);
+    this.drawCoverPill(doc, contentX + 112, 30, kindText, theme.coverPanelRgb, theme.coverLabelRgb, theme.coverPanelBorderRgb);
+    this.drawTenantBrand(doc, meta, W - contentX, 18, 132, 24, [255, 255, 255]);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(24);

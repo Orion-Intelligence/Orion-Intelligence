@@ -7,5 +7,5 @@ from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 
 
 class leak_converter:
-    def convert(self, raw: LeakResultItem) -> Dict[str, Any]:
-        return convert_to_stix("leak", raw)
+    def convert(self, raw: LeakResultItem, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return convert_to_stix("leak", raw, tenant_name)

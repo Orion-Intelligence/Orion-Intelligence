@@ -1,6 +1,6 @@
 import asyncio
 from typing import Optional
-from fastapi import APIRouter, Body, Depends, HTTPException, Query, UploadFile, File
+from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, UploadFile, File
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from configs.app_dependency import (
     _enforce_demo_safe_search,
@@ -42,6 +42,7 @@ from orion.services.mongo_manager.shared_model.db_takedown_request_model import 
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.api.server.entity_manager.entity_manager import entity_manager
 from orion.api.server.entity_manager.modal.EntityQueryModel import EntityGraphBatchQueryModel, EntityQueryModel
+from orion.api.server.config_manager.config_controller import config_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
@@ -67,6 +68,15 @@ APT_INTEL_DEPS = [
 ]
 SCANNING_DEPS = [Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("scanning"))]
 STIX_KIND_VALUES = {"general", "leak", "defacement", "exploit", "chat", "social"}
+
+
+async def _tenant_export_name(request: Request) -> str:
+    tenant = getattr(request.state, "tenant", None)
+    tenant_id = str(getattr(tenant, "id", "")).strip()
+    if not tenant_id:
+        return "Tenant"
+    app_name = await config_controller.getInstance().get_cached("app_name", "Tenant", tenant_id=tenant_id)
+    return str(app_name).strip() or "Tenant"
 
 
 @api_routes.post(
@@ -718,8 +728,8 @@ async def search_dynamic_national_identity(param: search_dynamic_crack_model = B
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:breach", bypass_licenses=["maintainer"])), ], )
-async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
-    return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
+async def get_breach_stix_document(request: Request, doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await stix_manager.get_instance().get_leak_stix(doc_id, lang, await _tenant_export_name(request))
 
 
 @api_routes.get(
@@ -734,8 +744,8 @@ async def get_breach_stix_document(doc_id: str, lang: Optional[str] = Query(None
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:general", bypass_licenses=["maintainer"])), ], )
-async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
-    return await stix_manager.get_instance().get_general_stix(doc_id, lang)
+async def get_strategic_stix_document(request: Request, doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await stix_manager.get_instance().get_general_stix(doc_id, lang, await _tenant_export_name(request))
 
 
 @api_routes.get(
@@ -750,8 +760,8 @@ async def get_strategic_stix_document(doc_id: str, lang: Optional[str] = Query(N
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:defacement", bypass_licenses=["maintainer"])), ], )
-async def get_defacement_stix_document(doc_id: str):
-    return await stix_manager.get_instance().get_defacement_stix(doc_id)
+async def get_defacement_stix_document(request: Request, doc_id: str):
+    return await stix_manager.get_instance().get_defacement_stix(doc_id, await _tenant_export_name(request))
 
 
 @api_routes.get(
@@ -766,8 +776,8 @@ async def get_defacement_stix_document(doc_id: str):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:exploit", bypass_licenses=["maintainer"])), ], )
-async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
-    return await stix_manager.get_instance().get_exploit_stix(doc_id, lang)
+async def get_exploit_stix_document(request: Request, doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await stix_manager.get_instance().get_exploit_stix(doc_id, lang, await _tenant_export_name(request))
 
 
 @api_routes.get(
@@ -779,8 +789,8 @@ async def get_exploit_stix_document(doc_id: str, lang: Optional[str] = Query(Non
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[*STIX_MEMBER_DEPS, Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
-async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
-    return await stix_manager.get_instance().get_social_stix(doc_id, lang)
+async def get_social_stix_document(request: Request, doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await stix_manager.get_instance().get_social_stix(doc_id, lang, await _tenant_export_name(request))
 
 
 @api_routes.get(
@@ -792,8 +802,8 @@ async def get_social_stix_document(doc_id: str, lang: Optional[str] = Query(None
     response_description=REPORT_DOCS["stix"]["response_description"],
     status_code=200,
     dependencies=[*STIX_MEMBER_DEPS, Depends(license_required("module:chat", bypass_licenses=["maintainer"]))], )
-async def get_chat_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
-    return await stix_manager.get_instance().get_chat_stix(doc_id, lang)
+async def get_chat_stix_document(request: Request, doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await stix_manager.get_instance().get_chat_stix(doc_id, lang, await _tenant_export_name(request))
 
 
 @api_routes.get(
@@ -828,8 +838,8 @@ async def post_entity_relations(query: EntityGraphBatchQueryModel = Body(...)):
         role_required(
             [user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
         Depends(license_required("module:feed", bypass_licenses=["maintainer"])), ], )
-async def get_news_stix_document(doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
-    return await stix_manager.get_instance().get_leak_stix(doc_id, lang)
+async def get_news_stix_document(request: Request, doc_id: str, lang: Optional[str] = Query(None, alias="lang", description="Optional language code for localized report content.")):
+    return await stix_manager.get_instance().get_leak_stix(doc_id, lang, await _tenant_export_name(request))
 
 
 @api_routes.post(
@@ -955,11 +965,11 @@ async def url_vulnerability_scan(param: UrlVulnerabilityScanRequest = Body(...),
     include_in_schema=False,
     dependencies=STIX_MEMBER_DEPS,
 )
-async def convert_stix_single(kind: str, payload: dict = Body(...)):
+async def convert_stix_single(request: Request, kind: str, payload: dict = Body(...)):
     kind_normalized = kind.strip().lower()
     if kind_normalized not in STIX_KIND_VALUES:
         return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
-    return convert_to_stix(kind_normalized, payload)
+    return convert_to_stix(kind_normalized, payload, await _tenant_export_name(request))
 
 
 @api_routes.post(
@@ -968,11 +978,12 @@ async def convert_stix_single(kind: str, payload: dict = Body(...)):
     include_in_schema=False,
     dependencies=STIX_MEMBER_DEPS,
 )
-async def convert_stix_batch(kind: str, payloads: list[dict] = Body(...)):
+async def convert_stix_batch(request: Request, kind: str, payloads: list[dict] = Body(...)):
     kind_normalized = kind.strip().lower()
     if kind_normalized not in STIX_KIND_VALUES:
         return {"error": "Unsupported STIX kind", "supported_kinds": sorted(STIX_KIND_VALUES)}
-    return {"items": [convert_to_stix(kind_normalized, payload) for payload in payloads]}
+    tenant_name = await _tenant_export_name(request)
+    return {"tenant_name": tenant_name, "items": [convert_to_stix(kind_normalized, payload, tenant_name) for payload in payloads]}
 
 @api_routes.post(
     "/api/takedowns",

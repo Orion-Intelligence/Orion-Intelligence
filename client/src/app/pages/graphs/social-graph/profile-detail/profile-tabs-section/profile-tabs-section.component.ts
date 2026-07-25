@@ -10,6 +10,7 @@ import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
 import { SocialProfilePostsSectionComponent } from '../profile-posts-section/profile-posts-section.component';
 import { SocialProfileVideosSectionComponent } from '../profile-videos-section/profile-videos-section.component';
 import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/profile-shorts-section.component';
+import { ExportBrandingService } from '../../../../../shared/services/export/export-branding.service';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
@@ -20,7 +21,8 @@ import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/p
 })
 export class SocialProfileTabsSectionComponent {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
-  private readonly stealerLogExportColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
+  private readonly exportBranding = inject(ExportBrandingService);
+  private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private pendingImageScrollToBottom = false;
   private sawImageLoadingForScroll = false;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
@@ -233,13 +235,14 @@ export class SocialProfileTabsSectionComponent {
 
   downloadStealerLogs(platformData: PlatformResult): void {
     const rows = this.getStealerLogs(platformData).map((item, index) => ({
+      tenant_name: this.exportBranding.getTenantName(),
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: `${platformData.username || platformData.keyUsername} ${this.getPlatformStealerDomain(platformData)}`.trim(),
       email: SocialNormalizationUtil.toExportValue(item?.['email']),
       username: SocialNormalizationUtil.toExportValue(item?.['username']),
       domain: SocialNormalizationUtil.toExportValue(item?.['domain']),
-      source: SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
+      source: String(this.exportBranding.replaceSystemBrand(SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']))),
       hash: SocialNormalizationUtil.toExportValue(item?.['m_hash']),
       title: '-',
       url: '-',
