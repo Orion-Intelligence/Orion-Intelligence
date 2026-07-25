@@ -202,13 +202,6 @@ async def update_user(current_user=Depends(get_current_user)):
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ResourceManager.get_instance().uploadTenantImage(file, current_user)
 
-@tenant_routes.put(
-    "/api/system/image",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
-async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
-    return await ResourceManager.get_instance().update_system_image(file, current_user)
-
-
 @tenant_routes.delete(
     "/api/user/image",
     include_in_schema=False,

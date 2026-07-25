@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import unicodedata
 from enum import Enum
 from typing import Any, List, Optional
 
@@ -9,6 +10,7 @@ from pydantic import BaseModel, field_validator, model_validator
 
 
 ALERT_RUN_TIME_PATTERN = r"^([01]\d|2[0-3]):[0-5]\d$"
+TENANT_SLUG_PATTERN = re.compile(r"[^a-z0-9]+")
 
 
 def normalize_alert_run_time(value: Optional[str]) -> Optional[str]:
@@ -21,6 +23,14 @@ def normalize_alert_run_time(value: Optional[str]) -> Optional[str]:
     if not re.match(ALERT_RUN_TIME_PATTERN, value):
         raise ValueError("alert_run_time must be in HH:mm 24-hour format")
     return value
+
+
+def normalize_tenant_slug(value: Optional[str]) -> Optional[str]:
+    if value is None:
+        return None
+    normalized = unicodedata.normalize("NFKD", str(value)).encode("ascii", "ignore").decode()
+    normalized = TENANT_SLUG_PATTERN.sub("-", normalized.lower()).strip("-")
+    return normalized[:63].rstrip("-") or None
 
 
 class IocCategory(EmbeddedModel):
@@ -36,6 +46,7 @@ class TenantStatus(str, Enum):
 class db_tenant_model(Model):
     iocs: List[IocCategory] = []
     name: str
+    slug: Optional[str] = None
     phone: str = ""
     country: str = ""
     subscription: bool = False
@@ -53,10 +64,6 @@ class db_tenant_model(Model):
     privileged_ioc: bool = False
     alert_run_time: Optional[str] = None
     allowed_alert_categories: Optional[List[str]] = None
-    accounts_mail_password: Optional[str] = None
-    accounts_mail: Optional[str] = None
-    accounts_smtp_server: Optional[str] = None
-    accounts_smtp_port: Optional[str] = None
     case_status_tracking_board: Optional[dict[str, Any]] = None
 
     @model_validator(mode="before")
@@ -68,6 +75,11 @@ class db_tenant_model(Model):
     @classmethod
     def validate_alert_run_time(cls, value):
         return normalize_alert_run_time(value)
+
+    @field_validator("slug", mode="before")
+    @classmethod
+    def validate_slug(cls, value):
+        return normalize_tenant_slug(value)
 
 class TenantRequest(BaseModel):
     id: str = "-1"

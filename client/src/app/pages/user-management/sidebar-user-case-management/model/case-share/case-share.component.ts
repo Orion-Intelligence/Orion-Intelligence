@@ -153,7 +153,11 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   }
 
   getLogoSrc(): string {
-    return '/assets/images/shared/logo-wide-light.svg';
+    if (!this.brandingResolved) {
+      return '/assets/images/shared/logo-wide-light.svg';
+    }
+    const settings = this.appService.getConfig().appSettings;
+    return settings.logo_wide_dark || settings.logo_wide_light || '/assets/images/shared/logo-wide-light.svg';
   }
 
   private forceDarkTheme(): void {

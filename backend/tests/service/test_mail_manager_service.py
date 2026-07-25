@@ -144,7 +144,7 @@ async def test_send_test_mail_falls_back_to_global_smtp_when_tenant_smtp_missing
     manager = mail_manager.get_instance()
     sent = {}
 
-    async def tenant_mail_config(tenant_id: str | None):
+    async def tenant_system_mail_config(tenant_id: str | None):
         assert tenant_id == "tenant-without-smtp"
         return None
 
@@ -166,7 +166,7 @@ async def test_send_test_mail_falls_back_to_global_smtp_when_tenant_smtp_missing
             }
         )
 
-    monkeypatch.setattr(manager, "_tenant_mail_config", tenant_mail_config)
+    monkeypatch.setattr(manager, "_tenant_system_mail_config", tenant_system_mail_config)
     monkeypatch.setattr(
         mail_manager,
         "_global_mail_config",

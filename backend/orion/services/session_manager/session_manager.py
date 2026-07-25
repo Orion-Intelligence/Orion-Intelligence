@@ -37,7 +37,22 @@ class session_manager:
         self._redis = redis_controller.getInstance()
         self._session_ttl = 30 * 60
 
-    async def get_current_user(self, token: str):
+    @staticmethod
+    def tenant_identifier(tenant_or_id) -> str | None:
+        if tenant_or_id is None:
+            return None
+        tenant_id = getattr(tenant_or_id, "id", tenant_or_id)
+        return str(tenant_id) if tenant_id is not None else None
+
+    @classmethod
+    def ensure_user_tenant_access(self, user, tenant_or_id) -> None:
+        tenant_id = self.tenant_identifier(tenant_or_id)
+        if tenant_id is None:
+            return
+        if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:
+            raise HTTPException(status_code=403, detail="Tenant access forbidden")
+
+    async def get_current_user(self, token: str, tenant_id=None):
         if not token:
             raise HTTPException(status_code=401, detail="Missing or invalid token")
 
@@ -59,6 +74,7 @@ class session_manager:
             if payload.get("free") is True:
                 return user
 
+            self.ensure_user_tenant_access(user, tenant_id)
             if not user:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
@@ -90,8 +106,12 @@ class session_manager:
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-    async def get_current_role(self, token: str) -> str:
-        user = await self.get_current_user(token)
+    async def get_current_role(self, token: str, tenant_id=None) -> str:
+        user = (
+            await self.get_current_user(token)
+            if tenant_id is None
+            else await self.get_current_user(token, tenant_id=tenant_id)
+        )
         if not user or isinstance(user, JSONResponse):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
 
@@ -102,8 +122,12 @@ class session_manager:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
         return role
 
-    async def get_current_status(self, token: str) -> str:
-        user = await self.get_current_user(token)
+    async def get_current_status(self, token: str, tenant_id=None) -> str:
+        user = (
+            await self.get_current_user(token)
+            if tenant_id is None
+            else await self.get_current_user(token, tenant_id=tenant_id)
+        )
         if not user or isinstance(user, JSONResponse):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
 
@@ -159,7 +183,7 @@ class session_manager:
             payload.update(extra)
         return jwt.encode(payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
-    async def verify_2fa_and_issue(self, temp_token: str, code: str):
+    async def verify_2fa_and_issue(self, temp_token: str, code: str, tenant_id=None):
         try:
             payload = jwt.decode(
                 temp_token,
@@ -173,9 +197,15 @@ class session_manager:
             if not username:
                 raise HTTPException(status_code=401, detail="Invalid 2FA token")
 
+            requested_tenant_id = self.tenant_identifier(tenant_id)
+            token_tenant_id = payload.get("tenant_id")
+            if token_tenant_id and requested_tenant_id and str(token_tenant_id) != requested_tenant_id:
+                raise HTTPException(status_code=403, detail="Tenant access forbidden")
+
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
+            self.ensure_user_tenant_access(user, tenant_id)
 
             secret = user.twofa_secret or payload.get("tfa_secret")
             if not secret:
@@ -217,7 +247,7 @@ class session_manager:
             "licenses": [user_license.value for user_license in user.licenses],
         }
 
-    async def refresh_token(self, token: str):
+    async def refresh_token(self, token: str, tenant_id=None):
         try:
             payload = jwt.decode(
                 token,
@@ -234,6 +264,7 @@ class session_manager:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
+            self.ensure_user_tenant_access(user, tenant_id)
 
             maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
             if not maintainer_user:
@@ -307,7 +338,7 @@ class session_manager:
         if not ptoken:
             return
 
-    async def invalidate_user_session(self, ptoken: str):
+    async def invalidate_user_session(self, ptoken: str, tenant_id=None):
         if not ptoken:
             return
 
@@ -332,6 +363,8 @@ class session_manager:
         user = await self._engine.find_one(db_user_account, db_user_account.username == username)
         if not user or user.current_session_id != session_id:
             return
+
+        self.ensure_user_tenant_access(user, tenant_id)
 
         user.current_session_id = None
         await self._engine.save(user)

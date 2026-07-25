@@ -46,20 +46,28 @@ class auth_manager:
         return user
 
     @staticmethod
-    async def login(mail: str, password: str, free=False):
+    async def login(mail: str, password: str, free=False, tenant_id=None):
         user = await auth_manager.get_instance().authenticate_user(mail, password)
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user or password")
+        session_manager.ensure_user_tenant_access(user, tenant_id)
+
+        requested_tenant_id = session_manager.tenant_identifier(tenant_id)
         if user.twofa_enabled:
             if user.twofa_secret:
                 user.twofa_secret = str()
-                temp_token = await session_manager.get_instance().create_temp_token(user.username)
+                temp_token = await session_manager.get_instance().create_temp_token(user.username, extra={"tenant_id": requested_tenant_id} if requested_tenant_id else None)
                 return {"twofa_required": True, "temp_token": temp_token, "username": mail}
             else:
                 secret = pyotp.random_base32()
                 provisioning_uri = pyotp.TOTP(secret).provisioning_uri(name=user.username, issuer_name="Orion Intelligence")
                 temp_token = await session_manager.get_instance().create_temp_token(
-                    user.username, extra={"tfa_secret": secret})
+                    user.username,
+                    extra={
+                        "tfa_secret": secret,
+                        **({"tenant_id": requested_tenant_id} if requested_tenant_id else {}),
+                    },
+                )
                 return {"twofa_required": True, "temp_token": temp_token, "provisioning_uri": provisioning_uri, "twofa_secret": secret, "username": user.username}
 
         engine = mongo_controller.get_instance().get_engine()

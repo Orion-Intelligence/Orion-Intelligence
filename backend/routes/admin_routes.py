@@ -6,10 +6,22 @@ from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.mail_manager.mail_manager import mail_manager
 
 admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+
+async def tenant_branding_editor(current_user=Depends(get_current_user)):
+    if getattr(current_user, "role", "") == user_role.ADMIN.value:
+        return current_user
+
+    licenses = {
+        license
+        for license in (getattr(current_user, "licenses", None) or [])
+    }
+    if LicenseName.MAINTAINER.value in licenses:
+        return current_user
+    raise HTTPException(status_code=403, detail="Tenant branding permission required")
 
 
 @admin_routes.get(
@@ -42,25 +54,23 @@ async def custom_edit_api_trailing(id: str, request: Request):
 
 @admin_routes.post(
     "/api/public/update",
-    dependencies=[Depends(
-        role_required(
-            [user_role.ADMIN])), ], )
-async def update_public_config(param: config_data):
-    return await config_controller.getInstance().update_public_config(param, include_email_config=True)
+)
+async def update_public_config(request: Request, param: config_data, current_user=Depends(tenant_branding_editor)):
+    is_admin = current_user.role == user_role.ADMIN.value
+    return await config_controller.getInstance().update_public_config(param, is_admin, str(request.state.tenant.id), current_user)
 
 @admin_routes.delete(
     "/api/system/image",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
-async def update_user(key: str, current_user=Depends(get_current_user)):
-    return await ResourceManager.get_instance().delete_system_image(current_user, key)
+)
+async def delete_system_image(request: Request, key: str, current_user=Depends(tenant_branding_editor)):
+    return await ResourceManager.get_instance().delete_system_image(current_user, key, tenant=request.state.tenant)
 
 @admin_routes.put(
     "/api/system/image",
-    dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def upload_system_image(file: UploadFile,key: str = "logo_url",current_user=Depends(get_current_user)):
-    return await config_controller.getInstance().uploadSystemResource(file, current_user, key)
+async def upload_system_image(request: Request, file: UploadFile, key: str = "logo_url", current_user=Depends(tenant_branding_editor)):
+    return await config_controller.getInstance().uploadSystemResource(file, current_user, key, tenant_id=str(request.state.tenant.id))
 
 
 @admin_routes.post(
@@ -71,8 +81,7 @@ async def upload_system_image(file: UploadFile,key: str = "logo_url",current_use
 )
 async def verify_mail_configuration(current_user=Depends(get_current_user)):
     try:
-        tenant_id = None if current_user.role == user_role.ADMIN else str(current_user.tenant_uuid)
-        await mail_manager.get_instance().send_test_mail(tenant_id=tenant_id)
+        await mail_manager.get_instance().send_test_mail(tenant_id=str(current_user.tenant_uuid))
         return {"status": "working"}
     except HTTPException:
         raise

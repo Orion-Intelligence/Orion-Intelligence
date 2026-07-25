@@ -31,4 +31,12 @@ export class SidebarShellComponent {
     }
     return settings.logo_wide_dark || settings.logo_wide_light || '/api/s/static/system/logo_wide_dark_default.png';
   }
+
+  get miniLogoSrc(): string {
+    return this.appService.getConfig().appSettings.logo_url || '/api/s/static/system/logo_url_default.png';
+  }
+
+  get resolvedLogoAlt(): string {
+    return this.appService.getConfig().appSettings.app_name || this.logoAlt();
+  }
 }

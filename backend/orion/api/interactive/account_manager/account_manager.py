@@ -1,4 +1,5 @@
 import asyncio
+import json
 import re
 from typing import List
 from pathlib import Path
@@ -21,6 +22,7 @@ from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
+from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
 
 
@@ -330,6 +332,17 @@ class AccountManager:
         if theme not in ("dark-theme", "light-theme"):
             theme = "dark-theme"
 
+        accounts_mail = ""
+        accounts_smtp_server = ""
+        accounts_smtp_port = ""
+        settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        if settings_record and settings_record.value:
+            system_settings = json.loads(settings_record.value)
+            meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
+            accounts_mail = meta_info.get("ACCOUNTS_MAIL") or ""
+            accounts_smtp_server = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
+            accounts_smtp_port = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
+
         node = NodeCallbackModel.model_validate(
             {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, "license": [
                 license.value for license in
@@ -348,9 +361,9 @@ class AccountManager:
                 "alertRunTime": getattr(tenant, "alert_run_time", None),
                 "allowedAlertCategories": getattr(tenant, "allowed_alert_categories", None),
                 "accountsMailPassword": "",
-                "accountsMail": self.safe_decrypt(enc, getattr(tenant, "accounts_mail", "")),
-                "accountsSmtpServer": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_server", "")),
-                "accountsSmtpPort": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_port", "")), }, "alerts": [], "alert_summary": alert_summary, })
+                "accountsMail": accounts_mail,
+                "accountsSmtpServer": accounts_smtp_server,
+                "accountsSmtpPort": accounts_smtp_port, }, "alerts": [], "alert_summary": alert_summary, })
 
         return node
 

@@ -2,27 +2,31 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { FormsModule } from '@angular/forms';
-import { UserImagePickerComponent } from "../sidebar-user-settings/user-image-picker/user-image-picker.component";
 import { AppService } from '../../../services/core/app/app.service';
-import { AuthService } from '../../../services/authetication/auth.service';
-import { ConfigSettings } from '../../../shared/model/app/config';
+import { AppSettingsModel, ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { SmtpSettingsBlockComponent } from '../../../shared/components/smtp-settings-block/smtp-settings-block.component';
 import { AlertWebhookSettingsBlockComponent } from '../../../shared/components/alert-webhook-settings-block/alert-webhook-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
+import { ActivatedRoute } from '@angular/router';
+import { LicenseService } from '../../../services/licenses/licenses.service';
+import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
 import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/model/alert-webhook-settings/alert-webhook-settings.model';
+import { UserImagePickerComponent } from '../sidebar-user-settings/user-image-picker/user-image-picker.component';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
+type SystemSettingsTab = 'branding' | 'platform';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TenantBrandingSettingsComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
+  activeTab: SystemSettingsTab = 'branding';
   configurationEditing = false;
   mailEditing = false;
   webhookEditing = false;
@@ -37,10 +41,31 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   smtpServerPattern = /^(?=.{1,253}$)(localhost|[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?|([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}|(\d{1,3}\.){3}\d{1,3})$/;
 
-  constructor(private apiService: ApiService, protected appService: AppService, protected authService: AuthService,private messageNotificationService: MessageNotificationService) {
+  constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
   }
 
   ngOnInit(): void {
+    this.activeTab = this.getInitialTab();
+    this.loadSettings();
+  }
+
+  canEditTenantBranding(): boolean {
+    const role = this.appService.userSessionData().user.role;
+    return role === 'admin' || (role === 'member' && this.licenseService.isMaintainer());
+  }
+
+  canManagePlatformSettings(): boolean {
+    return this.appService.userSessionData().user.role === 'admin';
+  }
+
+  selectTab(tab: SystemSettingsTab): void {
+    if ((tab === 'branding' && !this.canEditTenantBranding()) ||
+      (tab === 'platform' && !this.canManagePlatformSettings())) {
+      return;
+    }
+    this.activeTab = tab;
+    this.configurationEditing = false;
+    this.mailEditing = false;
     this.loadSettings();
     this.loadAlertConnectorSettings();
   }
@@ -210,7 +235,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     for (const field of requiredFields) {
       const value = this.form[field.key];
       if (typeof value !== 'string' || !value.trim()) {
-        if (String(field.key).startsWith('accounts_')) {
+        if (section === 'mail') {
           this.mailErrorState = true;
         }
         else {
@@ -271,11 +296,9 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.apiService.post<any>('public/update', { settings }).subscribe({
       next: (response) => {
         if (response?.settings) {
-          const current = this.appService.configData();
-          this.appService.configData.set(new ConfigSettings(response.settings, current.localSettings));
+          this.applySettings(response.settings);
           const s = this.appService.configData()?.appSettings;
           if (s) {
-            document.title = s.app_name?.trim() || DEFAULT_APP_NAME;
             this.loadSettings();
           }
         }
@@ -367,6 +390,23 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   get displayVersion(): string {
     return (this.form.version || '').replaceAll('_', '.');
+  }
+
+  private getInitialTab(): SystemSettingsTab {
+    const requestedTab = this.route.snapshot.queryParamMap.get('tab');
+    if (requestedTab === 'branding' && this.canEditTenantBranding()) {
+      return 'branding';
+    }
+    return this.canManagePlatformSettings() ? 'platform' : 'branding';
+  }
+
+  private applySettings(settings: Partial<AppSettingsModel>): void {
+    const current = this.appService.configData();
+    const appSettings = { ...current.appSettings, ...settings };
+    this.appService.configData.set(new ConfigSettings(appSettings, current.localSettings));
+    const updated = this.appService.configData().appSettings;
+    this.appService.updateFavicon(updated.logo_url);
+    document.title = updated.app_name?.trim() || DEFAULT_APP_NAME;
   }
 
   get isAdmin(): boolean {
