@@ -39,6 +39,9 @@ services:
   documentation:
     build:
       context: ./docs
+      args:
+        DOCUMENTATION_PROJECT_NAME: "${DOCUMENTATION_PROJECT_NAME:-Platform}"
+        DOCUMENTATION_COMPANY_NAME: "${DOCUMENTATION_COMPANY_NAME:-Platform Operator}"
     expose:
       - "80"
     networks:

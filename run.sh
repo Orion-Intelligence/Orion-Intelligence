@@ -283,7 +283,7 @@ if [ "$COMMAND" = "build" ]; then
     esac
 
     if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
-        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build web
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build web documentation
     else
         docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
     fi
