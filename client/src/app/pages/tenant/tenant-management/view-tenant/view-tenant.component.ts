@@ -106,6 +106,14 @@ export class ViewTenantComponent implements OnInit {
     return this.licenseService.isAdmin();
   }
 
+  openTenant(tenant: any): void {
+    const url = new URL(window.location.origin);
+    url.hostname = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+      ? `${tenant.slug}.localhost`
+      : `${tenant.slug}.${url.hostname}`;
+    window.open(url.toString(), '_blank', 'noopener,noreferrer');
+  }
+
   updateTenant(tenant: any): void {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];

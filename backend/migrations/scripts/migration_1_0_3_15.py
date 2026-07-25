@@ -72,7 +72,7 @@ class migration_1_0_3_15:
             return
 
         for tenant_doc in tenants:
-            tenant_id = str(tenant_doc.xget("_id"))
+            tenant_id = str(tenant_doc.get("_id"))
             settings = dict(base_settings)
             settings.update(settings_by_tenant.get(tenant_id, {}))
 
@@ -172,7 +172,14 @@ class migration_1_0_3_15:
             if tenant.is_default:
                 slug = "default"
             else:
-                domain = tenant.email.split("@", 1)[1]
+                email = str(tenant.email or "")
+                key_record = await engine.find_one(db_keys, db_keys.auth_id == str(tenant.id))
+                if email and key_record:
+                    try:
+                        email = Fernet(KeyManager.get_instance()._unwrap(key_record.wrapped_key)).decrypt(email.encode()).decode()
+                    except Exception:
+                        pass
+                domain = email.split("@", 1)[1] if "@" in email else ""
                 slug = normalize_tenant_slug(domain.split(".", 1)[0]) or f"tenant-{tenant.id}"
 
             await collection.update_one(

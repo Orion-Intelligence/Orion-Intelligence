@@ -140,9 +140,9 @@ export const ENTITY_ROLE_OPTIONS: CaseOption<EntityRole>[] = [
 
 export const SOURCE_TYPE_OPTIONS: CaseOption<SourceType>[] = [
   { value: 'manual', label: 'Manual' },
-  { value: 'orion_alert', label: 'Orion Alert' },
-  { value: 'orion_search', label: 'Orion Search' },
-  { value: 'orion_scan', label: 'Orion Scan' },
+  { value: 'orion_alert', label: 'Alert' },
+  { value: 'orion_search', label: 'Search' },
+  { value: 'orion_scan', label: 'Scan' },
   { value: 'import', label: 'Import' },
   { value: 'api', label: 'API' },
   { value: 'external', label: 'External' },

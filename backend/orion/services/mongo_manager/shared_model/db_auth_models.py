@@ -156,7 +156,7 @@ class db_user_account(Model):
             return False
         return pyotp.TOTP(self.twofa_secret).verify(code, valid_window=1)
 
-    def provisioning_uri(self, issuer: str = "Orion Intelligence") -> Optional[str]:
+    def provisioning_uri(self, issuer: str = "Authenticator") -> Optional[str]:
         if not self.twofa_secret:
             return None
         return pyotp.totp.TOTP(self.twofa_secret).provisioning_uri(

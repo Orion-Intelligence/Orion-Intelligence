@@ -14,19 +14,20 @@ class AlertPayloadBuilder:
         return values if all(values[key] for key in ("access_token", "cloud_id", "project_key")) else None
 
     def payload(self, config: dict[str, str], alert: dict[str, Any]) -> dict[str, Any]:
-        description = self.optimized_response_text(alert["email_title"] or alert["subject"], alert["friendly_message"], alert["scan_status"], alert["total_alerts"], alert["module_rows"], alert["ioc_rows"], alert["action_url"])
+        app_name = self.clean(alert.get("app_name")) or "Application"
+        description = self.optimized_response_text(alert["email_title"] or alert["subject"], alert["friendly_message"], alert["scan_status"], alert["total_alerts"], alert["module_rows"], alert["ioc_rows"], alert["action_url"], app_name)
         return {
             "fields": {
                 "project": {"key": config["project_key"]},
-                "summary": self.truncate(alert["subject"] or alert["email_title"] or "Orion alert", 255),
+                "summary": self.truncate(alert["subject"] or alert["email_title"] or f"{app_name} alert", 255),
                 "description": self.description(description),
                 "issuetype": {"name": config["issue_type"] or "Task"},
             }
         }
 
-    def optimized_response_text(self, subject: str, friendly_message: str, scan_status: str, total_alerts: int, module_rows: list[dict[str, Any]], ioc_rows: list[dict[str, str]], action_url: str) -> str:
+    def optimized_response_text(self, subject: str, friendly_message: str, scan_status: str, total_alerts: int, module_rows: list[dict[str, Any]], ioc_rows: list[dict[str, str]], action_url: str, app_name: str = "Application") -> str:
         lines = [
-            subject or "Orion alert",
+            subject or f"{app_name} alert",
             "",
             friendly_message or "Alert notification",
             f"Status: {scan_status or '-'}",
@@ -39,7 +40,7 @@ class AlertPayloadBuilder:
         if ioc_text:
             lines.extend(["", ioc_text])
         if action_url:
-            lines.extend(["", f"View in Orion: {action_url}"])
+            lines.extend(["", f"View in {app_name}: {action_url}"])
         return "\n".join(lines)
 
     def description(self, text: str) -> dict[str, Any]:
@@ -66,4 +67,3 @@ class AlertPayloadBuilder:
     def truncate(self, value: str, length: int) -> str:
         value = value or ""
         return value if len(value) <= length else f"{value[:length - 1]}..."
-

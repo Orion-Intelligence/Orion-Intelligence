@@ -28,7 +28,13 @@ class AlertWebhookManager:
         AlertWebhookManager.__instance = self
 
     async def send_alert(self, *, tenant_id: str, subject: str, email_title: str, friendly_message: str, scan_status: str, total_alerts: int, module_rows: list[dict[str, Any]], ioc_rows: list[dict[str, str]], action_url: str = "") -> None:
-        alert = {"subject": subject, "email_title": email_title, "friendly_message": friendly_message, "scan_status": scan_status, "total_alerts": total_alerts, "module_rows": module_rows, "ioc_rows": ioc_rows, "action_url": action_url}
+        app_name = "Application"
+        try:
+            from orion.api.server.config_manager.config_controller import config_controller
+            app_name = await config_controller.getInstance().get_cached("app_name", app_name, tenant_id=tenant_id)
+        except Exception:
+            pass
+        alert = {"subject": subject, "email_title": email_title, "friendly_message": friendly_message, "scan_status": scan_status, "total_alerts": total_alerts, "module_rows": module_rows, "ioc_rows": ioc_rows, "action_url": action_url, "app_name": app_name}
         tasks = []
         for provider in self._providers:
             if task := await self._delivery_task(provider, tenant_id, alert):

@@ -64,9 +64,14 @@
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                        <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="tenant._expanded = !tenant._expanded">
-                          <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
-                        </button>
+                        <span class="inline-flex items-center gap-2">
+                          <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="tenant._expanded = !tenant._expanded">
+                            <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
+                          </button>
+                          <button data-testid="tenant-view-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="openTenant(tenant)">
+                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon" />
+                          </button>
+                        </span>
                       </td>
                     </tr>
                     @if (tenant._expanded) {

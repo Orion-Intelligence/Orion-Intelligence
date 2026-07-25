@@ -19,7 +19,7 @@
       </div>
     </div>
 
-    @if (canEditTenantBranding() || canManagePlatformSettings()) {
+    @if (canEditTenantBranding() && canManagePlatformSettings()) {
       <div class="mb-4 flex w-full flex-wrap gap-2 border-b border-[var(--color-border)] pb-3" role="tablist" [attr.aria-label]="'System settings sections' | translate">
         @if (canEditTenantBranding()) {
           <button data-testid="system-settings-tab-branding" type="button" role="tab" [attr.aria-selected]="activeTab === 'branding'" (click)="selectTab('branding')" [ngClass]="activeTab === 'branding' ? 'border-sky-400/45 bg-sky-500/10 text-sky-200' : 'border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text3)] hover:bg-[var(--color-blue-810)]'" class="inline-flex min-h-9 items-center gap-2 rounded-[8px] border px-3 text-sm font-semibold transition">
@@ -208,6 +208,7 @@
       </div>
     }
       <app-alert-webhook-settings-block
+        class="mt-3"
         [form]="webhookForm"
         context="system"
         [isEditing]="webhookEditing"
