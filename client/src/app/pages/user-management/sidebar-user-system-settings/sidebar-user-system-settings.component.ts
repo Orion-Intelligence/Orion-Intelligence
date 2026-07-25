@@ -397,7 +397,10 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     if (requestedTab === 'branding' && this.canEditTenantBranding()) {
       return 'branding';
     }
-    return this.canManagePlatformSettings() ? 'platform' : 'branding';
+    if (requestedTab === 'platform' && this.canManagePlatformSettings()) {
+      return 'platform';
+    }
+    return this.canEditTenantBranding() ? 'branding' : 'platform';
   }
 
   private applySettings(settings: Partial<AppSettingsModel>): void {

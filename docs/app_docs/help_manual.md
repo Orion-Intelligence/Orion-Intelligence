@@ -1,6 +1,6 @@
 (help-manual)=
 
-# Orion Help Manual
+# Platform Help Manual
 
 :::{admonition} Scope
 :class: tip

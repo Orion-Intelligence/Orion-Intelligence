@@ -12,6 +12,10 @@ master_doc = "index"
 html_theme = "shibuya"
 exclude_patterns = [
     "api_docs/**",
+    "app_docs/company_and_product_scope.md",
+    "app_docs/introduction_to_platform.md",
+    "app_docs/organizational_security_policies.md",
+    "app_docs/swagger_api_reference.md",
 ]
 
 myst_enable_extensions = [

@@ -602,4 +602,3 @@ The repository may contain concurrent changes across docs, frontend, backend, an
 
 - [User Manual](./user_manual.md)
 - [Introduction To Modules](./introduction_to_modules.md)
-- [Introduction To Platform](./introduction_to_platform.md)

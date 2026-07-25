@@ -7,32 +7,27 @@
         </div>
         <div class="min-w-0">
           <h1 class="ui-page-title">{{ 'System Settings' | translate }}</h1>
-          <p class="ui-page-description">
-            {{ (activeTab === 'branding' ? 'Manage branding for the current tenant URL.' : 'Manage platform-level configuration and integrations.') | translate }}
+          <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
+            {{ 'Version' | translate }} <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
           </p>
-          @if (activeTab === 'platform') {
-            <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
-              {{ 'Version' | translate }} <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
-            </p>
-          }
         </div>
       </div>
     </div>
 
     @if (canEditTenantBranding() && canManagePlatformSettings()) {
-      <div class="mb-4 flex w-full flex-wrap gap-2 border-b border-[var(--color-border)] pb-3" role="tablist" [attr.aria-label]="'System settings sections' | translate">
-        @if (canEditTenantBranding()) {
-          <button data-testid="system-settings-tab-branding" type="button" role="tab" [attr.aria-selected]="activeTab === 'branding'" (click)="selectTab('branding')" [ngClass]="activeTab === 'branding' ? 'border-sky-400/45 bg-sky-500/10 text-sky-200' : 'border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text3)] hover:bg-[var(--color-blue-810)]'" class="inline-flex min-h-9 items-center gap-2 rounded-[8px] border px-3 text-sm font-semibold transition">
-            <i class="bi bi-palette-fill text-[13px]"></i>
-            {{ 'Tenant Branding / White Label' | translate }}
-          </button>
-        }
-        @if (canManagePlatformSettings()) {
-          <button data-testid="system-settings-tab-platform" type="button" role="tab" [attr.aria-selected]="activeTab === 'platform'" (click)="selectTab('platform')" [ngClass]="activeTab === 'platform' ? 'border-sky-400/45 bg-sky-500/10 text-sky-200' : 'border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text3)] hover:bg-[var(--color-blue-810)]'" class="inline-flex min-h-9 items-center gap-2 rounded-[8px] border px-3 text-sm font-semibold transition">
-            <i class="bi bi-gear-fill text-[13px]"></i>
-            {{ 'Platform Settings' | translate }}
-          </button>
-        }
+      <div class="mb-4 w-full overflow-x-auto border-b border-[var(--color-border)]">
+        <div class="inline-flex flex-nowrap items-center gap-[2px] bg-transparent p-0" role="tablist" [attr.aria-label]="'System settings sections' | translate">
+          @if (canEditTenantBranding()) {
+            <button data-testid="system-settings-tab-branding" type="button" role="tab" [attr.aria-selected]="activeTab === 'branding'" (click)="selectTab('branding')" [ngClass]="activeTab === 'branding' ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]">
+              {{ 'Branding' | translate }}
+            </button>
+          }
+          @if (canManagePlatformSettings()) {
+            <button data-testid="system-settings-tab-platform" type="button" role="tab" [attr.aria-selected]="activeTab === 'platform'" (click)="selectTab('platform')" [ngClass]="activeTab === 'platform' ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]">
+              {{ 'Platform Settings' | translate }}
+            </button>
+          }
+        </div>
       </div>
     }
 

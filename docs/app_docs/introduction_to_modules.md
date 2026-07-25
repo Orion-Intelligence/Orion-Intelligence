@@ -606,6 +606,5 @@ Use:
 
 ## Related Documents
 
-- [Introduction To Platform](./introduction_to_platform.md)
 - [User Manual](./user_manual.md)
 - [Developer Documentation](./developer_documentation.md)
