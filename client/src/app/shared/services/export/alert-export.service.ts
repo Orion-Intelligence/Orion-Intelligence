@@ -197,7 +197,16 @@ export class AlertExportService {
     if (fromIoc) {
       return fromIoc;
     }
-    return (alert.type || '').toLowerCase() === 'stealerlogs' ? this.cleanValue(alert.description || '') : '';
+    if ((alert.type || '').toLowerCase() !== 'stealerlogs') {
+      return '';
+    }
+    const description = String(alert.description || '');
+    const labelledPassword = description.match(/\bpassword\s*:\s*([\s\S]*?)(?=\s+(?:links?|filelist|files?|https?:\/\/)\b|$)/i)?.[1];
+    if (labelledPassword?.trim()) {
+      return this.getText(labelledPassword, 360);
+    }
+    const compact = description.trim();
+    return compact && !/\s/.test(compact) && compact.length <= 240 ? this.getText(compact, 240) : '';
   }
 
   private extractAlertResultDate(allIoc: AlertAllIoc[]): Date | null {

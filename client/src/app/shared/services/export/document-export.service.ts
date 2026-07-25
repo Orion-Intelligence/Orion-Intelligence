@@ -4,22 +4,8 @@ import type { RowInput } from 'jspdf-autotable';
 import { forkJoin, from } from 'rxjs';
 import { GraphReportMeta, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 import { GraphExportService } from './graph-export.service';
-
-interface DocumentPdfTheme {
-  coverBandRgb: [number, number, number];
-  coverSubtitleRgb: [number, number, number];
-  coverPanelRgb: [number, number, number];
-  coverPanelBorderRgb: [number, number, number];
-  coverLabelRgb: [number, number, number];
-  dividerRgb: [number, number, number];
-  headerAccentRgb: [number, number, number];
-  sectionHeaderRgb: [number, number, number];
-  tableRowBgRgb: [number, number, number];
-  tableRowAltBgRgb: [number, number, number];
-  tableBorderRgb: [number, number, number];
-  headerRowFillRgb: [number, number, number];
-  firstColumnFillRgb: [number, number, number];
-}
+import { PdfExportTheme } from './pdf-export-theme';
+import { preparePdfValue } from './pdf-text.util';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentExportService extends GraphExportService {
@@ -32,15 +18,16 @@ export class DocumentExportService extends GraphExportService {
       libs: this.getPdfLibs(),
       tenantLogoDataUrl: from(this.exportBranding.loadTenantLogoDataUrl())
     }).subscribe(({ libs, tenantLogoDataUrl }) => {
-      const bytes = this.buildDocPdfBytes(payload, libs.jsPDF, libs.autoTable, tenantLogoDataUrl);
-      this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-doc-report.pdf`);
+      const bytes = this.buildDocPdfBytes(this.preparePayloadForPdf(payload), libs.jsPDF, libs.autoTable, tenantLogoDataUrl);
+      this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}.pdf`);
     });
   }
 
   private buildDocPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null): Uint8Array {
     const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
     const meta = this.makeMeta(payload, tenantLogoDataUrl);
-    const theme = this.getDocumentTheme();
+    this.applyPdfDocumentProperties(doc, payload, meta);
+    const theme = this.PDF_THEME;
     const tableTheme = this.getTableTheme(theme);
     const hooks = this.makeHeaderFooterHooks(payload, meta, theme);
     const firstSectionY = this.drawCover(doc, payload, meta, 'Document Report', theme);
@@ -49,9 +36,9 @@ export class DocumentExportService extends GraphExportService {
     this.drawInfoSectionMarker(doc, firstSectionY, contentW, 'Executive Summary', theme?.sectionHeaderRgb);
     autoTable(doc, {
       startY: firstSectionY + 12,
-      margin: { left: 40, right: 40 },
+      margin: { top: 72, left: 40, right: 40, bottom: 58 },
       tableWidth: contentW,
-      body: Object.entries(payload.summary ?? {}).map(([k, v]) => [k, String(v)]) as RowInput[],
+      body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]) as RowInput[],
       ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6, ...tableTheme }),
       columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
       didParseCell: this.makeFirstColumnDidParse(theme?.firstColumnFillRgb),
@@ -63,10 +50,10 @@ export class DocumentExportService extends GraphExportService {
       this.drawInfoSectionMarker(doc, snapshotMarkerY, contentW, 'Network Snapshot', theme?.sectionHeaderRgb);
       autoTable(doc, {
         startY: snapshotMarkerY + 12,
-        margin: { left: 40, right: 40 },
+        margin: { top: 72, left: 40, right: 40, bottom: 58 },
         tableWidth: contentW,
         body: [['', '']] as RowInput[],
-        styles: { fontSize: 9, cellPadding: 6, textColor: [30, 41, 59], lineWidth: this.TABLE_BORDER_WIDTH, lineColor: theme?.tableBorderRgb ?? this.TABLE_BORDER_RGB },
+        styles: { fontSize: 9, cellPadding: 6, textColor: this.PDF_THEME.textBodyRgb, lineWidth: this.TABLE_BORDER_WIDTH, lineColor: theme?.tableBorderRgb ?? this.TABLE_BORDER_RGB },
         bodyStyles: { lineWidth: this.TABLE_BORDER_WIDTH, lineColor: theme?.tableBorderRgb ?? this.TABLE_BORDER_RGB },
         theme: 'plain',
         didDrawPage: hooks.didDrawPage
@@ -81,9 +68,13 @@ export class DocumentExportService extends GraphExportService {
       this.drawInfoSectionMarker(doc, nodeMarkerY, contentW, 'Nodes', theme?.sectionHeaderRgb);
       autoTable(doc, {
         startY: nodeMarkerY + 12,
-        margin: { left: 40, right: 40 },
+        margin: { top: 72, left: 40, right: 40, bottom: 58 },
         tableWidth: contentW,
-        body: [['Node', 'Type', 'ID'], ...payload.nodes.slice(0, 150).map(n => [n.label || n.id, n.type, this.truncateWithEllipsis(String(n.id || ''), 20)])] as RowInput[],
+        body: [['Node', 'Type', 'ID'], ...payload.nodes.slice(0, 150).map(n => [
+          preparePdfValue(n.label || n.id, 34),
+          preparePdfValue(n.type, 24),
+          preparePdfValue(String(n.id || ''), 34)
+        ])] as RowInput[],
         ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5, ...tableTheme }),
         columnStyles: { 0: { cellWidth: 240 }, 1: { cellWidth: 90 }, 2: { cellWidth: 185 } },
         didParseCell: this.makeHeaderRowDidParse(theme?.headerRowFillRgb),
@@ -102,7 +93,7 @@ export class DocumentExportService extends GraphExportService {
           const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
           const reportBlockDidDrawPage = (data: any) => {
             hooks.didDrawPage(data);
-            const pageNo = data?.pageNumber ?? (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? sectionStartPage;
+            const pageNo = (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? data?.pageNumber ?? sectionStartPage;
             if (pageNo !== sectionStartPage) {
               this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info', theme?.sectionHeaderRgb);
             }
@@ -112,6 +103,7 @@ export class DocumentExportService extends GraphExportService {
             margin: { top: 139, left: 40, right: 40, bottom: 58 },
             tableWidth: contentW,
             body: recordBlockRows.rows,
+            rowPageBreak: 'avoid',
             ...this.buildPlainTableTheme({
               fontSize: 8,
               cellPadding: 5,
@@ -135,7 +127,7 @@ export class DocumentExportService extends GraphExportService {
         const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
         const reportSectionDidDrawPage = (data: any) => {
           hooks.didDrawPage(data);
-          const pageNo = data?.pageNumber ?? (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? sectionStartPage;
+          const pageNo = (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? data?.pageNumber ?? sectionStartPage;
           if (pageNo !== sectionStartPage) {
             this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info', theme?.sectionHeaderRgb);
           }
@@ -170,16 +162,22 @@ export class DocumentExportService extends GraphExportService {
       this.drawInfoSectionMarker(doc, edgeMarkerY, contentW, 'Connection Matrix', theme?.sectionHeaderRgb);
       autoTable(doc, {
         startY: edgeMarkerY + 12,
-        margin: { left: 40, right: 40 },
+        margin: { top: 72, left: 40, right: 40, bottom: 58 },
         tableWidth: contentW,
-        body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 200).map((e, i) => [String(i + 1), e.from, e.to, e.label ?? ''])] as RowInput[],
-        ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5, ...tableTheme }),
+        body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 200).map((e, i) => [
+          String(i + 1),
+          preparePdfValue(e.from, 30),
+          preparePdfValue(e.to, 30),
+          preparePdfValue(e.label ?? '', 30)
+        ])] as RowInput[],
+        ...this.buildPlainTableTheme({ fontSize: 7.4, cellPadding: 4, ...tableTheme }),
         columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: 150 }, 2: { cellWidth: 150 }, 3: { cellWidth: 177 } },
         didParseCell: this.makeHeaderRowDidParse(theme?.headerRowFillRgb),
         didDrawPage: hooks.didDrawPage
       });
       this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
     }
+    this.finalizeDocumentPages(doc, payload, meta, theme);
     return this.docToBytes(doc);
   }
 
@@ -200,40 +198,52 @@ export class DocumentExportService extends GraphExportService {
     return { rows, titleRowIndexes };
   }
 
-  private makeRecordBlockDidParse(titleRowIndexes: Set<number>, theme: DocumentPdfTheme | null): (data: any) => void {
+  private makeRecordBlockDidParse(titleRowIndexes: Set<number>, theme: PdfExportTheme | null): (data: any) => void {
     return (data: any) => {
       if (titleRowIndexes.has(data?.row?.index)) {
-        data.cell.styles.fillColor = theme?.headerRowFillRgb ?? [226, 232, 240];
-        data.cell.styles.textColor = theme?.sectionHeaderRgb ?? [15, 23, 42];
+        data.cell.styles.fillColor = theme?.sectionHeaderRgb ?? this.PDF_THEME.sectionHeaderRgb;
+        data.cell.styles.textColor = theme?.whiteRgb ?? this.PDF_THEME.whiteRgb;
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.fontSize = 8.2;
-        data.cell.styles.cellPadding = { top: 6, right: 7, bottom: 5, left: 8 };
+        data.cell.styles.fontSize = 8.6;
+        data.cell.styles.cellPadding = { top: 7, right: 8, bottom: 7, left: 9 };
         return;
       }
       if (data?.column?.index === 0) {
-        data.cell.styles.fillColor = theme?.firstColumnFillRgb ?? [248, 250, 252];
+        data.cell.styles.fillColor = theme?.firstColumnFillRgb ?? this.PDF_THEME.headerBackgroundRgb;
         data.cell.styles.fontStyle = 'bold';
-        data.cell.styles.textColor = [71, 85, 105];
+        data.cell.styles.textColor = this.PDF_THEME.textSecondaryRgb;
+        data.cell.styles.fontSize = 7.7;
+      }
+      const rawRow = Array.isArray(data?.row?.raw) ? data.row.raw : [];
+      const fieldLabel = String(rawRow[0] ?? '');
+      if (data?.column?.index === 1 && this.isTechnicalPdfField(fieldLabel)) {
+        data.cell.styles.font = 'courier';
+        data.cell.styles.fontSize = 7.2;
+        data.cell.styles.cellPadding = { top: 6, right: 7, bottom: 6, left: 7 };
       }
     };
   }
 
-  private drawCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, subtitle: string, theme: DocumentPdfTheme | null): number {
+  private isTechnicalPdfField(label: string): boolean {
+    return /(password|hash|url|link|domain|email|username|ioc|file|identifier|ip|wallet|address)/i.test(label);
+  }
+
+  private drawCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, subtitle: string, theme: PdfExportTheme | null): number {
     this.drawReportBackgroundPattern(doc);
     const W = this.getPageW(doc);
     if (theme) {
       return this.drawCredentialCover(doc, payload, meta, subtitle, theme);
     }
-    doc.setFillColor(15, 23, 42);
+    doc.setFillColor(...this.PDF_THEME.textPrimaryRgb);
     doc.rect(0, 0, W, 138, 'F');
-    doc.setTextColor(255, 255, 255);
+    doc.setTextColor(...this.PDF_THEME.whiteRgb);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(20);
     doc.text(this.fitSingleLine(doc, payload.title || 'Network Report', W - 80), 40, 48);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(10);
-    doc.setTextColor(226, 232, 240);
-    const sessionLines = this.getSessionLines(doc, payload.sessionName || '—', W - 80);
+    doc.setTextColor(...this.PDF_THEME.softTextRgb);
+    const sessionLines = this.getSessionLines(doc, this.getReportContext(payload), W - 80);
     const isAlertCover = meta.kindLabel === 'Brand Alerts';
     if (isAlertCover) {
       const infoTop = 58;
@@ -241,68 +251,86 @@ export class DocumentExportService extends GraphExportService {
       const lineHeight = 12;
       const totalHeight = lineHeight * (2 + sessionLines.length);
       const startY = infoTop + Math.max(0, ((infoBottom - infoTop) - totalHeight) / 2) + 9;
-      doc.text(`${subtitle} • ${meta.kindLabel}`, 40, startY);
+      doc.text(`${subtitle} | ${meta.kindLabel}`, 40, startY);
       doc.text(sessionLines, 40, startY + lineHeight);
       doc.text(this.fitSingleLine(doc, `Generated: ${meta.generatedAt}`, W - 80), 40, startY + lineHeight + (sessionLines.length * lineHeight));
     }
     else {
-      doc.text(`${subtitle} • ${meta.kindLabel}`, 40, 70);
-      this.drawSessionBlock(doc, payload.sessionName || '—', meta.generatedAt, 40, 90, W - 80, 12);
+      doc.text(`${subtitle} | ${meta.kindLabel}`, 40, 70);
+      this.drawSessionBlock(doc, this.getReportContext(payload), meta.generatedAt, 40, 90, W - 80, 12);
     }
-    doc.setDrawColor(226, 232, 240);
+    doc.setDrawColor(...this.PDF_THEME.softTextRgb);
     doc.setLineWidth(0.5);
     doc.line(40, 146, W - 40, 146);
-    doc.setTextColor(15, 23, 42);
+    doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
     return 160;
   }
 
-  private drawCredentialCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, subtitle: string, theme: DocumentPdfTheme): number {
+  private drawCredentialCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, subtitle: string, theme: PdfExportTheme): number {
     const W = this.getPageW(doc);
-    const contentX = 40;
-    const contentW = W - 80;
-    const coverH = 226;
+    const H = this.getPageH(doc);
+    const contentX = 48;
+    const contentW = W - 96;
+    doc.setFillColor(...theme.whiteRgb);
+    doc.rect(0, 0, W, H, 'F');
     doc.setFillColor(...theme.coverBandRgb);
-    doc.rect(0, 0, W, coverH, 'F');
+    doc.rect(0, 0, 14, H, 'F');
     doc.setFillColor(...theme.headerAccentRgb);
-    doc.rect(0, 0, W, 5, 'F');
+    doc.rect(14, 0, W - 14, 6, 'F');
 
-    this.drawCoverPill(doc, contentX, 30, subtitle.toUpperCase(), theme.headerAccentRgb, [255, 255, 255]);
+    this.drawCoverPill(doc, contentX, 60, subtitle.toUpperCase(), theme.headerRowFillRgb, theme.sectionHeaderRgb);
     const kindText = String(meta.kindLabel || '').toUpperCase();
-    this.drawCoverPill(doc, contentX + 112, 30, kindText, theme.coverPanelRgb, theme.coverLabelRgb, theme.coverPanelBorderRgb);
-    this.drawTenantBrand(doc, meta, W - contentX, 18, 132, 24, [255, 255, 255]);
+    this.drawCoverPill(doc, contentX + 112, 60, kindText, theme.whiteRgb, theme.textSecondaryRgb, theme.coverPanelBorderRgb);
+    this.drawTenantBrand(doc, meta, W - contentX, 30, 150, 32, theme.textPrimaryRgb);
 
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(24);
-    doc.setTextColor(255, 255, 255);
-    doc.text(this.fitSingleLine(doc, payload.title || 'Network Report', contentW - 18), contentX, 72);
+    doc.setFontSize(32);
+    doc.setTextColor(...theme.textPrimaryRgb);
+    const titleLines = (doc.splitTextToSize(payload.title || 'Intelligence Report', contentW) as string[]).slice(0, 3);
+    const titleY = 190;
+    doc.text(titleLines, contentX, titleY, { lineHeightFactor: 1.1 });
+    const titleBottom = titleY + ((titleLines.length - 1) * 35);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...theme.coverSubtitleRgb);
-    doc.text(this.getCoverSubtitle(meta), contentX, 92);
-
-    doc.setFillColor(...theme.coverPanelRgb);
-    doc.roundedRect(contentX, 108, contentW, 50, 7, 7, 'F');
-    doc.setDrawColor(...theme.coverPanelBorderRgb);
-    doc.setLineWidth(0.6);
-    doc.roundedRect(contentX, 108, contentW, 50, 7, 7, 'S');
-    doc.setDrawColor(...theme.coverPanelBorderRgb);
-    doc.line(contentX + 262, 118, contentX + 262, 148);
-    this.drawCoverMetaItem(doc, contentX + 16, 127, 232, 'Session', payload.sessionName || 'Stealerlogs Search', theme);
-    this.drawCoverMetaItem(doc, contentX + 278, 127, contentW - 294, 'Generated', meta.generatedAt, theme);
-
-    const cardGap = 10;
-    const cardW = (contentW - (cardGap * 2)) / 3;
-    const cardY = 174;
-    const metrics = this.getCoverMetrics(payload, meta);
-    this.drawCoverMetric(doc, contentX, cardY, cardW, metrics[0].label, metrics[0].value);
-    this.drawCoverMetric(doc, contentX + cardW + cardGap, cardY, cardW, metrics[1].label, metrics[1].value);
-    this.drawCoverMetric(doc, contentX + ((cardW + cardGap) * 2), cardY, cardW, metrics[2].label, metrics[2].value);
-
+    doc.setFontSize(12);
+    doc.setTextColor(...theme.textSecondaryRgb);
+    doc.text(this.getCoverSubtitle(meta), contentX, titleBottom + 34);
     doc.setDrawColor(...theme.dividerRgb);
+    doc.setLineWidth(1.6);
+    doc.line(contentX, titleBottom + 58, contentX + 74, titleBottom + 58);
+
+    const infoY = 520;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...theme.sectionHeaderRgb);
+    doc.text('REPORT INFORMATION', contentX, infoY);
+    doc.setDrawColor(...theme.coverPanelBorderRgb);
+    doc.setLineWidth(0.7);
+    doc.line(contentX, infoY + 14, W - contentX, infoY + 14);
+    doc.line(contentX + (contentW / 2), infoY + 30, contentX + (contentW / 2), infoY + 136);
+    this.drawCoverInformation(doc, contentX, infoY + 42, (contentW / 2) - 24, 'Prepared By', meta.tenantName, theme);
+    this.drawCoverInformation(doc, contentX + (contentW / 2) + 24, infoY + 42, (contentW / 2) - 24, 'Generated', meta.generatedAt, theme);
+    this.drawCoverInformation(doc, contentX, infoY + 104, (contentW / 2) - 24, 'Report Family', meta.kindLabel, theme);
+    this.drawCoverInformation(doc, contentX + (contentW / 2) + 24, infoY + 104, (contentW / 2) - 24, 'Classification', 'Confidential', theme);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(...theme.sectionHeaderRgb);
+    doc.text('AUTHORIZED RECIPIENTS ONLY', contentX, H - 86);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...theme.textMutedRgb);
+    doc.text('Prepared for authorized recipients. Handle according to organizational policy.', contentX, H - 69);
+    doc.setDrawColor(...theme.coverPanelBorderRgb);
     doc.setLineWidth(0.6);
-    doc.line(contentX, coverH + 10, W - contentX, coverH + 10);
-    doc.setTextColor(15, 23, 42);
-    return coverH + 24;
+    doc.line(contentX, H - 50, W - contentX, H - 50);
+    doc.setFontSize(8);
+    doc.setTextColor(...theme.footerTextRgb);
+    doc.text(`${meta.tenantName} | ${meta.kindLabel}`, contentX, H - 30);
+    doc.text(meta.generatedAt, W - contentX, H - 30, { align: 'right' });
+
+    doc.addPage();
+    this.drawReportBackgroundPattern(doc);
+    return 82;
   }
 
   private drawCoverPill(doc: jsPDF, x: number, y: number, label: string, fillRgb: [number, number, number], textRgb: [number, number, number], borderRgb?: [number, number, number]): void {
@@ -321,31 +349,15 @@ export class DocumentExportService extends GraphExportService {
     doc.text(text, x + 11, y + 1);
   }
 
-  private drawCoverMetaItem(doc: jsPDF, x: number, y: number, width: number, label: string, value: string, theme: DocumentPdfTheme): void {
+  private drawCoverInformation(doc: jsPDF, x: number, y: number, width: number, label: string, value: string, theme: PdfExportTheme): void {
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.4);
+    doc.setFontSize(7.6);
     doc.setTextColor(...theme.coverLabelRgb);
     doc.text(String(label || '').toUpperCase(), x, y);
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(255, 255, 255);
-    doc.text(this.fitSingleLine(doc, value || '-', width), x, y + 17);
-  }
-
-  private drawCoverMetric(doc: jsPDF, x: number, y: number, width: number, label: string, value: string | number): void {
-    doc.setFillColor(45, 30, 34);
-    doc.roundedRect(x, y, width, 34, 6, 6, 'F');
-    doc.setDrawColor(127, 29, 29);
-    doc.setLineWidth(0.5);
-    doc.roundedRect(x, y, width, 34, 6, 6, 'S');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(13);
-    doc.setTextColor(255, 255, 255);
-    doc.text(this.fitSingleLine(doc, String(value ?? '-'), width - 18), x + 10, y + 14);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.4);
-    doc.setTextColor(254, 202, 202);
-    doc.text(this.fitSingleLine(doc, label.toUpperCase(), width - 18), x + 10, y + 27);
+    doc.setFontSize(10);
+    doc.setTextColor(...theme.textPrimaryRgb);
+    doc.text(this.fitSingleLine(doc, value || '-', width), x, y + 21);
   }
 
   private getCoverSubtitle(meta: GraphReportMeta): string {
@@ -361,29 +373,7 @@ export class DocumentExportService extends GraphExportService {
     return 'Credential exposure intelligence dossier';
   }
 
-  private getCoverMetrics(payload: GraphReportPayload, meta: GraphReportMeta): { label: string; value: string | number }[] {
-    if (meta.kindLabel === 'Brand Alerts') {
-      return [
-        { label: 'Total Alerts', value: payload.summary?.['total_alerts'] ?? '-' },
-        { label: 'Categories', value: payload.summary?.['categories'] ?? '-' },
-        { label: 'Sections', value: payload.tables?.length ?? 0 }
-      ];
-    }
-    if (Object.prototype.hasOwnProperty.call(payload.summary ?? {}, 'total_records')) {
-      return [
-        { label: 'Total Records', value: payload.summary?.['total_records'] ?? '-' },
-        { label: 'Stealer Records', value: payload.summary?.['stealer_records'] ?? '-' },
-        { label: 'Ranked Records', value: payload.summary?.['ranked_records'] ?? '-' }
-      ];
-    }
-    return [
-      { label: 'Nodes', value: payload.nodes?.length ?? 0 },
-      { label: 'Edges', value: payload.edges?.length ?? 0 },
-      { label: 'Sections', value: payload.tables?.length ?? 0 }
-    ];
-  }
-
-  private makeHeaderFooterHooks(payload: GraphReportPayload, meta: GraphReportMeta, theme: DocumentPdfTheme | null): {
+  private makeHeaderFooterHooks(payload: GraphReportPayload, meta: GraphReportMeta, theme: PdfExportTheme | null): {
     didDrawPage: (data: any) => void;
   } {
     const drawnPages = new Set<number>();
@@ -393,11 +383,6 @@ export class DocumentExportService extends GraphExportService {
         return;
       }
       this.drawStandardPageHeader(doc, payload.title || 'Network Report', section, 54);
-    };
-    const drawFooter = (doc: jsPDF, meta2: GraphReportMeta) => {
-      const pageNo = doc.getCurrentPageInfo().pageNumber;
-      const total = doc.getNumberOfPages();
-      this.drawStandardFooter(doc, payload.sessionName || '—', meta2, pageNo, total, 54, 32);
     };
     const didDrawPage = (data: any) => {
       const pageNo = data?.pageNumber ?? docPageNumberSafe(data?.doc);
@@ -410,7 +395,6 @@ export class DocumentExportService extends GraphExportService {
       if (!(theme && pageNo === 1)) {
         drawHeader(d, section);
       }
-      drawFooter(d, meta);
     };
     const docPageNumberSafe = (d?: jsPDF): number => {
       try {
@@ -423,9 +407,30 @@ export class DocumentExportService extends GraphExportService {
     return { didDrawPage };
   }
 
-  private drawCredentialPageHeader(doc: jsPDF, title: string, section: string, meta: GraphReportMeta, theme: DocumentPdfTheme): void {
+  private finalizeDocumentPages(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, theme: PdfExportTheme | null): void {
+    const totalPages = doc.getNumberOfPages();
+    const pageWidth = this.getPageW(doc);
+    const pageHeight = this.getPageH(doc);
+    for (let page = 1; page <= totalPages; page += 1) {
+      doc.setPage(page);
+      if (page === 1) {
+        continue;
+      }
+      if (theme) {
+        this.drawCredentialPageHeader(doc, payload.title || 'Network Report', 'Details', meta, theme);
+      }
+      else {
+        this.drawStandardPageHeader(doc, payload.title || 'Network Report', 'Details', 54);
+      }
+      doc.setFillColor(...(theme?.tableRowBgRgb ?? this.PDF_THEME.whiteRgb));
+      doc.rect(0, pageHeight - 58, pageWidth, 58, 'F');
+      this.drawStandardFooter(doc, this.getReportContext(payload), meta, page - 1, totalPages - 1, 54, 32);
+    }
+  }
+
+  private drawCredentialPageHeader(doc: jsPDF, title: string, section: string, meta: GraphReportMeta, theme: PdfExportTheme): void {
     const W = this.getPageW(doc);
-    doc.setFillColor(255, 251, 251);
+    doc.setFillColor(...theme.tableRowBgRgb);
     doc.rect(0, 0, W, 58, 'F');
     doc.setFillColor(...theme.headerAccentRgb);
     doc.rect(0, 0, W, 5, 'F');
@@ -433,36 +438,18 @@ export class DocumentExportService extends GraphExportService {
     doc.line(40, 58, W - 40, 58);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10.5);
-    doc.setTextColor(24, 24, 27);
+    doc.setTextColor(...theme.coverBandRgb);
     doc.text(this.fitSingleLine(doc, title, W - 245), 40, 34);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(7.8);
-    doc.setTextColor(127, 29, 29);
+    doc.setTextColor(...theme.sectionHeaderRgb);
     doc.text(this.fitSingleLine(doc, `${meta.kindLabel} / ${section}`, 190), W - 40, 24, { align: 'right' });
     doc.setFontSize(7.4);
-    doc.setTextColor(100, 116, 139);
+    doc.setTextColor(...theme.textMutedRgb);
     doc.text(this.fitSingleLine(doc, meta.generatedAt, 190), W - 40, 39, { align: 'right' });
   }
 
-  private getDocumentTheme(): DocumentPdfTheme {
-    return {
-      coverBandRgb: [24, 24, 27],
-      coverSubtitleRgb: [241, 245, 249],
-      coverPanelRgb: [39, 24, 27],
-      coverPanelBorderRgb: [127, 29, 29],
-      coverLabelRgb: [254, 202, 202],
-      dividerRgb: [248, 113, 113],
-      headerAccentRgb: [185, 28, 28],
-      sectionHeaderRgb: [127, 29, 29],
-      tableRowBgRgb: [255, 251, 251],
-      tableRowAltBgRgb: [254, 247, 247],
-      tableBorderRgb: [229, 199, 199],
-      headerRowFillRgb: [254, 226, 226],
-      firstColumnFillRgb: [255, 241, 242]
-    };
-  }
-
-  private getTableTheme(theme: DocumentPdfTheme | null): {
+  private getTableTheme(theme: PdfExportTheme | null): {
     rowFillColor?: [number, number, number];
     alternateRowFillColor?: [number, number, number];
     lineColor?: [number, number, number];

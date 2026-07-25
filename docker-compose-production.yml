@@ -38,6 +38,15 @@ services:
     command: >
       sh -c "python3 /app/cronjobs.py & exec gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 900"
 
+  documentation:
+    restart: unless-stopped
+    build:
+      context: ./docs
+    expose:
+      - "80"
+    networks:
+      - backend
+
   arangodb:
     container_name: trusted-web-arangodb
     image: arangodb:3.11
@@ -118,6 +127,8 @@ services:
       - "443:443"
     depends_on:
       web:
+        condition: service_started
+      documentation:
         condition: service_started
     volumes:
       - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro

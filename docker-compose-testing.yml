@@ -36,6 +36,14 @@ services:
     command: >
       sh -c "exec gunicorn --preload -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 900"
 
+  documentation:
+    build:
+      context: ./docs
+    expose:
+      - "80"
+    networks:
+      - backend
+
   arangodb:
     container_name: trusted-web-arangodb
     image: arangodb:3.11
@@ -65,6 +73,7 @@ services:
       - "8443:8443"
     depends_on:
       - web
+      - documentation
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./backend/.ssl:/etc/nginx/local-certs:ro

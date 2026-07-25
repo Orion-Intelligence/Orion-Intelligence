@@ -88,6 +88,17 @@ services:
     command: >
       sh -c "python3 /app/cronjobs.py & exec uvicorn main:app --host 0.0.0.0 --port 8070 --reload --reload-dir /app/configs --reload-dir /app/orion --reload-dir /app/routes"
 
+  documentation:
+    profiles:
+      - local
+      - dev
+    build:
+      context: ./docs
+    expose:
+      - "80"
+    networks:
+      - backend
+
   arangodb:
     container_name: trusted-web-arangodb
     image: arangodb:3.11
@@ -119,6 +130,7 @@ services:
       - "8443:8443"
     depends_on:
       - web
+      - documentation
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./backend/.ssl:/etc/nginx/local-certs:ro
@@ -147,6 +159,7 @@ services:
       - "8443:8443"
     depends_on:
       - web-dev
+      - documentation
     volumes:
       - ./nginx/nginx-dev.conf:/etc/nginx/nginx.conf:ro
       - ./backend/.ssl:/etc/nginx/local-certs:ro
