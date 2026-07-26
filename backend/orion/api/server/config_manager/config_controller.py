@@ -275,7 +275,6 @@ class config_controller:
                 raise HTTPException(status_code=400, detail="meta_info must be a JSON object")
             for key in self.LEGACY_ALERT_CONNECTOR_META_KEYS:
                 submitted_meta_info.pop(key, None)
-            existing_record = await self._engine.find_one(db_system_model, db_system_model.key == AllowedKeys.META_INFO)
             existing_meta_info = {}
             if self._configs.get(resolved_tenant_id, {}).get(AllowedKeys.META_INFO.value):
                 existing_meta_info = json.loads(self._configs[resolved_tenant_id][AllowedKeys.META_INFO.value])

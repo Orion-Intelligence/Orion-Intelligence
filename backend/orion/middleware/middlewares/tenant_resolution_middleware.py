@@ -26,6 +26,9 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
         hostname = hostname.rstrip(".")
 
         production_domain = str(env_handler.get_instance().env("PRODUCTION_DOMAIN", "") or "").strip().lower().rstrip(".")
+        if production_domain == "*":
+            app_url = str(env_handler.get_instance().env("APP_URL", "") or "").strip()
+            production_domain = (urlsplit(app_url).hostname or "").lower().rstrip(".")
         if "://" in production_domain:
             production_domain = urlsplit(production_domain).hostname or ""
         production_domain = production_domain.removeprefix("*.")

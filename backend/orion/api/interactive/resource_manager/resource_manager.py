@@ -106,9 +106,15 @@ class ResourceManager:
             return file_name.replace("_custom.png", "_default.png")
         return file_name if file_name.endswith("_default.png") else "logo_url_default.png"
 
-    def system_resource_path(self, file_name: str, tenant=None) -> Path:
-        if file_name not in self.SYSTEM_RESOURCE_FILES:
+    @classmethod
+    def _safe_system_filename(cls, file_name: str) -> str:
+        safe_name = next((name for name in cls.SYSTEM_RESOURCE_FILES if name == file_name), None)
+        if safe_name is None:
             raise HTTPException(status_code=404, detail="Resource not found")
+        return safe_name
+
+    def system_resource_path(self, file_name: str, tenant=None) -> Path:
+        file_name = self._safe_system_filename(file_name)
 
         tenant_dir = self.get_tenant_system_dir(tenant)
         if tenant_dir is not None:

@@ -32,8 +32,8 @@ class AlertWebhookManager:
         try:
             from orion.api.server.config_manager.config_controller import config_controller
             app_name = await config_controller.getInstance().get_cached("app_name", app_name, tenant_id=tenant_id)
-        except Exception:
-            pass
+        except Exception as ex:
+            log.g().w(f"Alert app name lookup failed: {str(ex)}")
         alert = {"subject": subject, "email_title": email_title, "friendly_message": friendly_message, "scan_status": scan_status, "total_alerts": total_alerts, "module_rows": module_rows, "ioc_rows": ioc_rows, "action_url": action_url, "app_name": app_name}
         tasks = []
         for provider in self._providers:

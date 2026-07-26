@@ -107,7 +107,6 @@ async def cancel_nexus_chat(current_user=Depends(get_current_user)):
 )
 async def clear_nexus_chat_session(payload: dict | None = Body(default=None), current_user=Depends(get_current_user)):
     return True
-    return await nexus_manager.getInstance().clear_chat_session(current_user, session_id=str((payload or {}).get("session_id") or ""))
 
 
 @ai_routes.get(

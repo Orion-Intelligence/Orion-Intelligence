@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim@sha256:57cd7c3a7a273101a6485ba99423ee568157882804b1124b4dd04266317710de AS builder
 
 WORKDIR /docs
 COPY requirements.txt .
@@ -13,5 +13,5 @@ RUN python replace_branding.py \
     "$DOCUMENTATION_PROJECT_NAME" \
     "$DOCUMENTATION_COMPANY_NAME"
 
-FROM nginx:alpine
+FROM nginx:alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
 COPY --from=builder /site /usr/share/nginx/html
