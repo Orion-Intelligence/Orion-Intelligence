@@ -149,9 +149,9 @@
 
 <app-export-choice-modal
   [visible]="isExportChoiceOpen"
-  [title]="exportTitle() | translate"
-  [subtitle]="exportSubtitle() | translate"
-  [options]="exportOptions()"
+  [title]="'Export Alert' | translate"
+  [subtitle]="'Choose the export format.' | translate"
+  [options]="alertExportOptions"
   [overlayTestId]="'notification-alert-export-overlay'"
   [modalTestId]="'notification-alert-export-modal'"
   [closeTestId]="'notification-alert-export-close'"

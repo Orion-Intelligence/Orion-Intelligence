@@ -102,7 +102,7 @@
                   <span>{{ 'Upload another' | translate }}</span>
                 </button>
                 <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-                <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" [appTooltip]="'Download report' | translate" (click)="exportReport()" [attr.aria-label]="'Download report' | translate">
+                <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" [appTooltip]="'Download report' | translate" (click)="openExportChoice()" [attr.aria-label]="'Download report' | translate">
                   <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="16" height="16" alt="download" class="ui-action-icon" />
                 </button>
               </div>
@@ -195,3 +195,15 @@
     </div>
   }
 </div>
+
+<app-export-choice-modal
+  [visible]="isExportChoiceOpen"
+  [title]="('Export Report') | translate"
+  [subtitle]="('Choose the export format.') | translate"
+  [options]="reportExportOptions"
+  overlayTestId="file-scan-export-overlay"
+  modalTestId="file-scan-export-modal"
+  closeTestId="file-scan-export-close"
+  (closed)="closeExportChoice()"
+  (optionSelected)="selectExport($event)">
+</app-export-choice-modal>

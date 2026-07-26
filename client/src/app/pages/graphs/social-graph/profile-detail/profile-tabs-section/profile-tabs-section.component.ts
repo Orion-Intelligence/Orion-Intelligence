@@ -11,12 +11,14 @@ import { SocialProfilePostsSectionComponent } from '../profile-posts-section/pro
 import { SocialProfileVideosSectionComponent } from '../profile-videos-section/profile-videos-section.component';
 import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/profile-shorts-section.component';
 import { ExportBrandingService } from '../../../../../shared/services/export/export-branding.service';
+import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { PROFILE_STEALERLOG_EXPORT_OPTIONS } from '../../../../../shared/model/report/export-choice.model';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, SocialProfilePostsSectionComponent, SocialProfileVideosSectionComponent, SocialProfileShortsSectionComponent],
+  imports: [TooltipDirective, SocialProfilePostsSectionComponent, SocialProfileVideosSectionComponent, SocialProfileShortsSectionComponent, ExportChoiceModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
@@ -41,6 +43,8 @@ export class SocialProfileTabsSectionComponent {
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;
   readonly isImageUrl = isImageUrl;
+  readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
+  readonly selectedStealerLogPlatform = signal<PlatformResult | null>(null);
 
   constructor() {
     effect(() => {
@@ -233,7 +237,24 @@ export class SocialProfileTabsSectionComponent {
     return `${this.getStealerRecordHost(record)}|${this.getStealerRecordIdentity(record)}|${this.getStealerRecordDate(record)}|${index}`;
   }
 
-  downloadStealerLogs(platformData: PlatformResult): void {
+  openStealerLogExportChoice(event: Event, platformData: PlatformResult): void {
+    event.stopPropagation();
+    this.selectedStealerLogPlatform.set(platformData);
+  }
+
+  closeStealerLogExportChoice(): void {
+    this.selectedStealerLogPlatform.set(null);
+  }
+
+  selectStealerLogExport(type: string): void {
+    const platformData = this.selectedStealerLogPlatform();
+    if (type === 'csv' && platformData) {
+      this.downloadStealerLogs(platformData);
+    }
+    this.closeStealerLogExportChoice();
+  }
+
+  private downloadStealerLogs(platformData: PlatformResult): void {
     const rows = this.getStealerLogs(platformData).map((item, index) => ({
       tenant_name: this.exportBranding.getTenantName(),
       recordType: 'stealer',

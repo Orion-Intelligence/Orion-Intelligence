@@ -26,13 +26,10 @@
     @if (!hasError && !isLoading) {
       <div class="mt-[12px] flex justify-end">
         <div class="security-scan-action-menu inline-flex items-stretch overflow-hidden rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)]">
-          <button data-testid="scan-download-report" (click)="exportReport()" [appTooltip]="'common.actions.download' | translate" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-            <img alt="common.actions.download" height="25" ngSrc="../../../../../assets/images/shared/theme/download.svg" width="25" class="ui-action-icon" />
-          </button>
-          <div class="security-scan-action-divider my-[10px] w-px bg-[var(--color-border)]"></div>
-          <button data-testid="scan-print-report" ngxPrint printSectionId="scanReport" [useExistingCss]="true" [appTooltip]="'Print' | translate" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
+          <button data-testid="scan-download-report" (click)="openExportChoice()" [appTooltip]="'Export Report' | translate" class="security-scan-action-btn flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
             <img alt="Print" height="25" ngSrc="../../../../../assets/images/shared/theme/print.svg" width="25" class="ui-action-icon" />
           </button>
+          <button #printReportButton type="button" ngxPrint printSectionId="scanReport" [useExistingCss]="true" class="hidden"></button>
         </div>
       </div>
     }
@@ -219,3 +216,15 @@
     </div>
   }
 </div>
+
+<app-export-choice-modal
+  [visible]="isExportChoiceOpen"
+  [title]="('Export Report') | translate"
+  [subtitle]="('Choose the export format.') | translate"
+  [options]="reportExportOptions"
+  overlayTestId="security-scan-export-overlay"
+  modalTestId="security-scan-export-modal"
+  closeTestId="security-scan-export-close"
+  (closed)="closeExportChoice()"
+  (optionSelected)="selectExport($event)">
+</app-export-choice-modal>

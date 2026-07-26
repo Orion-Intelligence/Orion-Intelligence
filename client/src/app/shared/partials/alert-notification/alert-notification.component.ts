@@ -7,7 +7,7 @@ import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
-import { ExportChoiceOption } from '../../model/report/export-choice.model';
+import { ALERT_REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { AlertExportService } from '../../services/export/alert-export.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScanNotificationService } from '../../services/scan-notification.service';
@@ -45,7 +45,7 @@ export class AlertNotificationComponent implements OnChanges {
   isScanDeleting: boolean = false;
   scanDeleteTarget: ScanJob | null = null;
   scanDeleteMode: ScanActionMode | null = null;
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
+  readonly alertExportOptions = ALERT_REPORT_EXPORT_OPTIONS;
   readonly alertLicenseWarning = "You don't have license to view this";
   readonly isNotificationOpen = input.required<boolean | null>();
   readonly notificationMode = input<NotificationMode>('alerts');
@@ -424,18 +424,6 @@ export class AlertNotificationComponent implements OnChanges {
 
   getScanError(job: ScanJob): string {
     return this.scanNotificationService.getError(job);
-  }
-
-  exportTitle(): string {
-    return 'Export Alert';
-  }
-
-  exportSubtitle(): string {
-    return 'Choose the export format.';
-  }
-
-  exportOptions(): ExportChoiceOption[] {
-    return this.alertExportOptions;
   }
 
   close() {

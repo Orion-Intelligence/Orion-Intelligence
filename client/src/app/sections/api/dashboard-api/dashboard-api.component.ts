@@ -17,10 +17,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ScanNotificationService } from '../../../shared/services/scan-notification.service';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
+import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { DASHBOARD_API_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe, ExportChoiceModalComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
@@ -45,6 +47,8 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   prevBreachData: any = null;
   expandedResultIndex: number | null = null;
   cryptoSummaryExpanded = false;
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = DASHBOARD_API_EXPORT_OPTIONS;
   trackByIndex = (index: number) => index;
 
   constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService, private scanNotifications: ScanNotificationService, private aiToolRoutingService: AiToolRoutingService) {
@@ -462,7 +466,22 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.cryptoSummaryExpanded = !this.cryptoSummaryExpanded;
   }
 
-  exportPdfReport(): void {
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'report') {
+      this.exportPdfReport();
+    }
+    this.closeExportChoice();
+  }
+
+  private exportPdfReport(): void {
     if (!this.hasResults) {
       return;
     }

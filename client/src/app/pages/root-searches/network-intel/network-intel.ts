@@ -18,12 +18,14 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ScannerService } from './security-scan/scanner-service.service';
 import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
 import { NetworkIntelSeoRepoScanCategory, SeoRepoScanSectionComponent } from './seo-repo-scan-section/seo-repo-scan-section.component';
+import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { NETWORK_INTEL_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
   standalone:  true,
-  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, SeoRepoScanSectionComponent, TranslatePipe],
+  imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, SeoRepoScanSectionComponent, TranslatePipe, ExportChoiceModalComponent],
   animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {
@@ -74,6 +76,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
   geoRangesSubmitAttempted = false;
   isExportingReport = false;
   exportProgress = 0;
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = NETWORK_INTEL_EXPORT_OPTIONS;
   isScanning = computed(() =>
     this.seoRepoScanLoading() ||
     this.scanHelper.isRunning() &&
@@ -345,7 +349,22 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return Boolean(this.geoIpListResult?.ips?.length || this.geoResult?.cameras?.length || this.geoResult || this.geoLiveStats);
   }
 
-  async downloadReport(): Promise<void> {
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'report') {
+      void this.downloadReport();
+    }
+    this.closeExportChoice();
+  }
+
+  private async downloadReport(): Promise<void> {
     try {
       this.isExportingReport = true;
       this.exportProgress = 6;

@@ -7,10 +7,13 @@ import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../.
 import { ApiService } from '../../../../../shared/services/api.service';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { CASE_SHARE_EXPORT_OPTIONS } from '../../../../../shared/model/report/export-choice.model';
+
 
 @Component({
   selector: 'app-case-share',
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, ExportChoiceModalComponent],
   templateUrl: './case-share.component.html',
 })
 export class CaseShareComponent implements OnInit, OnDestroy {
@@ -22,6 +25,8 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   expandedArtifactIds = new Set<string>();
   expandedRelatedEntityIds = new Set<string>();
   brandingResolved = false;
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = CASE_SHARE_EXPORT_OPTIONS;
 
   constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, public appService: AppService) { }
 
@@ -76,7 +81,22 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     return this.expandedArtifactIds.has(artifactId);
   }
 
-  exportPdf(): void {
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'report') {
+      this.exportPdf();
+    }
+    this.closeExportChoice();
+  }
+
+  private exportPdf(): void {
     if (!this.report) {
       return;
     }

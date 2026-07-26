@@ -124,7 +124,7 @@
               </button>
               <div class="h-6 w-px bg-[var(--color-divider)]"></div>
             }
-            <button data-testid="scan-download-report" type="button" [appTooltip]="'Download report' | translate" (click)="exportPdfReport()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]">
+            <button data-testid="scan-download-report" type="button" [appTooltip]="'Download report' | translate" (click)="openExportChoice()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]">
               <img src="assets/images/shared/theme/download.svg" alt="common.actions.download" class="h-4 w-4 ui-action-icon" />
             </button>
           </div>
@@ -467,3 +467,15 @@
   }
 
 </div>
+
+<app-export-choice-modal
+  [visible]="isExportChoiceOpen"
+  [title]="('Export Report') | translate"
+  [subtitle]="('Choose the export format.') | translate"
+  [options]="reportExportOptions"
+  overlayTestId="dashboard-api-export-overlay"
+  modalTestId="dashboard-api-export-modal"
+  closeTestId="dashboard-api-export-close"
+  (closed)="closeExportChoice()"
+  (optionSelected)="selectExport($event)">
+</app-export-choice-modal>
