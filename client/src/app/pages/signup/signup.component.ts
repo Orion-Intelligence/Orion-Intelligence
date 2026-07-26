@@ -7,6 +7,7 @@ import { AppService } from '../../services/core/app/app.service';
 import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../shared/utils/auth-form.util';
 import { PasswordToggleDirective } from '../../shared/directives/password-toggle.directive';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { isSignupHost } from '../../shared/utils/auth-host.util';
 
 @Component({
   selector: 'app-signup',
@@ -32,14 +33,11 @@ export class SignupComponent implements OnInit {
   constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute, protected appService: AppService) { }
 
   ngOnInit(): void {
-    const hostname = window.location.hostname.toLowerCase();
-    const isIpv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname);
-    if (!isIpv4 && (hostname.endsWith('.localhost') || hostname.split('.').length > 2)) {
-      this.router.navigate(['/login'], { replaceUrl: true }).then();
-      return;
-    }
-
     this.appService.loadConfig().subscribe(() => {
+      if (!isSignupHost(window.location.hostname, this.appService.getConfig().appSettings.app_url)) {
+        this.router.navigate(['/login'], { replaceUrl: true }).then();
+        return;
+      }
       this.brandingResolved = true;
     });
     this.route.queryParams.subscribe(() => {

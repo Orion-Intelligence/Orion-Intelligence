@@ -8,6 +8,7 @@ from orion.api.interactive.search_manager.search_model import search_model
 from orion.api.server.config_manager.config_controller import config_controller
 from configs.app_dependency import _enum_value
 from configs.auth_cookie import token_from_request
+from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
@@ -42,10 +43,12 @@ async def _request_has_admin_account(request: Request) -> bool:
     dependencies=[],
 )
 async def get_public_config(request: Request):
-    return await config_controller.getInstance().get_system_info(
+    config = await config_controller.getInstance().get_system_info(
         include_email_config=await _request_has_admin_account(request),
         tenant_id=str(request.state.tenant.id),
     )
+    config.settings["app_url"] = env_handler.get_instance().env("APP_URL", "")
+    return config
 
 
 @public_routes.get("/api/s/static/tenant/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])

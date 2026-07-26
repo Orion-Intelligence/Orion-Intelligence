@@ -25,16 +25,17 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
         hostname = urlsplit(f"//{raw_host}").hostname or ""
         hostname = hostname.rstrip(".")
 
+        app_url = str(env_handler.get_instance().env("APP_URL", "") or "").strip()
+        app_hostname = (urlsplit(app_url).hostname or "").lower().rstrip(".")
         production_domain = str(env_handler.get_instance().env("PRODUCTION_DOMAIN", "") or "").strip().lower().rstrip(".")
         if production_domain == "*":
-            app_url = str(env_handler.get_instance().env("APP_URL", "") or "").strip()
-            production_domain = (urlsplit(app_url).hostname or "").lower().rstrip(".")
+            production_domain = app_hostname
         if "://" in production_domain:
             production_domain = urlsplit(production_domain).hostname or ""
         production_domain = production_domain.removeprefix("*.")
 
         tenant_slug = None
-        if hostname in (production_domain, "localhost", "127.0.0.1"):
+        if hostname in (production_domain, app_hostname, "localhost", "127.0.0.1"):
             is_default_tenant = True
         elif production_domain and hostname.endswith(f".{production_domain}"):
             tenant_slug = hostname[: -(len(production_domain) + 1)]
