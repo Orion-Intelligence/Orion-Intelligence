@@ -43,10 +43,8 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
-      this.showSignupLink = isSignupHost(
-        window.location.hostname,
-        this.appService.getConfig().appSettings.app_url
-      );
+      this.showSignupLink = isSignupHost(window.location.hostname,
+        this.appService.getConfig().appSettings.app_url);
     });
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
