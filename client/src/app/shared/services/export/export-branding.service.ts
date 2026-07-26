@@ -12,7 +12,11 @@ export class ExportBrandingService {
 
   getTenantLogoUrl(): string {
     const settings = this.appService.getConfig()?.appSettings;
-    return String(settings?.logo_wide_dark || settings?.logo_wide_light || settings?.logo_url || '').trim();
+    const darkLogo = String(settings?.logo_wide_dark || '').trim();
+    const lightLogo = String(settings?.logo_wide_light || '').trim();
+    return darkLogo.endsWith('logo_wide_dark_default.png')
+      ? lightLogo || darkLogo
+      : darkLogo || lightLogo || String(settings?.logo_url || '').trim();
   }
 
   addTenantJsonMetadata(data: unknown): unknown {

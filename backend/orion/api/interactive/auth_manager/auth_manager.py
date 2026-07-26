@@ -7,6 +7,7 @@ from odmantic import AIOEngine
 import pyotp
 
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.constants import constant
 from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
 from orion.constants.constant import CONSTANTS
@@ -151,11 +152,14 @@ class auth_manager:
         return {"message": "Email verified successfully. You may continue onboarding."}
 
     @staticmethod
-    async def update_password(token: str, password: str):
+    async def update_password(token: str, password: str, tenant_id):
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.password_reset_token == token)
         if not user:
             raise HTTPException(status_code=404, detail="Invalid Link")
+        if tenant_id is None:
+            raise HTTPException(status_code=403, detail="Tenant access forbidden")
+        session_manager.ensure_user_tenant_access(user, tenant_id)
         if user.status != UserStatus.ACTIVE:
             raise HTTPException(status_code=403, detail="Account is not active")
         if not user.password_reset_expiry or datetime.now(timezone.utc) > user.password_reset_expiry.replace(
@@ -176,13 +180,21 @@ class auth_manager:
         return {"message": "Password reset successfully."}
 
     @staticmethod
-    async def forgot_password(mail: str):
+    async def forgot_password(mail: str, tenant_id):
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.email == mail)
         if not user:
             raise HTTPException(status_code=404, detail="Entered mail is not resgister")
+        if tenant_id is None:
+            raise HTTPException(status_code=403, detail="Tenant access forbidden")
+        session_manager.ensure_user_tenant_access(user, tenant_id)
         if user.status != UserStatus.ACTIVE:
             raise HTTPException(status_code=403, detail="Account is not active")
+
+        tenant = await engine.find_one(
+            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        if not tenant:
+            raise HTTPException(status_code=404, detail="Tenant not found")
 
         user.password_reset_token = session_manager.get_instance().generate_verification_token()
         user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
@@ -192,7 +204,8 @@ class auth_manager:
             str(user.tenant_uuid), str(user.id), "Password reset requested")
 
         APP_URL = env_handler.get_instance().env("APP_URL")
-        forgot_url = f"{APP_URL}/reset/{user.password_reset_token}"
+        forgot_url = TenantManager.build_tenant_url(
+            APP_URL, tenant, f"/reset/{user.password_reset_token}")
         html_content = constant.mail_template.render(
             username=user.username,
             email=user.email,

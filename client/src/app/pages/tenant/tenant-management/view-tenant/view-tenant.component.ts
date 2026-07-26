@@ -12,11 +12,12 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
 import { search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { TenantIocSelectorComponent } from '../../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
+import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent, TenantIocSelectorComponent],
+  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent, TenantIocSelectorComponent, ConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './view-tenant.component.html',
 })
@@ -32,6 +33,7 @@ export class ViewTenantComponent implements OnInit {
   isIocSelectorOpen = false;
   activeIocTenant: any | null = null;
   iocDraft: IocCategory[] = [];
+  tenantToDelete: any | null = null;
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService) {
   }
@@ -129,6 +131,29 @@ export class ViewTenantComponent implements OnInit {
         this.isLoading = false;
       },
       error: (_) => {
+        this.isLoading = false;
+      },
+    });
+  }
+
+  openDeleteConfirmation(tenant: any, event?: Event): void {
+    event?.stopPropagation();
+    this.tenantToDelete = tenant;
+  }
+
+  confirmDeleteTenant(confirmed: boolean): void {
+    const tenant = this.tenantToDelete;
+    this.tenantToDelete = null;
+    if (!confirmed || !tenant) {
+      return;
+    }
+    this.isLoading = true;
+    this.apiService.delete(`tenants/${tenant.id}`).subscribe({
+      next: () => {
+        this.tenants = this.tenants.filter(item => item.id !== tenant.id);
+        this.isLoading = false;
+      },
+      error: () => {
         this.isLoading = false;
       },
     });

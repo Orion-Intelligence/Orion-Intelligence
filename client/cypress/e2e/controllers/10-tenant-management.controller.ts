@@ -27,6 +27,7 @@ export interface CaseAlertTenant {
   email: string;
   password: string;
   companyName: string;
+  slug: string;
 }
 
 function setConfiguredViewport() {
@@ -78,9 +79,26 @@ export function clickWhenVisible(selector: string, timeout: number = 30000) {
   cy.get(selector, {timeout}).click({waitForAnimations: false, animationDistanceThreshold: 0});
 }
 
-export function submitLogin(username: string, password: string) {
+function tenantLoginUrl(slug: string): string {
+  const url = new URL(Cypress.config('baseUrl') || 'http://localhost:4200');
+  url.hostname = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+    ? `${slug}.localhost`
+    : `${slug}.${url.hostname}`;
+  url.pathname = '/login';
+  return url.toString();
+}
+
+export function submitLogin(username: string, password: string, tenant?: {slug: string}) {
   cy.intercept('POST', '**/api/token').as('loginRequest');
-  cy.visitLoginWithCleanAuthState();
+  if (tenant) {
+    const loginUrl = tenantLoginUrl(tenant.slug);
+    cy.clearCookies({log: false});
+    cy.clearLocalStorage(undefined, {log: false});
+    cy.visit(loginUrl);
+    cy.location('hostname').should('eq', new URL(loginUrl).hostname);
+  } else {
+    cy.visitLoginWithCleanAuthState();
+  }
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
@@ -88,7 +106,7 @@ export function submitLogin(username: string, password: string) {
 }
 
 export function loginTenant(tenant: any) {
-  submitLogin(tenant.username, tenant.password);
+  submitLogin(tenant.username, tenant.password, tenant);
   cy.get('[data-testid="dashboard-main"]').should('be.visible');
 }
 
@@ -120,7 +138,9 @@ export function completeTenantOnboardingIfNeeded(tenant: CaseAlertTenant) {
 }
 
 export function setCurrentTenantAlertVisibility(tenant: CaseAlertTenant, visible: boolean) {
-  cy.visit('/dashboard/profile/tenant-settings');
+  cy.location('origin').then((origin) => {
+    cy.visit(`${origin}/dashboard/profile/tenant-settings`);
+  });
   cy.contains('h1', 'Tenant Data').should('be.visible');
   cy.scrollDashboardToBottom();
   cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
@@ -147,10 +167,7 @@ export function setCurrentTenantAlertVisibility(tenant: CaseAlertTenant, visible
 }
 
 export function setTenantAlertVisibility(tenant: CaseAlertTenant, visible: boolean) {
-  submitLogin(tenant.username, tenant.password);
-  cy.get('[data-testid="dashboard-main"]').should('be.visible');
-  setCurrentTenantAlertVisibility(tenant, visible);
-  cy.logout();
+  runCaseAlertTenantSession(tenant, visible, false);
 }
 
 export function loginCaseAlertUser(username: string, password: string) {
@@ -161,13 +178,74 @@ export function loginCaseAlertUser(username: string, password: string) {
 }
 
 export function onboardTenantForCaseAlerts(tenant: CaseAlertTenant) {
-  submitLogin(tenant.username, tenant.password);
-  cy.get('[data-testid="dashboard-main"], [data-testid="tenant-company-input"]')
-    .filter(':visible')
-    .should('have.length.greaterThan', 0);
-  completeTenantOnboardingIfNeeded(tenant);
-  setCurrentTenantAlertVisibility(tenant, true);
-  cy.logout();
+  runCaseAlertTenantSession(tenant, true, true);
+}
+
+function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, onboard: boolean) {
+  const loginUrl = tenantLoginUrl(tenant.slug);
+  const origin = new URL(loginUrl).origin;
+
+  cy.origin(origin, {args: {tenant, visible, onboard}}, ({tenant, visible, onboard}) => {
+    cy.visit('/login', {
+      onBeforeLoad(win) {
+        win.localStorage.clear();
+        win.sessionStorage.clear();
+      },
+    });
+    cy.get('[data-testid="login-user"]').should('be.visible').clear().type(tenant.username);
+    cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(tenant.password, {log: false});
+    cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+    cy.get('[data-testid="dashboard-main"], [data-testid="tenant-company-input"]', {timeout: 60000})
+      .filter(':visible')
+      .should('have.length.greaterThan', 0);
+
+    if (onboard) {
+      cy.get('body').then(($body) => {
+        if (!$body.find('[data-testid="tenant-company-input"]').length) {
+          return;
+        }
+
+        cy.get('[data-testid="tenant-company-input"]').should('be.visible').clear().type(tenant.companyName);
+        cy.get('[data-testid="tenant-onboarding-next-step1"]').should('be.visible').click();
+        cy.get('[data-testid="tenant-onboarding-next-step2"]').should('be.visible').click();
+        cy.get('[data-testid="tenant-onboarding-confirm"]').should('be.visible').click();
+      });
+      cy.get('[data-testid="dashboard-main"]').should('be.visible');
+    }
+
+    cy.visit('/dashboard/profile/tenant-settings');
+    cy.contains('h1', 'Tenant Data').should('be.visible');
+    cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
+    cy.contains('label', 'Allow Admin Alert Visibility')
+      .scrollIntoView()
+      .closest('div.rounded-lg')
+      .then(($toggle) => {
+        const isVisible = ($toggle.text() || '').includes('Tenant alerts are visible to admin');
+        if (isVisible !== visible) {
+          cy.wrap($toggle).click({force: true});
+          cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click({force: true});
+        } else {
+          cy.get('button[aria-label="Cancel privacy edit"]').scrollIntoView().should('be.visible').click({force: true});
+        }
+      });
+    cy.get('button[aria-label="Edit privacy settings"]', {timeout: 60000}).should('be.visible');
+
+    cy.get('[data-testid="profile-menu"]').filter(':visible').first().scrollIntoView().click({force: true});
+    cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({force: true});
+    cy.get('[data-testid="login-user"]').should('exist');
+  });
+  cy.visit(new URL('/login', Cypress.config('baseUrl') || 'http://localhost:4200').toString());
+}
+
+export function deleteTenant(tenant: any) {
+  cy.intercept('DELETE', '**/api/tenants/*').as('deleteTenant');
+  cy.contains('tbody tr', tenant.email).within(() => {
+    cy.get('[data-testid="tenant-delete-button"]').click({force: true});
+  });
+  cy.contains('Are you sure you want to delete this tenant and its associated users and keys?').should('be.visible');
+  cy.get('[data-testid="confirmation-yes-button"]').click();
+  cy.wait('@deleteTenant').its('response.statusCode').should('eq', 200);
+  cy.contains('tbody tr', tenant.email).should('not.exist');
 }
 
 export function openTenantEditor(tenant: any) {
@@ -526,7 +604,7 @@ export function openAuditLogPage() {
 
 export function openAuditLogFilter() {
   cy.get('app-auditlog #top').scrollIntoView();
-  cy.contains('button', 'Filter').filter(':visible').first().scrollIntoView().click();
+  cy.get('[data-testid="auditlog-filter-open"]').scrollIntoView().should('be.visible').click();
   cy.get('[data-testid="side-filter-close"]').filter(':visible').first().should('be.visible');
 }
 
@@ -684,23 +762,25 @@ export function waitForTenantAlertScanComplete(timeoutMs = 180000) {
   const startedAt = Date.now();
   let observedRunning = false;
 
-  const poll = (): Cypress.Chainable<unknown> => {
-    return cy.request('POST', '/api/profile/alert/scan/status', {}).then((response) => {
-      expect(response.status).to.eq(200);
-      if (response.body?.scan_running) {
-        observedRunning = true;
-      }
-      if (!response.body?.scan_running && (observedRunning || Date.now() - startedAt > 3000)) {
-        return cy.wrap(null);
-      }
-      if (Date.now() - startedAt > timeoutMs) {
-        throw new Error('Tenant alert scan did not finish');
-      }
-      return cy.wait(1000, {log: false}).then(() => poll());
-    });
-  };
+  return cy.location('origin').then((origin) => {
+    const poll = (): Cypress.Chainable<unknown> => {
+      return cy.request('POST', `${origin}/api/profile/alert/scan/status`, {}).then((response) => {
+        expect(response.status).to.eq(200);
+        if (response.body?.scan_running) {
+          observedRunning = true;
+        }
+        if (!response.body?.scan_running && (observedRunning || Date.now() - startedAt > 3000)) {
+          return cy.wrap(null);
+        }
+        if (Date.now() - startedAt > timeoutMs) {
+          throw new Error('Tenant alert scan did not finish');
+        }
+        return cy.wait(1000, {log: false}).then(() => poll());
+      });
+    };
 
-  return poll().then(() => {
+    return poll();
+  }).then(() => {
     cy.get('app-alert-scan-loading', {timeout: 60000}).should('not.exist');
   });
 }

@@ -7,6 +7,8 @@ DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$DOCS_DIR/.." && pwd)"
 CLIENT_DIR="$REPO_ROOT/client"
 TARGET_DIR="$DOCS_DIR/screenshots"
+STAGING_DIR=""
+clear_requested=false
 
 clear_docs_screenshots() {
     mkdir -p "$TARGET_DIR"
@@ -21,11 +23,14 @@ clear_docs_screenshots() {
 }
 
 cleanup() {
-    true
+    find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} + 2>/dev/null || true
+    if [ -n "$STAGING_DIR" ]; then
+        rm -rf "$STAGING_DIR"
+    fi
 }
 
 if [ "${1:-}" = "--clear" ]; then
-    clear_docs_screenshots
+    clear_requested=true
     shift
 fi
 
@@ -70,13 +75,13 @@ trap cleanup EXIT
 cd "$CLIENT_DIR" || exit 1
 mkdir -p "$TARGET_DIR"
 find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} +
-rm -f "$TARGET_DIR"/*-20260326.png
+STAGING_DIR="$(mktemp -d /tmp/orion-docs-screenshots.XXXXXX)"
 
 CYPRESS_takeScreenshots=true npm test run
 
 copied=0
 while IFS= read -r -d '' screenshot_path; do
-    cp "$screenshot_path" "$TARGET_DIR"/
+    cp "$screenshot_path" "$STAGING_DIR"/
     copied=$((copied + 1))
 done < <(find "$TARGET_DIR" -path "*/user-manual/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -print0)
 
@@ -86,8 +91,7 @@ if [ "$copied" -eq 0 ]; then
 fi
 
 (
-    cd "$TARGET_DIR" || exit 1
-    rm -f *-20260326.png
+    cd "$STAGING_DIR" || exit 1
     for f in *.png; do
         [ -e "$f" ] || continue
         cp "$f" "${f%.png}-20260326.png"
@@ -96,6 +100,12 @@ fi
     find . -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
 )
 
-find "$TARGET_DIR" -mindepth 1 -maxdepth 1 -type d -name "*.cy.ts" -exec rm -rf {} +
+if [ "$clear_requested" = true ]; then
+    clear_docs_screenshots
+else
+    rm -f "$TARGET_DIR"/*-20260326.png
+    find "$TARGET_DIR" -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
+fi
+cp "$STAGING_DIR"/*-20260326.png "$TARGET_DIR"/
 trap - EXIT
 cleanup

@@ -92,8 +92,8 @@ async def verifyUser(token: str):
 
 
 @auth_router.post("/api/forgot")
-async def forgotPassword(request: ForgotPasswordRequest):
-    return await auth_manager.forgot_password(request.email)
+async def forgotPassword(data: ForgotPasswordRequest, request: Request):
+    return await auth_manager.forgot_password(data.email, getattr(request.state, "tenant", None))
 
 
 @auth_router.post("/api/subscription/request")
@@ -102,8 +102,8 @@ async def subscriptionRequest(request: PaymentParamModel):
 
 
 @auth_router.post("/api/updatePassword")
-async def updatePassword(data: ResetPassword):
-    return await auth_manager.update_password(data.token, data.password)
+async def updatePassword(data: ResetPassword, request: Request):
+    return await auth_manager.update_password(data.token, data.password, getattr(request.state, "tenant", None))
 
 @auth_router.post("/api/support")
 async def support(data: SupportRequest):

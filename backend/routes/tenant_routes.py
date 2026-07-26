@@ -68,6 +68,15 @@ async def get_all_tenants():
     return await TenantManager.get_instance().get_all_tenant()
 
 
+@tenant_routes.delete(
+    "/api/tenants/{tenant_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def delete_tenant(tenant_id: str, current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().delete_tenant(tenant_id, current_user)
+
+
 @tenant_routes.get(
     "/api/tenants/alerts/summary",
     status_code=200,

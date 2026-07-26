@@ -66,7 +66,7 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
   it('covers CTI report export option selection', () => {
     visitCtiGraph();
     const exportDate = new Date().toISOString().slice(0, 10);
-    const exportBase = `cypress/downloads/cti-cti-graph-${exportDate}-cti-graph-intelligence-report`;
+    const exportBase = `cypress/downloads/cti-graph-intelligence-report-${exportDate}`;
 
     openAndAssertReportModal('Export CTI Report');
     cy.docsScreenshot('cti-export-modal');

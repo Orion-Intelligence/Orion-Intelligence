@@ -33,7 +33,8 @@ export class SignupComponent implements OnInit {
 
   ngOnInit(): void {
     const hostname = window.location.hostname.toLowerCase();
-    if (hostname.endsWith('.localhost') || hostname.split('.').length > 2) {
+    const isIpv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(hostname);
+    if (!isIpv4 && (hostname.endsWith('.localhost') || hostname.split('.').length > 2)) {
       this.router.navigate(['/login'], { replaceUrl: true }).then();
       return;
     }

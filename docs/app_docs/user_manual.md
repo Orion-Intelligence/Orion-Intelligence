@@ -2438,6 +2438,7 @@ It supports:
 - configuring allowed alert scanner categories
 - enabling Privileged IOC handling where required
 - assigning which tenants a user can view in tenant-alert administration workflows
+- deleting a tenant and its associated users and keys after confirmation
 
 Displayed fields include:
 
@@ -2452,6 +2453,28 @@ Displayed fields include:
 - privileged IOC state where enabled
 
 Admin tenant-alert views can summarize alerts across visible tenants, filter or search tenants from a multi-select dropdown, open category-specific alert drilldowns, review risk summary cards, and export a tenant's alerts as a PDF report.
+
+Tenant deletion is available only to administrators. The root/default tenant cannot be deleted.
+
+To delete a tenant:
+
+1. Sign in as an administrator and open `Tenants`.
+2. Find the tenant and select its red delete button.
+3. Review the confirmation message and select `Yes, Confirm`.
+4. Confirm that the tenant disappears from the list.
+
+This permanently removes the tenant and its associated users and keys.
+
+#### Dedicated Tenant Subdomains and White-Labeling
+
+Each tenant uses a dedicated subdomain, such as `<tenant-slug>.<platform-domain>` (`<tenant-slug>.localhost` in local environments). Tenant accounts sign in through that tenant URL, keeping authentication isolated from the main platform domain. Branding is also tenant-scoped, so the application name, favicon, light and dark logos, and login image can be customized without changing other tenants.
+
+```{figure} ../screenshots/system-settings-20260326.png
+:alt: Tenant white-label branding settings
+:width: 100%
+
+Brand assets and application identity controls used for tenant-level white-labeling.
+```
 
 ```{figure} ../screenshots/tenant-administration-20260326.png
 :alt: Tenant administration page

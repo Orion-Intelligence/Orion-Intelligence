@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 
 from configs.app_dependency import get_current_user, license_required, role_required
 from configs.limiter_dependency import limiter_dependency
@@ -122,8 +122,8 @@ async def test_search_dynamic_cracked(param: search_dynamic_crack_model = Body(.
 
 
 @test_routes.post("/api/forgot")
-async def forgotPassword(request: ForgotPasswordRequest):
-    return await auth_manager.forgot_password(request.email)
+async def forgotPassword(data: ForgotPasswordRequest, request: Request):
+    return await auth_manager.forgot_password(data.email, getattr(request.state, "tenant", None))
 
 
 @test_routes.post(

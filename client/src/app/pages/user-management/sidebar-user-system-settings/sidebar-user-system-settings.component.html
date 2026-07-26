@@ -17,14 +17,14 @@
     @if (canEditTenantBranding() && canManagePlatformSettings()) {
       <div class="mb-4 w-full overflow-x-auto border-b border-[var(--color-border)]">
         <div class="inline-flex flex-nowrap items-center gap-[2px] bg-transparent p-0" role="tablist" [attr.aria-label]="'System settings sections' | translate">
-          @if (canEditTenantBranding()) {
-            <button data-testid="system-settings-tab-branding" type="button" role="tab" [attr.aria-selected]="activeTab === 'branding'" (click)="selectTab('branding')" [ngClass]="activeTab === 'branding' ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]">
-              {{ 'Branding' | translate }}
-            </button>
-          }
           @if (canManagePlatformSettings()) {
             <button data-testid="system-settings-tab-platform" type="button" role="tab" [attr.aria-selected]="activeTab === 'platform'" (click)="selectTab('platform')" [ngClass]="activeTab === 'platform' ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]">
               {{ 'Platform Settings' | translate }}
+            </button>
+          }
+          @if (canEditTenantBranding()) {
+            <button data-testid="system-settings-tab-branding" type="button" role="tab" [attr.aria-selected]="activeTab === 'branding'" (click)="selectTab('branding')" [ngClass]="activeTab === 'branding' ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]">
+              {{ 'Branding' | translate }}
             </button>
           }
         </div>

@@ -5,6 +5,7 @@ import threading
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List, Optional
+from urllib.parse import urlsplit, urlunsplit
 
 from bson import ObjectId
 from fastapi import HTTPException
@@ -18,7 +19,7 @@ from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_mo
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import (IocCategory, TenantRequest, TenantStatus, db_tenant_model, normalize_tenant_slug)
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName, user_role
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mail_manager.mail_enums import MailSubject, MailUrlHeading
@@ -104,6 +105,22 @@ class TenantManager:
             slug = domain.split(".", 1)[0]
             return normalize_tenant_slug(slug) or fallback
         return fallback
+
+    @staticmethod
+    def build_tenant_url(app_url: str, tenant: db_tenant_model, path: str) -> str:
+        base_url = app_url.rstrip("/")
+        if tenant.is_default:
+            return f"{base_url}/{path.lstrip('/')}"
+
+        parsed = urlsplit(base_url)
+        slug = normalize_tenant_slug(tenant.slug)
+        if not slug or not parsed.hostname:
+            raise HTTPException(status_code=400, detail="Tenant subdomain not configured")
+
+        hostname = f"{slug}.localhost" if parsed.hostname in {"localhost", "127.0.0.1"} else f"{slug}.{parsed.hostname}"
+        netloc = f"{hostname}:{parsed.port}" if parsed.port else hostname
+        tenant_url = urlunsplit((parsed.scheme, netloc, parsed.path.rstrip("/"), "", ""))
+        return f"{tenant_url}/{path.lstrip('/')}"
 
     @staticmethod
     def validate_signup_username(username: str):
@@ -588,6 +605,30 @@ class TenantManager:
 
         return result
 
+    async def delete_tenant(self, tenant_id: str, current_user):
+        if current_user.role != user_role.ADMIN:
+            raise HTTPException(status_code=403, detail="Only admins can delete tenants")
+        try:
+            tenant_object_id = ObjectId(tenant_id)
+        except Exception:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+        tenant = await self._engine.find_one(
+            db_tenant_model, db_tenant_model.id == tenant_object_id)
+        if not tenant:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+        if tenant.is_default:
+            raise HTTPException(status_code=403, detail="Default tenant cannot be deleted")
+
+        users = await self._engine.find(
+            db_user_account, db_user_account.tenant_uuid == tenant_id)
+        for user in users:
+            await self._engine.remove(db_keys, db_keys.auth_id == str(user.id))
+        await self._engine.remove(
+            db_user_account, db_user_account.tenant_uuid == tenant_id)
+        await self._engine.remove(db_keys, db_keys.auth_id == tenant_id)
+        await self._engine.delete(tenant)
+        return {"message": "Tenant deleted successfully"}
+
     async def get_visible_tenant_alerts_summary(self, current_user) -> List[dict]:
         tenant_ids = await self.resolve_visible_alert_tenant_ids_for_user(current_user)
         if not tenant_ids:
@@ -782,7 +823,7 @@ class TenantManager:
                 str(current_user.tenant_uuid), str(current_user.id), "tenant created successfully")
 
             APP_URL = env_handler.get_instance().env("APP_URL")
-            login_url = f"{APP_URL}/login"
+            login_url = TenantManager.build_tenant_url(APP_URL, tenant, "/login")
             if constant.mail_template is not None:
                 html_content = constant.mail_template.render(
                     username=user.username,

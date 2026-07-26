@@ -350,7 +350,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   openExportChoice(): void {
-    this.isExportChoiceOpen = true;
+    void this.downloadReport();
   }
 
   closeExportChoice(): void {

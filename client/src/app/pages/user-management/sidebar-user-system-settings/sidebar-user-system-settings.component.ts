@@ -26,7 +26,7 @@ type SystemSettingsTab = 'branding' | 'platform';
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
-  activeTab: SystemSettingsTab = 'branding';
+  activeTab: SystemSettingsTab = 'platform';
   configurationEditing = false;
   mailEditing = false;
   webhookEditing = false;
@@ -400,7 +400,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     if (requestedTab === 'platform' && this.canManagePlatformSettings()) {
       return 'platform';
     }
-    return this.canEditTenantBranding() ? 'branding' : 'platform';
+    return this.canManagePlatformSettings() ? 'platform' : 'branding';
   }
 
   private applySettings(settings: Partial<AppSettingsModel>): void {

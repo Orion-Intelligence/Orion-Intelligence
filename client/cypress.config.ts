@@ -46,6 +46,7 @@ export default defineConfig({
             username: "test_for_tenants",
             email: "testing1@orionintelligence.org",
             password: "1qaz!QAZ",
+            slug: "orionintelligence",
         },
         TENANT_SUB_USER: {
             username: "tenant_user_1",
@@ -58,18 +59,21 @@ export default defineConfig({
                 email: "dcasealert1@dcaseorionintelligence.org",
                 password: "1qaz!QAZ",
                 companyName: "Case Alert Tenant One",
+                slug: "dcaseorionintelligence",
             },
             {
                 username: "ecasealert2",
                 email: "ecasealert2@ecaseorionintelligence.org",
                 password: "1qaz!QAZ",
                 companyName: "Case Alert Tenant Two",
+                slug: "ecaseorionintelligence",
             },
             {
                 username: "fcasealert3",
                 email: "fcasealert3@fcaseorionintelligence.org",
                 password: "1qaz!QAZ",
                 companyName: "Case Alert Tenant Three",
+                slug: "fcaseorionintelligence",
             },
         ],
         CASE_ALERT_USERS: {
