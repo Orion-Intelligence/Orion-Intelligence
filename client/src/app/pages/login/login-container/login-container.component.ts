@@ -19,6 +19,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 export class LoginContainerComponent implements OnInit, OnDestroy {
   private static readonly DEFAULT_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
   private static readonly DEFAULT_AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
+  private static readonly SIGNUP_HOSTS = new Set(['try.orionintelligence.org', 'localhost', '127.0.0.1', '[::1]']);
   private authSubscription!: Subscription;
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
@@ -35,13 +36,13 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   isMobile = false;
   autoDemoLogin = false;
   brandingResolved = false;
-  isSubdomainLogin = false;
+  showSignupLink = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
 
   ngOnInit() {
     const hostname = window.location.hostname.toLowerCase();
-    this.isSubdomainLogin = hostname.endsWith('.localhost') || hostname.split('.').length > 2;
+    this.showSignupLink = LoginContainerComponent.SIGNUP_HOSTS.has(hostname);
 
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;

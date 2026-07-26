@@ -60,7 +60,7 @@
                   <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8" [class.cursor-not-allowed]="!loginForm.valid" data-testid="login-button" type="submit" [value]="'Sign In' | translate" />
                 </div>
               </form>
-              @if (!isSubdomainLogin) {
+              @if (showSignupLink) {
                 <p class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[14px] mt-[-16px]">
                   {{ 'Don\'t have an account?' | translate }} <span (click)="goToSignUp()" class="text-[#373637] font-bold no-underline cursor-pointer">{{ 'Sign Up' | translate }}</span>
                 </p>
