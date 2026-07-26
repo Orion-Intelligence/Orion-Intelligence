@@ -28,7 +28,7 @@
                   <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'User Quota' | translate }}</th>
                   <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
                   <th class="w-[210px] overflow-clip align-middle px-4 py-3.5">{{ 'Licenses' | translate }}</th>
-                  <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
+                  <th class="w-[150px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
                 </tr>
               </thead>
               @if ((filteredTenants?.length || 0) > 0) {
@@ -72,7 +72,7 @@
                             <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon" />
                           </button>
                           <button data-testid="tenant-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 p-0 text-red-400 transition hover:bg-red-500/20" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">
-                            <i class="bi bi-trash"></i>
+                            <i class="bi bi-trash3 text-sm leading-none"></i>
                           </button>
                         </span>
                       </td>
@@ -255,7 +255,7 @@
                         <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
                       </button>
                       <button data-testid="tenant-delete-button" type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">
-                        <i class="bi bi-trash"></i>
+                        <i class="bi bi-trash3 text-sm leading-none"></i>
                       </button>
                     </div>
                   </div>
