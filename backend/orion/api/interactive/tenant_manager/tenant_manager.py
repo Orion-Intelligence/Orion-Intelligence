@@ -117,7 +117,14 @@ class TenantManager:
         if not slug or not parsed.hostname:
             raise HTTPException(status_code=400, detail="Tenant subdomain not configured")
 
-        hostname = f"{slug}.localhost" if parsed.hostname in {"localhost", "127.0.0.1"} else f"{slug}.{parsed.hostname}"
+        tenant_base_domain = str(
+            env_handler.get_instance().env("TENANT_BASE_DOMAIN", "") or ""
+        ).strip().lower().rstrip(".").removeprefix("*.")
+        hostname = (
+            f"{slug}.localhost"
+            if parsed.hostname in {"localhost", "127.0.0.1"}
+            else f"{slug}.{tenant_base_domain or parsed.hostname}"
+        )
         netloc = f"{hostname}:{parsed.port}" if parsed.port else hostname
         tenant_url = urlunsplit((parsed.scheme, netloc, parsed.path.rstrip("/"), "", ""))
         return f"{tenant_url}/{path.lstrip('/')}"

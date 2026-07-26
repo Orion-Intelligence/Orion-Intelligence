@@ -140,6 +140,14 @@ class auth_manager:
                 tzinfo=timezone.utc):
             raise HTTPException(status_code=400, detail="Verification link expired")
 
+        tenant = await engine.find_one(
+            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        if not tenant:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+
+        app_url = env_handler.get_instance().env("APP_URL")
+        access_url = TenantManager.build_tenant_url(app_url, tenant, "/login")
+
         user.status = UserStatus.ACTIVE
         user.account_verify_at = datetime.now(timezone.utc)
         user.verification_token = None
@@ -149,7 +157,31 @@ class auth_manager:
         await AuditLogManager.get_instance().register(
             str(user.tenant_uuid), str(user.id), "User verified")
 
-        return {"message": "Email verified successfully. You may continue onboarding."}
+        if constant.mail_template is not None:
+            html_content = constant.mail_template.render(
+                username=user.username,
+                email=user.email,
+                subject=MailSubject.TENANT_ACCESS.value,
+                lurlHeading=MailUrlHeading.TENANT_ACCESS.value,
+                url=access_url,
+                tenant_access=True)
+        else:
+            html_content = (
+                f"{MailSubject.TENANT_ACCESS.value}\n\n"
+                f"Hi {user.username},\n\n"
+                "Your email has been verified successfully. "
+                f"Access your tenant workspace at: {access_url}"
+            )
+        await mail_manager.get_instance().send_verification_mail(
+            to=user.email,
+            subject=MailSubject.TENANT_ACCESS.value,
+            body=html_content,
+            tenant_id=str(user.tenant_uuid))
+
+        return {
+            "message": "Email verified successfully. You may continue onboarding.",
+            "access_url": access_url,
+        }
 
     @staticmethod
     async def update_password(token: str, password: str, tenant_id):

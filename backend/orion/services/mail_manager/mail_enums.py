@@ -3,6 +3,7 @@ from enum import Enum
 
 class MailSubject(str, Enum):
     VERIFICATION = "Please verify your account"
+    TENANT_ACCESS = "Your tenant workspace is ready"
     ACCOUNT_RECOVERY = "Reset your account access"
     PRO_SUBSCRIPTION = "Pro Subscription Request"
     SUPPORT = "Support Request Received"
@@ -18,6 +19,7 @@ class MailMessage(str, Enum):
 
 class MailUrlHeading(str, Enum):
     VERIFICATION = "Verification link : "
+    TENANT_ACCESS = "Tenant access link : "
     ACCOUNT_RECOVERY = "Reset link : "
     PRO_SUBSCRIPTION = "Pro subscription details : "
     SUPPORT = "Message : "

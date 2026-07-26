@@ -46,14 +46,19 @@ class EnforceHTTPSMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 
-def trusted_host_patterns(production_domain) -> list[str]:
-    raw_domain = str(production_domain or "").strip().lower().rstrip(".")
-    if "://" in raw_domain:
-        raw_domain = urlsplit(raw_domain).hostname or ""
-    host = raw_domain.removeprefix("*.")
-    if not host or host == "*":
+def trusted_host_patterns(production_domain, tenant_base_domain="") -> list[str]:
+    raw_domains = [production_domain, tenant_base_domain]
+    if any(str(domain or "").strip() == "*" for domain in raw_domains):
         return ["*"]
-    return [host, f"*.{host}"]
+    patterns = []
+    for domain in raw_domains:
+        raw_domain = str(domain or "").strip().lower().rstrip(".")
+        if "://" in raw_domain:
+            raw_domain = urlsplit(raw_domain).hostname or ""
+        host = raw_domain.removeprefix("*.")
+        if host:
+            patterns.extend((host, f"*.{host}"))
+    return list(dict.fromkeys(patterns))
 
 
 def setup_middlewares(app):
@@ -64,6 +69,7 @@ def setup_middlewares(app):
     app.add_middleware(service_ready_middleware)
 
     PRODUCTION_DOMAIN = env_handler.get_instance().env("PRODUCTION_DOMAIN", "-")
+    TENANT_BASE_DOMAIN = env_handler.get_instance().env("TENANT_BASE_DOMAIN", "")
 
     app.add_middleware(
         CORSMiddleware,
@@ -73,7 +79,9 @@ def setup_middlewares(app):
         allow_headers=["Authorization", "Content-Type"])
 
     if not config.DEBUG:
-        app.add_middleware(TrustedHostMiddleware, allowed_hosts=trusted_host_patterns(PRODUCTION_DOMAIN))
+        app.add_middleware(
+            TrustedHostMiddleware,
+            allowed_hosts=trusted_host_patterns(PRODUCTION_DOMAIN, TENANT_BASE_DOMAIN))
 
     app.add_middleware(security_headers_middleware)
     app.add_middleware(content_block_middleware)

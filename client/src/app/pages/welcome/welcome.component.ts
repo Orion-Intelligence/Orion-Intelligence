@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 })
 export class WelcomeComponent implements OnInit {
   hasToken: boolean = false;
+  accessUrl: string | null = null;
   isLightTheme = false;
   message: string = "Your registration has been submitted! We've received your information and are now reviewing your request. You will receive an email notification once your account has been approved by an administrator.";
   heading: string = "Thank you for registering with ";
@@ -38,6 +39,7 @@ export class WelcomeComponent implements OnInit {
         next: (res: any) => {
           this.heading = "Verification Successful!";
           this.message = res.message || "Your email has been verified successfully. You may continue onboarding.";
+          this.accessUrl = res.access_url || null;
         },
         error: (err) => {
           this.heading = "Verification Failed!";
@@ -56,6 +58,10 @@ export class WelcomeComponent implements OnInit {
   }
 
   goToLogin() {
+    if (this.accessUrl) {
+      window.location.assign(this.accessUrl);
+      return;
+    }
     this.router.navigate(['/login']).then();
   }
 }

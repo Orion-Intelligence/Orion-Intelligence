@@ -33,12 +33,18 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
         if "://" in production_domain:
             production_domain = urlsplit(production_domain).hostname or ""
         production_domain = production_domain.removeprefix("*.")
+        tenant_base_domain = str(
+            env_handler.get_instance().env("TENANT_BASE_DOMAIN", "") or ""
+        ).strip().lower().rstrip(".")
+        if "://" in tenant_base_domain:
+            tenant_base_domain = urlsplit(tenant_base_domain).hostname or ""
+        tenant_base_domain = tenant_base_domain.removeprefix("*.") or production_domain
 
         tenant_slug = None
         if hostname in (production_domain, app_hostname, "localhost", "127.0.0.1"):
             is_default_tenant = True
-        elif production_domain and hostname.endswith(f".{production_domain}"):
-            tenant_slug = hostname[: -(len(production_domain) + 1)]
+        elif tenant_base_domain and hostname.endswith(f".{tenant_base_domain}"):
+            tenant_slug = hostname[: -(len(tenant_base_domain) + 1)]
             is_default_tenant = False
         elif hostname.endswith(".localhost"):
             tenant_slug = hostname[:-10]
