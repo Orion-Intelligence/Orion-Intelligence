@@ -50,8 +50,8 @@ type IocResultTab = 'stealers' | 'threats';
 })
 export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
-  private isSearchLoading = false;
-  private isRankedLoading = false;
+  private searchRequestId = 0;
+  private rankedRequestId = 0;
   private stealerIocPage = 1;
   private threatIocPage = 1;
 
@@ -195,9 +195,7 @@ export class CredentialComponent implements OnInit {
 
   fetchSearchResults(reset = true): void {
     this.firstTrigger = false;
-    if (this.isSearchLoading) {
-      return;
-    }
+    const requestId = ++this.searchRequestId;
     this.dashboardService.consolidatedParamModel.page = 1;
     this.isLoadingMore = false;
     this.resetIocPaginationState();
@@ -213,13 +211,15 @@ export class CredentialComponent implements OnInit {
     this.dashboardService.consolidatedParamModel.url ??= '';
     const startTime = performance.now();
     this.setLoading(1);
-    this.isSearchLoading = true;
     this.dashboardService
       .fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(300).pipe(map(() => response))), finalize(() => {
-        this.setLoading(-1), this.isSearchLoading = false;
+        this.setLoading(-1);
       }))
       .subscribe(response => {
+        if (requestId !== this.searchRequestId) {
+          return;
+        }
         const endTime = performance.now();
         this.breachesApiTime = Math.round(endTime - startTime);
         if (response?.success && response?.data && Array.isArray(response.data.Result)) {
@@ -280,21 +280,21 @@ export class CredentialComponent implements OnInit {
     if (this.isStandaloneStealerlogsRoute) {
       return;
     }
-    if (this.isRankedLoading) {
-      return;
-    }
+    const requestId = ++this.rankedRequestId;
     const startTime = performance.now();
     this.dashboardService.consolidatedParamModel.category = "";
     this.dashboardService.consolidatedParamModel.ioc = this.searchQuery;
     this.dashboardService.consolidatedParamModel.url ??= '';
     this.setLoading(1);
-    this.isRankedLoading = true;
     this.dashboardService
       .fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(500).pipe(map(() => response))), finalize(() => {
-        this.setLoading(-1), this.isRankedLoading = false, this.dashboardService.consolidatedParamModel.ioc = '';
+        this.setLoading(-1), this.dashboardService.consolidatedParamModel.ioc = '';
       }))
       .subscribe(response => {
+        if (requestId !== this.rankedRequestId) {
+          return;
+        }
         const endTime = performance.now();
         this.allSearchApiTime = Math.round(endTime - startTime);
         if (response.success && response.data) {

@@ -101,6 +101,8 @@ class search_query_generator:
             return {"match_none": {}}
 
         def make_clause(field):
+            if value == "*":
+                return {"exists": {"field": field}}
             if field in ("domain.keyword", "source_domain.keyword", "source_domain"):
                 return search_query_generator._domain_wildcard_clause(field, value)
 

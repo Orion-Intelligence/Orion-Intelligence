@@ -183,9 +183,6 @@ export class IocSearchComponent implements OnInit {
       return false;
     }
     const value = this.basicQuery?.trim();
-    if (this.selectedTag !== this.allTag() && !value) {
-      return true;
-    }
     if (!value) {
       return false;
     }
@@ -267,7 +264,7 @@ export class IocSearchComponent implements OnInit {
   private normalizeBasicQuery(tag: string, input: string): string {
     input = this.stripUrlPrefixes(input);
     if (!input.trim()) {
-      return '';
+      return tag === this.allTag() ? '' : `${tag}:*`;
     }
     let normalized = input
       .replace(/(?<!\|)\|(?!\|)/g, ' || ')
@@ -293,8 +290,9 @@ export class IocSearchComponent implements OnInit {
 
   getBasicErrorMessage(): string {
     const value = this.basicQuery?.trim();
+    const displayTag = (this.filterLabels()[this.selectedTag] || this.selectedTag).replace(/^m_/, '');
     if (!value && this.selectedTag !== this.allTag()) {
-      return `Please enter a valid ${this.selectedTag}`;
+      return `Please enter a valid ${displayTag.toLowerCase()}`;
     }
     if (this.hasInvalidOperators(value)) {
       return 'Invalid operator usage (use && or ||)';
@@ -305,7 +303,6 @@ export class IocSearchComponent implements OnInit {
     if (this.selectedTag === this.allTag()) {
       return '';
     }
-    const fallbackLabel = this.filterLabels()[this.selectedTag] || this.selectedTag;
     switch (this.selectedTag) {
       case StealerlogsSearchFilters.EMAIL:
         return 'Invalid email format';
@@ -314,9 +311,9 @@ export class IocSearchComponent implements OnInit {
       case StealerlogsSearchFilters.IP:
         return 'Invalid IP address format';
       case StealerlogsSearchFilters.CREDITCARD:
-        return 'Invalid crediticard format';
+        return 'Invalid credit card format';
       default:
-        return `Invalid ${fallbackLabel.toLowerCase()} format`;
+        return `Invalid ${displayTag.toLowerCase()} format`;
     }
   }
 
@@ -334,7 +331,6 @@ export class IocSearchComponent implements OnInit {
     if (!this.basicTouched && this.basicQuery.trim().length > 0) {
       this.basicTouched = true;
     }
-    this.basicSubmitted = this.basicTouched;
   }
 
   filterBasicInput(event: Event): void {
