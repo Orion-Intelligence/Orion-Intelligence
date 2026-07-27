@@ -20,7 +20,7 @@ import { HelperService } from '../../../../shared/services/helper.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { EmptyResultComponent } from '../../../../shared/partials/empty-result/empty-result.component';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { ExportChoiceOption } from '../../../../shared/model/report/export-choice.model';
+import { buildStandardExportOptions } from '../../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../../shared/services/export/alert-export.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -64,7 +64,7 @@ export class CategoryAlertReportComponent implements OnInit {
   isExportChoiceOpen: boolean = false;
   isAdminTenantAlertReport: boolean = false;
   adminTenantId: string | null = null;
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'category-alert-export-option-report' }];
+  readonly alertExportOptions = buildStandardExportOptions('category-alert-export-option', 'report', 'Generate PDF export for selected alert.');
   expandedAlertIds = new Set<string>();
   hoveredReportTool: 'add' | 'export' | 'flush' | 'sidebar' | null = null;
 
@@ -400,20 +400,20 @@ export class CategoryAlertReportComponent implements OnInit {
     this.isExportChoiceOpen = false;
   }
 
-  exportSelectedAlert(_type: string): void {
+  exportSelectedAlert(type: string): void {
     if (this.alertExportScope === 'category') {
-      this.exportCategoryAlerts();
+      this.exportCategoryAlerts(type);
       return;
     }
     if (!this.alertToShowReport) {
       this.closeExportChoice();
       return;
     }
-    this.alertExportService.exportPdf([this.alertToShowReport], 'Brand Alerts');
+    this.alertExportService.exportByType([this.alertToShowReport], type, 'Brand Alerts');
     this.closeExportChoice();
   }
 
-  private exportCategoryAlerts(): void {
+  private exportCategoryAlerts(type: string): void {
     const endpoint = this.getCategoryExportEndpoint();
     if (!endpoint) {
       this.closeExportChoice();
@@ -429,7 +429,7 @@ export class CategoryAlertReportComponent implements OnInit {
           this.closeExportChoice();
           return;
         }
-        this.alertExportService.exportPdf(alerts, 'Brand Alerts');
+        this.alertExportService.exportByType(alerts, type, 'Brand Alerts');
         this.closeExportChoice();
       },
       error: () => {

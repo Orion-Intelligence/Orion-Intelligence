@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
-import { ExportChoiceOption } from '../../shared/model/report/export-choice.model';
+import { buildStandardExportOptions } from '../../shared/model/report/export-choice.model';
 import { GraphReportPayload } from '../../shared/model/report/report-export.model';
 import { ScanJob } from '../../shared/model/scan-jobs/scan-job.model';
 import { ExportChoiceModalComponent } from '../../shared/partials/export-choice-modal/export-choice-modal.component';
@@ -14,20 +14,7 @@ import { ValuePresentationBase } from '../../shared/utils/value-presentation.bas
 
 type ScanReportField = { label: string; value: any };
 type ScanReportSection = { title: string; items: ScanReportField[] };
-const SCAN_REPORT_EXPORT_OPTIONS: ExportChoiceOption[] = [
-  {
-    value: 'json',
-    title: '1. JSON',
-    description: 'Download machine-readable scan report data.',
-    testId: 'scan-report-export-json'
-  },
-  {
-    value: 'report',
-    title: '2. Export Report (PDF)',
-    description: 'Generate consistent scan report PDF export.',
-    testId: 'scan-report-export-report'
-  }
-];
+const SCAN_REPORT_EXPORT_OPTIONS = buildStandardExportOptions('scan-report-export', 'report', 'Generate consistent scan report PDF export.');
 
 @Component({
   selector: 'app-scan-report',
@@ -158,7 +145,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   selectExport(type: string): void {
-    if (type === 'json' || type === 'report') {
+    if (type === 'json' || type === 'csv' || type === 'report') {
       this.exportReport(type);
     }
     this.closeExportChoice();
@@ -168,7 +155,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     if (!this.job) {
       return;
     }
-    this.reportExportService.exportByType(this.buildReportPayload(), type === 'json' ? 'json' : 'doc_pdf');
+    this.reportExportService.exportByType(this.buildReportPayload(), type === 'json' || type === 'csv' ? type : 'doc_pdf');
   }
 
   private buildReportPayload(): GraphReportPayload {

@@ -1,17 +1,21 @@
 import { Injectable } from '@angular/core';
 import { AlertAllIoc, AlertModel } from '../../model/company-profile/node.model';
 import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from '../../model/report/report-export.model';
-import { DocumentExportService } from './document-export.service';
 import { ExportBrandingService } from './export-branding.service';
+import { ReportExportService } from './report-export.service';
 
 @Injectable({ providedIn: 'root' })
 export class AlertExportService {
-  constructor(private documentExport: DocumentExportService, private exportBranding: ExportBrandingService) {
+  constructor(private exportBranding: ExportBrandingService, private reportExport: ReportExportService) {
   }
 
   exportPdf(alerts: AlertModel[] | null | undefined, title: string = 'Brand Alerts'): void {
+    this.exportByType(alerts, 'report', title);
+  }
+
+  exportByType(alerts: AlertModel[] | null | undefined, type: string, title: string = 'Brand Alerts'): void {
     const payload = this.buildPayload(alerts, title);
-    this.documentExport.exportDocumentPdf(payload);
+    this.reportExport.exportByType(payload, type === 'json' || type === 'csv' ? type : 'doc_pdf');
   }
 
   private buildPayload(alerts: AlertModel[] | null | undefined, title: string): GraphReportPayload {

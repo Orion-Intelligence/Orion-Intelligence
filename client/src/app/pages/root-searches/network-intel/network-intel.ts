@@ -358,13 +358,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   selectExport(type: string): void {
-    if (type === 'report') {
-      void this.downloadReport();
+    if (type === 'report' || type === 'json' || type === 'csv') {
+      void this.downloadReport(type);
     }
     this.closeExportChoice();
   }
 
-  private async downloadReport(): Promise<void> {
+  private async downloadReport(type: string = 'report'): Promise<void> {
     try {
       this.isExportingReport = true;
       this.exportProgress = 6;
@@ -383,7 +383,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       if (!payload) {
         return;
       }
-      this.reportExport.exportByType(payload, 'doc_pdf');
+      this.reportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
     }
     finally {
       this.isExportingReport = false;

@@ -416,8 +416,8 @@ export class CredentialComponent implements OnInit {
     if (type === 'csv') {
       this.downloadCombinedResultsCsv();
     }
-    else {
-      this.exportCombinedResultsPdf();
+    else if (type === 'json' || type === 'report') {
+      this.exportCombinedResults(type);
     }
     this.closeExportChoice();
   }
@@ -426,7 +426,11 @@ export class CredentialComponent implements OnInit {
     this.helperService.downloadAsCSV(this.buildCombinedExportRows(), 'credentials_export.csv');
   }
 
-  private exportCombinedResultsPdf(): void {
+  private exportCombinedResults(type: 'json' | 'report'): void {
+    this.reportExportService.exportByType(this.buildCombinedReportPayload(), type === 'json' ? 'json' : 'doc_pdf');
+  }
+
+  private buildCombinedReportPayload(): GraphReportPayload {
     const stealerResults = this.stealerlogCallbackModel?.Result ?? [];
     const rankedResults = this.rankedResult?.result ?? [];
     const exportSearchQuery = this.getExportSearchQuery();
@@ -440,7 +444,7 @@ export class CredentialComponent implements OnInit {
       tables.push(this.buildRankedPdfBlocks(rankedResults));
     }
 
-    const payload: GraphReportPayload = {
+    return {
       graphKind: 'cti',
       title: 'Credentials Export',
       sessionName: exportSearchQuery || 'Stealerlogs Search',
@@ -457,8 +461,6 @@ export class CredentialComponent implements OnInit {
       },
       tables
     };
-
-    this.reportExportService.exportByType(payload, 'doc_pdf');
   }
 
   private buildCombinedExportRows(): Record<string, string>[] {

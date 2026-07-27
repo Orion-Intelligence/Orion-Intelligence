@@ -12,6 +12,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { FILE_SCAN_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { ReportExportService } from '../../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 
 type ScannerResultItem = { label: string; value: string };
 type ScannerResultSection = { title: string; items: ScannerResultItem[] };
@@ -49,7 +51,7 @@ export class FileScannerComponent {
   isExportChoiceOpen = false;
   readonly reportExportOptions = FILE_SCAN_EXPORT_OPTIONS;
 
-  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private exportBranding: ExportBrandingService) {
+  constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private exportBranding: ExportBrandingService, private reportExportService: ReportExportService) {
     this.route.data.subscribe(data => {
       this.type = data['type'] ?? this.type;
       this.title = data['title'] ?? this.title;
@@ -209,6 +211,9 @@ export class FileScannerComponent {
     if (type === 'json') {
       this.exportReport();
     }
+    else if (type === 'csv' || type === 'report') {
+      this.exportStructuredReport(type);
+    }
     this.closeExportChoice();
   }
 
@@ -231,6 +236,34 @@ export class FileScannerComponent {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(a.href);
+  }
+
+  private exportStructuredReport(type: 'csv' | 'report'): void {
+    if (!this.scanResult) {
+      return;
+    }
+    const payload: GraphReportPayload = {
+      graphKind: 'cti',
+      title: `${this.title || 'File Scan'} Report`,
+      sessionName: this.getDisplayFileName() || 'file-scan',
+      generatedAtIso: new Date().toISOString(),
+      nodes: [],
+      edges: [],
+      summary: {
+        file_name: this.getDisplayFileName() || '-',
+        file_type: this.getDisplayFileType() || '-',
+        sections: this.resultSections.length,
+        fields: this.resultSections.reduce((sum, section) => sum + section.items.length, 0)
+      },
+      tables: this.resultSections.map(section => ({
+        title: section.title,
+        values: section.items.reduce<Record<string, string>>((acc, item) => {
+          acc[item.label] = item.value;
+          return acc;
+        }, {})
+      }))
+    };
+    this.reportExportService.exportByType(payload, type === 'csv' ? 'csv' : 'doc_pdf');
   }
 
   triggerFileInput(): void {

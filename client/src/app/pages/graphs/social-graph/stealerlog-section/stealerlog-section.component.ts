@@ -6,6 +6,8 @@ import { SocialNormalizationUtil } from '../utils/social-normalization.util';
 import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { STEALERLOG_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
+import { ReportExportService } from '../../../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 
 @Component({
   selector: 'app-social-stealerlog-section',
@@ -18,6 +20,7 @@ export class StealerlogSectionComponent {
   private readonly exportCsvColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly state = inject(SocialService);
   private readonly exportBranding = inject(ExportBrandingService);
+  private readonly reportExportService = inject(ReportExportService);
   private requestId = 0;
 
   username = input.required<string>();
@@ -100,11 +103,14 @@ export class StealerlogSectionComponent {
     if (type === 'csv') {
       this.downloadRecords();
     }
+    else if (type === 'json' || type === 'report') {
+      this.exportRecords(type);
+    }
     this.closeExportChoice();
   }
 
-  private downloadRecords(): void {
-    const rows = this.records().map((item, index) => ({
+  private buildExportRows(): Record<string, string>[] {
+    return this.records().map((item, index) => ({
       tenant_name: this.exportBranding.getTenantName(),
       recordType: 'stealer',
       recordIndex: String(index + 1),
@@ -121,6 +127,10 @@ export class StealerlogSectionComponent {
       team: '-',
       summary: '-'
     }));
+  }
+
+  private downloadRecords(): void {
+    const rows = this.buildExportRows();
     const csvLines = [
       this.exportCsvColumns.join(','),
       ...rows.map(row => this.exportCsvColumns.map(column => SocialNormalizationUtil.escapeCsvValue(row[column] ?? '-')).join(','))
@@ -134,6 +144,24 @@ export class StealerlogSectionComponent {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  private exportRecords(type: 'json' | 'report'): void {
+    const rows = this.buildExportRows();
+    const payload: GraphReportPayload = {
+      graphKind: 'social',
+      title: 'Stealer Logs Export',
+      sessionName: this.searchIdentity() || 'stealerlogs',
+      generatedAtIso: new Date().toISOString(),
+      nodes: [],
+      edges: [],
+      summary: {
+        search_query: this.searchIdentity() || '-',
+        total_records: rows.length
+      },
+      tables: [{ title: 'Stealer Logs', values: {}, columns: [...this.exportCsvColumns], rows }]
+    };
+    this.reportExportService.exportByType(payload, type === 'json' ? 'json' : 'doc_pdf');
   }
 
   getRecordTrackKey(index: number, record: any): string {

@@ -36,7 +36,7 @@ export interface GraphReportPayload {
   graphImageDataUrl?: string;
 }
 
-export type GraphReportExportType = 'json' | 'graph_pdf' | 'doc_pdf';
+export type GraphReportExportType = 'json' | 'csv' | 'graph_pdf' | 'doc_pdf';
 
 export interface UnifiedReportPayloadInput {
   currentRouteUrl: string;
