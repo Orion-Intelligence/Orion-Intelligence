@@ -4,7 +4,7 @@ WORKDIR /docs
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
-RUN sphinx-build -W --keep-going -b html . /site
+RUN ORION_DOCS_PUBLIC=1 sphinx-build -W --keep-going -b html . /site
 
 ARG DOCUMENTATION_PROJECT_NAME=Platform
 ARG DOCUMENTATION_COMPANY_NAME="Platform Operator"
