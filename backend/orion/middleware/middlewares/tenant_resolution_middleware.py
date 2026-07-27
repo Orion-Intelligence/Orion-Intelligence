@@ -1,16 +1,19 @@
 from urllib.parse import urlsplit
 
+from bson import ObjectId
 from cryptography.fernet import Fernet
-from fastapi import Request
+from fastapi import HTTPException, Request
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
 
+from configs.auth_cookie import token_from_request
 from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.service_manager import service_manager
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
+from orion.services.session_manager.session_manager import session_manager
 
 
 class tenant_resolution_middleware(BaseHTTPMiddleware):
@@ -49,6 +52,8 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
         elif hostname.endswith(".localhost"):
             tenant_slug = hostname[:-10]
             is_default_tenant = False
+        elif hostname == "trusted-web-main":
+            is_default_tenant = False
         else:
             return JSONResponse(status_code=404, content={"detail": "Tenant not found"})
 
@@ -60,7 +65,13 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
             return JSONResponse(status_code=503, content={"detail": "Tenant service unavailable"})
 
         try:
-            if is_default_tenant:
+            if hostname == "trusted-web-main":
+                user = await session_manager.get_instance().get_current_user(token_from_request(request))
+                tenant = await engine.find_one(
+                    db_tenant_model,
+                    db_tenant_model.id == ObjectId(str(user.tenant_uuid)),
+                )
+            elif is_default_tenant:
                 tenant = await engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
             else:
                 tenant = await engine.find_one(db_tenant_model, db_tenant_model.slug == tenant_slug)
@@ -74,6 +85,8 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
                         if not getattr(item, "slug", None) and name.strip().lower() == tenant_slug:
                             tenant = item
                             break
+        except HTTPException as exc:
+            return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
         except Exception:
             return JSONResponse(status_code=503, content={"detail": "Tenant service unavailable"})
 
