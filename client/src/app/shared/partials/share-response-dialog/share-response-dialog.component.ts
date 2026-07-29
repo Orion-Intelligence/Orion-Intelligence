@@ -10,15 +10,15 @@ interface ShareDestination {
   target: ShareTarget;
   label: string;
   icon: string;
-  iconShellClass: string;
+  iconClass: string;
 }
 
 const SHARE_DESTINATIONS: ShareDestination[] = [
-  { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconShellClass: 'border-sky-400/30 bg-sky-500/15 text-sky-200 group-hover:bg-sky-500/25' },
-  { target: 'x', label: 'X', icon: 'bi-twitter-x', iconShellClass: 'border-white/15 bg-white/10 text-white group-hover:bg-white/15' },
-  { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconShellClass: 'border-blue-400/30 bg-blue-500/15 text-blue-200 group-hover:bg-blue-500/25' },
-  { target: 'reddit', label: 'Reddit', icon: 'bi-reddit', iconShellClass: 'border-orange-300/30 bg-orange-400/15 text-orange-100 group-hover:bg-orange-400/25' },
-  { target: 'email', label: 'Email', icon: 'bi-envelope-fill', iconShellClass: 'border-amber-300/30 bg-amber-400/15 text-amber-100 group-hover:bg-amber-400/25' },
+  { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconClass: 'text-sky-300 group-hover:text-sky-200' },
+  { target: 'x', label: 'X', icon: 'bi-twitter-x', iconClass: 'text-white/75 group-hover:text-white' },
+  { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconClass: 'text-blue-300 group-hover:text-blue-200' },
+  { target: 'reddit', label: 'Reddit', icon: 'bi-reddit', iconClass: 'text-orange-300 group-hover:text-orange-200' },
+  { target: 'email', label: 'Email', icon: 'bi-envelope-fill', iconClass: 'text-amber-300 group-hover:text-amber-200' },
 ];
 
 @Component({

@@ -77,7 +77,7 @@
                           message.time | date : 'h:mm a' }}</span>
                       </div>
                       }
-                      <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                      <div class="relative max-w-full px-4 py-2.5 max-[640px]:w-full">
                         <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="message.text | markdown"></div>
                         @if (streamingMessageId() === message.id) {
                         <span class="mt-2 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
@@ -176,7 +176,7 @@
                         <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{
                           'Thinking' | translate }}</span>
                       </div>
-                      <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot min-w-0 w-[280px] max-w-full rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+                      <div class="min-w-0 w-[280px] max-w-full px-4 py-2.5 max-[640px]:w-full">
                         <div class="flex min-w-0 flex-col gap-2">
                           <div class="flex items-center gap-2">
                             <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, signal } from '@angular/core';
+import { Component, Input, OnDestroy, signal } from '@angular/core';
 import { AiWorkspaceMessage } from '../../../../shared/model/chat/ai-workspace-message.model';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { ShareResponseDialogComponent } from '../../../../shared/partials/share-response-dialog/share-response-dialog.component';
@@ -10,13 +10,22 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, ShareResponseDialogComponent, TranslatePipe],
   templateUrl: './bot-message-actions.component.html',
+  host: { class: 'block w-full' },
 })
-export class BotMessageActionsComponent {
+export class BotMessageActionsComponent implements OnDestroy {
+  private copyFeedbackTimer?: ReturnType<typeof setTimeout>;
+
   protected readonly copied = signal(false);
 
   @Input({ required: true }) message!: AiWorkspaceMessage;
 
   constructor(private readonly resultRowHelper: ResultRowHelperService) {}
+
+  ngOnDestroy(): void {
+    if (this.copyFeedbackTimer) {
+      clearTimeout(this.copyFeedbackTimer);
+    }
+  }
 
   copyMessage(event?: MouseEvent): void {
     event?.stopPropagation();
@@ -26,7 +35,13 @@ export class BotMessageActionsComponent {
     }
     this.resultRowHelper.copyToClipboard(text).subscribe((ok) => {
       this.copied.set(ok);
-      setTimeout(() => this.copied.set(false), 1200);
+      if (!ok) {
+        return;
+      }
+      if (this.copyFeedbackTimer) {
+        clearTimeout(this.copyFeedbackTimer);
+      }
+      this.copyFeedbackTimer = setTimeout(() => this.copied.set(false), 1400);
     });
   }
 }
