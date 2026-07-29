@@ -210,7 +210,7 @@ class search_model:
                     cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
                 item.password = cipher.decrypt(str(password).encode()).decode()
             except Exception as ex:
-                log.g().w(f"Stealer password decrypt skipped: {str(ex)}")
+                pass
 
     @staticmethod
     def _enrich_bin_results(response):
