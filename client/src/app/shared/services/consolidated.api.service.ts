@@ -33,6 +33,10 @@ export class ConsolidatedApiService {
         endpoint = '/api/dynamic/cracked';
         payload = { text: { playstore: input.q1 } };
         break;
+      case 'software':
+        endpoint = '/api/dynamic/software';
+        payload = { text: { name: input.q1 } };
+        break;
       default:
         endpoint = '/api/dynamic/';
         payload = { text: { q1: input.q1, q2: input.q2 } };

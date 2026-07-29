@@ -51,24 +51,26 @@
               <div class="flex w-full flex-col gap-[8px]">
                 <div class="flex w-full items-start justify-between rounded-[8px] max-[640px]:hidden">
                   <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">{{ 'Scan' | translate }}</div>
-                  <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">{{ 'Scanned on' | translate }}</div>
+                  <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">{{ 'Target' | translate }}</div>
                   <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">{{ 'categoryAlerts.fields.risk' | translate }}</div>
                   <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">{{ 'Action' | translate }}</div>
                 </div>
-                @for (r of domainResults; track r.scanType + '|' + r.domain) {
-                  <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-2 max-[640px]:gap-x-[10px] max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
-                    <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">{{ r.scanType | titlecase }} {{ 'Scan' | translate }}</div>
-                    <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-auto">{{ today | date:'MMMM dd, yyyy' }}</div>
-                    <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] max-[640px]:w-auto">
-                      <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
+                <div class="flex max-h-[105px] w-full flex-col gap-[8px] overflow-y-auto pr-[4px]">
+                  @for (r of domainResults; track r.scanType + '|' + r.domain) {
+                    <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-2 max-[640px]:gap-x-[10px] max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
+                      <div class="w-[100px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">{{ r.scanType | titlecase }} {{ 'Scan' | translate }}</div>
+                      <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-auto">{{ truncateText(r.domain, 20) }}</div>
+                      <div class="w-[72px] font-[Inter] text-[12px] font-normal leading-[1.2] max-[640px]:w-auto">
+                        <span [class]="gradeBadgeClass(r.grade)">{{ gradeText(r.grade) }}</span>
+                      </div>
+                      <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">
+                        <a data-testid="consolidated-scan-openweb-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/network-scan', basic: '/dashboard/scanner/network-scan', advance: '/dashboard/scanner/network-scan', repo: '/dashboard/scanner/network-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: r.domain, page: 1, matchtype: 'or', domain: null, scanType: r.scanType, section: r.scanType === 'seo' ? 'seo-scan' : (r.scanType === 'repo' ? 'repository-scan' : null) }" target="_blank" rel="noopener">
+                          {{ 'Details' | translate }}
+                        </a>
+                      </div>
                     </div>
-                    <div class="w-[64px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-auto">
-                      <a data-testid="consolidated-scan-openweb-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [routerLink]="{ seo: '/dashboard/scanner/network-scan', basic: '/dashboard/scanner/network-scan', advance: '/dashboard/scanner/network-scan', repo: '/dashboard/scanner/network-scan' }[r.scanType] || '/dashboard/scanner/' + r.scanType" [queryParams]="{ q: r.domain, page: 1, matchtype: 'or', domain: null, scanType: r.scanType, section: r.scanType === 'seo' ? 'seo-scan' : (r.scanType === 'repo' ? 'repository-scan' : null) }" target="_blank" rel="noopener">
-                        {{ 'Details' | translate }}
-                      </a>
-                    </div>
-                  </div>
-                }
+                  }
+                </div>
               </div>
             </div>
           </div>
@@ -83,19 +85,21 @@
                   <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">{{ 'Profile' | translate }}</div>
                   <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text4)]">{{ 'Action' | translate }}</div>
                 </div>
-                @for (row of liveApiRows.slice(0,3); track row.url || row.profile || $index) {
-                  <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
-                    <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
-                      {{ (row.url || ('Details' | translate)).replace('https://', '').replace('http://', '').replace('www.', '') }}
+                <div class="flex max-h-[105px] w-full flex-col gap-[8px] overflow-y-auto pr-[4px]">
+                  @for (row of liveApiRows; track row.profile + '|' + row.url + '|' + $index) {
+                    <div class="flex w-full items-center justify-between border-t border-[var(--ui-consolidated-divider)] pt-[6px] max-[640px]:grid max-[640px]:grid-cols-1 max-[640px]:gap-y-[6px] max-[640px]:pt-[10px]">
+                      <div class="w-[200px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
+                        {{ truncateText((row.url || ('Details' | translate)).replace('https://', '').replace('http://', '').replace('www.', ''), 20) }}
+                      </div>
+                      <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-full">{{ row.profile }}</div>
+                      <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
+                        <a data-testid="consolidated-scan-liveapi-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [href]="row.url || '#'" target="_blank">
+                          {{ 'Detail' | translate }}
+                        </a>
+                      </div>
                     </div>
-                    <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text2)] max-[640px]:w-full">{{ row.profile }}</div>
-                    <div class="w-[120px] font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] max-[640px]:w-full">
-                      <a data-testid="consolidated-scan-liveapi-detail" class="font-[Inter] text-[12px] font-normal leading-[1.2] text-[var(--color-text1)] underline" [href]="row.url || '#'" target="_blank">
-                        {{ 'Detail' | translate }}
-                      </a>
-                    </div>
-                  </div>
-                }
+                  }
+                </div>
               </div>
             </div>
           </div>
