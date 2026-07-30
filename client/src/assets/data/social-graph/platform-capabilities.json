@@ -10,9 +10,9 @@
     "disallow": ["posts"]
   },
   "twitter": {
-    "disallow": ["comments"]
+    "allow": ["posts", "comments"]
   },
   "x": {
-    "disallow": ["comments"]
+    "allow": ["posts", "comments"]
   }
 }

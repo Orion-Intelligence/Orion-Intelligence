@@ -22,6 +22,7 @@ export interface SocialImage {
     thumbnail: string;
     title: string;
     source: string;
+    source_url?: string;
 }
 export interface SocialPostComment {
     sender_name?: string;
@@ -38,6 +39,7 @@ export interface SocialPost {
     source?: string;
     likes: string;
     comments: string;
+    collected_comments_count?: string;
     comment_items?: string[];
     comment_details?: SocialPostComment[];
     shares: string;

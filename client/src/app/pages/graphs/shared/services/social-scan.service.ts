@@ -407,11 +407,11 @@ export class SocialScanService {
     });
   }
 
-  fetchExtensionBundle(platform: string, username: string, maxPosts = 20, maxComments = 25, maxFollowers = 1000, maxFollowing = 1000): Observable<{
+  fetchExtensionBundle(platform: string, username: string, maxPosts = 20, maxComments = 25, maxFollowers = 1000, maxFollowing = 1000, maxShorts = 20): Observable<{
         extensionBundle: any;
     }> {
     return this.pollForResult({
-      request: () => this.api.post<ApiEnvelope<any>>('social/extensions/profile', { platform, username, max_posts: maxPosts, max_comments: maxComments, max_followers: maxFollowers, max_following: maxFollowing }),
+      request: () => this.api.post<ApiEnvelope<any>>('social/extensions/profile', { platform, username, max_posts: maxPosts, max_shorts: maxShorts, max_comments: maxComments, max_followers: maxFollowers, max_following: maxFollowing }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ extensionBundle: this.unwrapExtensionResult(res.result as any) }),
     });
@@ -472,6 +472,28 @@ export class SocialScanService {
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 shorts: SocialPost[];
             }>>('social/shorts', { platform, username, max_shorts: maxShorts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
+    });
+  }
+
+  fetchExtensionSocialShorts(platform: string, username: string, maxShorts = 5, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0, maxComments = 25): Observable<{
+        shorts: SocialPost[];
+    }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
+                shorts: SocialPost[];
+            }>>('social/shorts', {
+              platform,
+              username,
+              max_shorts: maxShorts,
+              max_comments: maxComments,
+              post_offset: postOffset,
+              existing_posts_count: existingPostsCount,
+              existing_post_urls: existingPostUrls,
+              social_data_type: 'shorts',
+              use_extension: true,
+            }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
     });

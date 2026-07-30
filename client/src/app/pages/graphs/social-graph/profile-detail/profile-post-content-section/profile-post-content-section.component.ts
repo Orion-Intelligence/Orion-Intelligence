@@ -65,6 +65,14 @@ export class SocialProfilePostContentSectionComponent {
   isVideoPost(post: SocialPost | null | undefined): boolean {
     const mediaType = (post?.media_type || '').toLowerCase();
     const mediaUrl = this.getPostMediaUrl(post).toLowerCase();
+    if (this.platformData().platform.toLowerCase() === 'tiktok' && this.contentType() === 'shorts') {
+      return false;
+    }
+    const isImageThumbnail = /\.(?:avif|gif|jpe?g|png|webp)(?:$|[?#])/i.test(mediaUrl)
+      || /pbs\.twimg\.com\/(?:media|amplify_video_thumb|ext_tw_video_thumb)\//i.test(mediaUrl);
+    if (isImageThumbnail) {
+      return false;
+    }
     return mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('.mov') || mediaUrl.includes('.webm');
   }
 
@@ -174,14 +182,18 @@ export class SocialProfilePostContentSectionComponent {
 
   arePostCommentsVisible(post: SocialPost | null | undefined): boolean {
     const key = this.getPostCommentStateKey(post);
-    return !!key && !!this.postCommentsVisible()[key];
+    if (!key) {
+      return false;
+    }
+    const visibility = this.postCommentsVisible();
+    if (Object.prototype.hasOwnProperty.call(visibility, key)) {
+      return visibility[key];
+    }
+    return false;
   }
 
   getCommentFetchLabel(post: SocialPost | null | undefined): string {
-    if (!this.arePostCommentsVisible(post)) {
-      return this.getPostComments(post).length > 0 ? 'Show comments' : 'Load comments';
-    }
-    return this.canLoadComments(post) ? 'Load more comments' : 'Hide comments';
+    return this.arePostCommentsVisible(post) ? 'Hide comments' : 'Show comments';
   }
 
   handleCommentAction(platformData: PlatformResult, tabKey: PostContentTabKey, post: SocialPost): void {
@@ -190,10 +202,6 @@ export class SocialProfilePostContentSectionComponent {
       if (this.getPostComments(post).length === 0 && this.canLoadComments(post)) {
         this.loadComments(platformData, tabKey, post);
       }
-      return;
-    }
-    if (this.canLoadComments(post)) {
-      this.loadComments(platformData, tabKey, post);
       return;
     }
     this.setPostCommentsVisible(post, false);

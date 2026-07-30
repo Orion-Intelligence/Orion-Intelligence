@@ -18,11 +18,12 @@ export class SocialStateService {
   private readonly platformImages = signal<Record<string, boolean>>({});
   private readonly extensionProfile = signal<Record<string, boolean>>({});
   private readonly extensionPosts = signal<Record<string, boolean>>({});
+  private readonly extensionShorts = signal<Record<string, boolean>>({});
   private readonly followers = signal<Record<string, boolean>>({});
   private readonly following = signal<Record<string, boolean>>({});
   private readonly onlinePresence = signal<Record<string, boolean>>({});
   private readonly stealerLogs = signal<Record<string, boolean>>({});
-  private readonly fetchStates: Record<FetchStateKey, WritableSignal<Record<string, boolean>>> = { profile: this.profile, posts: this.posts, videos: this.videos, shorts: this.shorts, platformImages: this.platformImages, extensionProfile: this.extensionProfile, extensionPosts: this.extensionPosts, followers: this.followers, following: this.following, onlinePresence: this.onlinePresence, stealerLogs: this.stealerLogs };
+  private readonly fetchStates: Record<FetchStateKey, WritableSignal<Record<string, boolean>>> = { profile: this.profile, posts: this.posts, videos: this.videos, shorts: this.shorts, platformImages: this.platformImages, extensionProfile: this.extensionProfile, extensionPosts: this.extensionPosts, extensionShorts: this.extensionShorts, followers: this.followers, following: this.following, onlinePresence: this.onlinePresence, stealerLogs: this.stealerLogs };
 
   readonly graphState: SocialGraphState = this.graphStateRef;
   readonly notification = signal<NotificationData | null>(null);
@@ -196,6 +197,8 @@ export class SocialStateService {
         return 'extensionProfile';
       case 'extensionPosts':
         return 'extensionPosts';
+      case 'extensionShorts':
+        return 'extensionShorts';
       case 'images':
         return 'platformImages';
       case 'posts':

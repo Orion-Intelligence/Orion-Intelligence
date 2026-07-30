@@ -223,9 +223,9 @@ export class SocialNormalizationUtil {
   static normalizeSocialPost(post: any): SocialPost {
     const mediaUrl = this.firstValue(post?.media_url, post?.image_url, post?.thumbnail, post?.video_url, post?.m_img_src, post?.m_coverpage);
     const directComments = Array.isArray(post?.comments) ? '' : post?.comments;
-    const arrayCommentCount = this.firstArrayCount(post?.comment_details, post?.comments, post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list);
+    const arrayCommentCount = this.firstArrayCount(post?.comment_details, post?.comment_items, post?.comments, post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list);
     const commentCount = this.firstValue(directComments, post?.comments_count, post?.comment_count, post?.m_post_comments_count, post?.m_comment_count, post?.m_comments_count, arrayCommentCount);
-    const commentSources = [post?.comment_details, Array.isArray(post?.comments) ? post.comments : [], post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list, post?.m_post_comments];
+    const commentSources = [post?.comment_details, post?.comment_items, Array.isArray(post?.comments) ? post.comments : [], post?.m_post_comments_list, post?.m_comments, post?.comments_list, post?.post_comments_list, post?.m_post_comments];
     const commentItems = this.normalizeCommentItems(...commentSources);
     const commentDetails = this.normalizeCommentDetails(...commentSources);
     return {
@@ -237,9 +237,10 @@ export class SocialNormalizationUtil {
       source: this.firstValue(post?.source, post?.m_domain, post?.m_platform, post?.m_scrap_file),
       likes: this.firstValue(post?.likes, post?.likes_count, post?.m_post_likes, post?.m_likes),
       comments: commentCount,
+      collected_comments_count: this.firstValue(post?.collected_comments_count, arrayCommentCount),
       comment_items: commentItems,
       comment_details: commentDetails,
-      shares: this.firstValue(post?.shares, post?.m_post_shares, post?.m_retweets),
+      shares: this.firstValue(post?.shares, post?.retweets, post?.m_post_shares, post?.m_retweets),
       views: this.firstValue(post?.views, post?.views_count, post?.m_post_views, post?.m_views),
       media_type: this.firstValue(post?.media_type, post?.video_url ? 'video' : mediaUrl ? 'image' : ''),
       media_url: mediaUrl,

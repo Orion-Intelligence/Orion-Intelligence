@@ -6,7 +6,7 @@
       {
         "extension_id": "test-extension",
         "status": "online",
-        "platforms": ["instagram", "facebook", "x"],
+        "platforms": ["instagram", "facebook", "x", "youtube"],
         "commands": ["profile", "posts"],
         "connected_at": "2026-07-21T00:00:00Z",
         "last_seen_at": "2026-07-21T00:00:05Z",

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output, signal } from '@angular/core';
-import { PlatformResult, SocialExtensionFetchError, SocialOnlinePresenceResult, SocialStealerLogRecord } from '../../../../../shared/model/social/social-scan.models';
+import { PlatformResult, SocialExtensionFetchError, SocialImage, SocialOnlinePresenceResult, SocialPost, SocialStealerLogRecord } from '../../../../../shared/model/social/social-scan.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../../shared/utils/formatters';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, PostContentTabKey, PostCursorFetchRequest, SocialExtensionStatus } from '../../models/social-graph.models';
@@ -99,7 +99,8 @@ export class SocialProfileTabsSectionComponent {
 
   isAnyExtensionLoading(): boolean {
     return !!(this.loadingStates().extensionDetails
-      || this.loadingStates().extensionPosts);
+      || this.loadingStates().extensionPosts
+      || this.loadingStates().extensionShorts);
   }
 
   refreshExtensionStatus(): void {
@@ -234,7 +235,7 @@ export class SocialProfileTabsSectionComponent {
   }
 
   private isKnownExtensionPlatform(platform: string): boolean {
-    return ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook'].includes(platform);
+    return ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook', 'youtube', 'tiktok'].includes(platform);
   }
 
   private hasReadyExtension(platformData: PlatformResult, command?: string): boolean {
@@ -320,11 +321,39 @@ export class SocialProfileTabsSectionComponent {
       profileDetails: platformData.extensionProfileDetails ?? null,
       posts: platformData.extensionPosts ?? null,
       videos: platformData.extensionVideos ?? null,
-      shorts: platformData.extensionShorts ?? null,
+      shorts: this.getExtensionShortsWithImages(platformData),
       images: platformData.extensionImages ?? null,
       followers_list: platformData.extensionFollowers ?? null,
       following_list: platformData.extensionFollowing ?? null,
     };
+  }
+
+  private getExtensionShortsWithImages(platformData: PlatformResult): SocialPost[] | null {
+    const shorts = platformData.extensionShorts;
+    if (!shorts || platformData.platform.toLowerCase() !== 'tiktok') {
+      return shorts ?? null;
+    }
+
+    const images = platformData.extensionImages || [];
+    return shorts.map((short, index) => {
+      if (short.media_url) {
+        return short;
+      }
+      const image = this.findShortImage(short, images) || images[index];
+      const mediaUrl = image?.thumbnail || image?.image_url || '';
+      return mediaUrl ? { ...short, media_url: mediaUrl, media_type: 'image' } : short;
+    });
+  }
+
+  private findShortImage(short: SocialPost, images: SocialImage[]): SocialImage | undefined {
+    const postUrl = this.normalizeMatchValue(short.post_url);
+    const caption = this.normalizeMatchValue(short.caption);
+    return images.find(image => postUrl && this.normalizeMatchValue(image.source_url) === postUrl)
+      || images.find(image => caption && this.normalizeMatchValue(image.title) === caption);
+  }
+
+  private normalizeMatchValue(value: string | null | undefined): string {
+    return String(value || '').trim().replace(/\/$/, '').toLowerCase();
   }
 
   handleExtensionPostCursorFetch(request: PostCursorFetchRequest): void {
@@ -392,6 +421,7 @@ export class SocialProfileTabsSectionComponent {
         linkedin: ['linkedin.com'],
         reddit: ['reddit.com'],
         github: ['github.com'],
+        tiktok: ['tiktok.com'],
       };
       const hosts = allowedHosts[this.normalizeExtensionPlatform(platform || '')] || [];
       return hosts.length > 0 && hosts.some(host => hostname === host || hostname.endsWith(`.${host}`));

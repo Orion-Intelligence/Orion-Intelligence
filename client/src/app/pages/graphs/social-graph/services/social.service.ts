@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, of } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
-import { Job, PlatformResult, ScanEvent, SocialExtensionFetchError } from '../../../../shared/model/social/social-scan.models';
+import { Job, PlatformResult, ScanEvent, SocialExtensionFetchError, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../../shared/services/social-scan.service';
 import type { FetchMergeMode, FetchStateKey, FetchTabKey, NotificationType, ScanJobOptions, UpdateStateFn } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
@@ -121,6 +121,10 @@ export class SocialService {
 
   fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts?: number): ReturnType<SocialScanService['fetchSocialShorts']> {
     return this.scanService.fetchSocialShorts(platform, username, hashId, maxShorts);
+  }
+
+  fetchExtensionSocialShorts(platform: string, username: string, maxShorts = 5, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0): ReturnType<SocialScanService['fetchExtensionSocialShorts']> {
+    return this.scanService.fetchExtensionSocialShorts(platform, username, maxShorts, postOffset, existingPostUrls, existingPostsCount);
   }
 
   fetchSocialPostComments(platform: string, username: string, tabKey: 'posts' | 'videos' | 'shorts', hashId?: string, commentOffset?: number, maxComments?: number): ReturnType<SocialScanService['fetchSocialPostComments']> {
@@ -407,16 +411,16 @@ export class SocialService {
     if (stateKey === 'extensionProfile' && data && typeof data === 'object' && ('profile' in data || 'posts' in data || 'images' in data)) {
       return {
         extensionProfileDetails: data.profile ?? null,
-        extensionPosts: Array.isArray(data.posts) ? data.posts : [],
-        extensionVideos: Array.isArray(data.videos) ? data.videos : [],
-        extensionShorts: Array.isArray(data.shorts) ? data.shorts : [],
+        extensionPosts: this.normalizeFetchedPosts(data.posts),
+        extensionVideos: this.normalizeFetchedPosts(data.videos),
+        extensionShorts: this.normalizeFetchedPosts(data.shorts),
         extensionImages: this.normalizeFetchedImages(data.images),
         extensionFollowers: this.normalizeFetchedUsernames(data.followers),
         extensionFollowing: this.normalizeFetchedUsernames(data.following),
         extensionError: null,
       };
     }
-    const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', extensionProfile: 'extensionProfileDetails', extensionPosts: 'extensionPosts', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
+    const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', extensionProfile: 'extensionProfileDetails', extensionPosts: 'extensionPosts', extensionShorts: 'extensionShorts', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
     const propertyName = (propertyMap as any)[stateKey];
     if (mergeMode && this.isPostStateKey(stateKey)) {
       if (!hasData || !Array.isArray(data)) {
@@ -451,8 +455,8 @@ export class SocialService {
     return newData;
   }
 
-  private isPostStateKey(stateKey: FetchStateKey): stateKey is 'posts' | 'videos' | 'shorts' | 'extensionPosts' {
-    return ['posts', 'videos', 'shorts', 'extensionPosts'].includes(stateKey);
+  private isPostStateKey(stateKey: FetchStateKey): stateKey is 'posts' | 'videos' | 'shorts' | 'extensionPosts' | 'extensionShorts' {
+    return ['posts', 'videos', 'shorts', 'extensionPosts', 'extensionShorts'].includes(stateKey);
   }
 
   private isExtensionStateKey(stateKey: FetchStateKey): boolean {
@@ -466,7 +470,16 @@ export class SocialService {
         thumbnail: image?.thumbnail || image?.image_url || image?.media_url || '',
         title: image?.title || image?.caption || image?.text || 'Image result',
         source: image?.source || image?.source_url || '',
+        source_url: image?.source_url || '',
       })).filter((image: any) => image.image_url || image.thumbnail)
+      : [];
+  }
+
+  private normalizeFetchedPosts(value: any): SocialPost[] {
+    return Array.isArray(value)
+      ? value
+        .filter(post => SocialNormalizationUtil.isUsableSocialPost(post))
+        .map(post => SocialNormalizationUtil.normalizeSocialPost(post))
       : [];
   }
 

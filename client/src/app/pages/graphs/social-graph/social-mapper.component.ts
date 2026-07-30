@@ -53,6 +53,7 @@ export class SocialMapperComponent implements OnDestroy {
   private cancelPlatformImageFetchSubjects = new Map<string, Subject<void>>();
   private cancelExtensionProfileFetchSubjects = new Map<string, Subject<void>>();
   private cancelExtensionPostFetchSubjects = new Map<string, Subject<void>>();
+  private cancelExtensionShortFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowersFetchSubjects = new Map<string, Subject<void>>();
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
   private cancelOnlinePresenceFetchSubjects = new Map<string, Subject<void>>();
@@ -338,6 +339,19 @@ export class SocialMapperComponent implements OnDestroy {
 
   handleFetchExtensionPostCursor(request: PostCursorFetchRequest): void {
     const p = request.platformData;
+    if (request.tabKey === 'shorts' && !request.commentsOnly) {
+      const existingShorts = request.mergeMode === 'prepend' ? [] : p.extensionShorts || [];
+      const shortOffset = existingShorts.length;
+      const shortLimit = request.limit || (shortOffset ? 5 : 20);
+      const existingShortUrls = existingShorts.map(short => short.post_url).filter(Boolean);
+      const mergeMode = request.mergeMode === 'prepend' ? undefined : 'append';
+      this.fetchData(p,
+        'extensionShorts',
+        this.state.fetchExtensionSocialShorts(p.platform, p.username, shortLimit, shortOffset, existingShortUrls, shortOffset),
+        this.cancelExtensionShortFetchSubjects,
+        mergeMode,);
+      return;
+    }
     if (request.commentsOnly) {
       this.fetchData(p, 'extensionPosts', this.state.fetchExtensionSocialPosts(p.platform, p.username, request.cursorId, 1, 0, [], 0, 'comments', request.maxComments || 10, request.commentOffset || 0), this.cancelExtensionPostFetchSubjects, 'update');
       return;
@@ -515,6 +529,7 @@ export class SocialMapperComponent implements OnDestroy {
     this.scanResults().get(username)?.forEach((p: PlatformResult) => {
       this.cancelFetch(p, 'extensionProfile', this.cancelExtensionProfileFetchSubjects);
       this.cancelFetch(p, 'extensionPosts', this.cancelExtensionPostFetchSubjects);
+      this.cancelFetch(p, 'extensionShorts', this.cancelExtensionShortFetchSubjects);
     });
   }
 

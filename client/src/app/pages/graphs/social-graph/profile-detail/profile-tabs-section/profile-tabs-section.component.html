@@ -365,7 +365,17 @@
 
                 <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
                   <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Shorts</p>
-                  <app-social-profile-shorts-section [platformData]="getExtensionPlatformData(platformData)" [isLoading]="isTabLoading('extensionDetails')" (refetch)="refetchTab.emit('extension')"></app-social-profile-shorts-section>
+                  <app-social-profile-shorts-section
+                    [platformData]="getExtensionPlatformData(platformData)"
+                    [isLoading]="isTabLoading('extensionDetails') || isTabLoading('extensionShorts')"
+                    [allowCommentFetch]="false"
+                    [showFetchLatest]="false"
+                    [showLoadMoreWhenDone]="true"
+                    [showHeader]="false"
+                    [compactMedia]="true"
+                    (refetch)="refetchTab.emit('extension')"
+                    (cursorFetch)="handleExtensionPostCursorFetch($event)">
+                  </app-social-profile-shorts-section>
                 </section>
 
                 <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">

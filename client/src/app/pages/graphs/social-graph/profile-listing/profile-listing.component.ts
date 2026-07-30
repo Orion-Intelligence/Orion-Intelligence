@@ -24,7 +24,7 @@ import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tab
 })
 export class SocialProfileListingComponent {
   private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
-  private readonly EXTENSION_PLATFORMS = ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook'];
+  private readonly EXTENSION_PLATFORMS = ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook', 'youtube', 'tiktok'];
   private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'extension', label: 'Extension Details', icon: 'bi bi-plugin' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
   private readonly mappedFetchTabs: Partial<Record<FetchTabKey, FetchTab>> = { videos: { key: 'videos', label: 'Videos', icon: 'bi bi-play-btn' }, shorts: { key: 'shorts', label: 'Shorts', icon: 'bi bi-play-circle' } };
   private readonly followerFetchTabs: FetchTab[] = [ { key: 'followers', label: 'Followers', icon: 'bi bi-people' }, { key: 'following', label: 'Following', icon: 'bi bi-person-plus' } ];
@@ -320,7 +320,8 @@ export class SocialProfileListingComponent {
       }
       states.extensionDetails = this.isTabLoading(platformData, 'extensionDetails');
       states.extensionPosts = this.isTabLoading(platformData, 'extensionPosts');
-      states.extension = !!(states.extensionDetails || states.extensionPosts);
+      states.extensionShorts = this.isTabLoading(platformData, 'extensionShorts');
+      states.extension = !!(states.extensionDetails || states.extensionPosts || states.extensionShorts);
     }
     return states;
   }
@@ -340,6 +341,8 @@ export class SocialProfileListingComponent {
         return this.getProfileDetailEntries(this.getExtensionPlatformData(platformData)).length > 0;
       case 'extensionPosts':
         return this.getUniquePosts(this.getExtensionPlatformData(platformData), 'posts').length > 0;
+      case 'extensionShorts':
+        return this.getUniquePosts(this.getExtensionPlatformData(platformData), 'shorts').length > 0;
       case 'videos':
         return this.getUniquePosts(platformData, 'videos').length > 0;
       case 'shorts':

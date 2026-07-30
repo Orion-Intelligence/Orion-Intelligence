@@ -9,7 +9,7 @@ export interface FeedUser {
   allPlatforms: PlatformResult[];
 }
 
-export type FetchTabKey = 'details' | 'posts' | 'extension' | 'extensionDetails' | 'extensionPosts' | 'videos' | 'shorts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
+export type FetchTabKey = 'details' | 'posts' | 'extension' | 'extensionDetails' | 'extensionPosts' | 'extensionShorts' | 'videos' | 'shorts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 export type PostContentTabKey = Extract<FetchTabKey, 'posts' | 'videos' | 'shorts'>;
 export type FetchMergeMode = 'prepend' | 'append' | 'update';
 export type PostFetchMergeMode = FetchMergeMode;
@@ -82,7 +82,7 @@ export interface DeleteConfirmationData {
   message: string;
 }
 
-export type FetchStateKey = 'profile' | 'posts' | 'videos' | 'shorts' | 'platformImages' | 'extensionProfile' | 'extensionPosts' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
+export type FetchStateKey = 'profile' | 'posts' | 'videos' | 'shorts' | 'platformImages' | 'extensionProfile' | 'extensionPosts' | 'extensionShorts' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 
 export type UpdateStateFn = (updater: (state: SocialGraphState) => void) => void;
 

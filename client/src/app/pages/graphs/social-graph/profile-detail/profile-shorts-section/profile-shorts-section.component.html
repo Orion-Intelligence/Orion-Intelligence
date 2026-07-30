@@ -2,6 +2,11 @@
   [platformData]="platformData()"
   contentType="shorts"
   [isLoading]="isLoading()"
+  [allowCommentFetch]="allowCommentFetch()"
+  [showFetchLatest]="showFetchLatest()"
+  [showLoadMoreWhenDone]="showLoadMoreWhenDone()"
+  [showHeader]="showHeader()"
+  [compactMedia]="compactMedia()"
   (refetch)="refetch.emit($event)"
   (cursorFetch)="cursorFetch.emit($event)">
 </app-social-profile-post-content-section>
