@@ -125,7 +125,7 @@ class nexus_chat_gateway:
         try:
             async with httpx.AsyncClient() as client:
                 response = await client.get(
-                    f"{self._base_url()}/v1/users/downloads/{quote(file_name, safe='')}",
+                    f"http://172.18.0.1:8300/downloads/{quote(file_name, safe='')}",
                     headers=self._headers(current_user),
                     timeout=120,
                 )

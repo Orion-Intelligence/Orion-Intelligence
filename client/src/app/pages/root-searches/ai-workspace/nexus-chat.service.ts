@@ -1,59 +1,23 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, Observable, ReplaySubject, timer } from 'rxjs';
+import { EMPTY, Observable, timer } from 'rxjs';
 import { expand, switchMap, takeWhile } from 'rxjs/operators';
 import { ChatApiResponse } from '../../../shared/model/chat/chat-api-response.model';
 import { AiWorkspaceTrigger } from '../../../shared/model/chat/ai-workspace-message.model';
 import { NexusChatPayload, NexusChatStreamChunk, NexusSummaryPayload } from '../../../shared/model/chat/nexus-chat.model';
 import { ApiService } from '../../../shared/services/api.service';
-import { NexusChatDetail, NexusChatSession, NexusSendMessageResponse } from '../../../shared/model/nexus/ai-chat-session.model';
+import { NexusChatDetail, NexusChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
 
 @Injectable({ providedIn: 'root' })
 export class NexusChatService {
   private readonly streamTimeoutMs = 900000;
-  private readonly recoverableStreamTtlMs = 600000;
-  private activeStream?: { type: 'chat' | 'resume'; subject: ReplaySubject<NexusChatStreamChunk>; controller: AbortController; completed: boolean; emitted: boolean; completedAt: number | null; timeoutId: number; };
 
   constructor(private readonly api: ApiService) { }
 
-  streamNexusChat(payload: NexusChatPayload, options: { recoverable?: boolean } = {}): Observable<NexusChatStreamChunk> {
-    if (!options.recoverable) {
-      return this.streamDirectNexusChat(payload);
-    }
-    if (this.activeStream && !this.activeStream.completed) {
-      if (this.activeStream.type === 'chat') {
-        return this.activeStream.subject.asObservable();
-      }
-      this.closeLocalStream(this.activeStream);
-    }
-    this.clearCompletedStream();
-    return this.startNexusStream('/api/nexus/chat/workspace', payload, 'chat');
-  }
-
-  resumeNexusChat(): Observable<NexusChatStreamChunk> {
-    if (this.hasRecoverableStream()) {
-      return this.activeStream!.subject.asObservable();
-    }
-    this.clearCompletedStream();
-    return this.startNexusStream('/api/nexus/chat/workspace', null, 'resume');
-  }
-
-  hasRecoverableStream(): boolean {
-    if (!this.activeStream) {
-      return false;
-    }
-    if (!this.activeStream.completed) {
-      return true;
-    }
-    return this.activeStream.emitted
-      && this.activeStream.completedAt !== null
-      && Date.now() - this.activeStream.completedAt < this.recoverableStreamTtlMs;
+  streamNexusChat(payload: NexusChatPayload): Observable<NexusChatStreamChunk> {
+    return this.streamDirectNexusChat(payload);
   }
 
   cancelNexusChat(): void {
-    const activeStream = this.activeStream;
-    if (activeStream) {
-      this.closeLocalStream(activeStream);
-    }
     const token = localStorage.getItem('token');
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -161,127 +125,6 @@ export class NexusChatService {
         controller.abort();
       };
     });
-  }
-
-  private startNexusStream(url: string, body: unknown, type: 'chat' | 'resume'): Observable<NexusChatStreamChunk> {
-    const subject = new ReplaySubject<NexusChatStreamChunk>(1000);
-    const controller = new AbortController();
-    const timeoutId = window.setTimeout(() => {
-      controller.abort();
-      if (this.activeStream?.subject === subject) {
-        window.clearTimeout(this.activeStream.timeoutId);
-        subject.error(new Error('Nexus chat timed out.'));
-        this.activeStream = undefined;
-      }
-    }, this.streamTimeoutMs);
-    const stream = {
-      type,
-      subject,
-      controller,
-      completed: false,
-      emitted: false,
-      completedAt: null,
-      timeoutId,
-    };
-    this.activeStream = stream;
-    this.consumeNexusStream(url, body, stream);
-    return subject.asObservable();
-  }
-
-  private consumeNexusStream(url: string, body: unknown, stream: NonNullable<NexusChatService['activeStream']>): void {
-    const token = localStorage.getItem('token');
-    const headers: Record<string, string> = {
-      Accept: 'application/x-ndjson',
-      'Content-Type': 'application/json',
-    };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    fetch(url, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-      credentials: 'include',
-      signal: stream.controller.signal,
-    }).then(async (response) => {
-      if (response.status === 204) {
-        this.completeStream(stream, false);
-        return;
-      }
-      if (!response.ok) {
-        throw new Error(await response.text() || response.statusText);
-      }
-      if (!response.body) {
-        this.completeStream(stream, false);
-        return;
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      const observer = {
-        next: (chunk: NexusChatStreamChunk) => {
-          stream.emitted = true;
-          stream.subject.next(chunk);
-        },
-      };
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) {
-          break;
-        }
-        buffer += decoder.decode(value, { stream: true });
-        buffer = this.emitStreamLines(buffer, observer);
-      }
-
-      buffer += decoder.decode();
-      this.emitStreamLines(`${buffer}\n`, observer);
-      this.completeStream(stream, stream.emitted);
-    }).catch((error) => {
-      if (error?.name === 'AbortError') {
-        this.completeStream(stream, stream.emitted);
-        return;
-      }
-      stream.subject.error(error);
-      if (this.activeStream === stream) {
-        this.activeStream = undefined;
-      }
-    }).finally(() => {
-      window.clearTimeout(stream.timeoutId);
-    });
-  }
-
-  private closeLocalStream(stream: NonNullable<NexusChatService['activeStream']>): void {
-    stream.controller.abort();
-    window.clearTimeout(stream.timeoutId);
-    stream.subject.complete();
-    if (this.activeStream === stream) {
-      this.activeStream = undefined;
-    }
-  }
-
-  private completeStream(stream: NonNullable<NexusChatService['activeStream']>, keepForRecovery: boolean): void {
-    if (stream.completed) {
-      return;
-    }
-    stream.completed = true;
-    stream.completedAt = Date.now();
-    window.clearTimeout(stream.timeoutId);
-    stream.subject.complete();
-    if (this.activeStream === stream && !keepForRecovery) {
-      this.activeStream = undefined;
-    }
-  }
-
-  private clearCompletedStream(): void {
-    if (!this.activeStream?.completed) {
-      return;
-    }
-    if (!this.hasRecoverableStream()) {
-      this.activeStream = undefined;
-    }
   }
 
   clearNexusSession(payload: { session_id?: string } = {}): Observable<{ cleared?: boolean; }> {
@@ -418,10 +261,6 @@ export class NexusChatService {
 
   getChat(sessionId: string): Observable<NexusChatDetail> {
     return this.api.get<NexusChatDetail>(`nexus/chats/${sessionId}`);
-  }
-
-  sendMessageToChat(sessionId: string, text: string): Observable<NexusSendMessageResponse> {
-    return this.api.post<NexusSendMessageResponse>(`nexus/chats/${sessionId}/messages`, { text });
   }
 
   renameChatSession(sessionId: string, title: string): Observable<NexusChatSession> {

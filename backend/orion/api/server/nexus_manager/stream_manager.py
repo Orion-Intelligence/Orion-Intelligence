@@ -4,17 +4,16 @@ from typing import Any, AsyncGenerator
 
 import httpx
 
-from orion.api.server.nexus_manager.helper.chat_manager import ChatManager
 from orion.api.server.nexus_manager.model.rpc_payload_model import NexusRpcPayloadModel
 
 
 class NexusStreamManager:
+    MCP_ENDPOINT = "http://172.18.0.1:8300/mcp"
     NOT_FOUND_RESPONSE = "The data you are looking for was not found."
 
     def __init__(self, base_url: str):
         self.base_url = base_url
         self.active_chat_tasks: dict[str, asyncio.Task] = {}
-        self.chat_manager = ChatManager(self.base_url, self.active_chat_tasks, self._stream)
 
     @staticmethod
     def _parse_stream_line(line: str) -> dict[str, Any] | None:
@@ -42,32 +41,31 @@ class NexusStreamManager:
                 return structured_content
         return parsed_line
 
-    async def _stream(self, client: httpx.AsyncClient, endpoint: str, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, payload: NexusRpcPayloadModel | None = None, recoverable: bool = False, auth_token: str = "", session_id: str = "", session_type: str = "persistent", tenant_id: str = "") -> AsyncGenerator[tuple[str, str, bool], None]:
+    async def _mcp_headers(self, client: httpx.AsyncClient) -> dict[str, str]:
+        headers = {"Accept": "application/json, text/event-stream", "Content-Type": "application/json"}
+        response = await client.post(self.MCP_ENDPOINT, headers=headers, json={"jsonrpc": "2.0", "id": "initialize", "method": "initialize", "params": {"protocolVersion": "2025-11-25", "capabilities": {}, "clientInfo": {"name": "orion-intelligence", "version": "1.0"}}})
+        response.raise_for_status()
+        session_id = response.headers["mcp-session-id"]
+        headers["Mcp-Session-Id"] = session_id
+        response = await client.post(self.MCP_ENDPOINT, headers=headers, json={"jsonrpc": "2.0", "method": "notifications/initialized"})
+        response.raise_for_status()
+        return headers
+
+    async def _store_turn(self, client: httpx.AsyncClient, prompt: str, response: str, user_id: str, tenant_id: str, session_id: str) -> None:
+        result = await client.post(f"{self.base_url}/v1/chats/{session_id}/messages", headers={"X-User-Id": user_id, "X-Tenant-Id": tenant_id}, json={"text": prompt, "response": response})
+        result.raise_for_status()
+
+    async def _close_mcp_session(self, client: httpx.AsyncClient, headers: dict[str, str]) -> None:
+        try:
+            await client.delete(self.MCP_ENDPOINT, headers=headers)
+        except httpx.HTTPError:
+            pass
+
+    async def _stream(self, client: httpx.AsyncClient, payload: NexusRpcPayloadModel, headers: dict[str, str]) -> AsyncGenerator[tuple[str, str, bool], None]:
         response = None
         answer = ""
         try:
-            headers: dict[str, str] = {}
-            if payload is None:
-                selected_tool = tool or "open_chat"
-                if selected_tool == "default":
-                    selected_tool = "open_chat"
-                request_body: dict[str, Any] = {
-                    "prompt": prompt,
-                    "tool": selected_tool,
-                    "session_id": session_id,
-                    "session_type": session_type or "persistent",
-                    "recoverable": recoverable,
-                }
-                if type_name and type_name != "default":
-                    request_body["type"] = type_name
-                if history:
-                    request_body["history"] = history
-                headers = {"X-User-Id": user_id, "X-Tenant-Id": tenant_id or "default"}
-                if auth_token:
-                    headers["Authorization"] = auth_token
-            else:
-                request_body = payload.model_dump()
-            request = client.build_request("POST", endpoint, json=request_body, headers=headers)
+            request = client.build_request("POST", self.MCP_ENDPOINT, json=payload.model_dump(), headers=headers)
             response = await client.send(request, stream=True)
             if response.status_code != 200:
                 yield json.dumps({"output": {"response": (await response.aread()).decode("utf-8", errors="ignore")}, "done": True, "error": True}, ensure_ascii=True) + "\n", "", True
@@ -86,9 +84,18 @@ class NexusStreamManager:
                         yield json.dumps({"output": {"response": error_message}, "done": True, "error": True}, ensure_ascii=True) + "\n", "", True
                         return
 
-                    status_value = parsed_line.get("status")
+                    result = parsed_line.get("result")
+                    if isinstance(result, dict) and result.get("isError"):
+                        content = result.get("content") or []
+                        message = "\n".join(str(item.get("text") or "") for item in content if isinstance(item, dict)).strip() or "MCP request failed"
+                        yield json.dumps({"output": {"response": message}, "done": True, "error": True}, ensure_ascii=True) + "\n", "", True
+                        return
+
+                    progress = parsed_line.get("params") if parsed_line.get("method") == "notifications/progress" else {}
+                    status_value = parsed_line.get("status") or (progress.get("message") if isinstance(progress, dict) else "")
                     if status_value:
-                        yield json.dumps({"status": status_value, "done": False, "error": False}, ensure_ascii=True) + "\n", "", False
+                        status = status_value if isinstance(status_value, dict) else {"message": str(status_value)}
+                        yield json.dumps({"status": status, "done": False, "error": False}, ensure_ascii=True) + "\n", "", False
 
                     output = self._stream_output(parsed_line)
                     response_type = output.get("response_type") or parsed_line.get("response_type")
@@ -116,24 +123,55 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", history: list[dict[str, str]] | None = None, recoverable: bool = False, auth_token: str = "", session_id: str = "", session_type: str = "persistent", tenant_id: str = "") -> AsyncGenerator[str, None]:
-        endpoint = f"{self.base_url}/v1/chats/stream"
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", auth_token: str = "", session_id: str = "", session_type: str = "persistent", tenant_id: str = "") -> AsyncGenerator[str, None]:
         client = httpx.AsyncClient(timeout=30 * 60)
         current_task = asyncio.current_task()
+        headers: dict[str, str] | None = None
+        stored = False
         if current_task is not None:
             self.active_chat_tasks[user_id] = current_task
         try:
-            async for line, answer, failed in self._stream(client, endpoint, prompt, user_id, tool=tool, type_name=type_name, history=history, recoverable=recoverable, auth_token=auth_token, session_id=session_id, session_type=session_type, tenant_id=tenant_id):
+            selected_tool = tool or "open_chat"
+            if selected_tool in {"default", "summarizer"}:
+                selected_tool = "open_chat"
+            headers = await self._mcp_headers(client)
+            headers["X-User-Id"] = user_id
+            if auth_token:
+                headers["Authorization"] = auth_token
+            arguments = {"prompt": prompt, "session_id": session_id}
+            if selected_tool == "api_payload":
+                arguments["request_type"] = type_name
+            payload = NexusRpcPayloadModel.tool_call(request_id=user_id, name=selected_tool, arguments=arguments)
+            async for line, answer, failed in self._stream(client, payload, headers):
                 if line:
+                    event = self._parse_stream_line(line)
+                    output = self._stream_output(event) if event is not None else {}
+                    final_response = str(output.get("response") or "").strip()
+                    if session_type == "persistent" and session_id and final_response and event is not None and event.get("done") and not event.get("error"):
+                        await self._store_turn(client, prompt, final_response, user_id, tenant_id, session_id)
+                        stored = True
                     yield line
                 if failed:
                     return
                 if answer:
+                    if session_type == "persistent" and session_id and not stored:
+                        await self._store_turn(client, prompt, answer, user_id, tenant_id, session_id)
                     yield json.dumps({"output": {"response": answer.strip()}, "done": True, "error": False}, ensure_ascii=True) + "\n"
                     return
-        except Exception as _:
+        except asyncio.CancelledError:
+            raise
+        except Exception:
             yield json.dumps({"output": {"response": "Something happened while calling api/chat"}, "done": True, "error": True}, ensure_ascii=True) + "\n"
         finally:
             if self.active_chat_tasks.get(user_id) is current_task:
                 self.active_chat_tasks.pop(user_id, None)
+            if headers is not None:
+                await self._close_mcp_session(client, headers)
             await client.aclose()
+
+    async def cancel_chat(self, user_id: str = "system") -> dict[str, bool]:
+        task = self.active_chat_tasks.pop(user_id, None)
+        cancelled = task is not None and not task.done()
+        if cancelled:
+            task.cancel()
+        return {"cancelled": cancelled}

@@ -4,6 +4,7 @@ export interface AiChatSession {
     sessionId: string;
     title: string;
     updatedAt: string;
+    messageCount: number;
     messages: AiWorkspaceMessage[];
     isPinned: boolean;
     pinnedAt: string | null;
@@ -28,10 +29,4 @@ export interface NexusChatMessage {
 
 export interface NexusChatDetail extends NexusChatSession {
     messages: NexusChatMessage[];
-}
-
-export interface NexusSendMessageResponse {
-    chat: NexusChatSession;
-    user_message: NexusChatMessage;
-    assistant_message: NexusChatMessage;
 }

@@ -66,19 +66,6 @@ async def nexus_chat(request: Request, payload: ReportChatRequest, current_user=
 
 
 @ai_routes.post(
-    "/api/nexus/chat/workspace",
-    status_code=200,
-    include_in_schema=False,
-    dependencies=[Depends(ai_enabled_required), Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), Depends(limiter_dependency)], )
-async def nexus_workspace_chat(request: Request, payload: ReportChatRequest | None = Body(default=None), current_user=Depends(get_current_user)):
-    user_id = str(current_user.id)
-    if payload is None or not payload.message.strip():
-        return await nexus_manager.getInstance().resume_chat(user_id=user_id)
-    response = await nexus_manager.getInstance().parse_chat(payload, user_id=user_id, current_user=current_user, recoverable=True, auth_token=token_from_request(request) or "")
-    return response
-
-
-@ai_routes.post(
     "/api/nexus/chat/cancel",
     include_in_schema=False,
     dependencies=[

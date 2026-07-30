@@ -62,6 +62,15 @@ export class AiChatSidebarComponent {
     }
   }
 
+  clearSearch(): void {
+    this.searchQuery = '';
+  }
+
+  closeSearch(): void {
+    this.searchOpen = false;
+    this.searchQuery = '';
+  }
+
   toggleChatMenu(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
     this.openedSessionMenuId = this.openedSessionMenuId === chat.sessionId ? null : chat.sessionId;
@@ -141,6 +150,9 @@ export class AiChatSidebarComponent {
 
   deleteChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
+    if (!this.canDeleteChat) {
+      return;
+    }
     this.deleteChatTarget = chat;
     this.closeChatMenu();
   }
@@ -148,7 +160,7 @@ export class AiChatSidebarComponent {
   confirmDeleteChat(confirmed: boolean): void {
     const chat = this.deleteChatTarget;
     this.deleteChatTarget = null;
-    if (!confirmed || !chat) {
+    if (!confirmed || !chat || !this.canDeleteChat) {
       return;
     }
     this.nexusChatService.deleteChatSession(chat.sessionId).subscribe({
@@ -163,9 +175,26 @@ export class AiChatSidebarComponent {
   get filteredSessions(): AiChatSession[] {
     const query = this.searchQuery.trim().toLowerCase();
     if (!query) {
-      return this.sessions();
+      return this.visibleSessions;
     }
-    return this.sessions().filter(chat => chat.title.toLowerCase().includes(query));
+    return this.visibleSessions.filter(chat => chat.title.toLowerCase().includes(query));
+  }
+
+  get visibleSessions(): AiChatSession[] {
+    const emptyFallback = this.sessions().find(chat =>
+      chat.sessionId === this.activeSessionId() && this.isChatEmpty(chat))
+      || this.sessions().find(chat => this.isChatEmpty(chat));
+    return this.sessions().filter(chat =>
+      !this.isChatEmpty(chat)
+      || chat.sessionId === emptyFallback?.sessionId);
+  }
+
+  isChatEmpty(chat: AiChatSession): boolean {
+    return chat.messageCount === 0 && chat.messages.length === 0;
+  }
+
+  get canDeleteChat(): boolean {
+    return this.visibleSessions.length > 1;
   }
 
   getChatInitial(chat: AiChatSession): string {
@@ -174,6 +203,11 @@ export class AiChatSidebarComponent {
 
   getChatTooltip(chat: AiChatSession): string {
     return chat.title || 'Nexus Chat';
+  }
+
+  shouldOpenMenuAbove(chat: AiChatSession): boolean {
+    const sessions = this.filteredSessions;
+    return sessions.length > 4 && sessions.indexOf(chat) >= sessions.length - 3;
   }
 
   @HostListener('document:click')
@@ -192,6 +226,7 @@ export class AiChatSidebarComponent {
       sessionId: updated.session_id || current.sessionId,
       title: updated.title || current.title,
       updatedAt: updated.updated_at || current.updatedAt,
+      messageCount: updated.message_count ?? current.messageCount,
       isPinned: updated.is_pinned ?? current.isPinned,
       pinnedAt: updated.pinned_at ?? current.pinnedAt ?? null,
     };

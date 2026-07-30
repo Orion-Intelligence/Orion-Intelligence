@@ -4,7 +4,7 @@
       <div class="relative flex min-h-0 flex-grow flex-row">
         <app-ai-chat-sidebar
           class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
-          [sessions]="chatSessions" [activeSessionId]="activeSessionId" [isBusy]="isSending() || isStreamingReply()"
+          [sessions]="chatSessions" [activeSessionId]="activeSessionId" [isBusy]="isSending()"
           (newChat)="startNewChat()" (chatSelected)="selectChat($event)"
           (sessionUpdated)="onSidebarSessionUpdated($event)"
           (sessionDeleted)="onSidebarSessionDeleted($event)"></app-ai-chat-sidebar>
@@ -35,7 +35,7 @@
                 <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
                 <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
                   @if (isLoadingHistory()) {
-                  <div class="flex min-h-full items-start justify-center pt-8 max-[640px]:pt-5">
+                  <div class="flex min-h-full items-center justify-center">
                     <div class="inline-flex items-center gap-3 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2.5 text-[13px] text-[var(--color-text3)] shadow-[0_8px_20px_var(--color-shadow-medium)]">
                       <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
                       <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
@@ -43,8 +43,8 @@
                       <span class="ml-1">{{ 'Fetching chat history' | translate }}</span>
                     </div>
                   </div>
-                  } @else if (!messages.length) {
-                  <div class="flex min-h-full items-start justify-center pt-6 max-[640px]:block max-[640px]:min-h-0 max-[640px]:pt-4">
+                  } @else if (!messages.length && !isSending()) {
+                  <div class="flex min-h-full items-center justify-center py-6 max-[640px]:min-h-full max-[640px]:px-1 max-[640px]:py-4">
                     <div class="w-full max-w-[620px] text-center">
                       <div class="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] shadow-[0_6px_14px_rgba(0,0,0,0.08)]">
                         <img alt="chat" src="assets/images/shared/chat-icon.svg" class="h-9 w-9 rounded-full object-cover">
@@ -79,15 +79,8 @@
                       }
                       <div class="relative max-w-full px-4 py-2.5 max-[640px]:w-full">
                         <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="message.text | markdown"></div>
-                        @if (streamingMessageId() === message.id) {
-                        <span class="mt-2 inline-flex translate-y-[-1px] items-center gap-1 align-middle">
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:140ms]"></span>
-                          <span class="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--color-blue-640)] [animation-delay:280ms]"></span>
-                        </span>
-                        }
                       </div>
-                      @if (streamingMessageId() !== message.id && message.text.trim()) {
+                      @if (message.text.trim()) {
                       <app-bot-message-actions [message]="message"></app-bot-message-actions>
                       }
                     </div>
@@ -167,7 +160,7 @@
                   }
                   }
 
-                  @if (isSending() && !isStreamingReply()) {
+                  @if (isSending()) {
                   <div class="ui-ai-chat-row mx-auto flex w-full max-w-[980px] justify-start">
                     <div class="ui-ai-chat-agent-turn space-y-1.5">
                       <div class="flex min-h-[20px] items-center gap-2 px-4">
@@ -195,23 +188,15 @@
                 </div>
 
                 <div class="shrink-0 border-t border-[var(--color-border)] p-3">
-                  <div [class]="messages.length ? 'mb-0 max-h-0 overflow-hidden opacity-0 pointer-events-none transition-all duration-200 max-[640px]:hidden' : 'mb-3 flex flex-wrap gap-2 transition-all duration-200 max-[640px]:hidden'">
-                    @for (prompt of quickPrompts; track prompt) {
-                    <button type="button" (click)="usePrompt(prompt)" class="rounded-full border border-[rgba(87,165,235,0.16)] bg-[linear-gradient(180deg,rgba(87,165,235,0.12)_0%,rgba(87,165,235,0.07)_100%)] px-3 py-1.5 text-[11px] font-medium text-[var(--color-text4)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-[rgba(87,165,235,0.28)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.11)_100%)] hover:text-[var(--color-text1)] max-[640px]:w-full max-[640px]:justify-center">
-                      {{ prompt }}
-                    </button>
-                    }
-                  </div>
-
                   <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded">
                     <div class="flex items-end gap-2">
                       <textarea #composerInput [(ngModel)]="messageDraft" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" data-testid="chat-widget-input" [rows]="composerRows" name="message" [placeholder]="'Ask a cybersecurity question' | translate" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded"></textarea>
-                      <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && (!messageDraft.trim() || isMessageDraftOverLimit)" [attr.aria-label]="(isSending() ? 'Stop generation' : 'Send message') | translate" [class]="isSending() ? 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-ai-action-button flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:border disabled:border-[#57A5EB]/25 disabled:bg-[#57A5EB]/15 disabled:text-[#A7D5FF] disabled:opacity-100'">
+                      <button data-testid="chat-widget-send" type="button" (click)="isSending() ? stopMessageGeneration() : sendMessage()" [disabled]="!isSending() && (!messageDraft.trim() || isMessageDraftOverLimit)" [attr.aria-label]="(isSending() ? 'Stop generation' : 'Send message') | translate" [class]="isSending() ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] text-white transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
                         @if (isSending()) {
                         <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
                         <span class="sr-only">{{ 'Stop generation' | translate }}</span>
                         } @else {
-                        <i class="bi bi-chat-dots-fill text-[14px] leading-none"></i>
+                        <i class="bi bi-chat-dots-fill ui-chat-send-icon text-[14px] leading-none"></i>
                         }
                       </button>
                     </div>
