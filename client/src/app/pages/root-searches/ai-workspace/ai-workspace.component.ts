@@ -16,6 +16,13 @@ import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 
+interface PendingNexusStream {
+  requestId: string;
+  sessionId: string;
+  message: string;
+  baselineMessageCount: number;
+}
+
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
@@ -24,7 +31,9 @@ import { ProfileComponent } from '../../../shared/partials/profile/profile.compo
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
   private readonly localNewChatSessionId = 'new-chat';
+  private readonly pendingStreamStorageKey = 'orion.nexus.pending-stream';
   private activeChatRequest?: Subscription;
+  private resumedRequestId: string | null = null;
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLElement>;
   @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
 
@@ -81,13 +90,22 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     this.cancelMessageEdit();
     this.detachActiveNexusRequest();
+    const requestId = this.resumedRequestId || crypto.randomUUID();
+    this.resumedRequestId = null;
 
     const sendToSession = (sessionId: string) => {
+      const baselineMessageCount = this.messages.length;
       this.messageDraft = '';
       this.queueComposerResize();
 
       this.isSending.set(true);
       this.nexusStep.set('Thinking');
+      this.messages = [
+        ...this.messages,
+        { id: `pending-user-${requestId}`, sender: 'user', text, time: new Date() },
+      ];
+      this.writePendingStream({ requestId, sessionId, message: text, baselineMessageCount });
+      this.scrollToBottom();
 
       let reply = '';
       let finished = false;
@@ -97,6 +115,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         }
         finished = true;
         this.messages = [...this.messages, this.createErrorMessage(text, errorText)];
+        this.clearPendingStream();
         this.isSending.set(false);
         this.nexusStep.set('');
         this.activeChatRequest = undefined;
@@ -114,7 +133,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         const now = new Date();
         this.messages = [
           ...this.messages,
-          { id: crypto.randomUUID(), sender: 'user', text, time: now },
           { id: crypto.randomUUID(), sender: 'bot', text: reply, time: now },
         ];
 
@@ -123,13 +141,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
             ? { ...session, updatedAt: now.toISOString(), messageCount: this.messages.length, messages: this.messages }
             : session));
 
+        this.clearPendingStream();
         this.isSending.set(false);
         this.nexusStep.set('');
         this.activeChatRequest = undefined;
         this.scrollToBottom();
       };
 
-      this.activeChatRequest = this.nexusChatService.streamNexusChat({ message: text, session_id: sessionId, session_type: 'persistent', tool: 'open_chat' }).subscribe({
+      this.activeChatRequest = this.nexusChatService.streamNexusChat({ message: text, request_id: requestId, session_id: sessionId, session_type: 'persistent', tool: 'open_chat' }).subscribe({
         next: (chunk) => {
           if (chunk.status) {
             this.nexusStep.set(chunk.status);
@@ -221,6 +240,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   stopMessageGeneration(): void {
     this.cancelActiveNexusRequest();
+    this.clearPendingStream();
     this.isSending.set(false);
     this.nexusStep.set('');
     this.scrollToBottom();
@@ -391,6 +411,92 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     };
   }
 
+  private writePendingStream(pending: PendingNexusStream): void {
+    try {
+      sessionStorage.setItem(this.pendingStreamStorageKey, JSON.stringify(pending));
+    }
+    catch {
+      // Reconnection is unavailable when browser session storage is blocked.
+    }
+  }
+
+  private readPendingStream(): PendingNexusStream | null {
+    try {
+      const value = sessionStorage.getItem(this.pendingStreamStorageKey);
+      if (!value) {
+        return null;
+      }
+      const pending = JSON.parse(value) as Partial<PendingNexusStream>;
+      if (!pending.requestId || !pending.sessionId || !pending.message || typeof pending.baselineMessageCount !== 'number') {
+        this.clearPendingStream();
+        return null;
+      }
+      return pending as PendingNexusStream;
+    }
+    catch {
+      this.clearPendingStream();
+      return null;
+    }
+  }
+
+  private clearPendingStream(): void {
+    try {
+      sessionStorage.removeItem(this.pendingStreamStorageKey);
+    }
+    catch {
+      // Nothing to clear when browser session storage is blocked.
+    }
+  }
+
+  private resumePendingStream(): boolean {
+    const pending = this.readPendingStream();
+    if (!pending) {
+      return false;
+    }
+
+    const existingSession = this.chatSessions.find(session => session.sessionId === pending.sessionId);
+    if (existingSession && existingSession.messageCount >= pending.baselineMessageCount + 2) {
+      this.clearPendingStream();
+      this.loadChat(pending.sessionId);
+      return true;
+    }
+
+    if (!existingSession) {
+      this.chatSessions = this.sortChatSessions([{
+        sessionId: pending.sessionId,
+        title: this.chatTitleFromPrompt(pending.message),
+        updatedAt: new Date().toISOString(),
+        messageCount: pending.baselineMessageCount,
+        isPinned: false,
+        pinnedAt: null,
+        messages: [],
+      }, ...this.chatSessions]);
+    }
+    this.activeSessionId = pending.sessionId;
+
+    const resume = () => {
+      this.resumedRequestId = pending.requestId;
+      this.messageDraft = pending.message;
+      this.sendMessage();
+    };
+    this.nexusChatService.getChat(pending.sessionId).subscribe({
+      next: (chat) => {
+        this.messages = chat.messages.map(message => this.mapMessage(message));
+        if (this.messages.length >= pending.baselineMessageCount + 2) {
+          this.clearPendingStream();
+          this.loadChat(pending.sessionId);
+          return;
+        }
+        resume();
+      },
+      error: () => {
+        this.messages = [];
+        resume();
+      },
+    });
+    return true;
+  }
+
   private scrollToBottom(): void {
     requestAnimationFrame(() => {
       const container = this.messagesContainer?.nativeElement;
@@ -464,14 +570,18 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.messages = [];
 
         this.isLoadingHistory.set(false);
-        this.createLocalNewChat();
+        if (!this.resumePendingStream()) {
+          this.createLocalNewChat();
+        }
       },
       error: () => {
         this.chatSessions = [];
         this.messages = [];
         this.activeSessionId = null;
         this.isLoadingHistory.set(false);
-        this.createLocalNewChat();
+        if (!this.resumePendingStream()) {
+          this.createLocalNewChat();
+        }
       },
     });
   }

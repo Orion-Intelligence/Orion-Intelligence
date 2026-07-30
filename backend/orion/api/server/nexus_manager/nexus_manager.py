@@ -36,6 +36,7 @@ class nexus_manager:
                 session_type=session_type,
                 auth_token=auth_token,
                 tenant_id=tenant_id,
+                request_id=str(model.request_id or "").strip(),
             )
             return StreamingResponse(stream, media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})
         except Exception:

@@ -1,19 +1,31 @@
 import asyncio
 import json
+from dataclasses import dataclass, field
 from typing import Any, AsyncGenerator
+from uuid import uuid4
 
 import httpx
 
 from orion.api.server.nexus_manager.model.rpc_payload_model import NexusRpcPayloadModel
 
 
+@dataclass
+class ActiveNexusStream:
+    lines: list[str] = field(default_factory=list)
+    done: bool = False
+    task: asyncio.Task | None = None
+    changed: asyncio.Condition = field(default_factory=asyncio.Condition)
+
+
 class NexusStreamManager:
     MCP_ENDPOINT = "http://172.18.0.1:8300/mcp"
     NOT_FOUND_RESPONSE = "The data you are looking for was not found."
+    STREAM_RETENTION_SECONDS = 300
 
     def __init__(self, base_url: str):
         self.base_url = base_url
         self.active_chat_tasks: dict[str, asyncio.Task] = {}
+        self.active_streams: dict[tuple[str, str], ActiveNexusStream] = {}
 
     @staticmethod
     def _parse_stream_line(line: str) -> dict[str, Any] | None:
@@ -123,7 +135,39 @@ class NexusStreamManager:
             if response is not None:
                 await response.aclose()
 
-    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", auth_token: str = "", session_id: str = "", session_type: str = "persistent", tenant_id: str = "") -> AsyncGenerator[str, None]:
+    async def _emit(self, stream: ActiveNexusStream, line: str) -> None:
+        if not line:
+            return
+        async with stream.changed:
+            stream.lines.append(line)
+            stream.changed.notify_all()
+
+    async def _finish(self, stream: ActiveNexusStream) -> None:
+        async with stream.changed:
+            stream.done = True
+            stream.changed.notify_all()
+
+    async def _subscribe(self, stream: ActiveNexusStream) -> AsyncGenerator[str, None]:
+        index = 0
+        while True:
+            async with stream.changed:
+                await stream.changed.wait_for(
+                    lambda: index < len(stream.lines) or stream.done
+                )
+                lines = stream.lines[index:]
+                index = len(stream.lines)
+                done = stream.done
+            for line in lines:
+                yield line
+            if done and index >= len(stream.lines):
+                return
+
+    async def _forget_stream(self, key: tuple[str, str], stream: ActiveNexusStream) -> None:
+        await asyncio.sleep(self.STREAM_RETENTION_SECONDS)
+        if self.active_streams.get(key) is stream:
+            self.active_streams.pop(key, None)
+
+    async def _run_stream(self, key: tuple[str, str], stream: ActiveNexusStream, prompt: str, user_id: str, tool: str, type_name: str, auth_token: str, session_id: str, session_type: str, tenant_id: str) -> None:
         client = httpx.AsyncClient(timeout=30 * 60)
         current_task = asyncio.current_task()
         headers: dict[str, str] | None = None
@@ -141,7 +185,7 @@ class NexusStreamManager:
             arguments = {"prompt": prompt, "session_id": session_id}
             if selected_tool == "api_payload":
                 arguments["request_type"] = type_name
-            payload = NexusRpcPayloadModel.tool_call(request_id=user_id, name=selected_tool, arguments=arguments)
+            payload = NexusRpcPayloadModel.tool_call(request_id=key[1], name=selected_tool, arguments=arguments)
             async for line, answer, failed in self._stream(client, payload, headers):
                 if line:
                     event = self._parse_stream_line(line)
@@ -150,24 +194,41 @@ class NexusStreamManager:
                     if session_type == "persistent" and session_id and final_response and event is not None and event.get("done") and not event.get("error"):
                         await self._store_turn(client, prompt, final_response, user_id, tenant_id, session_id)
                         stored = True
-                    yield line
+                    await self._emit(stream, line)
                 if failed:
                     return
                 if answer:
                     if session_type == "persistent" and session_id and not stored:
                         await self._store_turn(client, prompt, answer, user_id, tenant_id, session_id)
-                    yield json.dumps({"output": {"response": answer.strip()}, "done": True, "error": False}, ensure_ascii=True) + "\n"
+                    await self._emit(stream, json.dumps({"output": {"response": answer.strip()}, "done": True, "error": False}, ensure_ascii=True) + "\n")
                     return
         except asyncio.CancelledError:
             raise
         except Exception:
-            yield json.dumps({"output": {"response": "Something happened while calling api/chat"}, "done": True, "error": True}, ensure_ascii=True) + "\n"
+            await self._emit(stream, json.dumps({"output": {"response": "Something happened while calling api/chat"}, "done": True, "error": True}, ensure_ascii=True) + "\n")
         finally:
             if self.active_chat_tasks.get(user_id) is current_task:
                 self.active_chat_tasks.pop(user_id, None)
             if headers is not None:
                 await self._close_mcp_session(client, headers)
             await client.aclose()
+            await self._finish(stream)
+            asyncio.create_task(self._forget_stream(key, stream))
+
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", auth_token: str = "", session_id: str = "", session_type: str = "persistent", tenant_id: str = "", request_id: str = "") -> AsyncGenerator[str, None]:
+        stream_id = request_id or str(uuid4())
+        key = (user_id, stream_id)
+        stream = self.active_streams.get(key)
+        if stream is None:
+            stream = ActiveNexusStream()
+            self.active_streams[key] = stream
+            stream.task = asyncio.create_task(self._run_stream(
+                key, stream, prompt, user_id, tool, type_name, auth_token,
+                session_id, session_type, tenant_id,
+            ))
+
+        async for line in self._subscribe(stream):
+            yield line
 
     async def cancel_chat(self, user_id: str = "system") -> dict[str, bool]:
         task = self.active_chat_tasks.pop(user_id, None)
