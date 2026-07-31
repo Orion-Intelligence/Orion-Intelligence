@@ -33,10 +33,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   private readonly localNewChatSessionId = 'new-chat';
   private readonly pendingStreamStorageKey = 'orion.nexus.pending-stream';
   private activeChatRequest?: Subscription;
+  private chatHistoryRequest?: Subscription;
   private resumedRequestId: string | null = null;
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLElement>;
   @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
 
+  protected activeRequestSessionId: string | null = null;
   protected readonly quickPrompts = Object.values(AiWorkspacePrompt);
   protected readonly isSending = signal(false);
   protected readonly isLoadingHistory = signal(true);
@@ -62,6 +64,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.detachActiveNexusRequest();
+    this.chatHistoryRequest?.unsubscribe();
   }
 
   @HostListener('window:beforeunload')
@@ -93,33 +96,45 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const requestId = this.resumedRequestId || crypto.randomUUID();
     this.resumedRequestId = null;
 
-    const sendToSession = (sessionId: string) => {
-      const baselineMessageCount = this.messages.length;
+    const sendToSession = (sessionId: string, sessionMessages: AiWorkspaceMessage[]) => {
+      const baselineMessageCount = sessionMessages.length;
       this.messageDraft = '';
       this.queueComposerResize();
 
       this.isSending.set(true);
+      this.activeRequestSessionId = sessionId;
       this.nexusStep.set('Thinking');
-      this.messages = [
-        ...this.messages,
+      const requestMessages: AiWorkspaceMessage[] = [
+        ...sessionMessages,
         { id: `pending-user-${requestId}`, sender: 'user', text, time: new Date() },
       ];
+      this.updateSessionMessages(sessionId, requestMessages);
       this.writePendingStream({ requestId, sessionId, message: text, baselineMessageCount });
-      this.scrollToBottom();
+      if (this.activeSessionId === sessionId) {
+        this.scrollToBottom();
+      }
 
       let reply = '';
       let finished = false;
+      const finishRequest = () => {
+        this.clearPendingStream();
+        this.isSending.set(false);
+        this.nexusStep.set('');
+        if (this.activeRequestSessionId === sessionId) {
+          this.activeRequestSessionId = null;
+        }
+        this.activeChatRequest = undefined;
+      };
       const fail = (errorText = 'Something went wrong. Try again.') => {
         if (finished) {
           return;
         }
         finished = true;
-        this.messages = [...this.messages, this.createErrorMessage(text, errorText)];
-        this.clearPendingStream();
-        this.isSending.set(false);
-        this.nexusStep.set('');
-        this.activeChatRequest = undefined;
-        this.scrollToBottom();
+        this.updateSessionMessages(sessionId, [...requestMessages, this.createErrorMessage(text, errorText)]);
+        finishRequest();
+        if (this.activeSessionId === sessionId) {
+          this.scrollToBottom();
+        }
       };
       const complete = () => {
         if (finished) {
@@ -131,21 +146,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         }
         finished = true;
         const now = new Date();
-        this.messages = [
-          ...this.messages,
+        const completedMessages: AiWorkspaceMessage[] = [
+          ...requestMessages,
           { id: crypto.randomUUID(), sender: 'bot', text: reply, time: now },
         ];
 
-        this.chatSessions = this.sortChatSessions(this.chatSessions.map(session =>
-          session.sessionId === sessionId
-            ? { ...session, updatedAt: now.toISOString(), messageCount: this.messages.length, messages: this.messages }
-            : session));
-
-        this.clearPendingStream();
-        this.isSending.set(false);
-        this.nexusStep.set('');
-        this.activeChatRequest = undefined;
-        this.scrollToBottom();
+        this.updateSessionMessages(sessionId, completedMessages, now.toISOString());
+        finishRequest();
+        if (this.activeSessionId === sessionId) {
+          this.scrollToBottom();
+        }
       };
 
       this.activeChatRequest = this.nexusChatService.streamNexusChat({ message: text, request_id: requestId, session_id: sessionId, session_type: 'persistent', tool: 'open_chat' }).subscribe({
@@ -171,25 +181,34 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     };
 
     const createSessionAndSend = (localSessionId?: string) => {
+      const sourceSessionId = localSessionId ?? this.activeSessionId;
+      const sourceMessages = [...this.messages];
       this.isSending.set(true);
+      this.activeRequestSessionId = sourceSessionId;
       this.nexusStep.set('Starting chat');
       this.nexusChatService.createChat(this.chatTitleFromPrompt(text)).subscribe({
         next: (session) => {
           const mappedSession = this.mapSession(session);
+          const sourceStillSelected = this.activeSessionId === sourceSessionId;
 
           this.chatSessions = this.sortChatSessions([
             mappedSession,
             ...this.chatSessions.filter(chat =>
               chat.sessionId !== localSessionId && chat.sessionId !== mappedSession.sessionId),
           ]);
-          this.activeSessionId = mappedSession.sessionId;
-          this.messages = [];
+          if (sourceStillSelected) {
+            this.activeSessionId = mappedSession.sessionId;
+            this.messages = sourceMessages;
+          }
 
-          sendToSession(mappedSession.sessionId);
+          sendToSession(mappedSession.sessionId, sourceMessages);
         },
         error: () => {
-          this.messages = [...this.messages, this.createErrorMessage(text)];
+          if (this.activeSessionId === sourceSessionId) {
+            this.messages = [...sourceMessages, this.createErrorMessage(text)];
+          }
           this.isSending.set(false);
+          this.activeRequestSessionId = null;
           this.nexusStep.set('');
         },
       });
@@ -201,7 +220,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         createSessionAndSend(activeSession.sessionId);
         return;
       }
-      sendToSession(this.activeSessionId);
+      sendToSession(this.activeSessionId, [...this.messages]);
       return;
     }
 
@@ -242,15 +261,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.cancelActiveNexusRequest();
     this.clearPendingStream();
     this.isSending.set(false);
+    this.activeRequestSessionId = null;
     this.nexusStep.set('');
     this.scrollToBottom();
   }
 
   startNewChat(): void {
-    if (this.isSending()) {
-      return;
-    }
-
     const emptyChat = this.chatSessions.find(chat => chat.messageCount === 0 && chat.messages.length === 0);
     if (emptyChat) {
       this.activeSessionId = emptyChat.sessionId;
@@ -262,10 +278,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.detachActiveNexusRequest();
-
-    this.isSending.set(false);
-    this.nexusStep.set('');
+    if (!this.isSending()) {
+      this.detachActiveNexusRequest();
+      this.nexusStep.set('');
+    }
 
     this.createLocalNewChat();
   }
@@ -376,6 +392,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return this.messageDraftTokenOverflow > 0;
   }
 
+  protected get isActiveChatSending(): boolean {
+    return this.isSending() && this.activeSessionId === this.activeRequestSessionId;
+  }
+
+  protected get isAnotherChatSending(): boolean {
+    return this.isSending() && this.activeSessionId !== this.activeRequestSessionId;
+  }
+
   protected get editDraftTokenCount(): number {
     return this.countMessageTokens(this.editDraft);
   }
@@ -409,6 +433,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       time: new Date(),
       retryPayload: text,
     };
+  }
+
+  private updateSessionMessages(sessionId: string, messages: AiWorkspaceMessage[], updatedAt = new Date().toISOString()): void {
+    this.chatSessions = this.sortChatSessions(this.chatSessions.map(session =>
+      session.sessionId === sessionId
+        ? { ...session, updatedAt, messageCount: messages.length, messages }
+        : session));
+    if (this.activeSessionId === sessionId) {
+      this.messages = messages;
+    }
   }
 
   private writePendingStream(pending: PendingNexusStream): void {
@@ -587,9 +621,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private loadChat(sessionId: string): void {
+    this.chatHistoryRequest?.unsubscribe();
     this.isLoadingHistory.set(true);
 
-    this.nexusChatService.getChat(sessionId).subscribe({
+    this.chatHistoryRequest = this.nexusChatService.getChat(sessionId).subscribe({
       next: (chat) => {
         const chatSessionId = chat.session_id;
 
@@ -604,12 +639,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           ? this.chatSessions.map(session => session.sessionId === chatSessionId ? { ...session, ...updatedSession } : session)
           : [updatedSession, ...this.chatSessions]);
         this.isLoadingHistory.set(false);
+        this.chatHistoryRequest = undefined;
         this.cancelMessageEdit();
         this.queueComposerResize();
         this.scrollToBottom();
       },
       error: () => {
         this.isLoadingHistory.set(false);
+        this.chatHistoryRequest = undefined;
       },
     });
   }
@@ -644,7 +681,15 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   selectChat(session: AiChatSession): void {
-    if (this.isSending()) {
+    if (this.isSending() && session.sessionId === this.activeRequestSessionId) {
+      this.chatHistoryRequest?.unsubscribe();
+      this.chatHistoryRequest = undefined;
+      this.activeSessionId = session.sessionId;
+      this.messages = [...session.messages];
+      this.isLoadingHistory.set(false);
+      this.cancelMessageEdit();
+      this.queueComposerResize();
+      this.scrollToBottom();
       return;
     }
 

@@ -18,7 +18,7 @@ import { NexusChatService } from '../nexus-chat.service';
 export class AiChatSidebarComponent {
   readonly sessions = input<AiChatSession[]>([]);
   readonly activeSessionId = input<string | null>(null);
-  readonly isBusy = input(false);
+  readonly busySessionId = input<string | null>(null);
   readonly newChat = output<void>();
   readonly chatSelected = output<AiChatSession>();
   readonly sessionUpdated = output<AiChatSession>();
@@ -40,16 +40,14 @@ export class AiChatSidebarComponent {
   }
 
   startNewChat(): void {
-    if (!this.isBusy()) {
-      this.closeChatMenu();
-      this.newChat.emit();
+    if (this.hasEmptyChat) {
+      return;
     }
+    this.closeChatMenu();
+    this.newChat.emit();
   }
 
   selectChat(chat: AiChatSession): void {
-    if (this.isBusy()) {
-      return;
-    }
     this.closeChatMenu();
     this.chatSelected.emit(chat);
   }
@@ -73,11 +71,17 @@ export class AiChatSidebarComponent {
 
   toggleChatMenu(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
+    if (this.isChatBusy(chat)) {
+      return;
+    }
     this.openedSessionMenuId = this.openedSessionMenuId === chat.sessionId ? null : chat.sessionId;
   }
 
   togglePinChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
+    if (this.isChatBusy(chat)) {
+      return;
+    }
     this.nexusChatService.pinChatSession(chat.sessionId, !chat.isPinned).subscribe({
       next: updated => {
         this.sessionUpdated.emit(this.updatedSession(chat, updated));
@@ -88,7 +92,7 @@ export class AiChatSidebarComponent {
 
   shareChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
-    if (this.sharingSessionId) {
+    if (this.sharingSessionId || this.isChatBusy(chat)) {
       return;
     }
     this.sharingSessionId = chat.sessionId;
@@ -117,6 +121,9 @@ export class AiChatSidebarComponent {
 
   renameChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
+    if (this.isChatBusy(chat)) {
+      return;
+    }
     this.renameChatTarget = chat;
     this.renameChatDraft = chat.title;
     this.closeChatMenu();
@@ -125,7 +132,7 @@ export class AiChatSidebarComponent {
   confirmRenameChat(): void {
     const title = this.renameChatDraft.trim();
     const chat = this.renameChatTarget;
-    if (!chat || !title) {
+    if (!chat || !title || this.isChatBusy(chat)) {
       return;
     }
     this.nexusChatService.renameChatSession(chat.sessionId, title).subscribe({
@@ -150,7 +157,7 @@ export class AiChatSidebarComponent {
 
   deleteChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
-    if (!this.canDeleteChat) {
+    if (!this.canDeleteChat || this.isChatBusy(chat)) {
       return;
     }
     this.deleteChatTarget = chat;
@@ -160,7 +167,7 @@ export class AiChatSidebarComponent {
   confirmDeleteChat(confirmed: boolean): void {
     const chat = this.deleteChatTarget;
     this.deleteChatTarget = null;
-    if (!confirmed || !chat || !this.canDeleteChat) {
+    if (!confirmed || !chat || !this.canDeleteChat || this.isChatBusy(chat)) {
       return;
     }
     this.nexusChatService.deleteChatSession(chat.sessionId).subscribe({
@@ -191,6 +198,14 @@ export class AiChatSidebarComponent {
 
   isChatEmpty(chat: AiChatSession): boolean {
     return chat.messageCount === 0 && chat.messages.length === 0;
+  }
+
+  isChatBusy(chat: AiChatSession): boolean {
+    return this.busySessionId() === chat.sessionId;
+  }
+
+  get hasEmptyChat(): boolean {
+    return this.sessions().some(chat => this.isChatEmpty(chat));
   }
 
   get canDeleteChat(): boolean {

@@ -2,7 +2,7 @@
   <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" (toggleClicked)="toggleCollapsed()">
     <div sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
       <div class="flex shrink-0 flex-col bg-[var(--color-blue-820-light)]/95 pt-1 backdrop-blur-sm">
-        <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="isBusy()" class="mx-2 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-50">
+        <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="hasEmptyChat" class="mx-2 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-50">
           <span class="min-w-0">
             <span class="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{
               'Workspace' | translate }}</span>
@@ -54,7 +54,7 @@
 
           @for (chat of filteredSessions; track chat.sessionId) {
           <div class="group relative mb-0.5 select-none">
-            <button type="button" (click)="selectChat(chat)" [disabled]="isBusy()" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.075] text-[var(--color-text1)]' : 'text-[var(--color-text2)] hover:bg-white/[0.05] hover:text-[var(--color-text1)]'" class="ui-ai-chat-history-row relative flex min-h-[50px] w-full cursor-pointer items-center gap-2.5 rounded-[9px] border border-transparent px-2.5 py-2 pr-[42px] text-left transition-[background-color,color,border-color] focus-visible:z-[1] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65">
+            <button type="button" (click)="selectChat(chat)" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.075] text-[var(--color-text1)]' : 'text-[var(--color-text2)] hover:bg-white/[0.05] hover:text-[var(--color-text1)]'" class="ui-ai-chat-history-row relative flex min-h-[50px] w-full cursor-pointer items-center gap-2.5 rounded-[9px] border border-transparent px-2.5 py-2 pr-[42px] text-left transition-[background-color,color,border-color] focus-visible:z-[1] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55">
               @if (activeSessionId() === chat.sessionId) {
               <span class="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-[var(--color-blue-640)]" aria-hidden="true"></span>
               }
@@ -73,38 +73,43 @@
             </button>
 
             @if (!isChatEmpty(chat)) {
-              <button type="button" (click)="toggleChatMenu(chat, $event)" [disabled]="isBusy()" [attr.data-testid]="'ai-chat-options-' + chat.sessionId" [attr.aria-label]="'Options' | translate" aria-haspopup="menu" [attr.aria-expanded]="openedSessionMenuId === chat.sessionId" [ngClass]="openedSessionMenuId === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-text1)] opacity-100' : activeSessionId() === chat.sessionId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'" class="absolute right-[7px] top-1/2 flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-[background-color,color,opacity] hover:bg-white/[0.08] hover:text-[var(--color-text1)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-40">
+              <button type="button" (click)="toggleChatMenu(chat, $event)" [disabled]="isChatBusy(chat)" [attr.data-testid]="'ai-chat-options-' + chat.sessionId" [attr.aria-label]="'Options' | translate" aria-haspopup="menu" [attr.aria-expanded]="openedSessionMenuId === chat.sessionId" [ngClass]="openedSessionMenuId === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-text1)] opacity-100' : activeSessionId() === chat.sessionId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'" class="absolute right-[7px] top-1/2 flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-[background-color,color,opacity] hover:bg-white/[0.08] hover:text-[var(--color-text1)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-40">
                 <i class="bi bi-three-dots text-[16px]" aria-hidden="true"></i>
               </button>
             }
 
-            @if (!isChatEmpty(chat) && openedSessionMenuId === chat.sessionId) {
-            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px]' : 'top-[44px]'" class="absolute right-[5px] z-[999] w-[176px] overflow-hidden rounded-[12px] border border-white/[0.09] bg-[var(--color-blue-790)]/95 p-1.5 shadow-[0_16px_40px_rgba(0,0,0,0.42),0_2px_8px_rgba(0,0,0,0.22)] ring-1 ring-black/10 backdrop-blur-xl">
-              <button role="menuitem" type="button" (click)="togglePinChat(chat, $event)" [attr.data-testid]="'ai-chat-pin-' + chat.sessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2 text-left text-[12px] font-medium text-[var(--color-text3)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)] focus-visible:bg-white/[0.07] focus-visible:text-[var(--color-text1)] focus-visible:outline-none">
-                <span [ngClass]="chat.isPinned ? 'bg-[var(--color-blue-640)]/15 text-[var(--color-blue-640)]' : 'bg-white/[0.04] text-[var(--color-text4)] group-hover/menu-action:text-[var(--color-text2)]'" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] transition-colors">
+            @if (!isChatEmpty(chat) && !isChatBusy(chat) && openedSessionMenuId === chat.sessionId) {
+            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px] ui-ai-chat-dropdown-above' : 'top-[44px]'" class="ui-profile-dropdown absolute right-[5px] z-[999] w-[176px] overflow-visible rounded-[9px] border border-slate-200 !bg-white p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5">
+              @if (shouldOpenMenuAbove(chat)) {
+              <span class="pointer-events-none absolute bottom-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-white" aria-hidden="true"></span>
+              } @else {
+              <span class="pointer-events-none absolute top-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-b-[7px] border-l-transparent border-r-transparent border-b-white" aria-hidden="true"></span>
+              }
+              <button role="menuitem" type="button" (click)="togglePinChat(chat, $event)" [attr.data-testid]="'ai-chat-pin-' + chat.sessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:bg-slate-100 focus-visible:text-slate-950 focus-visible:outline-none">
+                <span [ngClass]="chat.isPinned ? 'bg-[var(--color-blue-640)]/15 text-[var(--color-blue-640)]' : 'bg-slate-100 text-slate-500 group-hover/menu-action:text-slate-700'" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors">
                   <i [ngClass]="chat.isPinned ? 'bi-pin-angle-fill' : 'bi-pin-angle'" class="bi text-[11px]" aria-hidden="true"></i>
                 </span>
                 <span class="min-w-0 flex-1 truncate">{{ chat.isPinned ? ('Unpin Chat' | translate) : ('Pin Chat' | translate) }}</span>
               </button>
 
-              <button role="menuitem" type="button" (click)="shareChat(chat, $event)" [disabled]="!!sharingSessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2 text-left text-[12px] font-medium text-[var(--color-text3)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)] focus-visible:bg-white/[0.07] focus-visible:text-[var(--color-text1)] focus-visible:outline-none disabled:cursor-wait disabled:opacity-50">
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] bg-white/[0.04] text-[var(--color-text4)] transition-colors group-hover/menu-action:text-[var(--color-text2)]">
+              <button role="menuitem" type="button" (click)="shareChat(chat, $event)" [disabled]="!!sharingSessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:bg-slate-100 focus-visible:text-slate-950 focus-visible:outline-none disabled:cursor-wait disabled:opacity-50">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-500 transition-colors group-hover/menu-action:text-slate-700">
                   <i [ngClass]="sharingSessionId === chat.sessionId ? 'bi-arrow-repeat animate-spin' : 'bi-share'" class="bi text-[11px]" aria-hidden="true"></i>
                 </span>
                 <span class="min-w-0 flex-1 truncate">{{ 'Share Chat' | translate }}</span>
               </button>
 
-              <button role="menuitem" type="button" (click)="renameChat(chat, $event)" [attr.data-testid]="'ai-chat-rename-' + chat.sessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2 text-left text-[12px] font-medium text-[var(--color-text3)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)] focus-visible:bg-white/[0.07] focus-visible:text-[var(--color-text1)] focus-visible:outline-none">
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] bg-white/[0.04] text-[var(--color-text4)] transition-colors group-hover/menu-action:text-[var(--color-text2)]">
+              <button role="menuitem" type="button" (click)="renameChat(chat, $event)" [attr.data-testid]="'ai-chat-rename-' + chat.sessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:bg-slate-100 focus-visible:text-slate-950 focus-visible:outline-none">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-500 transition-colors group-hover/menu-action:text-slate-700">
                   <i class="bi bi-pencil text-[11px]" aria-hidden="true"></i>
                 </span>
                 <span class="min-w-0 flex-1 truncate">{{ 'Rename' | translate }}</span>
               </button>
 
-              <div class="my-1.5 h-px bg-white/[0.07]" aria-hidden="true"></div>
+              <div class="my-1.5 h-px bg-slate-200" aria-hidden="true"></div>
 
-              <button role="menuitem" type="button" (click)="deleteChat(chat, $event)" [disabled]="!canDeleteChat" [attr.data-testid]="'ai-chat-delete-' + chat.sessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[8px] px-2 text-left text-[12px] font-medium text-red-300 transition-colors hover:bg-red-500/10 hover:text-red-200 focus-visible:bg-red-500/10 focus-visible:text-red-200 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40">
-                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[6px] bg-red-400/[0.08] text-red-300 transition-colors group-hover/menu-action:bg-red-400/[0.12]">
+              <button role="menuitem" type="button" (click)="deleteChat(chat, $event)" [disabled]="!canDeleteChat" [attr.data-testid]="'ai-chat-delete-' + chat.sessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2 text-left text-[12px] font-medium text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:bg-red-50 focus-visible:text-red-700 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-40">
+                <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] bg-red-50 text-red-600 transition-colors group-hover/menu-action:bg-red-100">
                   <i class="bi bi-trash3 text-[11px]" aria-hidden="true"></i>
                 </span>
                 <span class="min-w-0 flex-1 truncate">{{ 'Delete' | translate }}</span>
@@ -120,13 +125,13 @@
 
     <div sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
       <div class="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-        <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="isBusy()" [attr.aria-label]="'New Chat' | translate" [appTooltip]="'New Chat' | translate" class="mx-2 flex h-10 w-10 items-center justify-center rounded-[9px] text-[var(--color-text3)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-50">
+        <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="hasEmptyChat" [attr.aria-label]="'New Chat' | translate" [appTooltip]="'New Chat' | translate" class="mx-2 flex h-10 w-10 items-center justify-center rounded-[9px] text-[var(--color-text3)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-50">
           <i class="bi bi-plus-lg"></i>
         </button>
 
         @for (chat of filteredSessions; track chat.sessionId) {
         <div class="relative my-0.5 select-none">
-          <button type="button" (click)="selectChat(chat)" [disabled]="isBusy()" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [appTooltip]="getChatTooltip(chat)" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-blue-640)]' : 'text-[var(--color-text3)] hover:bg-white/[0.05] hover:text-[var(--color-text1)]'" class="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-[9px] border border-transparent text-[12px] font-semibold transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-50">
+          <button type="button" (click)="selectChat(chat)" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [appTooltip]="getChatTooltip(chat)" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-blue-640)]' : 'text-[var(--color-text3)] hover:bg-white/[0.05] hover:text-[var(--color-text1)]'" class="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-[9px] border border-transparent text-[12px] font-semibold transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55">
             {{ getChatInitial(chat) }}
             @if (chat.isPinned) {
             <span class="absolute right-[4px] top-[4px] h-1.5 w-1.5 rounded-full border border-[var(--color-blue-820-light)] bg-[var(--color-blue-640)]" aria-hidden="true"></span>

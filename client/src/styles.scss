@@ -1950,6 +1950,23 @@ body.demo-tour-scroll-locked {
   will-change: opacity, transform;
 }
 
+@keyframes ui-ai-chat-dropdown-above-in {
+  0% {
+    opacity: 0%;
+    transform: translate3d(0, 6px, 0) scale(0.98);
+  }
+
+  100% {
+    opacity: 100%;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.ui-profile-dropdown.ui-ai-chat-dropdown-above {
+  transform-origin: bottom right;
+  animation-name: ui-ai-chat-dropdown-above-in;
+}
+
 @keyframes ui-social-profile-overview-in {
   0% {
     opacity: 0%;
@@ -3565,6 +3582,26 @@ app-world-heatmap .country:not(.can-open-reports) {
     }
   }
 
+  @keyframes ui-ai-chat-progress-sweep {
+    0% {
+      transform: translate3d(-120%, 0, 0);
+      opacity: 0%;
+    }
+
+    8% {
+      opacity: 100%;
+    }
+
+    92% {
+      opacity: 100%;
+    }
+
+    100% {
+      transform: translate3d(310%, 0, 0);
+      opacity: 0%;
+    }
+  }
+
   .ui-shimmer {
     --ui-shimmer-base: rgb(255 255 255 / 6%);
     --ui-shimmer-edge: rgb(255 255 255 / 2%);
@@ -3631,6 +3668,13 @@ app-world-heatmap .country:not(.can-open-reports) {
 
   .ui-progress-indeterminate-bar::after {
     animation: ui-progress-sweep-primary 1.3s linear infinite;
+  }
+
+  .ui-ai-chat-progress.ui-progress-indeterminate-bar::after {
+    width: 36%;
+    animation: ui-ai-chat-progress-sweep 1s linear infinite;
+    backface-visibility: hidden;
+    will-change: transform, opacity;
   }
 
   .ui-table-shell {
