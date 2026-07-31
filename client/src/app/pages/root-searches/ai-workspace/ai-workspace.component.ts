@@ -14,7 +14,10 @@ import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
+import { AiDirectoryPanelComponent } from './ai-directory-panel/ai-directory-panel.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
+
+type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
 
 interface PendingNexusStream {
   requestId: string;
@@ -26,7 +29,7 @@ interface PendingNexusStream {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, MarkdownPipe, ProfileComponent, TranslatePipe],
+  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectoryPanelComponent, MarkdownPipe, ProfileComponent, TranslatePipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -35,8 +38,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   private activeChatRequest?: Subscription;
   private chatHistoryRequest?: Subscription;
   private resumedRequestId: string | null = null;
+  private activeSplitPointerId: number | null = null;
   @ViewChild('messagesContainer') private messagesContainer?: ElementRef<HTMLElement>;
   @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('workspacePanels') private workspacePanels?: ElementRef<HTMLElement>;
 
   protected activeRequestSessionId: string | null = null;
   protected readonly quickPrompts = Object.values(AiWorkspacePrompt);
@@ -45,6 +50,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly copiedMessageId = signal<string | null>(null);
   protected readonly nexusStep = signal('');
   protected readonly maxComposerTokens = 300;
+  protected workspaceViewMode: AiWorkspaceViewMode = 'chat';
+  protected directorySplitPercent = 30;
 
   messageDraft = '';
   editingMessageId: string | null = null;
@@ -80,6 +87,76 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.router.navigate(['/dashboard/home']).then();
   }
 
+  protected setWorkspaceViewMode(mode: AiWorkspaceViewMode): void {
+    if (this.workspaceViewMode === mode) {
+      return;
+    }
+    this.workspaceViewMode = mode;
+    this.activeSplitPointerId = null;
+    if (mode === 'split') {
+      this.setDirectorySplitPercent(this.directorySplitPercent);
+    }
+    requestAnimationFrame(() => {
+      if (mode !== 'directory') {
+        this.queueComposerResize();
+        this.scrollToBottom();
+      }
+    });
+  }
+
+  protected startDirectoryResize(event: PointerEvent): void {
+    if (this.workspaceViewMode !== 'split') {
+      return;
+    }
+    event.preventDefault();
+    this.activeSplitPointerId = event.pointerId;
+    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    this.resizeDirectoryPanel(event);
+  }
+
+  protected resizeDirectoryPanel(event: PointerEvent): void {
+    if (event.pointerId !== this.activeSplitPointerId) {
+      return;
+    }
+    const panelBounds = this.workspacePanels?.nativeElement.getBoundingClientRect();
+    if (!panelBounds?.width) {
+      return;
+    }
+    this.setDirectorySplitPercent((panelBounds.right - event.clientX) / panelBounds.width * 100);
+  }
+
+  protected stopDirectoryResize(event: PointerEvent): void {
+    if (event.pointerId !== this.activeSplitPointerId) {
+      return;
+    }
+    const divider = event.currentTarget as HTMLElement;
+    if (divider.hasPointerCapture(event.pointerId)) {
+      divider.releasePointerCapture(event.pointerId);
+    }
+    this.activeSplitPointerId = null;
+  }
+
+  protected resizeDirectoryWithKeyboard(event: KeyboardEvent): void {
+    let nextPercent: number | null = null;
+    if (event.key === 'ArrowLeft') {
+      nextPercent = this.directorySplitPercent + 2;
+    }
+    else if (event.key === 'ArrowRight') {
+      nextPercent = this.directorySplitPercent - 2;
+    }
+    else if (event.key === 'Home') {
+      nextPercent = 0;
+    }
+    else if (event.key === 'End') {
+      nextPercent = 100;
+    }
+    if (nextPercent === null) {
+      return;
+    }
+    event.preventDefault();
+    this.setDirectorySplitPercent(nextPercent);
+  }
+
   sendMessage(): void {
     if (this.isSending()) {
       return;
@@ -98,6 +175,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     const sendToSession = (sessionId: string, sessionMessages: AiWorkspaceMessage[]) => {
       const baselineMessageCount = sessionMessages.length;
+      const shouldNameNewChat = baselineMessageCount === 0 &&
+        this.chatSessions.some(session => session.sessionId === sessionId && session.title === 'New Chat');
       this.messageDraft = '';
       this.queueComposerResize();
 
@@ -152,6 +231,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         ];
 
         this.updateSessionMessages(sessionId, completedMessages, now.toISOString());
+        if (shouldNameNewChat) {
+          this.nameNewChatFromPrompt(sessionId, text);
+        }
         finishRequest();
         if (this.activeSessionId === sessionId) {
           this.scrollToBottom();
@@ -186,7 +268,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       this.isSending.set(true);
       this.activeRequestSessionId = sourceSessionId;
       this.nexusStep.set('Starting chat');
-      this.nexusChatService.createChat(this.chatTitleFromPrompt(text)).subscribe({
+      this.nexusChatService.createChat().subscribe({
         next: (session) => {
           const mappedSession = this.mapSession(session);
           const sourceStillSelected = this.activeSessionId === sourceSessionId;
@@ -498,7 +580,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     if (!existingSession) {
       this.chatSessions = this.sortChatSessions([{
         sessionId: pending.sessionId,
-        title: this.chatTitleFromPrompt(pending.message),
+        title: 'New Chat',
         updatedAt: new Date().toISOString(),
         messageCount: pending.baselineMessageCount,
         isPinned: false,
@@ -569,6 +651,31 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private countMessageTokens(value: string): number {
     return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
+  }
+
+  private setDirectorySplitPercent(value: number): void {
+    const dividerWidth = 12;
+    const minimumChatWidth = 420;
+    const minimumDirectoryWidth = 280;
+    const panelWidth = Math.max(1, (this.workspacePanels?.nativeElement.clientWidth ?? 0) - dividerWidth);
+    const minimumCombinedWidth = minimumChatWidth + minimumDirectoryWidth;
+
+    let minimumPercent: number;
+    let maximumPercent: number;
+    if (panelWidth < minimumCombinedWidth) {
+      minimumPercent = minimumDirectoryWidth / minimumCombinedWidth * 100;
+      maximumPercent = minimumPercent;
+    }
+    else {
+      minimumPercent = Math.max(20, minimumDirectoryWidth / panelWidth * 100);
+      maximumPercent = Math.min(50, 100 - minimumChatWidth / panelWidth * 100);
+    }
+
+    const clamped = Math.min(maximumPercent, Math.max(minimumPercent, value));
+    this.directorySplitPercent = Math.round(clamped * 10) / 10;
+    const panels = this.workspacePanels?.nativeElement;
+    panels?.style.setProperty('--ai-chat-panel-grow', String(100 - this.directorySplitPercent));
+    panels?.style.setProperty('--ai-directory-panel-grow', String(this.directorySplitPercent));
   }
 
   private mapSession(session: any): AiChatSession {
@@ -678,6 +785,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     return normalizedPrompt.length > 48
       ? `${normalizedPrompt.slice(0, 47).trimEnd()}…`
       : normalizedPrompt;
+  }
+
+  private nameNewChatFromPrompt(sessionId: string, prompt: string): void {
+    const title = this.chatTitleFromPrompt(prompt);
+    this.nexusChatService.renameChatSession(sessionId, title).subscribe({
+      next: (session) => {
+        this.chatSessions = this.sortChatSessions(this.chatSessions.map(chat =>
+          chat.sessionId === sessionId ? { ...chat, title: session.title || title } : chat));
+      },
+    });
   }
 
   selectChat(session: AiChatSession): void {

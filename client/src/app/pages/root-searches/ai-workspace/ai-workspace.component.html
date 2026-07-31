@@ -32,8 +32,33 @@
 
           <div class="ui-social-dashboard-body ui-dashboard-grid-bg flex min-h-0 flex-1 flex-col overflow-hidden p-3 max-[640px]:p-2">
             <div class="flex h-full min-h-0 items-stretch overflow-hidden">
-              <div class="chat-support__window ui-ai-chat-surface-pattern flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+              <div class="chat-support__window ui-ai-chat-surface-pattern relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+                <div role="group" [attr.aria-label]="'Workspace view' | translate" class="absolute right-3 top-3 z-40 flex items-center gap-0.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] p-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.14)]">
+                  <button data-testid="ai-window-view-chat" type="button" (click)="setWorkspaceViewMode('chat')" [attr.aria-label]="'Chat view' | translate" [attr.title]="'Chat view' | translate" [attr.aria-pressed]="workspaceViewMode === 'chat'" [ngClass]="workspaceViewMode === 'chat' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
+                    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" aria-hidden="true">
+                      <path d="M3 3.25h10a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5H7l-3.5 2v-2H3a1.5 1.5 0 0 1-1.5-1.5v-5.5A1.5 1.5 0 0 1 3 3.25Z" />
+                      <path d="M4.5 6.25h7M4.5 8.75h4.5" />
+                    </svg>
+                  </button>
+                  <button data-testid="ai-window-view-directory" type="button" (click)="setWorkspaceViewMode('directory')" [attr.aria-label]="'Directory view' | translate" [attr.title]="'Directory view' | translate" [attr.aria-pressed]="workspaceViewMode === 'directory'" [ngClass]="workspaceViewMode === 'directory' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
+                    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" aria-hidden="true">
+                      <path d="M1.5 4.75A1.5 1.5 0 0 1 3 3.25h3l1.4 1.5H13a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5H3a1.5 1.5 0 0 1-1.5-1.5v-7Z" />
+                    </svg>
+                  </button>
+                  <button data-testid="ai-window-view-split" type="button" (click)="setWorkspaceViewMode('split')" [attr.aria-label]="'Split view' | translate" [attr.title]="'Split view' | translate" [attr.aria-pressed]="workspaceViewMode === 'split'" [ngClass]="workspaceViewMode === 'split' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
+                    <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" aria-hidden="true">
+                      <rect x="1.5" y="2.5" width="13" height="11" rx="2" />
+                      <path d="M8 2.75v10.5" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div #workspacePanels class="flex min-h-0 flex-1 items-stretch overflow-x-auto overflow-y-hidden">
+                  @if (workspaceViewMode !== 'directory') {
+                  <section [ngClass]="workspaceViewMode === 'split' ? 'min-w-[420px] grow-[var(--ai-chat-panel-grow)]' : 'min-w-0 grow'" class="flex min-h-0 shrink basis-0 flex-col overflow-hidden">
+                @if (workspaceViewMode === 'chat') {
                 <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
+                }
                 <div #messagesContainer data-testid="chat-widget-messages" [class]="messages.length ? 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-[300px] [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-[300px] max-[640px]:[mask-image:none]' : 'min-h-0 flex-1 space-y-4 overflow-y-auto scroll-smooth px-5 pt-5 pb-6 [mask-image:linear-gradient(to_bottom,transparent_0,rgba(0,0,0,0.22)_14px,rgba(0,0,0,0.72)_30px,black_52px,black_calc(100%-10px),transparent_100%)] max-[640px]:space-y-3 max-[640px]:px-4 max-[640px]:pb-0 max-[640px]:[mask-image:none]'">
                   @if (isLoadingHistory()) {
                   <div class="flex min-h-full items-center justify-center">
@@ -231,6 +256,23 @@
                       {{ messageDraftTokenCount }}/{{ maxComposerTokens }}
                     </span>
                   </div>
+                </div>
+                  </section>
+                  }
+
+                  @if (workspaceViewMode === 'split') {
+                  <div role="separator" tabindex="0" aria-orientation="vertical" aria-valuemin="20" aria-valuemax="50" [attr.aria-valuenow]="directorySplitPercent" [attr.aria-valuetext]="directorySplitPercent + '% directory'" [attr.aria-label]="'Resize chat and directory panels' | translate" (pointerdown)="startDirectoryResize($event)" (pointermove)="resizeDirectoryPanel($event)" (pointerup)="stopDirectoryResize($event)" (pointercancel)="stopDirectoryResize($event)" (keydown)="resizeDirectoryWithKeyboard($event)" class="group/divider relative z-30 flex w-3 shrink-0 touch-none cursor-col-resize items-center justify-center bg-transparent outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[var(--color-blue-640)]/45">
+                    <span class="pointer-events-none absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-[var(--color-divider-dark)] transition-colors group-hover/divider:bg-[var(--color-text6)] group-focus-visible/divider:bg-[var(--color-blue-640)]" aria-hidden="true"></span>
+                    <span class="pointer-events-none relative z-10 h-8 w-[3px] rounded-full bg-[var(--color-text6)] opacity-0 transition-[height,opacity,background-color] group-hover/divider:h-10 group-hover/divider:opacity-100 group-focus-visible/divider:h-10 group-focus-visible/divider:bg-[var(--color-blue-640)] group-focus-visible/divider:opacity-100" aria-hidden="true"></span>
+                  </div>
+                  }
+
+                  @if (workspaceViewMode !== 'chat') {
+                  <app-ai-directory-panel
+                    [ngClass]="workspaceViewMode === 'split' ? 'min-w-[280px] grow-[var(--ai-directory-panel-grow)]' : 'min-w-0 grow'"
+                    class="flex min-h-0 shrink basis-0 overflow-hidden">
+                  </app-ai-directory-panel>
+                  }
                 </div>
               </div>
             </div>
