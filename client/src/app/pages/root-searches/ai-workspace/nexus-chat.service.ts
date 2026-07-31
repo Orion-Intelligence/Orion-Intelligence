@@ -259,6 +259,10 @@ export class NexusChatService {
     return this.api.post<NexusChatSession>('nexus/chats', { title, session_id: crypto.randomUUID() });
   }
 
+  deleteAllChatSessions(): Observable<{ success: boolean }> {
+    return this.api.delete<{ success: boolean }>('nexus/chats');
+  }
+
   getChat(sessionId: string): Observable<NexusChatDetail> {
     return this.api.get<NexusChatDetail>(`nexus/chats/${sessionId}`);
   }

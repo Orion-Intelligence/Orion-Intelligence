@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostListener, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
@@ -9,22 +10,38 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { SidebarShellComponent } from '../../../graphs/shared/sidebar-shell/sidebar-shell.component';
 import { NexusChatService } from '../nexus-chat.service';
 
+const chatRowAnimation = trigger('chatRowAnimation', [
+  transition(':enter', [
+    style({ height: 0, opacity: 0, overflow: 'hidden', transform: 'translateY(-4px) scale(0.99)' }),
+    animate('160ms cubic-bezier(0.16, 1, 0.3, 1)', style({ height: '*', opacity: 1, transform: 'translateY(0) scale(1)' })),
+  ]),
+  transition(':leave', [
+    style({ overflow: 'hidden' }),
+    animate('120ms cubic-bezier(0.4, 0, 1, 1)', style({ height: 0, opacity: 0, transform: 'translateY(-3px) scale(0.99)' })),
+  ]),
+]);
+
 @Component({
   selector: 'app-ai-chat-sidebar',
   standalone: true,
   imports: [CommonModule, FormsModule, ConfirmationPopupComponent, SidebarShellComponent, TooltipDirective, TranslatePipe],
   templateUrl: './ai-chat-sidebar.component.html',
+  animations: [chatRowAnimation],
 })
 export class AiChatSidebarComponent {
   readonly sessions = input<AiChatSession[]>([]);
   readonly activeSessionId = input<string | null>(null);
   readonly busySessionId = input<string | null>(null);
+  readonly creatingChat = input(false);
+  readonly clearingChats = input(false);
   readonly newChat = output<void>();
+  readonly clearChats = output<void>();
   readonly chatSelected = output<AiChatSession>();
   readonly sessionUpdated = output<AiChatSession>();
   readonly sessionDeleted = output<string>();
   openedSessionMenuId: string | null = null;
   deleteChatTarget: AiChatSession | null = null;
+  clearChatsConfirmationOpen = false;
   renameChatTarget: AiChatSession | null = null;
   renameChatDraft = '';
   searchOpen = false;
@@ -40,7 +57,7 @@ export class AiChatSidebarComponent {
   }
 
   startNewChat(): void {
-    if (this.hasEmptyChat) {
+    if (this.hasEmptyChat || this.creatingChat() || this.clearingChats()) {
       return;
     }
     this.closeChatMenu();
@@ -62,6 +79,22 @@ export class AiChatSidebarComponent {
 
   clearSearch(): void {
     this.searchQuery = '';
+  }
+
+  requestClearChats(event?: Event): void {
+    event?.stopPropagation();
+    if (!this.canClearChats) {
+      return;
+    }
+    this.closeChatMenu();
+    this.clearChatsConfirmationOpen = true;
+  }
+
+  confirmClearChats(confirmed: boolean): void {
+    this.clearChatsConfirmationOpen = false;
+    if (confirmed && this.canClearChats) {
+      this.clearChats.emit();
+    }
   }
 
   closeSearch(): void {
@@ -205,11 +238,16 @@ export class AiChatSidebarComponent {
   }
 
   get hasEmptyChat(): boolean {
-    return this.sessions().some(chat => this.isChatEmpty(chat));
+    const topChat = this.sessions()[0];
+    return Boolean(topChat && this.isChatEmpty(topChat) && topChat.title.trim().toLowerCase() === 'new chat');
   }
 
   get canDeleteChat(): boolean {
     return this.visibleSessions.length > 1;
+  }
+
+  get canClearChats(): boolean {
+    return this.sessions().length > 0 && !this.busySessionId() && !this.clearingChats();
   }
 
   getChatInitial(chat: AiChatSession): string {

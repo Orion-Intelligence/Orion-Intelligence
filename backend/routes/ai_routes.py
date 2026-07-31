@@ -155,6 +155,21 @@ async def list_nexus_chats(current_user=Depends(get_current_user)):
     return await nexus_chat_gateway.getInstance().list_chats(current_user)
 
 
+@ai_routes.delete(
+    "/api/nexus/chats",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(ai_enabled_required),
+        Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])),
+        Depends(license_required("scanning")),
+        Depends(limiter_dependency),
+    ],
+)
+async def delete_all_nexus_chats(current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().delete_all_chats(current_user)
+
+
 @ai_routes.get(
     "/api/nexus/chats/{session_id}",
     status_code=200,

@@ -82,6 +82,13 @@ class nexus_chat_gateway:
             current_user=current_user,
         )
 
+    async def delete_all_chats(self, current_user):
+        return await self._request(
+            method="DELETE",
+            path="/v1/chats",
+            current_user=current_user,
+        )
+
     async def get_chat(self, session_id: str, current_user):
         return await self._request(
             method="GET",

@@ -3,6 +3,7 @@ import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnIn
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { AppService } from '../../../services/core/app/app.service';
 import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
@@ -33,7 +34,6 @@ interface PendingNexusStream {
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
-  private readonly localNewChatSessionId = 'new-chat';
   private readonly pendingStreamStorageKey = 'orion.nexus.pending-stream';
   private activeChatRequest?: Subscription;
   private chatHistoryRequest?: Subscription;
@@ -50,6 +50,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly copiedMessageId = signal<string | null>(null);
   protected readonly nexusStep = signal('');
   protected readonly maxComposerTokens = 300;
+  protected creatingNewChat = false;
+  protected clearingChats = false;
   protected workspaceViewMode: AiWorkspaceViewMode = 'chat';
   protected directorySplitPercent = 30;
 
@@ -158,7 +160,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(): void {
-    if (this.isSending()) {
+    if (this.isSending() || this.clearingChats) {
       return;
     }
 
@@ -173,10 +175,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const requestId = this.resumedRequestId || crypto.randomUUID();
     this.resumedRequestId = null;
 
-    const sendToSession = (sessionId: string, sessionMessages: AiWorkspaceMessage[]) => {
+    const sendToSession = (sessionId: string, sessionMessages: AiWorkspaceMessage[], shouldNameNewChat = false) => {
       const baselineMessageCount = sessionMessages.length;
-      const shouldNameNewChat = baselineMessageCount === 0 &&
-        this.chatSessions.some(session => session.sessionId === sessionId && session.title === 'New Chat');
       this.messageDraft = '';
       this.queueComposerResize();
 
@@ -188,6 +188,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         { id: `pending-user-${requestId}`, sender: 'user', text, time: new Date() },
       ];
       this.updateSessionMessages(sessionId, requestMessages);
+      if (shouldNameNewChat) {
+        this.nameNewChatFromPrompt(sessionId, text);
+      }
       this.writePendingStream({ requestId, sessionId, message: text, baselineMessageCount });
       if (this.activeSessionId === sessionId) {
         this.scrollToBottom();
@@ -231,9 +234,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         ];
 
         this.updateSessionMessages(sessionId, completedMessages, now.toISOString());
-        if (shouldNameNewChat) {
-          this.nameNewChatFromPrompt(sessionId, text);
-        }
         finishRequest();
         if (this.activeSessionId === sessionId) {
           this.scrollToBottom();
@@ -262,51 +262,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       });
     };
 
-    const createSessionAndSend = (localSessionId?: string) => {
-      const sourceSessionId = localSessionId ?? this.activeSessionId;
-      const sourceMessages = [...this.messages];
-      this.isSending.set(true);
-      this.activeRequestSessionId = sourceSessionId;
-      this.nexusStep.set('Starting chat');
-      this.nexusChatService.createChat().subscribe({
-        next: (session) => {
-          const mappedSession = this.mapSession(session);
-          const sourceStillSelected = this.activeSessionId === sourceSessionId;
-
-          this.chatSessions = this.sortChatSessions([
-            mappedSession,
-            ...this.chatSessions.filter(chat =>
-              chat.sessionId !== localSessionId && chat.sessionId !== mappedSession.sessionId),
-          ]);
-          if (sourceStillSelected) {
-            this.activeSessionId = mappedSession.sessionId;
-            this.messages = sourceMessages;
-          }
-
-          sendToSession(mappedSession.sessionId, sourceMessages);
-        },
-        error: () => {
-          if (this.activeSessionId === sourceSessionId) {
-            this.messages = [...sourceMessages, this.createErrorMessage(text)];
-          }
-          this.isSending.set(false);
-          this.activeRequestSessionId = null;
-          this.nexusStep.set('');
-        },
-      });
-    };
-
     if (this.activeSessionId) {
       const activeSession = this.chatSessions.find(chat => chat.sessionId === this.activeSessionId);
-      if (activeSession?.sessionId === this.localNewChatSessionId) {
-        createSessionAndSend(activeSession.sessionId);
-        return;
-      }
-      sendToSession(this.activeSessionId, [...this.messages]);
-      return;
+      sendToSession(this.activeSessionId, [...this.messages], activeSession?.title.trim().toLowerCase() === 'new chat');
     }
-
-    createSessionAndSend();
   }
 
   onComposerKeydown(event: KeyboardEvent): void {
@@ -349,9 +308,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   startNewChat(): void {
-    const emptyChat = this.chatSessions.find(chat => chat.messageCount === 0 && chat.messages.length === 0);
-    if (emptyChat) {
-      this.activeSessionId = emptyChat.sessionId;
+    if (this.clearingChats) {
+      return;
+    }
+
+    const topChat = this.chatSessions[0];
+    if (topChat && topChat.messageCount === 0 && topChat.messages.length === 0 &&
+      topChat.title.trim().toLowerCase() === 'new chat') {
+      this.activeSessionId = topChat.sessionId;
       this.messages = [];
       this.messageDraft = '';
       this.cancelMessageEdit();
@@ -360,35 +324,72 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (this.creatingNewChat) {
+      return;
+    }
+
     if (!this.isSending()) {
       this.detachActiveNexusRequest();
       this.nexusStep.set('');
     }
 
-    this.createLocalNewChat();
+    this.createEmptyChat();
   }
 
-  private createLocalNewChat(): void {
-    const newChatSession: AiChatSession = {
-      sessionId: this.localNewChatSessionId,
-      title: 'New Chat',
-      updatedAt: new Date().toISOString(),
-      messageCount: 0,
-      isPinned: false,
-      pinnedAt: null,
-      messages: [],
-    };
-    this.chatSessions = this.sortChatSessions([
-      newChatSession,
-      ...this.chatSessions.filter(chat => chat.sessionId !== this.localNewChatSessionId),
-    ]);
-    this.activeSessionId = newChatSession.sessionId;
-    this.messages = [];
-    this.messageDraft = '';
+  clearAllChats(): void {
+    if (this.clearingChats || this.creatingNewChat || this.isSending() || !this.chatSessions.length) {
+      return;
+    }
 
+    this.clearingChats = true;
+    this.chatHistoryRequest?.unsubscribe();
+    this.chatHistoryRequest = undefined;
     this.cancelMessageEdit();
-    this.queueComposerResize();
-    this.scrollToBottom();
+
+    this.nexusChatService.deleteAllChatSessions().pipe(switchMap(() => {
+      this.chatSessions = [];
+      this.activeSessionId = null;
+      this.messages = [];
+      this.messageDraft = '';
+      this.clearPendingStream();
+      this.queueComposerResize();
+      return this.nexusChatService.createChat();
+    })).subscribe({
+      next: (session) => {
+        const newChatSession = this.mapSession(session);
+        this.chatSessions = [newChatSession];
+        this.activeSessionId = newChatSession.sessionId;
+        this.messages = [];
+        this.clearingChats = false;
+        this.scrollToBottom();
+      },
+      error: () => {
+        this.clearingChats = false;
+      },
+    });
+  }
+
+  private createEmptyChat(): void {
+    this.creatingNewChat = true;
+    this.nexusChatService.createChat().subscribe({
+      next: (session) => {
+        const newChatSession = this.mapSession(session);
+        this.creatingNewChat = false;
+        this.chatSessions = this.sortChatSessions([
+          newChatSession,
+          ...this.chatSessions.filter(chat => chat.sessionId !== newChatSession.sessionId),
+        ]);
+        this.activeSessionId = newChatSession.sessionId;
+        this.messages = [];
+        this.messageDraft = '';
+        this.cancelMessageEdit();
+        this.queueComposerResize();
+        this.scrollToBottom();
+      },
+      error: () => {
+        this.creatingNewChat = false;
+      },
+    });
   }
 
   trackMessage(_index: number, message: AiWorkspaceMessage): string {
@@ -704,15 +705,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     this.nexusChatService.listChats().subscribe({
       next: (sessions) => {
-        this.chatSessions = this.sortChatSessions(sessions
-          .map(session => this.mapSession(session))
-          .filter(session => session.messageCount > 0));
+        this.chatSessions = this.sortChatSessions(sessions.map(session => this.mapSession(session)));
         this.activeSessionId = null;
         this.messages = [];
 
         this.isLoadingHistory.set(false);
-        if (!this.resumePendingStream()) {
-          this.createLocalNewChat();
+        if (!this.resumePendingStream() && this.chatSessions[0]) {
+          this.selectChat(this.chatSessions[0]);
         }
       },
       error: () => {
@@ -720,9 +719,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.messages = [];
         this.activeSessionId = null;
         this.isLoadingHistory.set(false);
-        if (!this.resumePendingStream()) {
-          this.createLocalNewChat();
-        }
+        this.resumePendingStream();
       },
     });
   }
@@ -789,6 +786,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private nameNewChatFromPrompt(sessionId: string, prompt: string): void {
     const title = this.chatTitleFromPrompt(prompt);
+    this.chatSessions = this.sortChatSessions(this.chatSessions.map(chat =>
+      chat.sessionId === sessionId ? { ...chat, title } : chat));
     this.nexusChatService.renameChatSession(sessionId, title).subscribe({
       next: (session) => {
         this.chatSessions = this.sortChatSessions(this.chatSessions.map(chat =>
@@ -811,15 +810,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     if (this.activeSessionId === session.sessionId) {
-      return;
-    }
-
-    if (session.sessionId === this.localNewChatSessionId) {
-      this.activeSessionId = session.sessionId;
-      this.messages = [];
-      this.cancelMessageEdit();
-      this.queueComposerResize();
-      this.scrollToBottom();
       return;
     }
 
