@@ -14,8 +14,8 @@ import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
-import { AiDirectoryPanelComponent } from './ai-directory-panel/ai-directory-panel.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
+import { AiDirectory } from './ai-directory/ai-directory';
 
 type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
 
@@ -29,7 +29,7 @@ interface PendingNexusStream {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectoryPanelComponent, MarkdownPipe, ProfileComponent, TranslatePipe],
+  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectory ,MarkdownPipe, ProfileComponent, TranslatePipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -52,6 +52,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly maxComposerTokens = 300;
   protected workspaceViewMode: AiWorkspaceViewMode = 'chat';
   protected directorySplitPercent = 30;
+  protected directoryImportMode = false;
+  protected directoryRepoUrl = '';
+  protected directoryImportBusy = false;
+  protected directorySessionId: string | null = null;
+  protected directoryImportRequest: { requestId: string; sessionId: string; repoUrl: string } | null = null;
 
   messageDraft = '';
   editingMessageId: string | null = null;
@@ -389,6 +394,77 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.cancelMessageEdit();
     this.queueComposerResize();
     this.scrollToBottom();
+  }
+
+  openDirectoryImport(): void {
+    this.directoryImportMode = true;
+
+    if (this.activeSessionId && this.activeSessionId !== this.localNewChatSessionId) {
+      this.setWorkspaceViewMode('split');
+    }
+  }
+
+  cancelDirectoryImport(): void {
+    this.directoryImportMode = false;
+    this.directoryRepoUrl = '';
+  }
+
+  submitDirectoryImport(): void {
+    const repoUrl = this.directoryRepoUrl.trim();
+
+    if (!repoUrl || this.directoryImportBusy) {
+      return;
+    }
+
+    this.ensureBackendSessionForDirectory((sessionId) => {
+      this.directorySessionId = sessionId;
+      this.directoryImportRequest = {
+        requestId: crypto.randomUUID(),
+        sessionId,
+        repoUrl,
+      };
+
+      this.directoryImportMode = false;
+      this.directoryRepoUrl = '';
+      this.setWorkspaceViewMode('split');
+    });
+  }
+
+  onDirectoryWorkspaceApproved(): void {
+    this.setWorkspaceViewMode('split');
+  }
+
+  private ensureBackendSessionForDirectory(next: (sessionId: string) => void): void {
+    if (this.activeSessionId && this.activeSessionId !== this.localNewChatSessionId) {
+      this.directorySessionId = this.activeSessionId;
+      next(this.activeSessionId);
+      return;
+    }
+
+    this.directoryImportBusy = true;
+
+    this.nexusChatService.createChat().subscribe({
+      next: (session) => {
+        const mappedSession = this.mapSession(session);
+
+        this.chatSessions = this.sortChatSessions([
+          mappedSession,
+          ...this.chatSessions.filter(chat =>
+            chat.sessionId !== this.localNewChatSessionId &&
+            chat.sessionId !== mappedSession.sessionId),
+        ]);
+
+        this.activeSessionId = mappedSession.sessionId;
+        this.directorySessionId = mappedSession.sessionId;
+        this.messages = [];
+        this.directoryImportBusy = false;
+
+        next(mappedSession.sessionId);
+      },
+      error: () => {
+        this.directoryImportBusy = false;
+      },
+    });
   }
 
   trackMessage(_index: number, message: AiWorkspaceMessage): string {

@@ -5,7 +5,7 @@ import { ChatApiResponse } from '../../../shared/model/chat/chat-api-response.mo
 import { AiWorkspaceTrigger } from '../../../shared/model/chat/ai-workspace-message.model';
 import { NexusChatPayload, NexusChatStreamChunk, NexusSummaryPayload } from '../../../shared/model/chat/nexus-chat.model';
 import { ApiService } from '../../../shared/services/api.service';
-import { NexusChatDetail, NexusChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
+import { NexusChatDetail, NexusChatSession, NexusWorkspaceTreeResponse, NexusWorkspaceFileReadResponse, NexusWorkspaceImportResponse } from '../../../shared/model/nexus/ai-chat-session.model';
 
 @Injectable({ providedIn: 'root' })
 export class NexusChatService {
@@ -277,5 +277,21 @@ export class NexusChatService {
 
   pinChatSession(sessionId: string, isPinned: boolean): Observable<NexusChatSession> {
     return this.updateChatSession(sessionId, { is_pinned: isPinned });
+  }
+
+  importGithubRepo(sessionId: string, repoUrl: string): Observable<NexusWorkspaceImportResponse> {
+    return this.api.post<NexusWorkspaceImportResponse>(`nexus/chats/${sessionId}/workspace/github/import`, { repo_url: repoUrl });
+  }
+
+  getWorkspaceStatus(sessionId: string): Observable<NexusWorkspaceImportResponse> {
+    return this.api.get<NexusWorkspaceImportResponse>(`nexus/chats/${sessionId}/workspace/status`);
+  }
+
+  getWorkspaceTree(sessionId: string, path = ''): Observable<NexusWorkspaceTreeResponse> {
+    return this.api.get<NexusWorkspaceTreeResponse>(`nexus/chats/${sessionId}/workspace/tree?path=${encodeURIComponent(path)}`);
+  }
+
+  getWorkspaceFile(sessionId: string, path: string, startLine = 1, lineCount = 1000): Observable<NexusWorkspaceFileReadResponse> {
+    return this.api.get<NexusWorkspaceFileReadResponse>(`nexus/chats/${sessionId}/workspace/file?path=${encodeURIComponent(path)}&start_line=${startLine}&line_count=${lineCount}`);
   }
 }
