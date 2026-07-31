@@ -726,7 +726,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private loadChat(sessionId: string): void {
     this.chatHistoryRequest?.unsubscribe();
-    this.isLoadingHistory.set(true);
+    if (!this.activeSessionId) {
+      this.isLoadingHistory.set(true);
+    }
 
     this.chatHistoryRequest = this.nexusChatService.getChat(sessionId).subscribe({
       next: (chat) => {
@@ -810,6 +812,18 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     if (this.activeSessionId === session.sessionId) {
+      return;
+    }
+
+    if (session.messages.length || session.messageCount === 0) {
+      this.chatHistoryRequest?.unsubscribe();
+      this.chatHistoryRequest = undefined;
+      this.activeSessionId = session.sessionId;
+      this.messages = [...session.messages];
+      this.isLoadingHistory.set(false);
+      this.cancelMessageEdit();
+      this.queueComposerResize();
+      this.scrollToBottom();
       return;
     }
 
