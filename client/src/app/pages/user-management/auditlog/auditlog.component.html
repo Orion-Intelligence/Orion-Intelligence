@@ -45,5 +45,5 @@
   [subtitle]="('Choose the export format.') | translate"
   [options]="reportExportOptions"
   (closed)="closeExportChoice()"
-  (optionSelected)="selectExport()">
+  (optionSelected)="selectExport($event)">
 </app-export-choice-modal>

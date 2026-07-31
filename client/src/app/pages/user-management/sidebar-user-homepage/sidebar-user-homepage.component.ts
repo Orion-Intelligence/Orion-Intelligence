@@ -22,7 +22,7 @@ import { MessagePopupComponent } from "../../../shared/partials/message-popup/me
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 import { Subscription } from 'rxjs';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { ExportChoiceOption } from '../../../shared/model/report/export-choice.model';
+import { buildStandardExportOptions } from '../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../shared/services/export/alert-export.service';
 import { SidebarHomepageService } from '../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
@@ -48,7 +48,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   isExportChoiceOpen = false;
   readonly iocPermissionWarning = "You don't have permission to manage IOCs outside your domain. Ask your network administrator.";
   readonly alertLicenseWarning = "You don't have license to view this";
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for alerts.', testId: 'home-alert-export-option-report' }];
+  readonly alertExportOptions = buildStandardExportOptions('home-alert-export-option', 'report', 'Generate PDF export for alerts.');
 
   constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService) {
     effect(() => {
@@ -245,7 +245,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     this.isExportChoiceOpen = false;
   }
 
-  exportAlerts(_type: string): void {
+  exportAlerts(type: string): void {
     this.apiService.get<any>('profile/alerts').subscribe({
       next: (alerts) => {
         const normalizedAlerts: AlertModel[] = Array.isArray(alerts)
@@ -256,7 +256,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
           this.closeExportChoice();
           return;
         }
-        this.alertExportService.exportPdf(normalizedAlerts, 'Brand Alerts');
+        this.alertExportService.exportByType(normalizedAlerts, type, 'Brand Alerts');
         this.closeExportChoice();
       },
       error: () => {

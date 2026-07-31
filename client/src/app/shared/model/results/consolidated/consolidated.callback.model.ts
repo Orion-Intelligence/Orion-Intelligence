@@ -35,7 +35,7 @@ export class ConsolidatedCallbackModel {
   }
 }
 export interface ConsolidatedLiveApis {
-    type: 'user' | 'social' | 'cracked';
+    type: 'user' | 'social' | 'cracked' | 'software';
     q1: string;
     q2?: string;
 }

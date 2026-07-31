@@ -65,6 +65,10 @@ export class GraphExportService {
       this.exportGraphJson(payload);
       return;
     }
+    if (type === 'csv') {
+      this.exportGraphCsv(payload);
+      return;
+    }
     if (type !== 'graph_pdf') {
       throw new Error(`GraphExportService only supports graph exports. Received: ${type}`);
     }
@@ -106,6 +110,21 @@ export class GraphExportService {
   private exportGraphJson(payload: GraphReportPayload): void {
     const jsonString = JSON.stringify(this.exportBranding.addTenantJsonMetadata(payload), null, 2);
     this.downloadText(jsonString, 'application/json', `${this.buildSafeFilename(payload)}-graph.json`);
+  }
+
+  private exportGraphCsv(payload: GraphReportPayload): void {
+    const rows = [
+      ['type', 'id', 'label', 'from', 'to'],
+      ...(payload.nodes || []).map(node => ['node', node.id, node.label, '', '']),
+      ...(payload.edges || []).map(edge => ['edge', edge.id, edge.label || '', edge.from, edge.to])
+    ];
+    const csv = rows.map(row => row.map(value => this.escapeCsvValue(value)).join(',')).join('\n');
+    this.downloadText(csv, 'text/csv;charset=utf-8;', `${this.buildSafeFilename(payload)}-graph.csv`);
+  }
+
+  private escapeCsvValue(value: unknown): string {
+    const text = String(value ?? '');
+    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   }
 
   protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null = null): Uint8Array {

@@ -97,11 +97,14 @@ class migration_1_0_3_15:
                 for key in (
                     AllowedKeys.VERSION.value,
                     AllowedKeys.LANGUAGE_ALLOWED.value,
-                    AllowedKeys.AI_ENDPOINT_ENABLED.value,
                     AllowedKeys.ADMIN_ROOT_ALLOWED.value,
                     AllowedKeys.S_ONION.value,
                 ):
                     settings.pop(key, None)
+                settings[AllowedKeys.AI_ENDPOINT_ENABLED.value] = settings_by_tenant.get(tenant_id, {}).get(
+                    AllowedKeys.AI_ENDPOINT_ENABLED.value,
+                    "0",
+                )
 
             await settings_collection.insert_one({
                 "tenant_id": tenant_id,

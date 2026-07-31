@@ -475,13 +475,13 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   selectExport(type: string): void {
-    if (type === 'report') {
-      this.exportPdfReport();
+    if (type === 'report' || type === 'json' || type === 'csv') {
+      this.exportPdfReport(type);
     }
     this.closeExportChoice();
   }
 
-  private exportPdfReport(): void {
+  private exportPdfReport(type: string = 'report'): void {
     if (!this.hasResults) {
       return;
     }
@@ -530,7 +530,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
           { title: 'Crypto Result', values }
         ]
       };
-      this.graphReportExport.exportByType(payload, 'doc_pdf');
+      this.graphReportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
       return;
     }
 
@@ -581,6 +581,6 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       ]
     };
 
-    this.graphReportExport.exportByType(payload, 'doc_pdf');
+    this.graphReportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
   }
 }

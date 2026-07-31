@@ -192,16 +192,13 @@ export class SecurityScanComponent implements OnInit {
   }
 
   selectExport(type: string): void {
-    if (type === 'report') {
-      this.exportReport();
-    }
-    if (type === 'print') {
-      this.printReportButton?.nativeElement.click();
+    if (type === 'report' || type === 'json' || type === 'csv') {
+      this.exportReport(type);
     }
     this.closeExportChoice();
   }
 
-  private exportReport(): void {
+  private exportReport(type: string = 'report'): void {
     if (!this.meta) {
       return;
     }
@@ -275,7 +272,7 @@ export class SecurityScanComponent implements OnInit {
       tables
     };
 
-    this.graphReportExport.exportByType(payload, 'doc_pdf');
+    this.graphReportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
   }
 
   private resolveRequestedUrl(input: string): string {

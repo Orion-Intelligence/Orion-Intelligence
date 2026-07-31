@@ -93,7 +93,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       ]);
       const isSilentLogout = silentLogoutMessages.has(message);
       const isPublicCaseShareRequest = error instanceof HttpErrorResponse && authReq.url.includes('public/case-shares/');
-      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && error.status !== 400 && error.status !== 409 && error.status !== 424 && error.status !== 429) {
+      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && (error.status === 401 || isSilentLogout)) {
         localStorage.clear();
         sessionStorage.clear();
         router.navigate(['/login']).then();

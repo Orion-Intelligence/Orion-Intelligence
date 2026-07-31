@@ -9,7 +9,7 @@ import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary 
 import { AlertModel, AlertSummary } from '../../../../../shared/model/company-profile/node.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { ExportChoiceOption } from '../../../../../shared/model/report/export-choice.model';
+import { buildStandardExportOptions } from '../../../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../../../shared/services/export/alert-export.service';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/components/ui-dropdown/ui-dropdown.component';
@@ -30,7 +30,7 @@ export class AdminTenantAlerts implements OnInit {
   isExportChoiceOpen = false;
   isExportingTenantAlerts = false;
   selectedExportGroup: AdminTenantAlertGroup | null = null;
-  readonly tenantAlertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Download all alerts for this tenant.', testId: 'case-admin-alert-tenant-export-option-report' }];
+  readonly tenantAlertExportOptions = buildStandardExportOptions('case-admin-alert-tenant-export-option', 'report', 'Download all alerts for this tenant.');
 
   constructor(private apiService: ApiService, private sidebarHomepageService: SidebarHomepageService, private licenseService: LicenseService, private router: Router, private alertExportService: AlertExportService, private messageNotificationService: MessageNotificationService) { }
 
@@ -131,7 +131,7 @@ export class AdminTenantAlerts implements OnInit {
     this.selectedExportGroup = null;
   }
 
-  exportSelectedTenantAlerts(_type: string): void {
+  exportSelectedTenantAlerts(type: string): void {
     const group = this.selectedExportGroup;
     if (!group?.tenant.id || this.isExportingTenantAlerts) {
       return;
@@ -139,7 +139,7 @@ export class AdminTenantAlerts implements OnInit {
 
     this.isExportingTenantAlerts = true;
     this.fetchTenantAlertsPage(group.tenant.id, 1, [], (alerts) => {
-      this.alertExportService.exportPdf(alerts, `${group.tenant.name || 'Tenant'} Alerts`);
+      this.alertExportService.exportByType(alerts, type, `${group.tenant.name || 'Tenant'} Alerts`);
       this.isExportingTenantAlerts = false;
       this.isExportChoiceOpen = false;
       this.selectedExportGroup = null;

@@ -10,6 +10,13 @@ interface TelemetryGroup {
   label: string;
   values: string[];
 }
+
+interface CreditCardField {
+  key: string;
+  label: string;
+  icon: string;
+  value: string;
+}
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
@@ -194,6 +201,36 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   get passwordValue(): string {
     const arr = this.rowHelper.normalizeToArray(this.item()?.['password']);
     return arr[0] || '-';
+  }
+
+  get isCreditCardRecord(): boolean {
+    return String(this.item()?.['type'] || '').toLowerCase() === 'bin';
+  }
+
+  get recordSubtitle(): string {
+    return this.isCreditCardRecord ? 'Credit card BIN record' : 'Recovered credential record';
+  }
+
+  get identityPanelTitle(): string {
+    return this.isCreditCardRecord ? 'Credit Card Intelligence' : 'Identity Intelligence';
+  }
+
+  get identityPanelIcon(): string {
+    return this.isCreditCardRecord ? 'bi-credit-card-2-front-fill' : 'bi-person-badge-fill';
+  }
+
+  get creditCardFields(): CreditCardField[] {
+    const item = this.item();
+    return [
+      { key: 'bin', label: 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.firstValue(item?.['bin']) },
+      { key: 'Scheme', label: 'Scheme', icon: 'bi-wallet2', value: this.firstValue(item?.['Scheme'] ?? item?.['scheme']) },
+      { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.['Type'] ?? item?.['card_type'] ?? item?.['type']) },
+      { key: 'Tier', label: 'Tier', icon: 'bi-tag-fill', value: this.firstValue(item?.['Tier'] ?? item?.['tier']) },
+      { key: 'Issuer', label: 'Issuer', icon: 'bi-building', value: this.firstValue(item?.['Issuer'] ?? item?.['issuer']) },
+      { key: 'Country', label: 'Country', icon: 'bi-flag-fill', value: this.firstValue(item?.['Country'] ?? item?.['country']) },
+      { key: 'Luhn', label: 'Luhn', icon: 'bi-check2-circle', value: this.formatBooleanValue(item?.['Luhn'] ?? item?.['luhn']) },
+      { key: 'Website', label: 'Website', icon: 'bi-link-45deg', value: this.firstValue(item?.['Website'] ?? item?.['website']) },
+    ];
   }
 
   get sourceDomainValues(): string[] {
@@ -519,6 +556,20 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       'domain',
       'source_domain'
     ]);
+    if (this.isCreditCardRecord) {
+      ['bin', 'Scheme', 'scheme', 'Type', 'card_type', 'Tier', 'tier', 'Issuer', 'issuer', 'Country', 'country', 'Luhn', 'luhn', 'Website', 'website']
+        .forEach(key => exclude.add(key));
+      const cardGroups = this.creditCardFields
+        .filter(field => field.value && field.value !== '-')
+        .map(field => ({ key: field.key, label: field.label, values: [field.value] }));
+      const rest = Object.keys(item)
+        .filter(k => !exclude.has(k))
+        .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(item?.[k]) }))
+        .filter(g => g.values.length > 0)
+        .filter(g => !this.isHashOrIndexKey(g.key, g.label))
+        .sort((a, b) => a.label.localeCompare(b.label));
+      return [...cardGroups, ...rest];
+    }
     const core: TelemetryGroup[] = [];
     if (emails.length > 1) {
       core.push({ key: 'email', label: 'Email', values: emails });
@@ -596,6 +647,22 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
 
   private uniqueValues(values: string[]): string[] {
     return Array.from(new Set(values.map(v => String(v).trim()).filter(Boolean)));
+  }
+
+  private firstValue(value: any): string {
+    return this.rowHelper.normalizeToArray(value)
+      .map(v => String(v ?? '').trim())
+      .find(Boolean) || '-';
+  }
+
+  private formatBooleanValue(value: any): string {
+    if (value === true) {
+      return 'Valid';
+    }
+    if (value === false) {
+      return 'Invalid';
+    }
+    return this.firstValue(value);
   }
 
   private formatIndexLabel(value: any): string {

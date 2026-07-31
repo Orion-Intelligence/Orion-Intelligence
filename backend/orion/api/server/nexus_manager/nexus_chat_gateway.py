@@ -134,7 +134,7 @@ class nexus_chat_gateway:
                 response = await client.get(
                     f"http://172.18.0.1:8300/downloads/{quote(file_name, safe='')}",
                     headers=self._headers(current_user),
-                    timeout=120,
+                    timeout=1500,
                 )
             if response.status_code != 200:
                 return JSONResponse(status_code=response.status_code, content={"detail": response.text or "File not found."})
@@ -144,3 +144,41 @@ class nexus_chat_gateway:
             return Response(content=response.content, media_type=response.headers.get("content-type") or "application/octet-stream", headers=headers)
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Something happened while downloading Nexus file"})
+
+    async def import_github_repo(self, session_id: str, payload: dict[str, Any], current_user):
+        return await self._request(
+            method="POST",
+            path=f"/v1/chats/{session_id}/workspace/github/import",
+            current_user=current_user,
+            json_body=payload,
+        )
+
+    async def get_workspace_status(self, session_id: str, current_user):
+        return await self._request(
+            method="GET",
+            path=f"/v1/chats/{session_id}/workspace/status",
+            current_user=current_user,
+        )
+
+    async def get_workspace_tree(self, session_id: str, current_user, folder_path: str = ""):
+        encoded_path = quote(folder_path, safe="")
+
+        return await self._request(
+            method="GET",
+            path=f"/v1/chats/{session_id}/workspace/tree?path={encoded_path}",
+            current_user=current_user,
+        )
+
+    async def read_workspace_file(self, session_id: str, current_user, file_path: str, start_line: int = 1, line_count: int = 1000):
+        encoded_path = quote(file_path, safe="")
+
+        return await self._request(
+            method="GET",
+            path=(
+                f"/v1/chats/{session_id}/workspace/file"
+                f"?path={encoded_path}"
+                f"&start_line={start_line}"
+                f"&line_count={line_count}"
+            ),
+            current_user=current_user,
+        )

@@ -16,6 +16,8 @@ import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widge
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 import { ExportChoiceModalComponent } from "../../../shared/partials/export-choice-modal/export-choice-modal.component";
 import { AUDITLOG_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { ReportExportService } from '../../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 
 @Component({
   selector: 'app-auditlog',
@@ -26,6 +28,7 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
   private auditService = inject(AuditlogService);
   private helperService = inject(HelperService);
   private sidebarService = inject(SidebarService);
+  private reportExportService = inject(ReportExportService);
 
   protected aiToolRoutingService = inject(AiToolRoutingService);
   protected data$ = this.auditService.auditData$;
@@ -60,8 +63,8 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
     this.isExportChoiceOpen = false;
   }
 
-  selectExport() {
-    this.exportAuditLogs();
+  selectExport(type: string) {
+    this.exportAuditLogs(type);
     this.closeExportChoice();
   }
 
@@ -70,7 +73,7 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
     this.reload();
   }
 
-  exportAuditLogs() {
+  exportAuditLogs(type: string = 'csv') {
     this.auditService.auditData$.pipe(take(1)).subscribe(data => {
       const items = data?.items || [];
       if (!items.length) {
@@ -84,7 +87,37 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
         tenant: item.tenant_id,
         event: item.event
       }));
-      this.helperService.downloadAsCSV(rows);
+      if (type === 'csv') {
+        this.helperService.downloadAsCSV(rows);
+        return;
+      }
+      const payload: GraphReportPayload = {
+        graphKind: 'cti',
+        title: 'Audit Logs Export',
+        sessionName: 'audit-logs',
+        generatedAtIso: new Date().toISOString(),
+        nodes: [],
+        edges: [],
+        summary: {
+          total_records: rows.length,
+          page
+        },
+        tables: [
+          {
+            title: 'Audit Logs',
+            values: {},
+            columns: ['id', 'timestamp', 'actor', 'tenant', 'event'],
+            rows: rows.map(row => ({
+              id: String(row.id),
+              timestamp: String(row.timestamp || ''),
+              actor: String(row.actor || ''),
+              tenant: String(row.tenant || ''),
+              event: String(row.event || '')
+            }))
+          }
+        ]
+      };
+      this.reportExportService.exportByType(payload, type === 'json' ? 'json' : 'doc_pdf');
     });
   }
 }

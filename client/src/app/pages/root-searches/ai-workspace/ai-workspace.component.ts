@@ -15,8 +15,8 @@ import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
-import { AiDirectoryPanelComponent } from './ai-directory-panel/ai-directory-panel.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
+import { AiDirectory } from './ai-directory/ai-directory';
 
 type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
 
@@ -30,7 +30,7 @@ interface PendingNexusStream {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectoryPanelComponent, MarkdownPipe, ProfileComponent, TranslatePipe],
+  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectory, MarkdownPipe, ProfileComponent, TranslatePipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -53,7 +53,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected creatingNewChat = false;
   protected clearingChats = false;
   protected workspaceViewMode: AiWorkspaceViewMode = 'chat';
-  protected directorySplitPercent = 30;
+  protected directorySplitPercent = 42;
+  protected directoryImportMode = false;
+  protected directoryRepoUrl = '';
+  protected directoryImportBusy = false;
+  protected directorySessionId: string | null = null;
+  protected directoryImportRequest: { requestId: string; sessionId: string; repoUrl: string } | null = null;
 
   messageDraft = '';
   editingMessageId: string | null = null;
@@ -160,7 +165,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(): void {
-    if (this.isSending() || this.clearingChats) {
+    if (this.clearingChats || this.isActiveChatSending) {
       return;
     }
 
@@ -168,6 +173,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
       return;
+    }
+
+    if (this.isAnotherChatSending) {
+      this.cancelRunningNexusStream();
     }
 
     this.cancelMessageEdit();
@@ -299,11 +308,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   stopMessageGeneration(): void {
-    this.cancelActiveNexusRequest();
-    this.clearPendingStream();
-    this.isSending.set(false);
-    this.activeRequestSessionId = null;
-    this.nexusStep.set('');
+    this.cancelRunningNexusStream();
     this.scrollToBottom();
   }
 
@@ -312,10 +317,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.cancelRunningNexusStream();
+
     const topChat = this.chatSessions[0];
     if (topChat && topChat.messageCount === 0 && topChat.messages.length === 0 &&
       topChat.title.trim().toLowerCase() === 'new chat') {
       this.activeSessionId = topChat.sessionId;
+      this.syncDirectorySession(topChat.sessionId);
       this.messages = [];
       this.messageDraft = '';
       this.cancelMessageEdit();
@@ -328,19 +336,15 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.isSending()) {
-      this.detachActiveNexusRequest();
-      this.nexusStep.set('');
-    }
-
     this.createEmptyChat();
   }
 
   clearAllChats(): void {
-    if (this.clearingChats || this.creatingNewChat || this.isSending() || !this.chatSessions.length) {
+    if (this.clearingChats || this.creatingNewChat || !this.chatSessions.length) {
       return;
     }
 
+    this.cancelRunningNexusStream();
     this.clearingChats = true;
     this.chatHistoryRequest?.unsubscribe();
     this.chatHistoryRequest = undefined;
@@ -349,19 +353,30 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.nexusChatService.deleteAllChatSessions().pipe(switchMap(() => {
       this.chatSessions = [];
       this.activeSessionId = null;
+      this.syncDirectorySession(null);
       this.messages = [];
       this.messageDraft = '';
+      this.directoryImportMode = false;
+      this.directoryRepoUrl = '';
       this.clearPendingStream();
       this.queueComposerResize();
+      this.cdr.detectChanges();
       return this.nexusChatService.createChat();
     })).subscribe({
       next: (session) => {
         const newChatSession = this.mapSession(session);
         this.chatSessions = [newChatSession];
         this.activeSessionId = newChatSession.sessionId;
+        this.syncDirectorySession(newChatSession.sessionId);
         this.messages = [];
-        this.clearingChats = false;
-        this.scrollToBottom();
+        this.cdr.detectChanges();
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            this.clearingChats = false;
+            this.cdr.detectChanges();
+            this.scrollToBottom();
+          });
+        });
       },
       error: () => {
         this.clearingChats = false;
@@ -380,6 +395,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           ...this.chatSessions.filter(chat => chat.sessionId !== newChatSession.sessionId),
         ]);
         this.activeSessionId = newChatSession.sessionId;
+        this.syncDirectorySession(newChatSession.sessionId);
         this.messages = [];
         this.messageDraft = '';
         this.cancelMessageEdit();
@@ -388,6 +404,72 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.creatingNewChat = false;
+      },
+    });
+  }
+
+  openDirectoryImport(): void {
+    this.directoryImportMode = true;
+    this.setWorkspaceViewMode('split');
+  }
+
+  cancelDirectoryImport(): void {
+    this.directoryImportMode = false;
+    this.directoryRepoUrl = '';
+  }
+
+  submitDirectoryImport(): void {
+    const repoUrl = this.directoryRepoUrl.trim();
+
+    if (!repoUrl || this.directoryImportBusy) {
+      return;
+    }
+
+    this.ensureBackendSessionForDirectory((sessionId) => {
+      this.directorySessionId = sessionId;
+      this.directoryImportRequest = {
+        requestId: crypto.randomUUID(),
+        sessionId,
+        repoUrl,
+      };
+
+      this.directoryImportMode = false;
+      this.directoryRepoUrl = '';
+      this.setWorkspaceViewMode('split');
+    });
+  }
+
+  onDirectoryWorkspaceApproved(): void {
+    this.setWorkspaceViewMode('split');
+  }
+
+  private ensureBackendSessionForDirectory(next: (sessionId: string) => void): void {
+    if (this.activeSessionId) {
+      this.directorySessionId = this.activeSessionId;
+      next(this.activeSessionId);
+      return;
+    }
+
+    this.directoryImportBusy = true;
+
+    this.nexusChatService.createChat().subscribe({
+      next: (session) => {
+        const mappedSession = this.mapSession(session);
+
+        this.chatSessions = this.sortChatSessions([
+          mappedSession,
+          ...this.chatSessions.filter(chat => chat.sessionId !== mappedSession.sessionId),
+        ]);
+
+        this.activeSessionId = mappedSession.sessionId;
+        this.directorySessionId = mappedSession.sessionId;
+        this.messages = [];
+        this.directoryImportBusy = false;
+
+        next(mappedSession.sessionId);
+      },
+      error: () => {
+        this.directoryImportBusy = false;
       },
     });
   }
@@ -503,6 +585,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.activeChatRequest = undefined;
   }
 
+  private cancelRunningNexusStream(): void {
+    this.cancelActiveNexusRequest();
+    this.clearPendingStream();
+    this.isSending.set(false);
+    this.activeRequestSessionId = null;
+    this.nexusStep.set('');
+  }
+
   private detachActiveNexusRequest(): void {
     this.activeChatRequest?.unsubscribe();
     this.activeChatRequest = undefined;
@@ -590,6 +680,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       }, ...this.chatSessions]);
     }
     this.activeSessionId = pending.sessionId;
+    this.syncDirectorySession(pending.sessionId);
 
     const resume = () => {
       this.resumedRequestId = pending.requestId;
@@ -656,8 +747,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private setDirectorySplitPercent(value: number): void {
     const dividerWidth = 12;
-    const minimumChatWidth = 420;
-    const minimumDirectoryWidth = 280;
+    const minimumChatWidth = 520;
+    const minimumDirectoryWidth = 420;
     const panelWidth = Math.max(1, (this.workspacePanels?.nativeElement.clientWidth ?? 0) - dividerWidth);
     const minimumCombinedWidth = minimumChatWidth + minimumDirectoryWidth;
 
@@ -736,6 +827,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
         this.activeSessionId = chatSessionId;
         this.messages = chat.messages.map(message => this.mapMessage(message));
+        this.syncDirectorySession(chatSessionId);
 
         const updatedSession: AiChatSession = {
           ...this.mapSession(chat),
@@ -798,11 +890,23 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  private syncDirectorySession(sessionId: string | null): void {
+    if (!sessionId) {
+      this.directorySessionId = null;
+      this.directoryImportRequest = null;
+      return;
+    }
+
+    this.directorySessionId = sessionId;
+    this.directoryImportRequest = null;
+  }
+
   selectChat(session: AiChatSession): void {
     if (this.isSending() && session.sessionId === this.activeRequestSessionId) {
       this.chatHistoryRequest?.unsubscribe();
       this.chatHistoryRequest = undefined;
       this.activeSessionId = session.sessionId;
+      this.syncDirectorySession(session.sessionId);
       this.messages = [...session.messages];
       this.isLoadingHistory.set(false);
       this.cancelMessageEdit();
@@ -812,6 +916,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     if (this.activeSessionId === session.sessionId) {
+      this.syncDirectorySession(session.sessionId);
       return;
     }
 
@@ -819,6 +924,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       this.chatHistoryRequest?.unsubscribe();
       this.chatHistoryRequest = undefined;
       this.activeSessionId = session.sessionId;
+      this.syncDirectorySession(session.sessionId);
       this.messages = [...session.messages];
       this.isLoadingHistory.set(false);
       this.cancelMessageEdit();
@@ -827,6 +933,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.syncDirectorySession(session.sessionId);
     this.loadChat(session.sessionId);
   }
 
@@ -845,6 +952,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
     else {
       this.activeSessionId = null;
+      this.syncDirectorySession(null);
       this.messages = [];
       this.messageDraft = '';
     }

@@ -13,6 +13,7 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/compon
 import { search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { TenantIocSelectorComponent } from '../../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { AppService } from '../../../../services/core/app/app.service';
 
 @Component({
   selector: 'app-view-tenant',
@@ -35,7 +36,7 @@ export class ViewTenantComponent implements OnInit {
   iocDraft: IocCategory[] = [];
   tenantToDelete: any | null = null;
 
-  constructor(public apiService: ApiService, protected licenseService: LicenseService) {
+  constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService) {
   }
 
   get tenantLicenseOptions(): UiDropdownOption[] {
@@ -73,6 +74,7 @@ export class ViewTenantComponent implements OnInit {
           verified: tenant.verified ?? false,
           privileged_ioc: tenant.privileged_ioc ?? false,
           _saved_privileged_ioc: tenant.privileged_ioc ?? false,
+          ai_endpoint_enabled: tenant.ai_endpoint_enabled ?? false,
           user_quota: tenant.user_quota ?? 0,
           status: tenant.status === TenantStatusValues.ONBOARDING ||
                         tenant.status === TenantStatusValues.ACTIVE ||
@@ -108,6 +110,10 @@ export class ViewTenantComponent implements OnInit {
     return this.licenseService.isAdmin();
   }
 
+  canEditTenantAiEndpoint(): boolean {
+    return this.isAdmin() && this.appService.getConfig().appSettings.ai_endpoint_enabled;
+  }
+
   openTenant(tenant: any): void {
     const url = new URL(window.location.origin);
     url.hostname = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
@@ -120,13 +126,18 @@ export class ViewTenantComponent implements OnInit {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];
     }
+    const payload = { ...tenant };
+    if (!this.canEditTenantAiEndpoint()) {
+      delete payload.ai_endpoint_enabled;
+    }
     this.isLoading = true;
-    this.apiService.post<any>('update/tenants', tenant).subscribe({
+    this.apiService.post<any>('update/tenants', payload).subscribe({
       next: (res) => {
         if (res?.tenant) {
           tenant.iocs = res.tenant.iocs ?? tenant.iocs;
           tenant.privileged_ioc = res.tenant.privileged_ioc ?? tenant.privileged_ioc;
           tenant._saved_privileged_ioc = tenant.privileged_ioc ?? false;
+          tenant.ai_endpoint_enabled = res.tenant.ai_endpoint_enabled ?? tenant.ai_endpoint_enabled ?? false;
         }
         this.isLoading = false;
       },
@@ -238,6 +249,9 @@ export class ViewTenantComponent implements OnInit {
       ...this.activeIocTenant,
       iocs: selectedIocs
     };
+    if (!this.canEditTenantAiEndpoint()) {
+      delete payload.ai_endpoint_enabled;
+    }
     this.isLoading = true;
     this.apiService.post<any>('update/tenants', payload).subscribe({
       next: (res) => {

@@ -9,6 +9,8 @@ import { CasePdfExportService } from '../../case-management-service/case-pdf-exp
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { CASE_SHARE_EXPORT_OPTIONS } from '../../../../../shared/model/report/export-choice.model';
+import { ReportExportService } from '../../../../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../../../../shared/model/report/report-export.model';
 
 
 @Component({
@@ -28,7 +30,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   isExportChoiceOpen = false;
   readonly reportExportOptions = CASE_SHARE_EXPORT_OPTIONS;
 
-  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, public appService: AppService) { }
+  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, private reportExportService: ReportExportService, public appService: AppService) { }
 
   ngOnInit(): void {
     this.forceDarkTheme();
@@ -93,6 +95,9 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     if (type === 'report') {
       this.exportPdf();
     }
+    else if (type === 'json' || type === 'csv') {
+      this.exportCaseData(type);
+    }
     this.closeExportChoice();
   }
 
@@ -109,6 +114,39 @@ export class CaseShareComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Unable to export PDF.';
       }
     });
+  }
+
+  private exportCaseData(type: 'json' | 'csv'): void {
+    if (!this.report) {
+      return;
+    }
+    const payload: GraphReportPayload = {
+      graphKind: 'cti',
+      title: 'Shared Case Report',
+      sessionName: this.report.title || this.report.caseId || 'shared-case',
+      generatedAtIso: new Date().toISOString(),
+      nodes: [],
+      edges: [],
+      summary: {
+        case_id: this.report.caseId || '-',
+        title: this.report.title || '-',
+        status: this.report.status || '-',
+        entities: this.report.entities?.length || 0,
+        comments: this.report.comments?.length || 0
+      },
+      tables: [
+        {
+          title: 'Case Data',
+          values: {
+            case_id: this.report.caseId || '-',
+            title: this.report.title || '-',
+            status: this.report.status || '-',
+            description: this.report.description || '-'
+          }
+        }
+      ]
+    };
+    this.reportExportService.exportByType(payload, type);
   }
 
   getPrimaryEntity(): SharedCaseEntity | null {

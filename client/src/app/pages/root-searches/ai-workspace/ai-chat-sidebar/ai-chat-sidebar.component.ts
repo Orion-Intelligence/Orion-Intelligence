@@ -247,7 +247,7 @@ export class AiChatSidebarComponent {
   }
 
   get canClearChats(): boolean {
-    return this.sessions().length > 0 && !this.busySessionId() && !this.clearingChats();
+    return this.sessions().length > 0 && !this.clearingChats();
   }
 
   getChatInitial(chat: AiChatSession): string {
@@ -266,6 +266,7 @@ export class AiChatSidebarComponent {
   @HostListener('document:click')
   onDocumentClick(): void {
     this.closeChatMenu();
+    this.closeSearch();
   }
 
   private finishSharing(): void {

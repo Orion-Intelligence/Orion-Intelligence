@@ -101,6 +101,7 @@ class TenantRequest(BaseModel):
     alert_run_time: Optional[str] = None
     allowed_alert_categories: Optional[List[str]] = None
     password_reset_required: Optional[bool] = None
+    ai_endpoint_enabled: Optional[bool] = None
     accounts_mail_password: Optional[str] = None
     accounts_mail: Optional[str] = None
     accounts_smtp_server: Optional[str] = None

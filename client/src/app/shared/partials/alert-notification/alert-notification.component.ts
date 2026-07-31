@@ -263,12 +263,12 @@ export class AlertNotificationComponent implements OnChanges {
     this.exportSelectedAlert(type);
   }
 
-  exportSelectedAlert(_type: string): void {
+  exportSelectedAlert(type: string): void {
     if (!this.alertToShowReport) {
       this.closeExportChoice();
       return;
     }
-    this.alertExportService.exportPdf([this.alertToShowReport], 'Brand Alerts');
+    this.alertExportService.exportByType([this.alertToShowReport], type, 'Brand Alerts');
     this.closeExportChoice();
   }
 

@@ -63,10 +63,13 @@ export class ReportHeaderComponent {
   }
 
   selectExport(type: string) {
-    if (type === 'json' || type === 'csv') {
+    if (type === 'json') {
       this.downloadJSON();
     }
-    else {
+    else if (type === 'csv') {
+      this.helperService.downloadAsCSV([this.buildJsonExportPayload()], 'report_export.csv');
+    }
+    else if (type === 'report') {
       this.printPage();
     }
     this.closeExportChoice();

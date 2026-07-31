@@ -19,9 +19,9 @@
       @if (visibleSessions.length || searchOpen || creatingChat() || clearingChats()) {
       <div class="shrink-0 px-2 pb-2 pt-2">
         @if (searchOpen) {
-        <div class="flex h-10 items-center gap-2 rounded-[10px] border border-[var(--color-blue-640)]/60 bg-[var(--color-blue-790)] px-3 shadow-[0_0_0_3px_rgba(87,165,235,0.08)]">
-          <i class="bi bi-search shrink-0 text-[13px] text-[var(--color-text4)]" aria-hidden="true"></i>
-          <input type="search" [(ngModel)]="searchQuery" (keydown.escape)="closeSearch()" [attr.aria-label]="'Search Chats' | translate" [placeholder]="'Search chats...' | translate" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" autofocus />
+        <div (click)="$event.stopPropagation()" class="flex h-10 items-center gap-3 rounded-[9px] border border-[rgba(87,165,235,0.22)] bg-white/[0.04] px-3">
+          <i class="bi bi-search shrink-0 text-[14px] text-[var(--color-text4)]" aria-hidden="true"></i>
+          <input type="search" [(ngModel)]="searchQuery" (keydown.escape)="closeSearch()" [attr.aria-label]="'Search Chats' | translate" [placeholder]="'Search Chats...' | translate" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" autofocus />
           @if (searchQuery) {
           <button type="button" (click)="clearSearch()" [attr.aria-label]="'Clear search' | translate" [appTooltip]="'Clear search' | translate" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-[var(--color-text4)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)]">
             <i class="bi bi-x-lg text-[11px]" aria-hidden="true"></i>
@@ -46,7 +46,7 @@
           </button>
         </div>
 
-        <div [class.opacity-0]="clearingChats()" class="min-h-0 flex-grow overflow-y-auto px-2 pb-3 transition-opacity duration-200 ease-out [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+        <div [@.disabled]="clearingChats()" [class.opacity-0]="clearingChats()" class="min-h-0 flex-grow overflow-y-auto px-2 pb-3 transition-opacity duration-200 ease-out [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
           @if (creatingChat()) {
           <div data-testid="ai-chat-creation-status" role="status" aria-live="polite" class="group relative mb-1 select-none">
             <div class="ui-ai-chat-history-row relative flex min-h-[50px] w-full items-center gap-2.5 rounded-[9px] border border-transparent bg-white/[0.075] px-2.5 py-2 pr-[42px] text-left text-[var(--color-text1)]">
@@ -62,16 +62,6 @@
                 </span>
               </span>
             </div>
-          </div>
-          }
-
-          @if (!filteredSessions.length && !creatingChat()) {
-          <div class="flex min-h-[150px] flex-col items-center justify-center px-6 text-center">
-            <i class="bi bi-search text-[16px] text-[var(--color-text4)]" aria-hidden="true"></i>
-            <p class="mb-0 mt-3 text-[13px] font-medium text-[var(--color-text3)]">{{ 'No results found' | translate }}</p>
-            <button type="button" (click)="clearSearch()" class="mt-2 text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors hover:text-[var(--color-text1)]">
-              {{ 'Clear search' | translate }}
-            </button>
           </div>
           }
 
