@@ -26,7 +26,6 @@ class config_controller:
     ADMIN_SETTING_KEYS = {
         AllowedKeys.VERSION.value,
         AllowedKeys.LANGUAGE_ALLOWED.value,
-        AllowedKeys.AI_ENDPOINT_ENABLED.value,
         AllowedKeys.ADMIN_ROOT_ALLOWED.value,
         AllowedKeys.S_ONION.value,
     }
@@ -148,6 +147,10 @@ class config_controller:
                     default_config = json.loads(default_record.value)
                 for key in self.ADMIN_SETTING_KEYS:
                     config[key] = default_config.get(key, "")
+                config[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if (
+                    config.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
+                    and default_config.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
+                ) else "0"
             self._configs[resolved_tenant_id] = config
             if tenant.is_default:
                 self._config = config

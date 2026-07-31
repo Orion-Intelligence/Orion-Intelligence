@@ -286,11 +286,11 @@ class TenantManager:
             for key in (
                 AllowedKeys.VERSION.value,
                 AllowedKeys.LANGUAGE_ALLOWED.value,
-                AllowedKeys.AI_ENDPOINT_ENABLED.value,
                 AllowedKeys.ADMIN_ROOT_ALLOWED.value,
                 AllowedKeys.S_ONION.value,
             ):
                 system_settings.pop(key, None)
+            system_settings[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "0"
             await self._engine.save(db_system_model(tenant_id=str(tenant.id), key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
         from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 
@@ -387,6 +387,7 @@ class TenantManager:
 
         previous_alerts_visible_to_admin = getattr(tenant, "alerts_visible_to_admin", True)
         previous_privileged_ioc = getattr(tenant, "privileged_ioc", False)
+        is_admin = current_user.role in ["admin"]
 
         if data.password_reset_required is not None:
             maintainer = await self._engine.find_one(db_user_account,(db_user_account.tenant_uuid == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
@@ -428,13 +429,27 @@ class TenantManager:
             from orion.api.server.config_manager.config_controller import config_controller
             await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
 
+        if "ai_endpoint_enabled" in data.model_fields_set and data.ai_endpoint_enabled is not None:
+            if not is_admin:
+                raise HTTPException(status_code=403, detail="Only admin can change tenant AI endpoint")
+            from orion.api.server.config_manager.config_controller import config_controller
+            if await config_controller.getInstance().get_cached(AllowedKeys.AI_ENDPOINT_ENABLED.value, "0") != "1":
+                raise HTTPException(status_code=403, detail="Admin AI endpoint must be enabled first")
+            settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+            system_settings = json.loads(settings_record.value) if settings_record and settings_record.value else {}
+            system_settings[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if data.ai_endpoint_enabled else "0"
+            if settings_record:
+                settings_record.value = json.dumps(system_settings)
+                await self._engine.save(settings_record)
+            else:
+                await self._engine.save(db_system_model(tenant_id=tenant_id, key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
+            await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
+
         tenant.name = enc.encrypt((data.name or "").encode()).decode()
         tenant.phone = enc.encrypt((data.phone or "").encode()).decode()
         tenant.country = enc.encrypt((data.country or "").encode()).decode()
         tenant.city = enc.encrypt((data.city or "").encode()).decode()
         tenant.postal_code = enc.encrypt((data.postal_code or "").encode()).decode()
-        is_admin = current_user.role in ["admin"]
-
         if is_admin and data.verified is not None:
             tenant.verified = data.verified
 
@@ -556,6 +571,7 @@ class TenantManager:
             tenant_data["accounts_mail"] = meta_info.get("ACCOUNTS_MAIL") or ""
             tenant_data["accounts_smtp_server"] = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
             tenant_data["accounts_smtp_port"] = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
+            tenant_data["ai_endpoint_enabled"] = system_settings.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
         tenant_data["iocs"] = [{**ioc, "ioc_id": enc.decrypt((ioc.get("ioc_id") or "").encode()).decode() if ioc.get(
             "ioc_id") else "", "name": enc.decrypt((ioc.get("name") or "").encode()).decode() if ioc.get(
             "name") else "", "values": [enc.decrypt(v.encode()).decode() for v in (ioc.get("values") or [])], } for ioc
@@ -606,6 +622,7 @@ class TenantManager:
                 tenant_data["accounts_mail"] = meta_info.get("ACCOUNTS_MAIL") or ""
                 tenant_data["accounts_smtp_server"] = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
                 tenant_data["accounts_smtp_port"] = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
+                tenant_data["ai_endpoint_enabled"] = system_settings.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
             maintainer = maintainer_by_tenant_id.get(str(tenant.id))
             tenant_data["password_reset_required"] = getattr(maintainer, "password_reset_required", False)
             result.append(tenant_data)
