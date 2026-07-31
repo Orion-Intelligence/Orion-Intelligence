@@ -4,6 +4,8 @@ import { interval, Subscription } from 'rxjs';
 import { NexusChatService } from '../nexus-chat.service';
 import { NexusWorkspaceFileNode, NexusWorkspaceImportResponse } from '../../../../shared/model/nexus/ai-chat-session.model';
 
+type AiDirectoryViewMode = 'chat' | 'directory' | 'split';
+
 @Component({
   selector: 'app-ai-directory',
   standalone: true,
@@ -27,6 +29,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
   @Input() sessionId: string | null = null;
   @Input() importRequest: { requestId: string; sessionId: string; repoUrl: string } | null = null;
+  @Input() viewMode: AiDirectoryViewMode = 'directory';
 
   @Output() workspaceApproved = new EventEmitter<void>();
 
@@ -149,6 +152,15 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
         if (targetNode) {
           targetNode.loading = false;
+          return;
+        }
+
+        const detail = error?.error?.detail?.detail || error?.error?.detail || error?.error;
+
+        if (detail?.status === 'not_found') {
+          this.workspaceTree = null;
+          this.workspaceStatusType = 'idle';
+          this.workspaceStatusMessage = '';
           return;
         }
 
@@ -327,11 +339,30 @@ export class AiDirectory implements OnChanges, OnDestroy {
           this.workspaceStatusType = 'approved';
           this.workspaceStatusMessage = result.message || 'Repository is ready.';
           this.loadWorkspaceTree();
+          return;
         }
+
+        if (result.status === 'processing') {
+          this.workspaceStatusType = 'loading';
+          this.workspaceStatusMessage = result.message || 'Repository is still processing...';
+          this.pollWorkspaceStatus(sessionId);
+          return;
+        }
+
+        if (result.status === 'infected') {
+          this.workspaceStatusType = 'infected';
+          this.workspaceStatusMessage = result.message || 'Repository blocked because a threat was detected.';
+          return;
+        }
+
+        this.workspaceStatusType = 'idle';
+        this.workspaceStatusMessage = '';
+        this.workspaceTree = null;
       },
       error: () => {
         this.workspaceStatusType = 'idle';
         this.workspaceStatusMessage = '';
+        this.workspaceTree = null;
       },
     });
   }

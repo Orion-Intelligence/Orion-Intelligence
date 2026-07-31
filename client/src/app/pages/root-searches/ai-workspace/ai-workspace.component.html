@@ -290,13 +290,13 @@
                   </div>
                   }
 
-                  @if (workspaceViewMode !== 'chat') {
                   <app-ai-directory [sessionId]="directorySessionId || activeSessionId"
-                    [importRequest]="directoryImportRequest" (workspaceApproved)="onDirectoryWorkspaceApproved()"
-                    [ngClass]="workspaceViewMode === 'split' ? 'min-w-[280px] grow-[var(--ai-directory-panel-grow)]' : 'min-w-0 grow'"
-                    class="flex min-h-0 shrink basis-0 overflow-hidden">
+                    [importRequest]="directoryImportRequest" [viewMode]="workspaceViewMode"
+                    (workspaceApproved)="onDirectoryWorkspaceApproved()" [class.hidden]="workspaceViewMode === 'chat'"
+                    [ngClass]="workspaceViewMode === 'split'
+    ? 'min-w-[520px] grow-[var(--ai-directory-panel-grow)]'
+    : 'w-full min-w-0 flex-1'" class="flex h-full min-h-0 shrink basis-0 overflow-hidden">
                   </app-ai-directory>
-                  }
                 </div>
               </div>
             </div>

@@ -29,7 +29,7 @@ interface PendingNexusStream {
 @Component({
   selector: 'app-ai-workspace',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectory ,MarkdownPipe, ProfileComponent, TranslatePipe],
+  imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectory, MarkdownPipe, ProfileComponent, TranslatePipe],
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -51,7 +51,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   protected readonly nexusStep = signal('');
   protected readonly maxComposerTokens = 300;
   protected workspaceViewMode: AiWorkspaceViewMode = 'chat';
-  protected directorySplitPercent = 30;
+  protected directorySplitPercent = 42;
   protected directoryImportMode = false;
   protected directoryRepoUrl = '';
   protected directoryImportBusy = false;
@@ -357,6 +357,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     const emptyChat = this.chatSessions.find(chat => chat.messageCount === 0 && chat.messages.length === 0);
     if (emptyChat) {
       this.activeSessionId = emptyChat.sessionId;
+      this.syncDirectorySession(null);
       this.messages = [];
       this.messageDraft = '';
       this.cancelMessageEdit();
@@ -388,6 +389,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       ...this.chatSessions.filter(chat => chat.sessionId !== this.localNewChatSessionId),
     ]);
     this.activeSessionId = newChatSession.sessionId;
+    this.syncDirectorySession(null);
     this.messages = [];
     this.messageDraft = '';
 
@@ -731,8 +733,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private setDirectorySplitPercent(value: number): void {
     const dividerWidth = 12;
-    const minimumChatWidth = 420;
-    const minimumDirectoryWidth = 280;
+    const minimumChatWidth = 520;
+    const minimumDirectoryWidth = 420;
     const panelWidth = Math.max(1, (this.workspacePanels?.nativeElement.clientWidth ?? 0) - dividerWidth);
     const minimumCombinedWidth = minimumChatWidth + minimumDirectoryWidth;
 
@@ -780,9 +782,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     this.nexusChatService.listChats().subscribe({
       next: (sessions) => {
-        this.chatSessions = this.sortChatSessions(sessions
-          .map(session => this.mapSession(session))
-          .filter(session => session.messageCount > 0));
+        this.chatSessions = this.sortChatSessions(sessions.map(session => this.mapSession(session)));
         this.activeSessionId = null;
         this.messages = [];
 
@@ -813,6 +813,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
         this.activeSessionId = chatSessionId;
         this.messages = chat.messages.map(message => this.mapMessage(message));
+        this.syncDirectorySession(chatSessionId);
 
         const updatedSession: AiChatSession = {
           ...this.mapSession(chat),
@@ -873,11 +874,23 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  private syncDirectorySession(sessionId: string | null): void {
+    if (!sessionId || sessionId === this.localNewChatSessionId) {
+      this.directorySessionId = null;
+      this.directoryImportRequest = null;
+      return;
+    }
+
+    this.directorySessionId = sessionId;
+    this.directoryImportRequest = null;
+  }
+
   selectChat(session: AiChatSession): void {
     if (this.isSending() && session.sessionId === this.activeRequestSessionId) {
       this.chatHistoryRequest?.unsubscribe();
       this.chatHistoryRequest = undefined;
       this.activeSessionId = session.sessionId;
+      this.syncDirectorySession(session.sessionId);
       this.messages = [...session.messages];
       this.isLoadingHistory.set(false);
       this.cancelMessageEdit();
@@ -887,11 +900,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     if (this.activeSessionId === session.sessionId) {
+      this.syncDirectorySession(session.sessionId);
       return;
     }
 
     if (session.sessionId === this.localNewChatSessionId) {
       this.activeSessionId = session.sessionId;
+      this.syncDirectorySession(null);
       this.messages = [];
       this.cancelMessageEdit();
       this.queueComposerResize();
@@ -899,6 +914,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
 
+    this.syncDirectorySession(session.sessionId);
     this.loadChat(session.sessionId);
   }
 

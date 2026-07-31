@@ -1,7 +1,20 @@
-<section class="flex h-full min-h-0 flex-col border-l border-[var(--color-border)] bg-[var(--color-blue-790)]">
+<section class="flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden border-l border-[var(--color-border)] bg-[var(--color-blue-790)]">
     <div class="shrink-0 border-b border-[var(--color-border)] px-4 py-3">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">
-            Code Directory
+        <div class="flex items-center justify-between gap-3">
+            <div>
+                <div class="text-sm font-semibold text-[var(--color-text1)]">
+                    Code Directory
+                </div>
+                <div class="mt-0.5 text-[11px] text-[var(--color-text5)]">
+                    Read-only scanned repository
+                </div>
+            </div>
+
+            @if (viewMode !== 'split') {
+            <span class="rounded-full border border-green-400/20 bg-green-400/10 px-2 py-1 text-[10px] font-semibold text-green-100">
+                Read only
+            </span>
+            }
         </div>
 
         @if (workspaceStatusMessage) {
@@ -11,8 +24,8 @@
         }
     </div>
 
-    <div class="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[300px_1fr]">
-        <div class="min-h-0 overflow-auto border-r border-[var(--color-border)] p-3 text-sm text-[var(--color-text2)]">
+    <div [ngClass]="viewMode === 'split' ? 'flex flex-col' : 'grid grid-cols-[360px_minmax(0,1fr)]'" class="min-h-0 min-w-0 flex-1">
+        <div [ngClass]="viewMode === 'split' ? 'h-[42%] min-h-[220px] border-b' : 'border-r'" class="min-h-0 min-w-0 overflow-auto border-[var(--color-border)] p-3 text-sm text-[var(--color-text2)]">
             @if (workspaceTree) {
             <ng-container
                 *ngTemplateOutlet="fileTreeTemplate; context: { nodes: workspaceTree ? [workspaceTree] : [] }"></ng-container>
@@ -23,12 +36,41 @@
             }
         </div>
 
-        <div class="min-h-0 overflow-auto bg-black/20 p-3" (scroll)="onWorkspaceFileScroll($event)">
-            <div class="mb-2 text-xs font-semibold text-[var(--color-text4)]">
-                {{ selectedWorkspaceFilePath || 'Select a file' }}
+        <div [ngClass]="viewMode === 'split' ? 'flex-1' : ''" class="min-h-0 min-w-0 overflow-auto bg-black/20 p-3" (scroll)="onWorkspaceFileScroll($event)">
+            <div class="mb-3 flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                <div class="min-w-0">
+                    <div class="truncate text-xs font-semibold text-[var(--color-text1)]">
+                        {{ selectedWorkspaceFilePath || 'No file selected' }}
+                    </div>
+                    <div class="mt-0.5 text-[11px] text-[var(--color-text5)]">
+                        Repository file preview
+                    </div>
+                </div>
+
+                @if (selectedWorkspaceFilePath) {
+                <span class="shrink-0 rounded-full bg-white/5 px-2 py-1 text-[10px] text-[var(--color-text4)]">
+                    Read only
+                </span>
+                }
             </div>
 
-            <pre class="whitespace-pre-wrap text-xs leading-5 text-[var(--color-text1)]">{{ selectedWorkspaceFileContent }}</pre>
+            @if (selectedWorkspaceFilePath) {
+            <pre class="max-w-full overflow-x-auto whitespace-pre-wrap rounded-xl border border-white/10 bg-[#07111f]/70 p-4 font-mono text-[12px] leading-5 text-[var(--color-text1)] shadow-inner">{{ selectedWorkspaceFileContent }}</pre>
+            } @else {
+            <div class="flex h-full min-h-[280px] items-center justify-center rounded-xl border border-dashed border-white/10 bg-black/10 text-center">
+                <div>
+                    <div class="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5 text-xl">
+                        📄
+                    </div>
+                    <div class="text-sm font-semibold text-[var(--color-text2)]">
+                        Select a file to preview
+                    </div>
+                    <div class="mt-1 text-xs text-[var(--color-text5)]">
+                        Files are read-only after repository scan.
+                    </div>
+                </div>
+            </div>
+            }
 
             @if (selectedWorkspaceFileLoading) {
             <div class="py-3 text-center text-xs text-[var(--color-text4)]">
@@ -48,7 +90,7 @@
         @for (node of nodes; track node.path) {
         <div class="pl-2">
             @if (node.type === 'directory') {
-            <button type="button" (click)="toggleWorkspaceDirectory(node)" class="mt-1 block w-full truncate rounded px-2 py-1 text-left font-semibold text-[var(--color-text3)] hover:bg-white/10 hover:text-[var(--color-text1)]">
+            <button type="button" (click)="toggleWorkspaceDirectory(node)" class="group mt-1 flex w-full items-center gap-2 truncate rounded-lg px-2.5 py-1.5 text-left text-[13px] font-medium text-[var(--color-text3)] transition hover:bg-white/10 hover:text-[var(--color-text1)]">
                 {{ node.expanded ? '📂' : '📁' }} {{ node.name || 'Repository' }}
 
                 @if (node.loading) {
@@ -63,8 +105,9 @@
             </div>
             }
             } @else {
-            <button type="button" (click)="openWorkspaceFile(node)" class="block w-full truncate rounded px-2 py-1 text-left text-[var(--color-text2)] hover:bg-white/10 hover:text-[var(--color-text1)]">
-                📄 {{ node.name || node.path }}
+            <button type="button" (click)="openWorkspaceFile(node)" [ngClass]="selectedWorkspaceFilePath === node.path ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] ring-1 ring-white/10' : 'text-[var(--color-text2)] hover:bg-white/10 hover:text-[var(--color-text1)]'" class="group flex w-full items-center gap-2 truncate rounded-lg px-2.5 py-1.5 text-left text-[13px] transition">
+                <span class="shrink-0 text-[13px]">📄</span>
+                <span class="truncate">{{ node.name || node.path }}</span>
             </button>
             }
         </div>
