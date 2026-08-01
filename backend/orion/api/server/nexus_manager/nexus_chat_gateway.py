@@ -31,7 +31,6 @@ class nexus_chat_gateway:
     def _headers(self, current_user) -> dict[str, str]:
         return {
             "X-User-Id": str(current_user.id),
-            "X-Tenant-Id": str(current_user.tenant_uuid),
         }
 
     async def _request(self, method: str, path: str, current_user, json_body: Optional[dict[str, Any]] = None):

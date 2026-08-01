@@ -77,9 +77,6 @@
               <span class="min-w-0 flex-1">
                 <span class="block truncate text-[13px] font-medium leading-[18px]" [title]="chat.title">{{ chat.title }}</span>
                 <span class="mt-0.5 flex items-center gap-1.5 text-[10px] leading-[14px] text-[var(--color-text4)]">
-                  @if (chat.isPinned) {
-                  <i class="bi bi-pin-angle-fill text-[9px] text-[var(--color-blue-640)]" aria-hidden="true"></i>
-                  }
                   <span>{{ chat.updatedAt | date : 'MMM d, h:mm a' }}</span>
                 </span>
               </span>
@@ -98,13 +95,6 @@
               } @else {
               <span class="pointer-events-none absolute top-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-b-[7px] border-l-transparent border-r-transparent border-b-white" aria-hidden="true"></span>
               }
-              <button role="menuitem" type="button" (click)="togglePinChat(chat, $event)" [attr.data-testid]="'ai-chat-pin-' + chat.sessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:bg-slate-100 focus-visible:text-slate-950 focus-visible:outline-none">
-                <span [ngClass]="chat.isPinned ? 'bg-[var(--color-blue-640)]/15 text-[var(--color-blue-640)]' : 'bg-slate-100 text-slate-500 group-hover/menu-action:text-slate-700'" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] transition-colors">
-                  <i [ngClass]="chat.isPinned ? 'bi-pin-angle-fill' : 'bi-pin-angle'" class="bi text-[11px]" aria-hidden="true"></i>
-                </span>
-                <span class="min-w-0 flex-1 truncate">{{ chat.isPinned ? ('Unpin Chat' | translate) : ('Pin Chat' | translate) }}</span>
-              </button>
-
               <button role="menuitem" type="button" (click)="shareChat(chat, $event)" [disabled]="!!sharingSessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:bg-slate-100 focus-visible:text-slate-950 focus-visible:outline-none disabled:cursor-wait disabled:opacity-50">
                 <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-500 transition-colors group-hover/menu-action:text-slate-700">
                   <i [ngClass]="sharingSessionId === chat.sessionId ? 'bi-arrow-repeat animate-spin' : 'bi-share'" class="bi text-[11px]" aria-hidden="true"></i>
@@ -152,9 +142,6 @@
         <div @chatRowAnimation class="relative my-1 select-none">
           <button type="button" (click)="selectChat(chat)" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [appTooltip]="getChatTooltip(chat)" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-blue-640)]' : 'text-[var(--color-text3)] hover:bg-white/[0.05] hover:text-[var(--color-text1)]'" class="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-[9px] border border-transparent text-[12px] font-semibold transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55">
             {{ getChatInitial(chat) }}
-            @if (chat.isPinned) {
-            <span class="absolute right-[4px] top-[4px] h-1.5 w-1.5 rounded-full border border-[var(--color-blue-820-light)] bg-[var(--color-blue-640)]" aria-hidden="true"></span>
-            }
           </button>
         </div>
         }

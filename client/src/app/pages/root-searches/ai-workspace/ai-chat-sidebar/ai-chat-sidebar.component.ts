@@ -110,19 +110,6 @@ export class AiChatSidebarComponent {
     this.openedSessionMenuId = this.openedSessionMenuId === chat.sessionId ? null : chat.sessionId;
   }
 
-  togglePinChat(chat: AiChatSession, event: Event): void {
-    event.stopPropagation();
-    if (this.isChatBusy(chat)) {
-      return;
-    }
-    this.nexusChatService.pinChatSession(chat.sessionId, !chat.isPinned).subscribe({
-      next: updated => {
-        this.sessionUpdated.emit(this.updatedSession(chat, updated));
-        this.closeChatMenu();
-      },
-    });
-  }
-
   shareChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
     if (this.sharingSessionId || this.isChatBusy(chat)) {
@@ -281,8 +268,6 @@ export class AiChatSidebarComponent {
       title: updated.title || current.title,
       updatedAt: updated.updated_at || current.updatedAt,
       messageCount: updated.message_count ?? current.messageCount,
-      isPinned: updated.is_pinned ?? current.isPinned,
-      pinnedAt: updated.pinned_at ?? current.pinnedAt ?? null,
     };
   }
 }

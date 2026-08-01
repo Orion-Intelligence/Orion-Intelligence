@@ -256,7 +256,7 @@ export class NexusChatService {
   }
 
   createChat(title = 'New Chat'): Observable<NexusChatSession> {
-    return this.api.post<NexusChatSession>('nexus/chats', { title, session_id: crypto.randomUUID() });
+    return this.api.post<NexusChatSession>('nexus/chats', { title });
   }
 
   deleteAllChatSessions(): Observable<{ success: boolean }> {
@@ -273,14 +273,6 @@ export class NexusChatService {
 
   deleteChatSession(sessionId: string): Observable<{ success: boolean }> {
     return this.api.delete<{ success: boolean }>(`nexus/chats/${sessionId}`);
-  }
-
-  updateChatSession(sessionId: string, payload: { title?: string; is_pinned?: boolean }): Observable<NexusChatSession> {
-    return this.api.put<NexusChatSession>(`nexus/chats/${sessionId}`, payload);
-  }
-
-  pinChatSession(sessionId: string, isPinned: boolean): Observable<NexusChatSession> {
-    return this.updateChatSession(sessionId, { is_pinned: isPinned });
   }
 
   importGithubRepo(sessionId: string, repoUrl: string): Observable<NexusWorkspaceImportResponse> {

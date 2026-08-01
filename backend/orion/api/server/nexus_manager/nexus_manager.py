@@ -22,11 +22,10 @@ class nexus_manager:
         if type(self).__instance is None:
             type(self).__instance = self
 
-    async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", current_user=None, auth_token: str = ""):
+    async def parse_chat(self, model: ReportChatRequest, user_id: str = "system", auth_token: str = ""):
         try:
             session_id = str(model.session_id or "").strip()
             session_type = str(model.session_type or "persistent").strip() or "persistent"
-            tenant_id = str(getattr(current_user, "tenant_uuid", "") or "").strip()
             stream = self.stream_manager.stream_response(
                 model.message,
                 user_id=user_id,
@@ -35,7 +34,6 @@ class nexus_manager:
                 session_id=session_id,
                 session_type=session_type,
                 auth_token=auth_token,
-                tenant_id=tenant_id,
                 request_id=str(model.request_id or "").strip(),
             )
             return StreamingResponse(stream, media_type="application/x-ndjson", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

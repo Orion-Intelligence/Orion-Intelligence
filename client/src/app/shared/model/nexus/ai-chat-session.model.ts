@@ -6,18 +6,13 @@ export interface AiChatSession {
     updatedAt: string;
     messageCount: number;
     messages: AiWorkspaceMessage[];
-    isPinned: boolean;
-    pinnedAt: string | null;
 }
 
 export interface NexusChatSession {
     session_id: string;
     title: string;
-    created_at: string;
     updated_at: string;
     message_count: number;
-    is_pinned: boolean;
-    pinned_at: string | null;
 }
 
 export interface NexusChatMessage {

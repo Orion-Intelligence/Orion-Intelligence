@@ -33,11 +33,8 @@ export function sendDummyAiMessage(message = 'Cypress dummy AI message') {
                 chat: {
                     session_id: sessionId,
                     title: 'New Chat',
-                    created_at: now,
                     updated_at: now,
                     message_count: 2,
-                    is_pinned: false,
-                    pinned_at: null,
                 },
                 user_message: {
                     id: 'cypress-user-message',
@@ -111,36 +108,6 @@ export function renameFirstChat(title: string) {
 
         const body = response?.body || {};
         expect(body.title, JSON.stringify(body)).to.equal(title);
-    });
-}
-
-export function pinFirstChat() {
-    cy.intercept('PUT', '**/chats/*').as('pinAiChat');
-
-    openFirstChatMenu();
-
-    cy.get(firstByPrefix('ai-chat-pin-'))
-        .first()
-        .click({ force: true });
-
-    cy.wait('@pinAiChat', { timeout: 60000 }).then(({ response }) => {
-        expect(response, 'pin chat response').to.exist;
-        expect(response?.statusCode, JSON.stringify(response?.body || {})).to.be.oneOf([200, 201]);
-    });
-}
-
-export function unpinFirstChat() {
-    cy.intercept('PUT', '**/chats/*').as('unpinAiChat');
-
-    openFirstChatMenu();
-
-    cy.get(firstByPrefix('ai-chat-pin-'))
-        .first()
-        .click({ force: true });
-
-    cy.wait('@unpinAiChat', { timeout: 60000 }).then(({ response }) => {
-        expect(response, 'unpin chat response').to.exist;
-        expect(response?.statusCode, JSON.stringify(response?.body || {})).to.be.oneOf([200, 201]);
     });
 }
 

@@ -342,6 +342,7 @@ export class ConsolidatedScanComponent {
     const g = (grade || '—').toUpperCase();
     return `${g} Grade`;
   }
+
   truncateText(text:string, maxLength = 20) {
     return text?.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
   }

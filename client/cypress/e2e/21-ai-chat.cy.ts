@@ -1,4 +1,4 @@
-import { createNewAiChat, deleteFirstChat, openAiWorkspace, pinFirstChat, renameFirstChat, sendDummyAiMessage, unpinFirstChat } from "./controllers/21-ai-chat.controller";
+import { createNewAiChat, deleteFirstChat, openAiWorkspace, renameFirstChat, sendDummyAiMessage } from "./controllers/21-ai-chat.controller";
 
 
 describe('AI Chat - Basic Flow', () => {
@@ -16,10 +16,6 @@ describe('AI Chat - Basic Flow', () => {
         sendDummyAiMessage('Cypress dummy AI message');
 
         renameFirstChat('Cypress AI Renamed Chat');
-
-        pinFirstChat();
-
-        unpinFirstChat();
 
         createNewAiChat();
 

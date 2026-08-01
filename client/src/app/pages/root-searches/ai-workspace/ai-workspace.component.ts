@@ -674,8 +674,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         title: 'New Chat',
         updatedAt: new Date().toISOString(),
         messageCount: pending.baselineMessageCount,
-        isPinned: false,
-        pinnedAt: null,
         messages: [],
       }, ...this.chatSessions]);
     }
@@ -776,8 +774,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       title: session.title,
       updatedAt: session.updated_at,
       messageCount: session.message_count ?? 0,
-      isPinned: session.is_pinned ?? false,
-      pinnedAt: session.pinned_at ?? null,
       messages: [],
     };
   }
@@ -855,15 +851,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       const bIsEmpty = b.messageCount === 0 && b.messages.length === 0;
       if (aIsEmpty !== bIsEmpty) {
         return aIsEmpty ? -1 : 1;
-      }
-
-      if (a.isPinned !== b.isPinned) {
-        return a.isPinned ? -1 : 1;
-      }
-
-      if (a.isPinned && b.isPinned) {
-        return new Date(b.pinnedAt || b.updatedAt).getTime() -
-          new Date(a.pinnedAt || a.updatedAt).getTime();
       }
 
       return new Date(b.updatedAt).getTime() -

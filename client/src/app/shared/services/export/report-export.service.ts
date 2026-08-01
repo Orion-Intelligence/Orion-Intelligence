@@ -95,11 +95,9 @@ export class ReportExportService extends ExportSharedService {
       ...(payload.tables || []).flatMap(table => {
         const valueRows = Object.entries(table.values || {}).map(([key, value]) => [table.title, key, value]);
         const tableRows = (table.rows || []).flatMap((row, index) =>
-          Object.entries(row).map(([key, value]) => [`${table.title} #${index + 1}`, key, value])
-        );
+          Object.entries(row).map(([key, value]) => [`${table.title} #${index + 1}`, key, value]));
         const blockRows = (table.recordBlocks || []).flatMap(block =>
-          Object.entries(block.values || {}).map(([key, value]) => [`${table.title} - ${block.title}`, key, value])
-        );
+          Object.entries(block.values || {}).map(([key, value]) => [`${table.title} - ${block.title}`, key, value]));
         return [...valueRows, ...tableRows, ...blockRows];
       })
     ];

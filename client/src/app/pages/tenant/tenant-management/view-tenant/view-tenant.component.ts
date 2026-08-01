@@ -111,7 +111,7 @@ export class ViewTenantComponent implements OnInit {
   }
 
   canEditTenantAiEndpoint(): boolean {
-    return this.isAdmin() && this.appService.getConfig().appSettings.ai_endpoint_enabled;
+    return this.isAdmin() && this.appService.configData().appSettings.ai_endpoint_enabled === true;
   }
 
   openTenant(tenant: any): void {

@@ -63,8 +63,8 @@ class NexusStreamManager:
         response.raise_for_status()
         return headers
 
-    async def _store_turn(self, client: httpx.AsyncClient, prompt: str, response: str, user_id: str, tenant_id: str, session_id: str) -> None:
-        result = await client.post(f"{self.base_url}/v1/chats/{session_id}/messages", headers={"X-User-Id": user_id, "X-Tenant-Id": tenant_id}, json={"text": prompt, "response": response})
+    async def _store_turn(self, client: httpx.AsyncClient, prompt: str, response: str, user_id: str, session_id: str) -> None:
+        result = await client.post(f"{self.base_url}/v1/chats/{session_id}/messages", headers={"X-User-Id": user_id}, json={"text": prompt, "response": response})
         result.raise_for_status()
 
     async def _close_mcp_session(self, client: httpx.AsyncClient, headers: dict[str, str]) -> None:
@@ -167,7 +167,7 @@ class NexusStreamManager:
         if self.active_streams.get(key) is stream:
             self.active_streams.pop(key, None)
 
-    async def _run_stream(self, key: tuple[str, str], stream: ActiveNexusStream, prompt: str, user_id: str, tool: str, type_name: str, auth_token: str, session_id: str, session_type: str, tenant_id: str) -> None:
+    async def _run_stream(self, key: tuple[str, str], stream: ActiveNexusStream, prompt: str, user_id: str, tool: str, type_name: str, auth_token: str, session_id: str, session_type: str) -> None:
         client = httpx.AsyncClient(timeout=30 * 60)
         current_task = asyncio.current_task()
         headers: dict[str, str] | None = None
@@ -192,14 +192,14 @@ class NexusStreamManager:
                     output = self._stream_output(event) if event is not None else {}
                     final_response = str(output.get("response") or "").strip()
                     if session_type == "persistent" and session_id and final_response and event is not None and event.get("done") and not event.get("error"):
-                        await self._store_turn(client, prompt, final_response, user_id, tenant_id, session_id)
+                        await self._store_turn(client, prompt, final_response, user_id, session_id)
                         stored = True
                     await self._emit(stream, line)
                 if failed:
                     return
                 if answer:
                     if session_type == "persistent" and session_id and not stored:
-                        await self._store_turn(client, prompt, answer, user_id, tenant_id, session_id)
+                        await self._store_turn(client, prompt, answer, user_id, session_id)
                     await self._emit(stream, json.dumps({"output": {"response": answer.strip()}, "done": True, "error": False}, ensure_ascii=True) + "\n")
                     return
         except asyncio.CancelledError:
@@ -215,7 +215,7 @@ class NexusStreamManager:
             await self._finish(stream)
             asyncio.create_task(self._forget_stream(key, stream))
 
-    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", auth_token: str = "", session_id: str = "", session_type: str = "persistent", tenant_id: str = "", request_id: str = "") -> AsyncGenerator[str, None]:
+    async def stream_response(self, prompt: str, user_id: str, tool: str = "open_chat", type_name: str = "default", auth_token: str = "", session_id: str = "", session_type: str = "persistent", request_id: str = "") -> AsyncGenerator[str, None]:
         stream_id = request_id or str(uuid4())
         key = (user_id, stream_id)
         stream = self.active_streams.get(key)
@@ -224,7 +224,7 @@ class NexusStreamManager:
             self.active_streams[key] = stream
             stream.task = asyncio.create_task(self._run_stream(
                 key, stream, prompt, user_id, tool, type_name, auth_token,
-                session_id, session_type, tenant_id,
+                session_id, session_type,
             ))
 
         async for line in self._subscribe(stream):

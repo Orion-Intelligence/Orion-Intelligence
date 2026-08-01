@@ -61,7 +61,7 @@ async def chat_report(payload: ReportChatRequest, current_user=Depends(get_curre
     ],
 )
 async def nexus_chat(request: Request, payload: ReportChatRequest, current_user=Depends(get_current_user)):
-    response = await nexus_manager.getInstance().parse_chat(payload, user_id=str(current_user.id), current_user=current_user, auth_token=token_from_request(request) or "")
+    response = await nexus_manager.getInstance().parse_chat(payload, user_id=str(current_user.id), auth_token=token_from_request(request) or "")
     return response
 
 
