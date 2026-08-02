@@ -49,7 +49,6 @@ export class AiDirectory implements OnChanges, OnDestroy {
   @Input() viewMode: AiDirectoryViewMode = 'directory';
 
   @Output() importRequested = new EventEmitter<string>();
-  @Output() workspaceApproved = new EventEmitter<void>();
 
   constructor(private readonly nexusChatService: NexusChatService) { }
 
@@ -346,7 +345,6 @@ export class AiDirectory implements OnChanges, OnDestroy {
         result.message || 'Repository imported and scanned successfully.',
         result.scan_output,);
       this.loadWorkspaceTree();
-      this.workspaceApproved.emit();
       return;
     }
 
