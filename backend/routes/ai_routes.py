@@ -11,7 +11,7 @@ from orion.api.server.nexus_manager.nexus_manager import nexus_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 
-ai_routes = APIRouter()
+ai_routes = APIRouter(dependencies=[Depends(role_required([user_role.ADMIN, user_role.CRAWLER, user_role.MEMBER, user_role.ANALYST]))])
 
 
 async def ai_enabled_required(request: Request):

@@ -9,7 +9,6 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 
 from orion.constants.constant import CONSTANTS
-from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, UserStatus
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.session_manager.session_manager import session_manager
@@ -43,10 +42,6 @@ def enforce_request_tenant_access(user, request: Request):
 
 
 async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)):
-    auth = env_handler.get_instance().env("AUTH")
-    if auth == "0":
-        return user_role.DEMO
-
     token = get_request_token(request, token)
     user = await session_manager.get_instance().get_current_user(token)
     enforce_request_tenant_access(user, request)

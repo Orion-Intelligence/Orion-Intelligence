@@ -51,6 +51,8 @@ class auth_manager:
         user = await auth_manager.get_instance().authenticate_user(mail, password)
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user or password")
+        if user.status == UserStatus.DISABLE:
+            raise HTTPException(status_code=401, detail="Account Blocked")
         session_manager.ensure_user_tenant_access(user, tenant_id)
 
         requested_tenant_id = session_manager.tenant_identifier(tenant_id)
@@ -98,9 +100,6 @@ class auth_manager:
 
         if role_name == "member" and user.status != UserStatus.ACTIVE:
             raise HTTPException(status_code=401, detail="user currently disabled")
-
-        if user.status == UserStatus.DISABLE:
-            raise HTTPException(status_code=401, detail="Account Blocked")
 
         if getattr(user, "password_reset_required", False):
             reset_expiry = getattr(user, "password_reset_expiry", None)

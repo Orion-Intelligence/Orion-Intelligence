@@ -208,12 +208,9 @@ export class AiChatSidebarComponent {
   }
 
   get visibleSessions(): AiChatSession[] {
-    const emptyFallback = this.sessions().find(chat =>
-      chat.sessionId === this.activeSessionId() && this.isChatEmpty(chat))
-      || this.sessions().find(chat => this.isChatEmpty(chat));
     return this.sessions().filter(chat =>
       !this.isChatEmpty(chat)
-      || chat.sessionId === emptyFallback?.sessionId);
+      || chat.sessionId === this.activeSessionId());
   }
 
   isChatEmpty(chat: AiChatSession): boolean {
@@ -225,8 +222,8 @@ export class AiChatSidebarComponent {
   }
 
   get hasEmptyChat(): boolean {
-    const topChat = this.sessions()[0];
-    return Boolean(topChat && this.isChatEmpty(topChat) && topChat.title.trim().toLowerCase() === 'new chat');
+    const activeChat = this.sessions().find(chat => chat.sessionId === this.activeSessionId());
+    return Boolean(activeChat && this.isChatEmpty(activeChat) && activeChat.title.trim().toLowerCase() === 'new chat');
   }
 
   get canDeleteChat(): boolean {

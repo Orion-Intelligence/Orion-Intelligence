@@ -10,7 +10,6 @@ from fastapi import HTTPException, Request
 from starlette.responses import RedirectResponse
 
 from orion.constants.constant import CONSTANTS
-from orion.helper_manager.env_handler import env_handler
 from orion.services.alert_webhook_manager.alert_connector_helper import AlertConnectorHelper
 from orion.services.alert_webhook_manager.providers.provider_registry import ALERT_CONNECTOR_PROVIDERS
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import AlertConnectorProvider, AlertConnectorType, db_alert_connector_model
@@ -35,7 +34,7 @@ class AlertConnectorManager:
 
         self._engine = mongo_controller.get_instance().get_engine()
         self._providers = ALERT_CONNECTOR_PROVIDERS
-        self._state_secret = CONSTANTS.S_AUTH_SECRET_KEY or env_handler.get_instance().env("S_SUPER_PASSWORD_V1", "")
+        self._state_secret = CONSTANTS.S_AUTH_SECRET_KEY
         AlertConnectorManager.__instance = self
 
     async def get_settings(self, current_user) -> dict[str, Any]:

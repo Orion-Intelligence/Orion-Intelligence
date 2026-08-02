@@ -170,7 +170,7 @@ All supported `build` flags are listed below.
 | `-c` | rebuild client only for default local mode | builds the production client bundle, ensures local SSL certs exist, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
 | `-b` | rebuild backend and containers without rebuilding the client bundle | ensures local SSL certs exist, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
 | `-d` | general default-mode rebuild | builds the production client bundle, ensures local SSL certs exist, copies `nginx/nginx-dev.conf`, uses `docker-compose.yml`, and rebuilds images |
-| `-p` | production-oriented rebuild | builds the production client bundle, copies `nginx/nginx-prod.conf`, uses `docker-compose-production.yml`, prepares `/srv/elasticsearch/data`, sets `ELASTIC_ROOT_IP`, rebuilds images, and waits for `https://try.orionintelligence.org` |
+| `-p` | production-oriented rebuild | builds the production client bundle, copies `nginx/nginx-prod.conf`, uses `docker-compose-production.yml`, prepares `/srv/elasticsearch/data`, keeps Elasticsearch private to the Docker network with password authentication, rebuilds images, and waits for `https://try.orionintelligence.org` |
 
 Testing mode is the path most developers will use day to day. It enables the application testing flag, creates the instrumented frontend bundle, starts the testing compose stack, and blocks until the test service is reachable before Cypress is launched.
 

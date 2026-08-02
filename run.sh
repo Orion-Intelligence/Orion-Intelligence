@@ -274,7 +274,7 @@ if [ "$COMMAND" = "build" ]; then
             cp nginx/nginx-prod.conf nginx/nginx.conf
             sudo mkdir -p /srv/elasticsearch/data
             sudo chown -R 1000:1000 /srv/elasticsearch/data
-            export ELASTIC_ROOT_IP="37.27.128.168"
+            export ELASTIC_ROOT_IP="elasticsearch"
             ;;
         *)
             echo "Unknown build flag: $FLAG"
@@ -295,6 +295,7 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
+docker network create --driver bridge orion_nexus_backend 2>/dev/null || true
 compose_up_services=()
 
 if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then

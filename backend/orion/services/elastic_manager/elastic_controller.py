@@ -38,10 +38,10 @@ class elastic_controller:
     async def __link_connection(self):
         self.__m_core_connection = AsyncElasticsearch(
             f"http://{ELASTIC_CONNECTIONS.S_DATABASE_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
-            http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
+            basic_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
         self.__m_dump_connection = AsyncElasticsearch(
             f"http://{ELASTIC_CONNECTIONS.S_STEALER_IP}:{ELASTIC_CONNECTIONS.S_DATABASE_PORT}",
-            http_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
+            basic_auth=(ELASTIC_CONNECTIONS.S_ELASTIC_USERNAME, ELASTIC_CONNECTIONS.S_ELASTIC_PASSWORD))
         await self.__initialize_mappings()
 
     def get_connection(self):

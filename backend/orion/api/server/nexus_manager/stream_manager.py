@@ -6,6 +6,7 @@ from uuid import uuid4
 
 import httpx
 
+from orion.api.server.nexus_manager.model.nexus_chat_model import MAX_CHAT_MESSAGE_LENGTH
 from orion.api.server.nexus_manager.model.rpc_payload_model import NexusRpcPayloadModel
 
 
@@ -64,7 +65,14 @@ class NexusStreamManager:
         return headers
 
     async def _store_turn(self, client: httpx.AsyncClient, prompt: str, response: str, user_id: str, session_id: str) -> None:
-        result = await client.post(f"{self.base_url}/v1/chats/{session_id}/messages", headers={"X-User-Id": user_id}, json={"text": prompt, "response": response})
+        result = await client.post(
+            f"{self.base_url}/v1/chats/{session_id}/messages",
+            headers={"X-User-Id": user_id},
+            json={
+                "text": prompt.strip()[:MAX_CHAT_MESSAGE_LENGTH],
+                "response": response.strip()[:MAX_CHAT_MESSAGE_LENGTH],
+            },
+        )
         result.raise_for_status()
 
     async def _close_mcp_session(self, client: httpx.AsyncClient, headers: dict[str, str]) -> None:

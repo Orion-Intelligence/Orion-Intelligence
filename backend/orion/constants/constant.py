@@ -20,7 +20,8 @@ class CONSTANTS:
     S_SETTINGS_SEARCH_MAX_DYNAMIC_RESOURCE_LIMIT = 1
     S_SETTINGS_COUNTRY_DOCUMENT_SIZE = 500
 
-    S_AUTH_SECRET_KEY = env_handler.get_instance().env("S_SUPER_PASSWORD_V1")
+    S_SUPER_PASSWORD = env_handler.get_instance().env("S_SUPER_PASSWORD_V1")
+    S_AUTH_SECRET_KEY = env_handler.get_instance().env("JWT_SECRET_KEY")
     S_CRAWL_SECRET_KEY = env_handler.get_instance().env("S_CRAWLER_PASSWORD")
     S_AUTH_ALGORITHM = "HS256"
     S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = 30

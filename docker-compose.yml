@@ -11,13 +11,20 @@ services:
     environment:
       BLOOM_DIR: /app
       PYTHONPATH: /app
+      ELASTIC_ROOT_IP: elasticsearch
+      ELASTIC_ROOT_USERNAME: elastic
     working_dir: /app
     depends_on:
-      - elasticsearch
-      - redis_server
-      - mailpit
-      - mongo
-      - arangodb
+      elasticsearch:
+        condition: service_healthy
+      redis_server:
+        condition: service_started
+      mailpit:
+        condition: service_started
+      mongo:
+        condition: service_started
+      arangodb:
+        condition: service_started
     volumes:
       - ./backend/sitecustomize.py:/app/sitecustomize.py:ro
       - ./backend/main.py:/app/main.py:cached
@@ -33,6 +40,7 @@ services:
     networks:
       - backend
       - shared_bridge
+      - orion_nexus_backend
     healthcheck:
       test: [ "CMD-SHELL", "status=$$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8070/api/token || true); [ \"$$status\" = \"422\" ] || [ \"$$status\" = \"401\" ]" ]
       interval: 30s
@@ -54,13 +62,20 @@ services:
     environment:
       BLOOM_DIR: /app
       PYTHONPATH: /app
+      ELASTIC_ROOT_IP: elasticsearch
+      ELASTIC_ROOT_USERNAME: elastic
     working_dir: /app
     depends_on:
-      - elasticsearch
-      - redis_server
-      - mailpit
-      - mongo
-      - arangodb
+      elasticsearch:
+        condition: service_healthy
+      redis_server:
+        condition: service_started
+      mailpit:
+        condition: service_started
+      mongo:
+        condition: service_started
+      arangodb:
+        condition: service_started
     volumes:
       - ./backend/sitecustomize.py:/app/sitecustomize.py:ro
       - ./backend/main.py:/app/main.py:cached
@@ -79,6 +94,7 @@ services:
         aliases:
           - web
       shared_bridge:
+      orion_nexus_backend:
     healthcheck:
       test: [ "CMD-SHELL", "status=$$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8070/api/token || true); [ \"$$status\" = \"422\" ] || [ \"$$status\" = \"401\" ]" ]
       interval: 30s
@@ -185,29 +201,27 @@ services:
     container_name: trusted-web-elastic
     image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
     environment:
-      - cluster.routing.allocation.disk.threshold_enabled=false
-      - discovery.type=single-node
-      - network.host=0.0.0.0
-      - http.port=9400
-      - ELASTIC_USERNAME=${ELASTIC_ROOT_USERNAME}
-      - ELASTIC_PASSWORD=${ELASTIC_ROOT_PASSWORD}
-      - xpack.security.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-      - indices.memory.index_buffer_size=5%
-      - node.store.allow_mmap=false
-      - ES_JAVA_OPTS=-Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m
-    env_file:
-      - .env
+      ELASTIC_PASSWORD: ${ELASTIC_ROOT_PASSWORD:?ELASTIC_ROOT_PASSWORD must be set}
+      cluster.routing.allocation.disk.threshold_enabled: "false"
+      discovery.type: single-node
+      network.host: 0.0.0.0
+      http.port: "9400"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "false"
+      xpack.security.transport.ssl.enabled: "false"
+      indices.memory.index_buffer_size: 5%
+      node.store.allow_mmap: "false"
+      ES_JAVA_OPTS: -Djdk.internal.platform.disableContainerSupport=true -Xms512m -Xmx512m
     ports:
-      - "9400:9400"
+      - "127.0.0.1:9400:9400"
     volumes:
       - elastic:/usr/share/elasticsearch/data
     healthcheck:
-      test: curl -f http://localhost:9400/_cluster/health || exit 1
+      test: [ "CMD-SHELL", "curl --fail --silent --user \"elastic:$${ELASTIC_PASSWORD}\" http://localhost:9400/_cluster/health > /dev/null" ]
       interval: 10s
       timeout: 5s
-      retries: 3
-      start_period: 5s
+      retries: 12
+      start_period: 30s
     networks:
       backend:
         ipv4_address: 172.20.1.11
@@ -302,6 +316,8 @@ services:
           memory: 128M
 
 networks:
+  orion_nexus_backend:
+    external: true
   shared_bridge:
     external: true
   backend:
