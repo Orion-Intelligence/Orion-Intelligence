@@ -47,11 +47,6 @@ jobs:
             exit 1
           fi
 
-      - run: |
-          set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -b
-
       - id: compose_loc
         run: |
           set -euo pipefail
@@ -92,6 +87,11 @@ jobs:
             fp.write("TESTING_ENABLED=1\n")
           PY
           test -s .env
+
+      - run: |
+          set -euo pipefail
+          chmod +x ./run.sh
+          ./run.sh build -b
 
       - run: |
           set -euo pipefail
@@ -219,11 +219,6 @@ jobs:
             exit 1
           fi
 
-      - run: |
-          set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -b
-
       - id: compose_loc
         run: |
           set -euo pipefail
@@ -264,6 +259,11 @@ jobs:
             fp.write("TESTING_ENABLED=1\n")
           PY
           test -s .env
+
+      - run: |
+          set -euo pipefail
+          chmod +x ./run.sh
+          ./run.sh build -b
 
       - run: |
           set -euo pipefail

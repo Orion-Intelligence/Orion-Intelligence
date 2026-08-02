@@ -49,11 +49,6 @@ jobs:
             exit 1
           fi
 
-      - run: |
-          set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -d
-
       - id: compose_loc
         run: |
           set -euo pipefail
@@ -91,6 +86,11 @@ jobs:
           pathlib.Path(".env").write_text(os.environ["ENV_FILE"], encoding="utf-8")
           PY
           test -s .env
+
+      - run: |
+          set -euo pipefail
+          chmod +x ./run.sh
+          ./run.sh build -d
 
       - run: |
           set -euo pipefail
