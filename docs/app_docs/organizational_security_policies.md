@@ -153,6 +153,10 @@ Genesis Technologies requires that:
 - Access is based on least privilege.
 - Users are assigned unique accounts where applicable.
 - Users must not share accounts, passwords, tokens, or OTP codes.
+- Browser authentication tokens must be protected from frontend script access, must not be stored in browser local storage, and must use approved `HttpOnly`, `Secure` production, `SameSite`, path, and expiry controls.
+- Repeated unsuccessful authentication attempts must be throttled using approved progressive delays.
+- Sensitive account changes must require reauthentication with the current password.
+- Authentication sessions must expire, be invalidated on logout, and follow the approved single-active-session control.
 - Administrative access is restricted to authorized personnel.
 - Production access is limited to users with approved operational responsibility.
 - Database access is restricted to authorized personnel only.
@@ -280,6 +284,10 @@ Genesis Technologies requires that:
 - Administrative and service credentials must be restricted to authorized personnel.
 - Compromised or suspected exposed passwords must be changed promptly.
 - Password reset must follow an approved process.
+- Password-reset responses must not disclose whether an account or recovery credential exists.
+- Password-reset tokens must be short-lived, single-use, and stored only as hashes.
+- Global account-recovery keys must be generated securely, displayed only once, stored only as hashes, and invalidated when replaced.
+- Current-password verification must be enforced by the backend before password, 2FA, or recovery-key changes.
 
 ### 5. Orion Intelligence Password Handling
 
@@ -287,9 +295,11 @@ Orion Intelligence must protect user passwords by hashing them before storage.
 
 During login, the submitted password must be verified against the stored password hash. Plain-text passwords must not be retrievable from the database.
 
+Orion Intelligence must apply progressive delays to repeated unsuccessful login attempts and clear the failure state after successful authentication or approved expiry.
+
 ### 6. Multi-Factor Authentication
 
-Where supported, multi-factor authentication or two-factor authentication should be used to strengthen account security, especially for privileged or sensitive accounts.
+Where supported, multi-factor authentication or two-factor authentication should be used to strengthen account security, especially for privileged or sensitive accounts. Stored authenticator secrets must be encrypted using the approved tenant-scoped encryption mechanism.
 
 ### 7. Administrative and Service Credentials
 
@@ -302,6 +312,10 @@ Such credentials must be managed through approved configuration or secure storag
 Password reset must be performed through an approved password reset process.
 
 Passwords must not be reset or shared through insecure channels such as public chat, plain text messages, or unauthorized communication methods.
+
+Orion Intelligence reset links must expire after 20 minutes, be tenant-bound, be accepted only for active accounts, and be invalidated after successful use. Standard reset and recovery requests must return generic responses to prevent account enumeration.
+
+Users are responsible for saving global recovery keys in an approved secure location. A recovery key must never be treated as a substitute for the user's password during normal login, and an old key must be discarded after rotation.
 
 ### 9. Roles and Responsibilities
 
@@ -1405,6 +1419,10 @@ Genesis Technologies requires that:
 - Sensitive configuration must be kept separate from source code.
 - Input validation and access control must be considered during development.
 - Authentication and authorization logic must be protected from unauthorized changes.
+- Browser authentication tokens must use approved HTTP-only cookie controls and must not be exposed through frontend-accessible storage or JSON response bodies.
+- Authentication endpoints must implement approved controls for brute-force resistance and account-enumeration prevention.
+- Password-reset tokens, recovery keys, and other recovery secrets must be generated securely and retained only in protected or one-way-hashed form as appropriate.
+- Security-sensitive account operations must enforce authorization and reauthentication on the backend.
 - Dependencies should be reviewed and updated when required.
 - Identified vulnerabilities must be reviewed and remediated based on risk.
 - Testing should be performed before production deployment where applicable.
@@ -1421,12 +1439,14 @@ Repository access must be limited to authorized personnel based on role and busi
 Security review should be performed for changes that may affect:
 
 - Authentication
+- Authentication rate limiting and session-cookie handling
 - Authorization
 - User roles
 - Tenant access
 - Data protection
 - API security
 - Encryption
+- Password reset, account recovery, and sensitive-action reauthentication
 - Secrets management
 - Infrastructure configuration
 - Administrative functions

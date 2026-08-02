@@ -45,6 +45,10 @@ The standard entry point is the login screen. Depending on deployment settings, 
 - welcome or notification screens
 - password reset flows
 
+Browser sign-in uses an encrypted, HTTP-only session cookie instead of storing the access token in browser local storage. In production, the cookie is also marked `Secure`, uses `SameSite=Lax`, and expires after 30 minutes. Session renewal and authenticated requests use the cookie automatically. Signing out invalidates the server session and removes the authentication cookie.
+
+Unsuccessful login attempts are tracked against the entered email or username. The fifth consecutive failure temporarily pauses login for 1 minute, the next failure pauses it for 10 minutes, and later consecutive failures pause it for 30 minutes. The login screen reports how long to wait. A successful login clears the failure count, and an inactive failure history expires after 30 minutes.
+
 ```{figure} ../screenshots/login-page-20260326.png
 :alt: Orion login page
 :width: 100%
@@ -60,12 +64,40 @@ The sidebar, available modules, and some actions are controlled by role, tenant 
 
 ### Password Reset
 
-The reset flow supports two stages:
+Select `Recover account?` on the login screen to open the recovery page. The page provides two separate tabs:
+
+- `Reset password` sends a reset link to the registered email address.
+- `Account recovery` verifies the registered email together with the user's global recovery key before sending the same type of reset link.
+
+The standard reset flow supports two stages:
 
 - requesting a reset link by email
 - submitting a new password using a tokenized reset link
 
-The new-password form includes password-strength guidance and confirmation validation.
+The request form validates the email format when submitted. Orion always displays the same success result for a well-formed request, whether or not the email is registered. This prevents the recovery screen from revealing which accounts exist.
+
+Reset links expire after 20 minutes, are restricted to the correct tenant, and can be used only for an active account. The reset token is stored as a hash and is removed after a successful password change. The new-password form includes password-strength guidance and confirmation validation, and the new password cannot match the previous password.
+
+If an administrator requires a password change, a successful login redirects the user to the same new-password screen before normal work continues. Completing the change clears the forced-reset requirement.
+
+#### Recover With a Recovery Key
+
+Use account recovery when you have the global recovery key generated from Account Settings:
+
+1. Select `Recover account?` on the login screen.
+2. Select the `Account recovery` tab.
+3. Enter the registered email address.
+4. Enter the complete 43-character recovery key.
+5. Select `Recover account` and check the registered email for a reset link.
+6. Open the link, choose a new password, confirm it, and submit the form.
+
+The page validates email and recovery-key formats before submission. For correctly formatted input, Orion returns the same success screen even when the email or recovery key is incorrect. A reset email is sent only when both values match.
+
+:::{admonition} Recovery key and 2FA setup key
+:class: important
+
+The global recovery key is different from the authenticator setup secret shown while configuring 2FA. Use the global recovery key on the Account Recovery tab. Keep both values private and store them outside the Orion browser session.
+:::
 
 ```{figure} ../screenshots/password-reset-20260326.png
 :alt: Password reset request page
@@ -329,7 +361,7 @@ The exact menu depends on license and permissions, but the Orion UI commonly exp
 | Satellite Intel | Geo-fencing, satellite map, facilities, aircraft, and ship tracking | Satellite Map, Threat Lens, Imagery Analysis |
 | Social Intel | Username and profile mapping | graph and list views |
 | CTI Graph | Cyber relationship mapping | graph filters, Advanced Graph Builder, cluster, document, property pivots |
-| Account Settings | Current-user profile and preferences | profile image, theme, 2FA, licenses |
+| Account Settings | Current-user profile, security, and preferences | profile image, theme, 2FA, password, recovery key, licenses |
 | Public User Activity | Visible profile activity review | user profile, activity items, thread links |
 | Tenant Homepage | Tenant alert and monitoring overview | risk cards, alert categories, export, scan actions |
 | Manage IOCs | Tenant monitored-value management | IOC tabs, add, import, remove, clear |
@@ -356,7 +388,8 @@ The following supporting workflows are also part of the product even though they
 | --- | --- | --- |
 | Signup | Public entry screen | account request creation with username, email, and password validation |
 | Welcome and verification | Registration email and welcome screen | registration status and email verification result |
-| Password reset | Reset request and emailed reset link | reset request and tokenized password update |
+| Password reset | Reset request and emailed reset link | privacy-preserving reset request and tokenized password update |
+| Account recovery | Recovery page opened from login | email and global recovery-key verification followed by an emailed reset link |
 | Tenant onboarding | First-run tenant setup | tenant identity, monitored values, and initial configuration |
 | Notification | Access, trial, and subscription notices | access-level, trial, or subscription message |
 | Payment gateway notice | Trial, payment, or subscription state screen | trial/payment/subscription state notice |
@@ -1843,6 +1876,8 @@ The account page allows the current user to review and manage:
 - tenant or location display
 - assigned licenses
 - two-factor authentication
+- password
+- global recovery key
 - theme preference
 
 The page also shows the currently running platform version. It is focused on the current user rather than the tenant as a whole.
@@ -1854,6 +1889,22 @@ The tested account workflow also includes:
 - enabling `2FA`
 - logging out and reaching the two-factor challenge screen on next login
 - viewing the QR image and OTP input state for 2FA setup/verification
+- changing the account password
+- generating or replacing a global recovery key
+
+Changing the password, enabling or disabling 2FA, and generating or replacing a recovery key opens a `Confirm your identity` dialog. Enter the current account password to authorize the change. Orion verifies it on the server against the stored password hash; an incorrect password leaves the dialog open and shows an error. Profile, language, theme, and visibility changes do not require this additional confirmation.
+
+#### Generate or Replace a Recovery Key
+
+1. Open `Profile > Account`.
+2. In `Recovery Key`, select `Generate / replace recovery key`.
+3. Enter the current password in the identity-confirmation dialog.
+4. Copy the recovery key from the popup and store it in a password manager or another secure location.
+5. Close the popup after saving the key.
+
+The recovery key is 43 characters and is shown only once. Orion stores only its hash. Generating another key immediately replaces the previous key, so the older value can no longer recover the account.
+
+When 2FA is configured, the authenticator secret is encrypted with tenant-scoped encryption before it is retained. Existing unencrypted 2FA secrets are encrypted after successful verification.
 
 ```{figure} ../screenshots/account-settings-20260326.png
 :alt: Account settings form
@@ -2569,14 +2620,19 @@ The tested authentication lifecycle includes:
 
 - loading the login page from the public entry point
 - signing in as an administrator
+- keeping the browser access token in an encrypted HTTP-only cookie rather than local storage
+- applying progressive delays after consecutive unsuccessful login attempts
 - opening the profile menu and signing out
 - requesting a password-reset email
+- receiving the same reset-request result regardless of whether an account exists
+- requesting recovery with a registered email and global recovery key
 - opening a tokenized reset-password screen
 - validating that the new password cannot match the old password
 - applying a new password successfully
 - signing in again with the updated password
 - encountering a two-factor prompt after enabling `2FA`
 - viewing the 2FA QR image and OTP input state
+- requiring the current password before password, 2FA, or recovery-key changes
 
 ### Sidebar and Global Navigation States
 
@@ -3055,10 +3111,15 @@ Covered account behaviors include:
 - avatar upload
 - theme toggle
 - two-factor toggle
+- current-password confirmation for sensitive changes
+- one-time recovery-key generation and replacement
 - post-update persistence
 - returning to login after logout
 - viewing the 2FA challenge screen
 - requesting password reset from login
+- switching between Reset password and Account recovery without retaining fields or errors
+- validating email and recovery-key formats before submission
+- returning a generic result for validly formatted reset and recovery requests
 - reading the reset email flow
 - submitting an invalid reused password
 - submitting a valid new password

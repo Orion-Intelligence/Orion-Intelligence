@@ -16,7 +16,6 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class ResetPasswordComponent implements OnInit {
   @ViewChild('forgotForm') form?: NgForm;
-
   email = '';
   recoveryKey = '';
   recoveryMode = false;

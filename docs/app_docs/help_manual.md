@@ -21,7 +21,7 @@ Use this manual when you need to complete a specific task or resolve a common in
 
 ### Overview
 
-Orion account access, login 2FA, email/password sign-in, authenticator code verification, demo login, verification-pending accounts, forced password reset redirects, login failure handling, and authenticated session entry.
+Orion account access, login 2FA, email/password sign-in, authenticator code verification, demo login, verification-pending accounts, forced password reset redirects, progressive login delays, HTTP-only browser sessions, and authenticated session entry.
 
 **Search terms:** login, sign in, open account, access Orion, 2FA login, verify 2FA, demo login.
 
@@ -44,7 +44,7 @@ To sign in, open `/login`, enter email and password, select Sign In, then enter 
 
 ### Troubleshooting
 
-For verification-pending accounts, use Resend mail. If forced reset is active, the app redirects to the reset page. If 2FA fails, confirm the latest authenticator code and time sync.
+For verification-pending accounts, use Resend mail. If forced reset is active, the app redirects to the reset page. If 2FA fails, confirm the latest authenticator code and time sync. After five consecutive unsuccessful login attempts, wait for the delay shown on screen before trying again. Later consecutive failures increase the delay from 1 minute to 10 minutes and then 30 minutes. A successful login or 30 minutes without another failure resets the failure history.
 
 ## Signup And Email Verification
 
@@ -77,13 +77,13 @@ To create an account, open `/signup`, fill username, company email, and password
 
 If the username already exists, use suggested alternatives. If verification mail is missing, use resend verification. If token is expired/invalid, request a new verification email.
 
-## Password Reset And Forced Password Change
+## Password Reset, Account Recovery, And Forced Password Change
 
 ### Overview
 
-Forgotten password recovery, forced first-login password updates, reset email links, reset token pages, new password confirmation, old-password reuse validation, and return-to-login behavior.
+Forgotten password recovery, global recovery keys, forced first-login password updates, reset email links, reset token pages, new password confirmation, old-password reuse validation, and return-to-login behavior.
 
-**Search terms:** forgot password, reset password, forced password reset, change password, reset token, update password.
+**Search terms:** forgot password, reset password, recover account, recovery key, forced password reset, change password, reset token, update password.
 
 ### Navigation
 
@@ -91,22 +91,22 @@ Forgotten password recovery, forced first-login password updates, reset email li
 
 ### Quick answer
 
-To reset password, open `/reset`, submit the registered email, open the reset link, enter the new password and confirmation, then log in again.
+Select `Recover account?` on the login screen. Use `Reset password` to request a link by email, or use `Account recovery` with the registered email and 43-character global recovery key. Open the email link, enter and confirm a new password, then log in again.
 
 ### Steps
 
-  1. Open `/reset`.
-  2. Enter registered email.
-  3. Open the reset email.
-  4. Open `/reset/:token`.
+  1. Select `Recover account?` on `/login`, or open `/reset`.
+  2. Leave `Reset password` selected and enter the registered email, or select `Account recovery` and enter both the email and global recovery key.
+  3. Submit the form and open the reset email if the supplied account details are valid.
+  4. Open `/reset/:token` within 20 minutes.
   5. Enter New Password.
   6. Enter Confirm Password.
   7. Submit the reset form.
-  8. Return to `/login`.
+  8. Return to `/login`. A forced password change returns the signed-in user to the application instead.
 
 ### Troubleshooting
 
-The new password cannot match the old one. If the reset page fails, request a new token. If the user cannot log in after reset, confirm the reset completed and the new password is being used.
+Email and recovery-key format errors are shown before submission. For correctly formatted input, the same success screen appears even if the account or recovery details are wrong; this is intentional and prevents account discovery. If no email arrives, check the details and spam folder, then retry. Reset links expire after 20 minutes. The new password cannot match the old one. A newly generated recovery key replaces the old key.
 
 ## Tenant Onboarding
 
@@ -1292,9 +1292,9 @@ New IOCs can require matching data and the next scan cycle before alerts appear.
 
 ### Overview
 
-Signed-in user preferences, avatar upload, avatar delete, theme preference, 2FA preference, password preference, profile visibility, user metadata, public profile access from comments, and personal account page updates.
+Signed-in user preferences, avatar upload, avatar delete, theme preference, 2FA, password changes, global recovery-key generation, profile visibility, user metadata, public profile access from comments, and personal account page updates.
 
-**Search terms:** account settings, avatar, profile image, theme, 2FA, password preferences, profile visibility.
+**Search terms:** account settings, avatar, profile image, theme, 2FA, change password, recovery key, profile visibility.
 
 ### Navigation
 
@@ -1302,7 +1302,7 @@ Signed-in user preferences, avatar upload, avatar delete, theme preference, 2FA 
 
 ### Quick answer
 
-Open Profile > Account, edit the available user fields/preferences, upload or delete avatar if needed, and save changes.
+Open Profile > Account to manage profile preferences and security. Orion asks for the current password before changing the password or 2FA setting, or before generating/replacing the global recovery key.
 
 ### Steps
 
@@ -1311,11 +1311,13 @@ Open Profile > Account, edit the available user fields/preferences, upload or de
   3. Upload avatar if needed.
   4. Delete avatar if needed.
   5. Toggle theme/profile visibility where available.
-  6. Save or let setting auto-apply depending on control.
+  6. To change password or 2FA, perform the action and enter the current password in `Confirm your identity`.
+  7. To create a recovery key, select `Generate / replace recovery key`, confirm the current password, and save the displayed 43-character key immediately.
+  8. Save or let other settings auto-apply depending on control.
 
 ### Troubleshooting
 
-If public profile remains hidden, check both user profile visibility and tenant profile visibility setting.
+If confirmation fails, re-enter the current account password. If a recovery key was replaced, discard the old value because it is no longer valid. The recovery key is displayed only once. If public profile remains hidden, check both user profile visibility and tenant profile visibility setting.
 
 ## Tenant Settings
 
