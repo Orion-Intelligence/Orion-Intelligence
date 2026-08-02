@@ -90,6 +90,7 @@ jobs:
 
       - run: |
           set -euo pipefail
+          rm -f backend/static/.maintenance
           chmod +x ./run.sh
           ./run.sh build -b
 
@@ -263,6 +264,7 @@ jobs:
 
       - run: |
           set -euo pipefail
+          rm -f backend/static/.maintenance
           chmod +x ./run.sh
           ./run.sh build -b
 
