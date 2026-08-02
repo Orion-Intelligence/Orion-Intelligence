@@ -206,7 +206,7 @@ Cypress.Commands.add("typeSlow", (selector: string, value: string, options: Slow
 
 Cypress.Commands.add("loginAsAdmin", () => {
     cy.env(["ADMIN_USERNAME", "ADMIN_PASSWORD"]).then(({ ADMIN_USERNAME, ADMIN_PASSWORD }) => {
-        cy.intercept("POST", "**/api/token").as("loginRequest");
+        cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
         cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
         cy.visitLoginWithCleanAuthState();
         waitForLoginForm();
@@ -228,7 +228,7 @@ Cypress.Commands.add("loginAsTest1", () => {
         if (!user?.username || !user?.password) {
             throw new Error(`Missing test user credentials for key: ${key}`);
         }
-        cy.intercept("POST", "**/api/token").as("loginRequest");
+        cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
         cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
         cy.visitLoginWithCleanAuthState();
         waitForLoginForm();

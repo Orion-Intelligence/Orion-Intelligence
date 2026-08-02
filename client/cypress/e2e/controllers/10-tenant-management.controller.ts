@@ -89,7 +89,7 @@ function tenantLoginUrl(slug: string): string {
 }
 
 export function submitLogin(username: string, password: string, tenant?: {slug: string}) {
-  cy.intercept('POST', '**/api/token').as('loginRequest');
+  cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('loginRequest');
   if (tenant) {
     const loginUrl = tenantLoginUrl(tenant.slug);
     cy.clearCookies({log: false});

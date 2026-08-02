@@ -71,7 +71,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
   it('forces testing1 to change password on first login and clears the reset flag', () => {
     const user = testUsers[forcedResetUserKey] as ManagedUser;
 
-    cy.intercept('POST', '**/api/token').as('loginRequest');
+    cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('loginRequest');
     cy.visit('/login');
     cy.get('[data-testid="login-user"]').should('be.visible').clear().type(user.username);
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(user.password, {log: false});

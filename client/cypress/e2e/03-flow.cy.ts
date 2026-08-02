@@ -16,7 +16,7 @@ describe('Orion Intelligence - Free Mode Flow', () => {
 
   it('verifies free mode opens the simplified mobile dashboard chrome', () => {
     cy.viewport(430, 932);
-    cy.intercept('POST', '**/api/token/demo').as('demoLogin');
+    cy.intercept({ method: 'POST', pathname: '**/api/token/demo' }).as('demoLogin');
     cy.visit('/login?mode=free');
 
     cy.wait('@demoLogin').then((interception) => {

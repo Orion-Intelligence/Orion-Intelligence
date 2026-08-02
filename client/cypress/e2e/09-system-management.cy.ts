@@ -184,7 +184,7 @@ describe('System Settings - Admin Update Flow', () => {
     saveTenantEditor('saveWhiteLabelTenant');
     cy.logout();
 
-    cy.intercept('POST', '**/api/token').as('mainDomainTenantLogin');
+    cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('mainDomainTenantLogin');
     cy.visit('/login');
     cy.get('[data-testid="login-user"]').should('be.visible').clear().type(WHITE_LABEL_TENANT.username);
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(WHITE_LABEL_TENANT.password, {log: false});
@@ -194,7 +194,7 @@ describe('System Settings - Admin Update Flow', () => {
       .should('be.oneOf', [401, 403]);
 
     const subdomainOrigin = new URL(tenantUrl('/login')).origin;
-    cy.intercept('POST', '**/api/token').as('tenantSubdomainLogin');
+    cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('tenantSubdomainLogin');
     cy.visit(tenantUrl('/login'));
     cy.origin(subdomainOrigin, {args: WHITE_LABEL_TENANT}, (tenant) => {
       cy.contains('Sign Up').should('not.exist');

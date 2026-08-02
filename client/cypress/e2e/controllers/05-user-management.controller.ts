@@ -279,7 +279,7 @@ export function setPasswordResetRequired(username: string, required: boolean) {
 }
 
 export function loginAsUser(username: string, password: string) {
-  cy.intercept('POST', '**/api/token').as('loginRequest');
+  cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('loginRequest');
   cy.intercept('POST', '**/api/get/tenant/node').as('tenantNodeRequest');
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);

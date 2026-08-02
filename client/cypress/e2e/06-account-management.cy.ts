@@ -66,7 +66,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             cy.wait('@accountSettingsUpdate', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 204]);
             cy.logout();
 
-            cy.intercept('POST', '**/api/token').as('twoFaLogin');
+            cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('twoFaLogin');
             cy.visit('/login');
             cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing4.username);
             cy.get('[data-testid="login-pass"]').clear().type(TEST_USERS.testing4.password, {log: false});
@@ -101,7 +101,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 cy.get('[data-testid="reset-confirm-password"]').clear().type(resolvedNewPassword, {log: false}).blur();
                 cy.get('[data-testid="reset-submit"]').click();
                 cy.url().should('include', '/login');
-                cy.intercept('POST', '**/api/token').as('loginRequest');
+                cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('loginRequest');
                 cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing3.username);
                 cy.get('[data-testid="login-pass"]').clear().type(resolvedNewPassword, {log: false});
                 cy.get('[data-testid="login-button"]').click();
