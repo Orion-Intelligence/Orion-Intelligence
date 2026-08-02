@@ -344,7 +344,7 @@ class AccountManager:
             accounts_smtp_port = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
 
         node = NodeCallbackModel.model_validate(
-            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, "license": [
+            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": None, "license": [
                 license.value for license in
                 user.licenses], "permissions": [
                 permission.value if hasattr(permission, "value") else permission for permission in (getattr(user, "permissions", None) or [])], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(

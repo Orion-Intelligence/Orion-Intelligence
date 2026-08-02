@@ -101,13 +101,10 @@ class auth_manager:
         if role_name == "member" and user.status != UserStatus.ACTIVE:
             raise HTTPException(status_code=401, detail="user currently disabled")
 
+        reset_token = None
         if getattr(user, "password_reset_required", False):
-            reset_expiry = getattr(user, "password_reset_expiry", None)
-            reset_expired = not reset_expiry or datetime.now(timezone.utc) > reset_expiry.replace(tzinfo=timezone.utc)
-            if not getattr(user, "password_reset_token", None) or reset_expired:
-                user.password_reset_token = session_manager.get_instance().generate_verification_token()
-                user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
-                await engine.save(user)
+            reset_token = session_manager.issue_password_reset_token(user)
+            await engine.save(user)
 
         if user.role == user_role.CRAWLER:
             access_token_expires = timedelta(weeks=92)
@@ -123,7 +120,7 @@ class auth_manager:
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.tenant_uuid))
 
         session_data = {"role": role, "username": user.username, "status": user.status, "hasOnboarding": onboarding_exists, "subscription": user.subscription, "verificationDate": user.account_verify_at, "licenses": [
-            license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, }
+            license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": reset_token, }
 
 
         return {"access_token": access_token, "token_type": "bearer", "session": session_data, }  # nosec B105
@@ -185,7 +182,8 @@ class auth_manager:
     @staticmethod
     async def update_password(token: str, password: str, tenant_id):
         engine = mongo_controller.get_instance().get_engine()
-        user = await engine.find_one(db_user_account, db_user_account.password_reset_token == token)
+        token_hash = session_manager.hash_password_reset_token(token)
+        user = await engine.find_one(db_user_account, db_user_account.password_reset_token == token_hash)
         if not user:
             raise HTTPException(status_code=404, detail="Invalid Link")
         if tenant_id is None:
@@ -227,8 +225,7 @@ class auth_manager:
         if not tenant:
             raise HTTPException(status_code=404, detail="Tenant not found")
 
-        user.password_reset_token = session_manager.get_instance().generate_verification_token()
-        user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
+        reset_token = session_manager.issue_password_reset_token(user)
         await engine.save(user)
 
         await AuditLogManager.get_instance().register(
@@ -236,7 +233,7 @@ class auth_manager:
 
         APP_URL = env_handler.get_instance().env("APP_URL")
         forgot_url = TenantManager.build_tenant_url(
-            APP_URL, tenant, f"/reset/{user.password_reset_token}")
+            APP_URL, tenant, f"/reset/{reset_token}")
         html_content = constant.mail_template.render(
             username=user.username,
             email=user.email,

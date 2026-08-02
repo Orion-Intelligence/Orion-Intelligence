@@ -1,15 +1,18 @@
+import hashlib
+import secrets
 import threading
 import time
 from datetime import datetime, timedelta, timezone
-import secrets
 
 import jwt
 import pyotp
 from bson import ObjectId
+from cryptography.fernet import Fernet, InvalidToken
 from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
+from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, db_user_account, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -43,6 +46,22 @@ class session_manager:
             return None
         tenant_id = getattr(tenant_or_id, "id", tenant_or_id)
         return str(tenant_id) if tenant_id is not None else None
+
+    @staticmethod
+    def hash_password_reset_token(token: str) -> str:
+        return hashlib.sha256(token.encode()).hexdigest()
+
+    @staticmethod
+    def issue_password_reset_token(user) -> str:
+        token = session_manager.generate_verification_token()
+        user.password_reset_token = session_manager.hash_password_reset_token(token)
+        user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
+        return token
+
+    @staticmethod
+    async def _tenant_fernet(user) -> Fernet:
+        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_uuid))
+        return Fernet(dek)
 
     @classmethod
     def ensure_user_tenant_access(self, user, tenant_or_id) -> None:
@@ -207,16 +226,36 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="User not found")
             self.ensure_user_tenant_access(user, tenant_id)
 
-            secret = user.twofa_secret or payload.get("tfa_secret")
+            stored_secret = user.twofa_secret
+            secret = payload.get("tfa_secret")
+            cipher = None
+            encrypt_secret = not stored_secret
+            if stored_secret:
+                cipher = await self._tenant_fernet(user)
+                try:
+                    secret = cipher.decrypt(stored_secret.encode()).decode()
+                except InvalidToken:
+                    secret = stored_secret
+                    encrypt_secret = True
             if not secret:
                 raise HTTPException(status_code=401, detail="Missing 2FA secret")
 
             if not pyotp.TOTP(secret).verify(code, valid_window=1):
                 raise HTTPException(status_code=401, detail="Invalid 2FA code")
 
-            if not user.twofa_secret:
-                user.twofa_secret = secret
+            user_changed = False
+            if encrypt_secret:
+                cipher = cipher or await self._tenant_fernet(user)
+                user.twofa_secret = cipher.encrypt(secret.encode()).decode()
                 user.twofa_enabled = True
+                user_changed = True
+
+            reset_token = None
+            if getattr(user, "password_reset_required", False):
+                reset_token = self.issue_password_reset_token(user)
+                user_changed = True
+
+            if user_changed:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
@@ -226,7 +265,7 @@ class session_manager:
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
             onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
 
-            session = await self._build_session(user, onboarding_exists)
+            session = await self._build_session(user, onboarding_exists, reset_token)
             return {"access_token": access_token, "token_type": "bearer", "session": session}  # nosec B105
 
         except jwt.ExpiredSignatureError:
@@ -234,7 +273,7 @@ class session_manager:
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid 2FA token")
 
-    async def _build_session(self, user, onboarding_exists: bool):
+    async def _build_session(self, user, onboarding_exists: bool, password_reset_token: str | None = None):
         return {
             "username": user.username,
             "role": user.role.value if hasattr(user.role, "value") else str(user.role),
@@ -243,7 +282,7 @@ class session_manager:
             "subscription": user.subscription,
             "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
             "password_reset_required": getattr(user, "password_reset_required", False),
-            "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None,
+            "password_reset_token": password_reset_token,
             "licenses": [user_license.value for user_license in user.licenses],
         }
 

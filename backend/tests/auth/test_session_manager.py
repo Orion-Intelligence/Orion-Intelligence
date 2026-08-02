@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import jwt
 import pyotp
 import pytest
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from starlette.responses import JSONResponse
 
@@ -42,6 +43,9 @@ def _make_user(**overrides):
         "licenses": [LicenseName.MAINTAINER],
         "twofa_secret": None,
         "twofa_enabled": False,
+        "password_reset_required": False,
+        "password_reset_token": None,
+        "password_reset_expiry": None,
     }
     data.update(overrides)
     return SimpleNamespace(**data)
@@ -317,6 +321,7 @@ def test_create_temp_token_embeds_twofa_and_extra_fields():
 
 def test_verify_2fa_and_issue_enables_twofa_and_returns_session(monkeypatch):
     secret = pyotp.random_base32()
+    cipher = Fernet(Fernet.generate_key())
     user = _make_user(twofa_secret=None, licenses=[LicenseName.MAINTAINER, LicenseName.FREE])
     manager = _make_manager(user=user)
     temp_token = _run(session_manager.create_temp_token("alice", extra={"tfa_secret": secret}))
@@ -329,6 +334,7 @@ def test_verify_2fa_and_issue_enables_twofa_and_returns_session(monkeypatch):
         lambda data, ttl: asyncio.sleep(0, result=("issued-access-token", user.role)),
     )
     monkeypatch.setattr(manager, "has_onboarding", lambda company_id: asyncio.sleep(0, result=True))
+    monkeypatch.setattr(manager, "_tenant_fernet", lambda _user: asyncio.sleep(0, result=cipher))
 
     result = _run(manager.verify_2fa_and_issue(temp_token, code))
 
@@ -336,16 +342,19 @@ def test_verify_2fa_and_issue_enables_twofa_and_returns_session(monkeypatch):
     assert result["token_type"] == "bearer"
     assert result["session"]["username"] == "alice"
     assert result["session"]["hasOnboarding"] is True
-    assert user.twofa_secret == secret
+    assert user.twofa_secret != secret
+    assert cipher.decrypt(user.twofa_secret.encode()).decode() == secret
     assert user.twofa_enabled is True
     assert manager._engine.saved == [user]
 
 
-def test_verify_2fa_and_issue_rejects_invalid_code():
+def test_verify_2fa_and_issue_rejects_invalid_code(monkeypatch):
     secret = pyotp.random_base32()
-    user = _make_user(twofa_secret=secret)
+    cipher = Fernet(Fernet.generate_key())
+    user = _make_user(twofa_secret=cipher.encrypt(secret.encode()).decode())
     manager = _make_manager(user=user)
     temp_token = _run(session_manager.create_temp_token("alice"))
+    monkeypatch.setattr(manager, "_tenant_fernet", lambda _user: asyncio.sleep(0, result=cipher))
 
     with pytest.raises(HTTPException) as exc:
         _run(manager.verify_2fa_and_issue(temp_token, "000000"))
