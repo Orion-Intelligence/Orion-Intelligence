@@ -33,6 +33,12 @@ stop_ng_serve() {
     done
 }
 
+ng_serve_is_running() {
+    pgrep -f '(^|[[:space:]/])ng([[:space:]].*)? serve([[:space:]]|$)' >/dev/null \
+        || pgrep -f 'node .*@angular/cli/bin/ng serve' >/dev/null \
+        || pgrep -f 'npm run serve -- --host 127.0.0.1 --port 4200' >/dev/null
+}
+
 pull_image_if_missing() {
     local image="$1"
 
@@ -76,12 +82,18 @@ client_build() {
 }
 
 install_client_dependencies() {
+    local build_flag="$1"
+
     cd client || exit
     if [ ! -f package-lock.json ] && [ ! -f npm-shrinkwrap.json ]; then
         echo "Missing client lockfile; refusing unpinned dependency install"
         exit 1
     fi
-    npm ci
+    if [ "$build_flag" = "-d" ] && ng_serve_is_running; then
+        echo "Angular dev server is running; preserving node_modules and skipping npm ci"
+    else
+        npm ci
+    fi
     npm run lint
     cd ..
 }
@@ -234,7 +246,7 @@ if [ "$COMMAND" = "build" ]; then
     fi
 
     pull_image_if_missing python:3.11-slim
-    install_client_dependencies
+    install_client_dependencies "$FLAG"
 
     case "$FLAG" in
         -t)

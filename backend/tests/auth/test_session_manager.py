@@ -11,6 +11,7 @@ from fastapi import HTTPException
 from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
+from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import (
     LicenseName,
     UserStatus,
@@ -135,7 +136,12 @@ def test_auth_login_rejects_user_on_wrong_tenant_url(monkeypatch):
     assert exc.value.detail == "Tenant access forbidden"
 
 
-def test_tenant_urls_use_the_tenant_subdomain():
+def test_tenant_urls_use_the_tenant_subdomain(monkeypatch):
+    monkeypatch.setitem(
+        env_handler.get_instance()._env_vars,
+        "TENANT_BASE_DOMAIN",
+        "",
+    )
     tenant = SimpleNamespace(slug="acme", is_default=False)
 
     assert TenantManager.build_tenant_url(

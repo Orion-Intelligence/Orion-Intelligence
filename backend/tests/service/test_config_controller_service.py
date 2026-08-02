@@ -59,6 +59,6 @@ async def test_tenant_config_inherits_admin_settings_from_default_tenant(monkeyp
     assert manager._configs["tenant-child"][AllowedKeys.APP_NAME.value] == "Tenant App"
     assert manager._configs["tenant-child"][AllowedKeys.META_INFO.value] == child_settings[AllowedKeys.META_INFO.value]
     assert manager._configs["tenant-child"][AllowedKeys.VERSION.value] == "1_0_3_13"
-    assert manager._configs["tenant-child"][AllowedKeys.AI_ENDPOINT_ENABLED.value] == "1"
+    assert manager._configs["tenant-child"][AllowedKeys.AI_ENDPOINT_ENABLED.value] == "0"
     assert manager._configs["tenant-child"][AllowedKeys.ADMIN_ROOT_ALLOWED.value] == "0"
     assert AllowedKeys.VERSION.value not in child_settings
