@@ -62,6 +62,7 @@ export interface userMetaData {
     username: string;
     twofa_enabled?: boolean;
     password?: string;
+    current_password?: string;
     theme?: 'dark-theme' | 'light-theme';
     preferences?: Record<string, any> & {
         theme?: 'dark-theme' | 'light-theme';

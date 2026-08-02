@@ -46,7 +46,7 @@
     <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
       <div class="ui-section-title">{{ 'Recovery Key' | translate }}</div>
       <div class="ui-section-description">{{ 'Generate a key for account recovery. A new key replaces the previous one.' | translate }}</div>
-      <button type="button" class="ui-btn ui-btn-primary mt-3" (click)="generateRecoveryKey()">
+      <button type="button" class="ui-btn ui-btn-primary mt-3" (click)="requestSensitiveAction('recovery')">
         {{ 'Generate / replace recovery key' | translate }}
       </button>
     </div>
@@ -55,7 +55,7 @@
       <div class="ui-section-title">{{ 'Preferences' | translate }}</div>
       <div class="ui-section-description">{{ 'Security, language, and appearance settings.' | translate }}</div>
       <div class="mt-3 space-y-3">
-        <div data-testid="account-settings-twofa-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="twoFactorEnabled = !twoFactorEnabled; toggleTwoFa()">
+        <div data-testid="account-settings-twofa-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="requestSensitiveAction('twofa')">
           <div class="flex items-center justify-between gap-3">
             <div>
               <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ '2 Factor Authentication' | translate }}</label>
@@ -148,7 +148,7 @@
           </div>
 
           <div class="mt-4 flex justify-end">
-            <button data-testid="account-settings-password-submit" type="button" class="ui-btn ui-btn-primary" [disabled]="!newPassword || !confirmPassword || newPassword !== confirmPassword || !allPasswordRequirementsMet" (click)="updatePassword()">
+            <button data-testid="account-settings-password-submit" type="button" class="ui-btn ui-btn-primary" [disabled]="!newPassword || !confirmPassword || newPassword !== confirmPassword || !allPasswordRequirementsMet" (click)="requestSensitiveAction('password')">
               {{ 'Update Password' | translate }}
             </button>
           </div>
@@ -160,4 +160,8 @@
 
 @if (recoveryKey) {
   <app-recovery-key-popup [recoveryKey]="recoveryKey" (closed)="recoveryKey = null" />
+}
+
+@if (sensitiveAction) {
+  <app-password-confirmation-popup [error]="confirmationError" (confirmed)="confirmSensitiveAction($event)" (closed)="closeSensitiveAction()" />
 }

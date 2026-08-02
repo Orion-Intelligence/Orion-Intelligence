@@ -177,8 +177,8 @@ async def update_user(user: user_meta_model, current_user=Depends(get_current_us
     "/api/recovery-key",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
-async def generate_recovery_key(current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().generate_recovery_key(current_user)
+async def generate_recovery_key(current_password: str = Body(..., embed=True), current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().generate_recovery_key(current_user, current_password)
 
 
 @tenant_routes.post(

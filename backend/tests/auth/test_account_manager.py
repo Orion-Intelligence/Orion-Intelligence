@@ -9,6 +9,7 @@ from cryptography.fernet import Fernet
 from fastapi import HTTPException
 
 import orion.api.interactive.account_manager.account_manager as account_module
+from orion.constants.constant import CONSTANTS
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
 from orion.api.interactive.account_manager.models.user_model import user_model
@@ -267,7 +268,7 @@ def test_update_user_rejects_when_quota_exceeded(tmp_path):
 
 
 def test_update_current_user_updates_fields_and_clears_twofa_secret(tmp_path, monkeypatch):
-    user = _make_user()
+    user = _make_user(password=CONSTANTS.S_AUTH_PWD_CONTEXT.hash("CurrentPassword1!"))
     engine = FakeMongoEngine(find_one_results=[user])
     manager = _make_manager(tmp_path, engine)
     audit = FakeAuditManager()
@@ -276,6 +277,7 @@ def test_update_current_user_updates_fields_and_clears_twofa_secret(tmp_path, mo
         email="new@example.com",
         preferences={"theme": "dark-theme"},
         twofa_enabled=False,
+        current_password="CurrentPassword1!",
         demo_tour=False,
     )
 

@@ -118,6 +118,9 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.visit('/dashboard/profile/account');
     cy.get('[data-testid="account-settings-form"]').should('be.visible');
     cy.get('[data-testid="account-settings-twofa-toggle"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="password-confirmation-input"]').type(testUsers.testing2.password, {log: false});
+    cy.get('[data-testid="password-confirmation-submit"]').click();
+    cy.get('[data-testid="password-confirmation-input"]').should('not.exist');
     cy.get('[data-testid="account-settings-form"]').should('be.visible');
     cy.get('[data-testid="account-settings-theme-toggle"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="account-settings-form"]').should('be.visible');

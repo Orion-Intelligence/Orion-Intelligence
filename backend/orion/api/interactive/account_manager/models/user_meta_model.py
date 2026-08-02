@@ -7,6 +7,7 @@ class user_meta_model(BaseModel):
     username: str
     email: Optional[str] = None
     password: Optional[str] = None
+    current_password: Optional[str] = None
     preferences: Optional[Dict[str, Any]] = None
     twofa_enabled: Optional[bool] = None
     demo_tour: Optional[bool] = None

@@ -252,6 +252,13 @@ class AccountManager:
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
 
+        twofa_changed = request.twofa_enabled is not None and request.twofa_enabled != user.twofa_enabled
+        if (request.password is not None or twofa_changed) and (
+            not request.current_password or
+            not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(request.current_password, user.password)
+        ):
+            raise HTTPException(status_code=400, detail="Invalid password")
+
         if request.username is not None:
             user.username = request.username
         if request.email is not None:
@@ -275,7 +282,9 @@ class AccountManager:
 
         return {"message": "User updated successfully"}
 
-    async def generate_recovery_key(self, current_user):
+    async def generate_recovery_key(self, current_user, current_password: str):
+        if not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(current_password, current_user.password):
+            raise HTTPException(status_code=400, detail="Invalid password")
         recovery_key = secrets.token_urlsafe(32)
         current_user.recovery_key_hash = hashlib.sha256(recovery_key.encode()).hexdigest()
         await self._engine.save(current_user)
