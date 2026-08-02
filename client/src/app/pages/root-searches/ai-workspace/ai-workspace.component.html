@@ -1,9 +1,9 @@
-<div data-testid="ai-workspace-root" class="ui-consolidated-theme ui-social-root-bg flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden text-[var(--color-text2)]">
+<div data-testid="ai-workspace-root" class="ui-consolidated-theme ui-social-root-bg flex h-[100dvh] min-h-0 w-screen flex-col overflow-hidden text-[var(--color-text2)] [--color-border:var(--color-divider)] [--ui-table-row-border-hover:var(--color-divider)] [--ui-table-row-border:var(--color-divider)] [--ui-table-shell-border:var(--color-divider)]">
   <main class="relative min-h-0 flex-grow">
     <div class="flex h-full min-h-0 w-full flex-col overflow-hidden">
       <div class="relative flex min-h-0 flex-grow flex-row">
         <app-ai-chat-sidebar
-          class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
+          class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[var(--color-divider)] bg-[#172235]"
           [sessions]="chatSessions" [activeSessionId]="activeSessionId"
           [busySessionId]="activeRequestSessionId"
           [creatingChat]="creatingNewChat"
@@ -146,11 +146,11 @@
                             <button type="button" (click)="saveMessageEdit(message)" [disabled]="!editDraft.trim() || isEditDraftOverLimit" [attr.aria-label]="'Save edit' | translate" [title]="'Save edit' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full bg-[#57A5EB] text-white hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50">
                               <i class="bi bi-check-lg text-[13px] leading-none"></i>
                             </button>
-                            <button type="button" (click)="cancelMessageEdit()" [attr.aria-label]="'Cancel edit' | translate" [title]="'Cancel edit' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
+                            <button type="button" (click)="cancelMessageEdit()" [attr.aria-label]="'Cancel edit' | translate" [title]="'Cancel edit' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-blue-640)]/25 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
                               <i class="bi bi-x-lg text-[12px] leading-none"></i>
                             </button>
                             } @else {
-                            <button type="button" (click)="copyMessage(message, $event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" [attr.aria-label]="'Copy message' | translate" [title]="'Copy message' | translate">
+                            <button type="button" (click)="copyMessage(message, $event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-full border border-[var(--color-blue-640)]/25 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" [attr.aria-label]="'Copy message' | translate" [title]="'Copy message' | translate">
                               <i class="bi bi-copy text-[12px] leading-none"></i>
                               @if (copiedMessageId() === message.id) {
                               <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">{{
@@ -158,7 +158,7 @@
                               }
                             </button>
                             @if (canEditMessage(message)) {
-                            <button type="button" (click)="startMessageEdit(message)" [attr.aria-label]="'Edit message' | translate" [title]="'Edit message' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
+                            <button type="button" (click)="startMessageEdit(message)" [attr.aria-label]="'Edit message' | translate" [title]="'Edit message' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-blue-640)]/25 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white">
                               <i class="bi bi-pencil-fill text-[12px] leading-none"></i>
                             </button>
                             }
@@ -274,7 +274,7 @@
                   <app-ai-directory [sessionId]="workspaceViewMode === 'chat' ? null : directorySessionId || activeSessionId"
                     [importRequest]="directoryImportRequest" [importBusy]="directoryImportBusy || clearingChats" [viewMode]="workspaceViewMode"
                     (importRequested)="submitDirectoryImport($event)"
-                    (workspaceApproved)="onDirectoryWorkspaceApproved()" [class.hidden]="workspaceViewMode === 'chat'"
+                    [class.hidden]="workspaceViewMode === 'chat'"
                     [ngClass]="workspaceViewMode === 'split'
     ? 'min-w-[520px] grow-[var(--ai-directory-panel-grow)]'
     : 'w-full min-w-0 flex-1'" class="flex h-full min-h-0 shrink basis-0 overflow-hidden">

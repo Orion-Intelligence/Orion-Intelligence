@@ -1,7 +1,7 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AppService } from '../../../services/core/app/app.service';
@@ -70,9 +70,16 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   activeSessionId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
-  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef) { }
+  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
+    const requestedView = this.route.snapshot.queryParamMap.get('view');
+    if (requestedView === 'chat' || requestedView === 'directory' || requestedView === 'split') {
+      this.workspaceViewMode = requestedView;
+    }
+    else {
+      void this.router.navigate([], { relativeTo: this.route, queryParams: { view: 'chat' }, queryParamsHandling: 'merge', replaceUrl: true });
+    }
     this.loadBackendChatSessions();
   }
 
@@ -99,6 +106,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       return;
     }
     this.workspaceViewMode = mode;
+    void this.router.navigate([], { relativeTo: this.route, queryParams: { view: mode }, queryParamsHandling: 'merge', replaceUrl: true });
     this.activeSplitPointerId = null;
     if (mode === 'split') {
       this.setDirectorySplitPercent(this.directorySplitPercent);
@@ -479,13 +487,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         sessionId,
         repoUrl: normalizedRepoUrl,
       };
-
-      this.setWorkspaceViewMode('split');
     });
-  }
-
-  onDirectoryWorkspaceApproved(): void {
-    this.setWorkspaceViewMode('split');
   }
 
   private ensureBackendSessionForDirectory(next: (sessionId: string) => void): void {

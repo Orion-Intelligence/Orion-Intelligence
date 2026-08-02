@@ -11,12 +11,17 @@
       </span>
 
       <div role="tablist" aria-label="Working directory content" class="flex shrink-0 items-center gap-0.5 rounded-[9px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-0.5">
-        <button id="ai-directory-tab-files" data-testid="ai-directory-tab-files" type="button" role="tab" (click)="selectDirectoryTab('files')" [attr.aria-selected]="activeDirectoryTab === 'files'" aria-controls="ai-directory-files-panel" [ngClass]="activeDirectoryTab === 'files' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text2)]'" class="inline-flex h-8 items-center gap-1.5 rounded-[7px] px-3 text-[11px] font-semibold outline-none transition-[background-color,color,box-shadow] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
-          <i class="bi bi-folder2-open text-[11px]" aria-hidden="true"></i>
+        <button id="ai-directory-tab-files" data-testid="ai-directory-tab-files" type="button" role="tab" (click)="selectDirectoryTab('files')" [attr.aria-selected]="activeDirectoryTab === 'files'" aria-controls="ai-directory-files-panel" [ngClass]="activeDirectoryTab === 'files' ? 'border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)]' : 'border-transparent text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text2)]'" class="inline-flex h-8 items-center gap-1.5 rounded-[7px] border px-3 text-[11px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
+          <svg class="h-3.5 w-3.5 shrink-0 text-[#8ec8ff]" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" aria-hidden="true">
+            <path d="M1.5 4.75A1.5 1.5 0 0 1 3 3.25h3l1.4 1.5H13a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5H3a1.5 1.5 0 0 1-1.5-1.5v-7Z" />
+          </svg>
           <span>Files</span>
         </button>
-        <button id="ai-directory-tab-logs" data-testid="ai-directory-tab-logs" type="button" role="tab" (click)="selectDirectoryTab('logs')" [attr.aria-selected]="activeDirectoryTab === 'logs'" aria-controls="ai-directory-logs-panel" [ngClass]="activeDirectoryTab === 'logs' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text2)]'" class="inline-flex h-8 items-center gap-1.5 rounded-[7px] px-3 text-[11px] font-semibold outline-none transition-[background-color,color,box-shadow] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
-          <i class="bi bi-list-ul text-[11px]" aria-hidden="true"></i>
+        <button id="ai-directory-tab-logs" data-testid="ai-directory-tab-logs" type="button" role="tab" (click)="selectDirectoryTab('logs')" [attr.aria-selected]="activeDirectoryTab === 'logs'" aria-controls="ai-directory-logs-panel" [ngClass]="activeDirectoryTab === 'logs' ? 'border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)]' : 'border-transparent text-[var(--color-text4)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text2)]'" class="inline-flex h-8 items-center gap-1.5 rounded-[7px] border px-3 text-[11px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
+          <svg class="h-3.5 w-3.5 shrink-0 text-[#8ec8ff]" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" aria-hidden="true">
+            <path d="M5.25 4h8.25M5.25 8h8.25M5.25 12h8.25" />
+            <path d="M2.5 4h.01M2.5 8h.01M2.5 12h.01" stroke-width="2.2" />
+          </svg>
           <span>Logs</span>
           @if (workspaceStatusType !== 'idle') {
           <span class="h-1.5 w-1.5 rounded-full" [ngClass]="{ 'animate-pulse bg-[var(--color-blue-640)]': workspaceStatusType === 'loading', 'bg-emerald-300': workspaceStatusType === 'approved', 'bg-red-300': workspaceStatusType === 'infected' || workspaceStatusType === 'failed' }" aria-hidden="true"></span>
@@ -29,24 +34,29 @@
   @if (activeDirectoryTab === 'files') {
   <div id="ai-directory-files-panel" role="tabpanel" aria-labelledby="ai-directory-tab-files" [ngClass]="viewMode === 'split' ? 'flex flex-col' : 'grid grid-cols-[340px_minmax(0,1fr)]'" class="min-h-0 min-w-0 flex-1 bg-[var(--color-blue-790)]">
     <aside [ngClass]="viewMode === 'split' ? 'h-[40%] min-h-[210px] border-b' : 'border-r'" class="flex min-h-0 min-w-0 flex-col border-[var(--color-border)] bg-[var(--color-blue-800)]/35">
-      <div class="flex h-10 shrink-0 items-center justify-between border-b border-white/[0.045] px-3.5">
+      <div class="flex h-10 shrink-0 items-center justify-between border-b border-[var(--color-divider)] px-3.5">
         <span class="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text4)]">
           <i class="bi bi-folder-fill text-[12px] text-[var(--color-blue-640)]" aria-hidden="true"></i>
           <span class="truncate">Repository files</span>
         </span>
-        <button data-testid="ai-import-directory-button" type="button" (click)="toggleRepositoryImport()" [disabled]="importBusy || workspaceStatusType === 'loading'" [attr.aria-expanded]="repositoryImportMode" aria-controls="ai-directory-import-form" [attr.aria-label]="workspaceStatusType === 'loading' ? 'Repository downloading' : repositoryImportMode ? 'Hide repository import' : 'Import repository'" [attr.title]="workspaceStatusType === 'loading' ? 'Repository downloading' : repositoryImportMode ? 'Hide repository import' : 'Import repository'" [ngClass]="workspaceStatusType === 'loading' ? 'border-transparent bg-[var(--color-blue-640)]/[0.09] text-[var(--color-text3)]' : repositoryImportMode ? 'border-[var(--color-blue-640)]/30 bg-[var(--color-blue-640)]/[0.09] text-[var(--color-text1)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)]/70 text-[var(--color-text3)]'" class="inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border px-2 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] hover:border-[var(--color-blue-640)]/35 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65">
+        <button data-testid="ai-import-directory-button" type="button" (click)="toggleRepositoryImport()" [disabled]="importBusy || workspaceStatusType === 'loading'" [attr.aria-expanded]="repositoryImportMode" aria-controls="ai-directory-import-form" [attr.aria-label]="workspaceStatusType === 'loading' ? 'Repository downloading' : repositoryImportMode ? 'Hide repository import' : 'Import repository'" [attr.title]="workspaceStatusType === 'loading' ? 'Repository downloading' : repositoryImportMode ? 'Hide repository import' : 'Import repository'" [ngClass]="repositoryImportMode ? 'border-[#152137] bg-[var(--color-blue-690)] text-[var(--color-text1)]' : 'border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))]'" class="group inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border px-1.5 pr-2 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65">
           @if (workspaceStatusType === 'loading') {
           <span class="h-3 w-3 animate-spin rounded-full border border-[var(--color-blue-640)]/25 border-t-[var(--color-blue-640)]" aria-hidden="true"></span>
           <span>Downloading</span>
           } @else {
-          <i class="bi bi-folder-plus text-[11px] text-[var(--color-blue-640)]" aria-hidden="true"></i>
+          <span class="inline-flex h-[18px] w-[18px] items-center justify-center text-[#8ec8ff] transition-colors group-hover:text-white" aria-hidden="true">
+            <svg class="h-3.5 w-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35">
+              <path d="M1.5 4.75A1.5 1.5 0 0 1 3 3.25h3l1.4 1.5H13a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5H3a1.5 1.5 0 0 1-1.5-1.5v-7Z" />
+              <path d="M10.25 7.25v4M8.25 9.25h4" />
+            </svg>
+          </span>
           <span>{{ repositoryImportMode ? 'Hide' : 'Import' }}</span>
           }
         </button>
       </div>
 
       @if (repositoryImportMode) {
-      <form id="ai-directory-import-form" novalidate (ngSubmit)="submitRepositoryImport()" [attr.aria-busy]="importBusy" class="shrink-0 border-b border-white/[0.055] bg-[var(--color-blue-800)]/55 p-3">
+      <form id="ai-directory-import-form" novalidate (ngSubmit)="submitRepositoryImport()" [attr.aria-busy]="importBusy" class="shrink-0 border-b border-[var(--color-divider)] bg-[var(--color-blue-800)]/55 p-3">
         <label for="ai-directory-repo-url" class="block text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">
           Public GitHub repository URL
         </label>
@@ -81,7 +91,7 @@
     </aside>
 
     <section class="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--color-blue-790)]">
-      <div class="flex h-10 shrink-0 items-center justify-between gap-3 border-b border-white/[0.045] bg-[var(--color-blue-800)]/20 px-3.5">
+      <div class="flex h-10 shrink-0 items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-800)]/20 px-3.5">
         <div class="flex min-w-0 items-center gap-2">
           <i class="bi bi-file-earmark-code shrink-0 text-[12px] text-[var(--color-blue-640)]" aria-hidden="true"></i>
           <span class="truncate text-[11px] font-medium text-[var(--color-text3)]" [title]="selectedWorkspaceFilePath || 'File preview'">
@@ -98,7 +108,7 @@
 
       <div class="min-h-0 min-w-0 flex-1 overflow-auto p-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[7px] [&::-webkit-scrollbar]:w-[7px] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent" (scroll)="onWorkspaceFileScroll($event)">
         @if (selectedWorkspaceFilePath) {
-        <pre class="min-h-[240px] max-w-full overflow-x-auto whitespace-pre rounded-[12px] border border-white/[0.07] bg-[#081421]/80 p-4 font-mono text-[12px] leading-5 text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_10px_30px_rgba(0,0,0,0.1)] selection:bg-[var(--color-blue-640)]/25">{{ selectedWorkspaceFileContent }}</pre>
+        <pre class="min-h-[240px] max-w-full overflow-x-auto whitespace-pre rounded-[12px] border border-[var(--color-divider)] bg-[#081421]/80 p-4 font-mono text-[12px] leading-5 text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_10px_30px_rgba(0,0,0,0.1)] selection:bg-[var(--color-blue-640)]/25">{{ selectedWorkspaceFileContent }}</pre>
         } @else {
         <div class="flex h-full min-h-[240px] items-center justify-center rounded-[12px] bg-[var(--color-blue-800)]/20 px-6 text-center">
           <div class="max-w-[300px]">
@@ -128,7 +138,7 @@
   </div>
   } @else {
   <section id="ai-directory-logs-panel" role="tabpanel" aria-labelledby="ai-directory-tab-logs" class="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--color-blue-790)]">
-    <div class="flex h-10 shrink-0 items-center justify-between gap-3 border-b border-white/[0.045] bg-[var(--color-blue-800)]/35 px-3.5">
+    <div class="flex h-10 shrink-0 items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-800)]/35 px-3.5">
       <span class="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text4)]">
         <i class="bi bi-terminal text-[12px] text-[var(--color-blue-640)]" aria-hidden="true"></i>
         <span class="truncate">Repository logs</span>
@@ -147,13 +157,13 @@
     <div role="log" aria-live="polite" aria-relevant="additions text" class="min-h-0 flex-1 overflow-auto bg-[#081421]/45 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[7px] [&::-webkit-scrollbar]:w-[7px] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
       @if (workspaceLogs.length) {
       <div class="min-w-[430px]">
-        <div aria-hidden="true" class="grid grid-cols-[82px_62px_minmax(0,1fr)] gap-2 border-b border-white/[0.06] bg-[var(--color-blue-800)]/45 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-[var(--color-text6)]">
+        <div aria-hidden="true" class="grid grid-cols-[82px_62px_minmax(0,1fr)] gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-800)]/45 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-[var(--color-text6)]">
           <span>Time</span>
           <span>Level</span>
           <span>Message</span>
         </div>
         @for (log of workspaceLogs; track log.id) {
-        <article class="grid grid-cols-[82px_62px_minmax(0,1fr)] items-start gap-2 border-b border-white/[0.045] px-3 py-2 font-mono transition-colors hover:bg-white/[0.018]">
+        <article class="grid grid-cols-[82px_62px_minmax(0,1fr)] items-start gap-2 border-b border-[var(--color-divider)] px-3 py-2 font-mono transition-colors hover:bg-white/[0.018]">
           <time class="pt-px text-[10px] tabular-nums text-[var(--color-text6)]">{{ log.timestamp | date:'HH:mm:ss' }}</time>
           <span class="inline-flex items-center gap-1.5 pt-px text-[9px] font-semibold tracking-[0.04em]" [ngClass]="{ 'text-[var(--color-blue-640)]': log.type === 'loading', 'text-emerald-300': log.type === 'approved', 'text-red-300': log.type === 'infected' || log.type === 'failed' }">
             <span class="h-1.5 w-1.5 shrink-0 rounded-full" [ngClass]="{ 'bg-[var(--color-blue-640)]': log.type === 'loading', 'bg-emerald-300': log.type === 'approved', 'bg-red-300': log.type === 'infected' || log.type === 'failed' }" aria-hidden="true"></span>
@@ -162,7 +172,7 @@
           <div class="min-w-0">
             <p class="break-words text-[11px] leading-4 text-[var(--color-text3)]">{{ log.message }}</p>
             @if (log.details) {
-            <pre class="mt-1.5 max-h-72 overflow-auto whitespace-pre-wrap break-words border-l border-white/[0.08] pl-2.5 font-mono text-[10px] leading-4 text-[var(--color-text5)]">{{ log.details }}</pre>
+            <pre class="mt-1.5 max-h-72 overflow-auto whitespace-pre-wrap break-words border-l border-[var(--color-divider)] pl-2.5 font-mono text-[10px] leading-4 text-[var(--color-text5)]">{{ log.details }}</pre>
             }
           </div>
         </article>
@@ -200,7 +210,7 @@
       </button>
 
       @if (node.expanded) {
-      <div class="ml-[18px] border-l border-white/[0.065] pl-1.5">
+      <div class="ml-[18px] border-l border-[var(--color-divider)] pl-1.5">
         <ng-container *ngTemplateOutlet="fileTreeTemplate; context: { nodes: node.children || [] }"></ng-container>
       </div>
       }

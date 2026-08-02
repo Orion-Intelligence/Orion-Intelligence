@@ -89,11 +89,11 @@
             }
 
             @if (!isChatEmpty(chat) && !isChatBusy(chat) && openedSessionMenuId === chat.sessionId) {
-            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px] ui-ai-chat-dropdown-above' : 'top-[44px]'" class="ui-profile-dropdown absolute right-[5px] z-[999] w-[176px] overflow-visible rounded-[9px] border border-slate-200 !bg-white p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5">
+            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px] ui-ai-chat-dropdown-above' : 'top-[44px]'" class="ui-profile-dropdown absolute right-[5px] z-[999] w-[176px] overflow-visible rounded-[9px] border border-slate-200 !bg-slate-50 p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5">
               @if (shouldOpenMenuAbove(chat)) {
-              <span class="pointer-events-none absolute bottom-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-white" aria-hidden="true"></span>
+              <span class="pointer-events-none absolute bottom-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-slate-50" aria-hidden="true"></span>
               } @else {
-              <span class="pointer-events-none absolute top-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-b-[7px] border-l-transparent border-r-transparent border-b-white" aria-hidden="true"></span>
+              <span class="pointer-events-none absolute top-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-b-[7px] border-l-transparent border-r-transparent border-b-slate-50" aria-hidden="true"></span>
               }
               <button role="menuitem" type="button" (click)="shareChat(chat, $event)" [disabled]="!!sharingSessionId" class="group/menu-action flex h-9 w-full items-center gap-2.5 rounded-[6px] px-2 text-left text-[12px] font-medium text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-950 focus-visible:bg-slate-100 focus-visible:text-slate-950 focus-visible:outline-none disabled:cursor-wait disabled:opacity-50">
                 <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[5px] bg-slate-100 text-slate-500 transition-colors group-hover/menu-action:text-slate-700">
@@ -171,7 +171,7 @@
       {{ 'Update the chat name below.' | translate }}
     </div>
 
-    <input data-testid="ai-chat-rename-input" type="text" [(ngModel)]="renameChatDraft" class="mt-4 h-[40px] w-full rounded-[8px] border border-white/10 bg-[#102236] px-3 text-sm text-white outline-none placeholder:text-[#A0B8D1]" [placeholder]="'Chat name' | translate" (keydown.enter)="confirmRenameChat()" autofocus />
+    <input data-testid="ai-chat-rename-input" type="text" [(ngModel)]="renameChatDraft" class="mt-4 h-[40px] w-full rounded-[8px] border border-[var(--color-blue-640)]/25 bg-[#102236] px-3 text-sm text-white outline-none placeholder:text-[#A0B8D1]" [placeholder]="'Chat name' | translate" (keydown.enter)="confirmRenameChat()" autofocus />
 
     <div class="mt-6 flex justify-end gap-2">
       <button data-testid="ai-chat-rename-confirm" type="button" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold" [disabled]="!renameChatDraft.trim()" (click)="confirmRenameChat()">
