@@ -9,9 +9,10 @@ import { AppStorageService } from '../core/app/app-storage.service';
 import { AppService } from '../core/app/app.service';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private authState = new BehaviorSubject<AuthModel>(this.loadAuthState());
+  private authState = new BehaviorSubject<AuthModel>({ isAuthenticated: false, isValidated: true, error: null });
 
   constructor(private appService: AppService, private appStorageService: AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
+    this.authState.next(this.loadAuthState());
     if (this.isAuthenticated()) {
       this.startTokenRefresh();
     }
@@ -27,9 +28,9 @@ export class AuthService {
     }
     const body = new URLSearchParams();
     const headers = new HttpHeaders({ 'Content-Type': 'application/x-www-form-urlencoded' });
-    let route = 'token';
+    let route = 'token?cookie_only=true';
     if (isDemo) {
-      route = 'token/demo';
+      route = 'token/demo?cookie_only=true';
     }
     else {
       body.set('username', mail);
@@ -48,7 +49,6 @@ export class AuthService {
       error: (error) => {
         if (error?.error?.detail === 'Verification pending.') {
           this.authState.next({
-            token: null,
             isAuthenticated: false,
             isValidated: false,
             error: 'Access denied!',
@@ -72,7 +72,7 @@ export class AuthService {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${tempToken}`,
     });
-    return this.apiService.post<any>('token/2fa/verify', { code }, { headers }).pipe(tap({
+    return this.apiService.post<any>('token/2fa/verify?cookie_only=true', { code }, { headers }).pipe(tap({
       next: (response) => {
         if (!this.applyLoginResponse(response, 'Invalid 2FA code')) {
           return;
@@ -86,7 +86,6 @@ export class AuthService {
 
   logout(): void {
     this.authState.next({
-      token: null,
       isAuthenticated: false,
       isValidated: true,
       error: null,
@@ -130,14 +129,14 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    return !!this.getStoredToken();
+    return this.authState.value.isAuthenticated;
   }
 
   getSessionStatus(): {
         isAuthenticated: boolean;
         hasSession: boolean;
         } {
-    const isAuthenticated = !!this.getStoredToken();
+    const isAuthenticated = this.isAuthenticated();
     const hasSession = !!this.appService.userSessionData().user.username &&
             !!this.appService.userSessionData().user.role &&
             !!this.appService.userSessionData().user.verificationDate;
@@ -145,34 +144,31 @@ export class AuthService {
   }
 
   private denyAccess(error: string): void {
+    this.clearAuthentication(error);
+  }
+
+  public clearAuthentication(error: string | null = null): void {
+    this.tokenRefreshService.stopTokenRefresh();
     this.authState.next({
-      token: null,
       isAuthenticated: false,
       isValidated: true,
       error,
     });
   }
 
-  private setToken(token: string): void {
-    localStorage.setItem('token', token);
+  private setAuthenticated(): void {
     this.authState.next({
-      token,
       isAuthenticated: true,
       isValidated: true,
       error: null,
     });
   }
 
-  public getStoredToken(): string | null {
-    return localStorage.getItem('token');
-  }
-
   private loadAuthState(): AuthModel {
-    const token = this.getStoredToken();
+    const isAuthenticated = !!this.appService.userSessionData().user.username;
     return {
-      token,
       isValidated: true,
-      isAuthenticated: !!token,
+      isAuthenticated,
       error: null,
     };
   }
@@ -183,28 +179,26 @@ export class AuthService {
     }
   }
 
-  refreshToken(): Observable<string | null> {
-    const currentToken = this.getStoredToken();
-    if (!currentToken) {
+  refreshToken(): Observable<void> {
+    if (!this.isAuthenticated()) {
       return new Observable((observer) => {
-        observer.next(null);
+        observer.next();
         observer.complete();
       });
     }
     return this.apiService
       .post<{
-            access_token: string;
             session?: any;
-        }>('token/refresh', { token: currentToken }, { headers: new HttpHeaders({ Authorization: `Bearer ${currentToken}` }) })
+        }>('token/refresh?cookie_only=true', {})
       .pipe(tap((response) => {
-        if (response?.access_token) {
-          this.setToken(response.access_token);
+        if (response?.session) {
+          this.setAuthenticated();
         }
-      }), map((response) => response?.access_token || null));
+      }), map(() => void 0));
   }
 
   private applyLoginResponse(response: any, deniedMessage: string = 'Access denied!'): boolean {
-    if (!response?.access_token) {
+    if (!response?.session) {
       this.denyAccess(deniedMessage);
       return false;
     }
@@ -213,7 +207,7 @@ export class AuthService {
       this.denyAccess(deniedMessage);
       return false;
     }
-    this.setToken(response.access_token);
+    this.setAuthenticated();
     this.startTokenRefresh();
     return true;
   }

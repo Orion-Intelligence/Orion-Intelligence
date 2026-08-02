@@ -2,13 +2,12 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteFacilitiesResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
-import { AuthService } from '../../../../../services/authetication/auth.service';
 import { OrionSatelliteFeature, OrionSatelliteFeatureType } from '../../../models/geo-fencing.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteFacilitiesService {
-  constructor(private api: ApiService, private auth: AuthService, private satelliteIntelService: SatelliteIntelService) {}
+  constructor(private api: ApiService, private satelliteIntelService: SatelliteIntelService) {}
 
   fetchNearby(lat: number, lon: number, radiusKm = 5): Observable<SatelliteFacilitiesResponse> {
     return this.satelliteIntelService.createPolledRequest(() => this.api.post<SatelliteFacilitiesResponse>('satellite/facilities', { lat, lon, radius_km: radiusKm }), (res) => this.getPollStatus(res));
@@ -31,9 +30,9 @@ export class SatelliteFacilitiesService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.auth.getStoredToken()}`,
         },
         body: JSON.stringify({ size }),
+        credentials: 'include',
       });
 
       if (!response.body) {

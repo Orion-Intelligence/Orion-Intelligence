@@ -14,7 +14,7 @@ export class TokenRefreshService {
     });
   }
 
-  startTokenRefresh(refreshAction: () => Observable<string | null>): void {
+  startTokenRefresh(refreshAction: () => Observable<void>): void {
     if (!this.refreshTokenSubscription || this.refreshTokenSubscription.closed) {
       this.refreshTokenSubscription = timer(this.FIRST_REFRESH_DELAY, this.REFRESH_INTERVAL)
         .pipe(switchMap(() => refreshAction()),

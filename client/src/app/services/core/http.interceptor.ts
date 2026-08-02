@@ -31,10 +31,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   const loadingService = inject(LoadingService);
   const msg = inject(MessageNotificationService);
   const injector = inject(Injector);
-  const token = localStorage.getItem('token');
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` }, withCredentials: true })
-    : req.clone({ withCredentials: true });
+  const authReq = req.clone({ withCredentials: true });
   const key = authReq.url.startsWith('api/') ? authReq.url : null;
   let cancel$: Subject<void> | null = null;
   if (key) {
@@ -86,6 +83,11 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       return throwError(() => error);
     }
     const authService = injector.get(AuthService, null);
+    const isSessionProbe = authReq.url.includes('api/get/tenant/node');
+    if (error instanceof HttpErrorResponse && error.status === 401 && isSessionProbe) {
+      authService?.clearAuthentication();
+      return throwError(() => error);
+    }
     if (authService?.isAuthenticated()) {
       if (error instanceof HttpErrorResponse && authReq.url.includes('api/search')) {
         const detail = typeof error.error === 'object' ? String((error.error as any)?.detail || '') : '';
@@ -112,6 +114,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       const isSilentLogout = silentLogoutMessages.has(message);
       const isPublicCaseShareRequest = error instanceof HttpErrorResponse && authReq.url.includes('public/case-shares/');
       if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && (error.status === 401 || isSilentLogout)) {
+        authService.clearAuthentication();
         localStorage.clear();
         sessionStorage.clear();
         router.navigate(['/login']).then();
@@ -121,6 +124,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       }
     }
     else if (error instanceof HttpErrorResponse && error.status === 401) {
+      authService?.clearAuthentication();
       localStorage.clear();
       sessionStorage.clear();
       router.navigate(['/login']).then();

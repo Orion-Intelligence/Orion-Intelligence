@@ -18,52 +18,66 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 COOKIE_CIPHER = auth_cookie_config.COOKIE_CIPHER
 
 
+def uses_cookie_auth(request: Request, cookie_only: bool) -> bool:
+    return cookie_only or bool(request.cookies.get(ACCESS_COOKIE))
+
+
+def cookie_only_result(result: dict, cookie_auth: bool) -> dict:
+    if not cookie_auth:
+        return result
+    return {key: value for key, value in result.items() if key not in {"access_token", "token_type"}}
+
+
 @auth_router.post("/api/token")
-async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None):
+async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None, cookie_only: bool = False):
     result = await auth_manager.login(form_data.username, form_data.password, tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
+    cookie_auth = uses_cookie_auth(request, cookie_only)
 
-    if access_token and not twofa_required:
+    if access_token and not twofa_required and cookie_auth:
         set_access_cookie(response, access_token)
 
-    return result
+    return cookie_only_result(result, cookie_auth)
 
 
 @auth_router.post("/api/token/demo")
-async def token_demo(request: Request, response: Response = None):
+async def token_demo(request: Request, response: Response = None, cookie_only: bool = False):
     DEMO_USERNAME = env_handler.get_instance().env("DEMO_USERNAME")
     DEMO_PASSWORD = env_handler.get_instance().env("DEMO_PASSWORD")
 
     result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD, True, tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
+    cookie_auth = uses_cookie_auth(request, cookie_only)
 
-    if access_token and not twofa_required:
+    if access_token and not twofa_required and cookie_auth:
         set_access_cookie(response, access_token)
 
-    return result
+    return cookie_only_result(result, cookie_auth)
 
 
 @auth_router.post("/api/token/2fa/verify")
-async def verify_2fa(request: Request, code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None):
+async def verify_2fa(request: Request, code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None, cookie_only: bool = False):
     result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code, tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
-    if access_token:
+    cookie_auth = uses_cookie_auth(request, cookie_only)
+    if access_token and cookie_auth:
         set_access_cookie(response, access_token)
-    return result
+    return cookie_only_result(result, cookie_auth)
 
 
 @auth_router.post("/api/token/refresh")
-async def refresh_token(request: Request, response: Response = None):
+async def refresh_token(request: Request, response: Response = None, cookie_only: bool = False):
     token = token_from_request(request)
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
     result = await session_manager.get_instance().refresh_token(token,tenant_id=getattr(request.state, "tenant", None))
     access_token = result.get("access_token")
-    if access_token:
+    cookie_auth = uses_cookie_auth(request, cookie_only)
+    if access_token and cookie_auth:
         set_access_cookie(response, access_token)
-    return result
+    return cookie_only_result(result, cookie_auth)
 
 
 @auth_router.post("/api/logout")

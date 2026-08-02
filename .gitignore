@@ -1,4 +1,5 @@
 .env
+temo.env
 /.codex
 .DS_Store
 **/.DS_Store

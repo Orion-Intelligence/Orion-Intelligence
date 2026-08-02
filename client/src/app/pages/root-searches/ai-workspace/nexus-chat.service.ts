@@ -18,13 +18,9 @@ export class NexusChatService {
   }
 
   cancelNexusChat(): void {
-    const token = localStorage.getItem('token');
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
     void fetch('/api/nexus/chat/cancel', {
       method: 'POST',
       headers,
@@ -64,14 +60,10 @@ export class NexusChatService {
         this.cancelNexusChat();
         controller.abort();
       }, this.streamTimeoutMs);
-      const token = localStorage.getItem('token');
       const headers: Record<string, string> = {
         Accept: 'application/x-ndjson',
         'Content-Type': 'application/json',
       };
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-      }
 
       fetch('/api/nexus/chat', {
         method: 'POST',
