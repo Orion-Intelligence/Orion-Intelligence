@@ -2,6 +2,8 @@ from fastapi import APIRouter, Depends, Body, Response, Request, HTTPException, 
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from starlette.responses import JSONResponse
 
+from configs.limiter_dependency import auth_rate_limit
+from orion.services.redis_manager.redis_controller import redis_controller
 from configs import auth_cookie as auth_cookie_config
 from configs.auth_cookie import ACCESS_COOKIE, set_access_cookie, token_from_request
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
@@ -29,8 +31,9 @@ def cookie_only_result(result: dict, cookie_auth: bool) -> dict:
 
 
 @auth_router.post("/api/token")
-async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None, cookie_only: bool = False):
-    result = await auth_manager.login(form_data.username, form_data.password, tenant_id=getattr(request.state, "tenant", None))
+async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None, cookie_only: bool = False, redis_store: redis_controller = Depends(redis_controller.getInstance)):
+    result = await auth_rate_limit(redis_store, form_data.username, lambda: auth_manager.login(form_data.username, form_data.password, tenant_id=getattr(request.state, "tenant", None)))
+
     access_token = result.get("access_token")
     twofa_required = result.get("twofa_required")
     cookie_auth = uses_cookie_auth(request, cookie_only)
