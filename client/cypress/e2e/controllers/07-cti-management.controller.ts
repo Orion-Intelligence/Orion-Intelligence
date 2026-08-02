@@ -2,8 +2,9 @@ export function openAndAssertReportModal(title: string) {
   cy.get('[data-testid="cti-export-report"]').filter(':visible').first().click();
   cy.contains(title).should('be.visible');
   cy.get('[data-testid="graph-report-export-modal"]').filter(':visible').first().should('be.visible');
+  cy.get('[data-testid="graph-report-export-report"]').filter(':visible').first().should('exist');
   cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().should('exist');
-  cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().should('exist');
+  cy.get('[data-testid="graph-report-export-csv"]').filter(':visible').first().should('exist');
 }
 
 export function selectCtiFilterType(label: string) {

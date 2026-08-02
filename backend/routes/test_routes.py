@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 
 from configs.app_dependency import get_current_user, license_required, role_required
@@ -245,6 +247,77 @@ async def test_nlp_chat_report(_payload: dict = Body(...)):
 )
 async def test_nexus_chat(_payload: dict = Body(...)):
     return TestRouteHelper.static_test_chat_streaming_response()
+
+
+@test_routes.get(
+    "/api/nexus/chats",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_list_nexus_chats() -> list[dict[str, Any]]:
+    return []
+
+
+@test_routes.post(
+    "/api/nexus/chats",
+    status_code=201,
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_create_nexus_chat(payload: dict = Body(default={"title": "New Chat"})) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_session(title=payload.get("title", "New Chat"))
+
+
+@test_routes.delete(
+    "/api/nexus/chats",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_delete_all_nexus_chats() -> dict[str, bool]:
+    return {"success": True}
+
+
+@test_routes.get(
+    "/api/nexus/chats/{session_id}",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_get_nexus_chat(session_id: str) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_detail(session_id)
+
+
+@test_routes.post(
+    "/api/nexus/chats/{session_id}/messages",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_send_nexus_chat_message(session_id: str, payload: dict = Body(...)) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_message_response(
+        session_id,
+        str(payload.get("message", "")),
+    )
+
+
+@test_routes.put(
+    "/api/nexus/chats/{session_id}",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_rename_nexus_chat(session_id: str, payload: dict = Body(...)) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_session(
+        title=payload.get("title", "New Chat"),
+        session_id=session_id,
+        message_count=2,
+    )
+
+
+@test_routes.delete(
+    "/api/nexus/chats/{session_id}",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_delete_nexus_chat(session_id: str) -> dict[str, Any]:
+    return {"success": True, "session_id": session_id}
 
 
 @test_routes.post(

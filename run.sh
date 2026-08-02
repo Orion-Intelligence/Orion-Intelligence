@@ -89,7 +89,8 @@ install_client_dependencies() {
         echo "Missing client lockfile; refusing unpinned dependency install"
         exit 1
     fi
-    if [ "$build_flag" = "-d" ] && ng_serve_is_running; then
+    if { [ "$build_flag" = "-d" ] || [ "$build_flag" = "-t" ] || [ "$build_flag" = "-tb" ]; } \
+        && ng_serve_is_running; then
         echo "Angular dev server is running; preserving node_modules and skipping npm ci"
     else
         npm ci
@@ -234,7 +235,8 @@ COMMAND=$1
 FLAG=$2
 EXTRA_FLAG=$3
 
-if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ] || [ "$FLAG" != "-docs" ]; then
+if [ "$COMMAND" != "build" ] \
+    || { [ "$FLAG" != "-d" ] && [ "$FLAG" != "-t" ] && [ "$FLAG" != "-tb" ]; }; then
     stop_docker
 fi
 
@@ -243,6 +245,18 @@ set_testing_enabled "$FLAG"
 if [ "$COMMAND" = "build" ]; then
     if [ "$FLAG" = "-p" ]; then
         enable_maintenance_mode
+    elif [ "$FLAG" = "-d" ] || [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; then
+        if [ "$FLAG" = "-d" ]; then
+            cp nginx/nginx-dev.conf nginx/nginx.conf
+        else
+            cp nginx/nginx-testing.conf nginx/nginx.conf
+        fi
+        if docker inspect -f '{{.State.Running}}' trusted-web-nginx 2>/dev/null | grep -qx true; then
+            docker exec trusted-web-nginx nginx -t
+            docker exec trusted-web-nginx nginx -s reload
+        fi
+        enable_maintenance_mode
+        trap disable_maintenance_mode EXIT
     fi
 
     pull_image_if_missing python:3.11-slim
@@ -341,6 +355,12 @@ case "$COMMAND:$FLAG" in
         wait_for_test_service
         ;;
 esac
+
+if [ "$COMMAND" = "build" ] \
+    && { [ "$FLAG" = "-d" ] || [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then
+    disable_maintenance_mode
+    trap - EXIT
+fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-tb" ]; then
     run_backend_tests_protected

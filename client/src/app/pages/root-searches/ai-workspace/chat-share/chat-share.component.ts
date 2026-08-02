@@ -7,6 +7,7 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { MessageScrollRailComponent } from '../message-scroll-rail/message-scroll-rail.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { HeaderComponent } from '../../../../shared/partials/header/login-header/header.component';
 
 type SharedChatMessage = {
   sender: 'user' | 'bot';
@@ -17,7 +18,7 @@ type SharedChatMessage = {
 @Component({
   selector: 'app-chat-share',
   standalone: true,
-  imports: [CommonModule, DatePipe, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
+  imports: [CommonModule, DatePipe, HeaderComponent, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
   templateUrl: './chat-share.component.html',
 })
 export class ChatShareComponent implements OnInit, OnDestroy {

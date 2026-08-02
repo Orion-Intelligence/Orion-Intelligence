@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
+from uuid import uuid4
 
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
@@ -154,6 +155,45 @@ class TestRouteHelper:
             media_type="application/x-ndjson",
             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
         )
+
+    @classmethod
+    def static_test_chat_session(cls, title: str = "New Chat", session_id: str | None = None, message_count: int = 0) -> dict[str, Any]:
+        return {
+            "session_id": session_id or f"cypress-ai-chat-{uuid4()}",
+            "title": str(title or "New Chat").strip() or "New Chat",
+            "updated_at": datetime.now(timezone.utc).isoformat(),
+            "message_count": message_count,
+        }
+
+    @classmethod
+    def static_test_chat_detail(cls, session_id: str) -> dict[str, Any]:
+        return {
+            **cls.static_test_chat_session(session_id=session_id),
+            "messages": [],
+        }
+
+    @classmethod
+    def static_test_chat_message_response(cls, session_id: str, message: str) -> dict[str, Any]:
+        now = datetime.now(timezone.utc).isoformat()
+        return {
+            "chat": cls.static_test_chat_session(
+                title=message,
+                session_id=session_id,
+                message_count=2,
+            ),
+            "user_message": {
+                "id": f"cypress-user-{uuid4()}",
+                "sender": "user",
+                "text": message,
+                "created_at": now,
+            },
+            "assistant_message": {
+                "id": f"cypress-bot-{uuid4()}",
+                "sender": "bot",
+                "text": cls.STATIC_TEST_CHAT_RESPONSE,
+                "created_at": now,
+            },
+        }
 
     @classmethod
     async def setup_takedown_visibility_fixture(cls):

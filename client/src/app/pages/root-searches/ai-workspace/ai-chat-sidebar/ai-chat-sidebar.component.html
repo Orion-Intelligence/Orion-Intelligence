@@ -21,15 +21,15 @@
         @if (searchOpen) {
         <div (click)="$event.stopPropagation()" class="flex h-10 items-center gap-3 rounded-[9px] border border-[rgba(87,165,235,0.22)] bg-white/[0.04] px-3">
           <i class="bi bi-search shrink-0 text-[14px] text-[var(--color-text4)]" aria-hidden="true"></i>
-          <input type="search" [(ngModel)]="searchQuery" (keydown.escape)="closeSearch()" [attr.aria-label]="'Search Chats' | translate" [placeholder]="'Search Chats...' | translate" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" autofocus />
+          <input data-testid="ai-chat-search-input" type="search" [(ngModel)]="searchQuery" (keydown.escape)="closeSearch()" [attr.aria-label]="'Search Chats' | translate" [placeholder]="'Search Chats...' | translate" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" autofocus />
           @if (searchQuery) {
-          <button type="button" (click)="clearSearch()" [attr.aria-label]="'Clear search' | translate" [appTooltip]="'Clear search' | translate" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-[var(--color-text4)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)]">
+          <button data-testid="ai-chat-search-clear" type="button" (click)="clearSearch()" [attr.aria-label]="'Clear search' | translate" [appTooltip]="'Clear search' | translate" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-[var(--color-text4)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)]">
             <i class="bi bi-x-lg text-[11px]" aria-hidden="true"></i>
           </button>
           }
         </div>
         } @else {
-        <button type="button" (click)="toggleSearch($event)" class="flex h-10 w-full items-center gap-3 rounded-[9px] px-3 text-left text-sm font-medium text-[var(--color-text3)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)]">
+        <button data-testid="ai-chat-search-toggle" type="button" (click)="toggleSearch($event)" class="flex h-10 w-full items-center gap-3 rounded-[9px] px-3 text-left text-sm font-medium text-[var(--color-text3)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)]">
           <i class="bi bi-search text-[14px]" aria-hidden="true"></i>
           <span>{{ 'Search Chats' | translate }}</span>
         </button>
@@ -162,7 +162,7 @@
 
 @if (renameChatTarget) {
 <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" data-role="backdrop" (click)="onRenameBackdrop($event)">
-  <div class="ui-graph-popup-panel ui-popup-shell w-full max-w-[420px] rounded-xl p-6" (click)="$event.stopPropagation()">
+  <div data-testid="ai-chat-rename-modal" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[420px] rounded-xl p-6" (click)="$event.stopPropagation()">
     <div class="ui-popup-title text-lg font-semibold">
       {{ 'Rename Chat' | translate }}
     </div>
