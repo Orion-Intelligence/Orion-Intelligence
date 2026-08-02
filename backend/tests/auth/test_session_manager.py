@@ -197,7 +197,7 @@ def test_delete_tenant_removes_users_and_keys():
 
 
 @pytest.mark.parametrize("action", ["forgot", "update"])
-def test_password_recovery_rejects_the_wrong_tenant(monkeypatch, action):
+def test_password_recovery_handles_the_wrong_tenant(monkeypatch, action):
     user = _make_user(tenant_uuid="tenant-a", email="alice@example.com")
     engine = FakeEngine(user)
     monkeypatch.setattr(
@@ -205,14 +205,14 @@ def test_password_recovery_rejects_the_wrong_tenant(monkeypatch, action):
         staticmethod(lambda: SimpleNamespace(get_engine=lambda: engine)),
     )
 
-    with pytest.raises(HTTPException) as exc:
-        if action == "forgot":
-            _run(auth_manager.forgot_password("alice@example.com", SimpleNamespace(id="tenant-b")))
-        else:
+    if action == "forgot":
+        result = _run(auth_manager.forgot_password("alice@example.com", SimpleNamespace(id="tenant-b")))
+        assert result == {"message": "If the email is registered, a password reset email has been sent."}
+    else:
+        with pytest.raises(HTTPException) as exc:
             _run(auth_manager.update_password("token", "NewPassword1!", SimpleNamespace(id="tenant-b")))
-
-    assert exc.value.status_code == 403
-    assert exc.value.detail == "Tenant access forbidden"
+        assert exc.value.status_code == 403
+        assert exc.value.detail == "Tenant access forbidden"
 
 
 def test_get_current_role_and_status_return_enum_values():

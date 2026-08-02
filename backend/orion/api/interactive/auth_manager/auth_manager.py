@@ -1,3 +1,6 @@
+import hashlib
+import logging
+import secrets
 import threading
 from datetime import datetime, timedelta, timezone
 
@@ -17,6 +20,8 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_
 from orion.services.session_manager.session_manager import session_manager
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.helper_manager.env_handler import env_handler
+
+logger = logging.getLogger(__name__)
 
 
 class auth_manager:
@@ -212,38 +217,53 @@ class auth_manager:
     async def forgot_password(mail: str, tenant_id):
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.email == mail)
-        if not user:
-            raise HTTPException(status_code=404, detail="Entered mail is not resgister")
-        if tenant_id is None:
-            raise HTTPException(status_code=403, detail="Tenant access forbidden")
-        session_manager.ensure_user_tenant_access(user, tenant_id)
-        if user.status != UserStatus.ACTIVE:
-            raise HTTPException(status_code=403, detail="Account is not active")
+        if user:
+            try:
+                if tenant_id is None:
+                    raise HTTPException(status_code=403, detail="Tenant access forbidden")
+                session_manager.ensure_user_tenant_access(user, tenant_id)
+                if user.status != UserStatus.ACTIVE:
+                    raise HTTPException(status_code=403, detail="Account is not active")
 
-        tenant = await engine.find_one(
-            db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
-        if not tenant:
-            raise HTTPException(status_code=404, detail="Tenant not found")
+                tenant = await engine.find_one(
+                    db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+                if not tenant:
+                    raise HTTPException(status_code=404, detail="Tenant not found")
 
-        reset_token = session_manager.issue_password_reset_token(user)
-        await engine.save(user)
+                reset_token = session_manager.issue_password_reset_token(user)
+                await engine.save(user)
+                await AuditLogManager.get_instance().register(
+                    str(user.tenant_uuid), str(user.id), "Password reset requested")
 
-        await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(user.id), "Password reset requested")
+                app_url = env_handler.get_instance().env("APP_URL")
+                forgot_url = TenantManager.build_tenant_url(
+                    app_url, tenant, f"/reset/{reset_token}")
+                html_content = constant.mail_template.render(
+                    username=user.username,
+                    email=user.email,
+                    subject=MailSubject.ACCOUNT_RECOVERY.value,
+                    lurlHeading=MailUrlHeading.ACCOUNT_RECOVERY.value,
+                    url=forgot_url)
+                await mail_manager.get_instance().send_verification_mail(
+                    to=user.email, subject=MailSubject.ACCOUNT_RECOVERY.value,
+                    body=html_content, tenant_id=str(user.tenant_uuid))
+            except Exception:
+                logger.exception("Password reset email could not be sent")
 
-        APP_URL = env_handler.get_instance().env("APP_URL")
-        forgot_url = TenantManager.build_tenant_url(
-            APP_URL, tenant, f"/reset/{reset_token}")
-        html_content = constant.mail_template.render(
-            username=user.username,
-            email=user.email,
-            subject=MailSubject.ACCOUNT_RECOVERY.value,
-            lurlHeading=MailUrlHeading.ACCOUNT_RECOVERY.value,
-            url=forgot_url)
-        await mail_manager.get_instance().send_verification_mail(
-            to=user.email, subject=MailSubject.ACCOUNT_RECOVERY.value, body=html_content, tenant_id=str(user.tenant_uuid))
+        return {"message": "If the email is registered, a password reset email has been sent."}
 
-        return {"message": "Reset password mail send successfully."}
+    @staticmethod
+    async def recover_account(mail: str, recovery_key: str, tenant_id):
+        engine = mongo_controller.get_instance().get_engine()
+        user = await engine.find_one(db_user_account, db_user_account.email == mail)
+        submitted_hash = hashlib.sha256(recovery_key.strip().encode()).hexdigest()
+        stored_hash = getattr(user, "recovery_key_hash", None) if user else None
+        if stored_hash and secrets.compare_digest(stored_hash, submitted_hash):
+            try:
+                await auth_manager.forgot_password(mail, tenant_id)
+            except Exception:
+                logger.exception("Account recovery email could not be sent")
+        return {"message": "If the recovery details are valid, a password reset email has been sent."}
 
     @staticmethod
     async def edit_userStatus_and_sendMail_from_admin(user_id: str, request: Request):

@@ -1,6 +1,8 @@
 import asyncio
+import hashlib
 import json
 import re
+import secrets
 from typing import List
 from pathlib import Path
 from types import SimpleNamespace
@@ -272,6 +274,12 @@ class AccountManager:
             str(user.tenant_uuid), str(user.id), "Password updated" if request.password is not None else "Self profile updated")
 
         return {"message": "User updated successfully"}
+
+    async def generate_recovery_key(self, current_user):
+        recovery_key = secrets.token_urlsafe(32)
+        current_user.recovery_key_hash = hashlib.sha256(recovery_key.encode()).hexdigest()
+        await self._engine.save(current_user)
+        return {"recovery_key": recovery_key}
 
     async def getProfileImage(self, userId: str):
         file_path = Path(self.TENANT_DIR) / f"{userId}.png"

@@ -77,7 +77,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
 
             cy.visit('/');
             cy.clearAllEmails();
-            cy.contains('[data-testid="reset-password-link"], span.reset-password', 'Reset password?').click();
+            cy.contains('[data-testid="reset-password-link"]', 'Recover account?').click();
             cy.get('[data-testid="reset-companymail"]').clear().type(TEST_USERS.testing3.email);
             cy.get('[data-testid="reset-submit"]').click();
 

@@ -118,6 +118,10 @@ export class AuthService {
     return this.apiService.post('forgot', { email });
   }
 
+  recoverAccount(email: string, recoveryKey: string): Observable<any> {
+    return this.apiService.post('recover', { email, recovery_key: recoveryKey });
+  }
+
   updatePassword(token: string, password: string): Observable<any> {
     return this.apiService.post('updatePassword', { token, password });
   }

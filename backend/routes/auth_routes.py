@@ -13,7 +13,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.services.session_manager.session_manager import session_manager
 from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest,SupportRequest
 from orion.api.interactive.signup_manager.signup_manager import SignupManager
-from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest, ResetPassword
+from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest, RecoveryRequest, ResetPassword
 
 auth_router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -111,6 +111,11 @@ async def verifyUser(token: str):
 @auth_router.post("/api/forgot")
 async def forgotPassword(data: ForgotPasswordRequest, request: Request):
     return await auth_manager.forgot_password(data.email, getattr(request.state, "tenant", None))
+
+
+@auth_router.post("/api/recover")
+async def recover_account(data: RecoveryRequest, request: Request):
+    return await auth_manager.recover_account(data.email, data.recovery_key, getattr(request.state, "tenant", None))
 
 
 @auth_router.post("/api/subscription/request")

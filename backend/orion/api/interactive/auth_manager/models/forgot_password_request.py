@@ -5,6 +5,11 @@ class ForgotPasswordRequest(BaseModel):
     email: str
 
 
+class RecoveryRequest(BaseModel):
+    email: str
+    recovery_key: str
+
+
 class ResetPassword(BaseModel):
     token: str
     password: str
