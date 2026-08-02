@@ -328,8 +328,8 @@ jobs:
           docker exec trusted-web-main sh -lc '
             set -e
             cd /app
-            python -m pip install --quiet pytest pytest-cov
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
+            python -m pip install --quiet --no-cache-dir pytest pytest-cov
+            COVERAGE_FILE=/tmp/.coverage TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
               --cov=orion --maxfail=1 --disable-warnings \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
