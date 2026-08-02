@@ -227,7 +227,7 @@ class session_manager:
             onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
 
             session = await self._build_session(user, onboarding_exists)
-            return {"access_token": access_token, "token_type": "bearer", "session": session}
+            return {"access_token": access_token, "token_type": "bearer", "session": session}  # nosec B105
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="2FA token expired")
@@ -255,7 +255,7 @@ class session_manager:
                 algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
                 options={"verify_exp": True}, )
             if payload.get("free") is True:
-                return {"access_token": token, "token_type": "bearer"}
+                return {"access_token": token, "token_type": "bearer"}  # nosec B105
 
             username = payload.get("sub")
             if not username:
@@ -312,7 +312,7 @@ class session_manager:
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
             session = await self._build_session(user, onboarding_exists)
-            return {"access_token": new_token, "token_type": "bearer", "session": session}
+            return {"access_token": new_token, "token_type": "bearer", "session": session}  # nosec B105
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token has expired")

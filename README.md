@@ -11,17 +11,19 @@
 [![Lighthouse Performance](https://img.shields.io/badge/Lighthouse%20Performance-Run%20Artifacts-blue)](https://github.com/Orion-Intelligence/Orion-Intelligence/actions/workflows/build.yml)
 [![Codacy Badge](https://app.codacy.com/project/badge/Coverage/54342c0b3ffd4ae2ad9bcf701b2500f7)](https://app.codacy.com/gh/Orion-Intelligence/Orion-Intelligence/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_coverage)
 
-<img width="5121" height="2909" alt="CYBERATTACK HITS FRENCH INTERIOR(3)" src="https://github.com/user-attachments/assets/4266afc8-1d52-41ac-a2fe-b445e1b6b848" />
-
-<br>
-
 # Orion Platform
 
-DOCUMENTATION  https://orion-search.readthedocs.io<br>
-UPTIME STATUS  https://stats.uptimerobot.com/xV0BS3KMq7
+<p align="left">
+  <a href="https://orion-search.readthedocs.io"><img src="https://img.shields.io/badge/Documentation-Open_Guide-2F81F7?style=for-the-badge&amp;logo=readthedocs&amp;logoColor=white" alt="Open Orion documentation"></a>
+  &nbsp;
+  <a href="https://stats.uptimerobot.com/xV0BS3KMq7"><img src="https://img.shields.io/badge/Uptime_Status-View_Status-22A06B?style=for-the-badge&amp;logo=statuspage&amp;logoColor=white" alt="View Orion uptime status"></a>
+</p>
 
-<br>
-Orion Platform is a comprehensive, web-based solution that combines the functionality of a browser, search engine, crawler, and data aggregation tools to empower OSINT (Open Source Intelligence) experts. Built on top of Docker, Orion provides a user-friendly interface to explore, search, and visualize data extracted by its powerful Orion Crawler.<br><br>
+Orion Platform is a comprehensive, web-based solution that combines the functionality of a browser, search engine, crawler, and data aggregation tools to empower OSINT (Open Source Intelligence) experts. Built on top of Docker, Orion provides a user-friendly interface to explore, search, and visualize data extracted by its powerful Orion Crawler.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4266afc8-1d52-41ac-a2fe-b445e1b6b848" alt="CYBERATTACK HITS FRENCH INTERIOR(3)" width="1200">
+</p>
 
 The platform integrates seamlessly with machine learning models, enhancing search relevance and enabling advanced
 content analysis. Orion supports a broad range of functionalities, including the ability to search, filter, and
@@ -50,221 +52,169 @@ visual pivots that help analysts move quickly from overview to deeper investigat
 <details>
   <summary><strong>Screenshot Gallery</strong> · Browse 43 platform screens</summary>
   <br>
-  <table>
+  <table width="100%">
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/account-settings-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/account-settings-20260326.png" alt="Account Settings" width="260"></a><br><sub>Account Settings</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/apk-scan-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/apk-scan-report-20260326.png" alt="APK Scan Report" width="260"></a><br><sub>APK Scan Report</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/audit-logs-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/audit-logs-20260326.png" alt="Audit Logs" width="260"></a><br><sub>Audit Logs</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/account-settings-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/account-settings-20260326.png" alt="Account Settings" width="100%"></a><br><sub>Account Settings</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/apk-scan-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/apk-scan-report-20260326.png" alt="APK Scan Report" width="100%"></a><br><sub>APK Scan Report</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/audit-logs-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/audit-logs-20260326.png" alt="Audit Logs" width="100%"></a><br><sub>Audit Logs</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-insights-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-insights-20260326.png" alt="Consolidated Insights" width="260"></a><br><sub>Consolidated Insights</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-results-20260326.png" alt="Consolidated Results" width="260"></a><br><sub>Consolidated Results</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-context-menu-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-context-menu-20260326.png" alt="CTI Context Menu" width="260"></a><br><sub>CTI Context Menu</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-insights-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-insights-20260326.png" alt="Consolidated Insights" width="100%"></a><br><sub>Consolidated Insights</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/consolidated-results-20260326.png" alt="Consolidated Results" width="100%"></a><br><sub>Consolidated Results</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-context-menu-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-context-menu-20260326.png" alt="CTI Context Menu" width="100%"></a><br><sub>CTI Context Menu</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-export-modal-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-export-modal-20260326.png" alt="CTI Export Modal" width="260"></a><br><sub>CTI Export Modal</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-graph-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-graph-20260326.png" alt="CTI Graph" width="260"></a><br><sub>CTI Graph</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/data-breach-tracking-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/data-breach-tracking-20260326.png" alt="Data Breach Tracking" width="260"></a><br><sub>Data Breach Tracking</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-export-modal-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-export-modal-20260326.png" alt="CTI Export Modal" width="100%"></a><br><sub>CTI Export Modal</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-graph-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/cti-graph-20260326.png" alt="CTI Graph" width="100%"></a><br><sub>CTI Graph</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/data-breach-tracking-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/data-breach-tracking-20260326.png" alt="Data Breach Tracking" width="100%"></a><br><sub>Data Breach Tracking</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/defacement-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/defacement-report-20260326.png" alt="Defacement Report" width="260"></a><br><sub>Defacement Report</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/directory-monitoring-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/directory-monitoring-20260326.png" alt="Directory Monitoring" width="260"></a><br><sub>Directory Monitoring</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/entity-api-email-breach-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/entity-api-email-breach-20260326.png" alt="Entity API Email Breach" width="260"></a><br><sub>Entity API Email Breach</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/defacement-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/defacement-report-20260326.png" alt="Defacement Report" width="100%"></a><br><sub>Defacement Report</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/directory-monitoring-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/directory-monitoring-20260326.png" alt="Directory Monitoring" width="100%"></a><br><sub>Directory Monitoring</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/entity-api-email-breach-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/entity-api-email-breach-20260326.png" alt="Entity API Email Breach" width="100%"></a><br><sub>Entity API Email Breach</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/exploit-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/exploit-results-20260326.png" alt="Exploit Results" width="260"></a><br><sub>Exploit Results</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/feed-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/feed-report-20260326.png" alt="Feed Report" width="260"></a><br><sub>Feed Report</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/file-scanner-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/file-scanner-report-20260326.png" alt="File Scanner Report" width="260"></a><br><sub>File Scanner Report</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/exploit-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/exploit-results-20260326.png" alt="Exploit Results" width="100%"></a><br><sub>Exploit Results</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/feed-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/feed-report-20260326.png" alt="Feed Report" width="100%"></a><br><sub>Feed Report</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/file-scanner-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/file-scanner-report-20260326.png" alt="File Scanner Report" width="100%"></a><br><sub>File Scanner Report</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/general-intelligence-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/general-intelligence-results-20260326.png" alt="General Intelligence Results" width="260"></a><br><sub>General Intelligence Results</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/heatmap-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/heatmap-report-20260326.png" alt="Heatmap Report" width="260"></a><br><sub>Heatmap Report</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-overview-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-overview-20260326.png" alt="Homepage Overview" width="260"></a><br><sub>Homepage Overview</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/general-intelligence-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/general-intelligence-results-20260326.png" alt="General Intelligence Results" width="100%"></a><br><sub>General Intelligence Results</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/heatmap-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/heatmap-report-20260326.png" alt="Heatmap Report" width="100%"></a><br><sub>Heatmap Report</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-overview-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-overview-20260326.png" alt="Homepage Overview" width="100%"></a><br><sub>Homepage Overview</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-searchbar-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-searchbar-20260326.png" alt="Homepage Searchbar" width="260"></a><br><sub>Homepage Searchbar</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/login-page-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/login-page-20260326.png" alt="Login Page" width="260"></a><br><sub>Login Page</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-geo-modal-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-geo-modal-20260326.png" alt="Network Intel Geo Modal" width="260"></a><br><sub>Network Intel Geo Modal</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-searchbar-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/homepage-searchbar-20260326.png" alt="Homepage Searchbar" width="100%"></a><br><sub>Homepage Searchbar</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/login-page-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/login-page-20260326.png" alt="Login Page" width="100%"></a><br><sub>Login Page</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-geo-modal-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-geo-modal-20260326.png" alt="Network Intel Geo Modal" width="100%"></a><br><sub>Network Intel Geo Modal</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-host-recon-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-host-recon-20260326.png" alt="Network Intel Host Recon" width="260"></a><br><sub>Network Intel Host Recon</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-ip-scan-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-ip-scan-20260326.png" alt="Network Intel IP Scan" width="260"></a><br><sub>Network Intel IP Scan</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-vulnerability-scan-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-vulnerability-scan-20260326.png" alt="Network Intel Vulnerability Scan" width="260"></a><br><sub>Network Intel Vulnerability Scan</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-host-recon-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-host-recon-20260326.png" alt="Network Intel Host Recon" width="100%"></a><br><sub>Network Intel Host Recon</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-ip-scan-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-ip-scan-20260326.png" alt="Network Intel IP Scan" width="100%"></a><br><sub>Network Intel IP Scan</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-vulnerability-scan-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/network-intel-vulnerability-scan-20260326.png" alt="Network Intel Vulnerability Scan" width="100%"></a><br><sub>Network Intel Vulnerability Scan</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/password-reset-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/password-reset-20260326.png" alt="Password Reset" width="260"></a><br><sub>Password Reset</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-chatbot-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-chatbot-20260326.png" alt="Report Chatbot" width="260"></a><br><sub>Report Chatbot</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-json-viewer-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-json-viewer-20260326.png" alt="Report JSON Viewer" width="260"></a><br><sub>Report JSON Viewer</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/password-reset-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/password-reset-20260326.png" alt="Password Reset" width="100%"></a><br><sub>Password Reset</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-chatbot-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-chatbot-20260326.png" alt="Report Chatbot" width="100%"></a><br><sub>Report Chatbot</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-json-viewer-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/report-json-viewer-20260326.png" alt="Report JSON Viewer" width="100%"></a><br><sub>Report JSON Viewer</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/search-filters-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/search-filters-20260326.png" alt="Search Filters" width="260"></a><br><sub>Search Filters</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-list-view-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-list-view-20260326.png" alt="Social Intel List View" width="260"></a><br><sub>Social Intel List View</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-20260326.png" alt="Social Intel" width="260"></a><br><sub>Social Intel</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/search-filters-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/search-filters-20260326.png" alt="Search Filters" width="100%"></a><br><sub>Search Filters</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-list-view-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-list-view-20260326.png" alt="Social Intel List View" width="100%"></a><br><sub>Social Intel List View</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-intel-20260326.png" alt="Social Intel" width="100%"></a><br><sub>Social Intel</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-manage-profiles-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-manage-profiles-20260326.png" alt="Social Manage Profiles" width="260"></a><br><sub>Social Manage Profiles</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-metadata-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-metadata-results-20260326.png" alt="Social Metadata Results" width="260"></a><br><sub>Social Metadata Results</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-report-20260326.png" alt="Social Report" width="260"></a><br><sub>Social Report</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-manage-profiles-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-manage-profiles-20260326.png" alt="Social Manage Profiles" width="100%"></a><br><sub>Social Manage Profiles</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-metadata-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-metadata-results-20260326.png" alt="Social Metadata Results" width="100%"></a><br><sub>Social Metadata Results</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-report-20260326.png" alt="Social Report" width="100%"></a><br><sub>Social Report</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-summary-popup-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-summary-popup-20260326.png" alt="Social Summary Popup" width="260"></a><br><sub>Social Summary Popup</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/stealer-logs-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/stealer-logs-results-20260326.png" alt="Stealer Logs Results" width="260"></a><br><sub>Stealer Logs Results</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/support-modal-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/support-modal-20260326.png" alt="Support Modal" width="260"></a><br><sub>Support Modal</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-summary-popup-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/social-summary-popup-20260326.png" alt="Social Summary Popup" width="100%"></a><br><sub>Social Summary Popup</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/stealer-logs-results-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/stealer-logs-results-20260326.png" alt="Stealer Logs Results" width="100%"></a><br><sub>Stealer Logs Results</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/support-modal-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/support-modal-20260326.png" alt="Support Modal" width="100%"></a><br><sub>Support Modal</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/system-settings-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/system-settings-20260326.png" alt="System Settings" width="260"></a><br><sub>System Settings</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-administration-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-administration-20260326.png" alt="Tenant Administration" width="260"></a><br><sub>Tenant Administration</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-homepage-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-homepage-20260326.png" alt="Tenant Homepage" width="260"></a><br><sub>Tenant Homepage</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/system-settings-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/system-settings-20260326.png" alt="System Settings" width="100%"></a><br><sub>System Settings</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-administration-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-administration-20260326.png" alt="Tenant Administration" width="100%"></a><br><sub>Tenant Administration</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-homepage-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-homepage-20260326.png" alt="Tenant Homepage" width="100%"></a><br><sub>Tenant Homepage</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-manage-iocs-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-manage-iocs-20260326.png" alt="Tenant Manage IOCs" width="260"></a><br><sub>Tenant Manage IOCs</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-settings-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-settings-20260326.png" alt="Tenant Settings" width="260"></a><br><sub>Tenant Settings</sub></td>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-users-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-users-20260326.png" alt="Tenant Users" width="260"></a><br><sub>Tenant Users</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-manage-iocs-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-manage-iocs-20260326.png" alt="Tenant Manage IOCs" width="100%"></a><br><sub>Tenant Manage IOCs</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-settings-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-settings-20260326.png" alt="Tenant Settings" width="100%"></a><br><sub>Tenant Settings</sub></td>
+      <td width="33.33%" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-users-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/tenant-users-20260326.png" alt="Tenant Users" width="100%"></a><br><sub>Tenant Users</sub></td>
     </tr>
     <tr>
-      <td align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/web-scan-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/web-scan-report-20260326.png" alt="Web Scan Report" width="260"></a><br><sub>Web Scan Report</sub></td>
+      <td colspan="3" align="center" valign="top"><a href="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/web-scan-report-20260326.png"><img src="https://raw.githubusercontent.com/Orion-Intelligence/Orion-Intelligence/trusted-main/docs/screenshots/web-scan-report-20260326.png" alt="Web Scan Report" width="33.33%"></a><br><sub>Web Scan Report</sub></td>
     </tr>
   </table>
 </details>
 
-## Getting Started
-
-To explore the platform and project materials quickly:
-
-1. Open the documentation: https://orion-search.readthedocs.io
-2. Review the main platform repository: https://github.com/Orion-Intelligence/Orion-Intelligence
-3. Explore the wider Orion module set in the tables below
-4. Use the project documentation and repository modules to understand how collection, processing, and analyst workflows connect end to end
-
 ## Core Capabilities
 
-Orion is built as an operational intelligence environment rather than a single search page. At a project level, the
-platform is centered around:
+Orion is built as an operational intelligence environment rather than a single search page. Its capabilities span the
+complete path from collection to analyst action.
 
-- collection and ingestion from multiple sources
-- processing, normalization, and enrichment of collected data
-- indexing and retrieval for large investigative datasets
-- analyst-facing search, filtering, and correlation workflows
-- modular services that allow the ecosystem to expand as new investigative needs emerge
+- Collect and ingest intelligence from multiple sources.
+- Normalize collected data and enrich it with investigation-ready context.
+- Index and retrieve large investigative datasets through purpose-built search services.
+- Search, filter, correlate, visualize, and review intelligence in one analyst environment.
+- Extend the ecosystem as new collection sources and investigative needs emerge.
 
 ## Who It's For
 
-Orion is intended for teams and individuals who need a unified investigation environment, including OSINT analysts,
-research teams, cyber threat investigators, and operators who work across collection, search, enrichment, and review
-workflows.
+Orion is intended for OSINT analysts, research teams, cyber threat investigators, and platform operators who need a
+unified environment for collection, search, enrichment, correlation, and review workflows.
 
 ## Orion Ecosystem
 
-The Orion ecosystem is composed of multiple connected repositories that together support the full intelligence
-lifecycle. Some modules focus on collection, some on storage or microservices, some on presentation and analyst
-experience, and others on specialized workflows such as browser-assisted acquisition or social-data handling.
+The Orion ecosystem is composed of connected repositories that support the full intelligence lifecycle. Individual
+modules focus on collection, storage, supporting services, the analyst experience, browser-assisted acquisition, and
+specialized social-data workflows.
 
 At a high level, the project operates as a connected flow:
 
 `Collection -> Processing -> Orion Platform -> Access`
 
-## Technology Stack
-
-Orion Intelligence combines a modern analyst interface, an asynchronous API, purpose-built data stores, and a
-containerized delivery layer. The stack below reflects technologies used directly by this repository.
+## Modules
 
 <table width="100%">
   <thead>
     <tr>
-      <th width="22%" align="left">Layer</th>
-      <th width="43%" align="left">Core technologies</th>
-      <th width="35%" align="left">Role</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Analyst interface</strong></td>
-      <td>
-        <img src="https://img.shields.io/badge/Angular-21-DD0031?logo=angular" alt="Angular 21">
-        <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white" alt="TypeScript 5.9">
-        <img src="https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 3.4">
-      </td>
-      <td>Responsive investigation workflows, maps, graphs, and reporting interfaces.</td>
-    </tr>
-    <tr>
-      <td><strong>API and services</strong></td>
-      <td>
-        <img src="https://img.shields.io/badge/Python-3.11-3776AB?logo=python&logoColor=white" alt="Python 3.11">
-        <img src="https://img.shields.io/badge/FastAPI-0.135-009688?logo=fastapi&logoColor=white" alt="FastAPI 0.135">
-        <img src="https://img.shields.io/badge/Gunicorn-Uvicorn-499848" alt="Gunicorn and Uvicorn">
-      </td>
-      <td>Authentication, tenant-aware APIs, enrichment, orchestration, and background operations.</td>
-    </tr>
-    <tr>
-      <td><strong>Search and data</strong></td>
-      <td>
-        <img src="https://img.shields.io/badge/Elasticsearch-8.19-005571?logo=elasticsearch&logoColor=white" alt="Elasticsearch 8.19">
-        <img src="https://img.shields.io/badge/MongoDB-8.2-47A248?logo=mongodb&logoColor=white" alt="MongoDB 8.2">
-        <img src="https://img.shields.io/badge/ArangoDB-3.11-DDE072?logo=arangodb&logoColor=black" alt="ArangoDB 3.11">
-      </td>
-      <td>Indexed intelligence search, document storage, and graph relationships.</td>
-    </tr>
-    <tr>
-      <td><strong>Cache and delivery</strong></td>
-      <td>
-        <img src="https://img.shields.io/badge/Redis-7.4-DC382D?logo=redis&logoColor=white" alt="Redis 7.4">
-        <img src="https://img.shields.io/badge/NGINX-Brotli-009639?logo=nginx&logoColor=white" alt="NGINX with Brotli">
-        <img src="https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white" alt="Docker Compose">
-      </td>
-      <td>Fast shared state, reverse proxying, compressed delivery, and service orchestration.</td>
-    </tr>
-  </tbody>
-</table>
-
-### Modules
-
-<table width="100%">
-  <thead>
-    <tr>
-      <th width="30%" align="left">Module</th>
-      <th width="70%" align="left">Purpose</th>
+      <th width="24%" align="left">Module</th>
+      <th width="36%" align="left">Purpose</th>
+      <th width="40%" align="left">Technology stack</th>
     </tr>
   </thead>
   <tbody>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Intelligence"><strong>Orion Platform</strong></a></td>
       <td>Analyst-facing investigation platform.</td>
+      <td><img src="https://img.shields.io/badge/Angular-21-DD0031?style=flat-square&amp;logo=angular&amp;logoColor=white" alt="Angular 21"> <img src="https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python 3.11"> <img src="https://img.shields.io/badge/FastAPI-0.135-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI 0.135"> <img src="https://img.shields.io/badge/Elasticsearch-8.19-005571?style=flat-square&amp;logo=elasticsearch&amp;logoColor=white" alt="Elasticsearch 8.19"> <img src="https://img.shields.io/badge/MongoDB-8.2-47A248?style=flat-square&amp;logo=mongodb&amp;logoColor=white" alt="MongoDB 8.2"> <img src="https://img.shields.io/badge/ArangoDB-3.11-DDE072?style=flat-square&amp;logo=arangodb&amp;logoColor=black" alt="ArangoDB 3.11"> <img src="https://img.shields.io/badge/Redis-7.4-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis 7.4"> <img src="https://img.shields.io/badge/-NGINX-009639?style=flat-square&amp;logo=nginx&amp;logoColor=white" alt="NGINX"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Dark-Nexus"><strong>Orion Dark Nexus</strong></a></td>
       <td>AI-assisted investigation, chat orchestration, and secure workspace management.</td>
+      <td><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/-LangGraph-1C3C3C?style=flat-square&amp;logo=langchain&amp;logoColor=white" alt="LangGraph"> <img src="https://img.shields.io/badge/-MCP-5A45FF?style=flat-square" alt="Model Context Protocol"> <img src="https://img.shields.io/badge/-MongoDB-47A248?style=flat-square&amp;logo=mongodb&amp;logoColor=white" alt="MongoDB"> <img src="https://img.shields.io/badge/-Ollama-000000?style=flat-square&amp;logo=ollama&amp;logoColor=white" alt="Ollama"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Sandbox"><strong>Orion Sandbox</strong></a></td>
       <td>OpenSandbox and Kata isolated execution infrastructure for untrusted workspace code.</td>
+      <td><img src="https://img.shields.io/badge/-OpenSandbox-4B5563?style=flat-square" alt="OpenSandbox"> <img src="https://img.shields.io/badge/-Kata_Containers-2F81F7?style=flat-square" alt="Kata Containers"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"> <img src="https://img.shields.io/badge/-NGINX-009639?style=flat-square&amp;logo=nginx&amp;logoColor=white" alt="NGINX"> <img src="https://img.shields.io/badge/-ClamAV-CC1F2F?style=flat-square" alt="ClamAV"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Crawler"><strong>Orion Crawler</strong></a></td>
       <td>Hidden-web and monitored-source crawling engine.</td>
+      <td><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/-Celery-37814A?style=flat-square&amp;logo=celery&amp;logoColor=white" alt="Celery"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"> <img src="https://img.shields.io/badge/-I2P-2C3E50?style=flat-square" alt="I2P"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Collector"><strong>Orion Collector</strong></a></td>
       <td>Custom source collection framework.</td>
+      <td><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Beautiful_Soup-59666C?style=flat-square" alt="Beautiful Soup"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Micros"><strong>Orion Micros</strong></a></td>
       <td>Supporting backend service modules.</td>
+      <td><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/-Presidio-5E5E5E?style=flat-square&amp;logo=microsoft&amp;logoColor=white" alt="Microsoft Presidio"> <img src="https://img.shields.io/badge/-Transformers-FFD21E?style=flat-square&amp;logo=huggingface&amp;logoColor=black" alt="Transformers"> <img src="https://img.shields.io/badge/-ClamAV-CC1F2F?style=flat-square" alt="ClamAV"> <img src="https://img.shields.io/badge/-OWASP_ZAP-00549E?style=flat-square&amp;logo=owasp&amp;logoColor=white" alt="OWASP ZAP"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Browser"><strong>Orion Browser</strong></a></td>
       <td>Browser-assisted private collection workflows.</td>
+      <td><img src="https://img.shields.io/badge/-Kotlin-7F52FF?style=flat-square&amp;logo=kotlin&amp;logoColor=white" alt="Kotlin"> <img src="https://img.shields.io/badge/-Android-3DDC84?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android"> <img src="https://img.shields.io/badge/-GeckoView-FF7139?style=flat-square&amp;logo=firefoxbrowser&amp;logoColor=white" alt="GeckoView"> <img src="https://img.shields.io/badge/-Orbot-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Orbot"> <img src="https://img.shields.io/badge/-SQLCipher-003B57?style=flat-square&amp;logo=sqlite&amp;logoColor=white" alt="SQLCipher"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Social"><strong>Orion Social</strong></a></td>
       <td>Social intelligence data workflows.</td>
+      <td><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Leaks"><strong>Orion Leaks</strong></a></td>
       <td>Leak-focused ingestion and handling.</td>
+      <td><img src="https://img.shields.io/badge/Stack-Not_Publicly_Specified-6B7280?style=flat-square" alt="Technology stack not publicly specified"></td>
     </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Tor2Web"><strong>Orion Tor2Web</strong></a></td>
       <td>Tor-to-web access support component.</td>
+      <td><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Twisted-2D5E8C?style=flat-square" alt="Twisted"> <img src="https://img.shields.io/badge/-NGINX-009639?style=flat-square&amp;logo=nginx&amp;logoColor=white" alt="NGINX"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"></td>
     </tr>
   </tbody>
 </table>
@@ -291,14 +241,14 @@ Orion Platform is licensed under the [MIT License](LICENSE).
 This project is intended for research purposes only. The authors of Orion Platform do not support or endorse illegal
 activities, and users of this project are responsible for ensuring their actions comply with the law.
 
-## GitHub Repository
+## Project Links
 
-GitHub Repository URL: [https://github.com/Orion-Intelligence/Orion-Intelligence](https://github.com/Orion-Intelligence/Orion-Intelligence)
+Explore the Orion source repository, collaboration information, and platform documentation.
 
-## Project Information
-
-[https://www.orionintelligence.org/collaboration](https://www.orionintelligence.org/collaboration)
-
-## Documentation
-
-https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html
+<p>
+  <a href="https://github.com/Orion-Intelligence/Orion-Intelligence"><img src="https://img.shields.io/badge/-View_Repository-181717?style=for-the-badge&amp;logo=github&amp;logoColor=white" alt="View the Orion GitHub repository"></a>
+  &nbsp;
+  <a href="https://www.orionintelligence.org/collaboration"><img src="https://img.shields.io/badge/-Explore_Collaboration-2F81F7?style=for-the-badge&amp;logo=linktree&amp;logoColor=white" alt="Explore Orion collaboration"></a>
+  &nbsp;
+  <a href="https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html"><img src="https://img.shields.io/badge/-Read_Documentation-8CA1AF?style=for-the-badge&amp;logo=readthedocs&amp;logoColor=white" alt="Read the Orion documentation"></a>
+</p>

@@ -398,7 +398,7 @@ class TenantManager:
         enc = Fernet(dek)
 
         smtp_fields = {
-            "accounts_mail_password": "ACCOUNTS_MAIL_PASSWORD",
+            "accounts_mail_password": "ACCOUNTS_MAIL_PASSWORD",  # nosec B105
             "accounts_mail": "ACCOUNTS_MAIL",
             "accounts_smtp_server": "ACCOUNTS_SMTP_SERVER",
             "accounts_smtp_port": "ACCOUNTS_SMTP_PORT",

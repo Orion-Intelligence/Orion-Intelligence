@@ -126,7 +126,7 @@ class auth_manager:
             license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, }
 
 
-        return {"access_token": access_token, "token_type": "bearer", "session": session_data, }
+        return {"access_token": access_token, "token_type": "bearer", "session": session_data, }  # nosec B105
 
     @staticmethod
     async def verify_user(token: str):
