@@ -93,6 +93,8 @@ jobs:
           rm -f backend/static/.maintenance
           chmod +x ./run.sh
           ./run.sh build -b
+          sed -i '/^TESTING_ENABLED=/d' .env
+          echo 'TESTING_ENABLED="1"' >> .env
 
       - run: |
           set -euo pipefail
@@ -267,6 +269,8 @@ jobs:
           rm -f backend/static/.maintenance
           chmod +x ./run.sh
           ./run.sh build -b
+          sed -i '/^TESTING_ENABLED=/d' .env
+          echo 'TESTING_ENABLED="1"' >> .env
 
       - run: |
           set -euo pipefail

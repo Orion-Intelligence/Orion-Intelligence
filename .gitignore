@@ -7,6 +7,7 @@ temo.env
 **/package-lock.json
 !client/package-lock.json
 backend/static/.well-known/parser_files/*
+backend/static/.maintenance
 backend/backend_cov_app/*
 *.bak
 *.log
