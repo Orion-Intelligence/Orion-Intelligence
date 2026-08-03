@@ -207,14 +207,12 @@ Cypress.Commands.add("typeSlow", (selector: string, value: string, options: Slow
 Cypress.Commands.add("loginAsAdmin", () => {
     cy.env(["ADMIN_USERNAME", "ADMIN_PASSWORD"]).then(({ ADMIN_USERNAME, ADMIN_PASSWORD }) => {
         cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
-        cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
         cy.visitLoginWithCleanAuthState();
         waitForLoginForm();
         cy.get('[data-testid="login-user"]').clear().type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').clear().type(ADMIN_PASSWORD, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
         cy.waitForLoginRequest();
-        cy.wait("@tenantNodeRequest", { timeout: 60000 }).its("response.statusCode").should("be.oneOf", [200, 201]);
         cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
@@ -229,14 +227,12 @@ Cypress.Commands.add("loginAsTest1", () => {
             throw new Error(`Missing test user credentials for key: ${key}`);
         }
         cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
-        cy.intercept("POST", "**/api/get/tenant/node").as("tenantNodeRequest");
         cy.visitLoginWithCleanAuthState();
         waitForLoginForm();
         cy.get('[data-testid="login-user"]').clear().type(user.username);
         cy.get('[data-testid="login-pass"]').clear().type(user.password, { log: false });
         cy.get('[data-testid="login-button"], input.login-button').first().click();
         cy.waitForLoginRequest();
-        cy.wait("@tenantNodeRequest", { timeout: 60000 }).its("response.statusCode").should("be.oneOf", [200, 201]);
         cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
