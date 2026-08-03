@@ -368,7 +368,18 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.queueComposerResize();
   }
 
-  retryMessage(prompt: string): void {
+  retryMessage(message: AiWorkspaceMessage): void {
+    const prompt = message.retryPayload?.trim();
+    if (!prompt) {
+      return;
+    }
+    const errorIndex = this.messages.findIndex(item => item.id === message.id);
+    const failedUserIndex = errorIndex > 0 && this.messages[errorIndex - 1].sender === 'user'
+      ? errorIndex - 1
+      : errorIndex;
+    if (failedUserIndex >= 0) {
+      this.messages = this.messages.slice(0, failedUserIndex);
+    }
     this.cancelMessageEdit();
     this.messageDraft = prompt;
     this.sendMessage();
@@ -820,7 +831,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       sessionId: session.session_id || session.id,
       title: session.title,
       updatedAt: session.updated_at,
-      messageCount: session.message_count ?? 0,
+      messageCount: session.message_count ?? (Array.isArray(session.messages) ? session.messages.length : 0),
       messages: [],
     };
   }
@@ -843,9 +854,14 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.activeSessionId = null;
         this.messages = [];
 
-        this.isLoadingHistory.set(false);
-        if (!this.resumePendingStream() && this.chatSessions[0]) {
+        if (this.resumePendingStream()) {
+          this.isLoadingHistory.set(false);
+        }
+        else if (this.chatSessions[0]) {
           this.selectChat(this.chatSessions[0]);
+        }
+        else {
+          this.isLoadingHistory.set(false);
         }
       },
       error: () => {
@@ -860,21 +876,24 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private loadChat(sessionId: string): void {
     this.chatHistoryRequest?.unsubscribe();
-    if (!this.activeSessionId) {
-      this.isLoadingHistory.set(true);
-    }
+    this.isLoadingHistory.set(true);
 
     this.chatHistoryRequest = this.nexusChatService.getChat(sessionId).subscribe({
       next: (chat) => {
         const chatSessionId = chat.session_id;
+        if (this.activeSessionId && this.activeSessionId !== sessionId) {
+          return;
+        }
+        const messages = chat.messages.map(message => this.mapMessage(message));
 
         this.activeSessionId = chatSessionId;
-        this.messages = chat.messages.map(message => this.mapMessage(message));
+        this.messages = messages;
         this.syncDirectorySession(chatSessionId);
 
         const updatedSession: AiChatSession = {
           ...this.mapSession(chat),
-          messages: this.messages,
+          messageCount: chat.message_count ?? messages.length,
+          messages,
         };
         this.chatSessions = this.sortChatSessions(this.chatSessions.some(session => session.sessionId === chatSessionId)
           ? this.chatSessions.map(session => session.sessionId === chatSessionId ? { ...session, ...updatedSession } : session)
@@ -884,6 +903,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         this.cancelMessageEdit();
         this.queueComposerResize();
         this.scrollToBottom();
+        this.cdr.markForCheck();
       },
       error: () => {
         this.isLoadingHistory.set(false);
@@ -935,7 +955,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.directoryImportRequest = null;
   }
 
-  selectChat(session: AiChatSession): void {
+  selectChat(session: AiChatSession, openChat = false): void {
+    if (openChat) {
+      this.setWorkspaceViewMode('chat');
+    }
+
     if (this.isSending() && session.sessionId === this.activeRequestSessionId) {
       this.chatHistoryRequest?.unsubscribe();
       this.chatHistoryRequest = undefined;

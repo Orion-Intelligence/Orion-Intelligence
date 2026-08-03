@@ -32,7 +32,7 @@
   </header>
 
   @if (activeDirectoryTab === 'files') {
-  <div id="ai-directory-files-panel" role="tabpanel" aria-labelledby="ai-directory-tab-files" [ngClass]="viewMode === 'split' ? 'flex flex-col' : 'grid grid-cols-[340px_minmax(0,1fr)]'" class="min-h-0 min-w-0 flex-1 bg-[var(--color-blue-790)]">
+  <div id="ai-directory-files-panel" role="tabpanel" aria-labelledby="ai-directory-tab-files" [ngClass]="viewMode === 'split' ? 'flex flex-col' : 'grid grid-cols-[340px_minmax(0,1fr)] grid-rows-[minmax(0,1fr)]'" class="h-0 min-h-0 min-w-0 flex-1 overflow-hidden bg-[var(--color-blue-790)]">
     <aside [ngClass]="viewMode === 'split' ? 'h-[40%] min-h-[210px] border-b' : 'border-r'" class="flex min-h-0 min-w-0 flex-col border-[var(--color-border)] bg-[var(--color-blue-800)]/35">
       <div class="flex h-10 shrink-0 items-center justify-between border-b border-[var(--color-divider)] px-3.5">
         <span class="flex min-w-0 items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text4)]">
@@ -90,7 +90,7 @@
       </div>
     </aside>
 
-    <section class="flex min-h-0 min-w-0 flex-1 flex-col bg-[var(--color-blue-790)]">
+    <section class="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden bg-[var(--color-blue-790)]">
       <div class="flex h-10 shrink-0 items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-800)]/20 px-3.5">
         <div class="flex min-w-0 items-center gap-2">
           <i class="bi bi-file-earmark-code shrink-0 text-[12px] text-[var(--color-blue-640)]" aria-hidden="true"></i>
@@ -106,9 +106,9 @@
         }
       </div>
 
-      <div class="min-h-0 min-w-0 flex-1 overflow-auto p-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[7px] [&::-webkit-scrollbar]:w-[7px] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent" (scroll)="onWorkspaceFileScroll($event)">
+      <div class="h-0 min-h-0 min-w-0 flex-1 overflow-auto p-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[7px] [&::-webkit-scrollbar]:w-[7px] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent" (scroll)="onWorkspaceFileScroll($event)">
         @if (selectedWorkspaceFilePath) {
-        <pre class="min-h-[240px] max-w-full overflow-x-auto whitespace-pre rounded-[12px] border border-[var(--color-divider)] bg-[#081421]/80 p-4 font-mono text-[12px] leading-5 text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_10px_30px_rgba(0,0,0,0.1)] selection:bg-[var(--color-blue-640)]/25">{{ selectedWorkspaceFileContent }}</pre>
+        <pre class="min-h-[100vh] max-w-full overflow-x-auto whitespace-pre rounded-[12px] border border-[var(--color-divider)] bg-[#081421]/80 font-mono text-[12px] leading-5 text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_10px_30px_rgba(0,0,0,0.1)] selection:bg-[var(--color-blue-640)]/25">@if (selectedWorkspaceFileLines.length) {<code class="flex min-h-[100vh] min-w-max flex-col animate-[ui-overlay-fade-in_300ms_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:animate-none"><span aria-hidden="true" class="flex h-4 shrink-0"><span class="sticky left-0 w-11 shrink-0 border-r border-white/[0.04] bg-[#081421]"></span></span>@for (line of selectedWorkspaceFileLines; track $index) {<span class="flex min-h-5"><span aria-hidden="true" class="sticky left-0 w-11 shrink-0 select-none border-r border-white/[0.04] bg-[#081421] pr-2 text-right text-[10px] tabular-nums text-[var(--color-text6)]">{{ $index + 1 }}</span><span class="px-3">{{ line }}</span></span>}<span aria-hidden="true" class="flex min-h-0 flex-1"><span class="sticky left-0 w-11 shrink-0 select-none border-r border-white/[0.04] bg-[#081421]"></span></span></code>}</pre>
         } @else {
         <div class="flex h-full min-h-[240px] items-center justify-center rounded-[12px] bg-[var(--color-blue-800)]/20 px-6 text-center">
           <div class="max-w-[300px]">
@@ -154,16 +154,29 @@
       </span>
     </div>
 
+    <div class="shrink-0 border-b border-[var(--color-divider)] bg-[var(--color-blue-800)]/20 px-3 py-2">
+      <label for="ai-directory-log-search" class="sr-only">Search repository logs</label>
+      <div class="relative">
+        <i class="bi bi-search pointer-events-none absolute left-2.5 top-1/2 -translate-y-1/2 text-[11px] text-[var(--color-text5)]" aria-hidden="true"></i>
+        <input id="ai-directory-log-search" data-testid="ai-directory-log-search" type="search" [(ngModel)]="workspaceLogSearch" autocomplete="off" placeholder="Search logs" class="h-8 w-full rounded-[7px] border border-[#213f5c] bg-[#081421]/65 px-8 text-[11px] text-[var(--color-text2)] outline-none placeholder:text-[var(--color-text6)] focus:border-[#28557d] focus:ring-1 focus:ring-[var(--color-blue-640)]/25">
+        @if (workspaceLogSearch) {
+        <button type="button" (click)="workspaceLogSearch = ''" class="absolute right-1.5 top-1/2 inline-flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-[5px] text-[var(--color-text5)] hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text2)]" aria-label="Clear log search">
+          <i class="bi bi-x-lg text-[10px]" aria-hidden="true"></i>
+        </button>
+        }
+      </div>
+    </div>
+
     <div role="log" aria-live="polite" aria-relevant="additions text" class="min-h-0 flex-1 overflow-auto bg-[#081421]/45 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[7px] [&::-webkit-scrollbar]:w-[7px] [&::-webkit-scrollbar-thumb]:rounded-[4px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
-      @if (workspaceLogs.length) {
-      <div class="min-w-[430px]">
+      <div class="min-h-full min-w-[430px] animate-[ui-overlay-fade-in_300ms_cubic-bezier(0.16,1,0.3,1)_both] motion-reduce:animate-none">
         <div aria-hidden="true" class="grid grid-cols-[82px_62px_minmax(0,1fr)] gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-800)]/45 px-3 py-1.5 font-mono text-[9px] uppercase tracking-[0.08em] text-[var(--color-text6)]">
           <span>Time</span>
           <span>Level</span>
           <span>Message</span>
         </div>
-        @for (log of workspaceLogs; track log.id) {
-        <article class="grid grid-cols-[82px_62px_minmax(0,1fr)] items-start gap-2 border-b border-[var(--color-divider)] px-3 py-2 font-mono transition-colors hover:bg-white/[0.018]">
+        @if (filteredWorkspaceLogs.length) {
+        @for (log of filteredWorkspaceLogs; track log.id) {
+        <article class="grid animate-[ui-overlay-fade-in_300ms_cubic-bezier(0.16,1,0.3,1)_both] grid-cols-[82px_62px_minmax(0,1fr)] items-start gap-2 border-b border-[var(--color-divider)] px-3 py-2 font-mono transition-colors hover:bg-white/[0.018] motion-reduce:animate-none">
           <time class="pt-px text-[10px] tabular-nums text-[var(--color-text6)]">{{ log.timestamp | date:'HH:mm:ss' }}</time>
           <span class="inline-flex items-center gap-1.5 pt-px text-[9px] font-semibold tracking-[0.04em]" [ngClass]="{ 'text-[var(--color-blue-640)]': log.type === 'loading', 'text-emerald-300': log.type === 'approved', 'text-red-300': log.type === 'infected' || log.type === 'failed' }">
             <span class="h-1.5 w-1.5 shrink-0 rounded-full" [ngClass]="{ 'bg-[var(--color-blue-640)]': log.type === 'loading', 'bg-emerald-300': log.type === 'approved', 'bg-red-300': log.type === 'infected' || log.type === 'failed' }" aria-hidden="true"></span>
@@ -177,16 +190,20 @@
           </div>
         </article>
         }
+        } @else if (workspaceLogs.length) {
+        <div class="flex min-h-[240px] animate-[ui-overlay-fade-in_300ms_cubic-bezier(0.16,1,0.3,1)_both] items-center justify-center px-6 font-mono text-[11px] text-[var(--color-text5)] motion-reduce:animate-none">
+          <span>No matching logs found</span>
+        </div>
+        } @else {
+        <div class="flex min-h-[240px] animate-[ui-overlay-fade-in_300ms_cubic-bezier(0.16,1,0.3,1)_both] items-center justify-center px-6 font-mono text-[11px] text-[var(--color-text5)] motion-reduce:animate-none">
+          <span class="flex items-center gap-2">
+            <span class="text-[var(--color-blue-640)]" aria-hidden="true">$</span>
+            <span>Waiting for repository activity</span>
+            <span class="h-3.5 w-1 animate-pulse bg-[var(--color-text6)]" aria-hidden="true"></span>
+          </span>
+        </div>
+        }
       </div>
-      } @else {
-      <div class="flex h-full min-h-[240px] items-center justify-center px-6 font-mono text-[11px] text-[var(--color-text5)]">
-        <span class="flex items-center gap-2">
-          <span class="text-[var(--color-blue-640)]" aria-hidden="true">$</span>
-          <span>Waiting for repository activity</span>
-          <span class="h-3.5 w-1 animate-pulse bg-[var(--color-text6)]" aria-hidden="true"></span>
-        </span>
-      </div>
-      }
     </div>
   </section>
   }
@@ -210,7 +227,7 @@
       </button>
 
       @if (node.expanded) {
-      <div class="ml-[18px] border-l border-[var(--color-divider)] pl-1.5">
+      <div class="ml-[18px] animate-[ui-overlay-fade-in_300ms_cubic-bezier(0.16,1,0.3,1)_both] border-l border-[var(--color-divider)] pl-1.5 motion-reduce:animate-none">
         <ng-container *ngTemplateOutlet="fileTreeTemplate; context: { nodes: node.children || [] }"></ng-container>
       </div>
       }

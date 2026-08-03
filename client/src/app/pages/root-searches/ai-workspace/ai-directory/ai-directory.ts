@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription, timer } from 'rxjs';
 import { NexusChatService } from '../nexus-chat.service';
@@ -33,10 +33,12 @@ export class AiDirectory implements OnChanges, OnDestroy {
   workspaceStatusMessage = '';
   workspaceStatusType: WorkspaceStatusType = 'idle';
   workspaceLogs: WorkspaceLogEntry[] = [];
+  workspaceLogSearch = '';
   activeDirectoryTab: AiDirectoryTab = 'files';
   workspaceTree: NexusWorkspaceFileNode | null = null;
   selectedWorkspaceFilePath = '';
   selectedWorkspaceFileContent = '';
+  selectedWorkspaceFileLines: string[] = [];
   selectedWorkspaceFileHasMore = false;
   selectedWorkspaceFileNextStartLine: number | null = null;
   selectedWorkspaceFileLoading = false;
@@ -50,7 +52,20 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
   @Output() importRequested = new EventEmitter<string>();
 
-  constructor(private readonly nexusChatService: NexusChatService) { }
+  constructor(private readonly nexusChatService: NexusChatService, private readonly cdr: ChangeDetectorRef) { }
+
+  get filteredWorkspaceLogs(): WorkspaceLogEntry[] {
+    const search = this.workspaceLogSearch.trim().toLowerCase();
+
+    if (!search) {
+      return this.workspaceLogs;
+    }
+
+    return this.workspaceLogs.filter((log) => {
+      const level = log.type === 'loading' ? 'info' : log.type === 'approved' ? 'done' : log.type === 'infected' ? 'block' : 'error';
+      return `${log.message} ${log.details} ${log.type} ${level}`.toLowerCase().includes(search);
+    });
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['importRequest'] && this.importRequest) {
@@ -176,6 +191,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
           if (targetNode) {
             targetNode.loading = false;
+            this.cdr.markForCheck();
             return;
           }
 
@@ -190,6 +206,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
           targetNode.children_loaded = true;
           targetNode.expanded = true;
           targetNode.loading = false;
+          this.cdr.markForCheck();
           return;
         }
 
@@ -199,14 +216,14 @@ export class AiDirectory implements OnChanges, OnDestroy {
           children_loaded: true,
           children: loadedNode.children || [],
         };
-
-        this.updateWorkspaceStatus('approved', 'Repository loaded successfully.');
+        this.cdr.markForCheck();
       },
       error: (error) => {
         console.error('Workspace tree API error:', error);
 
         if (targetNode) {
           targetNode.loading = false;
+          this.cdr.markForCheck();
           return;
         }
 
@@ -246,6 +263,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
     this.selectedWorkspaceFilePath = node.path;
     this.selectedWorkspaceFileContent = '';
+    this.selectedWorkspaceFileLines = [];
     this.selectedWorkspaceFileHasMore = false;
     this.selectedWorkspaceFileNextStartLine = null;
     this.selectedWorkspaceFileLoading = false;
@@ -275,9 +293,11 @@ export class AiDirectory implements OnChanges, OnDestroy {
             this.selectedWorkspaceFileContent += content;
           }
 
+          this.selectedWorkspaceFileLines = this.selectedWorkspaceFileContent.split('\n');
           this.selectedWorkspaceFileHasMore = response.has_more;
           this.selectedWorkspaceFileNextStartLine = response.next_start_line || null;
           this.selectedWorkspaceFileLoading = false;
+          this.cdr.markForCheck();
         },
         error: (error) => {
           this.selectedWorkspaceFileLoading = false;
@@ -285,7 +305,10 @@ export class AiDirectory implements OnChanges, OnDestroy {
           if (reset) {
             this.selectedWorkspaceFileContent =
               this.getApiErrorMessage(error) || 'Unable to read file.';
+            this.selectedWorkspaceFileLines = this.selectedWorkspaceFileContent.split('\n');
           }
+
+          this.cdr.markForCheck();
         },
       });
   }
@@ -312,7 +335,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
   private pollWorkspaceStatus(sessionId: string): void {
     this.workspaceStatusRequest?.unsubscribe();
 
-    this.workspaceStatusRequest = timer(0, 3000).subscribe(() => {
+    this.workspaceStatusRequest = timer(0, 500).subscribe(() => {
       this.nexusChatService.getWorkspaceStatus(sessionId).subscribe({
         next: (response) => {
           const result = response.result || response;
@@ -364,6 +387,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
     if (!keepStatus) {
       this.clearWorkspaceStatus();
       this.workspaceLogs = [];
+      this.workspaceLogSearch = '';
       this.workspaceLogSequence = 0;
       this.activeDirectoryTab = 'files';
     }
@@ -371,6 +395,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
     this.workspaceTree = null;
     this.selectedWorkspaceFilePath = '';
     this.selectedWorkspaceFileContent = '';
+    this.selectedWorkspaceFileLines = [];
     this.selectedWorkspaceFileHasMore = false;
     this.selectedWorkspaceFileNextStartLine = null;
     this.selectedWorkspaceFileLoading = false;
@@ -389,6 +414,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
   private clearWorkspaceStatus(): void {
     this.workspaceStatusType = 'idle';
     this.workspaceStatusMessage = '';
+    this.cdr.markForCheck();
   }
 
   private updateWorkspaceStatus( type: Exclude<WorkspaceStatusType, 'idle'>, message: string, details = '', ): void {
@@ -397,6 +423,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
     this.workspaceStatusType = type;
     this.workspaceStatusMessage = normalizedMessage;
+    this.cdr.markForCheck();
 
     if (!normalizedMessage) {
       return;
