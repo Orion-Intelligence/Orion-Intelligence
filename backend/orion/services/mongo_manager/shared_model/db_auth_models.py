@@ -60,6 +60,7 @@ class db_user_account(Model):
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
     recovery_key_hash: Optional[str] = Field(default=None)
+    reset_twofa_on_password_reset: bool = Field(default=False)
     password_reset_required: bool = Field(default=False)
 
     account_verify_at: Optional[datetime] = Field(default=None)

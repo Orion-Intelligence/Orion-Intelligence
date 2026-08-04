@@ -115,7 +115,7 @@ async def forgotPassword(data: ForgotPasswordRequest, request: Request):
 
 @auth_router.post("/api/recover")
 async def recover_account(data: RecoveryRequest, request: Request):
-    return await auth_manager.recover_account(data.email, data.recovery_key, getattr(request.state, "tenant", None))
+    return await auth_manager.recover_account(data.recovery_key, getattr(request.state, "tenant", None))
 
 
 @auth_router.post("/api/subscription/request")

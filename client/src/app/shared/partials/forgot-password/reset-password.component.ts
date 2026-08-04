@@ -99,7 +99,7 @@ export class ResetPasswordComponent implements OnInit {
       }
       else {
         const request = this.recoveryMode
-          ? this.auth_service.recoverAccount(this.email, this.recoveryKey)
+          ? this.auth_service.recoverAccount(this.recoveryKey)
           : this.auth_service.forgotPassword(this.email);
         request.subscribe({
           next: (_) => {
@@ -114,7 +114,7 @@ export class ResetPasswordComponent implements OnInit {
           error: (err) => {
             this.responseError = true;
             if (this.recoveryMode) {
-              this.errorMessage = err?.error?.detail || "Invalid email or recovery key";
+              this.errorMessage = err?.error?.detail || "Invalid recovery key";
             }
             else {
               this.errorMessage = "Something went wrong. Please try again later.";

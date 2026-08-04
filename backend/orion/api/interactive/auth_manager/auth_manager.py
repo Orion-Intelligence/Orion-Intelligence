@@ -1,6 +1,5 @@
 import hashlib
 import logging
-import secrets
 import threading
 from datetime import datetime, timedelta, timezone
 
@@ -203,6 +202,10 @@ class auth_manager:
             raise HTTPException(status_code=400, detail="New password must be different from the old one.")
 
         user.password = CONSTANTS.S_AUTH_PWD_CONTEXT.hash(password)
+        if getattr(user, "reset_twofa_on_password_reset", False):
+            user.twofa_enabled = False
+            user.twofa_secret = None
+        user.reset_twofa_on_password_reset = False
         user.password_reset_required = False
         user.password_reset_token = None
         user.password_reset_expiry = None
@@ -214,7 +217,7 @@ class auth_manager:
         return {"message": "Password reset successfully."}
 
     @staticmethod
-    async def forgot_password(mail: str, tenant_id):
+    async def forgot_password(mail: str, tenant_id, reset_twofa: bool = False):
         engine = mongo_controller.get_instance().get_engine()
         user = await engine.find_one(db_user_account, db_user_account.email == mail)
         if user:
@@ -230,7 +233,8 @@ class auth_manager:
                 if not tenant:
                     raise HTTPException(status_code=404, detail="Tenant not found")
 
-                reset_token = session_manager.issue_password_reset_token(user)
+                reset_token = session_manager.issue_password_reset_token(
+                    user, reset_twofa=reset_twofa)
                 await engine.save(user)
                 await AuditLogManager.get_instance().register(
                     str(user.tenant_uuid), str(user.id), "Password reset requested")
@@ -253,14 +257,14 @@ class auth_manager:
         return {"message": "If the email is registered, a password reset email has been sent."}
 
     @staticmethod
-    async def recover_account(mail: str, recovery_key: str, tenant_id):
+    async def recover_account(recovery_key: str, tenant_id):
         engine = mongo_controller.get_instance().get_engine()
-        user = await engine.find_one(db_user_account, db_user_account.email == mail)
         submitted_hash = hashlib.sha256(recovery_key.strip().encode()).hexdigest()
-        stored_hash = getattr(user, "recovery_key_hash", None) if user else None
-        if stored_hash and secrets.compare_digest(stored_hash, submitted_hash):
+        user = await engine.find_one(
+            db_user_account, db_user_account.recovery_key_hash == submitted_hash)
+        if user:
             try:
-                await auth_manager.forgot_password(mail, tenant_id)
+                await auth_manager.forgot_password(user.email, tenant_id, reset_twofa=True)
             except Exception:
                 logger.exception("Account recovery email could not be sent")
         return {"message": "If the recovery details are valid, a password reset email has been sent."}

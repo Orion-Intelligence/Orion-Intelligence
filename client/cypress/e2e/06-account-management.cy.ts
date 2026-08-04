@@ -67,7 +67,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             cy.logout();
 
             cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('twoFaLogin');
-            cy.visit('/login');
+            cy.visitLoginWithCleanAuthState();
             cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing4.username);
             cy.get('[data-testid="login-pass"]').clear().type(TEST_USERS.testing4.password, {log: false});
             cy.get('[data-testid="login-button"]').click();

@@ -52,10 +52,11 @@ class session_manager:
         return hashlib.sha256(token.encode()).hexdigest()
 
     @staticmethod
-    def issue_password_reset_token(user) -> str:
+    def issue_password_reset_token(user, reset_twofa: bool = False) -> str:
         token = session_manager.generate_verification_token()
         user.password_reset_token = session_manager.hash_password_reset_token(token)
         user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
+        user.reset_twofa_on_password_reset = reset_twofa
         return token
 
     @staticmethod

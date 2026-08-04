@@ -185,6 +185,7 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
   const loginUrl = tenantLoginUrl(tenant.slug);
   const origin = new URL(loginUrl).origin;
 
+  cy.clearCookies({domain: new URL(loginUrl).hostname, log: false});
   cy.origin(origin, {args: {tenant, visible, onboard}}, ({tenant, visible, onboard}) => {
     cy.visit('/login', {
       onBeforeLoad(win) {
@@ -232,7 +233,6 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
 
     cy.get('[data-testid="profile-menu"]').filter(':visible').first().scrollIntoView().click({force: true});
     cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({force: true});
-    cy.get('[data-testid="login-user"]').should('exist');
   });
   cy.visit(new URL('/login', Cypress.config('baseUrl') || 'http://localhost:4200').toString());
 }

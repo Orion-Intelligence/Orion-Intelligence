@@ -11,6 +11,8 @@ import { AppService } from '../core/app/app.service';
 export class AuthService {
   private authState = new BehaviorSubject<AuthModel>({ isAuthenticated: false, isValidated: true, error: null });
 
+  passwordResetToken: string | null = null;
+
   constructor(private appService: AppService, private appStorageService: AppStorageService, private apiService: ApiService, private router: Router, private tokenRefreshService: TokenRefreshService) {
     this.authState.next(this.loadAuthState());
     if (this.isAuthenticated()) {
@@ -118,8 +120,8 @@ export class AuthService {
     return this.apiService.post('forgot', { email });
   }
 
-  recoverAccount(email: string, recoveryKey: string): Observable<any> {
-    return this.apiService.post('recover', { email, recovery_key: recoveryKey });
+  recoverAccount(recoveryKey: string): Observable<any> {
+    return this.apiService.post('recover', { recovery_key: recoveryKey });
   }
 
   updatePassword(token: string, password: string): Observable<any> {
@@ -211,6 +213,7 @@ export class AuthService {
       this.denyAccess(deniedMessage);
       return false;
     }
+    this.passwordResetToken = sessionData.password_reset_required ? sessionData.password_reset_token || null : null;
     this.setAuthenticated();
     this.startTokenRefresh();
     return true;

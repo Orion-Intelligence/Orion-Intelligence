@@ -174,7 +174,7 @@ class ELASTIC_ENUMS:
         "m_username": ["username.keyword"],
         "m_email": ["email.keyword"],
         "m_ip": ["ip.keyword"],
-        "m_creditcard": ["credit_card.keyword", "bin.keyword"],
+        "m_creditcard": ["bin.keyword"],
         "m_search_all": ["domain.keyword", "domain", "username.keyword", "email.keyword", "bin.keyword"]
     }
 
