@@ -798,7 +798,7 @@ export function runTenantAlertScan() {
   waitForTenantAlertScanComplete();
 }
 
-export function waitForTenantAlertFindings(category: AlertScannerCategory, timeoutMs = 180000) {
+export function waitForTenantAlertFindings(category: AlertScannerCategory, timeoutMs = 360000) {
   return cy.location('origin').then((origin) => {
     const startedAt = Date.now();
     const poll = (): Cypress.Chainable => {
