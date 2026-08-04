@@ -115,21 +115,12 @@ jobs:
             done
           '
 
-      - name: Start instrumented Angular development server
-        run: |
-          set -euo pipefail
-          cd client
-          export npm_config_loglevel=error
-          export NODE_OPTIONS=--no-deprecation
-          nohup npm run serve -- --configuration=instrumented --host 127.0.0.1 --port 4200 >/tmp/orion-ng-serve.log 2>&1 &
-          echo $! >/tmp/orion-ng-serve.pid
-
       - name: Wait for test service
         run: |
           set -euo pipefail
           for i in $(seq 1 180); do
             api_code="$(curl -sk --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' https://127.0.0.1:8443/api/test/ready || true)"
-            client_code="$(curl -s --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:4200/ || true)"
+            client_code="$(curl -sk --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' https://127.0.0.1:8443/ || true)"
             echo "readiness attempt $i/180: API HTTP ${api_code:-000}, client HTTP ${client_code:-000}"
             if [ "$api_code" = "200" ] && [ "$client_code" = "200" ]; then
               exit 0
@@ -137,7 +128,6 @@ jobs:
             if [ $((i % 12)) -eq 0 ]; then
               docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
               docker logs trusted-web-main --since 70s --tail=200 || true
-              tail -200 /tmp/orion-ng-serve.log || true
             fi
             sleep 5
           done
@@ -148,7 +138,22 @@ jobs:
           docker logs trustly-web-mongodb --tail=500 || true
           docker logs trusted-web-arangodb --tail=500 || true
           docker logs trusted-web-redis --tail=500 || true
-          tail -500 /tmp/orion-ng-serve.log || true
+          exit 1
+
+      - name: Verify General alert scanner fixture
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            curl -fsS -X POST http://127.0.0.1:9400/generic_model/_refresh >/dev/null
+            fixture_hits="$(curl -fsS -H 'Content-Type: application/json' http://127.0.0.1:9400/generic_model/_search --data '{"size":0,"query":{"match":{"m_domain":"bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion"}}}' | jq -r '.hits.total.value // 0')"
+            echo "General alert fixture attempt $i/30: ${fixture_hits} matching documents"
+            if [ "$fixture_hits" -gt 0 ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs trusted-web-main --tail=1000 || true
+          docker logs elasticsearch --tail=1000 || true
           exit 1
 
       - name: Run client tests with coverage
@@ -159,7 +164,7 @@ jobs:
           export NODE_OPTIONS=--no-deprecation
           mkdir -p coverage cypress/downloads cypress/error cypress/screenshots cypress/videos
           npx cypress verify
-          ORION_COVERAGE=true CI=false GITHUB_ACTIONS=false npm test run
+          ORION_COVERAGE=true CI=false GITHUB_ACTIONS=false npx cypress run --browser chrome --config baseUrl=http://127.0.0.1:8080
           test -s coverage/lcov.info
 
       - name: Capture client diagnostics on failure
@@ -176,7 +181,6 @@ jobs:
           docker logs elasticsearch >client/cypress/diagnostics/elasticsearch.log 2>&1 || true
           docker logs trustly-web-mongodb >client/cypress/diagnostics/mongodb.log 2>&1 || true
           docker logs trusted-web-arangodb >client/cypress/diagnostics/arangodb.log 2>&1 || true
-          cp /tmp/orion-ng-serve.log client/cypress/diagnostics/angular-dev-server.log || true
 
       - name: Detect client artifacts
         if: always()
@@ -232,7 +236,6 @@ jobs:
           docker logs elasticsearch --tail=500 || true
           docker logs trustly-web-mongodb --tail=500 || true
           docker logs trusted-web-arangodb --tail=500 || true
-          tail -1000 /tmp/orion-ng-serve.log || true
 
       - if: always()
         run: |
