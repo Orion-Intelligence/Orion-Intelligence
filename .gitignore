@@ -45,7 +45,11 @@ client/cypress/downloads/*
 client/cypress/screenshots/*
 client/cypress/error/*
 !client/cypress/error/.gitkeep
-client/coverage/*
+client/.nyc_output/
+client/coverage/
+backend/coverage.xml
+backend/htmlcov/
+coverage-merged/
 .coverage
 .coverage.*
 backend/.coverage

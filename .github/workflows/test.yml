@@ -115,13 +115,13 @@ jobs:
             done
           '
 
-      - name: Start the same Angular development server used by run.sh -docs
+      - name: Start instrumented Angular development server
         run: |
           set -euo pipefail
           cd client
           export npm_config_loglevel=error
           export NODE_OPTIONS=--no-deprecation
-          nohup npm run serve -- --host 127.0.0.1 --port 4200 >/tmp/orion-ng-serve.log 2>&1 &
+          nohup npm run serve -- --configuration=instrumented --host 127.0.0.1 --port 4200 >/tmp/orion-ng-serve.log 2>&1 &
           echo $! >/tmp/orion-ng-serve.pid
 
       - name: Wait for test service
@@ -151,14 +151,16 @@ jobs:
           tail -500 /tmp/orion-ng-serve.log || true
           exit 1
 
-      - run: |
+      - name: Run client tests with coverage
+        run: |
           set -euo pipefail
           cd client
           export npm_config_loglevel=error
           export NODE_OPTIONS=--no-deprecation
-          mkdir -p cypress/downloads cypress/error cypress/screenshots cypress/videos
+          mkdir -p coverage cypress/downloads cypress/error cypress/screenshots cypress/videos
           npx cypress verify
-          CI=false GITHUB_ACTIONS=false npm test run
+          ORION_COVERAGE=true CI=false GITHUB_ACTIONS=false npm test run
+          test -s coverage/lcov.info
 
       - name: Capture client diagnostics on failure
         if: failure()
@@ -182,13 +184,19 @@ jobs:
         run: |
           set -euo pipefail
           has_cypress=false
+          has_coverage=false
 
           if find client/cypress/diagnostics client/cypress/downloads client/cypress/error client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
             has_cypress=true
           fi
 
+          if [ -s client/coverage/lcov.info ]; then
+            has_coverage=true
+          fi
+
           {
             echo "has_cypress=${has_cypress}"
+            echo "has_coverage=${has_coverage}"
           } >> "$GITHUB_OUTPUT"
 
       - if: always() && steps.client_artifacts.outputs.has_cypress == 'true'
@@ -202,6 +210,14 @@ jobs:
             client/cypress/screenshots/
             client/cypress/videos/
           if-no-files-found: ignore
+          retention-days: 7
+
+      - if: always() && steps.client_artifacts.outputs.has_coverage == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: client-coverage
+          path: client/coverage/lcov.info
+          if-no-files-found: error
           retention-days: 7
 
       - name: Show client service logs on failure
@@ -387,48 +403,41 @@ jobs:
   coverage-report:
     runs-on: ubuntu-latest
     needs: [client-tests, backend-tests]
-    if: always()
+    if: needs.client-tests.result == 'success' && needs.backend-tests.result == 'success'
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
+      - name: Download client coverage
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: client-coverage
+          path: client/coverage
+
       - name: Download backend coverage
-        if: always()
-        continue-on-error: true
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: backend-coverage
           path: backend
 
       - name: Detect coverage reports
-        if: always()
         id: codacy_reports
         run: |
           set -euo pipefail
-          reports=""
-          if [ -s client/coverage/lcov.info ]; then
-            reports="client/coverage/lcov.info"
-          fi
-          if [ -s backend/coverage.xml ]; then
-            if [ -n "$reports" ]; then
-              reports="${reports},backend/coverage.xml"
-            else
-              reports="backend/coverage.xml"
-            fi
-          fi
-          echo "reports=${reports}" >> "$GITHUB_OUTPUT"
+          test -s client/coverage/lcov.info
+          test -s backend/coverage.xml
+          echo "reports=client/coverage/lcov.info,backend/coverage.xml" >> "$GITHUB_OUTPUT"
 
       - name: Upload combined coverage to Codacy
-        if: always() && steps.codacy_reports.outputs.reports != ''
+        if: steps.codacy_reports.outputs.reports != ''
         uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ${{ steps.codacy_reports.outputs.reports }}
 
       - name: Build merged coverage summary (client + backend)
-        if: always()
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -507,7 +516,6 @@ jobs:
           PY
 
       - name: Detect merged coverage artifacts
-        if: always()
         id: coverage_artifacts
         run: |
           set -euo pipefail
@@ -517,7 +525,7 @@ jobs:
           fi
           echo "has_coverage=${has_coverage}" >> "$GITHUB_OUTPUT"
 
-      - if: always() && steps.coverage_artifacts.outputs.has_coverage == 'true'
+      - if: steps.coverage_artifacts.outputs.has_coverage == 'true'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: coverage-artifacts

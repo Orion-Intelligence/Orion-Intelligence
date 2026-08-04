@@ -7,6 +7,7 @@ const isCi =
     process.env["CI"] === "true" ||
     process.env["GITHUB_ACTIONS"] === "true" ||
     process.env["GITLAB_CI"] === "true";
+const coverageEnabled = isCi || process.env["ORION_COVERAGE"] === "true";
 
 export default defineConfig({
     allowCypressEnv: false,
@@ -20,10 +21,10 @@ export default defineConfig({
     experimentalFastVisibility: true,
     retries: 0,
     env: {
-        coverage: isCi,
+        coverage: coverageEnabled,
         language: "en",
         codeCoverage: {
-            enabled: isCi,
+            enabled: coverageEnabled,
         },
         pgp: false,
         ADMIN_USERNAME: "admin_test_username",
@@ -127,7 +128,7 @@ export default defineConfig({
         takeScreenshots: false,
     },
     expose: {
-        coverage: isCi,
+        coverage: coverageEnabled,
         TEST_DATA: {
             stealer_ioc_email: "nora.keen@samplemail.test",
             stealer_upgrade_name: "Avery Stone",
@@ -172,7 +173,7 @@ export default defineConfig({
 
                 return { path: targetPath };
             });
-            if (isCi) {
+            if (coverageEnabled) {
                 registerCodeCoverageTasks(on, config);
             }
             on("before:browser:launch", (browser, launchOptions) => {

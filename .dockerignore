@@ -4,3 +4,8 @@
 **/.env.*
 **/.ssl/
 .git/
+client/.nyc_output/
+client/coverage/
+backend/coverage.xml
+backend/htmlcov/
+coverage-merged/
