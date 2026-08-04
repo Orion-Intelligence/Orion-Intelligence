@@ -29,24 +29,6 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends google-chrome-stable
 
-      - run: |
-          set -euo pipefail
-          cd client
-          export npm_config_loglevel=error
-          export NODE_OPTIONS=--no-deprecation
-          npm install
-          npx ng build --configuration=instrumented
-
-      - run: |
-          set -euo pipefail
-          echo "=== checking client build folder ==="
-          if [ -d "client/build" ]; then
-            find client/build -maxdepth 4 -type d -print || true
-            find client/build -maxdepth 2 -type f -print | head -n 200 || true
-          else
-            exit 1
-          fi
-
       - id: compose_loc
         run: |
           set -euo pipefail
@@ -103,9 +85,6 @@ jobs:
           set -euo pipefail
           rm -f backend/static/.maintenance
           chmod +x ./run.sh
-          ./run.sh build -b
-          sed -i '/^TESTING_ENABLED=/d' .env
-          echo 'TESTING_ENABLED="1"' >> .env
 
       - run: |
           set -euo pipefail
@@ -118,12 +97,11 @@ jobs:
           docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
           docker network inspect orion_nexus_backend >/dev/null 2>&1 || docker network create orion_nexus_backend
 
-      - run: |
+      - name: Start the same testing stack used by run.sh -docs
+        run: |
           set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_client_${{ github.run_id }}_${{ github.run_attempt }}"
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
-          docker-compose -f "${{ steps.compose_loc.outputs.file }}" exec -T web sh -lc '
+          SKIP_BACKEND_TESTS=1 ./run.sh build -t
+          docker compose -p trusted-search -f docker-compose-testing.yml exec -T web sh -lc '
             for path in \
               /app/static/resource/profile \
               /app/static/resource/tenant \
@@ -137,18 +115,29 @@ jobs:
             done
           '
 
+      - name: Start the same Angular development server used by run.sh -docs
+        run: |
+          set -euo pipefail
+          cd client
+          export npm_config_loglevel=error
+          export NODE_OPTIONS=--no-deprecation
+          nohup npm run serve -- --host 127.0.0.1 --port 4200 >/tmp/orion-ng-serve.log 2>&1 &
+          echo $! >/tmp/orion-ng-serve.pid
+
       - name: Wait for test service
         run: |
           set -euo pipefail
           for i in $(seq 1 180); do
-            code="$(curl -sk --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/test/ready || true)"
-            echo "readiness attempt $i/180: HTTP ${code:-000}"
-            if [ "$code" = "200" ]; then
+            api_code="$(curl -sk --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' https://127.0.0.1:8443/api/test/ready || true)"
+            client_code="$(curl -s --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:4200/ || true)"
+            echo "readiness attempt $i/180: API HTTP ${api_code:-000}, client HTTP ${client_code:-000}"
+            if [ "$api_code" = "200" ] && [ "$client_code" = "200" ]; then
               exit 0
             fi
             if [ $((i % 12)) -eq 0 ]; then
               docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
               docker logs trusted-web-main --since 70s --tail=200 || true
+              tail -200 /tmp/orion-ng-serve.log || true
             fi
             sleep 5
           done
@@ -159,6 +148,7 @@ jobs:
           docker logs trustly-web-mongodb --tail=500 || true
           docker logs trusted-web-arangodb --tail=500 || true
           docker logs trusted-web-redis --tail=500 || true
+          tail -500 /tmp/orion-ng-serve.log || true
           exit 1
 
       - run: |
@@ -166,14 +156,25 @@ jobs:
           cd client
           export npm_config_loglevel=error
           export NODE_OPTIONS=--no-deprecation
-          mkdir -p cypress/error cypress/screenshots cypress/videos coverage
-          npm ci --include=dev || npm install --include=dev
+          mkdir -p cypress/downloads cypress/error cypress/screenshots cypress/videos
           npx cypress verify
-          CYPRESS=true npx cypress run --browser chrome --config baseUrl="http://127.0.0.1:8080"
+          CI=false GITHUB_ACTIONS=false npm test run
 
-      - run: |
+      - name: Capture client diagnostics on failure
+        if: failure()
+        run: |
           set -euo pipefail
-          test -s client/coverage/lcov.info
+          mkdir -p client/cypress/diagnostics
+          free -h >client/cypress/diagnostics/memory.txt || true
+          df -h >client/cypress/diagnostics/disk.txt || true
+          docker stats --no-stream >client/cypress/diagnostics/docker-stats.txt || true
+          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' >client/cypress/diagnostics/docker-containers.txt || true
+          docker logs trusted-web-main >client/cypress/diagnostics/backend.log 2>&1 || true
+          docker logs trusted-web-nginx >client/cypress/diagnostics/nginx.log 2>&1 || true
+          docker logs elasticsearch >client/cypress/diagnostics/elasticsearch.log 2>&1 || true
+          docker logs trustly-web-mongodb >client/cypress/diagnostics/mongodb.log 2>&1 || true
+          docker logs trusted-web-arangodb >client/cypress/diagnostics/arangodb.log 2>&1 || true
+          cp /tmp/orion-ng-serve.log client/cypress/diagnostics/angular-dev-server.log || true
 
       - name: Detect client artifacts
         if: always()
@@ -181,19 +182,13 @@ jobs:
         run: |
           set -euo pipefail
           has_cypress=false
-          has_coverage=false
 
-          if find client/cypress/error client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
+          if find client/cypress/diagnostics client/cypress/downloads client/cypress/error client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
             has_cypress=true
-          fi
-
-          if [ -s client/coverage/lcov.info ]; then
-            has_coverage=true
           fi
 
           {
             echo "has_cypress=${has_cypress}"
-            echo "has_coverage=${has_coverage}"
           } >> "$GITHUB_OUTPUT"
 
       - if: always() && steps.client_artifacts.outputs.has_cypress == 'true'
@@ -201,29 +196,27 @@ jobs:
         with:
           name: cypress-artifacts
           path: |
+            client/cypress/diagnostics/
+            client/cypress/downloads/
             client/cypress/error/
             client/cypress/screenshots/
             client/cypress/videos/
           if-no-files-found: ignore
           retention-days: 7
 
-      - if: always() && steps.client_artifacts.outputs.has_coverage == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
-        with:
-          name: client-coverage
-          path: client/coverage/lcov.info
-          if-no-files-found: ignore
-          retention-days: 7
-
       - name: Show client service logs on failure
         if: failure()
         run: |
+          free -h || true
+          df -h || true
+          docker stats --no-stream || true
           docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
           docker logs trusted-web-main --tail=1000 || true
           docker logs trusted-web-nginx --tail=500 || true
           docker logs elasticsearch --tail=500 || true
           docker logs trustly-web-mongodb --tail=500 || true
           docker logs trusted-web-arangodb --tail=500 || true
+          tail -1000 /tmp/orion-ng-serve.log || true
 
       - if: always()
         run: |
