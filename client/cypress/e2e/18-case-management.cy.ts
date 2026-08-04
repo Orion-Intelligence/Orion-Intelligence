@@ -369,10 +369,14 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.contains(selector('report-feedback-comment-body'), 'Cypress analyst note').should('be.visible');
     cy.get(selector('report-feedback-comment-user-name')).should('exist');
 
+    const exportDate = new Date().toISOString().slice(0, 10);
+    const exportPath = `${Cypress.config('downloadsFolder')}/cypress-updated-case-title-${exportDate}.pdf`;
+
     clickHeaderAction('case-details-export-pdf');
     cy.then(() => {
-      cy.readFile(`cypress/downloads/${caseId}-case-report.pdf`, null, { timeout: 30000 })
+      cy.readFile(exportPath, 'binary', { timeout: 30000 })
         .should((contents) => {
+          expect(contents).to.contain('%PDF');
           expect(contents.length).to.be.greaterThan(1000);
         });
     });
