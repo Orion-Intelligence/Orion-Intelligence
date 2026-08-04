@@ -798,6 +798,27 @@ export function runTenantAlertScan() {
   waitForTenantAlertScanComplete();
 }
 
+export function waitForTenantAlertFindings(category: AlertScannerCategory, timeoutMs = 180000) {
+  return cy.location('origin').then((origin) => {
+    const startedAt = Date.now();
+    const poll = (): Cypress.Chainable => {
+      return cy.request('GET', `${origin}/api/get/tenant/alert/summary`).then((response) => {
+        expect(response.status).to.eq(200);
+        const count = Number(response.body?.counts_by_type?.[category] || 0);
+        if (count > 0) {
+          return cy.wrap(null);
+        }
+        if (Date.now() - startedAt > timeoutMs) {
+          throw new Error(`Tenant alert scan produced no ${category} findings`);
+        }
+        return cy.wait(1000, {log: false}).then(() => poll());
+      });
+    };
+
+    return poll();
+  });
+}
+
 function alertCardDisplayName(category: string) {
   return category.charAt(0).toUpperCase() + category.slice(1);
 }

@@ -28,6 +28,7 @@ import {
   setTenantLicenses,
   submitLogin,
   waitForTenantAlertScanComplete,
+  waitForTenantAlertFindings,
   waitForBlockingOverlayToClose
 } from './controllers/10-tenant-management.controller';
 import {TEST_DATA} from '../support/constants';
@@ -289,6 +290,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
 
     flushTenantAlertsIfPresent();
     runTenantAlertScan();
+    waitForTenantAlertFindings('general');
     cy.reload();
     openTenantHomepage();
     waitForTenantAlertScanComplete();

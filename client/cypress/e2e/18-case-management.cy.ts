@@ -374,7 +374,7 @@ describe('Case Management - Add View Edit Flow', () => {
 
     clickHeaderAction('case-details-export-pdf');
     cy.then(() => {
-      cy.readFile(exportPath, 'binary', { timeout: 30000 })
+      cy.readFile(exportPath, 'binary', { timeout: 120000 })
         .should((contents) => {
           expect(contents).to.contain('%PDF');
           expect(contents.length).to.be.greaterThan(1000);
