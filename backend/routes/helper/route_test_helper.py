@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 import json
 from pathlib import Path
+from threading import Lock
 from types import SimpleNamespace
 from typing import Any
 from uuid import uuid4
@@ -24,6 +25,8 @@ class TestRouteHelper:
 
     MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "api"
     ELASTIC_MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "elastic"
+    _MOCK_STEPS: dict[str, int] = {}
+    _MOCK_STEPS_LOCK = Lock()
     STATIC_TEST_CHAT_RESPONSE = "how may i help you"
     TAKEDOWN_TEST_PASSWORD = "1qaz!QAZ"
     TAKEDOWN_TEST_TARGET_URL = "https://example.com/takedown-test"
@@ -38,15 +41,9 @@ class TestRouteHelper:
 
     @classmethod
     def mock_step(cls, key: str):
-        p = cls.MOCKS_DIR / f".{key}.state"
-        p.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            n = int(p.read_text(encoding="utf-8").strip() or "0")
-        except FileNotFoundError:
-            n = 0
-        except Exception:
-            n = 0
-        p.write_text(str(n + 1), encoding="utf-8")
+        with cls._MOCK_STEPS_LOCK:
+            n = cls._MOCK_STEPS.get(key, 0)
+            cls._MOCK_STEPS[key] = n + 1
         if n == 0:
             return {"status": "pending", "progress": 20, "step": "running"}
         return None
