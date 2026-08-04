@@ -68,17 +68,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
     if (isDevMode() && error instanceof HttpErrorResponse && error.status === 503) {
       if (!maintenancePageLoading) {
         maintenancePageLoading = true;
-        void fetch('/static/maintenance.html', { cache: 'no-store' })
-          .then(response => response.text())
-          .then(html => {
-            const developmentHtml = html.replaceAll('/maintenance-assets/', '/static/resource/system/');
-            document.open();
-            document.write(developmentHtml);
-            document.close();
-          })
-          .catch(() => {
-            maintenancePageLoading = false;
-          });
+        window.location.replace('/static/maintenance.html');
       }
       return throwError(() => error);
     }
