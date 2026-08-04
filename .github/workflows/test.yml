@@ -86,6 +86,19 @@ jobs:
           PY
           test -s .env
 
+      - name: Prepare writable client-test runtime directories
+        run: |
+          set -euo pipefail
+          mkdir -p \
+            backend/static/resource/profile \
+            backend/static/resource/tenant \
+            backend/static/resource/system \
+            backend/static/resource/case_artifacts \
+            backend/static/.well-known/parser_files
+          chmod -R a+rwX \
+            backend/static/resource \
+            backend/static/.well-known/parser_files
+
       - run: |
           set -euo pipefail
           rm -f backend/static/.maintenance
@@ -110,6 +123,19 @@ jobs:
           cd "${{ steps.compose_loc.outputs.dir }}"
           export COMPOSE_PROJECT_NAME="ci_client_${{ github.run_id }}_${{ github.run_attempt }}"
           docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build
+          docker-compose -f "${{ steps.compose_loc.outputs.file }}" exec -T web sh -lc '
+            for path in \
+              /app/static/resource/profile \
+              /app/static/resource/tenant \
+              /app/static/resource/system \
+              /app/static/resource/case_artifacts \
+              /app/static/.well-known/parser_files; do
+              if [ ! -w "$path" ]; then
+                echo "Client-test runtime path is not writable: $path" >&2
+                exit 1
+              fi
+            done
+          '
 
       - name: Wait for test service
         run: |
