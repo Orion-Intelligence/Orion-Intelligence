@@ -276,6 +276,11 @@ Orion Platform is licensed under the [MIT License](LICENSE).
 This project is intended for research purposes only. The authors of Orion Platform do not support or endorse illegal
 activities, and users of this project are responsible for ensuring their actions comply with the law.
 
+## Security
+
+Please report suspected vulnerabilities privately according to the [Orion Security Policy](SECURITY.md). Do not open a
+public issue for a security vulnerability.
+
 ## Project Links
 
 Explore collaboration opportunities and platform documentation.

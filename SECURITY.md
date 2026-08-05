@@ -1,18 +1,80 @@
-If you've discovered a vulnerability, please refrain from filing a public issue.
+# Security Policy
 
-We kindly ask that you follow responsible disclosure guidelines, keeping in mind the risks faced by users.
+Orion Intelligence takes the security of its users, data, and services seriously. We welcome responsible reports from
+security researchers and the wider community.
 
-To report a vulnerability, please use the private reporting form:
+## Supported Code
+
+Security fixes are applied to the current code on the `trusted-main` branch and, when applicable, the latest published
+release. Older revisions, forks, and modified third-party deployments are not maintained by Orion Intelligence.
+
+## Report a Vulnerability
+
+Please **do not** disclose a suspected vulnerability through a public issue, discussion, pull request, or social-media
+post. Submit it privately through the:
 
 [GitHub private vulnerability reporting form](https://github.com/Orion-Intelligence/Orion-Intelligence/security/advisories/new)
 
-We aim to acknowledge reports within 8 hours and address any critical issues with short-term fixes within 2 days,
-whenever possible.
+Include as much of the following information as possible:
 
-## Uptime Monitoring
+- The affected component, endpoint, feature, or configuration.
+- A clear description of the vulnerability and its potential impact.
+- Reproduction steps or a minimal proof of concept.
+- Any required permissions, account state, or deployment conditions.
+- Suggested remediation, if available.
+- Your preferred contact and attribution details.
 
-We track uptime for multiple Orion Intelligence system components using UptimeRobot:
+Do not include user data, credentials, access tokens, or other sensitive material beyond what is strictly necessary to
+demonstrate the issue.
 
-[Orion Intelligence uptime status](https://stats.uptimerobot.com/xV0BS3KMq7)
+## Response Targets
 
-Uptime alerts are delivered automatically by email and Slack webhook so maintainers can respond to outages or degraded availability.
+We aim to:
+
+- Acknowledge a new report within 8 hours.
+- Validate and prioritize the report as quickly as practical.
+- Provide progress updates while remediation is underway.
+- Deliver a short-term mitigation for confirmed critical issues within 2 days, whenever feasible.
+
+These are response targets rather than guarantees. Resolution time depends on severity, complexity, affected systems,
+and the coordination required for a safe release.
+
+## Scope
+
+This policy covers security issues in:
+
+- Code and configuration maintained in this repository.
+- Orion Platform web, API, authentication, tenant-isolation, and data-processing functionality.
+- Official Orion Intelligence services when testing can be performed safely and without disrupting other users.
+
+The following are generally outside the scope of this policy:
+
+- Vulnerabilities in unrelated third-party services or software with no demonstrated Orion-specific impact.
+- Automated scanner output without a validated security impact.
+- Social engineering, phishing, physical attacks, denial-of-service testing, or traffic flooding.
+- Availability reports that do not involve a security vulnerability.
+- Issues that require an already-compromised operating system or unsupported deployment.
+
+## Research Guidelines
+
+When investigating a potential vulnerability:
+
+- Use accounts and data that you own or are explicitly authorized to test.
+- Access only the minimum data required to demonstrate the issue.
+- Do not modify or delete data, establish persistence, or move beyond the access needed for verification.
+- Avoid actions that degrade service availability or affect other users.
+- Stop testing and report immediately if you encounter sensitive or personal data.
+- Keep the report confidential until a coordinated disclosure date has been agreed upon.
+
+## Coordinated Disclosure
+
+We will work with reporters to understand, validate, and remediate confirmed vulnerabilities. When appropriate, we will
+coordinate publication of a GitHub security advisory after a fix or mitigation is available. Reporters may receive
+credit unless they prefer to remain anonymous.
+
+## Safe Harbor
+
+Orion Intelligence considers research performed in good faith and in accordance with this policy to be authorized. We
+will not pursue legal action against researchers for accidental, good-faith violations of this policy when they stop,
+notify us promptly, and cooperate in preventing further harm. This safe harbor does not bind third parties or authorize
+activity against systems and data owned by others.
