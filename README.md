@@ -45,7 +45,10 @@ actionable insights.<br>
 - A Node.js version matching `^20.19.0`, `^22.12.0`, or `>=24.0.0`, with npm.
 - OpenSSL and `rsync`, used by the local build script.
 
-### Install and configure
+<details>
+<summary><strong>Install and configure</strong> · build and run Orion locally</summary>
+
+<br>
 
 ```bash
 git clone https://github.com/Orion-Intelligence/Orion-Intelligence.git
@@ -84,6 +87,8 @@ For later starts or shutdowns:
 For additional build modes, testing workflows, production deployment, and configuration details, see the
 [developer documentation](docs/app_docs/developer_documentation.md) or the complete
 [Orion documentation](https://orion-search.readthedocs.io).
+
+</details>
 
 ## Platform Preview
 
@@ -196,15 +201,44 @@ unified environment for collection, search, enrichment, correlation, and review 
 
 ## Project Status and Support
 
-| Area | Current position |
-| --- | --- |
-| **Development status** | Actively developed on the `trusted-main` branch. |
-| **Supported deployment** | Docker Compose for local and development environments, with a dedicated production Compose configuration. |
-| **Release policy** | Versioned Git tags identify release snapshots. `trusted-main` contains current development, and releases follow validation rather than a fixed public cadence. |
-| **Documentation** | Use the [Orion documentation](https://orion-search.readthedocs.io) for platform usage, configuration, and API guidance. |
-| **Bugs and feature requests** | Use [GitHub Issues](https://github.com/Orion-Intelligence/Orion-Intelligence/issues) for reproducible bugs and feature proposals that contain no sensitive information. |
-| **Operational help** | Use the in-platform **Help & Support** workflow or the [collaboration page](https://www.orionintelligence.org/collaboration) for non-security questions. |
-| **Security reports** | Follow the [Security Policy](SECURITY.md) and report vulnerabilities privately. |
+<table width="100%" cellspacing="0" cellpadding="8">
+  <thead>
+    <tr>
+      <th width="23%" align="left" valign="bottom" scope="col">Area</th>
+      <th width="77%" align="left" valign="bottom" scope="col">Current position</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td valign="top"><strong>Development status</strong></td>
+      <td valign="top"><sub>Actively developed on the <code>trusted-main</code> branch.</sub></td>
+    </tr>
+    <tr>
+      <td valign="top"><strong>Supported deployment</strong></td>
+      <td valign="top"><sub>Docker Compose for local and development environments, with a dedicated production Compose configuration.</sub></td>
+    </tr>
+    <tr>
+      <td valign="top"><strong>Release policy</strong></td>
+      <td valign="top"><sub>Versioned Git tags identify release snapshots. <code>trusted-main</code> contains current development, and releases follow validation rather than a fixed public cadence.</sub></td>
+    </tr>
+    <tr>
+      <td valign="top"><strong>Documentation</strong></td>
+      <td valign="top"><sub>Use the <a href="https://orion-search.readthedocs.io">Orion documentation</a> for platform usage, configuration, and API guidance.</sub></td>
+    </tr>
+    <tr>
+      <td valign="top"><strong>Bugs and feature requests</strong></td>
+      <td valign="top"><sub>Use <a href="https://github.com/Orion-Intelligence/Orion-Intelligence/issues">GitHub Issues</a> for reproducible bugs and feature proposals that contain no sensitive information.</sub></td>
+    </tr>
+    <tr>
+      <td valign="top"><strong>Operational help</strong></td>
+      <td valign="top"><sub>Use the in-platform <strong>Help &amp; Support</strong> workflow or the <a href="https://www.orionintelligence.org/collaboration">collaboration page</a> for non-security questions.</sub></td>
+    </tr>
+    <tr>
+      <td valign="top"><strong>Security reports</strong></td>
+      <td valign="top"><sub>Follow the <a href="SECURITY.md">Security Policy</a> and report vulnerabilities privately.</sub></td>
+    </tr>
+  </tbody>
+</table>
 
 ## Orion Ecosystem
 
@@ -222,9 +256,9 @@ Orion follows a clear path from source collection to analyst action:
 
 ## Modules
 
-The five primary modules are shown first. Expand the additional modules to view the rest of the ecosystem.
+<sub>The five primary modules are shown first. Expand the additional modules to view the rest of the ecosystem.</sub>
 
-<table width="100%" cellspacing="0" cellpadding="10">
+<table width="100%" cellspacing="0" cellpadding="8">
   <thead>
     <tr>
       <th width="23%" align="left" valign="bottom" scope="col">Module</th>
@@ -238,12 +272,12 @@ The five primary modules are shown first. Expand the additional modules to view 
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Intelligence"><strong>Orion Platform</strong></a><br><sub>PUBLIC REPOSITORY</sub></td>
-      <td valign="top">Unified analyst workspace for search, investigation, correlation, visualization, cases, alerts, and administration.</td>
+      <td valign="top"><sub>Unified analyst workspace for search, investigation, correlation, visualization, cases, alerts, and administration.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Angular-DD0031?style=flat-square&amp;logo=angular&amp;logoColor=white" alt="Angular"> <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/-Elasticsearch-005571?style=flat-square&amp;logo=elasticsearch&amp;logoColor=white" alt="Elasticsearch"> <img src="https://img.shields.io/badge/-MongoDB-47A248?style=flat-square&amp;logo=mongodb&amp;logoColor=white" alt="MongoDB"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"></td>
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Intelligence-Landing"><strong>Orion Landing</strong></a><br><sub>PUBLIC REPOSITORY</sub></td>
-      <td valign="top">Public-facing product site for capability discovery, project orientation, and access to the Orion ecosystem.</td>
+      <td valign="top"><sub>Public-facing product site for capability discovery, project orientation, and access to the Orion ecosystem.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-React-61DAFB?style=flat-square&amp;logo=react&amp;logoColor=black" alt="React"> <img src="https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="TypeScript"> <img src="https://img.shields.io/badge/-Vite-646CFF?style=flat-square&amp;logo=vite&amp;logoColor=white" alt="Vite"> <img src="https://img.shields.io/badge/-Tailwind_CSS-06B6D4?style=flat-square&amp;logo=tailwindcss&amp;logoColor=white" alt="Tailwind CSS"></td>
     </tr>
     <tr>
@@ -251,17 +285,17 @@ The five primary modules are shown first. Expand the additional modules to view 
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Dark-Nexus"><strong>Orion Dark Nexus</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top">AI-assisted investigation, chat orchestration, tool integration, and secure workspace management.</td>
+      <td valign="top"><sub>AI-assisted investigation, chat orchestration, tool integration, and secure workspace management.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/-LangGraph-1C3C3C?style=flat-square&amp;logo=langchain&amp;logoColor=white" alt="LangGraph"> <img src="https://img.shields.io/badge/-MCP-5A45FF?style=flat-square" alt="Model Context Protocol"> <img src="https://img.shields.io/badge/-Ollama-000000?style=flat-square&amp;logo=ollama&amp;logoColor=white" alt="Ollama"></td>
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Crawler"><strong>Orion Crawler</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top">Scheduled crawling across hidden-web and monitored sources, with distributed task execution and private-network routing.</td>
+      <td valign="top"><sub>Scheduled crawling across hidden-web and monitored sources, with distributed task execution and private-network routing.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Celery-37814A?style=flat-square&amp;logo=celery&amp;logoColor=white" alt="Celery"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"></td>
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Collector"><strong>Orion Collector</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top">Extensible source-collection framework for targeted acquisition and custom ingestion workflows.</td>
+      <td valign="top"><sub>Extensible source-collection framework for targeted acquisition and custom ingestion workflows.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Beautiful_Soup-59666C?style=flat-square" alt="Beautiful Soup"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"></td>
     </tr>
   </tbody>
@@ -270,7 +304,7 @@ The five primary modules are shown first. Expand the additional modules to view 
 <details>
   <summary><strong>Show 6 more modules</strong> · Social, Browser, Micros, Sandbox, Leaks, and Tor2Web</summary>
   <br>
-  <table width="100%" cellspacing="0" cellpadding="10">
+  <table width="100%" cellspacing="0" cellpadding="8">
     <thead>
       <tr>
         <th width="23%" align="left" valign="bottom" scope="col">Module</th>
@@ -284,12 +318,12 @@ The five primary modules are shown first. Expand the additional modules to view 
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Social"><strong>Orion Social</strong></a><br><sub>PUBLIC REPOSITORY</sub></td>
-      <td valign="top">Social-intelligence collection and enrichment service with browser automation and isolated Tor-assisted crawling.</td>
+      <td valign="top"><sub>Social-intelligence collection and enrichment service with browser automation and isolated Tor-assisted crawling.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"></td>
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Browser"><strong>Orion Browser</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top">Private, browser-assisted acquisition workflows for mobile investigators.</td>
+      <td valign="top"><sub>Private, browser-assisted acquisition workflows for mobile investigators.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Kotlin-7F52FF?style=flat-square&amp;logo=kotlin&amp;logoColor=white" alt="Kotlin"> <img src="https://img.shields.io/badge/-Android-3DDC84?style=flat-square&amp;logo=android&amp;logoColor=white" alt="Android"> <img src="https://img.shields.io/badge/-GeckoView-FF7139?style=flat-square&amp;logo=firefoxbrowser&amp;logoColor=white" alt="GeckoView"> <img src="https://img.shields.io/badge/-Orbot-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Orbot"> <img src="https://img.shields.io/badge/-SQLCipher-003B57?style=flat-square&amp;logo=sqlite&amp;logoColor=white" alt="SQLCipher"></td>
     </tr>
     <tr>
@@ -297,22 +331,22 @@ The five primary modules are shown first. Expand the additional modules to view 
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Micros"><strong>Orion Micros</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top">Shared analysis, validation, privacy, malware-scanning, and security-testing services.</td>
+      <td valign="top"><sub>Shared analysis, validation, privacy, malware-scanning, and security-testing services.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-FastAPI-009688?style=flat-square&amp;logo=fastapi&amp;logoColor=white" alt="FastAPI"> <img src="https://img.shields.io/badge/-Presidio-5E5E5E?style=flat-square&amp;logo=microsoft&amp;logoColor=white" alt="Microsoft Presidio"> <img src="https://img.shields.io/badge/-ClamAV-CC1F2F?style=flat-square" alt="ClamAV"> <img src="https://img.shields.io/badge/-OWASP_ZAP-00549E?style=flat-square&amp;logo=owasp&amp;logoColor=white" alt="OWASP ZAP"></td>
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Sandbox"><strong>Orion Sandbox</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top">Isolated execution infrastructure for untrusted investigation and AI-workspace code.</td>
+      <td valign="top"><sub>Isolated execution infrastructure for untrusted investigation and AI-workspace code.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-OpenSandbox-4B5563?style=flat-square" alt="OpenSandbox"> <img src="https://img.shields.io/badge/-Kata_Containers-2F81F7?style=flat-square" alt="Kata Containers"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"> <img src="https://img.shields.io/badge/-ClamAV-CC1F2F?style=flat-square" alt="ClamAV"></td>
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Leaks"><strong>Orion Leaks</strong></a><br><sub>PUBLIC REPOSITORY</sub></td>
-      <td valign="top">Secure whistleblowing and report-intake portal based on the GlobaLeaks platform.</td>
+      <td valign="top"><sub>Secure whistleblowing and report-intake portal based on the GlobaLeaks platform.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-GlobaLeaks-3333AB?style=flat-square" alt="GlobaLeaks"> <img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="TypeScript"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"></td>
     </tr>
     <tr>
       <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Tor2Web"><strong>Orion Tor2Web</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top">Controlled Tor-to-web access layer for browser-compatible access to onion resources.</td>
+      <td valign="top"><sub>Controlled Tor-to-web access layer for browser-compatible access to onion resources.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Twisted-2D5E8C?style=flat-square" alt="Twisted"> <img src="https://img.shields.io/badge/-NGINX-009639?style=flat-square&amp;logo=nginx&amp;logoColor=white" alt="NGINX"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"></td>
     </tr>
   </tbody>
