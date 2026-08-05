@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 254" role="img" aria-labelledby="title description">
+  <title id="title">Orion intelligence lifecycle</title>
+  <desc id="description">A five-stage flow from collection and enrichment through indexing, platform delivery, and analyst investigation, with a feedback loop for new leads and monitoring.</desc>
+
+  <defs>
+    <linearGradient id="panelGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#F1F6FC"/>
+    </linearGradient>
+    <linearGradient id="activeGradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#153454"/>
+      <stop offset="1" stop-color="#0F2943"/>
+    </linearGradient>
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M 24 0 L 0 0 0 24" fill="none" stroke="#2A5784" stroke-opacity="0.05"/>
+    </pattern>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="145%">
+      <feDropShadow dx="0" dy="5" stdDeviation="5" flood-color="#0E1626" flood-opacity="0.10"/>
+    </filter>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#57A5EB"/>
+    </marker>
+    <marker id="feedbackArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L8,4 L0,8 Z" fill="#2B9F78"/>
+    </marker>
+    <style>
+      text { font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+      .panel { fill: url(#panelGradient); stroke: #D8E4F0; }
+      .card { fill: #FFFFFF; stroke: #D8E4F0; }
+      .card-active { fill: url(#activeGradient); stroke: #57A5EB; }
+      .step-chip { fill: #EAF2FB; }
+      .step-chip-active { fill: #57A5EB; }
+      .step { fill: #2A5784; font-size: 11px; font-weight: 800; letter-spacing: 0.08em; }
+      .step-active { fill: #FFFFFF; }
+      .heading { fill: #153454; font-size: 16px; font-weight: 800; letter-spacing: 0.03em; }
+      .heading-active { fill: #FFFFFF; }
+      .body { fill: #344054; font-size: 12.5px; font-weight: 600; }
+      .body-active { fill: #E6EEF8; }
+      .meta { fill: #667085; font-size: 11px; }
+      .meta-active { fill: #9AB2CD; }
+      .divider { stroke: #E3EAF2; }
+      .divider-active { stroke: #2A5784; }
+      .feedback-label { fill: #E8F7F1; stroke: #A7E3CE; }
+      .feedback-text { fill: #157A5A; font-size: 10.5px; font-weight: 800; letter-spacing: 0.08em; }
+      @media (prefers-color-scheme: dark) {
+        .panel { fill: #0E1626; stroke: #263A53; }
+        .card { fill: #101A2B; stroke: #263A53; }
+        .step-chip { fill: #172B43; }
+        .step { fill: #8FC7F8; }
+        .heading { fill: #F1F7FD; }
+        .body { fill: #D7E4F1; }
+        .meta { fill: #9AB2CD; }
+        .divider { stroke: #263A53; }
+        .feedback-label { fill: #0E2B25; stroke: #246D58; }
+        .feedback-text { fill: #6EE7B7; }
+      }
+    </style>
+  </defs>
+
+  <rect class="panel" x="1" y="1" width="1198" height="252" rx="18"/>
+  <rect x="1" y="1" width="1198" height="252" rx="18" fill="url(#grid)"/>
+
+  <g fill="none" stroke="#57A5EB" stroke-width="2" stroke-linecap="round" marker-end="url(#arrow)">
+    <path d="M232 106 H257"/>
+    <path d="M468 106 H493"/>
+    <path d="M704 106 H729"/>
+    <path d="M940 106 H965"/>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="card" x="24" y="20" width="208" height="172" rx="14"/>
+    <rect class="step-chip" x="40" y="38" width="38" height="22" rx="11"/>
+    <text class="step" x="59" y="53" text-anchor="middle">01</text>
+    <text class="heading" x="90" y="54">COLLECT</text>
+    <circle cx="212" cy="49" r="4" fill="#57A5EB"/>
+    <path class="divider" d="M40 72 H216"/>
+    <text class="body" x="40" y="99">Crawler · Collector · Social</text>
+    <text class="body" x="40" y="123">Browser · Leaks · Tor2Web</text>
+    <text class="meta" x="40" y="158">OPEN · ONION · HUMAN SOURCES</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="card" x="260" y="20" width="208" height="172" rx="14"/>
+    <rect class="step-chip" x="276" y="38" width="38" height="22" rx="11"/>
+    <text class="step" x="295" y="53" text-anchor="middle">02</text>
+    <text class="heading" x="326" y="54">ENRICH</text>
+    <circle cx="448" cy="49" r="4" fill="#57A5EB"/>
+    <path class="divider" d="M276 72 H452"/>
+    <text class="body" x="276" y="99">Validate · Normalize · Correlate</text>
+    <text class="body" x="276" y="123">Micros · Sandbox · Security</text>
+    <text class="meta" x="276" y="158">ENTITIES · METADATA · ARTIFACTS</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="card" x="496" y="20" width="208" height="172" rx="14"/>
+    <rect class="step-chip" x="512" y="38" width="38" height="22" rx="11"/>
+    <text class="step" x="531" y="53" text-anchor="middle">03</text>
+    <text class="heading" x="562" y="54">INDEX</text>
+    <circle cx="684" cy="49" r="4" fill="#57A5EB"/>
+    <path class="divider" d="M512 72 H688"/>
+    <text class="body" x="512" y="99">Elasticsearch · MongoDB</text>
+    <text class="body" x="512" y="123">ArangoDB · Redis</text>
+    <text class="meta" x="512" y="158">SEARCH · DOCUMENTS · GRAPH · CACHE</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="card-active" x="732" y="20" width="208" height="172" rx="14"/>
+    <rect class="step-chip-active" x="748" y="38" width="38" height="22" rx="11"/>
+    <text class="step step-active" x="767" y="53" text-anchor="middle">04</text>
+    <text class="heading heading-active" x="798" y="54">SERVE</text>
+    <circle cx="920" cy="49" r="4" fill="#57A5EB"/>
+    <path class="divider-active" d="M748 72 H924"/>
+    <text class="body body-active" x="748" y="99">NGINX · Angular · FastAPI</text>
+    <text class="body body-active" x="748" y="123">Auth · Tenancy · Jobs</text>
+    <text class="meta meta-active" x="748" y="158">SECURE APIs · ANALYST WORKSPACE</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect class="card-active" x="968" y="20" width="208" height="172" rx="14"/>
+    <rect class="step-chip-active" x="984" y="38" width="38" height="22" rx="11"/>
+    <text class="step step-active" x="1003" y="53" text-anchor="middle">05</text>
+    <text class="heading heading-active" x="1034" y="54">INVESTIGATE</text>
+    <circle cx="1156" cy="49" r="4" fill="#6EE7B7"/>
+    <path class="divider-active" d="M984 72 H1160"/>
+    <text class="body body-active" x="984" y="99">Search · Scans · Graphs · AI</text>
+    <text class="body body-active" x="984" y="123">Dark Nexus · Cases · Alerts</text>
+    <text class="meta meta-active" x="984" y="158">EXPORTS · COLLABORATION · ACTION</text>
+  </g>
+
+  <path d="M1072 193 V223 H128 V197" fill="none" stroke="#2B9F78" stroke-width="1.5" stroke-dasharray="5 5" stroke-linecap="round" marker-end="url(#feedbackArrow)"/>
+  <rect class="feedback-label" x="480" y="209" width="240" height="28" rx="14"/>
+  <text class="feedback-text" x="600" y="227" text-anchor="middle">NEW LEADS · PRIORITIES · MONITORING</text>
+</svg>
