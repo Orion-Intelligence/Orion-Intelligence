@@ -2,6 +2,9 @@
 S_SUPER_PASSWORD_V1='your_super_password'
 # Generate with: openssl rand -hex 32
 JWT_SECRET_KEY=''
+# Generate with: openssl rand -base64 32 | tr '+/' '-_'
+ENCRYPTION_KEY=''
+S_CRAWLER_PASSWORD='your_crawler_password'
 
 # ELASTIC KEYS
 # Production uses Elasticsearch's built-in bootstrap user. Set a strong, unique password.
@@ -29,15 +32,17 @@ DEMO_PASSWORD='your_demo_password'
 ARANGO_USERNAME='your_arango_username'
 ARANGO_PASSWORD='your_arango_password'
 
-# PRODUCTION MODE
+# APPLICATION MODE
 API_SWAGGER='1'
 API_ACCESS='1'
-PRODUCTION='1'
+PRODUCTION='0'
 
 # Runtime UID/GID used by the non-root API container. Match these to the
 # deployment account that owns backend/static and backend/orion/logs.
 APP_UID='1000'
 APP_GID='1000'
 PRODUCTION_DOMAIN='*'
-TENANT_BASE_DOMAIN='orionintelligence.org'
+APP_URL='http://127.0.0.1:8080'
+TENANT_BASE_DOMAIN='localhost'
+SEMANTIC_ENABLED='0'
 TESTING_ENABLED='0'

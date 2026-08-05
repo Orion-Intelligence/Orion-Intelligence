@@ -36,6 +36,55 @@ information gathering, Orion provides a unified ecosystem that enhances the work
 actionable insights.<br>
 <br>
 
+## Quick Start
+
+### Prerequisites
+
+- Git and a Bash-compatible shell.
+- Docker Engine with Docker Compose v2 (`docker compose`).
+- A Node.js version matching `^20.19.0`, `^22.12.0`, or `>=24.0.0`, with npm.
+- OpenSSL and `rsync`, used by the local build script.
+
+### Install and configure
+
+```bash
+git clone https://github.com/Orion-Intelligence/Orion-Intelligence.git
+cd Orion-Intelligence
+cp template-env .env
+```
+
+Open `.env` and replace every placeholder credential before starting the platform. Generate independent application
+keys with:
+
+```bash
+openssl rand -hex 32
+openssl rand -base64 32 | tr '+/' '-_'
+```
+
+Use the first value for `JWT_SECRET_KEY` and the second for `ENCRYPTION_KEY`. The `.env` file is ignored by Git and must
+never be committed.
+
+### Build and start
+
+```bash
+chmod +x run.sh
+./run.sh build -d
+```
+
+After the services become healthy, open [http://127.0.0.1:8080](http://127.0.0.1:8080). Local HTTPS is also available
+at `https://127.0.0.1:8443` with a generated self-signed certificate.
+
+For later starts or shutdowns:
+
+```bash
+./run.sh
+./run.sh stop
+```
+
+For additional build modes, testing workflows, production deployment, and configuration details, see the
+[developer documentation](docs/app_docs/developer_documentation.md) or the complete
+[Orion documentation](https://orion-search.readthedocs.io).
+
 ## Platform Preview
 
 The Orion homepage provides a search-first investigation workspace with summary panels, recent findings, and
@@ -145,15 +194,45 @@ complete path from collection to analyst action.
 Orion is intended for OSINT analysts, research teams, cyber threat investigators, and platform operators who need a
 unified environment for collection, search, enrichment, correlation, and review workflows.
 
+## Project Status and Support
+
+| Area | Current position |
+| --- | --- |
+| **Development status** | Actively developed on the `trusted-main` branch. |
+| **Supported deployment** | Docker Compose for local and development environments, with a dedicated production Compose configuration. |
+| **Release policy** | Versioned Git tags identify release snapshots. `trusted-main` contains current development, and releases follow validation rather than a fixed public cadence. |
+| **Documentation** | Use the [Orion documentation](https://orion-search.readthedocs.io) for platform usage, configuration, and API guidance. |
+| **Bugs and feature requests** | Use [GitHub Issues](https://github.com/Orion-Intelligence/Orion-Intelligence/issues) for reproducible bugs and feature proposals that contain no sensitive information. |
+| **Operational help** | Use the in-platform **Help & Support** workflow or the [collaboration page](https://www.orionintelligence.org/collaboration) for non-security questions. |
+| **Security reports** | Follow the [Security Policy](SECURITY.md) and report vulnerabilities privately. |
+
 ## Orion Ecosystem
 
 The Orion ecosystem is composed of connected repositories and services that support the full intelligence lifecycle.
 Individual modules focus on collection, storage, supporting services, the analyst experience, browser-assisted
 acquisition, and specialized social-data workflows.
 
-At a high level, the project operates as a connected flow:
+### Architecture Overview
 
-**Collection** → **Enrichment and services** → **Orion Platform** → **Analyst and public access**
+Orion follows a clear path from source collection to analyst action:
+
+```mermaid
+flowchart LR
+    collection["01 · COLLECT<br/>Crawler · Collector · Social"]
+    services["02 · PROCESS<br/>Enrichment · Micros · Sandbox"]
+    storage["03 · STORE<br/>Elasticsearch · MongoDB · ArangoDB · Redis"]
+    api["04 · SERVE<br/>FastAPI · Authentication · Tenancy"]
+    analyst["05 · INVESTIGATE<br/>Search · Cases · Alerts"]
+
+    collection --> services --> storage --> api --> analyst
+
+    classDef stage fill:#111827,stroke:#3B82F6,color:#E5E7EB,stroke-width:1.5px;
+    classDef outcome fill:#14291F,stroke:#22C55E,color:#F0FDF4,stroke-width:1.5px;
+
+    class collection,services,storage,api stage;
+    class analyst outcome;
+    linkStyle default stroke:#64748B,stroke-width:2px;
+```
 
 ## Modules
 
