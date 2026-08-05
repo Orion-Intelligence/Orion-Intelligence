@@ -4,10 +4,10 @@
   <defs>
     <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#111827"/>
-      <stop offset="1" stop-color="#312E81"/>
+      <stop offset="1" stop-color="#1E203D"/>
     </linearGradient>
   </defs>
-  <rect x="0.5" y="0.5" width="231" height="37" rx="9" fill="url(#background)" stroke="#818CF8" stroke-opacity="0.7"/>
+  <rect x="0.5" y="0.5" width="231" height="37" rx="9" fill="url(#background)" stroke="#818CF8" stroke-opacity="0.3"/>
   <g transform="translate(13 10)" fill="none" stroke="#A5B4FC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
     <circle cx="9" cy="5" r="3"/>
     <circle cx="3" cy="14" r="2.5"/>
