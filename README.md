@@ -157,6 +157,8 @@ At a high level, the project operates as a connected flow:
 
 ## Modules
 
+The five primary modules are shown first. Expand the additional modules to view the rest of the ecosystem.
+
 <table width="100%">
   <thead>
     <tr>
@@ -197,6 +199,24 @@ At a high level, the project operates as a connected flow:
       <td>Extensible source-collection framework for targeted acquisition and custom ingestion workflows.</td>
       <td><img src="https://img.shields.io/badge/-Python-3776AB?style=flat&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Beautiful_Soup-59666C?style=flat" alt="Beautiful Soup"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat&amp;logo=redis&amp;logoColor=white" alt="Redis"></td>
     </tr>
+  </tbody>
+</table>
+
+<details>
+  <summary><strong>Show 6 more modules</strong> · Social, Browser, Micros, Sandbox, Leaks, and Tor2Web</summary>
+  <br>
+  <table width="100%">
+    <thead>
+      <tr>
+        <th width="24%" align="left">Module</th>
+        <th width="38%" align="left">Role in the ecosystem</th>
+        <th width="38%" align="left">Core technologies</th>
+      </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <td colspan="3"><strong>Collection and enrichment</strong></td>
+    </tr>
     <tr>
       <td><a href="https://github.com/Orion-Intelligence/Orion-Social"><strong>Orion Social</strong></a><br><sub>PUBLIC REPOSITORY</sub></td>
       <td>Social-intelligence collection and enrichment service with browser automation and isolated Tor-assisted crawling.</td>
@@ -232,6 +252,7 @@ At a high level, the project operates as a connected flow:
     </tr>
   </tbody>
 </table>
+</details>
 
 ## Contribution
 
