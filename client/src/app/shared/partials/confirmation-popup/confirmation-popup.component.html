@@ -1,13 +1,20 @@
 <div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" @popupAnimation data-role="backdrop" (click)="onBackdrop($event)">
-  <div data-testid="confirmation-popup" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[420px] rounded-xl p-6">
-    <div class="ui-popup-title text-lg font-semibold">{{ 'confirmation.title' | translate }}</div>
+  <div data-testid="confirmation-popup" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[420px] rounded-xl p-6" [ngClass]="warning() ? ['[&&]:!border-0', '[&&]:!bg-[linear-gradient(145deg,rgba(249,115,22,0.14)_0%,#1b2a3b_48%)]', '[&&]:!shadow-[0_14px_42px_rgba(0,0,0,0.4),0_0_0_1px_rgba(249,115,22,0.08)]', '[body.light-theme_&&]:!bg-[linear-gradient(145deg,rgba(249,115,22,0.1)_0%,#fff7ed_48%)]', '[body.light-theme_&&]:!text-[#172235]', '[body.light-theme_&&]:!shadow-[0_10px_28px_rgba(154,52,18,0.12)]'] : []">
+    @if (warning()) {
+      <div class="ui-popup-title flex items-center gap-2 text-lg font-semibold [&&]:!text-orange-400 [body.light-theme_&&]:!text-orange-700">
+        <i data-testid="confirmation-warning-icon" class="bi bi-exclamation-triangle-fill text-[17px]" aria-hidden="true"></i>
+        <span>{{ 'confirmation.title' | translate }}</span>
+      </div>
+    } @else {
+      <div class="ui-popup-title text-lg font-semibold">{{ 'confirmation.title' | translate }}</div>
+    }
 
-    <div class="mt-3 break-all text-sm text-[var(--color-text3)]">
+    <div class="mt-3 break-all text-sm text-[var(--color-text3)]" [ngClass]="warning() ? ['whitespace-nowrap', 'max-[480px]:whitespace-normal'] : []">
       {{ message() }}
     </div>
 
     <div class="mt-6 flex justify-end gap-2">
-      <button triggerAutoFocus data-testid="confirmation-yes-button" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold" (click)="onYes()">{{ confirmLabel() | translate }}</button>
+      <button triggerAutoFocus data-testid="confirmation-yes-button" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold" [ngClass]="warning() ? ['[&&]:!bg-[linear-gradient(135deg,#d97706_0%,#f97316_100%)]', '[&&]:!shadow-[0_2px_8px_rgba(249,115,22,0.22)]', '[&&]:hover:!bg-[linear-gradient(135deg,#e58b0b_0%,#fb923c_100%)]', '[&&]:hover:!shadow-[0_3px_10px_rgba(249,115,22,0.28)]'] : []" (click)="onYes()">{{ confirmLabel() | translate }}</button>
       <button class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" (click)="onNo()">{{ 'common.actions.cancel' | translate }}</button>
     </div>
   </div>

@@ -125,7 +125,8 @@ describe('Network Intel - End-to-End Flow', () => {
     });
 
     cy.get('[data-testid="network-intel-tab-host-recon"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('example.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://www.example.com/{enter}');
+    cy.wait('@resolveIp').its('request.body').should('deep.equal', { domain: 'example.com' });
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
     cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]').should('be.visible');
     cy.docsScreenshot('network-intel-host-recon');
@@ -138,7 +139,8 @@ describe('Network Intel - End-to-End Flow', () => {
       .click();
 
     cy.get('[data-testid="network-intel-tab-ip-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('8.8.8.8{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://8.8.8.8/{enter}');
+    cy.wait('@ipScanner').its('request.body').should('deep.equal', { ip: '8.8.8.8' });
     cy.get('[data-testid="network-intel-ip-result"]').should('be.visible');
     cy.docsScreenshot('network-intel-ip-scan');
 
@@ -148,11 +150,12 @@ describe('Network Intel - End-to-End Flow', () => {
       .click();
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://www.bbc.com/{enter}');
     cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/, { timeout: 60000 }).should('be.visible');
     cy.docsScreenshot('network-intel-vulnerability-depth-controls');
     cy.get('[data-testid="network-intel-vulnerability-depth-full"]').should('be.visible').click();
-    cy.get('[data-testid="confirmation-popup"]').should('be.visible');
+    cy.get('[data-testid="confirmation-popup"]').should('be.visible').and('contain.text', 'over an hour');
+    cy.get('[data-testid="confirmation-warning-icon"]').should('be.visible');
     cy.get('[data-testid="confirmation-yes-button"]').click();
     cy.wait('@vulnerabilityScan').its('request.body').should('deep.equal', {
       domain: 'bbc.com',

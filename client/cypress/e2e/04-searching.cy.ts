@@ -276,7 +276,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    typeInputSlow('@scanInput', 'bbc.com');
+    typeInputSlow('@scanInput', 'https://www.bbc.com/');
     cy.docsScreenshot('web-scan-report');
 
     cy.get('button.ui-cred-toolbar-btn', { timeout: 60000 }).should('be.disabled');
@@ -299,7 +299,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.get('@scanInput').should('be.visible');
     cy.get('@scanInput').clear();
     waitForSearchReady();
-    typeInputSlow('@scanInput', 'bbc.com');
+    typeInputSlow('@scanInput', 'https://www.bbc.com/');
   });
 
   it('opens Playstore Scanner under Entity Lookup', () => {

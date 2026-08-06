@@ -15,7 +15,7 @@
       <div class="w-full">
         <form (submit)="$event.preventDefault(); runToolbarSearch()" class="relative flex w-full items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2" [ngClass]="[formError ? 'ring-1 ring-[var(--color-border-red)]' : '', activeTab === 'geo' ? 'opacity-70' : '']">
           <i class="bi bi-search text-[14px] text-[#0e1626]/70"></i>
-          <input data-testid="network-intel-search-input" [value]="getToolbarQuery()" (input)="setToolbarQuery($any($event.target).value)" (keyup.enter)="runToolbarSearch()" type="text" [placeholder]="getToolbarPlaceholder()" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45 disabled:cursor-pointer disabled:text-[#0e1626]/75" [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" [disabled]="activeTab === 'geo'" [readonly]="activeTab === 'geo'" />
+          <input data-testid="network-intel-search-input" [value]="getToolbarQuery()" (input)="setToolbarQuery($any($event.target).value)" type="text" [placeholder]="getToolbarPlaceholder()" class="flex-1 bg-transparent text-sm text-[#0e1626] outline-none placeholder:text-[#0e1626]/45 disabled:cursor-pointer disabled:text-[#0e1626]/75" [ngClass]="formError ? 'pr-[250px] max-[900px]:pr-[170px] max-[640px]:pr-[36px]' : ''" [disabled]="activeTab === 'geo'" [readonly]="activeTab === 'geo'" />
           @if (activeTab === 'geo') {
             <button type="button" class="absolute inset-0 z-[1] cursor-pointer rounded-[10px]" [attr.aria-label]="'Open geo coordinates picker' | translate" data-testid="network-intel-geo-search-trigger" (click)="openGeoCoordinatesModalFromStatus()"></button>
           }

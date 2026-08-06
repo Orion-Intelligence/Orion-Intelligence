@@ -163,15 +163,15 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   validateDns(): void {
-    this.formError = this.scanHelper.validateDnsInput(this.dnsForm.domain);
+    this.formError = this.scanHelper.validateDnsInput(this.normalizeDomainInput(this.dnsForm.domain));
   }
 
   validateShodan(): void {
-    this.formError = this.scanHelper.validateShodanInput(this.shodanForm.ip);
+    this.formError = this.scanHelper.validateShodanInput(this.normalizeIpInput(this.shodanForm.ip));
   }
 
   validateVulnerability(): void {
-    this.formError = this.scanHelper.validateVulnerabilityInput(this.vulnForm.ip);
+    this.formError = this.scanHelper.validateVulnerabilityInput(this.normalizeDomainInput(this.vulnForm.ip));
   }
 
   validateGeo(): void {
@@ -179,7 +179,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   validateSeoScan(): void {
-    this.formError = this.scanHelper.validateDnsInput(this.seoRepoScanForm.target);
+    this.formError = this.scanHelper.validateDnsInput(this.normalizeDomainInput(this.seoRepoScanForm.target));
   }
 
   validateRepositoryScan(): void {
@@ -476,6 +476,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   startDnsScan(): void {
+    this.dnsForm.domain = this.normalizeDomainInput(this.dnsForm.domain);
     this.validateDns();
     if (this.formError || !this.dnsForm.domain.trim() || this.isScanning()) {
       return;
@@ -522,6 +523,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   startShodanScan(): void {
+    this.shodanForm.ip = this.normalizeIpInput(this.shodanForm.ip);
     this.validateShodan();
     if (this.formError || !this.shodanForm.ip.trim() || this.isScanning()) {
       return;
@@ -535,6 +537,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   startVulnerabilityScan(): void {
+    this.vulnForm.ip = this.normalizeDomainInput(this.vulnForm.ip);
     this.validateVulnerability();
     if (this.formError || !this.vulnForm.ip.trim() || this.isScanning()) {
       return;
@@ -545,6 +548,18 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.syncUrl();
     this.sub = this.scanHelper.scanSubdomains(this.vulnForm.ip.trim(), false);
     this.watchResult(this.parseVulnerabilityTargets.bind(this));
+  }
+
+  private normalizeDomainInput(value: string): string {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^(?:https:\/\/)?(?:www\.)?([^/?#]+)\/?$/i);
+    return match?.[1] || trimmed;
+  }
+
+  private normalizeIpInput(value: string): string {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^(?:https:\/\/)?([^/?#]+)\/?$/i);
+    return match?.[1] || trimmed;
   }
 
   startVulnerabilityScanForTarget(target: string, depth: VulnerabilityScanDepth): void {
@@ -578,6 +593,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.validateRepositoryScan();
     }
     else {
+      this.seoRepoScanForm.target = this.normalizeDomainInput(this.seoRepoScanForm.target);
       this.validateSeoScan();
     }
     if (this.formError || !this.seoRepoScanForm.target.trim() || this.isScanning()) {
