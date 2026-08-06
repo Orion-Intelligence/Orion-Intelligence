@@ -430,12 +430,16 @@ class TenantManager:
             await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
 
         if "ai_endpoint_enabled" in data.model_fields_set and data.ai_endpoint_enabled is not None:
-            if not is_admin:
-                raise HTTPException(status_code=403, detail="Only admin can change tenant AI endpoint")
-            from orion.api.server.config_manager.config_controller import config_controller
-            if await config_controller.getInstance().get_cached(AllowedKeys.AI_ENDPOINT_ENABLED.value, "0") != "1":
-                raise HTTPException(status_code=403, detail="Admin AI endpoint must be enabled first")
-            settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+            if data.ai_endpoint_enabled:
+                if not is_admin:
+                    raise HTTPException(status_code=403, detail="Only admin can change tenant AI endpoint")
+                from orion.api.server.config_manager.config_controller import config_controller
+                if await config_controller.getInstance().get_cached(
+                    AllowedKeys.AI_ENDPOINT_ENABLED.value, "0"
+                ) != "1":
+                    raise HTTPException(status_code=403, detail="Admin AI endpoint must be enabled first")
+
+            settings_record = await self._engine.find_one(db_system_model,(db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
             system_settings = json.loads(settings_record.value) if settings_record and settings_record.value else {}
             system_settings[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if data.ai_endpoint_enabled else "0"
             if settings_record:
