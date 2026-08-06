@@ -1,4 +1,4 @@
-<div [ngClass]="isEmbeddedInConsolidated ? 'py-4' : 'px-4 py-4 md:px-6'">
+<div class="[app-scan-report_&]:!p-0" [ngClass]="isEmbeddedInConsolidated ? 'py-4' : 'px-4 py-4 md:px-6'">
   @if (isScanning()) {
     <div class="mb-5 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] p-4">
       <div class="mb-[6px] flex items-center justify-between gap-3">
@@ -30,7 +30,7 @@
         </div>
       } @else if (shodanResult) {
         <div @fadeInDashboardItem>
-          <div data-testid="network-intel-ip-result" class="ui-ioc-table-row ui-ioc-row-even flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
+          <div data-testid="network-intel-ip-result" class="ui-ioc-table-row ui-ioc-row-even flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 [app-scan-report_&]:hidden">
             <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ shodanResult.ip }}</span>
             <div class="flex items-center gap-2">
               @if (shodanResult.cloud_provider) {

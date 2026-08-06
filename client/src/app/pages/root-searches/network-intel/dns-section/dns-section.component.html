@@ -44,9 +44,6 @@
               @if (row.loading) {
                 <span class="w-3.5 h-3.5 border-2 border-sky-400/25 border-t-sky-400 rounded-full animate-spin"></span>
               }
-              <div class="flex h-6 w-6 items-center justify-center rounded border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] text-[14px] font-bold leading-none transition-colors duration-150" [ngClass]="{ 'bg-emerald-400/10 border-emerald-400/25 text-[var(--color-text1)]': row.expanded }">
-                <span>{{ row.expanded ? '−' : '+' }}</span>
-              </div>
             </div>
           </div>
           @if (row.expanded) {
