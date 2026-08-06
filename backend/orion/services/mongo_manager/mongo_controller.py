@@ -111,6 +111,28 @@ class mongo_controller:
             licenses=[LicenseName.OSINT_BASIC],
             tenant_uuid=str(default_tenant.id), ))
 
+    async def ensure_nexus_user(self):
+        if env_handler.get_instance().env("PRODUCTION") != "0":
+            return
+
+        nexus_username = env_handler.get_instance().env("NEXUS_USERNAME")
+        nexus_password = env_handler.get_instance().env("NEXUS_PASSWORD")
+        if not nexus_password or await self.__engine.find_one(db_user_account, db_user_account.username == "nexus"):
+            return
+
+        default_tenant = await self.__engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
+        if not default_tenant:
+            return
+
+        await self.__engine.save(db_user_account(
+            username=nexus_username,
+            password=nexus_password,
+            role=user_role.ANALYST,
+            status=UserStatus.ACTIVE,
+            subscription=True,
+            licenses=[LicenseName.ENTERPRISE],
+            tenant_uuid=str(default_tenant.id), ))
+
     async def initialize(self):
         await self.ensure_indexes()
 
@@ -121,6 +143,7 @@ class mongo_controller:
             default_tenant.event_management_enabled = True
             await self.__engine.save(default_tenant)
         await self.ensure_demo_user()
+        await self.ensure_nexus_user()
 
     def get_admin(self):
         from starlette_admin.contrib.odmantic import Admin, ModelView
