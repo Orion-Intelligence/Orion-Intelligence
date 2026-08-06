@@ -28,6 +28,8 @@ const SCAN_REPORT_EXPORT_OPTIONS = buildStandardExportOptions('scan-report-expor
   animations: [fadeInDashboardItem],
 })
 export class ScanReportComponent extends ValuePresentationBase implements OnInit {
+  private cachedResultSections: ScanReportSection[] | undefined;
+
   job: ScanJob | null = null;
   loading = true;
   errorMessage = '';
@@ -38,7 +40,6 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   vulnerabilityReportTargets: string[] = [];
   vulnerabilityReportTarget: string | null = null;
   vulnerabilityReportDepth: VulnerabilityScanDepth = 'low';
-  private cachedResultSections: ScanReportSection[] | undefined;
   readonly reportExportOptions = SCAN_REPORT_EXPORT_OPTIONS;
   readonly trackByIndex = (index: number) => index;
 

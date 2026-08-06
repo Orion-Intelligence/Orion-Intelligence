@@ -1367,11 +1367,11 @@ body.demo-tour-scroll-locked {
 }
 
 .dark-theme .ui-ioc-table-row.credential_row_expand {
-  background: linear-gradient(90deg, rgba(87, 165, 235, 0.2), rgba(43, 144, 238, 0.08)) !important;
+  background: linear-gradient(90deg, rgb(87 165 235 / 20%), rgb(43 144 238 / 8%)) !important;
 }
 
 .light-theme .ui-ioc-table-row.credential_row_expand {
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(14, 165, 233, 0.04)) !important;
+  background: linear-gradient(90deg, rgb(59 130 246 / 10%), rgb(14 165 233 / 4%)) !important;
 }
 
 .light-theme .ui-ioc-table-empty {

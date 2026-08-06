@@ -100,11 +100,21 @@ export class NetworkIntel implements OnInit, OnDestroy {
       if (!this.scanHelper.onDone()) {
         return;
       }
-      if (this.activeTab === 'dns') this.parseDnsResult();
-      else if (this.activeTab === 'shodan') this.parseShodanResult();
-      else if (this.activeTab === 'vuln' && this.vulnerabilityActiveTarget) this.parseVulnerabilityResult();
-      else if (this.activeTab === 'vuln') this.parseVulnerabilityTargets();
-      else if (this.activeTab === 'geo') this.parseGeoResult();
+      if (this.activeTab === 'dns') {
+        this.parseDnsResult();
+      }
+      else if (this.activeTab === 'shodan') {
+        this.parseShodanResult();
+      }
+      else if (this.activeTab === 'vuln' && this.vulnerabilityActiveTarget) {
+        this.parseVulnerabilityResult();
+      }
+      else if (this.activeTab === 'vuln') {
+        this.parseVulnerabilityTargets();
+      }
+      else if (this.activeTab === 'geo') {
+        this.parseGeoResult();
+      }
     });
   }
 
