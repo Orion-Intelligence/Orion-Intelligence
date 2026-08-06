@@ -2,7 +2,7 @@
   <div class="relative z-[1] border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
     <header class="mx-auto flex h-[64px] w-full max-w-[1280px] items-center justify-between gap-4 px-3 sm:px-5">
       <div class="flex min-w-0 items-center gap-3">
-        <img [src]="getLogoSrc()" alt="Orion" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
+        <img [src]="getLogoSrc()" [alt]="getAppName()" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
         <div class="hidden h-7 w-px bg-white/10 sm:block"></div>
         <div class="hidden min-w-0 text-sm font-semibold text-[var(--color-text2)] sm:block">{{ 'Shared Intelligence Report' | translate }}
         </div>
@@ -14,7 +14,7 @@
 
   <main class="relative z-[1] mx-auto w-full max-w-[1280px] px-3 py-5 sm:px-5 sm:py-6">
     <div class="mb-3 flex justify-end print:hidden">
-      <button type="button" (click)="exportPdf()" [disabled]="isLoading || !report" class="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-share-export-pdf">
+      <button type="button" (click)="openExportChoice()" [disabled]="isLoading || !report" class="inline-flex h-9 items-center gap-1.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60" data-testid="case-share-export-pdf">
         <i class="bi bi-download text-sm"></i>
         {{ 'Export PDF' | translate }}
       </button>
@@ -627,3 +627,15 @@
     </div>
   </footer>
 </div>
+
+<app-export-choice-modal
+  [visible]="isExportChoiceOpen"
+  [title]="('Export Report') | translate"
+  [subtitle]="('Choose the export format.') | translate"
+  [options]="reportExportOptions"
+  overlayTestId="case-share-export-overlay"
+  modalTestId="case-share-export-modal"
+  closeTestId="case-share-export-close"
+  (closed)="closeExportChoice()"
+  (optionSelected)="selectExport($event)">
+</app-export-choice-modal>

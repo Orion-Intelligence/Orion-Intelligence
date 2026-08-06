@@ -8,8 +8,15 @@ import { ScrollService } from '../../shared/services/scroll.service';
 export class SidebarHomepageService {
   constructor(private scrollService: ScrollService, private licenseService: LicenseService) {}
 
-  getRiskLevel(type: string): string {
-    const normalized = type.toLowerCase();
+  getRiskLevel(type: string, risk?: string): string {
+    const normalized = (type || '').toLowerCase();
+    const alertRisk = this.formatRisk(risk);
+    if (alertRisk) {
+      return alertRisk;
+    }
+    if (normalized === 'vulnerability-scanning') {
+      return 'Not Found';
+    }
 
     switch (normalized) {
       case 'general':
@@ -34,6 +41,14 @@ export class SidebarHomepageService {
       default:
         return 'Unknown';
     }
+  }
+
+  private formatRisk(value?: string): string {
+    const normalized = (value || '').trim().toLowerCase();
+    if (!normalized) {
+      return '';
+    }
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
   }
 
   selectSection<T>(category: T, emitter: { emit(value: T): void }) {

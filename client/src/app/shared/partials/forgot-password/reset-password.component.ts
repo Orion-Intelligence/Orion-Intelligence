@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { NgForm, FormsModule } from '@angular/forms';
@@ -15,7 +15,10 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   imports: [FormsModule, HeaderComponent, CommonModule, PasswordToggleDirective, TranslatePipe]
 })
 export class ResetPasswordComponent implements OnInit {
+  @ViewChild('forgotForm') form?: NgForm;
   email = '';
+  recoveryKey = '';
+  recoveryMode = false;
   password = '';
   errorMessage: string | null = null;
   responseError = false;
@@ -41,6 +44,15 @@ export class ResetPasswordComponent implements OnInit {
 
   get allPasswordRequirementsMet(): boolean {
     return areAllPasswordRequirementsMet(this.passwordChecks);
+  }
+
+  setRecoveryMode(recoveryMode: boolean) {
+    this.recoveryMode = recoveryMode;
+    this.form?.resetForm();
+    this.email = '';
+    this.recoveryKey = '';
+    this.errorMessage = null;
+    this.responseError = false;
   }
 
   ngOnInit() {
@@ -86,7 +98,10 @@ export class ResetPasswordComponent implements OnInit {
         });
       }
       else {
-        this.auth_service.forgotPassword(this.email).subscribe({
+        const request = this.recoveryMode
+          ? this.auth_service.recoverAccount(this.recoveryKey)
+          : this.auth_service.forgotPassword(this.email);
+        request.subscribe({
           next: (_) => {
             this.responseError = false;
             this.router.navigate(['notification'], {
@@ -98,8 +113,8 @@ export class ResetPasswordComponent implements OnInit {
           },
           error: (err) => {
             this.responseError = true;
-            if (err.status === 404) {
-              this.errorMessage = "Entered mail is not registered";
+            if (this.recoveryMode) {
+              this.errorMessage = err?.error?.detail || "Invalid recovery key";
             }
             else {
               this.errorMessage = "Something went wrong. Please try again later.";

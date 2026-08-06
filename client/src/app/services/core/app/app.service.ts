@@ -74,7 +74,12 @@ export class AppService {
         licenses: [],
         assignedQuota: '0',
         quotaExceeded: false,
+        profileVisibilityEnabled: true,
         eventManagementEnabled: false,
+        alertsVisibleToAdmin: true,
+        privilegedIoc: false,
+        alertRunTime: null,
+        allowedAlertCategories: null,
         accountsMailPassword: '',
         accountsMail: '',
         accountsSmtpServer: '',
@@ -111,14 +116,9 @@ export class AppService {
     this.appStorageService.setupWatcher(this.configData);
   }
 
-  loadSession(forced = false): Observable<void> {
+  loadSession(_forced = false): Observable<void> {
     if (this.sessionLoad$) {
       return this.sessionLoad$;
-    }
-
-    const token = localStorage.getItem('token');
-    if (!token && !forced) {
-      return of(void 0);
     }
 
     this.sessionLoad$ = this.apiService.post<userSessionData>('get/tenant/node', {}).pipe(tap((session) => {

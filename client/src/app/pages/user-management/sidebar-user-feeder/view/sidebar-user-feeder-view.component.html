@@ -291,9 +291,14 @@
                 <td data-feeder-text-selectable="true" class="px-4 py-2.5 text-[var(--color-text4)] select-text">{{ script.updated_at ? (script.updated_at | date:'medium') : '-' }}</td>
                 <td class="px-4 py-2.5">
                   <div class="inline-flex items-center justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)]">
-                      <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
+                    <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
                       {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                     </button>
+                    @if (getScriptExternalUrl(script); as scriptUrl) {
+                      <a [attr.data-testid]="'feeder-script-open-url-button-' + script.file_name" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [href]="scriptUrl" target="_blank" rel="noopener noreferrer" [title]="'Open URL' | translate" (click)="$event.stopPropagation()">
+                        <i class="bi bi-box-arrow-up-right text-[15px] leading-none"></i>
+                      </a>
+                    }
                     @if (canTransferScript(script)) {
                       <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] opacity-100 transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">
                         <svg viewBox="0 0 16 16" class="h-[16px] w-[16px] fill-current" aria-hidden="true">
@@ -411,9 +416,14 @@
             </div>
             <div class="px-3 py-2">
               <div class="inline-flex max-w-full flex-wrap justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)]">
-                  <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
+                <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
                   {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                 </button>
+                @if (getScriptExternalUrl(script); as scriptUrl) {
+                  <a [attr.data-testid]="'feeder-script-open-url-button-' + script.file_name" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [href]="scriptUrl" target="_blank" rel="noopener noreferrer" [title]="'Open URL' | translate" (click)="$event.stopPropagation()">
+                    <i class="bi bi-box-arrow-up-right text-[15px] leading-none"></i>
+                  </a>
+                }
                 @if (canTransferScript(script)) {
                   <button [attr.data-testid]="'feeder-script-owner-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-transparent text-[var(--color-text1)] opacity-100 transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" [title]="'Change Owner' | translate" (click)="openOwnerDialog(script)">
                     <svg viewBox="0 0 16 16" class="h-[16px] w-[16px] fill-current" aria-hidden="true">

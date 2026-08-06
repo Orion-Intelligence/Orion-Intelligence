@@ -16,6 +16,29 @@ stop_docker() {
     docker rm trusted-web-nginx 2>/dev/null || true
 }
 
+stop_ng_serve() {
+    local url="http://127.0.0.1:4200/"
+    local pid_file="/tmp/orion-ng-serve.pid"
+
+    if [ -f "$pid_file" ]; then
+        kill -9 "$(cat "$pid_file")" 2>/dev/null || true
+        rm -f "$pid_file"
+    fi
+    pkill -9 -f '(^|[[:space:]/])ng([[:space:]].*)? serve([[:space:]]|$)' 2>/dev/null || true
+    pkill -9 -f 'node .*@angular/cli/bin/ng serve' 2>/dev/null || true
+    pkill -9 -f "npm run serve -- --host 127.0.0.1 --port 4200" 2>/dev/null || true
+
+    while curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
+        sleep 1
+    done
+}
+
+ng_serve_is_running() {
+    pgrep -f '(^|[[:space:]/])ng([[:space:]].*)? serve([[:space:]]|$)' >/dev/null \
+        || pgrep -f 'node .*@angular/cli/bin/ng serve' >/dev/null \
+        || pgrep -f 'npm run serve -- --host 127.0.0.1 --port 4200' >/dev/null
+}
+
 pull_image_if_missing() {
     local image="$1"
 
@@ -59,12 +82,19 @@ client_build() {
 }
 
 install_client_dependencies() {
+    local build_flag="$1"
+
     cd client || exit
     if [ ! -f package-lock.json ] && [ ! -f npm-shrinkwrap.json ]; then
         echo "Missing client lockfile; refusing unpinned dependency install"
         exit 1
     fi
-    npm ci
+    if { [ "$build_flag" = "-d" ] || [ "$build_flag" = "-t" ] || [ "$build_flag" = "-tb" ]; } \
+        && ng_serve_is_running; then
+        echo "Angular dev server is running; preserving node_modules and skipping npm ci"
+    else
+        npm ci
+    fi
     npm run lint
     cd ..
 }
@@ -98,7 +128,7 @@ disable_maintenance_mode() {
 }
 
 wait_for_test_service() {
-    local url="https://127.0.0.1:8443/api/public"
+    local url="https://127.0.0.1:8443/api/test/ready"
     echo "Waiting for test service to become ready..."
     until curl -fksS -o /dev/null "$url" >/dev/null 2>&1; do
         sleep 2
@@ -129,6 +159,23 @@ run_test_task() {
     npm test run
     cd ..
     exit 0
+}
+
+restart_ng_serve() {
+    local url="http://127.0.0.1:4200/"
+    local pid_file="/tmp/orion-ng-serve.pid"
+
+    stop_ng_serve
+
+    (
+        cd client || exit
+        nohup npm run serve -- --host 127.0.0.1 --port 4200 >/tmp/orion-ng-serve.log 2>&1 &
+        echo $! > "$pid_file"
+    )
+
+    until curl -fsS -o /dev/null "$url" >/dev/null 2>&1; do
+        sleep 2
+    done
 }
 
 set_testing_enabled() {
@@ -162,19 +209,24 @@ if [ "$1" = "-ip" ]; then
 fi
 
 if [ "$1" = "stop" ]; then
+    stop_ng_serve
     stop_docker
     echo "Orion Intelligence service stopped"
     exit 0
 fi
 
 if [ "$1" = "-doc" ]; then
+    docker compose -p "$PROJECT_NAME" -f docker-compose-testing.yml down -v --remove-orphans
     "$0" build -t
+    restart_ng_serve
     bash docs/scripts/generate_docs.sh --clear
     exit 0
 fi
 
 if [ "$1" = "-docs" ]; then
+    docker compose -p "$PROJECT_NAME" -f docker-compose-testing.yml down -v --remove-orphans
     "$0" build -t
+    restart_ng_serve
     bash docs/scripts/generate_docs.sh
     exit 0
 fi
@@ -183,7 +235,8 @@ COMMAND=$1
 FLAG=$2
 EXTRA_FLAG=$3
 
-if [ "$COMMAND" != "build" ] || [ "$FLAG" != "-p" ]; then
+if [ "$COMMAND" != "build" ] \
+    || { [ "$FLAG" != "-d" ] && [ "$FLAG" != "-t" ] && [ "$FLAG" != "-tb" ]; }; then
     stop_docker
 fi
 
@@ -192,10 +245,22 @@ set_testing_enabled "$FLAG"
 if [ "$COMMAND" = "build" ]; then
     if [ "$FLAG" = "-p" ]; then
         enable_maintenance_mode
+    elif [ "$FLAG" = "-d" ] || [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; then
+        if [ "$FLAG" = "-d" ]; then
+            cp nginx/nginx-dev.conf nginx/nginx.conf
+        else
+            cp nginx/nginx-testing.conf nginx/nginx.conf
+        fi
+        if docker inspect -f '{{.State.Running}}' trusted-web-nginx 2>/dev/null | grep -qx true; then
+            docker exec trusted-web-nginx nginx -t
+            docker exec trusted-web-nginx nginx -s reload
+        fi
+        enable_maintenance_mode
+        trap disable_maintenance_mode EXIT
     fi
 
     pull_image_if_missing python:3.11-slim
-    install_client_dependencies
+    install_client_dependencies "$FLAG"
 
     case "$FLAG" in
         -t)
@@ -235,7 +300,7 @@ if [ "$COMMAND" = "build" ]; then
             cp nginx/nginx-prod.conf nginx/nginx.conf
             sudo mkdir -p /srv/elasticsearch/data
             sudo chown -R 1000:1000 /srv/elasticsearch/data
-            export ELASTIC_ROOT_IP="37.27.128.168"
+            export ELASTIC_ROOT_IP="elasticsearch"
             ;;
         *)
             echo "Unknown build flag: $FLAG"
@@ -244,7 +309,7 @@ if [ "$COMMAND" = "build" ]; then
     esac
 
     if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
-        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build web
+        docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build web documentation
     else
         docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" build
     fi
@@ -256,6 +321,7 @@ else
 fi
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
+docker network create --driver bridge orion_nexus_backend 2>/dev/null || true
 compose_up_services=()
 
 if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
@@ -289,6 +355,12 @@ case "$COMMAND:$FLAG" in
         wait_for_test_service
         ;;
 esac
+
+if [ "$COMMAND" = "build" ] \
+    && { [ "$FLAG" = "-d" ] || [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then
+    disable_maintenance_mode
+    trap - EXIT
+fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-tb" ]; then
     run_backend_tests_protected

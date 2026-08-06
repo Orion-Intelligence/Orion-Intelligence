@@ -10,14 +10,6 @@
   animation: social-result-source-indicator-fade-darkweb 120ms ease-out;
 }
 
-.social-result-source-count {
-  background: rgb(15 23 42 / 18%);
-}
-
-.social-result-source-count--active {
-  background: rgb(255 255 255 / 18%);
-}
-
 @keyframes social-result-source-indicator-fade-normal {
   0% {
     opacity: 72%;

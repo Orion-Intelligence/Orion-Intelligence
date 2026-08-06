@@ -3,7 +3,7 @@ from typing import Any, Dict
 
 from fastapi import HTTPException
 
-from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, AlertModel
+from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, db_alert_model, visible_alerts
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 
@@ -41,6 +41,7 @@ class AlertSummaryHelper:
             "email-breach",
             "stealerlogs",
             "software-scanning",
+            "vulnerability-scanning",
         ):
             return "critical"
         if normalized in ("defacement", "advanced scanning", "repo scanning"):
@@ -48,6 +49,15 @@ class AlertSummaryHelper:
         if normalized in ("social", "discussion"):
             return "medium"
         return "unknown"
+
+    @staticmethod
+    def risk_from_alert(alert: AlertModel) -> str:
+        root_risk = str(getattr(alert, "risk", "") or "").strip().lower()
+        if root_risk:
+            return root_risk
+        if (alert.type or "").strip().lower() == "vulnerability-scanning":
+            return "not found"
+        return AlertSummaryHelper.risk_from_alert_type(alert.type or "")
 
     def build_alert_summary(self, alerts_list: list[AlertModel]) -> Dict[str, Dict[str, int] | int]:
         counts_by_type: Dict[str, int] = {}
@@ -62,7 +72,7 @@ class AlertSummaryHelper:
             if not bool(alert.report_seen):
                 unseen_total += 1
 
-            risk = self.risk_from_alert_type(alert.type or "")
+            risk = self.risk_from_alert(alert)
             if risk in counts_by_risk:
                 counts_by_risk[risk] += 1
 
@@ -78,7 +88,7 @@ class AlertSummaryHelper:
             raise HTTPException(status_code=500, detail=f"Redis cache read failed: {ex}")
 
         alerts_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == str(tenant_id))
-        alerts = alerts_doc.alerts if alerts_doc and alerts_doc.alerts else []
+        alerts = visible_alerts(alerts_doc.alerts if alerts_doc and alerts_doc.alerts else [])
         summary = self.build_alert_summary(alerts)
 
         try:

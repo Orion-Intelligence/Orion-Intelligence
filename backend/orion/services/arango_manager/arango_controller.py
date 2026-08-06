@@ -109,6 +109,7 @@ class arango_controller:
                 ["node_class"],
                 ["entity_role"],
                 ["normalized_value"],
+                ["type", "normalized_value"],
                 ["doc_id"],
                 ["cluster_id"],
                 ["evidence_count"],
@@ -116,11 +117,14 @@ class arango_controller:
             ]:
                 try:
                     vertex_collection.add_persistent_index(fields=fields)
-                except Exception:
-                    pass
+                except Exception as ex:
+                    log.g().w(f"ARANGO VERTEX INDEX INIT SKIPPED for {fields}: {ex}")
 
             for fields in [
                 ["type"],
+                ["_from", "type"],
+                ["_to", "type"],
+                ["_from", "_to", "type"],
                 ["edge_type"],
                 ["entity_role"],
                 ["derived"],
@@ -129,8 +133,8 @@ class arango_controller:
             ]:
                 try:
                     edge_collection.add_persistent_index(fields=fields)
-                except Exception:
-                    pass
+                except Exception as ex:
+                    log.g().w(f"ARANGO EDGE INDEX INIT SKIPPED for {fields}: {ex}")
 
         except Exception as ex:
             log.g().e(f"ARANGO GRAPH INIT ERROR: {ex}")

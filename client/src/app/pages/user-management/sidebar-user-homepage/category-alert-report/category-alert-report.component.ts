@@ -20,21 +20,22 @@ import { HelperService } from '../../../../shared/services/helper.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { EmptyResultComponent } from '../../../../shared/partials/empty-result/empty-result.component';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { ExportChoiceOption } from '../../../../shared/model/report/export-choice.model';
+import { buildStandardExportOptions } from '../../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../../shared/services/export/alert-export.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { CategoryAlertDetailDrawerComponent } from './alert-detail-drawer/category-alert-detail-drawer.component';
 
 @Component({
   selector: 'app-category-alert-report',
-  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent, TranslatePipe, CategoryAlertDetailDrawerComponent],
   templateUrl: './category-alert-report.component.html',
 })
 export class CategoryAlertReportComponent implements OnInit {
   private appendTimer: ReturnType<typeof setTimeout> | null = null;
   private alertLookupById = new Map<string, AlertModel>();
 
-  filterModel: FilterModel = alert_filters;
+  filterModel: FilterModel = structuredClone(alert_filters);
   alerts: CategoryAlerts[] = []
   filteredAlerts: CategoryAlerts[] = []
   visibleFilteredAlerts: CategoryAlerts[] = [];
@@ -45,6 +46,7 @@ export class CategoryAlertReportComponent implements OnInit {
   isLoadingMoreAlerts: boolean = false;
   isInitialLoading: boolean = false;
   activeDateRange: string | null = null;
+  activeAlertFilters: Record<string, string | null> = {};
   searchText: string = '';
   category: string = '';
   iocTypes: Record<string, string> = { ...search_filter_labels };
@@ -57,10 +59,14 @@ export class CategoryAlertReportComponent implements OnInit {
   selectedDeleteAlertId: string = '';
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
+  activeDetailAlert: CategoryAlerts | null = null;
+  alertExportScope: 'selected' | 'category' = 'selected';
   isExportChoiceOpen: boolean = false;
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'category-alert-export-option-report' }];
+  isAdminTenantAlertReport: boolean = false;
+  adminTenantId: string | null = null;
+  readonly alertExportOptions = buildStandardExportOptions('category-alert-export-option', 'report', 'Generate PDF export for selected alert.');
   expandedAlertIds = new Set<string>();
-  hoveredReportTool: 'add' | 'import' | 'flush' | 'sidebar' | null = null;
+  hoveredReportTool: 'add' | 'export' | 'flush' | 'sidebar' | null = null;
 
   constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -81,7 +87,7 @@ export class CategoryAlertReportComponent implements OnInit {
     return document.body.classList.contains('light-theme');
   }
 
-  setReportToolHover(tool: 'add' | 'import' | 'flush' | 'sidebar' | null): void {
+  setReportToolHover(tool: 'add' | 'export' | 'flush' | 'sidebar' | null): void {
     this.hoveredReportTool = tool;
   }
 
@@ -91,13 +97,15 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.isAdminTenantAlertReport = this.route.snapshot.data['adminTenantAlerts'] === true;
     this.route.url.pipe(map(segments => {
       if (segments && segments.length > 0) {
         return segments[segments.length - 1].path;
       }
       return '';
     })).subscribe(lastSegment => {
-      this.category = lastSegment;
+      this.adminTenantId = this.route.snapshot.paramMap.get('tenantId') || this.route.snapshot.queryParamMap.get('tenantId');
+      this.category = this.route.snapshot.paramMap.get('type') || lastSegment;
       this.getLatestAlerts();
     });
   }
@@ -144,7 +152,12 @@ export class CategoryAlertReportComponent implements OnInit {
     if (reset) {
       this.isInitialLoading = true;
     }
-    const endpoint = `profile/alerts?paginate=true&page=${nextPage}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
+    const endpoint = this.getAlertsEndpoint(nextPage);
+    if (!endpoint) {
+      this.isLoadingMoreAlerts = false;
+      this.isInitialLoading = false;
+      return;
+    }
 
     this.apiService.get<any>(endpoint).subscribe({
       next: response => {
@@ -159,6 +172,7 @@ export class CategoryAlertReportComponent implements OnInit {
         this.currentPage = response?.page || nextPage;
         this.hasMoreAlerts = !!response?.has_more;
         this.alerts = reset ? convertedItems : [...this.alerts, ...convertedItems];
+        this.refreshAlertFilterOptions();
         this.isInitialLoading = false;
 
         if (this.activeDateRange || this.searchText.trim()) {
@@ -186,6 +200,17 @@ export class CategoryAlertReportComponent implements OnInit {
       return;
     }
     this.loadAlertsPage(false);
+  }
+
+  private getAlertsEndpoint(page: number): string | null {
+    if (this.isAdminTenantAlertReport) {
+      if (!this.adminTenantId) {
+        return null;
+      }
+      return `tenants/${encodeURIComponent(this.adminTenantId)}/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
+    }
+
+    return `profile/alerts?paginate=true&page=${page}&limit=${this.serverPageSize}&alert_type=${encodeURIComponent(this.category)}`;
   }
 
   flushAll() {
@@ -288,6 +313,10 @@ export class CategoryAlertReportComponent implements OnInit {
     return allowedCategories.includes(this.category);
   }
 
+  canExportCategoryAlerts(): boolean {
+    return this.alerts.length > 0 && (this.canExportstix() || this.licenseService.isMaintainer());
+  }
+
   cancleAlertPopup(refresh: boolean) {
     if (refresh) {
       this.getLatestAlerts();
@@ -329,6 +358,7 @@ export class CategoryAlertReportComponent implements OnInit {
     this.alerts = [];
     this.filteredAlerts = [];
     this.visibleFilteredAlerts = [];
+    this.refreshAlertFilterOptions();
     this.loadAlertsPage(true);
   }
 
@@ -339,31 +369,85 @@ export class CategoryAlertReportComponent implements OnInit {
       return;
     }
     if (this.alertToShowReport) {
+      if (this.isAdminTenantAlertReport) {
+        this.openExportChoice();
+        return;
+      }
       this.alertToShowReport.report_seen = true;
       this.apiService.post('alert/seen', [this.alertToShowReport]).subscribe({
         next: () => {
           this.decrementUnseenSummary(1);
         }
       });
-      this.openExportChoice();
+      this.openExportChoice('selected');
     }
   }
 
-  openExportChoice(): void {
+  openExportChoice(scope: 'selected' | 'category' = 'selected'): void {
+    this.alertExportScope = scope;
     this.isExportChoiceOpen = true;
+  }
+
+  openCategoryExportChoice(): void {
+    if (!this.canExportCategoryAlerts()) {
+      return;
+    }
+    this.alertToShowReport = null;
+    this.openExportChoice('category');
   }
 
   closeExportChoice(): void {
     this.isExportChoiceOpen = false;
   }
 
-  exportSelectedAlert(_type: string): void {
+  exportSelectedAlert(type: string): void {
+    if (this.alertExportScope === 'category') {
+      this.exportCategoryAlerts(type);
+      return;
+    }
     if (!this.alertToShowReport) {
       this.closeExportChoice();
       return;
     }
-    this.alertExportService.exportPdf([this.alertToShowReport], 'Brand Alerts');
+    this.alertExportService.exportByType([this.alertToShowReport], type, 'Brand Alerts');
     this.closeExportChoice();
+  }
+
+  private exportCategoryAlerts(type: string): void {
+    const endpoint = this.getCategoryExportEndpoint();
+    if (!endpoint) {
+      this.closeExportChoice();
+      return;
+    }
+    this.apiService.get<any>(endpoint).subscribe({
+      next: response => {
+        const alerts: AlertModel[] = Array.isArray(response)
+          ? response
+          : (Array.isArray(response?.items) ? response.items : []);
+        if (!alerts.length) {
+          this.messageNotificationService.show('No alerts available to export right now.');
+          this.closeExportChoice();
+          return;
+        }
+        this.alertExportService.exportByType(alerts, type, 'Brand Alerts');
+        this.closeExportChoice();
+      },
+      error: () => {
+        this.closeExportChoice();
+      }
+    });
+  }
+
+  private getCategoryExportEndpoint(): string | null {
+    const alertType = this.category ? `?alert_type=${encodeURIComponent(this.category)}` : '';
+    if (this.isAdminTenantAlertReport) {
+      if (!this.adminTenantId) {
+        return null;
+      }
+      return `tenants/${encodeURIComponent(this.adminTenantId)}/alerts${alertType}`;
+    }
+
+    return `profile/alerts${alertType}`;
   }
 
   seeDetails(id: string, hash: string) {
@@ -450,7 +534,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
 
         }
-        if (_alert) {
+        if (_alert && !this.isAdminTenantAlertReport) {
           _alert.report_seen = true;
           this.apiService.post('alert/seen', [_alert]).subscribe({
             next: () => {
@@ -476,12 +560,14 @@ export class CategoryAlertReportComponent implements OnInit {
 
   convertToCategoryAlert(alert: AlertModel): CategoryAlerts {
     const entity = alert.ioc_value || 'N/A';
+    const resultDate = this.extractAlertResultDate(alert.all_ioc || []);
+    const password = this.extractAlertPassword(alert);
 
     return {
       id: alert.alert_id || '',
       seen: alert.report_seen || false,
       custom: alert.custom_alert || false,
-      risk: this.getRiskLevel(alert.type!),
+      risk: this.getRiskLevel(alert.type!, alert.risk),
       category: alert.type || 'unknown',
       title: alert.title || 'No Title',
       description: alert.description || 'No description provided.',
@@ -489,14 +575,58 @@ export class CategoryAlertReportComponent implements OnInit {
       source: alert.source || 'N/A',
       url: alert.url || 'N/A',
       entity: entity,
+      contentTypes: alert.content_types || [],
+      rawFindings: alert.raw_findings || {},
 
       allIOC: alert.all_ioc || [],
       detectedOn: alert.first_seen || new Date(),
+      resultDate,
+      password,
     };
   }
 
-  getRiskLevel(type: string): string {
-    return this.sidebarHomepageService.getRiskLevel(type);
+  private extractAlertPassword(alert: AlertModel): string {
+    const fromIoc = this.getFirstAlertIocValue(alert.all_ioc || [], ['password', 'm_password']);
+    if (fromIoc) {
+      return fromIoc;
+    }
+    if ((alert.type || '').toLowerCase() === 'stealerlogs') {
+      return this.cleanAlertValue(alert.description || '');
+    }
+    return '';
+  }
+
+  private extractAlertResultDate(allIOC: AlertAllIoc[]): Date | null {
+    const rawDate = this.getFirstAlertIocValue(allIOC, [
+      'm_date',
+      'date',
+      'timestamp',
+      'created_at',
+      'm_creation_date',
+      'm_published_date',
+      'm_first_seen'
+    ]);
+    if (!rawDate) {
+      return null;
+    }
+    const date = new Date(rawDate);
+    return Number.isNaN(date.getTime()) ? null : date;
+  }
+
+  private getFirstAlertIocValue(allIOC: AlertAllIoc[], keys: string[]): string {
+    const wanted = new Set(keys.map(key => key.toLowerCase()));
+    const match = (allIOC || []).find(ioc => wanted.has(String(ioc?.name || '').toLowerCase()));
+    const value = match?.values?.find(item => this.cleanAlertValue(item));
+    return this.cleanAlertValue(value || '');
+  }
+
+  private cleanAlertValue(value: unknown): string {
+    const text = String(value ?? '').replace(/\s+/g, ' ').trim();
+    return ['-', 'n/a', 'none', 'null', 'undefined'].includes(text.toLowerCase()) ? '' : text;
+  }
+
+  getRiskLevel(type: string, risk?: string): string {
+    return this.sidebarHomepageService.getRiskLevel(type, risk);
   }
 
   getRiskIcon(risk: string): string {
@@ -525,8 +655,15 @@ export class CategoryAlertReportComponent implements OnInit {
       case 'low':
         return 'category_report_status-low';
       default:
-        return 'category_report_status-low';
+        return '';
     }
+  }
+
+  getRiskLabelClass(risk: string): string {
+    const normalized = (risk || '').toLowerCase();
+    return ['critical', 'high', 'medium', 'low'].includes(normalized)
+      ? `category_report_alert-label-${normalized}`
+      : '';
   }
 
   sliceString(text: string, maxLength: number): string {
@@ -542,6 +679,10 @@ export class CategoryAlertReportComponent implements OnInit {
   hasAlertUrl(url: string): boolean {
     const normalizedUrl = (url || '').trim().toLowerCase();
     return !!normalizedUrl && !['-', 'n/a', 'none', 'null'].includes(normalizedUrl);
+  }
+
+  getAlertCardDate(alert: CategoryAlerts): Date {
+    return alert.resultDate || alert.detectedOn;
   }
 
   getFilteredIocs(allIOC: AlertAllIoc[]): { label: string, count: number }[] {
@@ -645,6 +786,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   applyFilter(filters: Record<string, string | null>) {
+    this.activeAlertFilters = { ...filters };
     const range = filters['daterange'];
     this.activeDateRange = range || null;
     this.applyCurrentFilters();
@@ -668,6 +810,17 @@ export class CategoryAlertReportComponent implements OnInit {
       });
     }
 
+    const contentTypeFilter = this.normalizeFilterValue(this.activeAlertFilters['content_type']);
+    if (contentTypeFilter && contentTypeFilter !== 'all') {
+      result = result.filter(alert => (alert.contentTypes || []).some(value =>
+        this.normalizeFilterValue(value).includes(contentTypeFilter)));
+    }
+
+    const riskFilter = this.normalizeFilterValue(this.activeAlertFilters['risk']);
+    if (riskFilter && riskFilter !== 'all') {
+      result = result.filter(alert => this.normalizeFilterValue(alert.risk) === riskFilter);
+    }
+
     const query = this.searchText.trim().toLowerCase();
     if (query) {
       result = result.filter(alert => this.getAlertSearchText(alert).includes(query));
@@ -675,6 +828,50 @@ export class CategoryAlertReportComponent implements OnInit {
 
     this.filteredAlerts = result;
     this.visibleFilteredAlerts = [...result];
+  }
+
+  private normalizeFilterValue(value: unknown): string {
+    return String(value ?? '').trim().toLowerCase();
+  }
+
+  private refreshAlertFilterOptions(): void {
+    const suggestionEndpoint = this.getAlertFilterOptionsEndpoint();
+    const suggestionParams: Record<string, string> | undefined = this.category
+      ? { alert_type: this.category }
+      : undefined;
+    this.filterModel = {
+      ...this.filterModel,
+      filters: {
+        ...this.filterModel.filters,
+        content_type: {
+          ...this.filterModel.filters['content_type'],
+          options: this.toDropdownOptions(this.collectContentTypes()),
+          suggestionEndpoint,
+          suggestionParams
+        },
+      }
+    };
+  }
+
+  private getAlertFilterOptionsEndpoint(): string | undefined {
+    if (this.isAdminTenantAlertReport) {
+      return this.adminTenantId
+        ? `tenants/${encodeURIComponent(this.adminTenantId)}/alerts/filter-options`
+        : undefined;
+    }
+    return 'profile/alerts/filter-options';
+  }
+
+  private collectContentTypes(): string[] {
+    return this.alerts.flatMap(alert => alert.contentTypes || []);
+  }
+
+  private toDropdownOptions(values: unknown[]): { key: string; label: string }[] {
+    const uniqueValues = Array.from(new Set(values
+      .map(value => String(value ?? '').trim())
+      .filter(value => value && !['-', 'n/a', 'none', 'null', 'undefined'].includes(value.toLowerCase())))).sort((left, right) => left.localeCompare(right));
+
+    return uniqueValues.map(value => ({ key: value, label: value }));
   }
 
   private getAlertSearchText(alert: CategoryAlerts): string {
@@ -734,6 +931,7 @@ export class CategoryAlertReportComponent implements OnInit {
         }
 
         this.importedAlert = this.validateAlert(jsonData);
+        this.importedAlert.licenses = this.licenseService.getAlertLicenses(this.category || this.importedAlert.type);
 
         this.apiService.post('alert/add', this.importedAlert).subscribe({
           next: () => {
@@ -809,4 +1007,5 @@ export class CategoryAlertReportComponent implements OnInit {
       content_types: report.labels ?? [],
     };
   }
+
 }

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="232" height="38" viewBox="0 0 232 38" role="img" aria-labelledby="title description">
+  <title id="title">Explore Orion collaboration</title>
+  <desc id="description">Open Orion collaboration opportunities</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#111827"/>
+      <stop offset="1" stop-color="#1E203D"/>
+    </linearGradient>
+  </defs>
+  <rect x="0.5" y="0.5" width="231" height="37" rx="9" fill="url(#background)" stroke="#818CF8" stroke-opacity="0.3"/>
+  <g transform="translate(13 10)" fill="none" stroke="#A5B4FC" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6">
+    <circle cx="9" cy="5" r="3"/>
+    <circle cx="3" cy="14" r="2.5"/>
+    <circle cx="15" cy="14" r="2.5"/>
+    <path d="m7.3 7.5-2.5 4M10.7 7.5l2.5 4M5.5 14h7"/>
+  </g>
+  <text x="43" y="15" fill="#A5B4FC" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="8.5" font-weight="700" letter-spacing="1">COLLABORATION</text>
+  <text x="43" y="29" fill="#FFFFFF" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif" font-size="12" font-weight="650">Explore opportunities</text>
+  <path d="m215 15 4 4-4 4m4-4h-10" fill="none" stroke="#C7D2FE" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/>
+</svg>

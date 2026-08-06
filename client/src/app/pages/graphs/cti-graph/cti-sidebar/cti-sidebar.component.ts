@@ -5,12 +5,13 @@ import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../../../../
   selector: 'app-cti-sidebar',
   standalone: true,
   imports: [SidebarComponent],
-  template: `<graph-sidebar
+  template: `<graph-sidebar class="block h-full min-h-0"
     [filters]="filters()"
     [stats]="stats()"
     [legendItems]="legendItems()"
     [clusterLegendItems]="clusterLegendItems()"
     [collapsed]="collapsed()"
+    (filtersApply)="filtersApply.emit($event)"
     (collapsedChange)="collapsedChange.emit($event)">
   </graph-sidebar>`
 })
@@ -21,4 +22,5 @@ export class CtiSidebarComponent {
   readonly clusterLegendItems = input<CtiGraphLegendItem[]>([]);
   readonly collapsed = input(false);
   readonly collapsedChange = output<boolean>();
+  readonly filtersApply = output<CtiGraphFilters>();
 }

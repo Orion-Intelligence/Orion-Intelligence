@@ -153,6 +153,14 @@ const EXPLOIT_RISK_OPTIONS = [
   { key: "low", label: "Low" },
   { key: "info", label: "Info" }
 ];
+const ALERT_RISK_OPTIONS = [
+  { key: "critical", label: "Critical" },
+  { key: "high", label: "High" },
+  { key: "medium", label: "Medium" },
+  { key: "low", label: "Low" },
+  { key: "informational", label: "Informational" },
+  { key: "unknown", label: "Unknown" }
+];
 const EXPLOIT_REMOTE_TYPE_OPTIONS = [
   { key: "remote", label: "Remote" },
   { key: "local", label: "Local" },
@@ -309,15 +317,31 @@ const SOCIAL_PLATFORM_FILTER = {
   options: [
     { key: "all", label: "All" },
     { key: "telegram", label: "Telegram" },
-    { key: "twitter", label: "Twitter" },
-    { key: "mastodon", label: "Mastodon" },
-    { key: "pastebin", label: "Pastebin" },
     { key: "forum", label: "Forum" },
-    { key: "reddit", label: "Reddit" },
+    { key: "blogger", label: "Blogger" },
+    { key: "bluesky", label: "Bluesky" },
+    { key: "devto", label: "Dev.to" },
     { key: "facebook", label: "Facebook" },
+    { key: "habr", label: "Habr" },
+    { key: "hackernoon", label: "HackerNoon" },
+    { key: "hashnode", label: "Hashnode" },
     { key: "instagram", label: "Instagram" },
     { key: "linkedin", label: "LinkedIn" },
+    { key: "mastodon", label: "Mastodon" },
+    { key: "medium", label: "Medium" },
+    { key: "microblog", label: "Micro.blog" },
+    { key: "misskey", label: "Misskey" },
+    { key: "nostr", label: "Nostr" },
+    { key: "pastebin", label: "Pastebin" },
+    { key: "pleroma", label: "Pleroma" },
+    { key: "primal", label: "Primal" },
+    { key: "quora", label: "Quora" },
+    { key: "reddit", label: "Reddit" },
+    { key: "stackoverflow", label: "Stack Overflow" },
+    { key: "substack", label: "Substack" },
+    { key: "threads", label: "Threads" },
     { key: "tiktok", label: "TikTok" },
+    { key: "twitter", label: "Twitter" },
     { key: "youtube", label: "YouTube" },
   ],
   type: "dropdown" as const,
@@ -382,6 +406,24 @@ const MALWARE_REPORTER_FILTER = {
 export const audit_filters: FilterModel = {
   filters: {
     daterange: DATERANGE_DEFAULT
+  }
+};
+export const takedown_filters: FilterModel = {
+  filters: {
+    daterange: DATERANGE_DEFAULT,
+    status: {
+      title: "Status",
+      options: [
+        { key: "all", label: "All" },
+        { key: "pending", label: "Pending" },
+        { key: "accepted", label: "Accepted" },
+        { key: "denied", label: "Denied" },
+        { key: "failed", label: "Failed" }
+      ],
+      type: "dropdown" as const,
+      tooltip: "Status",
+      selected: "all"
+    }
   }
 };
 export const event_management_filters: FilterModel = {
@@ -499,6 +541,22 @@ export const threat_lens_filters: FilterModel = {
 export const alert_filters: FilterModel = {
   filters: {
     daterange: DATERANGE_DEFAULT,
+    content_type: {
+      title: "Content Type",
+      options: [],
+      type: "dropdown",
+      tooltip: "Content Type",
+      selected: "",
+      placeholder: "Headers, PII, vulnerability"
+    },
+    risk: {
+      title: "Risk",
+      options: ALERT_RISK_OPTIONS,
+      type: "dropdown",
+      tooltip: "Risk",
+      selected: "",
+      placeholder: "Risk"
+    },
   }
 };
 export const filter_mapping: Record<string, string> = {

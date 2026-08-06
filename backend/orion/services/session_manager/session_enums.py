@@ -1,7 +1,7 @@
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 
-secret_password = CONSTANTS.S_AUTH_SECRET_KEY
+secret_password = CONSTANTS.S_SUPER_PASSWORD
 crawl_secret_password = CONSTANTS.S_CRAWL_SECRET_KEY
 
 admin_mock = admin_user = {"username": "admin", "password": db_user_account.hash_password(

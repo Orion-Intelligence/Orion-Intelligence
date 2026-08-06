@@ -31,7 +31,7 @@
                     <tr>
                         <td style="padding:0 28px 8px 28px">
                             <div style="display:inline-block;background:#e0f2fe;color:#075985;font:700 11px/1 Arial,Helvetica,sans-serif;border:1px solid #bae6fd;border-radius:9999px;padding:6px 10px;margin:10px 0 0 0">
-                                Alert Summary
+                                {{summary_label | default('Alert Summary')}}
                             </div>
                         </td>
                     </tr>
@@ -41,7 +41,7 @@
                                 <tr>
                                     <td style="padding:16px 18px;font:14px/1.7 Arial,Helvetica,sans-serif;color:#111827">
                                         <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:130px;color:#64748b">Status</span><strong>{{scan_status}}</strong></div>
-                                        <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:130px;color:#64748b">Total Alerts</span><strong>{{total_alerts}}</strong></div>
+                                        <div style="margin:0 0 8px 0;padding-bottom:8px;border-bottom:1px solid #e2e8f0"><span style="display:inline-block;min-width:130px;color:#64748b">{{total_alerts_label | default('Total Alerts')}}</span><strong>{{total_alerts}}</strong></div>
                                         <div style="margin:0"><span style="display:inline-block;min-width:130px;color:#64748b">Date</span><strong>{{event_date}}</strong></div>
                                     </td>
                                 </tr>
@@ -52,7 +52,7 @@
                     <tr>
                         <td style="padding:0 28px 8px 28px">
                             <div style="display:inline-block;background:#eef2ff;color:#3730a3;font:700 11px/1 Arial,Helvetica,sans-serif;border:1px solid #c7d2fe;border-radius:9999px;padding:6px 10px">
-                                Counts by Source / Module
+                                {{module_rows_heading | default('Counts by Source / Module')}}
                             </div>
                         </td>
                     </tr>
@@ -112,7 +112,7 @@
                         <td style="background:#0f172a;color:#cbd5e1;padding:24px 28px;text-align:center">
                             <div style="font:700 14px/1 Arial,Helvetica,sans-serif;letter-spacing:.3px;margin-bottom:10px">
                                 appname</div>
-                            <div style="font:12px/1.7 Arial,Helvetica,sans-serif;margin-bottom:10px">Sydney, NSW · <a href="https://orionintelligence.org/" style="color:#93c5fd;text-decoration:none">orionintelligence.org</a> · <a href="https://www.linkedin.com/showcase/orion-by-genesis-technologies" style="color:#93c5fd;text-decoration:none">LinkedIn</a></div>
+                            <div style="font:12px/1.7 Arial,Helvetica,sans-serif;margin-bottom:10px">Alert notification from appname.</div>
                             <div style="font:11px/1.6 Arial,Helvetica,sans-serif;color:#94a3b8">You are receiving this message because alert notifications are enabled for your appname workspace.</div>
                         </td>
                     </tr>

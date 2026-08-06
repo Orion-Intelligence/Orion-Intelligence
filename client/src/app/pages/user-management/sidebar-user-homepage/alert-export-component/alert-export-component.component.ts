@@ -44,8 +44,15 @@ export class AlertExportComponentComponent {
     return d ? new Date(d).toLocaleString() : '—';
   }
 
-  getRiskLevel(type?: string): string {
+  getRiskLevel(type?: string, risk?: string): string {
     const normalized = (type || '').toLowerCase();
+    const alertRisk = this.formatRisk(risk);
+    if (alertRisk) {
+      return alertRisk;
+    }
+    if (normalized === 'vulnerability-scanning') {
+      return 'Not Found';
+    }
     switch (normalized) {
       case 'general':
       case 'seo scanning':
@@ -71,8 +78,8 @@ export class AlertExportComponentComponent {
     }
   }
 
-  riskClass(type?: string): AlertRiskClass {
-    const risk = this.getRiskLevel(type).toLowerCase();
+  riskClass(type?: string, alertRisk?: string): AlertRiskClass {
+    const risk = this.getRiskLevel(type, alertRisk).toLowerCase();
     if (risk === 'critical') {
       return 'risk-critical';
     }
@@ -86,5 +93,13 @@ export class AlertExportComponentComponent {
       return 'risk-low';
     }
     return 'risk-unknown';
+  }
+
+  private formatRisk(value?: string): string {
+    const normalized = (value || '').trim().toLowerCase();
+    if (!normalized) {
+      return '';
+    }
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
   }
 }

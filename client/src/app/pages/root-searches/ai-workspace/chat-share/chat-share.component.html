@@ -1,11 +1,13 @@
-<div class="ui-dashboard-grid-bg text-[var(--color-text1)]">
+<app-header data-testid="chat-share-header" [forceDark]="true"></app-header>
+
+<div data-testid="chat-share-root" class="ui-dashboard-grid-bg min-h-[calc(100dvh-60px)] text-[var(--color-text1)]">
   <header class="border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
     <div class="mx-auto flex h-[64px] w-full max-w-[980px] items-center justify-between gap-4 px-4">
       <div class="min-w-0">
         <h1 class="truncate text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Shared Chat' | translate }}</h1>
         <p class="mt-0.5 text-[11px] font-medium text-[var(--color-text5)]">{{ 'Read only' | translate }}@if (expiresAt) { · {{ 'Expires' | translate }} {{ expiresAt | date : 'medium' }} }</p>
       </div>
-      <span class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">{{ 'Read Only' | translate }}</span>
+      <span class="rounded-full border border-[var(--color-divider)] bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">{{ 'Read Only' | translate }}</span>
     </div>
   </header>
 

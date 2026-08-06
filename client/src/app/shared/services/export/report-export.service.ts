@@ -15,6 +15,10 @@ export class ReportExportService extends ExportSharedService {
       this.documentExport.exportDocumentPdf(payload);
       return;
     }
+    if (type === 'csv') {
+      this.exportCsv(payload);
+      return;
+    }
     this.graphExport.exportByType(payload, type);
   }
 
@@ -82,6 +86,46 @@ export class ReportExportService extends ExportSharedService {
       summary,
       tables
     };
+  }
+
+  private exportCsv(payload: GraphReportPayload): void {
+    const rows = [
+      ['section', 'field', 'value'],
+      ...Object.entries(payload.summary || {}).map(([key, value]) => ['Summary', key, value]),
+      ...(payload.tables || []).flatMap(table => {
+        const valueRows = Object.entries(table.values || {}).map(([key, value]) => [table.title, key, value]);
+        const tableRows = (table.rows || []).flatMap((row, index) =>
+          Object.entries(row).map(([key, value]) => [`${table.title} #${index + 1}`, key, value]));
+        const blockRows = (table.recordBlocks || []).flatMap(block =>
+          Object.entries(block.values || {}).map(([key, value]) => [`${table.title} - ${block.title}`, key, value]));
+        return [...valueRows, ...tableRows, ...blockRows];
+      })
+    ];
+    const csv = rows.map(row => row.map(value => this.escapeCsvValue(value)).join(',')).join('\n');
+    this.downloadText(csv, 'text/csv;charset=utf-8;', `${this.buildSafeFilename(payload)}.csv`);
+  }
+
+  private escapeCsvValue(value: unknown): string {
+    const text = String(value ?? '');
+    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+  }
+
+  private downloadText(content: string, type: string, filename: string): void {
+    const blob = new Blob([content], { type });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
+  private buildSafeFilename(payload: GraphReportPayload): string {
+    return (payload.sessionName || payload.title || 'report')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 80) || 'report';
   }
 
   private buildMetadataValues(source: Record<string, string>): Record<string, string> {

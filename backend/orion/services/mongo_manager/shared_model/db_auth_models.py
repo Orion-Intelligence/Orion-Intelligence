@@ -59,6 +59,8 @@ class db_user_account(Model):
 
     twofa_enabled: bool = Field(default=False)
     twofa_secret: Optional[str] = Field(default=None)
+    recovery_key_hash: Optional[str] = Field(default=None)
+    reset_twofa_on_password_reset: bool = Field(default=False)
     password_reset_required: bool = Field(default=False)
 
     account_verify_at: Optional[datetime] = Field(default=None)
@@ -67,6 +69,8 @@ class db_user_account(Model):
     current_session_id: Optional[str] = Field(default=None)
     licenses: List[LicenseName] = Field(default=[LicenseName.FREE])
     permissions: Optional[List[UserPermission]] = Field(default_factory=list)
+    alerts_allowed_all: bool = False
+    alerts_allowed_tenant_ids: List[str] = []
     demo_tour: bool = Field(default=False)
 
     @staticmethod
@@ -154,7 +158,7 @@ class db_user_account(Model):
             return False
         return pyotp.TOTP(self.twofa_secret).verify(code, valid_window=1)
 
-    def provisioning_uri(self, issuer: str = "Orion Intelligence") -> Optional[str]:
+    def provisioning_uri(self, issuer: str = "Authenticator") -> Optional[str]:
         if not self.twofa_secret:
             return None
         return pyotp.totp.TOTP(self.twofa_secret).provisioning_uri(

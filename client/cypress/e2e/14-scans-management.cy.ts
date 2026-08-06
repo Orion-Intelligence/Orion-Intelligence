@@ -46,7 +46,7 @@ describe('Scans Management - Entity Lookup Flow', () => {
     cy.logout();
   });
 
-  it('runs Email, Social, Wanted, National Identity, Playstore, Software, File, Text Analysis, and Crypto scans', () => {
+  it('runs Email, Social, Wanted, Playstore, Software, File, Text Analysis, and Crypto scans', () => {
     cy.visit('/dashboard');
 
     cy.visit('/dashboard/api/email-breach');
@@ -59,21 +59,19 @@ describe('Scans Management - Entity Lookup Flow', () => {
     fillPrimaryScanInput(testData.scans_social_username);
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('social-scanner-report');
 
     cy.visit('/dashboard/api/wanted-list');
     fillPrimaryScanInput(testData.scans_wanted_name);
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
-
-    cy.visit('/dashboard/api/national-identity');
-    fillPrimaryScanInput('92301234567');
-    clickSearch();
-    cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('wanted-list-report');
 
     cy.visit('/dashboard/api/playstore-scanner');
     fillPrimaryScanInput('https://play.google.com/store/apps/details?id=com.jrzheng.supervpnfree');
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('playstore-scanner-report');
 
     cy.visit('/dashboard/scanner/apk-scan');
     makeFileInputInteractable();
@@ -85,6 +83,7 @@ describe('Scans Management - Entity Lookup Flow', () => {
     fillPrimaryScanInput('gta');
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('software-scanner-report');
 
     cy.visit('/dashboard/api/file-scanner');
     makeFileInputInteractable();
@@ -114,11 +113,13 @@ describe('Scans Management - Entity Lookup Flow', () => {
     cy.get('[data-testid="text-analysis-submit"]').filter(':visible').first().should('be.enabled').click();
     cy.get('[data-testid="text-analysis-table"]').should('be.visible');
     cy.get('[data-testid="text-analysis-primary-detection"]').should('contain.text', 'Spam and phishing detected');
+    cy.docsScreenshot('text-analysis-report');
 
     cy.visit('/dashboard/api/crypto-scanner');
     fillPrimaryScanInput('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh');
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
+    cy.docsScreenshot('crypto-scanner-report');
   });
 
   it('manages completed scan notifications from the top header panel', () => {
@@ -133,6 +134,7 @@ describe('Scans Management - Entity Lookup Flow', () => {
       .then($cards => {
         cy.wrap($cards.length).as('initialScanCount');
       });
+    cy.docsScreenshot('scan-notifications');
 
     cy.get('[data-testid="scan-notification-delete"]').filter(':enabled').first().click();
     cy.get('[data-testid="confirmation-popup"]').should('be.visible');

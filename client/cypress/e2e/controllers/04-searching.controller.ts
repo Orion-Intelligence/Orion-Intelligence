@@ -4,6 +4,7 @@ const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   Defacement: 'defacement',
   Social: 'social',
   Exploit: 'exploit',
+  'Actors & Malware': 'apt-intel',
   Feed: 'feed',
   'Stealer logs': 'stealerlogs',
   'Web Scans': 'scanner',
@@ -108,6 +109,15 @@ export function clickOpenExploitReport() {
 export function clickOpenDefacementReport() {
   cy.get('[data-testid="defacement-group-card"]').first().find('button').scrollIntoView().should('be.visible').click({ force: true });
   cy.get('[data-testid="defacement-record-sidebar"] a').first().invoke('removeAttr', 'target').click({ force: true });
+}
+
+export function openDefacementReportAndValidate() {
+  clickOpenDefacementReport();
+  cy.get('body', {timeout: 60000}).should(($body) => {
+    const hasJsonViewer = $body.find('app-json-api-viewer').length > 0;
+    const hasDefacementReport = $body.find('app-report-defacement').length > 0;
+    expect(hasJsonViewer || hasDefacementReport, 'defacement report opened').to.eq(true);
+  });
 }
 
 export function exerciseJsonViewerOnce() {

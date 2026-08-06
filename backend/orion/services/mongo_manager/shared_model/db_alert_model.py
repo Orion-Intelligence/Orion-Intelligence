@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import Any, List
 
 from odmantic import Model, EmbeddedModel, Field
 from pydantic import field_validator
@@ -22,6 +22,7 @@ class AlertModel(EmbeddedModel):
     alert_id: str = ''
     report_seen: bool = False
     custom_alert: bool = False
+    is_deleted: bool = False
     type: str = ''
     ioc_type: str = ''
     ioc_value: str = ''
@@ -30,9 +31,13 @@ class AlertModel(EmbeddedModel):
     description: str = ''
     source: str = ''
     url: str = ''
+    risk: str = ''
+    licenses: List[str] = Field(default_factory=list)
     all_ioc: List[alert_all_ioc] = Field(default_factory=list)
     content_types: List[str] = Field(default_factory=list)
+    raw_findings: dict[str, Any] = Field(default_factory=dict)
     status: alert_status = Field(default=alert_status.ACTIVE)
+
     first_seen: datetime = Field(default_factory=datetime.utcnow)
     last_seen: datetime = Field(default_factory=datetime.utcnow)
 
@@ -52,3 +57,7 @@ class db_alert_model(Model):
     tenant_id: str = ''
     scan_running: bool = False
     alerts: List[AlertModel] = Field(default_factory=list)
+
+
+def visible_alerts(alerts: List[AlertModel] | None) -> List[AlertModel]:
+    return [alert for alert in (alerts or []) if not bool(getattr(alert, "is_deleted", False))]

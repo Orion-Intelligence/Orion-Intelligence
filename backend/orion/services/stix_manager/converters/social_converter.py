@@ -7,5 +7,5 @@ from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 
 
 class social_converter:
-    def convert(self, raw: SocialResultItem) -> Dict[str, Any]:
-        return convert_to_stix("social", raw)
+    def convert(self, raw: SocialResultItem, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return convert_to_stix("social", raw, tenant_name)

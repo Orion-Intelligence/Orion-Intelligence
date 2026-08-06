@@ -1,7 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
-import { AppService } from '../../../../services/core/app/app.service';
 import { JsonApiViewerComponent } from '../../../../shared/partials/json-api-viewer/json-api-viewer.component';
 import { ReportMappingComponent } from '../../../../shared/partials/report-mapping/report-mapping.component';
 import { DefacementResultItem } from '../../../../shared/model/results/defacement/defacement.callback.model';
@@ -9,10 +8,11 @@ import { ReportHeaderComponent } from '../../../../shared/partials/report-header
 import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
+import { formatKeyLabel as formatKeyLabelUtil, formatTitleUrl as formatTitleUrlUtil, isHiddenReportMetadataKey, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { ReportInteractionHostComponent } from '../../social-interactions/report-interaction-host/report-interaction-host.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TakedownActionComponent } from '../../../../shared/partials/takedown-action/takedown-action.component';
 
 @Component({
   selector: 'app-report-defacement',
@@ -27,20 +27,20 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     ResultListComponent,
     NgClass,
     TooltipDirective,
-    ReportInteractionHostComponent, TranslatePipe]
+    ReportInteractionHostComponent,
+    TranslatePipe,
+    TakedownActionComponent
+  ]
 })
 export class ReportDefacementComponent implements OnInit, AfterViewInit {
   defacementData: DefacementResultItem | null = null;
-  lang = 'en';
-  isExpandedMetadata = true;
-  activeTab = '';
-  content = '';
+  isExpandedMetadata: boolean = true;
+  activeTab: string = '';
+  content: string = '';
   listItems: any[] = [];
   arrayKeys: string[] = [];
 
-  constructor(private route: ActivatedRoute, private appService: AppService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
-    this.lang = this.appService.getConfig().appSettings.language_allowed;
-  }
+  constructor(private route: ActivatedRoute, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {}
 
   ngOnInit(): void {
     this.route.data.subscribe(data => {
@@ -64,11 +64,11 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   get filteredArrayKeys(): string[] {
     return this.arrayKeys.filter(key => {
       const val = (this.defacementData as any)?.[key];
-      return val != null && (!Array.isArray(val) || val.length > 0);
+      return !isHiddenReportMetadataKey(key) && val != null && (!Array.isArray(val) || val.length > 0);
     });
   }
 
-  metaadataToggleContent(): void {
+  metadataToggleContent(): void {
     this.isExpandedMetadata = !this.isExpandedMetadata;
   }
 
@@ -111,7 +111,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     if (this.defacementData) {
       Object.keys(this.defacementData).forEach(key => {
         const value = (this.defacementData as any)[key];
-        if (Array.isArray(value) && value.length > 0 && key !== 'm_section') {
+        if (Array.isArray(value) && value.length > 0 && key !== 'm_section' && !isHiddenReportMetadataKey(key)) {
           this.arrayKeys.push(key);
         }
       });
@@ -132,6 +132,11 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   }
 
   get reportDocId(): string {
-    return (this.defacementData as any)?.m_hash || (this.defacementData as any)?._id || '';
+    return (this.defacementData as any)?.m_hash
+      || (this.defacementData as any)?._id
+      || (this.defacementData as any)?.doc_id
+      || (this.defacementData as any)?.m_document_id
+      || this.route.snapshot.paramMap.get('m_hash')
+      || '';
   }
 }

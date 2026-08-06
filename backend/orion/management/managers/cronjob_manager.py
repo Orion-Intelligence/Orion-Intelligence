@@ -1,11 +1,11 @@
 import asyncio
-from datetime import datetime, timedelta
-from zoneinfo import ZoneInfo
+from datetime import timedelta
 from interface import BASE_DIR
 from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
 from orion.management.jobs.alert.alert_job import alert_job
+from orion.api.interactive.scheduler_manager.scheduler_manager import DailySchedulerConfig, SchedulerManager
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
 from orion.services.redis_manager.redis_enums import REDIS_KEYS
@@ -13,6 +13,10 @@ from orion.services.redis_manager.redis_enums import REDIS_KEYS
 
 class cronjob_manager:
     __instance = None
+    ALERT_TIMEZONE = "Australia/Sydney"
+    DEFAULT_ALERT_HOUR = 2
+    DEFAULT_ALERT_MINUTE = 0
+    ALERT_JOB_KEY = "auto_alert_scan"
 
     @staticmethod
     def get_instance():
@@ -52,24 +56,53 @@ class cronjob_manager:
 
     @staticmethod
     async def iocs_alert_loop():
-        tz = ZoneInfo("Australia/Sydney")
+        timezone_name = cronjob_manager.ALERT_TIMEZONE
+        default_job_config = DailySchedulerConfig(
+            job_key=cronjob_manager.ALERT_JOB_KEY,
+            hour=cronjob_manager.DEFAULT_ALERT_HOUR,
+            minute=cronjob_manager.DEFAULT_ALERT_MINUTE,
+            timezone_name=timezone_name,
+            handler=alert_job.get_instance().run_default_scheduled_categories,
+            stale_after=timedelta(minutes=15),
+            heartbeat_interval=timedelta(seconds=60),
+        )
+
         while True:
             if not allowed_key_titles:
                 await asyncio.sleep(60)
                 continue
 
-            now_local = datetime.now(tz)
-
-            next_run = datetime.combine(now_local.date(), datetime.min.time()).replace(
-                hour=2, minute=0, second=0, microsecond=0, tzinfo=tz)
-            if now_local >= next_run:
-                next_run += timedelta(days=1)
-
-            seconds_until_next = (next_run - now_local).total_seconds()
-
-            await asyncio.sleep(seconds_until_next)
-
             try:
-                await alert_job.get_instance().run_all_categories()
+                await SchedulerManager.get_instance().run_due_daily_job(default_job_config, reason="startup_or_schedule_check")
+                all_tenants = await alert_job.get_instance()._tenant_manager.get_all_tenant()
+                for tenant in all_tenants:
+                    tenant_id = str(alert_job.get_instance()._value(tenant, "id", ""))
+                    custom_run_time = alert_job.get_instance().tenant_alert_run_time(tenant)
+                    if not tenant_id or not custom_run_time:
+                        continue
+
+                    try:
+                        hour_text, minute_text = custom_run_time.split(":", 1)
+                        hour = int(hour_text)
+                        minute = int(minute_text)
+                    except ValueError:
+                        log.g().e(f"Invalid tenant alert run time skipped: tenant_id={tenant_id}, value={custom_run_time}")
+                        continue
+                    if hour < 0 or hour > 23 or minute < 0 or minute > 59:
+                        log.g().e(f"Invalid tenant alert run time skipped: tenant_id={tenant_id}, value={custom_run_time}")
+                        continue
+
+                    tenant_job_config = DailySchedulerConfig(
+                        job_key=f"{cronjob_manager.ALERT_JOB_KEY}:{tenant_id}",
+                        hour=hour,
+                        minute=minute,
+                        timezone_name=timezone_name,
+                        handler=lambda tenant=tenant: alert_job.get_instance().run_tenant_categories(tenant),
+                        stale_after=timedelta(minutes=15),
+                        heartbeat_interval=timedelta(seconds=60),
+                    )
+                    await SchedulerManager.get_instance().run_due_daily_job(tenant_job_config, reason="startup_or_tenant_schedule_check")
             except Exception as e:
                 log.g().e(f"IOC alert loop failed: {e}")
+
+            await asyncio.sleep(600)

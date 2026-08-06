@@ -16,20 +16,13 @@ import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ScanNotificationService } from '../../../shared/services/scan-notification.service';
-
-const API_CHAT_TOOL_TYPES: Record<string, string> = {
-  user: '/api/dynamic/user',
-  social: '/api/dynamic/social',
-  wanted: '/api/dynamic/wanted',
-  'national-identity': '/api/dynamic/national-identity',
-  cracked: '/api/dynamic/cracked',
-  software: '/api/dynamic/software',
-  crypto: '/api/crypto/scan'
-};
+import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
+import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { DASHBOARD_API_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 
 @Component({
   selector: 'app-dashboard-api',
-  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe],
+  imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe, ExportChoiceModalComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './dashboard-api.component.html'
 })
@@ -54,14 +47,20 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   prevBreachData: any = null;
   expandedResultIndex: number | null = null;
   cryptoSummaryExpanded = false;
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = DASHBOARD_API_EXPORT_OPTIONS;
   trackByIndex = (index: number) => index;
 
-  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService, private scanNotifications: ScanNotificationService) {
+  constructor(private route: ActivatedRoute, private http: HttpClient, private graphReportExport: ReportExportService, protected appService: AppService, private scanNotifications: ScanNotificationService, private aiToolRoutingService: AiToolRoutingService) {
     super();
   }
 
   get aiToolApiName(): string {
-    return API_CHAT_TOOL_TYPES[this.apiType || ''] || 'default';
+    return this.aiToolRoutingService.getTypeForApiType(this.apiType || '');
+  }
+
+  get aiWelcomeMessage(): string {
+    return this.aiToolRoutingService.getMessageForApiType(this.apiType || '');
   }
 
   get cardsData(): any[] {
@@ -286,33 +285,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.query_triggered = true;
     this.expandedResultIndex = null;
     this.cryptoSummaryExpanded = false;
-    let payload: any;
-    if (this.apiType === 'user') {
-      payload = { text: { username: this.q1, email: this.q2 } };
-    }
-    else if (this.apiType === 'social') {
-      payload = { text: { username: this.q1 } };
-    }
-    else if (this.apiType === 'wanted') {
-      payload = { text: { query: this.q1 } };
-    }
-    else if (this.apiType === 'national-identity') {
-      payload = { text: { pak_query: this.q1 } };
-    }
-    else if (this.apiType === 'cracked') {
-      payload = { text: { playstore: this.q1 } };
-    }
-    else if (this.apiType === 'software') {
-      payload = { text: { name: this.q1 } };
-    }
-    else if (this.apiType === 'crypto') {
-      const t = (this.q1 || '').trim();
-      const isHash = /^(0x)?[a-fA-F0-9]{64}$/.test(t);
-      payload = { text: isHash ? { hash: t } : { wallet: t } };
-    }
-    else {
-      payload = { text: { q1: this.q1, q2: this.q2 } };
-    }
+    const payload = this.buildApiPayload();
     let endpoint = '/api/dynamic/';
     if (this.apiType === 'user') {
       endpoint = '/api/dynamic/user';
@@ -435,6 +408,33 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       : EMPTY), takeWhile(res => this.shouldContinuePolling(res), true), catchError(_ => of(null)));
   }
 
+  private buildApiPayload(): any {
+    if (this.apiType === 'user') {
+      return { text: { username: this.q1, email: this.q2 } };
+    }
+    if (this.apiType === 'social') {
+      return { text: { username: this.q1 } };
+    }
+    if (this.apiType === 'wanted') {
+      return { text: { query: this.q1 } };
+    }
+    if (this.apiType === 'national-identity') {
+      return { text: { pak_query: this.q1 } };
+    }
+    if (this.apiType === 'cracked') {
+      return { text: { playstore: this.q1 } };
+    }
+    if (this.apiType === 'software') {
+      return { text: { name: this.q1 } };
+    }
+    if (this.apiType === 'crypto') {
+      const t = (this.q1 || '').trim();
+      const isHash = /^(0x)?[a-fA-F0-9]{64}$/.test(t);
+      return { text: isHash ? { hash: t } : { wallet: t } };
+    }
+    return { text: { q1: this.q1, q2: this.q2 } };
+  }
+
   private isPendingResponse(res: any): boolean {
     const topStatus = (res?.status || '').toLowerCase();
     const nestedStatus = (res?.result?.status || '').toLowerCase();
@@ -466,7 +466,22 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.cryptoSummaryExpanded = !this.cryptoSummaryExpanded;
   }
 
-  exportPdfReport(): void {
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'report' || type === 'json' || type === 'csv') {
+      this.exportPdfReport(type);
+    }
+    this.closeExportChoice();
+  }
+
+  private exportPdfReport(type: string = 'report'): void {
     if (!this.hasResults) {
       return;
     }
@@ -515,7 +530,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
           { title: 'Crypto Result', values }
         ]
       };
-      this.graphReportExport.exportByType(payload, 'doc_pdf');
+      this.graphReportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
       return;
     }
 
@@ -566,6 +581,6 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       ]
     };
 
-    this.graphReportExport.exportByType(payload, 'doc_pdf');
+    this.graphReportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
   }
 }

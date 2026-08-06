@@ -41,6 +41,10 @@ export class SidebarSectionComponent {
     this.sidebarHomepageService.requestSubscription(moduleName);
   }
 
+  visibleItems(): string[] {
+    return this.items();
+  }
+
   getItemTooltip(item: string): string {
     const mapped = this.itemTooltips[item];
     if (mapped) {

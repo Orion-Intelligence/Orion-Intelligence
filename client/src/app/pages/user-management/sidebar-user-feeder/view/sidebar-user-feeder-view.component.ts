@@ -157,6 +157,14 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     return script?.path || script?.url || 'Unknown Path';
   }
 
+  getScriptExternalUrl(script: FeederScriptItem | null | undefined): string {
+    const url = (script?.url || '').trim();
+    if (!url) {
+      return '';
+    }
+    return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+  }
+
   getSectionTitle(): string {
     if (this.entryType === 'values') {
       return 'Your Values';

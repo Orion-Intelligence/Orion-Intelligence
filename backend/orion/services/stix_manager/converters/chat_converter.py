@@ -7,5 +7,5 @@ from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 
 
 class chat_converter:
-    def convert(self, raw: ChatResultItem) -> Dict[str, Any]:
-        return convert_to_stix("chat", raw)
+    def convert(self, raw: ChatResultItem, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return convert_to_stix("chat", raw, tenant_name)

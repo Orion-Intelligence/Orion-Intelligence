@@ -1,3 +1,6 @@
+import { type CaseAlertTenant } from './10-tenant-management.controller';
+import { openTenantEditor } from './10-tenant-management.controller';
+
 export const CASE_MOVE_STATUS_IDS: Record<string, string> = {
   'Intake Review': 'intake_review',
   'Under Investigation': 'under_investigation',
@@ -60,6 +63,163 @@ export function clickHeaderAction(testId: string) {
 
 export function assertNotification(message: string) {
   cy.contains(message, { timeout: 60000 }).should('exist');
+}
+
+export function saveCaseAlertTenantEditor(alias: string) {
+  cy.intercept('POST', '**/api/update/tenants', (req) => {
+    if (req.body && typeof req.body === 'object') {
+      delete req.body.accounts_mail_password;
+      delete req.body.accounts_mail;
+      delete req.body.accounts_smtp_server;
+      delete req.body.accounts_smtp_port;
+      delete req.body.password_reset_required;
+    }
+  }).as(alias);
+
+  cy.scrollDashboardToBottom();
+  cy.get('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block')
+    .filter(':visible')
+    .first()
+    .scrollTo('bottomRight', {ensureScrollable: false});
+
+  cy.get('@tenantEditFormPanel')
+    .find('[data-testid="tenant-save-changes"]')
+    .then(($button) => {
+      const button = $button.get(0) as HTMLButtonElement;
+      button.scrollIntoView({block: 'center', inline: 'nearest'});
+
+      const dashboard = Cypress.$('#dashboard-container, [data-testid="dashboard-container"]')
+        .filter(':visible')
+        .first()
+        .get(0) as HTMLElement | undefined;
+      if (dashboard) {
+        dashboard.scrollTop = dashboard.scrollHeight;
+        dashboard.dispatchEvent(new Event('scroll', {bubbles: true}));
+      }
+
+      const scrollableParent = button.closest('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block') as HTMLElement | null;
+      if (scrollableParent) {
+        scrollableParent.scrollTop = scrollableParent.scrollHeight;
+        scrollableParent.scrollLeft = scrollableParent.scrollWidth;
+        scrollableParent.dispatchEvent(new Event('scroll', {bubbles: true}));
+      }
+
+      expect(button.disabled, 'tenant save changes button disabled').to.equal(false);
+      cy.wrap($button).click({force: true});
+    });
+
+  cy.wait(`@${alias}`, {timeout: 60000}).then(({response}) => {
+    expect(response, `${alias} response`).to.exist;
+    expect(response?.statusCode, JSON.stringify(response?.body || {})).to.be.oneOf([200, 201]);
+  });
+  cy.scrollDashboardToBottom();
+}
+
+function scrollCaseTenantControlIntoView(element: HTMLElement) {
+  element.scrollIntoView({block: 'center', inline: 'nearest'});
+
+  const dashboard = Cypress.$('#dashboard-container, [data-testid="dashboard-container"]')
+    .filter(':visible')
+    .first()
+    .get(0) as HTMLElement | undefined;
+  if (dashboard) {
+    const rect = element.getBoundingClientRect();
+    dashboard.scrollTop = Math.max(dashboard.scrollTop + rect.top - 180, 0);
+    dashboard.dispatchEvent(new Event('scroll', {bubbles: true}));
+  }
+
+  const tableScroller = element.closest('div.relative.hidden.overflow-x-auto.overflow-y-visible.md\\:block') as HTMLElement | null;
+  if (tableScroller) {
+    tableScroller.scrollLeft = tableScroller.scrollWidth;
+    tableScroller.dispatchEvent(new Event('scroll', {bubbles: true}));
+  }
+}
+
+export function setCaseAlertTenantEditorToggle(testId: string, checked: boolean) {
+  cy.get('@tenantEditFormPanel')
+    .find(`[data-testid="${testId}"]`)
+    .then(($control) => {
+      const control = $control.get(0) as HTMLElement;
+      scrollCaseTenantControlIntoView(control);
+      const $checkbox = $control.find('input[type="checkbox"]').first();
+      expect($checkbox.length, `${testId} checkbox`).to.be.greaterThan(0);
+      if ($checkbox.is(':checked') !== checked) {
+        cy.wrap($checkbox).click({force: true});
+      }
+    });
+}
+
+export function setCaseAlertTenantLicense(license: string, checked: boolean) {
+  cy.get('@tenantEditFormPanel')
+    .find('button[aria-controls^="tenant-license-menu-"]')
+    .first()
+    .then(($trigger) => {
+      const trigger = $trigger.get(0) as HTMLElement;
+      scrollCaseTenantControlIntoView(trigger);
+      const menuId = $trigger.attr('aria-controls');
+      expect(menuId, 'tenant license menu id').to.exist;
+
+      cy.wrap($trigger).click({force: true});
+      cy.get(`#${menuId} [data-testid="tenant-license-${license}"]`, {timeout: 10000})
+        .should('exist')
+        .then(($option) => {
+          const isSelected = $option.attr('aria-selected') === 'true';
+          if (isSelected !== checked) {
+            cy.wrap($option).click({force: true});
+          }
+        })
+        .then(() => {
+          cy.wrap($trigger).click({force: true});
+        });
+    });
+}
+
+export function setCaseAlertTenantQuota(value: string) {
+  cy.get('@tenantEditFormPanel')
+    .find('[data-testid="tenant-user-quota-input"]')
+    .then(($input) => {
+      const input = $input.get(0) as HTMLElement;
+      scrollCaseTenantControlIntoView(input);
+      cy.wrap($input).should('be.visible').clear().type(value);
+    });
+}
+
+export function configureTenantForCaseAlerts(tenant: CaseAlertTenant) {
+  openTenantEditor(tenant);
+  setCaseAlertTenantEditorToggle('tenant-verified-toggle', true);
+  setCaseAlertTenantEditorToggle('tenant-status-toggle', true);
+  setCaseAlertTenantLicense('free', false);
+  setCaseAlertTenantLicense('maintainer', true);
+  setCaseAlertTenantLicense('enterprise', true);
+  setCaseAlertTenantQuota('2');
+  saveCaseAlertTenantEditor(`saveCaseAlertTenant${tenant.username}`);
+}
+
+export function openCaseAlertsView() {
+  openCaseManagement();
+  cy.get(selector('case-mode-alerts-button')).scrollIntoView().should('be.visible').click({force: true});
+  cy.get(selector('case-admin-alerts-view')).should('be.visible');
+  cy.get(selector('case-admin-alerts-loading'), {timeout: 80000}).should('not.exist');
+}
+
+export function assertVisibleTenantAlertEmails(visibleTenants: CaseAlertTenant[], hiddenTenants: CaseAlertTenant[]) {
+  cy.get(selector('case-admin-alert-tenant-email'), {timeout: 80000})
+    .should('have.length.greaterThan', 0)
+    .then(($emails) => {
+      const renderedEmails = $emails.toArray().map((email) => (email.textContent || '').trim());
+      visibleTenants.forEach((tenant) => {
+        expect(renderedEmails, `${tenant.email} should be visible`).to.include(tenant.email);
+      });
+      hiddenTenants.forEach((tenant) => {
+        expect(renderedEmails, `${tenant.email} should be hidden`).not.to.include(tenant.email);
+      });
+    });
+
+  visibleTenants.forEach((tenant) => {
+    cy.contains(selector('case-admin-alert-tenant-email'), tenant.email)
+      .scrollIntoView()
+      .should('be.visible');
+  });
 }
 
 function caseListSelector(id: string): string {

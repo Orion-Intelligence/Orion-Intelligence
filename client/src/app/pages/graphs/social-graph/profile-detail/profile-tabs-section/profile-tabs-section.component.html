@@ -4,7 +4,7 @@
       <div class="ui-social-profile-overview-in">
         <div class="relative min-h-[172px] overflow-hidden border-b border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(15,23,42,0.28))]">
           @if (getCoverImageUrl(platformData)) {
-            <img [src]="getCoverImageUrl(platformData)" [alt]="(platformData.username || user.username) + ' cover'" class="absolute inset-0 h-full w-full object-cover">
+            <img [src]="getCoverImageUrl(platformData)" [alt]="(platformData.username || user.username) + ' cover'" referrerpolicy="no-referrer" class="absolute inset-0 h-full w-full object-cover">
           } @else {
             <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(125,211,252,0.18),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.10),transparent_24%),linear-gradient(135deg,rgba(30,41,59,0.78),rgba(15,23,42,0.94))]"></div>
             <div class="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] [background-size:22px_22px]"></div>
@@ -85,14 +85,12 @@
                       <div class="flex w-[128px] flex-shrink-0 items-center gap-2 pt-0.5">
                         <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" [class.bg-sky-500]="isUrl(item.value) && !isImageUrl(item.value)" [class.bg-emerald-500]="isImageUrl(item.value)" [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)" [class.bg-rose-400]="isBool(item.value)" [class.bg-slate-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
                         </span>
-                        <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</span>
+                        <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatProfileDetailKey(item.key) }}</span>
                       </div>
                       <div class="min-w-0 flex-1 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)]" [class.tabular-nums]="isNumeric(item.value)">
                         @if (isImageUrl(item.value)) {
                           <div class="flex items-center gap-2">
-                            @if (getDisplayImageUrl(item.value); as displayImageUrl) {
-                              <img [src]="displayImageUrl" [alt]="item.key" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
-                            }
+                            <img [src]="getDisplayUrl(item.value)" [alt]="item.key" referrerpolicy="no-referrer" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
                             <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[var(--color-blue-640)] hover:underline">view image</a>
                           </div>
                         } @else if (isUrl(item.value)) {
@@ -470,7 +468,7 @@
                 <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   @for (image of getDisplayableSocialImages(platformData.images || []); track image.image_url || image.thumbnail || $index) {
                     <a data-testid="social-image-result" [href]="getSocialImageHref(image)" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
-                      <img [src]="getSocialImageSrc(image)" [alt]="image.title || image.source || 'Social image'" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                      <img [src]="getSocialImageSrc(image)" [alt]="image.title || image.source || 'Social image'" referrerpolicy="no-referrer" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
                       <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
                         <p class="mb-0 truncate text-[10px] font-semibold text-white">{{ image.title || image.source || 'Image result' }}</p>
                       </div>
@@ -599,7 +597,7 @@
                 </div>
                 <div class="flex flex-shrink-0 items-center gap-2">
                   @if (getStealerLogs(platformData).length > 0) {
-                    <button data-testid="social-stealerlog-download" type="button" (click)="downloadStealerLogs(platformData)" title="Download records" aria-label="Download stealer log records" class="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+                    <button data-testid="social-stealerlog-download" type="button" (click)="openStealerLogExportChoice($event, platformData)" title="Download records" aria-label="Download stealer log records" class="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
                       <i class="bi bi-download text-xs"></i>
                     </button>
                   }
@@ -660,6 +658,17 @@
                     </div>
                   }
                 </div>
+                <app-export-choice-modal
+                  [visible]="!!selectedStealerLogPlatform()"
+                  title="Export Records"
+                  subtitle="Choose the export format."
+                  [options]="stealerLogExportOptions"
+                  overlayTestId="social-stealerlog-export-overlay"
+                  modalTestId="social-stealerlog-export-modal"
+                  closeTestId="social-stealerlog-export-close"
+                  (closed)="closeStealerLogExportChoice()"
+                  (optionSelected)="selectStealerLogExport($event)">
+                </app-export-choice-modal>
               }
             </div>
           }

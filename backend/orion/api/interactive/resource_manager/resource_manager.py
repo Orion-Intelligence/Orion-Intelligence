@@ -13,6 +13,16 @@ class ResourceManager:
     IMMUTABLE_IMAGE_CACHE_HEADERS = {
         "Cache-Control": "public, max-age=31536000, immutable"
     }
+    SYSTEM_RESOURCE_FILES = {
+        "logo_url_default.png",
+        "logo_url_custom.png",
+        "logo_wide_light_default.png",
+        "logo_wide_light_custom.png",
+        "logo_wide_dark_default.png",
+        "logo_wide_dark_custom.png",
+        "auth_dashboard_icon_default.png",
+        "auth_dashboard_icon_custom.png",
+    }
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
@@ -72,18 +82,72 @@ class ResourceManager:
         image_path = next((path for path in self.USER_DIR.iterdir() if path.name == f"{user_id}.png" and path.is_file()), None)
         return FileResponse(image_path or default_path)
 
-    async def get_system_image(self, user_id: str):
-        default_path = self.SYSTEM_DIR / "logo_url_default.png"
-        image_path = next((path for path in self.SYSTEM_DIR.iterdir() if path.name == user_id and path.is_file()), None)
-        response_path = image_path or default_path
+    @staticmethod
+    def _tenant_id(tenant) -> str | None:
+        if tenant is None:
+            return None
+        tenant_id = getattr(tenant, "id", None) or getattr(tenant, "tenant_uuid", tenant)
+        return str(tenant_id) if tenant_id else None
+
+    def get_tenant_system_dir(self, tenant) -> Path | None:
+        tenant_id = self._tenant_id(tenant)
+        if not tenant_id:
+            return None
+        # Tenant ids are Mongo ObjectIds in normal operation.  Keep the path
+        # construction defensive so a route parameter can never escape the
+        # system resource directory.
+        if not tenant_id.replace("-", "").replace("_", "").isalnum():
+            raise HTTPException(status_code=400, detail="Invalid tenant resource")
+        return self.SYSTEM_DIR / tenant_id
+
+    @classmethod
+    def _default_system_filename(cls, file_name: str) -> str:
+        if file_name.endswith("_custom.png"):
+            return file_name.replace("_custom.png", "_default.png")
+        return file_name if file_name.endswith("_default.png") else "logo_url_default.png"
+
+    @classmethod
+    def _safe_system_filename(cls, file_name: str) -> str:
+        safe_name = next((name for name in cls.SYSTEM_RESOURCE_FILES if name == file_name), None)
+        if safe_name is None:
+            raise HTTPException(status_code=404, detail="Resource not found")
+        return safe_name
+
+    def system_resource_path(self, file_name: str, tenant=None) -> Path:
+        file_name = self._safe_system_filename(file_name)
+
+        tenant_dir = self.get_tenant_system_dir(tenant)
+        if tenant_dir is not None:
+            tenant_path = tenant_dir / file_name
+            if tenant_path.is_file():
+                return tenant_path
+
+            # Existing deployments stored the default tenant's custom files in
+            # the shared system directory.  Retain those files only for the
+            # default tenant while all other tenants receive the stock asset.
+            if getattr(tenant, "is_default", False):
+                legacy_path = self.SYSTEM_DIR / file_name
+                if legacy_path.is_file():
+                    return legacy_path
+        else:
+            legacy_path = self.SYSTEM_DIR / file_name
+            if legacy_path.is_file():
+                return legacy_path
+
+        default_path = self.SYSTEM_DIR / self._default_system_filename(file_name)
+        if default_path.is_file():
+            return default_path
+        # Preserve the historical fallback if a non-logo default was not
+        # installed in an older deployment.
+        return self.SYSTEM_DIR / "logo_url_default.png"
+
+    async def get_system_image(self, file_name: str, tenant=None):
+        response_path = self.system_resource_path(file_name, tenant)
         headers = self.IMMUTABLE_IMAGE_CACHE_HEADERS if response_path.name.endswith("_default.png") else None
         return FileResponse(response_path, headers=headers)
 
-    async def get_favicon(self):
-        custom_path = self.SYSTEM_DIR / "logo_url_custom.png"
-        default_path = self.SYSTEM_DIR / "logo_url_default.png"
-
-        return FileResponse(custom_path if custom_path.is_file() else default_path)
+    async def get_favicon(self, tenant=None):
+        return await self.get_system_image("logo_url_custom.png", tenant)
 
     async def _save_image(self, file: UploadFile, file_path, check_admin: bool = False, current_user=None):
         if check_admin and current_user.role not in ["admin"]:
@@ -96,11 +160,6 @@ class ResourceManager:
 
         with open(file_path, "wb") as f:
             f.write(contents)
-
-    async def update_system_image(self, file: UploadFile, current_user):
-        file_path = self.SYSTEM_DIR / "logo.png"
-        await self._save_image(file, file_path, check_admin=True, current_user=current_user)
-        return {"image": "logo.png"}
 
     async def update_user_image(self, file: UploadFile, current_user):
         file_name = f"{current_user.id}.png"
@@ -125,9 +184,7 @@ class ResourceManager:
 
         return {"tenant_image": "deleted"}
 
-    async def delete_system_image(self, current_user, key: str):
-        if current_user.role not in ["admin"]:
-            return {"system_image deletion": "failed"}
+    async def delete_system_image(self, current_user, key: str, tenant=None):
         file_name = {
             AllowedKeys.LOGO_URL.value: "logo_url_custom.png",
             AllowedKeys.LOGO_WIDE_LIGHT.value: "logo_wide_light_custom.png",
@@ -135,11 +192,22 @@ class ResourceManager:
             AllowedKeys.AUTH_DASHBOARD_ICON.value: "auth_dashboard_icon_custom.png",
         }.get(key)
         if file_name is None:
-            return {"system_image deletion": "failed"}
-        image_path = self.SYSTEM_DIR / file_name
+            raise HTTPException(status_code=400, detail="Invalid system resource")
+
+        resource_tenant = tenant or current_user
+        system_dir = self.get_tenant_system_dir(resource_tenant)
+        if system_dir is None:
+            raise HTTPException(status_code=400, detail="Tenant resource unavailable")
+        image_path = system_dir / file_name
 
         if image_path.is_file():
             image_path.unlink()
+        elif getattr(resource_tenant, "is_default", False):
+            # Migrate gracefully from the former shared default-tenant asset
+            # location when an administrator clears an existing logo.
+            legacy_path = self.SYSTEM_DIR / file_name
+            if legacy_path.is_file():
+                legacy_path.unlink()
 
         return {"system_image": "deleted"}
 

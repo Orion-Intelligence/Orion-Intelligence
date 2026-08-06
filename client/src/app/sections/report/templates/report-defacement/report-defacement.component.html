@@ -2,11 +2,15 @@
 
 <app-report-interaction-host [docId]="reportDocId">
   <div class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
-    <div class="mb-4 pb-3">
-      <div class="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">{{ 'Target' | translate }}</div>
-      <a [href]="defacementData?.m_url" target="_blank" rel="noopener noreferrer" class="block min-w-0 truncate text-[20px] font-semibold leading-tight text-[var(--color-text1)] hover:text-[var(--color-blue-640)] hover:underline">
-        {{ formatTitleUrl(defacementData?.m_url) }}
-      </a>
+    <div class="mb-4 pb-3 flex justify-between items-center">
+      <div class="min-w-0 pr-4">
+        <div class="mb-1 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">{{ 'Target' | translate }}</div>
+        <a [href]="defacementData?.m_url" target="_blank" rel="noopener noreferrer" class="block min-w-0 truncate text-[20px] font-semibold leading-tight text-[var(--color-text1)] hover:text-[var(--color-blue-640)] hover:underline">
+          {{ formatTitleUrl(defacementData?.m_url) }}
+        </a>
+      </div>
+
+      <app-takedown-action class="shrink-0" [reportId]="reportDocId" [targetUrl]="defacementData?.m_url" [status]="$any(defacementData)?.m_takedown_status || null" [statusLabel]="$any(defacementData)?.m_takedown_label || ''"></app-takedown-action>
     </div>
 
     <div class="mt-5 grid gap-x-6 border-t border-[var(--color-divider)] pt-2 text-sm md:grid-cols-2 xl:grid-cols-3">
@@ -57,7 +61,7 @@
 
   @if (filteredArrayKeys.length) {
     <div data-testid="report-metadata-card" class="mt-4 mx-[12px] sm:mx-[15px] lg:mx-[30px] rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] ui-result-card bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4">
-      <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
+      <div (click)="metadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
             <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" [appTooltip]="'The metadata includes granular details from the report, such as detected people, organizations, domains, and other extracted elements' | translate">
@@ -65,8 +69,8 @@
           </div>
           <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Detected entities, extracted sections, and structured attributes.' | translate }}</p>
         </div>
-        <div [attr.aria-label]="(isExpandedMetadata ? 'Collapse' : 'Expand') | translate" class="mt-[2px] flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] ui-result-card-soft">
-          <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="toggle icon" class="h-[18px] w-[18px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+        <div [attr.aria-label]="(isExpandedMetadata ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
+          <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150">
         </div>
       </div>
       @if (isExpandedMetadata) {
@@ -98,8 +102,8 @@
             <app-result-list [activeTab]="activeTab" [listItems]="listItems"></app-result-list>
           }
         </div>
-        }
-      </div>
+      }
+    </div>
   }
 
   <app-json-api-viewer [jsonData]="defacementData"></app-json-api-viewer>

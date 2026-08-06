@@ -1,0 +1,109 @@
+<div role="tabpanel" class="grid gap-3 sm:grid-cols-2">
+  <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
+    <div class="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <div class="ui-section-title">{{ 'Brand assets' | translate }}</div>
+        <div class="ui-section-description">{{ 'These files are served from this tenant’s URL on login, navigation, and browser chrome.' | translate }}</div>
+      </div>
+      <span class="inline-flex items-center gap-1 rounded-full border border-sky-400/25 bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-200">
+        <i class="bi bi-building text-[10px]"></i>
+        {{ 'Current tenant only' | translate }}
+      </span>
+    </div>
+    <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div class="rounded-[8px] border border-[var(--color-divider)] bg-[var(--color-blue-700)] p-3">
+        <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Favicon / Compact Logo' | translate }}</div>
+        <div class="mt-0.5 min-h-8 text-xs text-[var(--color-text4)]">{{ 'Used in browser tabs and collapsed navigation.' | translate }}</div>
+        <app-user-image-picker
+          class="mt-2 block"
+          [imageUrl]="appService.getConfig().appSettings.logo_url || '/api/s/static/system/logo_url_default.png'"
+          [defaultImage]="'/api/s/static/system/logo_url_default.png'"
+          (onImageSelected)="updateUserResource($event, 'logo_url')"
+          (onClear)="deleteUserResource('logo_url')">
+        </app-user-image-picker>
+      </div>
+
+      <div class="rounded-[8px] border border-[var(--color-divider)] bg-[var(--color-blue-700)] p-3">
+        <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Wide Logo (Light)' | translate }}</div>
+        <div class="mt-0.5 min-h-8 text-xs text-[var(--color-text4)]">{{ 'Used on light surfaces and reports.' | translate }}</div>
+        <app-user-image-picker
+          class="mt-2 block h-20 w-full rounded-xl p-2 pl-0"
+          [wide]="true"
+          [imageUrl]="appService.getConfig().appSettings.logo_wide_light || '/api/s/static/system/logo_wide_light_default.png'"
+          [defaultImage]="'/api/s/static/system/logo_wide_light_default.png'"
+          (onImageSelected)="updateUserResource($event, 'logo_wide_light')"
+          (onClear)="deleteUserResource('logo_wide_light')">
+        </app-user-image-picker>
+      </div>
+
+      <div class="rounded-[8px] border border-[var(--color-divider)] bg-[var(--color-blue-700)] p-3">
+        <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Wide Logo (Dark)' | translate }}</div>
+        <div class="mt-0.5 min-h-8 text-xs text-[var(--color-text4)]">{{ 'Used on dark navigation and headers.' | translate }}</div>
+        <app-user-image-picker
+          class="mt-2 block h-20 w-full rounded-xl p-2 pl-0"
+          [wide]="true"
+          [imageUrl]="appService.getConfig().appSettings.logo_wide_dark || '/api/s/static/system/logo_wide_dark_default.png'"
+          [defaultImage]="'/api/s/static/system/logo_wide_dark_default.png'"
+          (onImageSelected)="updateUserResource($event, 'logo_wide_dark')"
+          (onClear)="deleteUserResource('logo_wide_dark')">
+        </app-user-image-picker>
+      </div>
+
+      <div class="rounded-[8px] border border-[var(--color-divider)] bg-[var(--color-blue-700)] p-3">
+        <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Login Image' | translate }}</div>
+        <div class="mt-0.5 min-h-8 text-xs text-[var(--color-text4)]">{{ 'Used on the login and sign-up pages.' | translate }}</div>
+        <app-user-image-picker
+          class="mt-2 block h-20 w-full rounded-xl p-2 pl-0"
+          [wide]="true"
+          [imageUrl]="appService.getConfig().appSettings.auth_dashboard_icon || '/api/s/static/system/auth_dashboard_icon_default.png'"
+          [defaultImage]="'/api/s/static/system/auth_dashboard_icon_default.png'"
+          (onImageSelected)="updateUserResource($event, 'auth_dashboard_icon')"
+          (onClear)="deleteUserResource('auth_dashboard_icon')">
+        </app-user-image-picker>
+      </div>
+    </div>
+  </div>
+
+  <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2" [ngClass]="brandingEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
+    <div class="flex items-start justify-between gap-3">
+      <div>
+        <div class="ui-section-title">{{ 'Tenant identity' | translate }}</div>
+        <div class="ui-section-description">{{ 'Set the name shown in page titles, login screens, and shared views.' | translate }}</div>
+      </div>
+      <div class="flex items-center gap-2">
+        @if (!brandingEditing) {
+          <button data-testid="tenant-branding-edit" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Edit tenant branding' | translate" (click)="toggleBrandingEdit()">
+            <img src="assets/images/shared/edit.svg" width="16" alt="edit" />
+          </button>
+        }
+        @if (brandingEditing) {
+          <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Cancel tenant branding edit' | translate" (click)="cancelBrandingEdit()">
+            <i class="bi bi-x-lg text-sm"></i>
+          </button>
+          <button data-testid="tenant-branding-save" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Save tenant branding' | translate" (click)="toggleBrandingEdit()">
+            <i class="bi bi-check-lg text-sm"></i>
+          </button>
+        }
+      </div>
+    </div>
+    @if (brandingEditing) {
+      <div class="mt-2 inline-flex items-center rounded-full border border-sky-400/35 bg-sky-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-300">
+        {{ 'Editing Enabled' | translate }}
+      </div>
+    }
+    <div class="mt-3 max-w-[720px]">
+      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
+        {{ 'App Name' | translate }}
+        @if (brandingEditing) {
+          <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="opacity-70" />
+        }
+      </label>
+      <input data-testid="tenant-branding-app-name" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.app_name" [disabled]="!brandingEditing" />
+    </div>
+    @if (brandingError) {
+      <div class="mt-3 max-w-[720px] rounded-[8px] border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300">
+        {{ brandingError }}
+      </div>
+    }
+  </div>
+</div>

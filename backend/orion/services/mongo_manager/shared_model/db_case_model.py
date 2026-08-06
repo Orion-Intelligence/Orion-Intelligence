@@ -376,6 +376,7 @@ class CaseShare(EmbeddedModel):
     revokedAt: Optional[datetime] = None
 
 
+
 class db_case_model(Model):
     caseId: str = Field(index=True)
     tenant_uuid: str = Field(index=True)

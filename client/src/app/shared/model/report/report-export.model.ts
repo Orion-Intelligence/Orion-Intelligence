@@ -14,6 +14,14 @@ export interface GraphReportEdge {
 export interface GraphReportTableRow {
   title: string;
   values: Record<string, string>;
+  columns?: string[];
+  rows?: Record<string, string>[];
+  recordBlocks?: GraphReportRecordBlock[];
+}
+
+export interface GraphReportRecordBlock {
+  title: string;
+  values: Record<string, string>;
 }
 
 export interface GraphReportPayload {
@@ -28,7 +36,7 @@ export interface GraphReportPayload {
   graphImageDataUrl?: string;
 }
 
-export type GraphReportExportType = 'json' | 'graph_pdf' | 'doc_pdf';
+export type GraphReportExportType = 'json' | 'csv' | 'graph_pdf' | 'doc_pdf';
 
 export interface UnifiedReportPayloadInput {
   currentRouteUrl: string;
@@ -42,4 +50,6 @@ export interface UnifiedReportPayloadInput {
 export interface GraphReportMeta {
   generatedAt: string;
   kindLabel: string;
+  tenantName: string;
+  tenantLogoDataUrl: string | null;
 }

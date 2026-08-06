@@ -51,11 +51,9 @@
                           <span aria-hidden="true" class="pointer-events-none absolute left-[3px] top-1/2 h-8 w-[calc((100%-6px)/2)] -translate-y-1/2 rounded-full bg-[var(--color-blue-640)] opacity-95 transition-[transform,opacity] duration-[120ms] ease-out" [class.translate-x-full]="activeResultSource() === 'darkweb'" [class.social-result-source-indicator--normal]="activeResultSource() === 'normal'" [class.social-result-source-indicator--darkweb]="activeResultSource() === 'darkweb'"></span>
                           <button type="button" (click)="setResultSource('normal')" [disabled]="getResultSourceCount('normal') === 0" class="relative z-10 inline-flex h-8 min-w-[86px] items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors disabled:cursor-not-allowed disabled:opacity-45" [class.social-result-source-tab--active]="activeResultSource() === 'normal'">
                             Normal
-                            <span class="social-result-source-count rounded-full px-1.5 py-0.5 text-[10px] transition-colors duration-200" [class.social-result-source-count--active]="activeResultSource() === 'normal'">{{ getResultSourceCount('normal') }}</span>
                           </button>
-                          <button type="button" (click)="setResultSource('darkweb')" [disabled]="getResultSourceCount('darkweb') === 0" class="relative z-10 inline-flex h-8 min-w-[86px] items-center justify-center gap-2 rounded-full pl-[17px] pr-3 text-xs font-semibold text-[var(--color-text3)] transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45" [class.social-result-source-tab--active]="activeResultSource() === 'darkweb'">
-                            <span class="ml-1">Darkweb</span>
-                            <span class="social-result-source-count rounded-full px-1.5 py-0.5 text-[10px] transition-colors duration-200" [class.social-result-source-count--active]="activeResultSource() === 'darkweb'">{{ getResultSourceCount('darkweb') }}</span>
+                          <button type="button" (click)="setResultSource('darkweb')" class="relative z-10 inline-flex h-8 min-w-[86px] items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold text-[var(--color-text3)] transition-colors duration-150 disabled:cursor-not-allowed disabled:opacity-45" [class.social-result-source-tab--active]="activeResultSource() === 'darkweb'">
+                            Darkweb
                           </button>
                         </div>
                       }

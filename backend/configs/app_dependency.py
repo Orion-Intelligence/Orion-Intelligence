@@ -9,12 +9,10 @@ from fastapi.security import OAuth2PasswordBearer
 import jwt
 
 from orion.constants.constant import CONSTANTS
-from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, UserStatus
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.session_manager.session_manager import session_manager
 from configs.auth_cookie import token_from_request
-# from orion.api.interactive.auth_manager.rules.license_rules import LICENSE_RULES
 from orion.constants import constant
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -38,13 +36,15 @@ def get_request_token(request: Request, token: str | None) -> str | None:
     return token_from_request(request) or token
 
 
-async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)):
-    auth = env_handler.get_instance().env("AUTH")
-    if auth == "0":
-        return user_role.DEMO
+def enforce_request_tenant_access(user, request: Request):
+    session_manager.ensure_user_tenant_access(user, getattr(request.state, "tenant", None))
+    return user
 
+
+async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)):
     token = get_request_token(request, token)
     user = await session_manager.get_instance().get_current_user(token)
+    enforce_request_tenant_access(user, request)
     enforce_password_reset(user, request)
     role = user.role
     try:
@@ -58,6 +58,7 @@ async def get_current_role(request: Request, token: str = Depends(oauth2_scheme)
 async def get_current_status(request: Request, token: str = Depends(oauth2_scheme)):
     token = get_request_token(request, token)
     user = await session_manager.get_instance().get_current_user(token)
+    enforce_request_tenant_access(user, request)
     enforce_password_reset(user, request)
     user_status = user.status
     try:
@@ -81,6 +82,7 @@ async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)
     session_mgr = session_manager.get_instance()
     token = get_request_token(request, token)
     user = await session_mgr.get_current_user(token)
+    enforce_request_tenant_access(user, request)
     enforce_password_reset(user, request)
     return user
 

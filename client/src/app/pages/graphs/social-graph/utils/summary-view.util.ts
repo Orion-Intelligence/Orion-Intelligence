@@ -1,5 +1,21 @@
 import { WritableSignal } from '@angular/core';
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
+
+const HIDDEN_PROFILE_DETAIL_KEYS = new Set(['m_scrap_file', 'm_network', 'm_hash_id', 'm_hash', 'm_content_type', 'm_channel_url', 'm_weblink', 'm_date', 'm_sender_name', 'm_message_id']);
+
+function hasProfileDetailValue(value: any): boolean {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (typeof value === 'string') {
+    return value.trim() !== '';
+  }
+  if (Array.isArray(value)) {
+    return value.some(item => hasProfileDetailValue(item));
+  }
+  return true;
+}
+
 export function getProfileDetailEntries(platform: PlatformResult | null): {
     key: string;
     value: any;
@@ -12,7 +28,7 @@ export function getProfileDetailEntries(platform: PlatformResult | null): {
     return [];
   }
   return Object.entries(details)
-    .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+    .filter(([key, value]) => !HIDDEN_PROFILE_DETAIL_KEYS.has(key.toLowerCase()) && hasProfileDetailValue(value))
     .map(([key, value]) => ({ key, value }));
 }
 export function getMetadataEntries(metadata: Record<string, any> | null | undefined): {

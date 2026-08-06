@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi import Depends, UploadFile
@@ -13,16 +14,21 @@ from orion.api.interactive.account_manager.models.user_param_model import user_p
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
+from orion.api.interactive.system_log_manager.system_log_manager import SystemLogManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantRequest
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel
+from orion.services.redis_manager.redis_controller import redis_controller
+from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.management.jobs.alert.alert_job import alert_job
 from orion.api.interactive.account_manager.models.user_model import user_model
+from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 
 tenant_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
+SYSTEM_LOG_FLUSHED_AT_KEY = "SYSTEM_LOG_FLUSHED_AT"
 
 
 @tenant_routes.post(
@@ -62,6 +68,95 @@ async def get_all_tenants():
     return await TenantManager.get_instance().get_all_tenant()
 
 
+@tenant_routes.delete(
+    "/api/tenants/{tenant_id}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def delete_tenant(tenant_id: str, current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().delete_tenant(tenant_id, current_user)
+
+
+@tenant_routes.get(
+    "/api/tenants/alerts/summary",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_alerts_summary(current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alerts_summary(current_user)
+
+
+@tenant_routes.get(
+    "/api/tenants/alerts/allowed-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_alert_allowed_tenant_options():
+    return await TenantManager.get_instance().get_alert_allowed_tenant_options()
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/alerts",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_category_alerts(tenant_id: str, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False), current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alerts(
+        tenant_id,
+        current_user,
+        page=page,
+        limit=limit,
+        alert_type=alert_type,
+        paginate=paginate,
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/{tenant_id}/alerts/filter-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.ANALYST]))], )
+async def get_visible_tenant_alert_filter_options(tenant_id: str, field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50), alert_type: str | None = Query(None), current_user=Depends(get_current_user)):
+    return await TenantManager.get_instance().get_visible_tenant_alert_filter_options(
+        tenant_id,
+        current_user,
+        field=field,
+        query=q,
+        limit=limit,
+        alert_type=alert_type,
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/admin/{tenant_id}/alerts",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_admin_tenant_category_alerts(tenant_id: str, page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=20), alert_type: str | None = Query(None), paginate: bool = Query(False)):
+    return await TenantManager.get_instance().get_admin_tenant_alerts(
+        tenant_id,
+        page=page,
+        limit=limit,
+        alert_type=alert_type,
+        paginate=paginate,
+    )
+
+
+@tenant_routes.get(
+    "/api/tenants/admin/{tenant_id}/alerts/filter-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_admin_tenant_alert_filter_options(tenant_id: str, field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50), alert_type: str | None = Query(None)):
+    return await TenantManager.get_instance().get_admin_tenant_alert_filter_options(
+        tenant_id,
+        field=field,
+        query=q,
+        limit=limit,
+        alert_type=alert_type,
+    )
+
+
 @tenant_routes.post(
     "/api/update/user",
     include_in_schema=False,
@@ -79,11 +174,19 @@ async def update_user(user: user_meta_model, current_user=Depends(get_current_us
 
 
 @tenant_routes.post(
+    "/api/recovery-key",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
+async def generate_recovery_key(current_password: str = Body(..., embed=True), current_user=Depends(get_current_user)):
+    return await AccountManager.get_instance().generate_recovery_key(current_user, current_password)
+
+
+@tenant_routes.post(
     "/api/get/current/user/chat-history",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
-async def get_current_user_chat_history(current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().get_current_user_chat_history(current_user)
+async def get_current_user_chat_history(data: dict | None = Body(default=None), current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().get_chat_history(data or {}, current_user)
 
 
 @tenant_routes.post(
@@ -91,7 +194,7 @@ async def get_current_user_chat_history(current_user=Depends(get_current_user)):
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))], )
 async def update_current_user_chat_history(data: chat_history_model, current_user=Depends(get_current_user)):
-    return await AccountManager.get_instance().update_current_user_chat_history(data, current_user)
+    return await nexus_chat_gateway.getInstance().update_chat_history(data.model_dump(), current_user)
 
 
 @tenant_routes.post(
@@ -115,13 +218,6 @@ async def update_user(current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
 async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
     return await ResourceManager.get_instance().uploadTenantImage(file, current_user)
-
-@tenant_routes.put(
-    "/api/system/image",
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER]))], )
-async def upload_profile_image(file: UploadFile, current_user=Depends(get_current_user)):
-    return await ResourceManager.get_instance().update_system_image(file, current_user)
-
 
 @tenant_routes.delete(
     "/api/user/image",
@@ -173,6 +269,41 @@ async def get_audit_logs(param: audit_log_param_model = Body(...), current_user=
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
 async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
     return {"success": await AuditLogManager.get_instance().delete(log_id)}
+
+
+@tenant_routes.get(
+    "/api/profile/system-logs",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
+    try:
+        flushed_at = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, None, None])
+        return SystemLogManager.get_instance().get(log_type=log_type, date=date, page=page, limit=limit, flushed_at=flushed_at)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+
+@tenant_routes.delete(
+    "/api/profile/system-logs",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def flush_system_logs():
+    result = SystemLogManager.get_instance().flush()
+    await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, datetime.now().replace(microsecond=0).isoformat(), None])
+    return result
+
+
+@tenant_routes.delete(
+    "/api/profile/system-logs/{log_date}/{file_name:path}",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN]))], )
+async def delete_system_log(log_date: str, file_name: str):
+    if not SystemLogManager.get_instance().delete(log_date, file_name):
+        raise HTTPException(status_code=404, detail="Log file not found")
+    return {"success": True}
 
 
 @tenant_routes.get(
@@ -243,6 +374,21 @@ async def get_user_alerts(current_user=Depends(get_current_user), page: int = Qu
         compact=compact,
         unseen_only=unseen_only,
         include_counts=include_counts,
+    )
+
+
+@tenant_routes.get(
+    "/api/profile/alerts/filter-options",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
+async def get_user_alert_filter_options(current_user=Depends(get_current_user), field: str = Query(...), q: str = Query(""), limit: int = Query(25, ge=1, le=50), alert_type: str | None = Query(None)):
+    return await AlertManager.getInstance().get_alert_filter_options(
+        current_user,
+        field=field,
+        query=q,
+        limit=limit,
+        alert_type=alert_type,
     )
 
 

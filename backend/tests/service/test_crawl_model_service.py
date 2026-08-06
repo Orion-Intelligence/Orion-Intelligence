@@ -28,7 +28,7 @@ from orion.api.server.crawl_manager.class_model.ip_scan_request_model import IPS
 from orion.api.server.crawl_manager.class_model.leak_model import CardExtractionModel as LeakCardExtractionModel
 from orion.api.server.crawl_manager.class_model.leak_model import LeakDataModel
 from orion.api.server.crawl_manager.class_model.nlp_data_model import nlp_data_model
-from orion.api.server.crawl_manager.class_model.report_chat_data_model import ReportChatRequest
+from orion.api.server.nexus_manager.model.nexus_chat_model import ReportChatRequest
 from orion.api.server.crawl_manager.class_model.social_model import social_data_model, social_model
 from orion.api.server.crawl_manager.class_model.social_scrape_request_model import SocialScrapeRequest
 from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_generator
@@ -304,7 +304,7 @@ def test_index_wrappers_cover_generator_and_elastic_paths(monkeypatch):
                     social_model(
                         m_message_sharable_link="https://pastebin.com/raw/abc",
                         m_content="post",
-                        m_platform="pastebin",
+                        m_platform=["pastebin"],
                         m_network="surface",
                     )
                 ],

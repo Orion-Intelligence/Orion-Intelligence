@@ -4,13 +4,14 @@ from fastapi import File
 from fastapi import UploadFile
 from fastapi import Query
 from typing import List
-from configs.app_dependency import role_required, get_current_user, status_required, case_management_required
+from configs.app_dependency import license_required, role_required, get_current_user, status_required, case_management_required
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 from orion.api.interactive.case_manager.case_manager import CaseManager
 from orion.api.interactive.case_manager.case_share_manager import CaseShareManager
 from orion.api.interactive.case_manager.models.case_models import AssignCaseAnalystRequest, CreateCaseRequest, UpdateCaseStatusRequest
 from orion.api.interactive.case_manager.models.case_models import CreateCaseShareRequest
 from orion.api.interactive.case_manager.models.case_models import UpdateCaseRequest
+from orion.api.interactive.case_manager.status_board_config import CaseStatusBoardConfig, StatusBoardConfigManager
 
 
 case_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE])), Depends(case_management_required)])
@@ -26,6 +27,24 @@ async def get_cases(archived: bool = Query(False), current_user=Depends(get_curr
         raise HTTPException(status_code=403, detail="Analysts cannot view archived cases")
 
     return await CaseManager.get_instance().get_cases(current_user, archived)
+
+
+@case_routes.get(
+    "/api/profile/cases/status-board-config",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))]
+)
+async def get_status_board_config(current_user=Depends(get_current_user)):
+    return await StatusBoardConfigManager.get_effective_config(current_user)
+
+
+@case_routes.put(
+    "/api/profile/cases/status-board-config/update",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(license_required("maintainer"))]
+)
+async def update_tenant_status_board_config(payload: CaseStatusBoardConfig = Body(...), current_user=Depends(get_current_user)):
+    return await StatusBoardConfigManager.save_tenant_config(str(current_user.tenant_uuid), payload)
 
 
 @case_routes.post(

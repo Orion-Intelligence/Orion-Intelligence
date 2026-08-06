@@ -39,8 +39,13 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     visitCtiGraph();
 
     cy.get('[data-testid="cti-graph-advanced-toggle"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-empty-state"]').filter(':visible').should('contain', 'No builder values selected');
+    cy.get('[data-testid="cti-graph-adv-clear-all"]').filter(':visible').first().should('be.disabled');
+    cy.get('[data-testid="cti-graph-adv-expand"]').filter(':visible').first().should('contain', 'Show filters').click();
+    cy.get('[data-testid="cti-graph-adv-expanded-modal"]').filter(':visible').first().should('be.visible');
     cy.get('[data-testid="cti-graph-adv-row"]').filter(':visible').first().should('exist');
     cy.get('[data-testid="cti-graph-adv-field-select"]').filter(':visible').first().click();
+    cy.get('.ui-dropdown-menu input').filter(':visible').first().clear().type('Country');
     cy.contains('[role="option"]', 'Country').filter(':visible').first().click();
     cy.get('[data-testid="cti-graph-adv-value-input"]').filter(':visible').first().clear().type('Pakistan');
     cy.get('[data-testid="cti-graph-adv-add-filter"]').filter(':visible').first().click();
@@ -48,7 +53,11 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="cti-graph-adv-operator-select"]').filter(':visible').eq(1).click();
     cy.contains('[role="option"]', 'OR').filter(':visible').first().click();
     cy.get('[data-testid="cti-graph-adv-value-input"]').filter(':visible').eq(1).clear().type('8.8.8.8');
-    cy.get('[data-testid="cti-graph-adv-execute"]').filter(':visible').first().click();
+    cy.docsScreenshot('cti-advanced-graph-builder');
+    cy.get('[data-testid="cti-graph-adv-expanded-execute"]').filter(':visible').first().click();
+    cy.get('[data-testid="cti-graph-adv-filter-chip"]').filter(':visible').should('have.length.at.least', 1);
+    cy.get('[data-testid="cti-graph-adv-clear-all"]').filter(':visible').first().should('not.be.disabled').click();
+    cy.get('[data-testid="cti-graph-adv-empty-state"]').filter(':visible').should('contain', 'No builder values selected');
     waitForCtiGraphReady();
     cy.get('[data-testid="graph-sidebar-collapse"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-sidebar-expand"]').filter(':visible').first().click();
@@ -57,15 +66,15 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
   it('covers CTI report export option selection', () => {
     visitCtiGraph();
     const exportDate = new Date().toISOString().slice(0, 10);
-    const exportBase = `cypress/downloads/cti-cti-graph-${exportDate}-cti-graph-intelligence-report`;
+    const exportBase = `cypress/downloads/cti-graph-intelligence-report-${exportDate}`;
 
     openAndAssertReportModal('Export CTI Report');
     cy.docsScreenshot('cti-export-modal');
     cy.get('[data-testid="graph-report-export-json"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
-    cy.readFile(`${exportBase}-graph.json`, { timeout: 15000 }).should('contain', 'CTI Graph Intelligence Report');
+    cy.readFile(`${exportBase}-graph.json`, { timeout: 15000 }).its('title').should('eq', 'CTI Graph Intelligence Report');
     openAndAssertReportModal('Export CTI Report');
-    cy.get('[data-testid="graph-report-export-graph-pdf"]').filter(':visible').first().click();
+    cy.get('[data-testid="graph-report-export-report"]').filter(':visible').first().click();
     cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
     cy.readFile(`${exportBase}-graph-report.pdf`, 'binary', { timeout: 30000 }).should('contain', '%PDF');
   });

@@ -61,11 +61,13 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             cy.wait('@accountThemeUpdate', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 204]);
             cy.intercept('POST', '**/api/update/current/user').as('accountSettingsUpdate');
             cy.get('[data-testid="account-settings-twofa-toggle"]').click();
+            cy.get('[data-testid="password-confirmation-input"]').type(TEST_USERS.testing4.password, {log: false});
+            cy.get('[data-testid="password-confirmation-submit"]').click();
             cy.wait('@accountSettingsUpdate', { timeout: 60000 }).its('response.statusCode').should('be.oneOf', [200, 204]);
             cy.logout();
 
-            cy.intercept('POST', '**/api/token').as('twoFaLogin');
-            cy.visit('/login');
+            cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('twoFaLogin');
+            cy.visitLoginWithCleanAuthState();
             cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing4.username);
             cy.get('[data-testid="login-pass"]').clear().type(TEST_USERS.testing4.password, {log: false});
             cy.get('[data-testid="login-button"]').click();
@@ -77,7 +79,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
 
             cy.visit('/');
             cy.clearAllEmails();
-            cy.contains('[data-testid="reset-password-link"], span.reset-password', 'Reset password?').click();
+            cy.contains('[data-testid="reset-password-link"]', 'Recover account?').click();
             cy.get('[data-testid="reset-companymail"]').clear().type(TEST_USERS.testing3.email);
             cy.get('[data-testid="reset-submit"]').click();
 
@@ -99,7 +101,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 cy.get('[data-testid="reset-confirm-password"]').clear().type(resolvedNewPassword, {log: false}).blur();
                 cy.get('[data-testid="reset-submit"]').click();
                 cy.url().should('include', '/login');
-                cy.intercept('POST', '**/api/token').as('loginRequest');
+                cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('loginRequest');
                 cy.get('[data-testid="login-user"]').clear().type(TEST_USERS.testing3.username);
                 cy.get('[data-testid="login-pass"]').clear().type(resolvedNewPassword, {log: false});
                 cy.get('[data-testid="login-button"]').click();

@@ -1,6 +1,13 @@
 import 'cypress-axe';
 import "./commands";
 
+beforeEach(() => {
+    cy.intercept("POST", "**/api/nexus/chat/clear-session", {
+        statusCode: 200,
+        body: { cleared: true },
+    }).as("clearNexusSession");
+});
+
 if (Cypress.expose("coverage")) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("@cypress/code-coverage/support");

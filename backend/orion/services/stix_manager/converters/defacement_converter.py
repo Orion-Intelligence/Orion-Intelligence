@@ -7,5 +7,5 @@ from orion.services.stix_manager.converters.stix_minimal import convert_to_stix
 
 
 class defacement_converter:
-    def convert(self, raw: DefacementResultItem) -> Dict[str, Any]:
-        return convert_to_stix("defacement", raw)
+    def convert(self, raw: DefacementResultItem, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return convert_to_stix("defacement", raw, tenant_name)

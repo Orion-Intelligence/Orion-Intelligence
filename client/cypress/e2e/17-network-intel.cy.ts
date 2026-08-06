@@ -149,7 +149,9 @@ describe('Network Intel - End-to-End Flow', () => {
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
     cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
-    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/, { timeout: 60000 }).click();
+    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/, { timeout: 60000 }).should('be.visible');
+    cy.docsScreenshot('network-intel-vulnerability-depth-controls');
+    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/).click();
     cy.get('[data-testid="network-intel-vulnerability-result"]', { timeout: 120000 }).should('be.visible');
     cy.docsScreenshot('network-intel-vulnerability-scan');
 

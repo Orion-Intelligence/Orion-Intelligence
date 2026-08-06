@@ -1,4 +1,4 @@
-# Socail: profile_global_presence
+# Social: profile_global_presence
 
 ## Description
 

@@ -9,6 +9,7 @@ import QRCode from 'qrcode';
 import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
 import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { isSignupHost } from '../../../shared/utils/auth-host.util';
 
 @Component({
   selector: 'app-login-container',
@@ -35,19 +36,23 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   isMobile = false;
   autoDemoLogin = false;
   brandingResolved = false;
+  showSignupLink = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
+      this.showSignupLink = isSignupHost(window.location.hostname,
+        this.appService.getConfig().appSettings.app_url);
     });
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {
         this.appService.loadSession(true).subscribe(() => {
           const user = this.appService.userSessionData().user;
-          if (user.password_reset_required && user.password_reset_token) {
-            this.router.navigate(['/reset', user.password_reset_token], { replaceUrl: true }).then();
+          const passwordResetToken = user.password_reset_token || this.authService.passwordResetToken;
+          if (user.password_reset_required && passwordResetToken) {
+            this.router.navigate(['/reset', passwordResetToken], { replaceUrl: true }).then();
             return;
           }
           this.router.navigate(['dashboard'], { replaceUrl: true }).then();
@@ -77,19 +82,11 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     if (!this.brandingResolved) {
       return '';
     }
-    const logo = this.appService.getConfig().appSettings.logo_wide_light;
-    if (!logo || logo === '/api/s/static/system/logo_wide_light_default.png') {
-      return LoginContainerComponent.DEFAULT_LOGO_SRC;
-    }
-    return logo;
+    return this.appService.getConfig().appSettings.logo_wide_light || LoginContainerComponent.DEFAULT_LOGO_SRC;
   }
 
   getDashboardPreviewSrc(): string {
-    const authDashboardIcon = this.appService.getConfig().appSettings.auth_dashboard_icon;
-    if (!authDashboardIcon || authDashboardIcon === '/api/s/static/system/auth_dashboard_icon_default.png') {
-      return LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
-    }
-    return authDashboardIcon;
+    return this.appService.getConfig().appSettings.auth_dashboard_icon || LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
   }
 
   copyToClipboard(text: string): void {

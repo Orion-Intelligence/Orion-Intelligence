@@ -1,22 +1,31 @@
-import {
-  CASE_MOVE_STATUS_IDS,
-  addCase,
-  addLinkTargetCase,
-  assertCaseHiddenInList,
-  assertCaseVisibleInList,
-  assertNotification,
-  assignAnalystIfAvailable,
-  caseId,
-  clickHeaderAction,
-  linkedCaseId,
-  openCaseManagement,
-  openCreatedCaseDetails,
-  openCreatedCaseFromList,
-  selectCaseDate,
-  selectCaseFilterDropdown,
-  selector,
-  typeCaseFilterSearch
-} from './controllers/18-case-management.controller';
+import { CASE_MOVE_STATUS_IDS } from './controllers/18-case-management.controller';
+import { addCase } from './controllers/18-case-management.controller';
+import { addLinkTargetCase } from './controllers/18-case-management.controller';
+import { assertCaseHiddenInList } from './controllers/18-case-management.controller';
+import { assertCaseVisibleInList } from './controllers/18-case-management.controller';
+import { assertNotification } from './controllers/18-case-management.controller';
+import { assertVisibleTenantAlertEmails } from './controllers/18-case-management.controller';
+import { assignAnalystIfAvailable } from './controllers/18-case-management.controller';
+import { caseId } from './controllers/18-case-management.controller';
+import { clickHeaderAction } from './controllers/18-case-management.controller';
+import { configureTenantForCaseAlerts } from './controllers/18-case-management.controller';
+import { linkedCaseId } from './controllers/18-case-management.controller';
+import { openCaseAlertsView } from './controllers/18-case-management.controller';
+import { openCaseManagement } from './controllers/18-case-management.controller';
+import { openCreatedCaseDetails } from './controllers/18-case-management.controller';
+import { openCreatedCaseFromList } from './controllers/18-case-management.controller';
+import { selectCaseDate } from './controllers/18-case-management.controller';
+import { selectCaseFilterDropdown } from './controllers/18-case-management.controller';
+import { selector } from './controllers/18-case-management.controller';
+import { typeCaseFilterSearch } from './controllers/18-case-management.controller';
+import { addUser } from './controllers/05-user-management.controller';
+import { type ManagedUser } from './controllers/05-user-management.controller';
+import { type CaseAlertTenant } from './controllers/10-tenant-management.controller';
+import { createTenantAccount } from './controllers/10-tenant-management.controller';
+import { loginCaseAlertUser } from './controllers/10-tenant-management.controller';
+import { onboardTenantForCaseAlerts } from './controllers/10-tenant-management.controller';
+import { openTenantsPage } from './controllers/10-tenant-management.controller';
+import { setTenantAlertVisibility } from './controllers/10-tenant-management.controller';
 
 describe('Case Management - Add View Edit Flow', () => {
   beforeEach(() => {
@@ -64,6 +73,7 @@ describe('Case Management - Add View Edit Flow', () => {
       assertCaseVisibleInList(caseId);
       assertCaseHiddenInList(linkedCaseId);
     });
+    cy.docsScreenshot('case-management-filters');
 
     selectCaseFilterDropdown('case-filter-status', 'New');
     cy.then(() => assertCaseVisibleInList(caseId));
@@ -95,8 +105,11 @@ describe('Case Management - Add View Edit Flow', () => {
 
   it('toggles case list and analytics views', () => {
     openCaseManagement();
-    cy.get(selector('case-mode-analytics-button')).click({ force: true }); cy.get(selector('case-analytics-panel')).should('be.visible');
-    cy.get(selector('case-mode-list-button')).click({ force: true }); cy.get(selector('case-management-table')).should('be.visible');
+    cy.get(selector('case-mode-analytics-button')).click({ force: true });
+    cy.get(selector('case-analytics-panel')).should('be.visible');
+    cy.docsScreenshot('case-management-analytics');
+    cy.get(selector('case-mode-list-button')).click({ force: true });
+    cy.get(selector('case-management-table')).should('be.visible');
   });
 
   it('edits case details and primary entity', () => {
@@ -128,6 +141,48 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-primary-entity-value')).should('contain.text', 'Cypress Updated Entity');
   });
 
+  it('applies status board settings to tracking board', () => {
+    const setStatusToggle = (testId: string, checked: boolean) => {
+      cy.get(selector(testId)).then(($input) => {
+        if ($input.is(':checked') !== checked) {
+          cy.wrap($input).click({ force: true });
+        }
+      });
+    };
+
+    const saveStatusBoardSettings = () => {
+      cy.intercept('PUT', '**/api/profile/cases/status-board-config/*').as('saveStatusBoardSettings');
+      cy.contains('button', 'Save').scrollIntoView().should('be.visible').click({ force: true });
+      cy.wait('@saveStatusBoardSettings', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
+    };
+
+    cy.then(() => {
+      expect(caseId, 'created case id').not.to.equal('');
+    });
+
+    cy.visit('/dashboard/profile/case-management/tracking-board/settings');
+    cy.get(selector('case-tracking-board-settings-page')).should('be.visible');
+    cy.get(selector('status-board-label-intake_review')).clear().type('Triage');
+    setStatusToggle('status-board-skippable-intake_review', true);
+    setStatusToggle('status-board-enabled-evidence_collection', false);
+    saveStatusBoardSettings();
+
+    cy.visit('/dashboard/profile/case-management/tracking-board');
+    cy.get(selector('case-tracking-board-page')).should('be.visible');
+    cy.get(selector('tracking-column-intake_review')).should('contain.text', 'Triage');
+    cy.get(selector('tracking-column-shell-evidence_collection')).should('not.exist');
+    cy.get(selector(`case-board-card-${caseId}`), { timeout: 60000 }).scrollIntoView().should('exist');
+    cy.get(selector(`case-board-move-${caseId}-under_investigation`)).should('exist');
+    cy.get(selector(`case-board-move-${caseId}-evidence_collection`)).should('not.exist');
+
+    cy.visit('/dashboard/profile/case-management/tracking-board/settings');
+    cy.get(selector('case-tracking-board-settings-page')).should('be.visible');
+    cy.get(selector('status-board-label-intake_review')).clear().type('Intake Review');
+    setStatusToggle('status-board-skippable-intake_review', false);
+    setStatusToggle('status-board-enabled-evidence_collection', true);
+    saveStatusBoardSettings();
+  });
+
   it('adds and edits related entity', () => {
     openCreatedCaseDetails();
 
@@ -152,7 +207,7 @@ describe('Case Management - Add View Edit Flow', () => {
   it('adds and edits artifacts and task', () => {
     openCreatedCaseDetails();
 
-    cy.get(selector('case-artifact-add')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+    cy.get(selector('case-artifact-add')).first().scrollIntoView().click({ force: true });
     cy.get(selector('case-artifact-add-drawer')).filter(':visible').first().should('be.visible');
     cy.get(selector('case-artifact-title-input')).should('be.visible').type('Cypress Evidence Artifact');
     cy.get(selector('case-artifact-type-select')).should('be.visible').select('file');
@@ -175,6 +230,7 @@ describe('Case Management - Add View Edit Flow', () => {
     assertNotification('File integrity verified');
 
     cy.get(selector('case-artifact-file-integrity-0')).should('contain.text', 'Verified');
+    cy.docsScreenshot('case-artifact-integrity');
 
     cy.get(selector('case-artifact-edit-0')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
     cy.get(selector('case-artifact-edit-drawer')).filter(':visible').first().within(() => {
@@ -187,7 +243,7 @@ describe('Case Management - Add View Edit Flow', () => {
     assertNotification('Artifacts updated successfully');
     cy.get(selector('case-artifact-title-value-0')).should('contain.text', 'Cypress Updated Evidence Artifact');
 
-    cy.get(selector('case-artifact-add')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+    cy.get(selector('case-artifact-add')).first().scrollIntoView().click({ force: true });
     cy.get(selector('case-artifact-add-drawer')).filter(':visible').first().should('be.visible');
 
     cy.get(selector('case-artifact-title-input')).should('be.visible').type('Cypress Linked Report Artifact');
@@ -204,6 +260,9 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-artifact-report-empty')).should('not.exist');
 
     cy.get(selector('case-artifact-report-option-0')).filter(':visible').first()
+      .should('be.visible');
+    cy.docsScreenshot('case-linked-report-artifact-search');
+    cy.get(selector('case-artifact-report-option-0')).filter(':visible').first()
       .click({ force: true });
 
     cy.get(selector('case-artifact-add-save')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
@@ -219,7 +278,7 @@ describe('Case Management - Add View Edit Flow', () => {
     assertNotification('File deleted successfully');
     cy.get(selector('case-artifact-file-download-0')).should('not.exist');
 
-    cy.get(selector('case-artifact-add')).filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
+    cy.get(selector('case-artifact-add')).first().scrollIntoView().click({ force: true });
     cy.get(selector('case-artifact-add-drawer')).filter(':visible').first().should('be.visible');
 
     cy.get(selector('case-artifact-title-input'))
@@ -310,10 +369,14 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.contains(selector('report-feedback-comment-body'), 'Cypress analyst note').should('be.visible');
     cy.get(selector('report-feedback-comment-user-name')).should('exist');
 
+    const exportDate = new Date().toISOString().slice(0, 10);
+    const exportPath = `${Cypress.config('downloadsFolder')}/cypress-updated-case-title-${exportDate}.pdf`;
+
     clickHeaderAction('case-details-export-pdf');
     cy.then(() => {
-      cy.readFile(`cypress/downloads/${caseId}-case-report.pdf`, null, { timeout: 30000 })
+      cy.readFile(exportPath, 'binary', { timeout: 120000 })
         .should((contents) => {
+          expect(contents).to.contain('%PDF');
           expect(contents.length).to.be.greaterThan(1000);
         });
     });
@@ -326,6 +389,13 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'anyone with the link');
     cy.get(selector('confirmation-yes-button')).should('be.visible').click();
     cy.get('@caseShareWindowOpen').should('have.been.calledWithMatch', /\/case-share\/.+token=/, '_blank');
+    cy.get('@caseShareWindowOpen').its('firstCall.args.0').then((shareUrl) => {
+      cy.visit(String(shareUrl));
+      cy.get(selector('case-share-export-pdf'), { timeout: 60000 }).should('be.visible');
+      cy.docsScreenshot('case-share-public-view');
+      cy.visit(`/dashboard/profile/case-management/case-details?caseId=${caseId}`);
+      cy.get(selector('case-details-page')).should('be.visible');
+    });
 
     clickHeaderAction('case-details-revoke-shares');
     cy.get(selector('confirmation-popup')).should('be.visible').and('contain.text', 'expire all previously shared links');
@@ -365,6 +435,9 @@ describe('Case Management - Add View Edit Flow', () => {
           cy.get(selector(`case-board-card-${createdCaseId}`), { timeout: 60000 })
             .should('exist')
             .scrollIntoView();
+          if (statusLabel === 'Intake Review') {
+            cy.docsScreenshot('case-tracking-board');
+          }
 
           cy.get(selector(`case-board-move-${createdCaseId}-${CASE_MOVE_STATUS_IDS[statusLabel]}`))
             .scrollIntoView()
@@ -375,6 +448,9 @@ describe('Case Management - Add View Edit Flow', () => {
             .should('be.visible')
             .clear()
             .type(`Moving case to ${statusLabel}`);
+          if (statusLabel === 'Intake Review') {
+            cy.docsScreenshot('case-tracking-board-move-reason');
+          }
 
           cy.get(selector('case-move-save'))
             .should('be.visible')
@@ -421,9 +497,10 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.get(selector('case-artifact-add')).should('not.exist');
     cy.get(selector('case-task-add')).should('not.exist');
     cy.get(selector('case-linked-case-add')).should('not.exist');
+    cy.docsScreenshot('case-closure-read-only');
   });
 
-  it('archives closed case and shows archived list', () => {
+  it('archives closed case and shows .then list', () => {
     openCreatedCaseDetails();
 
     clickHeaderAction('case-details-archive');
@@ -440,5 +517,75 @@ describe('Case Management - Add View Edit Flow', () => {
     cy.then(() => {
       assertCaseVisibleInList(caseId);
     });
+    cy.docsScreenshot('case-management-archived-list');
+  });
+});
+
+describe('Case Management - Tenant Alert Visibility', () => {
+  let caseAlertTenants: CaseAlertTenant[] = [];
+  let caseAlertUsers: {limited: ManagedUser; all: ManagedUser};
+
+  before(() => {
+    cy.env(['CASE_ALERT_TENANTS', 'CASE_ALERT_USERS']).then(({CASE_ALERT_TENANTS, CASE_ALERT_USERS}) => {
+      caseAlertTenants = CASE_ALERT_TENANTS || [];
+      caseAlertUsers = CASE_ALERT_USERS || {};
+      if (caseAlertTenants.length !== 3 || !caseAlertUsers.limited?.username || !caseAlertUsers.all?.username) {
+        throw new Error('Missing CASE_ALERT_TENANTS or CASE_ALERT_USERS in cypress.config.ts');
+      }
+    });
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('limits admin tenant alerts by analyst allowed tenants and tenant visibility settings', () => {
+    cy.logout();
+    caseAlertTenants.forEach((tenant) => {
+      createTenantAccount(tenant);
+      cy.loginAsAdmin();
+      openTenantsPage();
+      configureTenantForCaseAlerts(tenant);
+      cy.logout();
+    });
+
+    caseAlertTenants.forEach((tenant) => onboardTenantForCaseAlerts(tenant));
+
+    cy.loginAsAdmin();
+    cy.visit('/dashboard/profile/users');
+    cy.get('[data-testid="tenant-add-user-button"]').should('be.visible');
+    addUser(caseAlertUsers.limited);
+    addUser(caseAlertUsers.all);
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[0], caseAlertTenants[1]],
+      [caseAlertTenants[2]]
+    );
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(caseAlertTenants, []);
+    cy.logout();
+
+    setTenantAlertVisibility(caseAlertTenants[0], false);
+
+    loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[1]],
+      [caseAlertTenants[0], caseAlertTenants[2]]
+    );
+    cy.logout();
+
+    loginCaseAlertUser(caseAlertUsers.all.username, caseAlertUsers.all.password);
+    openCaseAlertsView();
+    assertVisibleTenantAlertEmails(
+      [caseAlertTenants[1], caseAlertTenants[2]],
+      [caseAlertTenants[0]]
+    );
   });
 });

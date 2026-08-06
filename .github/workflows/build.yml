@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: lts/*
 
@@ -48,11 +48,6 @@ jobs:
             find client -maxdepth 3 -type d \( -name build -o -name dist -o -name public \) -print || true
             exit 1
           fi
-
-      - run: |
-          set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -d
 
       - id: compose_loc
         run: |
@@ -94,6 +89,11 @@ jobs:
 
       - run: |
           set -euo pipefail
+          chmod +x ./run.sh
+          ./run.sh build -d
+
+      - run: |
+          set -euo pipefail
           docker ps -aq | xargs -r docker rm -f || true
           docker network prune -f || true
           docker system prune -f --volumes || true
@@ -101,6 +101,7 @@ jobs:
       - run: |
           set -euo pipefail
           docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
+          docker network inspect orion_nexus_backend >/dev/null 2>&1 || docker network create orion_nexus_backend
 
       - run: |
           set -euo pipefail
@@ -150,7 +151,7 @@ jobs:
             --only-categories=performance,accessibility,best-practices,seo || true
 
       - if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: lighthouse-results
           path: lighthouse-results/

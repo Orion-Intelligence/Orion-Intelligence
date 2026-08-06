@@ -15,10 +15,14 @@ import { PasswordToggleDirective } from '../../../shared/directives/password-tog
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { RecoveryKeyPopupComponent } from '../../../shared/partials/recovery-key-popup/recovery-key-popup.component';
+import { PasswordConfirmationPopupComponent } from '../../../shared/partials/password-confirmation-popup/password-confirmation-popup.component';
+
+type SensitiveAction = 'twofa' | 'password' | 'recovery';
 
 @Component({
   selector: 'app-sidebar-profile-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective, TranslatePipe],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective, TranslatePipe, RecoveryKeyPopupComponent, PasswordConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './account-settings.component.html'
 })
@@ -38,6 +42,9 @@ export class AccountSettingsComponent implements OnInit {
   showPasswordMeter = false;
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();
   currentUnmetCheck: string | null = null;
+  recoveryKey: string | null = null;
+  sensitiveAction: SensitiveAction | null = null;
+  confirmationError: string | null = null;
 
   constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
     this.userSessionData = this.appService.userSessionData();
@@ -103,9 +110,9 @@ export class AccountSettingsComponent implements OnInit {
     this.updateUser();
   }
 
-  toggleTwoFa() {
-    this.userSessionData.user.twofa_enabled = this.twoFactorEnabled;
-    this.updateUser();
+  requestSensitiveAction(action: SensitiveAction) {
+    this.confirmationError = null;
+    this.sensitiveAction = action;
   }
 
   toggleProfileVisibility() {
@@ -172,7 +179,6 @@ export class AccountSettingsComponent implements OnInit {
     this.userSessionData.user.preferences = preferences;
     const userMeta: userMetaData = {
       username: this.userSessionData.user.username,
-      twofa_enabled: this.userSessionData.user.twofa_enabled,
       theme,
       preferences,
       demo_tour: this.userSessionData.user.demo_tour
@@ -202,21 +208,44 @@ export class AccountSettingsComponent implements OnInit {
     return areAllPasswordRequirementsMet(this.passwordChecks);
   }
 
-  updatePassword() {
+  confirmSensitiveAction(currentPassword: string) {
+    if (this.sensitiveAction === 'recovery') {
+      this.apiService.post<{ recovery_key: string }>('recovery-key', { current_password: currentPassword }).subscribe({
+        next: (response) => {
+          this.sensitiveAction = null;
+          this.recoveryKey = response.recovery_key;
+        },
+        error: (err) => this.confirmationError = err?.error?.detail || 'Invalid password'
+      });
+      return;
+    }
+
+    const action = this.sensitiveAction;
     const userMeta: userMetaData = {
       username: this.userSessionData.user.username,
-      password: this.newPassword
+      current_password: currentPassword,
+      ...(action === 'password' ? { password: this.newPassword } : { twofa_enabled: !this.twoFactorEnabled })
     };
     this.apiService.post<{ message?: string }>('update/current/user', userMeta).subscribe({
       next: () => {
-        this.messageNotificationService.show('Password updated successfully', 'success');
-        this.resetPasswordForm();
-        this.isPasswordSectionOpen = false;
+        this.sensitiveAction = null;
+        if (action === 'twofa') {
+          this.twoFactorEnabled = !this.twoFactorEnabled;
+          this.userSessionData.user.twofa_enabled = this.twoFactorEnabled;
+        }
+        else {
+          this.messageNotificationService.show('Password updated successfully', 'success');
+          this.resetPasswordForm();
+          this.isPasswordSectionOpen = false;
+        }
       },
-      error: (err) => {
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to update password');
-      }
+      error: (err) => this.confirmationError = err?.error?.detail || 'Invalid password'
     });
+  }
+
+  closeSensitiveAction() {
+    this.sensitiveAction = null;
+    this.confirmationError = null;
   }
 
   private resetPasswordForm() {

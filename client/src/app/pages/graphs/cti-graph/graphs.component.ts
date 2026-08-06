@@ -1,7 +1,5 @@
 import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
-import { HttpParams } from '@angular/common/http';
-import { ActivatedRoute, Params } from '@angular/router';
-import { forkJoin } from 'rxjs';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Edge, Network } from 'vis-network';
 import { DataSet } from 'vis-data';
@@ -22,35 +20,17 @@ import { ProxyController } from '../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { splitCountryValues } from '../../../shared/utils/country-normalization.util';
+import { GraphAdvancedBuilderPopupComponent } from './advanced-builder-popup/advanced-builder-popup.component';
+import { GraphAdvancedFilterChipModel, GraphAdvancedFilterModel, GraphBuilderLogicalOperator, GraphSearchMode, GraphSearchOptionModel, GraphSearchRequestModel } from '../../../shared/model/graph/graph-builder.model';
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
-type GraphSearchMode = 'all' | 'cluster' | 'property';
-type GraphSearchOption = {
-  key: string;
-  label: string;
-  mode: GraphSearchMode;
-  propertyType?: string;
-  clusterValue?: string;
-  placeholder: string;
-};
-type GraphAdvancedFilter = {
-  id: string;
-  optionKey: string;
-  value: string;
-  operator: '&&' | '||';
-};
-type GraphSearchRequest = {
-  dataPointType: string;
-  modelType: string;
-  queryValue: string;
-  operator?: '&&' | '||';
-};
 @Component({
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, UiDropdownComponent]
+  imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, UiDropdownComponent, GraphAdvancedBuilderPopupComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly proxied_resource = inject(ProxyController);
@@ -65,6 +45,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly nodeDocumentBorder = '#f97316';
   private readonly nodePropertyBorder = '#38bdf8';
   private readonly nodeFocusColor = '#facc15';
+  private readonly defaultGraphBuilderClusterValue = 'general';
   private readonly clusterPalette: Record<string, { color: string; label: string; swatchClass: string; }> = { general: { color: '#38bdf8', label: 'General', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-sky-400' }, leak: { color: '#f97316', label: 'Leak', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-orange-500' }, tracking: { color: '#22c55e', label: 'Tracking', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-green-500' }, news: { color: '#eab308', label: 'News', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-yellow-500' }, defacement: { color: '#ef4444', label: 'Defacement', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-red-500' }, chat: { color: '#06b6d4', label: 'Chat', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-500' }, exploit: { color: '#fb7185', label: 'Exploit', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-400' }, social: { color: '#a78bfa', label: 'Social', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-purple-400' }, apt: { color: '#f43f5e', label: 'APT', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500' }, malware: { color: '#14b8a6', label: 'Malware', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-teal-500' } };
   private readonly propertyClassPalette: Record<string, string> = { geo: '#22c55e', identity: '#38bdf8', infrastructure: '#60a5fa', indicator: '#f59e0b', vulnerability: '#fb7185', host_indicator: '#eab308', financial: '#34d399', crypto: '#f97316', organization: '#a78bfa', source: '#94a3b8' };
   private readonly iconMap: Record<string, string> = { cluster: 'diagram-3-fill', campaign: 'diagram-3-fill', document: 'file-earmark-text-fill', property: 'tags-fill', actor: 'tags-fill', encoded: 'code-slash', document_id: 'file-earmark-lock-fill', ip: 'hdd-network-fill', phone: 'telephone-fill', email: 'envelope-fill', domain: 'globe2', url: 'link-45deg', country: 'flag-fill', file: 'folder-fill', card: 'credit-card-2-front-fill', crypto: 'currency-bitcoin', bank: 'bank2', platform: 'cpu-fill', company: 'building-fill', person: 'person-fill', location: 'geo-alt-fill', language: 'translate', hashtag: 'hash', mention: 'at', xmpp: 'chat-dots-fill', tactic: 'bullseye', technique: 'tools', script: 'braces' };
@@ -81,6 +62,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   private nodeTypeById: Record<string, string> = {};
   private lastAppliedQuerySignature = '';
   private readonly globalKeyDownListener = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && this.isGraphBuilderExpanded) {
+      event.preventDefault();
+      this.closeGraphBuilderExpanded();
+      return;
+    }
     if (!this.network) {
       return;
     }
@@ -117,6 +103,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   };
   private pendingFilters: CtiGraphFilters | null = null;
   private graphAdvancedFilterCounter = 0;
+  private skipNextBasicSearchRouteApply = false;
+  private hoveredNodeId: string | null = null;
+  private pendingFocusNodeId: string | null = null;
+  private graphRequestSequence = 0;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -127,6 +117,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   contextCanExpand = false;
   contextCanCollapse = false;
   contextShowOpenCti = false;
+  contextShowOpenDocument = false;
   contextShowOpenReport = false;
   network!: Network;
   selectedType = 'cluster';
@@ -150,14 +141,22 @@ export class GraphComponent implements OnInit, OnDestroy {
   readonly primaryGraphSearchKeys = ['all', 'leak', 'tracking', 'news', 'defacement', 'chat', 'exploit', 'social', 'apt', 'malware'];
   readonly graphWhereOperatorOptions: UiDropdownOption[] = [ { key: '__where__', label: 'WHERE' } ];
   readonly graphJoinOperatorOptions: UiDropdownOption[] = [ { key: '&&', label: 'AND' }, { key: '||', label: 'OR' } ];
-  readonly graphSearchOptions: GraphSearchOption[] = [ { key: 'all', label: 'All', mode: 'all', placeholder: 'Search...' }, { key: 'leak', label: 'Leak', mode: 'cluster', clusterValue: 'leak', placeholder: 'Search leak...' }, { key: 'tracking', label: 'Tracking', mode: 'cluster', clusterValue: 'tracking', placeholder: 'Search tracking...' }, { key: 'news', label: 'News', mode: 'cluster', clusterValue: 'news', placeholder: 'Search news...' }, { key: 'defacement', label: 'Defacement', mode: 'cluster', clusterValue: 'defacement', placeholder: 'Search defacement...' }, { key: 'chat', label: 'Chat', mode: 'cluster', clusterValue: 'chat', placeholder: 'Search chat...' }, { key: 'exploit', label: 'Exploit', mode: 'cluster', clusterValue: 'exploit', placeholder: 'Search exploit...' }, { key: 'social', label: 'Social', mode: 'cluster', clusterValue: 'social', placeholder: 'Search social...' }, { key: 'apt', label: 'APT', mode: 'cluster', clusterValue: 'apt', placeholder: 'Search APT...' }, { key: 'malware', label: 'Malware', mode: 'cluster', clusterValue: 'malware', placeholder: 'Search malware...' }, { key: 'm_ip', label: 'IP Address', mode: 'property', propertyType: 'm_ip', placeholder: '8.8.8.8' }, { key: 'm_asns', label: 'ASN', mode: 'property', propertyType: 'm_asns', placeholder: 'AS13335 or 13335' }, { key: 'm_domain', label: 'Domain', mode: 'property', propertyType: 'm_domain', placeholder: 'example.com' }, { key: 'm_url', label: 'URL', mode: 'property', propertyType: 'm_url', placeholder: 'https://example.com/path' }, { key: 'm_encoded_urls', label: 'Encoded URL', mode: 'property', propertyType: 'm_encoded_urls', placeholder: 'Encoded or defanged URL' }, { key: 'm_email', label: 'Email', mode: 'property', propertyType: 'm_email', placeholder: 'name@example.com' }, { key: 'm_username', label: 'Username', mode: 'property', propertyType: 'm_username', placeholder: 'Username or handle' }, { key: 'm_person', label: 'Person', mode: 'property', propertyType: 'm_person', placeholder: 'Person name' }, { key: 'm_phone_number', label: 'Phone Number', mode: 'property', propertyType: 'm_phone_number', placeholder: '+1 555 0100' }, { key: 'm_org', label: 'Organization', mode: 'property', propertyType: 'm_org', placeholder: 'Company or organization' }, { key: 'm_attacker', label: 'Threat Actor', mode: 'property', propertyType: 'm_attacker', placeholder: 'Threat actor or alias' }, { key: 'm_alias', label: 'Alias', mode: 'property', propertyType: 'm_alias', placeholder: 'Actor or entity alias' }, { key: 'm_country', label: 'Country', mode: 'property', propertyType: 'm_country', placeholder: 'Pakistan, Iran, United States...' }, { key: 'm_location', label: 'Location', mode: 'property', propertyType: 'm_location', placeholder: 'City, state, region...' }, { key: 'm_origin_country', label: 'Origin Country', mode: 'property', propertyType: 'm_origin_country', placeholder: 'Origin country' }, { key: 'm_industry', label: 'Industry', mode: 'property', propertyType: 'm_industry', placeholder: 'Finance, healthcare...' }, { key: 'm_cve', label: 'CVE', mode: 'property', propertyType: 'm_cve', placeholder: 'CVE-2026-0000' }, { key: 'm_cwe', label: 'CWE', mode: 'property', propertyType: 'm_cwe', placeholder: 'CWE-79' }, { key: 'm_vulnerability', label: 'Vulnerability', mode: 'property', propertyType: 'm_vulnerability', placeholder: 'Vulnerability name' }, { key: 'm_cvss', label: 'CVSS', mode: 'property', propertyType: 'm_cvss', placeholder: '9.8' }, { key: 'm_severity', label: 'Severity', mode: 'property', propertyType: 'm_severity', placeholder: 'critical, high...' }, { key: 'm_risk', label: 'Risk', mode: 'property', propertyType: 'm_risk', placeholder: 'Risk level' }, { key: 'm_product', label: 'Product', mode: 'property', propertyType: 'm_product', placeholder: 'Affected product' }, { key: 'm_vendor', label: 'Vendor', mode: 'property', propertyType: 'm_vendor', placeholder: 'Vendor name' }, { key: 'm_version', label: 'Version', mode: 'property', propertyType: 'm_version', placeholder: 'Version string' }, { key: 'm_platform', label: 'Platform', mode: 'property', propertyType: 'm_platform', placeholder: 'Windows, Linux, Android...' }, { key: 'm_web_server', label: 'Web Server', mode: 'property', propertyType: 'm_web_server', placeholder: 'nginx, Apache...' }, { key: 'm_remote_type', label: 'Remote Type', mode: 'property', propertyType: 'm_remote_type', placeholder: 'Remote exploit type' }, { key: 'm_md5', label: 'MD5', mode: 'property', propertyType: 'm_md5', placeholder: 'MD5 hash' }, { key: 'm_sha1', label: 'SHA1', mode: 'property', propertyType: 'm_sha1', placeholder: 'SHA1 hash' }, { key: 'm_sha256', label: 'SHA256', mode: 'property', propertyType: 'm_sha256', placeholder: 'SHA256 hash' }, { key: 'm_sha3_384', label: 'SHA3-384', mode: 'property', propertyType: 'm_sha3_384', placeholder: 'SHA3-384 hash' }, { key: 'm_imphash', label: 'Imphash', mode: 'property', propertyType: 'm_imphash', placeholder: 'Import hash' }, { key: 'm_telfhash', label: 'Telfhash', mode: 'property', propertyType: 'm_telfhash', placeholder: 'Telfhash' }, { key: 'm_tlsh', label: 'TLSH', mode: 'property', propertyType: 'm_tlsh', placeholder: 'TLSH hash' }, { key: 'm_file_name', label: 'File Name', mode: 'property', propertyType: 'm_file_name', placeholder: 'payload.exe' }, { key: 'm_file_paths', label: 'File Path', mode: 'property', propertyType: 'm_file_paths', placeholder: '/tmp/payload.exe' }, { key: 'm_file_type', label: 'File Type', mode: 'property', propertyType: 'm_file_type', placeholder: 'PE, APK, PDF...' }, { key: 'm_signature', label: 'Signature', mode: 'property', propertyType: 'm_signature', placeholder: 'Signature name' }, { key: 'm_yara_rule', label: 'YARA Rule', mode: 'property', propertyType: 'm_yara_rule', placeholder: 'YARA rule name' }, { key: 'm_family', label: 'Malware Family', mode: 'property', propertyType: 'm_family', placeholder: 'Malware family' }, { key: 'm_registry_key_path', label: 'Registry Key', mode: 'property', propertyType: 'm_registry_key_path', placeholder: 'HKCU\\Software\\...' }, { key: 'm_mac_address', label: 'MAC Address', mode: 'property', propertyType: 'm_mac_address', placeholder: '00:11:22:33:44:55' }, { key: 'm_user_agents', label: 'User Agent', mode: 'property', propertyType: 'm_user_agents', placeholder: 'Mozilla/5.0...' }, { key: 'm_crypto_address', label: 'Crypto Address', mode: 'property', propertyType: 'm_crypto_address', placeholder: 'Wallet address' }, { key: 'm_currencies', label: 'Currency', mode: 'property', propertyType: 'm_currencies', placeholder: 'BTC, USD...' }, { key: 'm_network', label: 'Network', mode: 'property', propertyType: 'm_network', placeholder: 'Network name' }, { key: 'm_social_media_profiles', label: 'Social Profile', mode: 'property', propertyType: 'm_social_media_profiles', placeholder: 'Profile URL or handle' }, { key: 'm_hashtag', label: 'Hashtag', mode: 'property', propertyType: 'm_hashtag', placeholder: '#tag' }, { key: 'm_mention', label: 'Mention', mode: 'property', propertyType: 'm_mention', placeholder: '@handle' }, { key: 'm_xmpp_addresses', label: 'XMPP Address', mode: 'property', propertyType: 'm_xmpp_addresses', placeholder: 'user@example.com' }, { key: 'm_enterprise_attack_tactics', label: 'MITRE Tactic', mode: 'property', propertyType: 'm_enterprise_attack_tactics', placeholder: 'TA0001' }, { key: 'm_enterprise_attack_techniques', label: 'MITRE Technique', mode: 'property', propertyType: 'm_enterprise_attack_techniques', placeholder: 'T1059' }, { key: 'm_author', label: 'Author', mode: 'property', propertyType: 'm_author', placeholder: 'Author/source' }, { key: 'm_reporter', label: 'Reporter', mode: 'property', propertyType: 'm_reporter', placeholder: 'Reporter/source' }, { key: 'm_team', label: 'Team', mode: 'property', propertyType: 'm_team', placeholder: 'Team or group' }, { key: 'm_tags', label: 'Tag', mode: 'property', propertyType: 'm_tags', placeholder: 'Tag value' }, { key: 'm_first_seen', label: 'First Seen', mode: 'property', propertyType: 'm_first_seen', placeholder: 'First seen date' }, { key: 'm_last_seen', label: 'Last Seen', mode: 'property', propertyType: 'm_last_seen', placeholder: 'Last seen date' }, { key: 'm_uk_nhs', label: 'UK NHS Number', mode: 'property', propertyType: 'm_uk_nhs', placeholder: 'NHS number' }, { key: 'm_us_driver_license', label: 'US Driver License', mode: 'property', propertyType: 'm_us_driver_license', placeholder: 'Driver license' } ];
+  readonly graphBuilderClusterOption: GraphSearchOptionModel = new GraphSearchOptionModel({ key: 'cluster', label: 'Cluster', mode: GraphSearchMode.Cluster, placeholder: 'Select cluster' });
+  readonly graphBuilderClusterValueOptions: UiDropdownOption[] = [ { key: 'general', label: 'General' }, { key: 'leak', label: 'Leak' }, { key: 'tracking', label: 'Tracking' }, { key: 'news', label: 'News' }, { key: 'defacement', label: 'Defacement' }, { key: 'chat', label: 'Chat' }, { key: 'exploit', label: 'Exploit' }, { key: 'social', label: 'Social' }, { key: 'apt', label: 'APT' }, { key: 'malware', label: 'Malware' } ];
+  readonly graphSearchOptions: GraphSearchOptionModel[] = [ { key: 'all', label: 'All', mode: 'all', placeholder: 'Search...' }, { key: 'leak', label: 'Leak', mode: 'cluster', clusterValue: 'leak', placeholder: 'Search leak...' }, { key: 'tracking', label: 'Tracking', mode: 'cluster', clusterValue: 'tracking', placeholder: 'Search tracking...' }, { key: 'news', label: 'News', mode: 'cluster', clusterValue: 'news', placeholder: 'Search news...' }, { key: 'defacement', label: 'Defacement', mode: 'cluster', clusterValue: 'defacement', placeholder: 'Search defacement...' }, { key: 'chat', label: 'Chat', mode: 'cluster', clusterValue: 'chat', placeholder: 'Search chat...' }, { key: 'exploit', label: 'Exploit', mode: 'cluster', clusterValue: 'exploit', placeholder: 'Search exploit...' }, { key: 'social', label: 'Social', mode: 'cluster', clusterValue: 'social', placeholder: 'Search social...' }, { key: 'apt', label: 'APT', mode: 'cluster', clusterValue: 'apt', placeholder: 'Search APT...' }, { key: 'malware', label: 'Malware', mode: 'cluster', clusterValue: 'malware', placeholder: 'Search malware...' }, { key: 'm_ip', label: 'IP Address', mode: 'property', propertyType: 'm_ip', placeholder: '8.8.8.8' }, { key: 'm_asns', label: 'ASN', mode: 'property', propertyType: 'm_asns', placeholder: 'AS13335 or 13335' }, { key: 'm_domain', label: 'Domain', mode: 'property', propertyType: 'm_domain', placeholder: 'example.com' }, { key: 'm_url', label: 'URL', mode: 'property', propertyType: 'm_url', placeholder: 'https://example.com/path' }, { key: 'm_encoded_urls', label: 'Encoded URL', mode: 'property', propertyType: 'm_encoded_urls', placeholder: 'Encoded or defanged URL' }, { key: 'm_email', label: 'Email', mode: 'property', propertyType: 'm_email', placeholder: 'name@example.com' }, { key: 'm_username', label: 'Username', mode: 'property', propertyType: 'm_username', placeholder: 'Username or handle' }, { key: 'm_person', label: 'Person', mode: 'property', propertyType: 'm_person', placeholder: 'Person name' }, { key: 'm_phone_number', label: 'Phone Number', mode: 'property', propertyType: 'm_phone_number', placeholder: '+1 555 0100' }, { key: 'm_org', label: 'Organization', mode: 'property', propertyType: 'm_org', placeholder: 'Company or organization' }, { key: 'm_attacker', label: 'Threat Actor', mode: 'property', propertyType: 'm_attacker', placeholder: 'Threat actor or alias' }, { key: 'm_alias', label: 'Alias', mode: 'property', propertyType: 'm_alias', placeholder: 'Actor or entity alias' }, { key: 'm_country', label: 'Country', mode: 'property', propertyType: 'm_country', placeholder: 'Pakistan, Iran, United States...' }, { key: 'm_location', label: 'Location', mode: 'property', propertyType: 'm_location', placeholder: 'City, state, region...' }, { key: 'm_origin_country', label: 'Origin Country', mode: 'property', propertyType: 'm_origin_country', placeholder: 'Origin country' }, { key: 'm_industry', label: 'Industry', mode: 'property', propertyType: 'm_industry', placeholder: 'Finance, healthcare...' }, { key: 'm_cve', label: 'CVE', mode: 'property', propertyType: 'm_cve', placeholder: 'CVE-2026-0000' }, { key: 'm_cwe', label: 'CWE', mode: 'property', propertyType: 'm_cwe', placeholder: 'CWE-79' }, { key: 'm_vulnerability', label: 'Vulnerability', mode: 'property', propertyType: 'm_vulnerability', placeholder: 'Vulnerability name' }, { key: 'm_cvss', label: 'CVSS', mode: 'property', propertyType: 'm_cvss', placeholder: '9.8' }, { key: 'm_severity', label: 'Severity', mode: 'property', propertyType: 'm_severity', placeholder: 'critical, high...' }, { key: 'm_risk', label: 'Risk', mode: 'property', propertyType: 'm_risk', placeholder: 'Risk level' }, { key: 'm_product', label: 'Product', mode: 'property', propertyType: 'm_product', placeholder: 'Affected product' }, { key: 'm_vendor', label: 'Vendor', mode: 'property', propertyType: 'm_vendor', placeholder: 'Vendor name' }, { key: 'm_version', label: 'Version', mode: 'property', propertyType: 'm_version', placeholder: 'Version string' }, { key: 'm_platform', label: 'Platform', mode: 'property', propertyType: 'm_platform', placeholder: 'Windows, Linux, Android...' }, { key: 'm_web_server', label: 'Web Server', mode: 'property', propertyType: 'm_web_server', placeholder: 'nginx, Apache...' }, { key: 'm_remote_type', label: 'Remote Type', mode: 'property', propertyType: 'm_remote_type', placeholder: 'Remote exploit type' }, { key: 'm_md5', label: 'MD5', mode: 'property', propertyType: 'm_md5', placeholder: 'MD5 hash' }, { key: 'm_sha1', label: 'SHA1', mode: 'property', propertyType: 'm_sha1', placeholder: 'SHA1 hash' }, { key: 'm_sha256', label: 'SHA256', mode: 'property', propertyType: 'm_sha256', placeholder: 'SHA256 hash' }, { key: 'm_sha3_384', label: 'SHA3-384', mode: 'property', propertyType: 'm_sha3_384', placeholder: 'SHA3-384 hash' }, { key: 'm_imphash', label: 'Imphash', mode: 'property', propertyType: 'm_imphash', placeholder: 'Import hash' }, { key: 'm_telfhash', label: 'Telfhash', mode: 'property', propertyType: 'm_telfhash', placeholder: 'Telfhash' }, { key: 'm_tlsh', label: 'TLSH', mode: 'property', propertyType: 'm_tlsh', placeholder: 'TLSH hash' }, { key: 'm_file_name', label: 'File Name', mode: 'property', propertyType: 'm_file_name', placeholder: 'payload.exe' }, { key: 'm_file_paths', label: 'File Path', mode: 'property', propertyType: 'm_file_paths', placeholder: '/tmp/payload.exe' }, { key: 'm_file_type', label: 'File Type', mode: 'property', propertyType: 'm_file_type', placeholder: 'PE, APK, PDF...' }, { key: 'm_signature', label: 'Signature', mode: 'property', propertyType: 'm_signature', placeholder: 'Signature name' }, { key: 'm_yara_rule', label: 'YARA Rule', mode: 'property', propertyType: 'm_yara_rule', placeholder: 'YARA rule name' }, { key: 'm_family', label: 'Malware Family', mode: 'property', propertyType: 'm_family', placeholder: 'Malware family' }, { key: 'm_registry_key_path', label: 'Registry Key', mode: 'property', propertyType: 'm_registry_key_path', placeholder: 'HKCU\\Software\\...' }, { key: 'm_mac_address', label: 'MAC Address', mode: 'property', propertyType: 'm_mac_address', placeholder: '00:11:22:33:44:55' }, { key: 'm_user_agents', label: 'User Agent', mode: 'property', propertyType: 'm_user_agents', placeholder: 'Mozilla/5.0...' }, { key: 'm_crypto_address', label: 'Crypto Address', mode: 'property', propertyType: 'm_crypto_address', placeholder: 'Wallet address' }, { key: 'm_currencies', label: 'Currency', mode: 'property', propertyType: 'm_currencies', placeholder: 'BTC, USD...' }, { key: 'm_network', label: 'Network', mode: 'property', propertyType: 'm_network', placeholder: 'Network name' }, { key: 'm_social_media_profiles', label: 'Social Profile', mode: 'property', propertyType: 'm_social_media_profiles', placeholder: 'Profile URL or handle' }, { key: 'm_hashtag', label: 'Hashtag', mode: 'property', propertyType: 'm_hashtag', placeholder: '#tag' }, { key: 'm_mention', label: 'Mention', mode: 'property', propertyType: 'm_mention', placeholder: '@handle' }, { key: 'm_xmpp_addresses', label: 'XMPP Address', mode: 'property', propertyType: 'm_xmpp_addresses', placeholder: 'user@example.com' }, { key: 'm_enterprise_attack_tactics', label: 'MITRE Tactic', mode: 'property', propertyType: 'm_enterprise_attack_tactics', placeholder: 'TA0001' }, { key: 'm_enterprise_attack_techniques', label: 'MITRE Technique', mode: 'property', propertyType: 'm_enterprise_attack_techniques', placeholder: 'T1059' }, { key: 'm_author', label: 'Author', mode: 'property', propertyType: 'm_author', placeholder: 'Author/source' }, { key: 'm_reporter', label: 'Reporter', mode: 'property', propertyType: 'm_reporter', placeholder: 'Reporter/source' }, { key: 'm_team', label: 'Team', mode: 'property', propertyType: 'm_team', placeholder: 'Team or group' }, { key: 'm_tags', label: 'Tag', mode: 'property', propertyType: 'm_tags', placeholder: 'Tag value' }, { key: 'm_first_seen', label: 'First Seen', mode: 'property', propertyType: 'm_first_seen', placeholder: 'First seen date' }, { key: 'm_last_seen', label: 'Last Seen', mode: 'property', propertyType: 'm_last_seen', placeholder: 'Last seen date' }, { key: 'm_uk_nhs', label: 'UK NHS Number', mode: 'property', propertyType: 'm_uk_nhs', placeholder: 'NHS number' }, { key: 'm_us_driver_license', label: 'US Driver License', mode: 'property', propertyType: 'm_us_driver_license', placeholder: 'Driver license' } ];
   activeGraphSearchKey = 'all';
   graphSearchAdvancedMode = false;
-  graphAdvancedFilters: GraphAdvancedFilter[] = [this.createGraphAdvancedFilter()];
+  isGraphBuilderExpanded = false;
+  graphAdvancedFilters: GraphAdvancedFilterModel[] = [this.createGraphAdvancedFilter()];
+  appliedGraphAdvancedFilterChips: GraphAdvancedFilterChipModel[] = [];
   graphSearchText = '';
   legendItems: CtiGraphLegendItem[] = [];
   clusterLegendItems: CtiGraphLegendItem[] = [];
   graphStats: CtiGraphStats = { visibleNodes: 0, totalNodes: 0, visibleEdges: 0, totalEdges: 0, hiddenNodes: 0 };
+  nodeInfoPanelVisible = false;
+  nodeInfoPanelHtml = '';
+  nodeInfoPanelLeft = 12;
+  nodeInfoPanelTop = 12;
 
   private getNodeLabelColor(): string {
     if (isPlatformBrowser(this.platformId)) {
@@ -181,7 +180,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
   }
 
-  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
+  constructor( private api: ApiService, private clipboard: Clipboard, private route: ActivatedRoute, private router: Router, private graphReportExport: ReportExportService, @Inject(PLATFORM_ID) private platformId: object ) { }
 
   ngOnInit(): void {
     if (isPlatformBrowser(this.platformId)) {
@@ -190,8 +189,14 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.route.queryParams.subscribe(params => {
       const routeFilters = this.buildRouteFilterOverride(params);
+      const shouldSkipRouteApply = this.skipNextBasicSearchRouteApply;
+      this.skipNextBasicSearchRouteApply = false;
       if (routeFilters) {
         this.applyFilterValues(routeFilters);
+        this.syncBasicSearchControlsFromRoute(params, routeFilters);
+        if (shouldSkipRouteApply) {
+          return;
+        }
       }
       this.applyCurrentFilters();
     });
@@ -241,8 +246,8 @@ export class GraphComponent implements OnInit, OnDestroy {
       singleInput: singleInput || 'all',
       propertyType: propertyType || 'all',
       propertyValue: propertyValue || '',
-      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 0 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
-      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 0 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
+      maxEdge: Number.isFinite(parsedMaxEdge) && parsedMaxEdge >= 20 && parsedMaxEdge <= 800 ? parsedMaxEdge : 25,
+      maxDepth: Number.isFinite(parsedMaxDepth) && parsedMaxDepth >= 1 && parsedMaxDepth <= 5 ? parsedMaxDepth : 1
     };
   }
 
@@ -261,16 +266,19 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.isSidebarCollapsed;
   }
 
-  get activeGraphSearchOption(): GraphSearchOption {
+  get activeGraphSearchOption(): GraphSearchOptionModel {
     return this.graphSearchOptions.find(option => option.key === this.activeGraphSearchKey) ?? this.graphSearchOptions[0];
   }
 
-  get primaryGraphSearchOptions(): GraphSearchOption[] {
+  get primaryGraphSearchOptions(): GraphSearchOptionModel[] {
     return this.graphSearchOptions.filter(option => this.primaryGraphSearchKeys.includes(option.key));
   }
 
-  get graphBuilderSearchOptions(): GraphSearchOption[] {
-    return this.graphSearchOptions.filter(option => option.mode === 'property');
+  get graphBuilderSearchOptions(): GraphSearchOptionModel[] {
+    return [
+      this.graphBuilderClusterOption,
+      ...this.graphSearchOptions.filter(option => option.mode === GraphSearchMode.Property && option.key !== 'm_origin_country')
+    ];
   }
 
   get graphSearchPlaceholder(): string {
@@ -284,7 +292,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.activeGraphSearchKey = option.key;
     this.graphSearchAdvancedMode = false;
-    if (option.mode === 'cluster') {
+    this.closeGraphBuilderExpanded();
+    if (option.mode === GraphSearchMode.Cluster) {
       this.graphSearchText = '';
       this.submitGraphSearch();
     }
@@ -299,6 +308,31 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!this.primaryGraphSearchKeys.includes(this.activeGraphSearchKey)) {
       this.activeGraphSearchKey = 'all';
     }
+    this.closeGraphBuilderExpanded();
+  }
+
+  openGraphBuilderExpanded(): void {
+    this.isGraphBuilderExpanded = true;
+  }
+
+  closeGraphBuilderExpanded(): void {
+    this.isGraphBuilderExpanded = false;
+  }
+
+  clearGraphAdvancedBuilder(): void {
+    this.graphAdvancedFilters = [this.createGraphAdvancedFilter()];
+    this.appliedGraphAdvancedFilterChips = [];
+  }
+
+  hasGraphAdvancedBuilderState(): boolean {
+    if (this.appliedGraphAdvancedFilterChips.length) {
+      return true;
+    }
+    if (this.graphAdvancedFilters.length !== 1) {
+      return true;
+    }
+    const filter = this.graphAdvancedFilters[0];
+    return Boolean(filter?.value.trim() || filter?.optionKey !== 'm_ip');
   }
 
   addGraphAdvancedFilter(): void {
@@ -315,7 +349,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.graphAdvancedFilters = this.graphAdvancedFilters.filter(filter => filter.id !== id);
   }
 
-  getGraphAdvancedOption(optionKey: string): GraphSearchOption {
+  getGraphAdvancedOption(optionKey: string): GraphSearchOptionModel {
     return this.graphBuilderSearchOptions.find(option => option.key === optionKey) ?? this.graphBuilderSearchOptions[0] ?? this.graphSearchOptions[0];
   }
 
@@ -323,33 +357,81 @@ export class GraphComponent implements OnInit, OnDestroy {
     return index === 0 ? this.graphWhereOperatorOptions : this.graphJoinOperatorOptions;
   }
 
-  getGraphOperatorValue(filter: GraphAdvancedFilter, index: number): string {
+  getGraphOperatorValue(filter: GraphAdvancedFilterModel, index: number): string {
     return index === 0 ? '__where__' : filter.operator;
   }
 
-  setGraphFilterOperator(filter: GraphAdvancedFilter, value: string | null, index: number): void {
+  setGraphFilterOperator(filter: GraphAdvancedFilterModel, value: string | null, index: number): void {
     if (index === 0) {
       return;
     }
-    filter.operator = value === '||' ? '||' : '&&';
+    filter.operator = value === GraphBuilderLogicalOperator.Or ? GraphBuilderLogicalOperator.Or : GraphBuilderLogicalOperator.And;
   }
 
-  setGraphFilterOption(filter: GraphAdvancedFilter, value: string | null): void {
+  setGraphFilterOption(filter: GraphAdvancedFilterModel, value: string | null): void {
     const option = this.graphBuilderSearchOptions.find(item => item.key === value);
     if (!option) {
       return;
     }
+    const previousOption = this.getGraphAdvancedOption(filter.optionKey);
     filter.optionKey = option.key;
+    if (option.mode === GraphSearchMode.Cluster) {
+      filter.value = this.defaultGraphBuilderClusterValue;
+    }
+    else if (previousOption.mode === GraphSearchMode.Cluster) {
+      filter.value = '';
+    }
   }
 
-  private createGraphAdvancedFilter(): GraphAdvancedFilter {
+  isGraphClusterAdvancedOption(optionKey: string): boolean {
+    return this.getGraphAdvancedOption(optionKey).mode === GraphSearchMode.Cluster;
+  }
+
+  getGraphFilterClusterValue(filter: GraphAdvancedFilterModel): string {
+    return filter.value || this.defaultGraphBuilderClusterValue;
+  }
+
+  getGraphAdvancedFilterChips(): GraphAdvancedFilterChipModel[] {
+    return this.appliedGraphAdvancedFilterChips;
+  }
+
+  private buildGraphAdvancedFilterChips(): GraphAdvancedFilterChipModel[] {
+    return this.graphAdvancedFilters.reduce<GraphAdvancedFilterChipModel[]>((chips, filter, index) => {
+      const option = this.getGraphAdvancedOption(filter.optionKey);
+      const value = this.getGraphFilterChipValue(filter, option);
+      if (!value) {
+        return chips;
+      }
+
+      const operator = chips.length === 0 ? 'WHERE' : (index === 0 || filter.operator === GraphBuilderLogicalOperator.And ? 'AND' : 'OR');
+      chips.push(new GraphAdvancedFilterChipModel({ id: filter.id, label: `${operator} ${option.label}: ${value}` }));
+      return chips;
+    }, []);
+  }
+
+  setGraphFilterClusterValue(filter: GraphAdvancedFilterModel, value: string | null): void {
+    if (!value || !this.graphBuilderClusterValueOptions.some(option => option.key === value)) {
+      return;
+    }
+    filter.value = value;
+  }
+
+  private getGraphFilterChipValue(filter: GraphAdvancedFilterModel, option: GraphSearchOptionModel): string {
+    if (option.mode === GraphSearchMode.Cluster) {
+      const clusterValue = this.getGraphFilterClusterValue(filter);
+      return this.graphBuilderClusterValueOptions.find(item => item.key === clusterValue)?.label || clusterValue;
+    }
+    return filter.value.trim();
+  }
+
+  private createGraphAdvancedFilter(): GraphAdvancedFilterModel {
     this.graphAdvancedFilterCounter += 1;
-    return {
+    return new GraphAdvancedFilterModel({
       id: `graph-filter-${Date.now()}-${this.graphAdvancedFilterCounter}`,
       optionKey: 'm_ip',
       value: '',
-      operator: '&&'
-    };
+      operator: GraphBuilderLogicalOperator.And
+    });
   }
 
   submitGraphSearch(): void {
@@ -362,15 +444,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     const queryValue = this.graphSearchText.trim();
     const nextFilters = { ...this.activeSidebarFilters };
 
-    if (option.mode === 'cluster') {
+    if (option.mode === GraphSearchMode.Cluster) {
       if (queryValue) {
         nextFilters.selectedType = 'property';
         nextFilters.singleInput = option.clusterValue || 'all';
         nextFilters.propertyType = 'all';
         nextFilters.propertyValue = queryValue;
         this.applyFilterValues(nextFilters);
-        this.lastAppliedQuerySignature = `cluster-property:${JSON.stringify({ cluster: option.clusterValue, queryValue, maxEdge: this.maxEdge, maxDepth: this.maxDepth })}`;
-        this.loadGraphByScopedPropertySearch(queryValue, option.clusterValue || 'all');
+        this.onSidebarApply(nextFilters);
+        this.persistBasicSearchParams(nextFilters, option.key);
         return;
       }
       nextFilters.selectedType = 'cluster';
@@ -378,7 +460,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       nextFilters.propertyType = 'all';
       nextFilters.propertyValue = '';
     }
-    else if (option.mode === 'property') {
+    else if (option.mode === GraphSearchMode.Property) {
       if (!queryValue) {
         return;
       }
@@ -402,49 +484,147 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     this.applyFilterValues(nextFilters);
     this.onSidebarApply(nextFilters);
+    this.persistBasicSearchParams(nextFilters, option.key);
   }
 
-  submitGraphSearchBuilder(): void {
-    const requests = this.graphAdvancedFilters
-      .map((filter, index) => this.buildGraphSearchRequest(this.getGraphAdvancedOption(filter.optionKey), filter.value.trim(), index === 0 ? undefined : filter.operator))
-      .filter((request): request is GraphSearchRequest => !!request);
+  private persistBasicSearchParams(filters: CtiGraphFilters, graphSearchKey: string): void {
+    this.skipNextBasicSearchRouteApply = true;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        selectedType: filters.selectedType || null,
+        singleInput: filters.singleInput || null,
+        propertyType: filters.propertyType || null,
+        propertyValue: filters.propertyValue || null,
+        maxEdge: Number(filters.maxEdge),
+        maxDepth: Number(filters.maxDepth),
+        graphSearchKey: graphSearchKey || null
+      },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    }).finally(() => {
+      this.skipNextBasicSearchRouteApply = false;
+    });
+  }
 
-    if (requests.length === 0) {
+  private syncBasicSearchControlsFromRoute(params: Params, filters: CtiGraphFilters): void {
+    this.graphSearchAdvancedMode = false;
+    const requestedKey = String(params['graphSearchKey'] ?? '').trim();
+    const requestedOption = requestedKey ? this.graphSearchOptions.find(option => option.key === requestedKey) : null;
+    if (requestedOption) {
+      this.activeGraphSearchKey = requestedOption.key;
+      this.graphSearchText = filters.propertyValue || '';
       return;
     }
 
+    if (filters.selectedType === 'property') {
+      const propertyOption = this.graphSearchOptions.find(option => option.mode === GraphSearchMode.Property && option.propertyType === filters.propertyType);
+      const scopedClusterOption = this.graphSearchOptions.find(option => option.mode === GraphSearchMode.Cluster && option.clusterValue === filters.singleInput);
+      this.activeGraphSearchKey = propertyOption?.key || scopedClusterOption?.key || 'all';
+      this.graphSearchText = filters.propertyValue || '';
+      return;
+    }
+
+    const clusterOption = this.graphSearchOptions.find(option => option.mode === GraphSearchMode.Cluster && option.clusterValue === filters.singleInput);
+    this.activeGraphSearchKey = clusterOption?.key || 'all';
+    this.graphSearchText = '';
+  }
+
+  submitGraphSearchBuilder(): void {
+    const requests = this.groupGraphBuilderListRequests(this.graphAdvancedFilters
+      .map((filter, index) => this.buildGraphSearchRequest(this.getGraphAdvancedOption(filter.optionKey), filter.value.trim(), index === 0 ? undefined : filter.operator))
+      .filter((request): request is GraphSearchRequestModel => !!request));
+    const chips = this.buildGraphAdvancedFilterChips();
+
+    if (requests.length === 0) {
+      this.appliedGraphAdvancedFilterChips = [];
+      return;
+    }
+
+    this.appliedGraphAdvancedFilterChips = chips;
     const nextFilters = {
       ...this.activeSidebarFilters,
       selectedType: 'property',
       singleInput: '',
       propertyType: 'advanced',
-      propertyValue: this.describeGraphSearchBuilder()
+      propertyValue: this.describeGraphSearchBuilder(chips)
     };
     this.applyFilterValues(nextFilters);
     this.lastAppliedQuerySignature = `advanced-builder:${JSON.stringify({ requests, maxEdge: this.maxEdge, maxDepth: this.maxDepth })}`;
     this.loadGraphByRequests(requests);
   }
 
-  private describeGraphSearchBuilder(): string {
-    const filled = this.graphAdvancedFilters
-      .map((filter, index) => {
-        const option = this.getGraphAdvancedOption(filter.optionKey);
-        const value = filter.value.trim() || option.clusterValue || '';
-        const operator = index === 0 ? 'WHERE' : filter.operator;
-        return `${operator} ${option.label}${value ? `:${value}` : ''}`;
-      })
+  private describeGraphSearchBuilder(chips: GraphAdvancedFilterChipModel[]): string {
+    const filled = chips
+      .map(chip => chip.label)
       .join(' ');
     return filled || 'advanced builder';
   }
 
-  private buildGraphSearchRequest(option: GraphSearchOption, queryValue: string, operator?: '&&' | '||'): GraphSearchRequest | null {
-    if (option.mode === 'cluster') {
-      return { dataPointType: 'cluster', modelType: 'cluster', queryValue: option.clusterValue || 'all', operator };
+  private buildGraphSearchRequest(option: GraphSearchOptionModel, queryValue: string, operator?: GraphSearchRequestModel['operator']): GraphSearchRequestModel | null {
+    if (option.mode === GraphSearchMode.Cluster) {
+      return new GraphSearchRequestModel({ dataPointType: 'cluster', modelType: 'cluster', queryValues: [queryValue || option.clusterValue || this.defaultGraphBuilderClusterValue], operator });
     }
-    if (option.mode === 'property') {
-      return queryValue ? { dataPointType: 'property', modelType: option.propertyType || 'all', queryValue, operator } : null;
+    if (option.mode === GraphSearchMode.Property) {
+      const queryValues = this.parseGraphBuilderValues(option, queryValue);
+      return queryValues.length ? new GraphSearchRequestModel({ dataPointType: 'property', modelType: option.propertyType || 'all', queryValues, operator }) : null;
     }
     return null;
+  }
+
+  private parseGraphBuilderValues(option: GraphSearchOptionModel, queryValue: string): string[] {
+    const trimmedValue = queryValue.trim();
+    if (!trimmedValue) {
+      return [];
+    }
+    if (option.propertyType === 'm_country' || option.propertyType === 'm_origin_country') {
+      return splitCountryValues(trimmedValue);
+    }
+    return [trimmedValue];
+  }
+
+  private groupGraphBuilderListRequests(requests: GraphSearchRequestModel[]): GraphSearchRequestModel[] {
+    const groupedRequests: GraphSearchRequestModel[] = [];
+
+    requests.forEach(request => {
+      if (request.dataPointType !== 'property' || !this.isGraphBuilderListKey(request.modelType)) {
+        groupedRequests.push(request);
+        return;
+      }
+
+      const previousRequest = groupedRequests[groupedRequests.length - 1];
+      const canMergeWithPrevious = request.operator !== GraphBuilderLogicalOperator.And &&
+        previousRequest?.dataPointType === request.dataPointType &&
+        previousRequest.modelType === request.modelType &&
+        previousRequest.operator !== GraphBuilderLogicalOperator.And;
+      if (!canMergeWithPrevious) {
+        groupedRequests.push(new GraphSearchRequestModel({ ...request, queryValues: [...request.queryValues] }));
+        return;
+      }
+
+      previousRequest.queryValues = this.mergeGraphBuilderQueryValues(previousRequest.queryValues, request.queryValues);
+    });
+
+    return groupedRequests;
+  }
+
+  private isGraphBuilderListKey(modelType: string): boolean {
+    return modelType === 'm_country' || modelType === 'm_origin_country';
+  }
+
+  private mergeGraphBuilderQueryValues(first: string[], second: string[]): string[] {
+    const values: string[] = [];
+    const seen = new Set<string>();
+    [...first, ...second].forEach(value => {
+      const trimmedValue = value.trim();
+      const normalizedValue = trimmedValue.toLowerCase();
+      if (!trimmedValue || seen.has(normalizedValue)) {
+        return;
+      }
+      seen.add(normalizedValue);
+      values.push(trimmedValue);
+    });
+    return values;
   }
 
   openReportExportModal(): void {
@@ -598,6 +778,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
   }
 
+  private nextGraphRequestId(): number {
+    this.graphRequestSequence += 1;
+    return this.graphRequestSequence;
+  }
+
+  private isCurrentGraphRequest(requestId: number): boolean {
+    return requestId === this.graphRequestSequence;
+  }
+
   resetGraph(): void {
     if (this.network) {
       this.network.destroy();
@@ -620,6 +809,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.highlightedNodeId = null;
     this.contextMenuNode = null;
     this.contextMenuNodeId = '';
+    this.hideNodeInfoPanel();
+    this.hoveredNodeId = null;
     this.result = [];
     this.originalNodeState.clear();
     this.updateLegendState([], []);
@@ -640,34 +831,31 @@ export class GraphComponent implements OnInit, OnDestroy {
     else {
       this.expandEnabled = false;
     }
-    let params = new HttpParams();
     this.loading = false;
-    if (data_point_type) {
-      params = params.set('data_point_type', data_point_type);
-    }
-    if (type) {
-      params = params.set('model_type', type);
-    }
-    if (value) {
-      params = params.set('query_value', value);
-    }
-    if (maxEdge) {
-      params = params.set('edge', maxEdge);
-    }
-    if (maxDepth) {
-      params = params.set('depth', maxDepth);
-    }
+    const requestId = this.nextGraphRequestId();
+    const payload = this.buildGraphPayload(data_point_type, type, value, '', maxEdge, maxDepth);
     this.resetGraph();
-    this.api.get<{
+    this.api.post<{
       results: any[];
-  }>('graph', { params }).subscribe({
+  }>('graph', payload).subscribe({
     next: response => {
+      if (!this.isCurrentGraphRequest(requestId)) {
+        return;
+      }
       const { results } = response;
       this.result = results;
       this.renderGraph(this.result);
+      if (data_point_type === 'document') {
+        this.focusGraphNode(this.pendingFocusNodeId || `cti_vertices/${value}`);
+        this.pendingFocusNodeId = null;
+      }
       this.loading = true;
     },
     error: _ => {
+      if (!this.isCurrentGraphRequest(requestId)) {
+        return;
+      }
+      this.pendingFocusNodeId = null;
       this.isEmpty = true;
       this.loading = true;
     }
@@ -685,40 +873,43 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
 
     this.loading = false;
+    const requestId = this.nextGraphRequestId();
     this.resetGraph();
-    this.api.get<{ results: GraphResultItem[]; }>('graph', {
-      params: this.buildGraphHttpParams('property', 'all', queryValue)
-    }).subscribe({
+    this.api.post<{ results: GraphResultItem[]; }>('graph', this.buildGraphPayload('property', 'all', queryValue, clusterKey)).subscribe({
       next: response => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
         const results = response.results ?? [];
         this.result = clusterKey === 'all' ? results : this.filterGraphResultsByCluster(results, clusterKey);
         this.renderGraph(this.result);
         this.loading = true;
       },
       error: _ => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
         this.isEmpty = true;
         this.loading = true;
       }
     });
   }
 
-  private buildGraphHttpParams(dataPointType: string, modelType: string, queryValue: string): HttpParams {
-    let params = new HttpParams();
-    if (dataPointType) {
-      params = params.set('data_point_type', dataPointType);
+  private buildGraphPayload(dataPointType: string, modelType: string, queryValue: string, scopeCluster = '', edgeOverride?: string | number, depthOverride?: string | number): Record<string, string> {
+    const payload: Record<string, string> = {
+      data_point_type: dataPointType,
+      model_type: modelType,
+      query_value: queryValue,
+      edge: String(edgeOverride ?? this.maxEdge),
+      depth: String(depthOverride ?? this.maxDepth)
+    };
+    if (scopeCluster && scopeCluster !== 'all') {
+      payload['scope_cluster'] = scopeCluster;
     }
-    if (modelType) {
-      params = params.set('model_type', modelType);
-    }
-    if (queryValue) {
-      params = params.set('query_value', queryValue);
-    }
-    params = params.set('edge', String(this.maxEdge));
-    params = params.set('depth', String(this.maxDepth));
-    return params;
+    return payload;
   }
 
-  private loadGraphByRequests(requests: GraphSearchRequest[]): void {
+  private loadGraphByRequests(requests: GraphSearchRequestModel[]): void {
     if (this.expandEnabled) {
       queueMicrotask(() => {
         this.expandEnabled = false;
@@ -728,18 +919,32 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.expandEnabled = false;
     }
     this.loading = false;
+    const requestId = this.nextGraphRequestId();
     this.resetGraph();
-    const calls = requests.map(request => this.api.get<{ results: GraphResultItem[]; }>('graph', {
-      params: this.buildGraphHttpParams(request.dataPointType, request.modelType, request.queryValue)
-    }));
-    forkJoin(calls).subscribe({
-      next: responses => {
-        const responseResults = responses.map(response => response.results ?? []);
-        this.result = this.mergeGraphBuilderResults(responseResults, requests);
+    const payload = {
+      requests: requests.map(request => ({
+        data_point_type: request.dataPointType,
+        model_type: request.modelType,
+        query_value: request.queryValues[0] || '',
+        query_values: request.queryValues,
+        operator: request.operator
+      })),
+      edge: String(this.maxEdge),
+      depth: String(this.maxDepth)
+    };
+    this.api.post<{ results: GraphResultItem[]; }>('graph', payload).subscribe({
+      next: response => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
+        this.result = response.results ?? [];
         this.renderGraph(this.result);
         this.loading = true;
       },
       error: _ => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
         this.isEmpty = true;
         this.loading = true;
       }
@@ -791,7 +996,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return Array.from(merged.values());
   }
 
-  private mergeGraphBuilderResults(responseResults: GraphResultItem[][], requests: GraphSearchRequest[]): GraphResultItem[] {
+  private mergeGraphBuilderResults(responseResults: GraphResultItem[][], requests: GraphSearchRequestModel[]): GraphResultItem[] {
     if (responseResults.length === 0) {
       return [];
     }
@@ -800,8 +1005,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     let aggregateDocumentIds = this.extractDocumentIdsFromGraphResults(aggregate);
     for (let index = 1; index < responseResults.length; index++) {
       const current = responseResults[index] ?? [];
-      const operator = requests[index]?.operator ?? '||';
-      if (operator !== '&&') {
+      const operator = requests[index]?.operator ?? GraphBuilderLogicalOperator.Or;
+      if (operator !== GraphBuilderLogicalOperator.And) {
         aggregate = this.dedupeGraphResults([...aggregate, ...current]);
         aggregateDocumentIds = this.unionSets(aggregateDocumentIds, this.extractDocumentIdsFromGraphResults(current));
         continue;
@@ -825,6 +1030,31 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.dedupeGraphResults(aggregate);
   }
 
+  private limitGraphBuilderResultsByDocuments(results: GraphResultItem[], documentLimit: number): GraphResultItem[] {
+    if (!Number.isFinite(documentLimit) || documentLimit < 1) {
+      return this.dedupeGraphResults(results);
+    }
+
+    const orderedDocumentIds: string[] = [];
+    const seenDocumentIds = new Set<string>();
+    results.forEach(item => {
+      this.extractDocumentIdsFromGraphResult(item).forEach(documentId => {
+        if (!seenDocumentIds.has(documentId)) {
+          seenDocumentIds.add(documentId);
+          orderedDocumentIds.push(documentId);
+        }
+      });
+    });
+
+    if (orderedDocumentIds.length <= documentLimit) {
+      return this.dedupeGraphResults(results);
+    }
+
+    const allowedDocumentIds = new Set(orderedDocumentIds.slice(0, documentLimit));
+    const limitedResults = results.filter(item => this.extractDocumentIdsFromGraphResult(item).some(documentId => allowedDocumentIds.has(documentId)));
+    return this.dedupeGraphResults(limitedResults);
+  }
+
   private extractDocumentIdsFromGraphResults(results: GraphResultItem[]): Set<string> {
     const ids = new Set<string>();
     results.forEach(item => {
@@ -835,6 +1065,25 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private extractDocumentIdsFromGraphResult(item: GraphResultItem): string[] {
     const ids = new Set<string>();
+    const addDocumentId = (id: unknown) => {
+      const value = String(id ?? '');
+      if (!value || this.isClusterRootNode(value)) {
+        return;
+      }
+      ids.add(value);
+    };
+    const inspectEdge = (edge: any) => {
+      if (!edge?._from || !edge?._to) {
+        return;
+      }
+      const type = String(edge.type || '');
+      if (type === 'cluster_to_doc') {
+        addDocumentId(edge._to);
+      }
+      else if (type.startsWith('has_')) {
+        addDocumentId(edge._from);
+      }
+    };
     const inspect = (vertex: any) => {
       if (!vertex?._id) {
         return;
@@ -844,7 +1093,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     };
     inspect(item.vertex);
+    inspectEdge(item.edge);
     (item.path?.vertices ?? []).forEach(inspect);
+    (item.path?.edges ?? []).forEach(inspectEdge);
     return Array.from(ids);
   }
 
@@ -887,6 +1138,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.contextCanExpand = this.canContextExpand();
       this.contextCanCollapse = this.canContextCollapse();
       this.contextShowOpenCti = this.showContextOpenCti();
+      this.contextShowOpenDocument = this.showContextOpenDocument();
       this.contextShowOpenReport = this.showContextOpenReport();
       this.changeDetector.detectChanges();
       const menuWidth = menu.offsetWidth || 256;
@@ -937,6 +1189,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.contextCanExpand = false;
     this.contextCanCollapse = false;
     this.contextShowOpenCti = false;
+    this.contextShowOpenDocument = false;
     this.contextShowOpenReport = false;
     this.changeDetector.detectChanges();
   }
@@ -1081,7 +1334,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     const uniqueSubNodes = Array.from(new Set(subNodes));
     const sourceId = this.groupParentByGroupId[nodeId] ?? nodeId;
-    const centerPos = this.network.getPositions([nodeId])[nodeId];
+    const centerPos = this.network.getPositions([nodeId])[nodeId] ?? { x: 0, y: 0 };
     const existingEdgeIds = new Set(this.edgeSet.getIds().map(id => String(id)));
     const uniqueEdgesById = new Map<string, Edge>();
     this.rawEdges.forEach(e => {
@@ -1117,6 +1370,29 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.groupExpandedState[nodeId] = true;
     this.updateGroupNodeVisual(nodeId, uniqueSubNodes.length, true);
+  }
+
+  private autoExpandSingleVisibleGroupNode(visibleNodes: ExtendedNode[]): void {
+    if (visibleNodes.length !== 1) {
+      return;
+    }
+    const node = visibleNodes[0];
+    const nodeId = String(node?.id ?? '');
+    const subNodes = node?.subNodes ?? [];
+    if (!node?.isGroup || !nodeId || subNodes.length === 0) {
+      return;
+    }
+    queueMicrotask(() => {
+      if (!this.network || !this.nodeSet?.get(nodeId)) {
+        return;
+      }
+      const hasVisibleSubNode = subNodes.some(subNodeId => !!this.nodeSet.get(subNodeId));
+      if (!hasVisibleSubNode) {
+        this.groupExpandedState[nodeId] = false;
+      }
+      this.expandGroupFromNodeId(nodeId, subNodes, 200);
+      this.captureOriginalNodeColors([nodeId, ...subNodes]);
+    });
   }
 
   private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false): void {
@@ -1206,6 +1482,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.isReportNode(node);
   }
 
+  showContextOpenDocument(): boolean {
+    return this.showContextOpenReport();
+  }
+
   private isReportNode(node: ExtendedNode | null): boolean {
     if (!node?.id) {
       return false;
@@ -1227,6 +1507,29 @@ export class GraphComponent implements OnInit, OnDestroy {
     const fullUrl = `${baseUrl}?${params.toString()}`;
     this.proxied_resource.open(fullUrl);
     this.hideContextMenu();
+  }
+
+  openDocumentGraph(): void {
+    const nodeId = this.contextMenuNodeId;
+    const parts = nodeId.split('/');
+    const documentKey = parts[parts.length - 1] || '';
+    if (!documentKey) {
+      this.hideContextMenu();
+      return;
+    }
+    const nextFilters: CtiGraphFilters = {
+      ...this.activeSidebarFilters,
+      selectedType: 'document',
+      singleInput: documentKey,
+      propertyType: 'all',
+      propertyValue: ''
+    };
+    this.pendingFocusNodeId = nodeId;
+    this.hideContextMenu();
+    this.applyFilterValues(nextFilters);
+    this.lastAppliedQuerySignature = '';
+    this.onSidebarApply(nextFilters);
+    this.persistBasicSearchParams(nextFilters, 'all');
   }
 
   copyNodeLabel() {
@@ -1378,11 +1681,24 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     this.lastAppliedQuerySignature = nextQuerySignature;
     if (filters.selectedType === 'property' && filters.propertyType && filters.propertyValue) {
-      this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
+      if (filters.propertyType === 'all' && filters.singleInput && filters.singleInput !== 'all') {
+        this.loadGraphByScopedPropertySearch(filters.propertyValue, filters.singleInput);
+      }
+      else {
+        this.loadGraphByNode(this.selectedType, filters.propertyType, filters.propertyValue, this.maxEdge.toString(), this.maxDepth.toString());
+      }
     }
     else if ((filters.selectedType === 'cluster' || filters.selectedType === 'document') && filters.singleInput) {
       this.loadGraphByNode(this.selectedType, filters.selectedType, filters.singleInput, this.maxEdge.toString(), this.maxDepth.toString());
     }
+  }
+
+  onGraphSizeApply(filters: CtiGraphFilters): void {
+    this.onSidebarApply(filters);
+    if (this.graphSearchAdvancedMode || filters.propertyType === 'advanced') {
+      return;
+    }
+    this.persistBasicSearchParams(filters, this.activeGraphSearchKey);
   }
 
   private renderGraph(data: GraphResultItem[]): void {
@@ -1406,6 +1722,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.initNetwork();
     this.applyPhysicsAutoDisableIfNeeded();
     this.attachNetworkHandlers();
+    this.autoExpandSingleVisibleGroupNode(visibleNodes);
     this.applyPropertyHighlights();
   }
 
@@ -1426,10 +1743,26 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     this.originalNodeState.clear();
     this.captureOriginalNodeColors();
+    this.autoExpandSingleVisibleGroupNode(visibleNodes);
     this.applyPropertyHighlights();
     if (this.network) {
       this.network.redraw();
     }
+  }
+
+  private focusGraphNode(nodeId: string): void {
+    queueMicrotask(() => {
+      if (!this.network || !this.nodeSet?.get(nodeId)) {
+        return;
+      }
+      this.network.focus(nodeId, {
+        scale: Math.max(this.network.getScale(), 0.9),
+        animation: {
+          duration: 250,
+          easingFunction: 'easeInOutQuad'
+        }
+      } as any);
+    });
   }
 
   private buildEdgesAndEdgeMap(data: GraphResultItem[]): Record<string, number> {
@@ -1461,6 +1794,89 @@ export class GraphComponent implements OnInit, OnDestroy {
     return `${String(label).replace(/_/g, ' ')}${confidence}`;
   }
 
+  private getNodeTitle(vertex: any): string {
+    const lines: string[] = [];
+    const type = String(vertex?.type || '').toLowerCase();
+    const add = (label: string, value: unknown) => {
+      const text = this.formatTooltipValue(value);
+      if (text) {
+        lines.push(`<strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(text)}`);
+      }
+    };
+    const title = this.formatTooltipValue(vertex?.display_value || vertex?.label || vertex?.title || vertex?.value);
+    if (title) {
+      lines.push(`<strong>${this.escapeHtml(this.truncateTooltipText(title, 90))}</strong>`);
+    }
+
+    if (type === 'document') {
+      add('Type', 'Report');
+      add('Cluster', this.formatTooltipLabel(vertex?.cluster_id || vertex?.module));
+      add('Published', vertex?.published);
+      add('Summary', this.truncateTooltipText(vertex?.summary, 180));
+      add('Reliability', this.formatTooltipPercent(vertex?.source_reliability));
+      add('ID', this.shortenTooltipId(vertex?.doc_id || vertex?.m_document_id || vertex?._key));
+    }
+    else if (type === 'cluster') {
+      add('Type', 'Cluster');
+    }
+    else {
+      add('Type', this.formatTooltipLabel(vertex?.type || vertex?.node_class));
+      add('Role', this.formatTooltipLabel(vertex?.entity_role));
+      add('Confidence', this.formatTooltipPercent(vertex?.confidence));
+      add('Evidence', vertex?.evidence_count);
+      add('First Seen', vertex?.first_seen);
+      add('Last Seen', vertex?.last_seen);
+      if (Array.isArray(vertex?.aliases) && vertex.aliases.length > 0) {
+        add('Aliases', vertex.aliases.slice(0, 3).join(', '));
+      }
+    }
+
+    return lines.join('<br>');
+  }
+
+  private formatTooltipValue(value: unknown): string {
+    if (value === null || value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
+      return '';
+    }
+    return String(value).replace(/\s+/g, ' ').trim();
+  }
+
+  private truncateTooltipText(value: unknown, limit: number): string {
+    const text = this.formatTooltipValue(value);
+    if (text.length <= limit) {
+      return text;
+    }
+    return `${text.slice(0, limit - 3)}...`;
+  }
+
+  private formatTooltipLabel(value: unknown): string {
+    const text = this.formatTooltipValue(value).replace(/^m_/, '').replace(/_/g, ' ');
+    if (!text) {
+      return '';
+    }
+    return text.toLowerCase() === 'apt' ? 'APT' : this.toTitleCase(text);
+  }
+
+  private formatTooltipPercent(value: unknown): string {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) {
+      return '';
+    }
+    const percent = numeric <= 1 ? numeric * 100 : numeric;
+    return `${Math.round(percent)}%`;
+  }
+
+  private shortenTooltipId(value: unknown): string {
+    const text = this.formatTooltipValue(value);
+    if (/^[a-f0-9]{32,}$/i.test(text)) {
+      return '';
+    }
+    if (text.length <= 22) {
+      return text;
+    }
+    return `${text.slice(0, 12)}...${text.slice(-6)}`;
+  }
+
   private toTitleCase(input: string): string {
     return input.replace(/\w\S*/g, word => word.charAt(0).toUpperCase() + word.slice(1));
   }
@@ -1486,6 +1902,12 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private normalizeFullLabel(v: any): string {
+    if (this.selectedType === 'document' && String(v?.type || '').toLowerCase() === 'document') {
+      const docLabel = v?.doc_id || v?.m_document_id || v?._key || v?._id;
+      if (docLabel) {
+        return String(docLabel).trim();
+      }
+    }
     const preferred = v?.display_value ?? v?.label ?? v?.title ?? v?.value;
     if (preferred) {
       return String(preferred).replace(/_/g, ' ').trim();
@@ -1498,6 +1920,14 @@ export class GraphComponent implements OnInit, OnDestroy {
   private normalizeLabel(v: any): string {
     const fullLabel = this.normalizeFullLabel(v);
     if (fullLabel) {
+      const propertyLabel = this.formatTooltipLabel(this.extractPropertyKey(v));
+      if (propertyLabel) {
+        const existingKeyPattern = new RegExp(`^${propertyLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*:`, 'i');
+        const displayLabel = existingKeyPattern.test(fullLabel)
+          ? fullLabel.replace(existingKeyPattern, `${propertyLabel}:`)
+          : `${propertyLabel}: ${fullLabel}`;
+        return this.truncateLabel(displayLabel);
+      }
       return this.truncateLabel(fullLabel);
     }
     return this.prettifyLabel(String(v?._key ?? v?._id ?? ''));
@@ -1593,6 +2023,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       return this.clusterPalette[clusterKey]?.color ?? this.nodeClusterBorder;
     }
     if (type === 'document') {
+      if (this.isFocusedDocumentNode(node)) {
+        return this.nodeFocusColor;
+      }
       return this.nodeDocumentBorder;
     }
     const classKey = String(node.nodeClass || '').toLowerCase();
@@ -1701,11 +2134,13 @@ export class GraphComponent implements OnInit, OnDestroy {
         existingNode.docId = existingNode.docId || vertex?.doc_id || vertex?.m_document_id || vertex?._key;
         existingNode.rawLabel = existingNode.rawLabel || rawLabel;
         existingNode.hiddenByDefault = existingNode.hiddenByDefault || !!vertex?.hidden_by_default;
+        existingNode.nodeInfoHtml = existingNode.nodeInfoHtml || this.getNodeTitle(vertex);
         return;
       }
       rawNodeMap.set(id, {
         id,
         label: this.normalizeLabel(vertex),
+        nodeInfoHtml: this.getNodeTitle(vertex),
         rawLabel,
         nodeClass: vertex?.node_class,
         clusterId: vertex?.cluster_id,
@@ -1781,6 +2216,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           isGroup: true,
           physics: false,
           subNodes,
+          nodeInfoHtml: `<strong>${this.escapeHtml(clusterLabel)}</strong><br><strong>Type:</strong> Cluster Group<br><strong>Reports:</strong> ${clusterDocumentIds.length}`,
           font: { size: 14, color: this.getNodeLabelColor(), strokeWidth: 1 },
           size: 44,
           image: this.createGroupNodeSvg(clusterDocumentIds.length, false, clusterLabel, clusterKey),
@@ -1811,6 +2247,15 @@ export class GraphComponent implements OnInit, OnDestroy {
   private applyNonGroupNodeColor(node: ExtendedNode, isClusterNode: boolean, edgeMap: Record<string, number>): void {
     const visualType = this.getVisualNodeCategory(node);
     const accentColor = this.getNodeAccentColor(node, visualType);
+    if (this.isFocusedDocumentNode(node)) {
+      node.color = {
+        border: this.nodeFocusColor,
+        background: this.nodeFillColor,
+        highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
+        hover: { border: this.nodeFocusColor, background: this.nodeFillColor }
+      };
+      return;
+    }
     if (isClusterNode) {
       node.color = {
         border: accentColor,
@@ -1856,6 +2301,15 @@ export class GraphComponent implements OnInit, OnDestroy {
         hover: { border: accentColor, background: this.nodeFillColor }
       };
     }
+  }
+
+  private isFocusedDocumentNode(node: ExtendedNode): boolean {
+    if (this.selectedType !== 'document') {
+      return false;
+    }
+    const nodeId = String(node.id ?? '');
+    const documentKey = String(this.singleInput || '').trim();
+    return !!documentKey && nodeId === `${this.clusterNodePrefix}${documentKey}`;
   }
 
   private buildVisibleSets(): {
@@ -2046,10 +2500,20 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.network.on('click', params => {
       this.handleClick(params);
     });
+    this.network.on('hoverNode', params => {
+      this.handleNodeHover(String(params.node));
+    });
+    this.network.on('blurNode', params => {
+      this.handleNodeBlur(String(params.node));
+    });
     this.network.on('doubleClick', params => {
       this.handleDoubleClick(params);
     });
+    this.network.on('dragStart', () => {
+      this.hideNodeInfoPanel();
+    });
     this.network.on('zoom', (properties: any) => {
+      this.hideNodeInfoPanel();
       const currentScale = this.network.getScale();
       const currentPosition = this.network.getViewPosition();
       if (currentScale <= this.minZoomScale) {
@@ -2203,10 +2667,114 @@ export class GraphComponent implements OnInit, OnDestroy {
     const pointer = params.pointer.DOM;
     const nodeIdRaw = this.network.getNodeAt(pointer);
     if (!nodeIdRaw) {
+      this.hideNodeInfoPanel();
       return;
     }
     const nodeId = String(nodeIdRaw);
+    const node = this.nodeSet.get(nodeId) as ExtendedNode | null;
     this.toggleEdgeHighlightOnClick(nodeId);
+    if (node) {
+      this.showNodeInfoPanel(node, pointer);
+    }
+  }
+
+  private handleNodeHover(nodeId: string): void {
+    if (!this.nodeSet?.get(nodeId) || this.hoveredNodeId === nodeId) {
+      return;
+    }
+    if (this.hoveredNodeId) {
+      this.handleNodeBlur(this.hoveredNodeId);
+    }
+    this.hoveredNodeId = nodeId;
+    const node = this.nodeSet.get(nodeId) as ExtendedNode;
+    const visualType = this.getVisualNodeCategory(node);
+    const accentColor = this.getNodeAccentColor(node, visualType);
+    this.nodeSet.update({
+      id: nodeId,
+      color: {
+        border: this.nodeFocusColor,
+        background: this.nodeFillColor,
+        highlight: { border: this.nodeFocusColor, background: this.nodeFillColor },
+        hover: { border: accentColor, background: this.nodeFillColor }
+      },
+      borderWidth: 2,
+      borderWidthSelected: 3
+    } as any);
+  }
+
+  private handleNodeBlur(nodeId: string): void {
+    const original = this.originalNodeState.get(nodeId);
+    if (original && this.nodeSet?.get(nodeId)) {
+      this.nodeSet.update({
+        id: nodeId,
+        color: original.color,
+        borderWidth: original.borderWidth,
+        borderWidthSelected: original.borderWidthSelected,
+        image: original.image
+      } as any);
+    }
+    if (this.hoveredNodeId === nodeId) {
+      this.hoveredNodeId = null;
+    }
+  }
+
+  private showNodeInfoPanel(node: ExtendedNode, pointerDom?: { x: number; y: number; }): void {
+    const html = node.nodeInfoHtml || this.getFallbackNodeInfoHtml(node);
+    if (!html) {
+      this.hideNodeInfoPanel();
+      return;
+    }
+    this.positionNodeInfoPanel(pointerDom);
+    this.nodeInfoPanelHtml = html;
+    this.nodeInfoPanelVisible = true;
+    this.changeDetector.detectChanges();
+    this.applyNodeInfoPanelPosition();
+  }
+
+  hideNodeInfoPanel(): void {
+    this.nodeInfoPanelVisible = false;
+    this.nodeInfoPanelHtml = '';
+  }
+
+  private positionNodeInfoPanel(pointerDom?: { x: number; y: number; }): void {
+    const container = this.networkContainer?.nativeElement as HTMLElement | undefined;
+    const width = 292;
+    const height = 260;
+    const padding = 12;
+    const offset = 14;
+    const containerWidth = container?.clientWidth || window.innerWidth;
+    const containerHeight = container?.clientHeight || window.innerHeight;
+    const maxLeft = Math.max(padding, containerWidth - width - padding);
+    const maxTop = Math.max(padding, containerHeight - height - padding);
+    const x = pointerDom?.x ?? padding;
+    const y = pointerDom?.y ?? padding;
+    const preferredLeft = x + offset + width <= containerWidth - padding ? x + offset : x - width - offset;
+    const preferredTop = y + offset + height <= containerHeight - padding ? y + offset : y - height - offset;
+    this.nodeInfoPanelLeft = Math.min(Math.max(preferredLeft, padding), maxLeft);
+    this.nodeInfoPanelTop = Math.min(Math.max(preferredTop, padding), maxTop);
+  }
+
+  private applyNodeInfoPanelPosition(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      return;
+    }
+    const panel = document.getElementById('ctiNodeInfoPanel');
+    if (!panel) {
+      return;
+    }
+    panel.setAttribute('data-left', String(this.normalizePositionValue(this.nodeInfoPanelLeft)));
+    panel.setAttribute('data-top', String(this.normalizePositionValue(this.nodeInfoPanelTop)));
+  }
+
+  private getFallbackNodeInfoHtml(node: ExtendedNode): string {
+    const label = this.formatTooltipValue(node.rawLabel || node.label || node.id);
+    const type = this.formatTooltipLabel(node.nodeType || node.nodeClass || 'Node');
+    const lines = [
+      label ? `<strong>${this.escapeHtml(this.truncateTooltipText(label, 90))}</strong>` : '',
+      type ? `<strong>Type:</strong> ${this.escapeHtml(type)}` : '',
+      node.degree !== undefined ? `<strong>Connections:</strong> ${node.degree}` : ''
+    ].filter(Boolean);
+    return lines.join('<br>');
   }
 
   private handleDoubleClick(params: any): void {

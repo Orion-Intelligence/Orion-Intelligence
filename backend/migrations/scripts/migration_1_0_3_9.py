@@ -6,6 +6,11 @@ from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 
+try:
+    from ._elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
+except ImportError:
+    from _elastic_migration_guard import short_elastic_error, should_skip_elastic_index_error
+
 
 class migration_1_0_3_9:
     @staticmethod
@@ -25,13 +30,14 @@ class migration_1_0_3_9:
 
     @staticmethod
     async def remove_invalid_cvss_values(es):
-        try:
-            await es.update_by_query(
-                index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
-                body={
-                    "script": {
-                        "lang": "painless",
-                        "source": """
+        for attempt in range(2):
+            try:
+                await es.update_by_query(
+                    index=ELASTIC_INDEX.S_EXPLOIT_INDEX,
+                    body={
+                        "script": {
+                            "lang": "painless",
+                            "source": """
                             if (!ctx._source.containsKey('m_cvss')) {
                                 return;
                             }
@@ -60,20 +66,31 @@ class migration_1_0_3_9:
                                 ctx._source.put('m_cvss', cleaned);
                             }
                         """,
+                        },
+                        "query": {"exists": {"field": "m_cvss"}},
                     },
-                    "query": {"exists": {"field": "m_cvss"}},
-                },
-                allow_no_indices=True,
-                conflicts="proceed",
-                ignore_unavailable=True,
-                refresh=True,
-                request_timeout=220,
-            )
-        except ApiError as ex:
-            status_code = getattr(ex, "status_code", None) or getattr(getattr(ex, "meta", None), "status", None)
-            if status_code != 503:
-                raise
-            log.g().w(f"Skipping invalid CVSS cleanup for unavailable Elasticsearch index {ELASTIC_INDEX.S_EXPLOIT_INDEX}: {str(ex)}")
+                    allow_no_indices=True,
+                    conflicts="proceed",
+                    ignore_unavailable=True,
+                    refresh=True,
+                    request_timeout=220,
+                )
+                break
+            except ApiError as ex:
+                if not should_skip_elastic_index_error(ex):
+                    raise
+
+                short_message = short_elastic_error(ex)
+                if attempt == 0:
+                    log.g().w(
+                        f"Retrying invalid CVSS cleanup for Elasticsearch index {ELASTIC_INDEX.S_EXPLOIT_INDEX}: {short_message}"
+                    )
+                    continue
+
+                log.g().w(
+                    f"Skipping invalid CVSS cleanup for unavailable Elasticsearch index {ELASTIC_INDEX.S_EXPLOIT_INDEX}: {short_message}"
+                )
+                break
 
     @staticmethod
     async def update_version(engine, version):

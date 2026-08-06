@@ -40,6 +40,10 @@ export class DashboardSidebarItemsComponent {
     this.sidebarHomepageService.requestSubscription(moduleName);
   }
 
+  visibleItems(): string[] {
+    return this.items();
+  }
+
   replaceDashWithSpace(value: string): string {
     if (!value) {
       return '';

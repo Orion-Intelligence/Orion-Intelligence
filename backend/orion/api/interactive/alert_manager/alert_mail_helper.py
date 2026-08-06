@@ -143,7 +143,7 @@ class AlertMailHelper:
         ioc_values = summary.get("ioc_values", []) if summary else []
         total_alerts = int(summary.get("total", 0) if summary else 0)
         if total_alerts <= 0:
-            return
+            return True
 
         module_rows = []
         for category, count in sorted(counts_by_category.items(), key=lambda item: item[0]):
@@ -177,7 +177,7 @@ class AlertMailHelper:
             alert_word=alert_word,
         )
 
-        await self._send_alert_mail(
+        return await self._send_alert_mail(
             tenant_id=tenant_id,
             current_user=current_user,
             subject=subject,

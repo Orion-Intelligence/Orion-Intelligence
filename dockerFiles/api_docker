@@ -1,17 +1,25 @@
-# Use a minimal Python image as the base
-FROM python:3.11-slim AS base
+# Keep the runtime reproducible. Update the tag and digest together when
+# deliberately upgrading Python.
+FROM python:3.11-slim@sha256:db3ff2e1800a8581e2c48a27c3995339d47bdf046da21c7627accd3d51053a93 AS base
+
+ARG APP_UID=1000
+ARG APP_GID=1000
 
 # Set the working directory inside the container
 WORKDIR /app
 
 # Disable output buffering (ensures logs are printed immediately)
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    HOME=/tmp
 
 # Install required system dependencies (minimal)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     curl \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd --gid "${APP_GID}" app \
+    && useradd --uid "${APP_UID}" --gid "${APP_GID}" --no-create-home --home-dir /app --shell /usr/sbin/nologin app
 
 # Install dependencies separately (for caching)
 COPY backend/requirements.txt /tmp/requirements.txt
@@ -19,15 +27,18 @@ RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r /t
 RUN pip install pydantic[email]
 RUN pip install coverage
 
-# Copy the actual application code
-COPY backend/ /app/
-COPY .env /app/.env
-COPY pyproject.toml /app/pyproject.toml
-COPY README.md /app/s.md
-COPY docs/ /app/docs/
-COPY client/build/ /app/build/
-RUN test -d /app/build/assets
+# Copy the application as the unprivileged runtime user. Writable production
+# state is supplied through narrowly scoped mounts in Compose.
+COPY --chown=app:app backend/ /app/
+COPY --chown=app:app pyproject.toml /app/pyproject.toml
+COPY --chown=app:app README.md /app/s.md
+COPY --chown=app:app docs/ /app/docs/
+COPY --chown=app:app client/build/ /app/build/
+RUN test -d /app/build/assets \
+    && mkdir -p /app/bloom_data \
+    && chown app:app /app/bloom_data
 
 # Expose FastAPI's application port
 EXPOSE 8070
 
+USER app:app

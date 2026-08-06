@@ -13,6 +13,8 @@ class ChatHistoryMessageModel(BaseModel):
 
 class chat_history_model(BaseModel):
     session_id: str = "default"
+    session_type: Literal["persistent", "temporary"] = "persistent"
+    context_summary: str | None = None
     chat_history: List[ChatHistoryMessageModel] = Field(default_factory=list)
 
 

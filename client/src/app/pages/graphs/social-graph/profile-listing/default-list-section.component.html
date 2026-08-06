@@ -26,10 +26,12 @@
                 <i class="bi bi-check-circle-fill text-[10px]"></i> Verified
               </span>
             }
-            @if (platformData.url) {
-              <a data-testid="social-list-platform-open-link" [href]="platformData.url" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="flex h-8 w-8 items-center justify-center overflow-visible text-[var(--color-text4)] transition-colors hover:text-[var(--color-blue-640)]" title="Open actual profile" aria-label="Open actual profile">
-                <i class="bi bi-person-circle text-[20px] leading-none"></i>
-              </a>
+            @if (getProfileUrl(platformData, platformData.username || user.username); as profileUrl) {
+              @if (profileUrl !== '#') {
+                <a data-testid="social-list-platform-open-link" [href]="profileUrl" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="flex h-8 w-8 items-center justify-center overflow-visible text-[var(--color-text4)] transition-colors hover:text-[var(--color-blue-640)]" title="Open actual profile" aria-label="Open actual profile">
+                  <i class="bi bi-person-circle text-[20px] leading-none"></i>
+                </a>
+              }
             }
           </div>
         </div>

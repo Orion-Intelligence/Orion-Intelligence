@@ -45,10 +45,10 @@ class FeederManager:
     async def _read_limited_session_file(self, session_file: UploadFile) -> bytes:
         max_size = self._helper.MAX_FILE_SIZE
         if getattr(session_file, "size", None) is not None and session_file.size > max_size:
-            raise HTTPException(status_code=400, detail="Session file size must be 50 KB or less")
+            raise HTTPException(status_code=400, detail="Session file size must be 1 MB or less")
         content = await session_file.read(max_size + 1)
         if len(content) > max_size:
-            raise HTTPException(status_code=400, detail="Session file size must be 50 KB or less")
+            raise HTTPException(status_code=400, detail="Session file size must be 1 MB or less")
         return content
 
     async def get_catalog(self, current_user) -> FeederCatalogResponse:
@@ -146,7 +146,7 @@ class FeederManager:
         if not content:
             raise HTTPException(status_code=400, detail="Uploaded file is empty")
         if len(content) > self._helper.MAX_FILE_SIZE:
-            raise HTTPException(status_code=400, detail="File size must be 50 KB or less")
+            raise HTTPException(status_code=400, detail="File size must be 1 MB or less")
 
         try:
             decoded = content.decode("utf-8")
@@ -405,7 +405,10 @@ class FeederManager:
 
         now = datetime.now(timezone.utc)
         status = data.status.strip().lower()
-        message = (data.message or "").strip() or None
+        message = (data.message or "").strip()
+        if len(message) > 5826:
+            message = message[:5826]
+        message = message or None
 
         if status not in {"success", "failure"}:
             raise HTTPException(status_code=400, detail="Status must be success or failure")

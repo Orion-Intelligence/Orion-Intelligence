@@ -7,6 +7,7 @@ import { SocialService } from '../services/social.service';
 import { getMetadataEntries } from '../utils/summary-view.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
+import { buildSocialProfileUrl } from '../utils/profile-url.util';
 
 @Component({
   selector: 'app-social-default-list-section',
@@ -16,7 +17,6 @@ import { SocialNormalizationUtil } from '../utils/social-normalization.util';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialDefaultListSectionComponent {
-  private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
   private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
 
   readonly state = inject(SocialService);
@@ -36,12 +36,13 @@ export class SocialDefaultListSectionComponent {
   }
 
   isPriorityPlatform(platformName?: string): boolean {
-    return !!platformName && this.PRIORITY_PLATFORMS.includes(platformName.toLowerCase());
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platformName);
+    return !!platformKey && !!this.platformCapabilities[platformKey];
   }
 
   isFetchTabAllowed(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
     const globalCapability = this.platformCapabilities['__all__'];
-    const capability = this.platformCapabilities[platformData.platform.toLowerCase()];
+    const capability = this.platformCapabilities[SocialNormalizationUtil.canonicalPlatformKey(platformData.platformKey || platformData.platform)];
     if (globalCapability?.disallow?.includes(tabKey) || capability?.disallow?.includes(tabKey)) {
       return false;
     }
@@ -86,6 +87,13 @@ export class SocialDefaultListSectionComponent {
     const details = (platformData.profileDetails || {}) as any;
     const timestamp = platformData.timestamp || details['m_date'] || metadata['timestamp'] || metadata['Timestamp'] || metadata['m_date'];
     return timestamp ? String(timestamp) : '';
+  }
+
+  getProfileUrl(platformData: PlatformResult, username: string): string {
+    if (platformData.resultSource === 'darkweb') {
+      return platformData.url || '#';
+    }
+    return buildSocialProfileUrl(platformData.platformKey || platformData.platform, username, platformData.url);
   }
 
   getFilteredMetadataEntries(platformData: PlatformResult): { key: string; value: any; }[] {

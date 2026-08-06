@@ -27,12 +27,12 @@ export const SAFE_SEARCH_OPTIONS = ['Yes', 'No'];
 export const NETWORK_OPTIONS = ['All', 'Onion'];
 export const CONTENT_TYPES = ['All', 'Leaks', 'Cryptocurrency', 'Marketplaces'];
 
-export const FLOW_ADMIN_SECTIONS = ['Homepage', 'Account', 'Users', 'Auditlog', 'Tenant', 'System Settings'];
+export const FLOW_ADMIN_SECTIONS = ['Homepage', 'Account', 'Users', 'Monitoring', 'Tenant', 'System Settings'];
 export const FLOW_GENERAL_INTELLIGENCE_SECTIONS = ['All', 'General', 'Forums', 'News', 'Stolen', 'Drugs', 'Hacking', 'Marketplaces', 'Cryptocurrency', 'Leaks'];
 export const FLOW_DATA_BREACH_SECTIONS = ['All', 'Databases', 'Tracking'];
 export const FLOW_DEFACEMENT_SECTIONS = ['All', 'Hacked', 'Phishing', 'Databases'];
 export const FLOW_SOCIAL_SECTIONS = ['All', 'Telegram', 'Twitter', 'Mastodon', 'Pastebin', 'Forum', 'Reddit'];
 export const FLOW_EXPLOIT_SECTIONS = ['All', 'CVE', 'Tools', 'ZeroDay'];
 export const FLOW_WEB_SCANS_SECTIONS = ['Basic Scan', 'Port Scan', 'Repository Scan', 'SEO Scan'];
-export const FLOW_ENTITY_API_SECTIONS = ['Email Breach', 'Social Scanner', 'Wanted List', 'National Identity', 'Playstore Scanner', 'Software Scanner', 'File Scanner', 'Text Analysis', 'Crypto Scanner'];
+export const FLOW_ENTITY_API_SECTIONS = ['Social Scanner', 'Wanted List', 'Playstore Scanner', 'Software Scanner', 'File Scanner', 'Text Analysis', 'Crypto Scanner'];
 export const DOMAIN_SCANNER_TEST_DOMAINS = ['example.com', 'google.com', 'openai.com'];

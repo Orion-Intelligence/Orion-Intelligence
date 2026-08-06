@@ -2,11 +2,28 @@
 
 # Swagger API Reference
 
-This page documents only the API operations exposed by the running FastAPI `/docs` page and `/openapi.json` schema. Routes hidden with `include_in_schema=False` or routers mounted with `include_in_schema=False` are intentionally excluded.
+This page documents the primary API operations maintained for integrators. It is based on the running FastAPI schema plus selected documented integration routes.
 
-- Generated from: `/openapi.json`
-- Exposed operations: **55**
+- Source: `/openapi.json` and maintained API docs
+- Documented operations: **57**
 - Tags: **10**
+
+## Relationship To `api_docs`
+
+This page is the consolidated published API reference for readers who want one long Swagger-style document. It should be treated as a synchronized artifact, not the only editing source.
+
+For day-to-day maintenance:
+
+- backend route metadata controls the live FastAPI `/openapi.json` schema
+- `docs/api_docs/` contains the maintained per-endpoint Markdown reference
+- `docs/api_docs/source_docs.py` is the source input for regenerated API Markdown bundles
+- this page should be refreshed or manually synchronized after route metadata and `api_docs` are updated
+
+Current route coverage:
+
+- Social search includes Telegram-oriented searches through the documented Social search request fields.
+- APT Intel search is `POST /api/search/apt-intel`; detail reports are split between `GET /api/search/apt/{doc_id}` and `GET /api/search/malware/{doc_id}`.
+- Public API docs should cover the operations listed in this reference and the matching per-endpoint files under `docs/api_docs/`.
 
 ## Authentication
 
@@ -51,7 +68,7 @@ Common error shapes:
 | `POST` | `/api/dynamic/cracked` | Dynamic cracked credential search | Entity Scans |
 | `POST` | `/api/dynamic/software` | Dynamic software credential search | Entity Scans |
 | `POST` | `/api/urlscan/domain` | Domain, SEO, and repository scan | Entity Scans |
-| `POST` | `/api/dynamic/social` | Dynamic social_models identifier exposure search | Entity Scans |
+| `POST` | `/api/dynamic/social` | Dynamic social identifier exposure search | Entity Scans |
 | `POST` | `/api/dynamic/wanted` | Searches wanted people around the Globe | Entity Scans |
 | `POST` | `/api/dynamic/national-identity` | Dynamic national identity search | Entity Scans |
 | `POST` | `/api/ioc/extract` | Extract IOCs from file(.pdf or .txt) or image(.png, .jpg or .jpeg) | Entity Scans |
@@ -67,14 +84,17 @@ Common error shapes:
 | `GET` | `/api/search/breach/{doc_id}` | Get breach monitoring report | Reports |
 | `GET` | `/api/search/news/{doc_id}` | Get breach-related news report | Reports |
 | `GET` | `/api/search/exploit/{doc_id}` | Get exploit intelligence report | Reports |
+| `GET` | `/api/search/apt/{doc_id}` | Get APT intelligence report | Reports |
+| `GET` | `/api/search/malware/{doc_id}` | Get malware intelligence report | Reports |
 | `GET` | `/api/search/strategic/{doc_id}` | Get darkweb strategic report | Reports |
 | `GET` | `/api/search/chat/{doc_id}` | Get chat intelligence report | Reports |
-| `GET` | `/api/search/social/{doc_id}` | Get social_models media intelligence report | Reports |
+| `GET` | `/api/search/social/{doc_id}` | Get social media intelligence report | Reports |
 | `GET` | `/api/search/breach/screenshot/{filename}` | Get breach report screenshot | Reports |
 | `POST` | `/api/search/strategic` | Search strategic reports | Search |
 | `POST` | `/api/search/breach` | Search breach reports | Search |
 | `POST` | `/api/search/social` | Search social reports | Search |
 | `POST` | `/api/search/exploit` | Search exploit reports | Search |
+| `POST` | `/api/search/apt-intel` | Search APT Intel reports | Search |
 | `POST` | `/api/search/defacement` | Search defacement reports | Search |
 | `POST` | `/api/search/stealer/ioc` | Search stealer log reports | Search |
 | `POST` | `/api/search/consolidated` | Search consolidated reports (grouped) | Search |
@@ -90,15 +110,14 @@ Common error shapes:
 | `GET` | `/api/search/strategic/stix/{doc_id}` | Get strategic media intelligence report in stix format | Stix |
 | `GET` | `/api/search/defacement/stix/{doc_id}` | Get defacement media intelligence report in stix format | Stix |
 | `GET` | `/api/search/exploit/stix/{doc_id}` | Get exploit media intelligence report in stix format | Stix |
-| `GET` | `/api/search/social/stix/{doc_id}` | Get social_models media intelligence report in stix format | Stix |
-| `GET` | `/api/search/chat/stix/{doc_id}` | Get social_models media intelligence report in stix format | Stix |
+| `GET` | `/api/search/social/stix/{doc_id}` | Get social media intelligence report in stix format | Stix |
+| `GET` | `/api/search/chat/stix/{doc_id}` | Get chat intelligence report in stix format | Stix |
 | `GET` | `/api/search/news/stix/{doc_id}` | Get news media intelligence report in stix format | Stix |
 | `POST` | `/api/urlscan/subdomains` | Returns the list of associated subdomains | Support Method |
 | `POST` | `/api/urlscan/dns` | Reverse DNS and ping check | Support Method |
 | `POST` | `/api/urlscan/wayback` | Fetches archived snapshots and timestamps | Support Method |
 | `POST` | `/api/cross/search` | Run Cross Search | Support Method |
 | `GET` | `/api/directory` | Get monitored source directory | System Info |
-| `GET` | `/api/dumps` | Get breach dump catalog | System Info |
 | `GET` | `/api/insight` | Get system insights | System Info |
 | `GET` | `/api/insight/country` | Get paginated country insights | System Info |
 
@@ -469,7 +488,7 @@ Response content type: `application/json`.
 ```
 ### `POST /api/dynamic/social`
 
-- **Summary:** Dynamic social_models identifier exposure search
+- **Summary:** Dynamic social identifier exposure search
 - **Operation ID:** `dynamicSocialIdentifierExposureSearch`
 - **Auth:** Bearer token required
 - **Response status:** `200`
@@ -1716,6 +1735,88 @@ Response content type: `application/json`.
   "m_creation_date": "2025-10-28T18:09:14.516589+00:00"
 }
 ```
+### `GET /api/search/apt/{doc_id}`
+
+- **Summary:** Get APT intelligence report
+- **Operation ID:** `getAptReport`
+- **Auth:** Bearer token required
+- **Response status:** `200`
+
+**Description**
+
+Retrieve an indexed APT actor intelligence report by document id. The optional `lang` query parameter requests localized narrative fields when available.
+
+**Parameters**
+
+| Name | In | Required | Type | Description | Sample |
+| --- | --- | --- | --- | --- | --- |
+| doc_id | path | yes | string |  | `example-doc-id` |
+| lang | query | no | string | Optional language code for localized report content. | `en` |
+
+**Request Sample**
+
+```bash
+curl -X GET "$BASE_URL/api/search/apt/example-doc-id" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Request body: none.
+
+**Response Sample `200`**
+
+Response content type: `application/json`.
+
+```json
+{
+  "m_title": "Example APT Actor",
+  "m_content": "Actor profile, aliases, targeting, tooling, and related indicators.",
+  "m_family": ["Example Actor"],
+  "m_country": ["Example Country"],
+  "m_url": ["https://example.test/report"],
+  "m_hash": "example-document-hash"
+}
+```
+### `GET /api/search/malware/{doc_id}`
+
+- **Summary:** Get malware intelligence report
+- **Operation ID:** `getMalwareReport`
+- **Auth:** Bearer token required
+- **Response status:** `200`
+
+**Description**
+
+Retrieve an indexed malware intelligence report by document id. The optional `lang` query parameter requests localized narrative fields when available.
+
+**Parameters**
+
+| Name | In | Required | Type | Description | Sample |
+| --- | --- | --- | --- | --- | --- |
+| doc_id | path | yes | string |  | `example-doc-id` |
+| lang | query | no | string | Optional language code for localized report content. | `en` |
+
+**Request Sample**
+
+```bash
+curl -X GET "$BASE_URL/api/search/malware/example-doc-id" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Request body: none.
+
+**Response Sample `200`**
+
+Response content type: `application/json`.
+
+```json
+{
+  "m_title": "Example Malware Family",
+  "m_signature": "example.signature",
+  "m_content": "Malware profile, signatures, indicators, reporting source, and related metadata.",
+  "m_family": ["Example Malware"],
+  "m_reporter": ["Example Source"],
+  "m_hash": "example-document-hash"
+}
+```
 ### `GET /api/search/strategic/{doc_id}`
 
 - **Summary:** Get darkweb strategic report
@@ -1874,7 +1975,7 @@ Response content type: `application/json`.
 ```
 ### `GET /api/search/social/{doc_id}`
 
-- **Summary:** Get social_models media intelligence report
+- **Summary:** Get social media intelligence report
 - **Operation ID:** `getSocialReport`
 - **Auth:** Bearer token required
 - **Response status:** `200`
@@ -1950,7 +2051,7 @@ Response content type: `application/json`.
 
 **Description**
 
-Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
+Search strategic intelligence reports using filters such as free-text query, network, date range, content type, and IOC entity filters. Matching records can be opened through the strategic report detail API.
 
 **Parameters**
 
@@ -2297,7 +2398,7 @@ Response content type: `application/json`.
 
 **Description**
 
-Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
+Search social media and chat intelligence reports using free-text query, platform/category selectors, date range, and structured IOC filters. Telegram searches are routed through this endpoint by using `category: "telegram"`.
 
 **Parameters**
 
@@ -2481,7 +2582,7 @@ Response content type: `application/json`.
 
 **Description**
 
-Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
+Search exploit and vulnerability intelligence reports using free-text query, CVE/vendor/product filters, content type, network, date range, and structured IOC filters.
 
 **Parameters**
 
@@ -2656,6 +2757,66 @@ Response content type: `application/json`.
   "Page_Count": 1
 }
 ```
+### `POST /api/search/apt-intel`
+
+- **Summary:** Search APT Intel reports
+- **Operation ID:** `searchAptIntelReports`
+- **Auth:** Bearer token required
+- **Response status:** `200`
+
+**Description**
+
+Search APT actor and malware intelligence reports across the Actors & Malware data set. Use `category: "all"` for combined results, `category: "apt"` for actor reports, and `category: "malware"` or `category: "malware-bazaar"` for malware records.
+
+**Parameters**
+
+No path or query parameters.
+
+**Request Sample**
+
+```bash
+curl -X POST "$BASE_URL/api/search/apt-intel" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+  "category": "apt",
+  "content": "all",
+  "daterange": "",
+  "entity_filter": {
+    "m_country": [
+      "KP"
+    ],
+    "m_family": [
+      "Lazarus"
+    ]
+  },
+  "matchtype": "or",
+  "must": false,
+  "network": "all",
+  "page": 1,
+  "q": "lazarus"
+}'
+```
+
+**Response Sample `200`**
+
+Response content type: `application/json`.
+
+```json
+{
+  "Result": [
+    {
+      "doc_id": "example-doc-id",
+      "rank_index": "apt_model",
+      "m_title": "Example APT Actor",
+      "m_family": ["Lazarus"],
+      "m_country": ["KP"],
+      "m_hash": "example-document-hash"
+    }
+  ],
+  "Page_Count": 1
+}
+```
 ### `POST /api/search/defacement`
 
 - **Summary:** Search defacement reports
@@ -2665,7 +2826,7 @@ Response content type: `application/json`.
 
 **Description**
 
-Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API. Request body (`search_general_param_model`): - **q** — free-text search over title, content and enrichment fields (default: empty string) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` - *...
+Search defacement, phishing, hacked-site, and related website compromise reports using free-text query, attacker/team filters, content type, network, date range, and structured IOC filters.
 
 **Parameters**
 
@@ -3151,7 +3312,7 @@ Response content type: `application/json`.
 ### `POST /api/social/recon`
 
 - **Summary:** Cross-platform identity search to locate a user's digital footprint
-- **Operation ID:** `getSocailProfileGlobalPresence`
+- **Operation ID:** `getSocialProfileGlobalPresence`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
@@ -3216,13 +3377,13 @@ Response content type: `application/json`.
 ### `POST /api/social/profile`
 
 - **Summary:** Scrapes the profile of requested social account
-- **Operation ID:** `getSocailProfiles`
+- **Operation ID:** `getSocialProfiles`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
 **Description**
 
-Scrape public profile information for a requested social media account by platform and username; returns structured profile metadata for the specified account. This endpoint corresponds to /api/search/social_profile and expects a JSON body containing the target platform and username. Supported request fields: - **platform** — name of the social media platform - **username** — account handle / username to scrape Example request payload:
+Scrape public profile information for a requested social media account by platform and username; returns structured profile metadata for the specified account. This endpoint corresponds to `POST /api/social/profile` and expects a JSON body containing the target platform and username. Supported request fields: - **platform** — name of the social media platform - **username** — account handle / username to scrape Example request payload:
 
 **Parameters**
 
@@ -3281,7 +3442,7 @@ Response content type: `application/json`.
 ### `POST /api/social/online/images`
 
 - **Summary:** Scrapes the images of requested social account
-- **Operation ID:** `getSocailProfileImages`
+- **Operation ID:** `getSocialProfileImages`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
@@ -3348,7 +3509,7 @@ Response content type: `application/json`.
 ### `POST /api/social/recon/image`
 
 - **Summary:** Reverse image search to identify associated social profiles
-- **Operation ID:** `getSocailReconImageSearch`
+- **Operation ID:** `getSocialReconImageSearch`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
@@ -3415,7 +3576,7 @@ Response content type: `application/json`.
 ### `POST /api/social/followers`
 
 - **Summary:** Scrapes the followers of requested social account
-- **Operation ID:** `getSocailProfileFollowers`
+- **Operation ID:** `getSocialProfileFollowers`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
@@ -3467,7 +3628,7 @@ Response content type: `application/json`.
 ### `POST /api/social/following`
 
 - **Summary:** Scrapes the following of requested social account
-- **Operation ID:** `getSocailProfileFollowing`
+- **Operation ID:** `getSocialProfileFollowing`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
@@ -3519,7 +3680,7 @@ Response content type: `application/json`.
 ### `POST /api/social/posts`
 
 - **Summary:** Scrapes the posts of requested social account
-- **Operation ID:** `getSocailProfilePosts`
+- **Operation ID:** `getSocialProfilePosts`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
@@ -3592,7 +3753,7 @@ Response content type: `application/json`.
 ### `POST /api/social/metadata`
 
 - **Summary:** Search for specific keyword combinations linked to a username across social platforms.
-- **Operation ID:** `getSocailMetadata`
+- **Operation ID:** `getSocialMetadata`
 - **Auth:** Bearer token required
 - **Response status:** `200`
 
@@ -4320,7 +4481,7 @@ Response content type: `application/json`.
 ```
 ### `GET /api/search/social/stix/{doc_id}`
 
-- **Summary:** Get social_models media intelligence report in stix format
+- **Summary:** Get social media intelligence report in stix format
 - **Operation ID:** `getSocialStixReport`
 - **Auth:** Bearer token required
 - **Response status:** `200`
@@ -4484,7 +4645,7 @@ Response content type: `application/json`.
 ```
 ### `GET /api/search/chat/stix/{doc_id}`
 
-- **Summary:** Get social_models media intelligence report in stix format
+- **Summary:** Get chat intelligence report in stix format
 - **Operation ID:** `getSocialStixReport`
 - **Auth:** Bearer token required
 - **Response status:** `200`
@@ -5105,57 +5266,6 @@ Response content type: `application/json`.
       "generic_model_last_update": "2025-12-04T09:00:00Z",
       "network_type": "onion",
       "name": "Example Darknet Forum"
-    }
-  ]
-}
-```
-### `GET /api/dumps`
-
-- **Summary:** Get breach dump catalog
-- **Operation ID:** `getBreachDumpCatalog`
-- **Auth:** Bearer token required
-- **Response status:** `200`
-
-**Description**
-
-Retrieve the complete catalog of breach dumps collected from Telegram channels and monitored websites. Supported filters: - **page:** page number of the result set - **source:** all, telegram, websites (origin of the leak, e.g., Telegram or monitored websites) - **group:** leak group or channel name derived from the source (e.g., Telegram channel name) - **status:** all, parsed, unparsed - **daterange:** optional date range string (e.g., `2025-01-01,2025-01-15`) - **q:** free-text search quer...
-
-**Parameters**
-
-| Name | In | Required | Type | Description | Sample |
-| --- | --- | --- | --- | --- | --- |
-| page | query | no | integer |  | `1` |
-| source | query | no | string |  | `all` |
-| group | query | no | string |  | `all` |
-| status | query | no | string |  | `all` |
-| daterange | query | no | string |  | `` |
-| q | query | no | string |  | `*` |
-
-**Request Sample**
-
-```bash
-curl -X GET "$BASE_URL/api/dumps?page=1&source=all&group=all&status=all&daterange=&q=*" \
-  -H "Authorization: Bearer $TOKEN"
-```
-
-Request body: none.
-
-**Response Sample `200`**
-
-Response content type: `application/json`.
-
-```json
-{
-  "total_count": 152,
-  "page": 1,
-  "mDumpCallbackLinks": [
-    {
-      "leak_url": "https://t.me/example_leaks/1234",
-      "source": "telegram",
-      "group": "example_leak_group",
-      "link": "https://t.me/example_leaks/1234",
-      "parsed_status": "parsed",
-      "created_at": "2025-12-03T21:15:23Z"
     }
   ]
 }

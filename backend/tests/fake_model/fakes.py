@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from orion.services.mongo_manager.shared_model.db_alert_connector_model import AlertConnectorProvider
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 
@@ -29,6 +30,35 @@ class FakeAuditManager:
 
     async def register(self, tenant_id: str, user_id: str, action: str):
         self.calls.append((tenant_id, user_id, action))
+
+
+class FakeAlertConnectorManager:
+    def __init__(self):
+        self.configs = {
+            ("tenant-1", AlertConnectorProvider.SLACK): {"webhook_url": "https://hooks.slack.test/tenant-1"},
+            ("tenant-2", AlertConnectorProvider.SLACK): {"webhook_url": "https://hooks.slack.test/tenant-2"},
+        }
+        self.config_calls = []
+        self.refresh_calls = []
+
+    async def tenant_provider_config(self, tenant_id, provider):
+        self.config_calls.append((tenant_id, provider))
+        return self.configs.get((tenant_id, provider))
+
+    async def refresh_provider_access_token(self, tenant_id, provider, config):
+        self.refresh_calls.append((tenant_id, provider, config))
+        return config
+
+
+class FakeSlackConnectorProvider:
+    def __init__(self):
+        self.sent = []
+
+    def delivery_config(self, config):
+        return config if config and config.get("webhook_url") else None
+
+    def send_alert(self, config, alert):
+        self.sent.append((config, alert))
 
 
 class FakeMongoEngine:

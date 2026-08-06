@@ -7,6 +7,8 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_
 from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
+from orion.services.mongo_manager.shared_model.db_scheduler_model import db_scheduler_model
+from orion.services.mongo_manager.shared_model.db_alert_connector_model import db_alert_connector_model
 from orion.services.mongo_manager.shared_views.tenant_admin_view import TenantAdminView
 from orion.services.mongo_manager.shared_views.tenant_key_admin_view import TenantKeyAdminView
 from orion.services.mongo_manager.shared_views.user_admin_view import UserAdminView

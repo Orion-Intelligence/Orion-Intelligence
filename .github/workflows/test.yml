@@ -12,11 +12,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: lts/*
 
@@ -29,35 +29,12 @@ jobs:
           sudo apt-get update -q
           sudo apt-get install -y --no-install-recommends google-chrome-stable
 
-      - run: |
-          set -euo pipefail
-          cd client
-          export npm_config_loglevel=error
-          export NODE_OPTIONS=--no-deprecation
-          npm install
-          npx ng build --configuration=instrumented
-
-      - run: |
-          set -euo pipefail
-          echo "=== checking client build folder ==="
-          if [ -d "client/build" ]; then
-            find client/build -maxdepth 4 -type d -print || true
-            find client/build -maxdepth 2 -type f -print | head -n 200 || true
-          else
-            exit 1
-          fi
-
-      - run: |
-          set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -b
-
       - id: compose_loc
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import os, sys
-          targets = {"docker-compose.yml","docker-compose.yaml","compose.yml","compose.yaml"}
+          targets = {"docker-compose-testing.yml"}
           found = None
           for root, dirs, files in os.walk("."):
             if root.count(os.sep) > 6:
@@ -87,11 +64,27 @@ jobs:
           p = pathlib.Path(".env")
           p.write_text(os.environ["ENV_FILE"], encoding="utf-8")
           with p.open("a", encoding="utf-8") as fp:
-            fp.write("\nCOVERAGE_PROCESS_START=/app/.coveragerc\n")
-            fp.write("COVERAGE_FILE=/app/.coverage\n")
-            fp.write("TESTING_ENABLED=1\n")
+            fp.write("\nTESTING_ENABLED=1\n")
           PY
           test -s .env
+
+      - name: Prepare writable client-test runtime directories
+        run: |
+          set -euo pipefail
+          mkdir -p \
+            backend/static/resource/profile \
+            backend/static/resource/tenant \
+            backend/static/resource/system \
+            backend/static/resource/case_artifacts \
+            backend/static/.well-known/parser_files
+          chmod -R a+rwX \
+            backend/static/resource \
+            backend/static/.well-known/parser_files
+
+      - run: |
+          set -euo pipefail
+          rm -f backend/static/.maintenance
+          chmod +x ./run.sh
 
       - run: |
           set -euo pipefail
@@ -102,37 +95,92 @@ jobs:
       - run: |
           set -euo pipefail
           docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
+          docker network inspect orion_nexus_backend >/dev/null 2>&1 || docker network create orion_nexus_backend
 
-      - run: |
+      - name: Start the same testing stack used by run.sh -docs
+        run: |
           set -euo pipefail
-          cd "${{ steps.compose_loc.outputs.dir }}"
-          export COMPOSE_PROJECT_NAME="ci_client_${{ github.run_id }}_${{ github.run_attempt }}"
-          COMPOSE_PROFILES=local docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build web nginx
+          SKIP_BACKEND_TESTS=1 ./run.sh build -t
+          docker compose -p trusted-search -f docker-compose-testing.yml exec -T web sh -lc '
+            for path in \
+              /app/static/resource/profile \
+              /app/static/resource/tenant \
+              /app/static/resource/system \
+              /app/static/resource/case_artifacts \
+              /app/static/.well-known/parser_files; do
+              if [ ! -w "$path" ]; then
+                echo "Client-test runtime path is not writable: $path" >&2
+                exit 1
+              fi
+            done
+          '
 
-      - run: |
+      - name: Wait for test service
+        run: |
           set -euo pipefail
           for i in $(seq 1 180); do
-            code="$(curl -skL -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/login || echo 000)"
-            if [ "$code" = "200" ]; then
+            api_code="$(curl -sk --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' https://127.0.0.1:8443/api/test/ready || true)"
+            client_code="$(curl -sk --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' https://127.0.0.1:8443/ || true)"
+            echo "readiness attempt $i/180: API HTTP ${api_code:-000}, client HTTP ${client_code:-000}"
+            if [ "$api_code" = "200" ] && [ "$client_code" = "200" ]; then
               exit 0
+            fi
+            if [ $((i % 12)) -eq 0 ]; then
+              docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
+              docker logs trusted-web-main --since 70s --tail=200 || true
             fi
             sleep 5
           done
+          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
+          docker logs trusted-web-main --tail=1000 || true
+          docker logs trusted-web-nginx --tail=500 || true
+          docker logs elasticsearch --tail=500 || true
+          docker logs trustly-web-mongodb --tail=500 || true
+          docker logs trusted-web-arangodb --tail=500 || true
+          docker logs trusted-web-redis --tail=500 || true
           exit 1
 
-      - run: |
+      - name: Verify General alert scanner fixture
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            curl -fsS -X POST http://127.0.0.1:9400/generic_model/_refresh >/dev/null
+            fixture_hits="$(curl -fsS -H 'Content-Type: application/json' http://127.0.0.1:9400/generic_model/_search --data '{"size":0,"query":{"match":{"m_domain":"bbcnewsd73hkzno2ini43t4gblxvycyac5aw4gnv7t2rccijh7745uqd.onion"}}}' | jq -r '.hits.total.value // 0')"
+            echo "General alert fixture attempt $i/30: ${fixture_hits} matching documents"
+            if [ "$fixture_hits" -gt 0 ]; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker logs trusted-web-main --tail=1000 || true
+          docker logs elasticsearch --tail=1000 || true
+          exit 1
+
+      - name: Run client tests with coverage
+        run: |
           set -euo pipefail
           cd client
           export npm_config_loglevel=error
           export NODE_OPTIONS=--no-deprecation
-          mkdir -p cypress/screenshots cypress/videos coverage
-          npm ci --include=dev || npm install --include=dev
+          mkdir -p coverage cypress/downloads cypress/error cypress/screenshots cypress/videos
           npx cypress verify
-          CYPRESS=true npx cypress run --browser chrome --config baseUrl="http://127.0.0.1:8080"
+          ORION_COVERAGE=true CI=false GITHUB_ACTIONS=false npx cypress run --browser chrome --config baseUrl=https://127.0.0.1:8443
+          test -s coverage/lcov.info
 
-      - run: |
+      - name: Capture client diagnostics on failure
+        if: failure()
+        run: |
           set -euo pipefail
-          test -s client/coverage/lcov.info
+          mkdir -p client/cypress/diagnostics
+          free -h >client/cypress/diagnostics/memory.txt || true
+          df -h >client/cypress/diagnostics/disk.txt || true
+          docker stats --no-stream >client/cypress/diagnostics/docker-stats.txt || true
+          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' >client/cypress/diagnostics/docker-containers.txt || true
+          docker logs trusted-web-main >client/cypress/diagnostics/backend.log 2>&1 || true
+          docker logs trusted-web-nginx >client/cypress/diagnostics/nginx.log 2>&1 || true
+          docker logs elasticsearch >client/cypress/diagnostics/elasticsearch.log 2>&1 || true
+          docker logs trustly-web-mongodb >client/cypress/diagnostics/mongodb.log 2>&1 || true
+          docker logs trusted-web-arangodb >client/cypress/diagnostics/arangodb.log 2>&1 || true
 
       - name: Detect client artifacts
         if: always()
@@ -142,7 +190,7 @@ jobs:
           has_cypress=false
           has_coverage=false
 
-          if find client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
+          if find client/cypress/diagnostics client/cypress/downloads client/cypress/error client/cypress/screenshots client/cypress/videos -type f 2>/dev/null | grep -q .; then
             has_cypress=true
           fi
 
@@ -156,22 +204,38 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - if: always() && steps.client_artifacts.outputs.has_cypress == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: cypress-artifacts
           path: |
+            client/cypress/diagnostics/
+            client/cypress/downloads/
+            client/cypress/error/
             client/cypress/screenshots/
             client/cypress/videos/
           if-no-files-found: ignore
           retention-days: 7
 
       - if: always() && steps.client_artifacts.outputs.has_coverage == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: client-coverage
           path: client/coverage/lcov.info
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 7
+
+      - name: Show client service logs on failure
+        if: failure()
+        run: |
+          free -h || true
+          df -h || true
+          docker stats --no-stream || true
+          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
+          docker logs trusted-web-main --tail=1000 || true
+          docker logs trusted-web-nginx --tail=500 || true
+          docker logs elasticsearch --tail=500 || true
+          docker logs trustly-web-mongodb --tail=500 || true
+          docker logs trusted-web-arangodb --tail=500 || true
 
       - if: always()
         run: |
@@ -184,11 +248,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020
         with:
           node-version: lts/*
 
@@ -218,11 +282,6 @@ jobs:
           else
             exit 1
           fi
-
-      - run: |
-          set -euo pipefail
-          chmod +x ./run.sh
-          ./run.sh build -b
 
       - id: compose_loc
         run: |
@@ -259,11 +318,17 @@ jobs:
           p = pathlib.Path(".env")
           p.write_text(os.environ["ENV_FILE"], encoding="utf-8")
           with p.open("a", encoding="utf-8") as fp:
-            fp.write("\nCOVERAGE_PROCESS_START=/app/.coveragerc\n")
-            fp.write("COVERAGE_FILE=/app/.coverage\n")
-            fp.write("TESTING_ENABLED=1\n")
+            fp.write("\nTESTING_ENABLED=1\n")
           PY
           test -s .env
+
+      - run: |
+          set -euo pipefail
+          rm -f backend/static/.maintenance
+          chmod +x ./run.sh
+          ./run.sh build -b
+          sed -i '/^TESTING_ENABLED=/d' .env
+          echo 'TESTING_ENABLED="1"' >> .env
 
       - run: |
           set -euo pipefail
@@ -274,6 +339,7 @@ jobs:
       - run: |
           set -euo pipefail
           docker network inspect shared_bridge >/dev/null 2>&1 || docker network create shared_bridge
+          docker network inspect orion_nexus_backend >/dev/null 2>&1 || docker network create orion_nexus_backend
 
       - run: |
           set -euo pipefail
@@ -281,15 +347,28 @@ jobs:
           export COMPOSE_PROJECT_NAME="ci_backend_${{ github.run_id }}_${{ github.run_attempt }}"
           COMPOSE_PROFILES=local docker-compose -f "${{ steps.compose_loc.outputs.file }}" up -d --build web nginx
 
-      - run: |
+      - name: Wait for test service
+        run: |
           set -euo pipefail
           for i in $(seq 1 180); do
-            code="$(curl -skL -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/login || echo 000)"
+            code="$(curl -sk --connect-timeout 2 --max-time 5 -o /dev/null -w '%{http_code}' http://127.0.0.1:8080/api/test/ready || true)"
+            echo "readiness attempt $i/180: HTTP ${code:-000}"
             if [ "$code" = "200" ]; then
               exit 0
             fi
+            if [ $((i % 12)) -eq 0 ]; then
+              docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
+              docker logs trusted-web-main --since 70s --tail=200 || true
+            fi
             sleep 5
           done
+          docker ps -a --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}' || true
+          docker logs trusted-web-main --tail=1000 || true
+          docker logs trusted-web-nginx --tail=500 || true
+          docker logs trusted-web-elastic --tail=500 || true
+          docker logs trustly-web-mongodb --tail=500 || true
+          docker logs trusted-web-arangodb --tail=500 || true
+          docker logs trusted-web-redis --tail=500 || true
           exit 1
 
       - name: Run backend tests with coverage
@@ -298,8 +377,7 @@ jobs:
           docker exec trusted-web-main sh -lc '
             set -e
             cd /app
-            python -m pip install --quiet pytest pytest-cov
-            TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
+            COVERAGE_FILE=/tmp/.coverage TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
               --cov=orion --maxfail=1 --disable-warnings \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
@@ -311,7 +389,7 @@ jobs:
           test -s backend/coverage.xml
 
       - if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: backend-coverage
           path: backend/coverage.xml
@@ -328,56 +406,41 @@ jobs:
   coverage-report:
     runs-on: ubuntu-latest
     needs: [client-tests, backend-tests]
-    if: always()
+    if: needs.client-tests.result == 'success' && needs.backend-tests.result == 'success'
 
     steps:
-      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
       - name: Download client coverage
-        if: always()
-        continue-on-error: true
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: client-coverage
           path: client/coverage
 
       - name: Download backend coverage
-        if: always()
-        continue-on-error: true
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
         with:
           name: backend-coverage
           path: backend
 
       - name: Detect coverage reports
-        if: always()
         id: codacy_reports
         run: |
           set -euo pipefail
-          reports=""
-          if [ -s client/coverage/lcov.info ]; then
-            reports="client/coverage/lcov.info"
-          fi
-          if [ -s backend/coverage.xml ]; then
-            if [ -n "$reports" ]; then
-              reports="${reports},backend/coverage.xml"
-            else
-              reports="backend/coverage.xml"
-            fi
-          fi
-          echo "reports=${reports}" >> "$GITHUB_OUTPUT"
+          test -s client/coverage/lcov.info
+          test -s backend/coverage.xml
+          echo "reports=client/coverage/lcov.info,backend/coverage.xml" >> "$GITHUB_OUTPUT"
 
       - name: Upload combined coverage to Codacy
-        if: always() && steps.codacy_reports.outputs.reports != ''
+        if: steps.codacy_reports.outputs.reports != ''
         uses: codacy/codacy-coverage-reporter-action@89d6c85cfafaec52c72b6c5e8b2878d33104c699
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: ${{ steps.codacy_reports.outputs.reports }}
 
       - name: Build merged coverage summary (client + backend)
-        if: always()
         run: |
           set -euo pipefail
           python3 - <<'PY'
@@ -456,7 +519,6 @@ jobs:
           PY
 
       - name: Detect merged coverage artifacts
-        if: always()
         id: coverage_artifacts
         run: |
           set -euo pipefail
@@ -466,8 +528,8 @@ jobs:
           fi
           echo "has_coverage=${has_coverage}" >> "$GITHUB_OUTPUT"
 
-      - if: always() && steps.coverage_artifacts.outputs.has_coverage == 'true'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+      - if: steps.coverage_artifacts.outputs.has_coverage == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: coverage-artifacts
           path: |

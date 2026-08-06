@@ -1,0 +1,26 @@
+<div class="mx-[32px] mb-[16px] mt-[24px] max-w-full overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1200px]:mx-[15px] max-[943px]:mx-[10px]">
+  <div class="inline-flex flex-nowrap items-center gap-[2px] bg-transparent p-0">
+    @for (tab of visibleTabs; track tab.id) {
+      <button type="button" [attr.data-testid]="'monitoring-tab-' + tab.id" [attr.data-tab]="tab.label" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color]" [ngClass]="activeTab === tab.id ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'" (click)="selectTab(tab.id)">
+        {{ tab.label | translate }}
+      </button>
+    }
+  </div>
+</div>
+
+@switch (activeTab) {
+  @case ('event-management') {
+    <app-sidebar-user-event-management></app-sidebar-user-event-management>
+  }
+  @case ('log-manager') {
+    <app-sidebar-user-log-manager></app-sidebar-user-log-manager>
+  }
+  @case ('auditlog') {
+    <app-auditlog></app-auditlog>
+  }
+  @default {
+    <div class="mx-[32px] mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3 text-sm text-[var(--color-text4)] max-[1200px]:mx-[15px] max-[943px]:mx-[10px]">
+      {{ 'No monitoring tools available.' | translate }}
+    </div>
+  }
+}

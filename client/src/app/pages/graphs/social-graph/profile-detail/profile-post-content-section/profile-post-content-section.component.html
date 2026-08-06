@@ -61,22 +61,16 @@
             <div data-testid="social-post-row" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                  <p class="mb-1 break-words text-sm font-medium leading-5 text-[var(--color-text2)]">{{ getPostCaption(post) || 'Untitled post' }}</p>
+                  <p [class]="isPostCaptionExpanded(post) ? 'mb-1 whitespace-pre-wrap break-words text-sm font-medium leading-5 text-[var(--color-text2)]' : 'mb-1 overflow-hidden break-words text-sm font-medium leading-5 text-[var(--color-text2)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]'">{{ getPostCaption(post) || 'Untitled post' }}</p>
+                  @if (shouldShowPostCaptionToggle(post)) {
+                    <div class="mb-1 flex justify-start">
+                      <button type="button" class="text-xs font-semibold text-sky-300 transition hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:hover:text-sky-800" (click)="togglePostCaption(post)" [attr.aria-expanded]="isPostCaptionExpanded(post)">
+                        {{ isPostCaptionExpanded(post) ? 'Show less' : 'Show more' }}
+                      </button>
+                    </div>
+                  }
                   @if (post.datetime) {
                     <p class="mb-0 text-[11px] text-[var(--color-text4)]">{{ post.datetime }}</p>
-                  }
-                  @if (post.author || post.source) {
-                    <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">
-                      @if (post.author) {
-                        <span>{{ post.author }}</span>
-                      }
-                      @if (post.author && post.source) {
-                        <span> · </span>
-                      }
-                      @if (post.source) {
-                        <span>{{ post.source }}</span>
-                      }
-                    </p>
                   }
                 </div>
                 @if (getPostUrl(post); as postUrl) {
@@ -98,7 +92,7 @@
                   @if (isVideoPost(post)) {
                     <video [src]="getPostMediaUrl(post)" controls preload="metadata" (loadstart)="markPostMediaLoading(post)" (loadedmetadata)="markPostMediaLoaded(post)" (loadeddata)="markPostMediaLoaded(post)" (canplay)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="w-full bg-black transition-opacity duration-150" [ngClass]="compactMedia() ? 'max-h-[360px]' : 'max-h-[420px]'" [class.opacity-0]="isPostMediaLoading(post)"></video>
                   } @else {
-                    <img [src]="getPostMediaUrl(post)" [alt]="getPostMediaTypeLabel(post)" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="w-full object-cover transition-opacity duration-150" [ngClass]="compactMedia() ? 'max-h-[360px]' : 'max-h-[420px]'" [class.opacity-0]="isPostMediaLoading(post)">
+                    <img [src]="getPostMediaUrl(post)" [alt]="getPostMediaTypeLabel(post)" referrerpolicy="no-referrer" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full object-cover transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)">
                   }
                 </div>
               }

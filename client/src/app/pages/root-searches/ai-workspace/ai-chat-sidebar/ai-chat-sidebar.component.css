@@ -1,0 +1,8 @@
+.ai-new-chat-icon {
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.ai-new-chat-icon:hover {
+  background-color: rgb(87 165 235 / 12%);
+  box-shadow: inset 0 0 0 1px rgb(87 165 235 / 14%);
+}

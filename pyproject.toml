@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "orion-intelligence"
 version = "1.0.3.8"
-migration_version = "1.0.3.8"
+migration_version = "1.0.3.15"
 description = "Orion Platform: A web-based OSINT solution integrating search, crawling, and data aggregation."
 authors = ["Abdul Mannan <msmannan00@gmail.com>"]
 license = "MIT"
@@ -22,7 +22,7 @@ termcolor = "3.3.0"
 redis = "7.3.0"
 motor = "3.7.1"
 brotli-asgi = "1.6.0"
-aiohttp = "3.14.1"
+aiohttp = "3.14.3"
 uvicorn = "0.42.0"
 httpx = "0.28.1"
 gunicorn = "25.1.0"

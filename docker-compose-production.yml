@@ -5,29 +5,46 @@ services:
     build:
       context: .
       dockerfile: dockerFiles/api_docker
+      args:
+        APP_UID: "${APP_UID:-1000}"
+        APP_GID: "${APP_GID:-1000}"
     env_file:
       - .env
     environment:
-      BLOOM_DIR: /app
+      BLOOM_DIR: /app/bloom_data
+      ELASTIC_ROOT_IP: elasticsearch
+      ELASTIC_ROOT_USERNAME: elastic
+      HOME: /tmp
     working_dir: /app
     depends_on:
-      - elasticsearch
-      - mongo
-      - arangodb
+      elasticsearch:
+        condition: service_healthy
+      mongo:
+        condition: service_started
+      arangodb:
+        condition: service_started
     volumes:
-      - ./backend/orion:/app/orion:cached
-      - ./backend/routes:/app/routes:cached
-      - ./backend/static:/app/static:cached
-      - ./backend/migrations:/app/migrations:cached
-      - ./client/build:/client_build:delegated
-      - ./bloom_data:/app/bloom_data
+      - ./backend/orion:/app/orion:ro
+      - ./backend/orion/logs:/app/orion/logs:rw
+      - ./backend/routes:/app/routes:ro
+      - ./backend/static:/app/static:rw
+      - ./backend/migrations:/app/migrations:ro
+      - ./client/build:/client_build:ro
+      - bloom-data:/app/bloom_data:rw
+      - ../Orion-Crawler/app/logs:/app/crawler_logs:ro
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=256m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     expose:
       - "8070"
-    ports:
-      - "8070:8070"
     networks:
       - backend
       - shared_bridge
+      - orion_nexus_backend
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8070" ]
       interval: 30s
@@ -37,15 +54,25 @@ services:
     command: >
       sh -c "python3 /app/cronjobs.py & exec gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 900"
 
+  documentation:
+    restart: unless-stopped
+    build:
+      context: ./docs
+      args:
+        DOCUMENTATION_PROJECT_NAME: "${DOCUMENTATION_PROJECT_NAME:-Platform}"
+        DOCUMENTATION_COMPANY_NAME: "${DOCUMENTATION_COMPANY_NAME:-Platform Operator}"
+    expose:
+      - "80"
+    networks:
+      - backend
+
   arangodb:
     container_name: trusted-web-arangodb
-    image: arangodb:3.11
+    image: arangodb:3.11@sha256:e83f37055170f647ebca1a09dd65ec850a578d8d4c9b90904de3359b909c1f16
     restart: unless-stopped
     environment:
       ARANGO_ROOT_PASSWORD: ${ARANGO_PASSWORD}
       ARANGODB_DEFAULT_SERVER_ENDPOINT: tcp://0.0.0.0:8529
-    ports:
-      - "8529:8529"
     volumes:
       - arangodb:/var/lib/arangodb3
     networks:
@@ -60,31 +87,37 @@ services:
 
   elasticsearch:
     container_name: trusted-web-elastic
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2
-    ports:
-      - "9400:9400"
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.19.2@sha256:21f64facd9a01bedcf1ee190f73246220a540f4a87bfbfa3c4e18d9681becd4d
+    expose:
+      - "9400"
     volumes:
       - elastic:/usr/share/elasticsearch/data
-    env_file:
-      - .env
     environment:
-      - cluster.routing.allocation.disk.threshold_enabled=false
-      - discovery.type=single-node
-      - network.host=0.0.0.0
-      - http.port=9400
-      - xpack.security.enabled=false
-      - xpack.security.transport.ssl.enabled=false
-      - node.store.allow_mmap=true
-      - indices.memory.index_buffer_size=25%
-      - ES_JAVA_OPTS=-Xms8512m -Xmx8512m
+      ELASTIC_PASSWORD: ${ELASTIC_ROOT_PASSWORD:?ELASTIC_ROOT_PASSWORD must be set}
+      cluster.routing.allocation.disk.threshold_enabled: "false"
+      discovery.type: single-node
+      network.host: 0.0.0.0
+      http.port: "9400"
+      xpack.security.enabled: "true"
+      xpack.security.http.ssl.enabled: "false"
+      xpack.security.transport.ssl.enabled: "false"
+      node.store.allow_mmap: "true"
+      indices.memory.index_buffer_size: 25%
+      ES_JAVA_OPTS: -Xms8512m -Xmx8512m
     mem_limit: 36g
     networks:
       backend:
         ipv4_address: 172.20.1.11
+    healthcheck:
+      test: [ "CMD-SHELL", "curl --fail --silent --user \"elastic:$${ELASTIC_PASSWORD}\" http://localhost:9400/_cluster/health > /dev/null" ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
 
   redis_server:
     container_name: trusted-web-redis
-    image: redis:7.4.0
+    image: redis:7.4.0@sha256:6725a7dc7a44a6486b9d0a5172b10ccaf0c2ea600df87c0b93450d0e7769297f
     logging:
       driver: none
     command: [ "redis-server", "--requirepass", "${REDIS_PASSWORD}" ]
@@ -110,7 +143,7 @@ services:
 
   nginx:
     container_name: trusted-web-nginx
-    image: wokalek/nginx-brotli
+    image: wokalek/nginx-brotli@sha256:118428ec4fae6ee4efcd998453f427f558ada29be0958cdaf33c7b9ed76ff56c
     restart: unless-stopped
     ports:
       - "80:80"
@@ -118,12 +151,21 @@ services:
     depends_on:
       web:
         condition: service_started
+      documentation:
+        condition: service_started
     volumes:
       - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro
-      - ./backend/static:/app/static:cached
+      - ./backend/static:/app/static:ro
       - ./client/build:/client_build:ro
-      - letsencrypt-webroot:/var/www/letsencrypt
+      - letsencrypt-webroot:/var/www/letsencrypt:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
+    read_only: true
+    tmpfs:
+      - /run:rw,nosuid,nodev,size=16m,mode=755
+      - /var/cache/nginx:rw,nosuid,nodev,size=1g,mode=755
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
     networks:
       backend:
         ipv4_address: 172.20.1.13
@@ -136,14 +178,12 @@ services:
       - ENABLE_BROTLI=1
 
   mongo:
-    image: mongo:latest
+    image: mongo:8.2.12@sha256:e0ce8c35124d4a9f9785532d1f268f39e9728ffa1cb38f46fa482436424c4bd3
     container_name: trusted-web-mongodb
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD}
-    ports:
-      - "27020:27017"
     volumes:
       - mongo:/data/db
     command: >
@@ -180,6 +220,8 @@ services:
           memory: 3G
 
 networks:
+  orion_nexus_backend:
+    external: true
   shared_bridge:
     external: true
   backend:
@@ -190,6 +232,7 @@ networks:
         - subnet: 172.20.1.0/24
 
 volumes:
+  bloom-data:
   redis:
   mongo:
   elastic:

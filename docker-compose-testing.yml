@@ -34,7 +34,18 @@ services:
       retries: 3
       start_period: 10s
     command: >
-      sh -c "python3 /app/cronjobs.py & exec gunicorn --preload -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 900"
+      sh -c "exec gunicorn --preload -w 1 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 900"
+
+  documentation:
+    build:
+      context: ./docs
+      args:
+        DOCUMENTATION_PROJECT_NAME: "${DOCUMENTATION_PROJECT_NAME:-Platform}"
+        DOCUMENTATION_COMPANY_NAME: "${DOCUMENTATION_COMPANY_NAME:-Platform Operator}"
+    expose:
+      - "80"
+    networks:
+      - backend
 
   arangodb:
     container_name: trusted-web-arangodb
@@ -65,6 +76,7 @@ services:
       - "8443:8443"
     depends_on:
       - web
+      - documentation
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./backend/.ssl:/etc/nginx/local-certs:ro

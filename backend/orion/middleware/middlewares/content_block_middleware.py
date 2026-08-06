@@ -17,7 +17,12 @@ class content_block_middleware(BaseHTTPMiddleware):
         path = request.url.path
 
         if path == "/admin" or path.startswith("/admin/") or path == "/dashboard/admin" or path.startswith("/dashboard/admin/"):
-            admin_root_allowed = await config_controller.getInstance().get_cached(AllowedKeys.ADMIN_ROOT_ALLOWED.value, "0")
+            tenant = getattr(request.state, "tenant", None)
+            admin_root_allowed = await config_controller.getInstance().get_cached(
+                AllowedKeys.ADMIN_ROOT_ALLOWED.value,
+                "0",
+                tenant_id=str(tenant.id) if tenant else None,
+            )
             if str(admin_root_allowed).lower() not in ("1", "true"):
                 return RedirectResponse(url="/", status_code=302)
 
@@ -29,7 +34,7 @@ class content_block_middleware(BaseHTTPMiddleware):
             if token:
                 try:
                     session_mgr = session_manager.get_instance()
-                    user = await session_mgr.get_current_user(token)
+                    user = await session_mgr.get_current_user(token, getattr(request.state, "tenant", None))
                     if user and user.role == user_role.ADMIN.value:
                         return await call_next(request)
                 except Exception:
@@ -47,7 +52,7 @@ class content_block_middleware(BaseHTTPMiddleware):
         user = None
         if token:
             try:
-                user = await session_manager.get_instance().get_current_user(token)
+                user = await session_manager.get_instance().get_current_user(token, tenant_id=getattr(request.state, "tenant", None))
             except Exception:
                 user = None
 

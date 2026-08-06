@@ -75,9 +75,9 @@ class ScanJobManager:
         return ScanJobStatus.DONE
 
     @staticmethod
-    def _build_poll_response(job: db_scan_job_model) -> Dict[str, Any]:
+    def _build_poll_response(job: db_scan_job_model, response: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         return {
-            "response": job.response,
+            "response": response if response is not None else job.response,
             "seen": job.seen,
             "updated_at": job.updated_at,
             "completed_at": job.completed_at,
@@ -226,7 +226,7 @@ class ScanJobManager:
             raise HTTPException(status_code=500, detail="Scan failed") from exc
 
         await self._save_job_response(job, response)
-        return self._with_scan_metadata(job.response, job)
+        return self._with_scan_metadata(response, job)
 
     async def list_scan_notifications(self, current_user, page: int = 1, limit: int = 8) -> ScanJobListResponse:
         safe_limit = max(1, min(int(limit or 8), 100))
@@ -296,21 +296,22 @@ class ScanJobManager:
         except ValueError:
             response_json = {"detail": response.text}
 
-        job.response = response_json if isinstance(response_json, dict) else {"result": response_json}
+        full_response = response_json if isinstance(response_json, dict) else {"result": response_json}
+        job.response = full_response
         job.updated_at = now
 
         if response.status_code != status.HTTP_200_OK:
-            job.response = {"status": ScanJobStatus.ERROR.value, "detail": response.text, "step": "failed", "response": job.response}
+            job.response = {"status": ScanJobStatus.ERROR.value, "detail": response.text, "step": "failed", "response": full_response}
             job.completed_at = now
             await self._engine.save(job)
             raise HTTPException(status_code=response.status_code, detail=f"Error from trusted-micros-api: {response.text}")
 
-        computed_status = self._job_status_from_response(job.response)
+        computed_status = self._job_status_from_response(full_response)
         if computed_status in {ScanJobStatus.DONE, ScanJobStatus.ERROR}:
             job.completed_at = now
 
         await self._engine.save(job)
-        return self._build_poll_response(job)
+        return self._build_poll_response(job, full_response)
 
     async def mark_seen(self, current_user, scan_id: Optional[str] = None, seen_all: bool = False) -> Dict[str, Any]:
         if seen_all:

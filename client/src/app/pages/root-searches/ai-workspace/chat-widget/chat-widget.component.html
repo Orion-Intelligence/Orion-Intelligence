@@ -1,4 +1,4 @@
-<div class="fixed bottom-6 right-6 z-[1400]">
+<div class="fixed bottom-6 right-6 z-[1180]">
   @if (showLauncher() && !chatOpen) {
     <button data-testid="chat-widget-open" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button">
       <span><img src="assets/images/shared/theme/chat.svg" alt="chat" class="h-5 w-5 [filter:brightness(0)_invert(1)]" /></span>
@@ -52,10 +52,24 @@
                       <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
                     </div>
                   }
-                  <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot relative rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3.5 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
-                    <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="msg.text | markdown"></div>
-                  </div>
-                  @if (msg.text.trim()) {
+                  @if ($index === 0) {
+                    <p class="w-full max-w-none px-4 py-2 text-[16px] font-medium leading-7 tracking-[-0.01em] text-[var(--color-text1)]">{{ msg.text }}</p>
+                  } @else {
+                    <div class="relative max-w-full px-4 py-2.5 max-[640px]:w-full">
+                      <div class="ui-ai-markdown text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="msg.text | markdown"></div>
+                      @if (msg.triggers?.length) {
+                        <div class="mt-3.5 flex flex-wrap items-center gap-2">
+                          @for (trigger of msg.triggers || []; track trigger.url) {
+                            <button type="button" (click)="downloadTrigger(trigger, $event)" class="group inline-flex h-9 min-w-[118px] items-center justify-center gap-2 rounded-lg border border-[var(--color-border)] bg-[rgba(87,165,235,0.09)] px-3.5 text-[12px] font-semibold text-[var(--color-text2)] no-underline shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] outline-none transition-[background-color,border-color,box-shadow,color,transform] duration-150 hover:-translate-y-[1px] hover:border-[var(--color-blue-640)] hover:bg-[rgba(87,165,235,0.14)] hover:text-[var(--color-text1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_8px_20px_var(--color-shadow-medium)] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-700)] active:translate-y-0 max-[420px]:w-full">
+                              <span class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[rgba(87,165,235,0.12)] transition-colors group-hover:bg-[rgba(87,165,235,0.18)]">
+                                <img src="assets/images/shared/theme/download.svg" alt="" class="h-3.5 w-3.5 ui-action-icon opacity-90" />
+                              </span>
+                              <span class="whitespace-nowrap">{{ (trigger.text || 'Download') | translate }}</span>
+                            </button>
+                          }
+                        </div>
+                      }
+                    </div>
                     <app-bot-message-actions [message]="msg"></app-bot-message-actions>
                   }
                 </div>
@@ -93,7 +107,7 @@
                 <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ 'Nexus' | translate }}</span>
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ 'Thinking' | translate }}</span>
               </div>
-              <div class="ui-ai-chat-bubble ui-ai-chat-bubble-bot min-w-0 w-[280px] max-w-full rounded-[22px] rounded-tl-[10px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] max-[640px]:w-full">
+              <div class="min-w-0 w-[280px] max-w-full px-4 py-2.5 max-[640px]:w-full">
                 <div class="flex min-w-0 flex-col gap-2">
                   <div class="flex items-center gap-2">
                     <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-[var(--color-blue-640)]"></span>
@@ -110,26 +124,37 @@
         }
         <div #bottomSentinel></div>
       </div>
-      <div class="shrink-0 border-t border-[var(--color-border)] p-3">
-        <div class="mb-0 max-h-0 overflow-hidden opacity-0 pointer-events-none transition-all duration-200 max-[640px]:hidden"></div>
-        <form novalidate class="border border-[rgba(255,255,255,0.08)] bg-[var(--color-blue-800)] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" (submit)="sendMessage($event)">
-          <div class="flex items-end gap-2">
-            <textarea #composerInput data-testid="chat-widget-input" [rows]="composerRows" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" [placeholder]="'Write a message' | translate" class="block min-h-8 max-h-[120px] flex-1 resize-none whitespace-pre-wrap break-words bg-[var(--color-blue-800)] px-3 py-1.5 text-sm leading-5 text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" [class.rounded-full]="!composerExpanded" [class.rounded-2xl]="composerExpanded" required></textarea>
-            <button data-testid="chat-widget-send" #submitBtn type="button" (click)="pushButton(submitBtn); isBotTyping ? stopMessageGeneration() : sendMessage($event)" [disabled]="!isBotTyping && (!newMessage.trim() || isNewMessageOverLimit)" [attr.aria-label]="(isBotTyping ? 'Stop generation' : 'Send message') | translate" [class]="isBotTyping ? 'flex h-8 w-8 items-center justify-center rounded-full border border-red-300/25 bg-red-950/70 text-red-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_0_0_1px_rgba(248,113,113,0.08)] transition hover:bg-red-900/80 hover:text-white disabled:cursor-not-allowed disabled:opacity-50' : 'ui-chat-send-btn flex h-8 w-8 items-center justify-center rounded-full bg-[#57A5EB] transition hover:bg-[#4b98dc] disabled:cursor-not-allowed disabled:opacity-50'">
+      <div class="shrink-0 border-t border-[var(--color-border)] bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.08))] p-3">
+        <form novalidate [attr.aria-busy]="isBotTyping" [ngClass]="composerExpanded ? 'rounded-[20px]' : 'rounded-full'" class="group/composer border border-[color-mix(in_srgb,var(--color-border)_78%,var(--color-blue-640)_22%)] bg-[var(--color-blue-800)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.055),0_8px_24px_rgba(0,0,0,0.1)] transition-[border-color,box-shadow,background-color] duration-200 hover:border-[color-mix(in_srgb,var(--color-border)_56%,var(--color-blue-640)_44%)] focus-within:border-[var(--color-blue-640)] focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_0_3px_color-mix(in_srgb,var(--color-blue-640)_16%,transparent),0_12px_30px_rgba(0,0,0,0.14)]" (submit)="sendMessage($event)">
+          <div class="flex items-end gap-1.5">
+            <span class="mb-1 ml-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-blue-640)_10%,transparent)] text-[var(--color-blue-640)] transition-colors group-focus-within/composer:bg-[color-mix(in_srgb,var(--color-blue-640)_16%,transparent)]" aria-hidden="true">
+              <i class="bi bi-stars text-[14px] leading-none"></i>
+            </span>
+            <textarea #composerInput data-testid="chat-widget-input" [rows]="composerRows" [(ngModel)]="newMessage" (input)="resizeComposer()" (ngModelChange)="queueComposerResize()" (keydown)="onComposerKeydown($event)" name="message" [placeholder]="'Ask about threats, indicators, or next steps…' | translate" [attr.aria-label]="'Message Nexus' | translate" autocomplete="off" autocapitalize="sentences" enterkeyhint="send" spellcheck="true" class="block min-h-9 max-h-[120px] min-w-0 flex-1 resize-none whitespace-pre-wrap break-words rounded-2xl bg-transparent px-2 py-2 text-[14px] leading-5 text-[var(--color-text1)] caret-[var(--color-blue-640)] outline-none selection:bg-[#57A5EB]/25 placeholder:text-[var(--color-text4)]/75" [class.overflow-y-hidden]="!composerScrollable" [class.overflow-y-auto]="composerScrollable" required></textarea>
+            <button data-testid="chat-widget-send" #submitBtn type="button" (click)="pushButton(submitBtn); isBotTyping ? stopMessageGeneration() : sendMessage($event)" [disabled]="!isBotTyping && (!newMessage.trim() || isNewMessageOverLimit)" [attr.aria-label]="(isBotTyping ? 'Stop generation' : 'Send message') | translate" [attr.title]="(isBotTyping ? 'Stop generation' : 'Send message') | translate" [class]="isBotTyping ? 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color-mix(in_srgb,var(--color-blue-640)_38%,var(--color-border))] bg-[color-mix(in_srgb,var(--color-blue-640)_14%,var(--color-blue-720))] text-[var(--color-blue-640)] shadow-[0_5px_14px_rgba(43,144,238,0.16)] outline-none transition-[background-color,border-color,box-shadow,transform,color] hover:border-[var(--color-blue-640)] hover:bg-[color-mix(in_srgb,var(--color-blue-640)_22%,var(--color-blue-720))] hover:shadow-[0_7px_18px_rgba(43,144,238,0.22)] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-800)] active:scale-95' : 'flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[var(--color-blue-640)] text-white shadow-[0_5px_14px_rgba(43,144,238,0.24)] outline-none transition-[background-color,box-shadow,transform,color] hover:bg-[var(--color-blue-630)] hover:shadow-[0_7px_18px_rgba(43,144,238,0.3)] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-800)] active:scale-95 disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text6)] disabled:shadow-none disabled:ring-1 disabled:ring-inset disabled:ring-[var(--color-border)]'">
               @if (isBotTyping) {
-                <span class="h-3 w-3 rounded-[3px] bg-current shadow-[0_0_10px_rgba(248,113,113,0.28)]" aria-hidden="true"></span>
-                <span class="sr-only">{{ 'Stop generation' | translate }}</span>
+                <svg class="h-4 w-4" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <rect x="4.5" y="4.5" width="7" height="7" rx="1.25" />
+                </svg>
               } @else {
-                <img src="assets/images/shared/chat_small.svg" alt="chat" class="h-4 w-4 [filter:brightness(0)_invert(1)]" />
+                <svg class="h-[17px] w-[17px]" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M8 12a.5.5 0 0 0 .5-.5V5.707l2.146 2.147a.5.5 0 0 0 .708-.708l-3-3a.5.5 0 0 0-.708 0l-3 3a.5.5 0 1 0 .708.708L7.5 5.707V11.5A.5.5 0 0 0 8 12" />
+                </svg>
               }
             </button>
           </div>
           @if (isNewMessageOverLimit) {
-            <p class="mt-2 px-1 text-[11px] font-medium text-amber-300">{{ '300 token max. Remove' | translate }} {{ newMessageTokenOverflow }} {{ 'tokens before sending.' | translate }}</p>
+            <p role="alert" aria-live="polite" class="mt-1.5 flex items-center gap-1.5 px-2 text-[11px] font-medium text-amber-300">
+              <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-300/10 text-[10px]" aria-hidden="true">!</span>
+              <span>{{ '300 token max. Remove' | translate }} {{ newMessageTokenOverflow }} {{ 'tokens before sending.' | translate }}</span>
+            </p>
           }
         </form>
-        <div class="mt-2 flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] text-[var(--color-text6)] max-[640px]:hidden">
+        <div class="mt-2 flex items-center justify-between gap-3 px-1.5 text-[11px] text-[var(--color-text6)]">
           <p>{{ 'Enter sends. Shift + Enter adds a new line.' | translate }}</p>
+          <span class="shrink-0 tabular-nums transition-colors" [ngClass]="isNewMessageOverLimit ? 'font-semibold text-amber-300' : newMessageTokenCount > 240 ? 'text-amber-200/80' : 'text-[var(--color-text5)]'">
+            {{ newMessageTokenCount }}/{{ maxComposerTokens }}
+          </span>
         </div>
       </div>
     </div>

@@ -7,13 +7,14 @@ import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
-import { ExportChoiceOption } from '../../model/report/export-choice.model';
+import { ALERT_REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
 import { AlertExportService } from '../../services/export/alert-export.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScanNotificationService } from '../../services/scan-notification.service';
 import { ScanJob } from '../../model/scan-jobs/scan-job.model';
 import { ConfirmationPopupComponent } from '../confirmation-popup/confirmation-popup.component';
 import { Router } from '@angular/router';
+import { LicenseService } from '../../../services/licenses/licenses.service';
 
 type NotificationMode = 'alerts' | 'scans';
 type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
@@ -44,12 +45,13 @@ export class AlertNotificationComponent implements OnChanges {
   isScanDeleting: boolean = false;
   scanDeleteTarget: ScanJob | null = null;
   scanDeleteMode: ScanActionMode | null = null;
-  readonly alertExportOptions: ExportChoiceOption[] = [{ value: 'report', title: 'Export Report (PDF)', description: 'Generate PDF export for selected alert.', testId: 'notification-alert-export-option-report' }];
+  readonly alertExportOptions = ALERT_REPORT_EXPORT_OPTIONS;
+  readonly alertLicenseWarning = "You don't have license to view this";
   readonly isNotificationOpen = input.required<boolean | null>();
   readonly notificationMode = input<NotificationMode>('alerts');
   readonly closeNotification = output<undefined>();
 
-  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, public scanNotificationService: ScanNotificationService, private router: Router) {
+  constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, public scanNotificationService: ScanNotificationService, private router: Router, private licenseService: LicenseService) {
   }
 
   private decrementUnseenSummary(by: number = 1): void {
@@ -205,6 +207,11 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   seeDetails(_category: string, hash: string) {
+    const notification = this.alertNotifications.find(n => n.hash === hash) || { categoryName: _category };
+    if (!this.licenseService.canViewAlert(notification)) {
+      this.messageNotificationService.show(this.alertLicenseWarning);
+      return;
+    }
     this.isFetchingDetail = true;
     this.apiService.get<any>('profile/alerts').subscribe({
       next: response => {
@@ -215,6 +222,12 @@ export class AlertNotificationComponent implements OnChanges {
         const selectedAlert = alerts.find(a => a.data_hash === hash) || null;
         if (!selectedAlert) {
           this.isFetchingDetail = false;
+          this.messageNotificationService.show(this.alertLicenseWarning);
+          return;
+        }
+        if (!this.licenseService.canViewAlert(selectedAlert)) {
+          this.isFetchingDetail = false;
+          this.messageNotificationService.show(this.alertLicenseWarning);
           return;
         }
 
@@ -250,12 +263,12 @@ export class AlertNotificationComponent implements OnChanges {
     this.exportSelectedAlert(type);
   }
 
-  exportSelectedAlert(_type: string): void {
+  exportSelectedAlert(type: string): void {
     if (!this.alertToShowReport) {
       this.closeExportChoice();
       return;
     }
-    this.alertExportService.exportPdf([this.alertToShowReport], 'Brand Alerts');
+    this.alertExportService.exportByType([this.alertToShowReport], type, 'Brand Alerts');
     this.closeExportChoice();
   }
 
@@ -411,18 +424,6 @@ export class AlertNotificationComponent implements OnChanges {
 
   getScanError(job: ScanJob): string {
     return this.scanNotificationService.getError(job);
-  }
-
-  exportTitle(): string {
-    return 'Export Alert';
-  }
-
-  exportSubtitle(): string {
-    return 'Choose the export format.';
-  }
-
-  exportOptions(): ExportChoiceOption[] {
-    return this.alertExportOptions;
   }
 
   close() {

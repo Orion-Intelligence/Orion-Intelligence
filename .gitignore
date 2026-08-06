@@ -1,4 +1,5 @@
 .env
+temo.env
 /.codex
 .DS_Store
 **/.DS_Store
@@ -6,6 +7,7 @@
 **/package-lock.json
 !client/package-lock.json
 backend/static/.well-known/parser_files/*
+backend/static/.maintenance
 backend/backend_cov_app/*
 *.bak
 *.log
@@ -41,7 +43,13 @@ db.sqlite3
 
 client/cypress/downloads/*
 client/cypress/screenshots/*
-client/coverage/*
+client/cypress/error/*
+!client/cypress/error/.gitkeep
+client/.nyc_output/
+client/coverage/
+backend/coverage.xml
+backend/htmlcov/
+coverage-merged/
 .coverage
 .coverage.*
 backend/.coverage

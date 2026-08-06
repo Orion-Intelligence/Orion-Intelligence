@@ -79,28 +79,28 @@ class stix_manager:
             stix_manager()
         return stix_manager.__instance  # type: ignore[return-value]
 
-    async def _get_stix(self, kind: str, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
+    async def _get_stix(self, kind: str, doc_id: str, lang: Optional[str] = None, tenant_name: str = "Tenant") -> Dict[str, Any]:
         spec = self._SPECS[kind]
         fetcher = getattr(self._search_model, spec.fetch_method)
         raw = await (fetcher(doc_id, lang) if spec.accepts_lang else fetcher(doc_id))
         if raw is None:
             return {"error": spec.missing_error, "doc_id": doc_id}
-        return spec.converter_cls().convert(spec.model_cls(**raw))
+        return spec.converter_cls().convert(spec.model_cls(**raw), tenant_name)
 
-    async def get_defacement_stix(self, doc_id: str) -> Dict[str, Any]:
-        return await self._get_stix("defacement", doc_id)
+    async def get_defacement_stix(self, doc_id: str, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return await self._get_stix("defacement", doc_id, tenant_name=tenant_name)
 
-    async def get_exploit_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        return await self._get_stix("exploit", doc_id, lang)
+    async def get_exploit_stix(self, doc_id: str, lang: Optional[str] = None, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return await self._get_stix("exploit", doc_id, lang, tenant_name)
 
-    async def get_leak_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        return await self._get_stix("leak", doc_id, lang)
+    async def get_leak_stix(self, doc_id: str, lang: Optional[str] = None, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return await self._get_stix("leak", doc_id, lang, tenant_name)
 
-    async def get_social_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        return await self._get_stix("social", doc_id, lang)
+    async def get_social_stix(self, doc_id: str, lang: Optional[str] = None, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return await self._get_stix("social", doc_id, lang, tenant_name)
 
-    async def get_general_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        return await self._get_stix("general", doc_id, lang)
+    async def get_general_stix(self, doc_id: str, lang: Optional[str] = None, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return await self._get_stix("general", doc_id, lang, tenant_name)
 
-    async def get_chat_stix(self, doc_id: str, lang: Optional[str] = None) -> Dict[str, Any]:
-        return await self._get_stix("chat", doc_id, lang)
+    async def get_chat_stix(self, doc_id: str, lang: Optional[str] = None, tenant_name: str = "Tenant") -> Dict[str, Any]:
+        return await self._get_stix("chat", doc_id, lang, tenant_name)

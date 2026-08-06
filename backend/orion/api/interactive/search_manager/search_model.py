@@ -4,6 +4,7 @@ from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from starlette import status
 from starlette.responses import JSONResponse
+from smartbindb import SmartBinDB
 from orion.api.interactive.search_manager.search_callback_model import search_callback
 from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_callback_model import grouped_consolidated_search_callback_model
@@ -16,7 +17,6 @@ from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from orion.services.log_manager.log_controller import log
 from orion.api.interactive.search_manager.search_query_generator import search_query_generator
 from orion.api.interactive.search_manager.search_enums import SEARCH_CONFIG
 
@@ -24,6 +24,7 @@ from orion.api.interactive.search_manager.search_enums import SEARCH_CONFIG
 class search_model:
     __instance = None
     __search_callback = search_callback()
+    __bin_db = None
 
     @staticmethod
     def getInstance():
@@ -207,8 +208,39 @@ class search_model:
                 if cipher is None:
                     cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
                 item.password = cipher.decrypt(str(password).encode()).decode()
-            except Exception as ex:
-                log.g().w(f"Stealer password decrypt skipped: {str(ex)}")
+            except Exception:
+                item.password = password
+
+    @staticmethod
+    def _enrich_bin_results(response):
+        for item in response.Result or []:
+            if (getattr(item, "type", "") or "").lower() != "bin":
+                continue
+            digits = "".join(filter(str.isdigit, str(getattr(item, "bin", ""))))
+            if len(digits) < 6:
+                continue
+            search_model.__bin_db = search_model.__bin_db or SmartBinDB()
+            lookup = search_model.__bin_db.get_bin_info(digits[:8])
+            if lookup.get("status") != "SUCCESS" and len(digits) > 6:
+                lookup = search_model.__bin_db.get_bin_info(digits[:6])
+            if lookup.get("status") != "SUCCESS" or not lookup.get("data"):
+                continue
+            data = lookup["data"][0]
+            extras = item.__pydantic_extra__ or {}
+            for key in list(extras):
+                if key.lower() in {"scheme", "card_type", "tier", "issuer", "country", "website", "luhn"}:
+                    extras.pop(key, None)
+            extras.update({
+                "Scheme": data.get("brand"),
+                "Type": data.get("Type") or data.get("type"),
+                "Tier": data.get("CardTier") or data.get("category"),
+                "Issuer": data.get("issuer"),
+                "Country": (data.get("Country") or {}).get("Name"),
+                "Website": data.get("website"),
+                "Luhn": lookup.get("Luhn"),
+            })
+            item.__pydantic_extra__ = extras
+        return response
 
     @staticmethod
     async def search_consolidated_ranked_result(param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories,search_type=""):
@@ -413,7 +445,7 @@ class search_model:
         size = getattr(param, "size", None) or (100 if not param.ioc else 500)
         response.Page_Count = page + 1 if raw_result_count >= size else (page if raw_result_count > 0 else max(1, page - 1))
 
-        return response
+        return self._enrich_bin_results(response)
 
     async def extract_ioc_from_file(self, file_content: bytes, filename: str, user_id: str = "system"):
 

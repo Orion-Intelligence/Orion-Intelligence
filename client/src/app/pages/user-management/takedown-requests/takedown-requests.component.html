@@ -1,0 +1,133 @@
+<ng-container>
+  <span id="top"></span>
+  <div class="w-full px-[32px] pb-[100px] pt-3 max-[1200px]:px-[15px] max-[943px]:px-[10px] md:pt-4">
+    <div class="ui-page-container w-full max-w-[2400px]">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 class="ui-page-title">{{ 'Take Down' | translate }}</h1>
+          <p class="ui-page-description">{{ 'Review takedown evidence requests and approve or deny abuse reports.' | translate }}</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="relative">
+            <i class="bi bi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[var(--color-text4)]"></i>
+            <input data-testid="takedown-search" type="text" [(ngModel)]="query" (keyup.enter)="search()" [placeholder]="'Search target, email, user, report' | translate" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full placeholder:text-[var(--color-text4)]" />
+          </div>
+          <app-takedown-action [manualUrlMode]="true" actionLabel="Report Takedown" buttonClass="ui-btn ui-btn-primary" buttonIcon="bi-shield-exclamation" (requestCreated)="load()"></app-takedown-action>
+          <button type="button" (click)="sidebarService.openSidebar()" class="inline-flex h-10 items-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-680)] px-3 text-[15px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-750)]">
+            <img alt="Filter Icon" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16" class="ui-filter-icon">
+            <span class="ml-2">{{ 'Filter' | translate }}</span>
+          </button>
+          @if (sidebarReady && (isFilterOpen$ | async)) {
+            <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
+          }
+          @if (sidebarReady) {
+            <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+              <app-filters (filterChanged)="applyFilters($event)" (filterClose)="sidebarService.closeSidebar()" (filterReset)="resetFilters()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (error) {
+        <div class="mt-4 rounded-[8px] border border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.08)] px-4 py-3 text-[13px] text-[var(--color-text1)]">{{ error }}</div>
+      }
+
+      <div class="ui-table-shell">
+        <table class="ui-table">
+          <thead>
+            <tr>
+              <th class="font-semibold">ID</th>
+              <th class="font-semibold">{{ 'Created' | translate }}</th>
+              <th class="font-semibold">{{ 'Target' | translate }}</th>
+              <th class="font-semibold">{{ 'Evidence' | translate }}</th>
+              <th class="font-semibold">{{ 'User' | translate }}</th>
+              <th class="font-semibold">{{ 'Status' | translate }}</th>
+              <th class="w-[170px] text-right font-semibold">{{ 'Action' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (loading) {
+              @for (_ of [1,2,3,4,5]; track _) {
+                <tr>
+                  <td><div class="ui-shimmer h-3 w-[55%] rounded bg-[var(--color-placeholder)]"></div></td>
+                  <td><div class="ui-shimmer h-3 w-full rounded bg-[var(--color-placeholder)]"></div></td>
+                  <td><div class="ui-shimmer h-3 w-full rounded bg-[var(--color-placeholder)]"></div></td>
+                  <td><div class="ui-shimmer h-3 w-[80%] rounded bg-[var(--color-placeholder)]"></div></td>
+                  <td><div class="ui-shimmer h-3 w-[75%] rounded bg-[var(--color-placeholder)]"></div></td>
+                  <td><div class="ui-shimmer h-3 w-[70%] rounded bg-[var(--color-placeholder)]"></div></td>
+                  <td><div class="ml-auto ui-shimmer h-8 w-[132px] rounded bg-[var(--color-placeholder)]"></div></td>
+                </tr>
+              }
+            } @else {
+              @for (item of items; track item.id; let i = $index) {
+                <tr data-testid="takedown-row">
+                  <td>{{ (i + 1) + (page - 1) * limit }}</td>
+                  <td>{{ item.created_at | date:'dd MMM yyyy, HH:mm:ss' }}</td>
+                  <td>
+                    <div class="max-w-[260px] truncate font-medium text-[var(--color-text1)]" [title]="item.target_domain || item.target_url">{{ item.target_domain || '-' }}</div>
+                    <div class="mt-0.5 max-w-[320px] truncate text-xs text-[var(--color-text4)]" [title]="item.target_url">{{ item.target_url }}</div>
+                  </td>
+                  <td>
+                    @if (item.abuse_email && (item.abuse_email.startsWith('http://') || item.abuse_email.startsWith('https://'))) {
+                      <a [href]="item.abuse_email" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-[6px] bg-[var(--color-blue-640)] px-2.5 py-1 text-[12px] font-medium text-white shadow-sm transition hover:bg-[rgba(87,165,235,0.9)]">
+                        Open Form <i class="bi bi-box-arrow-up-right text-[11px] leading-none"></i>
+                      </a>
+                    } @else {
+                      <div class="max-w-[260px] truncate" [title]="item.abuse_email">{{ item.abuse_email || 'No abuse email found' }}</div>
+                    }
+                    @if (item.denial_reason) {
+                      <div class="mt-0.5 max-w-[260px] truncate text-xs text-[#ff8a8a]" [title]="item.denial_reason">{{ item.denial_reason }}</div>
+                    }
+                  </td>
+                  <td>
+                    <div class="max-w-[180px] truncate text-[var(--color-text1)]">{{ item.username || '-' }}</div>
+                    <div class="mt-0.5 max-w-[180px] truncate text-xs text-[var(--color-text4)]">{{ item.user_uuid }}</div>
+                  </td>
+                  <td>
+                    <span [ngClass]="statusClass(item.status)" class="inline-flex h-7 items-center rounded-full border px-2.5 text-[11px] font-semibold uppercase tracking-[0.04em]">
+                      {{ item.status_label || item.public_status || item.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="flex items-center justify-end gap-2">
+                      @if (item.status === 'pending' || item.status === 'failed') {
+                        <button data-testid="takedown-reject-button" type="button" (click)="reject(item)" [disabled]="!!actionId" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[rgba(255,107,107,0.28)] bg-[rgba(255,107,107,0.08)] px-3 text-[12px] font-semibold text-[#ff8a8a] transition-colors hover:bg-[rgba(255,107,107,0.14)] disabled:cursor-not-allowed disabled:opacity-50">
+                          <i class="bi bi-x-lg text-[11px] leading-none"></i>
+                          {{ 'Reject' | translate }}
+                        </button>
+                      }
+                      @if (item.status === 'pending') {
+                        <button data-testid="takedown-accept-button" type="button" (click)="accept(item)" [disabled]="!!actionId" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-3 text-[12px] font-semibold text-white transition hover:bg-[rgba(87,165,235,0.9)] disabled:cursor-not-allowed disabled:opacity-50">
+                          <i class="bi bi-check2 text-[14px] leading-none"></i>
+                          {{ 'Accept' | translate }}
+                        </button>
+                      }
+                      @if (item.status !== 'pending' && item.status !== 'failed') {
+                        <span class="text-[12px] text-[var(--color-text4)]">{{ 'Closed' | translate }}</span>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+              @if (!items.length) {
+                <tr>
+                  <td data-testid="takedown-empty-state" class="py-10 text-center text-sm text-[var(--color-text4)]" colspan="7">{{ 'No takedown requests found for the selected filters.' | translate }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <app-pagination (pageChange)="onPageChange($event)" [maxPages]="totalPages" [currentPage]="page"></app-pagination>
+  </div>
+  <span id="bottom"></span>
+
+  @if (rejectionTarget) {
+    <app-takedown-rejection-popup
+      [target]="rejectionTarget.target_domain || rejectionTarget.target_url"
+      [isSubmitting]="actionId === rejectionTarget.id"
+      (submitted)="submitRejection($event)"
+      (cancelled)="cancelRejection()"></app-takedown-rejection-popup>
+  }
+</ng-container>

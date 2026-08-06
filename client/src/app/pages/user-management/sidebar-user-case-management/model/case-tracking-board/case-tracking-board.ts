@@ -6,11 +6,14 @@ import { CdkDrag, CdkDragDrop, CdkDragMove, CdkDropList, DragDropModule } from '
 import { Case, CaseStatus } from '../../../../../shared/model/case-management/case.model';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
-import { CASE_STATUS_WORKFLOW } from '../../../../../shared/model/case-management/case.config';
+import { getEnabledStatusWorkflow } from '../../../../../shared/model/case-management/status-board-config.model';
+import { LicenseService } from '../../../../../services/licenses/licenses.service';
+import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-tracking-board',
-  imports: [CommonModule, FormsModule, DragDropModule],
+  imports: [CommonModule, FormsModule, DragDropModule, TooltipDirective, TranslatePipe],
   templateUrl: './case-tracking-board.html',
   styleUrls: ['./case-tracking-board.css']
 })
@@ -26,16 +29,30 @@ export class CaseTrackingBoard implements OnInit {
   isSavingMove = false;
   draggedCase: Case | null = null;
   hoveredDropStatus: CaseStatus | null = null;
-  readonly workflow = CASE_STATUS_WORKFLOW;
+  workflow = getEnabledStatusWorkflow();
   readonly canDropIntoAllowedStatus = (drag: CdkDrag<Case>, drop: CdkDropList<CaseStatus>): boolean => {
     const caseItem = drag.data;
     return !!caseItem && this.getAllowedStatuses(caseItem.status).includes(drop.data);
   };
 
-  constructor(private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService) { }
+  constructor(private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService) { }
 
   ngOnInit(): void {
-    this.loadCases();
+    this.loadBoardConfig();
+  }
+
+  loadBoardConfig(): void {
+    this.isLoading = true;
+    this.caseService.getStatusBoardConfig().subscribe({
+      next: config => {
+        this.workflow = getEnabledStatusWorkflow(config);
+        this.loadCases();
+      },
+      error: () => {
+        this.workflow = getEnabledStatusWorkflow();
+        this.loadCases();
+      }
+    });
   }
 
   loadCases(): void {
@@ -84,7 +101,33 @@ export class CaseTrackingBoard implements OnInit {
       statuses.push(nextStatus);
     }
 
+    for (let nextIndex = index + 2; nextIndex < this.workflow.length; nextIndex += 1) {
+      const skippedStatuses = this.workflow.slice(index + 1, nextIndex);
+      const target = this.workflow[nextIndex]?.value || null;
+      if (!target || target === 'closed' || !skippedStatuses.length || !skippedStatuses.every(item => item.skippable)) {
+        break;
+      }
+      statuses.push(target);
+    }
+
+    for (let previousIndex = index - 2; previousIndex >= 0; previousIndex -= 1) {
+      const skippedStatuses = this.workflow.slice(previousIndex + 1, index);
+      const target = this.workflow[previousIndex]?.value || null;
+      if (!target || target === 'new' || !skippedStatuses.length || !skippedStatuses.every(item => item.skippable)) {
+        break;
+      }
+      statuses.push(target);
+    }
+
     return statuses;
+  }
+
+  openBoardSettings(): void {
+    this.router.navigate(['/dashboard/profile/case-management/tracking-board/settings']);
+  }
+
+  canManageBoardSettings(): boolean {
+    return this.licenseService.isMaintainer();
   }
 
   dropCase(event: CdkDragDrop<CaseStatus, CaseStatus, Case>, targetStatus: CaseStatus): void {
@@ -213,6 +256,13 @@ export class CaseTrackingBoard implements OnInit {
     return value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
   }
 
+  getStatusLabel(value?: string | null): string {
+    if (!value) {
+      return '-';
+    }
+    return this.workflow.find(item => item.value === value)?.label || this.formatLabel(value);
+  }
+
   getCaseTypeLabel(caseItem: Case): string {
     return this.formatLabel(caseItem.caseType === 'other' ? caseItem.caseTypeOtherValue : caseItem.caseType);
   }
@@ -339,10 +389,10 @@ export class CaseTrackingBoard implements OnInit {
     const targetIndex = this.workflow.findIndex(item => item.value === targetStatus);
 
     if (targetIndex < currentIndex) {
-      return `Move back to ${this.formatLabel(targetStatus)}`;
+      return `Move back to ${this.getStatusLabel(targetStatus)}`;
     }
 
-    return `Move to ${this.formatLabel(targetStatus)}`;
+    return `Move to ${this.getStatusLabel(targetStatus)}`;
   }
 
   isForwardMove(currentStatus: CaseStatus, targetStatus: CaseStatus): boolean {

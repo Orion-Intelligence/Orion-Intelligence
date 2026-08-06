@@ -1,5 +1,13 @@
 import { PlatformResult, SocialPost, SocialPostComment, SocialStoredProfile } from '../../../../shared/model/social/social-scan.models';
 
+const PLATFORM_KEY_ALIASES: Record<string, string> = {
+  dev_to: 'devto',
+  micro_blog: 'microblog',
+  stack_overflow: 'stackoverflow',
+  x: 'twitter',
+  youtube_user: 'youtube',
+};
+
 export class SocialNormalizationUtil {
   static normalizeIdentity(value: string): string {
     return (value || '').trim().replace(/^@+/, '');
@@ -11,6 +19,15 @@ export class SocialNormalizationUtil {
 
   static normalizeProfilePathUsername(value: string): string {
     return this.normalizeIdentity(value).replace(/\/+$/, '');
+  }
+
+  static normalizePlatformKey(platformName?: string): string {
+    return (platformName || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+  }
+
+  static canonicalPlatformKey(platformName?: string): string {
+    const key = this.normalizePlatformKey(platformName);
+    return PLATFORM_KEY_ALIASES[key] || key;
   }
 
   static normalizeDomain(value: string): string {

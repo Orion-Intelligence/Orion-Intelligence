@@ -11,6 +11,8 @@
       [useRouteQuery]="false"
       [advancedTitle]="'Advanced Filter Builder' | translate"
       [advancedSubtitle]="'Combine multiple filters with AND/OR for precise SIEM results' | translate"
+      [aiType]="aiToolRoutingService.getTypeForApiType('event-management')"
+      [aiWelcomeMessage]="aiToolRoutingService.getMessageForApiType('event-management')"
       (searchTriggered)="triggerSearch($event)"
     ></app-ioc-search>
 
@@ -95,109 +97,115 @@
       </div>
 
       <div class="mt-[16px]">
-        <div class="ui-ioc-table-shell overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-          <div class="ui-ioc-table-head grid min-w-[980px] grid-cols-[70px_1.5fr_130px_180px_180px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[70px_1.5fr_130px_180px_48px]">
-            <div>#</div>
-            <div>{{ 'Event' | translate }}</div>
-            <div>{{ 'Severity' | translate }}</div>
-            <div class="max-[900px]:hidden">{{ 'Source / Host' | translate }}</div>
-            <div>{{ 'Date' | translate }}</div>
-            <div></div>
-          </div>
+        <div class="ui-table-shell !mt-0">
+          <table class="ui-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>{{ 'Event' | translate }}</th>
+                <th>{{ 'Severity' | translate }}</th>
+                <th>{{ 'Source / Host' | translate }}</th>
+                <th>{{ 'Date' | translate }}</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (!records.length) {
+                <tr>
+                  <td colspan="6" class="py-8 text-center text-sm text-[var(--color-text4)]">{{ 'No results found.' | translate }}</td>
+                </tr>
+              }
 
-          @if (!records.length) {
-            <div class="ui-ioc-table-empty grid min-w-[980px] grid-cols-[70px_1.5fr_130px_180px_180px_48px] gap-2 bg-[var(--color-blue-720)] px-4 py-3 text-sm text-[var(--color-text4)] max-[900px]:grid-cols-[70px_1.5fr_130px_180px_48px]">
-              <div>-</div><div>-</div><div>-</div><div class="max-[900px]:hidden">-</div><div>-</div><div></div>
-            </div>
-          }
+              @for (item of records; track trackByIndex($index); let idx = $index) {
+                <tr data-testid="siem-log-row" class="cursor-pointer" [class.credential_row_expand]="expandedResultIndex === idx" tabindex="0" [attr.aria-expanded]="expandedResultIndex === idx" (click)="toggleResultItem(idx)">
+                  <td data-label="#" class="font-mono text-xs">{{ getDisplayIndex(idx) }}</td>
+                  <td [attr.data-label]="'Event' | translate" class="min-w-[280px]">
+                    <div class="truncate font-medium" [title]="getResultTitle(item, idx)">{{ getResultTitle(item, idx) }}</div>
+                    <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="getRawPreview(item)">{{ getRawPreview(item) }}</div>
+                  </td>
+                  <td [attr.data-label]="'Severity' | translate">
+                    <span class="inline-flex items-center rounded-full border px-[8px] py-[2px] text-[11px] font-semibold uppercase" [ngClass]="{ 'border-red-400/30 bg-red-500/10 text-red-300': stringifyPrimitive(item?.severity).toLowerCase() === 'critical', 'border-orange-400/30 bg-orange-500/10 text-orange-300': stringifyPrimitive(item?.severity).toLowerCase() === 'high', 'border-amber-400/30 bg-amber-500/10 text-amber-300': stringifyPrimitive(item?.severity).toLowerCase() === 'medium', 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': stringifyPrimitive(item?.severity).toLowerCase() === 'low', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text2)]': !['critical', 'high', 'medium', 'low'].includes(stringifyPrimitive(item?.severity).toLowerCase()) }">
+                      {{ stringifyPrimitive(item?.severity) }}
+                    </span>
+                  </td>
+                  <td [attr.data-label]="'Source / Host' | translate" class="min-w-[180px]">
+                    <div class="truncate" [title]="stringifyPrimitive(item?.source)">{{ stringifyPrimitive(item?.source) }}</div>
+                    <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="stringifyPrimitive(item?.host)">{{ stringifyPrimitive(item?.host) }}</div>
+                  </td>
+                  <td [attr.data-label]="'Date' | translate" class="text-xs text-[var(--color-text4)]">{{ getEventTimestamp(item) }}</td>
+                  <td>
+                    <button data-testid="siem-log-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expandedResultIndex === idx">
+                      <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" class="h-3 w-3 ui-action-icon" />
+                    </button>
+                  </td>
+                </tr>
 
-          <div>
-            @for (item of records; track trackByIndex($index); let idx = $index) {
-              <div data-testid="siem-log-row" class="ui-ioc-table-row grid min-w-[980px] cursor-pointer grid-cols-[70px_1.5fr_130px_180px_180px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[70px_1.5fr_130px_180px_48px]" [class.ui-ioc-row-even]="idx % 2 === 0" [class.ui-ioc-row-odd]="idx % 2 !== 0" [class.credential_row_expand]="expandedResultIndex === idx" role="row" tabindex="0" [attr.aria-expanded]="expandedResultIndex === idx" (click)="toggleResultItem(idx)">
-                <div class="font-mono text-xs">{{ getDisplayIndex(idx) }}</div>
-                <div class="min-w-0">
-                  <div class="truncate font-medium" [title]="getResultTitle(item, idx)">{{ getResultTitle(item, idx) }}</div>
-                  <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="getRawPreview(item)">{{ getRawPreview(item) }}</div>
-                </div>
-                <div>
-                  <span class="inline-flex items-center rounded-full border px-[8px] py-[2px] text-[11px] font-semibold uppercase" [ngClass]="{ 'border-red-400/30 bg-red-500/10 text-red-300': stringifyPrimitive(item?.severity).toLowerCase() === 'critical', 'border-orange-400/30 bg-orange-500/10 text-orange-300': stringifyPrimitive(item?.severity).toLowerCase() === 'high', 'border-amber-400/30 bg-amber-500/10 text-amber-300': stringifyPrimitive(item?.severity).toLowerCase() === 'medium', 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': stringifyPrimitive(item?.severity).toLowerCase() === 'low', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text2)]': !['critical', 'high', 'medium', 'low'].includes(stringifyPrimitive(item?.severity).toLowerCase()) }">
-                    {{ stringifyPrimitive(item?.severity) }}
-                  </span>
-                </div>
-                <div class="max-[900px]:hidden">
-                  <div class="truncate" [title]="stringifyPrimitive(item?.source)">{{ stringifyPrimitive(item?.source) }}</div>
-                  <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="stringifyPrimitive(item?.host)">{{ stringifyPrimitive(item?.host) }}</div>
-                </div>
-                <div class="text-xs text-[var(--color-text4)]">{{ getEventTimestamp(item) }}</div>
-                <button data-testid="siem-log-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expandedResultIndex === idx">
-                  <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" class="h-3 w-3 ui-action-icon" />
-                </button>
-              </div>
-
-              @if (expandedResultIndex === idx) {
-                <div @fadeInDashboardItem class="border-b border-[var(--color-divider)] bg-[var(--color-blue-720)] px-4 py-4 text-sm text-[var(--color-text1)]">
-                  <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
-                    <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-4">
-                      <div class="min-h-[64px] leading-6">{{ stringifyPrimitive(item?.raw) }}</div>
-                      @if (item?.tags?.length) {
-                        <div class="mt-[12px] flex flex-wrap gap-[6px]">
-                          @for (tag of item.tags; track trackByIndex($index)) {
-                            <span class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ stringifyPrimitive(tag) }}</span>
-                          }
-                        </div>
-                      }
-
-                      <div class="my-4 h-px w-full bg-[var(--color-divider)]"></div>
-
-                      <div>
-                        <div class="text-[12px] text-[var(--color-text4)]">{{ 'Extracted IOCs' | translate }}</div>
-                        @if (getExtractedIocs(item).length) {
-                          <div class="mt-[8px] flex flex-wrap gap-3">
-                            @for (ioc of getExtractedIocs(item); track ioc.name) {
-                              @for (value of ioc.values; track value) {
-                                <div class="min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]">
-                                  <div class="text-[12px] text-[var(--color-text4)]">{{ ioc.name }}</div>
-                                  <div class="mt-[4px] break-all text-[13px] text-[var(--color-text1)]">{{ value }}</div>
-                                </div>
+                @if (expandedResultIndex === idx) {
+                  <tr @fadeInDashboardItem>
+                    <td colspan="6" class="!whitespace-normal bg-[var(--color-blue-720)] p-4 text-sm text-[var(--color-text1)]">
+                      <div class="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+                        <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-4">
+                          <div class="min-h-[64px] leading-6">{{ stringifyPrimitive(item?.raw) }}</div>
+                          @if (item?.tags?.length) {
+                            <div class="mt-[12px] flex flex-wrap gap-[6px]">
+                              @for (tag of item.tags; track trackByIndex($index)) {
+                                <span class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-[8px] py-[2px] text-[11px] text-[var(--color-text1)]">{{ stringifyPrimitive(tag) }}</span>
                               }
+                            </div>
+                          }
+
+                          <div class="my-4 h-px w-full bg-[var(--color-divider)]"></div>
+
+                          <div>
+                            <div class="text-[12px] text-[var(--color-text4)]">{{ 'Extracted IOCs' | translate }}</div>
+                            @if (getExtractedIocs(item).length) {
+                              <div class="mt-[8px] flex flex-wrap gap-3">
+                                @for (ioc of getExtractedIocs(item); track ioc.name) {
+                                  @for (value of ioc.values; track value) {
+                                    <div class="min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]">
+                                      <div class="text-[12px] text-[var(--color-text4)]">{{ ioc.name }}</div>
+                                      <div class="mt-[4px] break-all text-[13px] text-[var(--color-text1)]">{{ value }}</div>
+                                    </div>
+                                  }
+                                }
+                              </div>
+                            } @else {
+                              <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'No extracted IOCs available' | translate }}</div>
                             }
                           </div>
-                        } @else {
-                          <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'No extracted IOCs available' | translate }}</div>
-                        }
-                      </div>
-                    </div>
+                        </div>
 
-                    <div class="ui-event-management-expand-side max-h-[320px] overflow-y-auto pr-1">
-                      <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Event ID' | translate }}</div>
-                          <div class="mt-[4px] text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.event_id) }}</div>
-                        </div>
-                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'User' | translate }}</div>
-                          <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.user) }}</div>
-                        </div>
-                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Timestamp' | translate }}</div>
-                          <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.timestamp) }}</div>
-                        </div>
-                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
-                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Ingested At' | translate }}</div>
-                          <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.ingested_at) }}</div>
-                        </div>
-                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px] sm:col-span-2">
-                          <div class="text-[12px] text-[var(--color-text4)]">{{ 'Hash' | translate }}</div>
-                          <div class="mt-[4px] break-all text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.hash) }}</div>
+                        <div class="ui-event-management-expand-side max-h-[320px] overflow-y-auto pr-1">
+                          <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                              <div class="text-[12px] text-[var(--color-text4)]">{{ 'Event ID' | translate }}</div>
+                              <div class="mt-[4px] text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.event_id) }}</div>
+                            </div>
+                            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                              <div class="text-[12px] text-[var(--color-text4)]">{{ 'User' | translate }}</div>
+                              <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.user) }}</div>
+                            </div>
+                            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                              <div class="text-[12px] text-[var(--color-text4)]">{{ 'Timestamp' | translate }}</div>
+                              <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.timestamp) }}</div>
+                            </div>
+                            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px]">
+                              <div class="text-[12px] text-[var(--color-text4)]">{{ 'Ingested At' | translate }}</div>
+                              <div class="mt-[4px] text-[13px] text-[var(--color-text1)]">{{ stringifyPrimitive(item?.ingested_at) }}</div>
+                            </div>
+                            <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] p-[10px] sm:col-span-2">
+                              <div class="text-[12px] text-[var(--color-text4)]">{{ 'Hash' | translate }}</div>
+                              <div class="mt-[4px] break-all text-[13px] font-mono text-[var(--color-text1)]">{{ stringifyPrimitive(item?.hash) }}</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-
-                    </div>
-                  </div>
-                </div>
+                    </td>
+                  </tr>
+                }
               }
-            }
-          </div>
+            </tbody>
+          </table>
         </div>
       </div>
 

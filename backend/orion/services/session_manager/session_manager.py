@@ -1,15 +1,18 @@
+import hashlib
+import secrets
 import threading
 import time
 from datetime import datetime, timedelta, timezone
-import secrets
 
 import jwt
 import pyotp
 from bson import ObjectId
+from cryptography.fernet import Fernet, InvalidToken
 from fastapi import HTTPException, status
 from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
+from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, db_user_account, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -39,7 +42,39 @@ class session_manager:
         self._redis = redis_controller.getInstance()
         self._session_ttl = 30 * 60
 
-    async def get_current_user(self, token: str):
+    @staticmethod
+    def tenant_identifier(tenant_or_id) -> str | None:
+        if tenant_or_id is None:
+            return None
+        tenant_id = getattr(tenant_or_id, "id", tenant_or_id)
+        return str(tenant_id) if tenant_id is not None else None
+
+    @staticmethod
+    def hash_password_reset_token(token: str) -> str:
+        return hashlib.sha256(token.encode()).hexdigest()
+
+    @staticmethod
+    def issue_password_reset_token(user, reset_twofa: bool = False) -> str:
+        token = session_manager.generate_verification_token()
+        user.password_reset_token = session_manager.hash_password_reset_token(token)
+        user.password_reset_expiry = datetime.now(timezone.utc) + timedelta(minutes=20)
+        user.reset_twofa_on_password_reset = reset_twofa
+        return token
+
+    @staticmethod
+    async def _tenant_fernet(user) -> Fernet:
+        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_uuid))
+        return Fernet(dek)
+
+    @classmethod
+    def ensure_user_tenant_access(self, user, tenant_or_id) -> None:
+        tenant_id = self.tenant_identifier(tenant_or_id)
+        if tenant_id is None:
+            return
+        if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:
+            raise HTTPException(status_code=403, detail="Tenant access forbidden")
+
+    async def get_current_user(self, token: str, tenant_id=None):
         if not token:
             raise HTTPException(status_code=401, detail="Missing or invalid token")
 
@@ -61,6 +96,7 @@ class session_manager:
             if payload.get("free") is True:
                 return user
 
+            self.ensure_user_tenant_access(user, tenant_id)
             if not user:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
@@ -80,8 +116,12 @@ class session_manager:
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid token")
 
-    async def get_current_role(self, token: str) -> str:
-        user = await self.get_current_user(token)
+    async def get_current_role(self, token: str, tenant_id=None) -> str:
+        user = (
+            await self.get_current_user(token)
+            if tenant_id is None
+            else await self.get_current_user(token, tenant_id=tenant_id)
+        )
         if not user or isinstance(user, JSONResponse):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
 
@@ -92,8 +132,12 @@ class session_manager:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found")
         return role
 
-    async def get_current_status(self, token: str) -> str:
-        user = await self.get_current_user(token)
+    async def get_current_status(self, token: str, tenant_id=None) -> str:
+        user = (
+            await self.get_current_user(token)
+            if tenant_id is None
+            else await self.get_current_user(token, tenant_id=tenant_id)
+        )
         if not user or isinstance(user, JSONResponse):
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
 
@@ -151,7 +195,7 @@ class session_manager:
             payload.update(extra)
         return jwt.encode(payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
-    async def verify_2fa_and_issue(self, temp_token: str, code: str):
+    async def verify_2fa_and_issue(self, temp_token: str, code: str, tenant_id=None):
         try:
             payload = jwt.decode(
                 temp_token,
@@ -165,20 +209,46 @@ class session_manager:
             if not username:
                 raise HTTPException(status_code=401, detail="Invalid 2FA token")
 
+            requested_tenant_id = self.tenant_identifier(tenant_id)
+            token_tenant_id = payload.get("tenant_id")
+            if token_tenant_id and requested_tenant_id and str(token_tenant_id) != requested_tenant_id:
+                raise HTTPException(status_code=403, detail="Tenant access forbidden")
+
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
+            self.ensure_user_tenant_access(user, tenant_id)
 
-            secret = user.twofa_secret or payload.get("tfa_secret")
+            stored_secret = user.twofa_secret
+            secret = payload.get("tfa_secret")
+            cipher = None
+            encrypt_secret = not stored_secret
+            if stored_secret:
+                cipher = await self._tenant_fernet(user)
+                try:
+                    secret = cipher.decrypt(stored_secret.encode()).decode()
+                except InvalidToken:
+                    secret = stored_secret
+                    encrypt_secret = True
             if not secret:
                 raise HTTPException(status_code=401, detail="Missing 2FA secret")
 
             if not pyotp.TOTP(secret).verify(code, valid_window=1):
                 raise HTTPException(status_code=401, detail="Invalid 2FA code")
 
-            if not user.twofa_secret:
-                user.twofa_secret = secret
+            user_changed = False
+            if encrypt_secret:
+                cipher = cipher or await self._tenant_fernet(user)
+                user.twofa_secret = cipher.encrypt(secret.encode()).decode()
                 user.twofa_enabled = True
+                user_changed = True
+
+            reset_token = None
+            if getattr(user, "password_reset_required", False):
+                reset_token = self.issue_password_reset_token(user)
+                user_changed = True
+
+            if user_changed:
                 await self._engine.save(user)
 
             access_ttl = timedelta(weeks=92) if user.role == user_role.CRAWLER else timedelta(minutes=30)
@@ -188,15 +258,15 @@ class session_manager:
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
             onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
 
-            session = await self._build_session(user, onboarding_exists)
-            return {"access_token": access_token, "token_type": "bearer", "session": session}
+            session = await self._build_session(user, onboarding_exists, reset_token)
+            return {"access_token": access_token, "token_type": "bearer", "session": session}  # nosec B105
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="2FA token expired")
         except jwt.InvalidTokenError:
             raise HTTPException(status_code=401, detail="Invalid 2FA token")
 
-    async def _build_session(self, user, onboarding_exists: bool):
+    async def _build_session(self, user, onboarding_exists: bool, password_reset_token: str | None = None):
         return {
             "username": user.username,
             "role": user.role.value if hasattr(user.role, "value") else str(user.role),
@@ -205,11 +275,11 @@ class session_manager:
             "subscription": user.subscription,
             "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None,
             "password_reset_required": getattr(user, "password_reset_required", False),
-            "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None,
+            "password_reset_token": password_reset_token,
             "licenses": [user_license.value for user_license in user.licenses],
         }
 
-    async def refresh_token(self, token: str):
+    async def refresh_token(self, token: str, tenant_id=None):
         try:
             payload = jwt.decode(
                 token,
@@ -217,7 +287,7 @@ class session_manager:
                 algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
                 options={"verify_exp": True}, )
             if payload.get("free") is True:
-                return {"access_token": token, "token_type": "bearer"}
+                return {"access_token": token, "token_type": "bearer"}  # nosec B105
 
             username = payload.get("sub")
             if not username:
@@ -226,6 +296,7 @@ class session_manager:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
+            self.ensure_user_tenant_access(user, tenant_id)
 
             maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
             if not maintainer_user:
@@ -261,7 +332,7 @@ class session_manager:
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
             session = await self._build_session(user, onboarding_exists)
-            return {"access_token": new_token, "token_type": "bearer", "session": session}
+            return {"access_token": new_token, "token_type": "bearer", "session": session}  # nosec B105
 
         except jwt.ExpiredSignatureError:
             raise HTTPException(status_code=401, detail="Token has expired")
@@ -287,7 +358,7 @@ class session_manager:
         if not ptoken:
             return
 
-    async def invalidate_user_session(self, ptoken: str):
+    async def invalidate_user_session(self, ptoken: str, tenant_id=None):
         if not ptoken:
             return
 
@@ -320,6 +391,8 @@ class session_manager:
 
         if user.current_session_id != session_id:
             return
+
+        self.ensure_user_tenant_access(user, tenant_id)
 
         user.current_session_id = None
         await self._engine.save(user)

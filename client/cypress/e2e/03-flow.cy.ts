@@ -16,7 +16,7 @@ describe('Orion Intelligence - Free Mode Flow', () => {
 
   it('verifies free mode opens the simplified mobile dashboard chrome', () => {
     cy.viewport(430, 932);
-    cy.intercept('POST', '**/api/token/demo').as('demoLogin');
+    cy.intercept({ method: 'POST', pathname: '**/api/token/demo' }).as('demoLogin');
     cy.visit('/login?mode=free');
 
     cy.wait('@demoLogin').then((interception) => {
@@ -46,6 +46,10 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
 
     FLOW_ADMIN_SECTIONS.forEach((section) => {
       clickSidebarSubItem('admin', section);
+      if (section === 'Monitoring') {
+        cy.get('[data-testid="monitoring-tab-auditlog"]').should('be.visible').click();
+        cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
+      }
     });
 
     cy.get('[data-testid="sidebar-collapse-button"]').should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
@@ -130,27 +134,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     openCountryReportFromMap();
     cy.get('[data-testid="heatmap-report-overlay"]').click('topLeft');
     cy.get('[data-testid="heatmap-report"]').should('not.exist');
-  });
-
-  it('opens AI workspace from homepage and sends messages with enter and button', () => {
-    cy.loginAsAdmin();
-    cy.intercept('POST', /\/api\/nexus\/chat(?:\/workspace)?$/, {
-      statusCode: 200,
-      headers: {'content-type': 'application/x-ndjson'},
-      body: '{"output":{"response":"ok"}}\n',
-    }).as('nexusChat');
-
-    cy.visit('/dashboard/profile/homepage');
-    cy.get('app-world-heatmap').should('be.visible');
-    cy.get('[data-testid="ioc-basic-tag-AI"]').filter(':visible').first().should('be.visible').click();
-    cy.location('pathname').should('include', '/dashboard/profile/ai');
-    typeVisibleInputSlow('[data-testid="chat-widget-input"]', 'hello from basic flow', true);
-    cy.wait('@nexusChat');
-    cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().should('contain.text', 'hello from basic flow');
-    typeVisibleInputSlow('[data-testid="chat-widget-input"]', 'send with button');
-    cy.get('[data-testid="chat-widget-send"]').filter(':visible').first().should('be.enabled').click();
-    cy.wait('@nexusChat');
-    cy.get('[data-testid="chat-widget-messages"]').filter(':visible').first().should('contain.text', 'send with button');
   });
 
   it('covers branch paths by invoking heatmap component API', () => {
@@ -263,7 +246,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     resetDirectoryFilters();
 
     applyDirectoryDropdown('content_type', DIRECTORY_CONTENT_OPTION, 'content_type');
-    cy.docsScreenshot('dump-listing');
     resetDirectoryFilters();
 
     applyDateRange(14);

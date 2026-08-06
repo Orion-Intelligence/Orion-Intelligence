@@ -1,3 +1,691 @@
+Changelog [1.0.3.8] – 2026-07-04
+*Release date: July 4, 2026*
+
+### Overview
+This update captures the development completed after the previous **1.0.3.2** changelog on **June 8, 2026** across the Orion ecosystem.
+
+The release introduces and tracks major progress across **Micros scan orchestration**, **Social Intelligence**, **Crawler and CTI indexing**, **APT and malware intelligence**, **case-management workflow maturity**, **Threat Lens and geospatial intelligence**, **system logs**, **security hardening**, **documentation automation**, **Orion landing updates**, **Genesis landing production readiness**, and a large **OrionCollector source expansion**.
+
+### Featured
+- **Tracked Micros scan jobs:** Persistent scan jobs were added so long-running Micros scans can be tracked, polled, recovered, marked seen/unseen, cleaned up, and opened from scan-detail APIs.
+- **Expanded dynamic scan coverage:** Tracked scan flows now cover social/user/cracked/software/wanted/national-identity scans, URL/domain DNS/subdomain/Wayback scans, crypto scanning, APK scanning, IOC extraction, SEO/repository scans, vulnerability scans, and network intelligence.
+- **Social Intelligence expansion:** Social recon now covers profiles, phone/image/reverse-image recon, online image discovery, posts, videos, shorts, followers, following, metadata, entities, forum profile search, saved profiles, stealer logs, wanted lists, and dark-web social support.
+- **Orion-Social platform integration:** Live search, custom recon, profile-only scrapers, post-supported scrapers, sessions, Redis, and crawler helpers were expanded across a large set of public profile and publishing platforms.
+- **APT and malware intelligence:** APT, malware, and APK models were added across Crawler and Platform workflows with Elastic indexing, search controllers, document retrieval, mocks, and frontend result models.
+- **CTI and entity graph expansion:** CTI graph routes, entity relationship APIs, graph schema constants, request generation, graph export/report payloads, Arango pass-through, sidebars, context menus, and relationship expansion were improved.
+- **Case management workflow maturity:** Case status workflows, analyst assignment, status history, task/comment restrictions, tracking board behavior, archive/unarchive, resolved-before-close, closure controls, analytics, details, summary, entities, comments, and PDF/payload mapping were added or improved.
+- **Threat Lens and geospatial intelligence:** Satellite rendering, arc rendering, country focus, real IP location support, category layers, topic search, arc report popup, IP detail popup, feed panels, and geo-fencing license/navigation behavior were improved.
+- **Security hardening:** Public scan target validation, upload limits, admin/enterprise stealer-log gates, public config scoping, case-management permissions, admin-root gating, CSP nonce support, dependency updates, and Genesis landing security headers were added.
+- **Landing and public presence:** Orion Intelligence Landing and Genesis Landing gained SEO, sitemap, `llms.txt`, strict headers, public assets, logo/favicon, Vercel deployment configuration, and services menu polish.
+- **Documentation and README updates:** README badges, public links, screenshots, docs routes, API docs, `llms.txt`, Cypress screenshot generation, and user manual screenshots were refreshed.
+- **OrionCollector source expansion:** New collectors were added for C2, crypto drain, hacks, redirects, malware URLs, open directories, phishing, scams, spam URLs, typosquatting, exploit intelligence, leak/onion sources, malware, news, tracking, forums, profile sources, and post-supported social platforms.
+
+---
+
+## Added
+
+### Micros Scan Orchestration
+- **Scan job model and manager:** Added persistent scan-job tracking for Micros-backed scans.
+- **Duplicate scan detection:** Added handling to detect repeated long-running scan requests and prompt recovery instead of blindly starting another job.
+- **Scan polling and incomplete scan recovery:** Added APIs and frontend flows for polling running scans and listing incomplete scan jobs.
+- **Scan notifications:** Added seen/unseen notification behavior for scan completion and cleanup behavior for completed jobs.
+- **Scan detail APIs:** Added detail retrieval for scan jobs so completed scan reports can be reopened from the UI.
+- **Per-user scan limits in Orion-Micros:** Added a limit of four scans per user.
+- **Micros scanner updates:** Added or updated IP scanner, geo-fencing scanner, onion extractor, runtime parser manager, and raw parser support.
+
+### Dynamic Scans, Network Intelligence & Scan Reports
+- **Social and identity scan flows:** Added tracked scan paths for social, user, cracked, software, wanted, and national identity style scans.
+- **Domain and URL intelligence:** Added scan support for URL reports, DNS, subdomains, Wayback data, and related domain intelligence.
+- **Network intelligence scans:** Added tracked host/IP, vulnerability, and network-intel report flows.
+- **APK scanning:** Added APK scan models and report integration across Crawler/Platform workflows.
+- **File IOC extraction:** Added file IOC extraction scan handling and result mapping.
+- **SEO and repository scanning:** Added SEO/repository scan sections and report behavior.
+- **Scan report pages:** Added report views for long-running scan results and scan-result reopening.
+
+### Social Intelligence & Orion-Social
+- **Social recon APIs:** Added routes and service handling for social profile recon, phone recon, image recon, reverse image recon, online image discovery, posts, videos, shorts, followers, following, entities, metadata, forum profile search, and saved social profile data.
+- **Social mapper rebuild:** Added profile listing, profile detail, platform tabs, post/video/short content sections, breadcrumb navigation, platform icon behavior, profile summary views, stealer-log section, wanted-list section, and social state/service helpers.
+- **Dark-web social support:** Added dark-web social handling in the Social Intelligence workspace.
+- **Wanted list in social graph:** Added wanted-list handling inside the social graph area.
+- **Social load-more support:** Added load-more behavior and list-oriented improvements for social profile data.
+- **Live search in Orion-Social:** Added live-search scraper handling and audit tooling.
+- **Custom recon:** Added `custom_recon.py` for Orion-Social recon expansion.
+- **Crawler helpers in Orion-Social:** Added Facebook, Mastodon, Reddit, and Twitter helper support.
+- **Session and Redis support:** Added social session handling and Redis-backed support services.
+- **Profile-only scraper coverage:** Added public profile/presence scrapers across developer, creator, media, commerce, video, writing, donation, archive, gaming, and social platforms.
+- **Post-supported scraper coverage:** Added post-supported scrapers for Blogger, Bluesky, Dev.to, Facebook, Habr, HackerNoon, Hashnode, Instagram, LinkedIn, Mastodon, Medium, Micro.blog, Misskey, Nostr, Pastebin, Pleroma, Primal, Quora, Reddit, StackOverflow, Substack, Threads, TikTok, Twitter, and YouTube.
+
+### Crawler, APT, Malware, APK & Source Processing
+- **APT support:** Added APT request models, Crawler models, Platform indexing, mocks, search handling, and frontend result support.
+- **Malware support:** Added malware request/data models, Crawler and Platform indexing, Malware Bazaar support, Malpedia support, mocks, search handling, and frontend result support.
+- **APK model support:** Added APK model handling through local interface and shared Crawler models.
+- **Custom parser session loader:** Added custom parser session loading for generated/parser-driven crawling.
+- **Local interface models:** Added local API, app, extractor, leak, APK, APT, and malware model support.
+- **Russian translator:** Added shared Russian translation support for Crawler/Collector workflows.
+- **LinkedIn support:** Added LinkedIn crawler/script support across Crawler and Collector/Social workflows.
+- **Telegram and social parser updates:** Added Telegram parser/script updates and social parser request-model fixes.
+- **I2P and proxy improvements:** Added I2P controller/proxy fixes, generated I2P artifact ignores, and proxy handling improvements.
+- **Persistent storage fixes:** Added persistent storage fixes for crawler data and runtime behavior.
+- **Celery, Redis, and run-script updates:** Added browser pool, Redis enum, Celery controller, application controller, and run-script changes.
+
+### CTI Graph, Entity Indexing & Search
+- **CTI graph routes:** Added graph routes and graph-oriented backend support.
+- **Entity relationship APIs:** Added entity relationship handling for identities, infrastructure, organizations, countries, platforms, vulnerabilities, malware, and threat actors.
+- **Graph schema constants:** Added schema constants and relationship mapping support.
+- **Entity request generation:** Added richer request generation for entity and relationship expansion.
+- **Graph UI expansion:** Added sidebar, context menu, toolbar, loading, tab-bar, expand/collapse, graph search, and sidebar shell behavior.
+- **Graph export/report payloads:** Added graph export and report payload mapping.
+- **Crawler-to-platform graph pass-through:** Added indexing and graph handoff for social, APT, malware, exploit, leak, sanctions, swarm, entity, stealer-log, and CTI text records.
+- **OpenSanctions indexing:** Added sanctions indexing and search support.
+- **Search controller split:** Added internal controllers for generic, defacement, exploit, and APT search flows.
+- **APT and malware filters:** Added frontend/backend support for APT and malware filters and result models.
+
+### Case Management & Evidence Workflows
+- **Workflow configuration:** Added shared workflow configuration for case statuses.
+- **Bidirectional one-step transitions:** Added status movement forward or backward by one step with history.
+- **Status history:** Added status history storage with status and reason.
+- **Analyst assignment:** Added analyst assignment, visibility, and assignment test coverage.
+- **Analyst restrictions:** Added restrictions so analysts can only update permitted task/comment areas.
+- **Tracking board behavior:** Added board scrolling, archive visibility controls, and structured case lifecycle behavior.
+- **Resolved-before-close:** Added enforcement that cases must be resolved before closure.
+- **Archive/unarchive:** Added archive and unarchive handling for cases.
+- **Case analytics and details:** Added analytics panel, case summary, primary entity, related entities, linked cases, comments, tasks, skeleton loading, header actions, filters, dialogs, edit drawer, share behavior, and entity details.
+- **Case AI chatbot:** Added chatbot support inside case investigation workflows.
+- **Evidence integrity:** Added file hashing, artifact verification, file-manipulation audit logs, and simplified artifact action buttons.
+
+### System Logs, Alerts, Tenant & Reporting
+- **System log manager:** Added backend manager and UI listing/pagination for system logs.
+- **Alert service refactor:** Added focused alert job services and alert mail support.
+- **Tenant IOC operations:** Added tenant IOC status updates, scan-all/flush-all improvements, export behavior, and category report improvements.
+- **Public case share retrieval:** Added public case-share retrieval and report/public profile interaction improvements.
+- **Report comments and reactions:** Expanded report comments, reactions, user sidebar behavior, and social interaction hosts.
+- **Record sidebar:** Added shared record sidebar models/components.
+- **SMTP and system settings:** Added settings refinements for SMTP blocks, public URL settings, data-source/adversary/pricing URLs, and admin-root behavior.
+
+### Documentation, README, Tests & Developer Pipeline
+- **README refresh:** Added/updated badges, public uptime/security/PageSpeed references, platform preview, screenshot gallery, capability sections, and public links.
+- **Docs screenshot pipeline:** Moved screenshot generation into regular Cypress specs with `cy.docsScreenshot()`.
+- **User manual screenshots:** Refreshed screenshots for social, tenant, API, scan, case, geo, CTI, system, and report pages.
+- **API docs updates:** Updated API docs routes, generated docs, report examples, and documentation outputs.
+- **LLM documentation file:** Added `client/src/llms.txt` with canonical Orion home, docs, API docs, and contact links.
+- **Backend test coverage:** Added or updated tests for scan jobs, crawl model, interface/resource services, middleware, search, insight jobs, auth/account behavior, STIX conversion, and permission flows.
+- **Cypress coverage:** Added or updated Cypress coverage for social, case management, network intelligence, geo-fencing, consolidated search, feeder, pagination, tenant, system, API validation, and documentation screenshots.
+
+### Orion Landing, Genesis Landing & Dark Nexus
+- **Orion Intelligence Landing updates:** Added landing public updates including `public/llms.txt`, `public/sitemap.xml`, component changes, and public asset adjustments.
+- **Genesis Landing project:** Added the initial Genesis landing project and deployment structure.
+- **Genesis security headers:** Added strict production headers through `public/_headers`.
+- **Genesis SEO assets:** Added `llms.txt`, `robots.txt`, `site.webmanifest`, `sitemap.xml`, SEO page build script, favicon, logo assets, and Vercel configuration.
+- **Genesis services menu:** Added and refined production logo behavior, services menu behavior, services dropdown hover behavior, and deployment optimizations.
+- **Dark Nexus classifier data:** Added classifier model datasets/assets for action-help routing and cyber/binary routing.
+- **Dark Nexus routing/controller work:** Added OCR/classifier constants, controller helper updates, tool controller changes, Docker compose production updates, and run-script improvements.
+
+---
+
+## Improved
+
+### Social Intelligence UX
+- Improved social profile normalization, Reddit URL handling, platform icon backgrounds, platform click behavior, profile overview separation, summary popups, profile search/list behavior, tab persistence, and mobile/list-oriented mapping.
+- Improved dark-web social display, wanted-list behavior, stealer-log section behavior, metadata popups, follower/following behavior, and social graph cleanup.
+- Improved Orion-Social platform coverage through profile-only and post-supported source expansion.
+
+### Scan UX & Network Intelligence
+- Improved scan notification flow, scan recovery, duplicate scan handling, global scan notification UI, scan report reopening, and long-running scan result pages.
+- Improved dynamic scan response shaping, URL scan behavior, consolidated scan handling, network-intel host/IP report behavior, DNS/subdomain/Wayback sections, vulnerability scan sections, and SEO/repo scan sections.
+- Improved Micros runtime parser, IP scanner, geo scanner, onion extractor, and per-user scan limit behavior.
+
+### Search, CTI Graph & Intelligence Results
+- Improved consolidated search, IOC filters, language/date filters, exploit filters, defacement filters, APT/malware filters, localized document retrieval, result counts, pagination resets, and report mapping.
+- Improved CTI graph state, sidebar rendering, context menu behavior, collapse/expand controls, graph toolbar behavior, tab navigation, graph loading, and graph search behavior.
+- Improved crawler indexing consistency for APT, malware, exploit, leak, social, sanctions, swarm, entity, stealer-log, and CTI text records.
+
+### Case Management & Analyst Workflow
+- Improved tracking-board scrolling, case filters, assignment visibility, task ownership rules, analyst restrictions, comment handling, linked cases, entity details, archive display, closure behavior, and PDF/export preparation.
+- Improved case date/time handling, metadata updates, status transitions, status history, and resolved-before-close enforcement.
+- Improved case-management test coverage and Cypress parity.
+
+### Threat Lens, Geospatial & Homepage
+- Improved satellite rendering, country focus, map animation, arc endpoint behavior, arc range behavior, result-count filtering, category layers, topic search, search-panel placement, feed panels, and geo-fencing navigation/license behavior.
+- Improved homepage summaries, heatmap/country report behavior, tenant alert actions, alert export, scan-all/flush-all flows, category report styling, and tenant homepage screenshots.
+
+### Documentation, Build & Public Presence
+- Improved README presentation, badges, product screenshots, public docs/API links, user manual screenshots, API docs, LLM docs, and developer documentation for the docs screenshot pipeline.
+- Improved Orion landing public metadata and sitemap behavior.
+- Improved Genesis landing public readiness through security headers, SEO files, production logo/favicon assets, services navigation, hover behavior, and deployment config.
+- Improved frontend infrastructure with package-lock coverage, Angular/stylelint config updates, Bootstrap icon refreshes, shared dropdowns, generic choice popups, scan/report models, record sidebar work, and translation updates.
+
+### Crawler, Collector & Dark Nexus Operations
+- Improved Crawler persistent storage, I2P/proxy behavior, Redis/Celery/browser-pool behavior, generated artifact ignores, parser request/rule models, and run scripts.
+- Improved OrionCollector script quality, parser recovery, reachability verification, crawler local model reuse, source coverage, and collector organization.
+- Improved Dark Nexus classifier/OCR routing, model assets, helper controllers, production compose, and run scripts.
+
+---
+
+## Fixed
+
+### Security Fixes & Hardening
+- **Public scan target protection:** Blocked private, loopback, link-local, multicast, reserved, unspecified, non-global, localhost, and internally resolving targets before scan dispatch.
+- **Upload size enforcement:** Added 10 MB upload enforcement for scan/file ingestion paths.
+- **Public stealer-log authorization:** Restricted public stealer-log search behind admin or enterprise checks.
+- **Public config scoping:** Limited email configuration exposure to authenticated active admin users.
+- **Case permission enforcement:** Added explicit case-management permission checks and analyst access restrictions.
+- **Admin root access control:** Added admin-root gating so `/admin` and `/dashboard/admin` redirect unless enabled.
+- **Content Security Policy hardening:** Added CSP nonce support, `ngCspNonce`, stricter production CSP behavior, and ArcGIS source allowlisting.
+- **Session/auth hardening:** Improved token/session behavior, crawler-login rejection, password-reset enforcement, 2FA/login state behavior, role/license checks, and user status handling.
+- **Dependency hardening:** Updated Starlette, aiohttp, PyJWT, Angular build tooling, Vite, webpack, tar, js-yaml, brace-expansion, undici, package-lock, and frontend override coverage.
+- **Genesis landing security:** Added strict landing security headers for the Genesis public site.
+- **Arango diagnostics:** Changed Arango index initialization failures to warning logs instead of silent failures.
+- **Social security regression coverage:** Normalized URL/domain title matching in social stealer-log Cypress checks to reduce false negatives.
+
+### Bug Fixes & Stability
+- **Migration fixes:** Added guarded Elastic migration helpers and migrations for date normalization, date backfill, permission backfill, `m_platform` list normalization, CVSS cleanup, and social/platform cleanup through migration target `1.0.3.11`.
+- **Crawler ingestion fixes:** Fixed APT, malware, exploit, leak, social, sanctions, swarm, entity, stealer-log, and CTI-text ingestion behavior, date normalization, content-type handling, dump-storage cleanup, persistent storage, and I2P behavior.
+- **Scan response fixes:** Fixed dynamic scan responses, URL scan results, consolidated scan behavior, network-intel responses, duplicate scan handling, scan notification behavior, and scan-job polling parity.
+- **Search fixes:** Fixed language/date filters, exploit filters, consolidated UI/search behavior, IOC search behavior, result counts, pagination resets, localized document retrieval, APT filter behavior, and malware filter behavior.
+- **Social fixes:** Fixed profile detail UI behavior, platform click handling, profile overview independence, load-more behavior, profile shifting, Reddit URL handling, dark-web social handling, social graph cleanup, and platform capability gating.
+- **Case workflow fixes:** Fixed closed-case transitions, resolved-before-close enforcement, assignment visibility, analyst restrictions, archive/unarchive behavior, task/status metadata, date/time formatting, and case-management regressions.
+- **Evidence fixes:** Fixed artifact action positioning, removed redundant artifact view/verify-all behavior, simplified artifact verification code, and added test coverage for file verification.
+- **Geo and Threat Lens fixes:** Fixed satellite rendering, country focus, arc endpoints, arc ranges, map animation, result-count filtering, search-panel placement, and geo-fencing license/navigation behavior.
+- **Alert and notification fixes:** Fixed alert job organization, alert mail delivery, tenant IOC scan status, notification flow, scan notifications, alert exports, and category report behavior.
+- **System log fixes:** Fixed log manager backend/UI behavior, pagination, layout, and listing behavior.
+- **Docs and screenshot fixes:** Removed stale docs-only screenshot flow, refreshed screenshots, added tenant homepage/IOC screenshots, and cleaned stale screenshot artifacts.
+- **Build and lint fixes:** Fixed frontend/backend lint regressions, package-lock issues, Angular/stylelint config, run scripts, test regressions, mocks, and package overrides.
+
+---
+
+## Platform Enhancements (Integrated)
+
+### Orion Intelligence Platform
+- **Scan-job infrastructure** integrated across backend routes, scan-job models, frontend shared models, scan helper methods, notification UI, and scan report pages.
+- **Social Intelligence** integrated across backend social manager routes/models, frontend social graph, profile listing/detail, metadata popups, wanted lists, stealer-log section, report templates, and social search behavior.
+- **APT and malware intelligence** integrated across Crawler models, Elastic indexes, backend search controllers, frontend result cards, mocks, filters, and documentation screenshots.
+- **CTI graph and entity relationships** integrated across Arango, entity manager, graph manager, graph UI, sidebars, exports, and request-generation workflows.
+- **Case-management workflow** integrated across backend case manager, frontend tracking board, case details, analytics, tasks, comments, evidence, chatbot, archive/unarchive, share, and permission flows.
+- **Threat Lens and geospatial intelligence** integrated across satellite map rendering, arc rendering, real IP location, topic search, category layers, report popups, and geo-fencing license behavior.
+- **System logs and admin settings** integrated across backend managers, UI listing, pagination, admin-root behavior, and system settings.
+- **Documentation and tests** integrated across Cypress, backend tests, user manual screenshots, API docs, README assets, and public LLM docs.
+
+### Orion-Micros
+- **Runtime parser manager** updated for scan/parser stability.
+- **IP scanner** updated for network intelligence workflows.
+- **Geo-fencing scanner** updated for geospatial scan behavior.
+- **Onion extractor** updated for onion scan processing.
+- **Per-user scan limit** integrated to cap scan volume.
+- **Raw API collector parser** updated for Micros parser coverage.
+
+### Orion-Crawler
+- **APT, malware, and APK models** integrated into local shared and interface models.
+- **Custom parser session loader** integrated into genbot custom parser workflows.
+- **Generic parser/request/rule model fixes** integrated.
+- **LinkedIn, Malware Bazaar, and Malpedia support** integrated.
+- **Telegram/social parser updates** integrated.
+- **I2P/proxy and persistent storage fixes** integrated.
+- **Celery, Redis, browser pool, application controller, and run-script updates** integrated.
+
+### Orion-Collector
+- **Defacement source families** integrated for C2 servers, crypto drain, hacks, malicious redirects, malware URLs, open directories, phishing, scams, spam URLs, and typosquatting.
+- **Exploit sources** integrated for GitHub Security Advisories and Zero Day Initiative.
+- **Leak/onion source coverage** expanded with new onion and ransomware/leak parsers.
+- **Malware collector** added with malware collector entrypoints and Malware Bazaar parser support.
+- **News and tracking sources** expanded with security news and public tracking feeds.
+- **Forum collectors** expanded across clear-web and onion forums.
+- **Social platform collectors** expanded across profile-only sources and post-supported sources.
+- **Reachability and audit artifacts** added for source verification.
+
+### Orion-Social
+- **Live search and custom recon** integrated.
+- **Profile/presence scrapers** integrated across developer, media, creator, commerce, archive, gaming, blog, donation, video, and social platforms.
+- **Post-supported scrapers** integrated for major publishing and social networks.
+- **Crawler helpers** integrated for Facebook, Mastodon, Reddit, and Twitter.
+- **Redis, sessions, local models, and audit scripts** integrated.
+
+### Orion-Dark-Nexus
+- **Action-help classifier model data** integrated.
+- **Cyber/binary classifier model data** integrated.
+- **OCR/classifier constants and controller helpers** updated.
+- **Tool controller and production compose/run scripts** updated.
+
+### Landing Projects
+- **Orion Intelligence Landing** integrated `llms.txt`, sitemap, public assets, and component updates.
+- **Genesis Landing** integrated initial project setup, strict security headers, logo assets, favicon, `robots.txt`, `llms.txt`, manifest, sitemap, SEO page build script, Vercel config, services dropdown hover behavior, production logo/menu refinements, and deployment optimizations.
+
+---
+
+## Notes
+- The largest completed gains are in **tracked Micros scans**, **Social Intelligence**, **Orion-Social scraper coverage**, **APT/malware intelligence**, **Crawler graph/indexing**, **case-management workflows**, **Threat Lens/geospatial intelligence**, **security hardening**, **documentation automation**, and **OrionCollector source coverage**.
+- The biggest public-facing gains are in **README/docs refreshes**, **Orion Intelligence Landing metadata**, and **Genesis Landing production/SEO/security readiness**.
+
+Added Scripts news
+
+    _bleepingcomputer.py
+    _csocybercrime.py
+    _cyberscoop.py
+    _cybersecuritydive.py
+    _darkreading.py
+    _hackread.py
+    _infosecuritymagazine.py
+    _krebsonsecurity.py
+    _schneier.py
+    _scmedia.py
+    _securityaffairs.py
+    _securityweek.py
+    _thehackernews.py
+    _therecord.py
+
+Added Scripts social
+
+    _0x00sec_org.py
+    _4cheat_ru.py
+    _4hpfzoj3tgyp2w7sbe3gnmphqiqpxwwyijyvotamrvojl7pkra7z7byd.py
+    _altenens_is.py
+    _ascarding_net.py
+    _b1nd.py
+    _bdfclub_com.py
+    _bestteermb42clir6ux7xm76d4jjodh3fpahjqgbddbmfrgp4skg2wqd_onion.py
+    _bfdxjkv5e2z3ilrifzbnvxxvhbzsj67akjpj3zc6smzr4vv6oz565gyd_onion.py
+    _bhcforums_cc.py
+    _blackbones_cc.py
+    _blackhatpakistan_net.py
+    _blogger.py
+    _bluesky.py
+    _carders_biz.py
+    _comfybox_floofey_dog.py
+    _cracked_st.py
+    _crackingx.py
+    _crdpro_at.py
+    _cryptogid_org.py
+    _csrin.py
+    _darkforums_ru.py
+    _darkfoxaqhfpxkrbt7vxns2z2u2k72sgmqbzeorupaiottw3ecm2wgyd_onion.py
+    _darkmarket_info.py
+    _darkpro_net.py
+    _devto.py
+    _dna777ucpo4unwxrzw5mzs4iqm5qz3uepw3k5mvwbt7tnufryvsgy5yd_onion.py
+    _dreadytofatroptsdj6io7l3xptbet6onoyno2yv7jicoxknyazubrad.py
+    _exiliow4ctlzrvaglkgwqnpxdlvrxmdgvuy2hkbzqoziebfim6q5hwid_onion.py
+    _ezcarder_is.py
+    _facebook.py
+    _femboyforum_com.py
+    _forum_bits_media.py
+    _forum_dangerousthings_com.py
+    _forum_softxaker_ru.py
+    _forumteam_top.py
+    _habr.py
+    _hacksnation.py
+    _hackernoon.py
+    _hashnode.py
+    _in4_bz.py
+    _instagram.py
+    _leakforum_io.py
+    _leetforums.py
+    _linkedin.py
+    _lolz_live.py
+    _mastodon.py
+    _medium.py
+    _microblog.py
+    _mipped_com.py
+    _misskey.py
+    _mmgp_com.py
+    _niflheim_world.py
+    _nostr.py
+    _nulledbb_com.py
+    _pastebin.py
+    _patched_to.py
+    _pleroma.py
+    _primal.py
+    _probiv_one.py
+    _pwnfrm7rbf6kyerigxi677lcz5ifmoagdbqqknwdu2by27wfdst5qmqd_onion.py
+    _quartertothree.py
+    _quora.py
+    _rambleeeqrhty6s5jgefdfdtc6tfgg4jj6svr4jpgk4wjtg3qshwbaad.py
+    _reddit.py
+    _redump.py
+    _re27glou7lmvirstrcadoxaleoyaf5v6wdsva5d7qp7lnorhjtft6dqd.py
+    _seopirat_club.py
+    _spear4h2potiyk43oilufhuq2jqbioyaizcs7xttlyw75s5ykwxpxlid_onion.py
+    _spear_cx.py
+    _spyhackerz_org.py
+    _stackoverflow.py
+    _substack.py
+    _thejavasea_me.py
+    _threads.py
+    _tiktok.py
+    _toolba_se.py
+    _twitter.py
+    _v_h_guru.py
+    _www_rf_cheats_ru.py
+    _www_turkhackteam_org.py
+    _xforums_st.py
+    _xreactor_org.py
+    _xssf_is.py
+    _xssf_net.py
+    _xssf_ru.py
+    _xssfnet2env65wnrlixkn4io3gzukirz7w767gdilk64iq6dg33jwsad_onion.py
+    _youtube.py
+
+Added Scripts social profile
+
+    _about_me.py
+    _ameba_blog.py
+    _anilist.py
+    _anime_planet.py
+    _aparat.py
+    _archive_org.py
+    _archiveofourown.py
+    _artstation.py
+    _audiomack.py
+    _bandcamp.py
+    _beacons.py
+    _behance.py
+    _bigo_live.py
+    _bio_site.py
+    _bitbucket.py
+    _bitchute.py
+    _buymeacoffee.py
+    _cara.py
+    _carrd.py
+    _chess_com.py
+    _codepen.py
+    _dailymotion.py
+    _dlive.py
+    _dockerhub.py
+    _douban.py
+    _douyin.py
+    _ebay_profiles.py
+    _ello.py
+    _genius.py
+    _gettr.py
+    _giphy.py
+    _gitea_public.py
+    _github.py
+    _github_sponsors.py
+    _gitlab.py
+    _goodreads.py
+    _gumroad.py
+    _hatena_blog.py
+    _hearthis.py
+    _imgur.py
+    _indiehackers.py
+    _issuu.py
+    _kakaostory.py
+    _kick.py
+    _komoot.py
+    _kuaishou.py
+    _lastfm.py
+    _letterboxd.py
+    _liberapay.py
+    _librarything.py
+    _lichess.py
+    _likee.py
+    _line_voom.py
+    _linktree.py
+    _livejournal.py
+    _lnk_bio.py
+    _mewe.py
+    _milkshake.py
+    _mixcloud.py
+    _mixi.py
+    _msha_ke.py
+    _myanimelist.py
+    _naver_blog.py
+    _niconico.py
+    _npm.py
+    _observable.py
+    _odysee.py
+    _ok_ru.py
+    _opencollective.py
+    _packagist.py
+    _patreon.py
+    _pinterest.py
+    _pixnet.py
+    _plurk.py
+    _producthunt.py
+    _pypi.py
+    _quay.py
+    _redbubble.py
+    _rednote.py
+    _rubygems.py
+    _semantic_scholar.py
+    _sketchfab.py
+    _smugmug.py
+    _snapchat_public.py
+    _solo_to.py
+    _sourceforge.py
+    _steam_community.py
+    _taplink.py
+    _tencent_video.py
+    _tistory.py
+    _triller.py
+    _tudou.py
+    _twitch.py
+    _unsplash.py
+    _vimeo.py
+    _vsco.py
+    _weibo.py
+    _write_as.py
+    _xing.py
+
+Added Scripts defacement
+
+    _blocklist_abuse_spam.py
+    _blocklist_crypto.py
+    _blocklist_fraud.py
+    _blocklist_phishing_typosquatting.py
+    _blocklist_redirect.py
+    _blocklist_scam.py
+    _cert_pl_phishing.py
+    _defacer.py
+    _feodo_tracker_c2.py
+    _github_disposible_list.py
+    _github_mthcht_awesome_lists.py
+    _github_openfish.py
+    _github_sefinek_blacklisted_emails.py
+    _hack_db.py
+    _haxorid.py
+    _metamask_crypto_drain.py
+    _metamask_eth_phishing.py
+    _metamask_typosquatting.py
+    _ownzyou.py
+    _phishing_database.py
+    _phishstats.py
+    _phishtank.py
+    _phishunt.py
+    _spamhaus_drop.py
+    _threatfox_c2.py
+    _threatview_malware.py
+    _threatview_open_directory.py
+    _tweetfeed.py
+    _urlhaus_malware.py
+    _urlhaus_open_directory.py
+    _usom.py
+    _zone_xsec.py
+
+Added Scripts exploit
+
+    _0dayfans.py
+    _cisa.py
+    _cxsecurity.py
+    _cybergcca.py
+    _exploitdb.py
+    _github_security_advisories.py
+    _github_trickest_cve.py
+    _inthewild.py
+    _kb_cert.py
+    _krcert.py
+    _sploitus.py
+    _talosintelligence.py
+    _vulnerability_lab.py
+    _zerodayinitiative.py
+
+Added Scripts api
+
+    _breachdbsztfykg2fdaq2gnqnxfsbj5d35byz3yzj73hazydk4vq72qd.py
+    _pcgame_mod.py
+    _pagespeed_seo_check.py
+    _apk_mod.py
+    _pakdbwftdzn3xwslrzewbtsju63wep2xn37klmhqjuynp554vhjtdiad.py
+    _username_checker.py
+
+Added Scripts tracking
+
+    _acn.py
+    _bsigermany.py
+    _cert.py
+    _cert_at.py
+    _cert_cn.py
+    _cert_pl.py
+    _certgovua.py
+    _certpk.py
+    _certeu.py
+    _cfcs_dk.py
+    _cirtbangladesh.py
+    _cncs_pt.py
+    _csa_gov_sg.py
+    _csidb.py
+    _csocybercrime_tracking.py
+    _cyber.py
+    _cybernewsksa.py
+    _idsirtii.py
+    _incibe.py
+    _jpcert.py
+    _kyberturvallisuuskeskus.py
+    _mcf.py
+    _msb.py
+    _ncsc.py
+    _ncsc_swed.py
+    _ncscuk.py
+    _nsm.py
+    _nukibgovcz.py
+    _public_tableau.py
+    _thaicert.py
+    _tracking_sample.py
+
+Added Scripts malware
+
+    _anyrun_malwaretrends.py
+    _malpedia.py
+    _malware_bazaar.py
+    _malware_sample.py
+
+Added Scripts leak
+
+    _34o4m3f26ucyeddzpf53bksy76wd737nf2fytslovwd3viac3by5chad.py
+    _genesis6ixpb5mcy4kudybtw5op2wqlrkocfogbnenz3c647ibqixiad.py
+    _pdcizqzjitsgfcgqeyhuee5u6uki6zy5slzioinlhx6xjnsw25irdgqd.py
+    _3bnusfu2lgk5at43ceu7cdok5yv4gfbono2jv57ho74ucjvc7czirfid.py
+    _github_doormanbreach.py
+    _3ev4metjirohtdpshsqlkrqcmxq6zu3d7obrdhglpy5jpbr7whmlfgqd.py
+    _gunrabxbig445sjqa535uaymzerj6fp4nwc6ngc2xughf2pedjdhk4ad.py
+    _47glxkuxyayqrvugfumgsblrdagvrah7gttfscgzn56eyss5wg3uvmqd.py
+    _4dwiv37h7hhuhjpvtn72hme4ylcv3qoe65arfc6mbweal7als6ma7pyd_onion.py
+    _5tqdhriujqb7tb3cw3i3ffwaamjtnph6wsijdbecscyqhii3jbjz2rqd.py
+    _6czlbd2jfiy6765fbnbnzuwuqocg57ebvp3tbm35kib425k4qnmiiiqd_onion_.py
+    _basheqtvzqwz4vp6ks5lm2ocq7i6tozqgf6vjcasj4ezmsy4bkpshhyd.py
+    _blogvl7tjyjvsfthobttze52w36wwiz34hrfcmorgvdzb6hikucb7aqd.py
+    _bs2tlg32pfjwmclm22cyngqmoo24cdlhfxzbruwrdaxumisfeory32qd.py
+    _business_data_leaks.py
+    _cmdnkiqjije2tllr3biee2sjgj3i4robg2cbtilbnytdhh2wy3syrlyd_onion_.py
+    _cryoblogedawivdcknyd4jsjxkrx3xrqqltxla6wwjjnzm3f3jaxjzqd_onion_.py
+    _dhnsppqjaaa22lsqxl2tfhji4ca43743kubltnodvsft3hkvai77p6ad.py
+    _ejzl7cjxmkx7lzhiqwidmrwtfjv45pkczbc4fnyaut3t7gll3yaiq5id_onion_.py
+    _embargobe3n5okxyzqphpmk3moinoap2snz5k6765mvtkk7hhi544jid.py
+    _intelrepository.py
+    _ipi4tiumgzjsym6pyuzrfqrtwskokxokqannmd6sa24shvr7x5kxdvqd_onion.py
+    _iywqjjaf2zioehzzauys3sktbcdmuzm2fsjkqsblnm7dt6axjfpoxwid_onion_.py
+    _izsp6ipui4ctgxfugbgtu65kzefrucltyfpbxplmfybl5swiadpljmyd.py
+    _j75o7xvvsm4lpsjhkjvb4wl2q6ajegvabe6oswthuaubbykk4xkzgpid_onion.py
+    _krybieodq754vlwufrsuxaswxb5zpxyibaawmed2jaduoz2e5m56hmid_onion_.py
+    _krybitqsdzwmhnitvwuhvsntfgf2wrhxveyxroxpc44c6gkft2cqldyd_onion_.py
+    _krybitx3fh5krdnhegyp2ob3lhizsaiadturtio3ginf7it5gsdgu2yd_onion_.py
+    _krybitxdpxohsmjooeb3gbgpmdddreh6mnflzac6bnezz74b7yje67yd_onion_.py
+    _ks5424y3wpr5zlug5c7i6svvxweinhbdcqcfnptkfcutrncfazzgz5id.py
+    _lamashtux5j74mcm7lwwgn5yrvuwtrpxjoyendif3v3hrztjesfoyayd_onion_.py
+    _leak_lookup.py
+    _leaksndi6i6m2ji6ozulqe4imlrqn6wrgjlhxe25vremvr3aymm4aaid.py
+    _lockbit3753ekiocyo5epmpy6klmejchjtzddoekjlnt6mu3qh4de2id_onion_.py
+    _lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd.py
+    _lockbit7z2jwcskxpbokpemdxmltipntwlkmidcll2qirbu7ykg46eyd_onion_.py
+    _longcc4fqrfcqt5lzceutylaxir6h66fp6df3oin6mvwvz6pfdbxc6qd.py
+    _lunalockcccxzkpfovwzifwxcytqkiuak6wzybnniqwxcmpsetpbetid.py
+    _lynxblogco7r37jt7p5wrmfxzqze7ghxw6rihzkqc455qluacwotciyd.py
+    _lynxblogijy4jfoblgix2klxmkbgee4leoeuge7qt4fpfkj4zbi2sjyd_onion_.py
+    _lynxblogmx3rbiwg3rpj4nds25hjsnrwkpxt5gaznetfikz4gz2csyad_onion_.py
+    _lynxblogoxllth4b46cfwlop5pfj4s7dyv37yuy7qn2ftan6gd72hsad_onion_.py
+    _lynxblogxstgzsarfyk2pvhdv45igghb4zmthnzmsipzeoduruz3xwqd_onion_.py
+    _lynxblogxutufossaeawlij3j3uikaloll5ko6grzhkwdclrjngrfoid_onion_.py
+    _m3ksukzn2glzfdvlusohril7n3iyk4z4fudf6mm22lwhpbpt5aiee5qd_onion_.py
+    _malas2urovbyyavjzaezkt5ohljvyd5lt7vv7mnsgbf2y4bwlh72doqd.py
+    _mblogci3rudehaagbryjznltdp33ojwzkq6hn2pckvjq33rycmzczpid.py
+    _mbrlkbtq5jonaqkurjwmxftytyn2ethqvbxfu4rgjbkkknndqwae6byd.py
+    _mes4qo4rd6t3biyrm6q4twkquspzd7r4kg7va765nbdfxqgnc2w3pead_onion_.py
+    _metacrptmytukkj7ajwjovdpjqzd7esg5v3sg344uzhigagpezcqlpyd_onion_.py
+    _monitor_mozilla.py
+    _msleakjir7pxbe6onlqe5uwgvdmy6nq4mnwfy7ojswbhnleenm77vgad.py
+    _mydatae2d63il5oaxxangwnid5loq2qmtsol2ozr6vtb7yfm5ypzo6id.py
+    _nasir.py
+    _nerqnacjmdy3obvevyol7qhazkwkv57dwqvye5v46k5bcujtfa6sduad.py
+    _netleaks.py
+    _netrunrsb3bivj5gnwajzxlig5qkteb6edgthxj7fmsvhkzxtwfxwaad_onion_.py
+    _nitrogenczslprh3xyw6lh5xyjvmsz7ciljoqxxknd7uymkfetfhgvqd.py
+    _nleakk6sejx45jxtk7x6iyt65hwvfrkifc5v7ertdlwm3gttbpvlvxqd.py
+    _novadmrkp4vbk2padk5t6pbxolndceuc7hrcq4mjaoyed6nxsqiuzyyd.py
+    _nsalewdnfclsowcal6kn5csm4ryqmfpijznxwictukhrgvz2vbmjjjyd.py
+    _nspirep7orjq73k2x2fwh2mxgh74vm2now6cdbnnxjk2f5wn34bmdxad.py
+    _obscurad3aphckihv7wptdxvdnl5emma6t3vikcf3c5oiiqndq6y6xad.py
+    _odaygplp3zhyx7zl45egetl6dzc4reduisnoyym34rjdmaryfaz5doqd_onion.py
+    _ojcmpbdncjo5dhaxxll44bq6to3kwqtoeraevgsjquhdtt4uv5l4igid_onion_.py
+    _om6q4a6cyipxvt7ioudxt24cw4oqu4yodmqzl25mqd2hgllymrgu4aqd.py
+    _omegalock5zxwbhswbisc42o2q2i54vdulyvtqqbudqousisjgc7j7yd.py
+    _orca66hwnpciepupe5626k2ib6dds6zizjwuuashz67usjps2wehz4id.py
+    _payloadrz5yw227brtbvdqpnlhq3rdcdekdnn3rgucbcdeawq2v6vuyd.py
+    _payoutsgn7cy6uliwevdqspncjpfxpmzgirwl2au65la7rfs5x3qnbqd.py
+    _peargxn3oki34c4savcbcfqofjjwjnnyrlrbszfv6ujlx36mhrh57did.py
+    _pearsmob5sn44ismokiusuld34pnfwi6ctgin3qbvonpoob4lh3rmtqd.py
+    _prinzfkbjiazbrur4mjje6mntjc4vydx3iatkkzycufoylqcoo4y7pqd_onion_.py
+    _ptyctpveqfevlukjw4hpdh6nb5oiemq6ek6tuuvxbtrfghvuutvscsid.py
+    _ransom.py
+    _ransomdb.py
+    _ransomed.py
+    _ransomfeed.py
+    _ransomlook.py
+    _ransomnews_online.py
+    _ransomocmou6mnbquqz44ewosbkjk3o5qjsl3orawojexfook2j7esad.py
+    _ransomware_live.py
+    _ransomwr3tsydeii4q43vazm7wofla5ujdajquitomtd47cxjtfgwyyd.py
+    _rhysidafc6lm7qa2mkiukbezh7zuth3i4wof4mh2audkymscjm6yegad_onion_.py
+    _rhysidafohrhyy2aszi7bm32tnjat5xri65fopcxkdfxhi4tidsg7cad.py
+    _rnsm777cdsjrsdlbs4v5qoeppu3px6sb2igmh53jzrx7ipcrbjz5b2ad.py
+    _rnsmwareartse3m4hjsumjf222pnka6gad26cqxqmbjvevhbnym5p6ad.py
+    _rzzfiwoop67jrxadngcy7nvjm7suwtrjznview63ooowqfsm5sq7gmqd_onion.py
+    _safepaypfxntwixwjrlcscft433ggemlhgkkdupi2ynhtcmvdgubmoyd.py
+    _sarcomawmawlhov7o5mdhz4eszxxlkyaoiyiy2b5iwxnds2dmb4jakad.py
+    _securo45z554mw7rgrt7wcgv5eenj2xmxyrsdj3fcjsvindu63s4bsid.py
+    _shinypogk4jjniry5qi7247tznop6mxdrdte2k6pdu5cyo43vdzmrwid.py
+    _silentbgdghp3zeldwpumnwabglreql7jcffhx5vqkvtf2lshc4n5zid.py
+    _spycorp_pro.py
+    _termiteuslbumdge2zmfmfcsrvmvsfe4gvyudc5j6cdnisnhtftvokid.py
+    _titanblog_org_f162afef.py
+    _toufanleaks.py
+    _tp5cwh6d2b5hekcg6jlhoe6mawa7dlwiv47epvnfmzuaaur2dnaa3uid.py
+    _tridentfrdy6jydwywfx4vx422vnto7pktao2gyx2qdcwjanogq454ad.py
+    _twniiyed6mydtbe64i5mdl56nihl7atfaqtpww6gqyaiohgc75apzpad.py
+    _txtggyng5euqkyzl2knbejwpm4rlq575jn2egqldu27osbqytrj6ruyd.py
+    _u6lieui2dakbctcjea2bz4r4q32r7t36nwljovqbv7mxs6o2smgxixid_onion.py
+    _vectordntlcrlmfkcm4alni734tbcrnd5lk44v6sp4lqal6noqrgnbyd.py
+    _vkvsgl7lhipjirmz6j5ubp3w3bwvxgcdbpi3fsbqngfynetqtw4w5hyd.py
+    _warlockhga5iw3t54ps5iytlilf7hlvxy7kwrkidspn4qoh64s4vsuyd.py
+    _weyhro27ruifvuqkk3hxzcrtxv2lsalntxgkv6q2j3znkhdqudz54rqd.py
+    _worldleaksartrjm3c6vasllvgacbi5u3mgzkluehrzhk2jz4taufuid.py
+    _x4bccxlsmjsxlnnf3ocvndlshgfkagzytpqmsjnlfykceumnw6i4hkqd_onion_.py
+    _xbkv2qey6u3gd3qxcojynrt4h5sgrhkar6whuo74wo63hijnn677jnyd.py
+    _yrz6bayqwhleymbeviter7ejccxm64sv2ppgqgderzgdhutozcbbhpqd.py
+    _yzcpwxuhbkyjnyn4qsf4o5dkvu6m2fyo7dwizmnlutanlmzlos7pa6qd.py
+    _z3wqggtxft7id3ibr7srivv5gjof5fwg76slewnzwwakjuf3nlhukdid.py
+    _z6wkgghtoawog5noty5nxulmmt2zs7c3yvwr22v4czbffdoly2kl4uad.py
+    _zfytizegsze6uiswodhbaalyy5rawaytv2nzyzdkt3susbewviqqh7yd.py
+    _zktnif5vckhmz5tyrukp5bamatbfhkxjnb23rspsanyzywcrx3bvtqad.py
+    _zohlm7ahjwegcedoz7lrdrti7bvpofymcayotp744qhx6gjmxbuo2yid.py
+
 Changelog [1.0.3.2] – 2026-06-08
 *Release date: June 8, 2026*
 

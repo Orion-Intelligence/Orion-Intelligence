@@ -117,13 +117,16 @@ export class SocialScanService {
   }
 
   private buildPlatformResult(item: any, keyUsername: string, rawPlatform: string): PlatformResult {
-    const capitalizedPlatform = this.capitalizePlatform(rawPlatform);
+    const displayPlatform = item?.metadata?.platform || rawPlatform;
+    const capitalizedPlatform = this.capitalizePlatform(displayPlatform);
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(item?.metadata?.platform_key || rawPlatform || displayPlatform);
     const extractedData = this.extractMetadata(item.data);
     const rawStatus = item?.metadata?.status ?? item?.data?.status;
     const normalizedStatus = typeof rawStatus === 'string' ? rawStatus.trim().toLowerCase() : rawStatus;
     const platformResult = {
       keyUsername,
       platform: capitalizedPlatform,
+      platformKey,
       username: item.metadata.username,
       url: item.metadata.url,
       isSelected: false,
@@ -394,10 +397,11 @@ export class SocialScanService {
   fetchProfileInfo(platform: string, username: string): Observable<{
         profile: ProfileDetails;
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<{
                 profile: ProfileDetails;
-            }>>('social/profile', { platform, username }),
+            }>>('social/profile', { platform: platformKey, username }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => {
         const result = this.unwrapExtensionResult(res.result as any);
@@ -420,10 +424,11 @@ export class SocialScanService {
   fetchPlatformImages(platform: string, username: string, maxImages = 10): Observable<{
         images: SocialImage[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<{
                 images: SocialImage[];
-            }>>('social/online/images', { platform, username, max_images: maxImages }),
+            }>>('social/online/images', { platform: platformKey, username, max_images: maxImages }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ images: this.unwrapExtensionResult(res.result as any)?.images ?? [] }),
     });
@@ -432,10 +437,11 @@ export class SocialScanService {
   fetchSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 5, socialDataType = 'posts', maxComments = 10, commentOffset = 0): Observable<{
         posts: SocialPost[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 posts: SocialPost[];
-            }>>('social/posts', { platform, username, max_posts: maxPosts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
+            }>>('social/posts', { platform: platformKey, username, max_posts: maxPosts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
     });
@@ -456,10 +462,11 @@ export class SocialScanService {
   fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos = 5, socialDataType = 'videos', maxComments = 10, commentOffset = 0): Observable<{
         videos: SocialPost[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 videos: SocialPost[];
-            }>>('social/videos', { platform, username, max_videos: maxVideos, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
+            }>>('social/videos', { platform: platformKey, username, max_videos: maxVideos, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ videos: this.normalizeSocialPosts(res.result, 'videos') }),
     });
@@ -468,10 +475,11 @@ export class SocialScanService {
   fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts = 5, socialDataType = 'shorts', maxComments = 10, commentOffset = 0): Observable<{
         shorts: SocialPost[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 shorts: SocialPost[];
-            }>>('social/shorts', { platform, username, max_shorts: maxShorts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
+            }>>('social/shorts', { platform: platformKey, username, max_shorts: maxShorts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
     });
@@ -516,8 +524,9 @@ export class SocialScanService {
   fetchFollowers(platform: string, username: string): Observable<{
         followers: string[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
-      request: () => this.api.post<any>('social/followers', { platform, username, max_followers: 1000 }),
+      request: () => this.api.post<any>('social/followers', { platform: platformKey, username, max_followers: 1000 }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ followers: this.unwrapExtensionResult(res.result as any)?.followers ?? [] }),
     });
@@ -526,8 +535,9 @@ export class SocialScanService {
   fetchFollowing(platform: string, username: string): Observable<{
         following: string[];
     }> {
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platform);
     return this.pollForResult({
-      request: () => this.api.post<any>('social/following', { platform, username, max_following: 1000 }),
+      request: () => this.api.post<any>('social/following', { platform: platformKey, username, max_following: 1000 }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ following: this.unwrapExtensionResult(res.result as any)?.following ?? [] }),
     });

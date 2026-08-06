@@ -31,15 +31,19 @@ const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').t
 const loadResetPasswordComponent = () => import('./shared/partials/forgot-password/reset-password.component').then(m => m.ResetPasswordComponent);
 const loadSidebarUserStatisticsComponent = () => import('./pages/user-management/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
 const loadSidebarUserIocComponent = () => import('./pages/user-management/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
+const loadSidebarUserMonitoringComponent = () => import('./pages/user-management/sidebar-user-monitoring/sidebar-user-monitoring.component').then(m => m.SidebarUserMonitoringComponent);
 const loadSidebarUserEventManagementComponent = () => import('./pages/user-management/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
+const loadSidebarUserLogManagerComponent = () => import('./pages/user-management/sidebar-user-log-manager/sidebar-user-log-manager.component').then(m => m.SidebarUserLogManagerComponent);
 const loadAuditlogComponent = () => import('./pages/user-management/auditlog/auditlog.component').then(m => m.AuditlogComponent);
 const loadNotificationComponent = () => import('./shared/partials/notification/notification.component').then(m => m.NotificationComponent);
 const loadTrailNotificationComponent = () => import('./shared/partials/trail-notification/trail-notification.component').then(m => m.TrailNotificationComponent);
 const loadAccountSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/account-settings.component').then(m => m.AccountSettingsComponent);
 const loadSidebarUserFeederComponent = () => import('./pages/user-management/sidebar-user-feeder/sidebar-user-feeder.component').then(m => m.SidebarUserFeederComponent);
 const loadSidebarUserHomepageComponent = () => import('./pages/user-management/sidebar-user-homepage/sidebar-user-homepage.component').then(m => m.SidebarUserHomepageComponent);
+const loadTakedownRequestsComponent = () => import('./pages/user-management/takedown-requests/takedown-requests.component').then(m => m.TakedownRequestsComponent);
 const loadCategoryAlertReportComponent = () => import('./pages/user-management/sidebar-user-homepage/category-alert-report/category-alert-report.component').then(m => m.CategoryAlertReportComponent);
 const loadAddCustomAlertComponent = () => import('./pages/user-management/sidebar-user-homepage/add-custom-alert/add-custom-alert.component').then(m => m.AddCustomAlertComponent);
+const loadAlertScannerSettingsComponent = () => import('./pages/user-management/sidebar-user-homepage/alert-scanner-settings/alert-scanner-settings.component').then(m => m.AlertScannerSettingsComponent);
 const loadManageProfileComponent = () => import('./pages/tenant/tenant-management/view-profile/manage-profile.component').then(m => m.ManageProfileComponent);
 const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/user-management/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
@@ -54,6 +58,7 @@ const loadCaseDetailsComponent = () => import('./pages/user-management/sidebar-u
 const loadCaseShareComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-share/case-share.component').then(m => m.CaseShareComponent);
 const loadSatelliteIntelComponent = () => import('./pages/geo-fencing/satellite-intel/satellite-intel').then(m => m.SatelliteIntel);
 const loadCaseTrackingBoardComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-tracking-board/case-tracking-board').then(m => m.CaseTrackingBoard);
+const loadCaseTrackingBoardSettingsComponent = () => import('./pages/user-management/sidebar-user-case-management/model/case-tracking-board-settings/case-tracking-board-settings').then(m => m.CaseTrackingBoardSettings);
 const loadScanReportComponent = () => import('./pages/scan-report/scan-report.component').then(m => m.ScanReportComponent);
 const HASH_CONSOLIDATED_ROUTE = {
   resolve: { reportdata: ReportConsolidatedResolver },
@@ -223,6 +228,12 @@ export const routes: Routes = [
         path: 'social-intel',
         loadComponent: loadSocialMapperComponent,
         data: { animation: 'SocialMapper' }
+      },
+      {
+        path: 'ai',
+        canActivate: [subscriptionGuard],
+        loadComponent: loadAiWorkspaceComponent,
+        data: { type: 'ai', animation: 'CategoryPage' }
       },
       {
         path: 'social-mapper',
@@ -767,8 +778,8 @@ export const routes: Routes = [
           },
           {
             path: 'ai',
-            loadComponent: loadAiWorkspaceComponent,
-            data: { type: 'ai', animation: 'CategoryPage' }
+            redirectTo: '/dashboard/ai',
+            pathMatch: 'full'
           },
           {
             canActivate: [subscriptionGuard],
@@ -790,6 +801,21 @@ export const routes: Routes = [
             path: 'homepage',
             loadComponent: loadSidebarUserHomepageComponent,
             data: { type: 'homepage', animation: 'HomepagePage' },
+          },
+          {
+            path: 'alert-scanners',
+            loadComponent: loadAlertScannerSettingsComponent,
+            data: { type: 'settings', animation: 'ProfilePage' }
+          },
+          {
+            path: 'monitoring',
+            loadComponent: loadSidebarUserMonitoringComponent,
+            data: { type: 'monitoring', animation: 'CategoryPage' }
+          },
+          {
+            path: 'take-down',
+            loadComponent: loadTakedownRequestsComponent,
+            data: { type: 'take-down', animation: 'CategoryPage' }
           },
           {
             path: 'statistics',
@@ -826,6 +852,11 @@ export const routes: Routes = [
             path: 'event-management',
             loadComponent: loadSidebarUserEventManagementComponent,
             data: { type: 'event-management', animation: 'CategoryPage' }
+          },
+          {
+            path: 'log-manager',
+            loadComponent: loadSidebarUserLogManagerComponent,
+            data: { type: 'log-manager', animation: 'CategoryPage' }
           },
           {
             path: 'feeder',
@@ -869,6 +900,16 @@ export const routes: Routes = [
                 path: 'tracking-board',
                 loadComponent: loadCaseTrackingBoardComponent,
                 data: { type: 'case-tracking-board', animation: 'CaseTrackingBoardPage' }
+              },
+              {
+                path: 'tracking-board/settings',
+                loadComponent: loadCaseTrackingBoardSettingsComponent,
+                data: { type: 'case-tracking-board-settings', animation: 'CaseTrackingBoardSettingsPage' }
+              },
+              {
+                path: 'admin-alerts/:tenantId/:type',
+                loadComponent: loadCategoryAlertReportComponent,
+                data: { type: 'case-admin-alerts', animation: 'CategoryPage', adminTenantAlerts: true }
               }
             ]
           },

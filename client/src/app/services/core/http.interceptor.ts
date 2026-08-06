@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
-import { inject, Injector } from '@angular/core';
+import { inject, Injector, isDevMode } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, throwError, TimeoutError, Subject } from 'rxjs';
 import { catchError, finalize, timeout, takeUntil } from 'rxjs/operators';
@@ -8,6 +8,7 @@ import { MessageNotificationService } from '../message_notification/message-noti
 import { AuthService } from '../authetication/auth.service';
 let activeRequests = 0;
 let hideTimeout: any = null;
+let maintenancePageLoading = false;
 const inFlightCancels = new Map<string, Subject<void>>();
 const GLOBAL_TIMEOUT = 150000;
 const STATUS_MEANINGS: Record<number, string> = {
@@ -30,10 +31,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   const loadingService = inject(LoadingService);
   const msg = inject(MessageNotificationService);
   const injector = inject(Injector);
-  const token = localStorage.getItem('token');
-  const authReq = token
-    ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` }, withCredentials: true })
-    : req.clone({ withCredentials: true });
+  const authReq = req.clone({ withCredentials: true });
   const key = authReq.url.startsWith('api/') ? authReq.url : null;
   let cancel$: Subject<void> | null = null;
   if (key) {
@@ -67,7 +65,19 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       }, 1000);
     }
   }), catchError((error: unknown) => {
+    if (isDevMode() && error instanceof HttpErrorResponse && error.status === 503) {
+      if (!maintenancePageLoading) {
+        maintenancePageLoading = true;
+        window.location.replace('/static/maintenance.html');
+      }
+      return throwError(() => error);
+    }
     const authService = injector.get(AuthService, null);
+    const isSessionProbe = authReq.url.includes('api/get/tenant/node');
+    if (error instanceof HttpErrorResponse && error.status === 401 && isSessionProbe) {
+      authService?.clearAuthentication();
+      return throwError(() => error);
+    }
     if (authService?.isAuthenticated()) {
       if (error instanceof HttpErrorResponse && authReq.url.includes('api/search')) {
         const detail = typeof error.error === 'object' ? String((error.error as any)?.detail || '') : '';
@@ -93,7 +103,8 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       ]);
       const isSilentLogout = silentLogoutMessages.has(message);
       const isPublicCaseShareRequest = error instanceof HttpErrorResponse && authReq.url.includes('public/case-shares/');
-      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && error.status !== 400 && error.status !== 409 && error.status !== 424 && error.status !== 429) {
+      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && (error.status === 401 || isSilentLogout)) {
+        authService.clearAuthentication();
         localStorage.clear();
         sessionStorage.clear();
         router.navigate(['/login']).then();
@@ -103,6 +114,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       }
     }
     else if (error instanceof HttpErrorResponse && error.status === 401) {
+      authService?.clearAuthentication();
       localStorage.clear();
       sessionStorage.clear();
       router.navigate(['/login']).then();

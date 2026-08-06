@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
 from fastapi.responses import Response
-
-from configs.app_dependency import get_current_user, license_required, role_required, status_required
+from typing import Any
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
+from configs.app_dependency import get_current_user, license_required, role_required
 from configs.limiter_dependency import limiter_dependency
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
@@ -9,7 +10,9 @@ from orion.api.interactive.auth_manager.models.forgot_password_request import Fo
 from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynamic_param_model import search_dynamic_crack_model, search_dynamic_onion_search, search_dynamic_param_model, search_dynamic_social_model
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, NetIntelDeepScanRequest, ResolveIPRequest
-from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
+from orion.management.managers.service_manager import service_manager
+from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest
 from routes.helper.route_test_helper import TestRouteHelper
 
 
@@ -30,10 +33,17 @@ ANALYST_SCAN_DEPS = [
 
 test_routes = APIRouter(
     dependencies=[
-        Depends(status_required([UserStatus.ACTIVE])),
         Depends(TestRouteHelper.require_testing_enabled),
     ]
 )
+
+
+@test_routes.get("/api/test/ready", include_in_schema=False)
+async def test_ready():
+    if not service_manager.get_instance().check_status():
+        raise HTTPException(status_code=503, detail="Test services are not ready")
+    return {"ready": True}
+
 
 @test_routes.post(
     "/api/scan-jobs/{scan_id}/poll",
@@ -60,6 +70,44 @@ async def test_get_tenant_node(current_user=Depends(get_current_user)):
 
 
 @test_routes.post(
+    "/api/test/takedown-visibility/setup",
+    include_in_schema=False,
+)
+async def test_setup_takedown_visibility():
+    return await TestRouteHelper.setup_takedown_visibility_fixture()
+
+
+@test_routes.post(
+    "/api/takedowns",
+    include_in_schema=False,
+)
+async def test_create_takedown_request(request: TakedownCreateRequest = Body(...)):
+    return await TestRouteHelper.create_test_takedown_request(request)
+
+
+@test_routes.get(
+    "/api/takedowns",
+    include_in_schema=False,
+)
+async def test_list_takedown_requests(
+    viewer: str = Query("initiator"),
+    status: str | None = Query(None),
+    q: str = Query(""),
+    daterange: str = Query(""),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+):
+    return await TestRouteHelper.list_test_takedown_requests(
+        viewer,
+        status=status,
+        q=q,
+        page=page,
+        limit=limit,
+        daterange=daterange,
+    )
+
+
+@test_routes.post(
     "/api/dynamic/user",
     dependencies=SCAN_DEPS,
 )
@@ -76,8 +124,8 @@ async def test_search_dynamic_cracked(param: search_dynamic_crack_model = Body(.
 
 
 @test_routes.post("/api/forgot")
-async def forgotPassword(request: ForgotPasswordRequest):
-    return await auth_manager.forgot_password(request.email)
+async def forgotPassword(data: ForgotPasswordRequest, request: Request):
+    return await auth_manager.forgot_password(data.email, getattr(request.state, "tenant", None))
 
 
 @test_routes.post(
@@ -114,14 +162,6 @@ async def test_search_dynamic_social(param: search_dynamic_social_model = Body(.
 )
 async def test_search_dynamic_wanted(param: search_dynamic_social_model = Body(...)):
     return TestRouteHelper.load_api_mock("dynamic_wanted.json")
-
-
-@test_routes.post(
-    "/api/dynamic/national-identity",
-    dependencies=SCAN_DEPS,
-)
-async def test_search_dynamic_national_identity(param: search_dynamic_crack_model = Body(...)):
-    return TestRouteHelper.pending_or_api_mock("dynamic_national_identity", "dynamic_national_identity.json")
 
 
 @test_routes.post(
@@ -207,6 +247,77 @@ async def test_nlp_chat_report(_payload: dict = Body(...)):
 )
 async def test_nexus_chat(_payload: dict = Body(...)):
     return TestRouteHelper.static_test_chat_streaming_response()
+
+
+@test_routes.get(
+    "/api/nexus/chats",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_list_nexus_chats() -> list[dict[str, Any]]:
+    return []
+
+
+@test_routes.post(
+    "/api/nexus/chats",
+    status_code=201,
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_create_nexus_chat(payload: dict = Body(default={"title": "New Chat"})) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_session(title=payload.get("title", "New Chat"))
+
+
+@test_routes.delete(
+    "/api/nexus/chats",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_delete_all_nexus_chats() -> dict[str, bool]:
+    return {"success": True}
+
+
+@test_routes.get(
+    "/api/nexus/chats/{session_id}",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_get_nexus_chat(session_id: str) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_detail(session_id)
+
+
+@test_routes.post(
+    "/api/nexus/chats/{session_id}/messages",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_send_nexus_chat_message(session_id: str, payload: dict = Body(...)) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_message_response(
+        session_id,
+        str(payload.get("message", "")),
+    )
+
+
+@test_routes.put(
+    "/api/nexus/chats/{session_id}",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_rename_nexus_chat(session_id: str, payload: dict = Body(...)) -> dict[str, Any]:
+    return TestRouteHelper.static_test_chat_session(
+        title=payload.get("title", "New Chat"),
+        session_id=session_id,
+        message_count=2,
+    )
+
+
+@test_routes.delete(
+    "/api/nexus/chats/{session_id}",
+    include_in_schema=False,
+    dependencies=SCAN_DEPS,
+)
+async def test_delete_nexus_chat(session_id: str) -> dict[str, Any]:
+    return {"success": True, "session_id": session_id}
 
 
 @test_routes.post(

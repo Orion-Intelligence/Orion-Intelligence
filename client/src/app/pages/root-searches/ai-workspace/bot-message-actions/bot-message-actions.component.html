@@ -1,12 +1,20 @@
-<ul class="flex justify-start gap-2 px-4 pt-1.5">
-  <li (click)="copyMessage($event)" class="ui-ai-action-button relative flex h-[30px] w-[30px] list-none cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" [title]="'Copy message' | translate" [attr.aria-label]="'Copy message' | translate">
-    <i class="bi bi-copy text-[12px] leading-none"></i>
-    @if (copied()) {
-      <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">{{ 'Copied!' | translate }}</span>
-    }
+<ul class="m-0 flex w-full list-none items-center justify-start gap-1 pl-[15px] pr-1 pt-1.5" [attr.aria-label]="'Message actions' | translate">
+  <li class="list-none">
+    <button type="button" (click)="copyMessage($event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 motion-reduce:transition-none" [ngClass]="copied() ? 'text-emerald-200 hover:text-emerald-100' : ''" [title]="(copied() ? 'Copied!' : 'Copy message') | translate" [attr.aria-label]="(copied() ? 'Copied!' : 'Copy message') | translate">
+      @if (copied()) {
+        <i class="bi bi-check-lg text-[13px] leading-none" aria-hidden="true"></i>
+        <span role="status" aria-live="polite" class="absolute left-[calc(100%+6px)] top-1/2 -translate-y-1/2 whitespace-nowrap rounded-md border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-2.5 py-1.5 text-[11px] font-semibold leading-none text-white shadow-lg">
+          {{ 'Copied!' | translate }}
+        </span>
+      } @else {
+        <i class="bi bi-copy text-[12px] leading-none" aria-hidden="true"></i>
+      }
+    </button>
   </li>
-  <li (click)="shareDialog.open($event)" class="ui-ai-action-button relative flex h-[30px] w-[30px] list-none cursor-pointer items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 hover:bg-white/15 hover:text-white" [title]="'Share message' | translate" [attr.aria-label]="'Share message' | translate">
-    <i class="bi bi-share-fill text-[12px] leading-none"></i>
+  <li class="list-none">
+    <button type="button" (click)="shareDialog.open($event)" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 motion-reduce:transition-none" [title]="'Share message' | translate" [attr.aria-label]="'Share message' | translate" aria-haspopup="dialog">
+      <i class="bi bi-share-fill text-[12px] leading-none" aria-hidden="true"></i>
+    </button>
   </li>
 </ul>
 

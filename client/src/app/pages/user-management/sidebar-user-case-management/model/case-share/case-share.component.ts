@@ -7,10 +7,15 @@ import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../.
 import { ApiService } from '../../../../../shared/services/api.service';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { CASE_SHARE_EXPORT_OPTIONS } from '../../../../../shared/model/report/export-choice.model';
+import { ReportExportService } from '../../../../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../../../../shared/model/report/report-export.model';
+
 
 @Component({
   selector: 'app-case-share',
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule, TranslatePipe, ExportChoiceModalComponent],
   templateUrl: './case-share.component.html',
 })
 export class CaseShareComponent implements OnInit, OnDestroy {
@@ -22,8 +27,10 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   expandedArtifactIds = new Set<string>();
   expandedRelatedEntityIds = new Set<string>();
   brandingResolved = false;
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = CASE_SHARE_EXPORT_OPTIONS;
 
-  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, public appService: AppService) { }
+  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, private reportExportService: ReportExportService, public appService: AppService) { }
 
   ngOnInit(): void {
     this.forceDarkTheme();
@@ -76,7 +83,25 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     return this.expandedArtifactIds.has(artifactId);
   }
 
-  exportPdf(): void {
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'report') {
+      this.exportPdf();
+    }
+    else if (type === 'json' || type === 'csv') {
+      this.exportCaseData(type);
+    }
+    this.closeExportChoice();
+  }
+
+  private exportPdf(): void {
     if (!this.report) {
       return;
     }
@@ -89,6 +114,39 @@ export class CaseShareComponent implements OnInit, OnDestroy {
         this.errorMessage = 'Unable to export PDF.';
       }
     });
+  }
+
+  private exportCaseData(type: 'json' | 'csv'): void {
+    if (!this.report) {
+      return;
+    }
+    const payload: GraphReportPayload = {
+      graphKind: 'cti',
+      title: 'Shared Case Report',
+      sessionName: this.report.title || this.report.caseId || 'shared-case',
+      generatedAtIso: new Date().toISOString(),
+      nodes: [],
+      edges: [],
+      summary: {
+        case_id: this.report.caseId || '-',
+        title: this.report.title || '-',
+        status: this.report.status || '-',
+        entities: this.report.entities?.length || 0,
+        comments: this.report.comments?.length || 0
+      },
+      tables: [
+        {
+          title: 'Case Data',
+          values: {
+            case_id: this.report.caseId || '-',
+            title: this.report.title || '-',
+            status: this.report.status || '-',
+            description: this.report.description || '-'
+          }
+        }
+      ]
+    };
+    this.reportExportService.exportByType(payload, type);
   }
 
   getPrimaryEntity(): SharedCaseEntity | null {
@@ -153,7 +211,11 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   }
 
   getLogoSrc(): string {
-    return '/assets/images/shared/logo-wide-light.svg';
+    if (!this.brandingResolved) {
+      return '/assets/images/shared/logo-wide-light.svg';
+    }
+    const settings = this.appService.getConfig().appSettings;
+    return settings.logo_wide_dark || settings.logo_wide_light || '/assets/images/shared/logo-wide-light.svg';
   }
 
   private forceDarkTheme(): void {

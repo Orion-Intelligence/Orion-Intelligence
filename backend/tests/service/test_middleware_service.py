@@ -17,6 +17,7 @@ from orion.middleware.middlewares.content_block_middleware import content_block_
 from orion.middleware.middlewares.content_security_policy_middleware import content_security_policy_middleware
 from orion.middleware.middlewares.security_headers_middleware import security_headers_middleware
 from orion.middleware.middlewares.service_ready_middleware import service_ready_middleware
+from orion.middleware.middlewares.tenant_resolution_middleware import tenant_resolution_middleware
 from routes.auth_routes import COOKIE_CIPHER
 
 
@@ -58,7 +59,7 @@ def test_setup_middlewares_registers_expected_stack(monkeypatch):
     monkeypatch.setattr("orion.middleware.middleware_setup.config.DEBUG", False)
     monkeypatch.setattr(
         "orion.middleware.middleware_setup.env_handler.get_instance",
-        staticmethod(lambda: SimpleNamespace(env=lambda *_args: ["example.com"])),
+        staticmethod(lambda: SimpleNamespace(env=lambda *_args: "example.com")),
     )
 
     class _FakeApp:
@@ -83,9 +84,90 @@ def test_setup_middlewares_registers_expected_stack(monkeypatch):
         security_headers_middleware,
         content_block_middleware,
         cache_admin,
+        tenant_resolution_middleware,
     ]
-    assert app.calls[4][2]["allow_origins"] == ["example.com"]
-    assert app.calls[5][2]["allowed_hosts"] == ["example.com"]
+    assert app.calls[4][2]["allow_origins"] == "example.com"
+    assert app.calls[5][2]["allowed_hosts"] == ["example.com", "*.example.com"]
+
+
+@pytest.mark.anyio
+async def test_tenant_resolution_middleware_resolves_slug_from_localhost(monkeypatch):
+    tenant = SimpleNamespace(id="tenant-1", slug="google", is_default=False)
+
+    class _FakeEngine:
+        async def find_one(self, *_args, **_kwargs):
+            return tenant
+
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.service_manager.get_instance",
+        staticmethod(lambda: SimpleNamespace(check_status=lambda: True)),
+    )
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.env_handler.get_instance",
+        staticmethod(lambda: SimpleNamespace(env=lambda *_args: "orion.org")),
+    )
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.mongo_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_engine=lambda: _FakeEngine())),
+    )
+
+    captured = {}
+    middleware = tenant_resolution_middleware(app=_noop_app)
+    request = Request({
+        "type": "http",
+        "scheme": "http",
+        "method": "GET",
+        "path": "/",
+        "headers": [(b"host", b"google.localhost:4200")],
+    })
+
+    async def _call_next(inner_request: Request):
+        captured["tenant"] = inner_request.state.tenant
+        return PlainTextResponse("ok")
+
+    response = await middleware.dispatch(request, _call_next)
+
+    assert response.status_code == 200
+    assert captured["tenant"] is tenant
+
+
+@pytest.mark.anyio
+async def test_tenant_resolution_middleware_rejects_unknown_subdomain(monkeypatch):
+    class _FakeEngine:
+        async def find_one(self, *_args, **_kwargs):
+            return None
+
+        async def find(self, *_args, **_kwargs):
+            return []
+
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.service_manager.get_instance",
+        staticmethod(lambda: SimpleNamespace(check_status=lambda: True)),
+    )
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.env_handler.get_instance",
+        staticmethod(lambda: SimpleNamespace(env=lambda *_args: "orion.org")),
+    )
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.tenant_resolution_middleware.mongo_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_engine=lambda: _FakeEngine())),
+    )
+
+    middleware = tenant_resolution_middleware(app=_noop_app)
+    request = Request({
+        "type": "http",
+        "scheme": "http",
+        "method": "GET",
+        "path": "/",
+        "headers": [(b"host", b"missing.localhost:4200")],
+    })
+
+    async def _call_next(_inner_request: Request):
+        return PlainTextResponse("ok")
+
+    response = await middleware.dispatch(request, _call_next)
+
+    assert response.status_code == 404
 
 
 @pytest.mark.anyio
@@ -120,8 +202,9 @@ async def test_content_block_middleware_redirects_dashboard_without_user(monkeyp
 @pytest.mark.anyio
 async def test_content_block_middleware_allows_dashboard_with_cookie_session(monkeypatch):
     class _FakeSessionManager:
-        async def get_current_user(self, token):
+        async def get_current_user(self, token, tenant_id=None):
             assert token == "cookie-token"
+            assert tenant_id is None
             return SimpleNamespace(id="user-1")
 
     monkeypatch.setattr(
@@ -140,7 +223,7 @@ async def test_content_block_middleware_allows_dashboard_with_cookie_session(mon
 @pytest.mark.anyio
 async def test_content_block_middleware_redirects_admin_to_home_when_system_flag_disabled(monkeypatch):
     class _FakeConfigController:
-        async def get_cached(self, *_args):
+        async def get_cached(self, *_args, **_kwargs):
             return "0"
 
     monkeypatch.setattr(
@@ -158,7 +241,7 @@ async def test_content_block_middleware_redirects_admin_to_home_when_system_flag
 @pytest.mark.anyio
 async def test_content_block_middleware_keeps_admin_available_when_system_flag_enabled(monkeypatch):
     class _FakeConfigController:
-        async def get_cached(self, *_args):
+        async def get_cached(self, *_args, **_kwargs):
             return "1"
 
     monkeypatch.setattr(

@@ -1,30 +1,43 @@
 import {
   addIOCForAllTabs,
+  assertOnlyGeneralHasAlertFindings,
   applyAuditLogDateRange,
   assertAlertScanCompletedMailPresent,
   closeFilterSidebar,
   closeNotificationSidebar,
+  deleteTenant,
+  ensureGeneralAlertIoc,
   exportFromModal,
   fillTenantNetworkConfiguration,
+  flushTenantAlertsIfPresent,
   loginTenant,
+  openAlertScannerSettings,
   openFilterSidebar,
   openAuditLogPage,
   openManageIOCs,
+  openTenantHomepage,
   openTenantEditor,
   openTenantSettings,
   openTenantsPage,
   resetAuditLogFilters,
+  runTenantAlertScan,
   saveTenantEditor,
+  setOnlyGeneralAlertScanner,
   setTenantEditorToggle,
   setTenantLicense,
+  setTenantLicenses,
   submitLogin,
+  waitForTenantAlertScanComplete,
+  waitForTenantAlertFindings,
   waitForBlockingOverlayToClose
 } from './controllers/10-tenant-management.controller';
+import {TEST_DATA} from '../support/constants';
 
 describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenant: any;
   let tenantSubUser: any;
   const tenantResetNewPassword = '2wsx@WSX2026';
+  const alertSlackClientId = TEST_DATA.alert_slack_client_id;
 
   const selectEnabledCurrentMonthDate = (day: number) => {
     cy.get(`[data-testid="side-filter-date-day-${day}"]`)
@@ -38,6 +51,10 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .scrollIntoView()
       .should('be.enabled')
       .click();
+  };
+
+  const enableTenantPrivilegedIocIfInputDisabled = () => {
+    cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 60000}).should('be.visible').and('not.be.disabled');
   };
 
   before(() => {
@@ -58,11 +75,14 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.clearAllEmails();
     cy.visit('/signup');
 
+    cy.get('[data-testid="signup-username"]').should('be.visible');
+    cy.docsScreenshot('signup-page');
     cy.get('[data-testid="signup-username"]').type(tenant.username);
     cy.get('[data-testid="signup-companymail"]').type(tenant.email);
     cy.get('[data-testid="signup-password"]').type(tenant.password, {log: false});
     cy.get('[data-testid="signup-submit"]').should('be.visible').click();
     cy.get('[data-testid="welcome-tick"]').should('exist');
+    cy.docsScreenshot('welcome-verification');
     cy.get('[data-testid="welcome-goto-login"]').click();
 
     cy.openLastMailAndGetUrl().then((url) => {
@@ -79,6 +99,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     setTenantEditorToggle('tenant-verified-toggle', true);
     setTenantEditorToggle('tenant-status-toggle', true);
     setTenantEditorToggle('tenant-password-reset-required-toggle', false);
+    setTenantEditorToggle('tenant-privileged-ioc-toggle', true);
     setTenantLicense('free', false);
     setTenantLicense('maintainer', true);
     setTenantLicense('enterprise', true);
@@ -87,21 +108,20 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
   });
 
   it('completes tenant onboarding and adds tenant user', () => {
-    cy.intercept('POST', '**/api/token').as('tenantLogin');
-    cy.visit('/login');
-    cy.reload();
-    cy.get('[data-testid="login-user"]').type(tenant.username);
-    cy.get('[data-testid="login-pass"]').type(tenant.password, {log: false});
-    cy.get('[data-testid="login-button"]').click();
-    cy.waitForLoginRequest('tenantLogin');
+    submitLogin(tenant.username, tenant.password, tenant);
 
-    cy.get('[data-testid="tenant-company-input"]').should('be.visible').clear().type('orion intelligence');
+    cy.get('[data-testid="tenant-company-input"]').should('be.visible');
+    cy.docsScreenshot('tenant-onboarding-company');
+    cy.get('[data-testid="tenant-company-input"]').clear().type('orion intelligence');
     cy.get('[data-testid="tenant-onboarding-next-step1"]').should('be.visible').click();
+    cy.get('[data-testid="tenant-onboarding-next-step2"]').should('be.visible');
+    cy.docsScreenshot('tenant-onboarding-iocs');
     cy.get('[data-testid="tenant-onboarding-next-step2"]').should('be.visible').click();
     cy.get('[data-testid="tenant-onboarding-confirm"]').should('be.visible').click();
 
     openManageIOCs();
-    cy.get('[data-testid="tenant-ioc-value-input"], [data-testid^="tenant-ioc-tab-"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid^="tenant-ioc-tab-"]').should('have.length.greaterThan', 0);
+    enableTenantPrivilegedIocIfInputDisabled();
     cy.docsScreenshot('tenant-manage-iocs');
     addIOCForAllTabs();
 
@@ -197,6 +217,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .scrollIntoView()
       .should('be.visible')
       .click({waitForAnimations: false, animationDistanceThreshold: 0});
+    exportFromModal('graph-report-export-modal', 'auditlog-export-option-csv');
 
     applyAuditLogDateRange(14);
     cy.get('[data-testid="auditlog-empty-state"]').should('be.visible');
@@ -210,8 +231,106 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     loginTenant(tenant);
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
     cy.location('pathname').should('include', '/dashboard/profile/homepage');
-    cy.get('app-alert-scan-loading').should('not.exist');
+    waitForTenantAlertScanComplete();
     cy.docsScreenshot('tenant-homepage');
+  });
+
+  it('downgrades tenant alert access to free as admin', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(tenant);
+    setTenantLicenses(['free']);
+    saveTenantEditor('saveTenantFreeLicense');
+    cy.logout();
+  });
+
+  it('blocks tenant alert access with the free license', () => {
+    loginTenant(tenant);
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
+    cy.contains('[data-testid="tenant-home-alert-category-card"]', 'Defacement', {timeout: 30000})
+      .scrollIntoView()
+      .should('be.visible')
+      .and('have.class', 'opacity-60')
+      .click();
+    cy.get('[data-testid="message-notification-text"]').should('contain.text', "You don't have license to view this");
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
+    cy.logout();
+  });
+
+  it('restores tenant enterprise access as admin', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(tenant);
+    setTenantLicenses(['enterprise']);
+    saveTenantEditor('saveTenantEnterpriseLicense');
+    cy.logout();
+  });
+
+  it('restores tenant alert access with the enterprise license', () => {
+    loginTenant(tenant);
+    cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
+    cy.contains('[data-testid="tenant-home-alert-category-card"]', 'Defacement', {timeout: 30000})
+      .scrollIntoView()
+      .should('be.visible')
+      .and('not.have.class', 'opacity-60');
+    cy.logout();
+  });
+
+  it('runs only the General alert scanner from scanner settings', () => {
+    loginTenant(tenant);
+    ensureGeneralAlertIoc();
+    openTenantHomepage();
+    waitForTenantAlertScanComplete();
+    openAlertScannerSettings();
+    cy.docsScreenshot('alert-scanner-settings');
+    setOnlyGeneralAlertScanner();
+    cy.contains('button', 'Back').scrollIntoView().click();
+    cy.location('pathname').should('include', '/dashboard/profile/homepage');
+
+    flushTenantAlertsIfPresent();
+    runTenantAlertScan();
+    waitForTenantAlertFindings('general');
+    cy.reload();
+    openTenantHomepage();
+    waitForTenantAlertScanComplete();
+    assertOnlyGeneralHasAlertFindings();
+    cy.logout();
+  });
+
+  it('uploads IOC values from a CSV file', () => {
+    const suffix = Date.now();
+    const domainIoc = `tenant-upload-${suffix}.example.com`;
+    const emailIoc = `tenant-upload-${suffix}@mail.com`;
+    const urlIoc = `https://tenant-upload-${suffix}.example.com/login`;
+    const iocCsv = [
+      'key,value',
+      `m_domain,${domainIoc}`,
+      `m_email,${emailIoc}`,
+      `m_url,${urlIoc}`
+    ].join('\n');
+
+    loginTenant(tenant);
+    openManageIOCs();
+    cy.get('[data-testid="tenant-ioc-upload-csv-button"]').scrollIntoView().should('be.visible').and('not.be.disabled');
+
+    cy.intercept('POST', '**/api/update/tenants').as('uploadTenantIocCsv');
+    cy.get('input[type="file"][accept=".csv,text/csv"]')
+      .first()
+      .selectFile({
+        contents: Cypress.Buffer.from(iocCsv),
+        fileName: 'tenant-ioc-upload.csv',
+        mimeType: 'text/csv',
+      }, {force: true});
+
+    cy.get('[data-testid="message-notification-text"]').should('contain.text', '3 IOC values imported.');
+    cy.wait('@uploadTenantIocCsv', {timeout: 60000})
+      .its('response.statusCode')
+      .should('be.oneOf', [200, 201]);
+    cy.contains(domainIoc).should('be.visible');
+    cy.contains(emailIoc).should('be.visible');
+    cy.contains(urlIoc).should('be.visible');
+    cy.logout();
   });
 
   it('saves tenant network configuration after failed SMTP validation', () => {
@@ -240,15 +359,17 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.logout();
   });
 
-  it('forces tenant account to change password when admin enables reset', () => {
+  it('enables tenant password reset as admin', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     openTenantEditor(tenant);
     setTenantEditorToggle('tenant-password-reset-required-toggle', true);
     saveTenantEditor('saveTenantPasswordReset');
     cy.logout();
+  });
 
-    submitLogin(tenant.username, tenant.password);
+  it('forces tenant account to change its password', () => {
+    submitLogin(tenant.username, tenant.password, tenant);
     cy.url().should('include', '/reset/');
     cy.get('[data-testid="reset-title"]').should('contain.text', 'Change Password');
     cy.get('[data-testid="reset-password"]').should('be.visible').clear().type(tenantResetNewPassword, {log: false});
@@ -257,7 +378,9 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('[data-testid="dashboard-main"]').should('be.visible');
     tenant.password = tenantResetNewPassword;
     cy.logout();
+  });
 
+  it('clears the tenant password reset flag after the change', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     openTenantEditor(tenant);
@@ -274,18 +397,21 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     const countryValue = 'Pakistan';
     const cityValue = 'Karachi';
 
+    tenant = { ...tenant, password: tenantResetNewPassword };
     loginTenant(tenant);
 
-    cy.visit('/dashboard/profile/tenant-settings');
+    cy.location('origin').then((origin) => {
+      cy.visit(`${origin}/dashboard/profile/tenant-settings`);
+    });
     cy.scrollDashboardToTop();
     cy.contains('h1', 'Tenant Data').scrollIntoView().should('be.visible');
     cy.contains('div', 'Profile').should('be.visible');
     cy.contains('div', 'Contacts').should('be.visible');
     cy.contains('div', 'Users').should('be.visible');
+    cy.contains('div', 'Address').should('be.visible');
     cy.docsScreenshot('tenant-settings');
     cy.scrollDashboardToBottom()
     cy.contains('div', 'Privacy').should('be.visible');
-    cy.contains('div', 'Address').should('be.visible');
 
     cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
     cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);
@@ -328,6 +454,60 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.logout();
   });
 
+  it('shows only admin-configured Slack connector in tenant settings', () => {
+    loginTenant(tenant);
+
+    cy.intercept('GET', '**/api/alert-connectors/settings', {
+      statusCode: 200,
+      body: {
+        app: {
+          slack_client_id: alertSlackClientId,
+          slack_configured: true,
+          jira_client_id: '',
+          jira_configured: false
+        },
+        tenant: {
+          slack_connected: false,
+          slack_channel: '',
+          slack_team: '',
+          jira_connected: false,
+          jira_site_url: '',
+          jira_site_name: ''
+        }
+      }
+    }).as('loadTenantAlertConnectors');
+
+    cy.location('origin').then((origin) => {
+      cy.visit(`${origin}/dashboard/profile/tenant-settings`);
+    });
+
+    cy.get('[data-testid="tenant-settings-connect-slack"]')
+      .scrollIntoView()
+      .should('be.visible')
+      .and('have.attr', 'target', '_blank')
+      .and('have.attr', 'href', '/api/alert-connectors/slack/connect');
+    cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
+    cy.docsScreenshot('tenant-alert-integrations-slack');
+    cy.window().then((win) => {
+      const slackConnectClicks: string[] = [];
+      win.document.addEventListener('click', (event) => {
+        const link = (event.target as Element).closest('[data-testid="tenant-settings-connect-slack"]') as HTMLAnchorElement | null;
+        if (!link) {
+          return;
+        }
+        event.preventDefault();
+        slackConnectClicks.push(link.href);
+      }, {capture: true, once: true});
+      cy.wrap(slackConnectClicks).as('slackConnectClicks');
+    });
+    cy.get('[data-testid="tenant-settings-connect-slack"]').click();
+    cy.get<string[]>('@slackConnectClicks').should((clicks) => {
+      expect(clicks[0]).to.include('/api/alert-connectors/slack/connect');
+    });
+
+    cy.logout();
+  });
+
   it('handles tenant alerts and notifications end-to-end', () => {
     loginTenant(tenant);
     cy.get('[data-testid="sidebar-subitem-profile-homepage"]').filter(':visible').first().scrollIntoView().click();
@@ -338,16 +518,23 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
 
     cy.get('[data-testid="profile-notification-bell"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-notification-sidebar"]').should('be.visible');
+    cy.docsScreenshot('tenant-notification-sidebar');
     cy.get('[data-testid="tenant-notification-see-details"]').first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="notification-alert-export-modal"]').should('be.visible');
+    cy.docsScreenshot('tenant-notification-alert-detail');
     exportFromModal('notification-alert-export-modal', 'notification-alert-export-option-report');
     closeNotificationSidebar();
 
     cy.get('[data-testid="tenant-home-alert-category-card"]').first().scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-report-see-details"]').first().scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
+    cy.docsScreenshot('tenant-alert-detail');
     exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
 
     cy.get('[data-testid="tenant-alert-add-button"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-modal"]').should('be.visible');
+    cy.docsScreenshot('custom-alert-modal');
     cy.get('[data-testid="tenant-alert-title"]').should('be.visible').clear().type('Test Alert');
     cy.get('[data-testid="tenant-alert-description"]').clear().type('Test description');
     cy.get('[data-testid="tenant-alert-ioc-type-toggle"]').click();
@@ -372,5 +559,11 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
 
     cy.get('[data-testid="tenant-alert-flush-all"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click();
+  });
+
+  it('deletes the tenant as admin', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    deleteTenant(tenant);
   });
 });

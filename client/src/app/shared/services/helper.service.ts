@@ -6,12 +6,13 @@ import { ConsolidatedParamModel } from '../model/results/consolidated/consolidat
 import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 import { PublicUserActivityItem } from '../../sections/report/social-interactions/models/public-user-data.model';
+import { ExportBrandingService } from './export/export-branding.service';
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 @Injectable({
   providedIn: 'root'
 })
 export class HelperService {
-  constructor(private sanitizer: DomSanitizer, private appService: AppService, private messageNotificationService: MessageNotificationService) {
+  constructor(private sanitizer: DomSanitizer, private appService: AppService, private messageNotificationService: MessageNotificationService, private exportBranding: ExportBrandingService) {
   }
 
   detectLanguageName(text: string): string {
@@ -63,25 +64,26 @@ export class HelperService {
     }).filter((v): v is string => !!v);
   }
 
-  downloadAsCSV(data: any) {
+  downloadAsCSV(data: any, filename: string = 'search_results.csv') {
     const csvContent = this.convertToCSV(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'search_results.csv');
+    link.setAttribute('download', filename.toLowerCase().endsWith('.csv') ? filename : `${filename}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   }
 
-  downloadstixJson(data: any) {
-    const jsonString = JSON.stringify(data, null, 2);
+  downloadstixJson(data: any, filename: string = 'stix_report.json') {
+    const jsonString = JSON.stringify(this.exportBranding.addTenantJsonMetadata(data), null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'stix_report.json';
+    a.download = filename.toLowerCase().endsWith('.json') ? filename : `${filename}.json`;
     a.click();
     window.URL.revokeObjectURL(url);
   }
@@ -183,9 +185,53 @@ export class HelperService {
   }
 
   private convertToCSV(data: any): string {
-    const keys = Object.keys(data);
-    const values = keys.map(key => `"${data[key]}"`).join(',');
-    return `${keys.join(',')}\n${values}`;
+    const rows = this.toCsvRows(data);
+    if (!rows.length) {
+      return '';
+    }
+    const keys = Array.from(rows.reduce((acc, row) => {
+      Object.keys(row).forEach(key => acc.add(key));
+      return acc;
+    }, new Set<string>()));
+    return [
+      keys.map(key => this.escapeCsvValue(key)).join(','),
+      ...rows.map(row => keys.map(key => this.escapeCsvValue(row[key])).join(','))
+    ].join('\n');
+  }
+
+  private toCsvRows(data: any): Record<string, unknown>[] {
+    const tenantName = this.exportBranding.getTenantName();
+    if (data === null || data === undefined) {
+      return [];
+    }
+    if (Array.isArray(data)) {
+      return data.map((item, index) => {
+        if (item && typeof item === 'object' && !Array.isArray(item)) {
+          return { tenant_name: tenantName, ...this.brandCsvRow(item as Record<string, unknown>) };
+        }
+        return { tenant_name: tenantName, index: index + 1, value: this.exportBranding.replaceSystemBrand(item) };
+      });
+    }
+    if (typeof data === 'object') {
+      return [{ tenant_name: tenantName, ...this.brandCsvRow(data as Record<string, unknown>) }];
+    }
+    return [{ tenant_name: tenantName, value: this.exportBranding.replaceSystemBrand(data) }];
+  }
+
+  private brandCsvRow(row: Record<string, unknown>): Record<string, unknown> {
+    return Object.fromEntries(Object.entries(row).map(([key, value]) => [
+      key,
+      this.exportBranding.replaceSystemBrand(value)
+    ]));
+  }
+
+  private escapeCsvValue(value: unknown): string {
+    const text = value === null || value === undefined
+      ? ''
+      : typeof value === 'object'
+        ? JSON.stringify(value)
+        : String(value);
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
   sortByKey<T>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {

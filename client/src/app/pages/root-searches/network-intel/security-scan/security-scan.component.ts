@@ -1,5 +1,5 @@
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
@@ -15,6 +15,8 @@ import { ReportExportService } from '../../../../shared/services/report-export.s
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { SECURITY_SCAN_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
 
 @Component({
   selector: 'app-security-scan',
@@ -30,11 +32,13 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     NgxPrintDirective,
     FormsModule,
     ReactiveFormsModule,
-    EmptyQueryComponent, TranslatePipe],
+    EmptyQueryComponent, TranslatePipe, ExportChoiceModalComponent],
   templateUrl: './security-scan.component.html',
   animations: [fadeInDashboardItem],
 })
 export class SecurityScanComponent implements OnInit {
+  @ViewChild('printReportButton') private printReportButton?: ElementRef<HTMLButtonElement>;
+
   meta: UrlScanMeta | null = null;
   categories: { name: string; total: number; items: UrlScanThreatItem[]; }[] = [];
   requestedUrl = '';
@@ -52,6 +56,8 @@ export class SecurityScanComponent implements OnInit {
   gradeCounts: { high: number; medium: number; low: number; informational: number; } = { high: 0, medium: 0, low: 0, informational: 0, };
   trackByCategory = ( _: number, c: { name: string; } ) => c.name;
   trackByItem = (i: number) => i;
+  isExportChoiceOpen = false;
+  readonly reportExportOptions = SECURITY_SCAN_EXPORT_OPTIONS;
 
   constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: ReportExportService, private scanHelperMethodsService: NetworkIntelScanService) { }
 
@@ -177,7 +183,22 @@ export class SecurityScanComponent implements OnInit {
       });
   }
 
-  exportReport(): void {
+  openExportChoice(): void {
+    this.isExportChoiceOpen = true;
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen = false;
+  }
+
+  selectExport(type: string): void {
+    if (type === 'report' || type === 'json' || type === 'csv') {
+      this.exportReport(type);
+    }
+    this.closeExportChoice();
+  }
+
+  private exportReport(type: string = 'report'): void {
     if (!this.meta) {
       return;
     }
@@ -251,7 +272,7 @@ export class SecurityScanComponent implements OnInit {
       tables
     };
 
-    this.graphReportExport.exportByType(payload, 'doc_pdf');
+    this.graphReportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
   }
 
   private resolveRequestedUrl(input: string): string {

@@ -2,6 +2,7 @@ import asyncio
 from typing import Any
 
 from orion.api.interactive.alert_manager.alert_summary_helper import AlertSummaryHelper
+from orion.management.jobs.alert.alert_buffer import AlertScanBuffer
 from orion.management.jobs.alert.cancellation_service import CancellationService
 from orion.management.jobs.alert.config import DYNAMIC_SCAN_RULES, DynamicScanRule
 from orion.management.jobs.alert.response_parser import ResponseParser
@@ -9,23 +10,27 @@ from orion.management.jobs.alert.result_mappers import DynamicResultMapper
 
 
 class DynamicScanningProcessor:
-    def __init__(self, alert_manager: Any, search_model: Any, cancellation_service: CancellationService):
-        self._alert_manager = alert_manager
+    def __init__(self, search_model: Any, cancellation_service: CancellationService, alert_buffer: AlertScanBuffer):
         self._search_model = search_model
         self._cancellation_service = cancellation_service
+        self._alert_buffer = alert_buffer
 
     @staticmethod
     def matching_rules(ioc_type: str, ioc_value: str) -> list[DynamicScanRule]:
         return [rule for rule in DYNAMIC_SCAN_RULES if rule.matches(ioc_type, ioc_value)]
 
-    async def process_ioc(self, tenant_id: str, ioc_type: str, values: list[str]) -> dict:
+    async def process_ioc(self, tenant_id: str, ioc_type: str, values: list[str], allowed_alert_categories: set[str] | None = None) -> dict:
         summary = AlertSummaryHelper.new_scan_summary()
         scans: list[tuple[DynamicScanRule, dict[str, Any]]] = []
         selected_ioc_value = ""
 
         for ioc_value in values or []:
             selected_ioc_value = ioc_value
-            scans = [(rule, rule.build_payload(ioc_value)) for rule in self.matching_rules(ioc_type, ioc_value)]
+            scans = [
+                (rule, rule.build_payload(ioc_value))
+                for rule in self.matching_rules(ioc_type, ioc_value)
+                if allowed_alert_categories is None or rule.scan_type in allowed_alert_categories
+            ]
 
         for rule, payload in scans:
             scan_summary = await self.handle_dynamic_scanning_alert(
@@ -89,23 +94,7 @@ class DynamicScanningProcessor:
                 if not alert_fields:
                     continue
 
-                upsert_result = await self._alert_manager.upsert_alert(
-                    tenantId=tenant_id,
-                    category=alert_fields["category"],
-                    ioc_type=alert_fields["ioc_type"],
-                    ioc_value=alert_fields["ioc_value"],
-                    title=alert_fields["title"],
-                    description=alert_fields["description"],
-                    url=alert_fields["url"],
-                    source=alert_fields["source"],
-                    content_types=alert_fields["content_types"],
-                    all_ioc=alert_fields["all_ioc"],
-                )
-
-                AlertSummaryHelper.merge_scan_summary(
-                    summary,
-                    AlertSummaryHelper.scan_result_summary(scan_type, ioc_type, ioc_value, upsert_result),
-                )
+                self._alert_buffer.add_alert(tenant_id, alert_fields)
 
             return summary
 

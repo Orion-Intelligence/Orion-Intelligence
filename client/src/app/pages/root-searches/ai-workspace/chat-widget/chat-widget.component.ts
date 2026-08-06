@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { chatBotAnimation } from '../../../../shared/animations/chat.bot.animation';
@@ -8,7 +9,7 @@ import { overlayFadeAnimation } from '../../../../shared/animations/chat.overlay
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { NexusChatService } from '../nexus-chat.service';
-import { AiWorkspaceMessage } from '../../../../shared/model/chat/ai-workspace-message.model';
+import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../../../../shared/model/chat/ai-workspace-message.model';
 import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-actions.component';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -25,6 +26,8 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   private chatRequestId = 0;
   private stoppedRequestIds = new Set<number>();
   private userNearBottom = true;
+  private routeSubscription?: Subscription;
+  private activeTempSessionId = '';
   private io?: IntersectionObserver;
   private mo?: MutationObserver;
   @ViewChild('composerInput') private composerInput?: ElementRef<HTMLTextAreaElement>;
@@ -46,15 +49,35 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly showLauncher = input(true);
   readonly tool = input('open_chat');
   readonly type = input('default');
+  readonly welcomeMessage = input('Hi there! How can I help you today?');
 
-  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService) { }
+  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService, private router: Router) { }
 
   ngOnInit(): void {
+    this.activeTempSessionId = this.temporarySessionId();
+    this.routeSubscription = this.router.events.subscribe(event => {
+      if (!(event instanceof NavigationEnd)) {
+        return;
+      }
+      const nextSessionId = this.temporarySessionId();
+      if (nextSessionId === this.activeTempSessionId) {
+        return;
+      }
+      const previousSessionId = this.activeTempSessionId;
+      this.activeTempSessionId = nextSessionId;
+      this.chatRequestId += 1;
+      this.stoppedRequestIds.clear();
+      this.cancelActiveNexusRequest();
+      this.clearTemporarySession(previousSessionId);
+      this.isBotTyping = false;
+      this.botStep = '';
+      this.resetChatView();
+    });
     if (this.chatMessages.length === 0) {
       this.chatMessages.push({
         id: crypto.randomUUID(),
         sender: 'bot',
-        text: 'Hi there! How can I help you today?',
+        text: this.defaultWelcomeMessage(),
         time: new Date()
       });
     }
@@ -67,7 +90,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.cancelActiveNexusRequest();
+    this.clearTemporarySession(this.activeTempSessionId);
     this.stoppedRequestIds.clear();
+    this.routeSubscription?.unsubscribe();
     this.io?.disconnect();
     this.mo?.disconnect();
   }
@@ -107,13 +132,16 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     const report = (this.report() || this.reportText() || '').trim();
     const payload = {
+      session_id: this.temporarySessionId(),
+      session_type: 'temporary' as const,
       message: report ? `${report}\n\n${userMessage}` : userMessage,
       tool: this.resolveTool(report),
-      type: this.type() || 'default'
+      type: this.type() || 'default',
     };
     const requestId = ++this.chatRequestId;
     this.stoppedRequestIds.delete(requestId);
     let reply = '';
+    let pendingTriggers: AiWorkspaceTrigger[] = [];
     let botMessage: AiWorkspaceMessage | undefined;
     const updateReply = (value: string) => {
       if (requestId !== this.chatRequestId || this.stoppedRequestIds.has(requestId)) {
@@ -124,6 +152,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
         this.chatMessages.push(botMessage);
       }
       botMessage.text = value;
+      if (pendingTriggers.length) {
+        botMessage.triggers = pendingTriggers;
+      }
       this.scrollToNewMessage();
     };
     const finishStream = () => {
@@ -155,6 +186,12 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
           this.showErrorMessage(userMessage, reply);
           this.scrollToNewMessage();
           return;
+        }
+        if (chunk.triggers?.length) {
+          pendingTriggers = this.validTriggers(chunk.triggers);
+          if (botMessage) {
+            botMessage.triggers = pendingTriggers;
+          }
         }
         if (chunk.delta) {
           reply += chunk.delta;
@@ -223,7 +260,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.cancelActiveNexusRequest();
     this.isBotTyping = false;
     this.botStep = '';
-    this.nexusChatService.clearNexusSession().subscribe({
+    this.nexusChatService.clearNexusSession({ session_id: this.temporarySessionId() }).subscribe({
       next: () => this.resetChatView(),
       error: () => this.resetChatView(),
     });
@@ -242,10 +279,6 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   closeChat() {
-    this.chatRequestId += 1;
-    this.cancelActiveNexusRequest();
-    this.isBotTyping = false;
-    this.botStep = '';
     this.chatOpen = false;
     this.composerExpanded = false;
     this.composerRows = 1;
@@ -254,6 +287,27 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.mo?.disconnect();
     this.io = undefined;
     this.mo = undefined;
+  }
+
+  private validTriggers(value: AiWorkspaceTrigger[]): AiWorkspaceTrigger[] {
+    return value.filter(item => Boolean(item.url));
+  }
+
+  async downloadTrigger(trigger: AiWorkspaceTrigger, event?: Event): Promise<void> {
+    event?.preventDefault();
+    event?.stopPropagation();
+    try {
+      await this.nexusChatService.downloadTrigger(trigger);
+    }
+    catch {
+      this.chatMessages.push({
+        id: crypto.randomUUID(),
+        sender: 'error',
+        text: 'Unable to download file. Please try again.',
+        time: new Date()
+      });
+      this.scrollToNewMessage();
+    }
   }
 
   trackByIndex(index: number): number {
@@ -324,7 +378,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chatMessages = [{
       id: crypto.randomUUID(),
       sender: 'bot',
-      text: 'Hi there! How can I help you today?',
+      text: this.defaultWelcomeMessage(),
       time: new Date()
     }];
     this.newMessage = '';
@@ -347,6 +401,29 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private countMessageTokens(value: string): number {
     return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
+  }
+
+  private defaultWelcomeMessage(): string {
+    return this.welcomeMessage().trim() || 'Hi there! How can I help you today?';
+  }
+
+  private temporarySessionId(): string {
+    return `temp:${this.routeHash(this.router.url.split('#')[0] || '/')}`;
+  }
+
+  private clearTemporarySession(sessionId: string): void {
+    if (!sessionId) {
+      return;
+    }
+    this.nexusChatService.clearNexusSession({ session_id: sessionId }).subscribe({ error: () => undefined });
+  }
+
+  private routeHash(value: string): string {
+    let hash = 0;
+    for (let index = 0; index < value.length; index += 1) {
+      hash = ((hash << 5) - hash + value.charCodeAt(index)) | 0;
+    }
+    return Math.abs(hash).toString(36);
   }
 
   private scrollToNewMessage(): void {

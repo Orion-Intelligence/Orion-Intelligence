@@ -1,7 +1,11 @@
 import asyncio
+import hashlib
+import json
 import re
+import secrets
 from typing import List
 from pathlib import Path
+from types import SimpleNamespace
 
 from bson import ObjectId
 from cryptography.fernet import Fernet
@@ -16,21 +20,16 @@ from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, UserStatus, LicenseName, user_role
+from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
+from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
-from orion.services.mongo_manager.shared_model.db_chat_session_model import ChatHistoryMessage
-from orion.services.mongo_manager.shared_model.db_chat_session_model import ChatSession
-from orion.services.mongo_manager.shared_model.db_chat_session_model import ChatSessionHistory
-from orion.services.mongo_manager.shared_model.db_chat_session_model import db_chat_session_model
-from orion.services.mongo_manager.shared_model.db_chat_session_model import utc_now
-from orion.api.server.nexus_manager.history_embeddings.history_embedding_manager import HistoryEmbeddingManager
 
 
 class AccountManager:
     __instance = None
-    DEFAULT_CHAT_SESSION_ID = "default"
 
     def __init__(self):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -117,6 +116,8 @@ class AccountManager:
                 subscription=data.subscription,
                 licenses=data.licenses,
                 permissions=data.permissions,
+                alerts_allowed_all=False,
+                alerts_allowed_tenant_ids=[],
                 password_reset_required=True, )
 
             await engine.save(user)
@@ -212,6 +213,30 @@ class AccountManager:
             user.licenses = request.licenses
         if request.permissions is not None:
             user.permissions = request.permissions
+            if UserPermission.CASE_MANAGEMENT not in (user.permissions or []):
+                user.alerts_allowed_all = False
+                user.alerts_allowed_tenant_ids = []
+
+        alert_fields_requested = (
+            "alerts_allowed_all" in request.model_fields_set
+            or "alerts_allowed_tenant_ids" in request.model_fields_set
+        )
+        alert_access_requested = bool(request.alerts_allowed_all) or bool(request.alerts_allowed_tenant_ids or [])
+        if alert_fields_requested and current_user.role != user_role.ADMIN:
+            if alert_access_requested:
+                raise HTTPException(status_code=403, detail="Only admin can assign alert access")
+        elif alert_fields_requested and UserPermission.CASE_MANAGEMENT in (user.permissions or []):
+            from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+            alert_request = SimpleNamespace(
+                permissions=user.permissions,
+                alerts_allowed_all=bool(request.alerts_allowed_all),
+                alerts_allowed_tenant_ids=list(request.alerts_allowed_tenant_ids or []),
+            )
+            user.alerts_allowed_all, user.alerts_allowed_tenant_ids = await TenantManager.get_instance().validate_alert_access_assignment(alert_request, current_user)
+        elif alert_fields_requested:
+            user.alerts_allowed_all = False
+            user.alerts_allowed_tenant_ids = []
+
         if request.password_reset_required is not None:
             user.password_reset_required = request.password_reset_required
         await self._engine.save(user)
@@ -226,6 +251,13 @@ class AccountManager:
         user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
         if not user:
             raise HTTPException(status_code=401, detail="User not found")
+
+        twofa_changed = request.twofa_enabled is not None and request.twofa_enabled != user.twofa_enabled
+        if (request.password is not None or twofa_changed) and (
+            not request.current_password or
+            not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(request.current_password, user.password)
+        ):
+            raise HTTPException(status_code=400, detail="Invalid password")
 
         if request.username is not None:
             user.username = request.username
@@ -250,6 +282,14 @@ class AccountManager:
 
         return {"message": "User updated successfully"}
 
+    async def generate_recovery_key(self, current_user, current_password: str):
+        if not CONSTANTS.S_AUTH_PWD_CONTEXT.verify(current_password, current_user.password):
+            raise HTTPException(status_code=400, detail="Invalid password")
+        recovery_key = secrets.token_urlsafe(32)
+        current_user.recovery_key_hash = hashlib.sha256(recovery_key.encode()).hexdigest()
+        await self._engine.save(current_user)
+        return {"recovery_key": recovery_key}
+
     async def getProfileImage(self, userId: str):
         file_path = Path(self.TENANT_DIR) / f"{userId}.png"
         default_path = Path(self.TENANT_DIR) / "logo_url_default.png"
@@ -272,87 +312,6 @@ class AccountManager:
             return enc.decrypt(value.encode()).decode()
         except Exception:
             return ""
-
-    async def get_current_user_chat_history(
-        self,
-        current_user,
-        include_embeddings: bool = False,
-        session_id: str | None = None,
-    ):
-        user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        chat_store = await self._engine.find_one(db_chat_session_model, db_chat_session_model.user_id == str(user.id))
-        session_id = session_id or self.DEFAULT_CHAT_SESSION_ID
-        session = self._find_chat_session(chat_store, session_id)
-        history = self._session_messages(session) if session else []
-        if not include_embeddings:
-            history = HistoryEmbeddingManager.strip_embeddings(history)
-        return {"history": history, "chat_history": history}
-
-    async def update_current_user_chat_history(self, chat_history, current_user):
-        user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        session_id = str(getattr(chat_history, "session_id", None) or self.DEFAULT_CHAT_SESSION_ID)
-        chat_store = await self._engine.find_one(db_chat_session_model, db_chat_session_model.user_id == str(user.id))
-        if not chat_store:
-            chat_store = db_chat_session_model(user_id=str(user.id), chat_sessions=[])
-
-        session = self._find_chat_session(chat_store, session_id)
-        existing_history = self._session_messages(session) if session else []
-        stored_messages = await HistoryEmbeddingManager.prepare_for_storage(
-            chat_history,
-            existing_history,
-            user_name=user.username,
-        )
-        message_models = [ChatHistoryMessage(**message) for message in stored_messages]
-        now = utc_now()
-
-        if session:
-            if session.chat_history:
-                session.chat_history.messages = message_models
-            else:
-                session.chat_history = ChatSessionHistory(messages=message_models)
-            session.updated_at = now
-        else:
-            chat_store.chat_sessions.append(
-                ChatSession(
-                    session_id=session_id,
-                    created_at=now,
-                    updated_at=now,
-                    chat_history=ChatSessionHistory(messages=message_models),
-                )
-            )
-
-        await self._engine.save(chat_store)
-        return {"message": "Chat history updated successfully"}
-
-    async def clear_current_user_chat_history(self, current_user):
-        user = await self._engine.find_one(db_user_account, db_user_account.username == current_user.username)
-        if not user:
-            raise HTTPException(status_code=401, detail="User not found")
-        chat_store = await self._engine.find_one(db_chat_session_model, db_chat_session_model.user_id == str(user.id))
-        if chat_store:
-            chat_store.chat_sessions = []
-            await self._engine.save(chat_store)
-        return {"cleared": True}
-
-    @staticmethod
-    def _find_chat_session(chat_store, session_id: str):
-        if not chat_store:
-            return None
-        for session in chat_store.chat_sessions or []:
-            if session.session_id == session_id:
-                return session
-        return None
-
-    @staticmethod
-    def _session_messages(session) -> list[dict]:
-        if not session:
-            return []
-        messages = session.chat_history.messages if session.chat_history else []
-        return [message.model_dump() for message in messages]
 
     async def get_node(self, current_user) -> NodeCallbackModel:
         user = current_user
@@ -390,8 +349,19 @@ class AccountManager:
         if theme not in ("dark-theme", "light-theme"):
             theme = "dark-theme"
 
+        accounts_mail = ""
+        accounts_smtp_server = ""
+        accounts_smtp_port = ""
+        settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        if settings_record and settings_record.value:
+            system_settings = json.loads(settings_record.value)
+            meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
+            accounts_mail = meta_info.get("ACCOUNTS_MAIL") or ""
+            accounts_smtp_server = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
+            accounts_smtp_port = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
+
         node = NodeCallbackModel.model_validate(
-            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": user.password_reset_token if getattr(user, "password_reset_required", False) else None, "license": [
+            {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "license": [
                 license.value for license in
                 user.licenses], "permissions": [
                 permission.value if hasattr(permission, "value") else permission for permission in (getattr(user, "permissions", None) or [])], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
@@ -403,10 +373,14 @@ class AccountManager:
                 assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
                 "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
                 "eventManagementEnabled": getattr(tenant, "event_management_enabled", False),
+                "alertsVisibleToAdmin": getattr(tenant, "alerts_visible_to_admin", True),
+                "privilegedIoc": getattr(tenant, "privileged_ioc", False),
+                "alertRunTime": getattr(tenant, "alert_run_time", None),
+                "allowedAlertCategories": getattr(tenant, "allowed_alert_categories", None),
                 "accountsMailPassword": "",
-                "accountsMail": self.safe_decrypt(enc, getattr(tenant, "accounts_mail", "")),
-                "accountsSmtpServer": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_server", "")),
-                "accountsSmtpPort": self.safe_decrypt(enc, getattr(tenant, "accounts_smtp_port", "")), }, "alerts": [], "alert_summary": alert_summary, })
+                "accountsMail": accounts_mail,
+                "accountsSmtpServer": accounts_smtp_server,
+                "accountsSmtpPort": accounts_smtp_port, }, "alerts": [], "alert_summary": alert_summary, })
 
         return node
 

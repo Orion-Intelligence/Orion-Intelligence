@@ -14,6 +14,24 @@ interface CombinedRule {
     scanning: boolean;
     maintainer: boolean;
 }
+
+type AlertLicenseTarget = string | {
+    licenses?: string[] | null;
+    type?: string | null;
+    categoryName?: string | null;
+};
+
+const SCANNING_ALERT_TYPES = new Set([
+  'advanced scanning',
+  'playstore-scanning',
+  'social-scanner',
+  'email-breach',
+  'software-scanning',
+  'vulnerability-scanning',
+  'repo scanning',
+  'seo scanning'
+]);
+
 @Injectable({
   providedIn: 'root'
 })
@@ -26,6 +44,14 @@ export class LicenseService {
 
   getLicenses(): string[] {
     return this.appService.userSessionData().user.license ?? [];
+  }
+
+  private normalizeAlertType(type: string): string {
+    const normalizedType = (type || '').trim().toLowerCase();
+    if (normalizedType === 'stealerlogs') {
+      return 'stealer_logs';
+    }
+    return normalizedType;
   }
 
   isAdmin(): boolean {
@@ -48,8 +74,8 @@ export class LicenseService {
     return of(this.appService.userSessionData().user.license);
   }
 
-  private getCombinedRule(): CombinedRule {
-    const userLicenses = this.getLicenses();
+  private getCombinedRule(licenses: string[] = this.getLicenses()): CombinedRule {
+    const userLicenses = licenses;
     const combined: CombinedRule = {
       modules: new Set<string>(),
       cti_graph: false,
@@ -76,6 +102,13 @@ export class LicenseService {
       combined.maintainer ||= rule.maintainer;
     }
     return combined;
+  }
+
+  private getAlertAccessLicenses(): string[] {
+    return Array.from(new Set([
+      ...this.getLicenses(),
+      ...(this.appService.userSessionData().tenant.licenses || [])
+    ]));
   }
 
   demoSubscription(moduleName: string) {
@@ -129,6 +162,55 @@ export class LicenseService {
     }
   }
 
+  canUseAlertType(type?: string | null): boolean {
+    const rawType = (type || '').trim().toLowerCase();
+    if (!rawType) {
+      return false;
+    }
+    if (this.isAdmin() || this.isDemo()) {
+      return true;
+    }
+    const rule = this.getCombinedRule(this.getAlertAccessLicenses());
+    if (SCANNING_ALERT_TYPES.has(rawType)) {
+      return rule.scanning;
+    }
+    const alertType = this.normalizeAlertType(rawType);
+    return rule.modules === 'all' || rule.modules.has(alertType);
+  }
+
+  getAlertLicenses(type?: string | null): string[] {
+    const rawType = (type || '').trim().toLowerCase();
+    const alertType = this.normalizeAlertType(rawType);
+    const isScanningAlert = SCANNING_ALERT_TYPES.has(rawType);
+    return Object.entries(license_rules)
+      .filter(([, rule]) => {
+        if (rule?.modules === 'all') {
+          return true;
+        }
+        if (Array.isArray(rule?.modules) && rule.modules.includes(alertType)) {
+          return true;
+        }
+        return isScanningAlert && !!rule?.scanning;
+      })
+      .map(([license]) => license);
+  }
+
+  canViewAlert(target: AlertLicenseTarget | null | undefined): boolean {
+    if (this.isAdmin() || this.isDemo()) {
+      return true;
+    }
+    const type = typeof target === 'string'
+      ? target
+      : (target?.type || target?.categoryName || '');
+    const alertLicenses = typeof target === 'string'
+      ? []
+      : (target?.licenses || []);
+    if (alertLicenses.length > 0 && this.getAlertAccessLicenses().some(license => alertLicenses.includes(license))) {
+      return true;
+    }
+    return this.canUseAlertType(type);
+  }
+
   canUseActorsAndMalware(): boolean {
     const licenses = this.getLicenses();
     return licenses.includes(LicenseName.OSINT_BASIC)
@@ -155,6 +237,17 @@ export class LicenseService {
 
   isMaintainer(): boolean {
     return this.getCombinedRule().maintainer;
+  }
+
+  canViewTenantAlerts(): boolean {
+    const permissions = this.appService.userSessionData().user.permissions || [];
+    return this.isAdmin() || (this.isAnalyst() && permissions.includes('case_management') && this.appService.userSessionData().tenant.isDefault);
+  }
+
+  canReviewTakedowns(): boolean {
+    const tenant = this.appService.userSessionData().tenant;
+    const isRootTenant = tenant.isDefault;
+    return this.isAdmin() && isRootTenant;
   }
 
   getLicenseLabel(license: LicenseName | string): string {

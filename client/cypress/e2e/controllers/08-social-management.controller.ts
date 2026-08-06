@@ -85,16 +85,10 @@ export function visitSocialIntel() {
 }
 
 function setViewportToCurrentScreen() {
-  cy.window({ log: false }).then((win) => {
-    const configuredWidth = Number(Cypress.config('viewportWidth'));
-    const configuredHeight = Number(Cypress.config('viewportHeight'));
-    const screenWidth = Math.floor(win.screen.availWidth || win.screen.width || configuredWidth);
-    const screenHeight = Math.floor(win.screen.availHeight || win.screen.height || configuredHeight);
-    const width = Math.max(screenWidth, configuredWidth);
-    const height = Math.max(screenHeight, configuredHeight);
-
-    cy.viewport(width, height);
-  });
+  cy.viewport(
+    Number(Cypress.config('viewportWidth')) || 1920,
+    Number(Cypress.config('viewportHeight')) || 1080
+  );
 }
 
 export function scanKnownSocialUsername(username = SOCIAL_STEALER_USERNAME) {
@@ -347,7 +341,8 @@ export function fetchSocialProfileTabs() {
     .then(($rows) => {
       const matchingRow = [...$rows].find((row) => {
         const text = row.textContent || '';
-        return text.includes(SOCIAL_STEALER_DOMAIN) && text.includes(SOCIAL_STEALER_USERNAME);
+        const domain = row.querySelector('[title]')?.getAttribute('title') || '';
+        return isStealerDomain(domain) && text.includes(SOCIAL_STEALER_USERNAME);
       });
       expect(matchingRow, `stealer tab row includes ${SOCIAL_STEALER_DOMAIN} and ${SOCIAL_STEALER_USERNAME}`).to.exist;
     });

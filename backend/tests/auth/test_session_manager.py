@@ -7,10 +7,12 @@ from types import SimpleNamespace
 import jwt
 import pyotp
 import pytest
+from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
+from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import (
     LicenseName,
     UserStatus,
@@ -19,6 +21,8 @@ from orion.services.mongo_manager.shared_model.db_auth_models import (
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
+from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from tests.fake_model.fakes import FakeEngine, FakeRedis
 
 
@@ -39,6 +43,9 @@ def _make_user(**overrides):
         "licenses": [LicenseName.MAINTAINER],
         "twofa_secret": None,
         "twofa_enabled": False,
+        "password_reset_required": False,
+        "password_reset_token": None,
+        "password_reset_expiry": None,
     }
     data.update(overrides)
     return SimpleNamespace(**data)
@@ -102,6 +109,110 @@ def test_get_current_user_allows_crawler_without_session_checks():
 
     assert current_user is user
     assert manager._redis.calls == []
+
+
+def test_get_current_user_rejects_token_for_other_tenant():
+    user = _make_user(tenant_uuid="tenant-a")
+    manager = _make_manager(user=user)
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.get_current_user(f"Bearer {_token({'sub': 'alice', 'sid': 'sid-123'})}", tenant_id="tenant-b"))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Tenant access forbidden"
+
+
+def test_auth_login_rejects_user_on_wrong_tenant_url(monkeypatch):
+    user = _make_user(tenant_uuid="tenant-a")
+
+    class _FakeAuthManager:
+        async def authenticate_user(self, mail, password):
+            assert mail == "alice"
+            assert password == "secret"
+            return user
+
+    monkeypatch.setattr(auth_manager, "get_instance", staticmethod(lambda: _FakeAuthManager()))
+
+    with pytest.raises(HTTPException) as exc:
+        _run(auth_manager.login("alice", "secret", tenant_id=SimpleNamespace(id="tenant-b")))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Tenant access forbidden"
+
+
+def test_tenant_urls_use_the_tenant_subdomain(monkeypatch):
+    monkeypatch.setitem(
+        env_handler.get_instance()._env_vars,
+        "TENANT_BASE_DOMAIN",
+        "",
+    )
+    tenant = SimpleNamespace(slug="acme", is_default=False)
+
+    assert TenantManager.build_tenant_url(
+        "https://orion.example", tenant, "/login"
+    ) == "https://acme.orion.example/login"
+    assert TenantManager.build_tenant_url(
+        "http://localhost:4200", tenant, "/reset/token"
+    ) == "http://acme.localhost:4200/reset/token"
+
+
+def test_delete_tenant_rejects_default_tenant():
+    tenant = SimpleNamespace(id="507f1f77bcf86cd799439012", is_default=True)
+    manager = object.__new__(TenantManager)
+    manager._engine = FakeEngine(find_one_results=[tenant])
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.delete_tenant(str(tenant.id), SimpleNamespace(role=user_role.ADMIN)))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Default tenant cannot be deleted"
+
+
+def test_delete_tenant_rejects_non_admin():
+    manager = object.__new__(TenantManager)
+    manager._engine = FakeEngine()
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.delete_tenant("507f1f77bcf86cd799439012", SimpleNamespace(role=user_role.MEMBER)))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Only admins can delete tenants"
+
+
+def test_delete_tenant_removes_users_and_keys():
+    tenant_id = "507f1f77bcf86cd799439012"
+    tenant = SimpleNamespace(id=tenant_id, is_default=False)
+    users = [
+        SimpleNamespace(id="507f1f77bcf86cd799439013"),
+        SimpleNamespace(id="507f1f77bcf86cd799439014"),
+    ]
+    manager = object.__new__(TenantManager)
+    manager._engine = FakeEngine(records=users, find_one_results=[tenant])
+
+    result = _run(manager.delete_tenant(tenant_id, SimpleNamespace(role=user_role.ADMIN)))
+
+    assert result == {"message": "Tenant deleted successfully"}
+    assert len(manager._engine.removed) == 4
+    assert manager._engine.deleted == [tenant]
+
+
+@pytest.mark.parametrize("action", ["forgot", "update"])
+def test_password_recovery_handles_the_wrong_tenant(monkeypatch, action):
+    user = _make_user(tenant_uuid="tenant-a", email="alice@example.com")
+    engine = FakeEngine(user)
+    monkeypatch.setattr(
+        "orion.api.interactive.auth_manager.auth_manager.mongo_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_engine=lambda: engine)),
+    )
+
+    if action == "forgot":
+        result = _run(auth_manager.forgot_password("alice@example.com", SimpleNamespace(id="tenant-b")))
+        assert result == {"message": "If the email is registered, a password reset email has been sent."}
+    else:
+        with pytest.raises(HTTPException) as exc:
+            _run(auth_manager.update_password("token", "NewPassword1!", SimpleNamespace(id="tenant-b")))
+        assert exc.value.status_code == 403
+        assert exc.value.detail == "Tenant access forbidden"
 
 
 def test_get_current_role_and_status_return_enum_values():
@@ -210,6 +321,7 @@ def test_create_temp_token_embeds_twofa_and_extra_fields():
 
 def test_verify_2fa_and_issue_enables_twofa_and_returns_session(monkeypatch):
     secret = pyotp.random_base32()
+    cipher = Fernet(Fernet.generate_key())
     user = _make_user(twofa_secret=None, licenses=[LicenseName.MAINTAINER, LicenseName.FREE])
     manager = _make_manager(user=user)
     temp_token = _run(session_manager.create_temp_token("alice", extra={"tfa_secret": secret}))
@@ -222,6 +334,7 @@ def test_verify_2fa_and_issue_enables_twofa_and_returns_session(monkeypatch):
         lambda data, ttl: asyncio.sleep(0, result=("issued-access-token", user.role)),
     )
     monkeypatch.setattr(manager, "has_onboarding", lambda company_id: asyncio.sleep(0, result=True))
+    monkeypatch.setattr(manager, "_tenant_fernet", lambda _user: asyncio.sleep(0, result=cipher))
 
     result = _run(manager.verify_2fa_and_issue(temp_token, code))
 
@@ -229,16 +342,19 @@ def test_verify_2fa_and_issue_enables_twofa_and_returns_session(monkeypatch):
     assert result["token_type"] == "bearer"
     assert result["session"]["username"] == "alice"
     assert result["session"]["hasOnboarding"] is True
-    assert user.twofa_secret == secret
+    assert user.twofa_secret != secret
+    assert cipher.decrypt(user.twofa_secret.encode()).decode() == secret
     assert user.twofa_enabled is True
     assert manager._engine.saved == [user]
 
 
-def test_verify_2fa_and_issue_rejects_invalid_code():
+def test_verify_2fa_and_issue_rejects_invalid_code(monkeypatch):
     secret = pyotp.random_base32()
-    user = _make_user(twofa_secret=secret)
+    cipher = Fernet(Fernet.generate_key())
+    user = _make_user(twofa_secret=cipher.encrypt(secret.encode()).decode())
     manager = _make_manager(user=user)
     temp_token = _run(session_manager.create_temp_token("alice"))
+    monkeypatch.setattr(manager, "_tenant_fernet", lambda _user: asyncio.sleep(0, result=cipher))
 
     with pytest.raises(HTTPException) as exc:
         _run(manager.verify_2fa_and_issue(temp_token, "000000"))

@@ -16,6 +16,13 @@ build/
 client/dist/
 client/build/
 
+# Ignore generated coverage output
+client/.nyc_output/
+client/coverage/
+backend/coverage.xml
+backend/htmlcov/
+coverage-merged/
+
 # Ignore Git and OS junk
 .git
 .gitignore

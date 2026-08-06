@@ -51,10 +51,10 @@ export enum GraphClusterType {
     Exploit = 'exploit'
 }
 export enum AiWorkspacePrompt {
-    SUMMARY_BRIEF = 'Summarize current findings into a short analyst brief.',
-    PRIORITY_INDICATORS = 'List the highest priority indicators to review next.',
-    COLLECTION_PLAN = 'Turn this query into a focused collection plan.',
-    TRIAGE_NOTE = 'Draft a triage note for suspicious activity.'
+    INFOSTEALER_BREACH = 'How can I protect myself after an infostealer data breach?',
+    LEAKED_CREDENTIALS = 'How can I check if my email or passwords were leaked?',
+    SUSPICIOUS_LINK = 'What should I do after clicking a suspicious link?',
+    SECURE_ACCOUNTS = 'How can I better protect my online accounts from hackers?'
 }
 export const sidebarItemTooltips: Record<string, string> = {
   'All': 'Comprehensive Overview',
@@ -96,6 +96,7 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Wanted-List': 'Wanted List',
   'Cracked': 'Cracked',
   'View': 'View',
+  'Take-Down': 'Takedown Requests',
   'Auditlog': 'Audit Logs',
   'Basic-Scan': 'Basic Scan',
   'Port-Scan': 'Port Scan',

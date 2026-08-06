@@ -10,7 +10,6 @@ from .log_model import InjectionBatchRequestModel, InjectionBatchResponseModel, 
 from .malware_model import MalwareDataModel
 from .nlp_data_model import nlp_data_model
 from .open_sanctions_model import open_sanctions_data_model
-from .report_chat_data_model import NexusTextAnalysisRequest, ReportChatRequest
 from .social_model import social_data_model
 from .social_scrape_request_model import SocialScrapeRequest
 from ..crawl_enums import CRAWL_PATHS, CRAWL_CALLBACK_RESPONSES
@@ -34,8 +33,6 @@ __all__ = [
     "SiemSearchResponseModel",
     "nlp_data_model",
     "open_sanctions_data_model",
-    "NexusTextAnalysisRequest",
-    "ReportChatRequest",
     "social_data_model",
     "SocialScrapeRequest",
     "CRAWL_PATHS",

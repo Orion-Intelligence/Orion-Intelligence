@@ -49,6 +49,10 @@ export interface TenantDataModel {
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
+    alertsVisibleToAdmin?: boolean;
+    privilegedIoc?: boolean;
+    alertRunTime?: string | null;
+    allowedAlertCategories?: string[] | null;
     accountsMailPassword?: string;
     accountsMail?: string;
     accountsSmtpServer?: string;
@@ -58,6 +62,7 @@ export interface userMetaData {
     username: string;
     twofa_enabled?: boolean;
     password?: string;
+    current_password?: string;
     theme?: 'dark-theme' | 'light-theme';
     preferences?: Record<string, any> & {
         theme?: 'dark-theme' | 'light-theme';
@@ -81,8 +86,11 @@ export interface AlertModel {
     description?: string;
     url?: string;
     source?: string;
+    risk?: string;
     all_ioc?: AlertAllIoc[];
+    licenses?: string[];
     content_types?: string[];
+    raw_findings?: Record<string, unknown>;
     status?: 'ignore' | 'active';
     first_seen?: Date;
     last_seen?: Date;

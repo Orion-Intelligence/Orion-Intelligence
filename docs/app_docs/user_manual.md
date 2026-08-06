@@ -12,12 +12,15 @@ This manual is written for the Orion web application as implemented in this repo
 
 Orion is an investigation and monitoring platform that combines indexed intelligence, live lookups, graph exploration, tenant workflows, and platform administration in one interface. Users typically work in one of four ways:
 
-1. Search indexed data from the main dashboard.
-2. Run a targeted lookup or scan against a domain, file, email, IP, username, or other entity.
-3. Open a report view to inspect metadata, evidence, and relationships.
-4. Manage tenant, user, alert, and platform settings based on role permissions.
+1. Enter the platform through login, signup, verification, onboarding, or shared links.
+2. Search indexed data from the main dashboard.
+3. Run a targeted lookup or scan against a domain, file, email, IP, username, or other entity.
+4. Open a report view to inspect metadata, evidence, and relationships.
+5. Manage tenant, user, alert, case, collection, and platform settings based on role permissions.
 
 This document is organized around those tasks.
+
+For concise, task-based instructions with navigation and troubleshooting, see the [Orion Help Manual](./help_manual.md).
 
 ```{contents}
 :local:
@@ -26,6 +29,14 @@ This document is organized around those tasks.
 
 ## Access and Entry Points
 
+### Signup
+
+Signup creates a new account request. The form validates username format, email format, and password requirements before submitting the registration.
+
+The username must start with a letter and use the supported username pattern. If the value is invalid, Orion suggests a corrected format. Password input shows strength and requirement feedback before submission.
+
+After a successful signup, the user is sent to the welcome flow. The account may still require administrator review, email verification, or tenant onboarding before full dashboard access.
+
 ### Login
 
 The standard entry point is the login screen. Depending on deployment settings, users may also encounter:
@@ -33,6 +44,10 @@ The standard entry point is the login screen. Depending on deployment settings, 
 - account onboarding
 - welcome or notification screens
 - password reset flows
+
+Browser sign-in uses an encrypted, HTTP-only session cookie instead of storing the access token in browser local storage. In production, the cookie is also marked `Secure`, uses `SameSite=Lax`, and expires after 30 minutes. Session renewal and authenticated requests use the cookie automatically. Signing out invalidates the server session and removes the authentication cookie.
+
+Unsuccessful login attempts are tracked against the entered email or username. The fifth consecutive failure temporarily pauses login for 1 minute, the next failure pauses it for 10 minutes, and later consecutive failures pause it for 30 minutes. The login screen reports how long to wait. A successful login clears the failure count, and an inactive failure history expires after 30 minutes.
 
 ```{figure} ../screenshots/login-page-20260326.png
 :alt: Orion login page
@@ -49,12 +64,40 @@ The sidebar, available modules, and some actions are controlled by role, tenant 
 
 ### Password Reset
 
-The reset flow supports two stages:
+Select `Recover account?` on the login screen to open the recovery page. The page provides two separate tabs:
+
+- `Reset password` sends a reset link to the registered email address.
+- `Account recovery` verifies the registered email together with the user's global recovery key before sending the same type of reset link.
+
+The standard reset flow supports two stages:
 
 - requesting a reset link by email
 - submitting a new password using a tokenized reset link
 
-The new-password form includes password-strength guidance and confirmation validation.
+The request form validates the email format when submitted. Orion always displays the same success result for a well-formed request, whether or not the email is registered. This prevents the recovery screen from revealing which accounts exist.
+
+Reset links expire after 20 minutes, are restricted to the correct tenant, and can be used only for an active account. The reset token is stored as a hash and is removed after a successful password change. The new-password form includes password-strength guidance and confirmation validation, and the new password cannot match the previous password.
+
+If an administrator requires a password change, a successful login redirects the user to the same new-password screen before normal work continues. Completing the change clears the forced-reset requirement.
+
+#### Recover With a Recovery Key
+
+Use account recovery when you have the global recovery key generated from Account Settings:
+
+1. Select `Recover account?` on the login screen.
+2. Select the `Account recovery` tab.
+3. Enter the registered email address.
+4. Enter the complete 43-character recovery key.
+5. Select `Recover account` and check the registered email for a reset link.
+6. Open the link, choose a new password, confirm it, and submit the form.
+
+The page validates email and recovery-key formats before submission. For correctly formatted input, Orion returns the same success screen even when the email or recovery key is incorrect. A reset email is sent only when both values match.
+
+:::{admonition} Recovery key and 2FA setup key
+:class: important
+
+The global recovery key is different from the authenticator setup secret shown while configuring 2FA. Use the global recovery key on the Account Recovery tab. Keep both values private and store them outside the Orion browser session.
+:::
 
 ```{figure} ../screenshots/password-reset-20260326.png
 :alt: Password reset request page
@@ -62,6 +105,19 @@ The new-password form includes password-strength guidance and confirmation valid
 
 Password reset workflow entry point.
 ```
+
+### Welcome and Email Verification
+
+The welcome page appears after signup and after tokenized verification links. Without a token, it confirms that registration was submitted and tells the user to wait for administrator approval or email notification.
+
+When opened with a verification token, the page verifies the token and reports one of the following states:
+
+- verification successful
+- expired verification link
+- invalid verification link
+- temporary verification failure
+
+After a successful verification, users can continue to login or onboarding depending on account state.
 
 ### Tenant Onboarding
 
@@ -81,6 +137,21 @@ The tested tenant flow confirms that onboarding is part of a larger tenant lifec
 - onboarding wizard completion
 - IOC seeding during onboarding
 - tenant sub-user creation immediately after onboarding
+
+### Notifications and Subscription Screens
+
+Notification screens are used for access-level messages such as trial expiration, subscription prompts, or deployment-specific access notices. The payment gateway screen displays trial or subscription messaging when payment or upgrade flow context is needed.
+
+These screens do not expose investigation data. They explain why a user cannot continue directly into the requested workflow and provide a path back to the main application.
+
+### Shared Links
+
+Some workflows can produce share links that open outside the signed-in dashboard:
+
+- shared case links open a scoped case view.
+- shared chat links open a scoped AI/chat transcript.
+
+Shared views are narrow by design. They expose only the material attached to that share link and do not grant broader dashboard access.
 
 ## Main Application Layout
 
@@ -152,7 +223,7 @@ The search bar is the main entry point for indexed investigation.
 
 ### Basic Search
 
-In standard mode, users can enter a free-text query and submit it immediately. Orion then loads results for the current module or route context.
+In standard mode, users can enter a free-text query and submit it immediately. Orion then loads results for the current module context.
 
 ### Advanced Search Toggle
 
@@ -276,24 +347,57 @@ The exact menu depends on license and permissions, but the Orion UI commonly exp
 | --- | --- | --- |
 | Homepage | Entry point and overview | search, summaries, statistics |
 | General Intelligence | Broad indexed intelligence search | All, General, Forums, News, Stolen, Drugs, Hacking, Marketplaces, Cryptocurrency, Leaks |
-| Data Breach | Breach records and exposure checks | All, Databases, Tracking |
-| Defacement | Website compromise monitoring | All, Hacked, Phishing, Databases |
-| Social | Social and community-source intelligence | All, Telegram, Twitter, Mastodon, Pastebin, Forum, Reddit |
+| Data Breach | Breach records, exposure checks, and leak references | All, Databases, Tracking |
+| Compromise Monitoring | Website compromise and defacement monitoring | All, Hacked, Phishing, Databases |
+| Social | Social and community-source intelligence | All, Telegram, Twitter, Mastodon, Pastebin, Forum, Reddit, Facebook, Instagram, LinkedIn, TikTok, YouTube |
 | Exploit | Vulnerability and exploit intelligence | All, CVE, Tools, ZeroDay |
+| Actors & Malware | APT actor and malware-family intelligence | All, APT, Malware, Compromised-Actors |
 | Consolidated | Combined multi-source investigation | IOCs, Deep Search, Network Intel |
-| Feed | News-style intelligence stream | News |
-| Dump | Dump and listing sources | Listing |
+| News Feed | News-style intelligence stream | News, Tracking |
 | Stealer Logs | Credential and IOC investigation | IOCs |
-| Web Scans | Live web-target scanning | Basic Scan, Port Scan, Repository Scan, SEO Scan, APK Scan |
-| Entity API | Entity-based live lookups | Email Breach, Social Scanner, Wanted List, National Identity, Playstore Scanner, Software Scanner, File Scanner, Crypto Scanner |
-| Network Intel | Domain, IP, and vulnerability recon | Host Recon, IP Scan, Vulnerability Scan |
+| Entity Lookup | Entity-based live lookups | Email Breach, Social Scanner, Wanted List, National Identity, Playstore Scanner, Software Scanner, File Scanner, Text Analysis, Crypto Scanner |
+| Web Scans | Live web-target scanning | Basic Scan, Port Scan, Repository Scan, SEO Scan, APK Scan, scan reports |
+| Network Intel | Domain, IP, and vulnerability recon | Host Recon, IP Scan, Vulnerability Scan with depth controls |
 | Satellite Intel | Geo-fencing, satellite map, facilities, aircraft, and ship tracking | Satellite Map, Threat Lens, Imagery Analysis |
 | Social Intel | Username and profile mapping | graph and list views |
-| CTI Graph | Cyber relationship mapping | cluster, document, property pivots |
+| CTI Graph | Cyber relationship mapping | graph filters, Advanced Graph Builder, cluster, document, property pivots |
+| Account Settings | Current-user profile, security, and preferences | profile image, theme, 2FA, password, recovery key, licenses |
+| Public User Activity | Visible profile activity review | user profile, activity items, thread links |
+| Tenant Homepage | Tenant alert and monitoring overview | risk cards, alert categories, export, scan actions |
+| Manage IOCs | Tenant monitored-value management | IOC tabs, add, import, remove, clear |
+| Monitoring | Operational monitoring container | Log Manager, Auditlog, Event Management |
+| Event Management | SIEM-style event search | IOC-tagged search, date filter, event expansion |
+| Log Manager | Admin operational log review | type/date filters, file delete, flush logs |
+| Case Management | Investigation case tracking | filters, analytics, details, artifacts, integrity verification, tracking board, shares, PDF export |
+| AI Workspace | In-app assistant workspace | Nexus chat, quick prompts, message actions, streaming controls, shared chat links where enabled |
+| Feeder | Feed/source rule operations | rule management and ownership flows where enabled |
+| Tenant Settings | Tenant identity and license summary | tenant image, contact data, license and quota summary |
+| Users | Tenant user management | add, edit, license assignment, status, delete |
+| Tenants | Cross-tenant administration | tenant status, quotas, licenses, alert settings |
+| Audit Logs | Administrative history | user and tenant activity records |
+| System Settings | Global platform configuration | branding, feature visibility, app metadata |
+| Custom Alerts | Manual alert creation | alert type, title, source, URL, IOC |
 | Links | Link directory and monitored references | directory listing |
 | Onion Link | External onion access | external link |
 | Whistle Blowing | External reporting portal | external link |
 | Documentation | Published documentation | external docs |
+
+The following supporting workflows are also part of the product even though they are not normal sidebar modules:
+
+| Workflow | Where users encounter it | Purpose |
+| --- | --- | --- |
+| Signup | Public entry screen | account request creation with username, email, and password validation |
+| Welcome and verification | Registration email and welcome screen | registration status and email verification result |
+| Password reset | Reset request and emailed reset link | privacy-preserving reset request and tokenized password update |
+| Account recovery | Recovery page opened from login | email and global recovery-key verification followed by an emailed reset link |
+| Tenant onboarding | First-run tenant setup | tenant identity, monitored values, and initial configuration |
+| Notification | Access, trial, and subscription notices | access-level, trial, or subscription message |
+| Payment gateway notice | Trial, payment, or subscription state screen | trial/payment/subscription state notice |
+| Case share | Shared case review link | public case review link |
+| Chat share | Shared chat transcript link | public shared chat transcript link |
+| Scan report | Scan notifications and scan-result links | reopened tracked scan result |
+| Discussion workflow | Discussion-style result workflow | supported discussion, chat, and social result paths |
+| Social mapper aliases | Social Intel navigation | alternate paths into Social Intel |
 
 ## Indexed Investigation Modules
 
@@ -301,7 +405,7 @@ The exact menu depends on license and permissions, but the Orion UI commonly exp
 
 The consolidated view is Orion's combined investigation workspace. It is designed for users who want one query to drive multiple result channels instead of searching each module separately.
 
-The consolidated route can expose three major tabs:
+The consolidated workspace can expose three major tabs:
 
 - `IOCs`
 - `Deep Search`
@@ -355,7 +459,7 @@ Typical use cases:
 
 ### Data Breach
 
-The Data Breach module is used for known breach data and identity exposure checks.
+The Data Breach module is used for known breach data, identity exposure checks, leak references, and breach-related listings gathered from monitored sources.
 
 Subcategories:
 
@@ -363,7 +467,7 @@ Subcategories:
 - `Databases`
 - `Tracking`
 
-Use `Databases` when you want structured breach records. Use `Tracking` when checking whether a specific email or identity appears in known breach data.
+Use `Databases` when you want structured breach records. Use `Tracking` when checking whether a specific email or identity appears in known breach data. Use breach report fields and URL/link pivots when the key artifact is a leak URL, dump reference, or channel-style source mention.
 
 ```{figure} ../screenshots/data-breach-tracking-20260326.png
 :alt: Email breach tracking
@@ -372,9 +476,9 @@ Use `Databases` when you want structured breach records. Use `Tracking` when che
 Example of a breach tracking workflow.
 ```
 
-### Defacement
+### Compromise Monitoring
 
-Defacement tracks websites that were altered, hijacked, cloned, or otherwise compromised.
+Compromise Monitoring tracks defacement-style website incidents where sites were altered, hijacked, cloned, or otherwise compromised. Backend routes and some report names still use the `defacement` term, but the current sidebar label is `Compromise Monitoring`.
 
 Subcategories:
 
@@ -397,7 +501,7 @@ The detail view commonly exposes:
 :alt: Defacement report view
 :width: 100%
 
-Defacement result detail with target and attacker context.
+Compromise Monitoring result detail with target and attacker context.
 ```
 
 ### Social
@@ -413,6 +517,11 @@ Supported views:
 - `Pastebin`
 - `Forum`
 - `Reddit`
+- `Facebook`
+- `Instagram`
+- `LinkedIn`
+- `TikTok`
+- `YouTube`
 
 Use this module for:
 
@@ -427,6 +536,12 @@ Use this module for:
 
 Example of a stream-oriented social intelligence view.
 ```
+
+#### Discussion Route
+
+Discussion opens discussion-style chat and social result contexts. It uses the current result container and can open chat, social, general, leak, exploit, and compromise-monitoring reports.
+
+Use the Social module for normal sidebar navigation. Use Discussion when a workflow routes through discussion-style result paths.
 
 ### Exploit
 
@@ -458,9 +573,29 @@ The E2E workflow covers all tested exploit entry points:
 Exploit search workflow across the tested vulnerability and tooling views.
 ```
 
-### Feed
+### Actors & Malware
 
-Feed is the stream-oriented intelligence area for news-style content and current reporting. It is useful for users who want a curated readout without first building a structured query.
+Actors & Malware is the APT Intel workspace for actor and malware tracking. It is exposed as a licensed sidebar module when the user's license allows access.
+
+Key views:
+
+- `All`
+- `APT`
+- `Malware`
+- `Compromised-Actors`
+
+Use this module when starting from:
+
+- an APT actor name or alias
+- a malware family, signature, or reporter
+- a country-linked threat actor question
+- a need to compare actor and malware records in one search
+
+Actor and malware results open into detail reports with the same report review, export, and pivot behavior used by other indexed investigation modules.
+
+### News Feed
+
+News Feed is the stream-oriented intelligence area for news-style content and current reporting. It is useful for users who want a curated readout without first building a structured query.
 
 The tested feed workflow covers:
 
@@ -476,13 +611,13 @@ The tested feed workflow covers:
 Feed report workflow with structured detail and raw response inspection.
 ```
 
-### Help and Support
+### Help & Support
 
 The profile menu exposes a support workflow that is part of the tested navigation model.
 
 Covered user-visible behavior includes:
 
-- opening help and support from the profile menu
+- opening Help & Support from the profile menu
 - filling email, subject, and message fields
 - submitting the support request
 
@@ -491,25 +626,6 @@ Covered user-visible behavior includes:
 :width: 100%
 
 Support modal used for direct in-app support requests.
-```
-
-### Dump
-
-Dump exposes indexed dump and listing material gathered from monitored sources such as channels, leak-sharing locations, and relevant websites. Use filters to narrow by source, type, or origin.
-
-The dump page also provides a dedicated search field for leak URLs, making it more direct than the broader keyword-first search used in other modules.
-
-Common usage patterns include:
-
-- browsing leak or dump listings with page-level filters
-- pivoting directly from a known leak URL
-- reviewing channel-style or site-style dump references without opening a broader module first
-
-```{figure} ../screenshots/dump-listing-20260326.png
-:alt: Dump listing workflow
-:width: 100%
-
-Dump listing view with direct leak URL search.
 ```
 
 ## Stealer Logs
@@ -594,9 +710,9 @@ Structured result review for credential-focused investigations.
 
 ## Live Lookup and Scan Modules
 
-### Entity API
+### Entity Lookup
 
-Entity API is used for targeted live lookups rather than passive indexed browsing.
+Entity Lookup is used for targeted live lookups rather than passive indexed browsing. The sidebar label is `Entity Lookup`, and the module groups focused enrichment workflows in one place.
 
 Available lookup types:
 
@@ -607,26 +723,41 @@ Available lookup types:
 - `Playstore Scanner`
 - `Software Scanner`
 - `File Scanner`
+- `Text Analysis`
 - `Crypto Scanner`
 
 ```{figure} ../screenshots/entity-api-email-breach-20260326.png
-:alt: Entity API view
+:alt: Entity Lookup view
 :width: 100%
 
-Entity API interface for live lookup workflows.
+Entity Lookup interface for live lookup workflows.
 ```
 
-#### Common Entity API Use Cases
+#### Common Entity Lookup Use Cases
 
 - breach validation for a single email
 - identity enrichment
 - app and software lookups
 - file analysis
+- text analysis for spam or malicious URL detection
 - crypto-address context
+
+### Text Analysis
+
+Text Analysis is part of Entity Lookup. It is used when the artifact is text rather than a file, domain, username, or IP address.
+
+Use Text Analysis for:
+
+- suspicious message bodies
+- text that may contain malicious URLs
+- spam or phishing-style content checks
+- short copied snippets that do not justify a full file upload
+
+The output depends on the configured analysis service, but the workflow follows the same scan-oriented pattern: provide the input, run the analysis, review the result, and use the result in a broader investigation if needed.
 
 ### File Scanner
 
-File Scanner is the upload-based analysis area inside `Entity API`.
+File Scanner is the upload-based analysis area inside `Entity Lookup`.
 
 #### Main Modes
 
@@ -658,7 +789,7 @@ File-scanner workflow after upload and successful analysis.
 
 ### Web Scans
 
-Web Scans is the live scanning area for web-facing targets.
+Web Scans is the live scanning area for web-facing targets. Depending on the selected scan, the workflow may run through Entity Lookup, Network Intel, or the scan report view used to reopen completed scan jobs.
 
 #### Available Scan Types
 
@@ -676,6 +807,7 @@ The standard web-scan flow is:
 2. run the scan
 3. wait for loading-step progress
 4. review the generated report
+5. reopen the report from scan-job notifications if needed
 
 #### Report Structure
 
@@ -708,6 +840,32 @@ Web scan report with security posture, findings, and metadata.
 
 APK scan workflow after file upload, analysis, and report generation.
 ```
+
+### Tracked Scan Jobs
+
+Long-running scan and lookup actions are tracked as scan jobs. This applies to several Entity Lookup, Web Scan, Network Intel, crypto, dynamic social, wanted-list, and national-identity workflows.
+
+Scan jobs can appear in the left home menu and notification surfaces with states such as queued, running, done, or error. Users can reopen completed scan reports, resume incomplete jobs, and poll running jobs without starting the same scan from scratch.
+
+User-visible scan job actions include:
+
+- opening the completed scan report
+- returning to an incomplete job
+- polling a running job for fresh status
+- marking a scan notification as seen
+- deleting one completed scan notification
+- clearing all completed scan notifications
+
+Duplicate scan handling follows these rules:
+
+- if an identical scan is already running, Orion reuses the existing running job
+- if an identical scan completed in the last three days, Orion opens the previous result automatically
+- if the last identical completed scan finished more than three days ago, Orion asks whether to use the previous result or run a new scan
+- choosing to run a new scan sends the request with `force_new=true`
+
+Notification controls allow terminal scan jobs to be marked seen, deleted individually, or cleared in bulk. Incomplete jobs are prioritized so users can continue active work before reviewing completed scans.
+
+Scan reports open from notifications, result links, or completed scan workflows. Users normally do not need to type a direct address manually.
 
 ### Network Intel
 
@@ -749,6 +907,18 @@ Vulnerability Scan reviews security issues for a supplied target and includes:
 - elapsed time
 - downloadable report output
 - cancel support during scanning
+
+After a target is resolved, the vulnerability view lists the primary domain and any discovered subdomains as selectable targets. Each target can be scanned with a depth level before opening the target result:
+
+| Depth | Intended use | Tool coverage shown in the UI |
+| --- | --- | --- |
+| `Low` | fast first-pass review when the analyst needs quick signal | URL probes and heuristic checks |
+| `Medium` | broader validation when the target needs passive security review | URL probes, heuristic checks, ZAP passive checks, and CVE lookup |
+| `High` | deeper review when the analyst accepts a longer scan | URL probes, ZAP spider, heuristic checks, ZAP passive checks, and CVE lookup |
+
+Changing the depth prompts the user to confirm the scan before the selected target is run. The selected depth is stored per target in the current view, so one target can be scanned at `Low` while another target is reviewed at `Medium` or `High`.
+
+Completed vulnerability results can show severity summary cards, extracted response details, scanned URLs, request metadata, and individual findings. Findings may include title, category, risk, description, affected URL, reference URLs, and evidence snippets when those fields are returned by the scanner.
 
 ```{figure} ../screenshots/network-intel-vulnerability-scan-20260326.png
 :alt: Network Intel vulnerability scan
@@ -795,9 +965,9 @@ Satellite Map overview with indexed map entities, facility filters, search, trac
 
 The sidebar entry is available to admins and users with the `osint_advanced` module. If the module is unavailable, the sidebar entry remains gated by the subscription prompt.
 
-The standalone route is `/dashboard/satellite-intel`. The embedded consolidated route opens the same component inside `/dashboard/profile/consolidated/all?tab=Geo%20Fencing`.
+Satellite Intel can be opened from the Geo Fencing sidebar entry or from consolidated geo-fencing flows.
 
-The embedded route exposes the `Satellite Map` and `Threat Lens` toggle. The map view keeps its own panel menu, layer switcher, facility dashboard, imagery-analysis panel, location modal, and tracking overlays.
+The embedded view exposes the `Satellite Map` and `Threat Lens` toggle. The map view keeps its own panel menu, layer switcher, facility dashboard, imagery-analysis panel, location modal, and tracking overlays.
 
 #### Map Renderer and Layers
 
@@ -822,7 +992,7 @@ Satellite imagery layer selected from the map layer control.
 
 #### Indexed Map Entities
 
-On load, the dashboard requests indexed map entities from `/api/search/map-entities/stream`. The response is streamed in newline-delimited chunks and converted into map features with name, type, source, coordinates, optional capacity, and an internal feature id.
+On load, the dashboard requests indexed map entities and converts them into map features with name, type, source, coordinates, optional capacity, and a stable feature identifier.
 
 The dashboard can show power and infrastructure facility categories, including:
 
@@ -861,13 +1031,6 @@ The selection panel can show:
 - capacity in megawatts when available
 - coordinates in latitude and longitude form
 
-```{figure} ../screenshots/satellite-map-search-selection-20260326.png
-:alt: Satellite Map search selection
-:width: 100%
-
-Satellite Map entity search with a selected facility highlighted in the dashboard and map state.
-```
-
 #### Location Search and Nearby Facilities
 
 The `Location` button opens the shared geocode modal. Users can search for a place, enter coordinates, adjust the map coverage delta, and apply the location to the Satellite Map.
@@ -883,7 +1046,7 @@ After a location is applied, Satellite Intel:
 
 - focuses the map on the selected coordinates
 - records the active viewport
-- loads nearby facilities from `/api/satellite/facilities`
+- loads nearby facilities for the selected viewport
 - refreshes enabled aircraft and ship tracking against the scoped viewport
 - enables the location-target control so the user can return to the selected location
 
@@ -900,9 +1063,9 @@ Nearby facilities loaded for a selected location, with facility counts and categ
 
 The `Tracking` panel controls live transportation overlays.
 
-Aircraft tracking posts the active bounds to `/api/satellite/livetrack/aircraft`. The request uses `lat_min`, `lat_max`, `lon_min`, and `lon_max`, and can include OpenSky credentials when configured.
+Aircraft tracking uses the active map bounds and can include OpenSky credentials when configured.
 
-Ship tracking posts the active bounds to `/api/satellite/livetrack/ships`. Bounds are clamped to valid latitude and longitude ranges, and the request can include an AISStream API key when configured.
+Ship tracking uses the active map bounds. Bounds are clamped to valid latitude and longitude ranges, and the request can include an AISStream API key when configured.
 
 Tracking behavior includes:
 
@@ -912,9 +1075,9 @@ Tracking behavior includes:
 - matching aircraft and ship counts in the facilities summary
 - marker rendering on the map
 - detail sidebars when a tracking marker is selected
-- aircraft detail lookup by ICAO through `/api/satellite/livetrack/aircraft/icao`
-- aircraft track lookup through `/api/satellite/livetrack/aircraft/track`
-- ship detail lookup by MMSI through `/api/satellite/livetrack/ships/mmsi`
+- aircraft detail lookup by ICAO
+- aircraft track lookup
+- ship detail lookup by MMSI
 - viewport refreshes for ships after the map moves
 
 If a tracking feed is pending or busy, the polling helper keeps waiting. If a feed returns an error, the dashboard shows the tracking-specific error while preserving the rest of the map context.
@@ -939,7 +1102,7 @@ The imagery workflow supports:
 - loading a comparison set
 - opening generated images in a lightbox
 
-When `Load comparison` is clicked, the view runs a combined comparison flow. The comparison request posts to `/api/satellite/compare`. If no explicit month is selected, the implementation can also request a year-ago image from `/api/satellite/sentinel/image`. Anomaly analysis posts to `/api/satellite/anomaly`.
+When `Load comparison` is clicked, the view runs a combined comparison flow. If no explicit month is selected, Orion can also request a year-ago image for comparison. Anomaly analysis runs against the selected imagery set.
 
 The result panel can show:
 
@@ -990,11 +1153,11 @@ Threat Lens overview with map, country ranking, category layers, live feed, arch
 
 The sidebar entry is available to admins and users with the `osint_advanced` module. When the module is not available, the sidebar item remains visible but gated by the subscription prompt.
 
-The direct workspace route is `/dashboard/threat-lens`. The embedded geo-fencing route keeps the same Threat Lens implementation but opens it from the Satellite Intel tab switcher.
+Threat Lens can be opened as its own geo-fencing workspace or from the Satellite Intel tab switcher.
 
 #### Data Request and Filtering
 
-Threat Lens requests consolidated data from `/api/threat/lens`. The request is built from the shared consolidated-search parameter model and the currently selected dashboard filters.
+Threat Lens requests consolidated map, feed, and category data based on the currently selected dashboard filters.
 
 Before the request is sent, empty values, default values, empty arrays, and `all` selections are removed. The keyword field `q` and page field are kept so that an empty search can still load the complete Threat Lens dataset.
 
@@ -1074,7 +1237,7 @@ The renderer also watches zoom and interaction state:
 - completed navigation can request a new viewport IP scan
 - resize handling keeps the scene stable inside dashboard layouts
 
-Automated documentation and test runs use a Cypress fallback map. The fallback emits the same map-ready event without loading ArcGIS, which keeps screenshot generation deterministic while preserving the real component flow.
+Documentation capture can use a fallback map state so screenshots remain stable while preserving the same visible panel flow.
 
 #### Summary Panel
 
@@ -1106,7 +1269,7 @@ Feed controls:
 - temporary pause during hover, wheel, or touch interaction
 - safe link opening for HTTP and HTTPS source URLs
 
-The feed range buttons filter data already loaded into the browser. The side filter date range fetches new data from the backend.
+The feed range buttons filter data already loaded into the browser. The side filter date range requests refreshed data for the selected time window.
 
 ```{figure} ../screenshots/threat-lens-feeds-20260326.png
 :alt: Threat Lens feeds
@@ -1146,7 +1309,7 @@ The IP scan panel shows:
 
 #### Empty and Error States
 
-If the Threat Lens request fails, the map is cleared and the status message names `/api/threat/lens` as the failed source. If records load but no country metadata is present, the workspace reports the loaded record count and explains that no country highlights were found.
+If the Threat Lens data request fails, the map is cleared and the status message explains that the data source could not be loaded. If records load but no country metadata is present, the workspace reports the loaded record count and explains that no country highlights were found.
 
 If records contain countries but no multi-country co-occurrence, the country ranking still appears while the arc count remains zero.
 
@@ -1189,6 +1352,41 @@ The listings panel provides a document-oriented summary of the current graph sta
 CTI graph workspace with filter controls, graph canvas, listings, and session actions.
 ```
 
+#### Advanced Graph Builder
+
+The Advanced Graph Builder is used when a single CTI filter is too broad. It opens from the CTI Graph advanced filter control and lets the analyst combine multiple graph fields in one search.
+
+The builder supports:
+
+- up to eight filter rows
+- searchable field selection
+- `AND` and `OR` joins after the first row
+- direct text values for property-style fields
+- searchable cluster values for cluster-style fields
+- removing individual rows
+- clearing the active builder chips after execution
+
+The first row acts as the initial condition. Additional rows refine or broaden the graph query depending on the selected join operator. Use `AND` when all conditions should be present in the graph result, and use `OR` when any of the selected conditions should be enough to bring related nodes into the result.
+
+Typical Advanced Graph Builder workflow:
+
+1. Open `CTI Graph`.
+2. Expand the advanced builder control.
+3. Choose the first field, such as country, actor, IP, domain, cluster, or another available graph field.
+4. Enter a value or choose a cluster value.
+5. Add another row when the investigation needs a second condition.
+6. Choose `AND` or `OR` for the new row.
+7. Execute the search.
+8. Review the generated filter chips and graph result.
+9. Clear the builder chips when returning to a broader graph view.
+
+The builder is useful for questions such as:
+
+- show graph records tied to a country and a specific infrastructure value
+- find relationships that match either of two indicators
+- narrow a noisy graph to a cluster plus one supporting property
+- prepare a cleaner graph before exporting JSON or a PDF report
+
 The tested CTI workflow also confirms the following operator-visible actions:
 
 - switching filter type to `Cluster`
@@ -1197,16 +1395,13 @@ The tested CTI workflow also confirms the following operator-visible actions:
 - switching between graph and list views
 - collapsing and reopening the listings panel
 - toggling physics simulation
+- opening the Advanced Graph Builder
+- adding multiple builder rows
+- joining builder rows with `OR`
+- executing builder filters and clearing generated filter chips
 - creating, renaming, importing, exporting, and closing sessions
 - exporting report options such as JSON and graph PDF
 - opening canvas context-menu actions
-
-```{figure} ../screenshots/cti-list-view-20260326.png
-:alt: CTI list view
-:width: 100%
-
-CTI list-view mode used when investigators want structured row-based review instead of the graph canvas.
-```
 
 ```{figure} ../screenshots/cti-export-modal-20260326.png
 :alt: CTI export modal
@@ -1252,9 +1447,9 @@ This is not a single-screen graph. It is a multi-state workspace where the user 
 Social Intel supports several starting paths:
 
 - direct username scanning
-- image-based profile discovery
+- image-based and reverse image profile discovery
 - manual custom-entity entry
-- API-backed entity submission from the add-entity modal
+- guided entity lookup submission from the add-entity modal
 - reopening previously created scan jobs from the left home menu
 
 This makes Social Intel useful for both:
@@ -1318,7 +1513,7 @@ The image-based workflow is one of the more advanced Social Intel paths.
 It supports:
 
 - uploading an image
-- waiting for image-recon processing
+- waiting for image recon processing
 - opening the manage-profiles modal
 - filtering candidate platforms
 - reviewing discovered usernames
@@ -1344,6 +1539,10 @@ From this modal, users can:
 - cancel without applying changes
 
 This modal is central to the Social Intel workflow and should be treated as part of the main graph system, not as a secondary helper.
+
+Profile detail panels can expose platform-specific sections for profile search results, posts, videos, shorts, followers, following, images, online presence, metadata, wanted-list context, forum profile matches, saved profile candidates, and stealer-log matches. Availability depends on the platform and on which data was found for the selected username.
+
+Use the profile detail panels to move from broad identity mapping into source-by-source review. Posts, videos, and shorts help review published content; followers and following show relationship context; images and online presence help validate whether the same identity appears elsewhere; stealer-log and wanted-list sections highlight risk context that may require a case or tenant alert follow-up.
 
 ```{figure} ../screenshots/social-manage-profiles-20260326.png
 :alt: Social Intel manage profiles modal
@@ -1407,13 +1606,6 @@ Covered actions include:
 - selecting all imported results and updating the graph
 
 In practice, this means Social Intel can expand an investigation outward from one profile into a broader relationship set rather than staying limited to the original target.
-
-```{figure} ../screenshots/social-followers-popup-20260326.png
-:alt: Social Intel followers and following popup
-:width: 100%
-
-Followers/following popup used to filter, inspect, and import related accounts.
-```
 
 #### Images, Followers, and Re-Scan Controls
 
@@ -1499,6 +1691,8 @@ The shared report header can expose:
 The exact buttons depend on the record and deployment configuration.
 
 When available, this toolbar is the fastest way to export, translate, summarize, share, or pivot the current record into graph analysis.
+
+Some report pages also show feedback controls. These controls let signed-in users mark a record as recommended, trusted, or untrusted. The counters help teams identify records that have already been reviewed and make it easier to spot material that needs confidence review before it is reused in a case, export, or briefing.
 
 ### Result Insights Side Panel
 
@@ -1611,9 +1805,9 @@ The tested chatbot flow specifically confirms:
 - sending a message
 - rendering a visible message thread in the chat area
 
-### Defacement Report Page
+### Compromise Monitoring Report Page
 
-The defacement report is a streamlined variant focused on target and attacker context. It includes:
+The Compromise Monitoring report is a streamlined variant focused on target and attacker context. It includes:
 
 - target URL
 - saved date
@@ -1682,6 +1876,8 @@ The account page allows the current user to review and manage:
 - tenant or location display
 - assigned licenses
 - two-factor authentication
+- password
+- global recovery key
 - theme preference
 
 The page also shows the currently running platform version. It is focused on the current user rather than the tenant as a whole.
@@ -1693,6 +1889,22 @@ The tested account workflow also includes:
 - enabling `2FA`
 - logging out and reaching the two-factor challenge screen on next login
 - viewing the QR image and OTP input state for 2FA setup/verification
+- changing the account password
+- generating or replacing a global recovery key
+
+Changing the password, enabling or disabling 2FA, and generating or replacing a recovery key opens a `Confirm your identity` dialog. Enter the current account password to authorize the change. Orion verifies it on the server against the stored password hash; an incorrect password leaves the dialog open and shows an error. Profile, language, theme, and visibility changes do not require this additional confirmation.
+
+#### Generate or Replace a Recovery Key
+
+1. Open `Profile > Account`.
+2. In `Recovery Key`, select `Generate / replace recovery key`.
+3. Enter the current password in the identity-confirmation dialog.
+4. Copy the recovery key from the popup and store it in a password manager or another secure location.
+5. Close the popup after saving the key.
+
+The recovery key is 43 characters and is shown only once. Orion stores only its hash. Generating another key immediately replaces the previous key, so the older value can no longer recover the account.
+
+When 2FA is configured, the authenticator secret is encrypted with tenant-scoped encryption before it is retained. Existing unencrypted 2FA secrets are encrypted after successful verification.
 
 ```{figure} ../screenshots/account-settings-20260326.png
 :alt: Account settings form
@@ -1700,6 +1912,60 @@ The tested account workflow also includes:
 
 Current-user profile and account settings form.
 ```
+
+### Public User Activity
+
+User activity pages open from profile, report, comment, or interaction links when profile visibility allows it.
+
+The page can show:
+
+- the user's profile image
+- visible activity items
+- report or thread links for activity entries
+- an unavailable or private-profile state when visibility is disabled
+
+Tenant profile visibility and the user's own profile preference can hide public activity from other users.
+
+### AI Workspace
+
+AI Workspace is opened from `Profile > AI` when the deployment enables the AI endpoint. It is used for support-style and investigation-assistant conversations inside the profile area.
+
+The workspace can support:
+
+- asking investigation or support questions
+- reviewing previous messages in the chat rail
+- sharing a chat transcript through a tokenized shared link where enabled
+- opening shared chat transcripts outside the dashboard shell
+
+#### Nexus Conversation Controls
+
+AI Workspace uses the Nexus assistant surface when the AI endpoint and user license allow access. The workspace opens as a full chat view and can also receive a query context from the surrounding dashboard route.
+
+The main controls are:
+
+- `New Chat` clears the current visible conversation and starts a fresh Nexus session when no response is actively streaming.
+- `Share` creates a tokenized shared-chat link for the current visible user and Nexus messages.
+- quick prompt buttons prefill the composer with common investigation-assistant prompts.
+- the composer sends with `Enter` and inserts a new line with `Shift + Enter`.
+- the send button changes to a stop control while Nexus is generating a response.
+
+The composer and edited user messages use a 300-token limit. When a draft is over the limit, the workspace shows how many tokens must be removed before the message can be sent or saved.
+
+#### Message Actions
+
+User messages can be copied or edited when Nexus is not currently sending. Editing a user message removes that message and the later conversation turns, places the edited text back into the composer flow, and resends it as a new request. This keeps the visible conversation aligned with the revised prompt instead of leaving stale assistant answers after an edited question.
+
+Nexus responses render markdown when returned by the assistant. Completed Nexus messages expose bot-message actions, while actively streaming messages show an in-progress indicator instead of the completed-message action row.
+
+#### History, Streaming, And Recovery
+
+AI Workspace loads saved chat history when the page opens. History preserves user, Nexus, and explicit cancellation messages; older history is trimmed so the workspace does not keep unlimited user or bot turns.
+
+When a response is running, the workspace shows streaming status and step text when available. If the user presses the stop control, the current Nexus stream is cancelled and a `Message canceled.` entry is stored in history.
+
+If the page reloads or the user returns while the last saved item is a user message with no matching Nexus response, AI Workspace attempts to resume the active Nexus stream. If recovery fails, the conversation remains visible and the user can retry from the error state where a retry payload is available.
+
+Shared chat links are separate from the editable workspace. A shared transcript opens outside the dashboard shell and shows only the messages included in the generated share payload.
 
 ### Tenant Homepage
 
@@ -1713,6 +1979,7 @@ Depending on license and role, this page can include:
 - risk summary cards
 - category alert cards
 - monitored IOC counts
+- alert scanner settings
 
 In some deployments, this page behaves differently by role:
 
@@ -1729,10 +1996,91 @@ The summary area commonly displays:
 
 Category cards provide quick access to alert-specific drill-down reports.
 
-The profile area also supports alert-focused routes such as:
+Maintainer-level users can manage alert scanner settings when the workflow is enabled. The scanner settings page lets the tenant enable or disable allowed alert categories for future tenant scans. Saving updates the tenant's allowed alert categories.
 
-- `alerts/<type>` for category-specific alert reports
-- `addcustomalert` for creating custom alert definitions where enabled
+Scheduled alert scans use the tenant's monitored IOC values, allowed alert categories, and alert run-time configuration. The run time controls when the platform should perform the tenant's recurring alert scan, while scan-all remains the manual path for immediate follow-up.
+
+The profile area also supports alert-focused workflows such as:
+
+- category-specific alert reports
+- custom alert creation where enabled
+- category-level alert scanner settings where enabled
+
+#### Custom Alerts
+
+Custom Alerts allow a permitted user to create or edit an alert record manually. The form captures alert type, status, title, description, source, reference URL, and one IOC bucket.
+
+Supported alert types are:
+
+- `general`
+- `breach`
+- `exploit`
+- `social`
+- `defacement`
+
+The alert form validates title, description, source, and URL before saving. The reference URL must start with `http://` or `https://`. The IOC selector uses the deployment's supported entity list, and the saved alert receives license visibility based on the alert type.
+
+#### Alert Scanner Settings
+
+Alert scanner settings control which alert categories are allowed to run for the tenant. They are useful when a tenant wants monitoring but does not want every possible scanner category to execute.
+
+Typical scanner categories can include:
+
+- general intelligence
+- breach and credential exposure
+- compromise monitoring
+- social and discussion sources
+- exploit intelligence
+- stealer logs
+- scanning-backed categories such as email breach, social scanner, software scanner, repository scan, SEO scan, playstore scan, advanced scan, and vulnerability scan
+
+The exact list depends on the deployment and tenant configuration. Disabled categories are not a data deletion control; they affect future alert scanning and visibility behavior.
+
+#### Alert Report Drilldown
+
+Category alert reports are opened from `Profile > Homepage` or from alert drilldowns. The report page is used to review category-specific alert records, inspect risk context, export findings, and move from an alert into a deeper investigation.
+
+Alert detail drawers can show the alert risk, title, description, URL, category, source, matched entity, result date, content type, password when present, and raw findings when the source record includes additional evidence. Use the drawer to verify the underlying finding before exporting, creating a custom alert, or opening a case workflow.
+
+Admins with case-management visibility can also open tenant alert views inside case management. That workflow is used when tenant alerts need administrative review alongside cases and tracked investigation work.
+
+### Take Down
+
+The `Take Down` page is the root-administrator review workspace for abuse/takedown evidence requests. It appears in the profile area as `Takedown Requests` for root-tenant administrators and opens at `/dashboard/profile/take-down`.
+
+The feature has two user-visible entry points:
+
+- `Initiate Takedown` on eligible Compromise Monitoring or defacement reports
+- `Report Takedown` on the Take Down review page for a manually entered target URL
+
+When a user initiates a takedown from a report, Orion uses the report target URL and captures abuse-contact evidence before creating the review entry. The modal shows the captured abuse email when one is found and confirms that evidence has been saved for administrator review. If no public abuse contact is exposed for the target, no evidence entry is saved and the modal shows that the request was not created.
+
+The review page supports:
+
+- searching by target, abuse email, user, or report identifier
+- date-range filtering
+- status filtering for `All`, `Pending`, `Accepted`, `Denied`, or `Failed`
+- pagination
+- accepting pending requests
+- rejecting pending or failed requests with a reason
+- manually creating a request from a target URL
+
+Request statuses are shown with the same meaning across reports and the review page:
+
+| Stored status | Report label | Meaning |
+| --- | --- | --- |
+| `pending` | `Takedown in progress` | Evidence was captured and the request is waiting for root-admin review. |
+| `accepted` | `Takedown reported` | A root administrator accepted the request and the abuse email was dispatched. |
+| `denied` | `Takedown denied` | A root administrator rejected the request, optionally with a reason. |
+| `failed` | `Takedown failed` | The request is in a failed state and can be reviewed or rejected. |
+
+Accepting a request sends the abuse/takedown email to the captured abuse contact using the saved evidence. Rejecting a request closes the review path and stores the rejection reason when one is supplied. After a request exists for a target domain, the source report disables duplicate initiation and shows the current takedown label.
+
+```{admonition} Access and scope
+:class: note
+
+Creating a takedown request requires an eligible role and defacement-module access. Reviewing, accepting, or rejecting takedown requests requires root-tenant administrator access.
+```
 
 ### Manage IOCs
 
@@ -1743,16 +2091,36 @@ Capabilities include:
 - IOC category search
 - horizontal category browsing
 - adding IOC values
+- IOC import from CSV
+- CSV upload action for bulk IOC upload
+- downloading the CSV template
 - removing IOC values
 - clearing all IOC values
 
 This page is especially important for tenant-driven monitoring workflows.
+
+CSV imports must use an exact `key,value` header. Files must be CSV format, no larger than 1 MB, and each key must match a supported IOC entity key. Duplicate values are ignored during import.
+
+Some tenants can be marked for Privileged IOC handling. When that protection applies, users without the required permission can review IOC values but cannot add, remove, clear, or upload IOC values for that tenant. The page shows a permission warning when IOC editing is disabled.
+
+Example CSV structure:
+
+```text
+key,value
+domain,example.com
+email,analyst@example.com
+ip,203.0.113.10
+url,https://example.com/login
+```
+
+After import, review the visible IOC counts before running tenant alert scans. Invalid keys or oversized files should be corrected before retrying the import.
 
 The tested tenant IOC workflow includes:
 
 - opening the IOC page from the tenant profile area
 - switching across IOC category tabs
 - adding values in multiple categories
+- importing values from a CSV template
 - adding monitored email values for downstream alerting
 - returning to the tenant homepage and triggering follow-up scanning actions
 
@@ -1762,11 +2130,130 @@ The `Statistics` page in the profile area reuses the insight-oriented summary ex
 
 ### Profile Consolidated View
 
-The profile area also contains a consolidated-search route. Functionally, it behaves like the main consolidated workspace but sits within profile and tenant-oriented workflows.
+The profile area also contains a consolidated-search view. Functionally, it behaves like the main consolidated workspace but sits within profile and tenant-oriented workflows.
+
+### Monitoring
+
+Monitoring is an operational profile workspace that groups monitoring-related tabs. Depending on role and tenant configuration, the visible tabs can include:
+
+- `Log Manager`
+- `Auditlog`
+- `Event Management`
+
+Admins can see Log Manager. Admins and maintainers can see Auditlog. Event Management appears only for admins or maintainers when the tenant has event management enabled.
+
+### Event Management
+
+Event Management is the SIEM-style event search workspace. It is available from the profile area or the Monitoring tab when enabled.
+
+Capabilities include:
+
+- searching SIEM events
+- using IOC-style search tags such as all, domain, email, and IP
+- validating domain, email, and IP input
+- filtering by date range
+- paginating large event result sets
+- expanding a result to inspect raw event fields and extracted IOCs
+
+### Log Manager
+
+Log Manager is an admin-only operational log viewer.
+
+Capabilities include:
+
+- filtering logs by type: `INFO`, `WARNING`, or `ERROR`
+- filtering by available log date
+- paginating log entries
+- deleting an individual log file
+- flushing all logs after confirmation
+- reviewing file size and log metadata
+
+Use Log Manager for operational troubleshooting, not analyst investigation.
+
+### Feeder
+
+Feeder is the source/rule intake workspace for users with feeder access.
+
+The Feeder workspace includes:
+
+- a rule catalog dropdown
+- grouped Social Media rules for supported social platforms
+- an `Add` tab for uploading parser files or saving URL values
+- a `View` tab for uploaded scripts
+- a `Values` tab for stored rule values where supported
+- search, sorting, pagination, preview, enable/disable, delete, and clear controls
+- owner transfer for admins
+
+Upload rules depend on the selected rule type:
+
+- Python parser uploads must use `.py` files no larger than 1 MB.
+- Shared session uploads must use `.zip` files.
+- Value-backed rules accept newline-separated URL values.
+- Shared rules require the parser file before adding values.
+
+Feeder data is used by collection workflows. It should be managed carefully because enabling, disabling, clearing, or deleting entries affects future ingestion behavior.
 
 ### Case Management
 
 Case Management is the investigation workspace for turning alerts, findings, and analyst leads into tracked cases. It is available from the profile area when the user has the required case-management access.
+
+Common entry points include:
+
+- `Profile > Case Management`
+- `Profile > Case Management > Tracking Board`
+- `Profile > Case Management > Case Details`
+- shared case links
+- admin tenant alert views inside case management
+
+Case visibility and allowed actions depend on role:
+
+| Role or access pattern | Typical capabilities |
+| --- | --- |
+| Admin | create, assign, update, archive, unarchive, close, share, export, and review tenant alert case flows |
+| Maintainer/member with access | create, assign where permitted, update, archive, share, export, and close eligible cases |
+| Analyst with case-management permission | view assigned or permitted work, update allowed case fields and task state, review evidence, and contribute comments |
+| Shared-link viewer | view only the shared case material allowed by the generated share link |
+
+#### Case List, Filters, And Analytics
+
+The Case Management landing page has three working modes where permissions allow them:
+
+- `Case List` for day-to-day triage and opening cases
+- `Analytics` for summary charts and workload review
+- `Alerts` for admin tenant-alert review inside the case-management context
+
+The case filter row applies to the list and analytics modes. It supports:
+
+- case-list scope selection for open or archived cases where the user can manage cases
+- free-text search across case ID, title, and description
+- status filtering
+- severity filtering
+- priority filtering
+- searchable case-type filtering
+- sort order selection
+
+The same filter state is used by the list and analytics panel. For example, if the user searches for a case ID and switches to `Analytics`, the analytics counts and charts reflect the filtered set rather than silently reverting to all cases.
+
+The analytics panel shows:
+
+- visible cases compared with total cases
+- active case count
+- critical-severity case count
+- high-priority case count
+- unassigned case count
+- open-task count
+- artifact count
+- average case age and stale case count
+- status distribution
+- severity distribution
+- priority distribution
+- case-type distribution
+- intake-source distribution
+- task-status distribution
+- analyst workload
+- `Needs Attention` cases
+
+Use analytics when a lead or administrator needs to understand workload, stale investigations, unassigned work, or high-risk cases before assigning analysts or moving cases through the tracking board.
 
 ```{figure} ../screenshots/case-management-add-20260326.png
 :alt: Add case drawer
@@ -1783,6 +2270,14 @@ When adding a case, users define:
 - tags for triage and reporting
 - primary entity, such as a person, organization, email, domain, IP, URL, account, credential, or infrastructure indicator
 
+Recommended case creation flow:
+
+1. Create the case with a clear title, severity, priority, and intake source.
+2. Add a primary entity before adding secondary evidence.
+3. Attach artifacts or report references while the source context is still fresh.
+4. Assign analysts or tasks if follow-up work is needed.
+5. Use the tracking board for status movement rather than editing status informally.
+
 The case details page keeps the case record organized into independent sections. Each section has its own add or edit action, and side drawers are used for focused data entry.
 
 ```{figure} ../screenshots/case-management-view-20260326.png
@@ -1794,9 +2289,68 @@ Case detail view with closure, case metadata, entity context, evidence, and anal
 
 The main case details section shows the title, description, case ID, type, intake source, status, severity, priority, tags, assigned analysts, PDF export, and share-link actions.
 
+PDF export is intended for handoff and reporting. Share links are intended for controlled review of a case without giving the recipient broader application access. Revoke case shares when external review is complete.
+
 Primary Entity stores the main subject of the investigation. Related Entities are additional people, domains, accounts, assets, indicators, sources, or actors connected to the case.
 
-Artifacts store evidence and supporting material. Common artifact types include screenshots, uploaded files, URL captures, raw alerts, log excerpts, email headers, chat transcripts, reports, and generic evidence. Artifact cards show the title, type, source, captured date, description, URL, and file actions such as view, download, and delete when a file is attached.
+The case details page also exposes a case-level Nexus assistant where enabled. This assistant receives the current case details as its working context, so it is useful for summarizing case state, asking what evidence is already attached, preparing handoff notes, or identifying likely next steps from the visible case record. It is separate from public case shares; shared-link viewers do not receive broader application access through the assistant.
+
+#### Case Artifacts
+
+Artifacts store evidence and supporting material. Common artifact types include screenshots, uploaded files, URL captures, raw alerts, log excerpts, email headers, chat transcripts, linked reports, and generic evidence.
+
+Artifact records include:
+
+- title
+- type
+- source
+- captured date
+- description
+- optional URL for URL-capture artifacts
+- optional files for screenshot and file artifacts
+- optional linked report metadata for report artifacts
+
+Artifact cards show the title, type, source, captured date, description, URL actions, linked-report actions, and file actions where relevant.
+
+##### Linked Report Artifacts
+
+When the artifact type is `Report`, the user can attach an existing Orion report instead of only typing a free-form artifact description.
+
+The linked-report workflow is:
+
+1. Add or edit an artifact.
+2. Set artifact type to `Report`.
+3. Choose a report source.
+4. Search for a report title.
+5. Select a result from the report dropdown.
+6. Save the artifact.
+7. Use `View Report` from the artifact card when the linked report needs to be reopened.
+
+Supported report sources are:
+
+- `General Intelligence`
+- `Data Breach`
+- `Defacement`
+- `Social`
+- `Feed`
+- `Exploit`
+- `Stealer Logs`
+
+If no result matches the search term, the dropdown shows the empty state. Clearing the selected report removes the linked report ID and title from the artifact before saving.
+
+##### Artifact Files And Integrity
+
+Screenshot and file artifacts support multiple uploaded files. Screenshot artifacts accept PNG files. File artifacts accept PDF, JPG, PNG, TXT, or DOCX files. The current UI allows up to five files per artifact.
+
+Saved artifact files show the file name and an integrity badge. Users with case-management authority can:
+
+- download a file
+- verify a file's integrity
+- delete a file from an open case
+
+Integrity verification compares the stored file against the case artifact record and updates the badge to `Verified` or `Integrity Failed`. Failed integrity disables download for that file so users do not rely on evidence that no longer matches its stored integrity record.
+
+Analyst-style users without the required management permission can review artifact files, but they cannot run artifact integrity verification.
 
 Tasks track follow-up work for analysts. A task can hold status, priority, assignee, due date, description, and links to relevant entities or artifacts.
 
@@ -1805,6 +2359,39 @@ Linked Cases connect the current case to other case records. Links can mark dupl
 Comments provide the analyst discussion thread for the case. Use comments for review notes, handoff context, evidence interpretation, or follow-up decisions. Comment authors can be opened through the user sidebar where supported.
 
 Closure records the final outcome. It includes the closure reason, summary, resolution notes, who closed the case, and the close time. Closing a case is the point where the investigation outcome becomes part of the case report and exported PDF.
+
+#### Case Status Lifecycle
+
+Case status changes follow a fixed tracking-board flow:
+
+1. `new`
+2. `intake_review`
+3. `under_investigation`
+4. `evidence_collection`
+5. `verification`
+6. `regulatory_action`
+7. `legal_review`
+8. `resolved`
+9. `closed`
+
+Status changes must be made from the tracking board, require a reason, and can move only one step forward or backward. A case cannot be moved back to `new`, and a closed case cannot be moved to another status.
+
+Each board move stores the submitted reason in the case status history. Use concise reasons that explain why the case moved, because this history supports handoff, review, export preparation, and later audit of the investigation timeline.
+
+Closure is handled separately from board movement. A case can be closed only from the case details closure section, only after it reaches `resolved`, and only by admins, maintainers, or the case creator.
+
+Archived cases are read-only for update-style actions. Analyst access is intentionally narrower than admin or maintainer access: analysts can view assigned work and update their allowed task state, but case assignment, case status movement, and closure remain restricted.
+
+#### Admin Tenant Alerts In Case Management
+
+Administrators can review tenant alert categories from the case-management area when the workflow is enabled. This view is useful when an alert needs to become a case, be compared with existing cases, or be reviewed across tenants.
+
+Use this path when:
+
+- a tenant alert requires administrative triage
+- a category alert needs to be linked to active case work
+- a default or administrative tenant needs to inspect alerts for another tenant
+- alert review and investigation status need to be handled together
 
 ### Tenant Settings
 
@@ -1819,8 +2406,20 @@ Depending on permissions, users can:
 - edit phone
 - edit country
 - edit city or state
+- review alert visibility and scanner-category settings where the tenant role allows it
 
 Some fields remain read-only depending on role. The page also acts as a tenant overview by summarizing the tenant name, status-style badges, location, assigned quota, and current license list.
+
+#### Tenant Alert Webhook Integrations
+
+Tenant Settings also shows tenant alert webhook integrations that an administrator has configured at the platform level. Tenants use the visible Connect or Reconnect action to authorize their own Slack or Jira webhook destination in a new tab. Providers that are not configured by an administrator are hidden from the tenant page.
+
+```{figure} ../screenshots/tenant-alert-integrations-slack-20260326.png
+:alt: Tenant Slack alert integration
+:width: 100%
+
+Tenant alert webhook integrations showing Slack as the only available configured connector.
+```
 
 ```{figure} ../screenshots/tenant-settings-20260326.png
 :alt: Tenant settings page
@@ -1842,6 +2441,8 @@ It supports:
 - expanding a user row for details
 - changing status
 - editing assigned licenses
+- editing user permissions where available
+- limiting alert-administration visibility to all tenants or selected tenants where enabled
 - deleting a user
 
 Displayed information commonly includes:
@@ -1852,6 +2453,8 @@ Displayed information commonly includes:
 - status
 - subscription
 - licenses
+- permissions
+- alert access scope where enabled
 
 The page also respects quota-based restrictions.
 
@@ -1881,6 +2484,12 @@ It supports:
 - changing quota
 - changing status
 - updating tenant licenses
+- setting tenant alert run time in `HH:mm` 24-hour format
+- controlling whether tenant alerts are visible to admins
+- configuring allowed alert scanner categories
+- enabling Privileged IOC handling where required
+- assigning which tenants a user can view in tenant-alert administration workflows
+- deleting a tenant and its associated users and keys after confirmation
 
 Displayed fields include:
 
@@ -1891,6 +2500,32 @@ Displayed fields include:
 - user quota
 - status
 - license assignments
+- alert visibility and alert run-time settings where enabled
+- privileged IOC state where enabled
+
+Admin tenant-alert views can summarize alerts across visible tenants, filter or search tenants from a multi-select dropdown, open category-specific alert drilldowns, review risk summary cards, and export a tenant's alerts as a PDF report.
+
+Tenant deletion is available only to administrators. The root/default tenant cannot be deleted.
+
+To delete a tenant:
+
+1. Sign in as an administrator and open `Tenants`.
+2. Find the tenant and select its red delete button.
+3. Review the confirmation message and select `Yes, Confirm`.
+4. Confirm that the tenant disappears from the list.
+
+This permanently removes the tenant and its associated users and keys.
+
+#### Dedicated Tenant Subdomains and White-Labeling
+
+Each tenant uses a dedicated subdomain, such as `<tenant-slug>.<platform-domain>` (`<tenant-slug>.localhost` in local environments). Tenant accounts sign in through that tenant URL, keeping authentication isolated from the main platform domain. Branding is also tenant-scoped, so the application name, favicon, light and dark logos, and login image can be customized without changing other tenants.
+
+```{figure} ../screenshots/system-settings-20260326.png
+:alt: Tenant white-label branding settings
+:width: 100%
+
+Brand assets and application identity controls used for tenant-level white-labeling.
+```
 
 ```{figure} ../screenshots/tenant-administration-20260326.png
 :alt: Tenant administration page
@@ -1950,11 +2585,23 @@ Editable platform settings can include:
 - application name
 - language
 - onion address
-- data-source URL
-- adversaries URL
-- pricing URL
-- documentation visibility
-- whistle-blowing visibility
+- AI endpoint visibility
+- admin panel visibility
+- documentation, pricing, data-source, and adversary public URL settings
+- account email and SMTP settings for platform mail delivery
+- version and platform metadata
+- logo and authentication dashboard image URLs
+
+#### Alert Webhook Integrations
+
+Administrators configure platform OAuth credentials for alert webhook integrations from System Settings. System Settings stores the Slack and Jira app credentials and redirect URI notes only; tenants connect their own webhook destinations from Tenant Settings.
+
+```{figure} ../screenshots/alert-integrations-system-slack-config-20260326.png
+:alt: System Slack alert integration configuration
+:width: 100%
+
+System alert webhook integration settings for configuring Slack OAuth credentials.
+```
 
 ```{figure} ../screenshots/system-settings-20260326.png
 :alt: Administrative and system settings workspace
@@ -1965,22 +2612,27 @@ Administrative settings and platform-management view.
 
 ## Detailed UI Coverage Appendix
 
-This appendix documents the exact user-visible behaviors covered by the automated Cypress suite. It is intended to close the gap between a feature overview and the concrete interactions that an operator, tenant user, or administrator can perform in the current product.
+This appendix documents exact user-visible behaviors verified during documentation coverage. It is intended to close the gap between a feature overview and the concrete interactions that an operator, tenant user, or administrator can perform in the current product.
 
 ### Authentication and Session Lifecycle
 
 The tested authentication lifecycle includes:
 
-- loading the login page from the root route
+- loading the login page from the public entry point
 - signing in as an administrator
+- keeping the browser access token in an encrypted HTTP-only cookie rather than local storage
+- applying progressive delays after consecutive unsuccessful login attempts
 - opening the profile menu and signing out
 - requesting a password-reset email
-- opening a tokenized reset-password route
+- receiving the same reset-request result regardless of whether an account exists
+- requesting recovery with a registered email and global recovery key
+- opening a tokenized reset-password screen
 - validating that the new password cannot match the old password
 - applying a new password successfully
 - signing in again with the updated password
 - encountering a two-factor prompt after enabling `2FA`
 - viewing the 2FA QR image and OTP input state
+- requiring the current password before password, 2FA, or recovery-key changes
 
 ### Sidebar and Global Navigation States
 
@@ -2004,7 +2656,7 @@ For user documentation purposes, that means the sidebar is not only a static men
 The profile menu is also part of this navigation model. Tested behavior includes:
 
 - opening the profile menu
-- reaching help and support from the profile menu
+- reaching Help & Support from the profile menu
 - signing out from the profile menu
 
 ### Homepage, Heatmap, and Support Interactions
@@ -2017,17 +2669,17 @@ The homepage is validated as more than a search landing page. The automated flow
 - opening a country-level report from the map
 - closing the country report with the close button
 - closing the same report by clicking the overlay
-- internal branch behavior when heatmap data or world data changes
+- fallback behavior when heatmap data or world data changes
 
 The support workflow is also covered directly from the profile menu:
 
-- opening the help and support modal
+- opening the Help & Support modal
 - filling email, subject, and message fields
 - submitting the support request
 
 ### Search Behavior and Result Expectations
 
-The test suite validates that indexed modules are not only searchable but also return stable, inspectable result structures.
+Documentation coverage validates that indexed modules are not only searchable but also return stable, inspectable result structures.
 
 Covered search behavior includes:
 
@@ -2071,6 +2723,7 @@ The suite covers more module variations than the earlier manual described explic
 - `All`
 - `Databases`
 - `Tracking`
+- leak URL and dump-reference fields inside breach reports
 
 `Defacement` coverage includes:
 
@@ -2104,10 +2757,6 @@ The suite covers more module variations than the earlier manual described explic
 
 - `IOCS`
 
-`Dump` coverage includes:
-
-- `Listing`
-
 ### Report Opening, JSON Review, and Chat Workflows
 
 Report handling is one of the most deeply exercised areas of the suite.
@@ -2115,7 +2764,7 @@ Report handling is one of the most deeply exercised areas of the suite.
 Covered behaviors include:
 
 - opening the first available report from multiple modules
-- verifying that a report can open as a route or modal, depending on module layout
+- verifying that a report can open as a page or modal, depending on module layout
 - opening JSON-backed report viewers
 - closing modal reports with escape
 - opening chat from a report
@@ -2218,7 +2867,7 @@ Covered behaviors include:
 
 - opening `Deep Search`
 - opening `IOCs`
-- using the profile-scoped consolidated route
+- using the profile-scoped consolidated view
 - searching from the homepage into consolidated
 - reviewing defacement-style threat cards inside deep search
 - expanding and collapsing grouped threat cards
@@ -2251,6 +2900,12 @@ Covered CTI behaviors include:
 
 - switching graph filter type to `Cluster`
 - applying CTI filters
+- opening the Advanced Graph Builder
+- adding multiple advanced-builder rows
+- selecting searchable advanced-builder fields
+- joining builder rows with `OR`
+- executing advanced-builder filters
+- clearing generated builder filter chips
 - searching the graph toolbar
 - validating highlighted results
 - opening export-report modals
@@ -2272,7 +2927,7 @@ There is also component-level branch coverage for:
 - rotated category sets
 - report retrieval by country
 
-Those internal branches are not a normal operator workflow, but they confirm the presence of fallback and re-render logic in the current UI.
+Those coverage points confirm fallback and re-render behavior in the current UI.
 
 ### Social Intel: Full Tested Behaviors
 
@@ -2287,7 +2942,7 @@ Covered behaviors include:
 - exporting a social report
 - opening the add-entity modal
 - validating disabled and enabled submit states
-- submitting both API-backed and manual entity entries
+- submitting both guided lookup and manual entity entries
 - triggering a graph context-menu path
 - opening image-based profile search
 - uploading an image for recon
@@ -2313,9 +2968,9 @@ Covered behaviors include:
 
 This is one of the richest modules in the product and should be documented as a multi-step graph, list, and modal workflow rather than only as a graph view.
 
-### Entity API and Scan Modules: Full Tested Behaviors
+### Entity Lookup and Scan Modules: Full Tested Behaviors
 
-The test suite covers every documented live lookup route currently present in the main product:
+Documentation coverage includes every documented live lookup workflow currently present in the main product:
 
 - `Email Breach`
 - `Social Scanner`
@@ -2363,6 +3018,8 @@ The Network Intel suite covers:
 - host recon search
 - IP scan search
 - vulnerability scan search
+- target selection inside vulnerability scanning
+- depth-aware vulnerability scanning controls
 - detail row expansion and collapse
 - downloading reports from each main network-intel tab
 - export-trigger validation
@@ -2387,8 +3044,8 @@ The Satellite Map documentation flow covers the embedded Geo Fencing map workspa
 
 Covered behaviors include:
 
-- loading the Satellite Map through the authenticated dashboard shell
-- requesting indexed map entities from `/api/search/map-entities/stream`
+- loading the Satellite Map from the dashboard
+- loading indexed map entities
 - rendering the Leaflet map before screenshots are captured
 - selecting all loaded map-entity categories
 - showing loaded and visible entity counts
@@ -2397,26 +3054,26 @@ Covered behaviors include:
 - selecting a search result and updating the selection panel
 - opening the geocode location modal
 - applying coordinates from the location modal
-- requesting nearby facilities from `/api/satellite/facilities`
+- loading nearby facilities
 - showing nearby facility counts and type breakdowns
-- enabling aircraft tracking through `/api/satellite/livetrack/aircraft`
-- enabling ship tracking through `/api/satellite/livetrack/ships`
+- enabling aircraft tracking
+- enabling ship tracking
 - showing aircraft and ship counts in the tracking and facilities panels
 - opening the panel menu
 - switching to `Imagery Analysis`
 - loading comparison imagery from the satellite imagery flow
-- requesting anomaly analysis from `/api/satellite/anomaly`
+- running anomaly analysis
 - rendering comparison and anomaly output before capture
 
 ### Threat Lens: Full Tested Behaviors
 
-The Threat Lens documentation flow covers the standalone `/dashboard/threat-lens` workspace.
+The Threat Lens documentation flow covers the standalone Threat Lens workspace.
 
 Covered behaviors include:
 
-- loading the Threat Lens page through the authenticated dashboard shell
-- rendering the documentation-safe map fallback during Cypress runs
-- requesting consolidated data from `/api/threat/lens`
+- loading the Threat Lens page from the dashboard
+- rendering the map fallback during documentation capture
+- loading consolidated Threat Lens data
 - ranking top highlighted countries from consolidated country metadata
 - rendering category-layer rows for leak, tracking, news, exploit, defacement, chat, social, and generic records
 - rendering live news feed records
@@ -2454,10 +3111,15 @@ Covered account behaviors include:
 - avatar upload
 - theme toggle
 - two-factor toggle
+- current-password confirmation for sensitive changes
+- one-time recovery-key generation and replacement
 - post-update persistence
 - returning to login after logout
 - viewing the 2FA challenge screen
 - requesting password reset from login
+- switching between Reset password and Account recovery without retaining fields or errors
+- validating email and recovery-key formats before submission
+- returning a generic result for validly formatted reset and recovery requests
 - reading the reset email flow
 - submitting an invalid reused password
 - submitting a valid new password
@@ -2474,7 +3136,7 @@ Covered behaviors include:
 - logging in as those users
 - verifying sidebar visibility based on assigned licenses
 - verifying that some users see only indexed modules
-- verifying that some users also see breach, social, exploit, feed, dump, or scanner modules
+- verifying that some users also see breach, social, exploit, feed, stealer-log, or scanner modules
 - updating account preferences as a non-admin user
 - triggering the stealer-logs subscription or paywall flow for a demo user
 - showing a near-expiry trial banner for a member user
@@ -2485,7 +3147,7 @@ This means license-aware UI visibility and paywall/subscription behavior are par
 In practical terms, the tested product states include:
 
 - users whose sidebar is limited to core indexed modules only
-- users who gain additional breach, social, exploit, feed, dump, or stealer visibility through license assignment
+- users who gain additional breach, social, exploit, feed, stealer-log, or scanner visibility through license assignment
 - users whose role grants scanner and entity-API access
 - demo or limited users who are redirected into subscription/paywall flows instead of full module access
 - expiring users who receive warning banners before access changes
@@ -2546,6 +3208,46 @@ Covered behaviors include:
 
 This should be documented explicitly because it is one of the tested administrative guardrails in the platform.
 
+### Case Management: Full Tested Behaviors
+
+The case-management suite covers the active investigation workflow from creation through evidence handling, status movement, closure, sharing, and archive review.
+
+Covered behaviors include:
+
+- opening Case Management from the profile area
+- creating a case with core fields and a primary entity
+- assigning an analyst when an eligible analyst is available
+- opening the created case detail page
+- filtering the case list by case ID or text
+- filtering by status, severity, priority, and case type
+- changing sort order
+- switching between open and archived case lists
+- switching between `Case List` and `Analytics`
+- rendering the analytics panel
+- editing case details
+- editing the primary entity
+- adding and editing related entities
+- adding file artifacts
+- uploading artifact files
+- verifying artifact-file integrity
+- showing verified file integrity state
+- editing artifact metadata
+- adding linked-report artifacts through report source and search controls
+- adding raw-alert artifacts
+- deleting artifact files
+- adding and editing tasks
+- adding and editing linked cases
+- adding comments
+- exporting a case PDF
+- creating a public case share link
+- revoking case share links
+- moving a case through the tracking board with required reasons
+- closing a resolved case
+- enforcing read-only controls after closure
+- archiving a closed case and reviewing it from the archived list
+
+This means Case Management should be documented as a complete investigation workspace rather than only a form for saving case metadata.
+
 ### Chatbot and Report Conversation Flow
 
 The report workspace also includes a tested conversational path when the chat widget is enabled.
@@ -2577,7 +3279,7 @@ Report-level chatbot workflow used for conversational follow-up on an opened rec
 
 ### Workflow 2: Identity Exposure Check
 
-1. Open `Data Breach` or `Entity API`.
+1. Open `Data Breach` or `Entity Lookup`.
 2. Search for an email or identity value.
 3. Review breach details or live lookup results.
 4. Use Stealer Logs if deeper credential evidence is required.
@@ -2587,8 +3289,9 @@ Report-level chatbot workflow used for conversational follow-up on an opened rec
 1. Open `Network Intel` or `Web Scans`.
 2. Enter a domain or IP.
 3. Run the appropriate recon or scan view.
-4. Review the report, severity, and evidence.
-5. Export the report if it needs to be shared externally.
+4. For vulnerability scans, choose the target and scan depth that match the investigation need.
+5. Review the report, severity, scanned URLs, request details, and evidence.
+6. Export the report if it needs to be shared externally.
 
 ### Workflow 4: Profile Mapping
 
@@ -2603,7 +3306,46 @@ Report-level chatbot workflow used for conversational follow-up on an opened rec
 1. Configure IOC values in `Profile > IOC`.
 2. Review alert summaries from the tenant homepage.
 3. Open category alert reports for the highest-risk items.
-4. Export alerts when sharing findings internally.
+4. Export alerts when sharing findings with teammates.
+5. Adjust `Profile > Alert Scanners` if future scans should include or exclude specific categories.
+6. Create or link a case when an alert needs ownership, tasking, or closure tracking.
+
+### Workflow 6: Actor Or Malware Investigation
+
+1. Open `Actors & Malware`.
+2. Search by actor name, alias, malware family, country, signature, reporter, or related keyword.
+3. Switch between `APT`, `Malware`, and `Compromised-Actors` when the result type is unclear.
+4. Open the actor or malware report.
+5. Pivot to related indicators, infrastructure, reports, or graph views when relationship context is needed.
+
+### Workflow 7: Geo-Fencing Review
+
+1. Open `Geo Fencing` or `Satellite Intel`.
+2. Search for a place or enter coordinates.
+3. Review indexed facilities and nearby facility results.
+4. Enable aircraft or ship tracking if transportation context matters.
+5. Use `Imagery Analysis` for comparison or anomaly review.
+6. Switch to `Threat Lens` when country-level threat records or map arcs are more relevant than facilities.
+
+### Workflow 8: Long-Running Scan Review
+
+1. Start the scan from `Entity Lookup`, `Web Scans`, `Network Intel`, or a geo camera workflow.
+2. Leave the page only after the scan job has been created.
+3. Use the notification or scan-job surface to reopen incomplete or completed scans.
+4. Reuse recent completed results when the application offers them.
+5. Choose a new scan only when a fresh result is required.
+
+### Workflow 9: Case Handoff
+
+1. Create a case from `Profile > Case-Management`.
+2. Add the primary entity and the first set of artifacts.
+3. Attach uploaded files, linked reports, or raw alerts as separate artifacts.
+4. Verify uploaded artifact-file integrity before handoff where the action is available.
+5. Assign analysts or tasks.
+6. Use the case filters and analytics view to monitor open, stale, high-risk, or unassigned work.
+7. Move the case through the tracking board as work progresses.
+8. Close the case only after it reaches `resolved`.
+9. Export a PDF or generate a share link for review, then revoke the share when review ends.
 
 ## Notes and Limitations
 
@@ -2616,7 +3358,7 @@ If a module described in this manual is not visible in your sidebar, the most co
 :::{admonition} External modules
 :class: note
 
-Some sidebar items open new tabs or external services rather than rendering inside the main Orion workspace. `CTI Graph`, `Social Intel`, `Onion Link`, `Whistle Blowing`, and `Documentation` may behave this way depending on route and deployment setup.
+Some sidebar items open new tabs or external services rather than rendering inside the main Orion workspace. `CTI Graph`, `Social Intel`, `Onion Link`, `Whistle Blowing`, and `Documentation` may behave this way depending on feature and deployment setup.
 :::
 
 :::{admonition} Recommended starting point

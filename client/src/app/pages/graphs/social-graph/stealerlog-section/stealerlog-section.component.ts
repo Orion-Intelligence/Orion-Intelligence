@@ -3,16 +3,24 @@ import { Subscription } from 'rxjs';
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 import { SocialService } from '../services/social.service';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
+import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
+import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { STEALERLOG_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
+import { ReportExportService } from '../../../../shared/services/report-export.service';
+import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 
 @Component({
   selector: 'app-social-stealerlog-section',
   standalone: true,
+  imports: [ExportChoiceModalComponent],
   templateUrl: './stealerlog-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StealerlogSectionComponent {
-  private readonly exportCsvColumns = [ 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
+  private readonly exportCsvColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly state = inject(SocialService);
+  private readonly exportBranding = inject(ExportBrandingService);
+  private readonly reportExportService = inject(ReportExportService);
   private requestId = 0;
 
   username = input.required<string>();
@@ -20,6 +28,8 @@ export class StealerlogSectionComponent {
   records = signal<any[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
+  isExportChoiceOpen = signal(false);
+  readonly reportExportOptions = STEALERLOG_EXPORT_OPTIONS;
   searchIdentity = computed(() => SocialNormalizationUtil.normalizeIdentity(this.username()));
   hasRecords = computed(() => this.records().length > 0);
   visibleRecords = computed(() => this.records().slice(0, 3));
@@ -80,17 +90,35 @@ export class StealerlogSectionComponent {
     });
   }
 
-  downloadRecords(event: Event): void {
+  openExportChoice(event: Event): void {
     event.stopPropagation();
-    const rows = this.records().map((item, index) => ({
+    this.isExportChoiceOpen.set(true);
+  }
+
+  closeExportChoice(): void {
+    this.isExportChoiceOpen.set(false);
+  }
+
+  selectExport(type: string): void {
+    if (type === 'csv') {
+      this.downloadRecords();
+    }
+    else if (type === 'json' || type === 'report') {
+      this.exportRecords(type);
+    }
+    this.closeExportChoice();
+  }
+
+  private buildExportRows(): Record<string, string>[] {
+    return this.records().map((item, index) => ({
+      tenant_name: this.exportBranding.getTenantName(),
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: this.searchIdentity() || '-',
       email: SocialNormalizationUtil.toExportValue(item?.['email'] || item?.['m_email']),
       username: SocialNormalizationUtil.toExportValue(item?.['username'] || item?.['m_username']),
       domain: SocialNormalizationUtil.toExportValue(item?.['domain'] || item?.['m_domain']),
-      source: SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file'] || item?.['m_source'] || item?.['m_scrap_file']),
-      hash: SocialNormalizationUtil.toExportValue(item?.['m_hash']),
+      source: String(this.exportBranding.replaceSystemBrand(SocialNormalizationUtil.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file'] || item?.['m_source'] || item?.['m_scrap_file']))),      hash: SocialNormalizationUtil.toExportValue(item?.['m_hash']),
       title: '-',
       url: SocialNormalizationUtil.toExportValue(item?.['url'] || item?.['m_url']),
       rank: '-',
@@ -98,6 +126,10 @@ export class StealerlogSectionComponent {
       team: '-',
       summary: '-'
     }));
+  }
+
+  private downloadRecords(): void {
+    const rows = this.buildExportRows();
     const csvLines = [
       this.exportCsvColumns.join(','),
       ...rows.map(row => this.exportCsvColumns.map(column => SocialNormalizationUtil.escapeCsvValue(row[column] ?? '-')).join(','))
@@ -111,6 +143,24 @@ export class StealerlogSectionComponent {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  }
+
+  private exportRecords(type: 'json' | 'report'): void {
+    const rows = this.buildExportRows();
+    const payload: GraphReportPayload = {
+      graphKind: 'social',
+      title: 'Stealer Logs Export',
+      sessionName: this.searchIdentity() || 'stealerlogs',
+      generatedAtIso: new Date().toISOString(),
+      nodes: [],
+      edges: [],
+      summary: {
+        search_query: this.searchIdentity() || '-',
+        total_records: rows.length
+      },
+      tables: [{ title: 'Stealer Logs', values: {}, columns: [...this.exportCsvColumns], rows }]
+    };
+    this.reportExportService.exportByType(payload, type === 'json' ? 'json' : 'doc_pdf');
   }
 
   getRecordTrackKey(index: number, record: any): string {

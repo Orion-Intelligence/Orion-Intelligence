@@ -28,6 +28,7 @@ class TokenAuthProvider(AuthProvider):
             user = await auth_manager.get_instance().authenticate_user(username, password)
             if not user:
                 raise HTTPException(status_code=401, detail="Invalid username or password")
+            session_manager.ensure_user_tenant_access(user, getattr(request.state, "tenant", None))
             if user.role != user_role.ADMIN:
                 raise HTTPException(status_code=403, detail="Not authorized")
 
@@ -52,6 +53,7 @@ class TokenAuthProvider(AuthProvider):
         try:
             session_mgr = session_manager.get_instance()
             user = await session_mgr.get_current_user(token)
+            session_manager.ensure_user_tenant_access(user, getattr(request.state, "tenant", None))
             if not user:
                 return False
             role = await session_mgr.get_current_role(token)
@@ -75,7 +77,7 @@ class TokenAuthProvider(AuthProvider):
 
     async def logout(self, request: Request, response: Response) -> Response:
         token = token_from_request(request)
-        await session_manager.get_instance().invalidate_user_session(ptoken=token)
+        await session_manager.get_instance().invalidate_user_session(ptoken=token, tenant_id=getattr(request.state, "tenant", None))
         redirect = RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
         redirect.delete_cookie(ACCESS_COOKIE, path="/")
         redirect.delete_cookie(ACCESS_COOKIE, path="/admin")
@@ -91,5 +93,6 @@ def setup_admin(engine: AIOEngine) -> Admin:
     admin.add_view(TenantKeyAdminView(db_keys, engine=engine, icon="fa fa-link"))
     admin.add_view(ModelView(db_system_model, icon="fa fa-cog", label="System Settings", name="system_settings"))
     admin.add_view(ModelView(db_url_data_model, icon="fa fa-link", label="URL Data", name="url_data"))
+    admin.add_view(ModelView(db_alert_connector_model, icon="fa fa-plug", label="Alert Connectors", name="alert_connectors"))
 
     return admin

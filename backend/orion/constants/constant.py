@@ -20,7 +20,8 @@ class CONSTANTS:
     S_SETTINGS_SEARCH_MAX_DYNAMIC_RESOURCE_LIMIT = 1
     S_SETTINGS_COUNTRY_DOCUMENT_SIZE = 500
 
-    S_AUTH_SECRET_KEY = env_handler.get_instance().env("S_SUPER_PASSWORD_V1")
+    S_SUPER_PASSWORD = env_handler.get_instance().env("S_SUPER_PASSWORD_V1")
+    S_AUTH_SECRET_KEY = env_handler.get_instance().env("JWT_SECRET_KEY")
     S_CRAWL_SECRET_KEY = env_handler.get_instance().env("S_CRAWLER_PASSWORD")
     S_AUTH_ALGORITHM = "HS256"
     S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES = 30
@@ -31,7 +32,12 @@ class CONSTANTS:
     BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
     IMAGE_DIR = BASE_DIR / "static" / "resource" / "tenant"
     S_SATELLITE_ASSET_FILE_NAME = "satellite_assets.json"
-    S_CASE_ARTIFACT_RESOURCE_DIR = Path("backend/static/resource/case_artifacts")
+    S_CASE_ARTIFACT_RESOURCE_DIR = (
+        Path(__file__).resolve().parents[2]
+        / "static"
+        / "resource"
+        / "case_artifacts"
+    )
     S_CASE_ARTIFACT_SCREENSHOT_ALLOWED = {"image/png"}
     S_CASE_ARTIFACT_FILE_ALLOWED = {
         "application/pdf",

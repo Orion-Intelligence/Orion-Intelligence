@@ -27,6 +27,10 @@ export interface TenantModel {
     password_reset_required?: boolean;
     profile_visibility_enabled?: boolean;
     event_management_enabled?: boolean;
+    alerts_visible_to_admin?: boolean;
+    privileged_ioc?: boolean;
+    alert_run_time?: string | null;
+    allowed_alert_categories?: string[] | null;
     accounts_mail_password?: string;
     accounts_mail?: string;
     accounts_smtp_server?: string;
@@ -41,6 +45,8 @@ export interface User {
     verificationDate: string;
     licenses?: string[] | null;
     permissions?: string[] | null;
+    alerts_allowed_all?: boolean;
+    alerts_allowed_tenant_ids?: string[] | null;
     password_reset_required?: boolean;
 }
 export interface TenantTeamModel {
@@ -52,5 +58,12 @@ export interface TenantTeamModel {
     subscription: boolean;
     licenses?: string[] | null;
     permissions?: string[] | null;
+    alerts_allowed_all?: boolean;
+    alerts_allowed_tenant_ids?: string[] | null;
     quotaExceeded?: boolean;
+}
+export interface AlertAllowedTenantOption {
+    id: string;
+    name: string;
+    email: string;
 }

@@ -68,6 +68,34 @@ export interface SocialExtensionFetchError {
     login_url?: string | null;
     platform?: string | null;
 }
+export const VERIFIED_SOCIAL_PLATFORM_KEYS = [
+  'blogger',
+  'bluesky',
+  'devto',
+  'facebook',
+  'habr',
+  'hackernoon',
+  'hashnode',
+  'instagram',
+  'linkedin',
+  'mastodon',
+  'medium',
+  'microblog',
+  'misskey',
+  'nostr',
+  'pleroma',
+  'primal',
+  'quora',
+  'pastebin',
+  'reddit',
+  'stackoverflow',
+  'substack',
+  'threads',
+  'tiktok',
+  'twitter',
+  'youtube',
+] as const;
+
 export interface SocialStoredProfile {
     user_id?: string;
     profile_username: string;
@@ -78,6 +106,7 @@ export interface SocialStoredProfile {
 export interface PlatformResult {
     keyUsername: string;
     platform: string;
+    platformKey?: string;
     username: string;
     url: string;
     timestamp?: string;

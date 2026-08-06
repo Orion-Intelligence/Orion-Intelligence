@@ -150,7 +150,8 @@ export class SocialProfileListingComponent {
       ? [...baseTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
       : sharedTabs;
     const globalCapability = this.platformCapabilities['__all__'];
-    const capability = this.platformCapabilities[platformData.platform.toLowerCase()];
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platformData.platformKey || platformData.platform);
+    const capability = this.platformCapabilities[platformKey];
     for (const key of [...(globalCapability?.allow ?? []), ...(capability?.allow ?? [])]) {
       const mappedTab = this.mappedFetchTabs[key as FetchTabKey];
       if (mappedTab && !tabs.some(tab => tab.key === mappedTab.key)) {
@@ -383,10 +384,8 @@ export class SocialProfileListingComponent {
   }
 
   isPriorityPlatform(platformName?: string): boolean {
-    if (!platformName) {
-      return false;
-    }
-    return this.PRIORITY_PLATFORMS.includes(platformName.toLowerCase());
+    const platformKey = SocialNormalizationUtil.canonicalPlatformKey(platformName);
+    return !!platformKey && !!this.platformCapabilities[platformKey];
   }
 
   getFollowers(platformData: PlatformResult): string[] {
@@ -600,9 +599,9 @@ export class SocialProfileListingComponent {
       return;
     }
     const normalizedProfile = SocialNormalizationUtil.normalizeUsername(profile);
-    const normalizedPlatform = platform.toLowerCase();
+    const normalizedPlatform = SocialNormalizationUtil.canonicalPlatformKey(platform);
     for (const user of this.activeUsers()) {
-      const match = user.platforms.find(item => item.platform.toLowerCase() === normalizedPlatform && SocialNormalizationUtil.normalizeUsername(item.username) === normalizedProfile);
+      const match = user.platforms.find(item => SocialNormalizationUtil.canonicalPlatformKey(item.platformKey || item.platform) === normalizedPlatform && SocialNormalizationUtil.normalizeUsername(item.username) === normalizedProfile);
       if (match) {
         const platformId = this.getPlatformCardId(match);
         this.state.graphState.activeUsername.set(user.username);
@@ -621,7 +620,7 @@ export class SocialProfileListingComponent {
   private setProfileQuery(platformData: PlatformResult): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { profile: SocialNormalizationUtil.normalizeProfilePathUsername(platformData.username || platformData.keyUsername), platform: platformData.platform.toLowerCase() },
+      queryParams: { profile: SocialNormalizationUtil.normalizeProfilePathUsername(platformData.username || platformData.keyUsername), platform: SocialNormalizationUtil.canonicalPlatformKey(platformData.platformKey || platformData.platform) },
       queryParamsHandling: 'merge',
       replaceUrl: true,
     });
