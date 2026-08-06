@@ -60,7 +60,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
         this.cachedResultSections = undefined;
         this.prepareNetworkIntelReport();
         this.loading = false;
-        if (this.statusLabel === 'Completed') {
+        if (this.statusLabel === 'Completed' || this.statusLabel === 'Partial') {
           this.scanNotifications.markSeen(job);
         }
       },
@@ -118,6 +118,9 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     const status = this.job ? this.scanNotifications.getStatus(this.job) : 'queued';
     if (status === 'done') {
       return 'Completed';
+    }
+    if (status === 'partial') {
+      return 'Partial';
     }
     if (status === 'error') {
       return 'Failed';

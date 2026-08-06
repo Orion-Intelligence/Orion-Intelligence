@@ -40,7 +40,7 @@
 
       <div class="hidden items-center gap-2 lg:flex">
         <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
-        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ (isScanning() ? 'Scanning' : ((scanHelper.onError() || seoRepoScanErrorMessage) ? 'Error' : 'Idle')) | translate }}</div>
+        <div class="text-sm font-semibold text-[var(--color-text1)]">{{ (isScanning() ? 'Scanning' : ((scanHelper.onError() || seoRepoScanErrorMessage) ? 'Error' : (activeTab === 'vuln' && vulnerabilityResult?.status === 'partial' ? 'Partial' : 'Idle'))) | translate }}</div>
         <div class="text-xs text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
       </div>
 

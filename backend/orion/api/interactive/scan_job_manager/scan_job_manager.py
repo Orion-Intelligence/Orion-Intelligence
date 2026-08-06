@@ -32,7 +32,7 @@ class ScanJobManager:
 
     @classmethod
     def is_terminal_status(self, scan_status: str | ScanJobStatus | None) -> bool:
-        return str(scan_status or "").strip().lower() in {ScanJobStatus.DONE.value, ScanJobStatus.ERROR.value, ScanJobStatus.CANCELLED.value, ScanJobStatus.EXPIRED.value}
+        return str(scan_status or "").strip().lower() in {ScanJobStatus.PARTIAL.value, ScanJobStatus.DONE.value, ScanJobStatus.ERROR.value, ScanJobStatus.CANCELLED.value, ScanJobStatus.EXPIRED.value}
 
     @staticmethod
     def _normalize_api_reference(api_reference: str) -> str:
@@ -66,6 +66,8 @@ class ScanJobManager:
 
         if response_status in {"error", "failed", "failure"}:
             return ScanJobStatus.ERROR
+        if response_status == "partial":
+            return ScanJobStatus.PARTIAL
         if response_status in {"done", "success", "completed", "complete"}:
             return ScanJobStatus.DONE
         if response_status in {"pending", "busy", "queued", "running", "started"}:
@@ -108,7 +110,7 @@ class ScanJobManager:
         job.response = response_dict
         job.updated_at = now
         computed_status = self._job_status_from_response(response_dict)
-        if computed_status in {ScanJobStatus.DONE, ScanJobStatus.ERROR}:
+        if computed_status in {ScanJobStatus.PARTIAL, ScanJobStatus.DONE, ScanJobStatus.ERROR}:
             job.completed_at = now
         await self._engine.save(job)
 
@@ -310,7 +312,7 @@ class ScanJobManager:
             raise HTTPException(status_code=response.status_code, detail=f"Error from trusted-micros-api: {response.text}")
 
         computed_status = self._job_status_from_response(full_response)
-        if computed_status in {ScanJobStatus.DONE, ScanJobStatus.ERROR}:
+        if computed_status in {ScanJobStatus.PARTIAL, ScanJobStatus.DONE, ScanJobStatus.ERROR}:
             job.completed_at = now
 
         await self._engine.save(job)

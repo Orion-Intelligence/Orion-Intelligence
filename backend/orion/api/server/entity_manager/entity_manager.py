@@ -55,6 +55,7 @@ class entity_manager:
     ARANGO_LOCK_RETRY_BASE_DELAY = 0.05
     ARANGO_DISTRIBUTED_LOCK_TTL = 10
     ARANGO_DISTRIBUTED_LOCK_WAIT = 5
+    PROVENANCE_SAMPLE_LIMIT = 6
 
     @staticmethod
     def get_instance():
@@ -348,7 +349,7 @@ class entity_manager:
         return float(observation.get("confidence") or 0.0)
 
     @staticmethod
-    def _merge_unique(existing: Any, additions: list[Any]) -> list[Any]:
+    def _merge_unique(existing: Any, additions: list[Any], limit: int | None = None) -> list[Any]:
         values = []
         seen = set()
         for value in (existing if isinstance(existing, list) else []):
@@ -361,7 +362,15 @@ class entity_manager:
             if marker not in seen and value not in (None, "", [], {}):
                 values.append(value)
                 seen.add(marker)
-        return values
+        return values[:limit] if limit is not None else values
+
+    @classmethod
+    def _updated_evidence_count(cls, old: dict[str, Any], additions: list[Any]) -> int:
+        existing_ids = cls._merge_unique([], old.get("evidence_doc_ids") or [])
+        existing_markers = {str(value) for value in existing_ids}
+        previous_count = max(int(old.get("evidence_count") or 0), len(existing_ids))
+        new_ids = cls._merge_unique([], additions)
+        return previous_count + sum(str(value) not in existing_markers for value in new_ids)
 
     @classmethod
     def _upsert_lock(cls, key: str):
@@ -545,9 +554,11 @@ class entity_manager:
             merged = {k: v for k, v in old.items() if k not in {"_id", "_rev"}}
             merged.update({k: v for k, v in document.items() if v not in (None, "", [], {})})
             for field, additions in (merge_arrays or {}).items():
-                merged[field] = self._merge_unique(old.get(field), additions)
-            if "evidence_doc_ids" in merged:
-                merged["evidence_count"] = len(merged["evidence_doc_ids"])
+                if field == "evidence_doc_ids":
+                    merged["evidence_count"] = self._updated_evidence_count(old, additions)
+                    continue
+                merged[field] = self._merge_unique(old.get(field), additions, self.PROVENANCE_SAMPLE_LIMIT)
+            merged.pop("evidence_doc_ids", None)
             if document.get("first_seen") or old.get("first_seen"):
                 merged["first_seen"] = self._min_seen(old.get("first_seen"), document.get("first_seen"))
             if document.get("last_seen") or old.get("last_seen"):
@@ -588,12 +599,12 @@ class entity_manager:
                 float(old.get("base_confidence") or 0),
                 float(edge_document.get("base_confidence") or 0.75),
             ))
-            merged["evidence_doc_ids"] = self._merge_unique(old.get("evidence_doc_ids"), [doc_id])
-            merged["source_modules"] = self._merge_unique(old.get("source_modules"), [source_module])
-            merged["sources"] = self._merge_unique(old.get("sources"), [source])
+            merged.pop("evidence_doc_ids", None)
+            merged["source_modules"] = self._merge_unique(old.get("source_modules"), [source_module], self.PROVENANCE_SAMPLE_LIMIT)
+            merged["sources"] = self._merge_unique(old.get("sources"), [source], self.PROVENANCE_SAMPLE_LIMIT)
             merged["first_seen"] = self._min_seen(old.get("first_seen"), published)
             merged["last_seen"] = self._max_seen(old.get("last_seen"), published)
-            merged["evidence_count"] = len(merged["evidence_doc_ids"])
+            merged["evidence_count"] = self._updated_evidence_count(old, [doc_id])
             merged["max_source_reliability"] = float(max(float(old.get("max_source_reliability") or 0), source_reliability))
             merged["confidence"] = self._score_confidence(
                 float(merged.get("base_confidence") or 0.75),
@@ -1726,7 +1737,6 @@ class entity_manager:
                                     "entity_role": entity_role,
                                     "label": edge_type.replace("_", " "),
                                     "confidence": confidence,
-                                    "evidence_doc_ids": [normalized_doc_id],
                                     "source_fields": source_fields,
                                     "source": source,
                                     "source_reliability": source_reliability,

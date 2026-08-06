@@ -432,6 +432,9 @@ export class ScanNotificationService {
     if (raw === 'error' || raw === 'failed' || raw === 'failure') {
       return 'error';
     }
+    if (raw === 'partial') {
+      return 'partial';
+    }
     if (raw === 'done' || raw === 'success' || raw === 'completed' || raw === 'complete') {
       return 'done';
     }
@@ -451,7 +454,7 @@ export class ScanNotificationService {
   }
 
   private progressFromResponse(response: any, status: ScanJobStatus, fallback = 5): number {
-    if (status === 'done') {
+    if (status === 'done' || status === 'partial') {
       return 100;
     }
     const raw = response?.result?.progress ?? response?.progress;
@@ -511,7 +514,7 @@ export class ScanNotificationService {
   }
 
   private isTerminal(job: ScanJob): boolean {
-    return ['done', 'error', 'cancelled', 'expired'].includes(this.getStatus(job));
+    return ['partial', 'done', 'error', 'cancelled', 'expired'].includes(this.getStatus(job));
   }
 
   private sortJobs(jobs: ScanJob[]): ScanJob[] {
