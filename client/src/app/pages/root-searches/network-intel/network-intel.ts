@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, Subscription } from 'rxjs';
@@ -95,7 +95,18 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return '-';
   }
 
-  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private scanner: ScannerService, ) {}
+  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private scanner: ScannerService, ) {
+    effect(() => {
+      if (!this.scanHelper.onDone()) {
+        return;
+      }
+      if (this.activeTab === 'dns') this.parseDnsResult();
+      else if (this.activeTab === 'shodan') this.parseShodanResult();
+      else if (this.activeTab === 'vuln' && this.vulnerabilityActiveTarget) this.parseVulnerabilityResult();
+      else if (this.activeTab === 'vuln') this.parseVulnerabilityTargets();
+      else if (this.activeTab === 'geo') this.parseGeoResult();
+    });
+  }
 
   ngOnInit(): void {
     this.scanHelper.resetState();
@@ -538,13 +549,16 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   startVulnerabilityScanForTarget(target: string, depth: VulnerabilityScanDepth): void {
     const normalizedTarget = target.trim();
-    if (!normalizedTarget || this.isScanning()) {
+    if (!normalizedTarget) {
       return;
     }
     this.vulnForm.ip = normalizedTarget;
     this.validateVulnerability();
     if (this.formError) {
       return;
+    }
+    if (this.isScanning()) {
+      this.cancel();
     }
     this.resetActiveWork();
     this.hasSearched = true;
@@ -827,16 +841,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private watchResult(fn: () => void): void {
     fn();
-
-    const id = setInterval(() => {
-      fn();
-      if (!this.isScanning()) {
-        fn();
-        clearInterval(id);
-      }
-    }, 200);
-
-    this._intervals.push(id);
   }
 
   private syncUrl(): void {

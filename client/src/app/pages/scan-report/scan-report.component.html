@@ -4,9 +4,32 @@
       <h1 class="text-[20px] font-semibold text-[var(--color-text1)]">{{ 'Analysis Report' | translate }}</h1>
       <p class="text-[13px] text-[var(--color-text4)]">{{ 'File Processing Results' | translate }}</p>
     </div>
-    <div class="mt-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] p-5">
-      <div class="ui-shimmer mb-3 h-4 w-44 rounded bg-[var(--color-blue-720)]"></div>
-      <div class="ui-shimmer h-3 w-72 rounded bg-[var(--color-blue-720)]"></div>
+    <div class="mt-3 flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+      <div class="flex min-w-0 items-center gap-2">
+        <div class="ui-shimmer h-4 w-[86px] rounded bg-[var(--color-placeholder)]"></div>
+        <div class="ui-shimmer h-3 w-[118px] rounded bg-[var(--color-placeholder)]"></div>
+      </div>
+      <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
+      @for (width of ['w-14', 'w-20', 'w-16']; track width) {
+        <div class="hidden items-center gap-2 md:flex">
+          <div class="ui-shimmer h-5 w-5 rounded bg-[var(--color-placeholder)]"></div>
+          <div class="ui-shimmer h-4 w-8 rounded bg-[var(--color-placeholder)]"></div>
+          <div class="ui-shimmer h-3 rounded bg-[var(--color-placeholder)]" [ngClass]="width"></div>
+        </div>
+        <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
+      }
+    </div>
+    <div class="mt-4 overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+      <div class="flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3">
+        <div class="ui-shimmer h-3 w-32 rounded bg-[var(--color-blue-720)]"></div>
+        <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
+      </div>
+      @for (_ of [1, 2, 3, 4]; track $index; let last = $last) {
+        <div class="flex items-center justify-between gap-4 border-b border-[var(--color-divider)] px-4 py-3" [class.border-b-0]="last">
+          <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
+          <div class="ui-shimmer h-6 w-20 rounded bg-[var(--color-blue-720)]"></div>
+        </div>
+      }
     </div>
   } @else if (errorMessage) {
     <section class="rounded-[10px] border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] p-[20px] text-center">
@@ -65,7 +88,19 @@
       </div>
     </div>
 
-    @if (resultSections.length > 0) {
+    @if (isHostReconReport) {
+      <section data-testid="scan-report-results" class="mt-4 w-full" @fadeInDashboardItem>
+        <app-network-intel-dns-section [dnsResult]="dnsReportResult" [ipRows]="dnsReportRows" [hasSearched]="true"></app-network-intel-dns-section>
+      </section>
+    } @else if (isIpScanReport) {
+      <section data-testid="scan-report-results" class="mt-4 w-full" @fadeInDashboardItem>
+        <app-network-intel-shodan-section [shodanResult]="shodanReportResult" [hasSearched]="true"></app-network-intel-shodan-section>
+      </section>
+    } @else if (isVulnerabilityReport) {
+      <section data-testid="scan-report-results" class="mt-4 w-full" @fadeInDashboardItem>
+        <app-network-intel-vulnerability-section class="block w-full" [targets]="vulnerabilityReportTargets" [activeTarget]="vulnerabilityReportTarget" [defaultDepth]="vulnerabilityReportDepth" [readOnly]="true" [searchDomain]="vulnerabilityReportTarget || ''" [vulnerabilityResult]="result" [hasSearched]="true"></app-network-intel-vulnerability-section>
+      </section>
+    } @else if (resultSections.length > 0) {
       <section data-testid="scan-report-results" class="mt-4 w-full space-y-4" @fadeInDashboardItem>
         @for (section of resultSections; track trackByIndex($index); let sectionIdx = $index) {
           <div>

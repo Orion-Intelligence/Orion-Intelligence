@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class ConfirmationPopupComponent {
   readonly message = input('Are you sure you want to perform this action?');
+  readonly confirmLabel = input('confirmation.yesConfirm');
   readonly confirmed = output<boolean>();
 
   onBackdrop(event: MouseEvent) {

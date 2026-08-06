@@ -146,7 +146,7 @@ export interface GeoLiveStats {
   cameras_found: number;
 }
 
-export type VulnerabilityScanDepth = 'low' | 'medium' | 'high';
+export type VulnerabilityScanDepth = 'low' | 'medium' | 'high' | 'full';
 
 export interface VulnerabilityTargetSelection {
   target: string;

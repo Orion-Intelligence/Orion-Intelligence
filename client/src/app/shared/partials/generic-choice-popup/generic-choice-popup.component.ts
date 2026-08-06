@@ -2,7 +2,7 @@ import { Component, input, output } from '@angular/core';
 import { popupAnimation } from '../../animations/popup.animations';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
-export type GenericChoicePopupAction = 'primary' | 'secondary' | 'cancel';
+export type GenericChoicePopupAction = 'secondary' | 'cancel';
 
 @Component({
   selector: 'app-generic-choice-popup',
@@ -13,7 +13,6 @@ export type GenericChoicePopupAction = 'primary' | 'secondary' | 'cancel';
 export class GenericChoicePopupComponent {
   readonly title = input('Confirm Action');
   readonly message = input('Choose how you want to continue.');
-  readonly primaryLabel = input('Use Previous Result');
   readonly secondaryLabel = input('Run New Scan');
   readonly cancelLabel = input('common.actions.cancel');
   readonly selected = output<GenericChoicePopupAction>();
@@ -23,10 +22,6 @@ export class GenericChoicePopupComponent {
     if (eventTargetElement?.dataset?.['role'] === 'backdrop') {
       this.selected.emit('cancel');
     }
-  }
-
-  choosePrimary(): void {
-    this.selected.emit('primary');
   }
 
   chooseSecondary(): void {

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 import httpx
@@ -171,12 +171,6 @@ class ScanJobManager:
                 latest_done_scan = record
 
         if latest_done_scan and not force_new:
-            completed_at = (latest_done_scan.completed_at or latest_done_scan.updated_at or latest_done_scan.created_at)
-            if completed_at and completed_at.tzinfo is None:
-                completed_at = completed_at.replace(tzinfo=timezone.utc)
-            if completed_at and completed_at >= now - timedelta(days=3):
-                return {**self._build_scan_detail(latest_done_scan, ScanJobStatus.DONE.value).model_dump(), "source": "previous_completed"}
-            
             if confirm_duplicates:
                 previous_scan = self._build_scan_notification(latest_done_scan, ScanJobStatus.DONE.value).model_dump()
                 return {
@@ -224,6 +218,15 @@ class ScanJobManager:
         except Exception as exc:
             await self._save_job_response(job, {"status": ScanJobStatus.ERROR.value, "detail": "Scan failed", "step": "failed"})
             raise HTTPException(status_code=500, detail="Scan failed") from exc
+
+        if not force_new and self._as_response_dict(response).get("cached") is True:
+            await self._save_job_response(job, response)
+            return {
+                "requires_confirmation": True,
+                "message": "A cached scan result is available. Do you want to use it or rescan?",
+                "source": "previous_completed",
+                "previous_scan": self._build_scan_notification(job, ScanJobStatus.DONE.value).model_dump(),
+            }
 
         await self._save_job_response(job, response)
         return self._with_scan_metadata(response, job)
