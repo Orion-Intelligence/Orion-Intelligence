@@ -14,7 +14,9 @@ from orion.constants.constant import CONSTANTS
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
+
 
 
 class social_model:
@@ -30,10 +32,6 @@ class social_model:
 
     def __init__(self):
         self._engine = mongo_controller.get_instance().get_engine()
-
-    @staticmethod
-    def _normalize_username(value: str) -> str:
-        return (value or "").strip().lstrip("@").lower()
 
     @staticmethod
     def _document_payload(record: dict) -> dict:
@@ -58,10 +56,9 @@ class social_model:
 
     @staticmethod
     def _social_api_base_urls() -> list[str]:
-        configured = os.getenv("ORION_SOCIAL_API_BASE_URL", "").strip()
+        configured = env_handler.get_instance().env("ORION_SOCIAL_API_BASE_URL") or ""
         candidates = [
             configured,
-            "http://trusted-social-api:8020",
             "http://127.0.0.1:8020",
             "http://localhost:8020",
         ]
@@ -76,17 +73,9 @@ class social_model:
         return urls
 
     @classmethod
-    def _social_url(cls, base_url: str, path: str) -> str:
-        return f"{base_url.rstrip('/')}/{path.lstrip('/')}"
-
-    @staticmethod
-    def _social_internal_token() -> str:
-        return os.getenv("ORION_SOCIAL_INTERNAL_TOKEN", "").strip() or os.getenv("S_SUPER_PASSWORD_V1", "").strip()
-
-    @classmethod
     def _social_headers(cls, current_user=None, request=None) -> dict[str, str]:
         headers: dict[str, str] = {}
-        internal_token = cls._social_internal_token()
+        internal_token = env_handler.get_instance().env("ORION_SOCIAL_INTERNAL_TOKEN")
         if internal_token:
             headers["X-Orion-Internal-Token"] = internal_token
 
@@ -98,12 +87,7 @@ class social_model:
         token = token_from_request(request) if request is not None else ""
         if token:
             try:
-                payload = jwt.decode(
-                    token,
-                    CONSTANTS.S_AUTH_SECRET_KEY,
-                    algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
-                    options={"verify_exp": True},
-                )
+                payload = jwt.decode(token, CONSTANTS.S_AUTH_SECRET_KEY, algorithms=[CONSTANTS.S_AUTH_ALGORITHM], options={"verify_exp": True})
                 session_id = str(payload.get("sid") or "")
                 client = str(payload.get("client") or "web")
                 if session_id:
@@ -132,7 +116,7 @@ class social_model:
         merged: dict[str, dict] = {}
         for row in rows:
             payload = cls._document_payload(row)
-            profile_username = cls._normalize_username(payload.get("profile_username") or "")
+            profile_username = (payload.get("profile_username") or "").strip().lstrip("@").lower()
             if not profile_username:
                 continue
             current = merged.setdefault(profile_username, {
@@ -158,7 +142,7 @@ class social_model:
                     async with httpx.AsyncClient() as client:
                         if isinstance(model, dict) and "file_bytes" in model:
                             response = await client.post(
-                                self._social_url(base_url, f"social/{key}"),
+                                f"{base_url.rstrip('/')}/{f"social/{key}".lstrip('/')}",
                                 files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
                                 headers=headers,
                                 timeout=120,
@@ -167,7 +151,7 @@ class social_model:
                             payload = model.model_dump() if hasattr(model, "model_dump") else model
                             payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
                             response = await client.post(
-                                self._social_url(base_url, f"social/{key}"),
+                                f"{base_url.rstrip('/')}/{f"social/{key}".lstrip('/')}",
                                 json=payload,
                                 headers=headers,
                                 timeout=120,
@@ -190,7 +174,7 @@ class social_model:
         return await self.social_search(param, "recon", current_user, request)
 
     async def search_forum_profiles(self, param):
-        query = self._normalize_username(getattr(param, "query", ""))
+        query = (getattr(param, "query", "") or "").strip().lstrip("@").lower()
         if not query:
             return {"Result": [], "Total_Hits": 0}
 
@@ -281,7 +265,8 @@ class social_model:
             for base_url in self._social_api_base_urls():
                 try:
                     async with httpx.AsyncClient() as client:
-                        response = await client.get(self._social_url(base_url, "extensions/status"), headers=self._social_headers(), timeout=20)
+                        f"{base_url.rstrip('/')}/{"extensions/status".lstrip('/')}"
+                        response = await client.get(f"{base_url.rstrip('/')}/{"extensions/status".lstrip('/')}", headers=self._social_headers(), timeout=20)
                     if response.status_code != 200:
                         return JSONResponse(status_code=response.status_code, content={"online": 0, "extensions": [], "error": "Social extension manager returned an error"})
                     payload = response.json()
@@ -306,7 +291,7 @@ class social_model:
             for base_url in self._social_api_base_urls():
                 try:
                     async with httpx.AsyncClient() as client:
-                        response = await client.get(self._social_url(base_url, path), headers=self._social_headers(), timeout=60)
+                        response = await client.get(f"{base_url.rstrip('/')}/{path.lstrip('/')}", headers=self._social_headers(), timeout=60)
                 except httpx.RequestError as exc:
                     last_error = str(exc)
                     continue
@@ -348,7 +333,7 @@ class social_model:
 
     async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], replace: bool = False):
         try:
-            normalized_username = self._normalize_username(profile_username)
+            normalized_username = profile_username.strip().lstrip("@").lower()
             if not normalized_username:
                 return JSONResponse(status_code=400, content={"detail": "profile_username is required"})
             if not isinstance(profiles, list):
@@ -397,7 +382,7 @@ class social_model:
         try:
             collection = self._engine.get_collection(db_social_model)
             query = {"user_id": user_id}
-            normalized_username = self._normalize_username(profile_username or "")
+            normalized_username = (profile_username or "").strip().lstrip("@").lower()
             if normalized_username:
                 query = {
                     "user_id": user_id,
@@ -420,7 +405,7 @@ class social_model:
 
     async def delete_social_profiles(self, user_id: str, profile_username: str):
         try:
-            normalized_username = self._normalize_username(profile_username)
+            normalized_username = (profile_username).strip().lstrip("@").lower()
             result = await self._engine.get_collection(db_social_model).delete_many({
                 "user_id": user_id,
                 "$or": [
