@@ -142,7 +142,7 @@ class social_model:
                     async with httpx.AsyncClient() as client:
                         if isinstance(model, dict) and "file_bytes" in model:
                             response = await client.post(
-                                f"{base_url.rstrip('/')}/{f"social/{key}".lstrip('/')}",
+                                f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
                                 files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
                                 headers=headers,
                                 timeout=120,
@@ -151,7 +151,7 @@ class social_model:
                             payload = model.model_dump() if hasattr(model, "model_dump") else model
                             payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
                             response = await client.post(
-                                f"{base_url.rstrip('/')}/{f"social/{key}".lstrip('/')}",
+                                f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
                                 json=payload,
                                 headers=headers,
                                 timeout=120,
@@ -265,8 +265,7 @@ class social_model:
             for base_url in self._social_api_base_urls():
                 try:
                     async with httpx.AsyncClient() as client:
-                        f"{base_url.rstrip('/')}/{"extensions/status".lstrip('/')}"
-                        response = await client.get(f"{base_url.rstrip('/')}/{"extensions/status".lstrip('/')}", headers=self._social_headers(), timeout=20)
+                        response = await client.get(f"{base_url.rstrip('/')}/extensions/status", headers=self._social_headers(), timeout=20)
                     if response.status_code != 200:
                         return JSONResponse(status_code=response.status_code, content={"online": 0, "extensions": [], "error": "Social extension manager returned an error"})
                     payload = response.json()
