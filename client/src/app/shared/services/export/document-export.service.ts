@@ -33,6 +33,8 @@ export class DocumentExportService extends GraphExportService {
     const pageW = doc.internal.pageSize.getWidth();
     const margin = PDF_EXPORT_LAYOUT.margin;
     const contentW = pageW - (margin * 2);
+    const continuationMarkerY = PDF_EXPORT_LAYOUT.contentStartY;
+    const continuationTableY = continuationMarkerY + 13;
     this.drawInfoSectionMarker(doc, firstSectionY, contentW, 'Executive Summary', theme?.sectionHeaderRgb);
     autoTable(doc, {
       startY: firstSectionY + 12,
@@ -88,19 +90,19 @@ export class DocumentExportService extends GraphExportService {
         const hasStructuredRows = structuredRows.length > 1;
         const tableRows = hasStructuredRows ? structuredRows : this.buildReportSectionRows(t.values ?? {});
         let markerY = ((doc as any).lastAutoTable.finalY ?? 160) + 18;
-        markerY = this.resolveMarkerY(doc, markerY, 126, undefined, 70);
+        markerY = this.resolveMarkerY(doc, markerY, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle, theme?.sectionHeaderRgb);
         const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
         const reportSectionDidDrawPage = (data: any) => {
           hooks.didDrawPage(data);
           const pageNo = (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? data?.pageNumber ?? sectionStartPage;
           if (pageNo !== sectionStartPage) {
-            this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info', theme?.sectionHeaderRgb);
+            this.drawInfoSectionMarker(data.doc as jsPDF, continuationMarkerY, contentW, sectionTitle || 'Info', theme?.sectionHeaderRgb);
           }
         };
         autoTable(doc, {
           startY: markerY + 12,
-          margin: { top: 139, left: margin, right: margin, bottom: 58 },
+          margin: { top: continuationTableY, left: margin, right: margin, bottom: 58 },
           tableWidth: contentW,
           head: [tableRows[0]] as RowInput[],
           body: tableRows.slice(1) as RowInput[],
@@ -112,7 +114,7 @@ export class DocumentExportService extends GraphExportService {
             valign: hasStructuredRows ? 'top' : undefined,
             ...tableTheme
           }),
-          columnStyles: hasStructuredRows ? this.buildStructuredColumnStyles(t.columns ?? [], contentW) : { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
+          columnStyles: hasStructuredRows ? this.buildStructuredColumnStyles(t.columns ?? [], contentW) : { 0: { cellWidth: 135 }, 1: { cellWidth: contentW - 135 } },
           didParseCell: hasStructuredRows
             ? this.makeHeaderRowDidParse(theme?.headerRowFillRgb, false)
             : this.makeHeaderAndFirstColumnDidParse(theme?.headerRowFillRgb, theme?.firstColumnFillRgb, false),

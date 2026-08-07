@@ -17,6 +17,7 @@ export interface GraphReportTableRow {
   columns?: string[];
   rows?: Record<string, string>[];
   recordBlocks?: GraphReportRecordBlock[];
+  excludeFromPdf?: boolean;
 }
 
 export interface GraphReportRecordBlock {

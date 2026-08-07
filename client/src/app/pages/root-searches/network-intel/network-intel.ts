@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, NetworkIntelTab, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
-import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -905,6 +905,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
   private buildReportPayload(): GraphReportPayload | null {
     if (this.activeTab === 'dns' && this.dnsResult) {
       const now = new Date().toISOString();
+      const completedDetails = this.ipRows.flatMap(row => row.detail ? [row.detail] : []);
+      const scanStatuses = Array.from(new Set(completedDetails
+        .map(detail => this.normalizeReportValue(detail['scan_status'] || detail.status))
+        .filter(Boolean)));
       const nodes = [
         { id: `domain-${this.dnsResult.domain}`, label: this.dnsResult.domain, type: 'domain' },
         ...this.dnsResult.ips.map(ip => ({ id: `ip-${ip}`, label: ip, type: 'ip' as const }))
@@ -926,6 +930,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
         summary: {
           domain: this.dnsResult.domain,
           resolved_ips: this.dnsResult.ips.length,
+          enriched_ips: completedDetails.length,
+          open_ports: completedDetails.reduce((total, detail) => total + (detail.open_ports?.length ?? 0), 0),
+          scan_status: scanStatuses.length ? scanStatuses.join(', ') : 'Not reported',
           exported_at: now
         },
         tables: [
@@ -1415,7 +1422,16 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private toStringRecord(source: Record<string, unknown> | undefined | null): Record<string, string> {
     const entries = Object.entries(source || {})
-      .map(([key, value]) => [key, this.normalizeReportValue(value)] as [string, string])
+      .map(([key, value]) => {
+        if (key.toLowerCase() === 'unknown' && value && typeof value === 'object' && !Array.isArray(value)) {
+          const nested = value as Record<string, unknown>;
+          const nestedKey = this.normalizeReportValue(nested['key']).replace(/_/g, '-');
+          if (nestedKey) {
+            return [nestedKey, this.normalizeReportValue(nested['value'])] as [string, string];
+          }
+        }
+        return [key, this.normalizeReportValue(value)] as [string, string];
+      })
       .filter(([, value]) => Boolean(value));
 
     if (!entries.length) {
@@ -1429,6 +1445,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     const titlePrefix = prefix ? `${prefix} ` : '';
     const cameraPorts = this.countCameraPorts(detail);
     const iotPorts = this.countIotPorts(detail);
+    const scanPolicy = detail['scan_policy'] as Record<string, any> | undefined;
+    const portScan = scanPolicy?.['port_scan'] as Record<string, any> | undefined;
+    const outcomes = portScan?.['outcomes'] as Record<string, any> | undefined;
+    const serviceDetection = (portScan?.['service_detection'] || scanPolicy?.['service_detection'] || detail['service_detection']) as Record<string, any> | undefined;
+    const httpProbe = detail['http_probe'] as Record<string, any> | undefined;
 
     return [
       {
@@ -1449,6 +1470,19 @@ export class NetworkIntel implements OnInit, OnDestroy {
           'Camera Detected': cameraPorts > 0 || !!detail.is_camera || (detail.cameras?.length ?? 0) > 0 ? 'Yes' : 'No',
           'Camera Ports': cameraPorts ? String(cameraPorts) : '-',
           'IoT Ports': iotPorts ? String(iotPorts) : '-',
+        }
+      },
+      {
+        title: `${titlePrefix}Scan Quality`.trim(),
+        values: {
+          Status: this.normalizeReportValue(detail['scan_status'] || detail.status),
+          'Coverage Complete': this.formatReportBoolean(portScan?.['coverage_complete'] ?? scanPolicy?.['coverage_complete']),
+          Conclusive: this.formatReportBoolean(portScan?.['conclusive'] ?? scanPolicy?.['conclusive']),
+          'Ports Attempted': this.normalizeReportValue(portScan?.['attempted'] ?? scanPolicy?.['ports_attempted']),
+          'Ports Completed': this.normalizeReportValue(portScan?.['completed'] ?? scanPolicy?.['ports_completed']),
+          'Unknown Outcomes': this.normalizeReportValue(outcomes?.['unknown']),
+          'Service Detection': this.normalizeReportValue(serviceDetection?.['completed'] === undefined ? serviceDetection?.['status'] : (serviceDetection?.['completed'] ? 'Complete' : 'Partial')),
+          'HTTP Probe': this.normalizeReportValue(httpProbe?.['status'])
         }
       },
       {
@@ -1570,7 +1604,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     })).filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
 
-  private buildRawJsonTables(source: unknown, title: string, chunkSize = 3500): { title: string; values: Record<string, string> }[] {
+  private buildRawJsonTables(source: unknown, title: string): GraphReportTableRow[] {
     if (source === null || source === undefined) {
       return [];
     }
@@ -1587,17 +1621,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [];
     }
 
-    const tables: { title: string; values: Record<string, string> }[] = [];
-    for (let offset = 0, part = 1; offset < json.length; offset += chunkSize, part += 1) {
-      tables.push({
-        title: `${title} ${part}`.trim(),
-        values: {
-          JSON: json.slice(offset, offset + chunkSize)
-        }
-      });
-    }
-
-    return tables;
+    return [{
+      title: title.trim(),
+      values: { JSON: json },
+      excludeFromPdf: true
+    }];
   }
 
   private truncateReportText(value: unknown, maxLength = 1200): string {
@@ -1640,6 +1668,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [cve, cvss].filter(Boolean).join(' • ');
     }
     return '';
+  }
+
+  private formatReportBoolean(value: unknown): string {
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+    return this.normalizeReportValue(value);
   }
 
   private securityItems(sec: string[] | Record<string, boolean> | undefined | null): string[] {

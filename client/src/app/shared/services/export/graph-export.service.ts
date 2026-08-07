@@ -680,8 +680,32 @@ export class GraphExportService {
   }
 
   protected preparePayloadForPdf(payload: GraphReportPayload): GraphReportPayload {
-    const normalizeValues = (values: Record<string, string>): Record<string, string> => Object.fromEntries(Object.entries(values ?? {}).map(([key, value]) => [normalizePdfText(key), preparePdfValue(value)]));
+    const normalizeValues = (values: Record<string, string>): Record<string, string> => {
+      const normalizedEntries = Object.entries(values ?? {})
+        .map(([key, value]) => {
+          const normalizedKey = normalizePdfText(key);
+          const normalizedValue = preparePdfValue(this.redactSensitivePdfValue(normalizedKey, value));
+          return [normalizedKey, normalizedValue] as const;
+        })
+        .filter(([, value]) => !this.isEmptyPdfTableValue(value));
+      return Object.fromEntries(normalizedEntries);
+    };
     const normalizeRecordValues = (values: Record<string, string>): Record<string, string> => Object.fromEntries(Object.entries(values ?? {}).map(([key, value]) => [normalizePdfText(key), normalizePdfText(value)]));
+    const tables = payload.tables
+      ?.filter(table => !table.excludeFromPdf)
+      .map(table => ({
+        ...table,
+        title: normalizePdfText(table.title),
+        values: normalizeValues(table.values ?? {}),
+        columns: table.columns?.map(column => normalizePdfText(column)),
+        rows: table.rows?.map(row => normalizeValues(row)),
+        recordBlocks: table.recordBlocks?.map(block => ({
+          ...block,
+          title: normalizePdfText(block.title),
+          values: normalizeRecordValues(block.values ?? {})
+        }))
+      }))
+      .filter(table => Boolean(Object.keys(table.values).length || table.rows?.length || table.recordBlocks?.length));
     return {
       ...payload,
       title: normalizePdfText(payload.title),
@@ -703,19 +727,27 @@ export class GraphExportService {
         normalizePdfText(key),
         typeof value === 'number' ? value : preparePdfValue(value)
       ])),
-      tables: payload.tables?.map(table => ({
-        ...table,
-        title: normalizePdfText(table.title),
-        values: normalizeValues(table.values ?? {}),
-        columns: table.columns?.map(column => normalizePdfText(column)),
-        rows: table.rows?.map(row => normalizeValues(row)),
-        recordBlocks: table.recordBlocks?.map(block => ({
-          ...block,
-          title: normalizePdfText(block.title),
-          values: normalizeRecordValues(block.values ?? {})
-        }))
-      }))
+      tables
     };
+  }
+
+  private isEmptyPdfTableValue(value: string): boolean {
+    return !value.trim() || /^[-\u2013\u2014]$/.test(value.trim());
+  }
+
+  private redactSensitivePdfValue(key: string, value: unknown): string {
+    const text = String(value ?? '');
+    if (!text.trim()) {
+      return text;
+    }
+    const sensitiveHeader = /^(?:set[-_ ]?cookie|cookie|authorization|proxy[-_ ]?authorization|x[-_ ]?api[-_ ]?key)$/i;
+    if (sensitiveHeader.test(key.trim())) {
+      return 'Present (value omitted from PDF)';
+    }
+    if (!/(?:banner|headers?|response|request)/i.test(key)) {
+      return text;
+    }
+    return text.replace(/^(\s*(?:set-cookie|cookie|authorization|proxy-authorization|x-api-key)\s*:).*$/gim, '$1 [value omitted from PDF]');
   }
 
   protected drawTenantBrand(doc: jsPDF, meta: GraphReportMeta, rightX: number, topY: number, maxWidth: number, maxHeight: number, textRgb: [number, number, number]): void {
