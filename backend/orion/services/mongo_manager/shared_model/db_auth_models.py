@@ -72,6 +72,7 @@ class db_user_account(Model):
     alerts_allowed_all: bool = False
     alerts_allowed_tenant_ids: List[str] = []
     demo_tour: bool = Field(default=False)
+    workspace_quota_bytes: Optional[int] = Field(default=None)
 
     @staticmethod
     def hash_password(password: str) -> str:

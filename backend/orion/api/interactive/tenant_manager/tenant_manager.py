@@ -18,7 +18,7 @@ from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, visible_alerts
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
-from orion.services.mongo_manager.shared_model.db_tenant_model import (IocCategory, TenantRequest, TenantStatus, db_tenant_model, normalize_tenant_slug)
+from orion.services.mongo_manager.shared_model.db_tenant_model import (DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES, IocCategory, TenantRequest, TenantStatus, db_tenant_model, normalize_tenant_slug)
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, LicenseName, user_role
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
@@ -306,12 +306,50 @@ class TenantManager:
             if source_path.name == file_name and source_path.is_file():
                 shutil.copy2(source_path, target_dir / file_name)
 
+    @staticmethod
+    def normalize_workspace_quota_bytes(value) -> Optional[int]:
+        if value is None:
+            return None
+
+        try:
+            quota = int(value)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Invalid workspace quota")
+
+        if quota < 0:
+            raise HTTPException(status_code=400, detail="Workspace quota cannot be negative")
+
+        return quota if quota > 0 else None
+
+
+    async def get_assigned_user_workspace_quota_bytes(self, tenant_id: str, exclude_user_id: Optional[str] = None) -> int:
+        users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
+
+        total = 0
+
+        for user in users:
+            if exclude_user_id and str(user.id) == str(exclude_user_id):
+                continue
+
+            quota = getattr(user, "workspace_quota_bytes", None) or 0
+
+            try:
+                total += max(0, int(quota))
+            except (TypeError, ValueError):
+                continue
+
+        return total
+
     async def create_tenant(self, data: db_tenant_model):
         try:
             data.privileged_ioc = False
             if not data.iocs and data.email:
                 data.iocs = self.build_privileged_iocs(data.email)
             data.slug = self.build_tenant_slug(data.email)
+
+            if not getattr(data, "workspace_quota_bytes", None):
+                data.workspace_quota_bytes = DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES
+
             await self.encrypt_tenant(data)
             data.status = TenantStatus.ONBOARDING
             await self._engine.save(data)
@@ -351,6 +389,7 @@ class TenantManager:
             privileged_ioc=getattr(tenant, "privileged_ioc", False),
             alert_run_time=getattr(tenant, "alert_run_time", None),
             allowed_alert_categories=getattr(tenant, "allowed_alert_categories", None),
+            workspace_quota_bytes=getattr(tenant, "workspace_quota_bytes", DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES),
             accounts_mail_password=None,
             accounts_mail="",
             accounts_smtp_server="",
@@ -458,6 +497,22 @@ class TenantManager:
                 data.user_quota = 0
             tenant.user_quota = data.user_quota
 
+        if is_admin and "workspace_quota_bytes" in data.model_fields_set:
+            workspace_quota = self.normalize_workspace_quota_bytes(data.workspace_quota_bytes)
+
+            if workspace_quota is None:
+                workspace_quota = DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES
+
+            assigned_user_quota = await self.get_assigned_user_workspace_quota_bytes(tenant_id=tenant_id)
+
+            if workspace_quota < assigned_user_quota:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Tenant workspace quota cannot be less than assigned user workspace quota",
+                )
+
+            tenant.workspace_quota_bytes = workspace_quota
+
         if is_admin and data.status is not None:
             tenant.status = data.status
         elif (
@@ -549,6 +604,10 @@ class TenantManager:
         tenant_data = tenant.model_dump()
         tenant_data["id"] = str(tenant.id)
 
+        tenant_data["workspace_quota_bytes"] = getattr(tenant, "workspace_quota_bytes", DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES)
+
+        tenant_data["workspace_assigned_user_quota_bytes"] = await self.get_assigned_user_workspace_quota_bytes(tenant_id=str(tenant.id))
+
         tenant_data["name"] = enc.decrypt((tenant_data.get("name") or "").encode()).decode() if tenant_data.get(
             "name") else ""
         tenant_data["phone"] = enc.decrypt((tenant_data.get("phone") or "").encode()).decode() if tenant_data.get(
@@ -625,6 +684,9 @@ class TenantManager:
                 tenant_data["ai_endpoint_enabled"] = system_settings.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
             maintainer = maintainer_by_tenant_id.get(str(tenant.id))
             tenant_data["password_reset_required"] = getattr(maintainer, "password_reset_required", False)
+            tenant_data["workspace_quota_bytes"] = getattr(tenant, "workspace_quota_bytes", DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES)
+            tenant_data["workspace_assigned_user_quota_bytes"] = await self.get_assigned_user_workspace_quota_bytes(tenant_id=str(tenant.id))
+
             result.append(tenant_data)
 
         return result
@@ -827,6 +889,19 @@ class TenantManager:
             if tenant.is_default == False and tenant.user_quota and users_count >= tenant.user_quota:
                 raise HTTPException(status_code=400, detail="User quota exceeded")
 
+            workspace_quota_bytes = self.normalize_workspace_quota_bytes(getattr(data, "workspace_quota_bytes", None))
+
+            if workspace_quota_bytes:
+                assigned_user_quota = await self.get_assigned_user_workspace_quota_bytes(tenant_id=tenant_uuid)
+
+                tenant_workspace_quota = getattr(tenant, "workspace_quota_bytes", DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES)
+
+                if assigned_user_quota + workspace_quota_bytes > tenant_workspace_quota:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Assigned user workspace quota exceeds tenant workspace quota",
+                    )
+
             user = db_user_account(
                 username=username,
                 email=email,
@@ -839,7 +914,8 @@ class TenantManager:
                 alerts_allowed_all=alerts_allowed_all,
                 alerts_allowed_tenant_ids=alerts_allowed_tenant_ids,
                 tenant_uuid=tenant_uuid,
-                password_reset_required=False, )
+                password_reset_required=False, 
+                workspace_quota_bytes=workspace_quota_bytes, )
             
             await mail_manager.get_instance().validate_mail_configuration(tenant_id=tenant_uuid)
             await engine.save(user)

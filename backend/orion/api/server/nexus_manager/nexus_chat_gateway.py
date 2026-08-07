@@ -5,6 +5,10 @@ import httpx
 from fastapi.responses import JSONResponse, Response
 
 from orion.helper_manager.env_handler import env_handler
+from bson import ObjectId
+from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
+from orion.services.mongo_manager.shared_model.db_tenant_model import (DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES, db_tenant_model)
 
 
 class nexus_chat_gateway:
@@ -29,8 +33,18 @@ class nexus_chat_gateway:
         ).strip().rstrip("/")
 
     def _headers(self, current_user) -> dict[str, str]:
+        role = current_user.role.value if hasattr(current_user.role, "value") else str(current_user.role)
+
+        licenses = ",".join([
+            license.value if hasattr(license, "value") else str(license)
+            for license in (current_user.licenses or [])
+        ])
+
         return {
             "X-User-Id": str(current_user.id),
+            "X-Tenant-Id": str(current_user.tenant_uuid),
+            "X-User-Role": role,
+            "X-User-Licenses": licenses,
         }
 
     async def _request(self, method: str, path: str, current_user, json_body: Optional[dict[str, Any]] = None):
@@ -145,11 +159,18 @@ class nexus_chat_gateway:
             return JSONResponse(status_code=500, content={"detail": "Something happened while downloading Nexus file"})
 
     async def import_github_repo(self, session_id: str, payload: dict[str, Any], current_user):
+        quota_payload = await self._workspace_quota_payload(current_user)
+
+        final_payload = {
+            **payload,
+            **quota_payload,
+        }
+
         return await self._request(
             method="POST",
             path=f"/v1/chats/{session_id}/workspace/github/import",
             current_user=current_user,
-            json_body=payload,
+            json_body=final_payload,
         )
 
     async def get_workspace_status(self, session_id: str, current_user):
@@ -181,3 +202,25 @@ class nexus_chat_gateway:
             ),
             current_user=current_user,
         )
+
+    async def _workspace_quota_payload(self, current_user) -> dict[str, Any]:
+        engine = mongo_controller.get_instance().get_engine()
+
+        tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(current_user.tenant_uuid)))
+
+        if not tenant:
+            return {
+                "tenant_quota_bytes": DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES,
+                "user_quota_bytes": None,
+            }
+
+        user = await engine.find_one(db_user_account,  db_user_account.id == ObjectId(str(current_user.id)))
+
+        tenant_quota_bytes = getattr(tenant, "workspace_quota_bytes", DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES)
+
+        user_quota_bytes = getattr(user, "workspace_quota_bytes", None) if user else None
+
+        return {
+            "tenant_quota_bytes": int(tenant_quota_bytes or DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES),
+            "user_quota_bytes": int(user_quota_bytes) if user_quota_bytes else None,
+        }

@@ -17,3 +17,4 @@ class user_model(BaseModel):
     permissions: List[UserPermission] = Field(default_factory=list)
     alerts_allowed_all: bool = False
     alerts_allowed_tenant_ids: Optional[List[str]] = Field(default_factory=list)
+    workspace_quota_bytes: Optional[int] = None
