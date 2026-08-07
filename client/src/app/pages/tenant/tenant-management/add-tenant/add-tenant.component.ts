@@ -27,7 +27,7 @@ export class AddTenantComponent implements OnInit {
   alertTenantOptions: AlertAllowedTenantOption[] = [];
   statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
   isAdmin: boolean = false;
-  model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [], permissions: [], alerts_allowed_all: false, alerts_allowed_tenant_ids: [] };
+  model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [], permissions: [], alerts_allowed_all: false, alerts_allowed_tenant_ids: [], workspace_quota_gb: null, };
   errorText: string = "";
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
   usernameSuggestion: string = "";
@@ -48,6 +48,16 @@ export class AddTenantComponent implements OnInit {
     if (this.isAdmin) {
       this.loadAlertTenantOptions();
     }
+  }
+
+  gbToBytes(value?: number | null): number | null {
+    const gb = Number(value || 0);
+
+    if (!Number.isFinite(gb) || gb <= 0) {
+      return null;
+    }
+
+    return Math.round(gb * 1_000_000_000);
   }
 
   onSubmit() {
@@ -77,7 +87,13 @@ export class AddTenantComponent implements OnInit {
     }
     this.applyAlertAccessPayload();
     const endpoint = this.isAdmin ? 'tenant/create/user' : 'tenant/create/user';
-    this.apiService.post(endpoint, this.model).subscribe({
+    const payload: any = { ...this.model };
+
+    payload.workspace_quota_bytes = this.gbToBytes(this.model.workspace_quota_gb);
+
+    delete payload.workspace_quota_gb;
+
+    this.apiService.post(endpoint, payload).subscribe({
       next: () => {
         // TODO: The 'emit' function requires a mandatory void argument
         this.accountAdded.emit(undefined);
@@ -117,7 +133,7 @@ export class AddTenantComponent implements OnInit {
       return this.licenseList.filter(license => this.licenseService.getLicenseLabel(license) !== 'maintainer').length;
     }
     return this.licenseList.filter(license => this.tenantLicenses.includes(license) &&
-          this.licenseService.getLicenseLabel(license) !== 'maintainer').length;
+      this.licenseService.getLicenseLabel(license) !== 'maintainer').length;
   }
 
   get roleOptions(): UiDropdownOption[] {

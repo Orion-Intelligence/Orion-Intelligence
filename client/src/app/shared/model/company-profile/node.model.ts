@@ -31,6 +31,9 @@ export interface UserDataModel {
     image?: string;
     preferences?: Record<string, any>;
     demo_tour: boolean;
+    workspaceQuotaBytes?: number | null;
+    workspaceUsedBytes?: number;
+    workspaceRemainingBytes?: number;
 }
 export interface TenantDataModel {
     id: string;
@@ -57,6 +60,10 @@ export interface TenantDataModel {
     accountsMail?: string;
     accountsSmtpServer?: string;
     accountsSmtpPort?: string;
+    workspaceQuotaBytes?: number;
+    workspaceUsedBytes?: number;
+    workspaceRemainingBytes?: number;
+    workspaceAssignedUserQuotaBytes?: number;
 }
 export interface userMetaData {
     username: string;

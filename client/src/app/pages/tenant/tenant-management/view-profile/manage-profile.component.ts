@@ -45,6 +45,30 @@ export class ManageProfileComponent implements OnInit {
   constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService) {
   }
 
+  bytesToGb(value?: number | null): number {
+    return Number(((Number(value || 0)) / 1_000_000_000).toFixed(2));
+  }
+
+  gbToBytes(value?: number | null): number | null {
+    const gb = Number(value || 0);
+
+    if (!Number.isFinite(gb) || gb <= 0) {
+      return null;
+    }
+
+    return Math.round(gb * 1_000_000_000);
+  }
+
+  formatGb(value?: number | null): string {
+    const bytes = Number(value || 0);
+
+    if (!bytes) {
+      return 'Shared';
+    }
+
+    return `${this.bytesToGb(bytes)} GB`;
+  }
+
   ngOnInit(): void {
     const headers = new HttpHeaders({});
     if (this.appService.userSessionData().user.role === 'admin') {
@@ -52,7 +76,10 @@ export class ManageProfileComponent implements OnInit {
     }
     this.apiService.post<User[]>('users', headers).subscribe({
       next: (data) => {
-        this.users = data;
+        this.users = (data || []).map((user: User) => ({
+          ...user,
+          workspace_quota_gb: this.bytesToGb(user.workspace_quota_bytes),
+        }));
         this.isLoading = false;
       },
       error: (_) => {
@@ -213,15 +240,25 @@ export class ManageProfileComponent implements OnInit {
     user.alerts_allowed_tenant_ids = (user.alerts_allowed_tenant_ids || []).filter(id => allowedTenantIds.has(id));
   }
 
-  private buildUserUpdatePayload(user: User): User {
+  private buildUserUpdatePayload(user: User): any {
+    if (this.appService.userSessionData().user.role === 'admin') {
+      this.applyAlertAccessPayload(user);
+    }
+
+    const payload: any = { ...user };
+
+    payload.workspace_quota_bytes = this.gbToBytes(user.workspace_quota_gb);
+
+    delete payload.workspace_quota_gb;
+    delete payload.workspace_used_bytes;
+    delete payload.workspace_remaining_bytes;
+
     if (this.appService.userSessionData().user.role !== 'admin') {
-      const payload = { ...user };
       delete payload.alerts_allowed_all;
       delete payload.alerts_allowed_tenant_ids;
-      return payload;
     }
-    this.applyAlertAccessPayload(user);
-    return user;
+
+    return payload;
   }
 
   toggleUserLicense(user: any, license: LicenseName) {
