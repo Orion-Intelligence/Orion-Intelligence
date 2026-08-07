@@ -128,6 +128,7 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-search-input"]').clear().type('https://www.example.com/{enter}');
     cy.wait('@resolveIp').its('request.body').should('deep.equal', { domain: 'example.com' });
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
+    cy.wait('@ipScanner').its('request.body').should('deep.equal', { ip: '93.184.216.34' });
     cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]').should('be.visible');
     cy.docsScreenshot('network-intel-host-recon');
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
@@ -152,13 +153,19 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
     cy.get('[data-testid="network-intel-search-input"]').clear().type('https://www.bbc.com/{enter}');
     cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/, { timeout: 60000 }).should('be.visible');
-    cy.contains('[data-testid="network-intel-vulnerability-row"]', /^bbc\.com$/).click();
+    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/)
+      .first()
+      .closest('[data-testid="network-intel-vulnerability-row"]')
+      .click();
     cy.get('[data-testid="confirmation-popup"]').should('not.exist');
     cy.get('[data-testid="network-intel-vulnerability-empty"]').should('contain.text', 'Nothing scanned yet.');
-    cy.contains('[data-testid="network-intel-vulnerability-row"]', /^bbc\.com$/).click();
+    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/)
+      .first()
+      .closest('[data-testid="network-intel-vulnerability-row"]')
+      .click();
     cy.get('[data-testid="network-intel-vulnerability-empty"]').should('not.exist');
     cy.docsScreenshot('network-intel-vulnerability-depth-controls');
-    cy.get('[data-testid="network-intel-vulnerability-depth-full"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-vulnerability-depth-full"]').first().should('be.visible').click();
     cy.get('[data-testid="confirmation-popup"]').should('be.visible').and('contain.text', 'over an hour');
     cy.get('[data-testid="confirmation-warning-icon"]').should('be.visible');
     cy.get('[data-testid="confirmation-yes-button"]').click();
