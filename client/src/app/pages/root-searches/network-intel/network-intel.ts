@@ -1351,7 +1351,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private startVulnerabilityElapsedTimer(createdAt: string | Date | number | null | undefined): void {
     if (createdAt) {
-      const timestamp = new Date(createdAt).getTime();
+      const timestamp = new Date(typeof createdAt === 'string' && !/(?:Z|[+-]\d{2}:\d{2})$/i.test(createdAt) ? `${createdAt}Z` : createdAt).getTime();
       if (Number.isFinite(timestamp)) {
         this.vulnerabilityCreatedAtMs = timestamp;
       }
