@@ -11,7 +11,7 @@
       </div>
       <div class="flex flex-wrap items-center justify-end gap-2 max-[760px]:w-full">
         <app-ui-dropdown class="w-[180px] max-[760px]:w-full" testId="log-manager-type-filter" menuId="log-manager-type-filter-menu" [options]="typeOptions" [selected]="logType" [searchable]="false" [placeholder]="'All' | translate" (valueChange)="onLogTypeChange($event)"></app-ui-dropdown>
-        <app-ui-dropdown class="w-[180px] max-[760px]:w-full" testId="log-manager-date-filter" menuId="log-manager-date-filter-menu" [options]="dateOptions" [selected]="logDate" [searchable]="false" [placeholder]="'All dates' | translate" (valueChange)="onLogDateChange($event)"></app-ui-dropdown>
+        <app-date-picker class="block w-[280px] max-[760px]:w-full" key="daterange" [mSelectedFilters]="logDateFilters" toggleTestId="log-manager-date-filter" (dateSelected)="onLogDateRangeChange($event)"></app-date-picker>
         <button type="button" class="inline-flex h-10 items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 text-[13px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="loadLogs()">
           <i class="bi bi-arrow-clockwise text-[13px]"></i>
           {{ 'Refresh' | translate }}

@@ -75,6 +75,7 @@ describe('System Settings - Admin Update Flow', () => {
 
   it('shows log manager filters and entries', () => {
     cy.loginAsAdmin();
+    cy.clock(new Date(2026, 6, 15, 12).getTime(), ['Date']);
 
     cy.intercept('GET', '**/api/profile/system-logs*', {
       statusCode: 200,
@@ -128,6 +129,12 @@ describe('System Settings - Admin Update Flow', () => {
     cy.get('[data-testid="log-manager-date-filter"]').should('be.visible');
     cy.contains('td', 'Scheduled scan completed for monitored indicators.').should('be.visible');
     cy.contains('td', 'Webhook delivery failed after retries.').should('be.visible');
+    cy.get('[data-testid="log-manager-date-filter"]').click();
+    cy.get('[data-testid="side-filter-date-month-label"]').should('contain.text', 'July 2026');
+    cy.get('[data-testid="side-filter-date-day-10"]').click();
+    cy.get('[data-testid="side-filter-date-day-12"]').click();
+    cy.wait('@systemLogs').its('request.query.date_range').should('eq', '2026-07-10,2026-07-12');
+    cy.get('[data-testid="log-manager-date-filter"]').should('contain.text', '2026-07-10,2026-07-12');
     cy.docsScreenshot('log-manager');
 
     cy.logout();

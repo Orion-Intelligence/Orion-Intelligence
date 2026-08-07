@@ -31,7 +31,8 @@ import { NETWORK_INTEL_EXPORT_OPTIONS } from '../../../shared/model/report/expor
 export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private seoRepoScanSub?: Subscription;
-  private _intervals: ReturnType<typeof setInterval>[] = [];
+  private vulnerabilityElapsedInterval?: ReturnType<typeof setInterval>;
+  private vulnerabilityCreatedAtMs: number | null = null;
   private readonly dnsIpDetailQueue$ = new Subject<IpRowState>();
   private dnsIpDetailQueueSub?: Subscription;
   private readonly sectionToTab: Record<string, NetworkIntelTab> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'vulnerability-scan': 'vuln', 'geo-cameras': 'geo', 'seo-scan': 'seo', 'repository-scan': 'repo', };
@@ -54,6 +55,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   vulnerabilityResult: any   = null;
   vulnerabilityTargets: string[] = [];
   vulnerabilityActiveTarget: string | null = null;
+  vulnerabilityElapsedSeconds = signal(0);
   geoIpListResult: DnsResult | null = null;
   geoIpRows:       IpRowState[]     = [];
   geoResult:       GeoResult | null    = null;
@@ -92,12 +94,21 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (typeof elapsed === 'number' && Number.isFinite(elapsed)) {
       return `${elapsed.toFixed(1)}s`;
     }
+    if (this.isScanning() && this.vulnerabilityCreatedAtMs !== null) {
+      const elapsedSeconds = this.vulnerabilityElapsedSeconds();
+      const hours = Math.floor(elapsedSeconds / 3600);
+      const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+      const seconds = elapsedSeconds % 60;
+      const clock = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      return hours ? `${String(hours).padStart(2, '0')}:${clock}` : clock;
+    }
     return '-';
   }
 
   constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private scanner: ScannerService, ) {
     effect(() => {
-      if (!this.scanHelper.onDone()) {
+      const done = this.scanHelper.onDone();
+      if (!done) {
         return;
       }
       if (this.activeTab === 'dns') {
@@ -107,6 +118,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         this.parseShodanResult();
       }
       else if (this.activeTab === 'vuln' && this.vulnerabilityActiveTarget) {
+        this.startVulnerabilityElapsedTimer(done.scan_created_at || done.result?.scan_created_at);
         this.parseVulnerabilityResult();
       }
       else if (this.activeTab === 'vuln') {
@@ -528,6 +540,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     row.loading = true;
     row.progress = 5;
     row.step = 'queued';
+    row.startedAtMs = Date.now();
     row.error   = null;
     this.enqueueDnsIpDetail(row);
   }
@@ -592,6 +605,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.lastResultCount = this.vulnerabilityTargets.length;
     this.syncUrl();
     this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget, depth);
+    this.startVulnerabilityElapsedTimer(Date.now());
     this.watchResult(this.parseVulnerabilityResult.bind(this));
   }
 
@@ -1316,14 +1330,41 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private resetActiveWork(): void {
-    this._intervals.forEach(clearInterval);
-    this._intervals = [];
+    clearInterval(this.vulnerabilityElapsedInterval);
+    this.vulnerabilityElapsedInterval = undefined;
+    this.vulnerabilityCreatedAtMs = null;
+    this.vulnerabilityElapsedSeconds.set(0);
     this.sub?.unsubscribe();
     this.seoRepoScanSub?.unsubscribe();
     this.sub = undefined;
     this.seoRepoScanSub = undefined;
     this.scanner.cancel();
     this.seoRepoScanLoading.set(false);
+  }
+
+  private startVulnerabilityElapsedTimer(createdAt: string | Date | number | null | undefined): void {
+    if (createdAt) {
+      const timestamp = new Date(createdAt).getTime();
+      if (Number.isFinite(timestamp)) {
+        this.vulnerabilityCreatedAtMs = timestamp;
+      }
+    }
+    if (this.vulnerabilityCreatedAtMs === null) {
+      return;
+    }
+
+    const updateElapsed = () => {
+      this.vulnerabilityElapsedSeconds.set(Math.max(0, Math.floor((Date.now() - this.vulnerabilityCreatedAtMs!) / 1000)));
+    };
+    updateElapsed();
+    this.vulnerabilityElapsedInterval ??= setInterval(() => {
+      if (!this.isScanning()) {
+        clearInterval(this.vulnerabilityElapsedInterval);
+        this.vulnerabilityElapsedInterval = undefined;
+        return;
+      }
+      updateElapsed();
+    }, 1000);
   }
 
   private enqueueDnsIpDetail(row: IpRowState): void {

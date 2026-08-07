@@ -1,5 +1,9 @@
 <div class="mb-[200px] w-full px-[32px] max-[1200px]:px-[15px] max-[943px]:px-[10px]" @fadeInDashboardItem>
-  <div class="rounded-[14px] bg-[var(--color-blue-760)] py-[15px]" @fadeInDashboardItem>
+  <div class="ui-page-container w-full max-w-[2400px]">
+    <h1 class="ui-page-title">{{ 'Event Management' | translate }}</h1>
+    <p class="ui-page-description">{{ 'Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.' | translate }}</p>
+
+  <div class="mt-4" @fadeInDashboardItem>
     <app-ioc-search
       [basicTags]="searchBuilderTags"
       [filterLabels]="searchBuilderLabels"
@@ -13,6 +17,7 @@
       [advancedSubtitle]="'Combine multiple filters with AND/OR for precise SIEM results' | translate"
       [aiType]="aiToolRoutingService.getTypeForApiType('event-management')"
       [aiWelcomeMessage]="aiToolRoutingService.getMessageForApiType('event-management')"
+      [usePageSearchStyle]="true"
       (searchTriggered)="triggerSearch($event)"
     ></app-ioc-search>
 
@@ -213,4 +218,5 @@
     </section>
   }
 
+  </div>
 </div>

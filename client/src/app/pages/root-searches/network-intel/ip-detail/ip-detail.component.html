@@ -1,6 +1,6 @@
-<div class="flex flex-col gap-4 p-4 [&>.ui-ip-detail-section]:min-w-0 [&>.ui-ip-detail-section]:rounded-[10px] [&>.ui-ip-detail-section]:border [&>.ui-ip-detail-section]:border-[var(--ui-table-shell-border)] [&>.ui-ip-detail-section]:bg-[linear-gradient(145deg,var(--color-blue-680)_0%,var(--color-blue-790)_100%)] [&>.ui-ip-detail-section]:p-4 [&>.ui-ip-detail-section]:shadow-[inset_0_1px_0_rgba(255,255,255,0.045),0_6px_18px_rgba(0,0,0,0.08)]">
+<div class="flex flex-col gap-4 p-4 [&>.ui-ip-detail-section]:min-w-0 [&>.ui-ip-detail-section]:rounded-[10px] [&>.ui-ip-detail-section]:border [&>.ui-ip-detail-section]:border-[var(--ui-table-shell-border)] [&>.ui-ip-detail-section]:bg-[#1b283e] [&>.ui-ip-detail-section]:p-4 [&>.ui-ip-detail-section]:shadow-[inset_0_1px_0_rgba(255,255,255,0.045),0_6px_18px_rgba(0,0,0,0.08)] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:-mx-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:-mt-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:mb-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:flex [&>.ui-ip-detail-section>.ui-ip-detail-heading]:min-h-12 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:items-center [&>.ui-ip-detail-section>.ui-ip-detail-heading]:border-b [&>.ui-ip-detail-section>.ui-ip-detail-heading]:border-[var(--ui-table-row-border)] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:!bg-[#1d2f49] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:px-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:py-3 [body.light-theme_&]:[&>.ui-ip-detail-section]:bg-[var(--color-blue-790)] [body.light-theme_&]:[&>.ui-ip-detail-section>.ui-ip-detail-heading]:!bg-[var(--color-blue-700)]">
 <div class="ui-ip-detail-section">
-  <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'General Information' | translate }}</div>
+  <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'General Information' | translate }}</div>
   @if (hasCameraSignals || iotPortCount > 0) {
     <div class="mb-3 flex flex-wrap gap-2">
       @if (hasCameraSignals) {
@@ -56,7 +56,7 @@
 
 @if (ui.hasItems(detail.open_ports)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Open Ports' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Open Ports' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (p of detail.open_ports; track p) {
         <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(87,165,235,0.2),rgba(43,144,238,0.09))] px-2.5 py-1 font-mono text-[13px] font-bold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">{{ p }}</span>
@@ -67,12 +67,12 @@
 
 @if (ui.hasItems(detail.ports)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Port Details' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Port Details' | translate }}</div>
     <div class="flex flex-col gap-3">
       @if (ui.renderablePorts(detail.ports).length) {
         @for (p of ui.renderablePorts(detail.ports); track p) {
-          <div class="overflow-hidden rounded-[10px] border border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_6px_16px_rgba(0,0,0,0.08)]">
-            <div class="flex flex-wrap items-center gap-2 bg-[linear-gradient(135deg,var(--color-blue-720),var(--color-blue-790))] px-3.5 py-2.5">
+          <div class="overflow-hidden rounded-[10px] border border-[var(--ui-table-shell-border)] bg-[#1b283e] shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_6px_16px_rgba(0,0,0,0.08)] [body.light-theme_&]:bg-[var(--color-blue-830)]">
+            <div class="flex flex-wrap items-center gap-2 !bg-[#1d2f49] px-3.5 py-2.5 [body.light-theme_&]:!bg-[var(--color-blue-700)]">
               @if (p.port) {
                 <span class="font-mono text-[16px] font-bold tracking-wide text-[#8ec8ff] [body.light-theme_&]:text-blue-600">{{ p.port }}</span>
               }
@@ -93,7 +93,7 @@
                 <span class="ml-auto rounded border px-2 py-0.5 text-[12px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>
               }
             </div>
-            <div class="flex flex-col gap-4 border-t border-[var(--ui-table-row-border)] bg-[linear-gradient(180deg,var(--color-blue-830),var(--color-blue-790))] p-3.5">
+            <div class="flex flex-col gap-4 border-t border-[var(--ui-table-row-border)] bg-[#1b283e] p-3.5 [body.light-theme_&]:bg-[var(--color-blue-790)]">
               @if (p.banner) {
                 <div>
                   <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text4)]">{{ 'Banner' | translate }}</div>
@@ -248,7 +248,7 @@
 
 @if (ui.hasItems(detail.web_technologies)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Web Technologies' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Web Technologies' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (t of detail.web_technologies; track t) {
         <span class="rounded-md border border-sky-400/25 bg-[linear-gradient(135deg,rgba(87,165,235,0.16),rgba(43,144,238,0.06))] px-2.5 py-1 text-[11px] font-semibold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">{{ t }}</span>
@@ -259,7 +259,7 @@
 
 @if (securityFlags.length || detail.cdn || detail.waf || detail.hsts || detail.load_balancer) {
   <div class="ui-ip-detail-section">
-    <div class="mb-2.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Security & CDN' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Security & CDN' | translate }}</div>
     <div class="flex flex-wrap gap-2">
       @if (detail.cdn) {
         <div class="flex min-h-10 w-full min-w-0 items-center justify-between gap-3 rounded-lg border border-[var(--ui-table-row-border)] bg-[linear-gradient(135deg,rgba(148,163,184,0.08),rgba(71,85,105,0.025))] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:w-auto sm:min-w-[170px] sm:flex-1">
@@ -299,7 +299,7 @@
 
 @if (ui.hasItems(detail.vulnerabilities)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.4px] text-red-400">{{ '⚠ Vulnerabilities (' | translate }}{{ detail.vulnerabilities!.length }})</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.4px] text-red-400">{{ '⚠ Vulnerabilities (' | translate }}{{ detail.vulnerabilities!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (v of detail.vulnerabilities; track v) {
         @if (formatVulnerability(v)) {
@@ -314,7 +314,7 @@
 
 @if (ui.hasItems(detail.misconfigurations)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.4px] text-amber-400">{{ '⚡ Misconfigurations' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.4px] text-amber-400">{{ '⚡ Misconfigurations' | translate }}</div>
     <div class="flex flex-col gap-1.5">
       @for (m of detail.misconfigurations; track m) {
         <div class="rounded-lg border border-amber-500/25 bg-amber-500/[0.07] px-3 py-2.5 text-[12px] font-medium leading-5 text-amber-300 [body.light-theme_&]:text-amber-700">{{ m }}</div>
@@ -325,7 +325,7 @@
 
 @if (renderHeaderEntries(detail.http_headers).length) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'HTTP Headers' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'HTTP Headers' | translate }}</div>
     <div class="overflow-hidden rounded-lg border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
       @for (h of renderHeaderEntries(detail.http_headers); track h[0]) {
         <div class="grid grid-cols-1 gap-1 border-b border-[var(--ui-table-row-border)] px-3 py-2.5 text-[12px] last:border-b-0 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-3" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0">
@@ -339,7 +339,7 @@
 
 @if (renderHeaderEntries(detail.cache_headers).length) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Cache Headers' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Cache Headers' | translate }}</div>
     <div class="overflow-hidden rounded-lg border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
       @for (h of renderHeaderEntries(detail.cache_headers); track h[0]) {
         <div class="grid grid-cols-1 gap-1 border-b border-[var(--ui-table-row-border)] px-3 py-2.5 text-[12px] last:border-b-0 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-3" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0">
@@ -353,7 +353,7 @@
 
 @if (ui.hasItems(detail.allowed_methods)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Allowed Methods' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Allowed Methods' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (m of detail.allowed_methods; track m) {
         <span class="rounded-md border border-[var(--ui-table-row-border)] bg-[linear-gradient(135deg,rgba(148,163,184,0.13),rgba(71,85,105,0.05))] px-2.5 py-1 font-mono text-[11px] font-semibold text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">{{ m }}</span>
@@ -364,7 +364,7 @@
 
 @if (ui.hasItems(detail.hostnames)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Hostnames (' | translate }}{{ detail.hostnames!.length }})</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Hostnames (' | translate }}{{ detail.hostnames!.length }})</div>
     <div class="flex flex-wrap gap-1.5">
       @for (h of detail.hostnames; track h) {
         <span class="rounded-md border border-[var(--ui-table-row-border)] bg-[linear-gradient(135deg,rgba(148,163,184,0.13),rgba(71,85,105,0.05))] px-2.5 py-1 font-mono text-[12px] text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">{{ h }}</span>
@@ -375,7 +375,7 @@
 
 @if (ui.hasItems(detail.cameras)) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ '📷 Cameras (' | translate }}{{ detail.cameras!.length }})</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ '📷 Cameras (' | translate }}{{ detail.cameras!.length }})</div>
     <div class="flex flex-col overflow-hidden rounded-lg border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] [&>div:nth-child(odd)]:bg-[var(--ui-table-row-even)] [&>div:nth-child(even)]:bg-[var(--ui-table-row-odd)]">
       @for (cam of detail.cameras; track cam) {
         <div class="flex items-center gap-2 flex-wrap border-b border-[var(--ui-table-row-border)] px-3 py-2.5 last:border-0">
@@ -397,7 +397,7 @@
 
 @if (extraDetailEntries.length) {
   <div class="ui-ip-detail-section">
-    <div class="mb-3 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Additional Details' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Additional Details' | translate }}</div>
     <div class="overflow-hidden rounded-lg border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.035)]">
       @for (entry of extraDetailEntries; track entry[0]) {
         <div class="grid grid-cols-1 gap-1 border-b border-[var(--ui-table-row-border)] px-3 py-2.5 text-[12px] last:border-b-0 sm:grid-cols-[160px_minmax(0,1fr)] sm:gap-3" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0">

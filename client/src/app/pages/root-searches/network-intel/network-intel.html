@@ -29,7 +29,7 @@
       </div>
     </div>
 
-    <div class="mt-[30px] flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+    <div class="mt-[30px] flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] pl-3 pr-2 py-[6px] max-[640px]:gap-3">
       <div class="hidden items-center gap-2 md:flex">
         <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
         <div class="text-sm font-semibold text-[var(--color-text1)]">{{ lastResultCount }}</div>
@@ -55,17 +55,19 @@
       }
 
       <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-        <button data-testid="network-intel-download-report" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color] duration-150 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] disabled:cursor-not-allowed disabled:opacity-40" (click)="openExportChoice()" [disabled]="!canDownloadReport()">
-          @if (isExportingReport) {
-            <span class="h-[18px] w-[18px] rounded-full border-2 border-sky-400/25 border-t-sky-400 animate-spin"></span>
-          } @else {
-            <img alt="common.actions.download" src="assets/images/shared/theme/download.svg" class="h-[18px] w-[18px] ui-action-icon">
-          }
-        </button>
-        <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-        <button class="ui-cred-toolbar-btn inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color] duration-150 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
-          <i class="bi bi-stop-fill text-[20px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
-        </button>
+        <div class="inline-flex items-center overflow-hidden rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))]">
+          <button data-testid="network-intel-download-report" class="inline-flex h-8 w-8 items-center justify-center text-[var(--color-text1)] transition-colors duration-150 hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] disabled:cursor-not-allowed disabled:opacity-40" (click)="openExportChoice()" [disabled]="!canDownloadReport()">
+            @if (isExportingReport) {
+              <span class="h-4 w-4 rounded-full border-2 border-sky-400/25 border-t-sky-400 animate-spin"></span>
+            } @else {
+              <img alt="common.actions.download" src="assets/images/shared/theme/download.svg" class="h-4 w-4 ui-action-icon">
+            }
+          </button>
+          <div class="h-4 w-px bg-white/[0.08]"></div>
+          <button class="ui-cred-toolbar-btn inline-flex h-8 w-8 items-center justify-center text-[var(--color-text1)] transition-colors duration-150 hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
+            <i class="bi bi-stop-fill text-[18px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -131,6 +133,7 @@
       [activeTarget]="vulnerabilityActiveTarget"
       [searchDomain]="vulnForm.ip"
       [vulnerabilityResult]="vulnerabilityResult"
+      [elapsedLabel]="vulnerabilityElapsedLabel"
       (selectTarget)="startVulnerabilityScanForTarget($event.target, $event.depth)"
       @fadeInDashboardItem>
     </app-network-intel-vulnerability-section>

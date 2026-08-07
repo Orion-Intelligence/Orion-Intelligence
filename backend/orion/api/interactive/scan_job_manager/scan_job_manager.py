@@ -169,12 +169,12 @@ class ScanJobManager:
             scan_status = self._job_status_from_response(response) if response else ScanJobStatus.QUEUED
             if not self.is_terminal_status(scan_status.value):
                 return {**self._build_scan_detail(record, scan_status.value).model_dump(), "source": "existing_running"}
-            if scan_status == ScanJobStatus.DONE and latest_done_scan is None:
+            if scan_status in {ScanJobStatus.DONE, ScanJobStatus.PARTIAL} and latest_done_scan is None:
                 latest_done_scan = record
 
         if latest_done_scan and not force_new:
             if confirm_duplicates:
-                previous_scan = self._build_scan_notification(latest_done_scan, ScanJobStatus.DONE.value).model_dump()
+                previous_scan = self._build_scan_notification(latest_done_scan).model_dump()
                 return {
                     "requires_confirmation": True,
                     "message": "You already scanned this before. Do you want to use the previous result or run a new scan?",
@@ -208,7 +208,7 @@ class ScanJobManager:
         if not job:
             raise HTTPException(status_code=404, detail="Scan job not found")
 
-        if created.get("source") == "previous_completed":
+        if created.get("source") in {"previous_completed", "existing_running"}:
             response = job.response or {"status": "pending", "progress": 5, "step": "queued"}
             return self._with_scan_metadata(response, job)
 

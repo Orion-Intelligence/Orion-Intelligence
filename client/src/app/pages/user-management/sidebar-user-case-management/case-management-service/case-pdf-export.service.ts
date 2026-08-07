@@ -5,13 +5,14 @@ import { forkJoin, from, map, Observable } from 'rxjs';
 import type { SharedCaseArtifact, SharedCaseComment, SharedCaseEntity, SharedCaseLink, SharedCaseReport, SharedCaseTask } from '../../../../shared/model/case-management/case.model';
 import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
 import { buildExportFileStem } from '../../../../shared/services/export/export-filename.util';
+import { drawInstitutionalCover, drawInstitutionalFooter, drawInstitutionalPageHeader, drawInstitutionalSectionHeading, PDF_EXPORT_LAYOUT } from '../../../../shared/services/export/pdf-export-layout';
+import { loadPdfExportFontData, registerPdfExportFonts } from '../../../../shared/services/export/pdf-export-fonts';
 import { PDF_EXPORT_THEME } from '../../../../shared/services/export/pdf-export-theme';
 import { normalizePdfText, preparePdfValue } from '../../../../shared/services/export/pdf-text.util';
 
 interface CasePdfExportOptions {
   appName?: string;
   filenameSuffix?: string;
-  logoDataUrl?: string | null;
   reportLabel?: string;
 }
 
@@ -26,13 +27,13 @@ export class CasePdfExportService {
     return forkJoin({
       jspdfModule: from(import('jspdf')),
       autoTableModule: from(import('jspdf-autotable')),
-      logoDataUrl: from(this.exportBranding.loadTenantLogoDataUrl())
-    }).pipe(map(({ jspdfModule, autoTableModule, logoDataUrl }) => {
+      fontData: from(loadPdfExportFontData())
+    }).pipe(map(({ jspdfModule, autoTableModule, fontData }) => {
       const doc = new jspdfModule.default({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
+      registerPdfExportFonts(doc, fontData);
       this.buildPdf(doc, autoTableModule.default, report, {
         ...options,
-        appName: this.exportBranding.getTenantName(),
-        logoDataUrl
+        appName: this.exportBranding.getTenantName()
       });
       doc.save(`${buildExportFileStem(report.title, report.updatedAt || report.createdAt, 'case-report')}.pdf`);
     }));
@@ -40,7 +41,7 @@ export class CasePdfExportService {
 
   private buildPdf(doc: jsPDF, autoTable: typeof import('jspdf-autotable').default, report: SharedCaseReport, options: CasePdfExportOptions): void {
     const pageWidth = doc.internal.pageSize.getWidth();
-    const contentWidth = pageWidth - 80;
+    const contentWidth = pageWidth - (PDF_EXPORT_LAYOUT.margin * 2);
     const appName = normalizePdfText(options.appName || this.exportBranding.getTenantName());
     doc.setProperties({
       title: normalizePdfText(report.title || options.reportLabel || 'Case Report'),
@@ -49,10 +50,9 @@ export class CasePdfExportService {
       creator: appName
     });
     doc.viewerPreferences({ DisplayDocTitle: true, FitWindow: true });
-    let y = 40;
-
     this.drawPdfCover(doc, report, options);
-    y = 178;
+    doc.addPage();
+    let y: number = PDF_EXPORT_LAYOUT.contentStartY;
     y = this.addPdfSection(doc, autoTable, y, 'Case Summary', [
       ['Case ID', report.caseId],
       ['Title', report.title],
@@ -150,54 +150,27 @@ export class CasePdfExportService {
   }
 
   private drawPdfCover(doc: jsPDF, report: SharedCaseReport, options: CasePdfExportOptions): void {
-    const pageWidth = doc.internal.pageSize.getWidth();
     const reportLabel = options.reportLabel || 'Shared Case Report';
     const appName = options.appName || this.exportBranding.getTenantName();
-    doc.setFillColor(...this.theme.headerBackgroundRgb);
-    doc.rect(0, 0, pageWidth, 158, 'F');
-    doc.setFillColor(...this.theme.coverBandRgb);
-    doc.rect(0, 0, 10, 158, 'F');
-    doc.setFillColor(...this.theme.headerAccentRgb);
-    doc.rect(0, 0, pageWidth, 5, 'F');
-    doc.setFillColor(...this.theme.headerRowFillRgb);
-    doc.roundedRect(40, 22, 116, 18, 5, 5, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.2);
-    doc.setTextColor(...this.theme.sectionHeaderRgb);
-    doc.text('CASE INTELLIGENCE', 51, 34);
-    doc.setTextColor(...this.theme.textPrimaryRgb);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(20);
-    const titleLines = (doc.splitTextToSize(normalizePdfText(report.title || reportLabel), pageWidth - 80) as string[]).slice(0, 2);
-    const titleY = 65;
-    doc.text(titleLines, 40, titleY, { lineHeightFactor: 1.12 });
-    const titleBottom = titleY + ((titleLines.length - 1) * 23);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9.5);
-    doc.setTextColor(...this.theme.textSecondaryRgb);
-    doc.text(this.fitPdfLine(doc, `${reportLabel} | ${report.caseId} | ${this.formatLabel(report.caseType)}`, pageWidth - 80), 40, titleBottom + 21);
-    doc.setFontSize(8.5);
-    doc.setTextColor(...this.theme.textMutedRgb);
-    doc.text(this.fitPdfLine(doc, `Prepared by ${appName}${report.expiresAt ? ` | Expires ${this.formatDate(report.expiresAt)}` : ''}`, pageWidth - 80), 40, titleBottom + 39);
-    doc.setDrawColor(...this.theme.coverPanelBorderRgb);
-    doc.line(40, 146, pageWidth - 40, 146);
-    this.drawTenantBrand(doc, appName, options.logoDataUrl || null, pageWidth - 40, 24, 140, 30, this.theme.textPrimaryRgb);
+    drawInstitutionalCover(doc, {
+      title: normalizePdfText(report.title || reportLabel),
+      subtitle: `${reportLabel} | ${report.caseId} | ${this.formatLabel(report.caseType)}`,
+      reportFamily: 'Case Intelligence Review',
+      preparedFor: appName,
+      generatedAt: this.formatDate(new Date().toISOString()),
+      context: report.caseId,
+      lead: 'A consolidated case record prepared for authorized investigation, review, and decision-making.',
+      sections: ['Case Summary', 'Entities and Evidence', 'Tasks and Linked Cases']
+    });
   }
 
   private addPdfSection(doc: jsPDF, autoTable: typeof import('jspdf-autotable').default, y: number, title: string, rows: RowInput[], contentWidth: number): number {
     const startY = this.resolvePdfY(doc, y, 86);
-    doc.setFillColor(...this.theme.headerBackgroundRgb);
-    doc.setDrawColor(...this.theme.tableBorderRgb);
-    doc.rect(40, startY, contentWidth, 24, 'FD');
-    doc.setFillColor(...this.theme.headerAccentRgb);
-    doc.rect(40, startY, 4, 24, 'F');
-    doc.setTextColor(...this.theme.sectionHeaderRgb);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.text(normalizePdfText(title), 52, startY + 16);
+    const margin = PDF_EXPORT_LAYOUT.margin;
+    drawInstitutionalSectionHeading(doc, startY, contentWidth, normalizePdfText(title));
     autoTable(doc, {
-      startY: startY + 32,
-      margin: { top: 70, left: 40, right: 40, bottom: 56 },
+      startY: startY + 16,
+      margin: { top: 70, left: margin, right: margin, bottom: 56 },
       tableWidth: contentWidth,
       body: this.preparePdfRows(rows.length ? rows : [['-', 'No data added.']] as RowInput[]),
       rowPageBreak: 'avoid',
@@ -208,17 +181,17 @@ export class CasePdfExportService {
         overflow: 'linebreak',
         valign: 'top',
         textColor: this.theme.textBodyRgb,
-        lineWidth: this.theme.tableBorderWidth,
+        lineWidth: { top: 0, right: 0, bottom: this.theme.tableBorderWidth, left: 0 },
         lineColor: this.theme.tableBorderRgb,
       },
       bodyStyles: {
         fillColor: this.theme.tableRowBgRgb,
-        lineWidth: this.theme.tableBorderWidth,
+        lineWidth: { top: 0, right: 0, bottom: this.theme.tableBorderWidth, left: 0 },
         lineColor: this.theme.tableBorderRgb,
       },
       alternateRowStyles: {
-        fillColor: this.theme.tableRowAltBgRgb,
-        lineWidth: this.theme.tableBorderWidth,
+        fillColor: this.theme.tableRowBgRgb,
+        lineWidth: { top: 0, right: 0, bottom: this.theme.tableBorderWidth, left: 0 },
         lineColor: this.theme.tableBorderRgb,
       },
       columnStyles: { 0: { cellWidth: 130, fontStyle: 'bold' }, 1: { cellWidth: contentWidth - 130 } },
@@ -293,39 +266,27 @@ export class CasePdfExportService {
 
   private addPdfFooters(doc: jsPDF, appName: string): void {
     const pageCount = doc.getNumberOfPages();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
     for (let page = 1; page <= pageCount; page += 1) {
       doc.setPage(page);
-      if (page !== 1) {
-        this.drawCasePageHeader(doc, 'Case Details');
+      if (page === 1) {
+        continue;
       }
-      doc.setDrawColor(...this.theme.tableBorderRgb);
-      doc.line(40, pageHeight - 38, pageWidth - 40, pageHeight - 38);
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(...this.theme.textMutedRgb);
-      doc.text(this.fitPdfLine(doc, `${appName} | Confidential intelligence. Do not redistribute without authorization.`, pageWidth - 170), 40, pageHeight - 22);
-      doc.text(`Page ${page} of ${pageCount}`, pageWidth - 40, pageHeight - 22, { align: 'right' });
+      this.drawCasePageHeader(doc, 'Case Details', appName);
+      drawInstitutionalFooter(doc, {
+        tenantName: appName,
+        section: 'Case Intelligence | Case Details',
+        pageNo: page - 1,
+        totalPages: pageCount - 1
+      });
     }
   }
 
-  private drawCasePageHeader(doc: jsPDF, section: string): void {
-    const pageWidth = doc.internal.pageSize.getWidth();
-    doc.setFillColor(...this.theme.headerBackgroundRgb);
-    doc.rect(0, 0, pageWidth, 52, 'F');
-    doc.setFillColor(...this.theme.headerAccentRgb);
-    doc.rect(0, 0, pageWidth, 5, 'F');
-    doc.setDrawColor(...this.theme.tableBorderRgb);
-    doc.line(40, 52, pageWidth - 40, 52);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9.5);
-    doc.setTextColor(...this.theme.textPrimaryRgb);
-    doc.text('Case Intelligence Report', 40, 32);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(...this.theme.sectionHeaderRgb);
-    doc.text(this.fitPdfLine(doc, section, 180), pageWidth - 40, 32, { align: 'right' });
+  private drawCasePageHeader(doc: jsPDF, section: string, appName: string): void {
+    drawInstitutionalPageHeader(doc, {
+      tenantName: appName,
+      reportFamily: 'Case Intelligence Report',
+      section
+    });
   }
 
   private preparePdfRows(rows: RowInput[]): RowInput[] {
@@ -347,30 +308,6 @@ export class CasePdfExportService {
 
   private isTechnicalPdfField(label: string): boolean {
     return /(password|hash|url|link|domain|email|username|ioc|file|identifier|ip|wallet|address)/i.test(label);
-  }
-
-  private drawTenantBrand(doc: jsPDF, appName: string, logoDataUrl: string | null, rightX: number, topY: number, maxWidth: number, maxHeight: number, textRgb: [number, number, number]): void {
-    let textY = topY + 10;
-    if (logoDataUrl) {
-      try {
-        const image = doc.getImageProperties(logoDataUrl);
-        const ratio = Math.min(maxWidth / image.width, maxHeight / image.height);
-        const width = image.width * ratio;
-        const height = image.height * ratio;
-        const imageType = logoDataUrl.toLowerCase().startsWith('data:image/png') ? 'PNG'
-          : logoDataUrl.toLowerCase().startsWith('data:image/webp') ? 'WEBP'
-            : 'JPEG';
-        doc.addImage(logoDataUrl, imageType, rightX - width, topY, width, height, undefined, 'FAST');
-        textY = topY + height + 11;
-      }
-      catch {
-        textY = topY + 10;
-      }
-    }
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(...textRgb);
-    doc.text(this.fitPdfLine(doc, appName, maxWidth), rightX, textY, { align: 'right' });
   }
 
   private fitPdfLine(doc: jsPDF, text: string, maxWidth: number): string {

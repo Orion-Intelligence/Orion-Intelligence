@@ -107,6 +107,9 @@ describe('Network Intel - End-to-End Flow', () => {
               title: 'Missing Content-Security-Policy',
               severity: 'high',
               category: 'headers',
+              description: 'The response does not define a Content Security Policy.',
+              urls: ['https://bbc.com/', 'https://bbc.com/news'],
+              evidence: 'content-security-policy: missing',
             },
           ],
         },
@@ -174,6 +177,22 @@ describe('Network Intel - End-to-End Flow', () => {
       depth: 'full',
     });
     cy.get('[data-testid="network-intel-vulnerability-result"]', { timeout: 120000 }).should('be.visible');
+    cy.contains('The response does not define a Content Security Policy.').should('be.visible');
+    cy.get('[data-testid="network-intel-vulnerability-finding-details"]').should('not.exist');
+    cy.get('[data-testid="network-intel-vulnerability-finding-toggle"]')
+      .first()
+      .should('have.attr', 'aria-expanded', 'false')
+      .click()
+      .should('have.attr', 'aria-expanded', 'true');
+    cy.get('[data-testid="network-intel-vulnerability-finding-details"]')
+      .should('be.visible')
+      .and('contain.text', 'Reference URLs')
+      .and('contain.text', 'content-security-policy: missing');
+    cy.get('[data-testid="network-intel-vulnerability-finding-toggle"]')
+      .first()
+      .click()
+      .should('have.attr', 'aria-expanded', 'false');
+    cy.get('[data-testid="network-intel-vulnerability-finding-details"]').should('not.exist');
     cy.docsScreenshot('network-intel-vulnerability-scan');
 
     cy.get('[data-testid="network-intel-download-report"]')

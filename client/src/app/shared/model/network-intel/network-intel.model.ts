@@ -120,6 +120,7 @@ export interface IpRowState {
   loading:  boolean;
   progress?: number;
   step?:    string | null;
+  startedAtMs?: number;
   detail:   IpDetail | null;
   error:    string | null;
 }

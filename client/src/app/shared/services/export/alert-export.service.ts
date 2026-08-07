@@ -54,6 +54,7 @@ export class AlertExportService {
 
   private buildAlertSections(alerts: AlertModel[]): GraphReportTableRow[] {
     const grouped = new Map<string, AlertModel[]>();
+    let recordOffset = 0;
     alerts.forEach(alert => {
       const key = this.getText(alert.type).toLowerCase();
       const type = key && key !== '-' ? key : 'unknown';
@@ -62,11 +63,15 @@ export class AlertExportService {
 
     return Array.from(grouped.entries())
       .sort(([a], [b]) => a.localeCompare(b))
-      .map(([type, records]) => ({
-        title: `${this.toTitle(type)} Alerts (${records.length})`,
-        values: { records: String(records.length) },
-        recordBlocks: records.map((alert, index) => this.buildAlertRecordBlock(alert, index))
-      }));
+      .map(([type, records]) => {
+        const recordBlocks = records.map((alert, index) => this.buildAlertRecordBlock(alert, recordOffset + index));
+        recordOffset += records.length;
+        return {
+          title: `${this.toTitle(type)} Alerts (${records.length})`,
+          values: { records: String(records.length) },
+          recordBlocks
+        };
+      });
   }
 
   private buildAlertRecordBlock(alert: AlertModel, index: number): GraphReportRecordBlock {
