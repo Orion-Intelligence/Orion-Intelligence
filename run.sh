@@ -14,10 +14,10 @@ is_nginx_running() {
 }
 
 stop_docker() {
-    docker compose -p "$PROJECT_NAME" down --remove-orphans
-    rm -rf staticfiles
     docker stop trusted-web-nginx 2>/dev/null || true
     docker rm trusted-web-nginx 2>/dev/null || true
+    docker compose -p "$PROJECT_NAME" down --remove-orphans
+    rm -rf staticfiles
 }
 
 stop_production_services_preserving_nginx() {
