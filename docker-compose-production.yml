@@ -46,7 +46,7 @@ services:
       - shared_bridge
       - orion_nexus_backend
     healthcheck:
-      test: [ "CMD-SHELL", "status=$$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8070/api/token || true); [ \"$$status\" = \"422\" ] || [ \"$$status\" = \"401\" ]" ]
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8070/api/public > /dev/null" ]
       interval: 30s
       timeout: 10s
       retries: 3
