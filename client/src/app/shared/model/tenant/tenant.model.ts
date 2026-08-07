@@ -35,6 +35,11 @@ export interface TenantModel {
     accounts_mail?: string;
     accounts_smtp_server?: string;
     accounts_smtp_port?: string;
+    workspace_quota_bytes?: number;
+    workspace_used_bytes?: number;
+    workspace_remaining_bytes?: number;
+    workspace_assigned_user_quota_bytes?: number;
+    workspace_quota_gb?: number;
 }
 export interface User {
     username: string;
@@ -48,6 +53,10 @@ export interface User {
     alerts_allowed_all?: boolean;
     alerts_allowed_tenant_ids?: string[] | null;
     password_reset_required?: boolean;
+    workspace_quota_bytes?: number | null;
+    workspace_used_bytes?: number;
+    workspace_remaining_bytes?: number;
+    workspace_quota_gb?: number | null;
 }
 export interface TenantTeamModel {
     username: string;
@@ -61,6 +70,8 @@ export interface TenantTeamModel {
     alerts_allowed_all?: boolean;
     alerts_allowed_tenant_ids?: string[] | null;
     quotaExceeded?: boolean;
+    workspace_quota_bytes?: number | null;
+    workspace_quota_gb?: number | null;
 }
 export interface AlertAllowedTenantOption {
     id: string;

@@ -24,3 +24,4 @@ class user_param_model(BaseModel):
     alerts_allowed_tenant_ids: Optional[List[str]] = Field(default_factory=list)
     password_reset_required: Optional[bool] = None
     preferences: Optional[Dict[str, Any]] = None
+    workspace_quota_bytes: Optional[int] = None

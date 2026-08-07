@@ -23,6 +23,8 @@ import { AppService } from '../../../../services/core/app/app.service';
   templateUrl: './view-tenant.component.html',
 })
 export class ViewTenantComponent implements OnInit {
+  private readonly DEFAULT_WORKSPACE_QUOTA_BYTES = 3_000_000_000;
+
   protected readonly JSON = JSON;
 
   tenants: any[] = [];
@@ -65,26 +67,58 @@ export class ViewTenantComponent implements OnInit {
     ].some(value => String(value || '').toLowerCase().includes(search)));
   }
 
+  bytesToGb(value?: number | null): number {
+    return Number(((Number(value || 0)) / 1_000_000_000).toFixed(2));
+  }
+
+  gbToBytes(value?: number | null): number {
+    const gb = Number(value || 0);
+
+    if (!Number.isFinite(gb) || gb <= 0) {
+      return this.DEFAULT_WORKSPACE_QUOTA_BYTES;
+    }
+
+    return Math.round(gb * 1_000_000_000);
+  }
+
+  formatGb(value?: number | null): string {
+    return `${this.bytesToGb(value)} GB`;
+  }
+
   ngOnInit(): void {
     const headers = new HttpHeaders({});
     this.apiService.post<any[]>('tenants/get', headers).subscribe({
       next: (data) => {
-        this.tenants = (data || []).map((tenant: any) => ({
-          ...tenant,
-          verified: tenant.verified ?? false,
-          privileged_ioc: tenant.privileged_ioc ?? false,
-          _saved_privileged_ioc: tenant.privileged_ioc ?? false,
-          ai_endpoint_enabled: tenant.ai_endpoint_enabled ?? false,
-          user_quota: tenant.user_quota ?? 0,
-          status: tenant.status === TenantStatusValues.ONBOARDING ||
-                        tenant.status === TenantStatusValues.ACTIVE ||
-                        tenant.status === TenantStatusValues.DISABLE
-            ? tenant.status
-            : TenantStatusValues.ACTIVE,
-          licenses: tenant.licenses?.length
-            ? tenant.licenses.filter((license: LicenseName) => license !== LicenseName.FEEDER)
-            : [LicenseName.FREE],
-        }));
+        this.tenants = (data || []).map((tenant: any) => {
+          const workspaceQuotaBytes =
+            tenant.workspace_quota_bytes ?? this.DEFAULT_WORKSPACE_QUOTA_BYTES;
+
+          return {
+            ...tenant,
+            verified: tenant.verified ?? false,
+            privileged_ioc: tenant.privileged_ioc ?? false,
+            _saved_privileged_ioc: tenant.privileged_ioc ?? false,
+            ai_endpoint_enabled: tenant.ai_endpoint_enabled ?? false,
+            user_quota: tenant.user_quota ?? 0,
+
+            workspace_quota_bytes: workspaceQuotaBytes,
+            workspace_quota_gb: this.bytesToGb(workspaceQuotaBytes),
+            workspace_used_bytes: tenant.workspace_used_bytes ?? 0,
+            workspace_remaining_bytes: tenant.workspace_remaining_bytes ?? workspaceQuotaBytes,
+            workspace_assigned_user_quota_bytes:
+              tenant.workspace_assigned_user_quota_bytes ?? 0,
+
+            status: tenant.status === TenantStatusValues.ONBOARDING ||
+              tenant.status === TenantStatusValues.ACTIVE ||
+              tenant.status === TenantStatusValues.DISABLE
+              ? tenant.status
+              : TenantStatusValues.ACTIVE,
+
+            licenses: tenant.licenses?.length
+              ? tenant.licenses.filter((license: LicenseName) => license !== LicenseName.FEEDER)
+              : [LicenseName.FREE],
+          };
+        });
         this.isLoading = false;
       },
       error: (_) => {
@@ -126,19 +160,48 @@ export class ViewTenantComponent implements OnInit {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];
     }
+
     const payload = { ...tenant };
+
+    payload.workspace_quota_bytes = this.gbToBytes(tenant.workspace_quota_gb);
+
+    delete payload.workspace_quota_gb;
+    delete payload.workspace_used_bytes;
+    delete payload.workspace_remaining_bytes;
+    delete payload.workspace_assigned_user_quota_bytes;
+    delete payload._expanded;
+    delete payload._saved_privileged_ioc;
+
     if (!this.canEditTenantAiEndpoint()) {
       delete payload.ai_endpoint_enabled;
     }
+
     this.isLoading = true;
+
     this.apiService.post<any>('update/tenants', payload).subscribe({
       next: (res) => {
         if (res?.tenant) {
+          tenant.verified = res.tenant.verified ?? tenant.verified;
+          tenant.status = res.tenant.status ?? tenant.status;
+
           tenant.iocs = res.tenant.iocs ?? tenant.iocs;
           tenant.privileged_ioc = res.tenant.privileged_ioc ?? tenant.privileged_ioc;
           tenant._saved_privileged_ioc = tenant.privileged_ioc ?? false;
-          tenant.ai_endpoint_enabled = res.tenant.ai_endpoint_enabled ?? tenant.ai_endpoint_enabled ?? false;
+
+          tenant.ai_endpoint_enabled =
+            res.tenant.ai_endpoint_enabled ?? tenant.ai_endpoint_enabled ?? false;
+
+          tenant.workspace_quota_bytes =
+            res.tenant.workspace_quota_bytes ?? tenant.workspace_quota_bytes;
+
+          tenant.workspace_assigned_user_quota_bytes =
+            res.tenant.workspace_assigned_user_quota_bytes ??
+            tenant.workspace_assigned_user_quota_bytes ??
+            0;
+
+          tenant.workspace_quota_gb = this.bytesToGb(tenant.workspace_quota_bytes);
         }
+
         this.isLoading = false;
       },
       error: (_) => {

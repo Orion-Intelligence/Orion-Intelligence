@@ -3,7 +3,7 @@ import hashlib
 import json
 import re
 import secrets
-from typing import List
+from typing import List, Optional
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,7 +25,7 @@ from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
-from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus, db_tenant_model
+from orion.services.mongo_manager.shared_model.db_tenant_model import DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES, TenantStatus, db_tenant_model
 
 
 class AccountManager:
@@ -104,7 +104,7 @@ class AccountManager:
 
             existing_user = await engine.find_one(db_user_account, db_user_account.username == username)
             existing_mail = await engine.find_one(db_user_account, db_user_account.email == email)
-            hashed_password = self.create_tenant_user(existing_user, existing_mail, password)
+            hashed_password = await self.create_tenant_user(existing_user, existing_mail, password)
 
             user = db_user_account(
                 username=username,
@@ -118,7 +118,8 @@ class AccountManager:
                 permissions=data.permissions,
                 alerts_allowed_all=False,
                 alerts_allowed_tenant_ids=[],
-                password_reset_required=True, )
+                password_reset_required=True, 
+                workspace_quota_bytes=self.normalize_workspace_quota_bytes(getattr(data, "workspace_quota_bytes", None)), )
 
             await engine.save(user)
             return {"message": "User created successfully", "username": username, "email": email}
@@ -155,6 +156,40 @@ class AccountManager:
 
         return {"message": "User deleted successfully"}
 
+    @staticmethod
+    def normalize_workspace_quota_bytes(value) -> Optional[int]:
+        if value is None:
+            return None
+
+        try:
+            quota = int(value)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=400, detail="Invalid workspace quota")
+
+        if quota < 0:
+            raise HTTPException(status_code=400, detail="Workspace quota cannot be negative")
+
+        return quota if quota > 0 else None
+
+
+    async def get_assigned_user_workspace_quota_bytes(self, tenant_id: str, exclude_user_id: Optional[str] = None,) -> int:
+        users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
+
+        total = 0
+
+        for user in users:
+            if exclude_user_id and str(user.id) == str(exclude_user_id):
+                continue
+
+            quota = getattr(user, "workspace_quota_bytes", None) or 0
+
+            try:
+                total += max(0, int(quota))
+            except (TypeError, ValueError):
+                continue
+
+        return total
+
     async def update_user(self, request: tenant_param_model, current_user):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
         user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
@@ -182,7 +217,9 @@ class AccountManager:
             raise HTTPException(status_code=401, detail="This user type cannot be updated")
 
         tenant = None
-        if request.licenses is not None or (user.status == UserStatus.DISABLE and request.status == UserStatus.ACTIVE):
+        workspace_quota_requested = "workspace_quota_bytes" in request.model_fields_set
+
+        if (request.licenses is not None or workspace_quota_requested or (user.status == UserStatus.DISABLE and request.status == UserStatus.ACTIVE)):
             tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
 
         if request.status == UserStatus.DISABLE:
@@ -236,6 +273,24 @@ class AccountManager:
         elif alert_fields_requested:
             user.alerts_allowed_all = False
             user.alerts_allowed_tenant_ids = []
+
+        if workspace_quota_requested:
+            if tenant is None:
+                raise HTTPException(status_code=400, detail="Tenant not found")
+
+            workspace_quota_bytes = self.normalize_workspace_quota_bytes(request.workspace_quota_bytes)
+
+            assigned_user_quota = await self.get_assigned_user_workspace_quota_bytes(tenant_id=str(user.tenant_uuid), exclude_user_id=str(user.id))
+
+            tenant_workspace_quota = getattr(tenant, "workspace_quota_bytes", DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES)
+
+            if workspace_quota_bytes and assigned_user_quota + workspace_quota_bytes > tenant_workspace_quota:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Assigned user workspace quota exceeds tenant workspace quota",
+                )
+
+            user.workspace_quota_bytes = workspace_quota_bytes
 
         if request.password_reset_required is not None:
             user.password_reset_required = request.password_reset_required
