@@ -1,4 +1,4 @@
-import { AiWorkspaceMessage } from "../chat/ai-workspace-message.model";
+import { AiWorkspaceMessage, AiWorkspaceTrigger } from "../chat/ai-workspace-message.model";
 
 export interface AiChatSession {
     sessionId: string;
@@ -20,6 +20,7 @@ export interface NexusChatMessage {
     sender: 'user' | 'bot';
     text: string;
     created_at: string;
+    triggers?: AiWorkspaceTrigger[];
 }
 
 export interface NexusChatDetail extends NexusChatSession {

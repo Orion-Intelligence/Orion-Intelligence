@@ -37,6 +37,8 @@ services:
       - ./client/build:/app/build:delegated
     expose:
       - "8070"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       - backend
       - shared_bridge
@@ -89,6 +91,8 @@ services:
       - ./client/src/assets/data:/app/build/assets/data:ro
     expose:
       - "8070"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     networks:
       backend:
         aliases:

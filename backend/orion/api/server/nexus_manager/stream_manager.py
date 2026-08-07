@@ -64,14 +64,17 @@ class NexusStreamManager:
         response.raise_for_status()
         return headers
 
-    async def _store_turn(self, client: httpx.AsyncClient, prompt: str, response: str, user_id: str, session_id: str) -> None:
+    async def _store_turn(self, client: httpx.AsyncClient, prompt: str, response: str, user_id: str, session_id: str, triggers: list[dict[str, Any]] | None = None) -> None:
+        payload: dict[str, Any] = {
+            "text": prompt.strip()[:MAX_CHAT_MESSAGE_LENGTH],
+            "response": response.strip()[:MAX_CHAT_MESSAGE_LENGTH],
+        }
+        if triggers:
+            payload["triggers"] = triggers
         result = await client.post(
             f"{self.base_url}/v1/chats/{session_id}/messages",
             headers={"X-User-Id": user_id},
-            json={
-                "text": prompt.strip()[:MAX_CHAT_MESSAGE_LENGTH],
-                "response": response.strip()[:MAX_CHAT_MESSAGE_LENGTH],
-            },
+            json=payload,
         )
         result.raise_for_status()
 
@@ -200,7 +203,8 @@ class NexusStreamManager:
                     output = self._stream_output(event) if event is not None else {}
                     final_response = str(output.get("response") or "").strip()
                     if session_type == "persistent" and session_id and final_response and event is not None and event.get("done") and not event.get("error"):
-                        await self._store_turn(client, prompt, final_response, user_id, session_id)
+                        triggers = output.get("triggers")
+                        await self._store_turn(client, prompt, final_response, user_id, session_id, triggers if isinstance(triggers, list) else None)
                         stored = True
                     await self._emit(stream, line)
                 if failed:

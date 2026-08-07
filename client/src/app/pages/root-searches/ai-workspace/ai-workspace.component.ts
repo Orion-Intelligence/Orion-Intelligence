@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AppService } from '../../../services/core/app/app.service';
-import { AiWorkspaceMessage } from '../../../shared/model/chat/ai-workspace-message.model';
+import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../../../shared/model/chat/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
 import { NexusChatService } from './nexus-chat.service';
@@ -13,7 +13,7 @@ import { BotMessageActionsComponent } from './bot-message-actions/bot-message-ac
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { AiChatSession } from '../../../shared/model/nexus/ai-chat-session.model';
+import { AiChatSession, NexusChatMessage } from '../../../shared/model/nexus/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { AiDirectory } from './ai-directory/ai-directory';
@@ -216,6 +216,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       }
 
       let reply = '';
+      let triggers: AiWorkspaceTrigger[] | undefined;
       let finished = false;
       const finishRequest = () => {
         this.clearPendingStream();
@@ -249,7 +250,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         const now = new Date();
         const completedMessages: AiWorkspaceMessage[] = [
           ...requestMessages,
-          { id: crypto.randomUUID(), sender: 'bot', text: reply, time: now },
+          { id: crypto.randomUUID(), sender: 'bot', text: reply, time: now, triggers },
         ];
 
         this.updateSessionMessages(sessionId, completedMessages, now.toISOString());
@@ -274,6 +275,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           }
           if (chunk.response) {
             reply = chunk.response;
+          }
+          if (chunk.triggers?.length) {
+            triggers = chunk.triggers;
           }
         },
         complete,
@@ -552,6 +556,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
+  async downloadTrigger(trigger: AiWorkspaceTrigger, event?: Event): Promise<void> {
+    event?.preventDefault();
+    event?.stopPropagation();
+    await this.nexusChatService.downloadTrigger(trigger);
+  }
+
   startMessageEdit(message: AiWorkspaceMessage): void {
     if (!this.canEditMessage(message)) {
       return;
@@ -597,10 +607,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       event.preventDefault();
       this.saveMessageEdit(message);
     }
-  }
-
-  getEditReserveText(message: AiWorkspaceMessage): string {
-    return this.editDraft.length > message.text.length ? this.editDraft : message.text;
   }
 
   protected get messageDraftTokenCount(): number {
@@ -836,12 +842,13 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     };
   }
 
-  private mapMessage(message: any): AiWorkspaceMessage {
+  private mapMessage(message: NexusChatMessage): AiWorkspaceMessage {
     return {
       id: message.id,
       sender: message.sender === 'bot' ? 'bot' : 'user',
       text: message.text,
       time: new Date(message.created_at),
+      triggers: Array.isArray(message.triggers) ? message.triggers.filter(trigger => Boolean(trigger?.url)) : undefined,
     };
   }
 

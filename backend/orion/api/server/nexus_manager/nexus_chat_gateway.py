@@ -127,20 +127,26 @@ class nexus_chat_gateway:
             current_user=current_user,
         )
 
-    async def download_user_file(self, file_name: str, current_user):
+    async def download_user_file(self, file_name: str, current_user, auth_token: str = ""):
         try:
+            headers = self._headers(current_user)
+            auth_token = str(auth_token or "").strip()
+            if auth_token:
+                headers["Authorization"] = auth_token if auth_token.casefold().startswith("bearer ") else f"Bearer {auth_token}"
             async with httpx.AsyncClient() as client:
                 response = await client.get(
-                    f"http://172.18.0.1:8300/downloads/{quote(file_name, safe='')}",
-                    headers=self._headers(current_user),
+                    f"http://host.docker.internal:8300/downloads/{quote(file_name, safe='')}",
+                    headers=headers,
                     timeout=1500,
                 )
             if response.status_code != 200:
                 return JSONResponse(status_code=response.status_code, content={"detail": response.text or "File not found."})
-            headers = {}
-            if response.headers.get("content-disposition"):
-                headers["content-disposition"] = response.headers["content-disposition"]
-            return Response(content=response.content, media_type=response.headers.get("content-type") or "application/octet-stream", headers=headers)
+            response_headers = {
+                name: response.headers[name]
+                for name in ("content-disposition", "cache-control", "x-content-type-options")
+                if response.headers.get(name)
+            }
+            return Response(content=response.content, media_type=response.headers.get("content-type") or "application/octet-stream", headers=response_headers)
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Something happened while downloading Nexus file"})
 

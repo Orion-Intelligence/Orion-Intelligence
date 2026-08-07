@@ -106,8 +106,8 @@ async def clear_nexus_chat_session(payload: dict | None = Body(default=None), cu
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST]))],
 )
-async def download_nexus_user_file(file_name: str, current_user=Depends(get_current_user)):
-    return await nexus_chat_gateway.getInstance().download_user_file(file_name, current_user)
+async def download_nexus_user_file(file_name: str, request: Request, current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().download_user_file(file_name, current_user, token_from_request(request) or "")
 
 
 @ai_routes.post(
