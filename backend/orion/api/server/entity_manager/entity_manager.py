@@ -1,6 +1,7 @@
 import hashlib
 import re
 import threading
+import time
 from datetime import date, datetime
 from typing import Any
 
@@ -19,6 +20,7 @@ from orion.constants.cti_graph_schema import (
 )
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.log_manager.log_controller import log
+from orion.services.redis_manager.redis_controller import redis_controller
 
 
 class entity_manager:
@@ -48,6 +50,12 @@ class entity_manager:
     EDGE_TYPE_BY_KEY = graph_enums.EDGE_TYPE_BY_KEY
     DEFAULT_HIDDEN_KEYS = graph_enums.DEFAULT_HIDDEN_KEYS
     GRAPH_BATCH_LIST_KEYS = {"m_country", "m_origin_country"}
+    ARANGO_LOCK_TIMEOUT_ERROR_CODE = 1200
+    ARANGO_LOCK_RETRY_ATTEMPTS = 5
+    ARANGO_LOCK_RETRY_BASE_DELAY = 0.05
+    ARANGO_DISTRIBUTED_LOCK_TTL = 10
+    ARANGO_DISTRIBUTED_LOCK_WAIT = 5
+    PROVENANCE_SAMPLE_LIMIT = 6
 
     @staticmethod
     def get_instance():
@@ -341,7 +349,7 @@ class entity_manager:
         return float(observation.get("confidence") or 0.0)
 
     @staticmethod
-    def _merge_unique(existing: Any, additions: list[Any]) -> list[Any]:
+    def _merge_unique(existing: Any, additions: list[Any], limit: int | None = None) -> list[Any]:
         values = []
         seen = set()
         for value in (existing if isinstance(existing, list) else []):
@@ -354,11 +362,51 @@ class entity_manager:
             if marker not in seen and value not in (None, "", [], {}):
                 values.append(value)
                 seen.add(marker)
-        return values
+        return values[:limit] if limit is not None else values
+
+    @classmethod
+    def _updated_evidence_count(cls, old: dict[str, Any], additions: list[Any]) -> int:
+        existing_ids = cls._merge_unique([], old.get("evidence_doc_ids") or [])
+        existing_markers = {str(value) for value in existing_ids}
+        previous_count = max(int(old.get("evidence_count") or 0), len(existing_ids))
+        new_ids = cls._merge_unique([], additions)
+        return previous_count + sum(str(value) not in existing_markers for value in new_ids)
 
     @classmethod
     def _upsert_lock(cls, key: str):
         return cls.__upsert_locks[abs(hash(key)) % len(cls.__upsert_locks)]
+
+    @classmethod
+    def _is_arango_lock_timeout(cls, exc: Exception) -> bool:
+        error_code = getattr(exc, "error_code", None)
+        if error_code == cls.ARANGO_LOCK_TIMEOUT_ERROR_CODE:
+            return True
+        message = str(exc)
+        return (
+            f"ERR {cls.ARANGO_LOCK_TIMEOUT_ERROR_CODE}" in message
+            or "timeout waiting to lock key" in message.lower()
+        )
+
+    @classmethod
+    def _run_arango_with_retry_sync(cls, operation):
+        attempt = 0
+        while True:
+            try:
+                return operation()
+            except Exception as exc:
+                attempt += 1
+                if attempt >= cls.ARANGO_LOCK_RETRY_ATTEMPTS or not cls._is_arango_lock_timeout(exc):
+                    raise
+                time.sleep(cls.ARANGO_LOCK_RETRY_BASE_DELAY * (2 ** (attempt - 1)))
+
+    async def _run_arango_with_distributed_lock(self, lock_key: str, operation):
+        redis_lock_key = f"arango:cti_graph:{lock_key}"
+        async with redis_controller.getInstance().lock(
+            redis_lock_key,
+            timeout=self.ARANGO_DISTRIBUTED_LOCK_TTL,
+            blocking_timeout=self.ARANGO_DISTRIBUTED_LOCK_WAIT,
+        ):
+            return await run_in_threadpool(lambda: self._run_arango_with_retry_sync(operation))
 
     @staticmethod
     def _min_seen(existing: Any, incoming: Any) -> Any:
@@ -506,9 +554,11 @@ class entity_manager:
             merged = {k: v for k, v in old.items() if k not in {"_id", "_rev"}}
             merged.update({k: v for k, v in document.items() if v not in (None, "", [], {})})
             for field, additions in (merge_arrays or {}).items():
-                merged[field] = self._merge_unique(old.get(field), additions)
-            if "evidence_doc_ids" in merged:
-                merged["evidence_count"] = len(merged["evidence_doc_ids"])
+                if field == "evidence_doc_ids":
+                    merged["evidence_count"] = self._updated_evidence_count(old, additions)
+                    continue
+                merged[field] = self._merge_unique(old.get(field), additions, self.PROVENANCE_SAMPLE_LIMIT)
+            merged.pop("evidence_doc_ids", None)
             if document.get("first_seen") or old.get("first_seen"):
                 merged["first_seen"] = self._min_seen(old.get("first_seen"), document.get("first_seen"))
             if document.get("last_seen") or old.get("last_seen"):
@@ -522,10 +572,11 @@ class entity_manager:
                     float(merged.get("max_source_reliability") or self.DEFAULT_SOURCE_RELIABILITY),
                     len(merged.get("sources") or []),
                 )
-            vertex_collection.insert(self._json_safe(merged), overwrite=True)
+            self._run_arango_with_retry_sync(lambda: vertex_collection.insert(self._json_safe(merged), overwrite=True))
 
     async def _upsert_observation_vertex(self, document: dict[str, Any], aliases: list[str], source_module: str, source_fields: list[str], doc_id: str):
-        await run_in_threadpool(
+        await self._run_arango_with_distributed_lock(
+            f"vertex:{document['_key']}",
             lambda: self._upsert_vertex_sync(
                 document,
                 {
@@ -548,12 +599,12 @@ class entity_manager:
                 float(old.get("base_confidence") or 0),
                 float(edge_document.get("base_confidence") or 0.75),
             ))
-            merged["evidence_doc_ids"] = self._merge_unique(old.get("evidence_doc_ids"), [doc_id])
-            merged["source_modules"] = self._merge_unique(old.get("source_modules"), [source_module])
-            merged["sources"] = self._merge_unique(old.get("sources"), [source])
+            merged.pop("evidence_doc_ids", None)
+            merged["source_modules"] = self._merge_unique(old.get("source_modules"), [source_module], self.PROVENANCE_SAMPLE_LIMIT)
+            merged["sources"] = self._merge_unique(old.get("sources"), [source], self.PROVENANCE_SAMPLE_LIMIT)
             merged["first_seen"] = self._min_seen(old.get("first_seen"), published)
             merged["last_seen"] = self._max_seen(old.get("last_seen"), published)
-            merged["evidence_count"] = len(merged["evidence_doc_ids"])
+            merged["evidence_count"] = self._updated_evidence_count(old, [doc_id])
             merged["max_source_reliability"] = float(max(float(old.get("max_source_reliability") or 0), source_reliability))
             merged["confidence"] = self._score_confidence(
                 float(merged.get("base_confidence") or 0.75),
@@ -561,7 +612,7 @@ class entity_manager:
                 merged["max_source_reliability"],
                 len(merged["sources"]),
             )
-            edge_collection.insert(self._json_safe(merged), overwrite=True)
+            self._run_arango_with_retry_sync(lambda: edge_collection.insert(self._json_safe(merged), overwrite=True))
 
     async def _upsert_derived_edge(self, from_vertex: str, to_vertex: str, edge_type: str, relationship_type: str, label: str, doc_id: str, source: str, source_module: str, published: str | None, source_reliability: float, base_confidence: float, extra: dict[str, Any] | None = None):
         edge_key = self._safe_key("derived", edge_type, from_vertex, to_vertex)
@@ -579,7 +630,8 @@ class entity_manager:
         }
         if extra:
             edge_document.update(extra)
-        await run_in_threadpool(
+        await self._run_arango_with_distributed_lock(
+            f"edge:{edge_key}",
             lambda: self._upsert_derived_edge_sync(
                 edge_document,
                 doc_id,
@@ -1585,10 +1637,12 @@ class entity_manager:
             }
             report_vertex = {k: v for k, v in report_vertex.items() if v not in (None, "", [], {})}
 
-            await run_in_threadpool(
+            await self._run_arango_with_distributed_lock(
+                f"vertex:{normalized_doc_id}",
                 lambda: self.__db.collection("cti_vertices").insert(report_vertex, overwrite=True))
 
-            await run_in_threadpool(
+            await self._run_arango_with_distributed_lock(
+                f"vertex:{normalized_cluster_id}",
                 lambda: self.__db.collection("cti_vertices").insert(
                     {
                         "_key": normalized_cluster_id,
@@ -1600,10 +1654,12 @@ class entity_manager:
                         "schema_version": self.GRAPH_SCHEMA_VERSION,
                     }, overwrite=True))
 
-            await run_in_threadpool(
+            cluster_edge_key = self._safe_key(normalized_cluster_id, "to", normalized_doc_id)
+            await self._run_arango_with_distributed_lock(
+                f"edge:{cluster_edge_key}",
                 lambda: self.__db.collection("cti_edges").insert(
                     {
-                        "_key": self._safe_key(normalized_cluster_id, "to", normalized_doc_id),
+                        "_key": cluster_edge_key,
                         "_from": cluster_vertex,
                         "_to": doc_vertex,
                         "type": "cluster_to_doc",
@@ -1668,7 +1724,8 @@ class entity_manager:
                             source_fields,
                             normalized_doc_id,
                         )
-                        await run_in_threadpool(
+                        await self._run_arango_with_distributed_lock(
+                            f"edge:{edge_key}",
                             lambda: self.__db.collection("cti_edges").insert(
                                 {
                                     "_key": edge_key,
@@ -1680,7 +1737,6 @@ class entity_manager:
                                     "entity_role": entity_role,
                                     "label": edge_type.replace("_", " "),
                                     "confidence": confidence,
-                                    "evidence_doc_ids": [normalized_doc_id],
                                     "source_fields": source_fields,
                                     "source": source,
                                     "source_reliability": source_reliability,

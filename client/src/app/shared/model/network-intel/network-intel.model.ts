@@ -120,6 +120,7 @@ export interface IpRowState {
   loading:  boolean;
   progress?: number;
   step?:    string | null;
+  startedAtMs?: number;
   detail:   IpDetail | null;
   error:    string | null;
 }
@@ -146,7 +147,7 @@ export interface GeoLiveStats {
   cameras_found: number;
 }
 
-export type VulnerabilityScanDepth = 'low' | 'medium' | 'high';
+export type VulnerabilityScanDepth = 'low' | 'medium' | 'high' | 'full';
 
 export interface VulnerabilityTargetSelection {
   target: string;

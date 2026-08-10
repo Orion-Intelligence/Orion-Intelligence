@@ -9,11 +9,23 @@ LOCAL_SSL_CERT="$LOCAL_SSL_DIR/localhost-cert.pem"
 LOCAL_SSL_KEY="$LOCAL_SSL_DIR/localhost-key.pem"
 MAINTENANCE_FLAG="backend/static/.maintenance"
 
+is_nginx_running() {
+    docker inspect -f '{{.State.Running}}' trusted-web-nginx 2>/dev/null | grep -qx true
+}
+
 stop_docker() {
-    docker compose -p "$PROJECT_NAME" down --remove-orphans
-    rm -rf staticfiles
     docker stop trusted-web-nginx 2>/dev/null || true
     docker rm trusted-web-nginx 2>/dev/null || true
+    docker compose -p "$PROJECT_NAME" down --remove-orphans
+    rm -rf staticfiles
+}
+
+stop_production_services_preserving_nginx() {
+    local services=(web documentation arangodb elasticsearch redis_server mongo)
+
+    docker compose -p "$PROJECT_NAME" -f docker-compose-production.yml stop "${services[@]}"
+    docker compose -p "$PROJECT_NAME" -f docker-compose-production.yml rm -f "${services[@]}"
+    rm -rf staticfiles
 }
 
 stop_ng_serve() {
@@ -109,13 +121,18 @@ use_compose_file() {
     fi
 }
 
-wait_for_server() {
-    local url="http://127.0.0.1/"
-    local status
-    until status="$(curl -s -o /dev/null -w '%{http_code}' "$url" 2>/dev/null)" \
-        && { [ "$status" = "200" ] || [ "$status" = "301" ] || [ "$status" = "302" ] || [ "$status" = "503" ]; }; do
+wait_for_application_services() {
+    local health
+
+    echo "Waiting for application services to become ready..."
+    until health="$(docker inspect -f '{{.State.Health.Status}}' trusted-web-main 2>/dev/null)" \
+        && [ "$health" = "healthy" ]; do
         sleep 2
     done
+}
+
+wait_for_server() {
+    wait_for_application_services
     sudo systemctl restart tor@default
 }
 
@@ -235,8 +252,15 @@ COMMAND=$1
 FLAG=$2
 EXTRA_FLAG=$3
 
-if [ "$COMMAND" != "build" ] \
-    || { [ "$FLAG" != "-d" ] && [ "$FLAG" != "-t" ] && [ "$FLAG" != "-tb" ]; }; then
+if [ "$COMMAND" = "production" ]; then
+    enable_maintenance_mode
+    if is_nginx_running; then
+        stop_production_services_preserving_nginx
+    else
+        stop_docker
+    fi
+elif [ "$COMMAND" != "build" ] \
+    || { [ "$FLAG" != "-d" ] && [ "$FLAG" != "-t" ] && [ "$FLAG" != "-tb" ] && [ "$FLAG" != "-p" ]; }; then
     stop_docker
 fi
 
@@ -326,6 +350,10 @@ compose_up_services=()
 
 if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
     compose_up_services=(web nginx)
+elif [ "$COMPOSE_FILE" = "docker-compose-production.yml" ] && is_nginx_running; then
+    # Keep the existing gateway alive so it can serve maintenance.html while
+    # the application and its dependencies are rebuilt or restarted.
+    compose_up_services=(web documentation arangodb elasticsearch redis_server mongo)
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
@@ -354,12 +382,21 @@ case "$COMMAND:$FLAG" in
     build:-t|build:-tb)
         wait_for_test_service
         ;;
+    build:-p)
+        ;;
+    *)
+        wait_for_application_services
+        ;;
 esac
 
 if [ "$COMMAND" = "build" ] \
     && { [ "$FLAG" = "-d" ] || [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; }; then
     disable_maintenance_mode
     trap - EXIT
+fi
+
+if [ "$COMMAND" = "production" ]; then
+    disable_maintenance_mode
 fi
 
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-tb" ]; then

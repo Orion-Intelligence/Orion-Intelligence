@@ -88,6 +88,17 @@
             overflow-wrap: anywhere;
         }
 
+        .home-link {
+            background: #57a5eb;
+            border-radius: 8px;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 22px;
+            padding: 10px 18px;
+            text-decoration: none;
+        }
+
         .meta {
             border-top: 1px solid #ffffff14;
             color: #9fb3c8;
@@ -203,7 +214,21 @@
     <div class="status">Maintenance</div>
     <h1>Orion is temporarily unavailable</h1>
     <p>Maintenance or update in progress. Please try again in a few moments.</p>
+    <a class="home-link" href="/dashboard/home">Go to homepage</a>
     <div class="meta">The gateway is online and will reconnect automatically when the application is ready.</div>
 </main>
+<script>
+    const reconnect = async () => {
+        try {
+            const response = await fetch('/dashboard/home', {cache: 'no-store'});
+            if (response.ok) {
+                window.location.replace('/dashboard/home');
+                return;
+            }
+        } catch (_) {}
+        window.setTimeout(reconnect, 5000);
+    };
+    window.setTimeout(reconnect, 5000);
+</script>
 </body>
 </html>

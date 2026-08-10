@@ -276,10 +276,10 @@ async def delete_audit_log(log_id: str, current_user=Depends(get_current_user)):
     status_code=200,
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN]))], )
-async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
+async def get_system_logs(log_type: str | None = Query(None), date: str | None = Query(None), date_range: str | None = Query(None), page: int = Query(1), limit: int = Query(200)):
     try:
         flushed_at = await redis_controller.getInstance().invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [SYSTEM_LOG_FLUSHED_AT_KEY, None, None])
-        return SystemLogManager.get_instance().get(log_type=log_type, date=date, page=page, limit=limit, flushed_at=flushed_at)
+        return SystemLogManager.get_instance().get(log_type=log_type, date=date, date_range=date_range, page=page, limit=limit, flushed_at=flushed_at)
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 

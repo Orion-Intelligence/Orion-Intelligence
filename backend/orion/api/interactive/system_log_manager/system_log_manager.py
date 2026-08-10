@@ -31,18 +31,28 @@ class SystemLogManager:
             raise Exception("This class is a singleton!")
         SystemLogManager.__instance = self
 
-    def get(self, log_type: str | None = None, date: str | None = None, page: int = 1, limit: int = 200, flushed_at: str | None = None) -> dict:
+    def get(self, log_type: str | None = None, date: str | None = None, date_range: str | None = None, page: int = 1, limit: int = 200, flushed_at: str | None = None) -> dict:
         safe_type = (log_type or "").strip().upper()
         if safe_type and safe_type not in self.VISIBLE_LOG_TYPES:
             raise ValueError("Invalid log type")
         safe_date = (date or "").strip()
         if safe_date and not self._valid_log_date(safe_date):
             raise ValueError("Invalid log date")
+        safe_date_range = (date_range or "").strip()
+        range_start = ""
+        range_end = ""
+        if safe_date_range:
+            parts = [part.strip() for part in safe_date_range.split(",")]
+            if len(parts) != 2 or not all(self._valid_log_date(part) for part in parts) or parts[0] > parts[1]:
+                raise ValueError("Invalid log date range")
+            range_start, range_end = parts
 
         safe_page = max(1, int(page or 1))
         safe_limit = max(1, min(int(limit or 100), 100))
         flushed_at_dt = self._parse_flushed_at(flushed_at)
         files = self._log_files(safe_date or None)
+        if range_start:
+            files = [path for path in files if range_start <= self._log_date(path) <= range_end]
         if flushed_at_dt:
             files = [path for path in files if self._log_file_may_have_entries_after(path, flushed_at_dt)]
         entries = []

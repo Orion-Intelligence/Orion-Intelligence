@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any, Awaitable, Callable, Dict, Optional
 
 import httpx
@@ -32,7 +32,7 @@ class ScanJobManager:
 
     @classmethod
     def is_terminal_status(self, scan_status: str | ScanJobStatus | None) -> bool:
-        return str(scan_status or "").strip().lower() in {ScanJobStatus.DONE.value, ScanJobStatus.ERROR.value, ScanJobStatus.CANCELLED.value, ScanJobStatus.EXPIRED.value}
+        return str(scan_status or "").strip().lower() in {ScanJobStatus.PARTIAL.value, ScanJobStatus.DONE.value, ScanJobStatus.ERROR.value, ScanJobStatus.CANCELLED.value, ScanJobStatus.EXPIRED.value}
 
     @staticmethod
     def _normalize_api_reference(api_reference: str) -> str:
@@ -66,6 +66,8 @@ class ScanJobManager:
 
         if response_status in {"error", "failed", "failure"}:
             return ScanJobStatus.ERROR
+        if response_status == "partial":
+            return ScanJobStatus.PARTIAL
         if response_status in {"done", "success", "completed", "complete"}:
             return ScanJobStatus.DONE
         if response_status in {"pending", "busy", "queued", "running", "started"}:
@@ -108,7 +110,7 @@ class ScanJobManager:
         job.response = response_dict
         job.updated_at = now
         computed_status = self._job_status_from_response(response_dict)
-        if computed_status in {ScanJobStatus.DONE, ScanJobStatus.ERROR}:
+        if computed_status in {ScanJobStatus.PARTIAL, ScanJobStatus.DONE, ScanJobStatus.ERROR}:
             job.completed_at = now
         await self._engine.save(job)
 
@@ -167,18 +169,12 @@ class ScanJobManager:
             scan_status = self._job_status_from_response(response) if response else ScanJobStatus.QUEUED
             if not self.is_terminal_status(scan_status.value):
                 return {**self._build_scan_detail(record, scan_status.value).model_dump(), "source": "existing_running"}
-            if scan_status == ScanJobStatus.DONE and latest_done_scan is None:
+            if scan_status in {ScanJobStatus.DONE, ScanJobStatus.PARTIAL} and latest_done_scan is None:
                 latest_done_scan = record
 
         if latest_done_scan and not force_new:
-            completed_at = (latest_done_scan.completed_at or latest_done_scan.updated_at or latest_done_scan.created_at)
-            if completed_at and completed_at.tzinfo is None:
-                completed_at = completed_at.replace(tzinfo=timezone.utc)
-            if completed_at and completed_at >= now - timedelta(days=3):
-                return {**self._build_scan_detail(latest_done_scan, ScanJobStatus.DONE.value).model_dump(), "source": "previous_completed"}
-            
             if confirm_duplicates:
-                previous_scan = self._build_scan_notification(latest_done_scan, ScanJobStatus.DONE.value).model_dump()
+                previous_scan = self._build_scan_notification(latest_done_scan).model_dump()
                 return {
                     "requires_confirmation": True,
                     "message": "You already scanned this before. Do you want to use the previous result or run a new scan?",
@@ -212,7 +208,7 @@ class ScanJobManager:
         if not job:
             raise HTTPException(status_code=404, detail="Scan job not found")
 
-        if created.get("source") == "previous_completed":
+        if created.get("source") in {"previous_completed", "existing_running"}:
             response = job.response or {"status": "pending", "progress": 5, "step": "queued"}
             return self._with_scan_metadata(response, job)
 
@@ -224,6 +220,15 @@ class ScanJobManager:
         except Exception as exc:
             await self._save_job_response(job, {"status": ScanJobStatus.ERROR.value, "detail": "Scan failed", "step": "failed"})
             raise HTTPException(status_code=500, detail="Scan failed") from exc
+
+        if not force_new and self._as_response_dict(response).get("cached") is True:
+            await self._save_job_response(job, response)
+            return {
+                "requires_confirmation": True,
+                "message": "A cached scan result is available. Do you want to use it or rescan?",
+                "source": "previous_completed",
+                "previous_scan": self._build_scan_notification(job, ScanJobStatus.DONE.value).model_dump(),
+            }
 
         await self._save_job_response(job, response)
         return self._with_scan_metadata(response, job)
@@ -307,7 +312,7 @@ class ScanJobManager:
             raise HTTPException(status_code=response.status_code, detail=f"Error from trusted-micros-api: {response.text}")
 
         computed_status = self._job_status_from_response(full_response)
-        if computed_status in {ScanJobStatus.DONE, ScanJobStatus.ERROR}:
+        if computed_status in {ScanJobStatus.PARTIAL, ScanJobStatus.DONE, ScanJobStatus.ERROR}:
             job.completed_at = now
 
         await self._engine.save(job)

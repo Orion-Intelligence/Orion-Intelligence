@@ -182,7 +182,9 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
         if (params['username']) {
           this.q1 = params['username'];
         }
-        this.q2 = '';
+        if (params['email']) {
+          this.q2 = params['email'];
+        }
       }
       else if (this.apiType === 'wanted') {
         if (params['query']) {
@@ -413,7 +415,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       return { text: { username: this.q1, email: this.q2 } };
     }
     if (this.apiType === 'social') {
-      return { text: { username: this.q1 } };
+      return { text: { username: this.q1, email: this.q2 } };
     }
     if (this.apiType === 'wanted') {
       return { text: { query: this.q1 } };

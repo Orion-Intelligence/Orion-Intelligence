@@ -82,7 +82,12 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   fetchShodanIpDetail$(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Observable<any> {
-    return this.fetchPolledResult$<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
+    return this.scanNotifications.runApiScanAsResponse<NetworkIntelScanResponse>({
+      apiReference: 'netintel/ipscanner',
+      payload: { ip },
+      metadata: { title: 'Deep IP Scan', target: ip, section: 'deep-scan' },
+      pollDelayMs: this.pollDelayMs,
+    }).pipe(tap(response => onEach?.(response)), map(response => this.unwrapPolledResult(response)));
   }
 
   scanThreatLensGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {

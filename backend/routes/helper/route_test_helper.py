@@ -132,7 +132,7 @@ class TestRouteHelper:
             job.response = mock_response if isinstance(mock_response, dict) else {"result": mock_response}
             job.updated_at = now
             computed_status = manager._job_status_from_response(job.response)
-            if computed_status.value in {"done", "error"}:
+            if computed_status.value in {"partial", "done", "error"}:
                 job.completed_at = now
             await manager._engine.save(job)
 

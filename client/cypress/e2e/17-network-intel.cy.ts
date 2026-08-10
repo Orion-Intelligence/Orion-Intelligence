@@ -107,6 +107,9 @@ describe('Network Intel - End-to-End Flow', () => {
               title: 'Missing Content-Security-Policy',
               severity: 'high',
               category: 'headers',
+              description: 'The response does not define a Content Security Policy.',
+              urls: ['https://bbc.com/', 'https://bbc.com/news'],
+              evidence: 'content-security-policy: missing',
             },
           ],
         },
@@ -125,8 +128,10 @@ describe('Network Intel - End-to-End Flow', () => {
     });
 
     cy.get('[data-testid="network-intel-tab-host-recon"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('example.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://www.example.com/{enter}');
+    cy.wait('@resolveIp').its('request.body').should('deep.equal', { domain: 'example.com' });
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
+    cy.wait('@ipScanner').its('request.body').should('deep.equal', { ip: '93.184.216.34' });
     cy.get('[data-testid="network-intel-dns-detail-93.184.216.34"]').should('be.visible');
     cy.docsScreenshot('network-intel-host-recon');
     cy.get('[data-testid="network-intel-dns-row-93.184.216.34"]').should('be.visible').click();
@@ -138,7 +143,8 @@ describe('Network Intel - End-to-End Flow', () => {
       .click();
 
     cy.get('[data-testid="network-intel-tab-ip-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('8.8.8.8{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://8.8.8.8/{enter}');
+    cy.wait('@ipScanner').its('request.body').should('deep.equal', { ip: '8.8.8.8' });
     cy.get('[data-testid="network-intel-ip-result"]').should('be.visible');
     cy.docsScreenshot('network-intel-ip-scan');
 
@@ -148,11 +154,45 @@ describe('Network Intel - End-to-End Flow', () => {
       .click();
 
     cy.get('[data-testid="network-intel-tab-vulnerability-scan"]').click();
-    cy.get('[data-testid="network-intel-search-input"]').clear().type('bbc.com{enter}');
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://www.bbc.com/{enter}');
     cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/, { timeout: 60000 }).should('be.visible');
+    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/)
+      .first()
+      .closest('[data-testid="network-intel-vulnerability-row"]')
+      .click();
+    cy.get('[data-testid="confirmation-popup"]').should('not.exist');
+    cy.get('[data-testid="network-intel-vulnerability-empty"]').should('contain.text', 'Nothing scanned yet.');
+    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/)
+      .first()
+      .closest('[data-testid="network-intel-vulnerability-row"]')
+      .click();
+    cy.get('[data-testid="network-intel-vulnerability-empty"]').should('not.exist');
     cy.docsScreenshot('network-intel-vulnerability-depth-controls');
-    cy.contains('[data-testid="network-intel-vulnerability-target"]', /^bbc\.com$/).click();
+    cy.get('[data-testid="network-intel-vulnerability-depth-full"]').first().should('be.visible').click();
+    cy.get('[data-testid="confirmation-popup"]').should('be.visible').and('contain.text', 'over an hour');
+    cy.get('[data-testid="confirmation-warning-icon"]').should('be.visible');
+    cy.get('[data-testid="confirmation-yes-button"]').click();
+    cy.wait('@vulnerabilityScan').its('request.body').should('deep.equal', {
+      domain: 'bbc.com',
+      depth: 'full',
+    });
     cy.get('[data-testid="network-intel-vulnerability-result"]', { timeout: 120000 }).should('be.visible');
+    cy.contains('The response does not define a Content Security Policy.').should('be.visible');
+    cy.get('[data-testid="network-intel-vulnerability-finding-details"]').should('not.exist');
+    cy.get('[data-testid="network-intel-vulnerability-finding-toggle"]')
+      .first()
+      .should('have.attr', 'aria-expanded', 'false')
+      .click()
+      .should('have.attr', 'aria-expanded', 'true');
+    cy.get('[data-testid="network-intel-vulnerability-finding-details"]')
+      .should('be.visible')
+      .and('contain.text', 'Reference URLs')
+      .and('contain.text', 'content-security-policy: missing');
+    cy.get('[data-testid="network-intel-vulnerability-finding-toggle"]')
+      .first()
+      .click()
+      .should('have.attr', 'aria-expanded', 'false');
+    cy.get('[data-testid="network-intel-vulnerability-finding-details"]').should('not.exist');
     cy.docsScreenshot('network-intel-vulnerability-scan');
 
     cy.get('[data-testid="network-intel-download-report"]')

@@ -1,4 +1,4 @@
-export type ScanJobStatus = 'queued' | 'running' | 'done' | 'error' | 'cancelled' | 'expired';
+export type ScanJobStatus = 'queued' | 'running' | 'partial' | 'done' | 'error' | 'cancelled' | 'expired';
 
 export interface ScanJobNotificationResponse {
   scan_id: string;

@@ -290,7 +290,10 @@ class test_manager:
                             return True
                 return False
 
-            for data_fp in sorted(mocks_dir.glob("*.data.ndjson")):
+            for data_fp in sorted(
+                mocks_dir.glob("*.data.ndjson"),
+                key=lambda path: (path.name.count("-"), path.name),
+            ):
                 print(f"Processing mock file: {data_fp}", flush=True)
 
                 if data_fp.stat().st_size == 0:

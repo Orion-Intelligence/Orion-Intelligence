@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, Subscription } from 'rxjs';
@@ -6,7 +6,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
 import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, NetworkIntelTab, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
-import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -31,7 +31,8 @@ import { NETWORK_INTEL_EXPORT_OPTIONS } from '../../../shared/model/report/expor
 export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
   private seoRepoScanSub?: Subscription;
-  private _intervals: ReturnType<typeof setInterval>[] = [];
+  private vulnerabilityElapsedInterval?: ReturnType<typeof setInterval>;
+  private vulnerabilityCreatedAtMs: number | null = null;
   private readonly dnsIpDetailQueue$ = new Subject<IpRowState>();
   private dnsIpDetailQueueSub?: Subscription;
   private readonly sectionToTab: Record<string, NetworkIntelTab> = { 'host-recon': 'dns', 'deep-scan': 'shodan', 'vulnerability-scan': 'vuln', 'geo-cameras': 'geo', 'seo-scan': 'seo', 'repository-scan': 'repo', };
@@ -54,6 +55,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   vulnerabilityResult: any   = null;
   vulnerabilityTargets: string[] = [];
   vulnerabilityActiveTarget: string | null = null;
+  vulnerabilityElapsedSeconds = signal(0);
   geoIpListResult: DnsResult | null = null;
   geoIpRows:       IpRowState[]     = [];
   geoResult:       GeoResult | null    = null;
@@ -92,10 +94,41 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (typeof elapsed === 'number' && Number.isFinite(elapsed)) {
       return `${elapsed.toFixed(1)}s`;
     }
+    if (this.isScanning() && this.vulnerabilityCreatedAtMs !== null) {
+      const elapsedSeconds = this.vulnerabilityElapsedSeconds();
+      const hours = Math.floor(elapsedSeconds / 3600);
+      const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+      const seconds = elapsedSeconds % 60;
+      const clock = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      return hours ? `${String(hours).padStart(2, '0')}:${clock}` : clock;
+    }
     return '-';
   }
 
-  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private scanner: ScannerService, ) {}
+  constructor( public scanHelper: NetworkIntelScanService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private scanner: ScannerService, ) {
+    effect(() => {
+      const done = this.scanHelper.onDone();
+      if (!done) {
+        return;
+      }
+      if (this.activeTab === 'dns') {
+        this.parseDnsResult();
+      }
+      else if (this.activeTab === 'shodan') {
+        this.parseShodanResult();
+      }
+      else if (this.activeTab === 'vuln' && this.vulnerabilityActiveTarget) {
+        this.startVulnerabilityElapsedTimer(done.scan_created_at || done.result?.scan_created_at);
+        this.parseVulnerabilityResult();
+      }
+      else if (this.activeTab === 'vuln') {
+        this.parseVulnerabilityTargets();
+      }
+      else if (this.activeTab === 'geo') {
+        this.parseGeoResult();
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.scanHelper.resetState();
@@ -152,15 +185,15 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   validateDns(): void {
-    this.formError = this.scanHelper.validateDnsInput(this.dnsForm.domain);
+    this.formError = this.scanHelper.validateDnsInput(this.normalizeDomainInput(this.dnsForm.domain));
   }
 
   validateShodan(): void {
-    this.formError = this.scanHelper.validateShodanInput(this.shodanForm.ip);
+    this.formError = this.scanHelper.validateShodanInput(this.normalizeIpInput(this.shodanForm.ip));
   }
 
   validateVulnerability(): void {
-    this.formError = this.scanHelper.validateVulnerabilityInput(this.vulnForm.ip);
+    this.formError = this.scanHelper.validateVulnerabilityInput(this.normalizeDomainInput(this.vulnForm.ip));
   }
 
   validateGeo(): void {
@@ -168,7 +201,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   validateSeoScan(): void {
-    this.formError = this.scanHelper.validateDnsInput(this.seoRepoScanForm.target);
+    this.formError = this.scanHelper.validateDnsInput(this.normalizeDomainInput(this.seoRepoScanForm.target));
   }
 
   validateRepositoryScan(): void {
@@ -465,6 +498,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   startDnsScan(): void {
+    this.dnsForm.domain = this.normalizeDomainInput(this.dnsForm.domain);
     this.validateDns();
     if (this.formError || !this.dnsForm.domain.trim() || this.isScanning()) {
       return;
@@ -506,11 +540,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
     row.loading = true;
     row.progress = 5;
     row.step = 'queued';
+    row.startedAtMs = Date.now();
     row.error   = null;
     this.enqueueDnsIpDetail(row);
   }
 
   startShodanScan(): void {
+    this.shodanForm.ip = this.normalizeIpInput(this.shodanForm.ip);
     this.validateShodan();
     if (this.formError || !this.shodanForm.ip.trim() || this.isScanning()) {
       return;
@@ -524,6 +560,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   startVulnerabilityScan(): void {
+    this.vulnForm.ip = this.normalizeDomainInput(this.vulnForm.ip);
     this.validateVulnerability();
     if (this.formError || !this.vulnForm.ip.trim() || this.isScanning()) {
       return;
@@ -536,15 +573,30 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.watchResult(this.parseVulnerabilityTargets.bind(this));
   }
 
+  private normalizeDomainInput(value: string): string {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^(?:https:\/\/)?(?:www\.)?([^/?#]+)\/?$/i);
+    return match?.[1] || trimmed;
+  }
+
+  private normalizeIpInput(value: string): string {
+    const trimmed = value.trim();
+    const match = trimmed.match(/^(?:https:\/\/)?([^/?#]+)\/?$/i);
+    return match?.[1] || trimmed;
+  }
+
   startVulnerabilityScanForTarget(target: string, depth: VulnerabilityScanDepth): void {
     const normalizedTarget = target.trim();
-    if (!normalizedTarget || this.isScanning()) {
+    if (!normalizedTarget) {
       return;
     }
     this.vulnForm.ip = normalizedTarget;
     this.validateVulnerability();
     if (this.formError) {
       return;
+    }
+    if (this.isScanning()) {
+      this.cancel();
     }
     this.resetActiveWork();
     this.hasSearched = true;
@@ -553,6 +605,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.lastResultCount = this.vulnerabilityTargets.length;
     this.syncUrl();
     this.sub = this.scanHelper.scanUrlVulnerability(normalizedTarget, depth);
+    this.startVulnerabilityElapsedTimer(Date.now());
     this.watchResult(this.parseVulnerabilityResult.bind(this));
   }
 
@@ -564,6 +617,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.validateRepositoryScan();
     }
     else {
+      this.seoRepoScanForm.target = this.normalizeDomainInput(this.seoRepoScanForm.target);
       this.validateSeoScan();
     }
     if (this.formError || !this.seoRepoScanForm.target.trim() || this.isScanning()) {
@@ -827,16 +881,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private watchResult(fn: () => void): void {
     fn();
-
-    const id = setInterval(() => {
-      fn();
-      if (!this.isScanning()) {
-        fn();
-        clearInterval(id);
-      }
-    }, 200);
-
-    this._intervals.push(id);
   }
 
   private syncUrl(): void {
@@ -861,6 +905,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
   private buildReportPayload(): GraphReportPayload | null {
     if (this.activeTab === 'dns' && this.dnsResult) {
       const now = new Date().toISOString();
+      const completedDetails = this.ipRows.flatMap(row => row.detail ? [row.detail] : []);
+      const scanStatuses = Array.from(new Set(completedDetails
+        .map(detail => this.normalizeReportValue(detail['scan_status'] || detail.status))
+        .filter(Boolean)));
       const nodes = [
         { id: `domain-${this.dnsResult.domain}`, label: this.dnsResult.domain, type: 'domain' },
         ...this.dnsResult.ips.map(ip => ({ id: `ip-${ip}`, label: ip, type: 'ip' as const }))
@@ -882,6 +930,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
         summary: {
           domain: this.dnsResult.domain,
           resolved_ips: this.dnsResult.ips.length,
+          enriched_ips: completedDetails.length,
+          open_ports: completedDetails.reduce((total, detail) => total + (detail.open_ports?.length ?? 0), 0),
+          scan_status: scanStatuses.length ? scanStatuses.join(', ') : 'Not reported',
           exported_at: now
         },
         tables: [
@@ -1286,14 +1337,41 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private resetActiveWork(): void {
-    this._intervals.forEach(clearInterval);
-    this._intervals = [];
+    clearInterval(this.vulnerabilityElapsedInterval);
+    this.vulnerabilityElapsedInterval = undefined;
+    this.vulnerabilityCreatedAtMs = null;
+    this.vulnerabilityElapsedSeconds.set(0);
     this.sub?.unsubscribe();
     this.seoRepoScanSub?.unsubscribe();
     this.sub = undefined;
     this.seoRepoScanSub = undefined;
     this.scanner.cancel();
     this.seoRepoScanLoading.set(false);
+  }
+
+  private startVulnerabilityElapsedTimer(createdAt: string | Date | number | null | undefined): void {
+    if (createdAt) {
+      const timestamp = new Date(typeof createdAt === 'string' && !/(?:Z|[+-]\d{2}:\d{2})$/i.test(createdAt) ? `${createdAt}Z` : createdAt).getTime();
+      if (Number.isFinite(timestamp)) {
+        this.vulnerabilityCreatedAtMs = timestamp;
+      }
+    }
+    if (this.vulnerabilityCreatedAtMs === null) {
+      return;
+    }
+
+    const updateElapsed = () => {
+      this.vulnerabilityElapsedSeconds.set(Math.max(0, Math.floor((Date.now() - this.vulnerabilityCreatedAtMs!) / 1000)));
+    };
+    updateElapsed();
+    this.vulnerabilityElapsedInterval ??= setInterval(() => {
+      if (!this.isScanning()) {
+        clearInterval(this.vulnerabilityElapsedInterval);
+        this.vulnerabilityElapsedInterval = undefined;
+        return;
+      }
+      updateElapsed();
+    }, 1000);
   }
 
   private enqueueDnsIpDetail(row: IpRowState): void {
@@ -1344,7 +1422,16 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private toStringRecord(source: Record<string, unknown> | undefined | null): Record<string, string> {
     const entries = Object.entries(source || {})
-      .map(([key, value]) => [key, this.normalizeReportValue(value)] as [string, string])
+      .map(([key, value]) => {
+        if (key.toLowerCase() === 'unknown' && value && typeof value === 'object' && !Array.isArray(value)) {
+          const nested = value as Record<string, unknown>;
+          const nestedKey = this.normalizeReportValue(nested['key']).replace(/_/g, '-');
+          if (nestedKey) {
+            return [nestedKey, this.normalizeReportValue(nested['value'])] as [string, string];
+          }
+        }
+        return [key, this.normalizeReportValue(value)] as [string, string];
+      })
       .filter(([, value]) => Boolean(value));
 
     if (!entries.length) {
@@ -1358,6 +1445,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     const titlePrefix = prefix ? `${prefix} ` : '';
     const cameraPorts = this.countCameraPorts(detail);
     const iotPorts = this.countIotPorts(detail);
+    const scanPolicy = detail['scan_policy'] as Record<string, any> | undefined;
+    const portScan = scanPolicy?.['port_scan'] as Record<string, any> | undefined;
+    const outcomes = portScan?.['outcomes'] as Record<string, any> | undefined;
+    const serviceDetection = (portScan?.['service_detection'] || scanPolicy?.['service_detection'] || detail['service_detection']) as Record<string, any> | undefined;
+    const httpProbe = detail['http_probe'] as Record<string, any> | undefined;
 
     return [
       {
@@ -1378,6 +1470,19 @@ export class NetworkIntel implements OnInit, OnDestroy {
           'Camera Detected': cameraPorts > 0 || !!detail.is_camera || (detail.cameras?.length ?? 0) > 0 ? 'Yes' : 'No',
           'Camera Ports': cameraPorts ? String(cameraPorts) : '-',
           'IoT Ports': iotPorts ? String(iotPorts) : '-',
+        }
+      },
+      {
+        title: `${titlePrefix}Scan Quality`.trim(),
+        values: {
+          Status: this.normalizeReportValue(detail['scan_status'] || detail.status),
+          'Coverage Complete': this.formatReportBoolean(portScan?.['coverage_complete'] ?? scanPolicy?.['coverage_complete']),
+          Conclusive: this.formatReportBoolean(portScan?.['conclusive'] ?? scanPolicy?.['conclusive']),
+          'Ports Attempted': this.normalizeReportValue(portScan?.['attempted'] ?? scanPolicy?.['ports_attempted']),
+          'Ports Completed': this.normalizeReportValue(portScan?.['completed'] ?? scanPolicy?.['ports_completed']),
+          'Unknown Outcomes': this.normalizeReportValue(outcomes?.['unknown']),
+          'Service Detection': this.normalizeReportValue(serviceDetection?.['completed'] === undefined ? serviceDetection?.['status'] : (serviceDetection?.['completed'] ? 'Complete' : 'Partial')),
+          'HTTP Probe': this.normalizeReportValue(httpProbe?.['status'])
         }
       },
       {
@@ -1499,7 +1604,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     })).filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
 
-  private buildRawJsonTables(source: unknown, title: string, chunkSize = 3500): { title: string; values: Record<string, string> }[] {
+  private buildRawJsonTables(source: unknown, title: string): GraphReportTableRow[] {
     if (source === null || source === undefined) {
       return [];
     }
@@ -1516,17 +1621,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [];
     }
 
-    const tables: { title: string; values: Record<string, string> }[] = [];
-    for (let offset = 0, part = 1; offset < json.length; offset += chunkSize, part += 1) {
-      tables.push({
-        title: `${title} ${part}`.trim(),
-        values: {
-          JSON: json.slice(offset, offset + chunkSize)
-        }
-      });
-    }
-
-    return tables;
+    return [{
+      title: title.trim(),
+      values: { JSON: json },
+      excludeFromPdf: true
+    }];
   }
 
   private truncateReportText(value: unknown, maxLength = 1200): string {
@@ -1569,6 +1668,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [cve, cvss].filter(Boolean).join(' • ');
     }
     return '';
+  }
+
+  private formatReportBoolean(value: unknown): string {
+    if (typeof value === 'boolean') {
+      return value ? 'Yes' : 'No';
+    }
+    return this.normalizeReportValue(value);
   }
 
   private securityItems(sec: string[] | Record<string, boolean> | undefined | null): string[] {

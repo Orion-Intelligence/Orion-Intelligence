@@ -21,6 +21,7 @@ export interface PdfExportTheme {
   tableRowBgRgb: PdfRgb;
   tableRowAltBgRgb: PdfRgb;
   tableBorderRgb: PdfRgb;
+  recordDividerRgb: PdfRgb;
   headerRowFillRgb: PdfRgb;
   firstColumnFillRgb: PdfRgb;
   defaultHeaderRowFillRgb: PdfRgb;
@@ -33,31 +34,32 @@ export interface PdfExportTheme {
 
 export const PDF_EXPORT_THEME: PdfExportTheme = {
   whiteRgb: [255, 255, 255],
-  coverBandRgb: [15, 23, 42],
-  coverSubtitleRgb: [71, 85, 105],
-  coverPanelRgb: [248, 250, 252],
-  coverMetricRgb: [248, 250, 252],
-  coverPanelBorderRgb: [203, 213, 225],
-  coverLabelRgb: [71, 85, 105],
-  dividerRgb: [14, 116, 144],
-  headerAccentRgb: [14, 116, 144],
-  sectionHeaderRgb: [15, 76, 129],
-  headerBackgroundRgb: [248, 250, 252],
-  textPrimaryRgb: [15, 23, 42],
-  textBodyRgb: [30, 41, 59],
-  textSecondaryRgb: [71, 85, 105],
-  textMutedRgb: [100, 116, 139],
-  footerTextRgb: [51, 65, 85],
-  softTextRgb: [226, 232, 240],
+  coverBandRgb: [21, 40, 63],
+  coverSubtitleRgb: [102, 115, 132],
+  coverPanelRgb: [255, 255, 255],
+  coverMetricRgb: [247, 247, 248],
+  coverPanelBorderRgb: [205, 212, 220],
+  coverLabelRgb: [102, 115, 132],
+  dividerRgb: [165, 35, 54],
+  headerAccentRgb: [165, 35, 54],
+  sectionHeaderRgb: [165, 35, 54],
+  headerBackgroundRgb: [255, 255, 255],
+  textPrimaryRgb: [21, 40, 63],
+  textBodyRgb: [37, 49, 66],
+  textSecondaryRgb: [102, 115, 132],
+  textMutedRgb: [102, 115, 132],
+  footerTextRgb: [91, 102, 117],
+  softTextRgb: [205, 212, 220],
   tableRowBgRgb: [255, 255, 255],
-  tableRowAltBgRgb: [248, 250, 252],
-  tableBorderRgb: [226, 232, 240],
-  headerRowFillRgb: [226, 232, 240],
-  firstColumnFillRgb: [248, 250, 252],
-  defaultHeaderRowFillRgb: [226, 232, 240],
-  defaultFirstColumnFillRgb: [248, 250, 252],
-  mediumBorderRgb: [203, 213, 225],
-  backgroundPatternRgb: [248, 250, 252],
-  sectionRadius: 5,
-  tableBorderWidth: 0.35
+  tableRowAltBgRgb: [255, 255, 255],
+  tableBorderRgb: [205, 212, 220],
+  recordDividerRgb: [222, 227, 232],
+  headerRowFillRgb: [247, 247, 248],
+  firstColumnFillRgb: [255, 255, 255],
+  defaultHeaderRowFillRgb: [247, 247, 248],
+  defaultFirstColumnFillRgb: [255, 255, 255],
+  mediumBorderRgb: [205, 212, 220],
+  backgroundPatternRgb: [255, 255, 255],
+  sectionRadius: 0,
+  tableBorderWidth: 0.4
 };

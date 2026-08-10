@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, SimpleChanges, effect, input, output } from '@angular/core';
+import { Component, OnDestroy, SimpleChanges, effect, input, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { vulnerabilityContentMotion } from '../../../../shared/animations/vulnerability.content.motion.animation';
 import { DnsResult, IpRowState } from '../../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
@@ -12,9 +13,16 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './dns-section.component.html',
-  animations: [fadeInDashboardItem],
+  animations: [fadeInDashboardItem, vulnerabilityContentMotion],
 })
-export class DnsSectionComponent {
+export class DnsSectionComponent implements OnDestroy {
+  private readonly elapsedNowMs = signal(Date.now());
+  private readonly elapsedClockInterval = setInterval(() => {
+    if (this.ipRows.some(row => row.loading)) {
+      this.elapsedNowMs.set(Date.now());
+    }
+  }, 1000);
+
   readonly errorMessageInput = input<string | null>(null, { alias: 'errorMessage' });
   readonly ipRowsInput = input<IpRowState[]>([], { alias: 'ipRows' });
   readonly pageSize = 500;
@@ -49,6 +57,28 @@ export class DnsSectionComponent {
     return this.ui.getLoadingStepLabel(this.currentStep());
   }
 
+  getRowLoadingStepLabel(row: IpRowState): string {
+    return this.ui.getLoadingStepLabel(row.step || `Loading details for ${row.ip}...`);
+  }
+
+  getRowProgressValue(row: IpRowState): number {
+    return this.ui.getProgressValue(row.progress);
+  }
+
+  getRowElapsedLabel(row: IpRowState): string {
+    const now = this.elapsedNowMs();
+    const startedAtMs = Number(row.startedAtMs);
+    if (!Number.isFinite(startedAtMs) || startedAtMs <= 0) {
+      return '00:00';
+    }
+    const elapsedSeconds = Math.max(0, Math.floor((now - startedAtMs) / 1000));
+    const hours = Math.floor(elapsedSeconds / 3600);
+    const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+    const seconds = elapsedSeconds % 60;
+    const clock = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    return hours ? `${String(hours).padStart(2, '0')}:${clock}` : clock;
+  }
+
   get showLoadingSkeleton(): boolean {
     return this.ui.shouldShowLoadingSkeleton(this.hasSearched(), this.dnsResult(), this.errorMessage, this.isScanning(), this.progress());
   }
@@ -63,6 +93,18 @@ export class DnsSectionComponent {
 
   trackByIp(_: number, row: IpRowState): string {
     return row.ip;
+  }
+
+  onRowKeydown(event: KeyboardEvent, row: IpRowState): void {
+    if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) {
+      return;
+    }
+    event.preventDefault();
+    this.toggleRow.emit(row);
+  }
+
+  ngOnDestroy(): void {
+    clearInterval(this.elapsedClockInterval);
   }
 
   ngOnChanges(changes: SimpleChanges): void {

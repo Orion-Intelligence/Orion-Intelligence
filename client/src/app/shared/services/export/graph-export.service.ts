@@ -1,11 +1,13 @@
 import { inject, Injectable } from '@angular/core';
 import type jsPDF from 'jspdf';
 import type { RowInput } from 'jspdf-autotable';
-import { forkJoin, from, Observable } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { map, shareReplay, tap } from 'rxjs/operators';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 import { ExportBrandingService } from './export-branding.service';
 import { buildExportFileStem } from './export-filename.util';
+import { drawInstitutionalContentTitle, drawInstitutionalCover, drawInstitutionalFooter, drawInstitutionalPageHeader, drawInstitutionalSectionHeading, PDF_EXPORT_LAYOUT } from './pdf-export-layout';
+import { loadPdfExportFontData, PdfExportFontData, registerPdfExportFonts } from './pdf-export-fonts';
 import { PDF_EXPORT_THEME } from './pdf-export-theme';
 import { normalizePdfText, preparePdfValue } from './pdf-text.util';
 
@@ -29,31 +31,36 @@ interface PlainTableThemeConfig {
     overflow?: 'linebreak';
     valign?: 'middle' | 'top';
     textColor: [number, number, number];
-    lineWidth: number;
+    lineWidth: number | { top: number; right: number; bottom: number; left: number; };
     lineColor: [number, number, number];
   };
   bodyStyles: {
     fillColor: [number, number, number];
     textColor?: [number, number, number];
-    lineWidth: number;
+    lineWidth: number | { top: number; right: number; bottom: number; left: number; };
     lineColor: [number, number, number];
   };
   alternateRowStyles: {
     fillColor: [number, number, number];
-    lineWidth: number;
+    lineWidth: number | { top: number; right: number; bottom: number; left: number; };
     lineColor: [number, number, number];
   };
   theme: 'plain';
 }
 
+interface PdfExportLibraries {
+  autoTable: typeof import('jspdf-autotable').default;
+  fontData: PdfExportFontData | null;
+  jsPDF: typeof import('jspdf').default;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
-  private pdfLibs$: Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> | null = null;
+  private pdfLibs$: Observable<PdfExportLibraries> | null = null;
   private loadedAutoTable: unknown = null;
 
   protected readonly exportBranding = inject(ExportBrandingService);
   protected readonly PDF_THEME = PDF_EXPORT_THEME;
-  protected readonly SECTION_RADIUS = PDF_EXPORT_THEME.sectionRadius;
   protected readonly INTERNAL_HEADER_RGB = PDF_EXPORT_THEME.sectionHeaderRgb;
   protected readonly TABLE_ROW_BG_RGB = PDF_EXPORT_THEME.tableRowBgRgb;
   protected readonly TABLE_ROW_ALT_BG_RGB = PDF_EXPORT_THEME.tableRowAltBgRgb;
@@ -75,16 +82,21 @@ export class GraphExportService {
     this.exportGraphPdf(payload);
   }
 
-  protected getPdfLibs(): Observable<{ jsPDF: typeof import('jspdf').default; autoTable: typeof import('jspdf-autotable').default; }> {
+  protected getPdfLibs(): Observable<PdfExportLibraries> {
     if (!this.pdfLibs$) {
       this.pdfLibs$ = from(Promise.all([
         import('jspdf'),
-        import('jspdf-autotable')
-      ])).pipe(tap(([_, autoTableModule]) => {
+        import('jspdf-autotable'),
+        loadPdfExportFontData()
+      ])).pipe(tap(([_, autoTableModule, fontData]) => {
         this.loadedAutoTable = autoTableModule.default;
-      }), map(([jspdfModule, autoTableModule]) => ({
+        if (!fontData) {
+          this.pdfLibs$ = null;
+        }
+      }), map(([jspdfModule, autoTableModule, fontData]) => ({
         jsPDF: jspdfModule.default,
-        autoTable: autoTableModule.default
+        autoTable: autoTableModule.default,
+        fontData
       })), shareReplay(1));
     }
     return this.pdfLibs$;
@@ -98,11 +110,8 @@ export class GraphExportService {
   }
 
   private exportGraphPdf(payload: GraphReportPayload): void {
-    forkJoin({
-      libs: this.getPdfLibs(),
-      tenantLogoDataUrl: from(this.exportBranding.loadTenantLogoDataUrl())
-    }).subscribe(({ libs, tenantLogoDataUrl }) => {
-      const bytes = this.buildGraphPdfBytes(this.preparePayloadForPdf(payload), libs.jsPDF, libs.autoTable, tenantLogoDataUrl);
+    this.getPdfLibs().subscribe(libs => {
+      const bytes = this.buildGraphPdfBytes(this.preparePayloadForPdf(payload), libs.jsPDF, libs.autoTable, null, libs.fontData);
       this.downloadBinary(bytes, 'application/pdf', `${this.buildSafeFilename(payload)}-graph-report.pdf`);
     });
   }
@@ -127,15 +136,18 @@ export class GraphExportService {
     return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   }
 
-  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null = null): Uint8Array {
-    const doc = new JsPdfCtor({ orientation: 'landscape', unit: 'pt', format: 'a4', compress: true });
+  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null = null, fontData: PdfExportFontData | null = null): Uint8Array {
+    const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
+    registerPdfExportFonts(doc, fontData);
     const meta = this.makeMeta(payload, tenantLogoDataUrl);
     this.applyPdfDocumentProperties(doc, payload, meta);
-    const sectionsByPage: Record<number, string> = { 1: 'Overview' };
+    const sectionsByPage: Record<number, string> = { 1: 'Cover', 2: 'Document Control and Contents' };
     this.drawGraphCover(doc, payload, meta);
+    doc.addPage();
+    let graphPageNo: number | null = null;
     if (this.isJpegDataUrl(payload.graphImageDataUrl)) {
       doc.addPage();
-      const graphPageNo = doc.getCurrentPageInfo().pageNumber;
+      graphPageNo = doc.getCurrentPageInfo().pageNumber;
       sectionsByPage[graphPageNo] = 'Graph Snapshot';
       this.drawGraphSnapshot(doc, payload);
     }
@@ -144,12 +156,13 @@ export class GraphExportService {
     sectionsByPage[analysisPageNo] = 'Graph Analysis';
     this.drawGraphAnalysisHeader(doc, payload, meta);
     const pageW = doc.internal.pageSize.getWidth();
-    const contentW = pageW - 80;
+    const margin = PDF_EXPORT_LAYOUT.margin;
+    const contentW = pageW - (margin * 2);
     const composition = this.buildTypeComposition(payload.nodes);
     const kpiTop = 122;
     const kpiH = 78;
-    const gap = 12;
-    const kpiW = (contentW - (gap * 3)) / 4;
+    const gap = 0;
+    const kpiW = contentW / 4;
     const kpis = [
       { label: 'Nodes', value: String(payload.nodes.length) },
       { label: 'Edges', value: String(payload.edges.length) },
@@ -157,13 +170,14 @@ export class GraphExportService {
       { label: 'Context', value: this.truncateWithEllipsis(this.getReportContext(payload), 15) }
     ];
     kpis.forEach((kpi, idx) => {
-      this.drawKpiCard(doc, 40 + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value); 
+      this.drawKpiCard(doc, margin + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value, idx === 0, idx === kpis.length - 1);
     });
     const analysisDidDrawPage = (data: any) => {
-      sectionsByPage[data.pageNumber] = 'Graph Analysis';
+      const pageNo = (data.doc as jsPDF).getCurrentPageInfo().pageNumber;
+      sectionsByPage[pageNo] = 'Graph Analysis';
     };
     const analysisTableBase = {
-      margin: { left: 40, right: 40, bottom: 58 },
+      margin: { left: margin, right: margin, bottom: 58 },
       tableWidth: contentW,
       ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6 }),
       didDrawPage: analysisDidDrawPage
@@ -176,15 +190,19 @@ export class GraphExportService {
       didParseCell: this.makeFirstColumnDidParse(),
       ...analysisTableBase
     });
-    this.drawRoundedTableContainer(doc, 40, contentW, 220, (doc as any).lastAutoTable?.finalY ?? 220);
-    const compositionMarkerY = (doc as any).lastAutoTable.finalY + 12;
+    this.drawRoundedTableContainer(doc, margin, contentW, 220, (doc as any).lastAutoTable?.finalY ?? 220);
+    const compositionMarkerY = this.resolveMarkerY(doc, (doc as any).lastAutoTable.finalY + 12, 126, () => {
+      const pageNo = doc.getCurrentPageInfo().pageNumber;
+      sectionsByPage[pageNo] = 'Graph Analysis';
+      this.drawGraphAnalysisHeader(doc, payload, meta);
+    }, 70);
     this.drawInfoSectionMarker(doc, compositionMarkerY, contentW, 'Node Type Distribution');
     this.requireAutoTable()(doc, {
       startY: compositionMarkerY + 12,
       body: composition.map(x => [x.type, String(x.count)]) as RowInput[],
       ...analysisTableBase
     });
-    this.drawRoundedTableContainer(doc, 40, contentW, (doc as any).lastAutoTable?.startY ?? 232, (doc as any).lastAutoTable?.finalY ?? 232);
+    this.drawRoundedTableContainer(doc, margin, contentW, (doc as any).lastAutoTable?.startY ?? 232, (doc as any).lastAutoTable?.finalY ?? 232);
     const socialPlatformCounts = this.extractSocialPlatformCounts(payload);
     let platformPageNo: number | null = null;
     if (payload.graphKind === 'social' && socialPlatformCounts.length > 0) {
@@ -195,14 +213,16 @@ export class GraphExportService {
       this.drawInfoSectionMarker(doc, 126, contentW, 'Platform Inventory');
       this.requireAutoTable()(doc, {
         startY: 138,
-        margin: { top: 126, left: 40, right: 40, bottom: 58 },
+        margin: { top: 126, left: margin, right: margin, bottom: 58 },
         tableWidth: contentW,
-        body: [['#', 'Platform', 'Node Count'], ...socialPlatformCounts.map((item, i) => [String(i + 1), item.name, String(item.count)])] as RowInput[],
+        head: [['#', 'Platform', 'Node Count']] as RowInput[],
+        body: socialPlatformCounts.map((item, i) => [String(i + 1), item.name, String(item.count)]) as RowInput[],
+        showHead: 'everyPage',
         ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6, valign: 'top' }),
-        didParseCell: this.makeHeaderRowDidParse(),
-        didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Platform Inventory', 'Detected social platforms in current graph')
+        didParseCell: this.makeHeaderRowDidParse(this.PDF_THEME.defaultHeaderRowFillRgb, false),
+        didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Platform Inventory', 'Detected social platforms in current graph', platformPageNo)
       });
-      this.drawRoundedTableContainer(doc, 40, contentW, 126, (doc as any).lastAutoTable?.finalY ?? 126);
+      this.drawRoundedTableContainer(doc, margin, contentW, 126, (doc as any).lastAutoTable?.finalY ?? 126);
     }
     let reportsPageNo: number | null = null;
     if (payload.tables?.length) {
@@ -222,32 +242,40 @@ export class GraphExportService {
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
         const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
         const reportSectionDidDrawPage = (data: any) => {
-          this.makeSectionHeaderCallback(sectionsByPage, 'Report Sections', 'Metadata, screenshot, and related reports')(data);
-          const pageNo = data?.pageNumber ?? (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? sectionStartPage;
+          const drawDoc = data.doc as jsPDF;
+          const pageNo = drawDoc.getCurrentPageInfo().pageNumber;
+          sectionsByPage[pageNo] = 'Report Sections';
           if (pageNo !== sectionStartPage) {
-            this.drawInfoSectionMarker(data.doc as jsPDF, 126, contentW, sectionTitle || 'Info');
+            this.drawConnectionMatrixHeader(drawDoc, 'Report Sections', 'Metadata, screenshot, and related reports');
+            this.drawInfoSectionMarker(drawDoc, 126, contentW, sectionTitle || 'Info');
           }
         };
         autoTable(doc, {
           startY: markerY + 12,
-          margin: { top: 139, left: 40, right: 40, bottom: 58 },
+          margin: { top: 139, left: margin, right: margin, bottom: 58 },
           tableWidth: contentW,
-          body: tableRows as RowInput[],
+          head: [tableRows[0]] as RowInput[],
+          body: tableRows.slice(1) as RowInput[],
+          showHead: 'everyPage',
           ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6 }),
           columnStyles: { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
-          didParseCell: this.makeHeaderAndFirstColumnDidParse(),
+          didParseCell: this.makeHeaderAndFirstColumnDidParse(this.PDF_THEME.defaultHeaderRowFillRgb, this.PDF_THEME.defaultFirstColumnFillRgb, false),
           didDrawPage: reportSectionDidDrawPage
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
         if (screenshotDataUrl) {
           const lastY = (doc as any).lastAutoTable?.finalY ?? (markerY + 12);
-          const imageY = this.resolveMarkerY(doc, lastY + 10, 126, () => {
+          const previewHeight = this.getScreenshotPreviewHeight(doc, screenshotDataUrl, contentW, 190);
+          const imageY = this.resolveMarkerY(doc, lastY + 10, 142, () => {
             const pageNo = doc.getCurrentPageInfo().pageNumber;
             sectionsByPage[pageNo] = 'Report Sections';
             this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
             this.drawInfoSectionMarker(doc, 126, contentW, sectionTitle);
-          });
-          this.drawScreenshotPreview(doc, screenshotDataUrl, 40, imageY, contentW, 190);
+          }, previewHeight);
+          const imageBottom = this.drawScreenshotPreview(doc, screenshotDataUrl, margin, imageY, contentW, 190);
+          if ((doc as any).lastAutoTable) {
+            (doc as any).lastAutoTable.finalY = imageBottom;
+          }
         }
       });
     }
@@ -258,22 +286,24 @@ export class GraphExportService {
     this.drawInfoSectionMarker(doc, 126, contentW, 'Connection Matrix');
     this.requireAutoTable()(doc, {
       startY: 138,
-      margin: { top: 126, left: 40, right: 40, bottom: 58 },
+      margin: { top: 126, left: margin, right: margin, bottom: 58 },
       tableWidth: contentW,
-      body: [['#', 'From', 'To', 'Label'], ...payload.edges.slice(0, 240).map((e, i) => [
+      head: [['#', 'From', 'To', 'Label']] as RowInput[],
+      body: payload.edges.slice(0, 240).map((e, i) => [
         String(i + 1),
         preparePdfValue(e.from),
         preparePdfValue(e.to),
         preparePdfValue(e.label ?? '')
-      ])] as RowInput[],
+      ]) as RowInput[],
+      showHead: 'everyPage',
       ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5 }),
-      didParseCell: this.makeHeaderRowDidParse(),
-      didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Connection Matrix', 'Relationship listing from current graph state')
+      didParseCell: this.makeHeaderRowDidParse(this.PDF_THEME.defaultHeaderRowFillRgb, false),
+      didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Connection Matrix', 'Relationship listing from current graph state', edgesPageNo)
     });
     const totalPages = doc.getNumberOfPages();
-    this.drawGraphToc(doc, payload, {
-      graphPage: this.isJpegDataUrl(payload.graphImageDataUrl) ? 2 : null,
-      analysisPage: this.isJpegDataUrl(payload.graphImageDataUrl) ? 3 : 2,
+    this.drawGraphToc(doc, payload, meta, {
+      graphPage: graphPageNo,
+      analysisPage: this.isJpegDataUrl(payload.graphImageDataUrl) ? 4 : 3,
       platformPage: platformPageNo,
       reportsPage: reportsPageNo,
       edgesPage: edgesPageNo
@@ -282,66 +312,64 @@ export class GraphExportService {
       doc.setPage(page);
       if (page !== 1) {
         this.drawGraphChrome(doc, payload, meta, sectionsByPage[page] ?? 'Details');
+        this.drawGraphFooter(doc, payload, meta, page - 1, totalPages - 1, sectionsByPage[page] ?? 'Details');
       }
-      this.drawGraphFooter(doc, payload, meta, page, totalPages);
     }
     return this.docToBytes(doc);
   }
 
   private drawGraphCover(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta): void {
     this.drawReportBackgroundPattern(doc);
-    const W = this.getPageW(doc);
-    doc.setFillColor(...this.PDF_THEME.headerAccentRgb);
-    doc.rect(0, 0, W, 5, 'F');
-    doc.setFillColor(...this.PDF_THEME.coverBandRgb);
-    doc.rect(0, 0, 12, 168, 'F');
-    doc.setFillColor(...this.PDF_THEME.headerBackgroundRgb);
-    doc.rect(12, 5, W - 12, 163, 'F');
-    doc.setFillColor(...this.PDF_THEME.headerRowFillRgb);
-    doc.roundedRect(40, 24, 124, 20, 5, 5, 'F');
-    doc.setTextColor(...this.PDF_THEME.sectionHeaderRgb);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.text('GRAPH INTELLIGENCE', 52, 37);
-    doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(26);
-    doc.text(this.fitSingleLine(doc, payload.title || 'Graph Intelligence Report', W - 300), 40, 79);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...this.PDF_THEME.textSecondaryRgb);
-    doc.text(`${meta.kindLabel} | Relationship and structural analysis`, 40, 101);
-    doc.setFillColor(...this.PDF_THEME.whiteRgb);
-    doc.setDrawColor(...this.PDF_THEME.coverPanelBorderRgb);
-    doc.roundedRect(40, 116, W - 80, 34, 5, 5, 'FD');
-    doc.setFontSize(8);
-    doc.setTextColor(...this.PDF_THEME.textMutedRgb);
-    doc.text('CONTEXT', 52, 130);
-    doc.text('GENERATED', W - 230, 130);
-    doc.setFontSize(9);
-    doc.setTextColor(...this.PDF_THEME.textBodyRgb);
-    doc.text(this.fitSingleLine(doc, this.getReportContext(payload), W - 330), 52, 143);
-    doc.text(this.fitSingleLine(doc, meta.generatedAt, 178), W - 230, 143);
-    this.drawTenantBrand(doc, meta, W - 40, 24, 150, 30, this.PDF_THEME.textPrimaryRgb);
+    drawInstitutionalCover(doc, {
+      title: payload.title || 'Graph Intelligence Report',
+      subtitle: `${meta.kindLabel} relationship and structural analysis`,
+      reportFamily: 'Graph Intelligence Review',
+      preparedFor: meta.tenantName,
+      generatedAt: meta.generatedAt,
+      context: this.getReportContext(payload),
+      lead: 'A structured view of entities, relationships, evidence, and supporting network intelligence.',
+      sections: [
+        this.isJpegDataUrl(payload.graphImageDataUrl) ? 'Graph Snapshot' : 'Document Control and Contents',
+        'Graph Analysis',
+        'Connection Matrix'
+      ]
+    });
   }
 
-  private drawGraphToc( doc: jsPDF, payload: GraphReportPayload, pages: { graphPage: number | null; analysisPage: number; platformPage: number | null; reportsPage: number | null; edgesPage: number; } ): void {
-    doc.setPage(1);
+  private drawGraphToc( doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, pages: { graphPage: number | null; analysisPage: number; platformPage: number | null; reportsPage: number | null; edgesPage: number; } ): void {
+    doc.setPage(2);
+    this.drawReportBackgroundPattern(doc);
     const W = this.getPageW(doc);
-    doc.setDrawColor(...this.PDF_THEME.softTextRgb);
-    doc.setLineWidth(0.8);
-    doc.line(40, 190, W - 40, 190);
-    doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text('Report Sections', 40, 220);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.setTextColor(...this.PDF_THEME.textMutedRgb);
-    doc.text('Click any section to jump directly to that page.', 40, 230);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.setTextColor(...this.PDF_THEME.headerAccentRgb);
+    const margin = PDF_EXPORT_LAYOUT.margin;
+    const contentW = W - (margin * 2);
+    drawInstitutionalContentTitle(doc, 'Document Control and Contents', 'Report governance and navigation');
+
+    const metadata = [
+      ['PREPARED FOR', meta.tenantName],
+      ['REPORT TYPE', meta.kindLabel],
+      ['CONTEXT', this.getReportContext(payload)],
+      ['GENERATED', meta.generatedAt]
+    ];
+    const metadataTop = 136;
+    const metadataColumnWidth = (contentW - 28) / 2;
+    metadata.forEach(([label, value], index) => {
+      const column = index % 2;
+      const row = Math.floor(index / 2);
+      const x = margin + (column * (metadataColumnWidth + 28));
+      const y = metadataTop + (row * 48);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.2);
+      doc.setTextColor(...this.PDF_THEME.textMutedRgb);
+      doc.text(label, x, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
+      doc.text(this.fitSingleLine(doc, value, metadataColumnWidth), x, y + 18);
+      doc.setDrawColor(...this.PDF_THEME.coverPanelBorderRgb);
+      doc.setLineWidth(0.45);
+      doc.line(x, y + 28, x + metadataColumnWidth, y + 28);
+    });
+
     const sectionItems: {
             label: string;
             page: number;
@@ -349,7 +377,7 @@ export class GraphExportService {
     if (pages.graphPage) {
       sectionItems.push({ label: 'Graph Snapshot', page: pages.graphPage });
     }
-    sectionItems.push({ label: 'Structural Analysis', page: pages.analysisPage });
+    sectionItems.push({ label: 'Graph Analysis', page: pages.analysisPage });
     if (pages.platformPage) {
       sectionItems.push({ label: 'Platform Inventory', page: pages.platformPage });
     }
@@ -358,78 +386,64 @@ export class GraphExportService {
     }
     sectionItems.push({ label: 'Connection Matrix', page: pages.edgesPage });
 
-    const tocX = 40;
-    const tocY = 252;
-    const tocW = W - 80;
-    const rowH = 20;
-    const pageColW = 72;
+    const tocX = margin;
+    const tocY = 259;
+    const tocW = contentW;
+    const rowH = 26;
+    const pageColW = 64;
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.setTextColor(...this.PDF_THEME.textMutedRgb);
-    doc.text('Section', tocX, tocY - 6);
-    doc.text('Page', tocX + tocW - pageColW, tocY - 6);
-    doc.setDrawColor(...this.PDF_THEME.softTextRgb);
-    doc.setLineWidth(0.45);
+    doc.setFontSize(7.4);
+    doc.setTextColor(...this.PDF_THEME.headerAccentRgb);
+    doc.text('REPORT CONTENTS', tocX, tocY - 12);
+    doc.setDrawColor(...this.PDF_THEME.textPrimaryRgb);
+    doc.setLineWidth(0.8);
+    doc.line(tocX, tocY - 3, tocX + tocW, tocY - 3);
     sectionItems.forEach((item, index) => {
       const rowTop = tocY + (index * rowH);
-      const baselineY = rowTop + 13;
+      const baselineY = rowTop + 17;
       const rowLabel = item.label;
-      const labelX = tocX;
+      const labelX = tocX + 40;
       const pageX = tocX + tocW - pageColW;
-      doc.setDrawColor(...this.PDF_THEME.softTextRgb);
+      doc.setDrawColor(...this.PDF_THEME.coverPanelBorderRgb);
       doc.line(tocX, rowTop + rowH, tocX + tocW, rowTop + rowH);
       doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(...this.PDF_THEME.textBodyRgb);
-      const labelText = this.fitSingleLine(doc, rowLabel, tocW - pageColW - 12);
-      doc.text(labelText, labelX, baselineY);
-      doc.link(labelX, rowTop + 2, tocW - pageColW - 4, rowH - 4, { pageNumber: item.page });
-
-      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
       doc.setTextColor(...this.PDF_THEME.headerAccentRgb);
-      const pageText = `Page ${String(item.page).padStart(2, '0')}`;
-      doc.text(pageText, pageX, baselineY);
+      doc.text(String(index + 1).padStart(2, '0'), tocX, baselineY);
+      doc.setFontSize(9.5);
+      doc.setTextColor(...this.PDF_THEME.textBodyRgb);
+      const labelText = this.fitSingleLine(doc, rowLabel, tocW - pageColW - 52);
+      doc.text(labelText, labelX, baselineY);
+      doc.link(tocX, rowTop + 2, tocW - pageColW, rowH - 4, { pageNumber: item.page });
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(...this.PDF_THEME.headerAccentRgb);
+      const pageText = `Page ${String(item.page - 1).padStart(2, '0')}`;
+      doc.text(pageText, pageX + pageColW, baselineY, { align: 'right' });
       doc.link(pageX, rowTop + 2, pageColW, rowH - 4, { pageNumber: item.page });
     });
-    const composition = this.buildTypeComposition(payload.nodes).slice(0, 7);
-    const compositionStartY = tocY + (sectionItems.length * rowH) + 24;
-    this.drawInfoSectionMarker(doc, compositionStartY, W - 80, 'Top Node Types');
-    this.requireAutoTable()(doc, {
-      startY: compositionStartY + 12,
-      margin: { left: 40, right: 40 },
-      tableWidth: W - 80,
-      body: [['Type', 'Count'], ...composition.map(item => [item.type, String(item.count)])] as RowInput[],
-      ...this.buildPlainTableTheme({ font: 'helvetica', fontSize: 9, cellPadding: 5, overflow: undefined }),
-      didParseCell: this.makeHeaderRowDidParse()
-    });
-    this.drawRoundedTableContainer(doc, 40, W - 80, compositionStartY, (doc as any).lastAutoTable?.finalY ?? compositionStartY);
-    if (payload.graphKind === 'social') {
-      const platformCounts = this.extractSocialPlatformCounts(payload);
-      const platformMarkerY = (doc as any).lastAutoTable.finalY + 10;
-      this.drawInfoSectionMarker(doc, platformMarkerY, W - 80, `Found Social Platforms (${platformCounts.length})`);
-      this.requireAutoTable()(doc, {
-        startY: platformMarkerY + 12,
-        margin: { left: 40, right: 40 },
-        tableWidth: W - 80,
-        body: [['Platform', 'Count'], ...platformCounts.slice(0, 12).map(item => [item.name, String(item.count)])] as RowInput[],
-        ...this.buildPlainTableTheme({ font: 'helvetica', fontSize: 9, cellPadding: 5, overflow: undefined }),
-        didParseCell: this.makeHeaderRowDidParse()
-      });
-      this.drawRoundedTableContainer(doc, 40, W - 80, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
-    }
+
+    const treatmentY = tocY + (sectionItems.length * rowH) + 34;
+    doc.setDrawColor(...this.PDF_THEME.headerAccentRgb);
+    doc.setLineWidth(2);
+    doc.line(tocX, treatmentY, tocX, treatmentY + 37);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
+    doc.text('Source treatment.', tocX + 14, treatmentY + 11);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(...this.PDF_THEME.textBodyRgb);
+    const treatment = 'This report preserves the supplied graph context and separates observed evidence from generated analysis.';
+    doc.text(doc.splitTextToSize(treatment, contentW - 14), tocX + 14, treatmentY + 25, { lineHeightFactor: 1.25 });
   }
 
   private drawGraphSnapshot(doc: jsPDF, payload: GraphReportPayload): void {
     this.drawReportBackgroundPattern(doc);
-    doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.text('Expanded Graph View', 40, 88);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...this.PDF_THEME.textSecondaryRgb);
-    doc.text('Snapshot captured from the rendered graph canvas at export time.', 40, 104);
-    const fit = this.fitRectToPage(doc, 40, 146, 40, 122);
+    drawInstitutionalContentTitle(doc, 'Expanded Graph View', 'Rendered graph snapshot at export time');
+    const margin = PDF_EXPORT_LAYOUT.margin;
+    const fit = this.fitRectToPage(doc, margin, 136, margin, 80);
     const img = doc.getImageProperties(payload.graphImageDataUrl!);
     let imgW = fit.w;
     let imgH = (imgW * img.height) / img.width;
@@ -449,52 +463,37 @@ export class GraphExportService {
     doc.addImage(payload.graphImageDataUrl!, 'JPEG', drawX, drawY, imgW, imgH, undefined, 'FAST');
     doc.setFontSize(8);
     doc.setTextColor(...this.PDF_THEME.textMutedRgb);
-    doc.text(`Nodes: ${payload.nodes.length}   Edges: ${payload.edges.length}`, 40, this.getPageH(doc) - 56);
+    doc.text(`Nodes: ${payload.nodes.length}   Edges: ${payload.edges.length}`, margin, this.getPageH(doc) - 56);
   }
 
   private drawGraphAnalysisHeader(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta): void {
     this.drawReportBackgroundPattern(doc);
-    const W = this.drawDarkTopBand(doc, 30, true);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(...this.PDF_THEME.whiteRgb);
-    doc.text('Graph Analysis', 56, 104);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...this.PDF_THEME.softTextRgb);
     const compactContext = this.truncateWithEllipsis(this.compactSession(this.getReportContext(payload)), 15);
-    const subtitle = this.fitSingleLineStrict(doc, `${meta.kindLabel} | Context: ${compactContext}`, 250, 48, 0.84);
-    this.drawClippedText(doc, subtitle, W - 56, 104, 56, 84, W - 112, 30, 'right');
+    drawInstitutionalContentTitle(doc, 'Graph Analysis', `${meta.kindLabel} / Context: ${compactContext}`);
   }
 
   private drawConnectionMatrixHeader(doc: jsPDF, title: string, subtitle: string): void {
-    const W = this.getPageW(doc);
-    doc.setFillColor(...this.INTERNAL_HEADER_RGB);
-    doc.roundedRect(40, 84, W - 80, 30, this.SECTION_RADIUS, this.SECTION_RADIUS, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.setTextColor(...this.PDF_THEME.whiteRgb);
-    doc.text(title, 56, 104);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...this.PDF_THEME.softTextRgb);
-    this.drawClippedText(doc, this.fitSingleLineStrict(doc, subtitle, 260, 58, 0.86), W - 56, 104, 56, 84, W - 112, 30, 'right');
+    drawInstitutionalContentTitle(doc, title, subtitle);
   }
 
-  private drawGraphChrome(doc: jsPDF, payload: GraphReportPayload, _meta: GraphReportMeta, section: string): void {
-    this.drawStandardPageHeader(doc, payload.title || 'Graph Report', section, 56);
+  private drawGraphChrome(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, section: string): void {
+    drawInstitutionalPageHeader(doc, {
+      tenantName: meta.tenantName,
+      reportFamily: payload.title || meta.kindLabel,
+      section
+    });
   }
 
-  private drawGraphFooter(doc: jsPDF, payload: GraphReportPayload, meta: GraphReportMeta, pageNo: number, totalPages: number): void {
-    this.drawStandardFooter(doc, this.getReportContext(payload), meta, pageNo, totalPages, 40, 24);
+  private drawGraphFooter(doc: jsPDF, _payload: GraphReportPayload, meta: GraphReportMeta, pageNo: number, totalPages: number, section: string): void {
+    drawInstitutionalFooter(doc, { tenantName: meta.tenantName, section, pageNo, totalPages });
   }
 
   protected buildPlainTableTheme(options: PlainTableThemeOptions): PlainTableThemeConfig {
     const styles: PlainTableThemeConfig['styles'] = {
       fontSize: options.fontSize,
       cellPadding: options.cellPadding,
-      textColor: options.textColor ?? [30, 41, 59],
-      lineWidth: this.TABLE_BORDER_WIDTH,
+      textColor: options.textColor ?? this.PDF_THEME.textBodyRgb,
+      lineWidth: { top: 0, right: 0, bottom: this.TABLE_BORDER_WIDTH, left: 0 },
       lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.font) {
@@ -509,7 +508,7 @@ export class GraphExportService {
 
     const bodyStyles: PlainTableThemeConfig['bodyStyles'] = {
       fillColor: options.rowFillColor ?? this.TABLE_ROW_BG_RGB,
-      lineWidth: this.TABLE_BORDER_WIDTH,
+      lineWidth: { top: 0, right: 0, bottom: this.TABLE_BORDER_WIDTH, left: 0 },
       lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.textColor) {
@@ -521,18 +520,21 @@ export class GraphExportService {
       bodyStyles,
       alternateRowStyles: {
         fillColor: options.alternateRowFillColor ?? this.TABLE_ROW_ALT_BG_RGB,
-        lineWidth: this.TABLE_BORDER_WIDTH,
+        lineWidth: { top: 0, right: 0, bottom: this.TABLE_BORDER_WIDTH, left: 0 },
         lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
       },
       theme: 'plain'
     };
   }
 
-  protected makeHeaderRowDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb): (data: any) => void {
+  protected makeHeaderRowDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, headerInBody: boolean = true): (data: any) => void {
     return (data: any) => {
-      if (data.row.index === 0) {
+      if (data.section === 'head' || (headerInBody && data.row.index === 0)) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = fillColor;
+        data.cell.styles.textColor = this.PDF_THEME.textPrimaryRgb;
+        data.cell.styles.lineColor = this.PDF_THEME.textPrimaryRgb;
+        data.cell.styles.lineWidth = { top: 0, right: 0, bottom: 0.8, left: 0 };
       }
     };
   }
@@ -542,20 +544,25 @@ export class GraphExportService {
       if (data.column.index === 0) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = fillColor;
+        data.cell.styles.textColor = this.PDF_THEME.textSecondaryRgb;
       }
     };
   }
 
-  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, firstColumnFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb): (data: any) => void {
+  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, firstColumnFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb, headerInBody: boolean = true): (data: any) => void {
     return (data: any) => {
-      if (data.row.index === 0) {
+      if (data.section === 'head' || (headerInBody && data.row.index === 0)) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = headerFillColor;
+        data.cell.styles.textColor = this.PDF_THEME.textPrimaryRgb;
+        data.cell.styles.lineColor = this.PDF_THEME.textPrimaryRgb;
+        data.cell.styles.lineWidth = { top: 0, right: 0, bottom: 0.8, left: 0 };
         return;
       }
-      if (data.column.index === 0) {
+      if (data.section === 'body' && data.column.index === 0) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = firstColumnFillColor;
+        data.cell.styles.textColor = this.PDF_THEME.textSecondaryRgb;
       }
     };
   }
@@ -576,32 +583,35 @@ export class GraphExportService {
   }
 
   protected drawStandardFooter(doc: jsPDF, sessionName: string, meta: GraphReportMeta, pageNo: number, totalPages: number, lineOffset: number, textOffset: number): void {
-    const W = this.getPageW(doc);
-    const H = this.getPageH(doc);
-    doc.setDrawColor(...this.PDF_THEME.softTextRgb);
-    doc.line(40, H - lineOffset, W - 40, H - lineOffset);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...this.PDF_THEME.footerTextRgb);
-    const context = normalizePdfText(sessionName || '-');
-    doc.text(this.fitSingleLine(doc, `${meta.tenantName} | ${meta.kindLabel} | ${context} | ${meta.generatedAt}`, W - 170), 40, H - textOffset);
-    doc.text(`Page ${pageNo} of ${totalPages}`, W - 40, H - textOffset, { align: 'right' });
+    void lineOffset;
+    void textOffset;
+    drawInstitutionalFooter(doc, {
+      tenantName: meta.tenantName,
+      section: normalizePdfText(`${meta.kindLabel} | ${sessionName || '-'}`),
+      pageNo,
+      totalPages
+    });
   }
 
-  private drawKpiCard(doc: jsPDF, x: number, y: number, w: number, h: number, label: string, value: string): void {
-    doc.setFillColor(...this.PDF_THEME.whiteRgb);
-    doc.setDrawColor(...this.PDF_THEME.mediumBorderRgb);
-    doc.roundedRect(x, y, w, h, this.SECTION_RADIUS, this.SECTION_RADIUS, 'FD');
-    doc.setFillColor(...this.PDF_THEME.headerAccentRgb);
-    doc.roundedRect(x, y, 4, h, 2, 2, 'F');
+  private drawKpiCard(doc: jsPDF, x: number, y: number, w: number, h: number, label: string, value: string, isFirst: boolean, isLast: boolean): void {
+    doc.setDrawColor(...this.PDF_THEME.coverPanelBorderRgb);
+    doc.setLineWidth(0.5);
+    doc.line(x, y, x + w, y);
+    doc.line(x, y + h, x + w, y + h);
+    if (!isFirst) {
+      doc.line(x, y + 10, x, y + h - 10);
+    }
+    if (isLast) {
+      doc.line(x + w, y + 10, x + w, y + h - 10);
+    }
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
+    doc.setFontSize(7.2);
     doc.setTextColor(...this.PDF_THEME.textSecondaryRgb);
-    doc.text(label, x + 12, y + 24);
+    doc.text(String(label || '').toUpperCase(), x + 12, y + 22);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
+    doc.setFontSize(18);
     doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
-    doc.text(value, x + 12, y + 50);
+    doc.text(this.fitSingleLine(doc, value, w - 24), x + 12, y + 52);
   }
 
   protected toTitle(input: string): string {
@@ -658,8 +668,9 @@ export class GraphExportService {
   protected makeMeta(payload: GraphReportPayload, tenantLogoDataUrl: string | null = null): GraphReportMeta {
     const generatedAt = new Date(payload.generatedAtIso).toLocaleString();
     const title = String(payload.title || '').trim().toLowerCase();
-    const isAlertReport = title === 'brand alerts' || (payload.nodes.length > 0 && payload.nodes.every(node => String(node.type || '').toLowerCase() === 'alert'));
-    const kindLabel = isAlertReport ? 'Brand Alerts' : (payload.graphKind === 'cti' ? 'CTI Network' : 'Social Network');
+    const isCredentialReport = title.includes('credential');
+    const isAlertReport = /\balerts?$/.test(title) || (payload.nodes.length > 0 && payload.nodes.every(node => String(node.type || '').toLowerCase() === 'alert'));
+    const kindLabel = isCredentialReport ? 'Credentials' : (isAlertReport ? 'Brand Alerts' : (payload.graphKind === 'cti' ? 'CTI Network' : 'Social Network'));
     return {
       generatedAt,
       kindLabel,
@@ -669,7 +680,32 @@ export class GraphExportService {
   }
 
   protected preparePayloadForPdf(payload: GraphReportPayload): GraphReportPayload {
-    const normalizeValues = (values: Record<string, string>): Record<string, string> => Object.fromEntries(Object.entries(values ?? {}).map(([key, value]) => [normalizePdfText(key), preparePdfValue(value)]));
+    const normalizeValues = (values: Record<string, string>): Record<string, string> => {
+      const normalizedEntries = Object.entries(values ?? {})
+        .map(([key, value]) => {
+          const normalizedKey = normalizePdfText(key);
+          const normalizedValue = preparePdfValue(this.redactSensitivePdfValue(normalizedKey, value));
+          return [normalizedKey, normalizedValue] as const;
+        })
+        .filter(([, value]) => !this.isEmptyPdfTableValue(value));
+      return Object.fromEntries(normalizedEntries);
+    };
+    const normalizeRecordValues = (values: Record<string, string>): Record<string, string> => Object.fromEntries(Object.entries(values ?? {}).map(([key, value]) => [normalizePdfText(key), normalizePdfText(value)]));
+    const tables = payload.tables
+      ?.filter(table => !table.excludeFromPdf)
+      .map(table => ({
+        ...table,
+        title: normalizePdfText(table.title),
+        values: normalizeValues(table.values ?? {}),
+        columns: table.columns?.map(column => normalizePdfText(column)),
+        rows: table.rows?.map(row => normalizeValues(row)),
+        recordBlocks: table.recordBlocks?.map(block => ({
+          ...block,
+          title: normalizePdfText(block.title),
+          values: normalizeRecordValues(block.values ?? {})
+        }))
+      }))
+      .filter(table => Boolean(Object.keys(table.values).length || table.rows?.length || table.recordBlocks?.length));
     return {
       ...payload,
       title: normalizePdfText(payload.title),
@@ -691,19 +727,27 @@ export class GraphExportService {
         normalizePdfText(key),
         typeof value === 'number' ? value : preparePdfValue(value)
       ])),
-      tables: payload.tables?.map(table => ({
-        ...table,
-        title: normalizePdfText(table.title),
-        values: normalizeValues(table.values ?? {}),
-        columns: table.columns?.map(column => normalizePdfText(column)),
-        rows: table.rows?.map(row => normalizeValues(row)),
-        recordBlocks: table.recordBlocks?.map(block => ({
-          ...block,
-          title: normalizePdfText(block.title),
-          values: normalizeValues(block.values ?? {})
-        }))
-      }))
+      tables
     };
+  }
+
+  private isEmptyPdfTableValue(value: string): boolean {
+    return !value.trim() || /^[-\u2013\u2014]$/.test(value.trim());
+  }
+
+  private redactSensitivePdfValue(key: string, value: unknown): string {
+    const text = String(value ?? '');
+    if (!text.trim()) {
+      return text;
+    }
+    const sensitiveHeader = /^(?:set[-_ ]?cookie|cookie|authorization|proxy[-_ ]?authorization|x[-_ ]?api[-_ ]?key)$/i;
+    if (sensitiveHeader.test(key.trim())) {
+      return 'Present (value omitted from PDF)';
+    }
+    if (!/(?:banner|headers?|response|request)/i.test(key)) {
+      return text;
+    }
+    return text.replace(/^(\s*(?:set-cookie|cookie|authorization|proxy-authorization|x-api-key)\s*:).*$/gim, '$1 [value omitted from PDF]');
   }
 
   protected drawTenantBrand(doc: jsPDF, meta: GraphReportMeta, rightX: number, topY: number, maxWidth: number, maxHeight: number, textRgb: [number, number, number]): void {
@@ -737,18 +781,6 @@ export class GraphExportService {
     doc.viewerPreferences({ DisplayDocTitle: true, FitWindow: true });
   }
 
-  private drawDarkTopBand(doc: jsPDF, height: number, rounded: boolean = false): number {
-    const W = this.getPageW(doc);
-    doc.setFillColor(...this.PDF_THEME.coverBandRgb);
-    if (rounded) {
-      doc.roundedRect(40, 84, W - 80, height, this.SECTION_RADIUS, this.SECTION_RADIUS, 'F');
-    }
-    else {
-      doc.rect(0, 0, W, height, 'F');
-    }
-    return W;
-  }
-
   protected isJpegDataUrl(dataUrl?: string): boolean {
     return typeof dataUrl === 'string' && dataUrl.startsWith('data:image/jpeg;base64,');
   }
@@ -774,21 +806,12 @@ export class GraphExportService {
   }
 
   protected drawStandardPageHeader(doc: jsPDF, title: string, section: string, barBottom: number, accentRgb: [number, number, number] = PDF_EXPORT_THEME.headerAccentRgb): void {
-    const W = this.getPageW(doc);
-    doc.setFillColor(...this.PDF_THEME.headerBackgroundRgb);
-    doc.rect(0, 0, W, barBottom, 'F');
-    doc.setFillColor(...accentRgb);
-    doc.rect(0, 0, W, 5, 'F');
-    doc.setDrawColor(...this.PDF_THEME.softTextRgb);
-    doc.line(40, barBottom, W - 40, barBottom);
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
-    doc.text(this.fitSingleLine(doc, title, W - 230), 40, 34);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(...this.PDF_THEME.textSecondaryRgb);
-    doc.text(this.fitSingleLine(doc, section, 170), W - 40, 34, { align: 'right' });
+    void accentRgb;
+    drawInstitutionalPageHeader(doc, {
+      tenantName: title,
+      reportFamily: 'Intelligence Report',
+      section
+    }, barBottom);
   }
 
   protected fitSingleLine(doc: jsPDF, text: string, maxWidth: number): string {
@@ -837,23 +860,7 @@ export class GraphExportService {
   }
 
   protected drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string, fillRgb: [number, number, number] = this.INTERNAL_HEADER_RGB): void {
-    const x = 40;
-    const normalizedLabel = String(label || '').trim();
-    const text = this.fitSingleLine(doc, normalizedLabel || 'Info', Math.max(110, width - 24));
-    const badgeWidth = width;
-    const badgeX = x;
-    // Keep the section badge close to table content with no separator rule below.
-    const badgeTopY = y - 4;
-    doc.setFillColor(...this.PDF_THEME.headerBackgroundRgb);
-    doc.setDrawColor(...this.PDF_THEME.mediumBorderRgb);
-    doc.setLineWidth(0.55);
-    doc.rect(badgeX, badgeTopY, badgeWidth, 16, 'FD');
-    doc.setFillColor(...fillRgb);
-    doc.rect(badgeX, badgeTopY, 4, 16, 'F');
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.4);
-    doc.setTextColor(...this.PDF_THEME.textPrimaryRgb);
-    doc.text(text, badgeX + 12, badgeTopY + 11);
+    drawInstitutionalSectionHeading(doc, y, width, label, fillRgb);
   }
 
   protected drawClippedText( doc: jsPDF, text: string, x: number, y: number, clipX: number, clipY: number, clipWidth: number, clipHeight: number, align: 'left' | 'center' | 'right' = 'left' ): void {
@@ -881,6 +888,9 @@ export class GraphExportService {
   protected buildReportSectionRows(values: Record<string, string>): [string, string][] {
     const rows: [string, string][] = [['Field', 'Value']];
     Object.entries(values ?? {}).forEach(([rawKey, rawValue]) => {
+      if (this.isImageDataUrl(rawValue)) {
+        return;
+      }
       const key = this.cleanReportFieldLabel(rawKey);
       const value = this.cleanReportFieldValue(rawValue, key);
       if (!key && !value) {
@@ -944,9 +954,8 @@ export class GraphExportService {
     return raw.replace(/\s*,\s*/g, ', ').replace(/\s+/g, ' ').trim();
   }
 
-  protected resolveMarkerY(doc: jsPDF, requestedY: number, resetY: number, onNewPage?: () => void): number {
+  protected resolveMarkerY(doc: jsPDF, requestedY: number, resetY: number, onNewPage?: () => void, minBlockHeight: number = 26): number {
     const pageBottom = this.getPageH(doc) - 58;
-    const minBlockHeight = 26; // marker + minimum first-row space
     if (requestedY + minBlockHeight <= pageBottom) {
       return requestedY;
     }
@@ -1000,11 +1009,15 @@ export class GraphExportService {
     return 'JPEG';
   }
 
-  protected drawScreenshotPreview(doc: jsPDF, dataUrl: string, x: number, y: number, width: number, maxH: number): void {
+  protected getScreenshotPreviewHeight(doc: jsPDF, dataUrl: string, width: number, maxH: number): number {
     const normalizedDataUrl = this.normalizeDataUrl(dataUrl);
-    const pageBottom = this.getPageH(doc) - 58;
-    const renderY = Math.min(y, pageBottom - 20);
-    const fit = this.fitRect(doc, width, maxH, x, renderY);
+    const img = doc.getImageProperties(normalizedDataUrl);
+    return Math.min((width * img.height) / img.width, maxH) + 8;
+  }
+
+  protected drawScreenshotPreview(doc: jsPDF, dataUrl: string, x: number, y: number, width: number, maxH: number): number {
+    const normalizedDataUrl = this.normalizeDataUrl(dataUrl);
+    const fit = this.fitRect(doc, width, maxH, x, y);
     const img = doc.getImageProperties(normalizedDataUrl);
     const imgType = this.getImageTypeFromDataUrl(normalizedDataUrl);
     let drawW = fit.w;
@@ -1012,12 +1025,13 @@ export class GraphExportService {
     if (drawH > fit.h) {
       const ratio = fit.h / drawH;
       drawH = fit.h;
-      drawW = drawW * ratio;
+      drawW *= ratio;
     }
     doc.setDrawColor(...this.PDF_THEME.mediumBorderRgb);
     doc.setLineWidth(0.8);
     doc.rect(fit.x, fit.y, fit.w, drawH + 8);
     doc.addImage(normalizedDataUrl, imgType, fit.x + ((fit.w - drawW) / 2), fit.y + 4, drawW, drawH, undefined, 'FAST');
+    return fit.y + drawH + 8;
   }
 
   protected compactSession(session: string): string {
@@ -1041,10 +1055,14 @@ export class GraphExportService {
     return sessionName;
   }
 
-  private makeSectionHeaderCallback(sectionsByPage: Record<number, string>, section: string, subtitle: string): (data: any) => void {
+  private makeSectionHeaderCallback(sectionsByPage: Record<number, string>, section: string, subtitle: string, firstPage: number): (data: any) => void {
     return (data: any) => {
-      sectionsByPage[data.pageNumber] = section;
-      this.drawConnectionMatrixHeader(data.doc as jsPDF, section, subtitle);
+      const doc = data.doc as jsPDF;
+      const pageNo = doc.getCurrentPageInfo().pageNumber;
+      sectionsByPage[pageNo] = section;
+      if (pageNo !== firstPage) {
+        this.drawConnectionMatrixHeader(doc, section, subtitle);
+      }
     };
   }
 

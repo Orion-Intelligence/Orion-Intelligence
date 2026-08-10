@@ -1,4 +1,5 @@
 import redis.asyncio as redis
+from contextlib import asynccontextmanager
 
 from orion.services.redis_manager.redis_enums import REDIS_CONNECTIONS, REDIS_COMMANDS
 
@@ -101,6 +102,20 @@ class redis_controller:
         lock = self.__redis.lock(p_key)
         if await lock.locked():
             await lock.release()
+
+    @asynccontextmanager
+    async def lock(self, key: str, timeout: int | None = None, blocking_timeout: int | None = None):
+        lock = self.__redis.lock(key, timeout=timeout, blocking_timeout=blocking_timeout)
+        acquired = await lock.acquire(blocking=True)
+        if not acquired:
+            raise TimeoutError(f"Redis lock not acquired: {key}")
+        try:
+            yield
+        finally:
+            try:
+                await lock.release()
+            except redis.exceptions.LockError:
+                pass
 
     async def __delete_key(self, p_key):
         await self.__redis.delete(p_key)

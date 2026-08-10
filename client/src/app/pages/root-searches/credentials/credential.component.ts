@@ -441,7 +441,7 @@ export class CredentialComponent implements OnInit {
     }
 
     if (rankedResults.length) {
-      tables.push(this.buildRankedPdfBlocks(rankedResults));
+      tables.push(this.buildRankedPdfBlocks(rankedResults, stealerResults.length));
     }
 
     return {
@@ -523,9 +523,9 @@ export class CredentialComponent implements OnInit {
       this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['channel'], item?.['m_channel'], item?.['source_channel'], item?.['m_source_channel']), 240);
       this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['date'], item?.['timestamp'], item?.['m_date'], item?.['m_update_date']), 160);
       this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.['type'])), 140);
-      this.addExportField(values, 'Source File', this.firstAvailableExportValue(item?.['filename'], item?.['file'], item?.['m_file']), 220);
       this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
       this.addExportField(values, 'Raw Trace', item?.['raw'], 900);
+      this.addExportField(values, 'File Name', this.firstAvailableExportValue(item?.['filename'], item?.['file'], item?.['m_file']), 220);
       this.appendAdditionalExportFields(values, item, new Set([
         '_id',
         'email',
@@ -568,7 +568,7 @@ export class CredentialComponent implements OnInit {
     };
   }
 
-  private buildRankedPdfBlocks(records: any[]): GraphReportTableRow {
+  private buildRankedPdfBlocks(records: any[], recordOffset = 0): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
       const title = this.firstAvailableExportValue(item?.['m_title'], item?.['m_important_content'], item?.['m_url']);
       const primaryUrl = this.firstAvailableExportValue(item?.['m_url'], item?.['m_base_url'], item?.['m_domain'], item?.['m_weblink']);
@@ -620,7 +620,7 @@ export class CredentialComponent implements OnInit {
         'm_index'
       ]));
       return {
-        title: this.buildRecordBlockTitle(index, title, primaryUrl),
+        title: this.buildRecordBlockTitle(recordOffset + index, title, primaryUrl),
         values
       };
     });
@@ -633,7 +633,8 @@ export class CredentialComponent implements OnInit {
 
   private buildRecordBlockTitle(index: number, ...parts: string[]): string {
     const detail = parts.filter(part => part && part !== '-').slice(0, 2).join(' | ');
-    return detail ? `Record ${index + 1} | ${detail}` : `Record ${index + 1}`;
+    const recordNumber = String(index + 1).padStart(3, '0');
+    return detail ? `Record ${recordNumber} | ${detail}` : `Record ${recordNumber}`;
   }
 
   private firstAvailableExportValue(...values: unknown[]): string {

@@ -1,5 +1,5 @@
 import { Component, OnInit, input, output } from '@angular/core';
-import { KeyValuePipe, NgClass } from '@angular/common';
+import { KeyValuePipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -19,7 +19,7 @@ interface SharedSearchAdvancedChip { id: string; label: string }
 
 @Component({
   selector: 'app-ioc-search',
-  imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, ChatWidgetComponent, TranslatePipe],
+  imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, NgTemplateOutlet, ChatWidgetComponent, TranslatePipe],
   templateUrl: './ioc-search.component.html',
   animations: [fadeInDashboardItem, advancedRowMotionAnimation, popupAnimation],
 })
@@ -40,6 +40,7 @@ export class IocSearchComponent implements OnInit {
   readonly advancedSubtitle = input<string>('Combine multiple filters with AND/OR for precise results');
   readonly aiType = input<string>('');
   readonly aiWelcomeMessage = input<string>('');
+  readonly usePageSearchStyle = input<boolean>(false);
   isAdvanced = false;
   isAdvancedBuilderExpanded = false;
   basicSubmitted = false;

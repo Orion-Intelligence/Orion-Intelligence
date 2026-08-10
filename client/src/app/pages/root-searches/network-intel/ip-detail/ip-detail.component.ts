@@ -46,6 +46,18 @@ export class IpDetailComponent {
     return this.buildRenderableEntries(this.detail?.ip_info, (key, value) => !this.isDuplicateGeneralInfoField(key, value));
   }
 
+  get securityFlags(): string[] {
+    const items = this.ui.securityItems(this.detail?.security);
+    if (!this.detail?.hsts) {
+      return items;
+    }
+
+    return items.filter(item => {
+      const normalized = String(item).trim().toLowerCase().replace(/[\s_-]+/g, '');
+      return normalized !== 'hsts' && normalized !== 'stricttransportsecurity';
+    });
+  }
+
   formatVulnerability(value: any): string {
     if (typeof value === 'string') {
       return value.trim();

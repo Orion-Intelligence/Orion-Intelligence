@@ -1,7 +1,7 @@
 <form class="relative w-full overflow-visible">
   <button [attr.data-testid]="toggleTestId()" type="button" (click)="togglePicker()" [disabled]="disabled()" class="flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition hover:brightness-[0.98] outline-none focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60">
     <span class="truncate">{{ displayValue || filterModel()?.filters?.[key()]?.placeholder || ((selectionMode() === 'single' ? 'Select date' : 'Select date range') | translate) }}</span>
-    @if (selectionMode() === 'single' && displayValue && !disabled()) {
+    @if (displayValue && !disabled()) {
       <span role="button" tabindex="0" (click)="clearSelection($event)" class="mr-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-sm text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">×</span>
     }
     <img alt="Calendar" class="h-4 w-4 shrink-0 opacity-70" src="assets/images/shared/theme/calendar.png" />

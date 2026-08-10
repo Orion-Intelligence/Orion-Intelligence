@@ -11,6 +11,7 @@ from pydantic import BaseModel
 class ScanJobStatus(str, Enum):
     QUEUED = "queued"
     RUNNING = "running"
+    PARTIAL = "partial"
     DONE = "done"
     ERROR = "error"
     CANCELLED = "cancelled"

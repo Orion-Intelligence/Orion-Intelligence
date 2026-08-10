@@ -273,7 +273,7 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   openScanReport(job: ScanJob): void {
-    if (!this.isScanCompleted(job)) {
+    if (!this.isScanReportAvailable(job)) {
       return;
     }
     this.scanNotificationService.markSeen(job);
@@ -388,6 +388,9 @@ export class AlertNotificationComponent implements OnChanges {
     if (status === 'done') {
       return 'Completed';
     }
+    if (status === 'partial') {
+      return 'Partial';
+    }
     if (status === 'error') {
       return 'Failed';
     }
@@ -403,6 +406,15 @@ export class AlertNotificationComponent implements OnChanges {
   isScanCompleted(job: ScanJob): boolean {
     const status = this.scanNotificationService.getStatus(job);
     return status === 'done';
+  }
+
+  isScanPartial(job: ScanJob): boolean {
+    return this.scanNotificationService.getStatus(job) === 'partial';
+  }
+
+  isScanReportAvailable(job: ScanJob): boolean {
+    const status = this.scanNotificationService.getStatus(job);
+    return status === 'done' || status === 'partial';
   }
 
   isScanPending(job: ScanJob): boolean {

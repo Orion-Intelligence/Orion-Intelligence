@@ -46,7 +46,7 @@ services:
       - shared_bridge
       - orion_nexus_backend
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8070" ]
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8070/api/public > /dev/null" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -77,7 +77,6 @@ services:
       - arangodb:/var/lib/arangodb3
     networks:
       backend:
-        ipv4_address: 172.20.1.15
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability" ]
       interval: 5s
@@ -107,7 +106,6 @@ services:
     mem_limit: 36g
     networks:
       backend:
-        ipv4_address: 172.20.1.11
     healthcheck:
       test: [ "CMD-SHELL", "curl --fail --silent --user \"elastic:$${ELASTIC_PASSWORD}\" http://localhost:9400/_cluster/health > /dev/null" ]
       interval: 10s
@@ -133,7 +131,6 @@ services:
       retries: 3
     networks:
       backend:
-        ipv4_address: 172.20.1.12
     deploy:
       resources:
         limits:
@@ -168,7 +165,6 @@ services:
       - no-new-privileges:true
     networks:
       backend:
-        ipv4_address: 172.20.1.13
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:80 || exit 1" ]
       interval: 30s
@@ -206,7 +202,6 @@ services:
       "
     networks:
       backend:
-        ipv4_address: 172.20.1.14
     healthcheck:
       test: [ "CMD-SHELL", "timeout 5 bash -c '</dev/tcp/localhost/27017' || exit 1" ]
       interval: 30s
@@ -226,10 +221,6 @@ networks:
     external: true
   backend:
     driver: bridge
-    ipam:
-      driver: default
-      config:
-        - subnet: 172.20.1.0/24
 
 volumes:
   bloom-data:

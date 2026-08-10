@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
+import { DnsResult, IpDetail, IpRowState, VulnerabilityScanDepth } from '../../shared/model/network-intel/network-intel.model';
 import { buildStandardExportOptions } from '../../shared/model/report/export-choice.model';
 import { GraphReportPayload } from '../../shared/model/report/report-export.model';
 import { ScanJob } from '../../shared/model/scan-jobs/scan-job.model';
@@ -11,6 +12,9 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ReportExportService } from '../../shared/services/report-export.service';
 import { ScanNotificationService } from '../../shared/services/scan-notification.service';
 import { ValuePresentationBase } from '../../shared/utils/value-presentation.base';
+import { DnsSectionComponent } from '../root-searches/network-intel/dns-section/dns-section.component';
+import { ShodanSectionComponent } from '../root-searches/network-intel/shodan-section/shodan-section.component';
+import { VulnerabilitySectionComponent } from '../root-searches/network-intel/vulnerability-section/vulnerability-section.component';
 
 type ScanReportField = { label: string; value: any };
 type ScanReportSection = { title: string; items: ScanReportField[] };
@@ -19,15 +23,23 @@ const SCAN_REPORT_EXPORT_OPTIONS = buildStandardExportOptions('scan-report-expor
 @Component({
   selector: 'app-scan-report',
   standalone: true,
-  imports: [CommonModule, NgClass, TooltipDirective, ExportChoiceModalComponent, TranslatePipe],
+  imports: [CommonModule, NgClass, TooltipDirective, ExportChoiceModalComponent, TranslatePipe, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
   templateUrl: './scan-report.component.html',
   animations: [fadeInDashboardItem],
 })
 export class ScanReportComponent extends ValuePresentationBase implements OnInit {
+  private cachedResultSections: ScanReportSection[] | undefined;
+
   job: ScanJob | null = null;
   loading = true;
   errorMessage = '';
   isExportChoiceOpen = false;
+  dnsReportResult: DnsResult | null = null;
+  dnsReportRows: IpRowState[] = [];
+  shodanReportResult: IpDetail | null = null;
+  vulnerabilityReportTargets: string[] = [];
+  vulnerabilityReportTarget: string | null = null;
+  vulnerabilityReportDepth: VulnerabilityScanDepth = 'low';
   readonly reportExportOptions = SCAN_REPORT_EXPORT_OPTIONS;
   readonly trackByIndex = (index: number) => index;
 
@@ -46,8 +58,10 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     this.scanNotifications.getScanDetail(scanId).subscribe({
       next: job => {
         this.job = job;
+        this.cachedResultSections = undefined;
+        this.prepareNetworkIntelReport();
         this.loading = false;
-        if (this.statusLabel === 'Completed') {
+        if (this.statusLabel === 'Completed' || this.statusLabel === 'Partial') {
           this.scanNotifications.markSeen(job);
         }
       },
@@ -89,10 +103,25 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     return this.job?.target || this.result?.domain || this.result?.host || this.result?.url || this.result?.ip || this.result?.query || 'Scan target';
   }
 
+  get isHostReconReport(): boolean {
+    return this.apiType === 'host-recon';
+  }
+
+  get isIpScanReport(): boolean {
+    return this.apiType === 'ip-scan';
+  }
+
+  get isVulnerabilityReport(): boolean {
+    return this.apiType === 'vulnerability-scan';
+  }
+
   get statusLabel(): string {
     const status = this.job ? this.scanNotifications.getStatus(this.job) : 'queued';
     if (status === 'done') {
       return 'Completed';
+    }
+    if (status === 'partial') {
+      return 'Partial';
     }
     if (status === 'error') {
       return 'Failed';
@@ -107,6 +136,16 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   get resultCount(): number {
+    if (this.isHostReconReport) {
+      return this.dnsReportRows.length;
+    }
+    if (this.isIpScanReport) {
+      return this.shodanReportResult ? 1 : 0;
+    }
+    if (this.isVulnerabilityReport) {
+      const total = Number(this.result?.summary?.total);
+      return this.findingItems.length || (Number.isFinite(total) ? total : 0);
+    }
     if (this.findingItems.length) {
       return this.findingItems.length;
     }
@@ -120,11 +159,23 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   get fieldCount(): number {
+    if (this.isHostReconReport) {
+      return this.dnsReportRows.length;
+    }
+    if (this.isIpScanReport) {
+      return this.shodanReportResult ? Object.keys(this.shodanReportResult).length : 0;
+    }
+    if (this.isVulnerabilityReport) {
+      return this.findingItems.length + Object.keys(this.result?.summary || {}).length;
+    }
     return this.resultSections.reduce((total, section) => total + section.items.length, 0);
   }
 
   get resultSections(): ScanReportSection[] {
-    return this.buildResultSections(this.result);
+    if (this.cachedResultSections === undefined) {
+      this.cachedResultSections = this.buildResultSections(this.result);
+    }
+    return this.cachedResultSections;
   }
 
   get completedAtLabel(): string {
@@ -156,6 +207,44 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
       return;
     }
     this.reportExportService.exportByType(this.buildReportPayload(), type === 'json' || type === 'csv' ? type : 'doc_pdf');
+  }
+
+  private prepareNetworkIntelReport(): void {
+    const result = this.result;
+
+    if (this.isHostReconReport && result && typeof result === 'object') {
+      const domain = String(result.domain || this.job?.payload?.['domain'] || this.job?.target || '');
+      const ips: string[] = Array.isArray(result.ips) ? result.ips.map((ip: unknown) => String(ip)).filter(Boolean) : [];
+      this.dnsReportResult = { domain, ips };
+      this.dnsReportRows = ips.map(ip => ({ ip, expanded: false, loading: false, detail: null, error: null }));
+      return;
+    }
+
+    if (this.isIpScanReport && result?.ip) {
+      this.shodanReportResult = result as IpDetail;
+      return;
+    }
+
+    if (this.isVulnerabilityReport && result && typeof result === 'object') {
+      const target = this.normalizeVulnerabilityTarget(result.host || result.extracted?.host || this.job?.payload?.['domain'] || this.job?.target || result.url);
+      this.vulnerabilityReportTarget = target || null;
+      this.vulnerabilityReportTargets = target ? [target] : [];
+      const depth = String(this.job?.payload?.['depth'] || '').toLowerCase();
+      this.vulnerabilityReportDepth = ['low', 'medium', 'high', 'full'].includes(depth) ? depth as VulnerabilityScanDepth : 'low';
+    }
+  }
+
+  private normalizeVulnerabilityTarget(value: unknown): string {
+    const raw = String(value || '').trim();
+    if (!raw) {
+      return '';
+    }
+    try {
+      return new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).hostname || raw;
+    }
+    catch {
+      return raw;
+    }
   }
 
   private buildReportPayload(): GraphReportPayload {

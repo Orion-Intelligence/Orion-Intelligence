@@ -8,20 +8,22 @@ import { ApiService } from '../../../shared/services/api.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { DatePickerComponent } from '../../../shared/partials/filters/date-picker/date-picker.component';
 import { SystemLogFile, SystemLogResponse } from './model/system-log.models';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-sidebar-user-log-manager',
   standalone: true,
-  imports: [CommonModule, TranslatePipe, ConfirmationPopupComponent, UiDropdownComponent],
+  imports: [CommonModule, TranslatePipe, ConfirmationPopupComponent, DatePickerComponent, UiDropdownComponent],
   templateUrl: './sidebar-user-log-manager.component.html',
   animations: [fadeInDashboardItem],
 })
 export class SidebarUserLogManagerComponent implements OnInit {
   readonly typeOptions: UiDropdownOption[] = [{ key: '', label: 'All' }, { key: 'INFO', label: 'INFO' }, { key: 'WARNING', label: 'WARNING' }, { key: 'ERROR', label: 'ERROR' }];
   logType = '';
-  logDate = '';
+  logDateRange = '';
+  logDateFilters: Record<string, string | null> = { daterange: null };
   page = 1;
   limit = 100;
   loading = false;
@@ -45,8 +47,8 @@ export class SidebarUserLogManagerComponent implements OnInit {
     if (this.logType) {
       params = params.set('log_type', this.logType);
     }
-    if (this.logDate) {
-      params = params.set('date', this.logDate);
+    if (this.logDateRange) {
+      params = params.set('date_range', this.logDateRange);
     }
 
     this.loading = true;
@@ -75,16 +77,10 @@ export class SidebarUserLogManagerComponent implements OnInit {
     this.applyFilters();
   }
 
-  onLogDateChange(value: string | null): void {
-    this.logDate = value ?? '';
+  onLogDateRangeChange(event: { key: string; value: string }): void {
+    this.logDateRange = event.value;
+    this.logDateFilters = { daterange: event.value || null };
     this.applyFilters();
-  }
-
-  get dateOptions(): UiDropdownOption[] {
-    return [
-      { key: '', label: 'All dates' },
-      ...this.response.available_dates.map(date => ({ key: date, label: date })),
-    ];
   }
 
   nextPage(): void {
@@ -130,7 +126,8 @@ export class SidebarUserLogManagerComponent implements OnInit {
     this.apiService.delete<{ success: boolean; deleted: number }>('profile/system-logs').subscribe({
       next: () => {
         this.logType = '';
-        this.logDate = '';
+        this.logDateRange = '';
+        this.logDateFilters = { daterange: null };
         this.page = 1;
         this.response = this.emptyResponse();
       },

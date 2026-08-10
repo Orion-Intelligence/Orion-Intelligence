@@ -27,6 +27,7 @@ TRAEFIK_PASSWORD='your_traefik_password'
 # DEMO KEYS
 DEMO_USERNAME='your_demo_username'
 DEMO_PASSWORD='your_demo_password'
+NEXUS_PASSWORD='your_nexus_password'
 
 # ARANGO KEYS
 ARANGO_USERNAME='your_arango_username'

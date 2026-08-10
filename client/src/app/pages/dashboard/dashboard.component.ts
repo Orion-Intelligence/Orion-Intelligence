@@ -111,14 +111,10 @@ export class DashboardComponent implements AfterViewInit, OnInit {
   }
 
   handleDuplicateScanChoice(action: GenericChoicePopupAction): void {
-    if (action === 'primary') {
-      this.scanNotificationService.resolveDuplicateScanChoice('previous');
-      return;
-    }
     if (action === 'secondary') {
       this.scanNotificationService.resolveDuplicateScanChoice('new');
       return;
     }
-    this.scanNotificationService.resolveDuplicateScanChoice('cancel');
+    this.scanNotificationService.resolveDuplicateScanChoice('previous');
   }
 }

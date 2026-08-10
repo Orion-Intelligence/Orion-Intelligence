@@ -510,13 +510,14 @@ class search_model:
             )
         return response.json()
 
-    async def network_intel(self, payload, route_name: str, user_id: str = "system"):
+    async def network_intel(self, payload, route_name: str, user_id: str = "system", force_new: bool = False):
         base_url = env_handler.get_instance().env("NETWORK_API_BASE")
 
         async with httpx.AsyncClient(timeout=120) as client:
             response = await client.post(
                 f"{base_url.rstrip('/')}/netintel/{route_name}/{user_id}",
-                json=payload.model_dump()
+                json=payload.model_dump(),
+                params={"force_new": "true"} if force_new else None,
             )
 
         if response.status_code != status.HTTP_200_OK:

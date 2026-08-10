@@ -282,9 +282,8 @@ class mail_manager:
         try:
             is_production = env_handler.get_instance().env("PRODUCTION", "0") == "1"
 
-            context = ssl.create_default_context()
-
             if is_production:
+                context = ssl.create_default_context()
                 with smtplib.SMTP_SSL(
                     smtp_server,
                     smtp_port,
@@ -300,12 +299,7 @@ class mail_manager:
                     smtp_port,
                     timeout=10
                 ) as server:
-
-                    try:
-                        server.starttls(context=context)
-                        server.login(sender_email, password)
-                    except Exception as ex:
-                        log.g().w(f"SMTP validation fallback failed: {str(ex)}")
+                    server.noop()
 
             return True
 
