@@ -7,7 +7,7 @@ import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
 import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
 import socialPlatformCapabilities from '../../../../../../assets/data/social-graph/platform-capabilities.json';
 
-import { ContentModerationBadgeComponent } from '../../../../../shared/components/content-moderation-badge/content-moderation-badge.component';
+import { ContentModerationBadgeComponent } from '../../../../../shared/partials/content-moderation-badge/content-moderation-badge.component';
 
 @Component({
   selector: 'app-social-profile-post-content-section',

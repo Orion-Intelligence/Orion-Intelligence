@@ -57,20 +57,8 @@ class social_model:
     @staticmethod
     def _social_api_base_urls() -> list[str]:
         configured = env_handler.get_instance().env("ORION_SOCIAL_API_BASE_URL") or ""
-        candidates = [
-            configured,
-            "http://127.0.0.1:8020",
-            "http://localhost:8020",
-        ]
-        urls: list[str] = []
-        seen: set[str] = set()
-        for candidate in candidates:
-            url = str(candidate or "").strip().rstrip("/")
-            if not url or url in seen:
-                continue
-            seen.add(url)
-            urls.append(url)
-        return urls
+        url = str(configured).strip().rstrip("/")
+        return [url] if url else []
 
     @classmethod
     def _social_headers(cls, current_user=None, request=None) -> dict[str, str]:

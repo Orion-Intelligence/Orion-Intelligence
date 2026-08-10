@@ -56,6 +56,7 @@ export class SocialProfileTabsSectionComponent {
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;
   readonly isImageUrl = isImageUrl;
+  readonly formatKey = formatKey;
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
   readonly selectedStealerLogPlatform = signal<PlatformResult | null>(null);
 
@@ -438,6 +439,7 @@ export class SocialProfileTabsSectionComponent {
       return false;
     }
   }
+
   formatProfileDetailKey(key: string): string {
     return formatKey(key.replace(/^m_/, ''));
   }

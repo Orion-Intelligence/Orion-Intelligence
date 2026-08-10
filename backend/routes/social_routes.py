@@ -134,7 +134,7 @@ async def search_social_metadata(request: Request, param: SocialMetadataRequest 
 @social_routes.get(
     "/api/social/extensions/status",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def get_social_extension_status():
     return await social_model.getInstance().extension_status()
 
@@ -142,7 +142,7 @@ async def get_social_extension_status():
 @social_routes.get(
     "/api/social/extensions/download/chrome",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def download_social_extension_chrome():
     return await social_model.getInstance().extension_download("chrome")
 
@@ -150,7 +150,7 @@ async def download_social_extension_chrome():
 @social_routes.get(
     "/api/social/extensions/download/firefox",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def download_social_extension_firefox():
     return await social_model.getInstance().extension_download("firefox")
 
@@ -158,7 +158,7 @@ async def download_social_extension_firefox():
 @social_routes.post(
     "/api/social/extensions/profile",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_extension_profile(request: Request, param: SocialProfileRequest = Body(...), current_user=Depends(get_current_user)):
     if not _field_was_sent(param, "max_posts"):
         param.max_posts = 20
@@ -169,7 +169,7 @@ async def search_extension_profile(request: Request, param: SocialProfileRequest
 @social_routes.post(
     "/api/social/extensions/posts",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_extension_posts(request: Request, param: SocialPostsRequest = Body(...), current_user=Depends(get_current_user)):
     if not _field_was_sent(param, "max_posts"):
         param.max_posts = 20

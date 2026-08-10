@@ -31,7 +31,9 @@ export const MODERATION_CONFIG: Record<string, ModerationMapping> = {
 };
 
 export function getModerationConfig(label?: string | null): ModerationMapping | null {
-  if (!label) return null;
+  if (!label) {
+    return null;
+  }
   return MODERATION_CONFIG[label] || {
     label: 'unknown',
     displayText: 'Flagged Content',

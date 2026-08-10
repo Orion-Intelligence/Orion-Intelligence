@@ -72,7 +72,6 @@ class SocialVideosRequest(PlatformUsernameRequest):
     comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
-    use_extension: bool = False
 
 
 class SocialShortsRequest(PlatformUsernameRequest):
@@ -84,7 +83,6 @@ class SocialShortsRequest(PlatformUsernameRequest):
     comment_offset: int = Field(default=0, ge=0, le=1000)
     social_data_type: Optional[str] = None
     hash_id: Optional[str] = None
-    use_extension: bool = False
 
 
 class SocialFollowersRequest(PlatformUsernameRequest):
@@ -93,8 +91,6 @@ class SocialFollowersRequest(PlatformUsernameRequest):
 
 class SocialOnlineImages(PlatformUsernameRequest):
     max_images: int = Field(default=10, ge=1, le=100)
-    max_followers: int = Field(default=50, ge=1, le=5000)
-    use_extension: bool = False
 
 
 class SocialFollowingRequest(PlatformUsernameRequest):
