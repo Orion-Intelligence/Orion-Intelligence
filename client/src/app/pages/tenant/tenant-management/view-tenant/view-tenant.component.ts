@@ -37,6 +37,7 @@ export class ViewTenantComponent implements OnInit {
   activeIocTenant: any | null = null;
   iocDraft: IocCategory[] = [];
   tenantToDelete: any | null = null;
+  tenantToFlush: any | null = null;
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService) {
   }
@@ -373,5 +374,40 @@ export class ViewTenantComponent implements OnInit {
     return isLightTheme
       ? 'bg-rose-100 text-rose-800'
       : 'bg-rose-500/10 text-rose-300';
+  }
+
+  openFlushTenantConfirmation(tenant: any, event?: Event): void {
+    event?.stopPropagation();
+    this.tenantToFlush = tenant;
+  }
+
+  confirmFlushTenantQuota(confirmed: boolean): void {
+    const tenant = this.tenantToFlush;
+    this.tenantToFlush = null;
+
+    if (!confirmed || !tenant) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.apiService
+      .post<any>(`tenants/${tenant.id}/workspace-quota/flush`, {})
+      .subscribe({
+        next: (res) => {
+          tenant.workspace_quota_bytes =
+            res?.workspace_quota_bytes ?? this.DEFAULT_WORKSPACE_QUOTA_BYTES;
+
+          tenant.workspace_quota_gb = this.bytesToGb(tenant.workspace_quota_bytes);
+          tenant.workspace_assigned_user_quota_bytes = 0;
+          tenant.workspace_used_bytes = 0;
+          tenant.workspace_remaining_bytes = tenant.workspace_quota_bytes;
+
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+        },
+      });
   }
 }

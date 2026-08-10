@@ -201,6 +201,9 @@
                           </label>
 
                           <input type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="user.workspace_quota_gb" [min]="0" step="0.1" placeholder="0 = shared tenant quota" />
+                          <button type="button" class="mt-2 ui-btn border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20" (click)="flushUserQuota(user)">
+                            {{ 'Flush User Quota' | translate }}
+                          </button>
                         </div>
                         <div>
                           <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
@@ -382,6 +385,9 @@
                   </label>
 
                   <input type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="user.workspace_quota_gb" [min]="0" step="0.1" placeholder="0 = shared tenant quota" />
+                  <button type="button" class="ui-btn border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20" (click)="flushUserQuota(user)">
+                    {{ 'Flush User Quota' | translate }}
+                  </button>
 
                   <div class="mt-3 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{
                     'Licenses' | translate }}</div>
@@ -506,4 +512,10 @@
 }
 @if (isDeleteConfirmationOpen()) {
 <app-confirmation-popup (confirmed)="confirmDeleteUser($event)"></app-confirmation-popup>
+}
+@if (isFlushUserConfirmationOpen()) {
+<app-confirmation-popup title="Flush User Quota"
+  message="This will remove this user's assigned quota and delete all imported workspaces. Continue?"
+  (confirmed)="confirmFlushUserQuota($event)">
+</app-confirmation-popup>
 }

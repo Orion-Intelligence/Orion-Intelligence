@@ -41,6 +41,8 @@ export class ManageProfileComponent implements OnInit {
   showAddTenantPopup: boolean = false;
   userToDelete: User | null = null;
   isDeleteConfirmationOpen = signal<boolean>(false);
+  userToFlush: User | null = null;
+  isFlushUserConfirmationOpen = signal<boolean>(false);
 
   constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService) {
   }
@@ -370,5 +372,44 @@ export class ManageProfileComponent implements OnInit {
 
   clossAddTenant() {
     this.showAddTenantPopup = false;
+  }
+
+  flushUserQuota(user: User): void {
+    this.userToFlush = user;
+    this.isFlushUserConfirmationOpen.set(true);
+  }
+
+  confirmFlushUserQuota(value: boolean): void {
+    this.isFlushUserConfirmationOpen.set(false);
+
+    if (!value || !this.userToFlush) {
+      this.userToFlush = null;
+      return;
+    }
+
+    const userId = this.userToFlush.id;
+
+    if (!userId) {
+      this.userToFlush = null;
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.apiService
+      .post(`users/${userId}/workspace-quota/flush`, {})
+      .pipe(switchMap(() => this.apiService.post<User[]>('users', new HttpHeaders({}))),
+        tap((data) => {
+          this.users = (data || []).map((user: User) => ({
+            ...user,
+            workspace_quota_gb: this.bytesToGb(user.workspace_quota_bytes),
+          }));
+        }),
+        switchMap(() => this.nodeResolver.resolve()),
+        finalize(() => {
+          this.isLoading = false;
+          this.userToFlush = null;
+        }))
+      .subscribe();
   }
 }
