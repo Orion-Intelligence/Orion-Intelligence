@@ -60,7 +60,8 @@
           @for (post of getUniquePosts(platformData, contentType); track post.post_url || $index) {
             <div data-testid="social-post-row" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
               <div class="flex items-start justify-between gap-3">
-                <div class="min-w-0">
+                <div class="min-w-0 flex-1">
+                  <app-content-moderation-badge [moderation]="post.hate_speech"></app-content-moderation-badge>
                   <p [class]="isPostCaptionExpanded(post) ? 'mb-1 whitespace-pre-wrap break-words text-sm font-medium leading-5 text-[var(--color-text2)]' : 'mb-1 overflow-hidden break-words text-sm font-medium leading-5 text-[var(--color-text2)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]'">{{ getPostCaption(post) || 'Untitled post' }}</p>
                   @if (shouldShowPostCaptionToggle(post)) {
                     <div class="mb-1 flex justify-start">

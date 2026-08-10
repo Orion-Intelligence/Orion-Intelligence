@@ -30,6 +30,13 @@ export interface SocialPostComment {
     likes?: string;
     text: string;
 }
+export interface SocialPostHateSpeech {
+    is_hate_speech: boolean;
+    label: string;
+    confidence: number;
+    explanation?: string | null;
+    model?: string;
+}
 export interface SocialPost {
     hash_id?: string;
     post_url: string;
@@ -46,6 +53,7 @@ export interface SocialPost {
     views: string;
     media_type: string;
     media_url: string;
+    hate_speech?: SocialPostHateSpeech | null;
 }
 export type SocialResultSource = 'normal' | 'darkweb';
 export interface SocialOnlinePresenceResult {

@@ -7,11 +7,13 @@ import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
 import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
 import socialPlatformCapabilities from '../../../../../../assets/data/social-graph/platform-capabilities.json';
 
+import { ContentModerationBadgeComponent } from '../../../../../shared/components/content-moderation-badge/content-moderation-badge.component';
+
 @Component({
   selector: 'app-social-profile-post-content-section',
   templateUrl: './profile-post-content-section.component.html',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, ContentModerationBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfilePostContentSectionComponent {

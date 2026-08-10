@@ -261,6 +261,7 @@ export class SocialNormalizationUtil {
       views: this.firstValue(post?.views, post?.views_count, post?.m_post_views, post?.m_views),
       media_type: this.firstValue(post?.media_type, post?.video_url ? 'video' : mediaUrl ? 'image' : ''),
       media_url: mediaUrl,
+      hate_speech: post?.hate_speech || post?.m_hate_speech || null,
     };
   }
 
