@@ -51,13 +51,24 @@ class AccountManager:
                 AccountManager.__instance = AccountManager()
         return AccountManager.__instance
 
-    async def get_all_users(self, current_user) -> List[user_param_model]:
+    async def get_all_users(self, current_user) -> List[dict]:
         if current_user.role == "admin" or LicenseName.MAINTAINER in (current_user.licenses or []):
             tenant_uuid = current_user.tenant_uuid
+
             users = await self._engine.find(
                 db_user_account,
-                (db_user_account.tenant_uuid == tenant_uuid) & (db_user_account.role != user_role.CRAWLER))
-            return [user_param_model(**u.dict()) for u in users]
+                (db_user_account.tenant_uuid == tenant_uuid) & (db_user_account.role != user_role.CRAWLER)
+            )
+
+            result = []
+
+            for u in users:
+                data = user_param_model(**u.dict()).model_dump()
+                data["id"] = str(u.id)
+                result.append(data)
+
+            return result
+
         return []
 
     async def create_tenant_user(self, existing_user, existing_mail, password):
@@ -473,4 +484,41 @@ class AccountManager:
             "role": user.role,
             "tenant_name": tenant_name,
             "licenses": [license.value if hasattr(license, "value") else str(license) for license in (user.licenses or [])],
+        }
+
+    async def flush_user_workspace_quota(self, user_id: str, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+        from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
+        
+        user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
+
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        is_admin = current_user.role == user_role.ADMIN
+        is_maintainer = LicenseName.MAINTAINER in (current_user.licenses or [])
+
+        if not is_admin:
+            if not is_maintainer or str(user.tenant_uuid) != str(current_user.tenant_uuid):
+                raise HTTPException(status_code=403, detail="Not allowed to flush this user quota")
+
+        if user.role in [user_role.ADMIN, user_role.CRAWLER]:
+            raise HTTPException(status_code=403, detail="This user type cannot be flushed")
+
+        user.workspace_quota_bytes = None
+        await self._engine.save(user)
+
+        nexus_response = await nexus_chat_gateway.getInstance().flush_user_workspaces(user_id=str(user.id), current_user=current_user)
+
+        await AuditLogManager.get_instance().register(
+            str(user.tenant_uuid),
+            str(current_user.id),
+            "User workspace quota flushed",
+        )
+
+        return {
+            "message": "User workspace quota flushed successfully",
+            "user_id": str(user.id),
+            "workspace_quota_bytes": None,
+            "nexus": nexus_response.body.decode() if hasattr(nexus_response, "body") else None,
         }

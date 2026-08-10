@@ -12,7 +12,6 @@ from fastapi import HTTPException
 from starlette import status
 from cryptography.fernet import Fernet
 
-from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, visible_alerts
@@ -853,6 +852,7 @@ class TenantManager:
             existing_user = await engine.find_one(db_user_account, (db_user_account.username == username) | (db_user_account.email == email))
             existing_mail = await engine.find_one(db_user_account, (db_user_account.email == email))
 
+            from orion.api.interactive.account_manager.account_manager import AccountManager
             hashed_password = await AccountManager.get_instance().create_tenant_user(existing_user, existing_mail, password)
 
             tenant_uuid = getattr(current_user, "tenant_uuid", None)
@@ -950,3 +950,43 @@ class TenantManager:
             raise e
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Error creating user {str(e)}")
+
+    async def flush_tenant_workspace_quota(self, tenant_id: str, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+        from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
+
+        if current_user.role != user_role.ADMIN:
+            raise HTTPException(status_code=403, detail="Only admin can flush tenant quota")
+
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
+
+        if not tenant:
+            raise HTTPException(status_code=404, detail="Tenant not found")
+
+        if tenant.is_default:
+            raise HTTPException(status_code=403, detail="Default tenant cannot be flushed")
+
+        tenant.workspace_quota_bytes = DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES
+        await self._engine.save(tenant)
+
+        users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
+
+        for user in users:
+            user.workspace_quota_bytes = None
+            await self._engine.save(user)
+
+        nexus_response = await nexus_chat_gateway.getInstance().flush_tenant_workspaces(tenant_id=tenant_id, current_user=current_user)
+
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            "Tenant workspace quota flushed",
+        )
+
+        return {
+            "message": "Tenant workspace quota flushed successfully",
+            "tenant_id": tenant_id,
+            "workspace_quota_bytes": DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES,
+            "assigned_user_workspace_quota_bytes": 0,
+            "nexus": nexus_response.body.decode() if hasattr(nexus_response, "body") else None,
+        }
