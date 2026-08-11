@@ -57,6 +57,10 @@ class auth_manager:
             raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.status == UserStatus.DISABLE:
             raise HTTPException(status_code=401, detail="Account Blocked")
+        
+        if str(client or "").strip().lower() == session_manager.EXTENSION_SESSION_CLIENT:
+            tenant_id = getattr(user, "tenant_uuid", None)
+            
         session_manager.ensure_user_tenant_access(user, tenant_id)
 
         requested_tenant_id = session_manager.tenant_identifier(tenant_id)
