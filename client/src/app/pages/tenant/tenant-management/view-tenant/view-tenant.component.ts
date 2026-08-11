@@ -39,6 +39,7 @@ export class ViewTenantComponent implements OnInit {
   tenantToDelete: any | null = null;
   tenantToFlush: any | null = null;
   tenantQuotaErrors: Record<string, string> = {};
+  showTenantQuotaSummary = false;
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService) {
   }
@@ -448,5 +449,26 @@ export class ViewTenantComponent implements OnInit {
           this.isLoading = false;
         },
       });
+  }
+
+  toggleTenantQuotaSummary(): void {
+    this.showTenantQuotaSummary = !this.showTenantQuotaSummary;
+  }
+
+  getTenantTotalQuotaBytes(tenant: any): number {
+    return Number(tenant.workspace_quota_bytes || 0);
+  }
+
+  getTenantAssignedQuotaBytes(tenant: any): number {
+    return Number(tenant.workspace_assigned_user_quota_bytes || 0);
+  }
+
+  getTenantFreeQuotaBytes(tenant: any): number {
+    return Math.max(this.getTenantTotalQuotaBytes(tenant) - this.getTenantAssignedQuotaBytes(tenant),
+      0);
+  }
+
+  get tenantsWithQuotaAccess(): any[] {
+    return this.filteredTenants.filter(tenant => this.getTenantTotalQuotaBytes(tenant) > 0);
   }
 }
