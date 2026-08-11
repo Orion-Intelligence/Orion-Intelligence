@@ -464,3 +464,15 @@ async def flush_user_workspace_quota(user_id: str, current_user=Depends(get_curr
 )
 async def flush_tenant_workspace_quota(tenant_id: str, current_user=Depends(get_current_user)):
     return await TenantManager.get_instance().flush_tenant_workspace_quota(tenant_id, current_user)
+
+@tenant_routes.get(
+    "/api/tenant/workspace-usage",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[
+        Depends(role_required([user_role.ADMIN, user_role.MEMBER])),
+        Depends(license_required("maintainer")),
+    ],
+)
+async def get_tenant_workspace_usage(current_user=Depends(get_current_user)):
+    return await nexus_chat_gateway.getInstance().get_tenant_workspace_usage(str(current_user.tenant_uuid), current_user)

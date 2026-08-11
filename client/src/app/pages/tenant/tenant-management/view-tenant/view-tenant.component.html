@@ -10,9 +10,55 @@
       </div>
 
       <div class="my-5 h-px w-full bg-[var(--color-divider)]"></div>
-      <div class="mb-3 flex justify-end">
+      <div class="mb-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <button type="button" class="ui-btn ui-btn-primary" (click)="toggleTenantQuotaSummary()">
+          {{ showTenantQuotaSummary ? 'Hide Quota Summary' : 'Quota Summary' }}
+        </button>
+
         <input data-testid="tenant-search-input" type="text" [(ngModel)]="tenantSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 sm:max-w-[320px]">
       </div>
+
+      @if (showTenantQuotaSummary) {
+      <div class="mb-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
+        <div class="mb-3 text-[19px] font-bold text-[var(--color-text1)]">
+          {{ 'Tenant Quota Summary' | translate }}
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full min-w-[760px] table-fixed border-collapse text-left text-sm text-[var(--color-text1)]">
+            <thead class="border-b border-[var(--tenant-line)] text-[11px] uppercase tracking-wide text-[var(--color-text4)]">
+              <tr>
+                <th class="px-3 py-2">{{ 'Tenant' | translate }}</th>
+                <th class="px-3 py-2">{{ 'Email' | translate }}</th>
+                <th class="px-3 py-2">{{ 'Total Quota' | translate }}</th>
+                <th class="px-3 py-2">{{ 'Assigned to Users' | translate }}</th>
+                <th class="px-3 py-2">{{ 'Free Quota' | translate }}</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (tenant of tenantsWithQuotaAccess; track tenant.id || tenant.email) {
+              <tr class="border-b border-[var(--tenant-line)]">
+                <td class="px-3 py-2">{{ tenant.companyName || tenant.name || '-' }}</td>
+                <td class="px-3 py-2">{{ tenant.email || '-' }}</td>
+                <td class="px-3 py-2">{{ formatGb(getTenantTotalQuotaBytes(tenant)) }}</td>
+                <td class="px-3 py-2">{{ formatGb(getTenantAssignedQuotaBytes(tenant)) }}</td>
+                <td class="px-3 py-2">{{ formatGb(getTenantFreeQuotaBytes(tenant)) }}</td>
+              </tr>
+              }
+
+              @if (tenantsWithQuotaAccess.length === 0) {
+              <tr>
+                <td colspan="5" class="px-3 py-8 text-center text-[var(--color-text4)]">
+                  {{ 'No tenant quota found.' | translate }}
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      }
 
       <div class="tenant-table-shell m-0 overflow-visible md:overflow-hidden rounded-[8px] border !border-[var(--tenant-line)] shadow-none">
         @if (!isLoading) {

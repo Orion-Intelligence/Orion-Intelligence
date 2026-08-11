@@ -44,6 +44,9 @@ export class ManageProfileComponent implements OnInit {
   userToFlush: User | null = null;
   isFlushUserConfirmationOpen = signal<boolean>(false);
   userQuotaErrors: Record<string, string> = {};
+  showUserQuotaSummary = false;
+  userWorkspaceUsageById: Record<string, number> = {};
+  isUserQuotaSummaryLoading = false;
 
   constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService) {
   }
@@ -114,6 +117,10 @@ export class ManageProfileComponent implements OnInit {
     const key = this.getUserErrorKey(user);
     const { [key]: _, ...rest } = this.userQuotaErrors;
     this.userQuotaErrors = rest;
+  }
+
+  onUserQuotaChange(user: User): void {
+    this.validateUserWorkspaceQuota(user);
   }
 
   private getTenantWorkspaceQuotaBytes(): number {
@@ -516,5 +523,50 @@ export class ManageProfileComponent implements OnInit {
           this.userToFlush = null;
         }))
       .subscribe();
+  }
+
+  toggleUserQuotaSummary(): void {
+    this.showUserQuotaSummary = !this.showUserQuotaSummary;
+
+    if (this.showUserQuotaSummary) {
+      this.loadUserWorkspaceUsage();
+    }
+  }
+
+  loadUserWorkspaceUsage(): void {
+    this.isUserQuotaSummaryLoading = true;
+
+    this.apiService.get<any>('tenant/workspace-usage')
+      .pipe(finalize(() => (this.isUserQuotaSummaryLoading = false)))
+      .subscribe({
+        next: (res) => {
+          this.userWorkspaceUsageById = res?.usage || {};
+        },
+        error: () => {
+          this.userWorkspaceUsageById = {};
+        },
+      });
+  }
+
+  get usersWithAssignedQuota(): User[] {
+    return this.filteredUsers.filter(user => Number(user.workspace_quota_bytes || 0) > 0);
+  }
+
+  getUserAssignedQuotaBytes(user: User): number {
+    return Number(user.workspace_quota_bytes || 0);
+  }
+
+  getUserUsedQuotaBytes(user: User): number {
+    const userId = String(user.id || '');
+    return Number(this.userWorkspaceUsageById[userId] || 0);
+  }
+
+  getUserFreeQuotaBytes(user: User): number {
+    return Math.max(this.getUserAssignedQuotaBytes(user) - this.getUserUsedQuotaBytes(user),
+      0);
+  }
+
+  formatStorageGb(value?: number | null): string {
+    return `${this.bytesToGb(value)} GB`;
   }
 }
