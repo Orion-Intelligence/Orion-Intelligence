@@ -42,6 +42,7 @@ export interface TenantModel {
     workspace_quota_gb?: number;
 }
 export interface User {
+    id?: string;
     username: string;
     email: string;
     role: string;

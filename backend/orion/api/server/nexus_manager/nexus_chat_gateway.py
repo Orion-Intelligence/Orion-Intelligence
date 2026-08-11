@@ -224,3 +224,18 @@ class nexus_chat_gateway:
             "tenant_quota_bytes": int(tenant_quota_bytes or DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES),
             "user_quota_bytes": int(user_quota_bytes) if user_quota_bytes else None,
         }
+
+    async def flush_user_workspaces(self, user_id: str, current_user):
+        return await self._request(
+            method="POST",
+            path=f"/v1/workspaces/users/{quote(user_id, safe='')}/flush",
+            current_user=current_user,
+        )
+
+
+    async def flush_tenant_workspaces(self, tenant_id: str, current_user):
+        return await self._request(
+            method="POST",
+            path=f"/v1/workspaces/tenants/{quote(tenant_id, safe='')}/flush",
+            current_user=current_user,
+        )

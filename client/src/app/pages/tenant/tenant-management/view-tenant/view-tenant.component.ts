@@ -37,6 +37,8 @@ export class ViewTenantComponent implements OnInit {
   activeIocTenant: any | null = null;
   iocDraft: IocCategory[] = [];
   tenantToDelete: any | null = null;
+  tenantToFlush: any | null = null;
+  tenantQuotaErrors: Record<string, string> = {};
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService) {
   }
@@ -156,6 +158,41 @@ export class ViewTenantComponent implements OnInit {
     window.open(url.toString(), '_blank', 'noopener,noreferrer');
   }
 
+  private getTenantErrorKey(tenant: any): string {
+    return String(tenant.id || tenant.email || tenant.companyName || 'tenant');
+  }
+
+  getTenantQuotaError(tenant: any): string {
+    return this.tenantQuotaErrors[this.getTenantErrorKey(tenant)] || '';
+  }
+
+  private setTenantQuotaError(tenant: any, message: string): void {
+    this.tenantQuotaErrors = {
+      ...this.tenantQuotaErrors,
+      [this.getTenantErrorKey(tenant)]: message,
+    };
+  }
+
+  private clearTenantQuotaError(tenant: any): void {
+    const key = this.getTenantErrorKey(tenant);
+    const { [key]: _, ...rest } = this.tenantQuotaErrors;
+    this.tenantQuotaErrors = rest;
+  }
+
+  private getApiErrorMessage(error: any, fallback: string): string {
+    const detail = error?.error?.detail;
+
+    if (Array.isArray(detail)) {
+      return detail[0]?.msg || fallback;
+    }
+
+    if (typeof detail === 'string') {
+      return detail;
+    }
+
+    return error?.error?.message || error?.message || fallback;
+  }
+
   updateTenant(tenant: any): void {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];
@@ -202,9 +239,12 @@ export class ViewTenantComponent implements OnInit {
           tenant.workspace_quota_gb = this.bytesToGb(tenant.workspace_quota_bytes);
         }
 
+        this.clearTenantQuotaError(tenant);
         this.isLoading = false;
       },
-      error: (_) => {
+      error: (error) => {
+        this.setTenantQuotaError(tenant,
+          this.getApiErrorMessage(error, 'Failed to update tenant quota.'));
         this.isLoading = false;
       },
     });
@@ -373,5 +413,40 @@ export class ViewTenantComponent implements OnInit {
     return isLightTheme
       ? 'bg-rose-100 text-rose-800'
       : 'bg-rose-500/10 text-rose-300';
+  }
+
+  openFlushTenantConfirmation(tenant: any, event?: Event): void {
+    event?.stopPropagation();
+    this.tenantToFlush = tenant;
+  }
+
+  confirmFlushTenantQuota(confirmed: boolean): void {
+    const tenant = this.tenantToFlush;
+    this.tenantToFlush = null;
+
+    if (!confirmed || !tenant) {
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.apiService
+      .post<any>(`tenants/${tenant.id}/workspace-quota/flush`, {})
+      .subscribe({
+        next: (res) => {
+          tenant.workspace_quota_bytes =
+            res?.workspace_quota_bytes ?? this.DEFAULT_WORKSPACE_QUOTA_BYTES;
+
+          tenant.workspace_quota_gb = this.bytesToGb(tenant.workspace_quota_bytes);
+          tenant.workspace_assigned_user_quota_bytes = 0;
+          tenant.workspace_used_bytes = 0;
+          tenant.workspace_remaining_bytes = tenant.workspace_quota_bytes;
+
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+        },
+      });
   }
 }

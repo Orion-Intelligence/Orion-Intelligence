@@ -41,6 +41,9 @@ export class ManageProfileComponent implements OnInit {
   showAddTenantPopup: boolean = false;
   userToDelete: User | null = null;
   isDeleteConfirmationOpen = signal<boolean>(false);
+  userToFlush: User | null = null;
+  isFlushUserConfirmationOpen = signal<boolean>(false);
+  userQuotaErrors: Record<string, string> = {};
 
   constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService) {
   }
@@ -92,16 +95,120 @@ export class ManageProfileComponent implements OnInit {
     this.expandedUserIndex = this.expandedUserIndex === index ? null : index;
   }
 
+  private getUserErrorKey(user: User): string {
+    return String(user.id || user.email || user.username || 'user');
+  }
+
+  getUserQuotaError(user: User): string {
+    return this.userQuotaErrors[this.getUserErrorKey(user)] || '';
+  }
+
+  private setUserQuotaError(user: User, message: string): void {
+    this.userQuotaErrors = {
+      ...this.userQuotaErrors,
+      [this.getUserErrorKey(user)]: message,
+    };
+  }
+
+  clearUserQuotaError(user: User): void {
+    const key = this.getUserErrorKey(user);
+    const { [key]: _, ...rest } = this.userQuotaErrors;
+    this.userQuotaErrors = rest;
+  }
+
+  private getTenantWorkspaceQuotaBytes(): number {
+    const tenant: any = this.appService.userSessionData()?.tenant || {};
+    return Number(tenant.workspace_quota_bytes || 0);
+  }
+
+  private getTenantAssignedUserQuotaBytes(): number {
+    const tenant: any = this.appService.userSessionData()?.tenant || {};
+    return Number(tenant.workspace_assigned_user_quota_bytes || 0);
+  }
+
+  private validateUserWorkspaceQuota(user: User): boolean {
+    this.clearUserQuotaError(user);
+
+    const requestedGb = Number(user.workspace_quota_gb || 0);
+
+    if (!Number.isFinite(requestedGb) || requestedGb < 0) {
+      this.setUserQuotaError(user, 'Workspace quota must be a valid positive number.');
+      return false;
+    }
+
+    const requestedBytes = this.gbToBytes(requestedGb) ?? 0;
+
+    if (requestedBytes === 0) {
+      return true;
+    }
+
+    const tenantQuotaBytes = this.getTenantWorkspaceQuotaBytes();
+
+    if (!tenantQuotaBytes) {
+      return true;
+    }
+
+    const assignedBytes = this.getTenantAssignedUserQuotaBytes();
+    const currentUserBytes = Number(user.workspace_quota_bytes || 0);
+
+    const availableBytes = Math.max(tenantQuotaBytes - Math.max(assignedBytes - currentUserBytes, 0),
+      0);
+
+    if (requestedBytes > availableBytes) {
+      this.setUserQuotaError(user,
+        `User workspace quota cannot exceed available tenant quota. Available: ${this.bytesToGb(availableBytes)} GB.`);
+      return false;
+    }
+
+    return true;
+  }
+
+  private getApiErrorMessage(error: any, fallback: string): string {
+    const detail = error?.error?.detail;
+
+    if (Array.isArray(detail)) {
+      return detail[0]?.msg || fallback;
+    }
+
+    if (typeof detail === 'string') {
+      return detail;
+    }
+
+    return error?.error?.message || error?.message || fallback;
+  }
+
   updateUser(user: User) {
+    if (!this.validateUserWorkspaceQuota(user)) {
+      return;
+    }
+
     if (!user.licenses || user.licenses.length === 0) {
       user.licenses = [LicenseName.FREE];
     }
+
     const payload = this.buildUserUpdatePayload(user);
+
     this.isLoading = true;
-    this.apiService.post('update/user', payload).pipe(switchMap(() => this.nodeResolver.resolve()), finalize(() => (this.isLoading = false))).subscribe({
-      next: (_) => void 0,
-      error: () => void 0
-    });
+
+    this.apiService.post('update/user', payload)
+      .pipe(switchMap(() => this.apiService.post<User[]>('users', new HttpHeaders({}))),
+        tap((data) => {
+          this.users = (data || []).map((user: User) => ({
+            ...user,
+            workspace_quota_gb: this.bytesToGb(user.workspace_quota_bytes),
+          }));
+        }),
+        switchMap(() => this.nodeResolver.resolve()),
+        finalize(() => (this.isLoading = false)))
+      .subscribe({
+        next: (_) => {
+          this.clearUserQuotaError(user);
+        },
+        error: (error) => {
+          this.setUserQuotaError(user,
+            this.getApiErrorMessage(error, 'Failed to update user quota.'));
+        }
+      });
   }
 
   @HostListener('document:click', ['$event'])
@@ -370,5 +477,44 @@ export class ManageProfileComponent implements OnInit {
 
   clossAddTenant() {
     this.showAddTenantPopup = false;
+  }
+
+  flushUserQuota(user: User): void {
+    this.userToFlush = user;
+    this.isFlushUserConfirmationOpen.set(true);
+  }
+
+  confirmFlushUserQuota(value: boolean): void {
+    this.isFlushUserConfirmationOpen.set(false);
+
+    if (!value || !this.userToFlush) {
+      this.userToFlush = null;
+      return;
+    }
+
+    const userId = this.userToFlush.id;
+
+    if (!userId) {
+      this.userToFlush = null;
+      return;
+    }
+
+    this.isLoading = true;
+
+    this.apiService
+      .post(`users/${userId}/workspace-quota/flush`, {})
+      .pipe(switchMap(() => this.apiService.post<User[]>('users', new HttpHeaders({}))),
+        tap((data) => {
+          this.users = (data || []).map((user: User) => ({
+            ...user,
+            workspace_quota_gb: this.bytesToGb(user.workspace_quota_bytes),
+          }));
+        }),
+        switchMap(() => this.nodeResolver.resolve()),
+        finalize(() => {
+          this.isLoading = false;
+          this.userToFlush = null;
+        }))
+      .subscribe();
   }
 }
