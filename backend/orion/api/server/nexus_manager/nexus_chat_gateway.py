@@ -239,3 +239,10 @@ class nexus_chat_gateway:
             path=f"/v1/workspaces/tenants/{quote(tenant_id, safe='')}/flush",
             current_user=current_user,
         )
+
+    async def get_tenant_workspace_usage(self, tenant_id: str, current_user):
+        return await self._request(
+            method="GET",
+            path=f"/v1/workspaces/tenants/{quote(tenant_id, safe='')}/usage",
+            current_user=current_user,
+        )
