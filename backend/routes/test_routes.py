@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
-from fastapi.responses import Response
 from typing import Any
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 from configs.app_dependency import get_current_user, license_required, role_required
@@ -466,14 +465,6 @@ async def test_social_metadata(payload: dict = Body(...)):
     return TestRouteHelper.pending_or_elastic_mock("social_online_presence", "social_online_presence.json")
 
 
-@test_routes.post(
-    "/api/search/stealer/ioc",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_stealer_ioc(payload: dict = Body(...)):
-    return TestRouteHelper.load_elastic_mock("social_stealer_logs.json")
-
-
 def _test_social_extension_result(data: dict):
     return {
         "job_id": "mock-social-extension",
@@ -496,32 +487,6 @@ def _test_social_extension_result(data: dict):
 )
 async def test_social_extension_status():
     return TestRouteHelper.load_elastic_mock("social_extensions.json")["status_response"]
-
-
-@test_routes.get(
-    "/api/social/extensions/download/chrome",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_extension_download_chrome():
-    mock = TestRouteHelper.load_elastic_mock("social_extensions.json")["download"]["chrome"]
-    return Response(
-        content=b"orion social scraper chrome test package\n",
-        media_type=mock["media_type"],
-        headers={"Content-Disposition": f'attachment; filename="{mock["filename"]}"'},
-    )
-
-
-@test_routes.get(
-    "/api/social/extensions/download/firefox",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_extension_download_firefox():
-    mock = TestRouteHelper.load_elastic_mock("social_extensions.json")["download"]["firefox"]
-    return Response(
-        content=b"orion social scraper firefox test package\n",
-        media_type=mock["media_type"],
-        headers={"Content-Disposition": f'attachment; filename="{mock["filename"]}"'},
-    )
 
 
 @test_routes.post(
