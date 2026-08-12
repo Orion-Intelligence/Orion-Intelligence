@@ -103,16 +103,17 @@ class search_model:
     @staticmethod
     async def social_search(model, key):
         try:
+            base_url = (env_handler.get_instance().env("ORION_SOCIAL_API_BASE_URL") or "").rstrip("/")
             async with httpx.AsyncClient() as client:
                 if isinstance(model, dict) and "file_bytes" in model:
                     response = await client.post(
-                        "http://trusted-social-api:8020/social/" + key,
+                        f"{base_url}/social/{key}",
                         files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
                         timeout=120)
                 else:
                     payload = model.model_dump() if hasattr(model, "model_dump") else model
                     response = await client.post(
-                        "http://trusted-social-api:8020/social/" + key,
+                        f"{base_url}/social/{key}",
                         json=payload,
                         timeout=120)
 
