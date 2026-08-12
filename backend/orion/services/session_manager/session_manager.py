@@ -22,6 +22,8 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 class session_manager:
     __instance = None
     __lock = threading.Lock()
+    WEB_SESSION_CLIENT = "web"
+    EXTENSION_SESSION_CLIENT = "extension"
 
     @staticmethod
     def get_instance():
@@ -105,19 +107,7 @@ class session_manager:
             if not session_id:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
 
-            redis_key = f"session:{str(user.id)}"
-            redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
-
-            if redis_sid is None:
-                if user.current_session_id != session_id:
-                    raise HTTPException(status_code=401, detail="Logged out due to multiple active sessions")
-                await self._redis.invoke_trigger(
-                    REDIS_COMMANDS.S_SET_STRING,
-                    [redis_key, session_id, self._session_ttl])
-            else:
-                if redis_sid != user.current_session_id or redis_sid != session_id:
-                    raise HTTPException(status_code=401, detail="Logged out due to multiple active sessions")
-                await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._session_ttl])
+            await self._ensure_active_session(user, session_id, self._session_client(payload), "Logged out due to multiple active sessions")
 
             return user
 
@@ -177,10 +167,12 @@ class session_manager:
 
         session_id = None
         if user and user.role != user_role.CRAWLER and not free:
+            session_client = self._session_client(to_encode)
             session_id = secrets.token_urlsafe(32)
-            user.current_session_id = session_id
-            await self._engine.save(user)
-            redis_key = f"session:{str(user.id)}"
+            if session_client == self.WEB_SESSION_CLIENT:
+                user.current_session_id = session_id
+                await self._engine.save(user)
+            redis_key = self._session_redis_key(user, session_client)
             await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
 
         if session_id:
@@ -314,21 +306,7 @@ class session_manager:
                 if not session_id:
                     raise HTTPException(status_code=401, detail="Invalid token")
 
-                redis_key = f"session:{str(user.id)}"
-                redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
-
-                if redis_sid is None:
-                    if user.current_session_id != session_id:
-                        raise HTTPException(status_code=401, detail="Invalid token")
-                    await self._redis.invoke_trigger(
-                        REDIS_COMMANDS.S_SET_STRING,
-                        [redis_key, session_id, self._session_ttl])
-                else:
-                    if redis_sid != user.current_session_id or redis_sid != session_id:
-                        raise HTTPException(status_code=401, detail="Invalid token")
-                    await self._redis.invoke_trigger(
-                        REDIS_COMMANDS.S_SET_STRING,
-                        [redis_key, redis_sid, self._session_ttl])
+                await self._ensure_active_session(user, session_id, self._session_client(payload), "Invalid token")
 
             role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
             acct_at = maintainer_user.account_verify_at
@@ -348,6 +326,8 @@ class session_manager:
                 new_token_payload = {"sub": username, "exp": base_expiry}
             else:
                 new_token_payload = {"sub": username, "exp": base_expiry, "sid": session_id}
+                if self._session_client(payload) == self.EXTENSION_SESSION_CLIENT:
+                    new_token_payload["client"] = self.EXTENSION_SESSION_CLIENT
 
             new_token = jwt.encode(new_token_payload, CONSTANTS.S_AUTH_SECRET_KEY, algorithm=CONSTANTS.S_AUTH_ALGORITHM)
 
@@ -401,11 +381,47 @@ class session_manager:
             return
 
         user = await self._engine.find_one(db_user_account, db_user_account.username == username)
-        if not user or user.current_session_id != session_id:
+        session_client = self._session_client(payload)
+        if not user:
+            return
+
+        if session_client == self.EXTENSION_SESSION_CLIENT:
+            await self._redis.invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [self._session_redis_key(user, session_client)])
+            return
+
+        if user.current_session_id != session_id:
             return
 
         self.ensure_user_tenant_access(user, tenant_id)
 
         user.current_session_id = None
         await self._engine.save(user)
-        await self._redis.invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [f"session:{str(user.id)}"])
+        await self._redis.invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [self._session_redis_key(user, session_client)])
+
+    async def _ensure_active_session(self, user, session_id: str, session_client: str, invalid_detail: str) -> None:
+        redis_key = self._session_redis_key(user, session_client)
+        redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+
+        if redis_sid is None:
+            if session_client == self.WEB_SESSION_CLIENT and user.current_session_id != session_id:
+                raise HTTPException(status_code=401, detail=invalid_detail)
+            await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
+            return
+
+        if redis_sid != session_id:
+            raise HTTPException(status_code=401, detail=invalid_detail)
+        if session_client == self.WEB_SESSION_CLIENT and redis_sid != user.current_session_id:
+            raise HTTPException(status_code=401, detail=invalid_detail)
+        await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._session_ttl])
+
+    def _session_client(self, payload: dict) -> str:
+        client = str((payload or {}).get("client") or "").strip().lower()
+        if client == self.EXTENSION_SESSION_CLIENT:
+            return self.EXTENSION_SESSION_CLIENT
+        return self.WEB_SESSION_CLIENT
+
+    def _session_redis_key(self, user, session_client: str) -> str:
+        base_key = f"session:{str(user.id)}"
+        if session_client == self.EXTENSION_SESSION_CLIENT:
+            return f"{base_key}:extension"
+        return base_key

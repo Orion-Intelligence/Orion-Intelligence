@@ -171,15 +171,18 @@
                 [platformData]="platformData"
                 [fetchTabs]="getFetchTabs(platformData)"
                 [activeTab]="getActiveTabForPlatform(platformData)"
-                        [loadingStates]="getLoadingStates(platformData)"
-                        [onlinePresenceSearchTerm]="getOnlinePresenceSearchTerm(platformData)"
-                        (tabSelected)="onProfileTabSelected(platformData, $event)"
-                        (refetchTab)="onProfileTabRefetch(platformData, $event)"
-                        (postCursorFetch)="fetchPostCursorInline.emit($event)"
-                        (imageCursorFetch)="fetchImageCursorInline.emit($event)"
-                        (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
-                        (onlinePresenceSearch)="searchOnlinePresence(platformData)">
-                      </app-social-profile-tabs-section>
+                [extensionStatusData]="extensionStatus()"
+                [loadingStates]="getLoadingStates(platformData)"
+                [onlinePresenceSearchTerm]="getOnlinePresenceSearchTerm(platformData)"
+                (tabSelected)="onProfileTabSelected(platformData, $event)"
+                (refetchTab)="onProfileTabRefetch(platformData, $event)"
+                (postCursorFetch)="fetchPostCursorInline.emit($event)"
+                (extensionPostCursorFetch)="fetchExtensionPostCursorInline.emit($event)"
+                (extensionStatusRefreshed)="onExtensionStatusRefreshed($event)"
+                (imageCursorFetch)="fetchImageCursorInline.emit($event)"
+                (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
+                (onlinePresenceSearch)="searchOnlinePresence(platformData)">
+              </app-social-profile-tabs-section>
             } @else {
               <app-social-default-list-section
                 [user]="user"

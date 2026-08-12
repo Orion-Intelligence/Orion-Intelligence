@@ -9,7 +9,7 @@ export interface FeedUser {
   allPlatforms: PlatformResult[];
 }
 
-export type FetchTabKey = 'details' | 'posts' | 'videos' | 'shorts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
+export type FetchTabKey = 'details' | 'posts' | 'extension' | 'extensionDetails' | 'extensionPosts' | 'extensionShorts' | 'videos' | 'shorts' | 'images' | 'connections' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 export type PostContentTabKey = Extract<FetchTabKey, 'posts' | 'videos' | 'shorts'>;
 export type FetchMergeMode = 'prepend' | 'append' | 'update';
 export type PostFetchMergeMode = FetchMergeMode;
@@ -24,6 +24,7 @@ export interface PostCursorFetchRequest {
   maxComments?: number;
   mergeMode: PostFetchMergeMode;
   commentsOnly?: boolean;
+  remoteFetch?: boolean;
 }
 
 export interface ImageCursorFetchRequest {
@@ -36,6 +37,22 @@ export interface FetchTab {
   key: FetchTabKey;
   label: string;
   icon: string;
+}
+
+export interface SocialExtensionStatus {
+  online: number;
+  backend_url?: string;
+  error?: string;
+  detail?: string;
+  extensions: Array<{
+    extension_id: string;
+    status: string;
+    platforms: string[];
+    commands: string[];
+    connected_at: string;
+    last_seen_at: string;
+    active_job_id: string | null;
+  }>;
 }
 
 export interface OnlinePresenceFetchRequest {
@@ -65,7 +82,7 @@ export interface DeleteConfirmationData {
   message: string;
 }
 
-export type FetchStateKey = 'profile' | 'posts' | 'videos' | 'shorts' | 'platformImages' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
+export type FetchStateKey = 'profile' | 'posts' | 'videos' | 'shorts' | 'platformImages' | 'extensionProfile' | 'extensionPosts' | 'extensionShorts' | 'followers' | 'following' | 'onlinePresence' | 'stealerLogs';
 
 export type UpdateStateFn = (updater: (state: SocialGraphState) => void) => void;
 

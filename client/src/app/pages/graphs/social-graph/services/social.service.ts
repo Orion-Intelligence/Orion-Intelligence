@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject, of } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
-import { Job, PlatformResult, ScanEvent } from '../../../../shared/model/social/social-scan.models';
+import { Job, PlatformResult, ScanEvent, SocialExtensionFetchError, SocialPost } from '../../../../shared/model/social/social-scan.models';
 import { SocialScanService } from '../../shared/services/social-scan.service';
 import type { FetchMergeMode, FetchStateKey, FetchTabKey, NotificationType, ScanJobOptions, UpdateStateFn } from '../models/social-graph.models';
 import { SocialNormalizationUtil } from '../utils/social-normalization.util';
@@ -99,6 +99,10 @@ export class SocialService {
     return this.scanService.fetchProfileInfo(platform, username);
   }
 
+  fetchExtensionBundle(platform: string, username: string): ReturnType<SocialScanService['fetchExtensionBundle']> {
+    return this.scanService.fetchExtensionBundle(platform, username);
+  }
+
   fetchPlatformImages(platform: string, username: string, maxImages?: number): ReturnType<SocialScanService['fetchPlatformImages']> {
     return this.scanService.fetchPlatformImages(platform, username, maxImages);
   }
@@ -107,12 +111,20 @@ export class SocialService {
     return this.scanService.fetchSocialPosts(platform, username, hashId, maxPosts);
   }
 
+  fetchExtensionSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 20, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0, socialDataType = 'posts', maxComments = 25, commentOffset = 0): ReturnType<SocialScanService['fetchExtensionSocialPosts']> {
+    return this.scanService.fetchExtensionSocialPosts(platform, username, hashId, maxPosts, socialDataType, maxComments, commentOffset, postOffset, existingPostUrls, existingPostsCount);
+  }
+
   fetchSocialVideos(platform: string, username: string, hashId?: string, maxVideos?: number): ReturnType<SocialScanService['fetchSocialVideos']> {
     return this.scanService.fetchSocialVideos(platform, username, hashId, maxVideos);
   }
 
   fetchSocialShorts(platform: string, username: string, hashId?: string, maxShorts?: number): ReturnType<SocialScanService['fetchSocialShorts']> {
     return this.scanService.fetchSocialShorts(platform, username, hashId, maxShorts);
+  }
+
+  fetchExtensionSocialShorts(platform: string, username: string, maxShorts = 5, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0): ReturnType<SocialScanService['fetchExtensionSocialShorts']> {
+    return this.scanService.fetchExtensionSocialShorts(platform, username, maxShorts, postOffset, existingPostUrls, existingPostsCount);
   }
 
   fetchSocialPostComments(platform: string, username: string, tabKey: 'posts' | 'videos' | 'shorts', hashId?: string, commentOffset?: number, maxComments?: number): ReturnType<SocialScanService['fetchSocialPostComments']> {
@@ -141,6 +153,10 @@ export class SocialService {
 
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): ReturnType<SocialScanService['fetchProfileMetadataTokens']> {
     return this.scanService.fetchProfileMetadataTokens(tokens, username, platform);
+  }
+
+  fetchExtensionStatus(): ReturnType<SocialScanService['fetchExtensionStatus']> {
+    return this.scanService.fetchExtensionStatus();
   }
 
   initiateScan(username: string, opts: ScanJobOptions): void {
@@ -245,11 +261,60 @@ export class SocialService {
           this.stateStore.setFetching(stateKey, key, false);
           cancelMap.delete(key);
         },
-        error: () => {
+        error: (error) => {
+          if (this.isExtensionStateKey(stateKey)) {
+            this.storeExtensionFetchError(platformResult, error, updateState, destroyRef);
+          }
           this.stateStore.setFetching(stateKey, key, false);
           cancelMap.delete(key);
         }
       });
+  }
+
+  private storeExtensionFetchError(platformResult: PlatformResult, error: any, updateState: UpdateStateFn, destroyRef: ScanJobOptions['destroyRef']): void {
+    const extensionError = this.normalizeExtensionFetchError(error, platformResult.platform);
+    let updatedProfiles: PlatformResult[] | null = null;
+    updateState(tabState => {
+      tabState.scanResults.update(currentMap => {
+        const newMap = new Map(currentMap);
+        const userResults = newMap.get(platformResult.keyUsername)?.map(platform => this.isSamePlatformIdentity(platform, platformResult)
+          ? { ...platform, extensionError }
+          : platform);
+        if (userResults) {
+          newMap.set(platformResult.keyUsername, userResults);
+          updatedProfiles = userResults;
+        }
+        return newMap;
+      });
+    });
+    if (updatedProfiles) {
+      this.saveSocialProfiles(platformResult.keyUsername, updatedProfiles, true).pipe(takeUntilDestroyed(destroyRef)).subscribe();
+    }
+  }
+
+  private normalizeExtensionFetchError(error: any, fallbackPlatform: string): SocialExtensionFetchError {
+    const result = error?.result && typeof error.result === 'object' ? error.result : {};
+    const message = result?.message || error?.message || result?.error || 'Extension job failed.';
+    return {
+      error_code: result?.error_code || error?.error_code || null,
+      message: String(message),
+      login_url: this.safeHttpUrl(result?.login_url || error?.login_url),
+      platform: result?.error_platform || result?.platform || error?.platform || fallbackPlatform || null,
+    };
+  }
+
+  private safeHttpUrl(value: any): string | null {
+    const url = String(value || '').trim();
+    if (!url) {
+      return null;
+    }
+    try {
+      const parsed = new URL(url);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? url : null;
+    }
+    catch {
+      return null;
+    }
   }
 
   cancelPlatformFetch(platformData: PlatformResult, stateKey: FetchStateKey, cancelMap: Map<string, Subject<void>>): void {
@@ -343,7 +408,19 @@ export class SocialService {
   }
 
   private buildFetchedPlatformData(platform: PlatformResult, stateKey: FetchStateKey, data: any, hasData: boolean, mergeMode?: FetchMergeMode): Partial<PlatformResult> {
-    const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
+    if (stateKey === 'extensionProfile' && data && typeof data === 'object' && ('profile' in data || 'posts' in data || 'images' in data)) {
+      return {
+        extensionProfileDetails: data.profile ?? null,
+        extensionPosts: this.normalizeFetchedPosts(data.posts),
+        extensionVideos: this.normalizeFetchedPosts(data.videos),
+        extensionShorts: this.normalizeFetchedPosts(data.shorts),
+        extensionImages: this.normalizeFetchedImages(data.images),
+        extensionFollowers: this.normalizeFetchedUsernames(data.followers),
+        extensionFollowing: this.normalizeFetchedUsernames(data.following),
+        extensionError: null,
+      };
+    }
+    const propertyMap = { profile: 'profileDetails', posts: 'posts', videos: 'videos', shorts: 'shorts', platformImages: 'images', extensionProfile: 'extensionProfileDetails', extensionPosts: 'extensionPosts', extensionShorts: 'extensionShorts', followers: 'followers_list', following: 'following_list', onlinePresence: 'onlinePresence', stealerLogs: 'stealerLogs' };
     const propertyName = (propertyMap as any)[stateKey];
     if (mergeMode && this.isPostStateKey(stateKey)) {
       if (!hasData || !Array.isArray(data)) {
@@ -355,24 +432,84 @@ export class SocialService {
       if (stateKey === 'posts') {
         mergedData.post_connections = this.extractConnections(merged);
       }
+      if (this.isExtensionStateKey(stateKey)) {
+        mergedData.extensionError = null;
+      }
       return mergedData;
     }
     if (mergeMode && stateKey === 'platformImages') {
       if (!hasData || !Array.isArray(data)) {
         return {};
       }
-      const existing = Array.isArray(platform.images) ? platform.images : [];
-      return { images: this.mergeImageItems(existing, data, mergeMode) };
+      const existing = Array.isArray((platform as any)[propertyName]) ? (platform as any)[propertyName] : [];
+      const mergedImages = { [propertyName]: this.mergeImageItems(existing, data, mergeMode) } as Partial<PlatformResult>;
+      return mergedImages;
     }
     const newData: Partial<PlatformResult> = { [propertyName]: hasData ? data : null } as Partial<PlatformResult>;
-    if (stateKey === 'posts') {
+    if (stateKey === 'posts' || stateKey === 'extensionPosts') {
       newData.post_connections = hasData ? this.extractConnections(data) : null;
+    }
+    if (this.isExtensionStateKey(stateKey)) {
+      newData.extensionError = null;
     }
     return newData;
   }
 
-  private isPostStateKey(stateKey: FetchStateKey): stateKey is 'posts' | 'videos' | 'shorts' {
-    return stateKey === 'posts' || stateKey === 'videos' || stateKey === 'shorts';
+  private isPostStateKey(stateKey: FetchStateKey): stateKey is 'posts' | 'videos' | 'shorts' | 'extensionPosts' | 'extensionShorts' {
+    return ['posts', 'videos', 'shorts', 'extensionPosts', 'extensionShorts'].includes(stateKey);
+  }
+
+  private isExtensionStateKey(stateKey: FetchStateKey): boolean {
+    return stateKey.startsWith('extension');
+  }
+
+  private normalizeFetchedImages(value: any): any[] {
+    return Array.isArray(value)
+      ? value.map((image: any) => ({
+        image_url: image?.image_url || image?.media_url || image?.thumbnail || '',
+        thumbnail: image?.thumbnail || image?.image_url || image?.media_url || '',
+        title: image?.title || image?.caption || image?.text || 'Image result',
+        source: image?.source || image?.source_url || '',
+        source_url: image?.source_url || '',
+      })).filter((image: any) => image.image_url || image.thumbnail)
+      : [];
+  }
+
+  private normalizeFetchedPosts(value: any): SocialPost[] {
+    return Array.isArray(value)
+      ? value
+        .filter(post => SocialNormalizationUtil.isUsableSocialPost(post))
+        .map(post => SocialNormalizationUtil.normalizeSocialPost(post))
+      : [];
+  }
+
+  private normalizeFetchedUsernames(value: any): string[] {
+    const items = Array.isArray(value)
+      ? value
+      : Array.isArray(value?.followers)
+        ? value.followers
+        : Array.isArray(value?.following)
+          ? value.following
+          : [];
+    const seen = new Set<string>();
+    const result: string[] = [];
+    for (const item of items) {
+      const username = this.extractUsernameValue(item);
+      const key = username.toLowerCase();
+      if (!username || seen.has(key)) {
+        continue;
+      }
+      seen.add(key);
+      result.push(username);
+    }
+    return result;
+  }
+
+  private extractUsernameValue(value: any): string {
+    const rawValue = typeof value === 'object' && value !== null
+      ? SocialNormalizationUtil.firstValue(value.username, value.user, value.handle, value.name, value.sender_name)
+      : value;
+    return String(rawValue || '').trim().replace(/^@+/, '');
   }
 
   private mergePostItems(existing: any[], incoming: any[], mergeMode: FetchMergeMode): any[] {

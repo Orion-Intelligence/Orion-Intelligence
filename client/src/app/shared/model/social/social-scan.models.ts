@@ -22,12 +22,20 @@ export interface SocialImage {
     thumbnail: string;
     title: string;
     source: string;
+    source_url?: string;
 }
 export interface SocialPostComment {
     sender_name?: string;
     date?: string;
     likes?: string;
     text: string;
+}
+export interface SocialPostHateSpeech {
+    is_hate_speech: boolean;
+    label: string;
+    confidence: number;
+    explanation?: string | null;
+    model?: string;
 }
 export interface SocialPost {
     hash_id?: string;
@@ -38,12 +46,14 @@ export interface SocialPost {
     source?: string;
     likes: string;
     comments: string;
+    collected_comments_count?: string;
     comment_items?: string[];
     comment_details?: SocialPostComment[];
     shares: string;
     views: string;
     media_type: string;
     media_url: string;
+    hate_speech?: SocialPostHateSpeech | null;
 }
 export type SocialResultSource = 'normal' | 'darkweb';
 export interface SocialOnlinePresenceResult {
@@ -59,6 +69,12 @@ export interface SocialOnlinePresenceResult {
 }
 export interface SocialStealerLogRecord {
     [key: string]: any;
+}
+export interface SocialExtensionFetchError {
+    error_code?: string | null;
+    message?: string | null;
+    login_url?: string | null;
+    platform?: string | null;
 }
 export const VERIFIED_SOCIAL_PLATFORM_KEYS = [
   'blogger',
@@ -114,6 +130,14 @@ export interface PlatformResult {
     posts?: SocialPost[] | null;
     videos?: SocialPost[] | null;
     shorts?: SocialPost[] | null;
+    extensionProfileDetails?: ProfileDetails | null;
+    extensionPosts?: SocialPost[] | null;
+    extensionVideos?: SocialPost[] | null;
+    extensionShorts?: SocialPost[] | null;
+    extensionImages?: SocialImage[] | null;
+    extensionFollowers?: string[] | null;
+    extensionFollowing?: string[] | null;
+    extensionError?: SocialExtensionFetchError | null;
     post_connections?: string[] | null;
     images?: SocialImage[] | null;
     followers_list?: string[] | null;

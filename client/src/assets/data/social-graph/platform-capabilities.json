@@ -35,9 +35,10 @@
     ]
   },
   "twitter": {
-    "disallow": [
-      "comments"
-    ]
+    "allow": ["posts", "comments"]
+  },
+  "x": {
+    "allow": ["posts", "comments"]
   },
   "youtube": {
     "allow": [

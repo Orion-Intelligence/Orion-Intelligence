@@ -51,12 +51,16 @@ class auth_manager:
         return user
 
     @staticmethod
-    async def login(mail: str, password: str, free=False, tenant_id=None):
+    async def login(mail: str, password: str, free=False, tenant_id=None, client: str = "web"):
         user = await auth_manager.get_instance().authenticate_user(mail, password)
         if not user:
             raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.status == UserStatus.DISABLE:
             raise HTTPException(status_code=401, detail="Account Blocked")
+        
+        if str(client or "").strip().lower() == session_manager.EXTENSION_SESSION_CLIENT:
+            tenant_id = getattr(user, "tenant_uuid", None)
+            
         session_manager.ensure_user_tenant_access(user, tenant_id)
 
         requested_tenant_id = session_manager.tenant_identifier(tenant_id)
@@ -115,8 +119,11 @@ class auth_manager:
         else:
             access_token_expires = timedelta(minutes=30)
 
+        token_data = {"sub": user.username}
+        if str(client or "").strip().lower() == session_manager.EXTENSION_SESSION_CLIENT:
+            token_data["client"] = session_manager.EXTENSION_SESSION_CLIENT
         access_token, role = await session_manager.get_instance().create_access_token(
-            data={"sub": user.username}, expires_delta=access_token_expires, free=free)
+            data=token_data, expires_delta=access_token_expires, free=free)
 
         await AuditLogManager.get_instance().register(
             str(user.tenant_uuid), str(user.id), "User login")

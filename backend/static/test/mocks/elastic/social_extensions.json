@@ -1,0 +1,163 @@
+{
+  "status_response": {
+    "online": 1,
+    "backend_url": "ws://127.0.0.1:8080/api/social/extensions/ws",
+    "extensions": [
+      {
+        "extension_id": "test-extension",
+        "status": "online",
+        "platforms": ["instagram", "facebook", "x", "youtube"],
+        "commands": ["profile", "posts"],
+        "connected_at": "2026-07-21T00:00:00Z",
+        "last_seen_at": "2026-07-21T00:00:05Z",
+        "active_job_id": null
+      }
+    ]
+  },
+  "cypress_profile_result": {
+    "platform": "twitter",
+    "username": "superman0011",
+    "profile": {
+      "display_name": "Extension Clark Kent",
+      "bio": "Browser extension profile metadata",
+      "followers_count": 42,
+      "following_count": 7
+    },
+    "posts": [
+      {
+        "caption": "Metropolis skyline extension post",
+        "title": "Metropolis skyline extension post",
+        "text": "Metropolis extension skyline",
+        "url": "https://x.com/superman0011/status/1001",
+        "post_url": "https://x.com/superman0011/status/1001",
+        "media_url": "https://example.test/social/extension-skyline.jpg",
+        "image_url": "https://example.test/social/extension-skyline.jpg",
+        "likes_count": 12,
+        "comments_count": 3,
+        "loaded_comments": ["loislane | Great update"]
+      }
+    ],
+    "images": [
+      {
+        "image_url": "https://example.test/social/extension-skyline.jpg",
+        "source_url": "https://x.com/superman0011/status/1001",
+        "title": "Metropolis skyline extension post"
+      }
+    ],
+    "followers": ["loislane"],
+    "following": ["dailyplanet"]
+  },
+  "cypress_more_posts_result": {
+    "posts": [
+      {
+        "caption": "Metropolis extension load more post",
+        "title": "Metropolis extension load more post",
+        "text": "Metropolis extension load more post",
+        "url": "https://x.com/superman0011/status/1002",
+        "post_url": "https://x.com/superman0011/status/1002",
+        "media_url": "https://example.test/social/extension-load-more.jpg",
+        "image_url": "https://example.test/social/extension-load-more.jpg",
+        "likes_count": 6,
+        "comments_count": 1
+      }
+    ]
+  },
+  "profile_default_request": {
+    "platform": "Instagram",
+    "username": "orion_profile"
+  },
+  "profile_default_expected": {
+    "platform": "instagram",
+    "username": "orion_profile",
+    "use_extension": true,
+    "max_posts": 20,
+    "max_comments": 25,
+    "max_followers": 1000,
+    "max_following": 1000
+  },
+  "profile_explicit_request": {
+    "platform": "Facebook",
+    "username": "orion_profile",
+    "max_posts": 6,
+    "max_comments": 9,
+    "max_followers": 250,
+    "max_following": 300
+  },
+  "profile_explicit_expected": {
+    "platform": "facebook",
+    "username": "orion_profile",
+    "use_extension": true,
+    "max_posts": 6,
+    "max_comments": 9,
+    "max_followers": 250,
+    "max_following": 300
+  },
+  "posts_default_request": {
+    "platform": "Instagram",
+    "username": "orion_profile",
+    "post_offset": 10,
+    "existing_posts_count": 10,
+    "existing_post_urls": [
+      "https://www.instagram.com/p/default-a/",
+      "https://www.instagram.com/p/default-b/"
+    ],
+    "social_data_type": "posts"
+  },
+  "posts_default_expected": {
+    "platform": "instagram",
+    "username": "orion_profile",
+    "use_extension": true,
+    "max_posts": 20,
+    "max_comments": 25,
+    "post_offset": 10,
+    "existing_posts_count": 10,
+    "existing_post_urls": [
+      "https://www.instagram.com/p/default-a/",
+      "https://www.instagram.com/p/default-b/"
+    ],
+    "comment_offset": 0,
+    "social_data_type": "posts",
+    "hash_id": null
+  },
+  "posts_explicit_request": {
+    "platform": "X",
+    "username": "orion_profile",
+    "max_posts": 5,
+    "max_comments": 12,
+    "post_offset": 20,
+    "existing_posts_count": 20,
+    "existing_post_urls": [
+      "https://x.com/orion_profile/status/1001"
+    ],
+    "comment_offset": 4,
+    "social_data_type": "comments",
+    "hash_id": "https://x.com/orion_profile/status/1001"
+  },
+  "posts_explicit_expected": {
+    "platform": "x",
+    "username": "orion_profile",
+    "use_extension": true,
+    "max_posts": 5,
+    "max_comments": 12,
+    "post_offset": 20,
+    "existing_posts_count": 20,
+    "existing_post_urls": [
+      "https://x.com/orion_profile/status/1001"
+    ],
+    "comment_offset": 4,
+    "social_data_type": "comments",
+    "hash_id": "https://x.com/orion_profile/status/1001"
+  },
+  "download": {
+    "chrome": {
+      "browser": "chrome",
+      "filename": "orion-social-scraper-chrome.zip",
+      "media_type": "application/zip"
+    },
+    "firefox": {
+      "browser": "firefox",
+      "filename": "orion-social-scraper-firefox.xpi",
+      "media_type": "application/x-xpinstall"
+    }
+  }
+}

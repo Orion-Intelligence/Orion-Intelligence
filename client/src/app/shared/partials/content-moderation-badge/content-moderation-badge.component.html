@@ -1,0 +1,17 @@
+@if (config; as cfg) {
+<div class="group relative mb-2 flex w-fit items-center gap-1.5 rounded-[6px] border px-2 py-1 text-[10px] font-semibold transition-colors" [ngClass]="cfg.colorClasses" tabindex="0" [attr.aria-label]="cfg.tooltipText">
+  <i [class]="cfg.iconClass" aria-hidden="true"></i>
+  <span>{{ cfg.displayText }}</span>
+
+  <div class="invisible absolute bottom-full left-0 z-50 mb-2 w-max max-w-xs rounded-md bg-gray-900 px-3 py-2 text-xs font-normal text-white opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 group-focus:visible group-focus:opacity-100 [body.light-theme_&]:bg-gray-800">
+    <p class="mb-1 font-semibold">{{ cfg.tooltipText }}</p>
+    <p class="mb-1 text-[11px] text-gray-300">Confidence: {{ confidenceText }}</p>
+    @if (moderation()?.explanation) {
+      <p class="mb-1 text-[10px] text-gray-400">Reason: {{ moderation()?.explanation }}</p>
+    }
+    <p class="mb-0 mt-2 text-[9px] text-gray-500">Model: {{ moderation()?.model || 'unknown' }}</p>
+
+    <div class="absolute left-4 top-full -mt-px border-[5px] border-transparent border-t-gray-900 [body.light-theme_&]:border-t-gray-800"></div>
+  </div>
+</div>
+}

@@ -66,11 +66,12 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
 
         try:
             if hostname == "trusted-web-main":
-                user = await session_manager.get_instance().get_current_user(token_from_request(request))
-                tenant = await engine.find_one(
-                    db_tenant_model,
-                    db_tenant_model.id == ObjectId(str(user.tenant_uuid)),
-                )
+                token = token_from_request(request)
+                if token:
+                    user = await session_manager.get_instance().get_current_user(token)
+                    tenant = await engine.find_one(db_tenant_model,db_tenant_model.id == ObjectId(str(user.tenant_uuid)),)
+                else:
+                    tenant = await engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
             elif is_default_tenant:
                 tenant = await engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
             else:

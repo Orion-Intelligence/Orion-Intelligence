@@ -4,10 +4,14 @@ import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
 import { ApiService } from '../../../../shared/services/api.service';
 import { PlatformResult, ProfileDetails, ScanEvent, SocialImage, SocialPost, SocialStoredProfile } from '../../../../shared/model/social/social-scan.models';
 import { SocialNormalizationUtil } from '../../social-graph/utils/social-normalization.util';
+import type { SocialExtensionStatus } from '../../social-graph/models/social-graph.models';
 interface ApiEnvelope<T> {
     status?: string;
     message?: any;
     result?: T;
+    error_code?: string;
+    login_url?: string;
+    error_platform?: string;
 }
 @Injectable({
   providedIn: 'root'
@@ -51,7 +55,7 @@ export class SocialScanService {
     const intervalMs = opts.intervalMs ?? 2000;
     return timer(initialDelayMs, intervalMs).pipe(switchMap(() => opts.request()), map(res => {
       if (res?.status === 'error') {
-        throw res.message || 'error';
+        throw this.buildPollingError(res);
       }
       return res;
     }), tap(res => {
@@ -59,6 +63,17 @@ export class SocialScanService {
         opts.onPending?.(res);
       }
     }), filter(res => opts.isReady(res)), take(1), map(res => opts.mapResult(res)), catchError(err => throwError(() => err)));
+  }
+
+  private buildPollingError(res: ApiEnvelope<any>): Error {
+    const result = res?.result && typeof res.result === 'object' ? res.result as any : {};
+    const message = result?.message || res?.message || result?.error || 'error';
+    const error = new Error(String(message));
+    (error as any).error_code = result?.error_code || res?.error_code || null;
+    (error as any).login_url = result?.login_url || res?.login_url || null;
+    (error as any).platform = result?.error_platform || result?.platform || res?.error_platform || null;
+    (error as any).result = result;
+    return error;
   }
 
   private emitPendingProgress(subscriber: any, res: any): void {
@@ -389,10 +404,20 @@ export class SocialScanService {
             }>>('social/profile', { platform: platformKey, username }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => {
-        const result = res.result as any;
+        const result = this.unwrapExtensionResult(res.result as any);
         const profile = Array.isArray(result) ? result[0] : result?.profile ?? result ?? {};
         return { profile: profile as ProfileDetails };
       },
+    });
+  }
+
+  fetchExtensionBundle(platform: string, username: string, maxPosts = 20, maxComments = 25, maxFollowers = 1000, maxFollowing = 1000, maxShorts = 20): Observable<{
+        extensionBundle: any;
+    }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<any>>('social/extensions/profile', { platform, username, max_posts: maxPosts, max_shorts: maxShorts, max_comments: maxComments, max_followers: maxFollowers, max_following: maxFollowing }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ extensionBundle: this.unwrapExtensionResult(res.result as any) }),
     });
   }
 
@@ -405,7 +430,7 @@ export class SocialScanService {
                 images: SocialImage[];
             }>>('social/online/images', { platform: platformKey, username, max_images: maxImages }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => ({ images: (res.result as any)?.images ?? [] }),
+      mapResult: (res) => ({ images: this.unwrapExtensionResult(res.result as any)?.images ?? [] }),
     });
   }
 
@@ -417,6 +442,18 @@ export class SocialScanService {
       request: () => this.api.post<ApiEnvelope<SocialPost[] | {
                 posts: SocialPost[];
             }>>('social/posts', { platform: platformKey, username, max_posts: maxPosts, max_comments: maxComments, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
+    });
+  }
+
+  fetchExtensionSocialPosts(platform: string, username: string, hashId?: string, maxPosts = 20, socialDataType = 'posts', maxComments = 25, commentOffset = 0, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0): Observable<{
+        posts: SocialPost[];
+    }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
+                posts: SocialPost[];
+            }>>('social/extensions/posts', { platform, username, max_posts: maxPosts, max_comments: maxComments, post_offset: postOffset, existing_posts_count: existingPostsCount, existing_post_urls: existingPostUrls, comment_offset: commentOffset, social_data_type: socialDataType, hash_id: hashId || undefined }),
       isReady: (res) => !!res && 'result' in res,
       mapResult: (res) => ({ posts: this.normalizeSocialPosts(res.result, 'posts') }),
     });
@@ -448,6 +485,28 @@ export class SocialScanService {
     });
   }
 
+  fetchExtensionSocialShorts(platform: string, username: string, maxShorts = 5, postOffset = 0, existingPostUrls: string[] = [], existingPostsCount = 0, maxComments = 25): Observable<{
+        shorts: SocialPost[];
+    }> {
+    return this.pollForResult({
+      request: () => this.api.post<ApiEnvelope<SocialPost[] | {
+                shorts: SocialPost[];
+            }>>('social/shorts', {
+              platform,
+              username,
+              max_shorts: maxShorts,
+              max_comments: maxComments,
+              post_offset: postOffset,
+              existing_posts_count: existingPostsCount,
+              existing_post_urls: existingPostUrls,
+              social_data_type: 'shorts',
+              use_extension: true,
+            }),
+      isReady: (res) => !!res && 'result' in res,
+      mapResult: (res) => ({ shorts: this.normalizeSocialPosts(res.result, 'shorts') }),
+    });
+  }
+
   fetchSocialPostComments(platform: string, username: string, tabKey: 'posts' | 'videos' | 'shorts', hashId?: string, commentOffset = 0, maxComments = 10): Observable<{
         posts?: SocialPost[];
         videos?: SocialPost[];
@@ -469,7 +528,7 @@ export class SocialScanService {
     return this.pollForResult({
       request: () => this.api.post<any>('social/followers', { platform: platformKey, username, max_followers: 1000 }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => ({ followers: (res.result as any)?.followers ?? [] }),
+      mapResult: (res) => ({ followers: this.unwrapExtensionResult(res.result as any)?.followers ?? [] }),
     });
   }
 
@@ -480,8 +539,18 @@ export class SocialScanService {
     return this.pollForResult({
       request: () => this.api.post<any>('social/following', { platform: platformKey, username, max_following: 1000 }),
       isReady: (res) => !!res && 'result' in res,
-      mapResult: (res) => ({ following: (res.result as any)?.following ?? [] }),
+      mapResult: (res) => ({ following: this.unwrapExtensionResult(res.result as any)?.following ?? [] }),
     });
+  }
+
+  fetchExtensionStatus(): Observable<SocialExtensionStatus> {
+    return this.api.get<SocialExtensionStatus>('social/extensions/status').pipe(map(status => ({
+      online: Number(status?.online || 0),
+      backend_url: status?.backend_url,
+      error: status?.error,
+      detail: status?.detail,
+      extensions: Array.isArray(status?.extensions) ? status.extensions : []
+    })));
   }
 
   fetchStealerLogsByIdentity(query: string): Observable<any[]> {
@@ -561,16 +630,29 @@ export class SocialScanService {
   }
 
   private normalizeSocialPosts(result: any, key: 'posts' | 'videos' | 'shorts'): SocialPost[] {
+    result = this.unwrapExtensionResult(result);
     const items = Array.isArray(result)
       ? result
       : Array.isArray(result?.[key])
         ? result[key]
-        : Array.isArray(result?.data)
-          ? result.data
-          : [];
+        : Array.isArray(result?.posts)
+          ? result.posts
+          : Array.isArray(result?.data)
+            ? result.data
+            : [];
     return items
       .filter((post: any) => SocialNormalizationUtil.isUsableSocialPost(post))
       .map((post: any) => SocialNormalizationUtil.normalizeSocialPost(post));
+  }
+
+  private unwrapExtensionResult(result: any): any {
+    if (result?.executor === 'extension' && result?.data !== undefined) {
+      return result.data;
+    }
+    if (result?.platform === 'extension' && result?.data !== undefined) {
+      return result.data;
+    }
+    return result;
   }
 
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<{

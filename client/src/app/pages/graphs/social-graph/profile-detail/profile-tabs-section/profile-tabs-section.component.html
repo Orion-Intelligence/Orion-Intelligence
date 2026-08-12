@@ -111,11 +111,298 @@
 
           @if (activeTab() === 'posts') {
             <app-social-profile-posts-section
-              [platformData]="platformData"
-              [isLoading]="isTabLoading('posts')"
-              (refetch)="refetchTab.emit($event)"
-              (cursorFetch)="postCursorFetch.emit($event)">
+              [platformData]="getPostsTabPlatformData(platformData)"
+              [isLoading]="isPostsTabLoading(platformData)"
+              [showLoadMoreWhenDone]="isExtensionPostExecutorReady(platformData)"
+              (refetch)="handlePostsTabRefetch($event)"
+              (cursorFetch)="handlePostsTabCursorFetch($event)">
             </app-social-profile-posts-section>
+          }
+
+          @if (activeTab() === 'extension') {
+            <div data-testid="social-tab-panel-extension" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Extension Executor</p>
+                <div class="flex flex-shrink-0 flex-wrap items-center gap-2">
+                  <a data-testid="social-extension-download-chrome" href="/api/social/extensions/download/chrome" download="orion-social-scraper-chrome.zip" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-download text-[11px]"></i>
+                    Chrome
+                  </a>
+                  <a data-testid="social-extension-download-firefox" href="/api/social/extensions/download/firefox" download="orion-social-scraper-firefox.xpi" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-download text-[11px]"></i>
+                    Firefox
+                  </a>
+                  <button data-testid="social-extension-refresh" type="button" (click)="refreshExtensionStatus()" [disabled]="extensionStatusLoading()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    @if (extensionStatusLoading()) {
+                      <span class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                    } @else {
+                      <i class="bi bi-arrow-clockwise text-[11px]"></i>
+                    }
+                    Refresh
+                  </button>
+                  <button data-testid="social-extension-fetch-all" type="button" (click)="refetchTab.emit('extension')" [disabled]="isAnyExtensionLoading()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)] disabled:cursor-not-allowed disabled:opacity-60">
+                    @if (isAnyExtensionLoading()) {
+                      <span class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                    } @else {
+                      <i class="bi bi-play-fill text-[11px]"></i>
+                    }
+                    Fetch All
+                  </button>
+                </div>
+              </div>
+
+              <div data-testid="social-extension-install-guide" class="mb-3 grid gap-3 lg:grid-cols-3">
+                <div data-testid="social-extension-install-guide-chrome" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-2 flex items-center gap-2">
+                    <i class="bi bi-download text-[13px] text-[var(--color-blue-640)]"></i>
+                    <p class="mb-0 text-sm font-bold text-[var(--color-text1)]">Chrome install</p>
+                  </div>
+                  <ol class="mb-0 list-decimal space-y-1 pl-5 text-xs leading-5 text-[var(--color-text4)]">
+                    <li>Download Chrome ZIP.</li>
+                    <li>Unzip it on your computer.</li>
+                    <li>Open <span class="font-mono text-[var(--color-text2)]">chrome://extensions</span>, enable Developer mode, then Load unpacked.</li>
+                  </ol>
+                </div>
+
+                <div data-testid="social-extension-install-guide-firefox" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-2 flex items-center gap-2">
+                    <i class="bi bi-download text-[13px] text-[var(--color-blue-640)]"></i>
+                    <p class="mb-0 text-sm font-bold text-[var(--color-text1)]">Firefox install</p>
+                  </div>
+                  <ol class="mb-0 list-decimal space-y-1 pl-5 text-xs leading-5 text-[var(--color-text4)]">
+                    <li>Download Firefox XPI.</li>
+                    <li>Open the downloaded file.</li>
+                    <li>Approve the add-on prompt and pin Orion if needed.</li>
+                  </ol>
+                </div>
+
+                <div data-testid="social-extension-install-guide-use" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-2 flex items-center gap-2">
+                    <i class="bi bi-play-circle text-[13px] text-[var(--color-blue-640)]"></i>
+                    <p class="mb-0 text-sm font-bold text-[var(--color-text1)]">Use it</p>
+                  </div>
+                  <ol class="mb-0 list-decimal space-y-1 pl-5 text-xs leading-5 text-[var(--color-text4)]">
+                    <li>Open the extension popup and log in with Orion.</li>
+                    <li>Keep the social platform logged in in the same browser.</li>
+                    <li>Click Refresh here; when status is Ready, use Fetch All or load more posts.</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="grid gap-3 lg:grid-cols-[1.15fr_0.85fr]">
+                <div class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-4">
+                  <div class="flex items-start gap-3">
+                    <i class="bi bi-plugin mt-0.5 flex-shrink-0 text-base text-[var(--color-blue-640)]"></i>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex min-w-0 flex-wrap items-center gap-2">
+                        <p data-testid="social-extension-status-label" class="mb-0 text-sm font-bold text-[var(--color-text1)]">{{ getExtensionStatusLabel(platformData) }}</p>
+                        <span data-testid="social-extension-platform-status" class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" [class.bg-emerald-500]="getExtensionPlatformStatus(platformData) === 'ready'" [class.text-white]="getExtensionPlatformStatus(platformData) === 'ready'" [class.bg-amber-500]="getExtensionPlatformStatus(platformData) === 'offline'" [class.bg-slate-600]="getExtensionPlatformStatus(platformData) === 'unsupported'" [class.text-slate-100]="getExtensionPlatformStatus(platformData) !== 'ready'">
+                          {{ getExtensionPlatformStatus(platformData) }}
+                        </span>
+                      </div>
+                      <p class="mt-1 mb-0 text-xs leading-5 text-[var(--color-text4)]">{{ getExtensionStatusDescription(platformData) }}</p>
+                    </div>
+                  </div>
+
+                  @if (extensionStatusError()) {
+                    <div class="mt-3 rounded-[8px] border border-rose-400/25 bg-rose-500/10 px-3 py-2 text-xs font-medium text-rose-200">
+                      {{ extensionStatusError() }}
+                    </div>
+                  }
+                </div>
+
+                <div class="ui-social-soft-surface overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
+                  <div class="ui-social-soft-row flex items-center justify-between gap-3 border-b border-[rgba(148,163,184,0.08)] px-3 py-2.5">
+                    <span class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Online</span>
+                    <span class="text-[13px] font-bold tabular-nums text-[var(--color-text2)]">{{ currentExtensionStatus()?.online || 0 }}</span>
+                  </div>
+                  <div class="ui-social-soft-row flex items-start justify-between gap-3 border-b border-[rgba(148,163,184,0.08)] px-3 py-2.5">
+                    <span class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Backend</span>
+                    <span class="min-w-0 flex-1 break-all text-right text-[12px] font-medium text-[var(--color-text2)]">{{ getExtensionBackendUrl(currentExtensionStatus()) }}</span>
+                  </div>
+                  <div class="ui-social-soft-row flex items-start justify-between gap-3 border-b border-[rgba(148,163,184,0.08)] px-3 py-2.5">
+                    <span class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Platforms</span>
+                    <span class="min-w-0 flex-1 break-words text-right text-[13px] font-medium text-[var(--color-text2)]">{{ getExtensionPlatformList(currentExtensionStatus()) }}</span>
+                  </div>
+                  <div class="ui-social-soft-row flex items-start justify-between gap-3 border-b border-[rgba(148,163,184,0.08)] px-3 py-2.5">
+                    <span class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Extension ID</span>
+                    <span data-testid="social-extension-id-value" class="min-w-0 flex-1 break-all text-right text-[12px] font-medium text-[var(--color-text2)]">{{ getExtensionIds(currentExtensionStatus()) }}</span>
+                  </div>
+                  <div class="ui-social-soft-row flex items-start justify-between gap-3 px-3 py-2.5">
+                    <span class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Active Job</span>
+                    <span class="min-w-0 flex-1 break-all text-right text-[12px] font-medium text-[var(--color-text2)]">{{ getActiveExtensionJob(currentExtensionStatus()) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              @if (getExtensionError(platformData)) {
+                <div class="mt-3 rounded-[10px] border border-amber-400/35 bg-amber-500/10 p-3">
+                  <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <div class="min-w-0">
+                      <p class="mb-1 text-sm font-bold text-amber-100">{{ getExtensionErrorTitle(platformData) }}</p>
+                      <p class="mb-0 break-words text-xs font-medium leading-5 text-amber-100/85">{{ getExtensionErrorMessage(platformData) }}</p>
+                    </div>
+                    <div class="flex flex-shrink-0 flex-wrap items-center gap-2">
+                      @if (getExtensionLoginUrl(platformData)) {
+                        <a [href]="getExtensionLoginUrl(platformData)" target="_blank" rel="noopener noreferrer" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] bg-amber-400 px-3 text-xs font-bold text-slate-950 transition-colors hover:bg-amber-300">
+                          <i class="bi bi-box-arrow-up-right text-[11px]"></i>
+                          Open Login
+                        </a>
+                      }
+                      <button type="button" (click)="refetchTab.emit('extension')" [disabled]="isAnyExtensionLoading()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-amber-300/40 bg-amber-500/10 px-3 text-xs font-bold text-amber-100 transition-colors hover:bg-amber-500/20 disabled:cursor-not-allowed disabled:opacity-60">
+                        <i class="bi bi-arrow-clockwise text-[11px]"></i>
+                        Retry
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <div class="mt-4 space-y-4">
+                <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Details</p>
+                    <button type="button" (click)="refetchTab.emit('extension')" [disabled]="isAnyExtensionLoading()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                      <i class="bi bi-arrow-clockwise text-[11px]"></i>
+                      Fetch
+                    </button>
+                  </div>
+                  @if (isTabLoading('extensionDetails') && getProfileDetailEntries(getExtensionPlatformData(platformData)).length === 0) {
+                    <div class="flex min-h-[120px] items-center justify-center gap-2 text-sm font-semibold text-[var(--color-text2)]">
+                      <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                      Loading extension details
+                    </div>
+                  } @else if (getProfileDetailEntries(getExtensionPlatformData(platformData)).length === 0) {
+                    <div class="flex min-h-[120px] items-center justify-center text-sm font-semibold text-[var(--color-text4)]">No extension details found</div>
+                  } @else {
+                    <div class="ui-social-soft-surface overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(15,23,42,0.05)]">
+                      @for (item of getProfileDetailEntries(getExtensionPlatformData(platformData)); track trackByKey($index, item)) {
+                        <div class="ui-social-soft-row group flex items-start gap-3 border-b border-[rgba(148,163,184,0.08)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
+                          <div class="flex w-[128px] flex-shrink-0 items-center gap-2 pt-0.5">
+                            <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-sky-500"></span>
+                            <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatKey(item.key) }}</span>
+                          </div>
+                          <div class="min-w-0 flex-1 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)]">
+                            @if (isUrl(item.value)) {
+                              <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="break-all text-[var(--color-blue-640)] hover:underline">{{ getDisplayUrl(item.value) }}</a>
+                            } @else {
+                              {{ item.value }}
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </section>
+
+                <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Connections</p>
+                    <span class="text-[11px] font-semibold tabular-nums text-[var(--color-text4)]">
+                      {{ getFollowers(getExtensionPlatformData(platformData)).length }} followers · {{ getFollowing(getExtensionPlatformData(platformData)).length }} following
+                    </span>
+                  </div>
+                  <div class="grid gap-3 lg:grid-cols-2">
+                    <div class="rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(15,23,42,0.05)] p-3">
+                      <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Followers</p>
+                      @if (isTabLoading('extensionDetails') && getFollowers(getExtensionPlatformData(platformData)).length === 0) {
+                        <div class="flex min-h-[96px] items-center justify-center gap-2 text-sm font-semibold text-[var(--color-text2)]">
+                          <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                          Loading extension followers
+                        </div>
+                      } @else if (getFollowers(getExtensionPlatformData(platformData)).length === 0) {
+                        <div class="flex min-h-[96px] items-center justify-center text-sm font-semibold text-[var(--color-text4)]">No extension followers found</div>
+                      } @else {
+                        <div class="grid max-h-[280px] grid-cols-1 gap-2 overflow-y-auto pr-1 custom-scrollbar sm:grid-cols-2">
+                          @for (follower of getFollowers(getExtensionPlatformData(platformData)); track trackByUsername($index, follower)) {
+                            <a data-testid="social-extension-follower-row" [href]="getProfileUrl(platformData, follower)" target="_blank" rel="noopener noreferrer" class="rounded-[8px] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-mono text-[var(--color-text3)] hover:text-[var(--color-blue-640)]">&#64;{{ follower }}</a>
+                          }
+                        </div>
+                      }
+                    </div>
+
+                    <div class="rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(15,23,42,0.05)] p-3">
+                      <p class="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">Following</p>
+                      @if (isTabLoading('extensionDetails') && getFollowing(getExtensionPlatformData(platformData)).length === 0) {
+                        <div class="flex min-h-[96px] items-center justify-center gap-2 text-sm font-semibold text-[var(--color-text2)]">
+                          <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                          Loading extension following
+                        </div>
+                      } @else if (getFollowing(getExtensionPlatformData(platformData)).length === 0) {
+                        <div class="flex min-h-[96px] items-center justify-center text-sm font-semibold text-[var(--color-text4)]">No extension following found</div>
+                      } @else {
+                        <div class="grid max-h-[280px] grid-cols-1 gap-2 overflow-y-auto pr-1 custom-scrollbar sm:grid-cols-2">
+                          @for (following of getFollowing(getExtensionPlatformData(platformData)); track trackByUsername($index, following)) {
+                            <a data-testid="social-extension-following-row" [href]="getProfileUrl(platformData, following)" target="_blank" rel="noopener noreferrer" class="rounded-[8px] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-mono text-[var(--color-text3)] hover:text-[var(--color-blue-640)]">&#64;{{ following }}</a>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </section>
+
+                <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Posts</p>
+                  <app-social-profile-posts-section
+                    [platformData]="getExtensionPlatformData(platformData)"
+                    [isLoading]="isTabLoading('extensionPosts')"
+                    [showFetchLatest]="false"
+                    [showLoadMoreWhenDone]="true"
+                    [showHeader]="false"
+                    [compactMedia]="true"
+                    [allowCommentFetch]="false"
+                    (refetch)="refetchTab.emit('extension')"
+                    (cursorFetch)="handleExtensionPostCursorFetch($event)">
+                  </app-social-profile-posts-section>
+                </section>
+
+                <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Videos</p>
+                  <app-social-profile-videos-section [platformData]="getExtensionPlatformData(platformData)" [isLoading]="isTabLoading('extensionDetails')" (refetch)="refetchTab.emit('extension')"></app-social-profile-videos-section>
+                </section>
+
+                <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Shorts</p>
+                  <app-social-profile-shorts-section
+                    [platformData]="getExtensionPlatformData(platformData)"
+                    [isLoading]="isTabLoading('extensionDetails') || isTabLoading('extensionShorts')"
+                    [allowCommentFetch]="false"
+                    [showFetchLatest]="false"
+                    [showLoadMoreWhenDone]="true"
+                    [showHeader]="false"
+                    [compactMedia]="true"
+                    (refetch)="refetchTab.emit('extension')"
+                    (cursorFetch)="handleExtensionPostCursorFetch($event)">
+                  </app-social-profile-shorts-section>
+                </section>
+
+                <section class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3">
+                  <div class="mb-3 flex items-center justify-between gap-3">
+                    <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Images</p>
+                    <button type="button" (click)="refetchTab.emit('extension')" [disabled]="isAnyExtensionLoading()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                      <i class="bi bi-arrow-clockwise text-[11px]"></i>
+                      Fetch
+                    </button>
+                  </div>
+                  @if (isTabLoading('extensionDetails') && (platformData.extensionImages || []).length === 0) {
+                    <div class="flex min-h-[120px] items-center justify-center gap-2 text-sm font-semibold text-[var(--color-text2)]">
+                      <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                      Loading extension images
+                    </div>
+                  } @else if (getDisplayableSocialImages(platformData.extensionImages || []).length === 0) {
+                    <div class="flex min-h-[120px] items-center justify-center text-sm font-semibold text-[var(--color-text4)]">No extension images found</div>
+                  } @else {
+                    <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                      @for (image of getDisplayableSocialImages(platformData.extensionImages || []); track image.image_url || image.thumbnail || $index) {
+                        <a data-testid="social-extension-image-result" [href]="getSocialImageHref(image)" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
+                          <img [src]="getSocialImageSrc(image)" [alt]="image.title || image.source || 'Extension image'" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                        </a>
+                      }
+                    </div>
+                  }
+                </section>
+              </div>
+            </div>
           }
 
           @if (activeTab() === 'videos') {
@@ -164,7 +451,7 @@
                     <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
                   </button>
                 </div>
-              } @else if ((platformData.images || []).length === 0) {
+              } @else if (getDisplayableSocialImages(platformData.images || []).length === 0) {
                 <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
                   <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
                     <i class="bi bi-images text-base"></i>
@@ -179,7 +466,7 @@
                 </div>
               } @else {
                 <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                  @for (image of platformData.images || []; track image.image_url || image.thumbnail || $index) {
+                  @for (image of getDisplayableSocialImages(platformData.images || []); track image.image_url || image.thumbnail || $index) {
                     <a data-testid="social-image-result" [href]="getSocialImageHref(image)" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
                       <img [src]="getSocialImageSrc(image)" [alt]="image.title || image.source || 'Social image'" referrerpolicy="no-referrer" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
                       <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">

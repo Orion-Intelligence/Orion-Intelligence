@@ -742,18 +742,33 @@ export function setOnlyGeneralAlertScanner() {
 }
 
 export function flushTenantAlertsIfPresent() {
-  cy.get('body').then(($body) => {
-    const $flushButton = $body.find('[data-testid="tenant-home-flush-all"]:visible').first();
-    if (!$flushButton.length) {
-      return;
-    }
+  cy.location('origin').then((origin) => {
+    cy.request({
+      method: 'POST',
+      url: `${origin}/api/profile/alerts/delete/all`,
+      failOnStatusCode: false,
+    }).then((response) => {
+      expect(response.status, 'flush tenant alerts').to.be.oneOf([200, 201, 400]);
+    });
 
-    cy.intercept('POST', '**/api/profile/alerts/delete/all').as('flushTenantAlerts');
-    cy.wrap($flushButton).scrollIntoView().click({force: true});
-    cy.get('[data-testid="confirmation-yes-button"]').should('be.visible').click({force: true});
-    cy.wait('@flushTenantAlerts', {timeout: 60000})
-      .its('response.statusCode')
-      .should('be.oneOf', [200, 201]);
+    const startedAt = Date.now();
+    const poll = (): Cypress.Chainable => {
+      return cy.request('GET', `${origin}/api/get/tenant/alert/summary`).then((response) => {
+        expect(response.status).to.eq(200);
+        const counts = Object.values(response.body?.counts_by_type || {});
+        const total = counts.reduce((sum, count) => sum + Number(count || 0), 0);
+        if (total === 0) {
+          return cy.wrap(null);
+        }
+        if (Date.now() - startedAt > 60000) {
+          throw new Error(`Tenant alerts were not flushed before scan: ${JSON.stringify(response.body?.counts_by_type || {})}`);
+        }
+        return cy.wait(1000, {log: false}).then(() => poll());
+      });
+    };
+
+    return poll();
+  }).then(() => {
     cy.get('app-alert-scan-loading', {timeout: 60000}).should('not.exist');
   });
 }

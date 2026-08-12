@@ -1,16 +1,22 @@
 import base64
 import binascii
 import hashlib
+import os
 from datetime import UTC, datetime
 
 import httpx
+import jwt
 from fastapi import HTTPException
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
+from configs.auth_cookie import token_from_request
+from orion.constants.constant import CONSTANTS
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
+
 
 
 class social_model:
@@ -26,10 +32,6 @@ class social_model:
 
     def __init__(self):
         self._engine = mongo_controller.get_instance().get_engine()
-
-    @staticmethod
-    def _normalize_username(value: str) -> str:
-        return (value or "").strip().lstrip("@").lower()
 
     @staticmethod
     def _document_payload(record: dict) -> dict:
@@ -52,6 +54,38 @@ class social_model:
     def _social_hash_id(platform: str, stable_id: str) -> str:
         return hashlib.sha256("|".join([platform or "", stable_id or "", "", "", ""]).encode("utf-8")).hexdigest()
 
+    @staticmethod
+    def _social_api_base_urls() -> list[str]:
+        configured = env_handler.get_instance().env("ORION_SOCIAL_API_BASE_URL") or ""
+        url = str(configured).strip().rstrip("/")
+        return [url] if url else []
+
+    @classmethod
+    def _social_headers(cls, current_user=None, request=None) -> dict[str, str]:
+        headers: dict[str, str] = {}
+        internal_token = env_handler.get_instance().env("ORION_SOCIAL_INTERNAL_TOKEN")
+        if internal_token:
+            headers["X-Orion-Internal-Token"] = internal_token
+
+        if current_user is not None:
+            headers["X-Orion-User"] = str(getattr(current_user, "username", "") or "")
+            headers["X-Orion-User-Id"] = str(getattr(current_user, "id", "") or "")
+            headers["X-Orion-Tenant-Id"] = str(getattr(current_user, "tenant_uuid", "") or "")
+
+        token = token_from_request(request) if request is not None else ""
+        if token:
+            try:
+                payload = jwt.decode(token, CONSTANTS.S_AUTH_SECRET_KEY, algorithms=[CONSTANTS.S_AUTH_ALGORITHM], options={"verify_exp": True})
+                session_id = str(payload.get("sid") or "")
+                client = str(payload.get("client") or "web")
+                if session_id:
+                    headers["X-Orion-Session-Id"] = session_id
+                if client:
+                    headers["X-Orion-Session-Client"] = client
+            except jwt.InvalidTokenError:
+                pass
+        return {key: value for key, value in headers.items() if value}
+
     @classmethod
     def _normalize_social_cursor(cls, payload: dict, key: str) -> dict:
         if key not in {"posts", "videos", "shorts"}:
@@ -70,7 +104,7 @@ class social_model:
         merged: dict[str, dict] = {}
         for row in rows:
             payload = cls._document_payload(row)
-            profile_username = cls._normalize_username(payload.get("profile_username") or "")
+            profile_username = (payload.get("profile_username") or "").strip().lstrip("@").lower()
             if not profile_username:
                 continue
             current = merged.setdefault(profile_username, {
@@ -87,38 +121,48 @@ class social_model:
                 current["updated_at"] = updated_at
         return sorted(merged.values(), key=lambda item: item.get("updated_at") or datetime.min.replace(tzinfo=UTC), reverse=True)
 
-    async def social_search(self, model, key: str):
+    async def social_search(self, model, key: str, current_user=None, request=None):
+        last_error = ""
+        headers = self._social_headers(current_user, request)
         try:
-            async with httpx.AsyncClient() as client:
-                if isinstance(model, dict) and "file_bytes" in model:
-                    response = await client.post(
-                        "http://trusted-social-api:8020/social/" + key,
-                        files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
-                        timeout=120,
-                    )
-                else:
-                    payload = model.model_dump() if hasattr(model, "model_dump") else model
-                    payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
-                    response = await client.post(
-                        "http://trusted-social-api:8020/social/" + key,
-                        json=payload,
-                        timeout=120,
-                    )
+            for base_url in self._social_api_base_urls():
+                try:
+                    async with httpx.AsyncClient() as client:
+                        if isinstance(model, dict) and "file_bytes" in model:
+                            response = await client.post(
+                                f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
+                                files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
+                                headers=headers,
+                                timeout=120,
+                            )
+                        else:
+                            payload = model.model_dump() if hasattr(model, "model_dump") else model
+                            payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
+                            response = await client.post(
+                                f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
+                                json=payload,
+                                headers=headers,
+                                timeout=120,
+                            )
 
-                if response.status_code != 200:
-                    return JSONResponse(
-                        status_code=response.status_code,
-                        content={"detail": "Social service request failed"},
-                    )
-                return response.json()
+                    if response.status_code != 200:
+                        return JSONResponse(
+                            status_code=response.status_code,
+                            content={"detail": "Social service request failed"},
+                        )
+                    return response.json()
+                except httpx.RequestError as exc:
+                    last_error = str(exc)
+                    continue
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Failed to process social search"})
+        return JSONResponse(status_code=502, content={"detail": "Social service unreachable", "error": last_error})
 
-    async def search_recon(self, param):
-        return await self.social_search(param, "recon")
+    async def search_recon(self, param, current_user=None, request=None):
+        return await self.social_search(param, "recon", current_user, request)
 
     async def search_forum_profiles(self, param):
-        query = self._normalize_username(getattr(param, "query", ""))
+        query = (getattr(param, "query", "") or "").strip().lstrip("@").lower()
         if not query:
             return {"Result": [], "Total_Hits": 0}
 
@@ -173,37 +217,86 @@ class social_model:
 
         return {"Result": results, "Total_Hits": total_hits}
 
-    async def search_phone_recon(self, param):
-        return await self.social_search(param, "phone")
+    async def search_phone_recon(self, param, current_user=None, request=None):
+        return await self.social_search(param, "phone", current_user, request)
 
-    async def search_profile(self, param):
-        return await self.social_search(param, "profile")
+    async def search_profile(self, param, current_user=None, request=None):
+        return await self.social_search(param, "profile", current_user, request)
 
-    async def search_online_images(self, param):
-        return await self.social_search(param, "online/images")
+    async def search_online_images(self, param, current_user=None, request=None):
+        return await self.social_search(param, "online/images", current_user, request)
 
-    async def search_followers(self, param):
-        return await self.social_search(param, "followers")
+    async def search_followers(self, param, current_user=None, request=None):
+        return await self.social_search(param, "followers", current_user, request)
 
-    async def search_following(self, param):
-        return await self.social_search(param, "following")
+    async def search_following(self, param, current_user=None, request=None):
+        return await self.social_search(param, "following", current_user, request)
 
-    async def search_posts(self, param):
-        return await self.social_search(param, "posts")
+    async def search_posts(self, param, current_user=None, request=None):
+        return await self.social_search(param, "posts", current_user, request)
 
-    async def search_videos(self, param):
-        return await self.social_search(param, "videos")
+    async def search_videos(self, param, current_user=None, request=None):
+        return await self.social_search(param, "videos", current_user, request)
 
-    async def search_shorts(self, param):
-        return await self.social_search(param, "shorts")
+    async def search_shorts(self, param, current_user=None, request=None):
+        return await self.social_search(param, "shorts", current_user, request)
 
-    async def search_entity(self, param):
-        return await self.social_search(param, "entity")
+    async def search_entity(self, param, current_user=None, request=None):
+        return await self.social_search(param, "entity", current_user, request)
 
-    async def search_metadata(self, param):
-        return await self.social_search(param, "metadata")
+    async def search_metadata(self, param, current_user=None, request=None):
+        return await self.social_search(param, "metadata", current_user, request)
 
-    async def search_image(self, payload: dict):
+    async def extension_status(self):
+        last_error = ""
+        try:
+            for base_url in self._social_api_base_urls():
+                try:
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(f"{base_url.rstrip('/')}/extensions/status", headers=self._social_headers(), timeout=20)
+                    if response.status_code != 200:
+                        return JSONResponse(status_code=response.status_code, content={"online": 0, "extensions": [], "error": "Social extension manager returned an error"})
+                    payload = response.json()
+                    if isinstance(payload, dict):
+                        payload.setdefault("backend_url", base_url)
+                    return payload
+                except httpx.RequestError as exc:
+                    last_error = str(exc)
+                    continue
+        except Exception:
+            return {"online": 0, "extensions": [], "error": "Failed to reach the extension manager"}
+        return {"online": 0, "extensions": [], "error": f"Social service unreachable: {last_error}"}
+
+    async def extension_download(self, browser: str = "chrome"):
+        last_error = ""
+        try:
+            normalized_browser = browser.strip().lower()
+            if normalized_browser in {"firefox", "mozilla"}:
+                path = "extensions/download/firefox"
+            else:
+                path = "extensions/download/chrome"
+            for base_url in self._social_api_base_urls():
+                try:
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(f"{base_url.rstrip('/')}/{path.lstrip('/')}", headers=self._social_headers(), timeout=60)
+                except httpx.RequestError as exc:
+                    last_error = str(exc)
+                    continue
+                if response.status_code != 200:
+                    return JSONResponse(status_code=response.status_code, content={"detail": "Extension download failed"})
+                return Response(
+                    content=response.content,
+                    media_type=response.headers.get("content-type", "application/octet-stream"),
+                    headers={
+                        "Content-Disposition": response.headers.get("content-disposition", f'attachment; filename="{normalized_browser}-extension"'),
+                        "Cache-Control": "no-store",
+                    },
+                )
+        except Exception:
+            return JSONResponse(status_code=500, content={"detail": "Extension download failed"})
+        return JSONResponse(status_code=502, content={"detail": "Social service unreachable", "error": last_error})
+
+    async def search_image(self, payload: dict, current_user=None, request=None):
         image_base64 = payload.get("image_base64")
         if not image_base64:
             return {"status": "error", "message": "image_base64_required"}
@@ -223,11 +316,11 @@ class social_model:
         if len(file_bytes) > self.SOCIAL_IMAGE_MAX_BYTES:
             raise HTTPException(status_code=413, detail="Image too large! Maximum allowed size is 10 MB")
 
-        return await self.social_search({"file_bytes": file_bytes, "filename": "upload.png"}, "recon/image")
+        return await self.social_search({"file_bytes": file_bytes, "filename": "upload.png"}, "recon/image", current_user, request)
 
     async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], replace: bool = False):
         try:
-            normalized_username = self._normalize_username(profile_username)
+            normalized_username = profile_username.strip().lstrip("@").lower()
             if not normalized_username:
                 return JSONResponse(status_code=400, content={"detail": "profile_username is required"})
             if not isinstance(profiles, list):
@@ -276,7 +369,7 @@ class social_model:
         try:
             collection = self._engine.get_collection(db_social_model)
             query = {"user_id": user_id}
-            normalized_username = self._normalize_username(profile_username or "")
+            normalized_username = (profile_username or "").strip().lstrip("@").lower()
             if normalized_username:
                 query = {
                     "user_id": user_id,
@@ -299,7 +392,7 @@ class social_model:
 
     async def delete_social_profiles(self, user_id: str, profile_username: str):
         try:
-            normalized_username = self._normalize_username(profile_username)
+            normalized_username = (profile_username).strip().lstrip("@").lower()
             result = await self._engine.get_collection(db_social_model).delete_many({
                 "user_id": user_id,
                 "$or": [
