@@ -15,9 +15,11 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
 import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/model/alert-webhook-settings/alert-webhook-settings.model';
 import { UserImagePickerComponent } from '../sidebar-user-settings/user-image-picker/user-image-picker.component';
+import { forkJoin, finalize } from 'rxjs';
+import { User } from '../../../shared/model/tenant/tenant.model';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
-type SystemSettingsTab = 'branding' | 'platform';
+type SystemSettingsTab = 'branding' | 'platform' | 'tenants' | 'users';
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
@@ -26,6 +28,8 @@ type SystemSettingsTab = 'branding' | 'platform';
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
+  private readonly DEFAULT_WORKSPACE_QUOTA_BYTES = 3_000_000_000;
+
   activeTab: SystemSettingsTab = 'platform';
   configurationEditing = false;
   mailEditing = false;
@@ -40,6 +44,13 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   urlPattern = /^https?:\/\/.+/i;
   emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   smtpServerPattern = /^(?=.{1,253}$)(localhost|[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?|([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}|(\d{1,3}\.){3}\d{1,3})$/;
+  tenantQuotaRows: any[] = [];
+  tenantQuotaLoading = false;
+  tenantQuotaError = '';
+  quotaUsers: User[] = [];
+  userWorkspaceUsageById: Record<string, number> = {};
+  userQuotaLoading = false;
+  userQuotaError = '';
 
   constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
   }
@@ -47,6 +58,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   ngOnInit(): void {
     this.activeTab = this.getInitialTab();
     this.loadSettings();
+    this.loadActiveQuotaTab();
   }
 
   canEditTenantBranding(): boolean {
@@ -58,16 +70,41 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     return this.appService.userSessionData().user.role === 'admin';
   }
 
+  canViewTenantQuotaSummary(): boolean {
+    return this.canManagePlatformSettings();
+  }
+
+  canViewUserQuotaSummary(): boolean {
+    return !this.canManagePlatformSettings() && this.canEditTenantBranding();
+  }
+
+  hasSystemSettingsTabs(): boolean {
+    return (
+      this.canManagePlatformSettings() ||
+      this.canEditTenantBranding() ||
+      this.canViewTenantQuotaSummary() ||
+      this.canViewUserQuotaSummary()
+    );
+  }
+
   selectTab(tab: SystemSettingsTab): void {
-    if ((tab === 'branding' && !this.canEditTenantBranding()) ||
-      (tab === 'platform' && !this.canManagePlatformSettings())) {
+    if (
+      (tab === 'branding' && !this.canEditTenantBranding()) ||
+      (tab === 'platform' && !this.canManagePlatformSettings()) ||
+      (tab === 'tenants' && !this.canViewTenantQuotaSummary()) ||
+      (tab === 'users' && !this.canViewUserQuotaSummary())
+    ) {
       return;
     }
+
     this.activeTab = tab;
     this.configurationEditing = false;
     this.mailEditing = false;
+    this.webhookEditing = false;
+
     this.loadSettings();
     this.loadAlertConnectorSettings();
+    this.loadActiveQuotaTab();
   }
 
   loadSettings() {
@@ -162,7 +199,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.webhookEditing = false;
   }
 
-  updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
+  updateUserResource(file: File, key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
     const formData = new FormData();
     formData.append('file', file);
     return this.apiService
@@ -178,7 +215,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           if (res?.logo_wide_dark) {
             (this.appService.getConfig().appSettings as any).logo_wide_dark = res.logo_wide_dark;
           }
-          if(res?.auth_dashboard_icon){
+          if (res?.auth_dashboard_icon) {
             (this.appService.getConfig().appSettings as any).auth_dashboard_icon = res.auth_dashboard_icon;
           }
           if ((this.appService.getConfig().appSettings as any).logo_url) {
@@ -388,19 +425,150 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     };
   }
 
+  private loadActiveQuotaTab(): void {
+    if (this.activeTab === 'tenants') {
+      this.loadTenantQuotaSummary();
+    }
+
+    if (this.activeTab === 'users') {
+      this.loadUserQuotaSummary();
+    }
+  }
+
+  loadTenantQuotaSummary(): void {
+    if (!this.canViewTenantQuotaSummary()) {
+      return;
+    }
+
+    this.tenantQuotaLoading = true;
+    this.tenantQuotaError = '';
+
+    this.apiService.post<any[]>('tenants/get', {})
+      .pipe(finalize(() => (this.tenantQuotaLoading = false)))
+      .subscribe({
+        next: (data) => {
+          this.tenantQuotaRows = (data || []).map((tenant: any) => {
+            const totalQuota = Number(tenant.workspace_quota_bytes ?? this.DEFAULT_WORKSPACE_QUOTA_BYTES);
+
+            return {
+              ...tenant,
+              workspace_quota_bytes: totalQuota,
+              workspace_assigned_user_quota_bytes: Number(tenant.workspace_assigned_user_quota_bytes || 0),
+            };
+          });
+        },
+        error: () => {
+          this.tenantQuotaRows = [];
+          this.tenantQuotaError = 'Failed to load tenant quota summary';
+        },
+      });
+  }
+
+  loadUserQuotaSummary(): void {
+    if (!this.canViewUserQuotaSummary()) {
+      return;
+    }
+
+    this.userQuotaLoading = true;
+    this.userQuotaError = '';
+
+    forkJoin({
+      users: this.apiService.post<User[]>('users', {}),
+      usage: this.apiService.get<any>('tenant/workspace-usage'),
+    })
+      .pipe(finalize(() => (this.userQuotaLoading = false)))
+      .subscribe({
+        next: ({ users, usage }) => {
+          this.quotaUsers = users || [];
+          this.userWorkspaceUsageById = usage?.usage || {};
+        },
+        error: () => {
+          this.quotaUsers = [];
+          this.userWorkspaceUsageById = {};
+          this.userQuotaError = 'Failed to load user quota summary';
+        },
+      });
+  }
+
+  bytesToGb(value?: number | null): number {
+    return Number(((Number(value || 0)) / 1_000_000_000).toFixed(2));
+  }
+
+  formatStorageGb(value?: number | null): string {
+    return `${this.bytesToGb(value)} GB`;
+  }
+
+  get tenantsWithQuotaAccess(): any[] {
+    return this.tenantQuotaRows.filter(tenant => this.getTenantTotalQuotaBytes(tenant) > 0);
+  }
+
+  getTenantTotalQuotaBytes(tenant: any): number {
+    return Number(tenant.workspace_quota_bytes || 0);
+  }
+
+  getTenantAssignedQuotaBytes(tenant: any): number {
+    return Number(tenant.workspace_assigned_user_quota_bytes || 0);
+  }
+
+  getTenantFreeQuotaBytes(tenant: any): number {
+    return Math.max(this.getTenantTotalQuotaBytes(tenant) - this.getTenantAssignedQuotaBytes(tenant),
+      0);
+  }
+
+  get usersWithAssignedQuota(): User[] {
+    return this.quotaUsers.filter(user => Number(user.workspace_quota_bytes || 0) > 0);
+  }
+
+  getUserAssignedQuotaBytes(user: User): number {
+    return Number(user.workspace_quota_bytes || 0);
+  }
+
+  getUserUsedQuotaBytes(user: User): number {
+    const userId = String(user.id || '');
+    return Number(this.userWorkspaceUsageById[userId] || 0);
+  }
+
+  getUserFreeQuotaBytes(user: User): number {
+    return Math.max(this.getUserAssignedQuotaBytes(user) - this.getUserUsedQuotaBytes(user),
+      0);
+  }
+
   get displayVersion(): string {
     return (this.form.version || '').replaceAll('_', '.');
   }
 
   private getInitialTab(): SystemSettingsTab {
     const requestedTab = this.route.snapshot.queryParamMap.get('tab');
+
     if (requestedTab === 'branding' && this.canEditTenantBranding()) {
       return 'branding';
     }
+
     if (requestedTab === 'platform' && this.canManagePlatformSettings()) {
       return 'platform';
     }
-    return this.canManagePlatformSettings() ? 'platform' : 'branding';
+
+    if (requestedTab === 'tenants' && this.canViewTenantQuotaSummary()) {
+      return 'tenants';
+    }
+
+    if (requestedTab === 'users' && this.canViewUserQuotaSummary()) {
+      return 'users';
+    }
+
+    if (this.canManagePlatformSettings()) {
+      return 'platform';
+    }
+
+    if (this.canEditTenantBranding()) {
+      return 'branding';
+    }
+
+    if (this.canViewUserQuotaSummary()) {
+      return 'users';
+    }
+
+    return 'branding';
   }
 
   private applySettings(settings: Partial<AppSettingsModel>): void {
