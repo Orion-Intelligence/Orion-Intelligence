@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewChild, effect, inject, input, output, signal } from '@angular/core';
 import { PlatformResult, SocialExtensionFetchError, SocialImage, SocialOnlinePresenceResult, SocialPost, SocialStealerLogRecord } from '../../../../../shared/model/social/social-scan.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../../shared/utils/formatters';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
@@ -39,6 +39,20 @@ export class SocialProfileTabsSectionComponent {
   extensionStatus = signal<SocialExtensionStatus | null>(null);
   extensionStatusLoading = signal(false);
   extensionStatusError = signal('');
+  activeExtensionDownloadTab = signal<'chrome' | 'firefox'>('chrome');
+
+  @ViewChild('extDialog') extDialog?: ElementRef<HTMLDialogElement>;
+
+  toggleExtensionDownloads() {
+    const dialog = this.extDialog?.nativeElement;
+    if (dialog) {
+      if (dialog.open) {
+        dialog.close();
+      } else {
+        dialog.showModal();
+      }
+    }
+  }
   user = input.required<FeedUser>();
   platformData = input.required<PlatformResult>();
   fetchTabs = input.required<FetchTab[]>();
