@@ -49,6 +49,11 @@ export interface TenantDataModel {
     licenses: string[];
     assignedQuota: string;
     quotaExceeded: boolean;
+    workspaceQuotaExceeded?: boolean;
+    workspaceQuotaBytes?: number;
+    workspaceUsedBytes?: number;
+    workspaceRemainingBytes?: number;
+    workspaceAssignedUserQuotaBytes?: number;
     image?: string;
     profileVisibilityEnabled?: boolean;
     eventManagementEnabled?: boolean;
@@ -60,10 +65,6 @@ export interface TenantDataModel {
     accountsMail?: string;
     accountsSmtpServer?: string;
     accountsSmtpPort?: string;
-    workspaceQuotaBytes?: number;
-    workspaceUsedBytes?: number;
-    workspaceRemainingBytes?: number;
-    workspaceAssignedUserQuotaBytes?: number;
 }
 export interface userMetaData {
     username: string;

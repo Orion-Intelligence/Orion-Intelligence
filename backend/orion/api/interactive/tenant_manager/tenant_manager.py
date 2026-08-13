@@ -502,14 +502,6 @@ class TenantManager:
             if workspace_quota is None:
                 workspace_quota = DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES
 
-            assigned_user_quota = await self.get_assigned_user_workspace_quota_bytes(tenant_id=tenant_id)
-
-            if workspace_quota < assigned_user_quota:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Tenant workspace quota cannot be less than assigned user workspace quota",
-                )
-
             tenant.workspace_quota_bytes = workspace_quota
 
         if is_admin and data.status is not None:

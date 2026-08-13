@@ -405,6 +405,37 @@ class AccountManager:
             not tenant.is_default and assigned_quota is not None and assigned_quota < total_user
         )
 
+        tenant_workspace_quota = int(getattr(tenant, "workspace_quota_bytes", DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES) or DEFAULT_TENANT_WORKSPACE_QUOTA_BYTES)
+
+        workspace_assigned_user_quota = await self.get_assigned_user_workspace_quota_bytes(tenant_id=tenant_id)
+
+        workspace_used_bytes = 0
+
+        try:
+            from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
+
+            nexus_response = await nexus_chat_gateway.getInstance().get_tenant_workspace_usage(tenant_id, current_user)
+
+            if getattr(nexus_response, "status_code", 500) == 200 and hasattr(nexus_response, "body"):
+                usage_payload = json.loads(nexus_response.body.decode() or "{}")
+                usage_map = usage_payload.get("usage", {})
+
+                if isinstance(usage_map, dict):
+                    for value in usage_map.values():
+                        try:
+                            workspace_used_bytes += max(0, int(value or 0))
+                        except (TypeError, ValueError):
+                            continue
+        except Exception:
+            workspace_used_bytes = 0
+
+        workspace_remaining_bytes = max(tenant_workspace_quota - workspace_used_bytes, 0)
+
+        workspace_quota_exceeded = bool(
+            not tenant.is_default
+            and (workspace_assigned_user_quota > tenant_workspace_quota or workspace_used_bytes > tenant_workspace_quota)
+        )
+
         tenant_image_file = self.TENANT_DIR / f"{str(tenant.id)}.png"
         tenant_image_path = "/api/s/static/tenant/" + (str(tenant.id) if tenant_image_file.is_file() else "default")
 
@@ -435,8 +466,14 @@ class AccountManager:
                 enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone), "country": self.safe_decrypt(
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
                 enc, tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
-                self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
-                assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
+                self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(assigned_quota),
+                "quotaExceeded": quota_exceeded,
+                "workspaceQuotaExceeded": workspace_quota_exceeded,
+                "workspaceQuotaBytes": tenant_workspace_quota,
+                "workspaceUsedBytes": workspace_used_bytes,
+                "workspaceRemainingBytes": workspace_remaining_bytes,
+                "workspaceAssignedUserQuotaBytes": workspace_assigned_user_quota,
+                "image": tenant_image_path,
                 "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
                 "eventManagementEnabled": getattr(tenant, "event_management_enabled", False),
                 "alertsVisibleToAdmin": getattr(tenant, "alerts_visible_to_admin", True),
