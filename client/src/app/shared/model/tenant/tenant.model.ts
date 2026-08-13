@@ -23,6 +23,7 @@ export interface TenantModel {
     status?: TenantStatus;
     licenses?: string[];
     quotaExceeded?: boolean;
+    workspaceQuotaExceeded?: boolean;
     email?: string;
     password_reset_required?: boolean;
     profile_visibility_enabled?: boolean;

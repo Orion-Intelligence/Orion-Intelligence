@@ -40,6 +40,11 @@ class TenantDataModel(BaseModel):
     licenses: list[str]
     assignedQuota: str
     quotaExceeded: bool
+    workspaceQuotaExceeded: bool = False
+    workspaceQuotaBytes: int = 0
+    workspaceUsedBytes: int = 0
+    workspaceRemainingBytes: int = 0
+    workspaceAssignedUserQuotaBytes: int = 0
     image: Optional[str] = None
     profileVisibilityEnabled: bool = True
     eventManagementEnabled: bool = False
