@@ -83,14 +83,6 @@ export const ORION_POWER_FILTERS: OrionSatelliteFilterOption[] = [
   { key: OrionSatelliteFeatureTypeEnum.Other, label: 'other', color: '#a3a3a3' },
 ];
 
-export const ORION_INFRASTRUCTURE_FILTERS: OrionSatelliteFilterOption[] = [
-  { key: OrionSatelliteFeatureTypeEnum.Airport, label: 'airport', color: '#9333ea' },
-  { key: OrionSatelliteFeatureTypeEnum.Port, label: 'port', color: '#0d9488' },
-  { key: OrionSatelliteFeatureTypeEnum.Warehouse, label: 'warehouse', color: '#92400e' },
-  { key: OrionSatelliteFeatureTypeEnum.Industrial, label: 'industrial', color: '#6b7280' },
-  { key: OrionSatelliteFeatureTypeEnum.Military, label: 'military', color: '#d71c1c' },
-];
-
 export const THREAT_LENS_CATEGORY_CONFIG = [
   { key: 'leak_model', label: 'Leak', color: [244, 114, 182] as [number, number, number] },
   { key: 'tracking_model', label: 'Tracking', color: [250, 204, 21] as [number, number, number] },
@@ -148,12 +140,6 @@ export interface ThreatLensLegendItem {
   countryCount: number;
   arcCount: number;
   totalResults: number;
-}
-
-export interface SelectedCountryCategoryCount {
-  label: string;
-  colorHex: string;
-  count: number;
 }
 
 export interface AnimatedArcDescriptor {

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { SatelliteAnomalyResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteAnomalyResponse } from '../../model/satellite-intel-api.models';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({

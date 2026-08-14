@@ -219,6 +219,4 @@ volumes:
   redis_test:
   mongo_test:
   elastic_test:
-  static_volume:
-  media_volume:
   arangodb_test:

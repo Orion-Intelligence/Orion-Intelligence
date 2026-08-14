@@ -751,18 +751,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     return this.toThreatLensCoordinates(point);
   }
 
-  private getExtentCenterCoordinates(extent: any): ThreatLensCoordinates | null {
-    const xmin = Number(extent?.xmin);
-    const xmax = Number(extent?.xmax);
-    const ymin = Number(extent?.ymin);
-    const ymax = Number(extent?.ymax);
-    if (![xmin, xmax, ymin, ymax].every(Number.isFinite)) {
-      return null;
-    }
-
-    return this.toThreatLensCoordinates({ x: (xmin + xmax) / 2, y: (ymin + ymax) / 2 });
-  }
-
   private getExtentCornerCoordinates(extent: any): ThreatLensCoordinates[] {
     const xmin = Number(extent?.xmin);
     const xmax = Number(extent?.xmax);

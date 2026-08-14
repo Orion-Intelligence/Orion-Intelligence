@@ -11,7 +11,7 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { LicenseName } from '../../../shared/model/licenses/license.rules';
 import { getTenantLocationDisplay } from './sidebar-settings.util';
 import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../shared/utils/auth-form.util';
-import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
+import { PasswordToggleDirective } from '../../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 import { TranslationService } from '../../../shared/services/translation.service';

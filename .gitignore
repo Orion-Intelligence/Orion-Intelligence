@@ -23,6 +23,8 @@ __pycache__/
 .idea/
 
 env/
+.venv/
+**/venv/
 client/build-next/*
 backend/env/
 client/node_modules/
@@ -35,7 +37,6 @@ client/build/
 logs/
 mongo-data/
 bloom_data/
-staticfiles/
 
 CrawlerInstance/applicationController/predictions.csv
 TrustlySearchServices/raw/classifier_output/training_data.csv

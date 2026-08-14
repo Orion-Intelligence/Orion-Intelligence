@@ -1,14 +1,14 @@
 import { Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
-import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
+import { AlertNotification } from './model/alert.notification.model';
 import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { ALERT_REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
-import { AlertExportService } from '../../services/export/alert-export.service';
+import { AlertExportService } from './services/alert-export.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScanNotificationService } from '../../services/scan-notification.service';
 import { ScanJob } from '../../model/scan-jobs/scan-job.model';

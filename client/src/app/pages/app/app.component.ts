@@ -1,6 +1,6 @@
 import { Component, effect, signal } from '@angular/core';
 import { NavigationCancel, NavigationEnd, NavigationError, RouteConfigLoadEnd, RouteConfigLoadStart, Router, RouterOutlet } from '@angular/router';
-import { ErrorStoreService } from '../../shared/services/error-store.service';
+import { ErrorStoreService } from './services/error-store.service';
 import { filter, map, Observable } from 'rxjs';
 
 import { AppService } from '../../services/core/app/app.service';

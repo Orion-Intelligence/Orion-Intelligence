@@ -1,5 +1,5 @@
 import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy } from '@angular/core';
-import { ScrollRailMarker, ScrollRailMessage, ScrollRailPrompt } from '../../../../shared/model/chat/message-scroll-rail.model';
+import { ScrollRailMarker, ScrollRailMessage, ScrollRailPrompt } from '../model/message-scroll-rail.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({

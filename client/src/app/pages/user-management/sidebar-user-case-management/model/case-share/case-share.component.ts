@@ -3,7 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { AppService } from '../../../../../services/core/app/app.service';
-import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
+import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../case.model';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';

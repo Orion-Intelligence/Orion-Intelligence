@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseArtifact } from '../../../../../../shared/model/case-management/case.model';
-import { ARTIFACT_REPORT_SOURCE_OPTIONS, ARTIFACT_TYPE_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseArtifact } from '../../case.model';
+import { ARTIFACT_REPORT_SOURCE_OPTIONS, ARTIFACT_TYPE_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { CaseDateField, CaseDateTarget, formatCaseLabel, getCaseDateInputValue, getCaseDisplayLabel, getFormattedCaseDateOnly, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';

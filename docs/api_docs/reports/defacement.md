@@ -4,7 +4,7 @@
 
 Search defacement intelligence reports for hacked or phishing websites; returns a paginated list of defacement events and their metadata.
 
-Request body (`search_defacement_param_model`):
+Request body (`search_consolidated_param_model`):
 - **q** — free-text search over URL, IP, team, attacker handle and content fields (default: empty string)
 - **category** — optional category filter (default `all`)
 - **page** — page number of the paginated result set (1-based)

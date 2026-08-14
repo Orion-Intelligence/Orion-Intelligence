@@ -54,13 +54,6 @@ class elastic_controller:
             return self.__m_dump_connection
         return self.__m_core_connection
 
-    def __conn_for_indices(self, indices):
-        if env_handler.get_instance().env('PRODUCTION') == '0':
-            return self.__m_core_connection
-        if indices and set(indices).issubset({ELASTIC_INDEX.S_STEALERLOGS_INDEX}):
-            return self.__m_dump_connection
-        return self.__m_core_connection
-
     @classmethod
     def _clip_oversized_keyword_values(cls, value, field_path: tuple[str, ...] = ()):
         if any(part.lower() in {"m_screenshot", "screenshot"} for part in field_path):
@@ -250,18 +243,6 @@ class elastic_controller:
             except (ValueError, TypeError):
                 pass
         return prepared
-
-    @staticmethod
-    def is_map_entity_document(document: dict) -> bool:
-        if not isinstance(document, dict):
-            return False
-
-        location = document.get("location")
-        has_location = isinstance(location, dict) and location.get("lat") is not None and location.get("lon") is not None
-        has_type = bool(str(document.get("type") or "").strip())
-        has_capacity = document.get("capacity_mw") is not None
-
-        return has_location and has_type and has_capacity
 
     @staticmethod
     def map_entities_document_id(document: dict) -> str:

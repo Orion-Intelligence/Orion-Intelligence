@@ -1,6 +1,6 @@
 import { Subscription } from 'rxjs';
 import { filter, map, switchMap, take } from 'rxjs/operators';
-import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../model/satellite-intel-api.models';
 import { SatelliteIntelViewport } from '../../enums/geo-fencing.enums';
 import { SatelliteIntelService } from '../satellite-intel-service';
 import { MonthCompareService } from '../ui-overlays/month-compare-section/month-compare.service';

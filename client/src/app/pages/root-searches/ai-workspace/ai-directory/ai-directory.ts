@@ -3,7 +3,7 @@ import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy
 import { FormsModule } from '@angular/forms';
 import { Subscription, timer } from 'rxjs';
 import { NexusChatService } from '../nexus-chat.service';
-import { NexusWorkspaceFileNode, NexusWorkspaceImportResponse } from '../../../../shared/model/nexus/ai-chat-session.model';
+import { NexusWorkspaceFileNode, NexusWorkspaceImportResponse } from '../model/ai-chat-session.model';
 
 type AiDirectoryViewMode = 'chat' | 'directory' | 'split';
 type AiDirectoryTab = 'files' | 'logs';

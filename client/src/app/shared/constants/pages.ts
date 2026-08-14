@@ -71,16 +71,6 @@ export enum TenantSubCategory {
     VIEW_TENANT = 'View-Tenants',
     AUDITLOG = 'Auditlog'
 }
-export enum NETINTSubCategory {
-    VIEW_PROFILE = 'View-Profiles',
-    VIEW_TENANT = 'View-Tenants',
-    AUDITLOG = 'Auditlog'
-}
-export enum SatelliteIntelSubCategory {
-    VIEW_PROFILE = 'View-Profiles',
-    VIEW_TENANT = 'View-Tenants',
-    AUDITLOG = 'Auditlog'
-}
 export enum ProfileSubCategory {
     HOMEPAGE = 'Homepage',
     MONITORING = 'Monitoring',

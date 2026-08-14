@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusReason, CaseUpdateRequest } from '../../../../shared/model/case-management/case.model';
-import { CaseStatusBoardConfig } from '../../../../shared/model/case-management/status-board-config.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusReason, CaseUpdateRequest } from '../model/case.model';
+import { CaseStatusBoardConfig } from '../model/status-board-config.model';
 
 type ArtifactFileIntegrityResult = {
   fileId: string;

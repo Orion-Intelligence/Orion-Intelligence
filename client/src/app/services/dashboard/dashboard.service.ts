@@ -16,7 +16,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { AppService } from '../core/app/app.service';
 import { RankedCallbackModel } from '../../shared/model/results/consolidated/ranked.callback.model';
 import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stealerlogs-filters';
-import { ReportFeedbackModel } from '../../sections/report/templates/report_general/models/report-feedback.model';
+import { ReportFeedbackModel } from '../../shared/partials/report-interactions/models/report-feedback.model';
 
 type FeedbackAction = 'recommended' | 'trust' | 'untrust';
 

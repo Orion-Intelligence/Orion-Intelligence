@@ -11,10 +11,10 @@ import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
-import { AlertWebhookSettingsBlockComponent } from '../../../../shared/components/alert-webhook-settings-block/alert-webhook-settings-block.component';
-import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../../shared/model/alert-webhook-settings/alert-webhook-settings.model';
-import { SmtpSettingsBlockComponent } from '../../../../shared/components/smtp-settings-block/smtp-settings-block.component';
-import { SmtpSettingsForm } from '../../../../shared/model/smtp-settings/smtp-settings.model';
+import { AlertWebhookSettingsBlockComponent } from '../../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
+import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
+import { SmtpSettingsBlockComponent } from '../../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
+import { SmtpSettingsForm } from '../../../../shared/partials/smtp-settings-block/model/smtp-settings.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({

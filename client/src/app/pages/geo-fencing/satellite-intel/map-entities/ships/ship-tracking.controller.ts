@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { SatelliteLiveShip } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveShip } from '../../model/satellite-intel-api.models';
 import { MapEntityLoadingBridge, SatelliteTrackingViewport } from '../../../models/geo-fencing.models';
 import { SatelliteShipTrackingService } from './ship-tracking.service';
 

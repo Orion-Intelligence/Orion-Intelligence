@@ -7,8 +7,6 @@ import { userSessionData } from '../model/company-profile/node.model';
 import { AppService } from '../../services/core/app/app.service';
 @Injectable({ providedIn: 'root' })
 export class NodeResolver implements Resolve<userSessionData> {
-  private cache$?: Observable<userSessionData>;
-
   constructor(private apiService: ApiService, private appService: AppService) {
   }
 

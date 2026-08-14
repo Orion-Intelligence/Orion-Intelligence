@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { AppService } from '../../../../services/core/app/app.service';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { ALERT_CATEGORY_NAMES } from '../../../../shared/model/alert-notification/alert.notification.model';
+import { ALERT_CATEGORY_NAMES } from '../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';

@@ -1,6 +1,6 @@
 import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output } from '@angular/core';
-import { Case, CaseEntity, CaseEntityRequest, CaseRequest, CaseTag } from '../../../../../shared/model/case-management/case.model';
-import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseEntity, CaseEntityRequest, CaseRequest, CaseTag } from '../case.model';
+import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../case-management.defaults';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EntityDetailsComponent } from '../entity-details/entity-details';

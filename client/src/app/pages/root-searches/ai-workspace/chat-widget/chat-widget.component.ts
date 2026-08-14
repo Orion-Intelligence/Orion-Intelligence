@@ -9,7 +9,7 @@ import { overlayFadeAnimation } from '../../../../shared/animations/chat.overlay
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { NexusChatService } from '../nexus-chat.service';
-import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../../../../shared/model/chat/ai-workspace-message.model';
+import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../model/ai-workspace-message.model';
 import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-actions.component';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';

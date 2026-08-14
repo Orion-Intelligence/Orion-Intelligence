@@ -93,7 +93,7 @@ export function submitLogin(username: string, password: string, tenant?: {slug: 
   if (tenant) {
     const loginUrl = tenantLoginUrl(tenant.slug);
     cy.clearCookies({log: false});
-    cy.clearLocalStorage(undefined, {log: false});
+    cy.clearLocalStorage();
     cy.visit(loginUrl);
     cy.location('hostname').should('eq', new URL(loginUrl).hostname);
   } else {
@@ -755,8 +755,8 @@ export function flushTenantAlertsIfPresent() {
     const poll = (): Cypress.Chainable => {
       return cy.request('GET', `${origin}/api/get/tenant/alert/summary`).then((response) => {
         expect(response.status).to.eq(200);
-        const counts = Object.values(response.body?.counts_by_type || {});
-        const total = counts.reduce((sum, count) => sum + Number(count || 0), 0);
+        const counts = Object.values((response.body?.counts_by_type || {}) as Record<string, unknown>);
+        const total = counts.reduce<number>((sum, count) => sum + Number(count || 0), 0);
         if (total === 0) {
           return cy.wrap(null);
         }
@@ -778,7 +778,7 @@ export function waitForTenantAlertScanComplete(timeoutMs = 180000) {
   let observedRunning = false;
 
   return cy.location('origin').then((origin) => {
-    const poll = (): Cypress.Chainable<unknown> => {
+    const poll = (): Cypress.Chainable<any> => {
       return cy.request('POST', `${origin}/api/profile/alert/scan/status`, {}).then((response) => {
         expect(response.status).to.eq(200);
         if (response.body?.scan_running) {

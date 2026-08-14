@@ -4,7 +4,7 @@
 
 Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API.
 
-Request body (`search_general_param_model`):
+Request body (`search_consolidated_param_model`):
 - **q** — free-text search over title, content and enrichment fields (default: empty string)
 - **page** — page number of the paginated result set (1-based)
 - **network** — one of: `all`, `clearnet`, `onion`, `i2p`

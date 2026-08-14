@@ -15,7 +15,7 @@ export class UserImagePickerComponent {
   selectedImage?: string;
   readonly id = input('');
   imageUrl!: string;
-  readonly defaultImage = input<string>('assets/images/tenant/logo_url_default.png');
+  readonly defaultImage = input<string>('/api/s/static/tenant/logo_url_default.png');
   readonly wide = input(false);
   readonly onImageSelected = output<File>();
   readonly onClear = output<string>();

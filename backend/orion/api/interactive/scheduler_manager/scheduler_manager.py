@@ -47,16 +47,6 @@ class SchedulerManager:
         scheduled_local = datetime.combine(now_local.date(),time(config.hour, config.minute, tzinfo=tz))
         return scheduled_local.astimezone(timezone.utc)
 
-    @staticmethod
-    def next_scheduled_for(config: DailySchedulerConfig, now_utc: datetime | None = None) -> datetime:
-        tz = ZoneInfo(config.timezone_name)
-        now_utc = now_utc or datetime.now(timezone.utc)
-        now_local = now_utc.astimezone(tz)
-        scheduled_local = datetime.combine(now_local.date(),time(config.hour, config.minute, tzinfo=tz))
-        if now_local >= scheduled_local:
-            scheduled_local += timedelta(days=1)
-        return scheduled_local.astimezone(timezone.utc)
-
     async def run_due_daily_job(self, config: DailySchedulerConfig, reason: str = "scheduled") -> bool:
         now_utc = datetime.now(timezone.utc)
         scheduled_for = self.scheduled_for_today(config, now_utc)

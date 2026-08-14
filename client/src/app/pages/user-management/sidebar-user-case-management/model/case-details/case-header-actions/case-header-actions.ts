@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
-import { Case } from '../../../../../../shared/model/case-management/case.model';
+import { Case } from '../../case.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { caseInlineMotion } from '../case-details.animations';
 import { getCaseDisplayLabel } from '../case-details-formatters';

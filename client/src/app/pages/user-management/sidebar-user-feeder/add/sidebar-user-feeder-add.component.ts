@@ -1,7 +1,7 @@
 import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
-import { FeederRuleOption, FeederScriptItem } from '../../../../shared/model/profile/feeder.model';
+import { FeederRuleOption, FeederScriptItem } from '../model/feeder.model';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { finalize } from 'rxjs';
 import { FeederService } from '../feeder.service';

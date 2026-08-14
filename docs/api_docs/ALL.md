@@ -421,7 +421,7 @@ Example response:
 
 Search defacement intelligence reports for hacked or phishing websites; returns a paginated list of defacement events and their metadata.
 
-Request body (`search_defacement_param_model`):
+Request body (`search_consolidated_param_model`):
 - **q** — free-text search over URL, IP, team, attacker handle and content fields (default: empty string)
 - **category** — optional category filter (default `all`)
 - **page** — page number of the paginated result set (1-based)
@@ -1488,7 +1488,7 @@ Example:
 
 Search defacement intelligence reports by keyword, threat group, or affected domain; returns metadata for matching defacement reports.
 
-This endpoint corresponds to `/api/search/defacement` and expects a JSON body matching the `search_defacement_param_model` schema.
+This endpoint corresponds to `/api/search/defacement` and expects a JSON body matching the `search_consolidated_param_model` schema.
 
 Supported request fields:
 - **q** — free-text search query over normalized titles, content and metadata (e.g. banner text, domains).
@@ -1637,7 +1637,7 @@ Supported IOC / enrichment fields:
 
 Search exploit and vulnerability intelligence reports using free-text query and structured filters such as CVE identifier, vendor, product, platform, or keyword.
 
-The request is an HTTP POST with a JSON body matching the `search_leak_param_model` schema:
+The request is an HTTP POST with a JSON body matching the `search_consolidated_param_model` schema:
 
 ```json
 {
@@ -1735,7 +1735,7 @@ Example response:
 
 Search breach / leak intelligence reports aggregated from ransomware blogs, extortion sites, leak forums, and darkweb data-dump portals; returns a paginated list of breach announcements and related metadata.
 
-Request body (`search_leak_param_model`):
+Request body (`search_consolidated_param_model`):
 - **q** — free-text search term applied across title, content, location, industry, team name, domains, etc. (default: empty string)
 - **category** — logical content bucket. `"all"` searches across consolidated leak indices; other values may restrict the search to specific collections such as `"leaks"`, `"tracking"`, or `"news"` depending on deployment (default: `"all"`). When `"all"`, the backend runs a consolidated ranked search over the core leak index.
 - **page** — page number of the paginated result set (1-based; default: `1`).
@@ -1920,7 +1920,7 @@ Supported IOC / enrichment fields:
 
 Search social media intelligence reports using free-text queries and structured filters such as hashtag, platform, organization, domain, or country.
 
-The request is an HTTP POST with a JSON body matching the `search_social_param_model` schema:
+The request is an HTTP POST with a JSON body matching the `search_consolidated_param_model` schema:
 
 ```json
 {
@@ -2255,7 +2255,7 @@ metadata to call the corresponding detailed report endpoints.
 
 Search strategic intelligence reports using filters such as free-text query, network, date range, MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be opened via the strategic report API.
 
-Request body (`search_general_param_model`):
+Request body (`search_consolidated_param_model`):
 - **q** — free-text search over title, content and enrichment fields (default: empty string)
 - **page** — page number of the paginated result set (1-based)
 - **network** — one of: `all`, `clearnet`, `onion`, `i2p`

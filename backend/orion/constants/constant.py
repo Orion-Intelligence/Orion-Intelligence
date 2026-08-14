@@ -53,4 +53,3 @@ alert_mail_template = None
 license_rules = {}
 url_rules = {}
 map_entities_data = {}
-map_entities_version = 0

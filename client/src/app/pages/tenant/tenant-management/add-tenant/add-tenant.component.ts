@@ -8,9 +8,9 @@ import { popupAnimation, overlayAnimation } from '../../../../shared/animations/
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../../shared/utils/auth-form.util';
-import { PasswordToggleDirective } from '../../../../shared/directives/password-toggle.directive';
+import { PasswordToggleDirective } from '../../../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-add-tenant',

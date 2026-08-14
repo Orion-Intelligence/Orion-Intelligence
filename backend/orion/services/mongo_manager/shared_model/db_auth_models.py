@@ -40,10 +40,6 @@ class LicenseName(str, Enum):
     ENTERPRISE = "enterprise"
 
 
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
-
-
 class db_user_account(Model):
     username: str = Field(unique=True)
     password: str

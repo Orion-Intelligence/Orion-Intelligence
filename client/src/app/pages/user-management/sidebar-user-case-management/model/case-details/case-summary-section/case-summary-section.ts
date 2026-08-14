@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseAnalyst, CaseTag } from '../../../../../../shared/model/case-management/case.model';
-import { CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseAnalyst, CaseTag } from '../../case.model';
+import { CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../case-management.defaults';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { caseInlineMotion, caseModeSwapMotion } from '../case-details.animations';
 import { formatCaseLabel, getAssignedCaseAnalysts, getCaseDisplayLabel, getFormattedCaseDateTime } from '../case-details-formatters';

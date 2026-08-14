@@ -35,7 +35,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   readonly searchResults = input<(GeneralResultItem | LeakResultItem)[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
-  constructor(private authService: AuthService, private activatedRoute: ActivatedRoute, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(private authService: AuthService, private helperService: HelperService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
   }
 
   ngAfterViewInit() {

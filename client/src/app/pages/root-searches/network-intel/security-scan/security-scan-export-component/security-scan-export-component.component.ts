@@ -1,7 +1,7 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnChanges, SimpleChanges, input } from '@angular/core';
 import { UrlScanMeta, UrlScanThreatItem } from '../../../../../shared/model/security-scan/security.scan.results.model';
-import { FindingRow } from '../../../../../shared/model/security-scan/finding-row.model';
+import { FindingRow } from '../model/finding-row.model';
 import { HelperService } from '../../../../../shared/services/helper.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 

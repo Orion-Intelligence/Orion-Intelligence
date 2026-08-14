@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseAnalyst, Priority, Severity } from '../../../shared/model/case-management/case.model';
+import { Case, CaseAnalyst, Priority, Severity } from './model/case.model';
 import { AddNewCase } from './model/add-new-case/add-new-case';
 import { CaseManagement } from './case-management-service/case-management';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';

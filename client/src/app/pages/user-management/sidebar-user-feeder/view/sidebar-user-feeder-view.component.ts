@@ -2,7 +2,7 @@ import { DatePipe, NgClass } from '@angular/common';
 import { Component, HostListener, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 
-import { FeederScriptItem, FeederValueItem } from '../../../../shared/model/profile/feeder.model';
+import { FeederScriptItem, FeederValueItem } from '../model/feeder.model';
 import { PaginationComponent } from '../../../../shared/partials/pagination/pagination.component';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { ScrollTopComponent } from '../../../../shared/partials/scroll-top/scroll-top.component';

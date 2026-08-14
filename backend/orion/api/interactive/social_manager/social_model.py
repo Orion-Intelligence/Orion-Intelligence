@@ -1,7 +1,6 @@
 import base64
 import binascii
 import hashlib
-import os
 from datetime import UTC, datetime
 from typing import Any
 
@@ -24,6 +23,20 @@ class social_model:
     __instance = None
     SOCIAL_IMAGE_MAX_BYTES = 10 * 1024 * 1024
     SOCIAL_IMAGE_MAX_BASE64_LENGTH = ((SOCIAL_IMAGE_MAX_BYTES + 2) // 3) * 4
+    INT64_MIN = -(2 ** 63)
+    INT64_MAX = 2 ** 63 - 1
+
+    @staticmethod
+    def _is_unstorable_int(value):
+        return isinstance(value, int) and not isinstance(value, bool) and not (social_model.INT64_MIN <= value <= social_model.INT64_MAX)
+
+    @staticmethod
+    def _drop_unstorable_ints(value):
+        if isinstance(value, dict):
+            return {key: social_model._drop_unstorable_ints(item) for key, item in value.items() if not social_model._is_unstorable_int(item)}
+        if isinstance(value, list):
+            return [social_model._drop_unstorable_ints(item) for item in value if not social_model._is_unstorable_int(item)]
+        return value
 
     @staticmethod
     def getInstance():
@@ -249,26 +262,6 @@ class social_model:
     async def search_metadata(self, param, current_user=None, request=None):
         return await self.social_search(param, "metadata", current_user, request)
 
-    async def extension_status(self):
-        last_error = ""
-        try:
-            for base_url in self._social_api_base_urls():
-                try:
-                    async with httpx.AsyncClient() as client:
-                        response = await client.get(f"{base_url.rstrip('/')}/extensions/status", headers=self._social_headers(), timeout=20)
-                    if response.status_code != 200:
-                        return JSONResponse(status_code=response.status_code, content={"online": 0, "extensions": [], "error": "Social extension manager returned an error"})
-                    payload = response.json()
-                    if isinstance(payload, dict):
-                        payload.setdefault("backend_url", base_url)
-                    return payload
-                except httpx.RequestError as exc:
-                    last_error = str(exc)
-                    continue
-        except Exception:
-            return {"online": 0, "extensions": [], "error": "Failed to reach the extension manager"}
-        return {"online": 0, "extensions": [], "error": f"Social service unreachable: {last_error}"}
-
     async def extension_download(self, browser: str = "chrome"):
         last_error = ""
         try:
@@ -333,10 +326,10 @@ class social_model:
             for profile in profiles:
                 if not isinstance(profile, dict):
                     continue
-                normalized_profiles.append({
+                normalized_profiles.append(social_model._drop_unstorable_ints({
                     **profile,
                     "keyUsername": normalized_username,
-                })
+                }))
 
             update_doc = {
                 "$setOnInsert": {

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { AlertService } from '../../../../services/alerts/alerts.service';
+import { AlertService } from '../services/alerts.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { NgClass } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';

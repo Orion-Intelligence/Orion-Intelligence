@@ -32,11 +32,6 @@ class CaseRequestModel(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class ArtifactReportOption(BaseModel):
-    id: str
-    title: str
-
-
 class SocialMediaProfileModel(CaseRequestModel):
     platform: SocialPlatform
     platformOtherValue: str = ""

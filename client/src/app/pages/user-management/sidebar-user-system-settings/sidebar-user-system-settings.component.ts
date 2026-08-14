@@ -6,14 +6,14 @@ import { AppService } from '../../../services/core/app/app.service';
 import { AppSettingsModel, ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
-import { SmtpSettingsBlockComponent } from '../../../shared/components/smtp-settings-block/smtp-settings-block.component';
-import { AlertWebhookSettingsBlockComponent } from '../../../shared/components/alert-webhook-settings-block/alert-webhook-settings-block.component';
+import { SmtpSettingsBlockComponent } from '../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
+import { AlertWebhookSettingsBlockComponent } from '../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 import { ActivatedRoute } from '@angular/router';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
-import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/model/alert-webhook-settings/alert-webhook-settings.model';
+import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
 import { UserImagePickerComponent } from '../sidebar-user-settings/user-image-picker/user-image-picker.component';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';

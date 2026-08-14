@@ -2,7 +2,7 @@ import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription, concat } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ConsolidatedApiService } from '../../../../shared/services/consolidated.api.service';
+import { ConsolidatedApiService } from '../services/consolidated.api.service';
 import { ConsolidatedScanResults, ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../shared/model/results/consolidated/consolidated.callback.model';
 import { RouterLink } from '@angular/router';
 import { scanAnimation } from '../../../../shared/animations/scan.animations';
@@ -25,7 +25,6 @@ interface PendingMsg {
 export class ConsolidatedScanComponent {
   private resultsByType: Partial<Record<Exclude<ScanKey, 'liveapi'>, ConsolidatedScanResults[]>> = {};
   private progressByType: Partial<Record<ScanKey, number>> = {};
-  private liveApiEntities: ConsolidatedLiveApis[] = [];
   private scanSub?: Subscription;
 
   today = new Date();
@@ -54,7 +53,6 @@ export class ConsolidatedScanComponent {
     this.resultsByType = {};
     this.progressByType = {};
     this.liveApiResults = [];
-    this.liveApiEntities = [];
     if (!keepExpectedTypes) {
       this.expectedTypes = [];
     }
@@ -165,7 +163,6 @@ export class ConsolidatedScanComponent {
       this.progressByType[t] = 0;
     }
     this.isProcessing = true;
-    this.liveApiEntities = liveApiEntities;
     this.scanSub = concat(...scans.map(({ t, o }) =>o.pipe(map(v => ({ t, v })))))
       .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({

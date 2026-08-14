@@ -6,8 +6,8 @@ import { DefacementGroup, DefacementGroupCallbackItem, DefacementRecord, Defacem
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
-import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
+import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
+import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
 
 const STAGGER_RENDER_BATCH_SIZE = 10;
 const STAGGER_RENDER_DELAY_MS = 16;

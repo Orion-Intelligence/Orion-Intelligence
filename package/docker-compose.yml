@@ -176,5 +176,3 @@ volumes:
   redis:
   mongo:
   elastic:
-  static_volume:
-  media_volume:

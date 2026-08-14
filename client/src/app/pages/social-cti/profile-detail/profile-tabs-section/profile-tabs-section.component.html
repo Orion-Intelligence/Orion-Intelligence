@@ -1,0 +1,470 @@
+@if (platformData(); as platformData) {
+  @if (user(); as user) {
+    <article data-testid="social-platform-card" class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)]">
+      <div class="ui-social-profile-overview-in">
+        <div class="relative min-h-[172px] overflow-hidden border-b border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(15,23,42,0.28))]">
+          @if (getCoverImageUrl(platformData)) {
+            <img [src]="getCoverImageUrl(platformData)" [alt]="(platformData.username || user.username) + ' cover'" referrerpolicy="no-referrer" (error)="onImageError($event)" class="absolute inset-0 h-full w-full object-cover">
+          } @else {
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(125,211,252,0.18),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.10),transparent_24%),linear-gradient(135deg,rgba(30,41,59,0.78),rgba(15,23,42,0.94))]"></div>
+            <div class="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] [background-size:22px_22px]"></div>
+          }
+          <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-blue-820-light)] via-[rgba(15,23,42,0.58)] to-[rgba(15,23,42,0.10)]"></div>
+          @if (getProfileUrl(platformData, platformData.username || user.username); as profileUrl) {
+            @if (profileUrl !== '#') {
+              <a [href]="profileUrl" target="_blank" rel="noopener noreferrer" aria-label="Open original profile" title="Open original profile" class="absolute right-3 top-3 z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/35 text-[13px] text-white shadow-[0_8px_18px_rgba(0,0,0,0.28)] backdrop-blur transition-colors hover:bg-black/50 hover:text-white">
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="h-4 w-4 text-white" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14"></path>
+                  <path d="m13 6 6 6-6 6"></path>
+                </svg>
+              </a>
+            }
+          }
+          <div class="relative z-[1] flex min-h-[172px] items-end gap-4 px-4 pb-4 pt-5">
+            <div class="flex h-[82px] w-[82px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[4px] border-[var(--color-blue-820-light)] bg-[var(--color-blue-720)] text-lg shadow-[0_12px_28px_rgba(0,0,0,0.34)]">
+              @if (getProfileImageUrl(platformData) && !isProfileImageFailed(platformData)) {
+                <img [src]="getProfileImageUrl(platformData)" [alt]="platformData.username || user.username" referrerpolicy="no-referrer" (error)="markProfileImageFailed(platformData)" class="h-full w-full object-cover">
+              } @else {
+                <i class="bi bi-person-fill text-[34px] text-[var(--color-text3)]"></i>
+              }
+            </div>
+            <div class="min-w-0 flex-1 pb-1">
+              <div class="flex min-w-0 flex-wrap items-center gap-2">
+                <h3 class="mb-0 min-w-0 truncate text-lg font-bold leading-tight text-[var(--color-text1)]">{{ platformData.username || user.username }}</h3>
+              </div>
+              <div class="mt-1 text-[12px] font-medium text-[var(--color-text3)]">{{ platformData.platform }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex overflow-x-auto border-b border-[var(--color-border)] bg-[var(--color-blue-700)] px-2">
+          @for (tab of fetchTabs(); track tab.key) {
+            <button data-testid="social-fetch-tab" [attr.data-tab-key]="tab.key" (click)="tabSelected.emit(tab.key)" class="relative flex items-center gap-1.5 px-4 py-3 text-xs font-semibold transition-colors" [class.text-sky-400]="activeTab() === tab.key" [class.text-slate-400]="activeTab() !== tab.key">
+              <i [class]="getTabIcon(tab)"></i>
+              {{ tab.label }}
+              @if (isTabLoading(tab.key)) {
+                <span class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+              }
+            </button>
+          }
+        </div>
+
+        <div [class]="activeTab() === 'stealerLogs' || (activeTab() === 'details' && getVisibleProfileDetailEntries(platformData).length > 0) ? 'bg-[var(--color-blue-820-light)]' : 'min-h-[220px] bg-[var(--color-blue-820-light)]'">
+          @if (activeTab() === 'details') {
+            <div data-testid="social-tab-panel-details" class="px-[13px] py-[11px]">
+              @if (isTabLoading('details') && getVisibleProfileDetailEntries(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading profile details</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching the latest profile metadata.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('details')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 py-1.5 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                  </button>
+                </div>
+              } @else if (getVisibleProfileDetailEntries(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                    <i class="bi bi-person-badge text-base"></i>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No profile details found</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Try fetching this section again.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('details')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                  </button>
+                </div>
+              } @else {
+                <div class="ui-social-soft-surface overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
+                  @for (item of getVisibleProfileDetailEntries(platformData); track trackByKey($index, item)) {
+                    <div class="ui-social-soft-row group flex items-start gap-3 border-b border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
+                      <div class="flex w-[128px] flex-shrink-0 items-center gap-2 pt-0.5">
+                        <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" [class.bg-sky-500]="isUrl(item.value) && !isImageUrl(item.value)" [class.bg-emerald-500]="isImageUrl(item.value)" [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)" [class.bg-rose-400]="isBool(item.value)" [class.bg-slate-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
+                        </span>
+                        <span class="min-w-0 truncate text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ formatProfileDetailKey(item.key) }}</span>
+                      </div>
+                      <div class="min-w-0 flex-1 whitespace-pre-wrap break-words text-[13px] font-medium leading-5 text-[var(--color-text2)]" [class.tabular-nums]="isNumeric(item.value)">
+                        @if (isImageUrl(item.value)) {
+                          <div class="flex items-center gap-2">
+                            <img [src]="getDisplayUrl(item.value)" [alt]="item.key" referrerpolicy="no-referrer" (error)="onImageError($event)" class="h-8 w-8 flex-shrink-0 rounded-[6px] object-cover">
+                            <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="text-[11px] text-[var(--color-blue-640)] hover:underline">view image</a>
+                          </div>
+                        } @else if (isUrl(item.value)) {
+                          <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="break-all text-[var(--color-blue-640)] hover:underline">{{ getDisplayUrl(item.value) }}</a>
+                        } @else {
+                          {{ formatMetadataValue(item.value) }}
+                        }
+                      </div>
+                      <button (click)="copyToClipboard(item.value)" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text4)] opacity-0 transition-all hover:bg-emerald-500/10 hover:text-emerald-300 group-hover:opacity-100" title="Copy value">
+                        <i class="bi bi-clipboard text-[10px]"></i>
+                      </button>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (activeTab() === 'posts') {
+            <app-social-profile-posts-section
+              [platformData]="platformData"
+              [isLoading]="isTabLoading('posts')"
+              (refetch)="refetchTab.emit($event)"
+              (cursorFetch)="postCursorFetch.emit($event)">
+            </app-social-profile-posts-section>
+          }
+
+
+          @if (activeTab() === 'videos') {
+            <app-social-profile-videos-section
+              [platformData]="platformData"
+              [isLoading]="isTabLoading('videos')"
+              (refetch)="refetchTab.emit($event)"
+              (cursorFetch)="postCursorFetch.emit($event)">
+            </app-social-profile-videos-section>
+          }
+
+          @if (activeTab() === 'shorts') {
+            <app-social-profile-shorts-section
+              [platformData]="platformData"
+              [isLoading]="isTabLoading('shorts')"
+              (refetch)="refetchTab.emit($event)"
+              (cursorFetch)="postCursorFetch.emit($event)">
+            </app-social-profile-shorts-section>
+          }
+
+          @if (activeTab() === 'images') {
+            <div data-testid="social-tab-panel-images" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Images</p>
+                @if ((platformData.images || []).length > 0) {
+                  <button type="button" (click)="refetchTab.emit('images')" [disabled]="isTabLoading('images')" class="inline-flex h-8 flex-shrink-0 items-center rounded-[6px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    Fetch Latest
+                  </button>
+                }
+              </div>
+              @if (isTabLoading('images') && (platformData.images || []).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading images</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching media results for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('images')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 py-1.5 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                  </button>
+                </div>
+              } @else if (getDisplayableSocialImages(platformData.images || []).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                    <i class="bi bi-images text-base"></i>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No images found</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Run the image fetch again for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('images')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                  </button>
+                </div>
+              } @else {
+                <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                  @for (image of getDisplayableSocialImages(platformData.images || []); track image.image_url || image.thumbnail || $index) {
+                    <a data-testid="social-image-result" [href]="getSocialImageHref(image)" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
+                      <img [src]="getSocialImageSrc(image)" [alt]="image.title || image.source || 'Social image'" referrerpolicy="no-referrer" (error)="onImageError($event)" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
+                      <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
+                        <p class="mb-0 truncate text-[10px] font-semibold text-white">{{ image.title || image.source || 'Image result' }}</p>
+                      </div>
+                      <span class="absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-[8px] bg-black/45 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <i class="bi bi-box-arrow-up-right"></i>
+                      </span>
+                    </a>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (activeTab() === 'connections') {
+            <div data-testid="social-tab-panel-connections" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Post Mentions</p>
+              </div>
+              @if (isTabLoading('connections') && getPostConnections(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading post mentions</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching post data for connections.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('connections')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 py-1.5 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                  </button>
+                </div>
+              } @else if (getPostConnections(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                    <i class="bi bi-diagram-3 text-base"></i>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No post mentions found</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Run the post fetch again for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('connections')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                  </button>
+                </div>
+              } @else {
+                <div class="flex flex-wrap gap-2">
+                  @for (connection of getPostConnections(platformData); track trackByUsername($index, connection)) {
+                    <span data-testid="social-connection-chip" class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)]">&#64;{{ connection }}</span>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (activeTab() === 'onlinePresence') {
+            <div data-testid="social-tab-panel-online-presence" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Online Presence</p>
+                @if (getOnlinePresence(platformData); as presence) {
+                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ presence.total_found }} results</span>
+                }
+              </div>
+              <div class="mb-3 flex min-w-0 items-center gap-2">
+                <input data-testid="social-online-presence-input" type="text" placeholder="Search online presence" [value]="onlinePresenceSearchTerm()" (input)="onOnlinePresenceInput($event)" (keydown.enter)="onlinePresenceSearch.emit()" class="h-8 w-full min-w-[180px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35">
+                <button data-testid="social-online-presence-submit" type="button" title="Search online presence" aria-label="Search online presence" (click)="onlinePresenceSearch.emit()" [disabled]="isTabLoading('onlinePresence')" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-50">
+                  <i class="bi bi-search text-xs"></i>
+                </button>
+              </div>
+              @if (isTabLoading('onlinePresence') && !getOnlinePresence(platformData)) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading online presence</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Searching this username with the platform token.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('onlinePresence')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 py-1.5 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                  </button>
+                </div>
+              } @else if (!getOnlinePresence(platformData) || getOnlinePresenceResults(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                    <i class="bi bi-globe2 text-base"></i>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No online presence found</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Run the online presence search again for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('onlinePresence')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                  </button>
+                </div>
+              } @else {
+                <div class="flex flex-col gap-2.5">
+                  @for (result of getOnlinePresenceResults(platformData); track result.url || result.title || $index) {
+                    <div data-testid="social-online-presence-result" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="mb-1 break-words text-sm font-semibold leading-5 text-[var(--color-text2)]">{{ result.title || result.url || 'Online result' }}</p>
+                          @if (result.url) {
+                            <a [href]="result.url" target="_blank" rel="noopener noreferrer" class="block truncate text-xs text-[var(--color-blue-640)] hover:underline">{{ result.url }}</a>
+                          }
+                          @if (result.snippet) {
+                            <p class="mb-0 mt-2 text-xs leading-5 text-[var(--color-text4)]">{{ result.snippet }}</p>
+                          }
+                          @if (result.timestamp) {
+                            <p class="mb-0 mt-2 text-[11px] font-medium text-[var(--color-text4)]">{{ result.timestamp }}</p>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (activeTab() === 'stealerLogs') {
+            <div data-testid="social-tab-panel-stealer-logs" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Stealer Logs</p>
+                  <p class="mb-0 mt-1 truncate font-mono text-[11px] text-[var(--color-text4)]">{{ platformData.username || platformData.keyUsername }} · {{ getPlatformStealerDomain(platformData) }}</p>
+                </div>
+                <div class="flex flex-shrink-0 items-center gap-2">
+                  @if (getStealerLogs(platformData).length > 0) {
+                    <button data-testid="social-stealerlog-download" type="button" (click)="openStealerLogExportChoice($event, platformData)" title="Download records" aria-label="Download stealer log records" class="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+                      <i class="bi bi-download text-xs"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+              @if (isTabLoading('stealerLogs') && getStealerLogs(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Checking stealer logs</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Searching records for this username and domain.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('stealerLogs')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 py-1.5 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                  </button>
+                </div>
+              } @else if (getStealerLogs(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-emerald-500/20 bg-emerald-500/[0.035] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/10 bg-emerald-500/10 text-emerald-300">
+                    <i class="bi bi-shield-check text-base"></i>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No stealer log match</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">No record matched both this username and domain.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('stealerLogs')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                  </button>
+                </div>
+              } @else {
+                <div data-testid="social-stealerlog-table" class="overflow-hidden rounded-[10px] border border-rose-500/15 bg-rose-500/[0.035]">
+                  <div class="hidden border-b border-rose-500/10 bg-rose-500/[0.045] px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:grid md:grid-cols-[1fr_1fr_82px_110px] md:gap-2">
+                    <div>Domain</div>
+                    <div>Identity</div>
+                    <div>Password</div>
+                    <div class="text-right">Date</div>
+                  </div>
+                  @for (record of getStealerLogs(platformData); track getStealerRecordTrackKey($index, record)) {
+                    <div data-testid="social-stealerlog-row" class="grid gap-2 border-b border-rose-500/10 bg-rose-500/[0.025] px-3 py-3 transition-colors last:border-b-0 hover:bg-rose-500/[0.055] md:grid-cols-[1fr_1fr_82px_110px]">
+                      <div class="min-w-0">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">Domain</div>
+                        <div class="mt-0.5 truncate text-[12px] font-semibold text-[var(--color-text2)] md:mt-0" [title]="getStealerRecordHost(record)">{{ getStealerRecordHost(record) }}</div>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">Identity</div>
+                        <div class="mt-0.5 truncate font-mono text-[11px] text-[var(--color-text3)] md:mt-0" [title]="getStealerRecordIdentity(record)">{{ getStealerRecordIdentity(record) }}</div>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">Password</div>
+                        <div class="mt-0.5 inline-flex cursor-not-allowed font-mono text-[11px] font-semibold text-[var(--color-text3)] md:mt-0" appTooltip="Restricted" title="Restricted" aria-label="Password restricted">****</div>
+                      </div>
+                      <div class="min-w-0 md:text-right">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">Date</div>
+                        <div class="mt-0.5 truncate text-[11px] font-medium text-[var(--color-text3)] md:mt-0" [title]="getStealerRecordDate(record)">{{ getStealerRecordDate(record) }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <app-export-choice-modal
+                  [visible]="!!selectedStealerLogPlatform()"
+                  title="Export Records"
+                  subtitle="Choose the export format."
+                  [options]="stealerLogExportOptions"
+                  overlayTestId="social-stealerlog-export-overlay"
+                  modalTestId="social-stealerlog-export-modal"
+                  closeTestId="social-stealerlog-export-close"
+                  (closed)="closeStealerLogExportChoice()"
+                  (optionSelected)="selectStealerLogExport($event)">
+                </app-export-choice-modal>
+              }
+            </div>
+          }
+
+          @if (activeTab() === 'followers') {
+            <div data-testid="social-tab-panel-followers" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Followers</p>
+              </div>
+              @if (isTabLoading('followers') && getFollowers(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading followers</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching followers for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('followers')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 py-1.5 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                  </button>
+                </div>
+              } @else if (getFollowers(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                    <i class="bi bi-people text-base"></i>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No followers found</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Run the followers fetch again for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('followers')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                  </button>
+                </div>
+              } @else {
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  @for (follower of getFollowers(platformData); track trackByUsername($index, follower)) {
+                    <a data-testid="social-follower-row" [href]="getProfileUrl(platformData, follower)" target="_blank" rel="noopener noreferrer" class="rounded-[8px] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-mono text-[var(--color-text3)] hover:text-[var(--color-blue-640)]">&#64;{{ follower }}</a>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (activeTab() === 'following') {
+            <div data-testid="social-tab-panel-following" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">Following</p>
+              </div>
+              @if (isTabLoading('following') && getFollowing(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                    <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">Loading following</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Fetching following list for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('following')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-[#e2e8f0] bg-[#f1f5f9] px-3 py-1.5 text-xs font-semibold text-[#1f3347] transition-colors hover:bg-[#e8eef5] hover:text-[#102033] [body.light-theme_&]:border-[#d9e4ef] [body.light-theme_&]:bg-[#f8fafc] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#edf4fb]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Restart fetch
+                  </button>
+                </div>
+              } @else if (getFollowing(platformData).length === 0) {
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+                    <i class="bi bi-person-plus text-base"></i>
+                  </div>
+                  <div>
+                    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No following results found</p>
+                    <p class="mb-0 text-xs text-[var(--color-text4)]">Run the following fetch again for this profile.</p>
+                  </div>
+                  <button (click)="refetchTab.emit('following')" class="inline-flex items-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+                    <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
+                  </button>
+                </div>
+              } @else {
+                <div class="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  @for (following of getFollowing(platformData); track trackByUsername($index, following)) {
+                    <a data-testid="social-following-row" [href]="getProfileUrl(platformData, following)" target="_blank" rel="noopener noreferrer" class="rounded-[8px] bg-[var(--color-blue-700)] px-3 py-2 text-sm font-mono text-[var(--color-text3)] hover:text-[var(--color-blue-640)]">&#64;{{ following }}</a>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </article>
+  }
+}

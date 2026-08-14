@@ -9,7 +9,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { RelatedReportItem, STRONG_RELATED_MAPPING_KEYS } from '../../model/report-mapping/report-mapping.model';
+import { RelatedReportItem, STRONG_RELATED_MAPPING_KEYS } from './model/report-mapping.model';
 
 @Component({
   selector: 'app-report-mapping',

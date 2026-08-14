@@ -5,6 +5,7 @@ from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 
 ACCESS_COOKIE = "access_token"
+EXTENSION_COOKIE_PATH = "/api/extension"
 COOKIE_MAX_AGE = 30 * 60  # 30 minutes
 COOKIE_CIPHER = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
 
@@ -21,6 +22,18 @@ def set_access_cookie(resp: Response, token: str) -> None:
         max_age=COOKIE_MAX_AGE,
     )
     resp.delete_cookie(ACCESS_COOKIE, path="/admin")
+
+
+def set_extension_cookie(resp: Response, token: str) -> None:
+    resp.set_cookie(
+        key=ACCESS_COOKIE,
+        value=COOKIE_CIPHER.encrypt(token.encode()).decode(),
+        httponly=True,
+        samesite="none",
+        secure=True,
+        path=EXTENSION_COOKIE_PATH,
+        max_age=COOKIE_MAX_AGE,
+    )
 
 
 def token_from_request(request: Request) -> str | None:

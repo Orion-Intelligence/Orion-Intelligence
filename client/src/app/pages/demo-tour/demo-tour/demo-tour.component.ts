@@ -1,6 +1,6 @@
 import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { DemoTourService } from '../../../shared/services/demo.tour.service';
-import { RenderedGeometry } from '../../../shared/model/demo-tour/modal/rendered-geometry.interface';
+import { DemoTourService } from '../services/demo.tour.service';
+import { RenderedGeometry } from '../model/rendered-geometry.interface';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 

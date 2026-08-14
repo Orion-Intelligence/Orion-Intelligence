@@ -1,0 +1,7 @@
+<app-social-profile-post-content-section
+  [platformData]="platformData()"
+  contentType="shorts"
+  [isLoading]="isLoading()"
+  (refetch)="refetch.emit($event)"
+  (cursorFetch)="cursorFetch.emit($event)">
+</app-social-profile-post-content-section>

@@ -5,8 +5,8 @@ import { PaginationComponent } from '../../../shared/partials/pagination/paginat
 import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
 import { audit_filters } from '../../../shared/constants/filters';
 import { AuditlogListComponent } from './auditlog-list/auditlog-list.component';
-import { AuditLogCallbackModel } from '../../../shared/model/auditlog/auditlog.model';
-import { AuditlogService } from '../../../services/auditlog/auditlog.service';
+import { AuditLogCallbackModel } from './model/auditlog.model';
+import { AuditlogService } from './services/auditlog.service';
 import { BaseListingComponent } from '../../../shared/directive/base.listing.directive';
 import { HelperService } from '../../../shared/services/helper.service';
 import { take } from 'rxjs/operators';

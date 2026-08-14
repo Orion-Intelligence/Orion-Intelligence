@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
-import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../model/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 
 @Injectable({ providedIn: 'root' })

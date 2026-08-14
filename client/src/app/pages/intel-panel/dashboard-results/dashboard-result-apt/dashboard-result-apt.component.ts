@@ -3,9 +3,9 @@ import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
+import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
 import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } from '../../../../shared/model/results/apt-intel/apt-intel.callback.model';
-import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
+import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 
 const STAGGER_RENDER_BATCH_SIZE = 10;

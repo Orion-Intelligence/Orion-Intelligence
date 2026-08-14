@@ -34,7 +34,7 @@ import { NetworkIntel } from '../network-intel/network-intel';
 import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-engine/cross-search-card.component';
 import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { ExternalConsolidatedFeedService } from '../../../services/dashboard/external-consolidated-feed.service';
+import { ExternalConsolidatedFeedService } from './services/external-consolidated-feed.service';
 
 @Component({
   selector: 'app-dashboard-consolidated',

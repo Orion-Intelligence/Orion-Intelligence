@@ -17,7 +17,6 @@ stop_docker() {
     docker stop trusted-web-nginx 2>/dev/null || true
     docker rm trusted-web-nginx 2>/dev/null || true
     docker compose -p "$PROJECT_NAME" down --remove-orphans
-    rm -rf staticfiles
 }
 
 stop_production_services_preserving_nginx() {
@@ -25,7 +24,6 @@ stop_production_services_preserving_nginx() {
 
     docker compose -p "$PROJECT_NAME" -f docker-compose-production.yml stop "${services[@]}"
     docker compose -p "$PROJECT_NAME" -f docker-compose-production.yml rm -f "${services[@]}"
-    rm -rf staticfiles
 }
 
 stop_ng_serve() {
@@ -171,13 +169,6 @@ run_backend_tests_protected() {
     fi
 }
 
-run_test_task() {
-    cd client || exit
-    npm test run
-    cd ..
-    exit 0
-}
-
 restart_ng_serve() {
     local url="http://127.0.0.1:4200/"
     local pid_file="/tmp/orion-ng-serve.pid"
@@ -218,6 +209,7 @@ set_swarm_url_to_local_ip() {
 
     sed -i.bak '/^SWARM_URL=/d' "$ENV_FILE" 2>/dev/null || true
     echo "SWARM_URL=http://$local_ip:5132" >> "$ENV_FILE"
+    rm -f "${ENV_FILE}.bak"
 }
 
 if [ "$1" = "-ip" ]; then

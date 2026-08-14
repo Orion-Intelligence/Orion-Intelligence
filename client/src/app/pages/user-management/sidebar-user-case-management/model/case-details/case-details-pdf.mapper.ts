@@ -1,4 +1,4 @@
-import { Case, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
+import { Case, SharedCaseReport } from '../case.model';
 
 export function buildCasePdfReport(caseData: Case, getAnalystLabel: (userId?: string) => string): SharedCaseReport {
   const report: SharedCaseReport = {

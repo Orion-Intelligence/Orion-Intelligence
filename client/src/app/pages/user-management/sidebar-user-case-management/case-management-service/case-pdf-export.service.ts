@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import type jsPDF from 'jspdf';
 import type { RowInput } from 'jspdf-autotable';
 import { forkJoin, from, map, Observable } from 'rxjs';
-import type { SharedCaseArtifact, SharedCaseComment, SharedCaseEntity, SharedCaseLink, SharedCaseReport, SharedCaseTask } from '../../../../shared/model/case-management/case.model';
+import type { SharedCaseArtifact, SharedCaseComment, SharedCaseEntity, SharedCaseLink, SharedCaseReport, SharedCaseTask } from '../model/case.model';
 import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
 import { buildExportFileStem } from '../../../../shared/services/export/export-filename.util';
 import { drawInstitutionalCover, drawInstitutionalFooter, drawInstitutionalPageHeader, drawInstitutionalSectionHeading, PDF_EXPORT_LAYOUT } from '../../../../shared/services/export/pdf-export-layout';
@@ -308,18 +308,6 @@ export class CasePdfExportService {
 
   private isTechnicalPdfField(label: string): boolean {
     return /(password|hash|url|link|domain|email|username|ioc|file|identifier|ip|wallet|address)/i.test(label);
-  }
-
-  private fitPdfLine(doc: jsPDF, text: string, maxWidth: number): string {
-    const normalizedText = normalizePdfText(text);
-    if (doc.getTextWidth(normalizedText) <= maxWidth) {
-      return normalizedText;
-    }
-    let value = normalizedText;
-    while (value.length > 4 && doc.getTextWidth(`${value}...`) > maxWidth) {
-      value = value.slice(0, -1);
-    }
-    return `${value}...`;
   }
 
   private formatConfidence(value?: string | null): string {

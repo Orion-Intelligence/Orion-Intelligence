@@ -8,8 +8,8 @@ import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../shared/model/filter/filter.model';
 import { directory_filters } from '../../shared/constants/filters';
 import { SidebarService } from '../../shared/services/sidebar.service';
-import { DirectoryService } from '../../services/directory/directory.service';
-import { DirectoryCallbackModel } from '../../shared/model/directory/directory.model';
+import { DirectoryService } from './services/directory.service';
+import { DirectoryCallbackModel } from './model/directory.model';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({

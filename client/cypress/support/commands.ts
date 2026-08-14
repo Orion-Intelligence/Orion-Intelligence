@@ -42,7 +42,7 @@ const loginRequestAlias = (alias = "loginRequest"): `@${string}` => (
 
 const visitLoginWithCleanAuthState = () => {
     cy.clearCookies({ log: false });
-    cy.clearLocalStorage(undefined, { log: false });
+    cy.clearLocalStorage();
     cy.visit("/login", {
         onBeforeLoad(win) {
             win.localStorage.clear();
@@ -262,7 +262,7 @@ Cypress.Commands.add("logout", () => {
             cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({ force: true });
             cy.get('[data-testid="login-user"]').should('exist');
             cy.clearCookies({ log: false });
-            cy.clearLocalStorage(undefined, { log: false });
+            cy.clearLocalStorage();
             cy.window({ log: false }).then((win) => {
                 win.localStorage.clear();
                 win.sessionStorage.clear();

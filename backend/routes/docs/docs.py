@@ -426,7 +426,7 @@ IOC_DOC = ("\n\nAdditionally, the response may include automatically extracted i
 REPORT_DOCS = {"defacement": {"description": (
     "Search defacement intelligence reports for hacked or phishing websites; returns a paginated list of "
     "defacement events and their metadata.\n\n"
-    "Request body (`search_defacement_param_model`):\n"
+    "Request body (`search_consolidated_param_model`):\n"
     "- **q** — free-text search over URL, IP, team, attacker handle and content fields (default: empty string)\n"
     "- **category** — optional category filter (default `all`)\n"
     "- **page** — page number of the paginated result set (1-based)\n"
@@ -1358,7 +1358,7 @@ SEARCH_DOCS = {"defacement": {"description": (
     "Search defacement intelligence reports by keyword, threat group, or affected domain; returns metadata "
     "for matching defacement reports.\n\n"
     "This endpoint corresponds to `/api/search/defacement` and expects a JSON body matching the "
-    "`search_defacement_param_model` schema.\n\n"
+    "`search_consolidated_param_model` schema.\n\n"
     "Supported request fields:\n"
     "- **q** — free-text search query over normalized titles, content and metadata (e.g. banner text, domains).\n"
     "- **category** — ML-based classifier label (e.g. `all`, `currency`, `forums`, `news`, `leaks`, etc.); "
@@ -1454,7 +1454,7 @@ SEARCH_DOCS = {"defacement": {"description": (
                                           "```\n") + IOC_DOC, }, "exploit": {"description": (
     "Search exploit and vulnerability intelligence reports using free-text query and structured filters such as "
     "CVE identifier, vendor, product, platform, or keyword.\n\n"
-    "The request is an HTTP POST with a JSON body matching the `search_leak_param_model` schema:\n\n"
+    "The request is an HTTP POST with a JSON body matching the `search_consolidated_param_model` schema:\n\n"
     "```json\n"
     "{\n"
     "  \"q\": \"CVE-2024-12345\",\n"
@@ -1536,7 +1536,7 @@ SEARCH_DOCS = {"defacement": {"description": (
     "```\n"), }, "breach": {"description": (
     "Search breach / leak intelligence reports aggregated from ransomware blogs, extortion sites, leak forums, "
     "and darkweb data-dump portals; returns a paginated list of breach announcements and related metadata.\n\n"
-    "Request body (`search_leak_param_model`):\n"
+    "Request body (`search_consolidated_param_model`):\n"
     "- **q** — free-text search term applied across title, content, location, industry, team name, domains, etc. "
     "(default: empty string)\n"
     "- **category** — logical content bucket. `\"all\"` searches across consolidated leak indices; other values "
@@ -1686,7 +1686,7 @@ SEARCH_DOCS = {"defacement": {"description": (
     "social": {"description": (
         "Search social media intelligence reports using free-text queries and structured filters such as hashtag, "
         "platform, organization, domain, or country.\n\n"
-        "The request is an HTTP POST with a JSON body matching the `search_social_param_model` schema:\n\n"
+        "The request is an HTTP POST with a JSON body matching the `search_consolidated_param_model` schema:\n\n"
         "```json\n"
         "{\n"
         "  \"q\": \"#ransomware data leak\",\n"
@@ -1973,7 +1973,7 @@ SEARCH_DOCS = {"defacement": {"description": (
         "Search strategic intelligence reports using filters such as free-text query, network, date range, "
         "MITRE/STIX object type or IOC entities; returns metadata for matching strategic reports that can be "
         "opened via the strategic report API.\n\n"
-        "Request body (`search_general_param_model`):\n"
+        "Request body (`search_consolidated_param_model`):\n"
         "- **q** — free-text search over title, content and enrichment fields (default: empty string)\n"
         "- **page** — page number of the paginated result set (1-based)\n"
         "- **network** — one of: `all`, `clearnet`, `onion`, `i2p`\n"
@@ -2265,8 +2265,3 @@ SEARCH_DOCS = {"strategic": _doc("search/strategic.md"), "stealerlogs": _doc(
 
 SUPPORT_METHOD_DOCS={"subdomain_scan": _doc("support/subdomain_scan.md"), "dns_scan": _doc(
     "support/dns_scan.md"), "wayback_scan": _doc("support/wayback_scan.md")}
-
-SOCIAL_DOCS ={"profile_search": _doc("social/profile_search.md"),"profile_posts": _doc("social/profile_posts.md"),"profile_followers": _doc(
-    "social/profile_followers.md"),"profile_following": _doc("social/profile_following.md"),"profile_images": _doc("social/profile_images.md"),
-    "recon_image_search": _doc("social/recon_image_search.md"),"profile_metadata": _doc("social/profile_metadata.md"),
-    "profile_global_presence": _doc("social/profile_global_presence.md")}

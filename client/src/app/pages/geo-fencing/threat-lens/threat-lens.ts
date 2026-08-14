@@ -8,8 +8,7 @@ import { FiltersComponent } from '../../../shared/partials/filters/filters.compo
 import { threat_lens_filters } from '../../../shared/constants/filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
-import { ThreatCountryCount, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensIpScanMode, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
-import { ThreatLensIpScanModeEnum } from '../enums/geo-fencing.enums';
+import { ThreatCountryCount, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensLegendItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 import { IpDetailPopupComponent } from './ui-overlays/ip-detail-popup/ip-detail-popup.component';
 import { ArcReportPopupComponent } from './ui-overlays/arc-report-popup/arc-report-popup.component';
 import { ThreatLensFeedPanelComponent } from './ui-overlays/feed-panel/threat-lens-feed-panel.component';
@@ -47,7 +46,6 @@ export class ThreatLensComponent implements OnDestroy {
   private activeArcCountryFilterKey = '';
   private ipScanSub?: Subscription;
   private ipScanWatchInterval: ReturnType<typeof setInterval> | null = null;
-  private ipScanResultKey = '';
   private hasStartedDefaultIpScan = false;
   private lastAutomaticIpScanKey = '';
   private selectedCountryIpScanRequest: ThreatLensIpViewportScanRequest | null = null;
@@ -216,7 +214,6 @@ export class ThreatLensComponent implements OnDestroy {
       : request;
     const center = this.normalizeIpScanCenter(effectiveRequest.center);
     const radiusKm = Math.round(Math.max(25, Math.min(this.defaultIpScanRadiusKm, effectiveRequest.radiusKm)));
-    const mode: ThreatLensIpScanMode = this.selectedCountryIpScanRequest ? ThreatLensIpScanModeEnum.Country : ThreatLensIpScanModeEnum.Default;
     const requestScope = this.selectedCountryIpScanRequest ? `country:${this.toCountryKey(this.selectedCountryName)}` : 'default';
     const requestKey = this.getIpScanRequestKey(center, radiusKm, requestScope);
     if (requestKey === this.lastAutomaticIpScanKey && (this.hasIpScanResult || this.isIpScanRunning)) {
@@ -227,10 +224,8 @@ export class ThreatLensComponent implements OnDestroy {
     this.runIpScan(`${center.lat.toFixed(6)}, ${center.lon.toFixed(6)}`,
       center,
       radiusKm,
-      mode,
       this.defaultIpScanMaxIps,
-      effectiveRequest.boundary ?? null,
-      requestScope,);
+      effectiveRequest.boundary ?? null,);
   }
 
   get isIpScanRunning(): boolean {
@@ -353,7 +348,7 @@ export class ThreatLensComponent implements OnDestroy {
     this.mapRenderer?.setArcCategoryFilter(this.selectedArcCategoryKey);
     this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
     const hasRenderableArcs = this.categoryLegend.some((item) => item.arcCount > 0);
-    this.applyLoadedDataState(stats, activeQuery, hasRenderableArcs ? Math.max(totalArcCount, 1) : 0);
+    this.applyLoadedDataState(stats, hasRenderableArcs ? Math.max(totalArcCount, 1) : 0);
 
     if (this.activeArcCountryFilterKey) {
       await this.focusCountryByKey(this.activeArcCountryFilterKey);
@@ -394,7 +389,7 @@ export class ThreatLensComponent implements OnDestroy {
     });
   }
 
-  private applyLoadedDataState(stats: ThreatLensMapData, activeQuery: string, totalArcCount: number): void {
+  private applyLoadedDataState(stats: ThreatLensMapData, totalArcCount: number): void {
     const mostActive = stats.countryCounts[0];
 
     this.ngZone.run(() => {
@@ -435,17 +430,14 @@ export class ThreatLensComponent implements OnDestroy {
     this.runIpScan(this.defaultIpScanCoordinates,
       this.defaultIpScanCenter,
       this.defaultIpScanRadiusKm,
-      ThreatLensIpScanModeEnum.Default,
       this.defaultIpScanMaxIps,
-      null,
-      'default',);
+      null,);
   }
 
-  private runIpScan(coordinates: string, center: ThreatLensCoordinates, radiusKm: number, mode: ThreatLensIpScanMode, maxIps: number, boundary: ThreatLensCountryBoundary | null = null, scope: string = mode): void {
+  private runIpScan(coordinates: string, center: ThreatLensCoordinates, radiusKm: number, maxIps: number, boundary: ThreatLensCountryBoundary | null = null): void {
     this.ipScanSub?.unsubscribe();
     this.stopIpScanWatcher();
     this.networkIntelService.resetState();
-    this.ipScanResultKey = '__pending__';
     this.mapRenderer?.clearIpScanMarkers();
 
     this.ngZone.run(() => {
@@ -454,7 +446,7 @@ export class ThreatLensComponent implements OnDestroy {
     });
 
     this.ipScanSub = this.networkIntelService.scanThreatLensGeoCamera(coordinates, radiusKm, maxIps);
-    this.watchIpScanResult(center, radiusKm, boundary, scope);
+    this.watchIpScanResult(center, radiusKm, boundary);
   }
 
   private getIpScanRequestKey(center: ThreatLensCoordinates, radiusKm: number, scope: string): string {
@@ -485,21 +477,19 @@ export class ThreatLensComponent implements OnDestroy {
     this.runIpScan(`${center.lat.toFixed(6)}, ${center.lon.toFixed(6)}`,
       center,
       radiusKm,
-      ThreatLensIpScanModeEnum.Country,
       this.defaultIpScanMaxIps,
-      request.boundary ?? null,
-      requestScope,);
+      request.boundary ?? null,);
   }
 
-  private watchIpScanResult(center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null, scope: string): void {
+  private watchIpScanResult(center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null): void {
     const parse = () => {
-      const finished = this.parseIpScanResult(center, radiusKm, boundary, scope);
+      const finished = this.parseIpScanResult(center, radiusKm, boundary);
       if (finished) {
         this.stopIpScanWatcher();
       }
     };
 
-    if (this.parseIpScanResult(center, radiusKm, boundary, scope)) {
+    if (this.parseIpScanResult(center, radiusKm, boundary)) {
       return;
     }
     this.ipScanWatchInterval = setInterval(parse, 250);
@@ -512,7 +502,7 @@ export class ThreatLensComponent implements OnDestroy {
     }
   }
 
-  private parseIpScanResult(center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null, scope: string): boolean {
+  private parseIpScanResult(center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null): boolean {
     const error = this.networkIntelService.onError();
     if (error) {
       return true;
@@ -536,15 +526,11 @@ export class ThreatLensComponent implements OnDestroy {
     }
 
     const records = ThreatLensGeoUtils.extractThreatLensIpScanRecords(payload);
-    const resultKey = `${this.getIpScanRequestKey(center, radiusKm, scope)}:${records.map((record) => record.ip).join('|')}`;
     const hasIpRecords = records.length > 0;
     let renderedMarkers = false;
 
     if (hasIpRecords) {
       renderedMarkers = this.mapRenderer?.renderIpScanMarkers(records, center, radiusKm, boundary) ?? false;
-      if (renderedMarkers) {
-        this.ipScanResultKey = resultKey;
-      }
     }
 
     this.ngZone.run(() => {

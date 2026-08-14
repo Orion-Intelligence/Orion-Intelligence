@@ -190,76 +190,6 @@ export function openProfileOverviewFromPlatformCard() {
   cy.docsScreenshot('social-metadata-results');
 }
 
-export function setupSocialExtensionExecutorStubs() {
-  loadSocialElasticMock('social_extensions.json').then((mock) => {
-    const status = mock.status_response || {};
-    const profileResult = mock.cypress_profile_result || {};
-    const morePostsResult = mock.cypress_more_posts_result || { posts: [] };
-    cy.intercept('GET', '**/api/social/extensions/status', { statusCode: 200, body: status }).as('extensionStatus');
-    cy.intercept('POST', '**/api/social/extensions/profile', (req) => {
-      expect(req.body.platform).to.match(/twitter|x/i);
-      expect(req.body.username).to.eq(SOCIAL_STEALER_USERNAME);
-      req.reply({ statusCode: 200, body: { result: profileResult } });
-    }).as('extensionProfile');
-    cy.intercept('POST', '**/api/social/extensions/posts', (req) => {
-      expect(req.body.platform).to.match(/twitter|x/i);
-      expect(req.body.username).to.eq(SOCIAL_STEALER_USERNAME);
-      const postOffset = Number(req.body.post_offset || 0);
-      req.reply({
-        statusCode: 200,
-        body: {
-          result: postOffset > 0 ? morePostsResult : { posts: profileResult.posts || [] }
-        }
-      });
-    }).as('extensionPosts');
-  });
-}
-
-export function assertSocialExtensionExecutorTab() {
-  clickFetchTab('extension');
-  cy.get('[data-testid="social-tab-panel-extension"]', { timeout: SOCIAL_FETCH_TIMEOUT })
-    .should('be.visible')
-    .within(() => {
-      cy.get('[data-testid="social-extension-download"]').click();
-      cy.get('[data-testid="social-extension-download-modal"]').should('be.visible');
-      cy.get('[data-testid="social-extension-download-chrome"]')
-        .should('have.attr', 'href')
-        .and('include', '/api/social/extensions/download/chrome');
-      cy.get('[data-testid="social-extension-download-chrome"]')
-        .should('have.attr', 'download', 'orion-social-scraper-chrome.zip');
-      cy.get('[data-testid="social-extension-browser-tab-firefox"]').click();
-      cy.get('[data-testid="social-extension-download-firefox"]')
-        .should('have.attr', 'href')
-        .and('include', '/api/social/extensions/download/firefox');
-      cy.get('[data-testid="social-extension-download-firefox"]')
-        .should('have.attr', 'download', 'orion-social-scraper-firefox.xpi');
-      cy.get('[data-testid="social-extension-download-close"]').click();
-      cy.get('[data-testid="social-extension-refresh"]').click();
-    });
-  cy.wait('@extensionStatus', { timeout: SOCIAL_FETCH_TIMEOUT });
-
-  cy.get('[data-testid="social-tab-panel-extension"]').within(() => {
-    cy.get('[data-testid="social-extension-status-label"]', { timeout: SOCIAL_FETCH_TIMEOUT })
-      .should('contain.text', 'Extension ready');
-    cy.get('[data-testid="social-extension-platform-status"]').should('contain.text', 'ready');
-    cy.get('[data-testid="social-extension-fetch-all"]').click();
-  });
-  cy.wait('@extensionProfile', { timeout: SOCIAL_FETCH_TIMEOUT });
-
-  cy.get('[data-testid="social-tab-panel-extension"]', { timeout: SOCIAL_FETCH_TIMEOUT }).within(() => {
-    cy.contains('Extension Clark Kent').should('be.visible');
-    cy.contains('Browser extension profile metadata').should('be.visible');
-    cy.get('[data-testid="social-extension-follower-row"]').should('contain.text', '@loislane');
-    cy.get('[data-testid="social-extension-following-row"]').should('contain.text', '@dailyplanet');
-    cy.get('[data-testid="social-post-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
-      .should('have.length.greaterThan', 0)
-      .first()
-      .should('contain.text', 'Metropolis skyline');
-    cy.get('[data-testid="social-extension-image-result"]')
-      .should('have.attr', 'href')
-      .and('include', 'extension-skyline.jpg');
-  });
-}
 
 export function fetchSocialProfileTabs() {
   clickFetchTab('posts');
@@ -271,16 +201,11 @@ export function fetchSocialProfileTabs() {
   cy.get('[data-testid="social-posts-load-more"]', { timeout: SOCIAL_FETCH_TIMEOUT })
     .should('be.visible')
     .click();
-  cy.wait('@extensionPosts', { timeout: SOCIAL_FETCH_TIMEOUT }).then(({ request }) => {
+  cy.wait('@socialPosts', { timeout: SOCIAL_FETCH_TIMEOUT }).then(({ request }) => {
     expect(request.body.platform).to.match(/twitter|x/i);
     expect(request.body.username).to.eq(SOCIAL_STEALER_USERNAME);
-    expect(request.body.max_posts).to.eq(5);
-    expect(request.body.post_offset).to.be.greaterThan(0);
-    expect(request.body.existing_posts_count).to.eq(request.body.post_offset);
-    expect(request.body.existing_post_urls).to.include('https://x.com/superman0011/status/1001');
+    expect(request.body.max_posts).to.eq(7);
   });
-  cy.get('[data-testid="social-post-row"]', { timeout: SOCIAL_FETCH_TIMEOUT })
-    .should('contain.text', 'Metropolis extension load more post');
 
   clickFetchTabIfPresent('videos', () => {
     cy.wait('@socialVideos', { timeout: SOCIAL_FETCH_TIMEOUT });

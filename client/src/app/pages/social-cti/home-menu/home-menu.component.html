@@ -1,0 +1,127 @@
+<div class="dark-theme flex h-full flex-col bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]" [class.w-[70px]]="isCollapsed()" [class.min-w-[70px]]="isCollapsed()" [class.overflow-hidden]="isCollapsed()" [class.px-[7px]]="isCollapsed()" [class.py-[8px]]="isCollapsed()" [class.w-[300px]]="!isCollapsed()" [class.min-w-[300px]]="!isCollapsed()" [class.overflow-y-auto]="!isCollapsed()" [class.p-0]="!isCollapsed()">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" [forceDarkLogo]="true" (toggleClicked)="toggle.emit(undefined)">
+
+    <div data-sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
+
+      <div class="flex shrink-0 flex-col bg-[var(--color-blue-820-light)]/95 pt-1 backdrop-blur-sm">
+        <div data-testid="home-menu-history-heading" class="mx-2 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left">
+          <span class="min-w-0">
+            <span class="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">Workspace</span>
+            <span class="mt-0.5 block truncate text-sm font-semibold text-[var(--color-text1)]">Scan History</span>
+          </span>
+        </div>
+        <div class="mx-3 h-px bg-white/5"></div>
+      </div>
+
+      <div class="flex-grow overflow-y-auto px-3 py-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
+
+        <div class="flex flex-col gap-2">
+
+          @for (job of displayJobs(); track job.id) {
+            <div data-testid="social-history-job" [attr.data-selected]="activeUsername()?.toLowerCase() === job.username.toLowerCase() ? 'true' : null" (click)="jobClicked.emit(job)" class="ui-social-history-job relative cursor-pointer rounded-[10px] border p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm transition-all duration-200 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]" [class.border-[var(--color-border)]]="job.status === 'completed'" [class.bg-[var(--color-blue-820-light)]]="job.status === 'completed'" [class.border-[rgba(87,165,235,0.5)]]="job.status === 'in_progress' || job.status === 'queued'" [class.bg-[rgba(87,165,235,0.05)]]="job.status === 'in_progress' || job.status === 'queued'" [class.border-red-500/50]="job.status === 'failed'" [class.bg-red-500/5]="job.status === 'failed'">
+
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex min-w-0 flex-1 items-center gap-2">
+
+                      <div class="flex-shrink-0">
+                        @switch (job.status) {
+                          @case ('queued') {
+                            <i class="bi bi-hourglass-split text-amber-400 text-base leading-none"></i>
+                          }
+                          @case ('in_progress') {
+                            <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--color-blue-640)]"></div>
+                          }
+                          @case ('completed') {
+                            <i class="bi bi-check-circle-fill text-green-500 text-base leading-none"></i>
+                          }
+                          @case ('failed') {
+                            <i class="bi bi-x-circle-fill text-red-400 text-base leading-none"></i>
+                          }
+                        }
+                      </div>
+                      <p class="mb-0 truncate text-sm font-semibold text-[var(--color-text1)]">
+                        {{ job.displayName || job.username }}
+                      </p>
+                    </div>
+
+
+                    @if (job.status === 'in_progress' || job.status === 'queued') {
+                      <div class="flex shrink-0 items-center gap-1.5">
+                        <span class="font-mono text-xs text-[var(--color-text4)]">{{ job.progress }}%</span>
+                        <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="flex h-6 w-6 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
+                          <i class="bi bi-x-lg text-xs leading-none"></i>
+                        </button>
+                      </div>
+                    }
+
+                  </div>
+
+                  @if (job.status === 'queued' || job.status === 'in_progress') {
+                    <progress class="home-menu-progress-track mt-2" max="100" [value]="job.progress"></progress>
+                  }
+
+                  <p class="mb-0 mt-1 truncate text-xs text-[var(--color-text4)]">{{ job.step }}</p>
+
+                  @if (job.status === 'completed' || job.status === 'failed') {
+                    <div class="mt-2.5 flex items-center justify-between">
+
+                      @if (hasResults(job.username)) {
+                        <span class="inline-flex items-center gap-1 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-[11px] font-medium text-green-500">
+                          <i class="bi bi-check-circle-fill text-[10px]"></i> Results Ready
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text4)]">
+                          <i class="bi bi-dash-circle text-[10px]"></i> No Results
+                        </span>
+                      }
+
+                      <div class="flex items-center gap-1">
+                        @if (job.status === 'failed' && !job.displayName) {
+                          <button data-testid="social-history-retry" (click)="$event.stopPropagation(); retryScan.emit(job)" title="Retry Scan" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-640)]/10 hover:text-[var(--color-blue-640)]">
+                            <i class="bi bi-arrow-clockwise text-sm leading-none"></i>
+                          </button>
+                        }
+                        <button (click)="$event.stopPropagation(); deleteRequested.emit(job.username)" title="Delete Profile" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
+                          <i class="bi bi-trash3 text-sm leading-none"></i>
+                        </button>
+                      </div>
+                    </div>
+                  }
+            </div>
+          }
+
+          @if (displayJobs().length < jobsWithFilter().length) {
+            <button data-testid="social-history-load-more" (click)="loadMoreJobs()" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2 text-sm font-semibold text-[var(--color-blue-640)] transition-colors hover:bg-[var(--color-blue-710)]">
+              Load More
+            </button>
+          }
+
+          @if (jobs().length === 0) {
+            <div data-testid="social-history-empty" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)]/35 px-4 py-8 text-center shadow-[0_8px_20px_rgba(15,23,42,0.08)] backdrop-blur-sm">
+              <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+                <i class="bi bi-clock-history text-base"></i>
+              </div>
+              <p class="mb-0 mt-3 text-sm font-semibold text-[var(--color-text2)]">No scans yet</p>
+              <p class="mb-0 mt-1 text-xs leading-5 text-[var(--color-text4)]">Search a username from the dashboard to create history.</p>
+            </div>
+          }
+        </div>
+
+      </div>
+
+    </div>
+
+    <div data-sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
+      <div class="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        @for (job of jobsWithFilter(); track job.id) {
+          <div class="my-[6px] rounded-[8px] select-none">
+            <button data-testid="social-collapsed-history-job" type="button" (click)="jobClicked.emit(job)" [appTooltip]="getJobTooltip(job)" [attr.aria-label]="getJobTooltip(job)" [class.ui-social-collapsed-job-selected]="isJobSelected(job)" class="ui-social-collapsed-job relative flex h-[46px] w-[54px] shrink-0 cursor-pointer items-center justify-center overflow-visible rounded-[8px] border border-transparent p-0 font-[Inter] text-[14px] font-semibold text-[var(--color-text4)] transition-colors duration-300 hover:bg-[var(--color-blue-870)] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.32)]">
+              {{ getJobInitial(job) }}
+              <span class="absolute right-[9px] top-[8px] h-2 w-2 rounded-full border border-[var(--color-blue-820-light)]" [class.bg-amber-400]="job.status === 'queued'" [class.bg-sky-400]="job.status === 'in_progress'" [class.bg-emerald-400]="job.status === 'completed'" [class.bg-red-400]="job.status === 'failed'" [class.animate-pulse]="job.status === 'queued' || job.status === 'in_progress'"></span>
+            </button>
+          </div>
+        }
+      </div>
+    </div>
+  </app-graph-sidebar-shell>
+</div>

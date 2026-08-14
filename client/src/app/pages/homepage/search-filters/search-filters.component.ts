@@ -5,7 +5,7 @@ import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { AppService } from '../../../services/core/app/app.service';
 import { FilterCategory } from '../../../shared/model/filter/filter.model';
 import { searchFilterAnimation } from '../../../shared/animations/search.filter.animation';
-import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import { SuggestionService } from '../../../shared/partials/filters/services/suggestions.service';
 import { HelperService } from '../../../shared/services/helper.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 

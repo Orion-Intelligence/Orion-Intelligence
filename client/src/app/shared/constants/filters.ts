@@ -501,11 +501,6 @@ export const apt_intel_filters: FilterModel = {
     content: APT_INTEL_CONTENT_FILTER
   }
 };
-export const threat_intel_filters: FilterModel = {
-  filters: {
-    daterange: DATERANGE_CREATION
-  }
-};
 export const threat_intel_apt_filters: FilterModel = {
   filters: {
     daterange: DATERANGE_CREATION,

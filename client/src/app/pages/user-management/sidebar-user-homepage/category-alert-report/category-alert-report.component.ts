@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CategoryAlerts } from '../../../../shared/model/alert-notification/alert.notification.model';
+import { CategoryAlerts } from '../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { AlertAllIoc, AlertModel } from '../../../../shared/model/company-profile/node.model';
 import { map, Observable } from 'rxjs';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -21,7 +21,7 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { EmptyResultComponent } from '../../../../shared/partials/empty-result/empty-result.component';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { buildStandardExportOptions } from '../../../../shared/model/report/export-choice.model';
-import { AlertExportService } from '../../../../shared/services/export/alert-export.service';
+import { AlertExportService } from '../../../../shared/partials/alert-notification/services/alert-export.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { CategoryAlertDetailDrawerComponent } from './alert-detail-drawer/category-alert-detail-drawer.component';

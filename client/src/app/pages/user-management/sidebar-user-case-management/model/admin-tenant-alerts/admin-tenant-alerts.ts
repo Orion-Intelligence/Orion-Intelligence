@@ -5,14 +5,14 @@ import { finalize } from 'rxjs';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { SidebarHomepageService } from '../../../../../services/dashboard/sidebar.service';
 import { ApiService } from '../../../../../shared/services/api.service';
-import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../../../shared/model/alert-notification/alert.notification.model';
+import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { AlertModel, AlertSummary } from '../../../../../shared/model/company-profile/node.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { buildStandardExportOptions } from '../../../../../shared/model/report/export-choice.model';
-import { AlertExportService } from '../../../../../shared/services/export/alert-export.service';
+import { AlertExportService } from '../../../../../shared/partials/alert-notification/services/alert-export.service';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { AdminTenantAlertGroup, AdminTenantAlertsPage, AdminTenantAlertsResponse } from './admin-tenant-alerts.model';
 
 const ALL_TENANTS_OPTION = 'all';

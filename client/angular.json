@@ -51,22 +51,14 @@
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
-              "src/favicon.ico",
               "src/llms.txt",
-              "src/assets",
-              "src/assets/images",
-              "src/assets/fonts"
+              "src/assets"
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-              "src/styles.scss",
-              {
-                "input": "src/tailwind.css",
-                "bundleName": "tailwind-social",
-                "inject": false
-              }
+              "src/styles.scss"
             ],
             "scripts": [
             ]
@@ -103,22 +95,14 @@
               "extractLicenses": true,
               "namedChunks": false,
               "assets": [
-                "src/favicon.ico",
                 "src/llms.txt",
-                "src/assets",
-                "src/assets/images",
-                "src/assets/fonts"
+                "src/assets"
               ],
               "styles": [
                 "node_modules/leaflet/dist/leaflet.css",
                 "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
                 "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-                "src/styles.scss",
-                {
-                  "input": "src/tailwind.css",
-                  "bundleName": "tailwind-social",
-                  "inject": false
-                }
+                "src/styles.scss"
               ],
               "scripts": [
               ]
@@ -181,22 +165,14 @@
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [
-              "src/favicon.ico",
               "src/llms.txt",
-              "src/assets/images",
-              "src/assets",
-              "src/assets/fonts"
+              "src/assets"
             ],
             "styles": [
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.css",
               "node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
-              "src/styles.scss",
-              {
-                "input": "src/tailwind.css",
-                "bundleName": "tailwind-social",
-                "inject": false
-              }
+              "src/styles.scss"
             ],
             "scripts": [
             ]

@@ -9,9 +9,9 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { search_filter_labels } from '../../../../shared/constants/shared-enums';
-import { TenantIocSelectorComponent } from '../../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
+import { TenantIocSelectorComponent } from '../../../../shared/partials/tenant-ioc-selector/tenant-ioc-selector.component';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { AppService } from '../../../../services/core/app/app.service';
 

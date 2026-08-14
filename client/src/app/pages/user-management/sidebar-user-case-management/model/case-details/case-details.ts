@@ -1,9 +1,9 @@
 import { ChangeDetectorRef, Component, forwardRef, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseCommentRequest, CaseEntity, CaseLink, CaseTask, CaseUpdateRequest, TaskStatus } from '../../../../../shared/model/case-management/case.model';
-import { DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE } from '../../../../../shared/model/case-management/case-management.defaults';
+import { ReportFeedbackModel } from '../../../../../shared/partials/report-interactions/models/report-feedback.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseCommentRequest, CaseEntity, CaseLink, CaseTask, CaseUpdateRequest, TaskStatus } from '../case.model';
+import { DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE } from '../case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';

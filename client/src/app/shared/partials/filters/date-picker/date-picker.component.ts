@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnChanges, input, output } from '@angular/core';
-import { CalendarCell } from '../../../model/filter/calendar-cell.model';
+import { CalendarCell } from './model/calendar-cell.model';
 import { FilterModel } from '../../../model/filter/filter.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 

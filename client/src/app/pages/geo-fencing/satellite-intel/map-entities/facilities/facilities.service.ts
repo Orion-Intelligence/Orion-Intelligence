@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
-import { SatelliteFacilitiesResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteFacilitiesResponse } from '../../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, OrionSatelliteFeatureType } from '../../../models/geo-fencing.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 

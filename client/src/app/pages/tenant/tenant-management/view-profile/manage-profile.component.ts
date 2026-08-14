@@ -15,7 +15,7 @@ import { finalize, switchMap, tap } from 'rxjs';
 import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-view-profile',

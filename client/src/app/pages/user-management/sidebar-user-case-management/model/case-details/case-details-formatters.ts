@@ -1,4 +1,4 @@
-import { Case, CaseAnalyst, CaseEntity } from '../../../../../shared/model/case-management/case.model';
+import { Case, CaseAnalyst, CaseEntity } from '../case.model';
 
 export type CaseDateField = 'dueAt' | 'capturedAt';
 

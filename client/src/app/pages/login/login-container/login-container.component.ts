@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 import QRCode from 'qrcode';
 import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
-import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
+import { PasswordToggleDirective } from '../../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { isSignupHost } from '../../../shared/utils/auth-host.util';
 

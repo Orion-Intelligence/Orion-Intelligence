@@ -4,7 +4,6 @@ import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { filter_mapping } from '../../../shared/constants/filters';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { Router } from '@angular/router';
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
@@ -33,7 +32,7 @@ export class SelectedFilterBarComponent implements OnInit {
     return document.body.classList.contains('light-theme');
   }
 
-  constructor(protected app_service: AppService, protected dashboardService: DashboardService, private router: Router) {
+  constructor(protected app_service: AppService, protected dashboardService: DashboardService) {
   }
 
   isConsolidatedRoute(): boolean {

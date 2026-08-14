@@ -10,7 +10,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { DatePickerComponent } from '../../../shared/partials/filters/date-picker/date-picker.component';
 import { SystemLogFile, SystemLogResponse } from './model/system-log.models';
-import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-sidebar-user-log-manager',

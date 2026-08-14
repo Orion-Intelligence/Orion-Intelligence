@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../../../../shared/model/satellite-intel/satellite-intel.model';
-import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../model/satellite-intel.model';
+import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../model/satellite-intel-api.models';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({

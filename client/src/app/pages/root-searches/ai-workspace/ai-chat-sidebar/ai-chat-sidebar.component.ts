@@ -3,11 +3,11 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostListener, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
-import { AiChatSession, NexusChatSession } from '../../../../shared/model/nexus/ai-chat-session.model';
+import { AiChatSession, NexusChatSession } from '../model/ai-chat-session.model';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-import { SidebarShellComponent } from '../../../graphs/shared/sidebar-shell/sidebar-shell.component';
+import { SidebarShellComponent } from '../../../../shared/partials/sidebar-shell/sidebar-shell.component';
 import { NexusChatService } from '../nexus-chat.service';
 
 const chatRowAnimation = trigger('chatRowAnimation', [

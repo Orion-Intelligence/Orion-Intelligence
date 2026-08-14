@@ -1,7 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { defer, EMPTY, Observable, throwError, timer } from 'rxjs';
 import { catchError, expand, switchMap, takeWhile, tap } from 'rxjs/operators';
-import { ApiService } from '../../../shared/services/api.service';
 
 export type SatellitePollingOptions = {
   trackState?: boolean;
@@ -10,8 +9,6 @@ export type SatellitePollingOptions = {
 @Injectable({ providedIn: 'root' })
 export class SatelliteIntelService {
   onError = signal<{ message: string } | null>(null);
-
-  constructor(private api: ApiService) {}
 
   resetState(): void {
     this.onError.set(null);

@@ -1,6 +1,6 @@
 import { ComponentRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { SatelliteLiveAircraft } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveAircraft } from '../../model/satellite-intel-api.models';
 import { SatelliteAircraftTrackingService } from './aircraft-tracking.service';
 import { AircraftMarkerIconComponent } from './components/aircraft-marker-icon/aircraft-marker-icon.component';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';

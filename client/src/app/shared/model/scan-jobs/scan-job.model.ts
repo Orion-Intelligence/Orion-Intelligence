@@ -23,8 +23,6 @@ export interface ScanJob extends ScanJobNotificationResponse {
   response?: any;
 }
 
-export type ScanJobNotification = ScanJobNotificationResponse;
-
 export interface ScanJobCreateResponse {
   scan_id: string;
   title: string;
@@ -74,20 +72,6 @@ export interface ScanJobPollResponse {
   seen?: boolean;
   updated_at?: string | Date;
   completed_at?: string | Date | null;
-}
-
-export interface ScanJobCountResponse {
-  total: number;
-}
-
-export interface ScanJobSeenResponse {
-  message: string;
-}
-
-export interface ScanJobDeleteResponse {
-  message: string;
-  deleted?: number;
-  skipped?: number;
 }
 
 export interface ScanJobStartRequest {

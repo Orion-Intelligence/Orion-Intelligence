@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
-import { CaseStatus, CaseType, Priority, Severity } from '../../../../../shared/model/case-management/case.model';
+import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../case-management.defaults';
+import { CaseStatus, CaseType, Priority, Severity } from '../case.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 export type CaseFilterValue<T extends string> = T | 'all';
 export type CaseSortValue = 'updated_desc' | 'updated_asc' | 'priority_desc' | 'severity_desc';

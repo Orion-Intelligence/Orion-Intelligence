@@ -1,5 +1,5 @@
 import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, TrackingEntityState, TrackingEntityType, TrackingSidebarBridge } from '../../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from '../map-entities/aircraft/aircraft-tracking.service';
 import { EntityRenderer } from '../map-entities/entity-renderer';

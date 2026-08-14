@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 
-import { FeederOwnerUser, FeederScriptItem } from '../../../../shared/model/profile/feeder.model';
+import { FeederOwnerUser, FeederScriptItem } from '../model/feeder.model';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { FeederService } from '../feeder.service';

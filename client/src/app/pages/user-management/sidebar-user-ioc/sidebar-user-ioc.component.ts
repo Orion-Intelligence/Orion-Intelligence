@@ -5,7 +5,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
-import { TenantIocSelectorComponent } from '../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
+import { TenantIocSelectorComponent } from '../../../shared/partials/tenant-ioc-selector/tenant-ioc-selector.component';
 
 @Component({
   selector: 'app-sidebar-user-ioc',

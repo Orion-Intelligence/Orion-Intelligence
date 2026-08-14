@@ -1109,7 +1109,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           type: 'url' as const
         }))
       ];
-      const edges = scannedUrls.slice(0, 25).map((url: string, index: number) => ({
+      const edges = scannedUrls.slice(0, 25).map((_: string, index: number) => ({
         id: `host-${host}-url-${index}`,
         from: `host-${host}`,
         to: `url-${index}`,

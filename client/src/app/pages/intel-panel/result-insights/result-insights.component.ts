@@ -2,7 +2,7 @@ import { FormsModule } from '@angular/forms';
 import { Component, OnInit, input } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
-import { UniqueLinkItem } from '../../../shared/model/homepage/consolidation_insights';
+import { UniqueLinkItem } from '../model/consolidation_insights';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { getStatusFlag } from '../../../shared/utils/intel-report.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';

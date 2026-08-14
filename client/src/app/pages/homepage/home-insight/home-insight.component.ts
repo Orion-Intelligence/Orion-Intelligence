@@ -1,12 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, NgOptimizedImage } from '@angular/common';
-import { DefacementModel, GenericModel, InsightMetric, LeakModel } from '../../../shared/model/homepage/stats_insight.model';
+import { DefacementModel, GenericModel, InsightMetric, LeakModel } from '../model/stats_insight.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
-import { LatestDocument, LatestDocumentCallbackModel } from '../../../shared/model/homepage/document_insight.model';
+import { LatestDocument, LatestDocumentCallbackModel } from '../model/document_insight.model';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { InsightCacheService } from '../../../shared/services/insight-cache.service';
+import { InsightCacheService } from '../services/insight-cache.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({

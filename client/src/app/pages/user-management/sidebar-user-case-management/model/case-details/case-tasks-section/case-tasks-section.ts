@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseAnalyst, CaseTask, TaskStatus } from '../../../../../../shared/model/case-management/case.model';
-import { PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseAnalyst, CaseTask, TaskStatus } from '../../case.model';
+import { PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from '../../case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { CaseDateField, CaseDateTarget, formatCaseLabel, getAssignedCaseAnalysts, getCaseAnalystLabel, getCaseDateInputValue, getFormattedCaseDateOnly, getFormattedCaseDateTime, setCaseDateInputValue } from '../case-details-formatters';

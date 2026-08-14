@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { SocialPostHateSpeech } from '../../model/social/social-scan.models';
+import { SocialPostHateSpeech } from '../../../pages/social-cti/models/social-scan.models';
 import { ModerationMapping, getModerationConfig } from '../../utils/moderation-mapping';
 
 @Component({

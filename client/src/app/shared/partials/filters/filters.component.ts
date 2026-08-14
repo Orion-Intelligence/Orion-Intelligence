@@ -9,8 +9,8 @@ import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ScrollService } from '../../services/scroll.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../components/ui-dropdown/ui-dropdown.component';
-import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import { UiDropdownComponent, UiDropdownOption } from '../ui-dropdown/ui-dropdown.component';
+import { SuggestionService } from './services/suggestions.service';
 
 @Component({
   selector: 'app-filters',

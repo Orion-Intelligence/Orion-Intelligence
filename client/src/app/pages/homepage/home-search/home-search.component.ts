@@ -9,7 +9,7 @@ import { AppService } from '../../../services/core/app/app.service';
 import { HomeInsightComponent } from '../home-insight/home-insight.component';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { HomeSearchService } from '../../../services/home_search/home.search.service';
+import { HomeSearchService } from '../../../shared/partials/result/services/home.search.service';
 import { WorldHeatmapComponent } from '../world-heatmap/world-heatmap.component';
 import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component";
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';

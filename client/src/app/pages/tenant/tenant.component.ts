@@ -8,7 +8,7 @@ import { ApiService } from '../../shared/services/api.service';
 import { AppService } from '../../services/core/app/app.service';
 import { HeaderComponent } from '../../shared/partials/header/login-header/header.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
-import { TenantIocSelectorComponent } from '../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
+import { TenantIocSelectorComponent } from '../../shared/partials/tenant-ioc-selector/tenant-ioc-selector.component';
 
 @Component({
   selector: 'app-tenant',

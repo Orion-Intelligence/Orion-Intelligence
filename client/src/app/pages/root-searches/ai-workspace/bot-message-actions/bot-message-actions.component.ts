@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, OnDestroy, signal } from '@angular/core';
-import { AiWorkspaceMessage } from '../../../../shared/model/chat/ai-workspace-message.model';
+import { AiWorkspaceMessage } from '../model/ai-workspace-message.model';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { ShareResponseDialogComponent } from '../../../../shared/partials/share-response-dialog/share-response-dialog.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';

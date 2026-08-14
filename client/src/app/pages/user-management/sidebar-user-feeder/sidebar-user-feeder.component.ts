@@ -3,14 +3,14 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { FeederRuleOption, FeederScriptItem } from '../../../shared/model/profile/feeder.model';
+import { FeederRuleOption, FeederScriptItem } from './model/feeder.model';
 import { FeederService } from './feeder.service';
 import { SidebarUserFeederAddComponent } from './add/sidebar-user-feeder-add.component';
 import { SidebarUserFeederViewComponent } from './view/sidebar-user-feeder-view.component';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from './feeder-rule.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
-import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../../shared/model/social/social-scan.models';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../social-cti/constants/social-platform.constants';
 
 @Component({
   selector: 'app-sidebar-user-feeder',

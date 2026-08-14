@@ -28,8 +28,6 @@ export interface EntityOption {
 export class AppService {
   private sessionLoad$: Observable<void> | null = null;
   private configLoad$: Observable<void> | null = null;
-  private entitiesCache: EntityOption[] | null = null;
-  private sessionLoadPromise: Promise<void> | null = null;
   private demoTourLoadPromise: Promise<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());

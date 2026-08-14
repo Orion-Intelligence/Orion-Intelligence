@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
 import { AuthService } from '../../services/authetication/auth.service';
-import { InsightCacheService } from '../services/insight-cache.service';
+import { InsightCacheService } from '../../pages/homepage/services/insight-cache.service';
 import { map, Observable, of } from 'rxjs';
 @Injectable({
   providedIn: 'root'

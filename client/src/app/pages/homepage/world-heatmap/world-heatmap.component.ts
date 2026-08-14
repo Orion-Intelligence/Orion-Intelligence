@@ -8,8 +8,8 @@ import { ActivatedRoute } from '@angular/router';
 import { HeatmapReportComponent } from './heatmap-report/heatmap-report.component';
 import { AppService } from '../../../services/core/app/app.service';
 import { ApiService } from '../../../shared/services/api.service';
-import { InsightCacheService } from '../../../shared/services/insight-cache.service';
-import { CountryData, CountryInsightPageResponse } from '../../../shared/model/homepage/country-insight.model';
+import { InsightCacheService } from '../services/insight-cache.service';
+import { CountryData, CountryInsightPageResponse } from '../model/country-insight.model';
 import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-badges/map-loading-badges.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 

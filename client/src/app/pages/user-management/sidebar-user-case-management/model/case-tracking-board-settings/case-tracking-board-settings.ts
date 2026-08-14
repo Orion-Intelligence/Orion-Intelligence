@@ -5,7 +5,7 @@ import { Router } from '@angular/router';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { AppService } from '../../../../../services/core/app/app.service';
-import { CaseStatusBoardConfig, CaseStatusBoardItem, DEFAULT_CASE_STATUS_BOARD_CONFIG } from '../../../../../shared/model/case-management/status-board-config.model';
+import { CaseStatusBoardConfig, CaseStatusBoardItem, DEFAULT_CASE_STATUS_BOARD_CONFIG } from '../status-board-config.model';
 
 @Component({
   selector: 'app-case-tracking-board-settings',

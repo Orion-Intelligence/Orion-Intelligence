@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { CategoryAlerts } from '../../../../../shared/model/alert-notification/alert.notification.model';
-import { RawFindingRow } from '../../../../../shared/model/alert-notification/raw-finding-row.model';
+import { CategoryAlerts } from '../../../../../shared/partials/alert-notification/model/alert.notification.model';
+import { RawFindingRow } from '../../../../../shared/partials/alert-notification/model/raw-finding-row.model';
 import { SidebarService } from '../../../../../shared/services/sidebar.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 

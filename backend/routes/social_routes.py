@@ -19,10 +19,6 @@ from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus,
 social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
 
-def _field_was_sent(model, field_name: str) -> bool:
-    return field_name in getattr(model, "model_fields_set", getattr(model, "__fields_set__", set()))
-
-
 @social_routes.post(
     "/api/social/recon",
     status_code=200,
@@ -132,14 +128,6 @@ async def search_social_metadata(request: Request, param: SocialMetadataRequest 
 
 
 @social_routes.get(
-    "/api/social/extensions/status",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def get_social_extension_status():
-    return await social_model.getInstance().extension_status()
-
-
-@social_routes.get(
     "/api/social/extensions/download/chrome",
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
@@ -153,30 +141,6 @@ async def download_social_extension_chrome():
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def download_social_extension_firefox():
     return await social_model.getInstance().extension_download("firefox")
-
-
-@social_routes.post(
-    "/api/social/extensions/profile",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_extension_profile(request: Request, param: SocialProfileRequest = Body(...), current_user=Depends(get_current_user)):
-    if not _field_was_sent(param, "max_posts"):
-        param.max_posts = 20
-    param.use_extension = True
-    return await social_model.getInstance().search_profile(param, current_user, request)
-
-
-@social_routes.post(
-    "/api/social/extensions/posts",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_extension_posts(request: Request, param: SocialPostsRequest = Body(...), current_user=Depends(get_current_user)):
-    if not _field_was_sent(param, "max_posts"):
-        param.max_posts = 20
-    if not _field_was_sent(param, "max_comments"):
-        param.max_comments = 25
-    param.use_extension = True
-    return await social_model.getInstance().search_posts(param, current_user, request)
 
 
 @social_routes.post(

@@ -9,19 +9,12 @@ from orion.services.mongo_manager.mongo_enums import MONGO_CONNECTIONS
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, LicenseName
 from orion.services.mongo_manager.shared_model.db_document_feedback_model import db_document_feedback_model
 from orion.services.mongo_manager.shared_model.db_feeder_script_model import db_feeder_script_model
-from orion.services.mongo_manager.shared_model.db_keys import db_keys
-from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
 from orion.services.mongo_manager.shared_model.db_scheduler_model import db_scheduler_model
 from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
-from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import db_alert_connector_model
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import db_takedown_request_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
-from orion.services.mongo_manager.shared_model.db_url_data_model import db_url_data_model
-from orion.services.mongo_manager.shared_views.tenant_admin_view import TenantAdminView
-from orion.services.mongo_manager.shared_views.tenant_key_admin_view import TenantKeyAdminView
-from orion.services.mongo_manager.shared_views.user_admin_view import UserAdminView
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
 
 
@@ -144,19 +137,3 @@ class mongo_controller:
             await self.__engine.save(default_tenant)
         await self.ensure_demo_user()
         await self.ensure_nexus_user()
-
-    def get_admin(self):
-        from starlette_admin.contrib.odmantic import Admin, ModelView
-        admin = Admin(self.__engine, title="Admin Panel")
-
-        admin.add_view(UserAdminView(db_user_account, engine=self.__engine, icon="fa fa-user-circle"))
-        admin.add_view(TenantAdminView(db_tenant_model, engine=self.__engine, icon="fa fa-link"))
-        admin.add_view(TenantKeyAdminView(db_keys, engine=self.__engine, icon="fa fa-link"))
-        admin.add_view(ModelView(db_system_model, icon="fa fa-building"))
-        admin.add_view(ModelView(db_url_data_model, icon="fa fa-link"))
-        admin.add_view(ModelView(db_feeder_script_model, icon="fa fa-file"))
-        admin.add_view(ModelView(db_document_feedback_model, icon="fa fa-comments"))
-        admin.add_view(ModelView(db_case_model, icon="fa fa-folder-open", label="Cases", name="cases"))
-        admin.add_view(ModelView(db_scan_job_model, icon="fa fa-tasks", label="Scan Jobs", name="scan_jobs"))
-        admin.add_view(ModelView(db_takedown_request_model, icon="fa fa-flag", label="Takedown Requests", name="takedown_requests"))
-        return admin

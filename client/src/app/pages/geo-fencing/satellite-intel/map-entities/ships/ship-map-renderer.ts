@@ -1,6 +1,6 @@
 import { ComponentRef } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { SatelliteLiveShip } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveShip } from '../../model/satellite-intel-api.models';
 import { SatelliteShipTrackingService } from './ship-tracking.service';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-marker-icon.component';

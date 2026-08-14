@@ -6,7 +6,7 @@ import { NgForm, FormsModule } from '@angular/forms';
 import { HeaderComponent } from "../header/login-header/header.component";
 import { PasswordChecks, PasswordStrength, areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput } from "../../utils/auth-form.util";
 import { AppService } from '../../../services/core/app/app.service';
-import { PasswordToggleDirective } from '../../directives/password-toggle.directive';
+import { PasswordToggleDirective } from '../../directive/password-toggle.directive';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({

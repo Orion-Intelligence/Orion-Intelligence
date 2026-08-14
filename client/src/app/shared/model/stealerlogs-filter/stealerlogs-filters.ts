@@ -18,12 +18,6 @@ export const StealerlogsSearchFilterLabels: Record<StealerlogsSearchFilters, str
   [StealerlogsSearchFilters.EMAIL]: 'Email',
   [StealerlogsSearchFilters.CREDITCARD]: 'Credit Card'
 };
-export interface StealerlogsAdvancedFilter {
-    id: string;
-    tag: StealerlogsSearchFilters;
-    value: string;
-    operator: '&&' | '||';
-}
 export interface PasswordSchemaFilter {
     minLength: number | null;
     maxLength: number | null;

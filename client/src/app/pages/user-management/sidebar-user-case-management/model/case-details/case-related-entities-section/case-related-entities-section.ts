@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { Case, CaseEntity } from '../../../../../../shared/model/case-management/case.model';
+import { Case, CaseEntity } from '../../case.model';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { EntityDetailsComponent } from '../../entity-details/entity-details';
 import { caseListItemMotion, caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
