@@ -7,8 +7,8 @@
   }
 
   @if (hasSearched()) {
-    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-      <div class="ui-ioc-table-head flex items-center justify-between border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">
+    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white">
+      <div class="ui-ioc-table-head flex items-center justify-between border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
         <span>{{ resultLabel() }}</span><span>{{ 'DETAILS' | translate }}</span>
       </div>
       @if (ipRows.length > pageSize) {
@@ -23,10 +23,10 @@
       }
       @if (showLoadingSkeleton) {
         @for (_ of [1,2,3,4]; track $index; let last = $last) {
-          <div class="ui-ioc-table-row flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [class.border-b-0]="last">
-            <div class="ui-shimmer h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
+          <div class="ui-ioc-table-row flex items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm [.light-theme_&]:!border-b-[#d8e0e9]" [class.ui-ioc-row-even]="$index % 2 === 0" [class.ui-ioc-row-odd]="$index % 2 !== 0" [class.border-b-0]="last">
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-40 rounded bg-[var(--color-blue-720)]"></div>
             <div class="flex items-center gap-2">
-              <div class="ui-shimmer h-6 w-6 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)]"></div>
+              <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-6 w-6 rounded border border-[var(--color-border)] bg-[var(--color-blue-720)]"></div>
             </div>
           </div>
         }
@@ -38,7 +38,7 @@
       } @else if (dnsResult() && pagedRows.length) {
         <div>
         @for (row of pagedRows; track trackByIp($index, row); let last = $last) {
-          <div [attr.data-testid]="'network-intel-dns-row-' + row.ip" class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-colors" [class.ui-ioc-row-even]="$index % 2 === 0 && !row.expanded" [class.ui-ioc-row-odd]="$index % 2 !== 0 && !row.expanded" [ngClass]="{ 'border-b-transparent bg-[#162840]': row.expanded, 'border-b-0': last && !row.expanded }" role="button" tabindex="0" [attr.aria-expanded]="row.expanded" (click)="toggleRow.emit(row)" (keydown)="onRowKeydown($event, row)">
+          <div [attr.data-testid]="'network-intel-dns-row-' + row.ip" class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-colors [.light-theme_&]:!border-b-[#d8e0e9]" [class.ui-ioc-row-even]="$index % 2 === 0 && !row.expanded" [class.ui-ioc-row-odd]="$index % 2 !== 0 && !row.expanded" [ngClass]="{ 'border-b-transparent bg-[#162840]': row.expanded, 'border-b-0': last && !row.expanded }" role="button" tabindex="0" [attr.aria-expanded]="row.expanded" (click)="toggleRow.emit(row)" (keydown)="onRowKeydown($event, row)">
             <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">{{ row.ip }}</span>
             <div class="flex items-center gap-2">
               @if (row.loading) {
@@ -53,9 +53,9 @@
                   <div class="px-4 py-4">
                     <div class="mb-[6px] flex items-center justify-between gap-3">
                       <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ getRowLoadingStepLabel(row) }}</span>
-                      <span class="text-[12px] font-semibold text-sky-400">{{ getRowProgressValue(row) }}%</span>
+                      <span class="text-[12px] font-semibold text-sky-400 [.light-theme_&]:!text-[#2d6f9f]">{{ getRowProgressValue(row) }}%</span>
                     </div>
-                    <div class="ui-progress-track h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+                    <div class="relative overflow-hidden h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
                       <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + getRowProgressValue(row)"></div>
                     </div>
                     <div [attr.data-testid]="'network-intel-dns-elapsed-' + row.ip" class="mt-2 text-right text-[12px] font-medium text-white">{{ getRowElapsedLabel(row) }}</div>
@@ -75,7 +75,7 @@
         }
         </div>
       } @else if (dnsResult()) {
-        <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even">
+        <div class="ui-ioc-table-row flex items-center justify-between border-b-0 px-4 py-3 text-sm ui-ioc-row-even [.light-theme_&]:!border-b-[#d8e0e9]">
           <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">-</span>
           <span class="text-[var(--color-text4)]">-</span>
         </div>

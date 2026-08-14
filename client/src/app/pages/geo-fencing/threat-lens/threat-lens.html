@@ -1,4 +1,4 @@
-<section data-testid="threat-lens-page" class="ui-consolidated-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black [body.light-theme_&]:![background:#e7eff9]">
+<section data-testid="threat-lens-page" class="ui-consolidated-theme [--ui-consolidated-main-bg:#f9fbff] [--ui-consolidated-sub-bg:#fff] [--ui-consolidated-border:#d4e0ed] [--ui-consolidated-divider:#dde7f2] [--ui-consolidated-sub-hover:#fbfdff] [.dark-theme_&]:[--ui-consolidated-main-bg:#101A2B] [.dark-theme_&]:[--ui-consolidated-sub-bg:#172235] [.dark-theme_&]:[--ui-consolidated-border:#ffffff1a] [.dark-theme_&]:[--ui-consolidated-divider:#ffffff14] [.dark-theme_&]:[--ui-consolidated-sub-hover:#172235] relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black [body.light-theme_&]:![background:#e7eff9]">
 	<div class="flex min-h-0 flex-1 flex-col overflow-hidden max-[1100px]:overflow-x-hidden max-[1100px]:overflow-y-auto max-[1100px]:pb-3">
 		<div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:block max-[1100px]:overflow-visible">
 			<div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:!h-[70vh] max-[1100px]:!min-h-[70vh] max-[1100px]:shrink-0">
@@ -42,8 +42,8 @@
 						<p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
 					</div>
 				</div>
-				<div class="ui-progress-track mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] [body.light-theme_&]:!bg-white">
-					<div class="ui-progress-indeterminate-bar"></div>
+				<div class="relative overflow-hidden mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] [body.light-theme_&]:!bg-white">
+					<div class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] after:[animation:ui-progress-sweep-primary_1.3s_linear_infinite]"></div>
 				</div>
 			</div>
 		</div>
@@ -159,12 +159,12 @@
 
 
  @if (filterModel && (isFilterOpen$ | async)) {
-    <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
+    <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
     </div>
   }
 
   @if (filterModel) {
-    <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[var(--color-border)] bg-[var(--color-blue-700)] transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
+    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[var(--color-border)] bg-[var(--color-blue-700)] transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="onSearch()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }

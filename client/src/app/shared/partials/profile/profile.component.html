@@ -30,7 +30,7 @@
       </button>
     }
     @if (dropdownOpen()) {
-      <ul class="ui-profile-dropdown absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)]">
+      <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] origin-top-right list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)] [animation:ui-profile-dropdown-in_160ms_cubic-bezier(0.16,1,0.3,1)_both] will-change-[opacity,transform] motion-reduce:animate-none">
         <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
         <li class="mb-[6px] flex min-w-full items-center rounded-[10px] border border-[#eef2f6] bg-[#f9fbff] p-[8px]">
           <div class="h-[46px] w-[46px] shrink-0 overflow-hidden rounded-full bg-[#e0e6ed]">

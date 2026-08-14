@@ -4,8 +4,8 @@
   }
 
   <form #analysisForm="ngForm" (submit)="analyzeText($event)" class="mt-6">
-    <div class="text-analysis-input-panel overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-        <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-start">
+    <div class="text-analysis-input-panel overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#c9d8e8] [.light-theme_&]:!bg-white">
+        <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-start [.light-theme_&]:!bg-[#f1f5fb]">
           <div class="flex min-w-0 items-center gap-3">
             <div class="min-w-0 flex-1">
               <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Text Analysis' | translate }}</div>
@@ -14,10 +14,10 @@
           </div>
           <div class="shrink-0 text-[12px] font-medium text-[var(--color-text4)]">{{ text.length }}/5000</div>
         </div>
-        <textarea data-testid="text-analysis-input" [(ngModel)]="text" name="text" required maxlength="5000" autocapitalize="none" autocomplete="off" [placeholder]="'Paste suspicious text here...' | translate" class="text-analysis-input-field block min-h-[180px] w-full resize-y bg-[var(--color-blue-700)] px-4 py-3 font-mono text-[13.5px] leading-6 text-[var(--color-text1)] outline-none placeholder:font-[Inter] placeholder:text-[14px] placeholder:text-[var(--color-text4)]"></textarea>
-        <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-t border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-stretch">
+        <textarea data-testid="text-analysis-input" [(ngModel)]="text" name="text" required maxlength="5000" autocapitalize="none" autocomplete="off" [placeholder]="'Paste suspicious text here...' | translate" class="text-analysis-input-field block min-h-[180px] w-full resize-y bg-[var(--color-blue-700)] px-4 py-3 font-mono text-[13.5px] leading-6 text-[var(--color-text1)] outline-none placeholder:font-[Inter] placeholder:text-[14px] placeholder:text-[var(--color-text4)] [.light-theme_&]:!bg-white"></textarea>
+        <div class="text-analysis-input-bar flex items-center justify-between gap-3 border-t border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3 max-[640px]:flex-col max-[640px]:items-stretch [.light-theme_&]:!bg-[#f1f5fb]">
           <div class="text-[12px] text-[var(--color-text4)]">{{ 'Spam classification and URL reputation checks run together.' | translate }}</div>
-          <button data-testid="text-analysis-submit" type="submit" [disabled]="loading || !text.trim()" class="ui-btn ui-btn-primary inline-flex h-10 min-w-[132px] items-center justify-center gap-2 rounded-[8px] px-5 text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
+          <button data-testid="text-analysis-submit" type="submit" [disabled]="loading || !text.trim()" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] inline-flex [--ui-btn-height:40px] min-w-[132px] items-center justify-center gap-2 [--ui-btn-radius:8px] [--ui-btn-px:1.25rem] text-[14px] font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
             <i class="bi bi-shield-check text-[15px]"></i>
             <span>{{ (loading ? 'Analyzing' : 'Analyze Text') | translate }}</span>
           </button>
@@ -32,12 +32,12 @@
   @if (queryTriggered && loading) {
     <div class="mt-[12px] ml-0 max-w-[720px]">
       <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ 'Analyzing text...' | translate }}</div>
-      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-        <div class="ui-progress-indeterminate-bar"></div>
+      <div class="relative overflow-hidden h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+        <div class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] after:[animation:ui-progress-sweep-primary_1.3s_linear_infinite]"></div>
       </div>
     </div>
-    <div data-testid="text-analysis-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
-      <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+    <div data-testid="text-analysis-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white" @fadeInDashboardItem>
+      <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
         <div>#</div>
         <div>{{ 'Result' | translate }}</div>
         <div>{{ 'Fields' | translate }}</div>
@@ -47,11 +47,11 @@
       <div class="space-y-2 px-4 py-3">
         @for (i of [1,2,3]; track i) {
           <div class="grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 max-[900px]:grid-cols-[60px_1fr_120px_48px]">
-            <div class="ui-shimmer h-3 w-8 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-44 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)] max-[640px]:hidden"></div>
-            <div class="ui-shimmer h-7 w-7 rounded-md bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-8 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-44 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-20 rounded bg-[var(--color-blue-720)] max-[640px]:hidden"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-7 w-7 rounded-md bg-[var(--color-blue-720)]"></div>
           </div>
         }
       </div>
@@ -95,15 +95,15 @@
         </div>
 
         <section class="mt-[16px] space-y-[16px]">
-          <div data-testid="text-analysis-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]" @fadeInDashboardItem>
-            <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+          <div data-testid="text-analysis-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white" @fadeInDashboardItem>
+            <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
               <div>#</div>
               <div>{{ 'Result' | translate }}</div>
               <div>{{ 'Fields' | translate }}</div>
               <div class="max-[640px]:hidden">{{ 'API Type' | translate }}</div>
               <div></div>
             </div>
-            <div data-testid="text-analysis-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px] ui-ioc-row-even" [class.credential_row_expand]="expanded" [attr.aria-expanded]="expanded" (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="$event.preventDefault(); toggleExpanded()">
+            <div data-testid="text-analysis-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px] ui-ioc-row-even [.light-theme_&]:!border-b-[#d8e0e9]" [class.credential_row_expand]="expanded" [attr.aria-expanded]="expanded" (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="$event.preventDefault(); toggleExpanded()">
               <div class="font-mono text-xs">1</div>
               <div class="truncate" [title]="primaryDetectionLabel">{{ primaryDetectionLabel }}</div>
               <div class="truncate">{{ resultEntries.length + (urlResults.length * 4) }} {{ 'Fields' | translate }}</div>
@@ -114,7 +114,7 @@
             </div>
             @if (expanded) {
               <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-790)] px-4 py-3" @fadeInDashboardItem>
-                <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+                <div data-testid="defacement-report-card" class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
                   <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
                     <div class="min-w-0">
                       <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">{{ 'TEXT ANALYSIS RESULT | 1' | translate }}</b>

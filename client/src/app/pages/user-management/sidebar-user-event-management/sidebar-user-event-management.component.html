@@ -1,7 +1,7 @@
 <div class="mb-[200px] w-full px-[32px] max-[1200px]:px-[15px] max-[943px]:px-[10px]" @fadeInDashboardItem>
-  <div class="ui-page-container w-full max-w-[2400px]">
-    <h1 class="ui-page-title">{{ 'Event Management' | translate }}</h1>
-    <p class="ui-page-description">{{ 'Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.' | translate }}</p>
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]">
+    <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Event Management' | translate }}</h1>
+    <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.' | translate }}</p>
 
   <div class="mt-4" @fadeInDashboardItem>
     <app-ioc-search
@@ -34,11 +34,11 @@
   </div>
 
   @if (sidebarReady && (isFilterOpen$ | async)) {
-    <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
+    <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
   }
 
   @if (sidebarReady) {
-    <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilters($event)" (filterReset)="reloadFilters({})" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }
@@ -102,8 +102,8 @@
       </div>
 
       <div class="mt-[16px]">
-        <div class="ui-table-shell !mt-0">
-          <table class="ui-table">
+        <div class="overflow-x-auto border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] [border-width:var(--ui-table-shell-border-width,1.5px)] [margin-top:var(--ui-table-shell-mt,16px)] [border-radius:var(--ui-table-shell-radius,10px)] [-webkit-overflow-scrolling:touch] [--ui-table-shell-mt:0px]">
+          <table class="w-full border-collapse text-left text-sm text-[var(--color-text1)] [min-width:var(--ui-table-min-width,920px)] max-md:[min-width:var(--ui-table-mobile-min-width,680px)] max-md:text-[13px] [&_thead]:border-b-2 [&_thead]:border-b-[rgb(87_165_235/37.6%)] [&_thead]:bg-[var(--color-blue-820-light)] [&_thead]:text-[13px] [&_thead]:uppercase [&_thead]:tracking-[.04em] [&_thead]:text-[var(--color-text6)] max-md:[&_thead]:text-xs [&_th]:p-3 [&_td]:p-3 max-md:[&_th]:p-2.5 max-md:[&_td]:p-2.5 [&_tbody_tr]:border-t [&_tbody_tr]:border-t-[var(--ui-table-row-border)] [&_tbody_tr]:text-[var(--color-text3)] [&_tbody_tr]:transition-[background-color,border-color] [&_tbody_tr]:duration-[160ms] [&_tbody_tr]:ease-[ease] [&_tbody_tr:nth-child(odd)]:bg-[var(--ui-table-row-odd)] [&_tbody_tr:nth-child(even)]:bg-[var(--ui-table-row-even)] [&_tbody_tr:hover]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:hover]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-visible]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:outline-none [&_tbody_tr:focus-within]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-within]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-within]:outline-none [&_tbody_tr:active]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:active]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:active]:outline-none [&_tbody_td]:whitespace-nowrap">
             <thead>
               <tr>
                 <th>#</th>

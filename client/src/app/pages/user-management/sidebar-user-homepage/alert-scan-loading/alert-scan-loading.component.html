@@ -13,7 +13,7 @@
 
     @if (this.licenseService.getLicenses().includes('maintainer')) {
       <div class="flex justify-center">
-        <button data-testid="tenant-scan-cancel" type="button" class="ui-alert-cancel-btn rounded-full px-[16px] py-[9px] text-[13px] font-extrabold transition duration-150 ease-out hover:-translate-y-[1px] hover:shadow-[0_8px_20px_rgba(0,0,0,0.20)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2" (click)="cancelScan()">
+        <button data-testid="tenant-scan-cancel" type="button" class="h-[42px] rounded-full !border !border-[rgba(148,163,184,0.35)] !bg-[rgba(79,100,121,0.12)] px-[16px] py-[9px] text-[13px] font-extrabold !text-[var(--color-text1)] transition-[background-color,border-color,transform,box-shadow] duration-150 ease-out hover:-translate-y-[1px] hover:!border-[rgba(148,163,184,0.55)] hover:!bg-[rgba(79,100,121,0.20)] hover:shadow-[0_8px_20px_rgba(0,0,0,0.20)] active:translate-y-0 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 [body.light-theme_&]:!border-[#c9d8e8] [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[#1f2e47] [body.light-theme_&]:hover:!border-[#7f9ab8] [body.light-theme_&]:hover:!bg-[#f8fbff]" (click)="cancelScan()">
           {{ 'common.actions.cancel' | translate }}
         </button>
       </div>

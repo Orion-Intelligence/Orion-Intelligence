@@ -64,7 +64,7 @@
             }
           </button>
           <div class="h-4 w-px bg-white/[0.08]"></div>
-          <button class="ui-cred-toolbar-btn inline-flex h-8 w-8 items-center justify-center text-[var(--color-text1)] transition-colors duration-150 hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] disabled:cursor-not-allowed disabled:opacity-40" (click)="cancel()" [disabled]="!isScanning()">
+          <button class="ui-cred-toolbar-btn inline-flex h-8 w-8 items-center justify-center text-[var(--color-text1)] transition-colors duration-150 hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] disabled:cursor-not-allowed disabled:opacity-40 [.light-theme_&]:!border-[#c8d9ea] [.light-theme_&]:!bg-[#f7fbff] [.light-theme_&]:!text-[#2f425e] [.light-theme_&]:hover:!border-[#b9cde4] [.light-theme_&]:hover:!bg-[#f1f8ff]" (click)="cancel()" [disabled]="!isScanning()">
             <i class="bi bi-stop-fill text-[18px] leading-none" [class.opacity-100]="isScanning()" [class.text-red-400]="isScanning()" [class.opacity-20]="!isScanning()"></i>
           </button>
         </div>

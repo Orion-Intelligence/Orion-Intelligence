@@ -1,7 +1,7 @@
 @if (platformData(); as platformData) {
   @if (user(); as user) {
     <article data-testid="social-platform-card" class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)]">
-      <div class="ui-social-profile-overview-in">
+      <div class="[animation:ui-social-profile-overview-in_180ms_ease-out_both] will-change-[opacity,transform] motion-reduce:animate-none">
         <div class="relative min-h-[172px] overflow-hidden border-b border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(15,23,42,0.28))]">
           @if (getCoverImageUrl(platformData)) {
             <img [src]="getCoverImageUrl(platformData)" [alt]="(platformData.username || user.username) + ' cover'" referrerpolicy="no-referrer" (error)="onImageError($event)" class="absolute inset-0 h-full w-full object-cover">
@@ -39,7 +39,7 @@
 
         <div class="flex overflow-x-auto border-b border-[var(--color-border)] bg-[var(--color-blue-700)] px-2">
           @for (tab of fetchTabs(); track tab.key) {
-            <button data-testid="social-fetch-tab" [attr.data-tab-key]="tab.key" (click)="tabSelected.emit(tab.key)" class="relative flex items-center gap-1.5 px-4 py-3 text-xs font-semibold transition-colors" [class.text-sky-400]="activeTab() === tab.key" [class.text-slate-400]="activeTab() !== tab.key">
+            <button data-testid="social-fetch-tab" [attr.data-tab-key]="tab.key" (click)="tabSelected.emit(tab.key)" class="relative flex items-center gap-1.5 px-4 py-3 text-xs font-semibold transition-colors [.light-theme_&.text-sky-400]:!text-[#1d77c9] [.light-theme_&.text-slate-400]:!text-[var(--color-text4)]" [class.text-sky-400]="activeTab() === tab.key" [class.text-slate-400]="activeTab() !== tab.key">
               <i [class]="getTabIcon(tab)"></i>
               {{ tab.label }}
               @if (isTabLoading(tab.key)) {
@@ -79,9 +79,9 @@
                   </button>
                 </div>
               } @else {
-                <div class="ui-social-soft-surface overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
+                <div class="[&&]:!bg-[rgba(87,165,235,0.035)] [body.light-theme_&&]:!bg-[#f8fbff] overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
                   @for (item of getVisibleProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                    <div class="ui-social-soft-row group flex items-start gap-3 border-b border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
+                    <div class="[&&]:!border-[rgba(148,163,184,0.08)] [&&]:!bg-[rgba(15,23,42,0.05)] hover:[&&]:!bg-[rgba(87,165,235,0.07)] [body.light-theme_&&]:!border-[rgba(199,213,230,0.72)] [body.light-theme_&&]:!bg-[rgba(255,255,255,0.76)] [body.light-theme_&&]:hover:!bg-[#edf5fd] group flex items-start gap-3 border-b border-[rgba(148,163,184,0.08)] bg-[rgba(15,23,42,0.05)] px-3 py-2.5 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.07)]">
                       <div class="flex w-[128px] flex-shrink-0 items-center gap-2 pt-0.5">
                         <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full" [class.bg-sky-500]="isUrl(item.value) && !isImageUrl(item.value)" [class.bg-emerald-500]="isImageUrl(item.value)" [class.bg-amber-500]="isNumeric(item.value) && !isImageUrl(item.value) && !isUrl(item.value)" [class.bg-rose-400]="isBool(item.value)" [class.bg-slate-300]="!isUrl(item.value) && !isImageUrl(item.value) && !isNumeric(item.value) && !isBool(item.value)">
                         </span>
@@ -99,7 +99,7 @@
                           {{ formatMetadataValue(item.value) }}
                         }
                       </div>
-                      <button (click)="copyToClipboard(item.value)" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text4)] opacity-0 transition-all hover:bg-emerald-500/10 hover:text-emerald-300 group-hover:opacity-100" title="Copy value">
+                      <button (click)="copyToClipboard(item.value)" class="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text4)] opacity-0 transition-all hover:bg-emerald-500/10 hover:text-emerald-300 group-hover:opacity-100 [.light-theme_&]:hover:!text-[#065f46]" title="Copy value">
                         <i class="bi bi-clipboard text-[10px]"></i>
                       </button>
                     </div>
@@ -327,14 +327,14 @@
                 </div>
               } @else if (getStealerLogs(platformData).length === 0) {
                 <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-emerald-500/20 bg-emerald-500/[0.035] px-4 py-8 text-center">
-                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/10 bg-emerald-500/10 text-emerald-300">
+                  <div class="flex h-10 w-10 items-center justify-center rounded-[10px] border border-emerald-500/10 bg-emerald-500/10 text-emerald-300 [.light-theme_&]:!text-[#047857]">
                     <i class="bi bi-shield-check text-base"></i>
                   </div>
                   <div>
                     <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No stealer log match</p>
                     <p class="mb-0 text-xs text-[var(--color-text4)]">No record matched both this username and domain.</p>
                   </div>
-                  <button (click)="refetchTab.emit('stealerLogs')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100">
+                  <button (click)="refetchTab.emit('stealerLogs')" class="inline-flex items-center gap-1.5 rounded-[8px] border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-semibold text-emerald-200 transition-colors hover:bg-emerald-500/15 hover:text-emerald-100 [.light-theme_&]:!text-[#047857] [.light-theme_&]:hover:!text-[#065f46]">
                     <i class="bi bi-arrow-clockwise text-[11px]"></i> Retry fetch
                   </button>
                 </div>

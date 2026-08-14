@@ -4,7 +4,7 @@
   @if (hasCameraSignals || iotPortCount > 0) {
     <div class="mb-3 flex flex-wrap gap-2">
       @if (hasCameraSignals) {
-        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.16),rgba(43,144,238,0.07))] px-2.5 py-1 text-[11px] font-bold text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">Camera Detected{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
+        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.16),rgba(43,144,238,0.07))] px-2.5 py-1 text-[11px] font-bold text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:!text-[#4e81ae]">Camera Detected{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
       }
       @if (iotPortCount > 0) {
         <span class="rounded-md border border-emerald-400/30 bg-[linear-gradient(135deg,rgba(52,211,153,0.15),rgba(16,185,129,0.06))] px-2.5 py-1 text-[11px] font-bold text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">{{ 'IoT Ports' | translate }} {{ iotPortCount }}</span>
@@ -59,7 +59,7 @@
     <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Open Ports' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (p of detail.open_ports; track p) {
-        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(87,165,235,0.2),rgba(43,144,238,0.09))] px-2.5 py-1 font-mono text-[13px] font-bold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">{{ p }}</span>
+        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(87,165,235,0.2),rgba(43,144,238,0.09))] px-2.5 py-1 font-mono text-[13px] font-bold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] [.light-theme_&]:!text-[#2d6f9f]">{{ p }}</span>
       }
     </div>
   </div>
@@ -78,13 +78,13 @@
               }
               @if (p.protocol || p.proto) {
                 <span class="text-[16px] text-[var(--color-text4)]">/</span>
-                <span class="rounded border border-sky-400/25 bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(43,144,238,0.08))] px-2 py-0.5 font-mono text-[11px] font-bold uppercase text-sky-400">{{ p.protocol || p.proto }}</span>
+                <span class="rounded border border-sky-400/25 bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(43,144,238,0.08))] px-2 py-0.5 font-mono text-[11px] font-bold uppercase text-sky-400 [.light-theme_&]:!text-[#2d6f9f]">{{ p.protocol || p.proto }}</span>
               }
               @if (p.service) {
                 <span class="rounded border border-[var(--ui-table-row-border)] bg-[linear-gradient(135deg,rgba(148,163,184,0.13),rgba(71,85,105,0.05))] px-2 py-0.5 font-mono text-[11px] font-semibold text-[var(--color-text3)]">{{ p.service }}</span>
               }
               @if (p['is_camera'] || p['device_type'] === 'camera') {
-                <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold text-sky-300">{{ 'CAMERA' | translate }}</span>
+                <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold text-sky-300 [.light-theme_&]:!text-[#4e81ae]">{{ 'CAMERA' | translate }}</span>
               }
               @if (p['is_iot']) {
                 <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-bold text-emerald-300">{{ 'IoT' | translate }}</span>
@@ -251,7 +251,7 @@
     <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Web Technologies' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (t of detail.web_technologies; track t) {
-        <span class="rounded-md border border-sky-400/25 bg-[linear-gradient(135deg,rgba(87,165,235,0.16),rgba(43,144,238,0.06))] px-2.5 py-1 text-[11px] font-semibold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">{{ t }}</span>
+        <span class="rounded-md border border-sky-400/25 bg-[linear-gradient(135deg,rgba(87,165,235,0.16),rgba(43,144,238,0.06))] px-2.5 py-1 text-[11px] font-semibold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:!text-[#2d6f9f]">{{ t }}</span>
       }
     </div>
   </div>
@@ -381,7 +381,7 @@
         <div class="flex items-center gap-2 flex-wrap border-b border-[var(--ui-table-row-border)] px-3 py-2.5 last:border-0">
           <span class="font-mono text-[14px] font-semibold text-[var(--color-text1)]">{{ cam.ip }}</span>
           @if (cam.port) {
-            <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30">:{{ cam.port }}</span>
+            <span class="px-2 py-0.5 rounded text-xs font-bold font-mono bg-sky-400/15 text-sky-400 border border-sky-400/30 [.light-theme_&]:!text-[#2d6f9f]">:{{ cam.port }}</span>
           }
           @if (cam.brand) {
             <span class="text-[13px] text-[var(--color-text2)]">{{ cam.brand }}</span>

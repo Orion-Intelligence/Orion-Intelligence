@@ -89,7 +89,7 @@
             }
 
             @if (!isChatEmpty(chat) && !isChatBusy(chat) && openedSessionMenuId === chat.sessionId) {
-            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px] ui-ai-chat-dropdown-above' : 'top-[44px]'" class="ui-profile-dropdown absolute right-[5px] z-[999] w-[176px] overflow-visible rounded-[9px] border border-slate-200 !bg-slate-50 p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5">
+            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px] origin-bottom-right [animation-name:ui-ai-chat-dropdown-above-in]' : 'top-[44px]'" class="absolute right-[5px] z-[999] w-[176px] origin-top-right overflow-visible rounded-[9px] border border-slate-200 !bg-slate-50 p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5 [animation:ui-profile-dropdown-in_160ms_cubic-bezier(0.16,1,0.3,1)_both] will-change-[opacity,transform] motion-reduce:animate-none">
               @if (shouldOpenMenuAbove(chat)) {
               <span class="pointer-events-none absolute bottom-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-slate-50" aria-hidden="true"></span>
               } @else {
@@ -161,9 +161,9 @@
 }
 
 @if (renameChatTarget) {
-<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" data-role="backdrop" (click)="onRenameBackdrop($event)">
-  <div data-testid="ai-chat-rename-modal" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[420px] rounded-xl p-6" (click)="$event.stopPropagation()">
-    <div class="ui-popup-title text-lg font-semibold">
+<div class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-50 flex items-center justify-center p-4" data-role="backdrop" (click)="onRenameBackdrop($event)">
+  <div data-testid="ai-chat-rename-modal" class="ui-graph-popup-panel [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] origin-top [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] w-full max-w-[420px] rounded-xl p-6" (click)="$event.stopPropagation()">
+    <div class="!text-[var(--color-text1)] text-lg font-semibold">
       {{ 'Rename Chat' | translate }}
     </div>
 
@@ -174,11 +174,11 @@
     <input data-testid="ai-chat-rename-input" type="text" [(ngModel)]="renameChatDraft" class="mt-4 h-[40px] w-full rounded-[8px] border border-[var(--color-blue-640)]/25 bg-[#102236] px-3 text-sm text-white outline-none placeholder:text-[#A0B8D1]" [placeholder]="'Chat name' | translate" (keydown.enter)="confirmRenameChat()" autofocus />
 
     <div class="mt-6 flex justify-end gap-2">
-      <button data-testid="ai-chat-rename-confirm" type="button" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold" [disabled]="!renameChatDraft.trim()" (click)="confirmRenameChat()">
+      <button data-testid="ai-chat-rename-confirm" type="button" class="ui-popup-btn-primary [&&]:!border-0 [&&]:!bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] [&&]:!text-white [&&]:!shadow-[0_1px_4px_rgb(87_165_235/25%)] [&&]:!px-[14px] [&&]:!py-[6px] [&&]:!h-auto [&&]:!min-w-0 [border-radius:var(--ui-popup-button-radius,6px)] [font-size:var(--ui-popup-button-font-size,13px)] [font-weight:var(--ui-popup-button-font-weight,500)] [transition-property:var(--ui-popup-button-transition,background-color,transform,box-shadow)] [transition-duration:var(--ui-popup-button-duration,180ms)] [transition-timing-function:ease] hover:[&&&]:!bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:[&&&]:!-translate-y-px hover:[&&&]:!shadow-[0_2px_6px_rgb(87_165_235/30%)] active:[&&&]:!translate-y-0 [--ui-popup-button-font-size:14px] [--ui-popup-button-font-weight:600]" [disabled]="!renameChatDraft.trim()" (click)="confirmRenameChat()">
         {{ 'confirmation.yesConfirm' | translate }}
       </button>
 
-      <button data-testid="ai-chat-rename-cancel" type="button" class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" (click)="closeRenameChatPopup()">
+      <button data-testid="ai-chat-rename-cancel" type="button" class="ui-popup-btn-secondary border [&&]:!border-[#4a5f77] [&&]:!bg-transparent [&&]:!text-[#e1e8f0] [&&]:!px-[14px] [&&]:!py-[6px] [&&]:!h-auto [&&]:!min-w-0 [border-radius:var(--ui-popup-button-radius,6px)] [font-size:var(--ui-popup-button-font-size,13px)] [font-weight:var(--ui-popup-button-font-weight,500)] [transition-property:var(--ui-popup-button-transition,background-color,border-color)] [transition-duration:var(--ui-popup-button-duration,180ms)] [transition-timing-function:ease] hover:[&&&]:!border-[#5a7594] hover:[&&&]:!bg-[rgb(74_95_119/10%)] [--ui-popup-button-font-size:14px] [--ui-popup-button-font-weight:600] [.light-theme_&&]:!border-[#c7d5e6] [.light-theme_&&]:!bg-transparent [.light-theme_&&]:!text-[#1f2e47] [.light-theme_&&]:hover:!border-[#aac0da] [.light-theme_&&]:hover:!bg-[#eef5ff]" (click)="closeRenameChatPopup()">
         {{ 'common.actions.cancel' | translate }}
       </button>
     </div>

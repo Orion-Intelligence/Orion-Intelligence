@@ -1,12 +1,12 @@
 @if (showUi && !isLoading()) {
-  <section data-testid="consolidated-scan-section" class="ui-consolidated-main mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] max-[640px]:gap-[12px] max-[640px]:p-[12px]">
+  <section data-testid="consolidated-scan-section" class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] max-[640px]:gap-[12px] max-[640px]:p-[12px]">
     <header class="w-full">
       <div class="flex w-full items-center justify-between gap-[12px]">
         <div class="min-w-0">
           <h1 data-testid="consolidated-scan-title" class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">{{ 'Threats Scans Report' | translate }}: {{ targetLabel }}</h1>
           @if (isProcessing || runningTypes.length) {
             <div class="mt-[6px] inline-flex items-center gap-[7px] font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap max-[640px]:whitespace-normal">
-              <span class="ui-scan-pulse-dot h-[7px] w-[7px] rounded-full bg-[#26B961]"></span>
+              <span class="h-[7px] w-[7px] rounded-full bg-[#26B961] [animation:uiScanPulse_1.2s_ease-in-out_infinite]"></span>
               {{ 'Collecting intelligence…' | translate }} {{ completedCount }}/{{ totalCount }} {{ 'scans completed' | translate }}
             </div>
           }
@@ -37,7 +37,7 @@
       @if (isCollapsed) {
         <div>
           <div class="mt-[12px] h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-            <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [ngClass]="'ui-wpct-' + ((isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100)"></div>
+            <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out" [ngClass]="(isProcessing || runningTypes.length ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0)_0,rgba(255,255,255,0)_6px,rgba(255,255,255,0.18)_6px,rgba(255,255,255,0.18)_12px)] [background-size:32px_100%] [animation:uiScanStripe_900ms_linear_infinite] ' : '') + 'ui-wpct-' + ((isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100)"></div>
           </div>
         </div>
       }
@@ -45,7 +45,7 @@
     @if (!isCollapsed) {
       <div class="flex w-full items-stretch gap-[24px] overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden max-[1200px]:flex-col">
         @if (domainResults.length) {
-          <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" @scanAnimation>
+          <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" @scanAnimation>
             <div class="flex flex-col gap-[9px] p-[12px]">
               <h2 data-testid="consolidated-scan-openweb-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">{{ 'Open Web Presence Scan' | translate }}</h2>
               <div class="flex w-full flex-col gap-[8px]">
@@ -76,7 +76,7 @@
           </div>
         }
         @if (liveApiRows.length) {
-          <div class="ui-consolidated-sub flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" @scanAnimation>
+          <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] flex-1 max-w-[462px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:max-w-full" @scanAnimation>
             <div class="flex flex-col gap-[9px] p-[12px]">
               <h2 data-testid="consolidated-scan-liveapi-title" class="font-[Inter] text-[14px] font-medium leading-[1.2] text-[var(--color-text1)]">{{ 'Active Threat Discovery/Live Api' | translate }}</h2>
               <div class="flex w-full flex-col gap-[8px]">
@@ -105,12 +105,12 @@
           </div>
         }
         @if (isProcessing || runningTypes.length) {
-          <div class="ui-consolidated-sub flex-none min-w-[350px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:min-w-0" @scanAnimation>
+          <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] flex-none min-w-[350px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:min-w-0" @scanAnimation>
             <div class="flex flex-col gap-[16px] p-[20px_24px]">
               <div class="flex w-full items-center justify-between">
                 <h2 class="font-[Inter] text-[16px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap">{{ 'Threats scans' | translate }}</h2>
                 <div class="inline-flex items-center gap-[6px]">
-                  <div class="ui-scan-pulse-dot h-[8px] w-[8px] rounded-full bg-[var(--color-text5)]"></div>
+                  <div class="h-[8px] w-[8px] rounded-full bg-[var(--color-text5)] [animation:uiScanPulse_1.2s_ease-in-out_infinite]"></div>
                   <div class="font-[Inter] text-[13px] font-normal leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap">{{ 'Collecting intelligence…' | translate }}</div>
                 </div>
               </div>
@@ -124,7 +124,7 @@
               <div class="inline-flex items-center gap-[50px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-[12px]">
                 <div class="w-[226px] max-[768px]:w-full">
                   <div class="h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-                    <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out ui-scan-progress-bar" [class.ui-scan-progress-indeterminate]="isProcessing || runningTypes.length" [ngClass]="'ui-wpct-' + (mergedProgress || 6)"></div>
+                    <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out" [ngClass]="(isProcessing || runningTypes.length ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0)_0,rgba(255,255,255,0)_6px,rgba(255,255,255,0.18)_6px,rgba(255,255,255,0.18)_12px)] [background-size:32px_100%] [animation:uiScanStripe_900ms_linear_infinite] ' : '') + 'ui-wpct-' + (mergedProgress || 6)"></div>
                   </div>
                 </div>
                 <div class="font-[Inter] text-[14px] font-normal leading-[18.2px] text-[var(--color-text4)] whitespace-nowrap">{{ completedCount }}/{{ totalCount }} {{ 'scans completed' | translate }}</div>

@@ -1,7 +1,7 @@
 <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
     <div class="min-w-0">
-        <h1 class="ui-page-title">{{ caseData.title || ('Case ' + caseData.caseId) }}</h1>
-        <p class="ui-page-description">
+        <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ caseData.title || ('Case ' + caseData.caseId) }}</h1>
+        <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">
             {{ caseData.caseId }} · {{ getDisplayLabel(caseData.caseType, caseData.caseTypeOtherValue) }}
         </p>
     </div>

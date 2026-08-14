@@ -1,5 +1,5 @@
-<div data-testid="tenant-alert-modal" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
-  <div class="ui-popup-shell relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] p-[30px] font-[Inter] max-[900px]:p-[18px]" @popupAnimation>
+<div data-testid="tenant-alert-modal" class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-[9999] flex items-center justify-center p-3" @overlayAnimation (click)="$event.target === $event.currentTarget && cancleAlert(false)">
+  <div class="ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] relative w-full max-w-[1000px] max-h-[88vh] overflow-y-auto rounded-[14px] p-[30px] font-[Inter] max-[900px]:p-[18px]" @popupAnimation>
     <div>
       <div class="text-[24px] font-semibold leading-none">{{ heading() }}</div>
       <button class="absolute right-[20px] top-[20px] text-[28px] text-[#ccc] hover:text-white" [attr.aria-label]="'common.actions.close' | translate" (click)="cancleAlert(false)">×</button>
@@ -63,7 +63,7 @@
     }
 
     <div class="mt-[26px] flex items-center justify-between gap-[15px]">
-      <button class="ui-alert-cancel-btn px-[24px] text-[14px]" (click)="cancleAlert(false)">{{ 'common.actions.cancel' | translate }}</button>
+      <button class="h-[42px] rounded-[8px] !border !border-[rgba(148,163,184,0.35)] !bg-[rgba(79,100,121,0.12)] px-[24px] text-[14px] !text-[var(--color-text1)] transition-[background-color,border-color] duration-[180ms] ease-[ease] hover:!border-[rgba(148,163,184,0.55)] hover:!bg-[rgba(79,100,121,0.20)] [body.light-theme_&]:!border-[#c9d8e8] [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[#1f2e47] [body.light-theme_&]:hover:!border-[#7f9ab8] [body.light-theme_&]:hover:!bg-[#f8fbff]" (click)="cancleAlert(false)">{{ 'common.actions.cancel' | translate }}</button>
       <button data-testid="tenant-alert-save" class="h-[42px] rounded-[8px] bg-[#57A5EB] px-[24px] text-[14px] font-medium text-[#0e1626]" (click)="saveAlert()">
         {{ (edit() ? 'categoryAlerts.form.saveAlert' : 'categoryAlerts.form.addAlert') | translate }}
       </button>

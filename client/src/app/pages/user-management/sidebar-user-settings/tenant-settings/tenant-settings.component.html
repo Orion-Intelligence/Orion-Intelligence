@@ -1,5 +1,5 @@
 <div class="w-full p-3 pb-[150px] md:p-4 md:pb-[150px]">
-  <form class="ui-page-container w-full max-w-[2400px]" @fadeInDashboardItem>
+  <form class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]" @fadeInDashboardItem>
     <div class="mb-4 flex items-start justify-between gap-3 max-[760px]:flex-col">
       <div class="flex items-start gap-3">
         <div class="h-[88px] w-[88px] shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[0.2rem]">
@@ -12,8 +12,8 @@
           </app-user-image-picker>
         </div>
         <div class="pt-1">
-          <h1 class="ui-page-title">{{ 'Tenant Data' | translate }}</h1>
-          <p class="ui-page-description">{{ 'Manage and edit your company details, including phone, address, and profile information.' | translate }}</p>
+          <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Tenant Data' | translate }}</h1>
+          <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Manage and edit your company details, including phone, address, and profile information.' | translate }}</p>
           <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
             {{ 'Licenses assigned' | translate }}:
             <span class="font-semibold text-[var(--color-text2)]">{{ userSessionData.tenant.licenses.join(', ') || ('No licenses assigned' | translate) }}</span>
@@ -23,8 +23,8 @@
     </div>
 
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="ui-section-title">{{ 'Profile' | translate }}</div>
-      <div class="ui-section-description">{{ 'Core tenant identity and assigned licenses.' | translate }}</div>
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Profile' | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Core tenant identity and assigned licenses.' | translate }}</div>
       <div class="mt-3">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -91,8 +91,8 @@
       <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <div class="ui-section-title">{{ 'Contacts, Users & Address' | translate }}</div>
-            <div class="ui-section-description">{{ 'Tenant communication details, assigned quota, and address information.' | translate }}</div>
+            <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Contacts, Users & Address' | translate }}</div>
+            <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Tenant communication details, assigned quota, and address information.' | translate }}</div>
           </div>
           <div class="flex items-center gap-2">
             @if (!contactEditing) {
@@ -187,8 +187,8 @@
       <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
         <div class="flex items-start justify-between gap-3">
           <div>
-            <div class="ui-section-title">{{ 'Privacy & Access' | translate }}</div>
-            <div class="ui-section-description">{{ 'Manage profile visibility, tenant alerts, and tenant access to Event Management.' | translate }}</div>
+            <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Privacy & Access' | translate }}</div>
+            <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Manage profile visibility, tenant alerts, and tenant access to Event Management.' | translate }}</div>
           </div>
           <div class="flex items-center gap-2">
             @if (!privacyEditing) {

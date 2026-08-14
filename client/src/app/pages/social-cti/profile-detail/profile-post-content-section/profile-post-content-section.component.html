@@ -48,7 +48,7 @@
                   <p [class]="isPostCaptionExpanded(post) ? 'mb-1 whitespace-pre-wrap break-words text-sm font-medium leading-5 text-[var(--color-text2)]' : 'mb-1 overflow-hidden break-words text-sm font-medium leading-5 text-[var(--color-text2)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:4]'">{{ getPostCaption(post) || 'Untitled post' }}</p>
                   @if (shouldShowPostCaptionToggle(post)) {
                     <div class="mb-1 flex justify-start">
-                      <button type="button" class="text-xs font-semibold text-sky-300 transition hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:hover:text-sky-800" (click)="togglePostCaption(post)" [attr.aria-expanded]="isPostCaptionExpanded(post)">
+                      <button type="button" class="text-xs font-semibold text-sky-300 transition hover:text-sky-200 [body.light-theme_&]:!text-[#4e81ae] [body.light-theme_&]:hover:!text-sky-800" (click)="togglePostCaption(post)" [attr.aria-expanded]="isPostCaptionExpanded(post)">
                         {{ isPostCaptionExpanded(post) ? 'Show less' : 'Show more' }}
                       </button>
                     </div>

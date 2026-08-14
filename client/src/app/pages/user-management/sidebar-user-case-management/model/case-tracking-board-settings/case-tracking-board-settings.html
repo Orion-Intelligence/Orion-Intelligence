@@ -1,16 +1,16 @@
 <div class="w-full p-5">
-  <div class="ui-page-container p-5" data-testid="case-tracking-board-settings-page">
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5" data-testid="case-tracking-board-settings-page">
     <div class="mb-5 flex flex-wrap items-center justify-between gap-4">
       <div class="min-w-0">
-        <h1 class="ui-page-title">Status Tracking Board Settings</h1>
-        <p class="ui-page-description">{{ scopeLabel }}</p>
+        <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">Status Tracking Board Settings</h1>
+        <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ scopeLabel }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-2">
-        <button type="button" class="ui-btn ui-btn-secondary inline-flex h-10 items-center gap-2" (click)="goBack()">
+        <button type="button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text2)] hover:bg-[var(--color-blue-810)] inline-flex [--ui-btn-height:40px] items-center gap-2" (click)="goBack()">
           <i class="bi bi-arrow-left text-sm"></i>
           Back
         </button>
-        <button type="button" class="ui-btn ui-btn-primary inline-flex h-10 items-center gap-2" [disabled]="isSaving || isLoading" (click)="save()">
+        <button type="button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] inline-flex [--ui-btn-height:40px] items-center gap-2" [disabled]="isSaving || isLoading" (click)="save()">
           <i class="bi bi-check2 text-sm"></i>
           {{ isSaving ? 'Saving' : 'Save' }}
         </button>

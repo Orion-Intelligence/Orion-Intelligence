@@ -3,13 +3,13 @@
 
   @if (!isFetched && !isLoading) {
     <div class="p-[24px] flex items-center justify-center">
-      <div class="box-border w-full rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[24px] text-center shadow-[0_10px_30px_var(--color-shadow-medium)]">
-        <div class="mx-auto mb-[12px] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[var(--color-blue-790-light)]">
+      <div class="box-border w-full rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[24px] text-center shadow-[0_10px_30px_var(--color-shadow-medium)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!shadow-none [.light-theme_&]:!bg-[#f9fbff]">
+        <div class="mx-auto mb-[12px] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[var(--color-blue-790-light)] [.light-theme_&]:!border [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white">
           <img src="assets/images/shared/theme/file-search.svg" alt="File Upload" class="h-[32px] w-[32px]"/>
         </div>
         <h2 class="text-[20px] font-semibold text-[var(--color-text1)]">{{ title }}</h2>
         <p class="mt-[6px] text-[14px] text-[var(--color-text4)]">{{ description }}</p>
-        <button type="button" class="ui-btn ui-btn-primary mt-[16px] inline-flex items-center justify-center rounded-[8px] px-[16px] py-[10px] text-[14px] transition-all duration-150 active:scale-[0.97] active:brightness-110 active:shadow-none" (click)="triggerFileInput()">
+        <button type="button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] mt-[16px] inline-flex items-center justify-center [--ui-btn-radius:8px] [--ui-btn-px:16px] [--ui-btn-py:10px] text-[14px] [--ui-btn-transition-properties:all] [--ui-btn-transition-duration:150ms] active:scale-[0.97] active:brightness-110 active:shadow-none" (click)="triggerFileInput()">
           <img ngSrc="../../../../assets/images/shared/theme/ai.svg" alt="Upload" width="24" height="24" class="mr-[10px]" />
           {{ 'Choose File' | translate }}
         </button>
@@ -34,15 +34,15 @@
         <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">
           {{ currentStep || ('Processing file...' | translate) }}
         </div>
-        <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-          <div class="ui-progress-indeterminate-bar"></div>
+        <div class="relative overflow-hidden h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+          <div class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] after:[animation:ui-progress-sweep-primary_1.3s_linear_infinite]"></div>
         </div>
       </div>
     }
 
     <div class="relative z-[1] mx-[20px] mt-[16px] mb-[100px] rounded-[10px] text-[var(--color-text1)]">
       @if (hasError && !isLoading) {
-        <div class="rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
+        <div class="rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)] [.light-theme_&]:!border-[#efc7ce] [.light-theme_&]:![background:#fff7f8] [.light-theme_&]:!shadow-none">
           <div class="mb-[6px] flex items-start justify-between gap-3">
             <div class="min-w-0">
               <div class="mt-[6px] text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Processing Failed' | translate }}</div>
@@ -58,7 +58,7 @@
               <li>{{ 'Please select a smaller file' | translate }}</li>
             </ul>
           }
-          <button class="ui-btn ui-btn-danger mt-[10px] rounded-[8px] px-[14px] py-[8px] text-[14px]" (click)="triggerFileInput()">{{ 'Try Again' | translate }}</button>
+          <button class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)] hover:bg-[var(--color-red-100)] mt-[10px] [--ui-btn-radius:8px] [--ui-btn-px:14px] [--ui-btn-py:8px] text-[14px]" (click)="triggerFileInput()">{{ 'Try Again' | translate }}</button>
         </div>
       }
 
@@ -97,13 +97,13 @@
               </div>
 
               <div class="ml-auto flex items-center gap-2 max-[640px]:w-full max-[640px]:justify-end">
-                <button data-testid="scan-another-file" type="button" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" [appTooltip]="'Scan another file' | translate" (click)="triggerFileInput()" [attr.aria-label]="'Scan another file' | translate">
-                  <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="16" height="16" alt="scan" class="ui-action-icon" />
+                <button data-testid="scan-another-file" type="button" class="inline-flex h-9 items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] [.light-theme_&]:!border-transparent [.light-theme_&]:!bg-transparent [.light-theme_&]:![transition:background-color_.16s_ease,transform_.16s_ease] [.light-theme_&]:hover:!bg-[#cfe0f4] [.light-theme_&]:hover:-translate-y-px [.light-theme_&]:focus-visible:!bg-[#bfd4ee] [.light-theme_&]:focus-visible:!outline-none [.light-theme_&]:active:!bg-[#bfd4ee]" [appTooltip]="'Scan another file' | translate" (click)="triggerFileInput()" [attr.aria-label]="'Scan another file' | translate">
+                  <img ngSrc="../../../../assets/images/shared/theme/file-search.svg" width="16" height="16" alt="scan" class="ui-action-icon [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [.light-theme_&]:!opacity-[92%]" />
                   <span>{{ 'Upload another' | translate }}</span>
                 </button>
                 <div class="h-6 w-px bg-[var(--color-divider)]"></div>
-                <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]" [appTooltip]="'Download report' | translate" (click)="openExportChoice()" [attr.aria-label]="'Download report' | translate">
-                  <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="16" height="16" alt="download" class="ui-action-icon" />
+                <button data-testid="scan-download-report" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] [.light-theme_&]:!border-transparent [.light-theme_&]:!bg-transparent [.light-theme_&]:![transition:background-color_.16s_ease,transform_.16s_ease] [.light-theme_&]:hover:!bg-[#cfe0f4] [.light-theme_&]:hover:-translate-y-px [.light-theme_&]:focus-visible:!bg-[#bfd4ee] [.light-theme_&]:focus-visible:!outline-none [.light-theme_&]:active:!bg-[#bfd4ee]" [appTooltip]="'Download report' | translate" (click)="openExportChoice()" [attr.aria-label]="'Download report' | translate">
+                  <img ngSrc="../../../../assets/images/shared/theme/download.svg" width="16" height="16" alt="download" class="ui-action-icon [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [.light-theme_&]:!opacity-[92%]" />
                 </button>
               </div>
             </div>
@@ -111,9 +111,9 @@
             <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
               @for (i of [1,2,3,4]; track i) {
                 <div class="flex items-center gap-2">
-                  <div class="ui-shimmer h-5 w-5 rounded bg-[var(--color-blue-720)]"></div>
-                  <div class="ui-shimmer h-4 w-24 rounded bg-[var(--color-blue-720)]"></div>
-                  <div class="ui-shimmer h-3 w-12 rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-5 w-5 rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-4 w-24 rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-12 rounded bg-[var(--color-blue-720)]"></div>
                 </div>
                 @if (i < 4) {
                   <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
@@ -124,16 +124,16 @@
 
           @if (isLoading) {
             <section class="mt-[16px] space-y-[16px]">
-              <div class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+              <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
                 <div class="border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
-                  <div class="ui-shimmer h-[13px] w-[160px] rounded bg-[var(--color-blue-720)]"></div>
-                  <div class="ui-shimmer mt-[7px] h-[11px] w-[92px] rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[13px] w-[160px] rounded bg-[var(--color-blue-720)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] mt-[7px] h-[11px] w-[92px] rounded bg-[var(--color-blue-720)]"></div>
                 </div>
                 <div class="grid grid-cols-1 gap-0 px-[14px] py-[6px] md:grid-cols-2 md:gap-x-[18px] max-[640px]:px-[10px]">
                   @for (j of [1,2,3,4,5,6]; track j) {
                     <div class="flex min-w-0 items-center gap-[10px] border-b border-[var(--ui-consolidated-divider)] py-[8px]" [ngClass]="{ 'border-b-0': j > 4 }">
-                      <div class="ui-shimmer h-[11px] w-[82px] shrink-0 rounded bg-[var(--color-blue-720)]"></div>
-                      <div class="ui-shimmer h-[13px] flex-1 rounded bg-[var(--color-blue-720)]"></div>
+                      <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[11px] w-[82px] shrink-0 rounded bg-[var(--color-blue-720)]"></div>
+                      <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[13px] flex-1 rounded bg-[var(--color-blue-720)]"></div>
                     </div>
                   }
                 </div>
@@ -148,7 +148,7 @@
                       <span>{{ section.title }}</span>
                       <span class="h-px flex-1 bg-[linear-gradient(90deg,rgba(16,185,129,0.6),rgba(16,185,129,0))]"></span>
                     </div>
-                    <div data-testid="defacement-report-card" class="ui-consolidated-sub w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
+                    <div data-testid="defacement-report-card" class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] w-full overflow-hidden rounded-[12px] border border-[var(--ui-consolidated-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] [--ui-consolidated-sub-bg:var(--color-blue-700)] [--ui-consolidated-sub-hover:var(--color-blue-700)] [--ui-consolidated-border:var(--color-border)] [--ui-consolidated-divider:var(--color-divider)]">
                       <div class="flex items-center justify-between gap-[12px] border-b border-[var(--ui-consolidated-divider)] px-[14px] py-[10px] max-[640px]:px-[10px]">
                         <div class="min-w-0">
                           <b data-testid="defacement-report-card-title" class="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[12px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text2)]">{{ section.title }}</b>
@@ -173,7 +173,7 @@
                 }
               </section>
             } @else {
-              <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[20px] text-center">
+              <div class="mt-[16px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[20px] text-center [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!shadow-none [.light-theme_&]:!bg-[#f9fbff]">
                 <div class="text-[30px] text-[var(--color-text1)]"><i class="bi bi-shield-check"></i></div>
                 <div class="mt-[6px] text-[16px] font-semibold text-[var(--color-text1)]">{{ 'No Findings' | translate }}</div>
                 <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'No indicators or suspicious items were detected in the file.' | translate }}</div>

@@ -2,8 +2,8 @@
   <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
     <div class="flex flex-wrap items-start justify-between gap-3">
       <div>
-        <div class="ui-section-title">{{ 'Brand assets' | translate }}</div>
-        <div class="ui-section-description">{{ 'These files are served from this tenant’s URL on login, navigation, and browser chrome.' | translate }}</div>
+        <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Brand assets' | translate }}</div>
+        <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'These files are served from this tenant’s URL on login, navigation, and browser chrome.' | translate }}</div>
       </div>
       <span class="inline-flex items-center gap-1 rounded-full border border-sky-400/25 bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-200">
         <i class="bi bi-building text-[10px]"></i>
@@ -67,8 +67,8 @@
   <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2" [ngClass]="brandingEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
     <div class="flex items-start justify-between gap-3">
       <div>
-        <div class="ui-section-title">{{ 'Tenant identity' | translate }}</div>
-        <div class="ui-section-description">{{ 'Set the name shown in page titles, login screens, and shared views.' | translate }}</div>
+        <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Tenant identity' | translate }}</div>
+        <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Set the name shown in page titles, login screens, and shared views.' | translate }}</div>
       </div>
       <div class="flex items-center gap-2">
         @if (!brandingEditing) {

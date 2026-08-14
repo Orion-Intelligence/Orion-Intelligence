@@ -1,8 +1,8 @@
 @if (isOpen()) {
-  <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="onClose()"></div>
+  <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="onClose()"></div>
 }
 
-<aside class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[520px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[620px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !isOpen(), 'translate-x-0 pointer-events-auto': isOpen() }" [attr.data-testid]="testId()">
+<aside class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[520px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[620px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !isOpen(), 'translate-x-0 pointer-events-auto': isOpen() }" [attr.data-testid]="testId()">
   <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-5 py-3">
     <div class="flex items-center justify-between gap-3">
       <div class="min-w-0">

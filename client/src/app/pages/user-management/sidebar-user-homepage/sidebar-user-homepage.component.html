@@ -14,27 +14,27 @@
                 <app-home-search class="homepage-search-no-margin" [isRoleAdmin]="false" [hideToolsSection]="true" [hideHeatmapAndAnalytics]="licenseService.isMaintainer()" [compactLayout]="licenseService.isMaintainer()"></app-home-search>
               }
               <div class="mt-[12px] flex justify-end max-[640px]:justify-start">
-                <div class="ioc-action-toolbar inline-flex items-center gap-2 rounded-[8px] border border-[#ffffff15] bg-[var(--color-blue-800)] px-[8px] py-[6px] max-[640px]:w-full max-[640px]:justify-center" [ngClass]="isLightTheme() ? 'bg-[#f7fbff] border-[#d3deeb]' : ''">
+                <div class="ioc-action-toolbar inline-flex items-center gap-2 rounded-[8px] border border-[#ffffff15] bg-[var(--color-blue-800)] px-[8px] py-[6px] max-[640px]:w-full max-[640px]:justify-center [.light-theme_&]:!border-[#d3deeb] [.light-theme_&]:!bg-[#f7fbff] [.light-theme_&]:!shadow-none" [ngClass]="isLightTheme() ? 'bg-[#f7fbff] border-[#d3deeb]' : ''">
                   @if (hasReports()) {
-                    <button data-testid="tenant-home-print-alerts" [appTooltip]="'Print Alerts' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (click)="openExportChoice()" (mouseenter)="setHomeToolHover('print')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='print' ? 'bg-[#cfe0f4]' : ''">
-                      <img src="assets/images/shared/theme/print.svg" height="25" alt="print" class="ioc-action-icon" />
+                    <button data-testid="tenant-home-print-alerts" [appTooltip]="'Print Alerts' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a] [.light-theme_&]:!bg-transparent [.light-theme_&]:[transition:background-color_.16s_ease,box-shadow_.16s_ease,transform_.16s_ease] [.light-theme_&]:hover:!bg-[#cfe0f4] [.light-theme_&]:hover:!shadow-[inset_0_0_0_1px_#9bb7d8] [.light-theme_&]:hover:-translate-y-px [.light-theme_&]:focus-visible:!bg-[#bfd4ee] [.light-theme_&]:focus-visible:!shadow-[inset_0_0_0_1px_#8eadd2] [.light-theme_&]:focus-visible:!outline-none [.light-theme_&]:active:!bg-[#bfd4ee] [.light-theme_&]:active:!shadow-[inset_0_0_0_1px_#8eadd2]" (click)="openExportChoice()" (mouseenter)="setHomeToolHover('print')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='print' ? 'bg-[#cfe0f4]' : ''">
+                      <img src="assets/images/shared/theme/print.svg" height="25" alt="print" class="ioc-action-icon [.light-theme_&&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&&]:!opacity-[92%]" />
                     </button>
                   }
                   @if (hasReports() && licenseService.isMaintainer()) {
-                    <div class="ioc-action-divider h-[20px] w-px bg-[#ffffff20]" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] opacity-100' : ''"></div>
+                    <div class="ioc-action-divider h-[20px] w-px bg-[#ffffff20] [.light-theme_&]:!border-l [.light-theme_&]:!border-l-[#a9bbd0] [.light-theme_&]:!bg-[#a9bbd0] [.light-theme_&]:!opacity-100" [ngClass]="isLightTheme() ? 'bg-[#a9bbd0] border-l border-l-[#a9bbd0] opacity-100' : ''"></div>
                   }
                   <div class="inline-flex items-center gap-2">
                     @if (hasReports() && licenseService.isMaintainer()) {
-                      <button data-testid="tenant-home-flush-all" (click)="flushAll()" [appTooltip]="'categoryAlerts.actions.flushAll' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('flush')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='flush' ? 'bg-[#cfe0f4]' : ''">
-                        <img alt="flush" height="20" ngSrc="../../../../assets/images/shared/theme/bin.svg" width="20" class="ioc-action-icon" />
+                      <button data-testid="tenant-home-flush-all" (click)="flushAll()" [appTooltip]="'categoryAlerts.actions.flushAll' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a] [.light-theme_&]:!bg-transparent [.light-theme_&]:[transition:background-color_.16s_ease,box-shadow_.16s_ease,transform_.16s_ease] [.light-theme_&]:hover:!bg-[#cfe0f4] [.light-theme_&]:hover:!shadow-[inset_0_0_0_1px_#9bb7d8] [.light-theme_&]:hover:-translate-y-px [.light-theme_&]:focus-visible:!bg-[#bfd4ee] [.light-theme_&]:focus-visible:!shadow-[inset_0_0_0_1px_#8eadd2] [.light-theme_&]:focus-visible:!outline-none [.light-theme_&]:active:!bg-[#bfd4ee] [.light-theme_&]:active:!shadow-[inset_0_0_0_1px_#8eadd2]" (mouseenter)="setHomeToolHover('flush')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='flush' ? 'bg-[#cfe0f4]' : ''">
+                        <img alt="flush" height="20" ngSrc="../../../../assets/images/shared/theme/bin.svg" width="20" class="ioc-action-icon [.light-theme_&&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&&]:!opacity-[92%]" />
                       </button>
                     }
                     @if (licenseService.isMaintainer()) {
-                      <button data-testid="tenant-home-alert-scanner-settings" type="button" (click)="openAlertScannerSettings()" [appTooltip]="'Alert scanner settings' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a]" (mouseenter)="setHomeToolHover('settings')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='settings' ? 'bg-[#cfe0f4]' : ''">
-                        <img alt="settings" src="assets/images/shared/settings.svg" class="ioc-action-icon ioc-action-icon--settings h-[18px] w-[18px]" />
+                      <button data-testid="tenant-home-alert-scanner-settings" type="button" (click)="openAlertScannerSettings()" [appTooltip]="'Alert scanner settings' | translate" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a] [.light-theme_&]:!bg-transparent [.light-theme_&]:[transition:background-color_.16s_ease,box-shadow_.16s_ease,transform_.16s_ease] [.light-theme_&]:hover:!bg-[#cfe0f4] [.light-theme_&]:hover:!shadow-[inset_0_0_0_1px_#9bb7d8] [.light-theme_&]:hover:-translate-y-px [.light-theme_&]:focus-visible:!bg-[#bfd4ee] [.light-theme_&]:focus-visible:!shadow-[inset_0_0_0_1px_#8eadd2] [.light-theme_&]:focus-visible:!outline-none [.light-theme_&]:active:!bg-[#bfd4ee] [.light-theme_&]:active:!shadow-[inset_0_0_0_1px_#8eadd2]" (mouseenter)="setHomeToolHover('settings')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='settings' ? 'bg-[#cfe0f4]' : ''">
+                        <img alt="settings" src="assets/images/shared/settings.svg" class="ioc-action-icon ioc-action-icon--settings h-[18px] w-[18px] [.light-theme_&&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&&]:!opacity-[92%] [filter:brightness(0)_invert(1)] !opacity-100" />
                       </button>
-                      <button data-testid="tenant-home-scan-all" (click)="scanIOCs()" [appTooltip]="isPrivilegedIoc() ? iocPermissionWarning : ('scan all' | translate)" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent" [disabled]="isPrivilegedIoc()" (mouseenter)="setHomeToolHover('scan')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='scan' ? 'bg-[#cfe0f4]' : ''">
-                        <img alt="scan" height="20" ngSrc="../../../../assets/images/sidebar/theme/scanner.svg" width="20" class="ioc-action-icon" />
+                      <button data-testid="tenant-home-scan-all" (click)="scanIOCs()" [appTooltip]="isPrivilegedIoc() ? iocPermissionWarning : ('scan all' | translate)" class="ioc-action-btn inline-flex h-[30px] w-[30px] items-center justify-center rounded-[6px] bg-transparent p-0 hover:bg-[#fcfcfc1a] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent [.light-theme_&]:!bg-transparent [.light-theme_&]:[transition:background-color_.16s_ease,box-shadow_.16s_ease,transform_.16s_ease] [.light-theme_&]:hover:!bg-[#cfe0f4] [.light-theme_&]:hover:!shadow-[inset_0_0_0_1px_#9bb7d8] [.light-theme_&]:hover:-translate-y-px [.light-theme_&]:focus-visible:!bg-[#bfd4ee] [.light-theme_&]:focus-visible:!shadow-[inset_0_0_0_1px_#8eadd2] [.light-theme_&]:focus-visible:!outline-none [.light-theme_&]:active:!bg-[#bfd4ee] [.light-theme_&]:active:!shadow-[inset_0_0_0_1px_#8eadd2]" [disabled]="isPrivilegedIoc()" (mouseenter)="setHomeToolHover('scan')" (mouseleave)="setHomeToolHover(null)" [ngClass]="isLightTheme() && hoveredHomeTool==='scan' ? 'bg-[#cfe0f4]' : ''">
+                        <img alt="scan" height="20" ngSrc="../../../../assets/images/sidebar/theme/scanner.svg" width="20" class="ioc-action-icon [.light-theme_&&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&&]:!opacity-[92%]" />
                       </button>
                     }
                   </div>
@@ -44,17 +44,17 @@
           }
           <div>
             @if (licenseService.isMaintainer() ) {
-              <div class="ioc-summary-bar flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[16px] py-[10px] max-[620px]:flex-wrap max-[620px]:gap-2 max-[620px]:px-[12px] max-[620px]:py-[12px]">
+              <div class="ioc-summary-bar flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-800)] px-[16px] py-[10px] max-[620px]:flex-wrap max-[620px]:gap-2 max-[620px]:px-[12px] max-[620px]:py-[12px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-[linear-gradient(180deg,#fff_0%,#f8fbff_100%)] [.light-theme_&]:!shadow-[0_6px_16px_rgba(15,23,42,0.08)]">
                 <div>
                   <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'IOC’s' | translate }}</div>
                   <div class="text-[12px] text-[var(--color-text4)]">{{ 'Monitored entities and filters' | translate }}</div>
                 </div>
                 <div class="flex items-center gap-[8px] max-[620px]:w-full max-[620px]:justify-between">
-                  <button class="ioc-entity-pill inline-flex h-[30px] items-center rounded-[7px] border border-[#57a5eb4a] bg-[#57a5eb1a] px-[10px] text-[12px] font-medium text-[#8bc6f7] max-[620px]:flex-1 max-[620px]:justify-center">
+                  <button class="ioc-entity-pill inline-flex h-[30px] items-center rounded-[7px] border border-[#57a5eb4a] bg-[#57a5eb1a] px-[10px] text-[12px] font-medium text-[#8bc6f7] max-[620px]:flex-1 max-[620px]:justify-center [.light-theme_&]:!border-[#bfdbfe] [.light-theme_&]:!bg-[#eff6ff] [.light-theme_&]:!text-[#2563eb]">
                     {{ 'Entity (' | translate }}{{ entityFiltersCount() }})
                   </button>
-                  <button class="ioc-edit-btn inline-flex h-[30px] items-center gap-[6px] rounded-[7px] border border-[var(--color-border)] bg-[#fcfcfc12] px-[11px] text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[#fcfcfc1f] max-[620px]:flex-1 max-[620px]:justify-center" (click)="editIocs()">
-                    <img alt="edit-icon" src="assets/images/shared/theme/edit.svg" class="ioc-edit-icon h-[12px] w-[12px]">
+                  <button class="ioc-edit-btn inline-flex h-[30px] items-center gap-[6px] rounded-[7px] border border-[var(--color-border)] bg-[#fcfcfc12] px-[11px] text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[#fcfcfc1f] max-[620px]:flex-1 max-[620px]:justify-center [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#334155] [.light-theme_&]:hover:!bg-[#f8fafc]" (click)="editIocs()">
+                    <img alt="edit-icon" src="assets/images/shared/theme/edit.svg" class="ioc-edit-icon h-[12px] w-[12px] [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&]:!opacity-[92%]">
                     {{ 'Edit' | translate }}
                   </button>
                 </div>
@@ -66,48 +66,48 @@
               }
             }
             <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[12px]">
-              <div class="risk-summary-card risk-summary-card--critical rounded-[8px] border border-[var(--color-border)] px-[16px] py-[14px]" [ngClass]="'bg-[#ff4c4c1a]'">
+              <div class="risk-summary-card risk-summary-card--critical rounded-[8px] border border-[var(--color-border)] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#f1b3b8] [.light-theme_&]:!bg-[linear-gradient(180deg,#ffe7e9_0%,#fff8f8_100%)]" [ngClass]="'bg-[#ff4c4c1a]'">
                 <div class="flex items-center justify-between">
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">
                     {{ criticalRisks }}
                   </div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total critical alert types' | translate" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px] [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&]:!opacity-[92%]" [appTooltip]="'Total critical alert types' | translate" />
                 </div>
                 <div class="text-[16px] font-semibold text-[#ff4c4c]">
                   {{ 'Critical Alerts' | translate }}
                 </div>
               </div>
-              <div class="risk-summary-card risk-summary-card--high rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px]">
+              <div class="risk-summary-card risk-summary-card--high rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#f3d09e] [.light-theme_&]:!bg-[linear-gradient(180deg,#fff3e2_0%,#fffaf3_100%)]">
                 <div class="flex items-center justify-between">
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ highRisks }}</div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total high risk alert types' | translate" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px] [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&]:!opacity-[92%]" [appTooltip]="'Total high risk alert types' | translate" />
                 </div>
                 <div class="text-[16px] font-semibold text-[#ffb347]">{{ 'High Risk Alerts' | translate }}</div>
               </div>
-              <div class="risk-summary-card risk-summary-card--medium rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px]">
+              <div class="risk-summary-card risk-summary-card--medium rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#e8dc98] [.light-theme_&]:!bg-[linear-gradient(180deg,#fffadf_0%,#fffdf3_100%)]">
                 <div class="flex items-center justify-between">
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ mediumRisks }}</div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total medium risk alert types' | translate" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px] [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&]:!opacity-[92%]" [appTooltip]="'Total medium risk alert types' | translate" />
                 </div>
                 <div class="text-[16px] font-semibold text-[#ffd966]">{{ 'Medium Risk' | translate }}</div>
               </div>
-              <div class="risk-summary-card risk-summary-card--low rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px]">
+              <div class="risk-summary-card risk-summary-card--low rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#b8ddc0] [.light-theme_&]:!bg-[linear-gradient(180deg,#e8f8eb_0%,#f7fdf8_100%)]">
                 <div class="flex items-center justify-between">
                   <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ lowRisks }}</div>
-                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px]" [appTooltip]="'Total low rish alert types' | translate" />
+                  <img src="assets/images/shared/theme/info-light.svg" alt="Critical Alert" class="summary-info-icon h-[18px] w-[18px] [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&]:!opacity-[92%]" [appTooltip]="'Total low rish alert types' | translate" />
                 </div>
                 <div class="text-[16px] font-semibold text-[#6ccf7e]">{{ 'Low Risk' | translate }}</div>
               </div>
             </div>
             <div class="mt-[15px] grid grid-cols-[repeat(auto-fit,minmax(340px,1fr))] gap-[16px] max-[760px]:grid-cols-1">
               @for (category of alertCategories; track category.categoryName) {
-                <div data-testid="tenant-home-alert-category-card" class="category-alert-card flex cursor-pointer flex-col gap-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[16px] hover:bg-[var(--color-blue-810)] max-[640px]:p-[12px]" [class.opacity-60]="!licenseService.canViewAlert(category.categoryName)" (click)="openAlerts(category.categoryName)">
+                <div data-testid="tenant-home-alert-category-card" class="category-alert-card flex cursor-pointer flex-col gap-[10px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[16px] hover:bg-[var(--color-blue-810)] max-[640px]:p-[12px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-[linear-gradient(180deg,#fff_0%,#f8fbff_100%)] [.light-theme_&]:!shadow-[0_6px_18px_rgba(15,23,42,0.08)] [.light-theme_&]:hover:!border-[#bfd0e4] [.light-theme_&]:hover:!bg-[#f8fbff]" [class.opacity-60]="!licenseService.canViewAlert(category.categoryName)" (click)="openAlerts(category.categoryName)">
                   <div class="flex items-center justify-between gap-[8px] max-[640px]:flex-wrap">
                     <div class="flex items-center gap-[6px] text-[16px] font-semibold max-[640px]:text-[14px]">
-                      <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="category-alert-icon h-[24px] w-[24px]">
+                      <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="category-alert-icon h-[24px] w-[24px] [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&]:!opacity-[92%]">
                       {{ category.categoryName.charAt(0).toUpperCase() + category.categoryName.slice(1) }}
                     </div>
-                    <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] category-risk-badge--critical': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] category-risk-badge--high': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] category-risk-badge--medium': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] category-risk-badge--low': category.risk.toLowerCase() === 'low', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700 category-risk-badge--unknown': !['critical', 'high', 'medium', 'low'].includes(category.risk.toLowerCase()) }">
+                    <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px] [.light-theme_&]:!border [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] [.light-theme_&]:!border-[#f3a7af]': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] [.light-theme_&]:!border-[#efcd97]': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] [.light-theme_&]:!border-[#e6d690]': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] [.light-theme_&]:!border-[#86efac] [.light-theme_&]:!bg-[#dcfce7] [.light-theme_&]:!text-[#166534] [.light-theme_&]:!font-semibold': category.risk.toLowerCase() === 'low', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': !['critical', 'high', 'medium', 'low'].includes(category.risk.toLowerCase()) }">
                       {{ category.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
                     </div>
                   </div>
@@ -123,7 +123,7 @@
                   </div>
                   <div class="mt-[6px] flex flex-wrap gap-[6px]">
                     @for (tag of category.tags; track tag) {
-                      <span class="category-alert-tag rounded-[100px] bg-[var(--color-tags)] px-[10px] py-[4px] text-[12px] font-normal text-[var(--color-text1)] max-[640px]:text-[11px]">{{ tag }}</span>
+                      <span class="category-alert-tag rounded-[100px] bg-[var(--color-tags)] px-[10px] py-[4px] text-[12px] font-normal text-[var(--color-text1)] max-[640px]:text-[11px] [.light-theme_&]:!border [.light-theme_&]:!border-[#c7d5e6] [.light-theme_&]:!bg-[#eef4fb] [.light-theme_&]:!text-[#334155] [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">{{ tag }}</span>
                     }
                   </div>
                 </div>

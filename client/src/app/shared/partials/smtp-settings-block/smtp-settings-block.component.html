@@ -1,8 +1,8 @@
 <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4" [ngClass]="isEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
   <div class="flex items-start justify-between gap-3">
     <div>
-      <div class="ui-section-title">{{ 'Network Configuration' | translate }}</div>
-      <div class="ui-section-description">{{ 'Mail delivery settings.' | translate }}</div>
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Network Configuration' | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Mail delivery settings.' | translate }}</div>
     </div>
     <div class="flex items-center gap-2">
       @if (!isEditing) {

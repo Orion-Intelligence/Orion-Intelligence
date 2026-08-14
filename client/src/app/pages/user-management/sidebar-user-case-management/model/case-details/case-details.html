@@ -3,7 +3,7 @@
     <app-case-details-skeleton></app-case-details-skeleton>
     } @else if (caseData) {
 
-    <div class="ui-page-container p-3 sm:p-5" data-testid="case-details-page" [@.disabled]="caseMotionDisabled">
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-3 sm:p-5" data-testid="case-details-page" [@.disabled]="caseMotionDisabled">
         <app-case-header-actions></app-case-header-actions>
 
         <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
@@ -42,7 +42,7 @@
     </div>
 
     } @else {
-    <div class="ui-page-container flex min-h-[70vh] items-center justify-center p-5">
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none flex min-h-[70vh] items-center justify-center p-5">
         <p class="text-[var(--color-text4)]">{{ 'Case not found' | translate }}</p>
     </div>
     }
