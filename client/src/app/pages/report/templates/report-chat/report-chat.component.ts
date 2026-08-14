@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
 import { CommonModule, NgClass, SlicePipe } from '@angular/common';
@@ -35,6 +35,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     ReportHeaderComponent,
     ChatWidgetComponent,
     ReportInteractionHostComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit, AfterViewInit {

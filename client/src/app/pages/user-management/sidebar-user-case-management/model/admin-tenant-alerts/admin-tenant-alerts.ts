@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
@@ -21,6 +21,7 @@ const ALL_TENANTS_OPTION = 'all';
   selector: 'app-admin-tenant-alerts',
   imports: [CommonModule, ExportChoiceModalComponent, TranslatePipe, UiDropdownComponent],
   host: { class: 'block mb-[100px]' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-tenant-alerts.html'
 })
 export class AdminTenantAlerts implements OnInit {

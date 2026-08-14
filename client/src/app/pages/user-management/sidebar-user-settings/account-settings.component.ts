@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
@@ -24,6 +24,7 @@ type SensitiveAction = 'twofa' | 'password' | 'recovery';
   selector: 'app-sidebar-profile-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective, TranslatePipe, RecoveryKeyPopupComponent, PasswordConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './account-settings.component.html'
 })
 export class AccountSettingsComponent implements OnInit {

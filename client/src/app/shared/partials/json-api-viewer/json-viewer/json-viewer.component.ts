@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
@@ -6,6 +6,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-json-viewer',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './json-viewer.component.html'
 })
 export class JsonViewerComponent {

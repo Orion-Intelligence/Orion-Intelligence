@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdditionalIdentifier, CaseEntity, CaseTag, SocialMediaProfile } from '../case.model';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-entity-details',
   imports: [CommonModule, FormsModule, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './entity-details.html'
 })
 export class EntityDetailsComponent implements OnChanges {

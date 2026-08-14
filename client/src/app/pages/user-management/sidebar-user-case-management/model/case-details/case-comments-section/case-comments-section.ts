@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ViewChild } from '@angular/core';
+import { Component, inject, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { ReportFeedbackCommentsComponent } from '../../../../../../shared/partials/report-interactions/report-feedback-comments/report-feedback-comments.component';
 import { ReportUserSidebarComponent } from '../../../../../../shared/partials/report-interactions/report-user-sidebar/report-user-sidebar.component';
 import { ReportFeedbackModel } from '../../../../../../shared/partials/report-interactions/models/report-feedback.model';
@@ -10,6 +10,7 @@ import { CaseDetailsStore } from '../case-details.store';
   selector: 'app-case-comments-section',
   imports: [CommonModule, ReportFeedbackCommentsComponent, ReportUserSidebarComponent],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-comments-section.html'
 })
 export class CaseCommentsSectionComponent {

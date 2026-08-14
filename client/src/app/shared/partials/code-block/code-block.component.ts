@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-code-block',
   standalone: true,
   templateUrl: './code-block.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     NgClass,
     TooltipDirective, TranslatePipe]

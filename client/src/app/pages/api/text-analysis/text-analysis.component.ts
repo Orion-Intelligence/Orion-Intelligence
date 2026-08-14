@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -40,6 +40,7 @@ type TextAnalysisResult = {
   standalone: true,
   imports: [FormsModule, NgClass, EmptyQueryComponent, ChatWidgetComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './text-analysis.component.html'
 })
 export class TextAnalysisComponent extends ValuePresentationBase implements OnInit {

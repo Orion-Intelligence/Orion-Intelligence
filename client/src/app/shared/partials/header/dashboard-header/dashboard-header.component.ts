@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-dashboard-header',
   standalone: true,
   imports: [FormsModule, ProfileComponent, NgClass, TitleCasePipe, NgOptimizedImage, SupportComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-header.component.html',
 })
 export class DashboardHeaderComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, OnInit, ViewChild, input } from '@angular/core';
+import { Component, ElementRef, HostListener, OnInit, ViewChild, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +18,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-home-search',
   standalone: true,
   imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, DemoTourComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './home-search.component.html',
 })
 export class HomeSearchComponent implements OnInit {

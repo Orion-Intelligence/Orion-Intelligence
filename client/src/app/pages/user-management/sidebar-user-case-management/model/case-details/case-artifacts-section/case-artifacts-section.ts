@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Case, CaseArtifact } from '../../case.model';
 import { ARTIFACT_REPORT_SOURCE_OPTIONS, ARTIFACT_TYPE_OPTIONS, SOURCE_TYPE_OPTIONS } from '../../case-management.defaults';
@@ -16,6 +16,7 @@ import { DatePickerComponent } from '../../../../../../shared/partials/filters/d
   imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe, DatePickerComponent],
   animations: [caseInlineMotion, caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-artifacts-section.html'
 })
 export class CaseArtifactsSectionComponent {

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output } from '@angular/core';
+import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/sidebar-shell.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
@@ -8,6 +8,7 @@ import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../model/cti
   selector: 'graph-sidebar',
   standalone: true,
   templateUrl: './sidebar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [SidebarShellComponent, TranslatePipe, FormsModule],
 })
 export class SidebarComponent implements OnInit, OnChanges {

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ApiService } from '../../../shared/services/api.service';
@@ -10,6 +10,7 @@ import { TenantIocSelectorComponent } from '../../../shared/partials/tenant-ioc-
 @Component({
   selector: 'app-sidebar-user-ioc',
   imports: [CommonModule, TenantIocSelectorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {

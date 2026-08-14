@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { popupAnimation } from '../../../../shared/animations/popup.animations';
 import { FocusDirective } from '../../../../shared/directive/focus.directive';
@@ -8,6 +8,7 @@ import { FocusDirective } from '../../../../shared/directive/focus.directive';
   standalone: true,
   imports: [FormsModule, FocusDirective],
   templateUrl: './takedown-rejection-popup.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [popupAnimation],
 })
 export class TakedownRejectionPopupComponent {

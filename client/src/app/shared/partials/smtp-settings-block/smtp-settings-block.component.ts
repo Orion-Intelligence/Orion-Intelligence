@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, ElementRef, EventEmitter, inject, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PasswordToggleDirective } from '../../directive/password-toggle.directive';
 import { SmtpSettingsForm } from './model/smtp-settings.model';
@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, FormsModule, PasswordToggleDirective, TranslatePipe],
   host: { class: 'block sm:col-span-2' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './smtp-settings-block.component.html'
 })
 export class SmtpSettingsBlockComponent implements OnChanges {

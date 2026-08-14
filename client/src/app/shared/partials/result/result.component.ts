@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, inject, input, output } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EmptyResultComponent } from '../empty-result/empty-result.component';
 import { FormsModule } from '@angular/forms';
@@ -37,6 +37,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   standalone: true,
   templateUrl: './result.component.html',
   animations: [fadeInDashboardItem, searchFilterAnimation],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent, ChatWidgetComponent, TranslatePipe],
 })
 export class ResultComponent implements OnInit, OnChanges {

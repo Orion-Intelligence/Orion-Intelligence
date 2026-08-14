@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, HostListener, NgZone, OnInit, OnDestroy, input, signal } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, HostListener, NgZone, OnInit, OnDestroy, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -17,6 +17,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-world-heatmap',
   imports: [HeatmapReportComponent, MapLoadingBadgesComponent, TranslatePipe],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './world-heatmap.component.html',
 })
 export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
@@ -238,7 +239,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     const title = legend.selectAll<SVGTextElement, any>('text.legend-title')
       .data([this.activeCategoryKey])
       .join('text')
-      .attr('class', 'legend-title')
+      .attr('class', 'legend-title [body.light-theme_&]:![fill:#1f2e47]')
       .attr('x', 0)
       .attr('y', 0)
       .attr('font-size', titleSize)
@@ -290,7 +291,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     legend.selectAll<SVGTextElement, number>('text.legend-tick-label')
       .data(ticks)
       .join(enter => enter.append('text')
-        .attr('class', 'legend-tick-label')
+        .attr('class', 'legend-tick-label [body.light-theme_&]:![fill:#1f2e47]')
         .attr('y', 8 + barH + 18)
         .attr('font-size', tickSize)
         .attr('font-weight', 500)
@@ -329,7 +330,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     labelG.selectAll<SVGTextElement, any>('text.map-type-text')
       .data([this.activeCategoryKey])
       .join('text')
-      .attr('class', 'map-type-text')
+      .attr('class', 'map-type-text [body.light-theme_&]:![fill:#1f2e47] [body.light-theme_&]:![filter:none]')
       .attr('x', 0)
       .attr('y', 0)
       .attr('dominant-baseline', 'middle')
@@ -372,6 +373,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
       .attr('d', this.path as any)
       .attr('class', this.countryClass)
       .classed('can-open-reports', this.canOpenReports())
+      .classed('cursor-pointer', this.canOpenReports())
+      .classed('cursor-default', !this.canOpenReports())
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
       .on('mousemove', (event: MouseEvent, d: any) => {
         this.onHoverMove(event, d); 
@@ -427,6 +430,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     const color = this.getColorScale();
     this.mapG.selectAll<SVGPathElement, any>('path.country')
       .classed('can-open-reports', this.canOpenReports())
+      .classed('cursor-pointer', this.canOpenReports())
+      .classed('cursor-default', !this.canOpenReports())
       .classed('has-data', (d: any) => this.getValueForFeature(d) != null)
       .classed('is-clickable', (d: any) => this.canOpenReports() && this.getValueForFeature(d) != null)
       .attr('fill', (d: any) => {
@@ -578,6 +583,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
     countries
       .classed('can-open-reports', this.canOpenReports())
+      .classed('cursor-pointer', this.canOpenReports())
+      .classed('cursor-default', !this.canOpenReports())
       .classed('has-data', (d: any) => getValueForFeature(d) != null)
       .classed('is-clickable', (d: any) => this.canOpenReports() && getValueForFeature(d) != null)
       .transition()

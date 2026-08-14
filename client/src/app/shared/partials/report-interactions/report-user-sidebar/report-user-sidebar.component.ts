@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ApiService } from '../../../services/api.service';
 import { PublicUserData } from '../models/public-user-data.model';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   selector: 'app-report-user-sidebar',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './report-user-sidebar.component.html',
 })
 export class ReportUserSidebarComponent {

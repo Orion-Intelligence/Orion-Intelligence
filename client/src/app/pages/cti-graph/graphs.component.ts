@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, Inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Edge, Network } from 'vis-network';
@@ -30,6 +30,7 @@ type GraphNodeColor = NonNullable<ExtendedNode['color']>;
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, GraphAdvancedBuilderPopupComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {

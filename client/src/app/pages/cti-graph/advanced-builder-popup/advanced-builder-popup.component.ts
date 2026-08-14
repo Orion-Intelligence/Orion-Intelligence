@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { popupAnimation } from '../../../shared/animations/popup.animations';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
@@ -10,6 +10,7 @@ import { GraphAdvancedFilterModel, GraphSearchMode, GraphSearchOptionModel } fro
   standalone: true,
   imports: [FormsModule, TranslatePipe, UiDropdownComponent],
   templateUrl: './advanced-builder-popup.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [popupAnimation],
 })
 export class GraphAdvancedBuilderPopupComponent {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ReportFeedbackCommentModel, ReportFeedbackModel } from '../models/report-feedback.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -11,6 +11,7 @@ import { ConfirmationPopupComponent } from '../../confirmation-popup/confirmatio
   selector: 'app-report-feedback-comments',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe, ConfirmationPopupComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './report-feedback-comments.component.html',
 })
 export class ReportFeedbackCommentsComponent implements OnChanges {

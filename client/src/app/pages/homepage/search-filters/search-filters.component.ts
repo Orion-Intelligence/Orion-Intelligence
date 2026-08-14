@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ViewChild, ElementRef, OnInit, input, output } from '@angular/core';
+import { Component, ViewChild, ElementRef, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { AppService } from '../../../services/core/app/app.service';
@@ -14,6 +14,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [FormsModule, CommonModule, TranslatePipe],
   templateUrl: './search-filters.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [searchFilterAnimation],
 })
 export class SearchFiltersComponent implements OnInit {

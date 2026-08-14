@@ -1,4 +1,4 @@
-import { Component, effect, signal } from '@angular/core';
+import { Component, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationCancel, NavigationEnd, NavigationError, RouteConfigLoadEnd, RouteConfigLoadStart, Router, RouterOutlet } from '@angular/router';
 import { ErrorStoreService } from './services/error-store.service';
 import { filter, map, Observable } from 'rxjs';
@@ -16,6 +16,7 @@ import { LoadingService } from '../../shared/services/loading.service';
   standalone: true,
   imports: [RouterOutlet, MessageNotificationComponent, LoaderComponent, TrailNotificationComponent, TranslatePipe],
   templateUrl: './app.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [appAnimation, quotaBannerAnimation],
 })
 export class AppComponent {

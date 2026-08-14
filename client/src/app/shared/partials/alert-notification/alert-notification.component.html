@@ -46,7 +46,7 @@
       @if (isAlertMode() && alertNotifications.length>0) {
         <div class="notification-stagger-list space-y-3">
           @for (n of alertNotifications; track n.hash) {
-            <div class="notif-stagger-item my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors hover:bg-[var(--color-blue-810)]">
+            <div class="animate-notif-stagger-in my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors will-change-[opacity,transform] hover:bg-[var(--color-blue-810)]">
               <div class="flex items-center justify-between">
                 <span class="font-[Inter] text-[16px] font-medium text-[var(--color-text1)]">{{ n.categoryName.charAt(0).toUpperCase() + n.categoryName.slice(1) }}</span>
                 <span class="rounded-full border border-[var(--color-border)] px-2 py-1 font-[Inter] text-[12px] font-semibold" [ngClass]="{ 'bg-[rgb(255,0,0,0.15)] text-[#ff4d4f]': n.risk.toLowerCase() === 'critical', 'bg-[rgb(255,165,0,0.15)] text-[#f59e0b]': n.risk.toLowerCase() === 'high', 'bg-[rgb(255,215,0,0.15)] text-[#facc15]': n.risk.toLowerCase() === 'medium', 'bg-[rgb(0,255,0,0.15)] text-[#4ade80]': n.risk.toLowerCase() === 'low' }">

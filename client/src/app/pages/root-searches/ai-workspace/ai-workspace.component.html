@@ -98,7 +98,7 @@
                       } @else {
                       @for (message of messages; track trackMessage($index, message)) {
                       @if (message.sender === 'bot') {
-                      <div data-testid="ai-message-bot" [attr.data-ai-message-index]="$index" class="mx-auto flex w-full min-w-0 max-w-[980px] justify-start [animation:ui-ai-chat-row-in_180ms_ease-out]">
+                      <div data-testid="ai-message-bot" [attr.data-ai-message-index]="$index" class="mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in justify-start">
                         <div class="min-w-0 max-w-full space-y-1.5">
                           @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
                           <div class="flex min-h-[20px] items-center gap-2 px-4">
@@ -127,7 +127,7 @@
                         </div>
                       </div>
                       } @else if (message.sender === 'user') {
-                      <div data-testid="ai-message-user" [attr.data-ai-message-index]="$index" class="ui-ai-user-message-turn mx-auto flex w-full min-w-0 max-w-[980px] justify-end [animation:ui-ai-chat-row-in_180ms_ease-out]">
+                      <div data-testid="ai-message-user" [attr.data-ai-message-index]="$index" class="ui-ai-user-message-turn mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in justify-end">
                         <div class="max-[640px]:w-full" [ngClass]="editingMessageId === message.id ? 'w-full max-w-full space-y-1' : 'max-w-[72%] space-y-1.5 max-[640px]:max-w-full'">
                           @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
                           <div class="flex items-center justify-end gap-2" [ngClass]="editingMessageId === message.id ? 'min-h-4 px-0' : 'min-h-[20px] px-1'">
@@ -184,7 +184,7 @@
                         </div>
                       </div>
                       } @else {
-                      <div data-testid="ai-message-error" [attr.data-ai-message-index]="$index" class="mx-auto flex w-full min-w-0 max-w-[980px] justify-start [animation:ui-ai-chat-row-in_180ms_ease-out]">
+                      <div data-testid="ai-message-error" [attr.data-ai-message-index]="$index" class="mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in justify-start">
                         <div class="min-w-0 max-w-full space-y-1 max-[640px]:w-full">
                           <div class="flex min-h-[20px] items-center gap-2 px-1">
                             <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{
@@ -206,7 +206,7 @@
                       }
 
                       @if (isActiveChatSending) {
-                      <div class="mx-auto flex w-full min-w-0 max-w-[980px] justify-start [animation:ui-ai-chat-row-in_180ms_ease-out]">
+                      <div class="mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in justify-start">
                         <div class="min-w-0 max-w-full space-y-1.5">
                           <div class="flex min-h-[20px] items-center gap-2 px-4">
                             <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{
@@ -226,7 +226,7 @@
                                 nexusStep() }}</span>
                               }
                               <div role="progressbar" aria-label="Nexus response in progress" class="relative overflow-hidden h-1 w-full rounded-full bg-white/[0.07]">
-                                <span class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] after:[animation:ui-progress-sweep-primary_1.3s_linear_infinite] [&&]:after:w-[36%] [&&]:after:[animation:ui-ai-chat-progress-sweep_1s_linear_infinite] after:[backface-visibility:hidden] after:will-change-[transform,opacity]" aria-hidden="true"></span>
+                                <span class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:animate-ai-chat-progress-sweep after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] [&&]:after:w-[36%] after:[backface-visibility:hidden] after:will-change-[transform,opacity]" aria-hidden="true"></span>
                               </div>
                             </div>
                           </div>

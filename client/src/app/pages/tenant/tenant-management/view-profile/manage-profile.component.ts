@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../shared/services/api.service';
 import { HttpHeaders } from '@angular/common/http';
@@ -21,6 +21,7 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partia
   selector: 'app-view-profile',
   imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective, TranslatePipe, UiDropdownComponent],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './manage-profile.component.html',
 })
 export class ManageProfileComponent implements OnInit {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './shodan-section.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class ShodanSectionComponent {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AlertWebhookSettingsForm } from './model/alert-webhook-settings.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   imports: [CommonModule, FormsModule, TranslatePipe],
   host: { class: 'block sm:col-span-2' },
   templateUrl: './alert-webhook-settings-block.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./alert-webhook-settings-block.component.scss']
 })
 export class AlertWebhookSettingsBlockComponent {

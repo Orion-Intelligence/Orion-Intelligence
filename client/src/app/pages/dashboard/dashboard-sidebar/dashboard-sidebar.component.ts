@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, output } from '@angular/core';
+import { Component, OnDestroy, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -21,6 +21,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-dashboard-sidebar',
   standalone: true,
   imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {

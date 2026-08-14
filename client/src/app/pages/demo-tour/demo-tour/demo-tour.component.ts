@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { DemoTourService } from '../services/demo.tour.service';
 import { RenderedGeometry } from '../model/rendered-geometry.interface';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-demo-tour',
   imports: [TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './demo-tour.component.html'
 })
 export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {

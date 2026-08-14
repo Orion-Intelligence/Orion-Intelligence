@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { SatelliteIntelPanel, SatelliteIntelPanelEnum } from '../../../enums/geo-fencing.enums';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
@@ -12,6 +12,7 @@ const PANEL_TABS: Array<{ id: SatelliteIntelPanel; label: string }> = [
   selector: 'app-satellite-panel-shell',
   imports: [NgClass, TranslatePipe],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './panel-shell.component.html',
 })
 export class PanelShellComponent {

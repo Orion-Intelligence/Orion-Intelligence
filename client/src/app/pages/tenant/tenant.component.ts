@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgClass } from '@angular/common';
 import { TenantModel, TenantStatusValues } from '../../shared/model/tenant/tenant.model';
@@ -13,6 +13,7 @@ import { TenantIocSelectorComponent } from '../../shared/partials/tenant-ioc-sel
 @Component({
   selector: 'app-tenant',
   imports: [FormsModule, CommonModule, NgClass, HeaderComponent, TranslatePipe, TenantIocSelectorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './tenant.component.html'
 })
 export class TenantComponent implements OnInit {

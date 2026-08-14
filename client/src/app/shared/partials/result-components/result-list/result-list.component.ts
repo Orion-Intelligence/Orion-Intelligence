@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 
 import { fadeInDashboardItem } from '../../../animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -8,6 +8,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
   standalone: true,
   imports: [TranslatePipe],
   templateUrl: './result-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem]
 })
 export class ResultListComponent {

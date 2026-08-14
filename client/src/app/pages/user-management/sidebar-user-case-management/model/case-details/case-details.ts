@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, forwardRef, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, forwardRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { ReportFeedbackModel } from '../../../../../shared/partials/report-interactions/models/report-feedback.model';
@@ -48,6 +48,7 @@ import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat
     { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
   ],
   animations: [caseSectionMotion],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-details.html',
 })
 export class CaseDetails extends CaseDetailsStore implements OnInit {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { Case } from '../../case.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
@@ -12,6 +12,7 @@ import { CaseDetailsStore } from '../case-details.store';
   imports: [CommonModule, TooltipDirective, TranslatePipe],
   animations: [caseInlineMotion],
   host: { class: 'contents' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-header-actions.html'
 })
 export class CaseHeaderActionsComponent {

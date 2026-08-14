@@ -1,4 +1,4 @@
-import { Component, ElementRef, signal, ViewChild } from '@angular/core';
+import { Component, ElementRef, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -28,6 +28,7 @@ type ScannerResultSection = { title: string; items: ScannerResultItem[] };
     NgOptimizedImage,
     TooltipDirective,
     FormsModule, TranslatePipe, ExportChoiceModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './file-scanner.component.html'
 })
 export class FileScannerComponent {

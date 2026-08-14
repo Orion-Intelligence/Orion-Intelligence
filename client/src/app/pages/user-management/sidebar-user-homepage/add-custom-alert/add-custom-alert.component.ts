@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, input, output } from '@angular/core';
+import { Component, HostListener, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlertAllIoc, AlertModel } from '../../../../shared/model/company-profile/node.model';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
   selector: 'app-add-custom-alert',
   imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './add-custom-alert.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [overlayAnimation, popupAnimation],
 })
 export class AddCustomAlertComponent implements OnInit {

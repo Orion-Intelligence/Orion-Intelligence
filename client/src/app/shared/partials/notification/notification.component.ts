@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeaderComponent } from '../header/login-header/header.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-notification',
   standalone: true,
   imports: [HeaderComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './notification.component.html'
 })
 export class NotificationComponent {

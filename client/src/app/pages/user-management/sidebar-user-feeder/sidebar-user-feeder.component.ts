@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
@@ -17,6 +17,7 @@ import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../social-cti/constants/social
   standalone: true,
   imports: [NgClass, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent, TranslatePipe, UiDropdownComponent],
   templateUrl: './sidebar-user-feeder.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class SidebarUserFeederComponent implements OnInit {

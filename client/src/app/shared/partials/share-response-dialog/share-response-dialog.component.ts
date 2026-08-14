@@ -1,5 +1,5 @@
 import { CommonModule, DOCUMENT } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../services/result-row-helper.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -25,6 +25,7 @@ const SHARE_DESTINATIONS: ShareDestination[] = [
   selector: 'app-share-response-dialog',
   standalone: true,
   imports: [CommonModule, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './share-response-dialog.component.html',
 })
 export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {

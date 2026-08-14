@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -18,6 +18,7 @@ import { AdminTenantAlerts } from './model/admin-tenant-alerts/admin-tenant-aler
 @Component({
   selector: 'app-sidebar-user-case-management',
   imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe, CaseDialog, CaseFilterRowComponent, CaseAnalyticsPanel, AdminTenantAlerts],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-case-management.html'
 })
 export class SidebarUserCaseManagement implements OnInit {

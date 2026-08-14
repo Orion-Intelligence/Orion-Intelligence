@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, SimpleChanges, ViewChild } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { ReportFeedbackCommentsComponent } from '../report-feedback-comments/report-feedback-comments.component';
 import { ReportFeedbackComponent } from '../report-feedback/report-feedback.component';
@@ -12,6 +12,7 @@ type FeedbackAction = 'recommended' | 'trust' | 'untrust';
   selector: 'app-report-interaction-host',
   standalone: true,
   imports: [CommonModule, ReportFeedbackComponent, ReportFeedbackCommentsComponent, ReportUserSidebarComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './report-interaction-host.component.html',
 })
 export class ReportInteractionHostComponent implements OnChanges {

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 
@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector: 'app-sidebar-user-feeder-owner-dialog',
   standalone: true,
   imports: [FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-feeder-owner-dialog.component.html',
 })
 export class SidebarUserFeederOwnerDialogComponent implements OnChanges {

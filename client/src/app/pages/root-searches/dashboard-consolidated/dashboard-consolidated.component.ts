@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, computed, OnInit, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -41,6 +41,7 @@ import { ExternalConsolidatedFeedService } from './services/external-consolidate
   standalone: true,
   imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultAptComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
   templateUrl: './dashboard-consolidated.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [scanAnimation, fadeInDashboardItem],
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {

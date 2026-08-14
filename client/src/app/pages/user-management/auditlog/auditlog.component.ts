@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
@@ -22,6 +22,7 @@ import { GraphReportPayload } from '../../../shared/model/report/report-export.m
 @Component({
   selector: 'app-auditlog',
   imports: [FormsModule, PaginationComponent, AsyncPipe, AuditlogListComponent, FiltersComponent, NgOptimizedImage, NgClass, TranslatePipe, ChatWidgetComponent, ExportChoiceModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './auditlog.component.html'
 })
 export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackModel> {

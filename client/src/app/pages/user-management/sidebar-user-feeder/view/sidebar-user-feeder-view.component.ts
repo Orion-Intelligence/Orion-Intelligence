@@ -1,5 +1,5 @@
 import { DatePipe, NgClass } from '@angular/common';
-import { Component, HostListener, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, HostListener, Input, OnChanges, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 
 import { FeederScriptItem, FeederValueItem } from '../model/feeder.model';
@@ -19,6 +19,7 @@ type SortColumn = 'file' | 'owner' | 'path' | 'active' | 'status' | 'lastSuccess
   selector: 'app-sidebar-user-feeder-view',
   standalone: true,
   imports: [NgClass, DatePipe, PaginationComponent, ConfirmationPopupComponent, ScrollTopComponent, SidebarUserFeederOwnerDialogComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-feeder-view.component.html',
 })
 export class SidebarUserFeederViewComponent implements OnChanges {

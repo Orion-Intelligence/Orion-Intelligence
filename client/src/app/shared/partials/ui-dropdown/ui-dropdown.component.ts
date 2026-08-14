@@ -1,6 +1,6 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { Component, ElementRef, HostListener, OnDestroy, ViewChild, input, output } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface UiDropdownOption {
@@ -22,6 +22,7 @@ interface UiDropdownMenuOption {
   host: {
     class: 'block',
   },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ui-dropdown.component.html',
 })
 export class UiDropdownComponent implements OnDestroy {

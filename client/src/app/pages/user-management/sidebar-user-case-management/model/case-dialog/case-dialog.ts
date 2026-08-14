@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { Case, CaseAnalyst } from '../case.model';
@@ -8,6 +8,7 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/par
   selector: 'app-case-dialog',
   standalone: true,
   imports: [UiDropdownComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-dialog.html',
 })
 export class CaseDialog implements OnChanges {

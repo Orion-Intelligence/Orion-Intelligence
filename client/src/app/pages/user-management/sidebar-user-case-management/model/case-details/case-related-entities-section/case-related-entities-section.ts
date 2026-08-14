@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { Case, CaseEntity } from '../../case.model';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { EntityDetailsComponent } from '../../entity-details/entity-details';
@@ -14,6 +14,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
   imports: [CommonModule, EntityDetailsComponent, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-related-entities-section.html'
 })
 export class CaseRelatedEntitiesSectionComponent {

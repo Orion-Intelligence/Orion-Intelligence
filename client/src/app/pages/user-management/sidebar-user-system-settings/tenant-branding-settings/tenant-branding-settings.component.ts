@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
@@ -22,6 +22,7 @@ const DEFAULT_SYSTEM_ASSETS: Record<SystemResourceKey, string> = {
   selector: 'app-tenant-branding-settings',
   standalone: true,
   imports: [CommonModule, FormsModule, UserImagePickerComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './tenant-branding-settings.component.html'
 })
 export class TenantBrandingSettingsComponent implements OnInit {

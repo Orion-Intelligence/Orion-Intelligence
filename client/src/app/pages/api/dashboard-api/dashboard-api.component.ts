@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgClass, NgOptimizedImage, UpperCasePipe } from '@angular/common';
@@ -24,6 +24,7 @@ import { DASHBOARD_API_EXPORT_OPTIONS } from '../../../shared/model/report/expor
   selector: 'app-dashboard-api',
   imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe, ExportChoiceModalComponent],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-api.component.html'
 })
 export class DashboardApiComponent extends ValuePresentationBase implements OnInit {

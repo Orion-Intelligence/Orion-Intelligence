@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { ReportFeedbackModel } from '../models/report-feedback.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
 
@@ -10,6 +10,7 @@ type FeedbackAction = 'recommended' | 'trust' | 'untrust';
   selector: 'app-report-feedback',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './report-feedback.component.html',
 })
 export class ReportFeedbackComponent {

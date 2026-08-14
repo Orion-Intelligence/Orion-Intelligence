@@ -1,4 +1,4 @@
-import { Component, HostListener, input, output } from '@angular/core';
+import { Component, HostListener, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { PasswordSchemaFilter } from '../../../../shared/model/stealerlogs-filter/stealerlogs-filters';
@@ -8,6 +8,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-password-schema',
   imports: [FormsModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './password-schema.component.html'
 })
 export class PasswordSchemaComponent {

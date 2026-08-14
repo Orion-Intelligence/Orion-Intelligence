@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { JsonApiViewerComponent } from '../../../../shared/partials/json-api-viewer/json-api-viewer.component';
@@ -17,6 +17,7 @@ import { TakedownActionComponent } from '../../../../shared/partials/takedown-ac
 @Component({
   selector: 'app-report-defacement',
   templateUrl: './report-defacement.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     DatePipe,

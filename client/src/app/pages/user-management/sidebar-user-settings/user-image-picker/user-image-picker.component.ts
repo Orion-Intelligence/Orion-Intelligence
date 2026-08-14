@@ -1,10 +1,11 @@
-import { Component, effect, input, output } from '@angular/core';
+import { Component, effect, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-image-picker',
   imports: [NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent {

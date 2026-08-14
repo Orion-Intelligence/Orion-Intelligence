@@ -1,4 +1,4 @@
-import { Component, OnInit, output } from '@angular/core';
+import { Component, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
@@ -16,6 +16,7 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partia
   selector: 'app-add-tenant',
   imports: [FormsModule, NgClass, PasswordToggleDirective, TranslatePipe, UiDropdownComponent],
   templateUrl: './add-tenant.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [popupAnimation, overlayAnimation]
 })
 export class AddTenantComponent implements OnInit {

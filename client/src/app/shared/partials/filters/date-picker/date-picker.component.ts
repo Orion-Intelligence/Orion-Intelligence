@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnChanges, input, output } from '@angular/core';
+import { Component, HostListener, OnChanges, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CalendarCell } from './model/calendar-cell.model';
 import { FilterModel } from '../../../model/filter/filter.model';
 import { TranslatePipe } from '../../../pipes/translate.pipe';
@@ -10,6 +10,7 @@ type DatePickerSelectionMode = 'range' | 'single';
   selector: 'app-date-picker',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './date-picker.component.html',
 })
 export class DatePickerComponent implements OnChanges {

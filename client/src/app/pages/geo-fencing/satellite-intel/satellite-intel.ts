@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -31,6 +31,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector:    'app-satellite-intel',
   templateUrl: './satellite-intel.html',
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     GeocodeModalComponent,

@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 import { Case, CaseEntity, CaseEntityRequest, CaseRequest, CaseTag } from '../case.model';
 import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../case-management.defaults';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-add-new-case',
   imports: [CommonModule, FormsModule, EntityDetailsComponent, CaseEditDrawerComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-new-case.html'
 })
 export class AddNewCase {

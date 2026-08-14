@@ -89,7 +89,7 @@
             }
 
             @if (!isChatEmpty(chat) && !isChatBusy(chat) && openedSessionMenuId === chat.sessionId) {
-            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px] origin-bottom-right [animation-name:ui-ai-chat-dropdown-above-in]' : 'top-[44px]'" class="absolute right-[5px] z-[999] w-[176px] origin-top-right overflow-visible rounded-[9px] border border-slate-200 !bg-slate-50 p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5 [animation:ui-profile-dropdown-in_160ms_cubic-bezier(0.16,1,0.3,1)_both] will-change-[opacity,transform] motion-reduce:animate-none">
+            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'animate-ai-chat-dropdown-above-in bottom-[44px] origin-bottom-right' : 'top-[44px] [animation:ui-profile-dropdown-in_160ms_cubic-bezier(0.16,1,0.3,1)_both]'" class="absolute right-[5px] z-[999] w-[176px] origin-top-right overflow-visible rounded-[9px] border border-slate-200 !bg-slate-50 p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5 will-change-[opacity,transform] motion-reduce:animate-none">
               @if (shouldOpenMenuAbove(chat)) {
               <span class="pointer-events-none absolute bottom-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-slate-50" aria-hidden="true"></span>
               } @else {

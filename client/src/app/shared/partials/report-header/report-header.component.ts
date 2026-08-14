@@ -1,4 +1,4 @@
-import { Component, HostListener, ViewChild, inject, input, output, signal } from '@angular/core';
+import { Component, HostListener, ViewChild, inject, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass, NgOptimizedImage } from '@angular/common';
 import { HelperService } from '../../services/helper.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -22,6 +22,7 @@ import { ReportRouteUtil } from '../../utils/report-route.util';
   selector: 'app-report-header',
   standalone: true,
   imports: [NgOptimizedImage, NgClass, TooltipDirective, ExportChoiceModalComponent, AiSummaryComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './report-header.component.html',
 })
 export class ReportHeaderComponent {

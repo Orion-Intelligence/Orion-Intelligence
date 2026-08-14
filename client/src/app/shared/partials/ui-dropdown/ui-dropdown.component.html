@@ -33,10 +33,10 @@
         </div>
       } @else {
       @for (option of visibleOptions; track option.trackKey; let index = $index) {
-        <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isOptionVisuallySelected(option.key)" class="relative mt-1 flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs transition first:mt-0" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
-          @if (index > 0) {
-            <span class="pointer-events-none absolute left-0 right-0 top-[-1px] h-px" [ngClass]="isLightTheme() ? 'bg-[#e2e8f0]' : 'bg-white/[0.06]'"></span>
-          }
+        @if (index > 0) {
+          <div aria-hidden="true" class="my-[3px] h-px w-full" [ngClass]="isLightTheme() ? 'bg-[#e2e8f0]' : 'bg-white/[0.06]'"></div>
+        }
+        <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isOptionVisuallySelected(option.key)" class="relative flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs transition" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
           @if (multiSelect()) {
             <span class="mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border" [ngClass]="checkboxClass()">
               @if (isOptionVisuallySelected(option.key)) {

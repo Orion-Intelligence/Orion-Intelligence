@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Case, CaseLink } from '../../case.model';
 import { CASE_LINK_RELATIONSHIP_OPTIONS } from '../../case-management.defaults';
@@ -15,6 +15,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
   imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-linked-cases-section.html'
 })
 export class CaseLinkedCasesSectionComponent {

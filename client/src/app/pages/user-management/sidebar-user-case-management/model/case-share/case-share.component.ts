@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { AppService } from '../../../../../services/core/app/app.service';
@@ -16,6 +16,7 @@ import { GraphReportPayload } from '../../../../../shared/model/report/report-ex
 @Component({
   selector: 'app-case-share',
   imports: [CommonModule, TranslatePipe, ExportChoiceModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-share.component.html',
 })
 export class CaseShareComponent implements OnInit, OnDestroy {

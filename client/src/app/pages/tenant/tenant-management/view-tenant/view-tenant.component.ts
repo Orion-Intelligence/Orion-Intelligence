@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -20,6 +20,7 @@ import { AppService } from '../../../../services/core/app/app.service';
   standalone: true,
   imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent, TenantIocSelectorComponent, ConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './view-tenant.component.html',
 })
 export class ViewTenantComponent implements OnInit {

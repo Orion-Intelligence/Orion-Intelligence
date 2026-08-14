@@ -1,10 +1,11 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../model/cti-graph.model';
 @Component({
   selector: 'app-cti-sidebar',
   standalone: true,
   imports: [SidebarComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `<graph-sidebar class="block h-full min-h-0"
     [filters]="filters()"
     [stats]="stats()"

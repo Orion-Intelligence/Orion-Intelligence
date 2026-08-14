@@ -1,5 +1,5 @@
 import { CommonModule, NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
@@ -25,6 +25,7 @@ const SCAN_REPORT_EXPORT_OPTIONS = buildStandardExportOptions('scan-report-expor
   standalone: true,
   imports: [CommonModule, NgClass, TooltipDirective, ExportChoiceModalComponent, TranslatePipe, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
   templateUrl: './scan-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class ScanReportComponent extends ValuePresentationBase implements OnInit {

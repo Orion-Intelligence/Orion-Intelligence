@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, OnChanges, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
@@ -14,6 +14,7 @@ import { downloadIocCsvTemplate, IOC_CSV_MAX_FILE_SIZE_BYTES, isCsvFile, mergeIo
   selector: 'app-tenant-ioc-selector',
   standalone: true,
   imports: [CommonModule, FormsModule, TooltipDirective, ConfirmationPopupComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './tenant-ioc-selector.component.html',
 })
 export class TenantIocSelectorComponent implements OnChanges {

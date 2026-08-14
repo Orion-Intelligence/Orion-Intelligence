@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -17,6 +17,7 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [NgClass, DatePipe, TooltipDirective, TranslatePipe, RecordSidebarComponent],
   templateUrl: './dashboard-result-defacement.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultDefacementComponent implements OnInit, AfterViewInit, OnDestroy {

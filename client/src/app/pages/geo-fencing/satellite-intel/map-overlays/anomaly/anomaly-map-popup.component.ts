@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { SatelliteAnomalyResponse } from '../../model/satellite-intel-api.models';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector:    'app-anomaly-map-popup',
   standalone:  true,
   imports:     [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './anomaly-map-popup.component.html',
 })
 export class AnomalyMapPopupComponent {

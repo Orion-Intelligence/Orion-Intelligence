@@ -1,4 +1,4 @@
-import { Component, DestroyRef, input, signal } from '@angular/core';
+import { Component, DestroyRef, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   imports: [TranslatePipe],
   standalone: true,
   templateUrl: './ai-summary.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class AiSummaryComponent {

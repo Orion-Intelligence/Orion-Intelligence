@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, SimpleChanges, input } from '@angular/core';
+import { Component, OnChanges, OnDestroy, SimpleChanges, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
@@ -22,6 +22,7 @@ interface CreditCardField {
   standalone: true,
   imports: [NgClass, TooltipDirective, TranslatePipe, ConfirmationPopupComponent],
   templateUrl: './expanded-row.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./expanded-row.component.scss'],
 })
 export class ExpandedRowComponent implements OnChanges, OnDestroy {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, SimpleChanges, effect, input, output, signal } from '@angular/core';
+import { Component, OnDestroy, SimpleChanges, effect, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { vulnerabilityContentMotion } from '../../../../shared/animations/vulnerability.content.motion.animation';
@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './dns-section.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem, vulnerabilityContentMotion],
 })
 export class DnsSectionComponent implements OnDestroy {

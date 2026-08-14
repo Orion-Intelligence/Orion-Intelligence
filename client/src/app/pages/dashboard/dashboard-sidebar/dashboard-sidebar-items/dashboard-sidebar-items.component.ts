@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector: 'app-dashboard-sidebar-items',
   standalone: true,
   imports: [NgClass, NgOptimizedImage, AsyncPipe, RouterLink, TooltipDirective, LowerPipe, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-sidebar-items.component.html',
 })
 export class DashboardSidebarItemsComponent {

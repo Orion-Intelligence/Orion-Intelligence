@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { LoadingService } from '../../services/loading.service';
 import { AsyncPipe, NgClass } from '@angular/common';
@@ -6,6 +6,7 @@ import { AsyncPipe, NgClass } from '@angular/common';
   selector: 'app-loader',
   standalone: true,
   templateUrl: './loader.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     AsyncPipe,
     NgClass

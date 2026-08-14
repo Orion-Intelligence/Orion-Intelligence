@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-case-edit-drawer',
   imports: [CommonModule, TranslatePipe],
   host: { class: 'contents' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-edit-drawer.html'
 })
 export class CaseEditDrawerComponent {

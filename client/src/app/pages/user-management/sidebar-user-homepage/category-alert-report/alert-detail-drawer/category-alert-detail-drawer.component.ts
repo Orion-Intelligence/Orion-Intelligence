@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, EventEmitter, Output } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CategoryAlerts } from '../../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { RawFindingRow } from '../../../../../shared/partials/alert-notification/model/raw-finding-row.model';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector: 'app-category-alert-detail-drawer',
   imports: [CommonModule, TranslatePipe],
   host: { class: 'contents' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './category-alert-detail-drawer.component.html',
 })
 export class CategoryAlertDetailDrawerComponent {

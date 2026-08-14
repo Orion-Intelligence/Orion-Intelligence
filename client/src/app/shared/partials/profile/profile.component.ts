@@ -1,4 +1,4 @@
-import { Component, HostListener, AfterViewInit, OnDestroy, signal, effect, output } from '@angular/core';
+import { Component, HostListener, AfterViewInit, OnDestroy, signal, effect, output, ChangeDetectionStrategy } from '@angular/core';
 import { NgOptimizedImage, NgClass } from "@angular/common";
 import { AuthService } from '../../../services/authetication/auth.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -20,6 +20,7 @@ type ThemeMode = 'dark-theme' | 'light-theme';
   selector: 'app-profile',
   standalone: true,
   imports: [NgOptimizedImage, TooltipDirective, NgClass, AlertNotificationComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './profile.component.html'
 })
 export class ProfileComponent implements AfterViewInit, OnDestroy {

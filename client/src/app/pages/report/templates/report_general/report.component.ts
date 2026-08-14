@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
 import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
@@ -26,6 +26,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector: 'app-result-panel',
   templateUrl: './report.component.html',
   imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class ReportComponent implements OnInit, AfterViewInit {

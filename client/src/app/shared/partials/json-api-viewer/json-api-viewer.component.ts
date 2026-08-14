@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, input } from '@angular/core';
+import { ChangeDetectorRef, Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { JsonViewerComponent } from './json-viewer/json-viewer.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -8,6 +8,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-json-api-viewer',
   standalone: true,
   imports: [CommonModule, NgClass, JsonViewerComponent, JsonViewerComponent, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './json-api-viewer.component.html',
 })
 export class JsonApiViewerComponent {

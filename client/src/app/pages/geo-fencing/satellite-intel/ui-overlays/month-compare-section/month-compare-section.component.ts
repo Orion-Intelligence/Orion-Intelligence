@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../model/satellite-intel.model';
 import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../model/satellite-intel-api.models';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector:    'app-satellite-month-compare',
   standalone:  true,
   imports:     [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './month-compare-section.component.html',
 })
 export class MonthCompareSectionComponent {

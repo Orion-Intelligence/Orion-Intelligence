@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { HomeSearchComponent } from './home-search/home-search.component';
@@ -7,6 +7,7 @@ import { AppService } from '../../services/core/app/app.service';
   selector: 'app-index',
   standalone: true,
   imports: [HomeSearchComponent,],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './homepage.component.html',
 })
 export class HomepageComponent implements OnInit, AfterViewInit {

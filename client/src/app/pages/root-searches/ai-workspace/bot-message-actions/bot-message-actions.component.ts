@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, signal } from '@angular/core';
+import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy } from '@angular/core';
 import { AiWorkspaceMessage } from '../model/ai-workspace-message.model';
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { ShareResponseDialogComponent } from '../../../../shared/partials/share-response-dialog/share-response-dialog.component';
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, ShareResponseDialogComponent, TranslatePipe],
   templateUrl: './bot-message-actions.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   host: { class: 'block w-full' },
 })
 export class BotMessageActionsComponent implements OnDestroy {

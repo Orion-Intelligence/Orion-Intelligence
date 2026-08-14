@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, input, output } from '@angular/core';
+import { Component, effect, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
@@ -17,6 +17,7 @@ import { SuggestionService } from './services/suggestions.service';
   templateUrl: './filters.component.html',
   standalone: true,
   imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent, TranslatePipe, UiDropdownComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {

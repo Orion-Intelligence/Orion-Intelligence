@@ -1,4 +1,4 @@
-import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, OnInit, signal } from '@angular/core';
+import { AfterViewChecked, AfterViewInit, ChangeDetectorRef, Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 
 import { DashboardResultsGeneralComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
@@ -38,6 +38,7 @@ import { applyMalpediaFilterOptions, applyMalwareBazaarFilterOptions, getDashboa
     DashboardResultChatComponent,
     DashboardResultDefacementComponent],
   templateUrl: './dashboard-result-container.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultContainer implements OnInit, AfterViewInit, AfterViewChecked {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnDestroy, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import { FilterModel } from '../../../shared/model/filter/filter.model';
@@ -37,6 +37,7 @@ import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-
     ThreatLensMapRendererComponent,
     MapLoadingBadgesComponent,
     TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './threat-lens.html',
 })
 export class ThreatLensComponent implements OnDestroy {

@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ import { TakedownActionComponent } from '../../../shared/partials/takedown-actio
   selector: 'app-takedown-requests',
   standalone: true,
   imports: [FormsModule, DatePipe, NgClass, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent, TranslatePipe, TakedownRejectionPopupComponent, TakedownActionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './takedown-requests.component.html'
 })
 export class TakedownRequestsComponent implements OnInit, AfterViewInit {

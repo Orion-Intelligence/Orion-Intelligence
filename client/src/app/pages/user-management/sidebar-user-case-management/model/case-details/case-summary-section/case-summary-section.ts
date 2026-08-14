@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Case, CaseAnalyst, CaseTag } from '../../case.model';
 import { CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../case-management.defaults';
@@ -14,6 +14,7 @@ import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
   imports: [CommonModule, FormsModule, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseInlineMotion, caseModeSwapMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-summary-section.html'
 })
 export class CaseSummarySectionComponent {

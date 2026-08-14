@@ -1,7 +1,7 @@
 @if (platformData(); as platformData) {
   @if (user(); as user) {
     <article data-testid="social-platform-card" class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)]">
-      <div class="[animation:ui-social-profile-overview-in_180ms_ease-out_both] will-change-[opacity,transform] motion-reduce:animate-none">
+      <div class="animate-social-profile-overview-in will-change-[opacity,transform] motion-reduce:animate-none">
         <div class="relative min-h-[172px] overflow-hidden border-b border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(15,23,42,0.28))]">
           @if (getCoverImageUrl(platformData)) {
             <img [src]="getCoverImageUrl(platformData)" [alt]="(platformData.username || user.username) + ' cover'" referrerpolicy="no-referrer" (error)="onImageError($event)" class="absolute inset-0 h-full w-full object-cover">

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -19,6 +19,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, FormsModule, BotMessageActionsComponent, MarkdownPipe, TranslatePipe],
   templateUrl: './chat-widget.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [chatBotAnimation, overlayFadeAnimation]
 })
 export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {

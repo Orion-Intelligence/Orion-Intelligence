@@ -13,7 +13,7 @@
       </button>
     </div>
 
-    <div class="threat-lens-detail-popup-body min-h-0 flex-1 overflow-y-auto p-4">
+    <div class="threat-lens-detail-popup-body min-h-0 flex-1 overflow-y-auto p-4 [background-image:linear-gradient(#1a2835_1px,transparent_1px),linear-gradient(90deg,#1a2835_1px,transparent_1px)] [background-size:22px_22px] [.light-theme_&]:[background-image:none]">
       @if (isLoading) {
         <div class="flex min-h-full items-center justify-center">
           <div class="w-full max-w-[420px] rounded-[10px] bg-[#182337] p-4 text-center ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-white">
@@ -36,7 +36,7 @@
           <p class="mt-1 text-[13px] text-red-200 [body.light-theme_&]:text-red-700">{{ errorMessage }}</p>
         </div>
       } @else if (detail) {
-        <app-ip-detail class="threat-lens-ip-detail-content block" [detail]="detail"></app-ip-detail>
+        <app-ip-detail class="threat-lens-ip-detail-content block [&>*]:!mx-0 [&>:first-child]:!mt-0 [&>:last-child]:!mb-0 [&>:first-child_.grid]:!grid-cols-2 [&>:first-child_.grid]:!gap-x-[24px] [&>:first-child_.grid]:!gap-y-0 [&>:first-child_.grid]:border-y [&>:first-child_.grid]:border-[rgb(143_166_190_/_16%)] [&>:first-child_.grid]:bg-[rgb(19_30_48_/_28%)] [&>:first-child_.grid>div]:!grid [&>:first-child_.grid>div]:min-h-[42px] [&>:first-child_.grid>div]:!grid-cols-[minmax(92px,0.72fr)_minmax(0,1fr)] [&>:first-child_.grid>div]:items-baseline [&>:first-child_.grid>div]:gap-[10px] [&>:first-child_.grid>div]:border-b [&>:first-child_.grid>div]:border-b-[rgb(143_166_190_/_14%)] [&>:first-child_.grid>div]:px-[2px] [&>:first-child_.grid>div]:py-[10px] [&>:first-child_.grid>div:nth-last-child(-n+2)]:!border-b-0 [&>:first-child_.grid>div>span:first-child]:!text-[10px] [&>:first-child_.grid>div>span:first-child]:!leading-[1.2] [&>:first-child_.grid>div>span:first-child]:!tracking-[0.12em] [&>:first-child_.grid>div>span:first-child]:!text-[rgb(160_184_209_/_82%)] [&>:first-child_.grid>div>span:last-child]:!text-right [&>:first-child_.grid>div>span:last-child]:!text-[14px] [&>:first-child_.grid>div>span:last-child]:!font-semibold [&>:first-child_.grid>div>span:last-child]:!leading-[1.35] [&>:first-child_.grid>div>span:last-child]:!text-[#e6eef8] max-[720px]:[&>:first-child_.grid]:!grid-cols-1 max-[720px]:[&>:first-child_.grid>div:nth-last-child(-n+2)]:!border-b max-[720px]:[&>:first-child_.grid>div:last-child]:!border-b-0" [detail]="detail"></app-ip-detail>
       } @else {
         <div class="rounded-[10px] bg-[rgba(22,34,48,0.88)] px-4 py-8 text-center text-[13px] text-[var(--color-text3)] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-white">{{ 'No IP detail available.' | translate }}</div>
       }

@@ -1,5 +1,5 @@
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit, input } from '@angular/core';
+import { Component, OnInit, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { UniqueLinkItem } from '../model/consolidation_insights';
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-result-insights',
   imports: [CommonModule, FormsModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './result-insights.component.html'
 })
 export class ResultInsightsComponent implements OnInit {

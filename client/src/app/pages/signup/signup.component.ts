@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -13,6 +13,7 @@ import { isSignupHost } from '../../shared/utils/auth-host.util';
   selector: 'app-signup',
   standalone: true,
   imports: [FormsModule, CommonModule, NgClass, PasswordToggleDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './signup.component.html'
 })
 export class SignupComponent implements OnInit {

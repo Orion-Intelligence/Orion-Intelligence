@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -17,6 +17,7 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   standalone: true,
   imports: [CommonModule, DatePipe, TranslatePipe, RouterLink, RecordSidebarComponent],
   templateUrl: './dashboard-result-apt.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDestroy {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../../models/geo-fencing.models';
 import { ThreatLensArcRangeOption } from '../../models/threat-lens-map.types';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector: 'app-threat-lens-category-layers',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './threat-lens-category-layers.component.html',
 })
 export class ThreatLensCategoryLayersComponent {

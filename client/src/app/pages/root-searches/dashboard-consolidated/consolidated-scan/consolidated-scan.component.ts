@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription, concat } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -20,6 +20,7 @@ interface PendingMsg {
   standalone: true,
   imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './consolidated-scan.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [scanAnimation]
 })
 export class ConsolidatedScanComponent {

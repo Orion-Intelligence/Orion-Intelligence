@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -29,6 +29,7 @@ interface SocialThreadComment {
     CommonModule,
     RemoveEmojisPipe, TranslatePipe],
   templateUrl: './dashboard-result-social.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem]
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {

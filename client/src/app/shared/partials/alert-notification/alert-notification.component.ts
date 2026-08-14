@@ -1,4 +1,4 @@
-import { Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { AlertNotification } from './model/alert.notification.model';
@@ -23,6 +23,7 @@ type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
   selector: 'app-alert-notification',
   imports: [CommonModule, NgClass, ExportChoiceModalComponent, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './alert-notification.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [sidebarAnimation, overlayAnimation],
 })
 export class AlertNotificationComponent implements OnChanges {

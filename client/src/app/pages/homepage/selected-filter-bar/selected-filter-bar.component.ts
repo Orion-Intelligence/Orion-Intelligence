@@ -1,4 +1,4 @@
-import { Component, OnInit, input, output } from '@angular/core';
+import { Component, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-selected-filter-bar',
   imports: [CommonModule, TranslatePipe],
   templateUrl: './selected-filter-bar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class SelectedFilterBarComponent implements OnInit {

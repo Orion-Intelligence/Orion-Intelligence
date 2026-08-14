@@ -6,7 +6,7 @@
           <h1 data-testid="consolidated-scan-title" class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">{{ 'Threats Scans Report' | translate }}: {{ targetLabel }}</h1>
           @if (isProcessing || runningTypes.length) {
             <div class="mt-[6px] inline-flex items-center gap-[7px] font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap max-[640px]:whitespace-normal">
-              <span class="h-[7px] w-[7px] rounded-full bg-[#26B961] [animation:uiScanPulse_1.2s_ease-in-out_infinite]"></span>
+              <span class="h-[7px] w-[7px] animate-consolidated-scan-pulse rounded-full bg-[#26B961]"></span>
               {{ 'Collecting intelligence…' | translate }} {{ completedCount }}/{{ totalCount }} {{ 'scans completed' | translate }}
             </div>
           }
@@ -37,7 +37,7 @@
       @if (isCollapsed) {
         <div>
           <div class="mt-[12px] h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-            <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out" [ngClass]="(isProcessing || runningTypes.length ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0)_0,rgba(255,255,255,0)_6px,rgba(255,255,255,0.18)_6px,rgba(255,255,255,0.18)_12px)] [background-size:32px_100%] [animation:uiScanStripe_900ms_linear_infinite] ' : '') + 'ui-wpct-' + ((isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100)"></div>
+            <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out" [ngClass]="(isProcessing || runningTypes.length ? 'animate-consolidated-scan-stripe bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0)_0,rgba(255,255,255,0)_6px,rgba(255,255,255,0.18)_6px,rgba(255,255,255,0.18)_12px)] [background-size:32px_100%] ' : '') + 'ui-wpct-' + ((isProcessing || runningTypes.length) ? (mergedProgress || 6) : 100)"></div>
           </div>
         </div>
       }
@@ -110,7 +110,7 @@
               <div class="flex w-full items-center justify-between">
                 <h2 class="font-[Inter] text-[16px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap">{{ 'Threats scans' | translate }}</h2>
                 <div class="inline-flex items-center gap-[6px]">
-                  <div class="h-[8px] w-[8px] rounded-full bg-[var(--color-text5)] [animation:uiScanPulse_1.2s_ease-in-out_infinite]"></div>
+                  <div class="h-[8px] w-[8px] animate-consolidated-scan-pulse rounded-full bg-[var(--color-text5)]"></div>
                   <div class="font-[Inter] text-[13px] font-normal leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap">{{ 'Collecting intelligence…' | translate }}</div>
                 </div>
               </div>
@@ -124,7 +124,7 @@
               <div class="inline-flex items-center gap-[50px] max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-[12px]">
                 <div class="w-[226px] max-[768px]:w-full">
                   <div class="h-[6px] w-full overflow-hidden rounded-[999px] bg-[var(--ui-consolidated-divider)]">
-                    <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out" [ngClass]="(isProcessing || runningTypes.length ? 'bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0)_0,rgba(255,255,255,0)_6px,rgba(255,255,255,0.18)_6px,rgba(255,255,255,0.18)_12px)] [background-size:32px_100%] [animation:uiScanStripe_900ms_linear_infinite] ' : '') + 'ui-wpct-' + (mergedProgress || 6)"></div>
+                    <div class="h-full bg-[#26B961] transition-[width] duration-500 ease-out" [ngClass]="(isProcessing || runningTypes.length ? 'animate-consolidated-scan-stripe bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0)_0,rgba(255,255,255,0)_6px,rgba(255,255,255,0.18)_6px,rgba(255,255,255,0.18)_12px)] [background-size:32px_100%] ' : '') + 'ui-wpct-' + (mergedProgress || 6)"></div>
                   </div>
                 </div>
                 <div class="font-[Inter] text-[14px] font-normal leading-[18.2px] text-[var(--color-text4)] whitespace-nowrap">{{ completedCount }}/{{ totalCount }} {{ 'scans completed' | translate }}</div>

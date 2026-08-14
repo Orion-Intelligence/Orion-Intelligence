@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -9,6 +9,7 @@ import { TakedownActionResponse, TakedownActionResult } from '../../model/takedo
   selector: 'app-takedown-action',
   standalone: true,
   imports: [CommonModule, FormsModule, NgClass, TooltipDirective],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './takedown-action.component.html'
 })
 export class TakedownActionComponent implements OnChanges {

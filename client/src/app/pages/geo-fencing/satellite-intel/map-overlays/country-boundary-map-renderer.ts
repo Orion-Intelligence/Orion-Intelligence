@@ -94,7 +94,7 @@ export class CountryBoundaryMapRenderer {
       direction: 'center',
       sticky: true,
       opacity: 0.95,
-      className: 'country-hover-tooltip',
+      className: 'country-hover-tooltip rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[10px] py-[6px] text-[12px] font-semibold text-[var(--color-text1)] shadow-[0_12px_30px_rgb(2_6_23_/_45%)] [backdrop-filter:blur(8px)]',
     });
     layer.on('click', () => this.toggleCountryHighlight(feature));
     layer.on('mouseover', () => this.showCountryHover(feature));

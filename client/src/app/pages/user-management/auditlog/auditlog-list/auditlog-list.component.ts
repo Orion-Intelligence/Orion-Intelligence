@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
 import { AuditLogCallbackModel } from '../model/auditlog.model';
@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector: 'app-auditlog-list',
   imports: [AsyncPipe, DatePipe, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './auditlog-list.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class AuditlogListComponent {

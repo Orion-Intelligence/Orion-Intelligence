@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS, TASK_STATUS_OPTIONS } from '../case-management.defaults';
 import { Case, CaseChartItem, CaseStatus, CaseType, IntakeSource, Priority, Severity } from '../case.model';
 
 @Component({
   selector: 'app-case-analytics-panel',
   imports: [CommonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-analytics-panel.html'
 })
 export class CaseAnalyticsPanel {

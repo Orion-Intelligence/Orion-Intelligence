@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FiltersComponent } from '../../shared/partials/filters/filters.component';
@@ -15,6 +15,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-directory',
   templateUrl: './directory.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FiltersComponent,
     DirectoryListComponent,

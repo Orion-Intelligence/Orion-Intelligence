@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { booleanAttribute, Component, input, output } from '@angular/core';
+import { booleanAttribute, Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FocusDirective } from '../../directive/focus.directive';
 import { popupAnimation } from '../../animations/popup.animations';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
     TranslatePipe
   ],
   templateUrl: './confirmation-popup.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [popupAnimation],
 })
 export class ConfirmationPopupComponent {

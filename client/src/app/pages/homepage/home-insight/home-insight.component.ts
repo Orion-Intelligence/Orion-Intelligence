@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, NgOptimizedImage } from '@angular/common';
 import { DefacementModel, GenericModel, InsightMetric, LeakModel } from '../model/stats_insight.model';
@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-home-insight',
   templateUrl: './home-insight.component.html',
   imports: [NgOptimizedImage, NgClass, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true,
 })
 export class HomeInsightComponent implements OnInit {

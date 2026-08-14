@@ -1,4 +1,4 @@
-import { Component, effect, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, effect, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../services/core/app/app.service';
@@ -31,6 +31,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-sidebar-user-homepage',
   imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './sidebar-user-homepage.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [overlayAnimation],
 })
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {

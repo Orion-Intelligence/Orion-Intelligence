@@ -1,4 +1,4 @@
-import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
+import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, TrackingEntityState, TrackingEntityType, TrackingSidebarBridge } from '../../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from '../map-entities/aircraft/aircraft-tracking.service';
@@ -14,6 +14,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector:    'app-satellite-map-renderer',
   imports: [TranslatePipe],
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './map-renderer.component.html',
 })
 export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy {

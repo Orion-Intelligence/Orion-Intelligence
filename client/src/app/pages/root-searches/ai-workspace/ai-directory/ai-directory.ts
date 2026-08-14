@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription, timer } from 'rxjs';
 import { NexusChatService } from '../nexus-chat.service';
@@ -21,6 +21,7 @@ interface WorkspaceLogEntry {
   selector: 'app-ai-directory',
   standalone: true,
   imports: [CommonModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ai-directory.html',
 })
 export class AiDirectory implements OnChanges, OnDestroy {

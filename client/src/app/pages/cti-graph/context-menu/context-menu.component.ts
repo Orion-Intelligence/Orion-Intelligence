@@ -1,9 +1,10 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
   selector: 'app-graph-context-menu',
   standalone: true,
   imports: [],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
   <div id="customContextMenu" data-left="0" data-top="0" data-testid="cti-context-menu" class="hidden fixed z-[1000] w-64 rounded-xl border border-slate-700/80 bg-slate-900/95 backdrop-blur-sm shadow-2xl focus:outline-none animate-[social-mapper-slide-down_0.12s_ease-out_forwards] [body.light-theme_&]:!border-[#cfdbeb] [body.light-theme_&]:!bg-[rgba(255,255,255,0.96)] [body.light-theme_&]:!shadow-[0_14px_32px_rgba(15,23,42,0.16)]">
     <div class="px-3 py-2 border-b border-slate-700/70 [body.light-theme_&]:border-[var(--color-border)]">

@@ -1,7 +1,7 @@
 @if (user(); as user) {
   <div class="flex min-w-0 flex-col gap-3">
     @for (platformData of user.platforms; track getPlatformTrackKey($index, platformData)) {
-      <article data-testid="social-platform-card" [id]="getPlatformCardId(platformData)" [class.highlight-focused-card]="highlightedNodeId() === getPlatformCardId(platformData)" class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)] [animation:ui-social-feed-card-in_190ms_ease-out_both] will-change-[opacity,transform] motion-reduce:animate-none">
+      <article data-testid="social-platform-card" [id]="getPlatformCardId(platformData)" [class.highlight-focused-card]="highlightedNodeId() === getPlatformCardId(platformData)" class="animate-social-feed-card-in overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)] will-change-[opacity,transform] motion-reduce:animate-none">
         <div class="relative flex items-start gap-3 px-4 pt-4">
           <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-lg">
             <app-social-icon [platformName]="platformData.platform"></app-social-icon>

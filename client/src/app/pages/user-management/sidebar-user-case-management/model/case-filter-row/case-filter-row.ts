@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../case-management.defaults';
 import { CaseStatus, CaseType, Priority, Severity } from '../case.model';
@@ -30,6 +30,7 @@ export const DEFAULT_CASE_LIST_FILTERS: CaseListFilters = {
 @Component({
   selector: 'app-case-filter-row',
   imports: [CommonModule, FormsModule, TranslatePipe, UiDropdownComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-filter-row.html'
 })
 export class CaseFilterRowComponent {

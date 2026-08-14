@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, HostListener, input, output } from '@angular/core';
+import { Component, HostListener, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
 import { AiChatSession, NexusChatSession } from '../model/ai-chat-session.model';
@@ -26,6 +26,7 @@ const chatRowAnimation = trigger('chatRowAnimation', [
   imports: [CommonModule, FormsModule, ConfirmationPopupComponent, SidebarShellComponent, TooltipDirective, TranslatePipe],
   templateUrl: './ai-chat-sidebar.component.html',
   styleUrls: ['./ai-chat-sidebar.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [chatRowAnimation],
 })
 export class AiChatSidebarComponent {

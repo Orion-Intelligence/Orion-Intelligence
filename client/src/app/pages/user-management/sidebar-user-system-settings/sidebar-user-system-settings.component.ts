@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { FormsModule } from '@angular/forms';
@@ -23,6 +23,7 @@ type SystemSettingsTab = 'branding' | 'platform';
   selector: 'app-sidebar-user-system-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TenantBrandingSettingsComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {

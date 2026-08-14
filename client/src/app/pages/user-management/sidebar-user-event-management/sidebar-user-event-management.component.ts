@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs';
@@ -26,6 +26,7 @@ import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.s
   imports: [CommonModule, PaginationComponent, FiltersComponent, EmptyQueryComponent, EmptyResultComponent, LoadingFormComponent, IocSearchComponent, TranslatePipe],
   templateUrl: './sidebar-user-event-management.component.html',
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sidebar-user-event-management.component.css'],
 })
 export class SidebarUserEventManagementComponent extends ValuePresentationBase implements OnInit, AfterViewInit {

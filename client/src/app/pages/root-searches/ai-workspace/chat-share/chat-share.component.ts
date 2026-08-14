@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { ApiService } from '../../../../shared/services/api.service';
@@ -19,6 +19,7 @@ type SharedChatMessage = {
   selector: 'app-chat-share',
   standalone: true,
   imports: [CommonModule, DatePipe, HeaderComponent, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './chat-share.component.html',
 })
 export class ChatShareComponent implements OnInit, OnDestroy {

@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensService } from '../threat-lens.service';
@@ -13,6 +13,7 @@ import { ThreatLensArcBatchStatus, ThreatLensArcRenderResult, ThreatLensArcSelec
 @Component({
   selector: 'app-threat-lens-map-renderer',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './threat-lens-map-renderer.component.html',
 })
 export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy {

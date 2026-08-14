@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnInit, inject, input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HelperService } from '../../../../shared/services/helper.service';
@@ -16,6 +16,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector: 'app-dashboard-results-general-grid',
   templateUrl: './dashboard-results-general.component.html',
   imports: [RouterLink, DatePipe, TooltipDirective, CommonModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   standalone: true
 })
 export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {

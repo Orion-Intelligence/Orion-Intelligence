@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
@@ -15,6 +15,7 @@ import { RelatedReportItem, STRONG_RELATED_MAPPING_KEYS } from './model/report-m
   selector: 'app-report-mapping',
   templateUrl: './report-mapping.component.html',
   imports: [CommonModule, NgClass, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingComponent {

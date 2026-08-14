@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, computed, input, output, signal } from '@angular/core';
+import { Component, computed, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScrollService } from '../../services/scroll.service';
@@ -9,6 +9,7 @@ import { RecordSidebarItem } from './model/record-sidebar.model';
   selector: 'app-record-sidebar',
   standalone: true,
   imports: [CommonModule, DatePipe, RouterLink, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './record-sidebar.component.html',
 })
 export class RecordSidebarComponent {

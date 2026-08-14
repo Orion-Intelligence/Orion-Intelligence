@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CdkDrag, CdkDragDrop, CdkDragMove, CdkDropList, DragDropModule } from '@angular/cdk/drag-drop';
@@ -15,6 +15,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector: 'app-case-tracking-board',
   imports: [CommonModule, FormsModule, DragDropModule, TooltipDirective, TranslatePipe],
   templateUrl: './case-tracking-board.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./case-tracking-board.css']
 })
 export class CaseTrackingBoard implements OnInit {

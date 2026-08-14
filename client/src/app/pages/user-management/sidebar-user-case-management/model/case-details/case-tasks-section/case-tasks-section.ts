@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Case, CaseAnalyst, CaseTask, TaskStatus } from '../../case.model';
 import { PRIORITY_OPTIONS, TASK_STATUS_OPTIONS } from '../../case-management.defaults';
@@ -16,6 +16,7 @@ import { DatePickerComponent } from '../../../../../../shared/partials/filters/d
   imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe, DatePickerComponent],
   animations: [caseListItemMotion, caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-tasks-section.html'
 })
 export class CaseTasksSectionComponent {

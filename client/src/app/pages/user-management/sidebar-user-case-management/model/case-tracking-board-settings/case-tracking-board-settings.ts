@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CaseManagement } from '../../case-management-service/case-management';
@@ -10,6 +10,7 @@ import { CaseStatusBoardConfig, CaseStatusBoardItem, DEFAULT_CASE_STATUS_BOARD_C
 @Component({
   selector: 'app-case-tracking-board-settings',
   imports: [CommonModule, FormsModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-tracking-board-settings.html'
 })
 export class CaseTrackingBoardSettings implements OnInit {
