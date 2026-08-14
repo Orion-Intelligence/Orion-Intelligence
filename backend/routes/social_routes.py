@@ -187,7 +187,8 @@ async def append_social_data(data: dict = Body(...), current_user=Depends(get_cu
     profile_username = (data or {}).get("profile_username") or (data or {}).get("root_username") or (data or {}).get("username") or ""
     profiles = (data or {}).get("profiles") or []
     replace = bool((data or {}).get("replace"))
-    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, replace=replace)
+    status = str((data or {}).get("status") or "complete")
+    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, replace=replace, status=status)
 
 
 @social_routes.get(

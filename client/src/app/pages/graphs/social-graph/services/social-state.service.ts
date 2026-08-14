@@ -177,6 +177,12 @@ export class SocialStateService {
   }
 
   private buildStoredJob(document: SocialStoredProfile): Job {
+    if (document.status === 'pending') {
+      return { id: `stored-${document.profile_username}`, username: document.profile_username, status: 'in_progress', progress: 5, step: 'Resuming' };
+    }
+    if (document.status === 'failed') {
+      return { id: `stored-${document.profile_username}`, username: document.profile_username, status: 'failed', progress: 0, step: 'Scan failed' };
+    }
     return {
       id: `stored-${document.profile_username}`,
       username: document.profile_username,

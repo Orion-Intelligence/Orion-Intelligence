@@ -1,4 +1,4 @@
-<div [class]="isCollapsed() ? 'dark-theme flex h-full w-[70px] min-w-[70px] flex-col overflow-hidden bg-[var(--color-blue-900)] px-[7px] py-[8px] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]' : (isSmallScreen() ? 'dark-theme flex h-full w-screen min-w-[100vw] flex-col overflow-y-auto bg-[var(--color-blue-900)] p-0 transition-none [scrollbar-color:var(--color-blue-880)_transparent]' : 'dark-theme flex h-full w-[300px] min-w-[300px] flex-col overflow-y-auto bg-[var(--color-blue-900)] p-0 transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]')">
+<div [class]="isCollapsed() ? 'dark-theme flex h-full w-[70px] min-w-[70px] flex-col overflow-hidden bg-[var(--color-blue-900)] px-[7px] py-[8px] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]' : 'dark-theme flex h-full w-[300px] min-w-[300px] flex-col overflow-y-auto bg-[var(--color-blue-900)] p-0 transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]'">
   <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" [forceDarkLogo]="true" (toggleClicked)="toggle.emit(undefined)">
 
     <div sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
@@ -86,6 +86,11 @@
                       }
 
                       <div class="flex items-center gap-1">
+                        @if (job.status === 'failed' && !job.displayName) {
+                          <button data-testid="social-history-retry" (click)="$event.stopPropagation(); retryScan.emit(job)" title="Retry Scan" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-640)]/10 hover:text-[var(--color-blue-640)]">
+                            <i class="bi bi-arrow-clockwise text-sm leading-none"></i>
+                          </button>
+                        }
                         <button (click)="$event.stopPropagation(); state.openDeleteConfirmation(job.username)" title="Delete Profile" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
                           <i class="bi bi-trash3 text-sm leading-none"></i>
                         </button>
@@ -110,13 +115,6 @@
               </div>
               <p class="mb-0 mt-3 text-sm font-semibold text-[var(--color-text2)]">No scans yet</p>
               <p class="mb-0 mt-1 text-xs leading-5 text-[var(--color-text4)]">Search a username from the dashboard to create history.</p>
-            </div>
-          }
-          @if (!hasJobMatches() && jobs().length > 0) {
-            <div data-testid="social-history-no-matches" class="flex flex-col items-center py-10 text-center">
-              <i class="bi bi-search text-3xl text-[var(--color-text4)]"></i>
-              <p class="mt-2 text-sm font-semibold text-[var(--color-text2)]">No Results Found</p>
-              <p class="text-xs text-[var(--color-text4)]">No scans match "{{ searchTerm() }}"</p>
             </div>
           }
         </div>

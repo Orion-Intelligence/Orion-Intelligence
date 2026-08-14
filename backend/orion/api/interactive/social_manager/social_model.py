@@ -3,6 +3,7 @@ import binascii
 import hashlib
 import os
 from datetime import UTC, datetime
+from typing import Any
 
 import httpx
 import jwt
@@ -47,6 +48,7 @@ class social_model:
             "profile_username": profile_username,
             "profiles": profiles,
             "count": len(profiles),
+            "status": record.get("status") or "complete",
             "updated_at": record.get("updated_at"),
         }
 
@@ -121,9 +123,11 @@ class social_model:
                 current["updated_at"] = updated_at
         return sorted(merged.values(), key=lambda item: item.get("updated_at") or datetime.min.replace(tzinfo=UTC), reverse=True)
 
-    async def social_search(self, model, key: str, current_user=None, request=None):
+    async def social_search(self, model, key: str, current_user=None, request=None) -> Any:
         last_error = ""
         headers = self._social_headers(current_user, request)
+        payload = model.model_dump() if hasattr(model, "model_dump") else model
+        payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
         try:
             for base_url in self._social_api_base_urls():
                 try:
@@ -136,8 +140,6 @@ class social_model:
                                 timeout=120,
                             )
                         else:
-                            payload = model.model_dump() if hasattr(model, "model_dump") else model
-                            payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
                             response = await client.post(
                                 f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
                                 json=payload,
@@ -318,7 +320,7 @@ class social_model:
 
         return await self.social_search({"file_bytes": file_bytes, "filename": "upload.png"}, "recon/image", current_user, request)
 
-    async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], replace: bool = False):
+    async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], replace: bool = False, status: str = "complete"):
         try:
             normalized_username = profile_username.strip().lstrip("@").lower()
             if not normalized_username:
@@ -336,30 +338,31 @@ class social_model:
                     "keyUsername": normalized_username,
                 })
 
+            update_doc = {
+                "$setOnInsert": {
+                    "user_id": user_id,
+                    "profile_username": normalized_username,
+                    "created_at": now_utc,
+                },
+                "$set": {"updated_at": now_utc, "status": status},
+            }
             if normalized_profiles:
-                update_doc = {
-                    "$setOnInsert": {
-                        "user_id": user_id,
-                        "profile_username": normalized_username,
-                        "created_at": now_utc,
-                    },
-                    "$set": {"updated_at": now_utc},
-                }
                 if replace:
                     update_doc["$set"]["profiles"] = normalized_profiles
                 else:
                     update_doc["$push"] = {"profiles": {"$each": normalized_profiles}}
 
-                await self._engine.get_collection(db_social_model).update_one(
-                    {"user_id": user_id, "profile_username": normalized_username},
-                    update_doc,
-                    upsert=True,
-                )
+            await self._engine.get_collection(db_social_model).update_one(
+                {"user_id": user_id, "profile_username": normalized_username},
+                update_doc,
+                upsert=True,
+            )
 
             return {
                 "user_id": user_id,
                 "profile_username": normalized_username,
                 "saved": len(normalized_profiles),
+                "status": status,
             }
 
         except Exception:

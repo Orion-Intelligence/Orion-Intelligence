@@ -175,7 +175,7 @@ export class ScanNotificationService {
     this.duplicateScanChoice$?.complete();
     this.duplicateScanChoice$ = new Subject<DuplicateScanChoice>();
     this.duplicateScanPrompt.set({
-      message: response.message,
+      message: response.message.replace('. ', '.\n'),
       previousScan: response.previous_scan,
     });
     return this.duplicateScanChoice$.asObservable();

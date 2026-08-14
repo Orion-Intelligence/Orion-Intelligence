@@ -42,10 +42,11 @@
 }
 
 @if (scanNotificationService.duplicateScanPrompt(); as duplicatePrompt) {
-  <app-generic-choice-popup
-    [title]="'Previous Scan Found'"
+  <app-confirmation-popup
     [message]="duplicatePrompt.message"
-    [secondaryLabel]="'Run New Scan'"
-    (selected)="handleDuplicateScanChoice($event)">
-  </app-generic-choice-popup>
+    [confirmLabel]="'Run New Scan'"
+    [warning]="true"
+    [showCancel]="false"
+    (confirmed)="handleDuplicateScanChoice($event)">
+  </app-confirmation-popup>
 }

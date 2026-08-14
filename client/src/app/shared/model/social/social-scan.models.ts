@@ -109,6 +109,7 @@ export interface SocialStoredProfile {
     profile_username: string;
     profiles: PlatformResult[];
     count?: number;
+    status?: string;
     updated_at?: string;
 }
 export interface PlatformResult {

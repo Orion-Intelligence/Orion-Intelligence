@@ -18,12 +18,12 @@ export class HomeMenuComponent implements OnDestroy {
   searchTerm = input.required<string>();
   jobs = input.required<Job[]>();
   resultUsernames = input.required<Set<string>>();
-  isSmallScreen = input.required<boolean>();
   toggle = output<undefined>();
   historyTabClicked = output<undefined>();
   searchChanged = output<string>();
   jobClicked = output<Job>();
   cancelScan = output<string>();
+  retryScan = output<Job>();
   cancelAllFetches = output<string>();
   public state = inject(SocialService);
   visibleJobsCount = signal(10);
@@ -36,9 +36,6 @@ export class HomeMenuComponent implements OnDestroy {
     }));
   });
   displayJobs = computed(() => this.jobsWithFilter().slice(0, this.visibleJobsCount()));
-  hasJobMatches = computed(() => {
-    return this.jobsWithFilter().some(j => j.matches);
-  });
 
   constructor() {
     effect(() => {

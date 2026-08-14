@@ -1,4 +1,3 @@
-import { WritableSignal } from '@angular/core';
 import { PlatformResult } from '../../../../shared/model/social/social-scan.models';
 
 const HIDDEN_PROFILE_DETAIL_KEYS = new Set(['m_scrap_file', 'm_network', 'm_hash_id', 'm_hash', 'm_content_type', 'm_channel_url', 'm_weblink', 'm_date', 'm_sender_name', 'm_message_id']);
@@ -39,31 +38,4 @@ export function getMetadataEntries(metadata: Record<string, any> | null | undefi
     return [];
   }
   return Object.entries(metadata).map(([key, value]) => ({ key, value }));
-}
-export function addItemsIncrementally<T>(displaySignal: WritableSignal<T[]>, itemsToAdd: T[], onComplete: () => void, delayMs: number = 75): void {
-  if (itemsToAdd.length === 0) {
-    onComplete();
-    return;
-  }
-  let index = 0;
-  const addNextItem = () => {
-    if (index < itemsToAdd.length) {
-      displaySignal.update(current => [...current, itemsToAdd[index]]);
-      index += 1;
-      setTimeout(addNextItem, delayMs);
-      return;
-    }
-    onComplete();
-  };
-  addNextItem();
-}
-export function loadMoreIncrementally<T>(isLoadingSignal: WritableSignal<boolean>, displaySignal: WritableSignal<T[]>, allItems: T[] | undefined | null, increment: number, delayMs: number = 75): void {
-  if (isLoadingSignal()) {
-    return;
-  }
-  isLoadingSignal.set(true);
-  const currentCount = displaySignal().length;
-  const items = allItems || [];
-  const nextItems = items.slice(currentCount, currentCount + increment);
-  addItemsIncrementally(displaySignal, nextItems, () => isLoadingSignal.set(false), delayMs);
 }

@@ -378,8 +378,8 @@ export class SocialScanService {
     return SocialNormalizationUtil.expandRecordValue(value).map(item => item.trim()).filter(Boolean);
   }
 
-  saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false): Observable<any> {
-    return this.api.post<any>('social/data', { profile_username: profileUsername, profiles, replace });
+  saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false, status = 'complete'): Observable<any> {
+    return this.api.post<any>('social/data', { profile_username: profileUsername, profiles, replace, status });
   }
 
   fetchStoredSocialProfiles(): Observable<SocialStoredProfile[]> {

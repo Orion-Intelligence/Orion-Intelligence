@@ -1,6 +1,6 @@
 @if (platformData(); as platformData) {
   @if (contentType(); as contentType) {
-    <div [attr.data-testid]="'social-tab-panel-' + contentType" class="px-[13px] pt-[11px] pb-[13px]">
+    <div [attr.data-testid]="'social-tab-panel-' + contentType" [ngClass]="flushHorizontal() ? 'px-0' : 'px-[13px]'" class="pt-[11px] pb-[13px]">
       @if (showHeader() || (canFetchRemote(platformData) && (showFetchLatest() || shouldShowLoadMorePosts(platformData, contentType)))) {
         <div class="mb-3 flex items-center justify-between gap-3">
           @if (showHeader()) {
@@ -42,9 +42,6 @@
         </div>
       } @else if (getUniquePosts(platformData, contentType).length === 0) {
         <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
-          <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
-            <i class="bi bi-file-post text-base"></i>
-          </div>
           <div>
             <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No {{ getPostContentTabLabel(contentType).toLowerCase() }} found</p>
             <p class="mb-0 text-xs text-[var(--color-text4)]">Run the {{ getPostContentTabLabel(contentType).toLowerCase() }} fetch again for this profile.</p>
@@ -84,7 +81,7 @@
                 }
               </div>
               @if (hasPostMedia(post)) {
-                <div class="relative mt-3 min-h-[140px] overflow-hidden rounded-[8px] border border-[rgba(148,163,184,0.16)] bg-[var(--color-blue-700)]" [ngClass]="compactMedia() ? 'mx-auto max-w-[560px]' : ''">
+                <div class="relative mt-3 flex min-h-[140px] flex-col justify-center overflow-hidden rounded-[8px] border border-[rgba(148,163,184,0.16)] bg-[var(--color-blue-700)]" [ngClass]="compactMedia() ? 'mx-auto max-w-[560px]' : ''">
                   @if (isPostMediaLoading(post)) {
                     <div class="absolute inset-0 z-10 flex items-center justify-center bg-[rgba(15,23,42,0.72)]">
                       <span class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-t-transparent"></span>
@@ -93,7 +90,7 @@
                   @if (isVideoPost(post)) {
                     <video [src]="getPostMediaUrl(post)" controls preload="metadata" (loadstart)="markPostMediaLoading(post)" (loadedmetadata)="markPostMediaLoaded(post)" (loadeddata)="markPostMediaLoaded(post)" (canplay)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="w-full bg-black transition-opacity duration-150" [ngClass]="compactMedia() ? 'max-h-[360px]' : 'max-h-[420px]'" [class.opacity-0]="isPostMediaLoading(post)"></video>
                   } @else {
-                    <img [src]="getPostMediaUrl(post)" [alt]="getPostMediaTypeLabel(post)" referrerpolicy="no-referrer" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post)" class="max-h-[420px] w-full object-cover transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)">
+                    <img [src]="getPostMediaUrl(post)" [alt]="getPostMediaTypeLabel(post)" referrerpolicy="no-referrer" (load)="markPostMediaLoaded(post)" (error)="markPostMediaLoaded(post); onImageError($event)" class="max-h-[420px] w-full object-cover transition-opacity duration-150" [class.opacity-0]="isPostMediaLoading(post)">
                   }
                 </div>
               }

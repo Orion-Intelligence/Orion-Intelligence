@@ -18,6 +18,7 @@ export class SocialProfilePostsSectionComponent {
   showHeader = input(true);
   compactMedia = input(false);
   allowCommentFetch = input(true);
+  flushHorizontal = input(false);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
 }

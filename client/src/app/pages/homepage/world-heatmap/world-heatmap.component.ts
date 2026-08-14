@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit, OnChanges, SimpleChanges, HostListener, OnInit, OnDestroy, input } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, HostListener, NgZone, OnInit, OnDestroy, input, signal } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -19,10 +19,12 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   standalone: true,
   templateUrl: './world-heatmap.component.html',
 })
-export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, OnDestroy {
+export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   @ViewChild('mapContainer') private chartContainer!: ElementRef;
   private allCategoryReports: any;
   private rotationTimer: any;
+  private worldJsonPollTimer: any;
+  private pendingFrame: number | null = null;
   private svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private mapG!: d3.Selection<SVGGElement, unknown, null, undefined>;
   private projection!: d3.GeoProjection;
@@ -44,13 +46,13 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   readonly canOpenReports = input<boolean>(true);
   public activeCountryReports: any;
   public activeCategoryKey: string | null = null;
-  public selectedCountryReports: any[] = [];
   public mapData: CountryData[] = [];
-  public isOpenCountryReport = false;
-  public isCountryReportLoading = false;
-  public isCountryReportLoadingMore = false;
-  public hasMoreCountryReports = false;
-  public isMapLoading = true;
+  public readonly selectedCountryReports = signal<any[]>([]);
+  public readonly isOpenCountryReport = signal(false);
+  public readonly isCountryReportLoading = signal(false);
+  public readonly isCountryReportLoadingMore = signal(false);
+  public readonly hasMoreCountryReports = signal(false);
+  public readonly isMapLoading = signal(true);
 
   private isLightTheme(): boolean {
     if (typeof document === 'undefined') {
@@ -77,7 +79,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
     };
   }
 
-  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService) {
+  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService, private zone: NgZone) {
   }
 
   ngOnInit(): void {
@@ -92,25 +94,21 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   ngAfterViewInit(): void {
-    window.requestAnimationFrame(() => {
+    this.pendingFrame = window.requestAnimationFrame(() => {
+      this.pendingFrame = null;
       this.appService.loadWorldJson();
       this.waitForWorldJsonAndRender();
     });
   }
 
   ngOnDestroy(): void {
+    if (this.pendingFrame !== null) {
+      window.cancelAnimationFrame(this.pendingFrame);
+      this.pendingFrame = null;
+    }
+    this.stopWorldJsonPoll();
     this.tooltip?.remove();
     this.stopCategoryRotation();
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['data'] && !changes['data'].firstChange) {
-      this.buildIndex();
-      if (!this.mapG || !this.svg) {
-        return;
-      }
-      this.refreshMapPresentation(false);
-    }
   }
 
   @HostListener('window:resize')
@@ -123,14 +121,23 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
 
   private waitForWorldJsonAndRender(): void {
     if (this.appService.worldJson()) {
+      this.stopWorldJsonPoll();
       this.createChart();
       this.startCategoryRotation();
-      this.isMapLoading = false;
+      this.isMapLoading.set(false);
       return;
     }
-    window.setTimeout(() => {
-      this.waitForWorldJsonAndRender(); 
+    this.worldJsonPollTimer = window.setTimeout(() => {
+      this.worldJsonPollTimer = null;
+      this.waitForWorldJsonAndRender();
     }, 50);
+  }
+
+  private stopWorldJsonPoll(): void {
+    if (this.worldJsonPollTimer) {
+      window.clearTimeout(this.worldJsonPollTimer);
+      this.worldJsonPollTimer = null;
+    }
   }
 
   private getAvailableCategories(): string[] {
@@ -173,9 +180,11 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
       index = (index + 1) % available.length;
     };
     switchCategory();
-    this.rotationTimer = setInterval(() => {
-      switchCategory();
-    }, 8000);
+    this.zone.runOutsideAngular(() => {
+      this.rotationTimer = setInterval(() => {
+        switchCategory();
+      }, 8000);
+    });
   }
 
   private ensureLegendDefs(): void {
@@ -511,20 +520,20 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private openCountryReport(): void {
-    this.isOpenCountryReport = true;
+    this.isOpenCountryReport.set(true);
     this.resetCountryReportState();
     void this.fetchCountryReportsPage(1, false);
   }
 
   closeCountryReport(): void {
-    this.isOpenCountryReport = false;
+    this.isOpenCountryReport.set(false);
     this.selectedName = null;
     this.resetCountryReportState();
     this.setCountryReportLoadingState(false, false);
   }
 
   async loadMoreCountryReports(): Promise<void> {
-    if (!this.hasMoreCountryReports || this.isCountryReportLoadingMore || !this.selectedName) {
+    if (!this.hasMoreCountryReports() || this.isCountryReportLoadingMore() || !this.selectedName) {
       return;
     }
     await this.fetchCountryReportsPage(this.selectedCountryPage + 1, true);
@@ -544,15 +553,15 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
         .set('limit', String(this.countryReportLimit));
       const response = await firstValueFrom(this.apiService.get<CountryInsightPageResponse>('insight/country', { params }));
       const incomingItems = Array.isArray(response?.items) ? response.items : [];
-      this.selectedCountryReports = append ? [...this.selectedCountryReports, ...incomingItems] : incomingItems;
+      this.selectedCountryReports.set(append ? [...this.selectedCountryReports(), ...incomingItems] : incomingItems);
       this.selectedCountryPage = response?.page ?? page;
-      this.hasMoreCountryReports = Boolean(response?.has_more);
+      this.hasMoreCountryReports.set(Boolean(response?.has_more));
     }
     catch {
       if (!append) {
-        this.selectedCountryReports = [];
+        this.selectedCountryReports.set([]);
       }
-      this.hasMoreCountryReports = false;
+      this.hasMoreCountryReports.set(false);
     }
     finally {
       this.setCountryReportLoadingState(append, false);
@@ -591,28 +600,30 @@ export class WorldHeatmapComponent implements AfterViewInit, OnChanges, OnInit, 
   }
 
   private refreshMapPresentation(animate: boolean): void {
-    if (animate) {
-      this.animateMapTransition();
-    }
-    else {
-      this.updateColors();
-    }
-    this.updateLegend();
-    this.updateActiveCategoryLabel();
+    this.zone.runOutsideAngular(() => {
+      if (animate) {
+        this.animateMapTransition();
+      }
+      else {
+        this.updateColors();
+      }
+      this.updateLegend();
+      this.updateActiveCategoryLabel();
+    });
   }
 
   private resetCountryReportState(): void {
-    this.selectedCountryReports = [];
+    this.selectedCountryReports.set([]);
     this.selectedCountryPage = 1;
-    this.hasMoreCountryReports = false;
+    this.hasMoreCountryReports.set(false);
   }
 
   private setCountryReportLoadingState(append: boolean, isLoading: boolean): void {
     if (append) {
-      this.isCountryReportLoadingMore = isLoading;
+      this.isCountryReportLoadingMore.set(isLoading);
       return;
     }
-    this.isCountryReportLoading = isLoading;
+    this.isCountryReportLoading.set(isLoading);
   }
 
   private normalizePositionValue(rawValue: number): number {

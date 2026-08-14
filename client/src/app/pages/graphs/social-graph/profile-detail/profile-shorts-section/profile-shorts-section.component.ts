@@ -18,6 +18,7 @@ export class SocialProfileShortsSectionComponent {
   showLoadMoreWhenDone = input(false);
   showHeader = input(true);
   compactMedia = input(false);
+  flushHorizontal = input(false);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
 }

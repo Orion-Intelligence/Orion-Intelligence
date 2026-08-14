@@ -81,9 +81,9 @@ export class SocialService {
     }));
   }
 
-  saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false): Observable<any> {
+  saveSocialProfiles(profileUsername: string, profiles: PlatformResult[], replace = false, status = 'complete'): Observable<any> {
     const normalizedUsername = SocialNormalizationUtil.normalizeUsername(profileUsername);
-    return this.scanService.saveSocialProfiles(normalizedUsername, profiles, replace).pipe(tap(() => {
+    return this.scanService.saveSocialProfiles(normalizedUsername, profiles, replace, status).pipe(tap(() => {
       this.stateStore.cacheCurrentProfiles(normalizedUsername, profiles);
     }));
   }
@@ -174,6 +174,7 @@ export class SocialService {
       step: shouldQueue ? 'Queued' : 'Starting'
     };
     opts.updateState(state => state.jobs.update(currentJobs => [newJob, ...currentJobs.filter(job => SocialNormalizationUtil.normalizeUsername(job.username) !== normalizedUsername)]));
+    opts.persistProfiles?.(newJob.username, [], 'pending');
     if (!shouldQueue) {
       this.runScan(newJob, this.scanService.performScan(newJob.username), opts);
     }
@@ -384,6 +385,7 @@ export class SocialService {
       },
       error: () => {
         opts.updateState(tabState => tabState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id ? { ...currentJob, status: 'failed', step: 'Scan failed' } : currentJob)));
+        opts.persistProfiles?.(job.username, [], 'failed');
         opts.cancelScanSubjects.delete(job.id);
         this.startNextQueuedScan(opts);
       },

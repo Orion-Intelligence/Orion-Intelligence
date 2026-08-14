@@ -26,6 +26,7 @@ export class SocialDefaultListSectionComponent {
   profileTab = output<{ platformData: PlatformResult; tabKey: FetchTabKey }>();
   copyValue = output<any>();
   readonly formatKey = formatKey;
+  readonly missingStatValue = 'Not fetched';
 
   getPlatformCardId(platformData: PlatformResult): string {
     return this.state.getPlatformUniqueKey(platformData);
@@ -115,7 +116,7 @@ export class SocialDefaultListSectionComponent {
     const metadataValue = platformData.allMetadata?.[key as string];
     const rawValue = profileValue ?? metadataValue ?? this.getFallbackStatValue(platformData, key);
     if (rawValue === null || rawValue === undefined || rawValue === '') {
-      return '--';
+      return this.missingStatValue;
     }
     const numericValue = typeof rawValue === 'number' ? rawValue : Number(String(rawValue).replace(/,/g, ''));
     return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(rawValue);

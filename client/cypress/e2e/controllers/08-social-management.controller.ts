@@ -220,16 +220,20 @@ export function assertSocialExtensionExecutorTab() {
   cy.get('[data-testid="social-tab-panel-extension"]', { timeout: SOCIAL_FETCH_TIMEOUT })
     .should('be.visible')
     .within(() => {
+      cy.get('[data-testid="social-extension-download"]').click();
+      cy.get('[data-testid="social-extension-download-modal"]').should('be.visible');
       cy.get('[data-testid="social-extension-download-chrome"]')
         .should('have.attr', 'href')
         .and('include', '/api/social/extensions/download/chrome');
       cy.get('[data-testid="social-extension-download-chrome"]')
         .should('have.attr', 'download', 'orion-social-scraper-chrome.zip');
+      cy.get('[data-testid="social-extension-browser-tab-firefox"]').click();
       cy.get('[data-testid="social-extension-download-firefox"]')
         .should('have.attr', 'href')
         .and('include', '/api/social/extensions/download/firefox');
       cy.get('[data-testid="social-extension-download-firefox"]')
         .should('have.attr', 'download', 'orion-social-scraper-firefox.xpi');
+      cy.get('[data-testid="social-extension-download-close"]').click();
       cy.get('[data-testid="social-extension-refresh"]').click();
     });
   cy.wait('@extensionStatus', { timeout: SOCIAL_FETCH_TIMEOUT });
@@ -238,7 +242,6 @@ export function assertSocialExtensionExecutorTab() {
     cy.get('[data-testid="social-extension-status-label"]', { timeout: SOCIAL_FETCH_TIMEOUT })
       .should('contain.text', 'Extension ready');
     cy.get('[data-testid="social-extension-platform-status"]').should('contain.text', 'ready');
-    cy.get('[data-testid="social-extension-id-value"]').should('contain.text', 'test-extension');
     cy.get('[data-testid="social-extension-fetch-all"]').click();
   });
   cy.wait('@extensionProfile', { timeout: SOCIAL_FETCH_TIMEOUT });

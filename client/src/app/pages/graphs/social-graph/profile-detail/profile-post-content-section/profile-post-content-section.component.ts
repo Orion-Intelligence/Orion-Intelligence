@@ -5,6 +5,7 @@ import { formatFollowers } from '../../../../../shared/utils/formatters';
 import type { PostContentTabKey, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../../models/social-graph.models';
 import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
 import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
+import { applyImageFallback } from '../../utils/image-fallback.util';
 import socialPlatformCapabilities from '../../../../../../assets/data/social-graph/platform-capabilities.json';
 
 import { ContentModerationBadgeComponent } from '../../../../../shared/partials/content-moderation-badge/content-moderation-badge.component';
@@ -25,6 +26,7 @@ export class SocialProfilePostContentSectionComponent {
   private pendingScrollToBottom = false;
   private sawLoadingForScroll = false;
 
+  readonly onImageError = applyImageFallback;
   platformData = input.required<PlatformResult>();
   contentType = input.required<PostContentTabKey>();
   isLoading = input(false);
@@ -33,6 +35,7 @@ export class SocialProfilePostContentSectionComponent {
   showHeader = input(true);
   compactMedia = input(false);
   allowCommentFetch = input(true);
+  flushHorizontal = input(false);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
 

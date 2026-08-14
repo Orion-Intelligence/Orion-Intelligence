@@ -19,7 +19,7 @@ import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
 import { ProxyController } from '../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
-import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
 import { splitCountryValues } from '../../../shared/utils/country-normalization.util';
 import { GraphAdvancedBuilderPopupComponent } from './advanced-builder-popup/advanced-builder-popup.component';
 import { GraphAdvancedFilterChipModel, GraphAdvancedFilterModel, GraphBuilderLogicalOperator, GraphSearchMode, GraphSearchOptionModel, GraphSearchRequestModel } from '../../../shared/model/graph/graph-builder.model';
@@ -30,7 +30,7 @@ type GraphNodeColor = NonNullable<ExtendedNode['color']>;
   standalone: true,
   templateUrl: './graphs.component.html',
   animations: [fadeInDashboardItem],
-  imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, UiDropdownComponent, GraphAdvancedBuilderPopupComponent]
+  imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, GraphAdvancedBuilderPopupComponent]
 })
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly proxied_resource = inject(ProxyController);
@@ -353,14 +353,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.graphBuilderSearchOptions.find(option => option.key === optionKey) ?? this.graphBuilderSearchOptions[0] ?? this.graphSearchOptions[0];
   }
 
-  getGraphOperatorOptions(index: number): UiDropdownOption[] {
-    return index === 0 ? this.graphWhereOperatorOptions : this.graphJoinOperatorOptions;
-  }
-
-  getGraphOperatorValue(filter: GraphAdvancedFilterModel, index: number): string {
-    return index === 0 ? '__where__' : filter.operator;
-  }
-
   setGraphFilterOperator(filter: GraphAdvancedFilterModel, value: string | null, index: number): void {
     if (index === 0) {
       return;
@@ -381,10 +373,6 @@ export class GraphComponent implements OnInit, OnDestroy {
     else if (previousOption.mode === GraphSearchMode.Cluster) {
       filter.value = '';
     }
-  }
-
-  isGraphClusterAdvancedOption(optionKey: string): boolean {
-    return this.getGraphAdvancedOption(optionKey).mode === GraphSearchMode.Cluster;
   }
 
   getGraphFilterClusterValue(filter: GraphAdvancedFilterModel): string {
@@ -994,117 +982,6 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
     });
     return Array.from(merged.values());
-  }
-
-  private mergeGraphBuilderResults(responseResults: GraphResultItem[][], requests: GraphSearchRequestModel[]): GraphResultItem[] {
-    if (responseResults.length === 0) {
-      return [];
-    }
-
-    let aggregate = responseResults[0] ?? [];
-    let aggregateDocumentIds = this.extractDocumentIdsFromGraphResults(aggregate);
-    for (let index = 1; index < responseResults.length; index++) {
-      const current = responseResults[index] ?? [];
-      const operator = requests[index]?.operator ?? GraphBuilderLogicalOperator.Or;
-      if (operator !== GraphBuilderLogicalOperator.And) {
-        aggregate = this.dedupeGraphResults([...aggregate, ...current]);
-        aggregateDocumentIds = this.unionSets(aggregateDocumentIds, this.extractDocumentIdsFromGraphResults(current));
-        continue;
-      }
-
-      const currentDocumentIds = this.extractDocumentIdsFromGraphResults(current);
-      if (aggregateDocumentIds.size === 0 || currentDocumentIds.size === 0) {
-        aggregate = [];
-        aggregateDocumentIds = new Set<string>();
-        break;
-      }
-
-      const sharedDocumentIds = this.intersectSets(aggregateDocumentIds, currentDocumentIds);
-      aggregate = this.dedupeGraphResults([...aggregate, ...current].filter(item => {
-        const itemDocumentIds = this.extractDocumentIdsFromGraphResult(item);
-        return itemDocumentIds.some(documentId => sharedDocumentIds.has(documentId));
-      }));
-      aggregateDocumentIds = sharedDocumentIds;
-    }
-
-    return this.dedupeGraphResults(aggregate);
-  }
-
-  private limitGraphBuilderResultsByDocuments(results: GraphResultItem[], documentLimit: number): GraphResultItem[] {
-    if (!Number.isFinite(documentLimit) || documentLimit < 1) {
-      return this.dedupeGraphResults(results);
-    }
-
-    const orderedDocumentIds: string[] = [];
-    const seenDocumentIds = new Set<string>();
-    results.forEach(item => {
-      this.extractDocumentIdsFromGraphResult(item).forEach(documentId => {
-        if (!seenDocumentIds.has(documentId)) {
-          seenDocumentIds.add(documentId);
-          orderedDocumentIds.push(documentId);
-        }
-      });
-    });
-
-    if (orderedDocumentIds.length <= documentLimit) {
-      return this.dedupeGraphResults(results);
-    }
-
-    const allowedDocumentIds = new Set(orderedDocumentIds.slice(0, documentLimit));
-    const limitedResults = results.filter(item => this.extractDocumentIdsFromGraphResult(item).some(documentId => allowedDocumentIds.has(documentId)));
-    return this.dedupeGraphResults(limitedResults);
-  }
-
-  private extractDocumentIdsFromGraphResults(results: GraphResultItem[]): Set<string> {
-    const ids = new Set<string>();
-    results.forEach(item => {
-      this.extractDocumentIdsFromGraphResult(item).forEach(id => ids.add(id));
-    });
-    return ids;
-  }
-
-  private extractDocumentIdsFromGraphResult(item: GraphResultItem): string[] {
-    const ids = new Set<string>();
-    const addDocumentId = (id: unknown) => {
-      const value = String(id ?? '');
-      if (!value || this.isClusterRootNode(value)) {
-        return;
-      }
-      ids.add(value);
-    };
-    const inspectEdge = (edge: any) => {
-      if (!edge?._from || !edge?._to) {
-        return;
-      }
-      const type = String(edge.type || '');
-      if (type === 'cluster_to_doc') {
-        addDocumentId(edge._to);
-      }
-      else if (type.startsWith('has_')) {
-        addDocumentId(edge._from);
-      }
-    };
-    const inspect = (vertex: any) => {
-      if (!vertex?._id) {
-        return;
-      }
-      if (String(vertex.type || '').toLowerCase() === 'document') {
-        ids.add(String(vertex._id));
-      }
-    };
-    inspect(item.vertex);
-    inspectEdge(item.edge);
-    (item.path?.vertices ?? []).forEach(inspect);
-    (item.path?.edges ?? []).forEach(inspectEdge);
-    return Array.from(ids);
-  }
-
-  private unionSets(first: Set<string>, second: Set<string>): Set<string> {
-    return new Set([...first, ...second]);
-  }
-
-  private intersectSets(first: Set<string>, second: Set<string>): Set<string> {
-    return new Set([...first].filter(item => second.has(item)));
   }
 
   showContextMenu( node: ExtendedNode, pointerDom?: { x: number; y: number; } ) {

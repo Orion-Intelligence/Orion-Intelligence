@@ -171,13 +171,13 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       let reports = comp.getReportsByCountry('Canada');
       expect(reports.length).to.be.greaterThan(0);
       comp['openCountryReport']('Canada');
-      expect(comp.isOpenCountryReport).to.equal(true);
-      expect(Array.isArray(comp.selectedCountryReports)).to.equal(true);
+      expect(comp.isOpenCountryReport()).to.equal(true);
+      expect(Array.isArray(comp.selectedCountryReports())).to.equal(true);
       comp.closeCountryReport();
-      expect(comp.isOpenCountryReport).to.equal(false);
+      expect(comp.isOpenCountryReport()).to.equal(false);
       comp['onCountryClick']({});
       comp['onCountryClick']({properties: {name: 'Canada'}});
-      expect(comp.isOpenCountryReport).to.equal(true);
+      expect(comp.isOpenCountryReport()).to.equal(true);
       comp.closeCountryReport();
       comp['allCategoryReports'] = originalAll;
       comp.ngOnDestroy();

@@ -362,6 +362,7 @@ export class SocialNormalizationUtil {
       profile_username: this.normalizeUsername(source.profile_username || source.root_username || source.username || ''),
       profiles,
       count: source.count ?? profiles.length,
+      status: source.status || 'complete',
     };
   }
 

@@ -133,6 +133,7 @@ export class ConsolidatedApiService {
       .runApiScanAsResponse<any>({
         apiReference: endpoint,
         payload,
+        forceNew: true,
         metadata: {
           title: `${scanType.toUpperCase()} Scan`,
           target,

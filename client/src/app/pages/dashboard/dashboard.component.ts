@@ -14,7 +14,7 @@ import { DemoTourComponent } from "../demo-tour/demo-tour/demo-tour.component";
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { SidebarService } from '../../shared/services/sidebar.service';
 import { ScanNotificationService } from '../../shared/services/scan-notification.service';
-import { GenericChoicePopupAction, GenericChoicePopupComponent } from '../../shared/partials/generic-choice-popup/generic-choice-popup.component';
+import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -29,7 +29,7 @@ import { GenericChoicePopupAction, GenericChoicePopupComponent } from '../../sha
     ProSubscriptionComponent,
     DemoTourComponent,
     TranslatePipe,
-    GenericChoicePopupComponent
+    ConfirmationPopupComponent
   ],
   templateUrl: './dashboard.component.html',
   animations: [dashboardGlobalAnimation]
@@ -110,8 +110,8 @@ export class DashboardComponent implements AfterViewInit, OnInit {
       !(user.role == 'admin');
   }
 
-  handleDuplicateScanChoice(action: GenericChoicePopupAction): void {
-    if (action === 'secondary') {
+  handleDuplicateScanChoice(runNewScan: boolean): void {
+    if (runNewScan) {
       this.scanNotificationService.resolveDuplicateScanChoice('new');
       return;
     }

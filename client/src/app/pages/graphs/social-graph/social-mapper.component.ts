@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Inject, OnDestroy, PLATFORM_ID, ViewEncapsulation, computed, inject, signal, viewChild } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewEncapsulation, computed, inject, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
@@ -41,7 +40,7 @@ interface LatestFetchConfirmationData {
     SocialBreadcrumbComponent
   ]
 })
-export class SocialMapperComponent implements OnDestroy {
+export class SocialMapperComponent {
   private readonly stateService = inject(SocialService);
   private readonly router = inject(Router);
   private readonly graphState = this.stateService.graphState;
@@ -58,13 +57,6 @@ export class SocialMapperComponent implements OnDestroy {
   private cancelFollowingFetchSubjects = new Map<string, Subject<void>>();
   private cancelOnlinePresenceFetchSubjects = new Map<string, Subject<void>>();
   private cancelStealerLogsFetchSubjects = new Map<string, Subject<void>>();
-  private mediaQueryList: MediaQueryList | null = null;
-  private readonly mediaQueryListener = (event: MediaQueryListEvent) => {
-    this.isSmallScreen.set(event.matches);
-    if (!event.matches) {
-      this.closeMobileHomeMenu();
-    }
-  };
 
   public state = this.stateService;
   homeMenuSearchTerm = computed(() => this.graphState.homeMenuSearchTerm());
@@ -75,13 +67,10 @@ export class SocialMapperComponent implements OnDestroy {
     ...this.jobs().filter(job => job.status === 'completed').map(job => job.username)
   ]));
   isHomeMenuCollapsed = computed(() => this.graphState.isHomeMenuCollapsed());
-  isSmallScreen = signal(false);
-  isMobileHomeMenuOpen = signal(false);
   isInitialLoading = signal(true);
   profileBreadcrumbLabel = signal<string | null>(null);
   latestFetchConfirmationData = signal<LatestFetchConfirmationData | null>(null);
   activeResultSources = signal<Record<string, SocialResultSource>>({});
-  effectiveHomeMenuCollapsed = computed(() => this.isSmallScreen() ? !this.isMobileHomeMenuOpen() : this.isHomeMenuCollapsed());
   activeSourceUsername = computed(() => this.state.activeUsername());
   activeSourcePlatforms = computed(() => {
     const username = this.activeSourceUsername();
@@ -105,20 +94,11 @@ export class SocialMapperComponent implements OnDestroy {
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   profileListing = viewChild(SocialProfileListingComponent);
 
-  constructor( private destroyRef: DestroyRef, @Inject(PLATFORM_ID) private platformId: object ) {
-    if (isPlatformBrowser(this.platformId)) {
-      this.mediaQueryList = window.matchMedia('(max-width: 1023px)');
-      this.isSmallScreen.set(this.mediaQueryList.matches);
-      this.mediaQueryList.addEventListener('change', this.mediaQueryListener);
-    }
-    this.state.loadStoredSocialProfiles().pipe(takeUntilDestroyed(this.destroyRef), finalize(() => this.isInitialLoading.set(false))).subscribe();
-    queueMicrotask(() => this.resumeIncompleteScans());
-  }
-
-  ngOnDestroy(): void {
-    if (isPlatformBrowser(this.platformId) && this.mediaQueryList) {
-      this.mediaQueryList.removeEventListener('change', this.mediaQueryListener);
-    }
+  constructor(private destroyRef: DestroyRef) {
+    this.state.loadStoredSocialProfiles().pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
+      this.isInitialLoading.set(false);
+      this.resumeIncompleteScans();
+    })).subscribe();
   }
 
   private updateState(updater: (state: SocialGraphState) => void): void {
@@ -135,22 +115,11 @@ export class SocialMapperComponent implements OnDestroy {
   }
 
   onHomeMenuToggled(): void {
-    if (this.isSmallScreen()) {
-      this.isMobileHomeMenuOpen.update(isOpen => !isOpen);
-      return;
-    }
     this.updateState(state => state.isHomeMenuCollapsed.update(v => !v));
-  }
-
-  closeMobileHomeMenu(): void {
-    this.isMobileHomeMenuOpen.set(false);
   }
 
   onHomeMenuHistoryTabClicked(): void {
     this.state.setActiveUserIndex(0);
-    if (this.isSmallScreen()) {
-      this.closeMobileHomeMenu();
-    }
   }
 
   setResultSource(source: SocialResultSource): void {
@@ -234,9 +203,6 @@ export class SocialMapperComponent implements OnDestroy {
     else {
       this.graphState.activeUsername.set(job.username);
     }
-    if (this.isSmallScreen()) {
-      this.closeMobileHomeMenu();
-    }
   }
 
   private initiateScan(username: string): void {
@@ -251,6 +217,10 @@ export class SocialMapperComponent implements OnDestroy {
     this.state.cancelScan(jobId, this.buildScanJobOptions());
   }
 
+  retryScan(job: Job): void {
+    this.initiateScan(job.username);
+  }
+
   private resumeIncompleteScans(): void {
     this.state.resumeIncompleteScans(() => this.graphState.jobs(), this.buildScanJobOptions());
   }
@@ -262,8 +232,8 @@ export class SocialMapperComponent implements OnDestroy {
       state: this.state,
       destroyRef: this.destroyRef,
       cancelScanSubjects: this.cancelScanSubjects,
-      persistProfiles: (profileUsername: string, profiles: PlatformResult[]) => {
-        this.state.saveSocialProfiles(profileUsername, profiles).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      persistProfiles: (profileUsername: string, profiles: PlatformResult[], status?: string) => {
+        this.state.saveSocialProfiles(profileUsername, profiles, false, status).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
       }
     };
   }

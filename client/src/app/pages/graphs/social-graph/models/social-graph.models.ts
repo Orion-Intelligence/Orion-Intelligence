@@ -92,7 +92,7 @@ export interface ScanJobOptions {
   state: SocialService;
   destroyRef: DestroyRef;
   cancelScanSubjects: Map<string, Subject<void>>;
-  persistProfiles?: (profileUsername: string, profiles: PlatformResult[]) => void;
+  persistProfiles?: (profileUsername: string, profiles: PlatformResult[], status?: string) => void;
 }
 
 export type ManagedPlatformRow = ManagedPlatform & {

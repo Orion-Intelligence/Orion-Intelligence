@@ -23,7 +23,6 @@ import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tab
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileListingComponent {
-  private readonly PRIORITY_PLATFORMS = ['instagram', 'youtube', 'facebook', 'behance', 'tiktok', 'twitter', 'vimeo', 'x'];
   private readonly EXTENSION_PLATFORMS = ['reddit', 'github', 'linkedin', 'x', 'instagram', 'facebook', 'youtube', 'tiktok'];
   private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'extension', label: 'Extension Details', icon: 'bi bi-plugin' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
   private readonly mappedFetchTabs: Partial<Record<FetchTabKey, FetchTab>> = { videos: { key: 'videos', label: 'Videos', icon: 'bi bi-play-btn' }, shorts: { key: 'shorts', label: 'Shorts', icon: 'bi bi-play-circle' } };
@@ -58,6 +57,7 @@ export class SocialProfileListingComponent {
   activeResultSources = input<Record<string, SocialResultSource>>({});
   extensionStatus = signal<SocialExtensionStatus | null>(null);
   platformSearchTerm = signal('');
+  readonly missingStatValue = 'Not fetched';
   onlinePresenceSearchTerms = signal<Record<string, string>>({});
   activeUsers = computed<FeedUser[]>(() => {
     return Array.from(this.scanResults().entries())
@@ -92,6 +92,7 @@ export class SocialProfileListingComponent {
   constructor() {
     effect(() => {
       this.activeUsers();
+      this.isInitialLoading();
       queueMicrotask(() => this.openProfileOverviewFromQuery());
     });
     queueMicrotask(() => this.refreshExtensionStatus());
@@ -139,11 +140,11 @@ export class SocialProfileListingComponent {
   getFetchTabs(platformData: PlatformResult): FetchTab[] {
     const baseTabs = this.getBaseFetchTabs(platformData);
     if (this.getResultSource(platformData) === 'darkweb') {
-      return [
+      return this.moveExtensionTabToEnd([
         ...baseTabs.filter(tab => tab.key === 'details' || tab.key === 'posts' || tab.key === 'extension' || tab.key === 'images'),
         this.onlinePresenceTab,
         this.stealerLogsTab
-      ];
+      ]);
     }
     const sharedTabs = [...baseTabs, this.onlinePresenceTab, this.stealerLogsTab];
     const tabs = this.isPriorityPlatform(platformData.platform)
@@ -159,7 +160,12 @@ export class SocialProfileListingComponent {
       }
     }
     const disabledTabs = new Set([...(globalCapability?.disallow ?? []), ...(capability?.disallow ?? [])]);
-    return tabs.filter(tab => !disabledTabs.has(tab.key));
+    return this.moveExtensionTabToEnd(tabs.filter(tab => !disabledTabs.has(tab.key)));
+  }
+
+  private moveExtensionTabToEnd(tabs: FetchTab[]): FetchTab[] {
+    const extensionTab = tabs.find(tab => tab.key === 'extension');
+    return extensionTab ? [...tabs.filter(tab => tab.key !== 'extension'), extensionTab] : tabs;
   }
 
   private getBaseFetchTabs(platformData: PlatformResult): FetchTab[] {
@@ -422,6 +428,10 @@ export class SocialProfileListingComponent {
     return this.getPlatformCardId(platformData);
   }
 
+  getUsernameInitial(username: string): string {
+    return username.match(/\p{L}/u)?.[0].toLocaleUpperCase() ?? '?';
+  }
+
   onPlatformSearchInput(event: Event): void {
     this.platformSearchTerm.set((event.target as HTMLInputElement | null)?.value ?? '');
   }
@@ -472,7 +482,7 @@ export class SocialProfileListingComponent {
     const metadataValue = platformData.allMetadata?.[key as string];
     const rawValue = profileValue ?? metadataValue ?? this.getFallbackStatValue(platformData, key);
     if (rawValue === null || rawValue === undefined || rawValue === '') {
-      return '--';
+      return this.missingStatValue;
     }
     const numericValue = typeof rawValue === 'number' ? rawValue : Number(String(rawValue).replace(/,/g, ''));
     return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(rawValue);
@@ -612,7 +622,7 @@ export class SocialProfileListingComponent {
         return;
       }
     }
-    if (this.activeUsers().length > 0) {
+    if (this.activeUsers().length > 0 || !this.isInitialLoading()) {
       this.appliedProfileQuery.set(true);
     }
   }

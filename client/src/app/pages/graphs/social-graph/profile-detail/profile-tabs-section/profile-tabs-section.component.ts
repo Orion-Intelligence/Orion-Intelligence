@@ -6,6 +6,7 @@ import type { FeedUser, FetchTab, FetchTabKey, ImageCursorFetchRequest, PostCont
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { SocialNormalizationUtil } from '../../utils/social-normalization.util';
+import { applyImageFallback } from '../../utils/image-fallback.util';
 import { normalizeRedditClearnetUrl } from '../../utils/reddit-url.util';
 import { SocialService } from '../../services/social.service';
 import { SocialProfilePostsSectionComponent } from '../profile-posts-section/profile-posts-section.component';
@@ -16,12 +17,13 @@ import { ExportChoiceModalComponent } from '../../../../../shared/partials/expor
 import { PROFILE_STEALERLOG_EXPORT_OPTIONS } from '../../../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../../../shared/model/report/report-export.model';
+import { SocialExtensionDownloadModalComponent } from '../../../../../shared/partials/social-extension-download-modal/social-extension-download-modal.component';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, SocialProfilePostsSectionComponent, SocialProfileVideosSectionComponent, SocialProfileShortsSectionComponent, ExportChoiceModalComponent],
+  imports: [TooltipDirective, SocialProfilePostsSectionComponent, SocialProfileVideosSectionComponent, SocialProfileShortsSectionComponent, ExportChoiceModalComponent, SocialExtensionDownloadModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
@@ -39,6 +41,7 @@ export class SocialProfileTabsSectionComponent {
   extensionStatus = signal<SocialExtensionStatus | null>(null);
   extensionStatusLoading = signal(false);
   extensionStatusError = signal('');
+  extensionDownloadVisible = signal(false);
   user = input.required<FeedUser>();
   platformData = input.required<PlatformResult>();
   fetchTabs = input.required<FetchTab[]>();
@@ -55,6 +58,7 @@ export class SocialProfileTabsSectionComponent {
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;
+  readonly onImageError = applyImageFallback;
   readonly isImageUrl = isImageUrl;
   readonly formatKey = formatKey;
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
@@ -324,6 +328,10 @@ export class SocialProfileTabsSectionComponent {
     return getProfileDetailEntries(platformData);
   }
 
+  getVisibleProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
+    return this.getProfileDetailEntries(platformData).filter(item => !['img_src', 'm_img_src'].includes(item.key.toLowerCase()));
+  }
+
   getExtensionPlatformData(platformData: PlatformResult): PlatformResult {
     return {
       ...platformData,
@@ -448,7 +456,13 @@ export class SocialProfileTabsSectionComponent {
     if (value === null || value === undefined) {
       return '';
     }
+    if (Array.isArray(value)) {
+      return value.map(entry => this.formatMetadataValue(entry)).filter(entry => entry !== '').join(', ');
+    }
     if (typeof value === 'object') {
+      if (typeof value['is_hate_speech'] === 'boolean') {
+        return value['is_hate_speech'] ? 'Yes' : 'No';
+      }
       try {
         return JSON.stringify(value, null, 2);
       }

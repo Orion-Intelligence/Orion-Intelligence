@@ -13,6 +13,12 @@ import { SocialProfilePostContentSectionComponent } from '../profile-post-conten
 export class SocialProfileVideosSectionComponent {
   platformData = input.required<PlatformResult>();
   isLoading = input(false);
+  allowCommentFetch = input(true);
+  showFetchLatest = input(true);
+  showLoadMoreWhenDone = input(false);
+  showHeader = input(true);
+  compactMedia = input(false);
+  flushHorizontal = input(false);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
 }
