@@ -90,6 +90,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     return this.appService.getConfig().appSettings.auth_dashboard_icon || LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
   }
 
+  isLightTheme(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('light-theme');
+  }
+
   copyToClipboard(text: string): void {
     void navigator.clipboard.writeText(text).then(() => {
       this.copied = true;

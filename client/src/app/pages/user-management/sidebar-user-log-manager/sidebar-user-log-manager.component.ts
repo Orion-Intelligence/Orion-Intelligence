@@ -140,12 +140,12 @@ export class SidebarUserLogManagerComponent implements OnInit {
 
   getTypeClass(type: string): string {
     if (type === 'ERROR') {
-      return 'border-red-400/30 bg-red-500/10 text-red-300';
+      return 'border-red-400/30 bg-red-500/10 text-red-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800';
     }
     if (type === 'WARNING') {
-      return 'border-amber-400/30 bg-amber-500/10 text-amber-300';
+      return 'border-amber-400/30 bg-amber-500/10 text-amber-300 [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800';
     }
-    return 'border-sky-400/30 bg-sky-500/10 text-sky-300';
+    return 'border-sky-400/30 bg-sky-500/10 text-sky-300 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800';
   }
 
   formatBytes(bytes: number): string {

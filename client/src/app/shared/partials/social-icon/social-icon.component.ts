@@ -5,7 +5,7 @@ import { IconService } from './services/icon.service';
   selector: 'app-social-icon',
   standalone: true,
   imports: [],
-  template: `<span class="block h-full w-full">@if (iconDataUrl()) { <img [src]="iconDataUrl()" [alt]="platformName()" class="h-full w-full object-contain"> }</span>`,
+  template: `<span class="block h-full w-full">@if (iconDataUrl()) { <img [src]="iconDataUrl()" [alt]="platformName()" class="h-full w-full object-contain [body.light-theme_&]:[filter:var(--ui-icon-filter-light)]"> }</span>`,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: 'block h-full w-full'

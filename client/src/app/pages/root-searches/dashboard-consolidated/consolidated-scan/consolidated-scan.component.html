@@ -1,9 +1,9 @@
 @if (showUi && !isLoading()) {
-  <section data-testid="consolidated-scan-section" class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] max-[640px]:gap-[12px] max-[640px]:p-[12px]">
+  <section data-testid="consolidated-scan-section" class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] mb-[20px] flex w-full flex-col gap-[16px] rounded-[8px] border border-[var(--color-border)] p-[16px] [.light-theme_&]:shadow-[0_8px_24px_rgba(15,23,42,0.06)] max-[640px]:gap-[12px] max-[640px]:p-[12px]">
     <header class="w-full">
       <div class="flex w-full items-center justify-between gap-[12px]">
         <div class="min-w-0">
-          <h1 data-testid="consolidated-scan-title" class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">{{ 'Threats Scans Report' | translate }}: {{ targetLabel }}</h1>
+          <h1 data-testid="consolidated-scan-title" class="font-[Inter] text-[20px] font-medium leading-[1.2] text-[var(--color-text5)] [.light-theme_&]:text-[#285f89] whitespace-nowrap max-[768px]:text-[16px] max-[768px]:whitespace-normal">{{ 'Threats Scans Report' | translate }}: {{ targetLabel }}</h1>
           @if (isProcessing || runningTypes.length) {
             <div class="mt-[6px] inline-flex items-center gap-[7px] font-[Inter] text-[13px] leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap max-[640px]:whitespace-normal">
               <span class="h-[7px] w-[7px] animate-consolidated-scan-pulse rounded-full bg-[#26B961]"></span>
@@ -25,11 +25,11 @@
             </div>
           }
         </div>
-        <button type="button" (click)="toggleCollapse()" class="inline-flex items-center gap-[6px] border-0 bg-transparent p-0 font-[Inter] text-[12px] font-medium text-[var(--color-text4)] transition-colors duration-150 hover:text-[var(--color-text5)] active:opacity-85 focus-visible:underline" [attr.aria-expanded]="!isCollapsed">
+        <button type="button" (click)="toggleCollapse()" class="inline-flex items-center gap-[6px] rounded-md border-0 bg-transparent p-1 font-[Inter] text-[12px] font-medium text-[var(--color-text4)] transition-colors duration-150 hover:text-[var(--color-text5)] [.light-theme_&]:hover:bg-[#edf4fb] [.light-theme_&]:hover:text-[#285f89] active:opacity-85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/40" [attr.aria-expanded]="!isCollapsed">
           <span class="whitespace-nowrap leading-none">
             {{ (isCollapsed ? 'Show details' : 'Hide details') | translate }}
           </span>
-          <svg class="h-[24px] w-[24px] shrink-0 text-[var(--color-text5)] transition-transform duration-150" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [ngClass]="{ 'rotate-180': !isCollapsed }">
+          <svg class="h-[24px] w-[24px] shrink-0 text-[var(--color-text5)] [.light-theme_&]:text-[#285f89] transition-transform duration-150" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" [ngClass]="{ 'rotate-180': !isCollapsed }">
             <polyline points="6 9 12 15 18 9"></polyline>
           </svg>
         </button>
@@ -108,7 +108,7 @@
           <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] flex-none min-w-[350px] rounded-[12px] border border-[var(--color-border)] max-[1200px]:min-w-0" @scanAnimation>
             <div class="flex flex-col gap-[16px] p-[20px_24px]">
               <div class="flex w-full items-center justify-between">
-                <h2 class="font-[Inter] text-[16px] font-medium leading-[1.2] text-[var(--color-text5)] whitespace-nowrap">{{ 'Threats scans' | translate }}</h2>
+                <h2 class="font-[Inter] text-[16px] font-medium leading-[1.2] text-[var(--color-text5)] [.light-theme_&]:text-[#285f89] whitespace-nowrap">{{ 'Threats scans' | translate }}</h2>
                 <div class="inline-flex items-center gap-[6px]">
                   <div class="h-[8px] w-[8px] animate-consolidated-scan-pulse rounded-full bg-[var(--color-text5)]"></div>
                   <div class="font-[Inter] text-[13px] font-normal leading-[16.9px] text-[var(--color-text1)] whitespace-nowrap">{{ 'Collecting intelligence…' | translate }}</div>

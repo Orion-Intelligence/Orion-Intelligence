@@ -255,7 +255,7 @@
                         </button>
                       }
                       @if (licenseService.isMaintainer() && !isAdminTenantAlertReport) {
-                        <button type="button" data-testid="tenant-alert-delete-button" class="inline-flex h-8 w-8 items-center justify-center border-0 bg-transparent text-[var(--color-text2)] transition hover:bg-[rgba(127,29,29,0.34)] hover:text-red-300" [attr.aria-label]="'categoryAlerts.actions.deleteAlert' | translate" [appTooltip]="'categoryAlerts.actions.deleteAlert' | translate" (click)="$event.stopPropagation(); deleteAlertConfirmation(item.id)">
+                        <button type="button" data-testid="tenant-alert-delete-button" class="inline-flex h-8 w-8 items-center justify-center border-0 bg-transparent text-[var(--color-text2)] transition hover:bg-[rgba(127,29,29,0.34)] hover:text-red-300 [body.light-theme_&]:hover:bg-red-100 [body.light-theme_&]:hover:text-red-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-500/30" [attr.aria-label]="'categoryAlerts.actions.deleteAlert' | translate" [appTooltip]="'categoryAlerts.actions.deleteAlert' | translate" (click)="$event.stopPropagation(); deleteAlertConfirmation(item.id)">
                           <i class="bi bi-trash3" aria-hidden="true"></i>
                         </button>
                       }
@@ -312,7 +312,7 @@
   }
 
   @if (filterModel) {
-    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%]': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
+    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full [body.light-theme_&]:border-l-[var(--color-border)]" [ngClass]="{ 'translate-x-[102%]': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" [filterModel]="filterModel" (filterChanged)="applyFilter($event)" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }

@@ -2,8 +2,8 @@
   <div class="absolute inset-0 z-30 bg-slate-950/60 backdrop-blur-sm [body.light-theme_&]:bg-[var(--color-blue-850)]/20 md:hidden" (click)="onMobileBackdropClick()"></div>
 }
 
-<aside class="dark-theme relative z-40 h-full border-r border-[#ffffff12] bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]" [class.w-[280px]]="!isCollapsed" [class.min-w-[280px]]="!isCollapsed" [class.w-[70px]]="isCollapsed && !isMobile" [class.min-w-[70px]]="isCollapsed && !isMobile" [class.w-[68px]]="isCollapsed && isMobile" [class.min-w-[68px]]="isCollapsed && isMobile">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" (toggleClicked)="toggleCollapsed()">
+<aside class="relative z-40 h-full border-r border-[#ffffff12] bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff]" [class.w-[280px]]="!isCollapsed" [class.min-w-[280px]]="!isCollapsed" [class.w-[70px]]="isCollapsed && !isMobile" [class.min-w-[70px]]="isCollapsed && !isMobile" [class.w-[68px]]="isCollapsed && isMobile" [class.min-w-[68px]]="isCollapsed && isMobile">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" (toggleClicked)="toggleCollapsed()">
     <div data-sidebar-expanded class="flex h-full flex-col gap-3 overflow-y-auto bg-[var(--color-blue-820-light)] p-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
       <section class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 p-3 shadow-[0_8px_20px_rgba(15,23,42,0.08)]">
         <div class="mb-2 flex items-center justify-between gap-2">
@@ -20,7 +20,7 @@
             <input type="number" min="1" max="5" step="1" [ngModel]="localMaxDepth" (ngModelChange)="onMaxDepthChange($event)" class="mt-1 h-8 w-full rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-2 text-sm font-semibold text-[var(--color-text1)] outline-none focus:border-[var(--color-blue-640)]" />
           </label>
         </div>
-        <button type="button" class="mt-2 inline-flex h-8 w-full items-center justify-center gap-2 rounded-[7px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]" (click)="applyGraphSize()">
+        <button type="button" class="mt-2 inline-flex h-8 w-full items-center justify-center gap-2 rounded-[7px] bg-[var(--color-blue-640)] px-3 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)] [body.light-theme_&]:bg-[var(--color-blue-640)] [body.light-theme_&]:hover:bg-[var(--color-blue-630)]" (click)="applyGraphSize()">
           <i class="bi bi-arrow-clockwise text-[13px]"></i>
           {{ 'Apply' | translate }}
         </button>

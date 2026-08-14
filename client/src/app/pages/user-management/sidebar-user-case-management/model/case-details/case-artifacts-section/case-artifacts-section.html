@@ -1,4 +1,4 @@
-<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Artifacts' | translate }}
@@ -125,7 +125,7 @@
                                 </div>
                                 } @else {
                                 @for (report of artifactReports; track report.id) {
-                                <button type="button" (click)="store.selectArtifactReport(artifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200" [attr.data-testid]="'case-artifact-report-option-' + $index">
+                                <button type="button" (click)="store.selectArtifactReport(artifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200 [body.light-theme_&]:hover:bg-sky-100 [body.light-theme_&]:hover:text-sky-800" [attr.data-testid]="'case-artifact-report-option-' + $index">
                                     {{ report.title }}
                                 </button>
                                 } @empty {
@@ -156,7 +156,7 @@
                                     <div class="mt-1 max-h-32 space-y-1 overflow-y-auto rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-2">
                                         @for (artifactFile of artifact.files || []; track artifactFile.fileId || $index; let fileIndex = $index) {
                                         <div class="flex min-w-0 items-center gap-2 rounded-[6px] bg-[var(--color-blue-820-light)] px-2 py-1.5 text-sm font-medium text-[var(--color-text2)]">
-                                            <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-500/10 text-[10px] font-semibold text-sky-300">{{ fileIndex + 1 }}</span>
+                                            <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-500/10 text-[10px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">{{ fileIndex + 1 }}</span>
                                             <span class="min-w-0 truncate" [title]="artifactFile.fileName">{{ artifactFile.fileName }}</span>
                                         </div>
                                         }
@@ -203,7 +203,7 @@
                         getFormattedDateOnly(artifact.capturedAt) }}</span>
                     }
                     @if (artifact.url) {
-                    <a [href]="artifact.url" target="_blank" rel="noopener" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">{{
+                    <a [href]="artifact.url" target="_blank" rel="noopener" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:text-sky-900">{{
                         'Open' | translate }}</a>
                     }
                     @if (canManageCases() && !caseData.closure) {
@@ -212,7 +212,7 @@
                     </button>
                     }
                     @if (artifact.type === 'report' && artifact.linkedReportId) {
-                    <button type="button" (click)="store.viewArtifactReport(artifact)" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200">
+                    <button type="button" (click)="store.viewArtifactReport(artifact)" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:text-sky-900">
                         View Report
                     </button>
                     }
@@ -244,22 +244,22 @@
                             {{ artifactFile.fileName }}
                         </span>
 
-                        <span class="rounded-full border px-2 py-0.5 text-[10px]" [attr.data-testid]="'case-artifact-file-integrity-' + fileIndex" [ngClass]="{ 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': artifactFile.integrityStatus === 'verified', 'border-red-400/30 bg-red-500/10 text-red-300': artifactFile.integrityStatus === 'failed' }">
+                        <span class="rounded-full border px-2 py-0.5 text-[10px]" [attr.data-testid]="'case-artifact-file-integrity-' + fileIndex" [ngClass]="{ 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': artifactFile.integrityStatus === 'verified', 'border-red-400/30 bg-red-500/10 text-red-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': artifactFile.integrityStatus === 'failed' }">
                             {{ artifactFile.integrityStatus === 'failed' ? 'Integrity Failed' : 'Verified' }}
                         </span>
                     </div>
 
                     <div class="ml-auto flex shrink-0 items-center gap-2">
-                        <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" [disabled]="store.isArtifactFileIntegrityFailed(artifactFile)" [attr.data-testid]="'case-artifact-file-download-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-emerald-300 transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-40">
+                        <button type="button" (click)="store.downloadArtifactFile(artifact, artifactFile.fileId)" [disabled]="store.isArtifactFileIntegrityFailed(artifactFile)" [attr.data-testid]="'case-artifact-file-download-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-emerald-300 transition hover:bg-[var(--color-blue-810)] disabled:cursor-not-allowed disabled:opacity-40 [body.light-theme_&]:text-emerald-700">
                             <i class="bi bi-download text-xs"></i>
                         </button>
 
-                        <button type="button" (click)="store.verifyArtifactFile(artifact, artifactFile.fileId)" [attr.data-testid]="'case-artifact-file-verify-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-amber-300 transition hover:bg-[var(--color-blue-810)]">
+                        <button type="button" (click)="store.verifyArtifactFile(artifact, artifactFile.fileId)" [attr.data-testid]="'case-artifact-file-verify-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-amber-300 transition hover:bg-[var(--color-blue-810)] [body.light-theme_&]:text-amber-700">
                             <i class="bi bi-shield-check text-xs"></i>
                         </button>
 
                         @if (canManageCases() && !caseData.closure) {
-                        <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" [attr.data-testid]="'case-artifact-file-delete-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-red-300 transition hover:bg-red-500/10">
+                        <button type="button" (click)="store.deleteArtifactFile(artifact, artifactFile.fileId)" [attr.data-testid]="'case-artifact-file-delete-' + fileIndex" class="inline-flex h-7 w-7 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-red-300 transition hover:bg-red-500/10 [body.light-theme_&]:text-red-700 [body.light-theme_&]:hover:bg-red-100">
                             <i class="bi bi-trash3 text-xs"></i>
                         </button>
                         }
@@ -389,7 +389,7 @@
                                 </div>
                                 } @else {
                                 @for (report of artifactReports; track report.id) {
-                                <button type="button" (click)="store.selectArtifactReport(newArtifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200" [attr.data-testid]="'case-artifact-report-option-' + $index">
+                                <button type="button" (click)="store.selectArtifactReport(newArtifact, report)" class="block w-full px-3 py-2 text-left text-sm text-[var(--color-text2)] hover:bg-sky-500/10 hover:text-sky-200 [body.light-theme_&]:hover:bg-sky-100 [body.light-theme_&]:hover:text-sky-800" [attr.data-testid]="'case-artifact-report-option-' + $index">
                                     {{ report.title }}
                                 </button>
                                 } @empty {
@@ -423,7 +423,7 @@
                                     <div class="mt-1 max-h-32 space-y-1 overflow-y-auto rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-2">
                                         @for (fileName of pendingNewArtifactFileNameRows; track $index; let fileIndex = $index) {
                                         <div class="flex min-w-0 items-center gap-2 rounded-[6px] bg-[var(--color-blue-820-light)] px-2 py-1.5 text-sm font-medium text-[var(--color-text2)]">
-                                            <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-500/10 text-[10px] font-semibold text-sky-300">{{ fileIndex + 1 }}</span>
+                                            <span class="flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-500/10 text-[10px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">{{ fileIndex + 1 }}</span>
                                             <span class="min-w-0 truncate" [title]="fileName">{{ fileName }}</span>
                                         </div>
                                         }

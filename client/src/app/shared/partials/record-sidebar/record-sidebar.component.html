@@ -2,7 +2,7 @@
   <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="onClose()"></div>
 }
 
-<aside class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[520px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[620px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !isOpen(), 'translate-x-0 pointer-events-auto': isOpen() }" [attr.data-testid]="testId()">
+<aside class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[520px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:border-l-[var(--color-border)] max-[620px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !isOpen(), 'translate-x-0 pointer-events-auto': isOpen() }" [attr.data-testid]="testId()">
   <div class="border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-5 py-3">
     <div class="flex items-center justify-between gap-3">
       <div class="min-w-0">
@@ -35,7 +35,7 @@
       </div>
 
       <div class="relative mt-4">
-        <img alt="search" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70">
+        <img alt="search" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70 [body.light-theme_&]:[filter:var(--ui-icon-filter-light)]">
         <input data-testid="record-sidebar-local-search" type="search" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] pl-10 pr-3 text-sm text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)]" [placeholder]="'Search records' | translate">
       </div>
     </div>

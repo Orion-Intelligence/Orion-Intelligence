@@ -23,7 +23,7 @@
             <td class="max-w-[420px] truncate">{{ item.event }}</td>
             @if (isAdmin()) {
               <td>
-                <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b]" (click)="openDeleteConfirmation(item.id)" [title]="'Delete audit log' | translate" [attr.aria-label]="'Delete audit log' | translate">
+                <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b] [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-100 [body.light-theme_&]:hover:text-red-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-500/30" (click)="openDeleteConfirmation(item.id)" [title]="'Delete audit log' | translate" [attr.aria-label]="'Delete audit log' | translate">
                   <i class="bi bi-trash3 text-sm leading-none"></i>
                 </button>
               </td>
@@ -45,7 +45,7 @@
           <div class="text-xs font-semibold tracking-wide text-[var(--color-text4)]">#{{ (i + 1) + ((currentPage$ | async)! - 1) * 100 }}</div>
           <div class="text-[11px] font-medium text-[var(--color-text4)]">{{ item.ts | date:'dd MMM yyyy, HH:mm:ss' }}</div>
         </div>
-        <div class="divide-y divide-white/10">
+        <div class="divide-y divide-white/10 [body.light-theme_&]:divide-[var(--color-divider)]">
           <div class="px-3 py-2">
             <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Actor' | translate }}</div>
             <div data-testid="auditlog-actor" class="mt-0.5 break-all text-sm font-medium text-[var(--color-text3)]">{{ item.actor_id }}</div>
@@ -60,7 +60,7 @@
           </div>
           @if (isAdmin()) {
             <div class="px-3 py-2">
-              <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b]" (click)="openDeleteConfirmation(item.id)" [title]="'Delete audit log' | translate" [attr.aria-label]="'Delete audit log' | translate">
+              <button data-testid="auditlog-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:border-[rgba(255,107,107,0.28)] hover:bg-[rgba(255,107,107,0.12)] hover:text-[#ff6b6b] [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-100 [body.light-theme_&]:hover:text-red-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-500/30" (click)="openDeleteConfirmation(item.id)" [title]="'Delete audit log' | translate" [attr.aria-label]="'Delete audit log' | translate">
                 <i class="bi bi-trash3 text-sm leading-none"></i>
               </button>
             </div>

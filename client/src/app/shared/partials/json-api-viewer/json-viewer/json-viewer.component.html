@@ -8,7 +8,7 @@
     @for (key of keys(json); track key; let last = $last) {
       <li class="relative py-[1px]" [class.mb-[3px]]="!last">
         @if (isCollapsible(json[key])) {
-          <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff]">
+          <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff] [body.light-theme_&&]:hover:!bg-[var(--color-blue-800)]">
             @if (level() > 0) {
               <span class="pointer-events-none absolute left-[-11px] top-1/2 w-[20px] -translate-y-1/2 border-t-[1.5px] border-[var(--color-divider)]"></span>
             }
@@ -41,7 +41,7 @@
           </div>
         }
       } @else {
-        <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-start gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff]">
+        <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-start gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff] [body.light-theme_&&]:hover:!bg-[var(--color-blue-800)]">
           @if (level() > 0) {
             <span class="pointer-events-none absolute left-[-11px] top-[14px] w-[20px] border-t-[1.5px] border-[var(--color-divider)]"></span>
           }

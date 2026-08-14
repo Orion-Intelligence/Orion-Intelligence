@@ -1,6 +1,6 @@
 <div [ngClass]="isConsolidatedView ? 'w-full min-w-0 space-y-4' : 'w-full max-w-[910px] px-2 sm:px-0 max-[640px]:px-0 space-y-4'">
   @for (item of searchResults().slice(0, getResultDisplayLimit()); track item.m_message_id || item.m_hash || item.m_message_sharable_link || $index) {
-    <div data-testid="result-card" [attr.data-result-index]="$index" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] [&&&&]:![background-image:repeating-linear-gradient(135deg,rgb(255_255_255/1.4%)_0,rgb(255_255_255/1.4%)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&&&]:![background-image:repeating-linear-gradient(135deg,rgb(15_23_42/2.2%)_0,rgb(15_23_42/2.2%)_1px,transparent_1px,transparent_12px)]' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] ui-result-card [&&]:!bg-[var(--color-blue-700)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-none px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)]" (click)="openExternalUrl(item?.m_message_sharable_link)">
+    <div data-testid="result-card" [attr.data-result-index]="$index" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] [&&&&]:![background-image:repeating-linear-gradient(135deg,rgb(255_255_255/1.4%)_0,rgb(255_255_255/1.4%)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&&&]:![background-image:repeating-linear-gradient(135deg,rgb(15_23_42/2.2%)_0,rgb(15_23_42/2.2%)_1px,transparent_1px,transparent_12px)]' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] ui-result-card [&&]:!bg-[var(--color-blue-700)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)]" (click)="openExternalUrl(item?.m_message_sharable_link)">
       <div class="flex items-start justify-between gap-3">
         <div class="flex min-w-0 flex-1 flex-wrap gap-[10px]">
           @if (item.m_content_type?.length) {
@@ -31,7 +31,7 @@
         <h2 class="mb-0 ml-2 max-w-[700px] truncate text-[24px] font-medium text-[var(--color-text1)]">{{ item.m_channel_name || ('Untitled' | translate) }}</h2>
       </div>
       @if (item.m_message_sharable_link) {
-        <div class="mb-[20px] mt-[5px] block truncate text-[12px] font-medium text-[var(--color-text8)]">
+        <div class="mb-[20px] mt-[5px] block truncate text-[12px] font-medium text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
           <a [href]="item.m_message_sharable_link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
             {{ item.m_message_sharable_link }}
           </a>
@@ -39,12 +39,12 @@
       }
       @if (item.m_summary && item.m_summary[0] && item.m_summary[0].length > 5) {
         <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'AI Summary' | translate }}</h5>
-        <div class="text-[12px] font-medium text-[var(--color-text8)]">{{ item.m_summary[0].slice(0, 500) | normalizeUnicode}}...</div>
+        <div class="text-[12px] font-medium text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">{{ item.m_summary[0].slice(0, 500) | normalizeUnicode}}...</div>
       }
       @if (item.m_file_name?.length) {
         <h5 class="mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Embedded Files' | translate }}</h5>
         @for (file of item.m_file_name | slice:0:3; track $index) {
-          <div class="text-[12px] font-medium text-[var(--color-text8)]">
+          <div class="text-[12px] font-medium text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
             @for (part of file.split(' - '); track $index) {
               <div>{{ part | normalizeUnicode}}</div>
             }
@@ -53,14 +53,14 @@
       }
       @if (item) {
         @if (item.m_caption && item.m_caption.length > 5) {
-          <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">{{ item.m_caption.slice(0, 300) | normalizeUnicode}}...</p>
+          <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">{{ item.m_caption.slice(0, 300) | normalizeUnicode}}...</p>
           @if (item.m_media_caption && item.m_media_caption.length > 5) {
             <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Media Caption' | translate }}</h5>
-            <div class="text-[12px] font-medium text-[var(--color-text8)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode}}...</div>
+            <div class="text-[12px] font-medium text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode}}...</div>
           }
           @if (item.m_content) {
             <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Raw Data Content' | translate }}</h5>
-            <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
+            <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
               @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                 {{ part | normalizeUnicode }}@if (!last) {
                 <br />
@@ -73,10 +73,10 @@
         }
       } @else {
         @if (item.m_media_caption && item.m_media_caption.length > 5) {
-          <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode }}...</p>
+          <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">{{ item.m_media_caption.slice(0, 300) | normalizeUnicode }}...</p>
           @if (item.m_content) {
             <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Raw Data Content' | translate }}</h5>
-            <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
+            <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
               @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                 {{ part | normalizeUnicode }}@if (!last) {
                 <br />
@@ -89,7 +89,7 @@
         }
       } @else {
         @if (item.m_content) {
-          <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)]">
+          <p class="mt-[10px] mb-[12px] break-all text-[14px] font-normal text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
             @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
               {{ part | normalizeUnicode}}@if (!last) {
               <br />
@@ -100,7 +100,7 @@
           }
         </p>
       } @else {
-        <p class="mt-[10px] text-[14px] font-normal text-[var(--color-text8)]">{{ 'No content available' | translate }}</p>
+        <p class="mt-[10px] text-[14px] font-normal text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">{{ 'No content available' | translate }}</p>
       }
     }
   }
@@ -108,7 +108,7 @@
   @if (item.m_weblink?.length) {
   <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Embedded URL' | translate }}</h5>
   @for (link of item.m_weblink | slice:0:3; track $index) {
-    <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
+    <div class="block truncate text-[12px] font-medium text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
       <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
         {{ link }}
       </a>

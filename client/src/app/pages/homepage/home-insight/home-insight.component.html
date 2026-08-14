@@ -4,7 +4,7 @@
       <div>
         <div class="mt-[16px] grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
           @for (_ of loadingCards; track $index) {
-            <div class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] shadow-[0_6px_18px_var(--color-shadow-light)]">
+            <div class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] shadow-[0_6px_18px_var(--color-shadow-light)] [body.light-theme_&]:border-[#d7e1ec] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_5px_16px_rgba(15,23,42,0.07)]">
               <div>
                 <div class="mb-[10px] grid grid-cols-2 gap-x-4">
                   <div>
@@ -70,7 +70,7 @@
       <div>
         <div class="mt-[16px] grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
           @for (item of getResultItems(modelKey); track item.hash || item.url || $index) {
-            <div class="ui-home-insight-card group flex h-[205px] w-full flex-col justify-between overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] text-[var(--color-text2)] shadow-none transition-all duration-200 hover:border-[var(--color-text4)]/30 hover:bg-[var(--color-blue-720)] [.light-theme_&]:!border-[#d7e1ec] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-none [.light-theme_&]:hover:!border-[#b9c8da] [.light-theme_&]:hover:!bg-[#f9fbff] [.light-theme_&]:hover:!shadow-none max-[550px]:w-full max-[550px]:min-w-0 max-[550px]:max-w-full">
+            <div class="ui-home-insight-card group flex h-[205px] w-full flex-col justify-between overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[15px] text-[var(--color-text2)] shadow-none transition-all duration-200 hover:border-[var(--color-text4)]/30 hover:bg-[var(--color-blue-720)] [.light-theme_&]:!border-[#d7e1ec] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.07)] [.light-theme_&]:hover:!border-[#b9c8da] [.light-theme_&]:hover:!bg-[#f9fbff] [.light-theme_&]:hover:!shadow-[0_8px_22px_rgba(15,23,42,0.10)] max-[550px]:w-full max-[550px]:min-w-0 max-[550px]:max-w-full">
               <div class="mb-[10px] grid grid-cols-2 gap-x-4">
                 <div class="min-w-0">
                   <div class="mb-[2px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'categoryAlerts.form.title' | translate }}</div>
@@ -126,7 +126,7 @@
               }
               @if (licenseService.canUseModule('defacement') && licenseService.canUseModule('breach')) {
                 <div class="text-center">
-                  <p [appTooltip]="'Open Report' | translate" data-testid="open-report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)]">
+                  <p [appTooltip]="'Open Report' | translate" data-testid="open-report" (click)="openReport(modelKey, item.hash, item.title)" class="mt-[5px] inline-block cursor-pointer rounded-[6px] px-[12px] py-[7px] text-[12px] font-semibold text-[var(--color-blue-640)] transition-colors duration-200 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#eaf2fb] [body.light-theme_&]:hover:text-[#1176d4]">
                     {{ 'View Details' | translate }}
                   </p>
                 </div>
@@ -150,7 +150,7 @@
       </div>
       <div class="grid grid-cols-1 gap-[20px] md:grid-cols-2 xl:grid-cols-4">
         @for (key of getKeys(insights[model]); track key; let first = $first) {
-          <div class="ui-home-insight-metric-card flex min-h-[132px] w-full items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[18px] text-[var(--color-text1)] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_3px_rgba(0,0,0,0.1)] transition-shadow hover:shadow-[0_3px_6px_rgba(0,0,0,0.11),_0_3px_6px_rgba(0,0,0,0.16)] [.light-theme_&]:!border-[#cdd9e8] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#334e68] [.light-theme_&]:!shadow-none [.light-theme_&]:hover:!bg-[#f9fbff] [.light-theme_&]:hover:!shadow-none [.light-theme_&]:[&_.min-w-0>div]:!text-[#2f465f] [.light-theme_&]:[&_.ml-auto>div]:!text-[#3f5872] [.light-theme_&]:[&_.text-\[var\(--color-text1\)\]]:!text-[#2f465f] [.light-theme_&]:[&_.opacity-50]:!text-[#6f86a0] [.light-theme_&]:[&_.opacity-50]:!opacity-[85%] max-[550px]:w-full max-[550px]:min-w-0 max-[550px]:max-w-full">
+          <div class="ui-home-insight-metric-card flex min-h-[132px] w-full items-center justify-center overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-800)] p-[18px] text-[var(--color-text1)] shadow-[0_1px_3px_rgba(0,0,0,0.1),_0_1px_3px_rgba(0,0,0,0.1)] transition-shadow hover:shadow-[0_3px_6px_rgba(0,0,0,0.11),_0_3px_6px_rgba(0,0,0,0.16)] [.light-theme_&]:!border-[#cdd9e8] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#334e68] [.light-theme_&]:!shadow-[0_4px_14px_rgba(15,23,42,0.065)] [.light-theme_&]:hover:!bg-[#f9fbff] [.light-theme_&]:hover:!shadow-[0_7px_20px_rgba(15,23,42,0.09)] [.light-theme_&]:[&_.min-w-0>div]:!text-[#2f465f] [.light-theme_&]:[&_.text-\[var\(--color-text1\)\]]:!text-[#2f465f] [.light-theme_&]:[&_.opacity-50]:!text-[#6f86a0] [.light-theme_&]:[&_.opacity-50]:!opacity-[85%] max-[550px]:w-full max-[550px]:min-w-0 max-[550px]:max-w-full">
             <div class="grid w-full grid-cols-[40px_minmax(0,1fr)_auto] items-start gap-[10px]">
               <div class="w-[40px] flex-shrink-0">
                 <img [attr.alt]="insights[model][key].key || key || 'Statistic icon'" class="ui-home-insight-stat-icon h-8 w-8 object-contain transition-[filter,opacity,transform] duration-200 [.light-theme_&]:[filter:var(--ui-icon-filter-light)] [.light-theme_&]:!opacity-90 [.dark-theme_&]:[filter:saturate(1.04)_brightness(1.05)]" height="32" [ngSrc]="'/assets/images/statistics/' + getStatIcon(key, insights[model][key]) + '.svg'" width="32">
@@ -164,10 +164,10 @@
                 </div>
               </div>
               <div class="ml-auto flex max-w-[86px] min-w-0 flex-col items-end justify-center text-right text-[13px] font-medium">
-                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_daily).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_daily).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_daily == null }" [appTooltip]="'stat changes daily' | translate">
+                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53] [body.light-theme_&]:!text-emerald-700': String(insights[model][key].change_daily).startsWith('+'), 'text-[#f59e0b] [body.light-theme_&]:!text-amber-700': String(insights[model][key].change_daily).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_daily == null }" [appTooltip]="'stat changes daily' | translate">
                   {{ insights[model][key].change_daily ?? '-' }}
                 </div>
-                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53]': String(insights[model][key].change_weekly).startsWith('+'), 'text-[#f59e0b]': String(insights[model][key].change_weekly).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_weekly == null }" [appTooltip]="'stat changes weekly' | translate">
+                <div class="w-full truncate" [ngClass]="{ 'text-[#90DF53] [body.light-theme_&]:!text-emerald-700': String(insights[model][key].change_weekly).startsWith('+'), 'text-[#f59e0b] [body.light-theme_&]:!text-amber-700': String(insights[model][key].change_weekly).startsWith('-'), 'text-[var(--color-text1)] opacity-50': insights[model][key].change_weekly == null }" [appTooltip]="'stat changes weekly' | translate">
                   {{ insights[model][key].change_weekly ?? '-' }}
                 </div>
               </div>

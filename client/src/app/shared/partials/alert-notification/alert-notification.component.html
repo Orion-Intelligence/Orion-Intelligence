@@ -1,9 +1,9 @@
 @if (isNotificationOpen()) {
-  <div (click)="close()" @overlayAnimation class="fixed inset-0 z-40 bg-black/40"></div>
+  <div (click)="close()" @overlayAnimation class="fixed inset-0 z-40 bg-black/40 [body.light-theme_&]:bg-slate-900/25"></div>
 }
 
 @if (isNotificationOpen()) {
-  <div data-testid="tenant-notification-sidebar" class="fixed right-0 top-0 z-50 flex h-screen w-[360px] flex-col items-center gap-[10px] rounded-l-[16px] border-[var(--color-border)] bg-[var(--color-blue-850)] py-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] max-[420px]:w-full max-[420px]:rounded-none" @sidebarAnimation>
+  <div data-testid="tenant-notification-sidebar" class="fixed right-0 top-0 z-50 flex h-screen w-[360px] flex-col items-center gap-[10px] rounded-l-[16px] border-[var(--color-border)] bg-[var(--color-blue-850)] py-4 shadow-[0_20px_60px_rgba(0,0,0,0.3)] [body.light-theme_&]:border-l [body.light-theme_&]:shadow-[0_20px_60px_rgba(15,23,42,0.16)] max-[420px]:w-full max-[420px]:rounded-none" @sidebarAnimation>
     <div class="flex w-[340px] items-center justify-between border-b border-[var(--color-border)] px-[6px] pb-3 max-[420px]:w-[calc(100%-20px)]">
       <div class="flex min-w-0 flex-col">
         <span class="font-[Inter] text-[18px] font-semibold text-[var(--color-text1)]">{{ (isScanMode() ? 'Scan Notifications' : 'Notifications') | translate }}</span>
@@ -14,19 +14,19 @@
     </div>
     <div class="w-[325px] flex-1 overflow-y-auto px-0 py-2 [scrollbar-color:#667085_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#667085] [&::-webkit-scrollbar]:w-[6px] max-[420px]:w-[calc(100%-20px)]">
       @if (isAlertMode() && isLoadingMore && !isLoadMoreTriggered) {
-        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)] [body.light-theme_&]:bg-slate-900/[0.025]">
           <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
           {{ 'Loading alerts...' | translate }}
         </div>
       }
       @if (isScanMode() && scanNotificationService.isLoading() && scanNotificationService.jobs().length === 0) {
-        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)] [body.light-theme_&]:bg-slate-900/[0.025]">
           <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
           {{ 'Loading scans...' | translate }}
         </div>
       }
       @if (isAlertMode() && isFetchingDetail) {
-        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)]">
+        <div class="my-2 flex items-center justify-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[rgba(255,255,255,0.04)] px-3 py-2 text-[12px] text-[var(--color-text2)] [body.light-theme_&]:bg-slate-900/[0.025]">
           <div class="h-4 w-4 animate-spin rounded-full border-2 border-[#57a5eb] border-t-transparent"></div>
           {{ 'Fetching alert details...' | translate }}
         </div>
@@ -46,10 +46,10 @@
       @if (isAlertMode() && alertNotifications.length>0) {
         <div class="notification-stagger-list space-y-3">
           @for (n of alertNotifications; track n.hash) {
-            <div class="animate-notif-stagger-in my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors will-change-[opacity,transform] hover:bg-[var(--color-blue-810)]">
+            <div class="animate-notif-stagger-in my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors will-change-[opacity,transform] hover:bg-[var(--color-blue-810)] [body.light-theme_&]:bg-white [body.light-theme_&]:hover:bg-[var(--color-blue-810)]">
               <div class="flex items-center justify-between">
                 <span class="font-[Inter] text-[16px] font-medium text-[var(--color-text1)]">{{ n.categoryName.charAt(0).toUpperCase() + n.categoryName.slice(1) }}</span>
-                <span class="rounded-full border border-[var(--color-border)] px-2 py-1 font-[Inter] text-[12px] font-semibold" [ngClass]="{ 'bg-[rgb(255,0,0,0.15)] text-[#ff4d4f]': n.risk.toLowerCase() === 'critical', 'bg-[rgb(255,165,0,0.15)] text-[#f59e0b]': n.risk.toLowerCase() === 'high', 'bg-[rgb(255,215,0,0.15)] text-[#facc15]': n.risk.toLowerCase() === 'medium', 'bg-[rgb(0,255,0,0.15)] text-[#4ade80]': n.risk.toLowerCase() === 'low' }">
+                <span class="rounded-full border border-[var(--color-border)] px-2 py-1 font-[Inter] text-[12px] font-semibold" [ngClass]="{ 'bg-[rgb(255,0,0,0.15)] text-[#ff4d4f] [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700': n.risk.toLowerCase() === 'critical', 'bg-[rgb(255,165,0,0.15)] text-[#f59e0b] [body.light-theme_&]:bg-amber-50 [body.light-theme_&]:text-amber-700': n.risk.toLowerCase() === 'high', 'bg-[rgb(255,215,0,0.15)] text-[#facc15] [body.light-theme_&]:bg-yellow-50 [body.light-theme_&]:text-yellow-700': n.risk.toLowerCase() === 'medium', 'bg-[rgb(0,255,0,0.15)] text-[#4ade80] [body.light-theme_&]:bg-emerald-50 [body.light-theme_&]:text-emerald-700': n.risk.toLowerCase() === 'low' }">
                   {{ n.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
                 </span>
               </div>
@@ -58,12 +58,12 @@
                 <span class="font-semibold text-[var(--color-text1)]">{{ n.iocNames.join(', ') }}</span>.
               </div>
               <div class="mt-2 mb-0 flex w-full items-center justify-between">
-                <div class="flex items-center gap-1 font-[Inter] text-[12px] font-normal text-[#a0b8d1]">
+                <div class="flex items-center gap-1 font-[Inter] text-[12px] font-normal text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">
                   <span>{{ n.subCategory }}</span>
-                  <span class="h-1 w-1 rounded-full bg-[#a0b8d1]"></span>
+                  <span class="h-1 w-1 rounded-full bg-[#a0b8d1] [body.light-theme_&]:bg-[var(--color-text4)]"></span>
                   <span>{{ timeAgo(n.lastSeen) }}</span>
                 </div>
-                <button data-testid="tenant-notification-see-details" class="border-0 bg-transparent font-[Inter] text-[12px] font-semibold text-[#57a5eb]" (click)="seeDetails(n.categoryName,n.hash)">{{ 'common.actions.seeDetails' | translate }}</button>
+                <button data-testid="tenant-notification-see-details" class="border-0 bg-transparent font-[Inter] text-[12px] font-semibold text-[#57a5eb] [body.light-theme_&]:text-sky-700" (click)="seeDetails(n.categoryName,n.hash)">{{ 'common.actions.seeDetails' | translate }}</button>
               </div>
             </div>
           }
@@ -86,13 +86,13 @@
                   <div class="mt-1 truncate text-[12px] text-[var(--color-text4)]">{{ job.target || 'Scan target' }}</div>
                 </div>
                 @if (!isScanCompleted(job)) {
-                  <span class="shrink-0 rounded-full border border-[var(--color-border)] px-2 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-[rgba(87,165,235,0.14)] text-[#57a5eb]': isScanPending(job), 'bg-amber-500/15 text-amber-300': isScanPartial(job), 'bg-[rgba(255,77,79,0.14)] text-[#ff4d4f]': isScanFailed(job) }">
+                  <span class="shrink-0 rounded-full border border-[var(--color-border)] px-2 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-[rgba(87,165,235,0.14)] text-[#57a5eb] [body.light-theme_&]:text-sky-700': isScanPending(job), 'bg-amber-500/15 text-amber-300 [body.light-theme_&]:bg-amber-50 [body.light-theme_&]:text-amber-700': isScanPartial(job), 'bg-[rgba(255,77,79,0.14)] text-[#ff4d4f] [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700': isScanFailed(job) }">
                     {{ statusLabel(job) | translate }}
                   </span>
                 }
               </div>
 
-              <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10" role="progressbar" [attr.aria-valuenow]="getProgress(job)" aria-valuemin="0" aria-valuemax="100">
+              <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-white/10 [body.light-theme_&]:bg-slate-200" role="progressbar" [attr.aria-valuenow]="getProgress(job)" aria-valuemin="0" aria-valuemax="100">
                 @if (isScanCompleted(job)) {
                   <div class="h-full w-full rounded-full bg-[#57a5eb]"></div>
                 }
@@ -107,15 +107,15 @@
                 }
               </div>
 
-              <div class="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#a0b8d1]">
+              <div class="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">
                 <span class="min-w-0 truncate">{{ getScanStep(job) }}</span>
                 <span class="shrink-0">{{ getProgress(job) }}%</span>
               </div>
 
-              <div class="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#a0b8d1]">
+              <div class="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">
                 <span>{{ timeAgo(job.created_at) }}</span>
                 <div class="flex shrink-0 items-center gap-2">
-                  <button data-testid="scan-notification-delete" type="button" [disabled]="isScanPending(job) || isScanDeleting" class="rounded-md border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] px-2 py-1 text-[12px] font-semibold text-[#ff8a8c] transition hover:bg-[rgba(255,77,79,0.14)] disabled:cursor-not-allowed disabled:opacity-45" (click)="requestDeleteScan(job, $event)">{{ 'Delete' | translate }}</button>
+                  <button data-testid="scan-notification-delete" type="button" [disabled]="isScanPending(job) || isScanDeleting" class="rounded-md border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] px-2 py-1 text-[12px] font-semibold text-[#ff8a8c] transition hover:bg-[rgba(255,77,79,0.14)] disabled:cursor-not-allowed disabled:opacity-45 [body.light-theme_&]:border-red-200 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700 [body.light-theme_&]:hover:bg-red-100" (click)="requestDeleteScan(job, $event)">{{ 'Delete' | translate }}</button>
                 </div>
               </div>
 
@@ -139,7 +139,7 @@
         }
         @if (isScanMode() && scanNotificationService.jobs().length>0) {
           <button data-testid="scan-notification-clear-all" [disabled]="isScanDeleting" (click)="requestClearAllScans()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" type="button">{{ 'Read All' | translate }}</button>
-          <button data-testid="scan-notification-delete-all" [disabled]="isScanDeleting" (click)="requestDeleteAllScans()" class="w-full rounded-md border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] px-4 py-2 text-sm font-semibold text-[#ff8a8c] transition hover:bg-[rgba(255,77,79,0.14)] disabled:cursor-not-allowed disabled:opacity-60" type="button">{{ 'Delete All' | translate }}</button>
+          <button data-testid="scan-notification-delete-all" [disabled]="isScanDeleting" (click)="requestDeleteAllScans()" class="w-full rounded-md border border-[rgba(255,77,79,0.35)] bg-[rgba(255,77,79,0.08)] px-4 py-2 text-sm font-semibold text-[#ff8a8c] transition hover:bg-[rgba(255,77,79,0.14)] disabled:cursor-not-allowed disabled:opacity-60 [body.light-theme_&]:border-red-200 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700 [body.light-theme_&]:hover:bg-red-100" type="button">{{ 'Delete All' | translate }}</button>
         }
       </div>
     </div>

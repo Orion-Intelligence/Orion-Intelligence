@@ -3,7 +3,7 @@
     saveTestId="case-add-save" cancelTestId="case-add-cancel" drawerTestId="case-add-drawer" (save)="onSubmit()"
     (cancel)="closePopup()">
     <div class="bg-[var(--color-blue-830)] p-6">
-        <form (ngSubmit)="onSubmit()" class="space-y-5">
+        <form (ngSubmit)="onSubmit()" class="space-y-5 [body.light-theme_&]:[&_.case-form-error]:text-red-700 [body.light-theme_&]:[&_input:focus]:ring-2 [body.light-theme_&]:[&_input:focus]:ring-sky-500/20 [body.light-theme_&]:[&_select:focus]:ring-2 [body.light-theme_&]:[&_select:focus]:ring-sky-500/20 [body.light-theme_&]:[&_textarea:focus]:ring-2 [body.light-theme_&]:[&_textarea:focus]:ring-sky-500/20">
 
             <div class="space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4">
                 <h3 class="text-[15px] font-bold leading-tight text-[var(--color-text1)] mb-4">{{ 'Case Details' |
@@ -14,17 +14,17 @@
                         'Case ID' | translate }}</label>
                     <input type="text" [value]="caseForm.caseId" disabled class="mt-1 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3 py-2 text-[var(--color-text4)] outline-none" data-testid="case-add-id-input" />
                     @if (validationErrors['caseId']) {
-                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseId'] }}</p>
+                    <p class="case-form-error mt-1 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ validationErrors['caseId'] }}</p>
                     }
                 </div>
 
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                        {{ 'categoryAlerts.form.title' | translate }} <span class="text-red-500">*</span>
+                        {{ 'categoryAlerts.form.title' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span>
                     </label>
                     <input type="text" [(ngModel)]="caseForm.title" name="title" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Brief case title' | translate" data-testid="case-add-title-input" />
                     @if (validationErrors['title']) {
-                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['title'] }}</p>
+                    <p class="case-form-error mt-1 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ validationErrors['title'] }}</p>
                     }
                 </div>
 
@@ -36,7 +36,7 @@
 
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
-                        'Case Type' | translate }} <span class="text-red-500">*</span></label>
+                        'Case Type' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
                     <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-type-select">
                         @for (type of caseTypeOptions; track type.value) {
                         <option [value]="type.value">{{ type.label }}</option>
@@ -47,18 +47,18 @@
                 @if (caseForm.caseType === 'other') {
                 <div class="mt-3">
                     <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                        {{ 'Other Case Type' | translate }} <span class="text-red-500">*</span>
+                        {{ 'Other Case Type' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span>
                     </label>
                     <input type="text" [(ngModel)]="caseForm.caseTypeOtherValue" name="caseTypeOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other case type' | translate" />
                     @if (validationErrors['caseTypeOther']) {
-                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['caseTypeOther'] }}</p>
+                    <p class="case-form-error mt-1 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ validationErrors['caseTypeOther'] }}</p>
                     }
                 </div>
                 }
 
                 <div>
                     <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
-                        'Intake Source' | translate }} <span class="text-red-500">*</span></label>
+                        'Intake Source' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
                     <select [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-intake-source-select">
                         @for (source of intakeSourceOptions; track source.value) {
                         <option [value]="source.value">{{ source.label }}</option>
@@ -69,11 +69,11 @@
                 @if (caseForm.intakeSource === 'other') {
                 <div class="mt-3">
                     <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                        {{ 'Other Intake Source' | translate }} <span class="text-red-500">*</span>
+                        {{ 'Other Intake Source' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span>
                     </label>
                     <input type="text" [(ngModel)]="caseForm.intakeSourceOtherValue" name="intakeSourceOtherValue" class="mt-1 mb-5 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other intake source' | translate" />
                     @if (validationErrors['intakeSourceOther']) {
-                    <p class="case-form-error mt-1 text-xs text-red-400">{{ validationErrors['intakeSourceOther'] }}
+                    <p class="case-form-error mt-1 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ validationErrors['intakeSourceOther'] }}
                     </p>
                     }
                 </div>
@@ -93,7 +93,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
                             'Severity' | translate }}
-                            <span class="text-red-500">*</span></label>
+                            <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
                         <select [(ngModel)]="caseForm.severity" name="severity" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-severity-select">
                             @for (severity of severityOptions; track severity) {
                             <option [value]="severity" class="capitalize">{{ severity }}</option>
@@ -104,7 +104,7 @@
                     <div>
                         <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{
                             'Priority' | translate }}
-                            <span class="text-red-500">*</span></label>
+                            <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
                         <select [(ngModel)]="caseForm.priority" name="priority" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-priority-select">
                             @for (p of priorityOptions; track p) {
                             <option [value]="p" class="capitalize">{{ p }}</option>
@@ -131,10 +131,10 @@
                 [showInlineSaveButtons]="false"></app-entity-details>
 
             @if (validationErrors['identifier']) {
-            <p class="case-form-error text-xs text-red-400">{{ validationErrors['identifier'] }}</p>
+            <p class="case-form-error text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ validationErrors['identifier'] }}</p>
             }
             @if (validationErrors['socialProfile']) {
-            <p class="case-form-error text-xs text-red-400">{{ validationErrors['socialProfile'] }}</p>
+            <p class="case-form-error text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ validationErrors['socialProfile'] }}</p>
             }
         </form>
     </div>

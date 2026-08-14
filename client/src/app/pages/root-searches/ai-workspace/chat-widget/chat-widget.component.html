@@ -8,7 +8,7 @@
 
 @if (chatOpen) {
   <div data-testid="chat-widget-overlay" class="fixed inset-0 z-[1400] flex items-end justify-end bg-black/40 p-4 max-[640px]:items-stretch max-[640px]:justify-stretch max-[640px]:p-5" @overlayFade (click)="closeChat()">
-    <div class="chat-support__window flex min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] bg-[linear-gradient(rgba(255,255,255,0.011)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.011)_1px,transparent_1px)] bg-[length:28px_28px] shadow-[0_24px_80px_rgba(0,0,0,0.35)] max-[640px]:h-full max-[640px]:max-w-none" [ngClass]="isFullScreen ? 'h-[calc(100vh-32px)] max-w-[714px]' : 'h-[640px] max-w-[420px]'" @chatBotAnimation (click)="$event.stopPropagation()">
+    <div class="chat-support__window flex min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] bg-[linear-gradient(rgba(255,255,255,0.011)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.011)_1px,transparent_1px)] bg-[length:28px_28px] shadow-[0_24px_80px_rgba(0,0,0,0.35)] [body.light-theme_&]:border [body.light-theme_&]:border-[#cad8e6] [body.light-theme_&]:bg-[linear-gradient(rgba(15,23,42,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.018)_1px,transparent_1px),#fff] [body.light-theme_&]:shadow-[0_22px_62px_rgba(15,23,42,0.16)] max-[640px]:h-full max-[640px]:max-w-none" [ngClass]="isFullScreen ? 'h-[calc(100vh-32px)] max-w-[714px]' : 'h-[640px] max-w-[420px]'" @chatBotAnimation (click)="$event.stopPropagation()">
       <div class="flex shrink-0 items-center justify-between px-5 pt-5">
         <button type="button" class="inline-flex items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text3)] transition hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" (click)="startNewChat()">
           {{ 'New Chat' | translate }}
@@ -48,7 +48,7 @@
                 <div class="min-w-0 max-w-full space-y-1.5">
                   @if ($index === 0 || chatMessages[$index - 1].sender !== msg.sender) {
                     <div class="flex min-h-[20px] items-center gap-2 px-4">
-                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ 'Nexus' | translate }}</span>
+                      <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{ 'Nexus' | translate }}</span>
                       <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ msg.time | date : 'h:mm a' }}</span>
                     </div>
                   }
@@ -82,11 +82,11 @@
                 </div>
                 <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
                   <div class="flex min-h-[20px] items-center gap-2 px-1">
-                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ 'Nexus' | translate }}</span>
+                    <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{ 'Nexus' | translate }}</span>
                   </div>
-                  <div class="rounded-[18px] rounded-tl-[8px] border border-red-300/25 bg-red-950/35 px-4 py-2.5 text-sm text-red-100 shadow-[0_10px_24px_var(--color-shadow-medium)] max-[640px]:w-full">
+                  <div class="rounded-[18px] rounded-tl-[8px] border border-red-300/25 bg-red-950/35 px-4 py-2.5 text-sm text-red-100 shadow-[0_10px_24px_var(--color-shadow-medium)] max-[640px]:w-full [.light-theme_&]:border-red-200 [.light-theme_&]:bg-red-50 [.light-theme_&]:text-red-700">
                     <p class="flex items-center gap-2 whitespace-pre-wrap leading-6">
-                      <span class="mt-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-red-300/25 bg-red-300/10 text-[10px] font-semibold leading-none text-red-100/80">!</span>
+                      <span class="mt-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-red-300/25 bg-red-300/10 text-[10px] font-semibold leading-none text-red-100/80 [.light-theme_&]:border-red-300 [.light-theme_&]:bg-red-100 [.light-theme_&]:text-red-700">!</span>
                       <span>{{ msg.text }}</span>
                     </p>
                   </div>
@@ -104,7 +104,7 @@
           <div class="mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in justify-start">
             <div class="min-w-0 max-w-full space-y-1.5">
               <div class="flex min-h-[20px] items-center gap-2 px-4">
-                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ 'Nexus' | translate }}</span>
+                <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{ 'Nexus' | translate }}</span>
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ 'Thinking' | translate }}</span>
               </div>
               <div class="min-w-0 w-[280px] max-w-full px-4 py-2.5 max-[640px]:w-full">
@@ -125,7 +125,7 @@
         <div #bottomSentinel></div>
       </div>
       <div class="shrink-0 border-t border-[var(--color-border)] bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.08))] p-3">
-        <form novalidate [attr.aria-busy]="isBotTyping" [ngClass]="composerExpanded ? 'rounded-[20px]' : 'rounded-full'" class="group/composer border border-[color-mix(in_srgb,var(--color-border)_78%,var(--color-blue-640)_22%)] bg-[var(--color-blue-800)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.055),0_8px_24px_rgba(0,0,0,0.1)] transition-[border-color,box-shadow,background-color] duration-200 hover:border-[color-mix(in_srgb,var(--color-border)_56%,var(--color-blue-640)_44%)] focus-within:border-[var(--color-blue-640)] focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_0_3px_color-mix(in_srgb,var(--color-blue-640)_16%,transparent),0_12px_30px_rgba(0,0,0,0.14)]" (submit)="sendMessage($event)">
+        <form novalidate [attr.aria-busy]="isBotTyping" [ngClass]="composerExpanded ? 'rounded-[20px]' : 'rounded-full'" class="group/composer border border-[color-mix(in_srgb,var(--color-border)_78%,var(--color-blue-640)_22%)] bg-[var(--color-blue-800)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.055),0_8px_24px_rgba(0,0,0,0.1)] transition-[border-color,box-shadow,background-color] duration-200 hover:border-[color-mix(in_srgb,var(--color-border)_56%,var(--color-blue-640)_44%)] focus-within:border-[var(--color-blue-640)] focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_0_3px_color-mix(in_srgb,var(--color-blue-640)_16%,transparent),0_12px_30px_rgba(0,0,0,0.14)] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_5px_18px_rgba(15,23,42,0.09)]" (submit)="sendMessage($event)">
           <div class="flex items-end gap-1.5">
             <span class="mb-1 ml-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-blue-640)_10%,transparent)] text-[var(--color-blue-640)] transition-colors group-focus-within/composer:bg-[color-mix(in_srgb,var(--color-blue-640)_16%,transparent)]" aria-hidden="true">
               <i class="bi bi-stars text-[14px] leading-none"></i>
@@ -144,7 +144,7 @@
             </button>
           </div>
           @if (isNewMessageOverLimit) {
-            <p role="alert" aria-live="polite" class="mt-1.5 flex items-center gap-1.5 px-2 text-[11px] font-medium text-amber-300">
+            <p role="alert" aria-live="polite" class="mt-1.5 flex items-center gap-1.5 px-2 text-[11px] font-medium text-amber-300 [.light-theme_&]:text-amber-700">
               <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-300/10 text-[10px]" aria-hidden="true">!</span>
               <span>{{ '300 token max. Remove' | translate }} {{ newMessageTokenOverflow }} {{ 'tokens before sending.' | translate }}</span>
             </p>
@@ -152,7 +152,7 @@
         </form>
         <div class="mt-2 flex items-center justify-between gap-3 px-1.5 text-[11px] text-[var(--color-text6)]">
           <p>{{ 'Enter sends. Shift + Enter adds a new line.' | translate }}</p>
-          <span class="shrink-0 tabular-nums transition-colors" [ngClass]="isNewMessageOverLimit ? 'font-semibold text-amber-300' : newMessageTokenCount > 240 ? 'text-amber-200/80' : 'text-[var(--color-text5)]'">
+          <span class="shrink-0 tabular-nums transition-colors" [ngClass]="isNewMessageOverLimit ? 'font-semibold text-amber-300 [.light-theme_&]:text-amber-700' : newMessageTokenCount > 240 ? 'text-amber-200/80 [.light-theme_&]:text-amber-700/80' : 'text-[var(--color-text5)] [body.light-theme_&]:text-[#466a87]'">
             {{ newMessageTokenCount }}/{{ maxComposerTokens }}
           </span>
         </div>

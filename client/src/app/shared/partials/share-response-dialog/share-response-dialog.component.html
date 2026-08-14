@@ -1,5 +1,5 @@
 @if (visible()) {
-  <div class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-[1300] flex items-center justify-center p-4" (click)="close()">
+  <div class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] [body.light-theme_&&]:!bg-[rgba(15,23,42,0.24)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-[1300] flex items-center justify-center p-4" (click)="close()">
     <section role="dialog" aria-modal="true" aria-labelledby="share-response-dialog-title" class="ui-graph-popup-panel [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] origin-top [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] w-full max-w-[540px] overflow-hidden rounded-xl border border-[var(--color-border)] shadow-[0_30px_80px_rgba(2,6,23,0.65)]" (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between gap-4 border-b border-[var(--color-border)] px-5 py-4">
         <div class="min-w-0">
@@ -15,13 +15,13 @@
         <div>
           <div class="flex items-center justify-between gap-4">
             <span class="inline-flex min-w-0 items-center gap-2 text-[12px] font-semibold text-[var(--color-text2)]">
-              <i class="bi bi-body-text text-[14px] leading-none text-[#A7D5FF]" aria-hidden="true"></i>
+              <i class="bi bi-body-text text-[14px] leading-none text-[#A7D5FF] [body.light-theme_&]:text-[#2563a8]" aria-hidden="true"></i>
               <span>{{ 'Message' | translate }}</span>
-              <span class="font-normal tabular-nums text-[var(--color-text5)]">· {{ characterCount }} {{ 'chars' | translate }}</span>
+              <span class="font-normal tabular-nums text-[var(--color-text5)] [body.light-theme_&]:text-[#2563a8]">· {{ characterCount }} {{ 'chars' | translate }}</span>
             </span>
-            <button type="button" (click)="copyText()" class="ui-ai-action-button inline-flex h-7 shrink-0 items-center gap-1.5 border-0 bg-transparent p-0 text-[11px] font-semibold text-[#A7D5FF] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/55" [attr.aria-label]="(copied() ? 'Copied!' : 'Copy message') | translate">
+            <button type="button" (click)="copyText()" class="ui-ai-action-button inline-flex h-7 shrink-0 items-center gap-1.5 border-0 bg-transparent p-0 text-[11px] font-semibold text-[#A7D5FF] transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/55 [body.light-theme_&]:text-[#2563a8] [body.light-theme_&]:hover:text-[#174f8a]" [attr.aria-label]="(copied() ? 'Copied!' : 'Copy message') | translate">
               @if (copied()) {
-                <i class="bi bi-check-lg text-[13px] leading-none text-emerald-300" aria-hidden="true"></i>
+                <i class="bi bi-check-lg text-[13px] leading-none text-emerald-300 [body.light-theme_&]:text-emerald-700" aria-hidden="true"></i>
               } @else {
                 <i class="bi bi-copy text-[12px] leading-none" aria-hidden="true"></i>
               }
@@ -33,17 +33,17 @@
         </div>
 
         <div class="mt-5 border-t border-[var(--color-border)] pt-4">
-          <h4 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text5)]">{{ 'Share via' | translate }}</h4>
+          <h4 class="mb-2 text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text5)] [body.light-theme_&]:text-[#2563a8]">{{ 'Share via' | translate }}</h4>
           <div class="grid grid-cols-[repeat(auto-fit,minmax(68px,1fr))] gap-1">
             @if (canNativeShare()) {
-              <button type="button" (click)="shareViaNative()" class="group flex min-w-0 flex-col items-center gap-1.5 rounded-lg border-0 bg-transparent px-2 py-2.5 text-center transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45">
-                <i class="bi bi-share-fill text-[19px] leading-none text-[#A7D5FF] group-hover:text-white" aria-hidden="true"></i>
+              <button type="button" (click)="shareViaNative()" class="group flex min-w-0 flex-col items-center gap-1.5 rounded-lg border-0 bg-transparent px-2 py-2.5 text-center transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45 [body.light-theme_&]:hover:bg-[#eaf3ff]">
+                <i class="bi bi-share-fill text-[19px] leading-none text-[#A7D5FF] group-hover:text-white [body.light-theme_&]:text-[#2563a8] [body.light-theme_&]:group-hover:text-[#174f8a]" aria-hidden="true"></i>
                 <span class="w-full truncate text-[10px] font-medium text-[var(--color-text4)] group-hover:text-[var(--color-text2)]">{{ 'System' | translate }}</span>
               </button>
             }
 
             @for (destination of destinations; track destination.target) {
-              <a [href]="shareUrl(destination.target)" [attr.target]="destination.target === 'email' ? null : '_blank'" [attr.rel]="destination.target === 'email' ? null : 'noopener noreferrer'" [attr.aria-label]="('Share via' | translate) + ' ' + destination.label" (click)="close()" class="group flex min-w-0 flex-col items-center gap-1.5 rounded-lg px-2 py-2.5 text-center transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45">
+              <a [href]="shareUrl(destination.target)" [attr.target]="destination.target === 'email' ? null : '_blank'" [attr.rel]="destination.target === 'email' ? null : 'noopener noreferrer'" [attr.aria-label]="('Share via' | translate) + ' ' + destination.label" (click)="close()" class="group flex min-w-0 flex-col items-center gap-1.5 rounded-lg px-2 py-2.5 text-center transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45 [body.light-theme_&]:hover:bg-[#eaf3ff]">
                 <i [class]="'bi text-[19px] leading-none transition-colors ' + destination.iconClass" [ngClass]="destination.icon" aria-hidden="true"></i>
                 <span class="w-full truncate text-[10px] font-medium text-[var(--color-text4)] group-hover:text-[var(--color-text2)]">{{ destination.label }}</span>
               </a>

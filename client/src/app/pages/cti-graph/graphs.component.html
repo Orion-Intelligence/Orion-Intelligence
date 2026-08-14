@@ -3,7 +3,7 @@
     <div class="flex h-full min-h-0 w-full flex-col overflow-hidden [.light-theme_&]:!bg-[#e7eff9]">
       <div class="relative flex min-h-0 flex-grow flex-row">
         <app-cti-sidebar
-          class="z-[1200] flex h-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
+          class="z-[1200] flex h-full min-h-0 flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff]"
           [class.max-md:absolute]="!activeSidebarCollapsed"
           [class.max-md:inset-y-0]="!activeSidebarCollapsed"
           [class.max-md:left-0]="!activeSidebarCollapsed"
@@ -132,7 +132,7 @@
                     <div class="flex items-start gap-2">
                       <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
                       <span>{{ 'You can see' | translate }} {{ maxEdge }} {{ 'nodes at a time, avoid using extreme values for better performance' | translate }}</span>
-                      <button type="button" class="ml-1 text-[var(--color-text4)] hover:text-white" (click)="showMaxEdgeNotice=false" [title]="'Hide' | translate">
+                      <button type="button" class="ml-1 text-[var(--color-text4)] hover:text-white [body.light-theme_&]:hover:text-[var(--color-text1)]" (click)="showMaxEdgeNotice=false" [title]="'Hide' | translate">
                         <i class="bi bi-x-lg text-xs"></i>
                       </button>
                     </div>

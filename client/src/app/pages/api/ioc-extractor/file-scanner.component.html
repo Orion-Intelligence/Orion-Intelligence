@@ -3,7 +3,7 @@
 
   @if (!isFetched && !isLoading) {
     <div class="p-[24px] flex items-center justify-center">
-      <div class="box-border w-full rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[24px] text-center shadow-[0_10px_30px_var(--color-shadow-medium)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!shadow-none [.light-theme_&]:!bg-[#f9fbff]">
+      <div class="box-border w-full rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[24px] text-center shadow-[0_10px_30px_var(--color-shadow-medium)] [.light-theme_&]:!border-[#d2deeb] [.light-theme_&]:!bg-[linear-gradient(180deg,#fff_0%,#f7faff_100%)] [.light-theme_&]:!shadow-[0_8px_24px_rgba(15,23,42,0.075)]">
         <div class="mx-auto mb-[12px] flex h-[64px] w-[64px] items-center justify-center rounded-full bg-[var(--color-blue-790-light)] [.light-theme_&]:!border [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white">
           <img src="assets/images/shared/theme/file-search.svg" alt="File Upload" class="h-[32px] w-[32px]"/>
         </div>
@@ -65,7 +65,7 @@
       @if (!hasError && (isLoading || scanResult || resultSections.length > 0)) {
         <section>
           @if (!isLoading) {
-            <div data-testid="scan-success-badge" class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+            <div data-testid="scan-success-badge" class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3 [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_3px_12px_rgba(15,23,42,0.055)]">
               <div class="flex min-w-0 items-center gap-2">
                 <img alt="File" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
                 <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="getDisplayFileName()">{{ getDisplayFileName() }}</div>
@@ -108,7 +108,7 @@
               </div>
             </div>
           } @else {
-            <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
+            <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3 [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_3px_12px_rgba(15,23,42,0.055)]">
               @for (i of [1,2,3,4]; track i) {
                 <div class="flex items-center gap-2">
                   <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-5 w-5 rounded bg-[var(--color-blue-720)]"></div>
@@ -144,7 +144,7 @@
               <section class="mt-[16px] space-y-[16px]">
                 @for (section of resultSections; track section.title) {
                   <div>
-                    <div class="my-[10px] flex items-center gap-[12px] text-[12px] font-semibold uppercase tracking-[1px] text-[#10b981]">
+                    <div class="my-[10px] flex items-center gap-[12px] text-[12px] font-semibold uppercase tracking-[1px] text-[#10b981] [body.light-theme_&]:text-emerald-700">
                       <span>{{ section.title }}</span>
                       <span class="h-px flex-1 bg-[linear-gradient(90deg,rgba(16,185,129,0.6),rgba(16,185,129,0))]"></span>
                     </div>
@@ -161,7 +161,7 @@
                             <div class="w-[150px] shrink-0 break-words font-[Inter] text-[10px] font-[700] uppercase leading-[1.25] tracking-[0.05em] text-[var(--color-text6)] max-[640px]:w-[110px]" [title]="item.label">{{ item.label }}</div>
                             <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                               <div class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-[Inter] text-[13px] font-[600] text-[var(--color-text1)]" [title]="item.value">{{ item.value }}</div>
-                              <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100" [appTooltip]="(copiedValue() === item.value ? 'Copied' : 'Copy') | translate" (click)="copyValue(item.value)">
+                              <button type="button" class="inline-flex h-[26px] w-[26px] flex-none items-center justify-center border border-transparent bg-transparent p-0 text-[var(--color-text1)] opacity-0 pointer-events-none transition-[opacity,border-color,background] duration-150 hover:bg-white/[0.05] hover:border-[var(--ui-consolidated-border)] group-hover:pointer-events-auto group-hover:opacity-100 [.light-theme_&]:hover:bg-[#eaf2fb]" [appTooltip]="(copiedValue() === item.value ? 'Copied' : 'Copy') | translate" (click)="copyValue(item.value)">
                                 <i class="bi" [ngClass]="copiedValue() === item.value ? 'bi-clipboard-check-fill' : 'bi-clipboard'"></i>
                               </button>
                             </div>

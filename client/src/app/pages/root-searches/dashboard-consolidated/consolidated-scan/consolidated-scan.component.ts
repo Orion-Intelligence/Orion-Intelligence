@@ -328,10 +328,10 @@ export class ConsolidatedScanComponent {
     const g = (grade || '').toUpperCase();
     const baseClass = 'inline-flex items-center justify-center rounded-[999px] border px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] whitespace-nowrap';
     if (g === 'D') {
-      return `${baseClass} border-[rgba(248,113,113,0.45)] bg-[rgba(127,29,29,0.42)] text-red-100`;
+      return `${baseClass} border-[rgba(248,113,113,0.45)] bg-[rgba(127,29,29,0.42)] text-red-100 [body.light-theme_&]:border-red-300 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700`;
     }
     if (g === 'C' || g === 'F') {
-      return `${baseClass} border-[var(--color-border)] bg-[var(--color-banner)] text-[var(--color-text5)]`;
+      return `${baseClass} border-[var(--color-border)] bg-[var(--color-banner)] text-[var(--color-text5)] [body.light-theme_&]:border-amber-300 [body.light-theme_&]:bg-amber-50 [body.light-theme_&]:text-amber-800`;
     }
     return `${baseClass} border-[var(--color-border)] text-[var(--color-text1)]`;
   }

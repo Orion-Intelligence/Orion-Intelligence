@@ -1,13 +1,13 @@
 <div [ngClass]="isEmbeddedInConsolidated ? 'py-4' : 'px-4 py-4 md:px-6'">
   @if (errorMessage && !isScanning()) {
-    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)] [body.light-theme_&]:border-rose-200 [body.light-theme_&]:from-rose-50 [body.light-theme_&]:to-white [body.light-theme_&]:shadow-none">
       <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Request Failed' | translate }}</div>
       <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
     </div>
   }
 
   @if (hasSearched()) {
-    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white">
+    <div class="ui-ioc-table-shell overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
       <div class="ui-ioc-table-head flex items-center justify-between border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
         <span>{{ resultLabel() }}</span><span>{{ 'DETAILS' | translate }}</span>
       </div>
@@ -38,7 +38,7 @@
       } @else if (dnsResult() && pagedRows.length) {
         <div>
         @for (row of pagedRows; track trackByIp($index, row); let last = $last) {
-          <div [attr.data-testid]="'network-intel-dns-row-' + row.ip" class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-colors [.light-theme_&]:!border-b-[#d8e0e9]" [class.ui-ioc-row-even]="$index % 2 === 0 && !row.expanded" [class.ui-ioc-row-odd]="$index % 2 !== 0 && !row.expanded" [ngClass]="{ 'border-b-transparent bg-[#162840]': row.expanded, 'border-b-0': last && !row.expanded }" role="button" tabindex="0" [attr.aria-expanded]="row.expanded" (click)="toggleRow.emit(row)" (keydown)="onRowKeydown($event, row)">
+          <div [attr.data-testid]="'network-intel-dns-row-' + row.ip" class="ui-ioc-table-row flex cursor-pointer items-center justify-between border-b border-[var(--color-divider)] px-4 py-3 text-sm transition-colors [.light-theme_&]:!border-b-[#d8e0e9]" [class.ui-ioc-row-even]="$index % 2 === 0 && !row.expanded" [class.ui-ioc-row-odd]="$index % 2 !== 0 && !row.expanded" [ngClass]="{ 'border-b-transparent bg-[#162840] [body.light-theme_&]:bg-[#edf4fb]': row.expanded, 'border-b-0': last && !row.expanded }" role="button" tabindex="0" [attr.aria-expanded]="row.expanded" (click)="toggleRow.emit(row)" (keydown)="onRowKeydown($event, row)">
             <span class="font-mono text-[14px] font-semibold tracking-wide text-[var(--color-text1)]">{{ row.ip }}</span>
             <div class="flex items-center gap-2">
               @if (row.loading) {
@@ -58,11 +58,11 @@
                     <div class="relative overflow-hidden h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
                       <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + getRowProgressValue(row)"></div>
                     </div>
-                    <div [attr.data-testid]="'network-intel-dns-elapsed-' + row.ip" class="mt-2 text-right text-[12px] font-medium text-white">{{ getRowElapsedLabel(row) }}</div>
+                    <div [attr.data-testid]="'network-intel-dns-elapsed-' + row.ip" class="mt-2 text-right text-[12px] font-medium text-white [.light-theme_&]:text-[var(--color-text3)]">{{ getRowElapsedLabel(row) }}</div>
                   </div>
                 }
                 @if (row.error) {
-                  <div [attr.data-testid]="'network-intel-dns-row-error-' + row.ip" class="mx-4 my-3 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300">✕ {{ row.error }}</div>
+                  <div [attr.data-testid]="'network-intel-dns-row-error-' + row.ip" class="mx-4 my-3 flex items-center gap-2 rounded-lg border border-red-500/25 bg-red-500/8 px-4 py-2.5 text-[13px] text-red-300 [.light-theme_&]:border-red-200 [.light-theme_&]:bg-red-50 [.light-theme_&]:text-red-700">✕ {{ row.error }}</div>
                 }
                 @if (row.detail) {
                   <div [attr.data-testid]="'network-intel-dns-detail-' + row.ip">

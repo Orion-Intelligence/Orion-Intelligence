@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { AppService } from '../../../../../services/core/app/app.service';
@@ -19,9 +19,7 @@ import { GraphReportPayload } from '../../../../../shared/model/report/report-ex
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-share.component.html',
 })
-export class CaseShareComponent implements OnInit, OnDestroy {
-  private previousTheme: 'light-theme' | 'dark-theme' | null = null;
-
+export class CaseShareComponent implements OnInit {
   report: SharedCaseReport | null = null;
   isLoading = true;
   errorMessage = '';
@@ -34,7 +32,6 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, private reportExportService: ReportExportService, public appService: AppService) { }
 
   ngOnInit(): void {
-    this.forceDarkTheme();
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
     });
@@ -63,13 +60,6 @@ export class CaseShareComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    document.body.classList.remove('light-theme', 'dark-theme');
-    if (this.previousTheme) {
-      document.body.classList.add(this.previousTheme);
-    }
   }
 
   toggleArtifact(artifactId: string): void {
@@ -216,15 +206,10 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       return '/assets/images/shared/logo-wide-light.svg';
     }
     const settings = this.appService.getConfig().appSettings;
-    return settings.logo_wide_dark || settings.logo_wide_light || '/assets/images/shared/logo-wide-light.svg';
-  }
-
-  private forceDarkTheme(): void {
-    this.previousTheme = document.body.classList.contains('light-theme') ? 'light-theme'
-      : document.body.classList.contains('dark-theme') ? 'dark-theme'
-        : null;
-    document.body.classList.remove('light-theme');
-    document.body.classList.add('dark-theme');
+    const isLightTheme = this.appService.userSessionData()?.user?.theme === 'light-theme';
+    return isLightTheme
+      ? settings.logo_wide_light || settings.logo_wide_dark || '/assets/images/shared/logo-wide-light.svg'
+      : settings.logo_wide_dark || settings.logo_wide_light || '/assets/images/shared/logo-wide-light.svg';
   }
 
   getAppName(): string {

@@ -19,9 +19,9 @@
     </div>
   } @else if (errorMessage) {
     <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]">
-      <div class="rounded-[10px] border border-rose-400/25 bg-rose-500/10 p-4">
-        <div class="text-[14px] font-medium text-rose-200">{{ 'Unable to load user activity' | translate }}</div>
-        <p class="mt-1 text-[12px] text-rose-200/80">{{ errorMessage }}</p>
+      <div class="rounded-[10px] border border-rose-400/25 bg-rose-500/10 p-4 [body.light-theme_&]:border-rose-200 [body.light-theme_&]:bg-rose-50">
+        <div class="text-[14px] font-medium text-rose-200 [body.light-theme_&]:text-rose-700">{{ 'Unable to load user activity' | translate }}</div>
+        <p class="mt-1 text-[12px] text-rose-200/80 [body.light-theme_&]:text-rose-600">{{ errorMessage }}</p>
       </div>
     </div>
   } @else if (response?.profile?.hidden) {
@@ -97,7 +97,7 @@
                     }
                   </div>
                   @if (item.route_path) {
-                    <button data-testid="user-profile-open-thread" type="button" (click)="openThread(item)" class="inline-flex shrink-0 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35">
+                    <button data-testid="user-profile-open-thread" type="button" (click)="openThread(item)" class="inline-flex shrink-0 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2 text-[12px] font-semibold text-[var(--color-text1)] transition hover:border-sky-400/35 [body.light-theme_&]:hover:bg-[var(--color-blue-810)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30">
                       {{ 'Open Thread' | translate }}
                     </button>
                   }
@@ -105,13 +105,13 @@
 
                 <div class="mt-3 flex flex-wrap gap-2">
                   @if (item.recommended) {
-                    <span class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">{{ 'Recommended' | translate }}</span>
+                    <span class="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300 [body.light-theme_&]:border-emerald-200 [body.light-theme_&]:bg-emerald-50 [body.light-theme_&]:text-emerald-700">{{ 'Recommended' | translate }}</span>
                   }
                   @if (item.trust_state === 'trust') {
-                    <span class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">{{ 'Trust' | translate }}</span>
+                    <span class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:border-sky-200 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">{{ 'Trust' | translate }}</span>
                   }
                   @if (item.trust_state === 'untrust') {
-                    <span class="rounded-full border border-rose-400/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300">{{ 'Untrust' | translate }}</span>
+                    <span class="rounded-full border border-rose-400/30 bg-rose-500/10 px-2.5 py-1 text-[11px] font-semibold text-rose-300 [body.light-theme_&]:border-rose-200 [body.light-theme_&]:bg-rose-50 [body.light-theme_&]:text-rose-700">{{ 'Untrust' | translate }}</span>
                   }
                   @if (item.comments_count > 0) {
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ item.comments_count }} comment{{ item.comments_count > 1 ? 's' : '' }}</span>

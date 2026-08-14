@@ -643,15 +643,15 @@ export class CategoryAlertReportComponent implements OnInit {
   getRiskIconColorClass(risk: string): string {
     switch ((risk || '').toLowerCase()) {
       case 'critical':
-        return '[&_i]:text-[#ef4444]';
+        return '[&_i]:text-[#ef4444] [body.light-theme_&]:[&_i]:text-red-700';
       case 'high':
-        return '[&_i]:text-[#f97316]';
+        return '[&_i]:text-[#f97316] [body.light-theme_&]:[&_i]:text-orange-700';
       case 'medium':
-        return '[&_i]:text-[#f59e0b]';
+        return '[&_i]:text-[#f59e0b] [body.light-theme_&]:[&_i]:text-amber-700';
       case 'low':
-        return '[&_i]:text-[#60a5fa]';
+        return '[&_i]:text-[#60a5fa] [body.light-theme_&]:[&_i]:text-sky-700';
       default:
-        return '';
+        return '[body.light-theme_&]:[&_i]:text-sky-700';
     }
   }
 

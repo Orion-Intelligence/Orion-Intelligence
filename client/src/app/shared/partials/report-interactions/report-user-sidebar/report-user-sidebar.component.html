@@ -1,7 +1,7 @@
 @if (isMounted) {
 <div class="fixed inset-0 z-[1190] bg-black/25 transition-opacity duration-300 ease-out" [class.opacity-100]="isVisible" [class.opacity-0]="!isVisible" [class.pointer-events-auto]="isVisible" [class.pointer-events-none]="!isVisible" (click)="closeSidebar()"></div>
 
-<div class="fixed top-0 right-0 z-[1200] h-screen w-[360px] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [class.translate-x-0]="isVisible" [class.translate-x-[102%]]="!isVisible" (transitionend)="onPanelTransitionEnd()">
+<div class="fixed top-0 right-0 z-[1200] h-screen w-[360px] overflow-hidden border-l border-l-[#ffffff15] bg-[var(--color-blue-820-light)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:border-l-[var(--color-border)] [body.light-theme_&]:shadow-[-16px_0_40px_rgba(15,23,42,0.10)] max-[450px]:w-full" [class.translate-x-0]="isVisible" [class.translate-x-[102%]]="!isVisible" (transitionend)="onPanelTransitionEnd()">
   <div class="flex h-full flex-col">
     <div class="border-b border-[var(--color-divider)] bg-[var(--color-blue-820-light)] px-4 pb-3 pt-3">
       <div class="flex items-center justify-between gap-3">
@@ -36,9 +36,9 @@
           </div>
         </div>
       } @else if (errorMessage) {
-        <div class="rounded-[20px] border border-rose-400/25 bg-rose-500/10 p-4">
-          <div class="text-[14px] font-medium text-rose-200">{{ 'Unable to load profile' | translate }}</div>
-          <p class="mt-1 text-[12px] text-rose-200/80">{{ errorMessage }}</p>
+        <div class="rounded-[20px] border border-rose-400/25 bg-rose-500/10 p-4 [body.light-theme_&]:border-rose-200 [body.light-theme_&]:bg-rose-50">
+          <div class="text-[14px] font-medium text-rose-200 [body.light-theme_&]:text-rose-800">{{ 'Unable to load profile' | translate }}</div>
+          <p class="mt-1 text-[12px] text-rose-200/80 [body.light-theme_&]:text-rose-700">{{ errorMessage }}</p>
         </div>
       } @else if (userData?.hidden) {
         <div data-testid="report-user-sidebar-hidden-profile" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">

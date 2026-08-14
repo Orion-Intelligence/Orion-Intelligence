@@ -12,7 +12,7 @@
         }
       </div>
       @if (isLoading() && getUniquePosts(platformData, contentType).length === 0) {
-        <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+        <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center [body.light-theme_&]:border-[#d8e3ef] [body.light-theme_&]:bg-[#f8fbff]">
           <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
             <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
           </div>
@@ -27,7 +27,7 @@
           }
         </div>
       } @else if (getUniquePosts(platformData, contentType).length === 0) {
-        <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+        <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center [body.light-theme_&]:border-[#cbd9e8] [body.light-theme_&]:bg-[#f8fbff]">
           <div>
             <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">No {{ getPostContentTabLabel(contentType).toLowerCase() }} found</p>
             <p class="mb-0 text-xs text-[var(--color-text4)]">Run the {{ getPostContentTabLabel(contentType).toLowerCase() }} fetch again for this profile.</p>
@@ -41,7 +41,7 @@
       } @else {
         <div class="flex flex-col gap-2.5">
           @for (post of getUniquePosts(platformData, contentType); track post.post_url || $index) {
-            <div data-testid="social-post-row" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
+            <div data-testid="social-post-row" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)] [body.light-theme_&]:border-[#d8e3ef] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_4px_12px_rgba(15,23,42,0.05)] [body.light-theme_&]:hover:bg-[#f8fbff]">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0 flex-1">
                   <app-content-moderation-badge [moderation]="post.hate_speech"></app-content-moderation-badge>

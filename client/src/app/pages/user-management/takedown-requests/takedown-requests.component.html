@@ -21,7 +21,7 @@
             <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
           }
           @if (sidebarReady) {
-            <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+            <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full [body.light-theme_&]:border-l-[var(--color-border)]" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
               <app-filters (filterChanged)="applyFilters($event)" (filterClose)="sidebarService.closeSidebar()" (filterReset)="resetFilters()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
             </div>
           }
@@ -29,7 +29,7 @@
       </div>
 
       @if (error) {
-        <div class="mt-4 rounded-[8px] border border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.08)] px-4 py-3 text-[13px] text-[var(--color-text1)]">{{ error }}</div>
+        <div class="mt-4 rounded-[8px] border border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.08)] px-4 py-3 text-[13px] text-[var(--color-text1)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">{{ error }}</div>
       }
 
       <div class="overflow-x-auto border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] [border-width:var(--ui-table-shell-border-width,1.5px)] [margin-top:var(--ui-table-shell-mt,16px)] [border-radius:var(--ui-table-shell-radius,10px)] [-webkit-overflow-scrolling:touch]">
@@ -69,14 +69,14 @@
                   </td>
                   <td>
                     @if (item.abuse_email && (item.abuse_email.startsWith('http://') || item.abuse_email.startsWith('https://'))) {
-                      <a [href]="item.abuse_email" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-[6px] bg-[var(--color-blue-640)] px-2.5 py-1 text-[12px] font-medium text-white shadow-sm transition hover:bg-[rgba(87,165,235,0.9)]">
+                      <a [href]="item.abuse_email" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-[6px] bg-[var(--color-blue-640)] px-2.5 py-1 text-[12px] font-medium text-white shadow-sm transition hover:bg-[rgba(87,165,235,0.9)] [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30">
                         Open Form <i class="bi bi-box-arrow-up-right text-[11px] leading-none"></i>
                       </a>
                     } @else {
                       <div class="max-w-[260px] truncate" [title]="item.abuse_email">{{ item.abuse_email || 'No abuse email found' }}</div>
                     }
                     @if (item.denial_reason) {
-                      <div class="mt-0.5 max-w-[260px] truncate text-xs text-[#ff8a8a]" [title]="item.denial_reason">{{ item.denial_reason }}</div>
+                      <div class="mt-0.5 max-w-[260px] truncate text-xs text-[#ff8a8a] [body.light-theme_&]:text-red-700" [title]="item.denial_reason">{{ item.denial_reason }}</div>
                     }
                   </td>
                   <td>
@@ -91,13 +91,13 @@
                   <td>
                     <div class="flex items-center justify-end gap-2">
                       @if (item.status === 'pending' || item.status === 'failed') {
-                        <button data-testid="takedown-reject-button" type="button" (click)="reject(item)" [disabled]="!!actionId" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[rgba(255,107,107,0.28)] bg-[rgba(255,107,107,0.08)] px-3 text-[12px] font-semibold text-[#ff8a8a] transition-colors hover:bg-[rgba(255,107,107,0.14)] disabled:cursor-not-allowed disabled:opacity-50">
+                        <button data-testid="takedown-reject-button" type="button" (click)="reject(item)" [disabled]="!!actionId" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[rgba(255,107,107,0.28)] bg-[rgba(255,107,107,0.08)] px-3 text-[12px] font-semibold text-[#ff8a8a] transition-colors hover:bg-[rgba(255,107,107,0.14)] disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-500/30">
                           <i class="bi bi-x-lg text-[11px] leading-none"></i>
                           {{ 'Reject' | translate }}
                         </button>
                       }
                       @if (item.status === 'pending') {
-                        <button data-testid="takedown-accept-button" type="button" (click)="accept(item)" [disabled]="!!actionId" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-3 text-[12px] font-semibold text-white transition hover:bg-[rgba(87,165,235,0.9)] disabled:cursor-not-allowed disabled:opacity-50">
+                        <button data-testid="takedown-accept-button" type="button" (click)="accept(item)" [disabled]="!!actionId" class="inline-flex h-8 items-center gap-2 rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-3 text-[12px] font-semibold text-white transition hover:bg-[rgba(87,165,235,0.9)] disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:border-sky-700 [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30">
                           <i class="bi bi-check2 text-[14px] leading-none"></i>
                           {{ 'Accept' | translate }}
                         </button>

@@ -15,14 +15,14 @@
         <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-0 text-[var(--color-text1)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="loadLogs()" [attr.aria-label]="'Refresh' | translate" [attr.title]="'Refresh' | translate">
           <i class="bi bi-arrow-clockwise text-[15px]" aria-hidden="true"></i>
         </button>
-        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-red-400/30 bg-red-500/10 p-0 text-red-300 transition-colors hover:bg-red-500/20" (click)="flushLogs()" [attr.aria-label]="'Flush All' | translate" [attr.title]="'Flush All' | translate">
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-[8px] border border-red-400/30 bg-red-500/10 p-0 text-red-300 transition-colors hover:bg-red-500/20 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-500/30" (click)="flushLogs()" [attr.aria-label]="'Flush All' | translate" [attr.title]="'Flush All' | translate">
           <i class="bi bi-trash3 text-[13px]" aria-hidden="true"></i>
         </button>
       </div>
     </div>
 
     @if (errorMessage) {
-      <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+      <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
         {{ errorMessage }}
       </div>
     }

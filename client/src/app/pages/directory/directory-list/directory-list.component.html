@@ -33,24 +33,24 @@
                   <div class="flex flex-wrap gap-[6px]">
                     @if (item.content_type?.length) {
                       @for (category of item.content_type | slice:0:2; track $index) {
-                        <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text2)]">
+                        <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text2)] [body.light-theme_&]:border [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-tags)]">
                           {{ category | titlecase }}
                         </div>
                       }
                     } @else {
-                      <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text4)]">{{ 'No categories' | translate }}</div>
+                      <div class="rounded-full bg-white/[0.05] px-[10px] py-[4px] text-[12px] text-[var(--color-text4)] [body.light-theme_&]:border [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-blue-810)]">{{ 'No categories' | translate }}</div>
                     }
                   </div>
                 </td>
                 <td [attr.data-label]="'General Model Status' | translate">
                   <span class="inline-flex w-full items-center justify-end gap-[6px]">
-                    <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
+                    <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50] [body.light-theme_&]:bg-emerald-600' : 'bg-[#cbd5e1] [body.light-theme_&]:bg-slate-500'"></span>
                     <span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}</span>
                   </span>
                 </td>
                 <td [attr.data-label]="'Leak Model Status' | translate">
                   <span class="inline-flex w-full items-center justify-end gap-[6px]">
-                    <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50]' : 'bg-[#cbd5e1]'"></span>
+                    <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50] [body.light-theme_&]:bg-emerald-600' : 'bg-[#cbd5e1] [body.light-theme_&]:bg-slate-500'"></span>
                     <span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}</span>
                   </span>
                 </td>

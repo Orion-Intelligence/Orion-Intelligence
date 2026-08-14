@@ -39,7 +39,7 @@
             @if (sidebarFilterCount() > 0) {
               @for (key of sidebarFilters(); track key) {
                 <div class="flex flex-col pb-[8px]">
-                  <div class="mb-[10px] flex items-center text-[14px] font-medium text-[#A0B8D1]">
+                  <div class="mb-[10px] flex items-center text-[14px] font-medium text-[#A0B8D1] [body.light-theme_&]:text-[var(--color-text4)]">
                     {{ filter_mapping[key] || key }}
                   </div>
                   <span class="selected-filter-chip flex h-[30px] items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] text-[12px] font-normal text-[var(--color-text1)] [.light-theme_&]:!border-[#c7d5e6] [.light-theme_&]:!bg-[#eef4fb] [.light-theme_&]:!text-[#1d4ed8] [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
@@ -48,7 +48,7 @@
                 </div>
               }
             } @else {
-              <div class="mt-[6px] mb-[10px] text-[12px] text-[#A0B8D1]">
+              <div class="mt-[6px] mb-[10px] text-[12px] text-[#A0B8D1] [body.light-theme_&]:text-[var(--color-text4)]">
                 {{ 'Sidebar filters are empty. Click the filter icon (top right) to select filters.' | translate }}
               </div>
             }
@@ -56,7 +56,7 @@
           <div class="my-[12px] h-px bg-[var(--color-border)]"></div>
           @if (entityFiltersCount()) {
             <div class="flex flex-col pb-[8px]">
-              <div class="mb-[10px] flex items-center text-[14px] font-medium text-[#A0B8D1]">{{ 'Entity Type' | translate }}</div>
+              <div class="mb-[10px] flex items-center text-[14px] font-medium text-[#A0B8D1] [body.light-theme_&]:text-[var(--color-text4)]">{{ 'Entity Type' | translate }}</div>
               <div class="flex flex-1 gap-[16px] overflow-x-auto overflow-y-hidden">
                 @if (getVisibleTags().length > 0) {
                   @for (tag of getVisibleTags(); track tag) {
@@ -74,7 +74,7 @@
               </div>
             </div>
           } @else {
-            <div class="mt-[6px] mb-[10px] text-[12px] text-[#A0B8D1]">
+            <div class="mt-[6px] mb-[10px] text-[12px] text-[#A0B8D1] [body.light-theme_&]:text-[var(--color-text4)]">
               {{ 'Entity filters are empty. Click the search bar to select filters.' | translate }}
             </div>
           }

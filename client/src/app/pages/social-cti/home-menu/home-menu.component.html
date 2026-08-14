@@ -1,5 +1,5 @@
-<div class="dark-theme flex h-full flex-col bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]" [class.w-[70px]]="isCollapsed()" [class.min-w-[70px]]="isCollapsed()" [class.overflow-hidden]="isCollapsed()" [class.px-[7px]]="isCollapsed()" [class.py-[8px]]="isCollapsed()" [class.w-[300px]]="!isCollapsed()" [class.min-w-[300px]]="!isCollapsed()" [class.overflow-y-auto]="!isCollapsed()" [class.p-0]="!isCollapsed()">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" [forceDarkLogo]="true" (toggleClicked)="toggle.emit(undefined)">
+<div class="flex h-full flex-col bg-[var(--color-blue-900)] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent] [body.light-theme_&]:bg-[#f9fbff]" [class.w-[70px]]="isCollapsed()" [class.min-w-[70px]]="isCollapsed()" [class.overflow-hidden]="isCollapsed()" [class.px-[7px]]="isCollapsed()" [class.py-[8px]]="isCollapsed()" [class.w-[300px]]="!isCollapsed()" [class.min-w-[300px]]="!isCollapsed()" [class.overflow-y-auto]="!isCollapsed()" [class.p-0]="!isCollapsed()">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed()" (toggleClicked)="toggle.emit(undefined)">
 
     <div data-sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
 
@@ -10,7 +10,7 @@
             <span class="mt-0.5 block truncate text-sm font-semibold text-[var(--color-text1)]">Scan History</span>
           </span>
         </div>
-        <div class="mx-3 h-px bg-white/5"></div>
+        <div class="mx-3 h-px bg-white/5 [body.light-theme_&]:bg-[var(--color-divider)]"></div>
       </div>
 
       <div class="flex-grow overflow-y-auto px-3 py-3 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[6px] [&::-webkit-scrollbar]:w-[6px] [&::-webkit-scrollbar-thumb]:rounded-[3px] [&::-webkit-scrollbar-thumb]:bg-[var(--color-blue-720)] [&::-webkit-scrollbar-thumb:hover]:bg-[var(--color-blue-710)] [&::-webkit-scrollbar-track]:bg-transparent">
@@ -26,16 +26,16 @@
                       <div class="flex-shrink-0">
                         @switch (job.status) {
                           @case ('queued') {
-                            <i class="bi bi-hourglass-split text-amber-400 text-base leading-none"></i>
+                            <i class="bi bi-hourglass-split text-amber-400 text-base leading-none [body.light-theme_&]:text-amber-700"></i>
                           }
                           @case ('in_progress') {
                             <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--color-blue-640)]"></div>
                           }
                           @case ('completed') {
-                            <i class="bi bi-check-circle-fill text-green-500 text-base leading-none"></i>
+                            <i class="bi bi-check-circle-fill text-green-500 text-base leading-none [body.light-theme_&]:text-green-700"></i>
                           }
                           @case ('failed') {
-                            <i class="bi bi-x-circle-fill text-red-400 text-base leading-none"></i>
+                            <i class="bi bi-x-circle-fill text-red-400 text-base leading-none [body.light-theme_&]:text-red-600"></i>
                           }
                         }
                       </div>
@@ -66,7 +66,7 @@
                     <div class="mt-2.5 flex items-center justify-between">
 
                       @if (hasResults(job.username)) {
-                        <span class="inline-flex items-center gap-1 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-[11px] font-medium text-green-500">
+                        <span class="inline-flex items-center gap-1 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-[11px] font-medium text-green-500 [body.light-theme_&]:text-green-700">
                           <i class="bi bi-check-circle-fill text-[10px]"></i> Results Ready
                         </span>
                       } @else {

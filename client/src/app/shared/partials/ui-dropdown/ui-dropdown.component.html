@@ -28,7 +28,7 @@
     <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="listboxClass()" role="listbox" [attr.aria-multiselectable]="multiSelect() ? true : null">
       @if (loading()) {
         <div class="flex h-9 items-center gap-2 px-3 text-xs font-medium text-[var(--color-text4)]">
-          <span class="h-3 w-3 animate-spin rounded-full border border-white/[0.16] border-t-[var(--color-text2)]"></span>
+          <span class="h-3 w-3 animate-spin rounded-full border border-white/[0.16] border-t-[var(--color-text2)] [body.light-theme_&]:border-slate-300 [body.light-theme_&]:border-t-[var(--color-text2)]"></span>
           <span>Loading...</span>
         </div>
       } @else {
@@ -47,7 +47,7 @@
           <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
         </button>
       } @empty {
-        <div class="px-3 py-3 text-xs font-medium text-[var(--color-text5)]">No results</div>
+        <div class="px-3 py-3 text-xs font-medium text-[var(--color-text5)] [body.light-theme_&]:text-[#2563a8]">No results</div>
       }
       }
     </div>

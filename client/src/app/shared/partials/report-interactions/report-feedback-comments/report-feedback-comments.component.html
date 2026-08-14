@@ -15,17 +15,16 @@
 
   <div class="orion-comment-input-surface report-comment-surface relative mt-4 overflow-hidden rounded-[12px] border border-[color-mix(in_srgb,var(--color-border)_82%,var(--color-blue-640)_18%)] bg-[#172235] p-3.5 [.light-theme_&]:!bg-[var(--color-blue-720)]">
     <div class="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(87,165,235,0.18)_18%,rgba(87,165,235,0.32)_50%,rgba(87,165,235,0.18)_82%,transparent_100%)]"></div>
-    <textarea data-testid="report-feedback-comment-input" [(ngModel)]="draft" rows="3" [placeholder]="'Add an analyst note, context, or follow-up...' | translate" class="orion-comment-input-field min-h-[90px] w-full resize-y rounded-[10px] border border-[color-mix(in_srgb,var(--color-border)_88%,var(--color-blue-640)_12%)] bg-[#172235] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:ring-2 focus:ring-sky-400/20"></textarea>
+    <textarea data-testid="report-feedback-comment-input" [(ngModel)]="draft" rows="3" [placeholder]="'Add an analyst note, context, or follow-up...' | translate" class="orion-comment-input-field min-h-[90px] w-full resize-y rounded-[10px] border border-[color-mix(in_srgb,var(--color-border)_88%,var(--color-blue-640)_12%)] bg-[#172235] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:ring-2 focus:ring-sky-400/20 [.light-theme_&]:!bg-white"></textarea>
 
-    <div class="orion-comment-input-footer mt-3 flex items-center justify-between gap-3 border-t border-[var(--color-divider)] bg-[#172235] pt-3">
-      <p class="orion-comment-footer-copy text-[11px] text-[var(--color-text4)]">{{ 'Notes are shared on this report.' | translate }}</p>
+    <div class="orion-comment-input-footer mt-3 flex items-center justify-end gap-3 border-t border-[var(--color-divider)] bg-[#172235] pt-3 [.light-theme_&]:!bg-transparent">
       <button data-testid="report-feedback-comment-save" type="button" [disabled]="!docId || !draft.trim() || isSaving" (click)="submitComment()" class="orion-comment-action-send inline-flex h-9 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-640)] px-3.5 text-[12px] font-semibold text-white transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60">
         {{ (isSaving ? 'Saving...' : 'Save Comment') | translate }}
       </button>
     </div>
 
     @if (errorMessage) {
-      <p class="mt-2 text-[12px] text-rose-300">{{ errorMessage }}</p>
+      <p class="mt-2 text-[12px] text-rose-300 [.light-theme_&]:text-rose-700">{{ errorMessage }}</p>
     }
   </div>
 
@@ -34,30 +33,28 @@
       @for (comment of feedback.comments; track comment.created_at) {
         <div class="report-comment-surface relative overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-3.5 py-3 [.light-theme_&]:!bg-[var(--color-blue-720)]">
           <div class="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent_0%,rgba(87,165,235,0.18)_18%,rgba(87,165,235,0.32)_50%,rgba(87,165,235,0.18)_82%,transparent_100%)]"></div>
-          <div class="flex items-start gap-3">
-            <button data-testid="report-feedback-comment-user-avatar" type="button" (click)="openUser(comment.user_id)" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[11px] font-semibold uppercase text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:text-[var(--color-text1)]">
-              {{ (comment.username || 'A').slice(0, 1) }}
-            </button>
-            <div class="min-w-0 flex-1">
-              <div class="flex min-w-0 items-start justify-between gap-3">
+          <div>
+            <div class="flex min-w-0 items-center justify-between gap-3">
+              <div class="flex min-w-0 flex-1 items-center gap-3">
+                <button data-testid="report-feedback-comment-user-avatar" type="button" (click)="openUser(comment.user_id)" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[11px] font-semibold uppercase text-[var(--color-text2)] transition hover:border-[var(--color-blue-640)] hover:text-[var(--color-text1)]">
+                  {{ (comment.username || 'A').slice(0, 1) }}
+                </button>
                 <button data-testid="report-feedback-comment-user-name" type="button" (click)="openUser(comment.user_id)" class="truncate text-[13px] font-semibold text-[var(--color-text1)] transition hover:text-[var(--color-blue-640)]">
                   {{ comment.username || ('Analyst note' | translate) }}
                 </button>
-                <div class="flex shrink-0 flex-col items-end gap-1">
-                  <div class="text-[11px] text-[var(--color-text4)]">{{ getFormattedDateTime(comment.created_at) }}</div>
-                  @if (canDeleteComment(comment)) {
-                    <button data-testid="report-feedback-comment-delete" type="button" [disabled]="isSaving" (click)="requestDeleteComment(comment.created_at)" [attr.aria-label]="'Delete comment' | translate" class="inline-flex h-6 items-center gap-1 rounded-[7px] border border-red-400/20 bg-red-500/5 px-2 text-[11px] font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/12 disabled:cursor-not-allowed disabled:opacity-50">
-                      <i class="bi bi-trash3 text-[10px]"></i>
-                      <span>{{ 'Delete' | translate }}</span>
-                    </button>
-                  }
-                </div>
               </div>
-              <div class="mt-2">
-                <div>
-                  <p class="whitespace-pre-wrap text-[13px] leading-[1.65]" [ngClass]="comment.is_deleted ? 'italic text-[var(--color-text4)]' : 'text-[var(--color-text1)]'" data-testid="report-feedback-comment-body">{{ comment.is_deleted ? ('Comment deleted by user' | translate) : comment.comment }}</p>
-                </div>
+              <div class="flex shrink-0 flex-col items-end gap-1">
+                <div class="text-[11px] text-[var(--color-text4)]">{{ getFormattedDateTime(comment.created_at) }}</div>
+                @if (canDeleteComment(comment)) {
+                  <button data-testid="report-feedback-comment-delete" type="button" [disabled]="isSaving" (click)="requestDeleteComment(comment.created_at)" [attr.aria-label]="'Delete comment' | translate" class="inline-flex h-6 items-center gap-1 rounded-[7px] border border-red-400/20 bg-red-500/5 px-2 text-[11px] font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/12 disabled:cursor-not-allowed disabled:opacity-50 [.light-theme_&]:border-red-200 [.light-theme_&]:bg-red-50 [.light-theme_&]:text-red-700 [.light-theme_&]:hover:bg-red-100">
+                    <i class="bi bi-trash3 text-[10px]"></i>
+                    <span>{{ 'Delete' | translate }}</span>
+                  </button>
+                }
               </div>
+            </div>
+            <div class="ml-11 mt-2 border-t border-[var(--color-divider)] pt-2 [body.light-theme_&]:border-[#d7e2ee]">
+              <p class="whitespace-pre-wrap text-[13px] leading-[1.65]" [ngClass]="comment.is_deleted ? 'italic text-[var(--color-text4)]' : 'text-[var(--color-text1)]'" data-testid="report-feedback-comment-body">{{ comment.is_deleted ? ('Comment deleted by user' | translate) : comment.comment }}</p>
             </div>
           </div>
         </div>

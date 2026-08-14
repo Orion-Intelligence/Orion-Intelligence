@@ -38,13 +38,13 @@
   }
 
   @if (sidebarReady) {
-    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full [body.light-theme_&]:border-l-[var(--color-border)]" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilters($event)" (filterReset)="reloadFilters({})" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }
 
   @if (errorMessage) {
-    <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+    <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
       {{ errorMessage }}
     </div>
   }
@@ -71,7 +71,7 @@
     <section class="mt-[15px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] p-[15px]" @fadeInDashboardItem>
       <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
         <div class="flex items-center gap-2">
-          <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+          <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ getActorLabel() }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Access' | translate }}</div>
         </div>
@@ -79,7 +79,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
         <div class="hidden items-center gap-2 md:flex">
-          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ totalHits }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Total Hits' | translate }}</div>
         </div>
@@ -87,7 +87,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
         <div class="hidden items-center gap-2 lg:flex">
-          <img alt="Search" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+          <img alt="Search" src="assets/images/shared/assets_searched.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="displayQuery || 'query'">{{ displayQuery || 'query' }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Query' | translate }}</div>
         </div>
@@ -95,7 +95,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
         <div class="hidden items-center gap-2 xl:flex">
-          <img alt="Search" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+          <img alt="Search" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ currentBatchSize }} / {{ pageCount }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Batch / Pages' | translate }}</div>
         </div>
@@ -129,7 +129,7 @@
                     <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="getRawPreview(item)">{{ getRawPreview(item) }}</div>
                   </td>
                   <td [attr.data-label]="'Severity' | translate">
-                    <span class="inline-flex items-center rounded-full border px-[8px] py-[2px] text-[11px] font-semibold uppercase" [ngClass]="{ 'border-red-400/30 bg-red-500/10 text-red-300': stringifyPrimitive(item?.severity).toLowerCase() === 'critical', 'border-orange-400/30 bg-orange-500/10 text-orange-300': stringifyPrimitive(item?.severity).toLowerCase() === 'high', 'border-amber-400/30 bg-amber-500/10 text-amber-300': stringifyPrimitive(item?.severity).toLowerCase() === 'medium', 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': stringifyPrimitive(item?.severity).toLowerCase() === 'low', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text2)]': !['critical', 'high', 'medium', 'low'].includes(stringifyPrimitive(item?.severity).toLowerCase()) }">
+                    <span class="inline-flex items-center rounded-full border px-[8px] py-[2px] text-[11px] font-semibold uppercase" [ngClass]="{ 'border-red-400/30 bg-red-500/10 text-red-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': stringifyPrimitive(item?.severity).toLowerCase() === 'critical', 'border-orange-400/30 bg-orange-500/10 text-orange-300 [body.light-theme_&]:border-orange-600/30 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': stringifyPrimitive(item?.severity).toLowerCase() === 'high', 'border-amber-400/30 bg-amber-500/10 text-amber-300 [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': stringifyPrimitive(item?.severity).toLowerCase() === 'medium', 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': stringifyPrimitive(item?.severity).toLowerCase() === 'low', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text2)]': !['critical', 'high', 'medium', 'low'].includes(stringifyPrimitive(item?.severity).toLowerCase()) }">
                       {{ stringifyPrimitive(item?.severity) }}
                     </span>
                   </td>

@@ -339,7 +339,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     if (container) {
       const fallback = document.createElement('div');
       fallback.setAttribute('data-testid', 'threat-lens-map-fallback');
-      fallback.className = 'flex h-full w-full items-center justify-center bg-black text-[12px] text-[var(--color-text3)]';
+      fallback.className = 'flex h-full w-full items-center justify-center bg-black text-[12px] text-[var(--color-text3)] [body.light-theme_&]:bg-[#edf4fb]';
       fallback.textContent = 'Threat Lens map fallback';
       container.replaceChildren(fallback);
     }

@@ -31,23 +31,20 @@
         </div>
 
         @for (group of visibleTenantAlertGroups; track group.tenant.id || $index) {
-        <section class="rounded-[10px] border border-[var(--tenant-line)] p-4 [background-color:color-mix(in_srgb,var(--tenant-row-bg)_50%,transparent)]" data-testid="case-admin-alert-tenant">
-            <div class="mb-4 flex flex-col gap-3 border-b border-[var(--tenant-line)] pb-4 md:flex-row md:items-start md:justify-between">
+        <section class="rounded-[10px] border border-[var(--tenant-line)] p-4 [background-color:color-mix(in_srgb,var(--tenant-row-bg)_50%,transparent)] [body.light-theme_&]:border-[#c8d8e8] [body.light-theme_&]:bg-[linear-gradient(180deg,#ffffff_0%,#f7faff_100%)] [body.light-theme_&]:shadow-[0_10px_28px_rgba(15,23,42,0.07)]" data-testid="case-admin-alert-tenant">
+            <div class="mb-4 flex flex-col gap-3 border-b border-[var(--tenant-line)] pb-4 [body.light-theme_&]:border-[#d8e4f0] md:flex-row md:items-start md:justify-between">
                 <div class="min-w-0">
                     <h2 class="mb-1 truncate text-[18px] font-semibold text-[var(--color-text1)]" data-testid="case-admin-alert-tenant-name">{{ group.tenant.name || '-' }}</h2>
                     <div class="flex flex-wrap items-center gap-2 text-xs font-medium text-[var(--color-text4)]" data-testid="case-admin-alert-tenant-meta">
                         <span data-testid="case-admin-alert-tenant-email">{{ group.tenant.email || '-' }}</span>
-                        <span aria-hidden="true">|</span>
-                        <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold" [ngClass]="group.tenant.is_active ? 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700'" data-testid="case-admin-alert-tenant-status">
+                        <span aria-hidden="true" class="[body.light-theme_&]:text-[var(--tenant-line)]">|</span>
+                        <span class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold [body.light-theme_&]:border" [ngClass]="group.tenant.is_active ? 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:border-emerald-200 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:border-slate-200 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700'" data-testid="case-admin-alert-tenant-status">
                             {{ (group.tenant.is_active ? 'Active' : 'Inactive') | translate }}
                         </span>
                     </div>
                 </div>
                 <div class="flex shrink-0 flex-wrap items-center gap-2">
-                    <div class="inline-flex rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1.5 text-xs font-semibold text-sky-200 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800" data-testid="case-admin-alert-tenant-count">
-                        {{ group.totalAlerts }} {{ 'Alerts' | translate }}
-                    </div>
-                    <button type="button" data-testid="case-admin-alert-tenant-download" class="inline-flex items-center gap-1.5 rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--color-text2)] transition hover:border-sky-400/50 hover:text-sky-200 disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:hover:text-sky-800" [disabled]="group.totalAlerts === 0 || isExportingTenantAlerts" [attr.aria-label]="'Download tenant alerts' | translate" (click)="openTenantAlertsDownload(group)">
+                    <button type="button" data-testid="case-admin-alert-tenant-download" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 text-xs font-semibold text-[var(--color-text2)] transition hover:border-sky-400/50 hover:text-sky-200 disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:border-[#cbd9e8] [body.light-theme_&]:bg-white [body.light-theme_&]:hover:border-sky-300 [body.light-theme_&]:hover:bg-sky-50 [body.light-theme_&]:hover:text-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" [disabled]="group.totalAlerts === 0 || isExportingTenantAlerts" [attr.aria-label]="'Download tenant alerts' | translate" (click)="openTenantAlertsDownload(group)">
                         @if (isExportingGroup(group)) {
                         <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[var(--tenant-line)] border-t-sky-400"></span>
                         } @else {
@@ -59,21 +56,21 @@
             </div>
 
             <div class="grid grid-cols-[repeat(auto-fit,minmax(180px,1fr))] gap-[12px]" data-testid="case-admin-alert-risk-summary">
-                <div class="risk-summary-card risk-summary-card--critical rounded-[8px] border border-[var(--color-border)] bg-[#ff4c4c1a] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#f1b3b8] [.light-theme_&]:!bg-[linear-gradient(180deg,#ffe7e9_0%,#fff8f8_100%)]">
+                <div class="risk-summary-card risk-summary-card--critical rounded-[8px] border border-[var(--color-border)] bg-[#ff4c4c1a] px-[16px] py-[14px] [.light-theme_&]:!border-[#f1b3b8] [.light-theme_&]:!bg-[linear-gradient(180deg,#ffe7e9_0%,#fff8f8_100%)] [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)]">
                     <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ group.riskCounts.critical }}</div>
-                    <div class="text-[16px] font-semibold text-[#ff4c4c]">{{ 'Critical Alerts' | translate }}</div>
+                    <div class="text-[16px] font-semibold text-[#ff4c4c] [body.light-theme_&]:text-red-700">{{ 'Critical Alerts' | translate }}</div>
                 </div>
-                <div class="risk-summary-card risk-summary-card--high rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#f3d09e] [.light-theme_&]:!bg-[linear-gradient(180deg,#fff3e2_0%,#fffaf3_100%)]">
+                <div class="risk-summary-card risk-summary-card--high rounded-[8px] border border-[var(--color-border)] bg-[#ffb3471a] px-[16px] py-[14px] [.light-theme_&]:!border-[#f3d09e] [.light-theme_&]:!bg-[linear-gradient(180deg,#fff3e2_0%,#fffaf3_100%)] [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)]">
                     <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ group.riskCounts.high }}</div>
-                    <div class="text-[16px] font-semibold text-[#ffb347]">{{ 'High Risk Alerts' | translate }}</div>
+                    <div class="text-[16px] font-semibold text-[#ffb347] [body.light-theme_&]:text-orange-700">{{ 'High Risk Alerts' | translate }}</div>
                 </div>
-                <div class="risk-summary-card risk-summary-card--medium rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#e8dc98] [.light-theme_&]:!bg-[linear-gradient(180deg,#fffadf_0%,#fffdf3_100%)]">
+                <div class="risk-summary-card risk-summary-card--medium rounded-[8px] border border-[var(--color-border)] bg-[#ffd9661a] px-[16px] py-[14px] [.light-theme_&]:!border-[#e8dc98] [.light-theme_&]:!bg-[linear-gradient(180deg,#fffadf_0%,#fffdf3_100%)] [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)]">
                     <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ group.riskCounts.medium }}</div>
-                    <div class="text-[16px] font-semibold text-[#ffd966]">{{ 'Medium Risk' | translate }}</div>
+                    <div class="text-[16px] font-semibold text-[#ffd966] [body.light-theme_&]:text-amber-700">{{ 'Medium Risk' | translate }}</div>
                 </div>
-                <div class="risk-summary-card risk-summary-card--low rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px] [.light-theme_&]:!border-[#d7dee8] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)] [.light-theme_&]:!border-[#b8ddc0] [.light-theme_&]:!bg-[linear-gradient(180deg,#e8f8eb_0%,#f7fdf8_100%)]">
+                <div class="risk-summary-card risk-summary-card--low rounded-[8px] border border-[var(--color-border)] bg-[#6ccf7e1a] px-[16px] py-[14px] [.light-theme_&]:!border-[#b8ddc0] [.light-theme_&]:!bg-[linear-gradient(180deg,#e8f8eb_0%,#f7fdf8_100%)] [.light-theme_&]:!shadow-[0_8px_20px_rgba(15,23,42,0.10)]">
                     <div class="text-[20px] font-semibold text-[var(--color-text1)]">{{ group.riskCounts.low }}</div>
-                    <div class="text-[16px] font-semibold text-[#6ccf7e]">{{ 'Low Risk' | translate }}</div>
+                    <div class="text-[16px] font-semibold text-[#6ccf7e] [body.light-theme_&]:text-emerald-700">{{ 'Low Risk' | translate }}</div>
                 </div>
             </div>
 
@@ -85,15 +82,15 @@
                             <img alt="icon" src="assets/images/shared/theme/alert-categories-icon.svg" class="category-alert-icon h-[24px] w-[24px] [.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(28%)_sepia(15%)_saturate(1038%)_hue-rotate(176deg)_brightness(93%)_contrast(90%)] [.light-theme_&]:!opacity-[92%]">
                             {{ getCategoryLabel(category.categoryName) }}
                         </div>
-                        <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px] [.light-theme_&]:!border [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] [.light-theme_&]:!border-[#f3a7af]': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] [.light-theme_&]:!border-[#efcd97]': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] [.light-theme_&]:!border-[#e6d690]': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] [.light-theme_&]:!border-[#86efac] [.light-theme_&]:!bg-[#dcfce7] [.light-theme_&]:!text-[#166534] [.light-theme_&]:!font-semibold': category.risk.toLowerCase() === 'low', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': !['critical', 'high', 'medium', 'low'].includes(category.risk.toLowerCase()) }">
+                        <div class="category-risk-badge rounded-[100px] border border-[var(--color-border)] px-[10px] py-[4px] text-[12px] font-normal max-[640px]:text-[11px] [.light-theme_&]:!border [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.65)]" [ngClass]="{ 'bg-[#ff4c4c1a] text-[#ff4c4c] [.light-theme_&]:!border-[#f3a7af] [.light-theme_&]:!bg-red-100 [.light-theme_&]:!text-red-700': category.risk.toLowerCase() === 'critical', 'bg-[#ffb3471a] text-[#ffb347] [.light-theme_&]:!border-[#efcd97] [.light-theme_&]:!bg-orange-100 [.light-theme_&]:!text-orange-700': category.risk.toLowerCase() === 'high', 'bg-[#ffd9661a] text-[#ffd966] [.light-theme_&]:!border-[#e6d690] [.light-theme_&]:!bg-amber-100 [.light-theme_&]:!text-amber-700': category.risk.toLowerCase() === 'medium', 'bg-[#6ccf7e1a] text-[#6ccf7e] [.light-theme_&]:!border-[#86efac] [.light-theme_&]:!bg-[#dcfce7] [.light-theme_&]:!text-[#166534] [.light-theme_&]:!font-semibold': category.risk.toLowerCase() === 'low', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': !['critical', 'high', 'medium', 'low'].includes(category.risk.toLowerCase()) }">
                             {{ category.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
                         </div>
                     </div>
-                    <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1]">
+                    <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">
                         <span>{{ 'IOC’s found' | translate }}</span>
                         <span class="font-semibold text-[var(--color-text1)]">{{ category.iocCount }}</span>
                     </div>
-                    <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1]">
+                    <div class="flex justify-between text-[12px] font-normal text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">
                         <span>{{ 'Detected on' | translate }}</span>
                         <span class="font-semibold text-[var(--color-text1)]">
                             {{ category.detectedDate ? (category.detectedDate | date:'dd/MM/yyyy') : '-' }}

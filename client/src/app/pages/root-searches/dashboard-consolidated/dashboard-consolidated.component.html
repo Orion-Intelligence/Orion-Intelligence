@@ -23,7 +23,7 @@
           <div class="min-w-0 space-y-4">
             @if (isGrouped) {
               @if (showScanCard()) {
-                <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-4">
+                <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_20px_rgba(15,23,42,0.05)]">
                   <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                       <div class="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-blue-640)]"></div>
@@ -52,7 +52,7 @@
               }
               @for (index of (groupedResults | sortGroupedResults); track index.key) {
                 @if (index.key === 'exploit_model' && externalConsolidatedFeedService.actorMalwareResults().length > 0) {
-                  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-4 max-[640px]:p-3" data-testid="consolidated-section-actors-malware">
+                  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_20px_rgba(15,23,42,0.05)] max-[640px]:p-3" data-testid="consolidated-section-actors-malware">
                     <div class="flex items-center justify-between">
                       <span class="mb-[10px] block">
                         <div class="text-sm font-semibold text-[var(--color-text1)]" data-testid="consolidated-section-title-actors-malware">
@@ -74,7 +74,7 @@
                   </div>
                 }
                 @if (index.key !== 'defacement_model' && index.key !== 'stealer_model' && index.key !== 'apt_model' && index.key !== 'malware_model') {
-                  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-4 max-[640px]:p-3" [attr.data-testid]="'consolidated-section-' + index.key.replace('_model', '')">
+                  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_20px_rgba(15,23,42,0.05)] max-[640px]:p-3" [attr.data-testid]="'consolidated-section-' + index.key.replace('_model', '')">
                     <div class="flex items-center justify-between">
                       <span class="mb-[10px] block">
                         <div class="text-sm font-semibold text-[var(--color-text1)]" [attr.data-testid]="'consolidated-section-title-' + index.key.replace('_model', '')">
@@ -118,7 +118,7 @@
             } @else {
               @for (item of rankedResult.result; track item.m_hash || item.m_message_id || item.id || item.m_url || $index) {
                 <div class="mt-4">
-                  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-3">
+                  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] min-w-0 rounded-xl border border-[var(--color-border)] p-3 [.light-theme_&]:shadow-[0_6px_20px_rgba(15,23,42,0.05)]">
                     @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model') {
                       <app-dashboard-results-general-grid
                         [query]="query"

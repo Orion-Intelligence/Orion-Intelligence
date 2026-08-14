@@ -274,15 +274,18 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   triggerClass(): string {
+    const lightTheme = this.isLightTheme();
     const radiusClass = this.isOpen
       ? (this.size() === 'large' ? 'rounded-t-[10px] rounded-b-none' : 'rounded-t-[7px] rounded-b-none')
       : (this.size() === 'large' ? 'rounded-[10px]' : 'rounded-[7px]');
-    const sizeClass = this.size() === 'large' ? `h-11 ${radiusClass} px-3 text-sm` : `h-10 ${radiusClass} px-[15px] text-xs`;
+    const sizeClass = this.size() === 'large'
+      ? `${lightTheme ? 'h-10' : 'h-11'} ${radiusClass} px-3 text-sm`
+      : `${lightTheme ? 'h-9 px-3' : 'h-10 px-[15px]'} ${radiusClass} text-xs`;
     const openBorderClass = this.isOpen ? '!border-b-transparent hover:!border-b-transparent focus:!border-b-transparent' : '';
     const darkSurfaceClass = this.surface() === 'alert'
       ? '!bg-[#152230] hover:!bg-[#152230] focus:!bg-[#152230]'
       : '!bg-[#131E30] hover:!bg-[#131E30] focus:!bg-[#131E30]';
-    const themeClass = this.isLightTheme()
+    const themeClass = lightTheme
       ? `border-[#c7d5e6] bg-white text-[#172235] hover:border-[#b8c8dc] hover:bg-[#f8fbff] focus:border-[#b8c8dc] focus:bg-white ${openBorderClass}`
       : `border-[#2c3a4a] ${darkSurfaceClass} text-[var(--color-text1)] hover:border-[#2c3a4a] focus:border-[#2c3a4a] ${openBorderClass}`;
     return `${sizeClass} ${themeClass}`;

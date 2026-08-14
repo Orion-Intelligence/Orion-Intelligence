@@ -1,5 +1,5 @@
-<div class="overflow-hidden rounded-[8px] border" [ngClass]="!isEditing && caseData.closure ? 'border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)]' : 'border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]'">
-    <div class="flex h-12 items-center justify-between gap-3 px-4" [ngClass]="!isEditing && caseData.closure ? 'border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)]' : 'border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]'">
+<div class="overflow-hidden rounded-[8px] border" [ngClass]="!isEditing && caseData.closure ? 'border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)] [body.light-theme_&]:border-emerald-600/30' : 'border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]'">
+    <div class="flex h-12 items-center justify-between gap-3 px-4" [ngClass]="!isEditing && caseData.closure ? 'border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)] [body.light-theme_&]:border-emerald-600/25' : 'border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)]'">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Closure' | translate }}
             </h2>
@@ -52,7 +52,7 @@
     </app-case-edit-drawer>
     }
 
-    <div @caseModeSwapMotion class="bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+    <div @caseModeSwapMotion class="bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         @if (caseData.closure; as closure) {
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
             <div class="min-w-0 p-4">
@@ -80,7 +80,7 @@
                 </div>
                 }
             </div>
-            <div class="border-t border-emerald-400/15 p-4 lg:border-l lg:border-t-0">
+            <div class="border-t border-emerald-400/15 p-4 [body.light-theme_&]:border-emerald-600/25 lg:border-l lg:border-t-0">
                 <div class="grid grid-cols-1 gap-x-5 gap-y-4 xl:grid-cols-2">
                     <div>
                         <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">

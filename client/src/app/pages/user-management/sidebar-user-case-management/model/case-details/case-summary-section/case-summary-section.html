@@ -1,4 +1,4 @@
-<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
     <div class="flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 lg:flex-row lg:items-center lg:justify-between">
         <div class="min-w-0">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Case Details'
@@ -14,7 +14,7 @@
         <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
             @if (caseData) {
             <div class="grid w-full grid-cols-3 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/60 sm:w-[420px] xl:w-[480px]">
-                <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-blue-500/10 text-blue-300': caseData.status === 'new' || caseData.status === 'intake_review', 'bg-yellow-500/10 text-yellow-300': caseData.status === 'under_investigation' || caseData.status === 'evidence_collection' || caseData.status === 'verification' || caseData.status === 'regulatory_action' || caseData.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300': caseData.status === 'resolved', 'bg-slate-500/10 text-slate-300': caseData.status === 'closed' }">
+                <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': caseData.status === 'new' || caseData.status === 'intake_review', 'bg-yellow-500/10 text-yellow-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseData.status === 'under_investigation' || caseData.status === 'evidence_collection' || caseData.status === 'verification' || caseData.status === 'regulatory_action' || caseData.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseData.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': caseData.status === 'closed' }">
                     <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Status' |
                         translate }}</div>
                     <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold text-[var(--color-text1)]">
@@ -23,7 +23,7 @@
                             formatLabel(caseData.status) }}</span>
                     </div>
                 </div>
-                <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.severity === 'critical', 'bg-orange-500/10 text-orange-300': caseData.severity === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.severity === 'medium', 'bg-green-500/10 text-green-300': caseData.severity !== 'critical' && caseData.severity !== 'high' && caseData.severity !== 'medium' }">
+                <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': caseData.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': caseData.severity === 'high', 'bg-yellow-500/10 text-yellow-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseData.severity === 'medium', 'bg-green-500/10 text-green-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseData.severity !== 'critical' && caseData.severity !== 'high' && caseData.severity !== 'medium' }">
                     <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Severity'
                         | translate }}
                     </div>
@@ -34,7 +34,7 @@
                             }}</span>
                     </div>
                 </div>
-                <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': caseData.priority === 'critical', 'bg-orange-500/10 text-orange-300': caseData.priority === 'high', 'bg-yellow-500/10 text-yellow-300': caseData.priority === 'medium', 'bg-green-500/10 text-green-300': caseData.priority !== 'critical' && caseData.priority !== 'high' && caseData.priority !== 'medium' }">
+                <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': caseData.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': caseData.priority === 'high', 'bg-yellow-500/10 text-yellow-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseData.priority === 'medium', 'bg-green-500/10 text-green-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseData.priority !== 'critical' && caseData.priority !== 'high' && caseData.priority !== 'medium' }">
                     <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Priority'
                         | translate }}
                     </div>

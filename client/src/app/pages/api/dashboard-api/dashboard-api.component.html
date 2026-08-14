@@ -4,10 +4,10 @@
   }
 
   <form #searchForm="ngForm" (submit)="onSearchSubmit($event)" action="" enctype="multipart/form-data" method="GET" class="mt-6 flex items-center">
-    <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3 max-[800px]:flex-col max-[800px]:items-stretch [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-[#f9fbff]" [ngClass]="{ 'xl:max-w-[620px]': (apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'), 'xl:max-w-[980px]': !(apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto') }">
+    <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3 max-[800px]:flex-col max-[800px]:items-stretch [.light-theme_&]:!border-[#d3deea] [.light-theme_&]:!bg-[#f7faff] [.light-theme_&]:!shadow-[0_5px_18px_rgba(15,23,42,0.065)]" [ngClass]="{ 'xl:max-w-[620px]': (apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto'), 'xl:max-w-[980px]': !(apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto') }">
       <div class="flex w-full items-center gap-3 max-[800px]:flex-col max-[800px]:items-stretch">
         <div class="min-w-0 flex-1">
-          <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+          <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white transition-[border-color,box-shadow] [body.light-theme_&]:border-[#c7d5e4] [body.light-theme_&]:focus-within:border-[#70aee8] [body.light-theme_&]:focus-within:shadow-[0_0_0_3px_rgba(43,144,238,0.14)]">
             <div class="flex w-[45px] items-center justify-center bg-white">
               <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20" class="brightness-0 opacity-80">
             </div>
@@ -23,7 +23,7 @@
 
         @if (apiType !== 'wanted' && apiType !== 'national-identity' && apiType !== 'cracked' && apiType !== 'software' && apiType !== 'crypto') {
           <div class="min-w-0 flex-1">
-            <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+            <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white transition-[border-color,box-shadow] [body.light-theme_&]:border-[#c7d5e4] [body.light-theme_&]:focus-within:border-[#70aee8] [body.light-theme_&]:focus-within:shadow-[0_0_0_3px_rgba(43,144,238,0.14)]">
               <div class="flex w-[45px] items-center justify-center bg-white">
                 <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20" class="brightness-0 opacity-80">
               </div>
@@ -40,7 +40,7 @@
   </form>
 
   <div class="ml-0 mt-3">
-    <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-[#f9fbff] [.light-theme_&]:!shadow-none">
+    <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_3px_12px_rgba(15,23,42,0.055)]">
       <span>
         <img alt="Info Icon" class="mr-[8px] inline-block" src="assets/images/shared/hint.svg"/>
         <span>{{ (apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'wanted' ? 'Searches OpenSanctions wanted/watchlist records for the provided person query.' : apiType === 'national-identity' ? 'Searches national identity records using the provided CNIC or Mobile Number.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '') | translate }}</span>
@@ -61,7 +61,7 @@
         </div>
       </div>
     }
-    <div data-testid="ioc-threat-table-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white" @fadeInDashboardItem>
+    <div data-testid="ioc-threat-table-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]" @fadeInDashboardItem>
       <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
         <div>#</div>
         <div>{{ 'Result' | translate }}</div>
@@ -277,7 +277,7 @@
                   </div>
                 }
               } @else {
-                <div data-testid="ioc-threat-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white" @fadeInDashboardItem>
+                <div data-testid="ioc-threat-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]" @fadeInDashboardItem>
                   <div class="ui-ioc-table-head grid min-w-[1128px] grid-cols-[60px_1.5fr_120px_150px_160px_160px_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
                     <div>#</div>
                     <div>{{ 'Address' | translate }}</div>
@@ -337,7 +337,7 @@
                               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                                 @if (!isArrayValue(entry.value)) {
                                   @if (isUrlValue(entry.value)) {
-                                    <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="entry.value" target="_blank" rel="noopener noreferrer">
+                                    <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline [body.light-theme_&]:text-[#176aa8] [body.light-theme_&]:hover:text-[#0f568d]" [href]="entry.value" target="_blank" rel="noopener noreferrer">
                                       {{ entry.value }}
                                     </a>
                                   } @else {
@@ -352,7 +352,7 @@
                                       <span class="inline-flex max-w-full items-center gap-[4px] text-[13px] font-[600] text-[var(--color-text1)]">
                                         <span class="truncate">{{ stringifyPrimitive(valueItem.value) }}</span>
                                         @if (valueItem.count > 1) {
-                                          <span class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide">x{{ valueItem.count }}</span>
+                                          <span class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide [.light-theme_&]:text-sky-700">x{{ valueItem.count }}</span>
                                         }
                                       </span>
                                     }
@@ -370,7 +370,7 @@
             }
           } @else {
             @if (genericItems.length > 0) {
-              <div data-testid="ioc-threat-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white" @fadeInDashboardItem>
+              <div data-testid="ioc-threat-table" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]" @fadeInDashboardItem>
                 <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
                   <div>#</div>
                   <div>{{ 'Result' | translate }}</div>
@@ -418,7 +418,7 @@
                               <div class="flex min-w-0 flex-1 items-center gap-[8px]">
                                 @if (!isArrayValue(entry.value)) {
                                   @if (isUrlValue(entry.value)) {
-                                    <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline" [href]="entry.value" target="_blank" rel="noopener noreferrer">
+                                    <a class="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-mono text-[12.5px] font-[600] text-[var(--color-text5)] hover:underline [body.light-theme_&]:text-[#176aa8] [body.light-theme_&]:hover:text-[#0f568d]" [href]="entry.value" target="_blank" rel="noopener noreferrer">
                                       {{ entry.value }}
                                     </a>
                                   } @else {
@@ -433,7 +433,7 @@
                                       <span class="inline-flex max-w-full items-center gap-[4px] text-[13px] font-[600] text-[var(--color-text1)]">
                                         <span class="truncate">{{ stringifyPrimitive(valueItem.value) }}</span>
                                         @if (valueItem.count > 1) {
-                                          <span class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide">x{{ valueItem.count }}</span>
+                                          <span class="ml-[2px] rounded-md bg-sky-500/10 border border-sky-500/20 px-[6px] py-[1px] text-[10px] font-semibold text-sky-400 tracking-wide [.light-theme_&]:text-sky-700">x{{ valueItem.count }}</span>
                                         }
                                       </span>
                                     }

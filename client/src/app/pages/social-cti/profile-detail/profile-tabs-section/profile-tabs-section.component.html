@@ -6,10 +6,10 @@
           @if (getCoverImageUrl(platformData)) {
             <img [src]="getCoverImageUrl(platformData)" [alt]="(platformData.username || user.username) + ' cover'" referrerpolicy="no-referrer" (error)="onImageError($event)" class="absolute inset-0 h-full w-full object-cover">
           } @else {
-            <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(125,211,252,0.18),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.10),transparent_24%),linear-gradient(135deg,rgba(30,41,59,0.78),rgba(15,23,42,0.94))]"></div>
-            <div class="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] [background-size:22px_22px]"></div>
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(125,211,252,0.18),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.10),transparent_24%),linear-gradient(135deg,rgba(30,41,59,0.78),rgba(15,23,42,0.94))] [body.light-theme_&]:bg-[radial-gradient(circle_at_22%_18%,rgba(56,189,248,0.16),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.10),transparent_26%),linear-gradient(135deg,#eaf4ff,#f8fbff)]"></div>
+            <div class="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] [background-size:22px_22px] [body.light-theme_&]:opacity-[0.28] [body.light-theme_&]:[background-image:linear-gradient(rgba(79,112,148,0.13)_1px,transparent_1px),linear-gradient(90deg,rgba(79,112,148,0.13)_1px,transparent_1px)]"></div>
           }
-          <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-blue-820-light)] via-[rgba(15,23,42,0.58)] to-[rgba(15,23,42,0.10)]"></div>
+          <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-blue-820-light)] via-[rgba(15,23,42,0.58)] to-[rgba(15,23,42,0.10)] [body.light-theme_&]:bg-[linear-gradient(to_top,#f9fbff_0%,rgba(249,251,255,0.90)_42%,rgba(249,251,255,0.10)_100%)]"></div>
           @if (getProfileUrl(platformData, platformData.username || user.username); as profileUrl) {
             @if (profileUrl !== '#') {
               <a [href]="profileUrl" target="_blank" rel="noopener noreferrer" aria-label="Open original profile" title="Open original profile" class="absolute right-3 top-3 z-[2] inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/35 text-[13px] text-white shadow-[0_8px_18px_rgba(0,0,0,0.28)] backdrop-blur transition-colors hover:bg-black/50 hover:text-white">
@@ -53,7 +53,7 @@
           @if (activeTab() === 'details') {
             <div data-testid="social-tab-panel-details" class="px-[13px] py-[11px]">
               @if (isTabLoading('details') && getVisibleProfileDetailEntries(platformData).length === 0) {
-                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center [body.light-theme_&]:border-[#d8e3ef] [body.light-theme_&]:bg-[#f8fbff]">
                   <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
                     <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
                   </div>
@@ -66,7 +66,7 @@
                   </button>
                 </div>
               } @else if (getVisibleProfileDetailEntries(platformData).length === 0) {
-                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center [body.light-theme_&]:border-[#cbd9e8] [body.light-theme_&]:bg-[#f8fbff]">
                   <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
                     <i class="bi bi-person-badge text-base"></i>
                   </div>
@@ -148,7 +148,7 @@
                 }
               </div>
               @if (isTabLoading('images') && (platformData.images || []).length === 0) {
-                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-[rgba(148,163,184,0.16)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center [body.light-theme_&]:border-[#d8e3ef] [body.light-theme_&]:bg-[#f8fbff]">
                   <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
                     <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
                   </div>
@@ -161,7 +161,7 @@
                   </button>
                 </div>
               } @else if (getDisplayableSocialImages(platformData.images || []).length === 0) {
-                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center">
+                <div class="flex min-h-[180px] flex-col items-center justify-center gap-3 rounded-[10px] border border-dashed border-[rgba(148,163,184,0.22)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center [body.light-theme_&]:border-[#cbd9e8] [body.light-theme_&]:bg-[#f8fbff]">
                   <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
                     <i class="bi bi-images text-base"></i>
                   </div>
@@ -176,7 +176,7 @@
               } @else {
                 <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                   @for (image of getDisplayableSocialImages(platformData.images || []); track image.image_url || image.thumbnail || $index) {
-                    <a data-testid="social-image-result" [href]="getSocialImageHref(image)" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)]">
+                    <a data-testid="social-image-result" [href]="getSocialImageHref(image)" target="_blank" rel="noopener noreferrer" class="group relative block overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] shadow-[0_8px_18px_var(--color-shadow-light)] transition-colors hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.06)] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_6px_16px_rgba(15,23,42,0.08)] [body.light-theme_&]:hover:border-[#aac7e4]">
                       <img [src]="getSocialImageSrc(image)" [alt]="image.title || image.source || 'Social image'" referrerpolicy="no-referrer" (error)="onImageError($event)" class="aspect-[4/5] w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]">
                       <div class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent p-2 opacity-0 transition-opacity group-hover:opacity-100">
                         <p class="mb-0 truncate text-[10px] font-semibold text-white">{{ image.title || image.source || 'Image result' }}</p>

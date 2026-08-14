@@ -1,17 +1,17 @@
-<div class="flex flex-col gap-4 p-4 [&>.ui-ip-detail-section]:min-w-0 [&>.ui-ip-detail-section]:rounded-[10px] [&>.ui-ip-detail-section]:border [&>.ui-ip-detail-section]:border-[var(--ui-table-shell-border)] [&>.ui-ip-detail-section]:bg-[#1b283e] [&>.ui-ip-detail-section]:p-4 [&>.ui-ip-detail-section]:shadow-[inset_0_1px_0_rgba(255,255,255,0.045),0_6px_18px_rgba(0,0,0,0.08)] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:-mx-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:-mt-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:mb-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:flex [&>.ui-ip-detail-section>.ui-ip-detail-heading]:min-h-12 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:items-center [&>.ui-ip-detail-section>.ui-ip-detail-heading]:border-b [&>.ui-ip-detail-section>.ui-ip-detail-heading]:border-[var(--ui-table-row-border)] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:!bg-[#1d2f49] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:px-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:py-3 [body.light-theme_&]:[&>.ui-ip-detail-section]:bg-[var(--color-blue-790)] [body.light-theme_&]:[&>.ui-ip-detail-section>.ui-ip-detail-heading]:!bg-[var(--color-blue-700)]">
+<div class="flex flex-col gap-4 p-4 [&>.ui-ip-detail-section]:min-w-0 [&>.ui-ip-detail-section]:rounded-[10px] [&>.ui-ip-detail-section]:border [&>.ui-ip-detail-section]:border-[var(--ui-table-shell-border)] [&>.ui-ip-detail-section]:bg-[#1b283e] [&>.ui-ip-detail-section]:p-4 [&>.ui-ip-detail-section]:shadow-[inset_0_1px_0_rgba(255,255,255,0.045),0_6px_18px_rgba(0,0,0,0.08)] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:-mx-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:-mt-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:mb-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:flex [&>.ui-ip-detail-section>.ui-ip-detail-heading]:min-h-12 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:items-center [&>.ui-ip-detail-section>.ui-ip-detail-heading]:border-b [&>.ui-ip-detail-section>.ui-ip-detail-heading]:border-[var(--ui-table-row-border)] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:!bg-[#1d2f49] [&>.ui-ip-detail-section>.ui-ip-detail-heading]:px-4 [&>.ui-ip-detail-section>.ui-ip-detail-heading]:py-3 [body.light-theme_&]:[&>.ui-ip-detail-section]:border-[#d4dfeb] [body.light-theme_&]:[&>.ui-ip-detail-section]:bg-white [body.light-theme_&]:[&>.ui-ip-detail-section]:shadow-[0_5px_16px_rgba(15,23,42,0.065)] [body.light-theme_&]:[&>.ui-ip-detail-section>.ui-ip-detail-heading]:!bg-[#f4f8fc]">
 <div class="ui-ip-detail-section">
   <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'General Information' | translate }}</div>
   @if (hasCameraSignals || iotPortCount > 0) {
     <div class="mb-3 flex flex-wrap gap-2">
       @if (hasCameraSignals) {
-        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.16),rgba(43,144,238,0.07))] px-2.5 py-1 text-[11px] font-bold text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:!text-[#4e81ae]">Camera Detected{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
+        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.16),rgba(43,144,238,0.07))] px-2.5 py-1 text-[11px] font-bold text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:!border-[#a7c9e7] [.light-theme_&]:!bg-[#eaf4fd] [.light-theme_&]:!text-[#376d9b] [.light-theme_&]:!shadow-none">Camera Detected{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
       }
       @if (iotPortCount > 0) {
-        <span class="rounded-md border border-emerald-400/30 bg-[linear-gradient(135deg,rgba(52,211,153,0.15),rgba(16,185,129,0.06))] px-2.5 py-1 text-[11px] font-bold text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]">{{ 'IoT Ports' | translate }} {{ iotPortCount }}</span>
+        <span class="rounded-md border border-emerald-400/30 bg-[linear-gradient(135deg,rgba(52,211,153,0.15),rgba(16,185,129,0.06))] px-2.5 py-1 text-[11px] font-bold text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:border-emerald-300 [.light-theme_&]:bg-emerald-50 [.light-theme_&]:text-emerald-700 [.light-theme_&]:shadow-none">{{ 'IoT Ports' | translate }} {{ iotPortCount }}</span>
       }
     </div>
   }
-  <div class="grid grid-cols-2 gap-x-5 gap-y-3.5 md:grid-cols-4 [&>div]:rounded-md [&>div]:border [&>div]:border-[var(--ui-table-row-border)] [&>div]:bg-[linear-gradient(135deg,rgba(148,163,184,0.08),rgba(71,85,105,0.025))] [&>div]:px-3 [&>div]:py-2.5 [&>div]:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+  <div class="grid grid-cols-2 gap-x-5 gap-y-3.5 md:grid-cols-4 [&>div]:rounded-md [&>div]:border [&>div]:border-[var(--ui-table-row-border)] [&>div]:bg-[linear-gradient(135deg,rgba(148,163,184,0.08),rgba(71,85,105,0.025))] [&>div]:px-3 [&>div]:py-2.5 [&>div]:shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] [body.light-theme_&]:[&>div]:border-[#dce5ef] [body.light-theme_&]:[&>div]:bg-[#f7faff] [body.light-theme_&]:[&>div]:shadow-none">
     @if (detail.country) {
       <div class="flex min-w-0 flex-col gap-1"><span class="text-[11px] font-semibold uppercase tracking-[0.9px] text-[var(--color-text4)]">{{ 'iocTypes.m_country' | translate }}</span><span class="break-words text-[14px] font-medium leading-5 text-[var(--color-text1)]">{{ detail.country }}</span></div>
     }
@@ -59,7 +59,7 @@
     <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text1)]">{{ 'Open Ports' | translate }}</div>
     <div class="flex flex-wrap gap-1.5">
       @for (p of detail.open_ports; track p) {
-        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(87,165,235,0.2),rgba(43,144,238,0.09))] px-2.5 py-1 font-mono text-[13px] font-bold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] [.light-theme_&]:!text-[#2d6f9f]">{{ p }}</span>
+        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(87,165,235,0.2),rgba(43,144,238,0.09))] px-2.5 py-1 font-mono text-[13px] font-bold text-sky-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)] [.light-theme_&]:!border-[#a7c9e7] [.light-theme_&]:!bg-[#eaf4fd] [.light-theme_&]:!text-[#2d6f9f] [.light-theme_&]:!shadow-none">{{ p }}</span>
       }
     </div>
   </div>
@@ -71,14 +71,14 @@
     <div class="flex flex-col gap-3">
       @if (ui.renderablePorts(detail.ports).length) {
         @for (p of ui.renderablePorts(detail.ports); track p) {
-          <div class="overflow-hidden rounded-[10px] border border-[var(--ui-table-shell-border)] bg-[#1b283e] shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_6px_16px_rgba(0,0,0,0.08)] [body.light-theme_&]:bg-[var(--color-blue-830)]">
-            <div class="flex flex-wrap items-center gap-2 !bg-[#1d2f49] px-3.5 py-2.5 [body.light-theme_&]:!bg-[var(--color-blue-700)]">
+          <div class="overflow-hidden rounded-[10px] border border-[var(--ui-table-shell-border)] bg-[#1b283e] shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_6px_16px_rgba(0,0,0,0.08)] [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_4px_14px_rgba(15,23,42,0.055)]">
+            <div class="flex flex-wrap items-center gap-2 !bg-[#1d2f49] px-3.5 py-2.5 [body.light-theme_&]:!bg-[#f4f8fc]">
               @if (p.port) {
                 <span class="font-mono text-[16px] font-bold tracking-wide text-[#8ec8ff] [body.light-theme_&]:text-blue-600">{{ p.port }}</span>
               }
               @if (p.protocol || p.proto) {
                 <span class="text-[16px] text-[var(--color-text4)]">/</span>
-                <span class="rounded border border-sky-400/25 bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(43,144,238,0.08))] px-2 py-0.5 font-mono text-[11px] font-bold uppercase text-sky-400 [.light-theme_&]:!text-[#2d6f9f]">{{ p.protocol || p.proto }}</span>
+                <span class="rounded border border-sky-400/25 bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(43,144,238,0.08))] px-2 py-0.5 font-mono text-[11px] font-bold uppercase text-sky-400 [.light-theme_&]:!border-[#b5cee5] [.light-theme_&]:!bg-[#edf6fd] [.light-theme_&]:!text-[#2d6f9f]">{{ p.protocol || p.proto }}</span>
               }
               @if (p.service) {
                 <span class="rounded border border-[var(--ui-table-row-border)] bg-[linear-gradient(135deg,rgba(148,163,184,0.13),rgba(71,85,105,0.05))] px-2 py-0.5 font-mono text-[11px] font-semibold text-[var(--color-text3)]">{{ p.service }}</span>
@@ -87,13 +87,13 @@
                 <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2 py-0.5 text-[12px] font-bold text-sky-300 [.light-theme_&]:!text-[#4e81ae]">{{ 'CAMERA' | translate }}</span>
               }
               @if (p['is_iot']) {
-                <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-bold text-emerald-300">{{ 'IoT' | translate }}</span>
+                <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2 py-0.5 text-[12px] font-bold text-emerald-300 [.light-theme_&]:text-emerald-700">{{ 'IoT' | translate }}</span>
               }
               @if (p.state) {
-                <span class="ml-auto rounded border px-2 py-0.5 text-[12px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>
+                <span class="ml-auto rounded border px-2 py-0.5 text-[12px] font-semibold" [ngClass]="p.state==='open' ? ['bg-emerald-400/12', 'text-emerald-400', '[.light-theme_&]:text-emerald-700', 'border-emerald-400/20'] : ['bg-[var(--color-blue-700)]', 'text-[var(--color-text3)]', 'border-[var(--color-border)]']">{{ p.state }}</span>
               }
             </div>
-            <div class="flex flex-col gap-4 border-t border-[var(--ui-table-row-border)] bg-[#1b283e] p-3.5 [body.light-theme_&]:bg-[var(--color-blue-790)]">
+            <div class="flex flex-col gap-4 border-t border-[var(--ui-table-row-border)] bg-[#1b283e] p-3.5 [body.light-theme_&]:bg-white">
               @if (p.banner) {
                 <div>
                   <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-[var(--color-text4)]">{{ 'Banner' | translate }}</div>
@@ -140,7 +140,7 @@
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 shrink-0 font-semibold text-[var(--color-text3)]">{{ 'Serial No.' | translate }}</span><span class="break-all text-[12px] text-[var(--color-text2)]">{{ p.tls.serial_number }}</span></div>
                     }
                     @if (p.tls.is_self_signed) {
-                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 shrink-0 font-semibold text-[var(--color-text3)]">{{ 'Self-Signed' | translate }}</span><span class="font-bold text-red-400">{{ '⚠ Yes' | translate }}</span></div>
+                      <div class="flex gap-2.5 text-[13px]"><span class="w-32 shrink-0 font-semibold text-[var(--color-text3)]">{{ 'Self-Signed' | translate }}</span><span class="font-bold text-red-400 [.light-theme_&]:text-red-700">{{ '⚠ Yes' | translate }}</span></div>
                     }
                     @if (p.tls['is_ca'] !== undefined) {
                       <div class="flex gap-2.5 text-[13px]"><span class="w-32 shrink-0 font-semibold text-[var(--color-text3)]">{{ 'Certificate CA' | translate }}</span><span class="text-[var(--color-text2)]">{{ (p.tls['is_ca'] ? 'Yes' : 'No') | translate }}</span></div>
@@ -189,7 +189,7 @@
                           }
                         }
                         @if (ui.hasItems(p.tls.weak_protocols)) {
-                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 shrink-0 font-semibold text-red-400">{{ 'Weak Protocols' | translate }}</span><span class="text-red-400">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
+                          <div class="flex gap-2.5 text-[13px]"><span class="w-32 shrink-0 font-semibold text-red-400 [.light-theme_&]:text-red-700">{{ 'Weak Protocols' | translate }}</span><span class="text-red-400 [.light-theme_&]:text-red-700">{{ p.tls.weak_protocols?.join(', ') }}</span></div>
                         }
                         @if (ui.hasItems(p.tls.risk_flags)) {
                           <div class="flex gap-2.5 text-[13px]"><span class="w-32 shrink-0 font-semibold text-[var(--color-text4)]">{{ 'Risk Flags' | translate }}</span><span class="text-[var(--color-text2)]">{{ p.tls.risk_flags?.join(', ') }}</span></div>
@@ -226,10 +226,10 @@
               }
               @if (ui.hasItems(p.risk_flags)) {
                 <div>
-                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-orange-400">{{ 'Risk Flags' | translate }}</div>
+                  <div class="mb-1.5 text-[11px] font-bold uppercase tracking-[1.3px] text-orange-400 [.light-theme_&]:text-orange-700">{{ 'Risk Flags' | translate }}</div>
                   <div class="flex flex-wrap gap-1.5">
                     @for (r of p.risk_flags; track r) {
-                      <span class="rounded px-2.5 py-1 text-[13px] font-semibold bg-orange-400/12 text-orange-400 border border-orange-400/25">{{ r }}</span>
+                      <span class="rounded px-2.5 py-1 text-[13px] font-semibold bg-orange-400/12 text-orange-400 border border-orange-400/25 [.light-theme_&]:text-orange-700">{{ r }}</span>
                     }
                   </div>
                 </div>
@@ -281,14 +281,14 @@
       }
       <div class="flex min-h-10 w-full items-center justify-between gap-3 rounded-lg border border-[var(--ui-table-row-border)] bg-[linear-gradient(135deg,rgba(148,163,184,0.08),rgba(71,85,105,0.025))] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:w-[130px] sm:flex-none">
         <span class="text-[10px] font-semibold uppercase tracking-[0.9px] text-[var(--color-text4)]">HSTS</span>
-        <span class="rounded-md border px-2 py-0.5 text-[11px] font-bold" [ngClass]="detail.hsts ? ['border-emerald-400/25', 'bg-emerald-400/10', 'text-emerald-400'] : ['border-[var(--ui-table-row-border)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text4)]']">{{ (detail.hsts ? '✓ Yes' : '✕ No') | translate }}</span>
+        <span class="rounded-md border px-2 py-0.5 text-[11px] font-bold" [ngClass]="detail.hsts ? ['border-emerald-400/25', 'bg-emerald-400/10', 'text-emerald-400', '[.light-theme_&]:text-emerald-700'] : ['border-[var(--ui-table-row-border)]', 'bg-[var(--color-blue-790)]', 'text-[var(--color-text4)]']">{{ (detail.hsts ? '✓ Yes' : '✕ No') | translate }}</span>
       </div>
       @if (securityFlags.length) {
         <div class="flex min-h-10 w-full min-w-0 flex-wrap items-center gap-x-2.5 gap-y-1.5 rounded-lg border border-[var(--ui-table-row-border)] bg-[linear-gradient(135deg,rgba(148,163,184,0.08),rgba(71,85,105,0.025))] px-3 py-2 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:w-auto sm:min-w-[220px] sm:flex-[2_1_300px]">
           <span class="shrink-0 text-[10px] font-semibold uppercase tracking-[0.9px] text-[var(--color-text4)]">{{ 'Flags' | translate }}</span>
           <div class="flex min-w-0 flex-wrap gap-1.5">
             @for (s of securityFlags; track s) {
-              <span class="rounded-md border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400">{{ s }}</span>
+              <span class="rounded-md border border-emerald-400/25 bg-emerald-400/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-400 [.light-theme_&]:text-emerald-700">{{ s }}</span>
             }
           </div>
         </div>
@@ -299,7 +299,7 @@
 
 @if (ui.hasItems(detail.vulnerabilities)) {
   <div class="ui-ip-detail-section">
-    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.4px] text-red-400">{{ '⚠ Vulnerabilities (' | translate }}{{ detail.vulnerabilities!.length }})</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.4px] text-red-400 [.light-theme_&]:text-red-700">{{ '⚠ Vulnerabilities (' | translate }}{{ detail.vulnerabilities!.length }})</div>
     <div class="flex flex-col gap-1.5">
       @for (v of detail.vulnerabilities; track v) {
         @if (formatVulnerability(v)) {
@@ -314,7 +314,7 @@
 
 @if (ui.hasItems(detail.misconfigurations)) {
   <div class="ui-ip-detail-section">
-    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.4px] text-amber-400">{{ '⚡ Misconfigurations' | translate }}</div>
+    <div class="ui-ip-detail-heading text-[11px] font-bold uppercase tracking-[1.4px] text-amber-400 [.light-theme_&]:text-amber-700">{{ '⚡ Misconfigurations' | translate }}</div>
     <div class="flex flex-col gap-1.5">
       @for (m of detail.misconfigurations; track m) {
         <div class="rounded-lg border border-amber-500/25 bg-amber-500/[0.07] px-3 py-2.5 text-[12px] font-medium leading-5 text-amber-300 [body.light-theme_&]:text-amber-700">{{ m }}</div>

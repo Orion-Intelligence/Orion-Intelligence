@@ -43,7 +43,7 @@
   </div>
 
   <div class="mb-6 mt-auto flex flex-col pt-5">
-    <button data-testid="side-filter-reset" (click)="resetFilters()" class="mb-4 h-[42px] w-full rounded-lg border-2 border-[var(--color-blue-640)] bg-transparent px-[14px] text-sm font-medium text-[var(--color-text1)] transition hover:bg-white/10" type="button">
+    <button data-testid="side-filter-reset" (click)="resetFilters()" class="mb-4 h-[42px] w-full rounded-lg border-2 border-[var(--color-blue-640)] bg-transparent px-[14px] text-sm font-medium text-[var(--color-text1)] transition hover:bg-white/10 [body.light-theme_&]:hover:bg-sky-50" type="button">
       {{ 'common.actions.reset' | translate }}
     </button>
     <button data-testid="side-filter-apply" (click)="applyFilters()" class="h-[42px] w-full rounded-lg bg-[var(--color-blue-640)] px-[14px] text-sm font-medium text-[var(--color-text1)] transition [.light-theme_&]:!text-white" type="button">

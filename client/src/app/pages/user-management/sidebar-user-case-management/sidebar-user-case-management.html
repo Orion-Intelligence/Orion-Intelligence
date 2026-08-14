@@ -10,7 +10,7 @@
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
-                    <div class="grid h-10 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" [ngClass]="canViewAdminAlerts() ? 'grid-cols-3' : 'grid-cols-2'" data-testid="case-management-mode-toggle">
+                    <div class="grid h-8 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" [ngClass]="canViewAdminAlerts() ? 'grid-cols-3' : 'grid-cols-2'" data-testid="case-management-mode-toggle">
                         <button type="button" data-testid="case-mode-list-button" class="px-3 text-sm font-semibold transition" [ngClass]="caseManagementMode === 'list' ? 'bg-sky-500/15 text-sky-200 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'" (click)="setCaseManagementMode('list')">
                             {{ 'Case List' | translate }}
                         </button>
@@ -25,11 +25,11 @@
                     </div>
 
                     @if (canManageCases()) {
-                    <button type="button" data-testid="case-tracking-board-button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text2)] hover:bg-[var(--color-blue-810)]" (click)="openTrackingBoard()">
+                    <button type="button" data-testid="case-tracking-board-button" class="inline-flex h-8 items-center justify-center border text-sm font-semibold leading-none [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text2)] hover:bg-[var(--color-blue-810)]" (click)="openTrackingBoard()">
                         {{ 'Status Tracking Board' | translate }}
                     </button>
 
-                    <button type="button" data-testid="add-case-button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="addCase()">
+                    <button type="button" data-testid="add-case-button" class="inline-flex h-8 items-center justify-center border text-sm font-semibold leading-none [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="addCase()">
                         {{ 'Add Case' | translate }}
                     </button>
                     }
@@ -132,10 +132,10 @@
                                         </button>
                                         }
                                         <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-view-' + case.caseId">
-                                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
+                                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon ui-action-icon cursor-pointer" />
                                         </button>
                                         @if (canDeleteCases()) {
-                                        <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-delete-' + case.caseId">
+                                        <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-delete-' + case.caseId">
                                             <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
                                         </button>
                                         }
@@ -177,10 +177,10 @@
                                 </button>
                                 }
                                 <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-mobile-view-' + case.caseId">
-                                    <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon cursor-pointer" />
+                                    <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon ui-action-icon cursor-pointer" />
                                 </button>
                                 @if (canDeleteCases()) {
-                                <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-mobile-delete-' + case.caseId">
+                                <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-mobile-delete-' + case.caseId">
                                     <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
                                 </button>
                                 }

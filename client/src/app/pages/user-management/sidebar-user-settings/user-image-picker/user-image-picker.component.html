@@ -8,7 +8,7 @@
     <input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" hidden />
   </div>
   @if (hasCustomImage()) {
-    <button class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_2px_6px_rgba(0,0,0,0.18)] transition-all duration-150 hover:scale-110 hover:bg-[rgb(255,65,65,0.92)] hover:text-white active:scale-95" (click)="deleteImage($event)">
+    <button class="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[13px] font-medium text-[var(--color-text1)] shadow-[0_2px_6px_rgba(0,0,0,0.18)] transition-all duration-150 hover:scale-110 hover:bg-[rgb(255,65,65,0.92)] hover:text-white active:scale-95 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-500/30" (click)="deleteImage($event)">
       ✕
     </button>
   }

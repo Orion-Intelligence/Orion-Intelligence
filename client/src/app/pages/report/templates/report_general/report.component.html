@@ -106,7 +106,7 @@
         <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Detected entities, extracted sections, and structured attributes.' | translate }}</p>
       </div>
       <div [attr.aria-label]="(isExpandedMetadata ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
-        <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150">
+        <img [ngClass]="{ 'rotate-180': !isExpandedMetadata }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [body.light-theme_&]:!filter-none">
       </div>
     </div>
 
@@ -156,7 +156,7 @@
           </div>
         </div>
         <div [attr.aria-label]="(isExpandedScreenshoot ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
-          <img [ngClass]="{ 'rotate-180': !isExpandedScreenshoot }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150">
+          <img [ngClass]="{ 'rotate-180': !isExpandedScreenshoot }" alt="" aria-hidden="true" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [body.light-theme_&]:!filter-none">
         </div>
       </div>
       @if (isExpandedScreenshoot) {

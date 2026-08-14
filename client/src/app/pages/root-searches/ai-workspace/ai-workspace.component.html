@@ -34,19 +34,19 @@
           </div>
 
           <div class="ui-social-dashboard-body [&&]:![background:repeating-linear-gradient(0deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,var(--color-blue-830)_0%,var(--color-blue-850)_100%)] [body.light-theme_&&]:![background:repeating-linear-gradient(0deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,#e7eff9_0%,#e7eff9_100%)] flex min-h-0 flex-1 flex-col overflow-hidden p-3 max-[640px]:p-2">
-            <div role="group" [attr.aria-label]="'Workspace view' | translate" class="mb-2 flex shrink-0 self-end items-center gap-0.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] p-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.14)]">
-              <button data-testid="ai-window-view-chat" type="button" (click)="setWorkspaceViewMode('chat')" [attr.aria-label]="'Chat view' | translate" [attr.title]="'Chat view' | translate" [attr.aria-pressed]="workspaceViewMode === 'chat'" [ngClass]="workspaceViewMode === 'chat' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
+            <div role="group" [attr.aria-label]="'Workspace view' | translate" class="mb-2 flex shrink-0 self-end items-center gap-0.5 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-800)] p-0.5 shadow-[0_2px_8px_rgba(0,0,0,0.14)] [body.light-theme_&]:border-[#cad8e6] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_3px_10px_rgba(15,23,42,0.08)]">
+              <button data-testid="ai-window-view-chat" type="button" (click)="setWorkspaceViewMode('chat')" [attr.aria-label]="'Chat view' | translate" [attr.title]="'Chat view' | translate" [attr.aria-pressed]="workspaceViewMode === 'chat'" [ngClass]="workspaceViewMode === 'chat' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)] [body.light-theme_&]:bg-[#e4effa] [body.light-theme_&]:text-[#164e79] [body.light-theme_&]:shadow-[inset_0_0_0_1px_#b8cee3]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#eef4fa]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
                 <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" aria-hidden="true">
                   <path d="M3 3.25h10a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5H7l-3.5 2v-2H3a1.5 1.5 0 0 1-1.5-1.5v-5.5A1.5 1.5 0 0 1 3 3.25Z" />
                   <path d="M4.5 6.25h7M4.5 8.75h4.5" />
                 </svg>
               </button>
-              <button data-testid="ai-window-view-directory" type="button" (click)="setWorkspaceViewMode('directory')" [attr.aria-label]="'Directory view' | translate" [attr.title]="'Directory view' | translate" [attr.aria-pressed]="workspaceViewMode === 'directory'" [ngClass]="workspaceViewMode === 'directory' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
+              <button data-testid="ai-window-view-directory" type="button" (click)="setWorkspaceViewMode('directory')" [attr.aria-label]="'Directory view' | translate" [attr.title]="'Directory view' | translate" [attr.aria-pressed]="workspaceViewMode === 'directory'" [ngClass]="workspaceViewMode === 'directory' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)] [body.light-theme_&]:bg-[#e4effa] [body.light-theme_&]:text-[#164e79] [body.light-theme_&]:shadow-[inset_0_0_0_1px_#b8cee3]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#eef4fa]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
                 <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" aria-hidden="true">
                   <path d="M1.5 4.75A1.5 1.5 0 0 1 3 3.25h3l1.4 1.5H13a1.5 1.5 0 0 1 1.5 1.5v5.5a1.5 1.5 0 0 1-1.5 1.5H3a1.5 1.5 0 0 1-1.5-1.5v-7Z" />
                 </svg>
               </button>
-              <button data-testid="ai-window-view-split" type="button" (click)="setWorkspaceViewMode('split')" [attr.aria-label]="'Split view' | translate" [attr.title]="'Split view' | translate" [attr.aria-pressed]="workspaceViewMode === 'split'" [ngClass]="workspaceViewMode === 'split' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
+              <button data-testid="ai-window-view-split" type="button" (click)="setWorkspaceViewMode('split')" [attr.aria-label]="'Split view' | translate" [attr.title]="'Split view' | translate" [attr.aria-pressed]="workspaceViewMode === 'split'" [ngClass]="workspaceViewMode === 'split' ? 'bg-[var(--color-blue-690)] text-[var(--color-text1)] shadow-[0_1px_2px_rgba(0,0,0,0.16)] [body.light-theme_&]:bg-[#e4effa] [body.light-theme_&]:text-[#164e79] [body.light-theme_&]:shadow-[inset_0_0_0_1px_#b8cee3]' : 'text-[var(--color-text4)] hover:bg-[var(--color-blue-690)] hover:text-[var(--color-text1)] [body.light-theme_&]:hover:bg-[#eef4fa]'" class="flex h-8 w-8 items-center justify-center rounded-md outline-none transition-[background-color,color,box-shadow,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/55 active:scale-95">
                 <svg class="h-4 w-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.4" aria-hidden="true">
                   <rect x="1.5" y="2.5" width="13" height="11" rx="2" />
                   <path d="M8 2.75v10.5" />
@@ -55,7 +55,7 @@
             </div>
 
             <div class="flex min-h-0 flex-1 items-stretch overflow-hidden">
-              <div class="chat-support__window relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] bg-[linear-gradient(rgba(255,255,255,0.011)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.011)_1px,transparent_1px)] bg-[length:28px_28px] shadow-[0_24px_80px_rgba(0,0,0,0.35)]">
+              <div class="chat-support__window relative flex h-full min-h-0 w-full flex-col overflow-hidden rounded-2xl bg-[var(--color-blue-700)] bg-[linear-gradient(rgba(255,255,255,0.011)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.011)_1px,transparent_1px)] bg-[length:28px_28px] shadow-[0_24px_80px_rgba(0,0,0,0.35)] [body.light-theme_&]:border [body.light-theme_&]:border-[#cfdbe8] [body.light-theme_&]:bg-[linear-gradient(rgba(15,23,42,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.018)_1px,transparent_1px),#fff] [body.light-theme_&]:shadow-[0_20px_54px_rgba(15,23,42,0.12)]">
 
                 <div #workspacePanels class="flex min-h-0 flex-1 items-stretch overflow-x-auto overflow-y-hidden">
                   @if (workspaceViewMode !== 'directory') {
@@ -88,7 +88,7 @@
                             the dashboard.' | translate }}</p>
                           <div class="mt-7 flex flex-wrap justify-center gap-3 max-[640px]:grid max-[640px]:grid-cols-1">
                             @for (prompt of quickPrompts; track prompt) {
-                            <button type="button" (click)="usePrompt(prompt)" class="rounded-full border border-[rgba(87,165,235,0.16)] bg-[linear-gradient(180deg,rgba(87,165,235,0.12)_0%,rgba(87,165,235,0.07)_100%)] px-4 py-2 text-[12px] font-medium text-[var(--color-text3)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:border-[rgba(87,165,235,0.28)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.11)_100%)] hover:text-[var(--color-text1)] max-[640px]:w-full max-[640px]:justify-center">
+                            <button type="button" (click)="usePrompt(prompt)" class="rounded-full border border-[rgba(87,165,235,0.16)] bg-[linear-gradient(180deg,rgba(87,165,235,0.12)_0%,rgba(87,165,235,0.07)_100%)] px-4 py-2 text-[12px] font-medium text-[var(--color-text3)] shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] outline-none transition hover:border-[rgba(87,165,235,0.28)] hover:bg-[linear-gradient(180deg,rgba(87,165,235,0.18)_0%,rgba(87,165,235,0.11)_100%)] hover:text-[var(--color-text1)] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/35 [body.light-theme_&]:border-[#c8d9e9] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_3px_10px_rgba(15,23,42,0.06)] [body.light-theme_&]:hover:border-[#9fbad5] [body.light-theme_&]:hover:bg-[#eef5fc] max-[640px]:w-full max-[640px]:justify-center">
                               {{ prompt }}
                             </button>
                             }
@@ -102,7 +102,7 @@
                         <div class="min-w-0 max-w-full space-y-1.5">
                           @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
                           <div class="flex min-h-[20px] items-center gap-2 px-4">
-                            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{
                               'Nexus' | translate }}</span>
                             <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{
                               message.time | date : 'h:mm a' }}</span>
@@ -139,17 +139,17 @@
                           }
                           <div class="relative min-w-0 max-w-full rounded-[22px] rounded-tr-[10px] border border-[var(--color-border)] bg-[color-mix(in_srgb,var(--color-text1)_4%,transparent)] px-4 py-2.5 text-sm text-[var(--color-text1)] shadow-[0_10px_28px_var(--color-shadow-medium)] [body.light-theme_&]:bg-[color-mix(in_srgb,var(--color-blue-640)_14%,var(--color-consolidated-primary))] max-[640px]:w-full" [ngClass]="editingMessageId === message.id ? '!overflow-hidden !rounded-[13px] !rounded-tr-[7px] !border-[color-mix(in_srgb,var(--color-border)_82%,var(--color-blue-640)_18%)] [&&]:!bg-[color-mix(in_srgb,var(--color-blue-720)_96%,var(--color-blue-640)_4%)] !p-0 !shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_5px_14px_rgba(0,0,0,0.10)] transition-[border-color,box-shadow,background-color] duration-150 focus-within:!border-[color-mix(in_srgb,var(--color-border)_62%,var(--color-blue-640)_38%)] focus-within:!shadow-[inset_0_1px_0_rgba(255,255,255,0.035),0_6px_16px_rgba(0,0,0,0.12)]' : ''">
                             @if (editingMessageId === message.id) {
-                            <textarea rows="1" [(ngModel)]="editDraft" [id]="'ai-message-edit-' + message.id" [name]="'message-edit-' + message.id" (keydown)="onEditKeydown($event, message)" class="block min-h-10 max-h-40 w-full resize-none overflow-y-auto border-0 bg-transparent px-3 py-2 text-sm leading-6 text-[var(--color-text1)] caret-[var(--color-blue-640)] outline-none transition-colors [field-sizing:content] selection:bg-sky-400/20 placeholder:text-[var(--color-text4)] focus:bg-white/[0.012]"></textarea>
+                            <textarea rows="1" [(ngModel)]="editDraft" [id]="'ai-message-edit-' + message.id" [name]="'message-edit-' + message.id" (keydown)="onEditKeydown($event, message)" class="block min-h-10 max-h-40 w-full resize-none overflow-y-auto border-0 bg-transparent px-3 py-2 text-sm leading-6 text-[var(--color-text1)] caret-[var(--color-blue-640)] outline-none transition-colors [field-sizing:content] selection:bg-sky-400/20 placeholder:text-[var(--color-text4)] focus:bg-white/[0.012] [body.light-theme_&]:focus:bg-slate-900/[0.025]"></textarea>
                             <div class="flex min-h-9 items-center justify-between gap-2 border-t border-[color-mix(in_srgb,var(--color-divider)_86%,transparent)] bg-black/[0.025] py-1 pl-2">
                               <div class="flex min-w-0 items-center gap-2 text-[10px] text-[var(--color-text4)]">
-                                <span class="font-medium tabular-nums" [class.text-amber-300]="isEditDraftOverLimit">{{ editDraftTokenCount }} / {{ maxComposerTokens }}</span>
+                                <span class="font-medium tabular-nums" [ngClass]="isEditDraftOverLimit ? 'text-amber-300 [.light-theme_&]:text-amber-700' : ''">{{ editDraftTokenCount }} / {{ maxComposerTokens }}</span>
                                 @if (isEditDraftOverLimit) {
-                                <span class="truncate font-medium text-amber-300">{{ 'Remove' | translate }} {{ editDraftTokenOverflow }} {{ 'tokens' | translate }}</span>
+                                <span class="truncate font-medium text-amber-300 [.light-theme_&]:text-amber-700">{{ 'Remove' | translate }} {{ editDraftTokenOverflow }} {{ 'tokens' | translate }}</span>
                                 } @else {
                                 <span class="hidden items-center gap-1 sm:inline-flex"><kbd class="font-sans text-[9px]">Ctrl / ⌘</kbd><span>+</span><kbd class="font-sans text-[9px]">Enter</kbd></span>
                                 }
                               </div>
-                              <div class="flex shrink-0 items-center overflow-hidden rounded-[7px] border border-[color-mix(in_srgb,var(--color-border)_88%,transparent)] bg-white/[0.02]">
+                              <div class="flex shrink-0 items-center overflow-hidden rounded-[7px] border border-[color-mix(in_srgb,var(--color-border)_88%,transparent)] bg-white/[0.02] [body.light-theme_&]:bg-slate-900/[0.025]">
                                 <button type="button" (click)="cancelMessageEdit()" [attr.aria-label]="'Cancel edit' | translate" [title]="'Cancel edit' | translate" class="inline-flex h-7 w-8 items-center justify-center border-r border-[color-mix(in_srgb,var(--color-divider)_86%,transparent)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-[var(--color-blue-640)]/55">
                                   <i class="bi bi-x-lg text-[11px] leading-none"></i>
                                 </button>
@@ -164,7 +164,7 @@
                           </div>
                           @if (editingMessageId !== message.id) {
                           <div class="ui-ai-user-message-actions flex justify-end gap-2 px-1 pt-1.5">
-                            <button type="button" (click)="copyMessage(message, $event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[7px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55" [attr.aria-label]="'Copy message' | translate" [title]="'Copy message' | translate">
+                            <button type="button" (click)="copyMessage(message, $event)" class="ui-ai-action-button relative inline-flex h-[30px] w-[30px] cursor-pointer items-center justify-center rounded-[7px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]" [attr.aria-label]="'Copy message' | translate" [title]="'Copy message' | translate">
                               <i class="bi bi-copy text-[12px] leading-none"></i>
                               @if (copiedMessageId() === message.id) {
                               <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">{{
@@ -172,7 +172,7 @@
                               }
                             </button>
                             @if (canEditMessage(message)) {
-                            <button type="button" (click)="startMessageEdit(message)" [attr.aria-label]="'Edit message' | translate" [title]="'Edit message' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
+                            <button type="button" (click)="startMessageEdit(message)" [attr.aria-label]="'Edit message' | translate" [title]="'Edit message' | translate" class="ui-ai-action-button inline-flex h-[30px] w-[30px] items-center justify-center rounded-[7px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] transition-[background-color,border-color,color] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
                               <i class="bi bi-pencil-fill text-[12px] leading-none"></i>
                             </button>
                             }
@@ -187,11 +187,11 @@
                       <div data-testid="ai-message-error" [attr.data-ai-message-index]="$index" class="mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in justify-start">
                         <div class="min-w-0 max-w-full space-y-1 max-[640px]:w-full">
                           <div class="flex min-h-[20px] items-center gap-2 px-1">
-                            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{
                               'Nexus' | translate }}</span>
                           </div>
                           <div class="flex items-start gap-2 px-1">
-                            <span class="mt-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-red-300/25 bg-red-300/10 text-[10px] font-semibold leading-none text-red-100/80">!</span>
+                            <span class="mt-1.5 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-red-300/25 bg-red-300/10 text-[10px] font-semibold leading-none text-red-100/80 [.light-theme_&]:border-red-300 [.light-theme_&]:bg-red-100 [.light-theme_&]:text-red-700">!</span>
                             <div class="min-w-0 max-w-full [overflow-wrap:anywhere] [&_*]:min-w-0 [&_*]:max-w-full [&_table]:table [&_table]:w-full [&_table]:min-w-max [&_table]:max-w-none [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:overflow-visible [&_table]:text-left [&_table]:text-[13px] [&_table]:leading-[1.5] [&_table]:text-[var(--color-text2)] [&_th]:box-border [&_td]:box-border [&_th]:min-w-[120px] [&_td]:min-w-[120px] [&_th]:max-w-[280px] [&_td]:max-w-[280px] [&_th]:border-r [&_td]:border-r [&_th]:border-r-[var(--ui-table-row-border)] [&_td]:border-r-[var(--ui-table-row-border)] [&_th]:px-3 [&_td]:px-3 [&_th]:py-2.5 [&_td]:py-2.5 [&_th]:align-top [&_td]:align-top [&_th]:whitespace-normal [&_td]:whitespace-normal [&_th]:[overflow-wrap:anywhere] [&_td]:[overflow-wrap:anywhere] [&_th:last-child]:border-r-0 [&_td:last-child]:border-r-0 [&_th]:sticky [&_th]:top-0 [&_th]:z-[1] [&_th]:whitespace-nowrap [&_th]:bg-[var(--color-blue-820-light)] [&_th]:text-[11px] [&_th]:font-bold [&_th]:uppercase [&_th]:tracking-[0.06em] [&_th]:text-[var(--color-text6)] [&_td]:border-t [&_td]:border-t-[var(--ui-table-row-border)] [&_tbody_tr:nth-child(odd)]:bg-[var(--ui-table-row-odd)] [&_tbody_tr:nth-child(even)]:bg-[var(--ui-table-row-even)] [&_tbody_tr:hover]:bg-[var(--ui-table-row-hover)] [&_a]:[overflow-wrap:anywhere] [&_code]:[overflow-wrap:anywhere] [&_li]:[overflow-wrap:anywhere] [&_p]:[overflow-wrap:anywhere] [&_strong]:[overflow-wrap:anywhere] [&_em]:[overflow-wrap:anywhere] [&_pre]:box-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre_code]:block [&_pre_code]:max-w-full [&_pre_code]:whitespace-pre-wrap [&_pre_code]:[overflow-wrap:anywhere] text-[15px] leading-7 text-[var(--color-text1)]" [innerHTML]="message.text | markdown"></div>
                           </div>
                           @if (message.retryPayload) {
@@ -209,7 +209,7 @@
                       <div class="mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in justify-start">
                         <div class="min-w-0 max-w-full space-y-1.5">
                           <div class="flex min-h-[20px] items-center gap-2 px-4">
-                            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{
+                            <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{
                               'Nexus' | translate }}</span>
                             <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{
                               'Thinking' | translate }}</span>
@@ -225,7 +225,7 @@
                               <span class="block max-w-full truncate whitespace-nowrap text-[12px] leading-5 text-[var(--color-text4)]">{{
                                 nexusStep() }}</span>
                               }
-                              <div role="progressbar" aria-label="Nexus response in progress" class="relative overflow-hidden h-1 w-full rounded-full bg-white/[0.07]">
+                              <div role="progressbar" aria-label="Nexus response in progress" class="relative h-1 w-full overflow-hidden rounded-full bg-white/[0.07] [body.light-theme_&]:bg-slate-200">
                                 <span class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:animate-ai-chat-progress-sweep after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] [&&]:after:w-[36%] after:[backface-visibility:hidden] after:will-change-[transform,opacity]" aria-hidden="true"></span>
                               </div>
                             </div>
@@ -235,8 +235,8 @@
                       }
                     </div>
 
-                    <div class="shrink-0 border-t border-[var(--color-border)] bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.08))] p-3">
-                      <form novalidate [attr.aria-busy]="isActiveChatSending" [ngClass]="composerExpanded ? 'rounded-[20px]' : 'rounded-full'" class="group/composer border border-[color-mix(in_srgb,var(--color-border)_78%,var(--color-blue-640)_22%)] bg-[var(--color-blue-800)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.055),0_8px_24px_rgba(0,0,0,0.1)] transition-[border-color,box-shadow,background-color] duration-200 hover:border-[color-mix(in_srgb,var(--color-border)_56%,var(--color-blue-640)_44%)] focus-within:border-[var(--color-blue-640)] focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_0_3px_color-mix(in_srgb,var(--color-blue-640)_16%,transparent),0_12px_30px_rgba(0,0,0,0.14)]">
+                    <div class="shrink-0 border-t border-[var(--color-border)] bg-[linear-gradient(180deg,transparent,rgba(0,0,0,0.08))] p-3 [body.light-theme_&]:border-[#d7e2ee] [body.light-theme_&]:bg-[linear-gradient(180deg,rgba(255,255,255,0.72),#f2f6fb)]">
+                      <form novalidate [attr.aria-busy]="isActiveChatSending" [ngClass]="composerExpanded ? 'rounded-[20px]' : 'rounded-full'" class="group/composer border border-[color-mix(in_srgb,var(--color-border)_78%,var(--color-blue-640)_22%)] bg-[var(--color-blue-800)] p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.055),0_8px_24px_rgba(0,0,0,0.1)] transition-[border-color,box-shadow,background-color] duration-200 hover:border-[color-mix(in_srgb,var(--color-border)_56%,var(--color-blue-640)_44%)] focus-within:border-[var(--color-blue-640)] focus-within:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_0_0_3px_color-mix(in_srgb,var(--color-blue-640)_16%,transparent),0_12px_30px_rgba(0,0,0,0.14)] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_5px_18px_rgba(15,23,42,0.09)]">
                         <div class="flex items-end gap-1.5">
                           <span class="mb-1 ml-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-blue-640)_10%,transparent)] text-[var(--color-blue-640)] transition-colors group-focus-within/composer:bg-[color-mix(in_srgb,var(--color-blue-640)_16%,transparent)]" aria-hidden="true">
                             <i class="bi bi-stars text-[14px] leading-none"></i>
@@ -255,7 +255,7 @@
                           </button>
                         </div>
                         @if (isMessageDraftOverLimit) {
-                        <p role="alert" aria-live="polite" class="mt-1.5 flex items-center gap-1.5 px-2 text-[11px] font-medium text-amber-300">
+                        <p role="alert" aria-live="polite" class="mt-1.5 flex items-center gap-1.5 px-2 text-[11px] font-medium text-amber-300 [.light-theme_&]:text-amber-700">
                           <span class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-amber-300/10 text-[10px]" aria-hidden="true">!</span>
                           <span>{{ '300 token max. Remove' | translate }} {{ messageDraftTokenOverflow }} {{ 'tokens before sending.' | translate }}</span>
                         </p>
@@ -263,14 +263,14 @@
                       </form>
                       <div id="ai-workspace-composer-status" class="mt-2 flex items-center justify-between gap-3 px-1.5 text-[11px] text-[var(--color-text6)]">
                         @if (isAnotherChatSending) {
-                        <p class="flex min-w-0 items-center gap-1.5 text-[var(--color-text5)]">
+                        <p class="flex min-w-0 items-center gap-1.5 text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">
                           <span class="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-[var(--color-blue-640)]" aria-hidden="true"></span>
                           <span class="truncate">{{ 'A response is running in another chat.' | translate }}</span>
                         </p>
                         } @else {
                         <p>{{ 'Enter sends. Shift + Enter adds a new line.' | translate }}</p>
                         }
-                        <span class="shrink-0 tabular-nums transition-colors" [ngClass]="isMessageDraftOverLimit ? 'font-semibold text-amber-300' : messageDraftTokenCount > 240 ? 'text-amber-200/80' : 'text-[var(--color-text5)]'">
+                        <span class="shrink-0 tabular-nums transition-colors" [ngClass]="isMessageDraftOverLimit ? 'font-semibold text-amber-300 [.light-theme_&]:text-amber-700' : messageDraftTokenCount > 240 ? 'text-amber-200/80 [.light-theme_&]:text-amber-700/80' : 'text-[var(--color-text5)] [body.light-theme_&]:text-[#466a87]'">
                           {{ messageDraftTokenCount }}/{{ maxComposerTokens }}
                         </span>
                       </div>

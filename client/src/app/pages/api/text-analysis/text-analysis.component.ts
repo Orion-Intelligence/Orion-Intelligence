@@ -135,8 +135,8 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
   get primaryDetectionClass(): Record<string, boolean> {
     const detected = this.isThreatDetected;
     return {
-      'border-rose-400/35 bg-rose-500/10 text-rose-100': detected,
-      'border-emerald-400/30 bg-emerald-500/10 text-emerald-100': !detected
+      'border-rose-400/35 bg-rose-500/10 text-rose-100 [body.light-theme_&]:border-rose-200 [body.light-theme_&]:bg-rose-50 [body.light-theme_&]:text-rose-800': detected,
+      'border-emerald-400/30 bg-emerald-500/10 text-emerald-100 [body.light-theme_&]:border-emerald-200 [body.light-theme_&]:bg-emerald-50 [body.light-theme_&]:text-emerald-800': !detected
     };
   }
 

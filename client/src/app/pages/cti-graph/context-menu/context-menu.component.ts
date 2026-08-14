@@ -27,7 +27,7 @@ import { Component, input, output, ChangeDetectionStrategy } from '@angular/core
         </button>
       }
       @if (canExpand() || canCollapse()) {
-        <div class="my-2 h-px bg-slate-700/70 [body.light-theme_&]:bg-transparent"></div>
+        <div class="my-2 h-px bg-slate-700/70 [body.light-theme_&]:bg-[var(--color-border)]"></div>
       }
       @if (showOpenCti()) {
         <button data-testid="cti-context-open-cti" (click)="openCti.emit(undefined)" class="group flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm text-sky-200 transition-colors hover:bg-sky-500/20 hover:text-sky-100 [body.light-theme_&]:text-[#1d75c9] [body.light-theme_&]:hover:bg-[#eef5ff] [body.light-theme_&]:hover:text-[#1d75c9]">

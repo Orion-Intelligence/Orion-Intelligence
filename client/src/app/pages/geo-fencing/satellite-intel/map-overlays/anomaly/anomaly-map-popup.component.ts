@@ -24,14 +24,14 @@ export class AnomalyMapPopupComponent {
 
   get alertClass(): string {
     if (this.alertLevel === 'critical') {
-      return 'text-rose-300';
+      return 'text-rose-300 [body.light-theme_&]:text-rose-700';
     }
     if (this.alertLevel === 'warning') {
-      return 'text-amber-300';
+      return 'text-amber-300 [body.light-theme_&]:text-amber-700';
     }
     if (this.alertLevel === 'nominal') {
-      return 'text-emerald-300';
+      return 'text-emerald-300 [body.light-theme_&]:text-emerald-700';
     }
-    return 'text-sky-300';
+    return 'text-sky-300 [body.light-theme_&]:text-sky-700';
   }
 }

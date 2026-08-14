@@ -1,4 +1,4 @@
-<div [ngClass]="isMainEntity ? (showTopDivider ? 'mt-7 space-y-5 border-t border-[var(--color-border)] pt-7' : 'space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4') : 'mb-6 space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4'">
+<div class="[body.light-theme_&]:[&_.case-form-error]:text-red-700 [body.light-theme_&]:[&_input:focus]:ring-2 [body.light-theme_&]:[&_input:focus]:ring-sky-500/20 [body.light-theme_&]:[&_select:focus]:ring-2 [body.light-theme_&]:[&_select:focus]:ring-sky-500/20" [ngClass]="isMainEntity ? (showTopDivider ? 'mt-7 space-y-5 border-t border-[var(--color-border)] pt-7' : 'space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4') : 'mb-6 space-y-5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4'">
 
     @if (showTitle) {
     <div class="flex items-center justify-between gap-3">
@@ -16,7 +16,7 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                {{ 'Entity Type' | translate }} <span class="text-red-500">*</span>
+                {{ 'Entity Type' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span>
             </label>
             <select [(ngModel)]="entity.type" [name]="'entityType-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-primary-entity-type-select">
                 @for (type of entityTypes; track type.value) {
@@ -27,22 +27,22 @@
 
         <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                {{ 'Entity Value' | translate }} <span class="text-red-500">*</span>
+                {{ 'Entity Value' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span>
             </label>
             <input type="text" [(ngModel)]="entity.value" [name]="'entityValue-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Name, email, domain, IP, URL, etc.' | translate" [attr.data-testid]="isMainEntity ? 'case-primary-entity-value-input' : 'case-related-entity-value-input-' + entityIndex" />
             @if (entityValueError) {
-            <p class="case-form-error mt-1 text-xs text-red-400">{{ entityValueError }}</p>
+            <p class="case-form-error mt-1 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ entityValueError }}</p>
             }
         </div>
 
         @if (entity.type === 'other') {
         <div class="sm:col-span-2">
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                {{ 'Other Entity Type' | translate }} <span class="text-red-500">*</span>
+                {{ 'Other Entity Type' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span>
             </label>
             <input type="text" [(ngModel)]="entity.entityTypeOtherValue" [name]="'entityTypeOtherValue-' + controlPrefix" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other entity type' | translate" />
             @if (getOtherError(entity.type, entity.entityTypeOtherValue)) {
-            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.type,
+            <p class="case-form-error mt-1 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ getOtherError(entity.type,
                 entity.entityTypeOtherValue) }}</p>
             }
         </div>
@@ -112,11 +112,11 @@
         @if (entity.source === 'other') {
         <div class="sm:col-span-2">
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">
-                {{ 'Other Source' | translate }} <span class="text-red-500">*</span>
+                {{ 'Other Source' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span>
             </label>
             <input type="text" [(ngModel)]="entity.entitySourceOtherValue" [name]="'entitySourceOtherValue-' + controlPrefix" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-[var(--color-text1)] outline-none focus:border-sky-400/40" [placeholder]="'Specify other source' | translate" />
             @if (getOtherError(entity.source, entity.entitySourceOtherValue)) {
-            <p class="case-form-error mt-1 text-xs text-red-400">{{ getOtherError(entity.source,
+            <p class="case-form-error mt-1 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ getOtherError(entity.source,
                 entity.entitySourceOtherValue) }}</p>
             }
         </div>
@@ -154,11 +154,11 @@
 
             <div class="flex items-center gap-2">
                 @if (showInlineSaveButtons) {
-                <button type="button" (click)="onSave()" [disabled]="!hasSocialProfilesChanged()" [class.hidden]="!hasSocialProfilesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                <button type="button" (click)="onSave()" [disabled]="!hasSocialProfilesChanged()" [class.hidden]="!hasSocialProfilesChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30 [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800 [body.light-theme_&]:hover:border-emerald-700/40 [body.light-theme_&]:hover:bg-emerald-200/70 [body.light-theme_&]:hover:text-emerald-900">
                     <i class="bi bi-check-lg"></i> {{ 'Save' | translate }}
                 </button>
                 }
-                <button type="button" (click)="addSocialMedia()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                <button type="button" (click)="addSocialMedia()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:border-sky-700/40 [body.light-theme_&]:hover:bg-sky-200/70 [body.light-theme_&]:hover:text-sky-900">
                     <i class="bi bi-plus-lg"></i> {{ 'common.actions.add' | translate }}
                 </button>
             </div>
@@ -194,7 +194,7 @@
             </div>
 
             @if (getSocialMediaError(profile)) {
-            <p class="case-form-error mt-2 text-xs text-red-400">{{ getSocialMediaError(profile) }}</p>
+            <p class="case-form-error mt-2 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ getSocialMediaError(profile) }}</p>
             }
         </div>
         }
@@ -217,11 +217,11 @@
 
             <div class="flex items-center gap-2">
                 @if (showInlineSaveButtons) {
-                <button type="button" (click)="onSave()" [disabled]="!hasIdentifiersChanged()" [class.hidden]="!hasIdentifiersChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30">
+                <button type="button" (click)="onSave()" [disabled]="!hasIdentifiersChanged()" [class.hidden]="!hasIdentifiersChanged()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-emerald-400/20 bg-emerald-500/10 px-2.5 text-sm font-medium text-emerald-300 transition hover:border-emerald-400/35 hover:bg-emerald-500/15 hover:text-emerald-200 disabled:pointer-events-none disabled:opacity-30 [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800 [body.light-theme_&]:hover:border-emerald-700/40 [body.light-theme_&]:hover:bg-emerald-200/70 [body.light-theme_&]:hover:text-emerald-900">
                     <i class="bi bi-check-lg"></i> {{ 'Save' | translate }}
                 </button>
                 }
-                <button type="button" (click)="addIdentifier()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200">
+                <button type="button" (click)="addIdentifier()" class="inline-flex h-8 items-center gap-1.5 rounded-[8px] border border-sky-400/20 bg-sky-500/10 px-2.5 text-sm font-medium text-sky-300 transition hover:border-sky-400/35 hover:bg-sky-500/15 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:border-sky-700/40 [body.light-theme_&]:hover:bg-sky-200/70 [body.light-theme_&]:hover:text-sky-900">
                     <i class="bi bi-plus-lg"></i> {{ 'common.actions.add' | translate }}
                 </button>
             </div>
@@ -265,7 +265,7 @@
             </div>
 
             @if (getIdentifierError(identifier)) {
-            <p class="case-form-error mt-2 text-xs text-red-400">{{ getIdentifierError(identifier) }}</p>
+            <p class="case-form-error mt-2 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ getIdentifierError(identifier) }}</p>
             }
         </div>
         }

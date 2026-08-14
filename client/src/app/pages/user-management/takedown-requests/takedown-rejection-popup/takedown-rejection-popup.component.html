@@ -1,11 +1,11 @@
-<div class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-[1400] flex items-center justify-center p-4" @popupAnimation data-role="backdrop" (click)="onBackdrop($event)">
+<div class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-[1400] flex items-center justify-center p-4 [body.light-theme_&&]:!bg-[rgba(23,34,53,0.18)]" @popupAnimation data-role="backdrop" (click)="onBackdrop($event)">
   <div data-testid="takedown-rejection-popup" class="ui-graph-popup-panel [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] origin-top [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] relative w-full max-w-[520px] rounded-xl p-6">
     <div class="pr-8">
       <div class="!text-[var(--color-text1)] text-lg font-semibold">Reject takedown request</div>
       <div class="mt-2 text-sm leading-6 text-[var(--color-text3)]">Provide the reason admins will see in the request history.</div>
     </div>
 
-    <button type="button" class="absolute right-5 top-5 text-[26px] leading-none text-[#ccc] hover:text-white disabled:cursor-not-allowed disabled:opacity-50" aria-label="Close" [disabled]="isSubmitting()" (click)="cancel()">&times;</button>
+    <button type="button" class="absolute right-5 top-5 text-[26px] leading-none text-[#ccc] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:text-[var(--color-text1)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" aria-label="Close" [disabled]="isSubmitting()" (click)="cancel()">&times;</button>
 
     @if (target()) {
       <div class="mt-5 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd]">
@@ -20,7 +20,7 @@
     <div class="mt-2 flex items-center justify-between gap-3">
       <span class="text-[12px] text-[var(--color-text4)]">{{ reason.length }}/500</span>
       @if (!trimmedReason && reason.length > 0) {
-        <span class="text-[12px] text-[#ff8a8a]">Reason cannot be blank.</span>
+        <span class="text-[12px] text-[#ff8a8a] [body.light-theme_&]:text-red-700">Reason cannot be blank.</span>
       }
     </div>
 

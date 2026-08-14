@@ -39,7 +39,7 @@
                 <span class="h-1.5 w-1.5 rounded-full bg-[var(--color-blue-640)] shadow-[0_0_14px_rgba(87,165,235,0.5)]"></span>
                 {{ 'Step' | translate }} {{ currentIndex + 1 }} / {{ totalSteps }}
               </div>
-              <h3 class="text-lg font-semibold leading-tight text-white">
+              <h3 class="text-lg font-semibold leading-tight text-white [.light-theme_&]:text-[var(--color-text1)]">
                 {{ step?.title }}
               </h3>
             </div>
@@ -52,7 +52,7 @@
                 <span class="tour-loader-spinner animate-tour-loader-spin h-[1.125rem] w-[1.125rem] flex-none rounded-full border-2 border-[color-mix(in_srgb,var(--tour-accent)_20%,var(--color-text1)_10%)] border-t-[color-mix(in_srgb,var(--tour-accent)_88%,var(--color-text1)_12%)]" aria-hidden="true"></span>
                 {{ 'Loading' | translate }}
               </div>
-              <h3 class="text-lg font-semibold leading-tight text-white">
+              <h3 class="text-lg font-semibold leading-tight text-white [.light-theme_&]:text-[var(--color-text1)]">
                 {{ 'Loading step' | translate }}
               </h3>
             </div>
@@ -61,7 +61,7 @@
       </div>
 
       <div class="mb-3">
-        <div class="h-1.5 overflow-hidden rounded-full bg-white/8">
+        <div class="h-1.5 overflow-hidden rounded-full bg-white/8 [.light-theme_&]:bg-slate-200">
           <div class="tour-progress-bar h-full w-[var(--tour-progress-width)] rounded-full [background:linear-gradient(90deg,var(--tour-accent),color-mix(in_srgb,var(--tour-accent)_58%,white_42%))] [box-shadow:0_0_10px_color-mix(in_srgb,var(--tour-accent)_22%,transparent)] [transition:width_180ms_ease-out] [.tour-loading_&]:!transition-none"></div>
         </div>
       </div>
@@ -84,14 +84,14 @@
 
       <div class="grid">
         <div class="tour-state-layer tour-state-layer-ready pointer-events-none col-start-1 row-start-1 opacity-0 [transform:translate3d(0,6px,0)] [transition:opacity_220ms_ease-out,transform_220ms_ease-out,filter_220ms_ease-out] [transition-delay:70ms] [will-change:opacity,transform] [&.is-active]:pointer-events-auto [&.is-active]:!opacity-100 [&.is-active]:![transform:translate3d(0,0,0)] [&:not(.is-active)]:![transition-delay:0ms]" [class.is-active]="stepReady">
-          <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
+          <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] [.light-theme_&]:border-[var(--color-border)] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
             @if (stepReady && (step?.endOnEnter || step?.captureValueOnEnter)) {
               <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase max-[640px]:mr-0">
                 {{ 'Press Enter' | translate }}
               </div>
             }
             <div class="flex items-center gap-2 max-[640px]:block max-[640px]:w-full">
-              <button type="button" (click)="next()" class="tour-primary-button inline-flex items-center gap-[0.45rem] rounded-full border border-[color-mix(in_srgb,var(--tour-accent)_34%,var(--color-border))] px-[0.95rem] py-[0.65rem] text-xs font-semibold tracking-[0.01em] text-[var(--color-text1)] [background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_90%,transparent),color-mix(in_srgb,var(--tour-accent)_82%,var(--color-text1)_18%))] [box-shadow:0_8px_18px_color-mix(in_srgb,var(--tour-accent)_16%,transparent)] [transition:background-color_160ms_ease,border-color_160ms_ease,color_160ms_ease,transform_160ms_ease,box-shadow_160ms_ease] hover:-translate-y-px hover:!border-[color-mix(in_srgb,var(--tour-accent)_48%,var(--color-text1)_12%)] hover:![background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_96%,var(--color-text1)_4%),color-mix(in_srgb,var(--tour-accent)_88%,var(--color-text1)_12%))] hover:![box-shadow:0_10px_22px_color-mix(in_srgb,var(--tour-accent)_20%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,var(--tour-accent)_62%,var(--color-text1)_38%)] disabled:cursor-default disabled:!opacity-[65%] disabled:!transform-none disabled:!shadow-none max-[640px]:w-full max-[640px]:justify-center" data-testid="demo-tour-next" [disabled]="!stepReady">
+              <button type="button" (click)="next()" class="tour-primary-button inline-flex items-center gap-[0.45rem] rounded-full border border-[color-mix(in_srgb,var(--tour-accent)_34%,var(--color-border))] px-[0.95rem] py-[0.65rem] text-xs font-semibold tracking-[0.01em] text-[var(--color-text1)] [background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_90%,transparent),color-mix(in_srgb,var(--tour-accent)_82%,var(--color-text1)_18%))] [box-shadow:0_8px_18px_color-mix(in_srgb,var(--tour-accent)_16%,transparent)] [transition:background-color_160ms_ease,border-color_160ms_ease,color_160ms_ease,transform_160ms_ease,box-shadow_160ms_ease] hover:-translate-y-px hover:!border-[color-mix(in_srgb,var(--tour-accent)_48%,var(--color-text1)_12%)] hover:![background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_96%,var(--color-text1)_4%),color-mix(in_srgb,var(--tour-accent)_88%,var(--color-text1)_12%))] hover:![box-shadow:0_10px_22px_color-mix(in_srgb,var(--tour-accent)_20%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,var(--tour-accent)_62%,var(--color-text1)_38%)] disabled:cursor-default disabled:!opacity-[65%] disabled:!transform-none disabled:!shadow-none [.light-theme_&]:!text-white max-[640px]:w-full max-[640px]:justify-center" data-testid="demo-tour-next" [disabled]="!stepReady">
                 <span>{{ (currentIndex + 1 === totalSteps ? 'Finish' : 'Next') | translate }}</span>
                 <span aria-hidden="true">→</span>
               </button>
@@ -99,12 +99,12 @@
           </div>
         </div>
         <div class="tour-state-layer tour-state-layer-loading pointer-events-none col-start-1 row-start-1 opacity-0 [transform:translate3d(0,6px,0)] [transition:opacity_160ms_ease-out,transform_160ms_ease-out,filter_160ms_ease-out] [will-change:opacity,transform] [&.is-active]:pointer-events-auto [&.is-active]:!opacity-100 [&.is-active]:![transform:translate3d(0,0,0)]" [class.is-active]="!stepReady" [attr.aria-hidden]="stepReady">
-          <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] saturate-[0.96] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
+          <div class="flex items-center justify-end gap-2 border-t border-[rgba(255,255,255,0.06)] pt-[0.72rem] saturate-[0.96] [.light-theme_&]:border-[var(--color-border)] max-[640px]:flex-col max-[640px]:items-stretch max-[640px]:gap-[0.65rem]">
             <div class="mr-auto rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)]/70 px-3 py-1.5 text-[11px] font-medium tracking-[0.14em] text-[var(--color-text2)] uppercase max-[640px]:mr-0">
               {{ 'Loading' | translate }}
             </div>
             <div class="flex items-center gap-2 max-[640px]:block max-[640px]:w-full">
-              <button type="button" (click)="next()" class="tour-primary-button inline-flex items-center gap-[0.45rem] rounded-full border border-[color-mix(in_srgb,var(--tour-accent)_34%,var(--color-border))] px-[0.95rem] py-[0.65rem] text-xs font-semibold tracking-[0.01em] text-[var(--color-text1)] [background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_90%,transparent),color-mix(in_srgb,var(--tour-accent)_82%,var(--color-text1)_18%))] [box-shadow:0_8px_18px_color-mix(in_srgb,var(--tour-accent)_16%,transparent)] [transition:background-color_160ms_ease,border-color_160ms_ease,color_160ms_ease,transform_160ms_ease,box-shadow_160ms_ease] hover:-translate-y-px hover:!border-[color-mix(in_srgb,var(--tour-accent)_48%,var(--color-text1)_12%)] hover:![background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_96%,var(--color-text1)_4%),color-mix(in_srgb,var(--tour-accent)_88%,var(--color-text1)_12%))] hover:![box-shadow:0_10px_22px_color-mix(in_srgb,var(--tour-accent)_20%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,var(--tour-accent)_62%,var(--color-text1)_38%)] disabled:cursor-default disabled:!opacity-[65%] disabled:!transform-none disabled:!shadow-none max-[640px]:w-full max-[640px]:justify-center" [disabled]="true">
+              <button type="button" (click)="next()" class="tour-primary-button inline-flex items-center gap-[0.45rem] rounded-full border border-[color-mix(in_srgb,var(--tour-accent)_34%,var(--color-border))] px-[0.95rem] py-[0.65rem] text-xs font-semibold tracking-[0.01em] text-[var(--color-text1)] [background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_90%,transparent),color-mix(in_srgb,var(--tour-accent)_82%,var(--color-text1)_18%))] [box-shadow:0_8px_18px_color-mix(in_srgb,var(--tour-accent)_16%,transparent)] [transition:background-color_160ms_ease,border-color_160ms_ease,color_160ms_ease,transform_160ms_ease,box-shadow_160ms_ease] hover:-translate-y-px hover:!border-[color-mix(in_srgb,var(--tour-accent)_48%,var(--color-text1)_12%)] hover:![background:linear-gradient(135deg,color-mix(in_srgb,var(--tour-accent-strong)_96%,var(--color-text1)_4%),color-mix(in_srgb,var(--tour-accent)_88%,var(--color-text1)_12%))] hover:![box-shadow:0_10px_22px_color-mix(in_srgb,var(--tour-accent)_20%,transparent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color-mix(in_srgb,var(--tour-accent)_62%,var(--color-text1)_38%)] disabled:cursor-default disabled:!opacity-[65%] disabled:!transform-none disabled:!shadow-none [.light-theme_&]:!text-white max-[640px]:w-full max-[640px]:justify-center" [disabled]="true">
                 <span>{{ (currentIndex + 1 === totalSteps ? 'Finish' : 'Next') | translate }}</span>
                 <span aria-hidden="true">→</span>
               </button>

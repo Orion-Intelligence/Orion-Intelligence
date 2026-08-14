@@ -16,7 +16,7 @@
 
       <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
       <div class="mb-3 flex justify-end">
-        <input data-testid="tenant-user-search-input" type="text" [(ngModel)]="userSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 sm:max-w-[320px]">
+        <input data-testid="tenant-user-search-input" type="text" [(ngModel)]="userSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-sky-400/20 sm:max-w-[320px]">
       </div>
 
       <div class="m-0 overflow-hidden rounded-none border-0 [box-shadow:rgba(0,0,0,0.06)_0_4px_6px_-1px,rgba(0,0,0,0.035)_0_2px_4px_-1px] md:rounded-[8px] md:border md:!border-[var(--tenant-line)]">
@@ -44,7 +44,7 @@
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
                         <div class="flex items-center gap-2">
-                          <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/20 bg-[var(--color-blue-820-light)] text-[11px] font-semibold uppercase text-[var(--color-text2)]">
+                          <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/20 bg-[var(--color-blue-820-light)] text-[11px] font-semibold uppercase text-[var(--color-text2)] [body.light-theme_&]:border-[var(--color-border)]">
                             {{ (user.username || '?').slice(0, 1) }}
                           </span>
                           <a class="inline-block max-w-full truncate font-medium text-[var(--color-text1)] no-underline">{{ user.username }}</a>
@@ -75,11 +75,11 @@
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
                         @if (!canEditUser(user)) {
-                          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View user' | translate" (click)="toggleExpandedUser(i)">
+                          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'View user' | translate" (click)="toggleExpandedUser(i)">
                             <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon cursor-pointer" />
                           </button>
                         } @else {
-                          <button id="edit-profile" data-testid="tenant-edit-user-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="('Edit user') | translate" (click)="toggleExpandedUser(i)">
+                          <button id="edit-profile" data-testid="tenant-edit-user-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="('Edit user') | translate" (click)="toggleExpandedUser(i)">
                             <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
                           </button>
                         }
@@ -125,7 +125,7 @@
                                   @if (user.licenses?.length) {
                                     <div class="flex flex-wrap gap-1.5">
                                       @for (license of user.licenses; track license) {
-                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
+                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
                                           {{ licenseService.getLicenseLabel(license) }}
                                         </span>
                                       }
@@ -139,7 +139,7 @@
                                   @if (user.permissions?.length) {
                                     <div class="flex flex-wrap gap-1.5">
                                       @for (permission of user.permissions; track permission) {
-                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
+                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
                                           {{ getPermissionLabel(permission) }}
                                         </span>
                                       }
@@ -252,7 +252,7 @@
                       <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ user.username || '-' }}</div>
                       <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ user.role }}</div>
                     </div>
-                    <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" [attr.aria-label]="(canEditUser(user) ? 'Edit user' : 'View user') | translate" (click)="toggleExpandedUser(i)">
+                    <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="(canEditUser(user) ? 'Edit user' : 'View user') | translate" (click)="toggleExpandedUser(i)">
                       <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" [alt]="canEditUser(user) ? 'edit' : 'view'" class="tenant-action-icon" />
                     </button>
                   </div>
@@ -274,7 +274,7 @@
                       @if (user.licenses?.length) {
                         <div class="flex flex-wrap gap-1.5">
                           @for (license of user.licenses; track license) {
-                            <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
+                            <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
                               {{ licenseService.getLicenseLabel(license) }}
                             </span>
                           }
@@ -307,7 +307,7 @@
                               @if (user.permissions?.length) {
                                 <div class="flex flex-wrap gap-1.5">
                                   @for (permission of user.permissions; track permission) {
-                                    <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300">
+                                    <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
                                       {{ getPermissionLabel(permission) }}
                                     </span>
                                   }

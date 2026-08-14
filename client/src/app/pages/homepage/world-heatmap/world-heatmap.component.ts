@@ -26,6 +26,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   private rotationTimer: any;
   private worldJsonPollTimer: any;
   private pendingFrame: number | null = null;
+  private themeObserver: MutationObserver | null = null;
   private svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
   private mapG!: d3.Selection<SVGGElement, unknown, null, undefined>;
   private projection!: d3.GeoProjection;
@@ -95,6 +96,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.observeThemeChanges();
     this.pendingFrame = window.requestAnimationFrame(() => {
       this.pendingFrame = null;
       this.appService.loadWorldJson();
@@ -108,6 +110,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
       this.pendingFrame = null;
     }
     this.stopWorldJsonPoll();
+    this.themeObserver?.disconnect();
+    this.themeObserver = null;
     this.tooltip?.remove();
     this.stopCategoryRotation();
   }
@@ -426,6 +430,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     };
   }
 
+  private getNeutralFill(): string {
+    return this.isLightTheme() ? 'rgba(148,163,184,0.34)' : this.neutralFill;
+  }
+
   private updateColors(): void {
     const color = this.getColorScale();
     this.mapG.selectAll<SVGPathElement, any>('path.country')
@@ -436,7 +444,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
       .classed('is-clickable', (d: any) => this.canOpenReports() && this.getValueForFeature(d) != null)
       .attr('fill', (d: any) => {
         const v = this.getValueForFeature(d);
-        return v == null ? this.neutralFill : color(v);
+        return v == null ? this.getNeutralFill() : color(v);
       });
   }
 
@@ -579,7 +587,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     }
     const color = this.getColorScale();
     const getValueForFeature = this.getValueForFeature.bind(this);
-    const neutralFill = this.neutralFill;
+    const neutralFill = this.getNeutralFill();
     const countries = this.mapG.selectAll<SVGPathElement, any>('path.country');
     countries
       .classed('can-open-reports', this.canOpenReports())
@@ -617,6 +625,22 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
       this.updateLegend();
       this.updateActiveCategoryLabel();
     });
+  }
+
+  private observeThemeChanges(): void {
+    if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') {
+      return;
+    }
+
+    this.themeObserver?.disconnect();
+    this.themeObserver = new MutationObserver(() => {
+      if (this.mapG && this.svg) {
+        this.refreshMapPresentation(false);
+      }
+    });
+    const options: MutationObserverInit = { attributes: true, attributeFilter: [ 'class' ] };
+    this.themeObserver.observe(document.documentElement, options);
+    this.themeObserver.observe(document.body, options);
   }
 
   private resetCountryReportState(): void {

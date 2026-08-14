@@ -108,6 +108,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private hoveredNodeId: string | null = null;
   private pendingFocusNodeId: string | null = null;
   private graphRequestSequence = 0;
+  private themeObserver: MutationObserver | null = null;
 
   networkContainer?: ElementRef;
   public rawNodes: ExtendedNode[] = [];
@@ -173,6 +174,38 @@ export class GraphComponent implements OnInit, OnDestroy {
     return '#e5e7eb';
   }
 
+  private refreshGraphTheme(): void {
+    const labelColor = this.getNodeLabelColor();
+    this.rawNodes = this.rawNodes.map(node => ({
+      ...node,
+      font: {
+        ...(node.font && typeof node.font === 'object' ? node.font : {}),
+        color: labelColor,
+      },
+    }));
+    if (!this.nodeSet) {
+      return;
+    }
+    const updates: ExtendedNode[] = [];
+    this.nodeSet.get().forEach(node => {
+      if (node.id === undefined) {
+        return;
+      }
+      updates.push({
+        id: node.id,
+        font: {
+          ...(node.font && typeof node.font === 'object' ? node.font : {}),
+          color: labelColor,
+        },
+      });
+    });
+    if (updates.length > 0) {
+      this.nodeSet.update(updates);
+    }
+    this.network?.redraw();
+    this.changeDetector.markForCheck();
+  }
+
   @ViewChild('networkContainer')
   set networkContainerRef(ref: ElementRef) {
     if (ref) {
@@ -187,6 +220,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
       document.addEventListener('keydown', this.globalKeyDownListener, true);
+      this.themeObserver = new MutationObserver(() => this.refreshGraphTheme());
+      this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
     this.route.queryParams.subscribe(params => {
       const routeFilters = this.buildRouteFilterOverride(params);
@@ -206,6 +241,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (isPlatformBrowser(this.platformId)) {
       document.removeEventListener('keydown', this.globalKeyDownListener, true);
+      this.themeObserver?.disconnect();
+      this.themeObserver = null;
     }
   }
 

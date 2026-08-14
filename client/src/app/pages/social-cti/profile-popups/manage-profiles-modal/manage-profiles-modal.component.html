@@ -33,7 +33,7 @@
       @if (!isImageExtractedFlow()) {
         <div class="mx-4 mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-emerald-500/10 bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] px-4 py-3">
           <div>
-            <div class="text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-400">Active Profiles</div>
+            <div class="text-[12px] font-semibold uppercase tracking-[0.14em] text-emerald-400 [body.light-theme_&]:text-emerald-700">Active Profiles</div>
             <div class="mt-1 text-[12px] text-[var(--color-text4)]">Choose which discovered profiles stay visible.</div>
           </div>
           <div class="flex flex-shrink-0 items-center gap-2">
@@ -67,7 +67,7 @@
 
             <div data-testid="social-manage-profile-card" (click)="onPlatformCardClick($event, platform)" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)]/35 p-3 shadow-[0_10px_24px_var(--color-shadow-light)] transition-colors hover:!border-[rgba(16,185,129,0.18)] hover:!bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] [&[data-selected='true']]:!border-[rgba(16,185,129,0.18)] [&[data-selected='true']]:!bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] [&[data-selected='true']]:!shadow-[0_10px_24px_var(--color-shadow-light),inset_0_0_0_1px_rgba(16,185,129,0.08)]" [attr.data-selected]="platform.isSelected && !isImageExtractedFlow() ? 'true' : 'false'" [class.cursor-pointer]="!isImageExtractedFlow()">
               <div class="flex items-center gap-3">
-                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-lg font-bold text-white">
+                <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-lg font-bold text-white [body.light-theme_&]:text-[var(--color-text2)]">
                   <app-social-icon [platformName]="platform.platform"></app-social-icon>
                 </div>
                 <div class="min-w-0 flex-grow">
@@ -100,7 +100,7 @@
                 </div>
                 @if (!isImageExtractedFlow() && !isInformational(platform)) {
                   <div class="ml-1 flex-shrink-0">
-                    <button data-testid="social-manage-profile-switch" type="button" (click)="onSelectionSwitchClick($event, platform)" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-[var(--color-blue-720)] transition-colors duration-300 ease-in-out hover:bg-[rgba(16,185,129,0.14)] focus:outline-none focus:ring-2 focus:ring-emerald-400/35 disabled:cursor-not-allowed disabled:opacity-40 [&[data-selected='true']]:bg-[#059669] [&[data-selected='true']]:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] [&[data-selected='true']]:hover:bg-[#10b981] [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]" role="switch" [attr.aria-checked]="platform.isSelected" [attr.data-selected]="platform.isSelected ? 'true' : 'false'">
+                    <button data-testid="social-manage-profile-switch" type="button" (click)="onSelectionSwitchClick($event, platform)" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-[var(--color-blue-720)] transition-colors duration-300 ease-in-out hover:bg-[rgba(16,185,129,0.14)] focus:outline-none focus:ring-2 focus:ring-emerald-400/35 disabled:cursor-not-allowed disabled:opacity-40 [&[data-selected='true']]:bg-[#059669] [&[data-selected='true']]:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] [&[data-selected='true']]:hover:bg-[#10b981] [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] [body.light-theme_&[data-selected=false]]:!border-[#c3d2e2] [body.light-theme_&[data-selected=false]]:!bg-[#dbe5f0]" role="switch" [attr.aria-checked]="platform.isSelected" [attr.data-selected]="platform.isSelected ? 'true' : 'false'">
                       <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform duration-300 ease-in-out" [class.translate-x-5]="platform.isSelected" [class.translate-x-0]="!platform.isSelected"></span>
                     </button>
                   </div>

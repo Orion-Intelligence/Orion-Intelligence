@@ -14,11 +14,11 @@ interface ShareDestination {
 }
 
 const SHARE_DESTINATIONS: ShareDestination[] = [
-  { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconClass: 'text-sky-300 group-hover:text-sky-200' },
-  { target: 'x', label: 'X', icon: 'bi-twitter-x', iconClass: 'text-white/75 group-hover:text-white' },
-  { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconClass: 'text-blue-300 group-hover:text-blue-200' },
-  { target: 'reddit', label: 'Reddit', icon: 'bi-reddit', iconClass: 'text-orange-300 group-hover:text-orange-200' },
-  { target: 'email', label: 'Email', icon: 'bi-envelope-fill', iconClass: 'text-amber-300 group-hover:text-amber-200' },
+  { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconClass: 'text-sky-300 group-hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:group-hover:text-sky-800' },
+  { target: 'x', label: 'X', icon: 'bi-twitter-x', iconClass: 'text-white/75 group-hover:text-white [body.light-theme_&]:text-slate-600 [body.light-theme_&]:group-hover:text-slate-900' },
+  { target: 'linkedin', label: 'LinkedIn', icon: 'bi-linkedin', iconClass: 'text-blue-300 group-hover:text-blue-200 [body.light-theme_&]:text-blue-700 [body.light-theme_&]:group-hover:text-blue-800' },
+  { target: 'reddit', label: 'Reddit', icon: 'bi-reddit', iconClass: 'text-orange-300 group-hover:text-orange-200 [body.light-theme_&]:text-orange-700 [body.light-theme_&]:group-hover:text-orange-800' },
+  { target: 'email', label: 'Email', icon: 'bi-envelope-fill', iconClass: 'text-amber-300 group-hover:text-amber-200 [body.light-theme_&]:text-amber-700 [body.light-theme_&]:group-hover:text-amber-800' },
 ];
 
 @Component({

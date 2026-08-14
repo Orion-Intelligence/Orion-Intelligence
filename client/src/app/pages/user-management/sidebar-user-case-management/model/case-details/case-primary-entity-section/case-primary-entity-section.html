@@ -1,4 +1,4 @@
-<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
     @if (activeEditSection === 'primaryEntity' && editablePrimaryEntity) {
     <app-case-edit-drawer [title]="'Edit Primary Entity' | translate"
         [subtitle]="editablePrimaryEntity.value || ('Primary Entity' | translate)"
@@ -134,13 +134,13 @@
         <div class="flex flex-wrap gap-2">
             @for (profile of primaryEntity.socialProfiles; track $index) {
             <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
-                <span class="font-semibold text-sky-400">{{ formatLabel(profile.platform) }}</span>
+                <span class="font-semibold text-sky-400 [body.light-theme_&]:text-sky-700">{{ formatLabel(profile.platform) }}</span>
                 <span class="ml-1 text-[var(--color-text2)]">{{ profile.username }}</span>
                 @if (profile.displayName) {
                 <span class="ml-1 text-[var(--color-text4)]">({{ profile.displayName }})</span>
                 }
                 @if (profile.profileUrl) {
-                <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-1 text-sky-300 hover:text-sky-200">URL</a>
+                <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-1 text-sky-300 hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:hover:text-sky-900">URL</a>
                 }
             </div>
             }
@@ -155,14 +155,14 @@
         <div class="flex flex-wrap gap-2">
             @for (identifier of primaryEntity.identifiers; track $index) {
             <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
-                <span class="font-semibold text-green-400">{{ formatLabel(identifier.type) }}</span>
+                <span class="font-semibold text-green-400 [body.light-theme_&]:text-emerald-700">{{ formatLabel(identifier.type) }}</span>
                 <span class="ml-1 text-[var(--color-text2)]">{{ identifier.value }}</span>
                 @if (identifier.issuer) {
                 <span class="ml-1 text-[var(--color-text4)]">{{ 'Issuer' | translate }}: {{
                     identifier.issuer }}</span>
                 }
                 @if (identifier.verified) {
-                <span class="ml-1 text-green-300">{{ 'Verified' | translate }}</span>
+                <span class="ml-1 text-green-300 [body.light-theme_&]:text-emerald-700">{{ 'Verified' | translate }}</span>
                 }
             </div>
             }
