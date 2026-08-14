@@ -66,7 +66,6 @@ export class CategoryAlertReportComponent implements OnInit {
   adminTenantId: string | null = null;
   readonly alertExportOptions = buildStandardExportOptions('category-alert-export-option', 'report', 'Generate PDF export for selected alert.');
   expandedAlertIds = new Set<string>();
-  hoveredReportTool: 'add' | 'export' | 'flush' | 'sidebar' | null = null;
 
   constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -85,10 +84,6 @@ export class CategoryAlertReportComponent implements OnInit {
 
   isLightTheme(): boolean {
     return document.body.classList.contains('light-theme');
-  }
-
-  setReportToolHover(tool: 'add' | 'export' | 'flush' | 'sidebar' | null): void {
-    this.hoveredReportTool = tool;
   }
 
   applySearch(value: string): void {
@@ -647,23 +642,31 @@ export class CategoryAlertReportComponent implements OnInit {
   getRiskIconColorClass(risk: string): string {
     switch ((risk || '').toLowerCase()) {
       case 'critical':
-        return 'category_report_status-critical';
+        return '[&_i]:text-[#ef4444]';
       case 'high':
-        return 'category_report_status-high';
+        return '[&_i]:text-[#f97316]';
       case 'medium':
-        return 'category_report_status-medium';
+        return '[&_i]:text-[#f59e0b]';
       case 'low':
-        return 'category_report_status-low';
+        return '[&_i]:text-[#60a5fa]';
       default:
         return '';
     }
   }
 
   getRiskLabelClass(risk: string): string {
-    const normalized = (risk || '').toLowerCase();
-    return ['critical', 'high', 'medium', 'low'].includes(normalized)
-      ? `category_report_alert-label-${normalized}`
-      : '';
+    switch ((risk || '').toLowerCase()) {
+      case 'critical':
+        return 'border border-[var(--color-border)] bg-[rgb(255_76_76/10%)] text-[#ff4c4c] [body.light-theme_&]:border-[#f3b6bb] [body.light-theme_&]:bg-[#feecec] [body.light-theme_&]:text-[#dc2626]';
+      case 'high':
+        return 'border border-[var(--color-border)] bg-[rgb(255_179_71/10%)] text-[#ffb347] [body.light-theme_&]:border-[#efcd98] [body.light-theme_&]:bg-[#fff5e8] [body.light-theme_&]:text-[#c66a08]';
+      case 'medium':
+        return 'border border-[var(--color-border)] bg-[rgb(255_217_102/10%)] text-[#ffd966] [body.light-theme_&]:border-[#e8d694] [body.light-theme_&]:bg-[#fffbe6] [body.light-theme_&]:text-[#a16207]';
+      case 'low':
+        return 'border border-[var(--color-border)] bg-[rgb(108_207_126/10%)] text-[#6ccf7e] [body.light-theme_&]:border-[#b7dec0] [body.light-theme_&]:bg-[#e8f8ec] [body.light-theme_&]:text-[#166534]';
+      default:
+        return '';
+    }
   }
 
   sliceString(text: string, maxLength: number): string {

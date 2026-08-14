@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly hostRuntimeSelector = 'app-demo-tour.demo-tour-runtime';
   private static readonly bodyRuntimeSelector = 'body.demo-tour-scroll-locked';
+  private static readonly activeElementUtilityClasses = ['!relative', '!z-[1004]', '!pointer-events-auto', 'isolate', '!transition-none', '[--tour-accent:#34d399]', '![box-shadow:0_0_0_1px_color-mix(in_srgb,var(--tour-accent)_18%,transparent),0_0_0_5px_color-mix(in_srgb,var(--tour-accent)_6%,transparent),0_0_18px_color-mix(in_srgb,var(--tour-accent)_12%,transparent)]'] as const;
   private readonly fallbackPositions: NonNullable<TourStep['position']>[] = ['bottom', 'top', 'right', 'left'];
   private readonly minimumLoadingMs = 350;
   private readonly geometryTolerancePx = 1.5;
@@ -426,7 +427,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.clearActiveElementStyles();
     this.activeElement = element;
-    this.activeElement.classList.add('demo-tour-active');
+    this.activeElement.classList.add('demo-tour-active', ...DemoTourComponent.activeElementUtilityClasses);
     this.observeActiveElement(element);
   }
 
@@ -439,7 +440,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.activeElement.classList.remove('demo-tour-active');
+    this.activeElement.classList.remove('demo-tour-active', ...DemoTourComponent.activeElementUtilityClasses);
     this.activeElement = null;
   }
 
