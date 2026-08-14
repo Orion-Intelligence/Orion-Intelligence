@@ -317,7 +317,7 @@ Orion follows a clear path from source collection to analyst action:
       <th colspan="3" align="left" scope="rowgroup"><strong>Collection and enrichment</strong></th>
     </tr>
     <tr>
-      <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Social"><strong>Orion Social</strong></a><br><sub>PUBLIC REPOSITORY</sub></td>
+      <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Social"><strong>Orion Social</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
       <td valign="top"><sub>Social-intelligence collection and enrichment service with browser automation and isolated Tor-assisted crawling.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"></td>
     </tr>
@@ -340,7 +340,7 @@ Orion follows a clear path from source collection to analyst action:
       <td valign="top"><img src="https://img.shields.io/badge/-OpenSandbox-4B5563?style=flat-square" alt="OpenSandbox"> <img src="https://img.shields.io/badge/-Kata_Containers-2F81F7?style=flat-square" alt="Kata Containers"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"> <img src="https://img.shields.io/badge/-ClamAV-CC1F2F?style=flat-square" alt="ClamAV"></td>
     </tr>
     <tr>
-      <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Leaks"><strong>Orion Leaks</strong></a><br><sub>PUBLIC REPOSITORY</sub></td>
+      <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Leaks"><strong>Orion Leaks</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
       <td valign="top"><sub>Secure whistleblowing and report-intake portal based on the GlobaLeaks platform.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-GlobaLeaks-3333AB?style=flat-square" alt="GlobaLeaks"> <img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-TypeScript-3178C6?style=flat-square&amp;logo=typescript&amp;logoColor=white" alt="TypeScript"> <img src="https://img.shields.io/badge/-Docker-2496ED?style=flat-square&amp;logo=docker&amp;logoColor=white" alt="Docker"></td>
     </tr>
