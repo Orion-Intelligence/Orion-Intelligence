@@ -297,6 +297,13 @@ export class AlertNotificationComponent implements OnChanges {
     this.isScanDeleteConfirmationOpen = true;
   }
 
+  stopScan(job: ScanJob, event?: Event): void {
+    event?.stopPropagation();
+    this.scanNotificationService.deleteScan(job).subscribe({
+      error: err => this.messageNotificationService.show(err?.error?.detail || 'Failed to stop scan'),
+    });
+  }
+
   requestClearAllScans(): void {
     if (!this.scanNotificationService.jobs().length) {
       return;
@@ -426,6 +433,11 @@ export class AlertNotificationComponent implements OnChanges {
 
   isScanFailed(job: ScanJob): boolean {
     return this.scanNotificationService.getStatus(job) === 'error';
+  }
+
+  isNetworkScan(job: ScanJob): boolean {
+    const reference = String(job.api_reference || '').replace(/^\/?api\//, '');
+    return reference.startsWith('netintel/') || reference.startsWith('urlscan/');
   }
 
   getProgress(job: ScanJob): number {
