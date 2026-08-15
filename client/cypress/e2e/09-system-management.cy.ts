@@ -67,7 +67,7 @@ describe('System Settings - Admin Update Flow', () => {
     cy.get('input[placeholder="Adversaries"]').should('be.visible').clear().type('https://example.com/adversaries');
     cy.get('input[placeholder="Pricing"]').should('be.visible').clear().type('https://example.com/pricing');
     cy.scrollDashboardToTop()
-    cy.get('[data-testid="system-settings-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-save"]').should('be.visible').and('not.be.disabled').click();
 
     cy.logout();
   });
@@ -149,7 +149,7 @@ describe('System Settings - Admin Update Flow', () => {
 
     cy.intercept('POST', '**/api/public/update').as('updateWrongSystemSettings');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@updateWrongSystemSettings', {timeout: 60000})
       .its('response.statusCode')
       .should('eq', 424);
@@ -161,7 +161,7 @@ describe('System Settings - Admin Update Flow', () => {
 
     cy.intercept('POST', '**/api/public/update').as('updateSystemSettings');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
 
     cy.wait('@updateSystemSettings', {timeout: 60000}).then(({ request, response }) => {
       expect(response?.statusCode).to.be.oneOf([200, 201]);
@@ -271,13 +271,12 @@ describe('System Settings - Admin Update Flow', () => {
     cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
 
     cy.get('[data-testid="alert-integration-slack"]')
-      .should('not.have.attr', 'open')
-      .find('summary')
-      .click();
+      .should('not.have.attr', 'open');
+    cy.get('[data-testid="alert-integration-slack"] summary').click();
     cy.get('[data-testid="system-settings-slack-client-id"]').scrollIntoView().should('be.visible').clear().type(alertSlackClientId);
     cy.get('[data-testid="system-settings-slack-client-secret"]').scrollIntoView().should('be.visible').clear().type('slack-secret-for-cypress', {log: false});
     cy.docsScreenshot('alert-integrations-system-slack-config');
-    cy.get('[data-testid="system-settings-alert-integrations-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-alert-integrations-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
 
     cy.wait('@saveAlertConnectors').then(({request}) => {
       expect(request.body.slack_client_id).to.eq(alertSlackClientId);

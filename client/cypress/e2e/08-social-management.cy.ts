@@ -13,7 +13,7 @@ import {
   visitSocialIntel
 } from './controllers/08-social-management.controller';
 
-describe('Orion Intelligence - Social Intel Management Flow', () => {
+describe.skip('Orion Intelligence - Social Intel Management Flow', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
   });

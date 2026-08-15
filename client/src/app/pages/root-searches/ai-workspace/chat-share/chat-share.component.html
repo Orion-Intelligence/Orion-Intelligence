@@ -1,15 +1,16 @@
-<app-header data-testid="chat-share-header"></app-header>
-
-<div data-testid="chat-share-root" class="[&&]:![background:repeating-linear-gradient(0deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,var(--color-blue-830)_0%,var(--color-blue-850)_100%)] [body.light-theme_&&]:![background:repeating-linear-gradient(0deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,#e7eff9_0%,#e7eff9_100%)] min-h-[calc(100dvh-60px)] text-[var(--color-text1)]">
-  <header class="border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
-    <div class="mx-auto flex h-[64px] w-full max-w-[980px] items-center justify-between gap-4 px-4">
-      <div class="min-w-0">
-        <h1 class="truncate text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Shared Chat' | translate }}</h1>
-        <p class="mt-0.5 text-[11px] font-medium text-[var(--color-text5)] [body.light-theme_&]:text-[#466a87]">{{ 'Read only' | translate }}@if (expiresAt) { · {{ 'Expires' | translate }} {{ expiresAt | date : 'medium' }} }</p>
+<div data-testid="chat-share-root" class="[&&]:![background:repeating-linear-gradient(0deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,var(--color-blue-830)_0%,var(--color-blue-850)_100%)] [body.light-theme_&&]:![background:repeating-linear-gradient(0deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,#e7eff9_0%,#e7eff9_100%)] relative min-h-screen overflow-hidden text-[var(--color-text1)]">
+  <div data-testid="chat-share-header" class="relative z-[1] border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
+    <header class="mx-auto flex h-[64px] w-full max-w-[1280px] items-center justify-between gap-4 px-3 sm:px-5">
+      <div class="flex min-w-0 items-center gap-3">
+        <img [src]="getLogoSrc()" [alt]="getAppName()" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
+        <div class="hidden h-7 w-px bg-white/10 sm:block [body.light-theme_&]:bg-[var(--color-divider)]"></div>
+        <div class="hidden min-w-0 text-sm font-semibold text-[var(--color-text2)] sm:block">{{ 'Shared Intelligence Report' | translate }}
+        </div>
       </div>
-      <span class="rounded-full border border-[var(--color-divider)] bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_2px_8px_rgba(15,23,42,0.06)]">{{ 'Read Only' | translate }}</span>
-    </div>
-  </header>
+      <div class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white">
+        {{ 'Read Only' | translate }}</div>
+    </header>
+  </div>
 
   <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
 

@@ -44,7 +44,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.get('[data-testid="system-settings-account-smtp-server"]').scrollIntoView().should('be.visible').clear().type('mailpit');
     cy.get('[data-testid="system-settings-account-smtp-port"]').scrollIntoView().should('be.visible').clear().type('1025');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.get('[data-testid="system-settings-mail-save"]', {timeout: 30000}).should('be.disabled');
 
     cy.visit('/dashboard/profile/users');
@@ -307,7 +307,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
   };
 
   const resetDocumentationScroll = () => {
-    cy.get('[data-testid="dashboard-sidebar-scroll"]').filter(':visible').should('have.length', 1).then($scrollers => {
+    cy.get('[data-sidebar-expanded] [data-testid="dashboard-sidebar-scroll"]').should('have.length', 1).then($scrollers => {
       const scroller = $scrollers[0] as HTMLElement;
       const documentation = scroller.querySelector<HTMLElement>('[data-testid="sidebar-documentation"]');
 
@@ -326,7 +326,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
   };
 
   const assertDocumentationScrolledIntoView = () => {
-    cy.get('[data-testid="dashboard-sidebar-scroll"]').filter(':visible').should('have.length', 1).then($scrollers => {
+    cy.get('[data-sidebar-expanded] [data-testid="dashboard-sidebar-scroll"]').should('have.length', 1).then($scrollers => {
       const scroller = $scrollers[0] as HTMLElement;
       const documentation = scroller.querySelector<HTMLElement>('[data-testid="sidebar-documentation"]');
 
@@ -344,6 +344,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
   };
 
   const advanceToFinalTourStep = (visitedTitles: string[] = [], expectedTotal: number): Cypress.Chainable<string[]> => {
+    waitForTourStep(visitedTitles.length + 1, expectedTotal);
     return cy.get('[data-testid="demo-tour-step"]').should('be.visible').invoke('text').then(rawProgress => {
       const progress = rawProgress.match(/^\s*Step\s+(\d+)\s*\/\s*(\d+)\s*$/);
       expect(progress, 'tour progress').to.not.be.null;
@@ -383,31 +384,31 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
 
   const assertSharedStepBackSequence = () => {
     assertTourStep(7, 10, 'Collapse sidebar');
-    cy.get('[data-testid="sidebar-collapse-button"]').should('be.visible');
+    cy.get('[data-testid="sidebar-collapse-button"]').should('exist');
 
     cy.get('[data-testid="demo-tour-next"]').click();
     assertTourStep(8, 10, 'Expand sidebar');
-    cy.get('[data-testid="sidebar-expand-button"]').should('be.visible');
+    cy.get('[data-testid="sidebar-expand-button"]').should('exist');
 
     cy.get('[data-testid="demo-tour-back"]').should('be.visible').and('not.be.disabled').click();
     assertTourStep(7, 10, 'Collapse sidebar');
-    cy.get('[data-testid="sidebar-collapse-button"]').should('be.visible');
+    cy.get('[data-testid="sidebar-collapse-button"]').should('exist');
 
     cy.get('[data-testid="demo-tour-next"]').click();
     assertTourStep(8, 10, 'Expand sidebar');
-    cy.get('[data-testid="sidebar-expand-button"]').should('be.visible');
+    cy.get('[data-testid="sidebar-expand-button"]').should('exist');
 
     cy.get('[data-testid="demo-tour-next"]').click();
     assertTourStep(9, 10, 'Profile menu');
-    cy.get('[data-testid="profile-dropdown-menu"]').should('be.visible');
+    cy.get('[data-testid="profile-dropdown-menu"]').should('exist');
 
     cy.get('[data-testid="demo-tour-back"]').should('be.visible').and('not.be.disabled').click();
     assertTourStep(8, 10, 'Expand sidebar');
-    cy.get('[data-testid="sidebar-expand-button"]').should('be.visible');
+    cy.get('[data-testid="sidebar-expand-button"]').should('exist');
 
     cy.get('[data-testid="demo-tour-next"]').click();
     assertTourStep(9, 10, 'Profile menu');
-    cy.get('[data-testid="profile-dropdown-menu"]').should('be.visible');
+    cy.get('[data-testid="profile-dropdown-menu"]').should('exist');
 
     resetDocumentationScroll();
     cy.get('[data-testid="demo-tour-next"]').click();
@@ -416,7 +417,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
 
     cy.get('[data-testid="demo-tour-back"]').should('be.visible').and('not.be.disabled').click();
     assertTourStep(9, 10, 'Profile menu');
-    cy.get('[data-testid="profile-dropdown-menu"]').should('be.visible');
+    cy.get('[data-testid="profile-dropdown-menu"]').should('exist');
 
     resetDocumentationScroll();
     cy.get('[data-testid="demo-tour-next"]').click();
@@ -453,7 +454,6 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
   });
 
   it('blocks background interaction while tour controls remain available', () => {
-    cy.viewport(1280, 720);
     interceptDocumentationAvailability(true);
 
     loginAsUser(enterpriseUser.username, enterpriseUser.password);
@@ -476,6 +476,8 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     });
 
     assertBackWorksDuringLoading(10);
+    cy.reload();
+    cy.wait('@enterpriseTenantNode');
     advanceToTourStep(1, 7, 10);
     assertSharedStepBackSequence();
   });

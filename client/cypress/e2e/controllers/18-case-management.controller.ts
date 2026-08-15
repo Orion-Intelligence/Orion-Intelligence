@@ -237,11 +237,13 @@ export function openCaseFiltersIfCollapsed() {
 
 export function selectCaseFilterDropdown(testId: string, optionLabel: string) {
   openCaseFiltersIfCollapsed();
-  cy.get(selector(testId)).filter(':visible').first().scrollIntoView().should('be.visible').then(($button) => {
+  cy.get(selector(testId)).filter(':visible').first().scrollIntoView().should('be.visible').and('not.be.disabled').then(($button) => {
     const menuId = $button.attr('aria-controls');
     expect(menuId, `${testId} dropdown menu id`).to.exist;
 
-    cy.wrap($button).click({ force: true });
+    if ($button.attr('aria-expanded') !== 'true') {
+      cy.wrap($button).click({ force: true });
+    }
     cy.get(`#${menuId}`, { timeout: 60000 })
       .should('be.visible')
       .contains('[role="option"]', optionLabel)

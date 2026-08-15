@@ -272,13 +272,13 @@ export function setPasswordResetRequired(username: string, required: boolean) {
   });
 
   cy.get('@expandedUserEditor').within(() => {
-    cy.contains('button', 'Save changes').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-save-user-changes"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
   });
 }
 
 export function loginAsUser(username: string, password: string) {
   cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('loginRequest');
-  cy.visit('/login');
+  cy.visitLoginWithCleanAuthState();
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
   cy.get('[data-testid="login-button"]').filter(':visible').first().should('be.visible').click({ force: true });

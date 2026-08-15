@@ -7,8 +7,8 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { MessageScrollRailComponent } from '../message-scroll-rail/message-scroll-rail.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { HeaderComponent } from '../../../../shared/partials/header/login-header/header.component';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { AppService } from '../../../../services/core/app/app.service';
 
 type SharedChatMessage = {
   sender: 'user' | 'bot';
@@ -19,7 +19,7 @@ type SharedChatMessage = {
 @Component({
   selector: 'app-chat-share',
   standalone: true,
-  imports: [CommonModule, DatePipe, HeaderComponent, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
+  imports: [CommonModule, DatePipe, MessageScrollRailComponent, MarkdownPipe, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './chat-share.component.html',
 })
@@ -30,10 +30,14 @@ export class ChatShareComponent implements OnInit, OnDestroy {
   expiresAt: Date | null = null;
   isLoading = true;
   errorMessage = '';
+  brandingResolved = false;
 
-  constructor(private readonly route: ActivatedRoute, private readonly api: ApiService, private readonly title: Title, private readonly translationService: TranslationService) { }
+  constructor(private readonly route: ActivatedRoute, private readonly api: ApiService, private readonly title: Title, private readonly translationService: TranslationService, public readonly appService: AppService) { }
 
   ngOnInit(): void {
+    this.appService.loadConfig().subscribe(() => {
+      this.brandingResolved = true;
+    });
     this.previousTitle = this.title.getTitle();
     this.title.setTitle(this.translationService.translate('Shared Chat'));
     const shareId = this.route.snapshot.paramMap.get('shareId') || '';
@@ -68,5 +72,23 @@ export class ChatShareComponent implements OnInit, OnDestroy {
 
   trackMessage(index: number): number {
     return index;
+  }
+
+  getLogoSrc(): string {
+    if (!this.brandingResolved) {
+      return '/assets/images/shared/logo-wide-light.svg';
+    }
+    const settings = this.appService.getConfig().appSettings;
+    const isLightTheme = this.appService.userSessionData()?.user?.theme === 'light-theme';
+    return isLightTheme
+      ? settings.logo_wide_light || settings.logo_wide_dark || '/assets/images/shared/logo-wide-light.svg'
+      : settings.logo_wide_dark || settings.logo_wide_light || '/assets/images/shared/logo-wide-light.svg';
+  }
+
+  getAppName(): string {
+    if (!this.brandingResolved) {
+      return 'Orion Intelligence';
+    }
+    return this.appService.getConfig().appSettings.app_name || 'Orion Intelligence';
   }
 }

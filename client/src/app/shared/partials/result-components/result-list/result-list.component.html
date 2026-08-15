@@ -1,20 +1,26 @@
 @if (filteredItems.length > 0) {
   <div data-testid="report-metadata-values" class="mt-4 overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff]">
-    <div [class]="isRowLayout() ? 'grid grid-cols-1' : 'grid sm:grid-cols-2 xl:grid-cols-3'">
+    <div [class]="isRowLayout() ? 'grid grid-cols-1' : 'flex flex-wrap gap-2 p-3'">
       @for (item of filteredItems; track $index; let i = $index) {
-        <button data-testid="report-metadata-value" type="button" (click)="handleItemClick(item, i)" class="group relative min-w-0 border-b border-[var(--color-divider)] px-3 py-2.5 text-left text-[13px] font-medium text-[var(--color-text3)] transition hover:bg-[rgba(87,165,235,0.10)] hover:text-[var(--color-text1)]">
+        <button data-testid="report-metadata-value" type="button" (click)="handleItemClick(item, i)" [attr.title]="isRowLayout() ? null : item" [attr.aria-label]="isRowLayout() ? null : ('Copy ' + item)" [class]="isRowLayout() ? 'group relative min-w-0 border-b border-[var(--color-divider)] px-3 py-2.5 text-left text-[13px] font-medium text-[var(--color-text3)] transition hover:bg-[rgba(87,165,235,0.10)] hover:text-[var(--color-text1)]' : 'group inline-flex min-w-0 max-w-full items-center gap-2 rounded-[8px] border border-[var(--color-divider)] bg-[var(--color-blue-820-light)] px-3 py-2 text-left text-[12px] font-semibold text-[var(--color-text3)] shadow-[0_1px_2px_rgba(0,0,0,0.08)] transition-[border-color,background-color,color,transform] hover:-translate-y-px hover:border-sky-400/35 hover:bg-[rgba(87,165,235,0.10)] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400/30 [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_1px_2px_rgba(15,23,42,0.05)]'">
           @if (isRowLayout()) {
             <span class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ getRowLabel(i) | translate }}</span>
             <span [class]="isExpanded(i) ? 'mt-1 block whitespace-pre-wrap break-words text-[13px] leading-5 text-[var(--color-text3)]' : 'mt-1 block overflow-hidden break-words text-[13px] leading-5 text-[var(--color-text3)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]'">
               {{ item }}
             </span>
           } @else {
-            <span class="block break-all underline decoration-[var(--color-divider)] underline-offset-4 group-hover:decoration-[var(--color-blue-640)]">
+            <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-blue-640)] opacity-75 transition-opacity group-hover:opacity-100"></span>
+            <span class="min-w-0 break-all leading-4">
               {{ item }}
             </span>
-          }
-          @if (!isRowLayout() && copiedIndex === i) {
-            <span class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-[var(--color-blue-640)] px-2 py-1 text-[10px] font-semibold text-white">{{ 'Copied!' | translate }}</span>
+            @if (copiedIndex === i) {
+              <span class="inline-flex shrink-0 items-center gap-1 text-[10px] font-semibold text-emerald-300 [body.light-theme_&]:text-emerald-700" aria-live="polite">
+                <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5"><path d="m3 8.25 3.15 3.15L13 4.75" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                {{ 'Copied!' | translate }}
+              </span>
+            } @else {
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 shrink-0 text-[var(--color-text4)] transition-colors group-hover:text-[var(--color-blue-640)]"><rect x="5.25" y="2.25" width="8.5" height="8.5" rx="1.5" stroke="currentColor" stroke-width="1.25"></rect><path d="M10.75 11v1.25a1.5 1.5 0 0 1-1.5 1.5h-5.5a1.5 1.5 0 0 1-1.5-1.5v-5.5a1.5 1.5 0 0 1 1.5-1.5H5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"></path></svg>
+            }
           }
         </button>
       }

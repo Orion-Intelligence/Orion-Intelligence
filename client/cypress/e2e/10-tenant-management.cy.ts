@@ -340,7 +340,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
 
     fillTenantNetworkConfiguration('localhost', '1');
     cy.intercept('POST', '**/api/update/tenants').as('saveWrongTenantMail');
-    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveWrongTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('eq', 424);
@@ -348,7 +348,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
 
     fillTenantNetworkConfiguration('mailpit', '1025');
     cy.intercept('POST', '**/api/update/tenants').as('saveRightTenantMail');
-    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveRightTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
@@ -416,7 +416,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.get('input[name="tenant_city"]').scrollIntoView().should('be.visible').clear().type(cityValue);
 
     cy.intercept('POST', '**/api/update/tenants').as('saveTenantContact');
-    cy.get('[data-testid="tenant-contact-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-contact-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveTenantContact', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
@@ -432,7 +432,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       });
 
     cy.intercept('POST', '**/api/update/tenants').as('saveTenantPrivacy');
-    cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveTenantPrivacy', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);

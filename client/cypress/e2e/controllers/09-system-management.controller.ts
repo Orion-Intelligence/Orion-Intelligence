@@ -31,5 +31,5 @@ export function fillSystemMailConfiguration(server: string, port: string) {
 }
 
 export function ensureSystemSettingsEditing() {
-  cy.get('[data-testid="system-settings-mail-save"]').should('be.visible');
+  cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled');
 }
