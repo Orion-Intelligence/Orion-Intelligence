@@ -1,16 +1,14 @@
 @if (this.username()) {
   <div class="profile relative z-[1300] flex items-center gap-[2px]">
     @if (licenseService.isMaintainer()) {
-      @if (isMember()) {
-        <a data-testid="profile-notification-bell" (click)="openNotifications()" [attr.aria-label]="'Notifications' | translate" class="relative inline-flex cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
-          @if (!this.appService.userSessionData().tenant.hasOnboarding) {
-            <div class="relative p-0">
-              <img alt="" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="20" class="h-6 w-5">
-              <span class="absolute right-[-7px] top-[-6px] mt-[2px] inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold leading-none text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
-                {{ getUnseenAlertCount() }}
-              </span>
-            </div>
-          }
+      @if (isMember() && !this.appService.userSessionData().tenant.hasOnboarding) {
+        <a id="profile-notification-bell" data-testid="profile-notification-bell" (click)="openNotifications()" [attr.aria-label]="'Notifications' | translate" class="relative inline-flex cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
+          <div class="relative p-0">
+            <img alt="" height="24" ngSrc="assets/images/shared/theme/notification.svg" priority width="20" class="h-6 w-5">
+            <span class="absolute right-[-7px] top-[-6px] mt-[2px] inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full px-[5px] text-[10px] font-bold leading-none text-white" [ngClass]="getUnseenAlertCount() === 0 ? 'bg-[#00C853]' : 'bg-[#F00]'">
+              {{ getUnseenAlertCount() }}
+            </span>
+          </div>
         </a>
       }
     }
@@ -25,12 +23,12 @@
       </button>
     }
     @if (router.url !== '/login') {
-      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" [attr.aria-label]="'Profile menu' | translate" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
+      <button type="button" (click)="toggleDropdown($event)" appTooltip="" data-testid="profile-menu" [attr.aria-expanded]="dropdownOpen()" [attr.aria-label]="'Profile menu' | translate" class="inline-flex flex-none shrink-0 cursor-pointer items-center justify-center px-[15px] pt-[18px] pb-[20px]">
         <img alt="" height="24" ngSrc="assets/images/shared/theme/profile-icon.svg" priority width="24" class="ui-topbar-icon ui-topbar-profile-icon h-6 w-6">
       </button>
     }
     @if (dropdownOpen()) {
-      <ul class="absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] origin-top-right list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)] [animation:ui-profile-dropdown-in_160ms_cubic-bezier(0.16,1,0.3,1)_both] will-change-[opacity,transform] motion-reduce:animate-none">
+      <ul id="profile-dropdown-menu" data-testid="profile-dropdown-menu" class="absolute right-[10px] top-[calc(100%+8px)] z-[1310] w-[248px] origin-top-right list-none rounded-[12px] border border-[#e5e7eb] bg-white p-[10px] text-[15px] shadow-[0_16px_30px_rgba(2,6,23,0.14)] [animation:ui-profile-dropdown-in_160ms_cubic-bezier(0.16,1,0.3,1)_both] will-change-[opacity,transform] motion-reduce:animate-none">
         <div class="pointer-events-none absolute top-[-10px] right-[16px] h-0 w-0 border-l-[8px] border-r-[8px] border-b-[10px] border-l-transparent border-r-transparent border-b-white"></div>
         <li class="mb-[6px] flex min-w-full items-center rounded-[10px] border border-[#eef2f6] bg-[#f9fbff] p-[8px]">
           <div class="h-[46px] w-[46px] shrink-0 overflow-hidden rounded-full bg-[#e0e6ed]">

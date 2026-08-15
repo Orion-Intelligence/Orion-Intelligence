@@ -7,7 +7,7 @@
   collapseTestId="sidebar-collapse-button"
   (toggleClicked)="onToggleSidebar(!sidebar_default)">
   <nav data-sidebar-expanded class="h-full w-full animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
-    <div class="ml-[-5px] h-full min-h-[500px] overflow-y-auto p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div data-testid="dashboard-sidebar-scroll" class="ml-[-5px] h-full min-h-[500px] overflow-y-auto p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div id="sidebar-profile">
       <app-dashboard-sidebar-items
         (optionSelected)="onOptionSelected($event)"
@@ -185,7 +185,7 @@
         </div>
       </div>
       @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
-        <a class="select-none p-0" href="/documentation/" target="_blank">
+        <a id="sidebar-documentation" data-testid="sidebar-documentation" class="block select-none p-0" href="/documentation/" target="_blank">
           <div class="my-[6px] rounded-[8px] select-none">
             <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
               <img alt="" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/documentation.svg" width="20">{{ 'Documentation' | translate }}
@@ -204,7 +204,7 @@
   </nav>
 
   <nav data-sidebar-collapsed class="flex h-full min-h-0 w-full flex-col pt-0 animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
-    <div class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div data-testid="dashboard-sidebar-scroll" class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-collapsed
         id="sidebar-profile"
         (optionSelected)="onOptionSelected($event)"
@@ -379,7 +379,7 @@
       </li>
       <li class="my-[6px] rounded-[8px] select-none">
         @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
-          <a [appTooltip]="'Documentation' | translate" [attr.aria-label]="'Open documentation' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="/documentation/" target="_blank">
+          <a id="sidebar-documentation" data-testid="sidebar-documentation" [appTooltip]="'Documentation' | translate" [attr.aria-label]="'Open documentation' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="/documentation/" target="_blank">
             <img alt="" class="opacity-100" height="20" ngSrc="assets/images/sidebar/documentation.svg" width="20">
             <span class="sr-only">{{ 'Open documentation' | translate }}</span>
           </a>

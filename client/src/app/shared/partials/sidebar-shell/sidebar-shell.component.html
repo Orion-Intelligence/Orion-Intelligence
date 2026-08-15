@@ -1,7 +1,7 @@
 <div [class]="forceDarkLogo() ? 'flex h-full w-full flex-col bg-[#172235]' : 'flex h-full w-full flex-col'">
   @if (isCollapsed()) {
     <div [class]="forceDarkLogo() ? 'flex w-full shrink-0 items-center justify-center bg-[#172235] pt-0 text-[24px] font-medium' : 'flex w-full shrink-0 items-center justify-center pt-0 text-[24px] font-medium'">
-      <button [attr.data-testid]="expandTestId()" (click)="toggleClicked.emit(undefined)" [attr.aria-label]="'Expand sidebar' | translate" [title]="'Expand sidebar' | translate" class="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+      <button [attr.id]="expandTestId()" [attr.data-testid]="expandTestId()" (click)="toggleClicked.emit(undefined)" [attr.aria-label]="'Expand sidebar' | translate" [title]="'Expand sidebar' | translate" class="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
         <img alt="" aria-hidden="true" class="block h-5 w-5 shrink-0 max-w-none object-contain" height="20" src="assets/images/sidebar/menu-mini.svg" width="20" />
       </button>
     </div>
@@ -15,7 +15,7 @@
       <a data-testid="graph-sidebar-logo" [href]="homeHref()" [title]="resolvedLogoAlt" [attr.aria-label]="'Go to homepage' | translate" class="inline-flex min-h-[48px] max-w-full items-center pr-[8px]">
         <img [src]="logoSrc" [alt]="resolvedLogoAlt" class="block max-h-[36px] w-auto max-w-full object-contain" height="44" width="246">
       </a>
-      <button [attr.data-testid]="collapseTestId()" (click)="toggleClicked.emit(undefined)" [attr.aria-label]="'Collapse sidebar' | translate" [title]="'Collapse sidebar' | translate" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">
+      <button [attr.id]="collapseTestId()" [attr.data-testid]="collapseTestId()" (click)="toggleClicked.emit(undefined)" [attr.aria-label]="'Collapse sidebar' | translate" [title]="'Collapse sidebar' | translate" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">
         <img alt="" aria-hidden="true" class="block h-7 w-6 shrink-0 max-w-none object-contain" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
       </button>
     </div>

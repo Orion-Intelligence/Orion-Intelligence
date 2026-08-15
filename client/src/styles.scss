@@ -329,6 +329,17 @@ html:has(body.dark-theme) {
 
 
 body.demo-tour-active {
+  [data-testid="dashboard-sidebar-main"] {
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+  }
+
+  [data-testid="dashboard-sidebar-scroll"] {
+    min-height: 0 !important;
+  }
+
   [class*="ng-trigger-fadeInDashboardItem"],
   [class*="ng-trigger-dashboard-global-animation"],
   [class*="ng-trigger-appAnimation"] {
@@ -356,12 +367,14 @@ body.demo-tour-active {
     animation: none !important;
   }
 
-  .ui-filter-sidebar-panel,
-  .ui-result-card,
-  [class*="transition-"],
-  [class*="duration-"] {
-    transition-duration: 0ms !important;
-    animation-duration: 0ms !important;
+  [data-testid="dashboard-main"] {
+    .ui-filter-sidebar-panel,
+    .ui-result-card,
+    [class*="transition-"],
+    [class*="duration-"] {
+      transition-duration: 0ms !important;
+      animation-duration: 0ms !important;
+    }
   }
 }
 

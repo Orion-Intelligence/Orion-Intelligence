@@ -8,6 +8,7 @@ import { ApiService } from '../../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })
 export class DemoTourService {
+  private readonly tourLicensePriority = ['enterprise', 'osint_advanced', 'social_mapper', 'pentester', 'osint_basic', 'feeder', 'maintainer', 'free'];
   private steps: TourStep[] = [];
   private capturedValues = new Map<string, string>();
   private currentStepIndex = new BehaviorSubject<number>(-1);
@@ -105,15 +106,29 @@ export class DemoTourService {
 
   private getTourStepsForCurrentLicense(): TourStep[] {
     const config = this.appService.demoTourConfig();
-    const licenses = this.appService.userSessionData().user.license ?? [];
+    const licenses = (this.appService.userSessionData().user.license ?? []).map(license => license.toLowerCase());
+    const selectedLicense = this.tourLicensePriority.find(license => licenses.includes(license) && config[license]?.length) ??
+      licenses.find(license => config[license]?.length);
+    const licenseSteps = selectedLicense ? config[selectedLicense] : config['default'] ?? [];
+    const auxiliarySteps = ['feeder', 'maintainer']
+      .filter(license => license !== selectedLicense && licenses.includes(license))
+      .flatMap(license => config[license] ?? []);
 
-    for (const license of licenses) {
-      const steps = config[license];
-      if (steps?.length) {
-        return steps;
-      }
+    const sharedSteps = config['shared'] ?? [];
+    const documentationSteps = this.appService.getConfig().appSettings.home_header_pricing_allowed
+      ? config['shared_documentation'] ?? []
+      : [];
+
+    return [...licenseSteps, ...auxiliarySteps, ...sharedSteps, ...documentationSteps]
+      .filter(step => !step.showWhenSelector || this.isSelectorRendered(step.showWhenSelector));
+  }
+
+  private isSelectorRendered(selector: string): boolean {
+    if (typeof document === 'undefined') {
+      return false;
     }
 
-    return config['default'] ?? [];
+    return Array.from(document.querySelectorAll(selector))
+      .some(element => element.getClientRects().length > 0);
   }
 }

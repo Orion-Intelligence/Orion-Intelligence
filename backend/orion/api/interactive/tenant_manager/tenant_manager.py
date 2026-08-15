@@ -844,7 +844,7 @@ class TenantManager:
                 alerts_allowed_all=alerts_allowed_all,
                 alerts_allowed_tenant_ids=alerts_allowed_tenant_ids,
                 tenant_uuid=tenant_uuid,
-                password_reset_required=False, )
+                password_reset_required=True, )
             
             await mail_manager.get_instance().validate_mail_configuration(tenant_id=tenant_uuid)
             await engine.save(user)
