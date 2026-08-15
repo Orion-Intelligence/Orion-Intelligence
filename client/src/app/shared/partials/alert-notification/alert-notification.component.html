@@ -119,7 +119,7 @@
                     <button data-testid="scan-notification-stop" type="button" class="rounded-md px-2 py-1 text-[12px] font-semibold border border-red-400/5 bg-red-500/10 text-red-300 transition-colors hover:border-red-400/15 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900" (click)="stopScan(job, $event)">{{ 'Stop' | translate }}</button>
                   }
                   @else {
-                    <button data-testid="scan-notification-delete" type="button" [disabled]="isScanPending(job) || isScanDeleting" class="rounded-md px-2 py-1 text-[12px] font-semibold border border-red-400/5 bg-red-500/10 text-red-300 transition-colors hover:border-red-400/15 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50" (click)="requestDeleteScan(job, $event)">{{ 'Delete' | translate }}</button>
+                    <button data-testid="scan-notification-delete" type="button" [disabled]="isScanPending(job) || isScanDeleting" class="ui-delete-button rounded-md border px-2 py-1 text-[12px] font-semibold" (click)="requestDeleteScan(job, $event)">{{ 'Delete' | translate }}</button>
                   }
                 </div>
               </div>
@@ -144,7 +144,7 @@
         }
         @if (isScanMode() && scanNotificationService.jobs().length>0) {
           <button data-testid="scan-notification-clear-all" [disabled]="isScanDeleting" (click)="requestClearAllScans()" class="w-full rounded-md bg-[var(--color-blue-640)] px-4 py-2 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60" type="button">{{ 'Read All' | translate }}</button>
-          <button data-testid="scan-notification-delete-all" [disabled]="isScanDeleting" (click)="requestDeleteAllScans()" class="w-full rounded-md px-4 py-2 text-sm font-semibold border border-red-400/5 bg-red-500/10 text-red-300 transition-colors hover:border-red-400/15 hover:bg-red-500/15 hover:text-red-200 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70 [body.light-theme_&]:hover:text-red-900 disabled:cursor-not-allowed disabled:opacity-50" type="button">{{ 'Delete All' | translate }}</button>
+          <button data-testid="scan-notification-delete-all" [disabled]="isScanDeleting" (click)="requestDeleteAllScans()" class="ui-delete-button w-full rounded-md border px-4 py-2 text-sm font-semibold" type="button">{{ 'Delete All' | translate }}</button>
         }
       </div>
     </div>

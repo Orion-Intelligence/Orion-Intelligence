@@ -27,7 +27,8 @@ const DEFAULT_SYSTEM_ASSETS: Record<SystemResourceKey, string> = {
   templateUrl: './tenant-branding-settings.component.html'
 })
 export class TenantBrandingSettingsComponent implements OnInit {
-  brandingEditing = false;
+  private appNameSnapshot = '';
+
   brandingError = '';
   form = { app_name: '0' };
 
@@ -45,21 +46,11 @@ export class TenantBrandingSettingsComponent implements OnInit {
     }
     this.form.app_name = settings.app_name?.trim() || DEFAULT_APP_NAME;
     this.brandingError = '';
+    this.appNameSnapshot = this.form.app_name;
   }
 
-  toggleBrandingEdit(): void {
-    if (this.brandingEditing) {
-      if (this.save()) {
-        this.brandingEditing = false;
-      }
-      return;
-    }
-    this.brandingEditing = true;
-  }
-
-  cancelBrandingEdit(): void {
-    this.loadSettings();
-    this.brandingEditing = false;
+  isBrandingDirty(): boolean {
+    return this.form.app_name !== this.appNameSnapshot;
   }
 
   updateUserResource(file: File, key: SystemResourceKey = 'logo_url'): void {
@@ -112,7 +103,6 @@ export class TenantBrandingSettingsComponent implements OnInit {
       },
       error: () => {
         this.brandingError = 'Failed to save tenant branding';
-        this.brandingEditing = true;
       }
     });
     return true;

@@ -309,6 +309,38 @@ p {
   overflow-wrap: anywhere;
 }
 
+.ui-delete-button {
+  border-color: rgb(248 113 113 / 5%);
+  background-color: rgb(239 68 68 / 13%);
+  color: rgb(252 165 165);
+  transition-property: background-color, border-color, color;
+  transition-duration: 160ms;
+  transition-timing-function: ease;
+}
+
+.ui-delete-button:hover:not(:disabled) {
+  border-color: rgb(248 113 113 / 22%);
+  background-color: rgb(239 68 68 / 18%);
+  color: rgb(254 202 202);
+}
+
+.ui-delete-button:disabled {
+  cursor: not-allowed;
+  opacity: 50%;
+}
+
+body.light-theme .ui-delete-button {
+  border-color: rgb(220 38 38 / 30%);
+  background-color: rgb(254 226 226);
+  color: rgb(153 27 27);
+}
+
+body.light-theme .ui-delete-button:hover:not(:disabled) {
+  border-color: rgb(185 28 28 / 45%);
+  background-color: rgb(254 202 202 / 85%);
+  color: rgb(127 29 29);
+}
+
 html.light-theme,
 body.light-theme {
   background: #fff;
@@ -415,11 +447,32 @@ body.demo-tour-scroll-locked {
 
 @for $i from 0 through 2000 {
   $value: $i * 2;
-  .ui-left-#{$value},
-  [data-left="#{$value}"] {
+  .ui-left-#{$value} {
     left: #{$value}px;
   }
   .ui-top-#{$value},
+  [data-top="#{$value}"] {
+    top: #{$value}px;
+  }
+}
+
+// 1px resolution: used where a box must line up exactly with another element (ui-dropdown menus).
+@for $i from 0 through 4000 {
+  [data-left="#{$i}"] {
+    left: #{$i}px;
+  }
+  [data-width="#{$i}"] {
+    width: #{$i}px;
+  }
+}
+
+[data-width="0"] {
+  display: none;
+}
+
+// data-top beyond 4000px (long pages/tables), 4px resolution.
+@for $i from 1001 through 5000 {
+  $value: $i * 4;
   [data-top="#{$value}"] {
     top: #{$value}px;
   }
@@ -481,6 +534,46 @@ body.demo-tour-scroll-locked {
   filter: var(--ui-icon-filter-light);
 }
 
+table tbody > tr:not(:has(> td[colspan]), :has(.ui-shimmer), .credential_row_expand, [data-table-row-hover="custom"]) {
+  transition: background-color 160ms ease;
+}
+
+table tbody > tr:not(:has(> td[colspan]), :has(.ui-shimmer), .credential_row_expand, [data-table-row-hover="custom"]):is(:hover, :focus-within) {
+  background: var(--ui-table-row-hover) !important;
+}
+
+.ui-settings-save-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 112px;
+  height: 36px;
+  appearance: none;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(92.32deg, #4ea2f1 2.58%, #2c7ac5);
+  color: #fff;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: background 160ms ease, filter 160ms ease, opacity 160ms ease;
+}
+
+.ui-settings-save-button:hover:not(:disabled) {
+  background: linear-gradient(92.32deg, #3f96e8 2.58%, #236eb7);
+}
+
+.ui-settings-save-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(87 165 235 / 30%);
+}
+
+.ui-settings-save-button:disabled {
+  cursor: not-allowed;
+  background: linear-gradient(92.32deg, rgb(78 162 241 / 42%) 2.58%, rgb(44 122 197 / 42%));
+  color: rgb(255 255 255 / 58%);
+  opacity: 100%;
+}
+
 .ui-ioc-row-even {
   background: var(--color-blue-700);
 }
@@ -505,7 +598,7 @@ body.demo-tour-scroll-locked {
 .light-theme .ui-ioc-row-odd:focus-visible,
 .light-theme .ui-ioc-row-odd:focus-within,
 .light-theme .ui-ioc-row-odd:active {
-  background: #f5f8fb !important;
+  background: var(--ui-table-row-hover) !important;
 }
 
 .dark-theme .ui-ioc-row-even {
@@ -514,6 +607,17 @@ body.demo-tour-scroll-locked {
 
 .dark-theme .ui-ioc-row-odd {
   background: #131e30 !important;
+}
+
+.dark-theme .ui-ioc-row-even:hover,
+.dark-theme .ui-ioc-row-even:focus-visible,
+.dark-theme .ui-ioc-row-even:focus-within,
+.dark-theme .ui-ioc-row-even:active,
+.dark-theme .ui-ioc-row-odd:hover,
+.dark-theme .ui-ioc-row-odd:focus-visible,
+.dark-theme .ui-ioc-row-odd:focus-within,
+.dark-theme .ui-ioc-row-odd:active {
+  background: var(--ui-table-row-hover) !important;
 }
 
 .dark-theme .ui-ioc-table-row.credential_row_expand {

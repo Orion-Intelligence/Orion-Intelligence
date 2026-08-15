@@ -233,14 +233,12 @@ export function addUser(user: ManagedUser) {
 }
 
 export function openUserEditor(username: string) {
-  cy.contains('tbody tr', username)
+  cy.contains('tbody tr[data-testid="tenant-user-row"]', username)
     .scrollIntoView()
     .should('be.visible')
-    .within(() => {
-      cy.get('[data-testid="tenant-edit-user-button"]').first().scrollIntoView().should('be.visible').click();
-    });
+    .click();
 
-  cy.contains('tbody tr', username)
+  cy.contains('tbody tr[data-testid="tenant-user-row"]', username)
     .next()
     .as('expandedUserEditor')
     .should('contain.text', 'Edit User');
@@ -395,21 +393,16 @@ export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboar
     const [username, ...rest] = remaining;
 
     openUsersList(usersUrl);
-    cy.contains('tbody tr', username).then(($row) => {
+    cy.contains('tbody tr[data-testid="tenant-user-row"]', username).then(($row) => {
       if (!$row.length) {
         cy.log(`User ${username} not found. Skip.`);
         deleteNext(rest);
         return;
       }
 
-      cy.wrap($row)
-        .find('[data-testid="tenant-edit-user-button"]')
-        .first()
-        .scrollIntoView()
-        .should('be.visible')
-        .click();
+      cy.wrap($row).scrollIntoView().should('be.visible').click();
 
-      cy.contains('tbody tr', username)
+      cy.contains('tbody tr[data-testid="tenant-user-row"]', username)
         .next()
         .within(() => {
           cy.get('[data-testid="tenant-delete-user-button"]').first().scrollIntoView().click({force: true});

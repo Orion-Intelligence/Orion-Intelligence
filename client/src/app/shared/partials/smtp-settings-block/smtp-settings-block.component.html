@@ -1,68 +1,31 @@
-<div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4" [ngClass]="isEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
-  <div class="flex items-start justify-between gap-3">
+<div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
+  <div>
     <div>
       <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Network Configuration' | translate }}</div>
       <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Mail delivery settings.' | translate }}</div>
     </div>
-    <div class="flex items-center gap-2">
-      @if (!isEditing) {
-        <button data-testid="system-settings-mail-edit" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Edit mail settings' | translate" (click)="edit.emit()">
-          <img src="assets/images/shared/edit.svg" width="16" alt="" />
-        </button>
-      }
-      @if (isEditing) {
-        <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Cancel mail edit' | translate" (click)="cancel.emit()">
-          <i class="bi bi-x-lg text-sm"></i>
-        </button>
-      }
-      @if (isEditing) {
-        <button data-testid="system-settings-mail-save" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Save mail settings' | translate" (click)="save.emit()">
-          <i class="bi bi-check-lg text-sm"></i>
-        </button>
-      }
-    </div>
   </div>
   <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
     <div>
-      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-        {{ 'ACCOUNT MAIL' | translate }}
-        @if (isEditing) {
-          <img src="assets/images/shared/edit.svg" width="11" alt="" class="opacity-70" />
-        }
-      </label>
-      <input data-testid="system-settings-account-mail" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_mail" [disabled]="!isEditing" />
+      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'ACCOUNT MAIL' | translate }}</label>
+      <input data-testid="system-settings-account-mail" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.accounts_mail" (ngModelChange)="onFormChange()" />
     </div>
 
     <div>
-      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-        {{ 'ACCOUNT MAIL PASSWORD' | translate }}
-        @if (isEditing) {
-          <img src="assets/images/shared/edit.svg" width="11" alt="" class="opacity-70" />
-        }
-      </label>
+      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'ACCOUNT MAIL PASSWORD' | translate }}</label>
       <div class="relative">
-        <input data-testid="system-settings-account-mail-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="password" [(ngModel)]="form.accounts_mail_password" [disabled]="!isEditing" [placeholder]="'test' | translate" appPasswordToggle="dark" />
+        <input data-testid="system-settings-account-mail-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="password" [(ngModel)]="form.accounts_mail_password" (ngModelChange)="onFormChange()" [placeholder]="'test' | translate" appPasswordToggle="dark" />
       </div>
     </div>
 
     <div>
-      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-        {{ 'ACCOUNT SMTP SERVER' | translate }}
-        @if (isEditing) {
-          <img src="assets/images/shared/edit.svg" width="11" alt="" class="opacity-70" />
-        }
-      </label>
-      <input data-testid="system-settings-account-smtp-server" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_server" [disabled]="!isEditing" [placeholder]="'mailpit' | translate" />
+      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'ACCOUNT SMTP SERVER' | translate }}</label>
+      <input data-testid="system-settings-account-smtp-server" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.accounts_smtp_server" (ngModelChange)="onFormChange()" [placeholder]="'mailpit' | translate" />
     </div>
 
     <div>
-      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-        {{ 'ACCOUNT SMTP PORT' | translate }}
-        @if (isEditing) {
-          <img src="assets/images/shared/edit.svg" width="11" alt="" class="opacity-70" />
-        }
-      </label>
-      <input data-testid="system-settings-account-smtp-port" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.accounts_smtp_port" [disabled]="!isEditing" placeholder="1025" />
+      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'ACCOUNT SMTP PORT' | translate }}</label>
+      <input data-testid="system-settings-account-smtp-port" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.accounts_smtp_port" (ngModelChange)="onFormChange()" placeholder="1025" />
     </div>
 
     <div class="lg:col-span-2 flex flex-wrap items-center gap-3">
@@ -79,5 +42,10 @@
         {{ (mailConfigurationStatus === 'working' && !errorState && !verifyError ? 'Mail configuration is working' : 'Mail configuration is not working') | translate }}
       </div>
     }
+    <div class="flex justify-end lg:col-span-2">
+      <button data-testid="system-settings-mail-save" type="button" class="ui-settings-save-button" [disabled]="!isDirty" (click)="save.emit()">
+        {{ 'Save changes' | translate }}
+      </button>
+    </div>
   </div>
 </div>

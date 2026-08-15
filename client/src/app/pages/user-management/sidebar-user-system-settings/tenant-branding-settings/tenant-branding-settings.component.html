@@ -5,10 +5,6 @@
         <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Brand assets' | translate }}</div>
         <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'These files are served from this tenant’s URL on login, navigation, and browser chrome.' | translate }}</div>
       </div>
-      <span class="inline-flex items-center gap-1 rounded-full border border-sky-400/25 bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-        <i class="bi bi-building text-[10px]"></i>
-        {{ 'Current tenant only' | translate }}
-      </span>
     </div>
     <div class="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
       <div class="rounded-[8px] border border-[var(--color-divider)] bg-[var(--color-blue-700)] p-3">
@@ -64,46 +60,26 @@
     </div>
   </div>
 
-  <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2" [ngClass]="brandingEditing ? 'ring-2 ring-sky-400/20 border-sky-400/35' : ''">
-    <div class="flex items-start justify-between gap-3">
+  <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 sm:col-span-2">
+    <div>
       <div>
         <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Tenant identity' | translate }}</div>
         <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Set the name shown in page titles, login screens, and shared views.' | translate }}</div>
       </div>
-      <div class="flex items-center gap-2">
-        @if (!brandingEditing) {
-          <button data-testid="tenant-branding-edit" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Edit tenant branding' | translate" (click)="toggleBrandingEdit()">
-            <img src="assets/images/shared/edit.svg" width="16" alt="" class="ui-action-icon" />
-          </button>
-        }
-        @if (brandingEditing) {
-          <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Cancel tenant branding edit' | translate" (click)="cancelBrandingEdit()">
-            <i class="bi bi-x-lg text-sm"></i>
-          </button>
-          <button data-testid="tenant-branding-save" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Save tenant branding' | translate" (click)="toggleBrandingEdit()">
-            <i class="bi bi-check-lg text-sm"></i>
-          </button>
-        }
-      </div>
     </div>
-    @if (brandingEditing) {
-      <div class="mt-2 inline-flex items-center rounded-full border border-sky-400/35 bg-sky-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-sky-300 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800">
-        {{ 'Editing Enabled' | translate }}
-      </div>
-    }
     <div class="mt-3 max-w-[720px]">
-      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
-        {{ 'App Name' | translate }}
-        @if (brandingEditing) {
-          <img src="assets/images/shared/edit.svg" width="11" alt="" class="ui-action-icon opacity-70" />
-        }
-      </label>
-      <input data-testid="tenant-branding-app-name" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.app_name" [disabled]="!brandingEditing" />
+      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'App Name' | translate }}</label>
+      <input data-testid="tenant-branding-app-name" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.app_name" />
     </div>
     @if (brandingError) {
       <div class="mt-3 max-w-[720px] rounded-[8px] border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
         {{ brandingError }}
       </div>
     }
+    <div class="mt-3 flex justify-end">
+      <button data-testid="tenant-branding-save" type="button" class="ui-settings-save-button" [disabled]="!isBrandingDirty()" (click)="save()">
+        {{ 'Save changes' | translate }}
+      </button>
+    </div>
   </div>
 </div>

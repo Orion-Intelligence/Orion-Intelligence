@@ -29,7 +29,7 @@
                         {{ 'Status Tracking Board' | translate }}
                     </button>
 
-                    <button type="button" data-testid="add-case-button" class="inline-flex h-8 items-center justify-center border text-sm font-semibold leading-none [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="addCase()">
+                    <button type="button" data-testid="add-case-button" class="inline-flex h-8 appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="addCase()">
                         {{ 'Add Case' | translate }}
                     </button>
                     }
@@ -92,7 +92,7 @@
                         @if ((filteredCases?.length || 0) > 0) {
                         <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
                             @for (case of filteredCases; track case.caseId || $index; let i = $index) {
-                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [attr.data-testid]="'case-row-' + case.caseId">
+                            <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--ui-table-row-hover)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [attr.data-testid]="'case-row-' + case.caseId">
                                 <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">
                                     {{ case.caseId }}</td>
                                 <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5" [title]="case.title">{{ case.title }}

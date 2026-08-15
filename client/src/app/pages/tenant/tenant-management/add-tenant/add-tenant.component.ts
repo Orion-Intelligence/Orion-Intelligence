@@ -1,10 +1,9 @@
-import { Component, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { AlertAllowedTenantOption, TenantTeamModel } from '../../../../shared/model/tenant/tenant.model';
 import { ApiService } from '../../../../shared/services/api.service';
-import { popupAnimation, overlayAnimation } from '../../../../shared/animations/popup.animations';
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../../shared/utils/auth-form.util';
@@ -17,11 +16,11 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partia
   selector: 'app-add-tenant',
   imports: [FormsModule, NgClass, PasswordToggleDirective, TranslatePipe, UiDropdownComponent],
   templateUrl: './add-tenant.component.html',
-  changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [popupAnimation, overlayAnimation]
+  changeDetection: ChangeDetectionStrategy.Eager
 })
 export class AddTenantComponent implements OnInit {
   private readonly allAlertsOption = 'all';
+  private isClosing = false;
 
   licenseList = Object.values(LicenseName);
   licenses = ['free', 'osint_basic', 'osint_advanced', 'social_mapper', 'pentester', 'maintainer', 'enterprise'];
@@ -36,10 +35,11 @@ export class AddTenantComponent implements OnInit {
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();
   currentUnmetCheck: string | null = null;
   confirmPassword = '';
+  isOpen = false;
   readonly closs = output<undefined>();
   readonly accountAdded = output<undefined>();
 
-  constructor(public apiService: ApiService, private appService: AppService, protected licenseService: LicenseService, private translationService: TranslationService) {
+  constructor(public apiService: ApiService, private appService: AppService, protected licenseService: LicenseService, private translationService: TranslationService, private cdr: ChangeDetectorRef) {
   }
 
   get permissionOptions(): UiDropdownOption[] {
@@ -61,6 +61,10 @@ export class AddTenantComponent implements OnInit {
     if (this.isAdmin) {
       this.loadAlertTenantOptions();
     }
+    setTimeout(() => {
+      this.isOpen = true;
+      this.cdr.detectChanges();
+    }, 10);
   }
 
   onSubmit() {
@@ -113,8 +117,13 @@ export class AddTenantComponent implements OnInit {
   }
 
   onClose() {
-    // TODO: The 'emit' function requires a mandatory void argument
-    this.closs.emit(undefined);
+    if (this.isClosing) {
+      return;
+    }
+    this.isClosing = true;
+    this.isOpen = false;
+    this.cdr.detectChanges();
+    setTimeout(() => this.closs.emit(undefined), 300);
   }
 
   get hasFullLicenseAccess(): boolean {

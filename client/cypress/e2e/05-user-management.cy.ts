@@ -39,14 +39,13 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
     cy.get('[data-testid="sidebar-subitem-profile-system-settings"]').filter(':visible').first().scrollIntoView().click();
     cy.url().should('include', 'system-settings');
-    cy.get('[data-testid="system-settings-mail-edit"]').should('be.visible').click();
     cy.get('[data-testid="system-settings-account-mail"]').scrollIntoView().should('be.visible').clear().type('cypress-mailer@example.test');
     cy.get('[data-testid="system-settings-account-mail-password"]').scrollIntoView().should('be.visible').clear().type('1#VSC&cuad)d', {log: false});
     cy.get('[data-testid="system-settings-account-smtp-server"]').scrollIntoView().should('be.visible').clear().type('mailpit');
     cy.get('[data-testid="system-settings-account-smtp-port"]').scrollIntoView().should('be.visible').clear().type('1025');
     cy.scrollDashboardToTop();
     cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
-    cy.get('[data-testid="system-settings-mail-edit"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="system-settings-mail-save"]', {timeout: 30000}).should('be.disabled');
 
     cy.visit('/dashboard/profile/users');
     cy.get('[data-testid="tenant-add-user-button"]').should('not.be.disabled');

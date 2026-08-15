@@ -46,7 +46,7 @@
               <div class="flex shrink-0 flex-col items-end gap-1">
                 <div class="text-[11px] text-[var(--color-text4)]">{{ getFormattedDateTime(comment.created_at) }}</div>
                 @if (canDeleteComment(comment)) {
-                  <button data-testid="report-feedback-comment-delete" type="button" [disabled]="isSaving" (click)="requestDeleteComment(comment.created_at)" [attr.aria-label]="'Delete comment' | translate" class="inline-flex h-6 items-center gap-1 rounded-[7px] border border-red-400/20 bg-red-500/5 px-2 text-[11px] font-medium text-red-300 transition hover:border-red-400/35 hover:bg-red-500/12 disabled:cursor-not-allowed disabled:opacity-50 [.light-theme_&]:border-red-200 [.light-theme_&]:bg-red-50 [.light-theme_&]:text-red-700 [.light-theme_&]:hover:bg-red-100">
+                  <button data-testid="report-feedback-comment-delete" type="button" [disabled]="isSaving" (click)="requestDeleteComment(comment.created_at)" [attr.aria-label]="'Delete comment' | translate" class="ui-delete-button inline-flex h-6 items-center gap-1 rounded-[7px] border px-2 text-[11px] font-medium">
                     <i class="bi bi-trash3 text-[10px]"></i>
                     <span>{{ 'Delete' | translate }}</span>
                   </button>

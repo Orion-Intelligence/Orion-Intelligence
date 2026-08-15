@@ -9,7 +9,7 @@ import { userSessionData } from '../../../../shared/model/company-profile/node.m
 import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
 import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
-import { getTenantLocationDisplay, toggleEditState } from '../sidebar-settings.util';
+import { getTenantLocationDisplay } from '../sidebar-settings.util';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { AlertWebhookSettingsBlockComponent } from '../../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
 import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
@@ -26,10 +26,11 @@ import { TranslationService } from '../../../../shared/services/translation.serv
   templateUrl: './tenant-settings.component.html'
 })
 export class TenantSettingsComponent implements OnInit {
+  private contactSnapshot = '';
+  private privacySnapshot = '';
+  private mailSnapshot = '';
+
   isAccountSectionOpen = true;
-  isEditing = false;
-  contactEditing = false;
-  privacyEditing = false;
   mailErrorState = false;
   webhookErrorState = false;
   userSessionData: userSessionData;
@@ -49,6 +50,7 @@ export class TenantSettingsComponent implements OnInit {
       accounts_smtp_server: this.userSessionData.tenant.accountsSmtpServer || '',
       accounts_smtp_port: this.userSessionData.tenant.accountsSmtpPort || '',
     };
+    this.captureEditableSettings();
     this.loadAlertConnectorSettings();
   }
 
@@ -62,27 +64,34 @@ export class TenantSettingsComponent implements OnInit {
     }
   }
 
-  toggleEdit(event: Event) {
-    this.isEditing = toggleEditState(event, this.isEditing, () => {
+  isContactDirty(): boolean {
+    return this.contactState() !== this.contactSnapshot;
+  }
+
+  isPrivacyDirty(): boolean {
+    return this.privacyState() !== this.privacySnapshot;
+  }
+
+  isMailDirty(): boolean {
+    return this.mailState() !== this.mailSnapshot;
+  }
+
+  saveContactSettings(): void {
+    if (this.isContactDirty()) {
+      this.updateUser();
+    }
+  }
+
+  savePrivacySettings(): void {
+    if (this.isPrivacyDirty()) {
+      this.updateUser();
+    }
+  }
+
+  saveMailSettings(): void {
+    if (this.isMailDirty()) {
       this.updateUser(true);
-    });
-  }
-
-  toggleContactEdit(event: Event) {
-    this.contactEditing = toggleEditState(event, this.contactEditing, () => {
-      this.updateUser();
-    });
-  }
-
-  togglePrivacyEdit(event: Event) {
-    this.privacyEditing = toggleEditState(event, this.privacyEditing, () => {
-      this.updateUser();
-    });
-  }
-
-  saveMailSettings() {
-    this.updateUser(true);
-    this.isEditing = false;
+    }
   }
 
   getLocationDisplay(): string {
@@ -99,9 +108,6 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   openAlertRunTimePicker(input: HTMLInputElement): void {
-    if (!this.privacyEditing || input.disabled) {
-      return;
-    }
     input.focus();
     if (typeof input.showPicker === 'function') {
       input.showPicker();
@@ -132,27 +138,19 @@ export class TenantSettingsComponent implements OnInit {
       tenantData.accounts_smtp_port = this.mailForm.accounts_smtp_port;
     }
     this.apiService.post(route, tenantData).subscribe({
+      next: () => {
+        this.contactSnapshot = this.contactState();
+        this.privacySnapshot = this.privacyState();
+        if (includeMailSettings) {
+          this.mailSnapshot = this.mailState();
+        }
+      },
       error: () => {
         if (includeMailSettings) {
           this.mailErrorState = true;
         }
       }
     });
-  }
-
-  cancelEdit(event?: Event) {
-    event?.stopPropagation();
-    this.isEditing = false;
-  }
-
-  cancelContactEdit(event: Event) {
-    event.stopPropagation();
-    this.contactEditing = false;
-  }
-
-  cancelPrivacyEdit(event: Event) {
-    event.stopPropagation();
-    this.privacyEditing = false;
   }
 
   updateUserResource(file: File) {
@@ -221,5 +219,37 @@ export class TenantSettingsComponent implements OnInit {
       alert_jira_site_url: '',
       alert_jira_site_name: ''
     };
+  }
+
+  private captureEditableSettings(): void {
+    this.contactSnapshot = this.contactState();
+    this.privacySnapshot = this.privacyState();
+    this.mailSnapshot = this.mailState();
+  }
+
+  private contactState(): string {
+    return JSON.stringify([
+      this.userSessionData.tenant.phone || '',
+      this.userSessionData.tenant.country || '',
+      this.userSessionData.tenant.city || ''
+    ]);
+  }
+
+  private privacyState(): string {
+    return JSON.stringify([
+      this.normalizedAlertRunTime(),
+      this.userSessionData.tenant.profileVisibilityEnabled !== false,
+      this.userSessionData.tenant.eventManagementEnabled === true,
+      this.userSessionData.tenant.alertsVisibleToAdmin !== false
+    ]);
+  }
+
+  private mailState(): string {
+    return JSON.stringify([
+      this.mailForm.accounts_mail,
+      this.mailForm.accounts_mail_password,
+      this.mailForm.accounts_smtp_server,
+      this.mailForm.accounts_smtp_port
+    ]);
   }
 }

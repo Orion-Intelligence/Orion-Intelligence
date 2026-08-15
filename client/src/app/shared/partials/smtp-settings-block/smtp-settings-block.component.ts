@@ -23,12 +23,11 @@ export class SmtpSettingsBlockComponent implements OnChanges {
   verifyError = false;
 
   @Input({ required: true }) form!: SmtpSettingsForm;
-  @Input({ required: true }) isEditing!: boolean;
+  @Input() isDirty = false;
   @Input() errorState = false;
 
-  @Output() edit = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
   @Output() save = new EventEmitter<void>();
+  @Output() settingsChange = new EventEmitter<void>();
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['errorState']?.currentValue) {
@@ -55,6 +54,12 @@ export class SmtpSettingsBlockComponent implements OnChanges {
         this.scrollToError();
       }
     });
+  }
+
+  onFormChange(): void {
+    this.mailConfigurationStatus = '';
+    this.verifyError = false;
+    this.settingsChange.emit();
   }
 
   private scrollToError(): void {

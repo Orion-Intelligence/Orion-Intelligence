@@ -15,13 +15,11 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class AlertWebhookSettingsBlockComponent {
   @Input({ required: true }) form!: AlertWebhookSettingsForm;
-  @Input({ required: true }) isEditing!: boolean;
+  @Input() isDirty = false;
   @Input() context: 'system' | 'tenant' = 'system';
   @Input() isAdmin = false;
   @Input() errorState = false;
 
-  @Output() edit = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
   @Output() save = new EventEmitter<void>();
 
   get slackRedirectUri(): string {

@@ -143,7 +143,6 @@ export function setCurrentTenantAlertVisibility(tenant: CaseAlertTenant, visible
   });
   cy.contains('h1', 'Tenant Data').should('be.visible');
   cy.scrollDashboardToBottom();
-  cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
   cy.contains('label', 'Allow Admin Alert Visibility')
     .scrollIntoView()
     .closest('div.rounded-lg')
@@ -153,16 +152,13 @@ export function setCurrentTenantAlertVisibility(tenant: CaseAlertTenant, visible
         cy.wrap($toggle).click({force: true});
       }
 
-      if (isVisible === visible) {
-        cy.get('button[aria-label="Cancel privacy edit"]').scrollIntoView().should('be.visible').click({force: true});
-        return;
+      if (isVisible !== visible) {
+        cy.intercept('POST', '**/api/update/tenants').as(`saveAlertVisibility${tenant.username}`);
+        cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').click({force: true});
+        cy.wait(`@saveAlertVisibility${tenant.username}`, {timeout: 60000})
+          .its('response.statusCode')
+          .should('be.oneOf', [200, 201]);
       }
-
-      cy.intercept('POST', '**/api/update/tenants').as(`saveAlertVisibility${tenant.username}`);
-      cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click({force: true});
-      cy.wait(`@saveAlertVisibility${tenant.username}`, {timeout: 60000})
-        .its('response.statusCode')
-        .should('be.oneOf', [200, 201]);
     });
 }
 
@@ -216,7 +212,6 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
 
     cy.visit('/dashboard/profile/tenant-settings');
     cy.contains('h1', 'Tenant Data').should('be.visible');
-    cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
     cy.contains('label', 'Allow Admin Alert Visibility')
       .scrollIntoView()
       .closest('div.rounded-lg')
@@ -224,12 +219,10 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
         const isVisible = ($toggle.text() || '').includes('Tenant alerts are visible to admin');
         if (isVisible !== visible) {
           cy.wrap($toggle).click({force: true});
-          cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click({force: true});
-        } else {
-          cy.get('button[aria-label="Cancel privacy edit"]').scrollIntoView().should('be.visible').click({force: true});
+          cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').click({force: true});
         }
       });
-    cy.get('button[aria-label="Edit privacy settings"]', {timeout: 60000}).should('be.visible');
+    cy.get('[data-testid="tenant-privacy-save"]', {timeout: 60000}).should('be.disabled');
 
     cy.get('[data-testid="profile-menu"]').filter(':visible').first().scrollIntoView().click({force: true});
     cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({force: true});
@@ -239,9 +232,12 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
 
 export function deleteTenant(tenant: any) {
   cy.intercept('DELETE', '**/api/tenants/*').as('deleteTenant');
-  cy.contains('tbody tr', tenant.email).within(() => {
-    cy.get('[data-testid="tenant-delete-button"]').click({force: true});
-  });
+  cy.contains('tbody tr[data-testid="tenant-row"]', tenant.email)
+    .scrollIntoView()
+    .should('be.visible')
+    .as('tenantRow')
+    .click();
+  cy.get('@tenantRow').next().find('[data-testid="tenant-delete-button"]').click({force: true});
   cy.contains('Are you sure you want to delete this tenant and its associated users and keys?').should('be.visible');
   cy.get('[data-testid="confirmation-yes-button"]').click();
   cy.wait('@deleteTenant').its('response.statusCode').should('eq', 200);
@@ -249,13 +245,11 @@ export function deleteTenant(tenant: any) {
 }
 
 export function openTenantEditor(tenant: any) {
-  cy.contains('tbody tr', tenant.email)
+  cy.contains('tbody tr[data-testid="tenant-row"]', tenant.email)
     .scrollIntoView()
     .should('be.visible')
     .as('tenantRow');
-  cy.get('@tenantRow').within(() => {
-    cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().click({force: true});
-  });
+  cy.get('@tenantRow').click({force: true});
   cy.get('@tenantRow')
     .next()
     .as('tenantEditor')
@@ -498,12 +492,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
       });
 
     cy.wrap(rows.eq(0)).find('td').last().scrollIntoView();
-    cy.wrap(rows.eq(0))
-      .find('[data-testid="tenant-edit-button"], #edit-tenant, #edit-profile')
-      .first()
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.wrap(rows.eq(0)).should('be.visible').click();
     cy.wrap(false).as('changed');
     cy.get('[data-testid="tenant-edit-panel"]').filter(':visible').first().as('tenantEditPanel').should('be.visible');
 
