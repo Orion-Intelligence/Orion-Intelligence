@@ -7,6 +7,7 @@ import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { FeederService } from '../feeder.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-sidebar-user-feeder-owner-dialog',
@@ -26,7 +27,7 @@ export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
-  constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService) {}
+  constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['script'] && this.script) {
@@ -51,11 +52,11 @@ export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
       }))
       .subscribe({
         next: (response) => {
-          this.messageNotificationService.show(response?.message || 'Script owner updated successfully', 'success');
+          this.messageNotificationService.show(response?.message || this.translationService.translate('Script owner updated successfully'), 'success');
           this.saved.emit();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail || 'Failed to update script owner');
+          this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Failed to update script owner'));
         }
       });
   }
@@ -75,7 +76,7 @@ export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
         },
         error: (error) => {
           this.closed.emit();
-          this.messageNotificationService.show(error?.error?.detail || 'Failed to load feeder users');
+          this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Failed to load feeder users'));
         }
       });
   }

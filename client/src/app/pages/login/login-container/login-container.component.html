@@ -14,7 +14,7 @@
               @if (!twofaRequired) {
                 <div class="mb-[14px] h-[54px] w-[300px]">
                   @if (getLoginLogoSrc()) {
-                    <img [src]="getLoginLogoSrc()" width="300" height="54" alt="logo" loading="eager" fetchpriority="high" decoding="async" class="h-[54px] w-[300px] object-contain" />
+                    <img [src]="getLoginLogoSrc()" width="300" height="54" [alt]="'Logo' | translate" loading="eager" fetchpriority="high" decoding="async" class="h-[54px] w-[300px] object-contain" />
                   } @else {
                     <div class="flex h-[54px] w-[300px] items-center justify-center text-[28px] text-[#5a6f85]">-</div>
                   }
@@ -25,7 +25,7 @@
               @if (isMobile) {
                 <div class="flex items-center gap-2 cursor-pointer text-[#373637] text-[14px]" (click)="demoLogin()">
                   <span class="flex items-center gap-2">
-                    <img src="/assets/images/shared/theme/info.svg" class="mt-[-2px]" alt="Information">
+                    <img src="/assets/images/shared/theme/info.svg" class="mt-[-2px]" alt="" aria-hidden="true">
                     {{ 'Want to explore first?' | translate }} <strong class="font-semibold">{{ 'Try Demo' | translate }}</strong>
                   </span>
                 </div>
@@ -33,18 +33,18 @@
               <form #loginForm="ngForm" (ngSubmit)="onSubmit(loginForm)" class="w-full flex flex-col gap-2">
                 <label for="username" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">{{ 'Email' | translate }}</label>
                 <div class="relative w-full">
-                  <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" fetchpriority="high" decoding="async" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+                  <img src="/assets/images/shared/profile-icon-dark.svg" alt="" aria-hidden="true" fetchpriority="high" decoding="async" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
                   <input [(ngModel)]="user.mail" [placeholder]="'Enter email' | translate" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black [body.light-theme_&]:border-[#c7d5e6] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:focus:border-[#2b90ee] [body.light-theme_&]:focus:bg-white [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-[#2b90ee]/20" name="username" data-testid="login-user" required type="text" />
                 </div>
                 <label for=" word" class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">{{ 'Password' | translate }}</label>
                 <div class="relative w-full">
-                  <img src="/assets/images/shared/lock.svg" alt="profile icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+                  <img src="/assets/images/shared/lock.svg" alt="" aria-hidden="true" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
                   <input [(ngModel)]="user.password" [placeholder]="'Enter password' | translate" class="!pr-16 w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black [body.light-theme_&]:border-[#c7d5e6] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:focus:border-[#2b90ee] [body.light-theme_&]:focus:bg-white [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-[#2b90ee]/20" name="password" data-testid="login-pass" required type="password" appPasswordToggle />
                 </div>
                 <span (click)="goToForgot()" class="mb-6 cursor-pointer self-end text-[14px] text-[#5a6f85] transition-colors [body.light-theme_&]:hover:text-[#1176d4]" data-testid="reset-password-link">{{ 'Recover account?' | translate }}</span>
                 @if (errorMessage == 'verification pending') {
                   <div class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm [body.light-theme_&]:!bg-[#b42318] [body.light-theme_&]:!bg-opacity-100">
-                    <span class="text-left"><b>{{ errorMessage }}</b></span>
+                    <span class="text-left"><b>{{ errorMessage | translate }}</b></span>
                     <button (click)="resendMail()" class="ml-3 bg-[var(--color-blue-700)] text-[var(--color-text1)] text-[12px] font-medium px-3 py-1 rounded">
                       {{ 'Resend mail' | translate }}
                     </button>
@@ -53,7 +53,7 @@
                 @if (errorMessage && errorMessage != 'verification pending') {
                   <div class="mt-2 w-full max-w-full box-border break-words px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center [body.light-theme_&]:!bg-[#b42318] [body.light-theme_&]:!bg-opacity-100">
                     <i class="bi bi-exclamation-diamond-fill mr-2"></i>
-                    {{ errorMessage }}
+                    {{ errorMessage | translate }}
                   </div>
                 }
                 <div>
@@ -73,7 +73,7 @@
           </div>
         </div>
         <div class="flex-1 relative overflow-hidden bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
-          <img [src]="getDashboardPreviewSrc()" alt="Dashboard Preview" loading="eager" fetchpriority="high" decoding="async" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
+          <img [src]="getDashboardPreviewSrc()" [alt]="'Dashboard Preview' | translate" loading="eager" fetchpriority="high" decoding="async" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
         </div>
       </div>
     </div>
@@ -90,12 +90,12 @@
             <div class="space-y-[14px]">
               <div class="flex items-center">
                 <a class="inline-flex items-center gap-2 rounded-[20px] border border-[rgba(255,255,255,0.35)] bg-[rgba(255,255,255,0.2)] px-[14px] py-[6px] text-[14px] font-bold text-white no-underline transition-colors hover:bg-[rgba(255,255,255,0.3)] hover:border-[rgba(255,255,255,0.6)] [body.light-theme_&]:border-[#c8d9ea] [body.light-theme_&]:bg-[#f7fbff] [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:border-[#b9cde4] [body.light-theme_&]:hover:bg-[#eef5ff]" href="/">
-                  <img alt="back" src="assets/images/shared/theme/arrow.svg" class="h-[18px] w-[18px] [body.light-theme_&]:[filter:var(--ui-icon-filter-light)]">
+                  <img alt="" src="assets/images/shared/theme/arrow.svg" class="h-[18px] w-[18px] [body.light-theme_&]:[filter:var(--ui-icon-filter-light)]">
                   <span>{{ 'Homepage' | translate }}</span>
                 </a>
               </div>
               @if (errorMessage) {
-                <p class="text-left text-[#ffc107] [body.light-theme_&]:text-[#8a5d00]"><b>{{ errorMessage }}</b></p>
+                <p class="text-left text-[#ffc107] [body.light-theme_&]:text-[#8a5d00]"><b>{{ errorMessage | translate }}</b></p>
               }
               @if (otpDataUrl) {
                 <div class="grid justify-items-start text-left" data-testid="twofa-center">
@@ -109,7 +109,7 @@
                   <div class="cursor-pointer rounded-md border border-[#ffecb5] bg-[#fff3cd] px-4 py-3 text-[#664d03]" role="alert" (click)="copyToClipboard(otpSecret)">
                     <div class="flex items-center justify-between gap-3">
                       <div class="flex items-center">
-                        <img src="assets/images/shared/copy-dark.svg" alt="Copy" width="18" height="18">
+                        <img src="assets/images/shared/copy-dark.svg" alt="" width="18" height="18">
                         <strong class="ml-2">{{ otpSecret }}</strong>
                       </div>
                       @if (copied) {

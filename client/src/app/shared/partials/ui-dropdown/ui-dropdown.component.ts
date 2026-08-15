@@ -2,6 +2,7 @@ import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Component, ElementRef, HostListener, OnDestroy, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 export interface UiDropdownOption {
   key: string;
@@ -18,7 +19,7 @@ interface UiDropdownMenuOption {
 @Component({
   selector: 'app-ui-dropdown',
   standalone: true,
-  imports: [FormsModule, NgClass, NgTemplateOutlet, OverlayModule],
+  imports: [FormsModule, NgClass, NgTemplateOutlet, OverlayModule, TranslatePipe],
   host: {
     class: 'block',
   },

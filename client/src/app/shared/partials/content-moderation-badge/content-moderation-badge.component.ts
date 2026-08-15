@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { SocialPostHateSpeech } from '../../../pages/social-cti/models/social-scan.models';
 import { ModerationMapping, getModerationConfig } from '../../utils/moderation-mapping';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-content-moderation-badge',
   templateUrl: './content-moderation-badge.component.html',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContentModerationBadgeComponent {

@@ -235,7 +235,7 @@ export class AccountSettingsComponent implements OnInit {
           this.userSessionData.user.twofa_enabled = this.twoFactorEnabled;
         }
         else {
-          this.messageNotificationService.show('Password updated successfully', 'success');
+          this.messageNotificationService.show(this.translationService.translate('Password updated successfully'), 'success');
           this.resetPasswordForm();
           this.isPasswordSectionOpen = false;
         }
@@ -268,7 +268,7 @@ export class AccountSettingsComponent implements OnInit {
         }
       },
       error: (err) => {
-        const message = err?.error?.detail || 'Failed to upload image';
+        const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
         this.messageNotificationService.show(message);
       }
     });

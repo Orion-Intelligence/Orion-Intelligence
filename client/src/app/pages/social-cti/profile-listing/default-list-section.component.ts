@@ -7,12 +7,13 @@ import type { FeedUser, SocialPlatformCapabilityMap } from '../models/social-gra
 import { getMetadataEntries } from '../utils/summary-view.util';
 import socialPlatformCapabilities from '../../../../assets/data/social-graph/platform-capabilities.json';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-social-default-list-section',
   templateUrl: './default-list-section.component.html',
   standalone: true,
-  imports: [SocialIconComponent],
+  imports: [SocialIconComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialDefaultListSectionComponent {

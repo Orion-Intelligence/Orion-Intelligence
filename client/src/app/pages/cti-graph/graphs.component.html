@@ -19,12 +19,12 @@
         <main class="ui-social-dashboard-shell relative flex min-h-0 min-w-0 flex-grow flex-col bg-transparent [.light-theme_&]:!bg-[#e7eff9]">
           <div class="ui-social-topbar relative z-[1100] flex h-[60px] w-full flex-shrink-0 items-center justify-between overflow-visible border-b border-[var(--color-border)] bg-[var(--color-mono)] p-0">
             <div data-testid="cti-header-breadcrumb" class="ml-[10px] flex min-w-0 flex-1 items-center overflow-hidden pr-[20px] pl-3 text-[15px] text-white max-[943px]:ml-0 max-[943px]:pl-3">
-              <button type="button" (click)="goBack()" aria-label="Back" title="Back" class="mr-[10px] flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[8px]">
-                <img alt="Back" class="ui-breadcrumb-chevron h-[30px] w-[30px] p-[5px]" height="30" src="assets/images/shared/theme/arrow.svg" width="30" />
+              <button type="button" (click)="goBack()" [attr.aria-label]="'Back' | translate" [title]="'Back' | translate" class="mr-[10px] flex h-[50px] w-[50px] shrink-0 items-center justify-center rounded-[8px]">
+                <img alt="" class="ui-breadcrumb-chevron h-[30px] w-[30px] p-[5px]" height="30" src="assets/images/shared/theme/arrow.svg" width="30" />
               </button>
               <span class="inline-flex min-w-0 items-center font-[Inter,sans-serif] text-[16px] font-medium text-[var(--color-text1)]">
                 <span class="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[110px]">CTI</span>
-                <img alt="breadcrumb" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" src="assets/images/shared/theme/nav-next.svg" width="20" />
+                <img alt="" class="ui-breadcrumb-chevron ml-[5px] mr-[5px] inline-block" height="20" src="assets/images/shared/theme/nav-next.svg" width="20" />
                 <span class="max-w-[240px] overflow-hidden text-ellipsis whitespace-nowrap max-[943px]:max-w-[130px]">{{ 'Graph' | translate }}</span>
               </span>
             </div>
@@ -130,7 +130,7 @@
                 @if (maxEdge> 50 && showMaxEdgeNotice) {
                   <div class="absolute bottom-4 right-4 z-30 max-w-md rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]/95 px-3 py-2 text-sm text-[var(--color-text1)] shadow-[0_10px_24px_var(--color-shadow-light)] backdrop-blur-sm">
                     <div class="flex items-start gap-2">
-                      <img alt="Info Icon" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
+                      <img alt="" class="mt-0.5 h-4 w-4 opacity-90" src="assets/images/shared/hint.svg">
                       <span>{{ 'You can see' | translate }} {{ maxEdge }} {{ 'nodes at a time, avoid using extreme values for better performance' | translate }}</span>
                       <button type="button" class="ml-1 text-[var(--color-text4)] hover:text-white [body.light-theme_&]:hover:text-[var(--color-text1)]" (click)="showMaxEdgeNotice=false" [title]="'Hide' | translate">
                         <i class="bi bi-x-lg text-xs"></i>
@@ -142,10 +142,10 @@
                 @if (this.isEmpty) {
                   <div @fadeInDashboardItem class="pointer-events-none absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
                     @if (loading) {
-                      <img alt="No Data" class="h-40 w-auto" src="assets/images/shared/cti-empty.svg"/>
+                      <img [alt]="'No Data' | translate" class="h-40 w-auto" src="assets/images/shared/cti-empty.svg"/>
                     }
                     @if (!loading) {
-                      <img alt="No Data" class="h-40 w-auto animate-pulse" src="assets/images/shared/magnifying_search.svg"/>
+                      <img [alt]="'No Data' | translate" class="h-40 w-auto animate-pulse" src="assets/images/shared/magnifying_search.svg"/>
                     }
                   </div>
                 }

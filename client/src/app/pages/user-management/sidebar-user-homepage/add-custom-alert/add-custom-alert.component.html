@@ -10,7 +10,7 @@
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.selectedType' | translate }}</label>
       <button class="flex w-full items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-left text-[14px] text-[var(--color-text1)] opacity-80 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" type="button" disabled>
-        {{ decodeURIComponent(router.url.split('/').pop() || '') }}
+        {{ decodeURIComponent(router.url.split('/').pop() || '') | translate }}
       </button>
 
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.title' | translate }}</label>
@@ -22,7 +22,7 @@
       <label class="mt-[18px] mb-[6px] block text-[16px] font-normal text-[var(--color-text2)]">{{ 'categoryAlerts.form.selectIocType' | translate }}</label>
       <div class="relative">
         <button data-testid="tenant-alert-ioc-type-toggle" type="button" class="flex w-full cursor-pointer list-none items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-[14px] py-[12px] text-[14px] text-[var(--color-text1)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" (click)="toggleIocDropdown($event)">
-          <span>{{ getIOCTypeLabel(alert.ioc_type!) }}</span>
+          <span>{{ getIOCTypeLabel(alert.ioc_type!) | translate }}</span>
           <i class="bi text-[12px] text-[#57718D]" [ngClass]="iocDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
         </button>
         @if (iocDropdownOpen) {
@@ -30,7 +30,7 @@
             @for (item of allowedIocTypes; track item; let last = $last) {
               <li>
                 <button data-testid="tenant-alert-ioc-type-option" type="button" class="flex w-full items-center justify-between rounded-[6px] px-[10px] py-[8px] text-[14px] text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]" (click)="onIOCTypeChange(item.key)" [class]="alert.ioc_type === item.key ? 'bg-[var(--color-blue-820)] text-[var(--color-text1)]' : ''">
-                  <span>{{ item.title }}</span>
+                  <span>{{ item.title | translate }}</span>
                   @if (alert.ioc_type === item.key) {
                     <span>✓</span>
                   }
@@ -57,7 +57,7 @@
       <div class="mt-[8px] text-center">
         <div class="inline-block w-full rounded-lg bg-[#dc3545] bg-opacity-75 px-3 py-2 text-center text-white shadow-sm [body.light-theme_&]:border [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
           <i class="bi bi-exclamation-diamond-fill mr-2"></i>
-          {{ formError }}
+          {{ formError | translate }}
         </div>
       </div>
     }

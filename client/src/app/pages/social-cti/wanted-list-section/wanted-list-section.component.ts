@@ -1,10 +1,12 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { SocialFetchService } from '../services/social-fetch.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-social-wanted-list-section',
   standalone: true,
+  imports: [TranslatePipe],
   templateUrl: './wanted-list-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

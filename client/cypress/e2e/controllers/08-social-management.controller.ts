@@ -288,9 +288,19 @@ export function assertManageProfilesForScannedResult() {
 }
 
 export function assertSocialSidebarAndBackNavigation() {
-  cy.get('[data-testid="graph-sidebar-collapse"]').should('be.visible').click();
-  cy.get('[data-testid="graph-sidebar-expand"]').should('be.visible');
-  cy.get('[data-testid="graph-sidebar-expand"]').click();
+  cy.get('app-home-menu [data-sidebar-expanded]').should('be.visible');
+  cy.get('[data-testid="graph-sidebar-collapse"]')
+    .should('be.visible')
+    .and('have.attr', 'aria-label', 'Collapse sidebar')
+    .click();
+  cy.get('app-home-menu [data-sidebar-expanded]').should('not.exist');
+  cy.get('app-home-menu [data-sidebar-collapsed]').should('be.visible');
+  cy.get('[data-testid="graph-sidebar-expand"]')
+    .should('be.visible')
+    .and('have.attr', 'aria-label', 'Expand sidebar')
+    .click();
+  cy.get('app-home-menu [data-sidebar-expanded]').should('be.visible');
+  cy.get('app-home-menu [data-sidebar-collapsed]').should('not.exist');
   cy.get('[data-testid="social-scan-control"]').should('be.visible');
   cy.get('[data-testid="social-header-back"]').click();
   cy.location('pathname').should('match', /^\/dashboard\/(home|profile\/homepage)/);

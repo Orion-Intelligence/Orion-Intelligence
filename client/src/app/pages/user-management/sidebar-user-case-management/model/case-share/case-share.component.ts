@@ -7,6 +7,7 @@ import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../c
 import { ApiService } from '../../../../../shared/services/api.service';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { CASE_SHARE_EXPORT_OPTIONS } from '../../../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../../../shared/services/report-export.service';
@@ -29,7 +30,7 @@ export class CaseShareComponent implements OnInit {
   isExportChoiceOpen = false;
   readonly reportExportOptions = CASE_SHARE_EXPORT_OPTIONS;
 
-  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, private reportExportService: ReportExportService, public appService: AppService) { }
+  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, private reportExportService: ReportExportService, public appService: AppService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
     this.appService.loadConfig().subscribe(() => {
@@ -38,7 +39,7 @@ export class CaseShareComponent implements OnInit {
     const shareId = this.route.snapshot.paramMap.get('shareId') || '';
     const token = this.route.snapshot.queryParamMap.get('token') || '';
     if (!shareId || !token) {
-      this.errorMessage = 'Invalid share link.';
+      this.errorMessage = this.translationService.translate('Invalid share link.');
       this.isLoading = false;
       return;
     }
@@ -56,7 +57,7 @@ export class CaseShareComponent implements OnInit {
         this.isLoading = false;
       },
       error: err => {
-        this.errorMessage = err?.error?.detail || 'This share link is unavailable.';
+        this.errorMessage = err?.error?.detail || this.translationService.translate('This share link is unavailable.');
         this.isLoading = false;
       }
     });
@@ -102,7 +103,7 @@ export class CaseShareComponent implements OnInit {
       reportLabel: 'Shared Case Report'
     }).subscribe({
       error: () => {
-        this.errorMessage = 'Unable to export PDF.';
+        this.errorMessage = this.translationService.translate('Unable to export PDF.');
       }
     });
   }
@@ -113,7 +114,7 @@ export class CaseShareComponent implements OnInit {
     }
     const payload: GraphReportPayload = {
       graphKind: 'cti',
-      title: 'Shared Case Report',
+      title: this.translationService.translate('Shared Case Report'),
       sessionName: this.report.title || this.report.caseId || 'shared-case',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
@@ -127,7 +128,7 @@ export class CaseShareComponent implements OnInit {
       },
       tables: [
         {
-          title: 'Case Data',
+          title: this.translationService.translate('Case Data'),
           values: {
             case_id: this.report.caseId || '-',
             title: this.report.title || '-',
@@ -179,12 +180,12 @@ export class CaseShareComponent implements OnInit {
 
   formatLabel(value?: string | null, otherValue?: string | null): string {
     if (value === 'other' && otherValue?.trim()) {
-      return `Other: ${otherValue}`;
+      return `${this.translationService.translate('Other')}: ${otherValue}`;
     }
     if (!value) {
       return '-';
     }
-    return value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+    return this.translationService.translate(value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase()));
   }
 
   formatDate(value?: string | null): string {

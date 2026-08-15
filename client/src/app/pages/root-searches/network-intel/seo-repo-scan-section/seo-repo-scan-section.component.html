@@ -2,7 +2,7 @@
   @if (errorMessage() && !isScanning()) {
     <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)] [.light-theme_&]:border-rose-200 [.light-theme_&]:from-rose-50 [.light-theme_&]:to-white [.light-theme_&]:shadow-none">
       <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Request Failed' | translate }}</div>
-      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage() }}</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage() | translate }}</div>
     </div>
   }
 
@@ -24,7 +24,7 @@
       @if (isScanning() && !meta()) {
         <div class="px-4 py-5" @fadeInDashboardItem>
           <div class="mb-[6px] flex items-center justify-between gap-3">
-            <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
+            <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel | translate }}</span>
             <span class="text-[12px] font-semibold text-sky-400 [.light-theme_&]:!text-[#2d6f9f]">{{ progressValue }}%</span>
           </div>
           <div class="relative overflow-hidden h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">

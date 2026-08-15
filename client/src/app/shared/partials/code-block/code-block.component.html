@@ -3,12 +3,12 @@
     <div class="min-w-0">
       <div class="flex items-center gap-2 text-[13px] font-semibold text-[var(--color-text1)]">
         <span class="truncate">{{ 'Code snippet' | translate }}</span>
-        <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-4 w-4 shrink-0 ui-action-icon" [appTooltip]="'Shows the original exploit code associated with this report.' | translate">
+        <img src="/assets/images/shared/theme/info.svg" alt="" class="h-4 w-4 shrink-0 ui-action-icon" [appTooltip]="'Shows the original exploit code associated with this report.' | translate">
       </div>
       <p class="mt-1 text-[11px] leading-relaxed text-[var(--color-text4)]">{{ 'Original exploit code associated with this report.' | translate }}</p>
     </div>
     <div [attr.aria-label]="(isExpanded ? 'Collapse' : 'Expand') | translate" class="mt-[2px] flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff] transition hover:bg-[var(--color-blue-710)]">
-      <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="toggle icon" class="h-[15px] w-[15px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+      <img [ngClass]="{ 'rotate-180': !isExpanded }" alt="" class="h-[15px] w-[15px] transition ui-action-icon" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
     </div>
   </div>
 

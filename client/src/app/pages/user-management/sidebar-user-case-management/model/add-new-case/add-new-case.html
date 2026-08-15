@@ -39,7 +39,7 @@
                         'Case Type' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
                     <select [(ngModel)]="caseForm.caseType" name="caseType" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-type-select">
                         @for (type of caseTypeOptions; track type.value) {
-                        <option [value]="type.value">{{ type.label }}</option>
+                        <option [value]="type.value">{{ type.label | translate }}</option>
                         }
                     </select>
                 </div>
@@ -61,7 +61,7 @@
                         'Intake Source' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
                     <select [(ngModel)]="caseForm.intakeSource" name="intakeSource" required class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" data-testid="case-add-intake-source-select">
                         @for (source of intakeSourceOptions; track source.value) {
-                        <option [value]="source.value">{{ source.label }}</option>
+                        <option [value]="source.value">{{ source.label | translate }}</option>
                         }
                     </select>
                 </div>
@@ -119,7 +119,7 @@
                     <div class="flex flex-wrap gap-2">
                         @for (tag of tagOptions; track tag.value) {
                         <button type="button" (click)="toggleTag(tag.value)" class="shrink-0 rounded-full border px-3 py-1.5 text-xs font-semibold transition" [ngClass]="isTagSelected(tag.value) ? 'border-sky-400/50 bg-sky-500/20 text-sky-200 [body.light-theme_&]:border-sky-600/40 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800' : 'border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text3)] hover:bg-[var(--tenant-chip-hover)]'">
-                            {{ tag.label }}
+                            {{ tag.label | translate }}
                         </button>
                         }
                     </div>

@@ -10,6 +10,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { areAllPasswordRequirementsMet, buildUsernameSuggestions, buildUsernameSuggestionText, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../../shared/utils/auth-form.util';
 import { PasswordToggleDirective } from '../../../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 @Component({
@@ -24,9 +25,7 @@ export class AddTenantComponent implements OnInit {
 
   licenseList = Object.values(LicenseName);
   licenses = ['free', 'osint_basic', 'osint_advanced', 'social_mapper', 'pentester', 'maintainer', 'enterprise'];
-  permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
   alertTenantOptions: AlertAllowedTenantOption[] = [];
-  statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
   isAdmin: boolean = false;
   model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [], permissions: [], alerts_allowed_all: false, alerts_allowed_tenant_ids: [] };
   errorText: string = "";
@@ -40,7 +39,20 @@ export class AddTenantComponent implements OnInit {
   readonly closs = output<undefined>();
   readonly accountAdded = output<undefined>();
 
-  constructor(public apiService: ApiService, private appService: AppService, protected licenseService: LicenseService) {
+  constructor(public apiService: ApiService, private appService: AppService, protected licenseService: LicenseService, private translationService: TranslationService) {
+  }
+
+  get permissionOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return [{ key: 'case_management', label: this.translationService.translate('Case Management') }];
+  }
+
+  get statusOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return [
+      { key: 'active', label: this.translationService.translate('Active') },
+      { key: 'disable', label: this.translationService.translate('Disable') }
+    ];
   }
 
   ngOnInit(): void {
@@ -55,22 +67,22 @@ export class AddTenantComponent implements OnInit {
     this.errorText = '';
     this.usernameSuggestion = '';
     if (!this.model.username) {
-      this.errorText = 'Username is required';
+      this.errorText = this.translationService.translate('Username is required');
       return;
     }
     if (!this.validateUsername()) {
       return;
     }
     if (!this.model.email && this.model.role != "demo") {
-      this.errorText = 'Email is required';
+      this.errorText = this.translationService.translate('Email is required');
       return;
     }
     if (!this.model.password || !this.allPasswordRequirementsMet) {
-      this.errorText = 'Password is required';
+      this.errorText = this.translationService.translate('Password is required');
       return;
     }
     if (this.model.password !== this.confirmPassword) {
-      this.errorText = 'Password and confirm password do not match';
+      this.errorText = this.translationService.translate('Password and confirm password do not match');
       return;
     }
     if (!this.model.licenses || this.model.licenses.length === 0) {
@@ -85,7 +97,7 @@ export class AddTenantComponent implements OnInit {
         this.onClose();
       },
       error: err => {
-        this.errorText = err?.error?.detail || 'Failed to create user';
+        this.errorText = err?.error?.detail || this.translationService.translate('Failed to create user');
       }
     });
   }
@@ -96,7 +108,7 @@ export class AddTenantComponent implements OnInit {
     }
     const suggestions = buildUsernameSuggestions(this.model.username, this.usernamePattern);
     this.usernameSuggestion = buildUsernameSuggestionText(suggestions);
-    this.errorText = 'Invalid username';
+    this.errorText = this.translationService.translate('Invalid username');
     return false;
   }
 
@@ -122,9 +134,10 @@ export class AddTenantComponent implements OnInit {
   }
 
   get roleOptions(): UiDropdownOption[] {
+    this.translationService.version();
     return this.isAdmin
-      ? [{ key: 'analyst', label: 'Analyst' }, { key: 'demo', label: 'Demo' }]
-      : [{ key: 'analyst', label: 'Analyst' }, { key: 'member', label: 'Member' }];
+      ? [{ key: 'analyst', label: this.translationService.translate('Analyst') }, { key: 'demo', label: this.translationService.translate('Demo') }]
+      : [{ key: 'analyst', label: this.translationService.translate('Analyst') }, { key: 'member', label: this.translationService.translate('Member') }];
   }
 
   get licenseDropdownOptions(): UiDropdownOption[] {
@@ -150,8 +163,9 @@ export class AddTenantComponent implements OnInit {
   }
 
   get alertAllowedOptions(): UiDropdownOption[] {
+    this.translationService.version();
     return [
-      { key: this.allAlertsOption, label: 'All' },
+      { key: this.allAlertsOption, label: this.translationService.translate('All') },
       ...this.alertTenantOptions.map(tenant => ({
         key: tenant.id,
         label: tenant.name || tenant.email || tenant.id

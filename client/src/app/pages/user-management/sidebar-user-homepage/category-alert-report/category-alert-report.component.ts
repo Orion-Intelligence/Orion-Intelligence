@@ -24,6 +24,7 @@ import { buildStandardExportOptions } from '../../../../shared/model/report/expo
 import { AlertExportService } from '../../../../shared/partials/alert-notification/services/alert-export.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { CategoryAlertDetailDrawerComponent } from './alert-detail-drawer/category-alert-detail-drawer.component';
 
 @Component({
@@ -68,7 +69,7 @@ export class CategoryAlertReportComponent implements OnInit {
   readonly alertExportOptions = buildStandardExportOptions('category-alert-export-option', 'report', 'Generate PDF export for selected alert.');
   expandedAlertIds = new Set<string>();
 
-  constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService ) {
+  constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService, private translationService: TranslationService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -222,7 +223,7 @@ export class CategoryAlertReportComponent implements OnInit {
           this.router.navigate(["/dashboard"], {});
         },
         error: (err) => {
-          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete')
+          this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to delete'))
         },
       });
     }
@@ -336,11 +337,11 @@ export class CategoryAlertReportComponent implements OnInit {
 
     this.apiService.post('alert/delete', id).subscribe({
       next: () => {
-        this.messageNotificationService.show('Alert deleted successfully!', 'success');
+        this.messageNotificationService.show(this.translationService.translate('Alert deleted successfully!'), 'success');
         this.getLatestAlerts();
       },
       error: (err) => {
-        const mess = err?.error?.detail || 'delete alert failed'
+        const mess = err?.error?.detail || this.translationService.translate('Failed to delete alert');
         this.messageNotificationService.show(mess)
       },
     });
@@ -421,7 +422,7 @@ export class CategoryAlertReportComponent implements OnInit {
           ? response
           : (Array.isArray(response?.items) ? response.items : []);
         if (!alerts.length) {
-          this.messageNotificationService.show('No alerts available to export right now.');
+          this.messageNotificationService.show(this.translationService.translate('No alerts available to export right now.'));
           this.closeExportChoice();
           return;
         }
@@ -540,7 +541,7 @@ export class CategoryAlertReportComponent implements OnInit {
         }
       }
       else {
-        this.messageNotificationService.show("Please purchase enterprise license to view reports")
+        this.messageNotificationService.show(this.translationService.translate('Please purchase enterprise license to view reports'))
       }
     });
 
@@ -930,7 +931,7 @@ export class CategoryAlertReportComponent implements OnInit {
         const jsonData = JSON.parse(reader.result as string);
 
         if (Array.isArray(jsonData)) {
-          this.messageNotificationService.show('Only one STIX bundle is allowed per upload');
+          this.messageNotificationService.show(this.translationService.translate('Only one STIX bundle is allowed per upload'));
           return;
         }
 
@@ -940,17 +941,17 @@ export class CategoryAlertReportComponent implements OnInit {
         this.apiService.post('alert/add', this.importedAlert).subscribe({
           next: () => {
             this.getLatestAlerts();
-            this.messageNotificationService.show('Alert imported successfully!', 'success');
+            this.messageNotificationService.show(this.translationService.translate('Alert imported successfully!'), 'success');
           },
           error: (err) => {
-            const mess = err?.error?.detail || 'Add alert failed';
+            const mess = err?.error?.detail || this.translationService.translate('Failed to add alert');
             this.messageNotificationService.show(mess);
           },
         });
 
       }
       catch (error: any) {
-        this.messageNotificationService.show(error.message || 'Invalid JSON file');
+        this.messageNotificationService.show(error.message || this.translationService.translate('Invalid JSON file'));
       }
     };
 

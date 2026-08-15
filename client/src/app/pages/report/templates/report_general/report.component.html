@@ -100,7 +100,7 @@
     <div (click)="metaadataToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
       <div class="min-w-0">
         <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
-          <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" [appTooltip]="'The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements' | translate">
+          <img src="/assets/images/shared/theme/info.svg" alt="" class="h-5 w-5 shrink-0 ui-action-icon" [appTooltip]="'The metadata includes granular details from the report, such as detected email addresses, identified countries, and other extracted elements' | translate">
           <span class="truncate">{{ 'Metadata' | translate }}</span>
         </div>
         <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Detected entities, extracted sections, and structured attributes.' | translate }}</p>
@@ -151,7 +151,7 @@
       <div (click)="screenshootToggleContent()" class="flex cursor-pointer items-start justify-between gap-3">
         <div class="min-w-0">
           <div class="flex items-center gap-2 text-[16px] font-semibold leading-tight text-[var(--color-text1)]">
-            <img src="/assets/images/shared/theme/info.svg" alt="Icon" class="h-5 w-5 shrink-0 ui-action-icon" [appTooltip]="'Leak Screenshot' | translate">
+            <img src="/assets/images/shared/theme/info.svg" alt="" class="h-5 w-5 shrink-0 ui-action-icon" [appTooltip]="'Leak Screenshot' | translate">
             <span class="truncate">{{ 'Leak Screenshot' | translate }}</span>
           </div>
         </div>
@@ -174,7 +174,7 @@
             </div>
           }
           @if (imageSrc && !isImageError) {
-            <img (error)="onImageError()" (load)="onImageLoad()" [src]="imageSrc" alt="Screenshot Preview" class="mt-3 w-full rounded-lg border border-[var(--color-border)]" />
+            <img (error)="onImageError()" (load)="onImageLoad()" [src]="imageSrc" [alt]="'Screenshot Preview' | translate" class="mt-3 w-full rounded-lg border border-[var(--color-border)]" />
           }
         </div>
       }

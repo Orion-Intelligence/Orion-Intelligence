@@ -23,12 +23,12 @@
       }
       @if (!isLoading && engines.length > 0) {
         <span class="inline-flex h-[26px] items-center rounded-full border border-[rgba(34,197,94,0.22)] bg-[rgba(34,197,94,0.09)] px-[10px] text-[11px] font-[700] text-[var(--color-text2)]">
-          {{ engines.length >= 100 ? '100+' : engines.length }} engines matched
+          {{ engines.length >= 100 ? '100+' : engines.length }} {{ 'engines matched' | translate }}
         </span>
       }
 
       <div data-testid="onion-search-report-toggle" class="relative inline-flex h-[28px] w-[28px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] before:absolute before:inset-[-10px] before:content-['']">
-        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="h-[12px] w-[12px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
+        <img src="assets/images/shared/theme/cheveron-right.svg" alt="" class="h-[12px] w-[12px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
       </div>
     </div>
   </div>
@@ -94,11 +94,11 @@
                 {{ 'Top suggested result from each responding engine.' | translate }}
               </div>
               <div class="inline-flex items-center gap-[6px]">
-                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-[opacity,background,color] duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)] [body.light-theme_&]:text-[#2563a8]" [class.opacity-50]="!canScrollLeft" (click)="scrollResults('left', $event)">
-                  <img src="assets/images/shared/theme/cheveron-right.svg" alt="Scroll left" class="h-[12px] w-[12px] rotate-180 opacity-80" />
+                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-[opacity,background,color] duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)] [body.light-theme_&]:text-[#2563a8]" [class.opacity-50]="!canScrollLeft" (click)="scrollResults('left', $event)" [attr.aria-label]="'Scroll left' | translate">
+                  <img src="assets/images/shared/theme/cheveron-right.svg" alt="" class="h-[12px] w-[12px] rotate-180 opacity-80" />
                 </button>
-                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-[opacity,background,color] duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)] [body.light-theme_&]:text-[#2563a8]" [class.opacity-50]="!canScrollRight" (click)="scrollResults('right', $event)">
-                  <img src="assets/images/shared/theme/cheveron-right.svg" alt="Scroll right" class="h-[12px] w-[12px] opacity-80" />
+                <button type="button" class="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] text-[var(--color-text5)] transition-[opacity,background,color] duration-150 hover:bg-[var(--color-blue-820)] hover:text-[var(--color-text1)] [body.light-theme_&]:text-[#2563a8]" [class.opacity-50]="!canScrollRight" (click)="scrollResults('right', $event)" [attr.aria-label]="'Scroll right' | translate">
+                  <img src="assets/images/shared/theme/cheveron-right.svg" alt="" class="h-[12px] w-[12px] opacity-80" />
                 </button>
               </div>
             </div>

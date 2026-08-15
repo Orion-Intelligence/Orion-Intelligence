@@ -1,4 +1,4 @@
-<img alt="background" src="/assets/images/shared/Bg.webp" class="pointer-events-none fixed inset-0 z-0 h-screen w-screen object-cover object-center opacity-[0.35]">
+<img alt="" src="/assets/images/shared/Bg.webp" class="pointer-events-none fixed inset-0 z-0 h-screen w-screen object-cover object-center opacity-[0.35]">
 
 <ng-container>
   <app-header [forceDark]="true"></app-header>
@@ -11,7 +11,7 @@
         <div class="flex items-center gap-2">
           <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d] [body.light-theme_&]:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[var(--color-text3)]'">
             @if (currentStep > 1) {
-              <img src="assets/images/shared/onboarding_tick.svg" alt="tick" class="h-[15px] w-[15px]">
+              <img src="assets/images/shared/onboarding_tick.svg" alt="" class="h-[15px] w-[15px]">
             } @else {
               1
             }
@@ -24,7 +24,7 @@
         <div class="flex items-center gap-2">
           <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d] [body.light-theme_&]:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[var(--color-text3)]'">
             @if (currentStep > 2) {
-              <img src="assets/images/shared/onboarding_tick.svg" alt="tick" class="h-[15px] w-[15px]">
+              <img src="assets/images/shared/onboarding_tick.svg" alt="" class="h-[15px] w-[15px]">
             } @else {
               2
             }
@@ -72,7 +72,7 @@
                     @for (ioc of onboardingData.iocs; track ioc.ioc_id) {
                       <div>
                         @if (ioc.values.length > 0) {
-                          <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb] [body.light-theme_&]:text-sky-700">{{ ioc.name }}</p>
+                          <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb] [body.light-theme_&]:text-sky-700">{{ ioc.name | translate }}</p>
                           <div class="flex flex-wrap gap-2">
                             @for (value of ioc.values; track value) {
                               <div class="flex cursor-pointer items-center gap-2 rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-1 text-[12px] font-normal text-[var(--color-text1)] hover:bg-[#FCFCFC20] [body.light-theme_&]:bg-[var(--color-tags)] [body.light-theme_&]:hover:bg-[var(--color-blue-810)]">

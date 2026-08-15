@@ -134,6 +134,36 @@ describe('AI Chat - Basic Flow', () => {
     cy.contains(firstByPrefix('ai-chat-session-'), AI_CHAT_RENAMED_TITLE)
       .should('be.visible');
 
+    cy.get(selector('ai-chat-sidebar-collapse'))
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Collapse sidebar')
+      .click();
+
+    cy.get('app-ai-chat-sidebar [data-sidebar-expanded]').should('not.exist');
+    cy.get('app-ai-chat-sidebar [data-sidebar-collapsed]').should('be.visible');
+    cy.get(selector('ai-chat-sidebar-expand'))
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Expand sidebar');
+
+    cy.get(`${firstByPrefix('ai-chat-session-')}[data-selected="true"]`)
+      .should('be.visible');
+
+    cy.get(selector('ai-chat-sidebar-expand')).click();
+
+    cy.get('app-ai-chat-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('app-ai-chat-sidebar [data-sidebar-collapsed]').should('not.exist');
+    cy.get(selector('ai-chat-search-toggle'))
+      .should('be.visible');
+
+    cy.get(selector('ai-chat-search-input'))
+      .should('not.exist');
+
+    cy.get(selector('ai-chat-search-toggle')).click();
+
+    cy.get(selector('ai-chat-search-input'))
+      .should('be.visible')
+      .type(AI_CHAT_RENAMED_TITLE);
+
     cy.get(selector('ai-chat-search-clear'))
       .should('be.visible')
       .click({ force: true });

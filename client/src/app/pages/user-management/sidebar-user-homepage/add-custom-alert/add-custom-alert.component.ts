@@ -9,6 +9,7 @@ import { map } from 'rxjs';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { overlayAnimation, popupAnimation } from '../../../../shared/animations/popup.animations';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-add-custom-alert',
@@ -30,7 +31,7 @@ export class AddCustomAlertComponent implements OnInit {
   readonly editAlertData = input<AlertModel | null>(null);
   readonly cancle = output<boolean>();
 
-  constructor(public appService: AppService, public apiService: ApiService, public router: Router, public route: ActivatedRoute, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService) { }
+  constructor(public appService: AppService, public apiService: ApiService, public router: Router, public route: ActivatedRoute, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService, private translationService: TranslationService) { }
 
   get allowedIocTypes() {
     return this.appService.entities();
@@ -149,7 +150,7 @@ export class AddCustomAlertComponent implements OnInit {
         this.cancleAlert(true);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || 'alert operation failed');
+        this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Alert operation failed'));
       }
     });
   }

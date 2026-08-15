@@ -1,6 +1,6 @@
 <div [class]="isCollapsed ? 'dark-theme flex h-full w-[70px] min-w-[70px] flex-col overflow-hidden bg-[var(--color-blue-900)] px-[7px] py-[8px] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]' : 'dark-theme flex h-full w-[300px] min-w-[300px] flex-col overflow-y-auto bg-[var(--color-blue-900)] p-0 transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]'">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" (toggleClicked)="toggleCollapsed()">
-    <div sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" expandTestId="ai-chat-sidebar-expand" collapseTestId="ai-chat-sidebar-collapse" (toggleClicked)="toggleCollapsed()">
+    <div data-sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
       <div class="flex shrink-0 flex-col bg-[var(--color-blue-820-light)]/95 pt-1 backdrop-blur-sm">
         <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="hasEmptyChat || creatingChat() || clearingChats()" [attr.aria-busy]="creatingChat()" class="ai-new-chat-button mx-2 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-50">
           <span class="min-w-0">
@@ -55,7 +55,7 @@
                 <i class="bi bi-chat-left-text text-[13px]" aria-hidden="true"></i>
               </span>
               <span class="min-w-0 flex-1">
-                <span class="block truncate text-[13px] font-medium leading-[18px]" title="New Chat">{{ 'New Chat' | translate }}</span>
+                <span class="block truncate text-[13px] font-medium leading-[18px]" [title]="'New Chat' | translate">{{ 'New Chat' | translate }}</span>
                 <span class="mt-0.5 flex items-center gap-1.5 text-[10px] leading-[14px] text-[var(--color-text4)]">
                   <span class="h-2.5 w-2.5 shrink-0 animate-spin rounded-full border border-[var(--color-blue-640)]/25 border-t-[var(--color-blue-640)]" aria-hidden="true"></span>
                   <span>{{ 'Creating chat…' | translate }}</span>
@@ -126,7 +126,7 @@
       }
     </div>
 
-    <div sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
+    <div data-sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
       <div class="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="hasEmptyChat || creatingChat() || clearingChats()" [attr.aria-label]="'New Chat' | translate" [attr.aria-busy]="creatingChat()" [appTooltip]="'New Chat' | translate" class="mx-2 flex h-10 w-10 items-center justify-center rounded-[9px] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-640)]/10 hover:text-[var(--color-blue-640)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-50">
           <i class="bi bi-plus-lg" aria-hidden="true"></i>

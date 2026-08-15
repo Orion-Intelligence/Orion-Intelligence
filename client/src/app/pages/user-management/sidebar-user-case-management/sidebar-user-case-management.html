@@ -55,8 +55,8 @@
                 <div class="flex items-center gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-4 py-3">
                     <span class="h-5 w-5 animate-spin rounded-full border-2 border-[var(--tenant-line)] border-t-sky-400"></span>
                     <div>
-                        <p class="mb-0 text-sm font-semibold text-[var(--color-text2)]">Loading cases</p>
-                        <p class="mt-0.5 mb-0 text-xs text-[var(--color-text4)]">Preparing analytics</p>
+                        <p class="mb-0 text-sm font-semibold text-[var(--color-text2)]">{{ 'Loading cases' | translate }}</p>
+                        <p class="mt-0.5 mb-0 text-xs text-[var(--color-text4)]">{{ 'Preparing analytics' | translate }}</p>
                     </div>
                 </div>
             </div>
@@ -132,11 +132,11 @@
                                         </button>
                                         }
                                         <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-view-' + case.caseId">
-                                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon ui-action-icon cursor-pointer" />
+                                            <img src="assets/images/shared/view.svg" width="18" alt="" class="case-action-icon ui-action-icon cursor-pointer" />
                                         </button>
                                         @if (canDeleteCases()) {
                                         <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-delete-' + case.caseId">
-                                            <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
+                                            <img src="assets/images/shared/theme/bin.svg" width="18" alt="" class="case-action-icon cursor-pointer" />
                                         </button>
                                         }
                                     </div>
@@ -177,11 +177,11 @@
                                 </button>
                                 }
                                 <button type="button" (click)="viewCase(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" [attr.aria-label]="'View case' | translate" [attr.data-testid]="'case-mobile-view-' + case.caseId">
-                                    <img src="assets/images/shared/view.svg" width="18" alt="view" class="case-action-icon ui-action-icon cursor-pointer" />
+                                    <img src="assets/images/shared/view.svg" width="18" alt="" class="case-action-icon ui-action-icon cursor-pointer" />
                                 </button>
                                 @if (canDeleteCases()) {
                                 <button type="button" (click)="openDeleteConfirmation(case.caseId)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70" [attr.aria-label]="'Delete case' | translate" [attr.data-testid]="'case-mobile-delete-' + case.caseId">
-                                    <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
+                                    <img src="assets/images/shared/theme/bin.svg" width="18" alt="" class="case-action-icon cursor-pointer" />
                                 </button>
                                 }
                             </div>

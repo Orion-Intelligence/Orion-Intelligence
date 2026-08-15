@@ -1,22 +1,22 @@
 <div [class]="forceDarkLogo() ? 'flex h-full w-full flex-col bg-[#172235]' : 'flex h-full w-full flex-col'">
   @if (isCollapsed()) {
     <div [class]="forceDarkLogo() ? 'flex w-full shrink-0 items-center justify-center bg-[#172235] pt-0 text-[24px] font-medium' : 'flex w-full shrink-0 items-center justify-center pt-0 text-[24px] font-medium'">
-      <button data-testid="graph-sidebar-expand" (click)="toggleClicked.emit(undefined)" aria-label="Expand sidebar" title="Expand sidebar" class="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
-        <img alt="Menu" class="block h-5 w-5 shrink-0 max-w-none object-contain" height="20" src="assets/images/sidebar/menu-mini.svg" width="20" />
+      <button [attr.data-testid]="expandTestId()" (click)="toggleClicked.emit(undefined)" [attr.aria-label]="'Expand sidebar' | translate" [title]="'Expand sidebar' | translate" class="mx-auto flex h-10 w-10 shrink-0 items-center justify-center rounded-[8px] border border-transparent bg-transparent p-0 transition-colors hover:bg-[var(--color-blue-870)]">
+        <img alt="" aria-hidden="true" class="block h-5 w-5 shrink-0 max-w-none object-contain" height="20" src="assets/images/sidebar/menu-mini.svg" width="20" />
       </button>
     </div>
     <div [class]="forceDarkLogo() ? 'mt-1 flex w-full shrink-0 items-center justify-center bg-[#172235] px-2 py-2 text-[24px] font-medium' : 'mt-1 flex w-full shrink-0 items-center justify-center px-2 py-2 text-[24px] font-medium'">
-      <a data-testid="graph-sidebar-mini-logo" [href]="homeHref()" [title]="resolvedLogoAlt" aria-label="Go to homepage" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[8px] transition-colors hover:bg-[var(--color-blue-870)]">
+      <a data-testid="graph-sidebar-mini-logo" [href]="homeHref()" [title]="resolvedLogoAlt" [attr.aria-label]="'Go to homepage' | translate" class="inline-flex min-h-[48px] min-w-[48px] items-center justify-center rounded-[8px] transition-colors hover:bg-[var(--color-blue-870)]">
         <img [alt]="resolvedLogoAlt" class="block h-[30px] w-[30px] shrink-0 max-w-none object-contain" height="30" [src]="miniLogoSrc" width="30" />
       </a>
     </div>
   } @else {
     <div [class]="forceDarkLogo() ? 'mt-[10px] flex w-full shrink-0 items-center justify-between bg-[#172235] px-[20px] py-[10px] text-[24px] font-medium' : 'mt-[10px] flex w-full shrink-0 items-center justify-between px-[20px] py-[10px] text-[24px] font-medium'">
-      <a data-testid="graph-sidebar-logo" [href]="homeHref()" [title]="resolvedLogoAlt" aria-label="Go to homepage" class="inline-flex min-h-[48px] max-w-full items-center pr-[8px]">
+      <a data-testid="graph-sidebar-logo" [href]="homeHref()" [title]="resolvedLogoAlt" [attr.aria-label]="'Go to homepage' | translate" class="inline-flex min-h-[48px] max-w-full items-center pr-[8px]">
         <img [src]="logoSrc" [alt]="resolvedLogoAlt" class="block max-h-[36px] w-auto max-w-full object-contain" height="44" width="246">
       </a>
-      <button data-testid="graph-sidebar-collapse" (click)="toggleClicked.emit(undefined)" aria-label="Collapse sidebar" title="Collapse sidebar" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">
-        <img alt="Collapse sidebar" class="block h-7 w-6 shrink-0 max-w-none object-contain" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
+      <button [attr.data-testid]="collapseTestId()" (click)="toggleClicked.emit(undefined)" [attr.aria-label]="'Collapse sidebar' | translate" [title]="'Collapse sidebar' | translate" class="inline-flex h-[48px] w-[48px] shrink-0 cursor-pointer items-center justify-center rounded-[8px] border-0 bg-transparent p-0">
+        <img alt="" aria-hidden="true" class="block h-7 w-6 shrink-0 max-w-none object-contain" height="28" src="assets/images/sidebar/nav_menu.svg" width="24" />
       </button>
     </div>
   }

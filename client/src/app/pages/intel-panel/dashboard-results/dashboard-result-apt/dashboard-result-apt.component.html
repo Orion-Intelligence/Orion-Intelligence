@@ -10,7 +10,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
         <div class="hidden items-center gap-2 md:flex">
-          <img alt="Records" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <img alt="" aria-hidden="true" src="assets/images/shared/results_found.svg" class="h-5 w-5">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ summary.total }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Records' | translate }}</div>
         </div>
@@ -18,7 +18,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
         <div class="hidden items-center gap-2 lg:flex">
-          <img alt="Actors" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+          <img alt="" aria-hidden="true" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ summary.actorCount }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Actors' | translate }}</div>
         </div>
@@ -26,7 +26,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
         <div class="hidden items-center gap-2 xl:flex">
-          <img alt="Malware" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+          <img alt="" aria-hidden="true" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ summary.malwareCount }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Malware' | translate }}</div>
         </div>
@@ -50,13 +50,13 @@
                   </div>
                   <div class="mt-3 h-6 truncate text-[17px] font-semibold leading-6 text-[var(--color-text1)]" [title]="getTitle(item)">{{ getTitle(item) }}</div>
                   <div class="mt-1 flex h-5 min-w-0 items-center gap-x-2 overflow-hidden text-[12px] text-[var(--color-text4)]">
-                    <span class="shrink-0 max-w-[45%] truncate" [title]="getPrimarySource(item) || 'Unknown source'">{{ getPrimarySource(item) || ('Unknown source' | translate) }}</span>
+                    <span class="shrink-0 max-w-[45%] truncate" [title]="getPrimarySource(item) || ('Unknown source' | translate)">{{ getPrimarySource(item) || ('Unknown source' | translate) }}</span>
                     <span class="shrink-0 text-[var(--color-text5)]">/</span>
                     <span class="min-w-0 flex-1 truncate" [title]="getPrimaryIdentity(item)">{{ getPrimaryIdentity(item) }}</span>
                   </div>
                 </div>
                 <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)]">
-                  <img alt="Open report" src="assets/images/shared/theme/redirect.svg" class="h-4 w-4 ui-action-icon">
+                  <img alt="" aria-hidden="true" src="assets/images/shared/theme/redirect.svg" class="h-4 w-4 ui-action-icon">
                 </span>
               </div>
 
@@ -116,7 +116,7 @@
                 <div class="mt-1 flex h-5 min-w-0 items-center gap-x-2 overflow-hidden text-[12px] text-[var(--color-text4)]">
                   <span class="shrink-0 max-w-[45%] truncate" [title]="getGroupPrimarySource(group)">{{ getGroupPrimarySource(group) }}</span>
                   <span class="shrink-0 text-[var(--color-text5)]">/</span>
-                  <span class="min-w-0 flex-1 truncate" [title]="group.subtitle">{{ group.subtitle | translate }}</span>
+                  <span class="min-w-0 flex-1 truncate" [title]="group.subtitle | translate">{{ group.subtitle | translate }}</span>
                 </div>
               </div>
               <span class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border transition-[background-color,border-color,transform] duration-150 group-hover:-translate-y-[1px]" [ngClass]="isGroupExpanded(group.key) ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-710)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] group-hover:border-[var(--color-blue-640)] group-hover:bg-[var(--color-blue-710)]'">
@@ -173,7 +173,7 @@
     [records]="getSidebarItems()"
     [subtitle]="getSidebarSubtitle()"
     [testId]="'apt-intel-record-sidebar'"
-    [title]="'APT Intel Records'"
+    [title]="'APT Intel Records' | translate"
     (close)="closeRecordSidebar()">
   </app-record-sidebar>
   }

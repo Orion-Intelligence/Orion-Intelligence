@@ -45,13 +45,13 @@
                 <td [attr.data-label]="'General Model Status' | translate">
                   <span class="inline-flex w-full items-center justify-end gap-[6px]">
                     <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.geneic_model_last_update) ? 'bg-[#4caf50] [body.light-theme_&]:bg-emerald-600' : 'bg-[#cbd5e1] [body.light-theme_&]:bg-slate-500'"></span>
-                    <span>{{ isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable' }}</span>
+                    <span>{{ (isRecent(item.geneic_model_last_update) ? 'active' : 'unavailable') | translate }}</span>
                   </span>
                 </td>
                 <td [attr.data-label]="'Leak Model Status' | translate">
                   <span class="inline-flex w-full items-center justify-end gap-[6px]">
                     <span class="inline-block h-[8px] w-[8px] rounded-full" [ngClass]="isRecent(item.leak_model_last_update) ? 'bg-[#4caf50] [body.light-theme_&]:bg-emerald-600' : 'bg-[#cbd5e1] [body.light-theme_&]:bg-slate-500'"></span>
-                    <span>{{ isRecent(item.leak_model_last_update) ? 'active' : 'unavailable' }}</span>
+                    <span>{{ (isRecent(item.leak_model_last_update) ? 'active' : 'unavailable') | translate }}</span>
                   </span>
                 </td>
                 <td class="capitalize" [attr.data-label]="'Network Type' | translate">

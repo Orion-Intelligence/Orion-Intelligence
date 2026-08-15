@@ -1,12 +1,12 @@
 <app-header [forceDark]="!isLightTheme"></app-header>
 
-<img alt="background" src="/assets/images/shared/Bg.webp" class="pointer-events-none fixed inset-0 z-0 h-screen w-screen object-cover object-center opacity-[0.05]">
+<img alt="" aria-hidden="true" src="/assets/images/shared/Bg.webp" class="pointer-events-none fixed inset-0 z-0 h-screen w-screen object-cover object-center opacity-[0.05]">
 
 <div class="relative z-[1] flex min-h-[calc(100dvh-60px)] w-full items-center justify-center p-4 max-[600px]:items-start max-[600px]:justify-center max-[600px]:p-[15px]">
     <div class="box-border mt-[-200px] max-h-[502px] w-[90%] max-w-[1000px] rounded-2xl border border-[#FCFCFC12] bg-[rgb(23_34_53_/_55%)] p-[60px] text-center [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[rgba(255,255,255,0.96)] [body.light-theme_&]:shadow-[0_18px_46px_rgba(15,23,42,0.12)] max-[600px]:mt-0 max-[600px]:w-full max-[600px]:max-w-none max-[600px]:p-[30px_20px]">
-        <img src="/assets/images/shared/welcom_icon.svg" data-testid="welcome-tick" alt="Tick" class="mx-auto mb-6 block max-[600px]:h-[72px] max-[600px]:w-[72px]">
-        <div class="mb-5 text-2xl font-semibold text-white [body.light-theme_&]:text-[var(--color-text1)] max-[600px]:text-lg">{{ heading }}</div>
-        <div class="mb-8 text-lg font-normal leading-[1.6] text-[#A0B8D1] [body.light-theme_&]:text-[var(--color-text4)] max-[600px]:text-base">{{ message }}</div>
+        <img src="/assets/images/shared/welcom_icon.svg" data-testid="welcome-tick" alt="" aria-hidden="true" class="mx-auto mb-6 block max-[600px]:h-[72px] max-[600px]:w-[72px]">
+        <div class="mb-5 text-2xl font-semibold text-white [body.light-theme_&]:text-[var(--color-text1)] max-[600px]:text-lg">{{ heading | translate }}</div>
+        <div class="mb-8 text-lg font-normal leading-[1.6] text-[#A0B8D1] [body.light-theme_&]:text-[var(--color-text4)] max-[600px]:text-base">{{ message | translate }}</div>
         <button data-testid="welcome-goto-login" class="mx-auto block h-11 w-[124px] cursor-pointer rounded-lg border-0 bg-[#57A5EB] text-sm font-medium text-[#373637] shadow-[0_1px_2px_#1018280D] transition-all duration-200 ease-in-out hover:bg-[#4591d4] [body.light-theme_&]:bg-[var(--color-blue-640)] [body.light-theme_&]:text-white [body.light-theme_&]:hover:bg-[var(--color-blue-630)] [body.light-theme_&]:focus-visible:outline [body.light-theme_&]:focus-visible:outline-2 [body.light-theme_&]:focus-visible:outline-offset-2 [body.light-theme_&]:focus-visible:outline-[#2b90ee]" (click)="goToLogin()">{{ 'Go to login' | translate }}</button>
     </div>
 </div>

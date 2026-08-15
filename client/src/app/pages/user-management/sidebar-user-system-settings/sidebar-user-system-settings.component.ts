@@ -9,6 +9,7 @@ import { MessageNotificationService } from '../../../services/message_notificati
 import { SmtpSettingsBlockComponent } from '../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
 import { AlertWebhookSettingsBlockComponent } from '../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 import { ActivatedRoute } from '@angular/router';
 import { LicenseService } from '../../../services/licenses/licenses.service';
@@ -42,7 +43,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   smtpServerPattern = /^(?=.{1,253}$)(localhost|[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?|([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}|(\d{1,3}\.){3}\d{1,3})$/;
 
-  constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
+  constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
   }
 
   ngOnInit(): void {
@@ -187,7 +188,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           }
         },
         error: (err) => {
-          const message = err?.error?.detail || 'Failed to upload image';
+          const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
           this.messageNotificationService.show(message);
         }
       });
@@ -240,7 +241,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           this.mailErrorState = true;
         }
         else {
-          this.configurationError = `${field.label} is required`;
+          this.configurationError = this.translationService.translate(`${field.label} is required`);
         }
         return false;
       }
@@ -256,13 +257,13 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.accounts_smtp_server = this.form.accounts_smtp_server.trim();
     this.form.accounts_smtp_port = this.form.accounts_smtp_port.trim();
     if (section === 'configuration' && this.form.s_onion && !this.onionPattern.test(this.form.s_onion)) {
-      this.messageNotificationService.show('Invalid onion address');
+      this.messageNotificationService.show(this.translationService.translate('Invalid onion address'));
       return false;
     }
     if (section === 'configuration' && ((this.form.data_sources_url && !this.urlPattern.test(this.form.data_sources_url)) ||
       (this.form.adversaries_url && !this.urlPattern.test(this.form.adversaries_url)) ||
       (this.form.pricing_url && !this.urlPattern.test(this.form.pricing_url)))) {
-      this.configurationError = 'Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://';
+      this.configurationError = this.translationService.translate('Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://');
       return false;
     }
     if (section === 'mail' && !this.emailPattern.test(this.form.accounts_mail)) {
@@ -310,7 +311,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           this.mailEditing = true;
         }
         else {
-          this.configurationError = 'Failed to save configuration';
+          this.configurationError = this.translationService.translate('Failed to save configuration');
           this.configurationEditing = true;
         }
       }

@@ -55,12 +55,12 @@
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">
                         <span class="inline-flex rounded-[6px] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">
-                          {{ user.role }}
+                          {{ user.role | translate }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
                         <span class="mr-0 inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
-                          {{ user.status }}
+                          {{ user.status | translate }}
                         </span>
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
@@ -76,11 +76,11 @@
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
                         @if (!canEditUser(user)) {
                           <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'View user' | translate" (click)="toggleExpandedUser(i)">
-                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon cursor-pointer" />
+                            <img src="assets/images/shared/view.svg" width="18" alt="" class="tenant-action-icon cursor-pointer" />
                           </button>
                         } @else {
                           <button id="edit-profile" data-testid="tenant-edit-user-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="('Edit user') | translate" (click)="toggleExpandedUser(i)">
-                            <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
+                            <img src="assets/images/shared/edit.svg" width="18" alt="" class="tenant-action-icon" />
                           </button>
                         }
                       </td>
@@ -102,13 +102,13 @@
                                 </div>
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
-                                  <div class="text-sm capitalize text-[var(--color-text1)]">{{ user.role }}</div>
+                                  <div class="text-sm capitalize text-[var(--color-text1)]">{{ user.role | translate }}</div>
                                 </div>
                                 <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
                                   <div>
                                     <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
-                                      {{ user.status }}
+                                      {{ user.status | translate }}
                                     </span>
                                   </div>
                                 </div>
@@ -250,10 +250,10 @@
                   <div class="flex items-center justify-between px-3 py-2.5">
                     <div class="min-w-0">
                       <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ user.username || '-' }}</div>
-                      <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ user.role }}</div>
+                      <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ user.role | translate }}</div>
                     </div>
                     <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="(canEditUser(user) ? 'Edit user' : 'View user') | translate" (click)="toggleExpandedUser(i)">
-                      <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" [alt]="canEditUser(user) ? 'edit' : 'view'" class="tenant-action-icon" />
+                      <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" alt="" class="tenant-action-icon" />
                     </button>
                   </div>
                   <div class="divide-y divide-[var(--tenant-line)] px-3 py-2.5 text-sm text-[var(--color-text2)]">
@@ -263,7 +263,7 @@
                     </div>
                     <div class="flex items-center justify-between gap-3 py-2">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</span>
-                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">{{ user.status }}</span>
+                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">{{ user.status | translate }}</span>
                     </div>
                     <div class="flex items-center justify-between gap-3 py-2">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Subscription' | translate }}</span>
@@ -300,7 +300,7 @@
                             </div>
                             <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
                               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ user.role }}</div>
+                              <div class="text-sm text-[var(--color-text1)]">{{ user.role | translate }}</div>
                             </div>
                             <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
                               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Permissions' | translate }}</div>

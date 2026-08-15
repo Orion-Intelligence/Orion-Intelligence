@@ -13,6 +13,7 @@ import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../model/ai-workspace-me
 import { BotMessageActionsComponent } from '../bot-message-actions/bot-message-actions.component';
 import { MarkdownPipe } from '../../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-chat-widget',
@@ -52,7 +53,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly type = input('default');
   readonly welcomeMessage = input('Hi there! How can I help you today?');
 
-  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService, private router: Router) { }
+  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService, private router: Router, private readonly translationService: TranslationService) { }
 
   ngOnInit(): void {
     this.activeTempSessionId = this.temporarySessionId();
@@ -182,7 +183,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
           this.cdr.detectChanges();
         }
         if (chunk.error) {
-          reply = chunk.response || chunk.delta || 'Something went wrong. try again.';
+          reply = chunk.response || chunk.delta || this.translationService.translate('Something went wrong. Try again.');
           this.chatMessages = botMessage ? this.chatMessages.filter(message => message.id !== botMessage?.id) : this.chatMessages;
           this.showErrorMessage(userMessage, reply);
           this.scrollToNewMessage();
@@ -220,11 +221,11 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private showErrorMessage(originalMessage: string, errorText = 'Something went wrong. try again.'): void {
+  private showErrorMessage(originalMessage: string, errorText = this.translationService.translate('Something went wrong. Try again.')): void {
     this.chatMessages.push({
       id: crypto.randomUUID(),
       sender: 'error',
-      text: errorText.trim() || 'Something went wrong. try again.',
+      text: errorText.trim() || this.translationService.translate('Something went wrong. Try again.'),
       time: new Date(),
       retryPayload: originalMessage
     });
@@ -247,7 +248,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.chatMessages.push({
       id: crypto.randomUUID(),
       sender: 'error',
-      text: 'Message canceled.',
+      text: this.translationService.translate('Message canceled.'),
       time: new Date()
     });
     this.isBotTyping = false;
@@ -304,7 +305,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       this.chatMessages.push({
         id: crypto.randomUUID(),
         sender: 'error',
-        text: 'Unable to download file. Please try again.',
+        text: this.translationService.translate('Unable to download file. Please try again.'),
         time: new Date()
       });
       this.scrollToNewMessage();
@@ -405,7 +406,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private defaultWelcomeMessage(): string {
-    return this.welcomeMessage().trim() || 'Hi there! How can I help you today?';
+    return this.translationService.translate(this.welcomeMessage().trim() || 'Hi there! How can I help you today?');
   }
 
   private temporarySessionId(): string {

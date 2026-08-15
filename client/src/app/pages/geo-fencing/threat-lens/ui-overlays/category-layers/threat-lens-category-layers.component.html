@@ -11,7 +11,7 @@
       <div class="absolute left-0 right-0 top-[calc(100%+4px)] z-30 max-h-[180px] overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] py-1 shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white [body.light-theme_&]:ring-[#d7e2ef]">
         @for (range of filteredArcRangeOptions; track range.index) {
           <button type="button" (mousedown)="onRangeOptionMouseDown($event, range)" class="block w-full px-3 py-1.5 text-left text-[12px] font-semibold text-[#C4D4E6] transition-colors hover:bg-[rgba(65,86,110,0.64)] hover:text-white" [ngClass]="range.index === selectedArcRangeIndex ? 'bg-[rgba(78,102,130,0.52)] text-white [body.light-theme_&]:!bg-[#e3effc] [body.light-theme_&]:!text-[#0f5fa8]' : '[body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text2)] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]'">
-            {{ range.label }}
+            {{ range.label | translate }}
           </button>
         }
       </div>
@@ -26,7 +26,7 @@
           <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0" [attr.color]="item.colorHex" aria-hidden="true">
             <circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
           </svg>
-          <span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label }}</span>
+          <span class="truncate font-semibold text-[var(--color-text1)]">{{ item.label | translate }}</span>
         </span>
       </div>
     </button>

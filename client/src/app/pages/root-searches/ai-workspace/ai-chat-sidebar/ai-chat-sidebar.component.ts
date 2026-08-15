@@ -55,6 +55,9 @@ export class AiChatSidebarComponent {
   toggleCollapsed(): void {
     this.isCollapsed = !this.isCollapsed;
     this.closeChatMenu();
+    if (this.isCollapsed) {
+      this.closeSearch();
+    }
   }
 
   startNewChat(): void {

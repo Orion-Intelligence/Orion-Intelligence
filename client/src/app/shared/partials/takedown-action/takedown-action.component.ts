@@ -4,11 +4,12 @@ import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { TakedownActionResponse, TakedownActionResult } from '../../model/takedown/takedown.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-takedown-action',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass, TooltipDirective],
+  imports: [CommonModule, FormsModule, NgClass, TooltipDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './takedown-action.component.html'
 })

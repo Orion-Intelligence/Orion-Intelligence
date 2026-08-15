@@ -17,6 +17,7 @@ import { AiChatSession, NexusChatMessage } from './model/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { AiDirectory } from './ai-directory/ai-directory';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
 
@@ -71,7 +72,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   activeSessionId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
-  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef) { }
+  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef, private readonly translationService: TranslationService) { }
 
   ngOnInit(): void {
     const requestedView = this.route.snapshot.queryParamMap.get('view');
@@ -228,7 +229,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         }
         this.activeChatRequest = undefined;
       };
-      const fail = (errorText = 'Something went wrong. Try again.') => {
+      const fail = (errorText = this.translationService.translate('Something went wrong. Try again.')) => {
         if (finished) {
           return;
         }
@@ -244,7 +245,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           return;
         }
         if (!reply.trim()) {
-          fail('Nexus returned no response. Try again.');
+          fail(this.translationService.translate('Nexus returned no response. Try again.'));
           return;
         }
         finished = true;
@@ -268,7 +269,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }
           if (chunk.error) {
-            fail(chunk.response || 'Something went wrong. Try again.');
+            fail(chunk.response || this.translationService.translate('Something went wrong. Try again.'));
             return;
           }
           if (chunk.delta) {
@@ -663,11 +664,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.activeChatRequest = undefined;
   }
 
-  private createErrorMessage(text: string, errorText = 'Something went wrong. Try again.'): AiWorkspaceMessage {
+  private createErrorMessage(text: string, errorText = this.translationService.translate('Something went wrong. Try again.')): AiWorkspaceMessage {
     return {
       id: crypto.randomUUID(),
       sender: 'error',
-      text: errorText.trim() || 'Something went wrong. Try again.',
+      text: errorText.trim() || this.translationService.translate('Something went wrong. Try again.'),
       time: new Date(),
       retryPayload: text,
     };

@@ -18,7 +18,7 @@
 
           </button>
           <button data-testid="auditlog-filter-open" type="button" (click)="openSidebar()" class="inline-flex h-10 items-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-680)] px-3 text-[15px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-750)]">
-            <img alt="Filter Icon" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16" class="ui-filter-icon">
+            <img alt="" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16" class="ui-filter-icon">
             <span class="ml-2">{{ 'Filter' | translate }}</span>
           </button>
           @if (sidebarReady && (isFilterOpen$ | async)) {

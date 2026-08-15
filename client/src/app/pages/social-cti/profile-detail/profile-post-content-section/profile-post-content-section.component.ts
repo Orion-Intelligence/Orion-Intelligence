@@ -7,12 +7,13 @@ import { applyImageFallback } from '../../utils/image-fallback.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
 
 import { ContentModerationBadgeComponent } from '../../../../shared/partials/content-moderation-badge/content-moderation-badge.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-social-profile-post-content-section',
   templateUrl: './profile-post-content-section.component.html',
   standalone: true,
-  imports: [ContentModerationBadgeComponent],
+  imports: [ContentModerationBadgeComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfilePostContentSectionComponent {

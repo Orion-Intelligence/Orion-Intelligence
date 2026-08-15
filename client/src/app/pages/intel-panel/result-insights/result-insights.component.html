@@ -12,7 +12,7 @@
         @for (item of keywordData; track item.label; let i = $index) {
           <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-keyword-item-' + i">
             <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
-            <div class="text-xs text-[var(--color-text4)]">{{ item.label }}</div>
+            <div class="text-xs text-[var(--color-text4)]">{{ item.label | translate }}</div>
           </div>
         }
       </div>
@@ -36,7 +36,7 @@
               @if (item.color) {
                 <span class="h-2.5 w-2.5 rounded-full" [ngClass]="coverageDotClass(item)"></span>
               }
-              {{ item.label }}
+              {{ item.label | translate }}
             </div>
           </div>
         }
@@ -60,13 +60,13 @@
       @if (isSectionExpanded('isThreatExpanded')) {
         <div class="mt-4 space-y-4">
           <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 focus-within:!border-[var(--color-blue-640)] focus-within:shadow-[0_0_0_2px_rgb(43_144_238/14%)]">
-            <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="magnifier" class="h-4 w-4 [.light-theme_&]:brightness-0 [.light-theme_&]:opacity-60">
+            <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="" aria-hidden="true" class="h-4 w-4 [.light-theme_&]:brightness-0 [.light-theme_&]:opacity-60">
             <input type="text" [placeholder]="'common.actions.search' | translate" [(ngModel)]="searchQuery" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" data-testid="insights-threat-search-input" />
           </div>
           <div class="flex flex-wrap gap-2">
             @for (option of filterOptions; track option) {
               <button type="button" class="rounded-full border px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-720)]" [ngClass]="selectedFilter === option ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] border-[var(--color-border)] text-[var(--color-text3)]'" (click)="toggleFilter(option)" [attr.data-testid]="'insights-threat-filter-' + (option | lowercase)">
-                {{ option }}
+                {{ option | translate }}
               </button>
             }
           </div>
@@ -107,7 +107,7 @@
       </div>
       @if (isSectionExpanded('isUrlsExpanded')) {
         <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] mt-3 flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 focus-within:!border-[var(--color-blue-640)] focus-within:shadow-[0_0_0_2px_rgb(43_144_238/14%)]" (click)="$event.stopPropagation()">
-          <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="search" class="h-3.5 w-3.5 ui-action-icon opacity-70">
+          <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="" aria-hidden="true" class="h-3.5 w-3.5 ui-action-icon opacity-70">
           <input type="text" [(ngModel)]="uniqueUrlSearchQuery" [placeholder]="('common.actions.search' | translate) + ' ' + ('Unique URLs' | translate)" class="min-w-0 flex-1 bg-transparent text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text5)] [.light-theme_&]:placeholder:text-[#667b92]" [attr.aria-label]="('common.actions.search' | translate) + ' ' + ('Unique URLs' | translate)">
         </div>
         @if (getFilteredUniqueUrls(); as filteredUrls) {
@@ -141,7 +141,7 @@
         <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_18px_rgba(15,23,42,0.05)]" [attr.data-testid]="'insights-section-' + section.key">
           <div class="flex cursor-pointer items-start justify-between gap-3" (click)="toggleSection(section.key)" [attr.data-testid]="'insights-toggle-' + section.key">
             <div class="min-w-0">
-              <span class="block truncate text-sm font-semibold text-[var(--color-text1)]">{{ section.title }}</span>
+              <span class="block truncate text-sm font-semibold text-[var(--color-text1)]">{{ section.title | translate }}</span>
               <span class="mt-0.5 block truncate text-[11px] text-[var(--color-text4)]">
                 {{ section.data.length }} {{ 'items' | translate }} · {{ section.data[0] }}@if (section.data[1]) { · {{ section.data[1] }} }
               </span>
@@ -152,8 +152,8 @@
           </div>
           @if (isSectionExpanded(section.key)) {
             <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] mt-3 flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 focus-within:!border-[var(--color-blue-640)] focus-within:shadow-[0_0_0_2px_rgb(43_144_238/14%)]" (click)="$event.stopPropagation()">
-              <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="search" class="h-3.5 w-3.5 ui-action-icon opacity-70">
-              <input type="text" [(ngModel)]="sectionSearchQueries[section.key]" [placeholder]="('common.actions.search' | translate) + ' ' + section.title" class="min-w-0 flex-1 bg-transparent text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text5)] [.light-theme_&]:placeholder:text-[#667b92]" [attr.aria-label]="('common.actions.search' | translate) + ' ' + section.title">
+              <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="" aria-hidden="true" class="h-3.5 w-3.5 ui-action-icon opacity-70">
+              <input type="text" [(ngModel)]="sectionSearchQueries[section.key]" [placeholder]="('common.actions.search' | translate) + ' ' + (section.title | translate)" class="min-w-0 flex-1 bg-transparent text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text5)] [.light-theme_&]:placeholder:text-[#667b92]" [attr.aria-label]="('common.actions.search' | translate) + ' ' + (section.title | translate)">
             </div>
             @if (getFilteredSectionData(section); as filteredItems) {
               <div class="relative mt-3 overflow-hidden rounded-md">

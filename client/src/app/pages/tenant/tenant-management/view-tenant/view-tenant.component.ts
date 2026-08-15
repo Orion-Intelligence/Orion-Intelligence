@@ -9,6 +9,7 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { TenantIocSelectorComponent } from '../../../../shared/partials/tenant-ioc-selector/tenant-ioc-selector.component';
@@ -37,7 +38,7 @@ export class ViewTenantComponent implements OnInit {
   iocDraft: IocCategory[] = [];
   tenantToDelete: any | null = null;
 
-  constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService) {
+  constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService, private translationService: TranslationService) {
   }
 
   get tenantLicenseOptions(): UiDropdownOption[] {
@@ -95,13 +96,14 @@ export class ViewTenantComponent implements OnInit {
   }
 
   getStatusLabel(status: TenantStatus): string {
+    this.translationService.version();
     switch (status) {
       case TenantStatusValues.ONBOARDING:
-        return 'Disable';
+        return this.translationService.translate('Disable');
       case TenantStatusValues.ACTIVE:
-        return 'Active';
+        return this.translationService.translate('Active');
       case TenantStatusValues.DISABLE:
-        return 'Disable';
+        return this.translationService.translate('Disable');
       default:
         return '';
     }
@@ -270,7 +272,7 @@ export class ViewTenantComponent implements OnInit {
 
   getTenantLicensesLabel(tenant: any): string {
     if (!tenant.licenses || tenant.licenses.length === 0) {
-      return 'None';
+      return this.translationService.translate('None');
     }
     return tenant.licenses
       .map((l: LicenseName) => this.licenseService.getLicenseLabel(l))

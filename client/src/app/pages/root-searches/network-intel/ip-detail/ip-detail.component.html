@@ -4,7 +4,7 @@
   @if (hasCameraSignals || iotPortCount > 0) {
     <div class="mb-3 flex flex-wrap gap-2">
       @if (hasCameraSignals) {
-        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.16),rgba(43,144,238,0.07))] px-2.5 py-1 text-[11px] font-bold text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:!border-[#a7c9e7] [.light-theme_&]:!bg-[#eaf4fd] [.light-theme_&]:!text-[#376d9b] [.light-theme_&]:!shadow-none">Camera Detected{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
+        <span class="rounded-md border border-sky-400/30 bg-[linear-gradient(135deg,rgba(56,189,248,0.16),rgba(43,144,238,0.07))] px-2.5 py-1 text-[11px] font-bold text-sky-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:!border-[#a7c9e7] [.light-theme_&]:!bg-[#eaf4fd] [.light-theme_&]:!text-[#376d9b] [.light-theme_&]:!shadow-none">{{ 'Camera Detected' | translate }}{{ cameraPortCount > 0 ? ' (' + cameraPortCount + ')' : '' }}</span>
       }
       @if (iotPortCount > 0) {
         <span class="rounded-md border border-emerald-400/30 bg-[linear-gradient(135deg,rgba(52,211,153,0.15),rgba(16,185,129,0.06))] px-2.5 py-1 text-[11px] font-bold text-emerald-300 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] [.light-theme_&]:border-emerald-300 [.light-theme_&]:bg-emerald-50 [.light-theme_&]:text-emerald-700 [.light-theme_&]:shadow-none">{{ 'IoT Ports' | translate }} {{ iotPortCount }}</span>

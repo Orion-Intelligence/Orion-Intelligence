@@ -50,7 +50,7 @@
                             'Relationship' | translate }}</label>
                         <select [(ngModel)]="linkedCase.relationship" name="linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-linked-case-relationship-select">
                             @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
-                            <option [value]="relationship.value">{{ relationship.label }}</option>
+                            <option [value]="relationship.value">{{ relationship.label | translate }}</option>
                             }
                         </select>
                     </div>
@@ -111,7 +111,7 @@
                             'Relationship' | translate }}</label>
                         <select [(ngModel)]="newLinkedCase.relationship" name="new-linked-relationship" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-linked-case-relationship-select">
                             @for (relationship of caseLinkRelationshipOptions; track relationship.value) {
-                            <option [value]="relationship.value">{{ relationship.label }}</option>
+                            <option [value]="relationship.value">{{ relationship.label | translate }}</option>
                             }
                         </select>
                     </div>

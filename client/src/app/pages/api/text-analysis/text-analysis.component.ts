@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgClass } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
@@ -11,6 +11,7 @@ import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widge
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 type TextAnalysisResult = {
   title: string;
@@ -44,6 +45,8 @@ type TextAnalysisResult = {
   templateUrl: './text-analysis.component.html'
 })
 export class TextAnalysisComponent extends ValuePresentationBase implements OnInit {
+  private readonly translationService = inject(TranslationService);
+
   text = '';
   submittedText = '';
   loading = false;
@@ -211,7 +214,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
           this.result = this.normalizeResult(res);
         },
         error: err => {
-          this.errorMessage = err?.error?.detail || err?.message || 'Text analysis failed.';
+          this.errorMessage = err?.error?.detail || err?.message || this.translationService.translate('Text analysis failed.');
         }
       });
   }

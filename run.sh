@@ -144,8 +144,42 @@ disable_maintenance_mode() {
 
 wait_for_test_service() {
     local url="https://127.0.0.1:8443/api/test/ready"
+    local timeout_seconds="${TEST_SERVICE_READY_TIMEOUT:-300}"
+    local deadline
+    local http_status
+    local container_health
+
+    case "$timeout_seconds" in
+        ''|*[!0-9]*)
+            echo "TEST_SERVICE_READY_TIMEOUT must be a non-negative integer, got: $timeout_seconds" >&2
+            return 2
+            ;;
+    esac
+
+    deadline=$((SECONDS + timeout_seconds))
     echo "Waiting for test service to become ready..."
-    until curl -fksS -o /dev/null "$url" >/dev/null 2>&1; do
+
+    while true; do
+        http_status="$(curl -ksS -o /dev/null -w '%{http_code}' --max-time 5 "$url" 2>/dev/null || true)"
+        if [ "$http_status" = "200" ]; then
+            echo "Test service is ready."
+            return 0
+        fi
+
+        container_health="$(docker inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' trusted-web-main 2>/dev/null || true)"
+        if [ "$container_health" = "unhealthy" ] || [ "$container_health" = "exited" ] || [ "$container_health" = "dead" ]; then
+            echo "Test service failed before becoming ready (container: ${container_health}, HTTP: ${http_status:-unreachable})." >&2
+            docker logs --tail 100 trusted-web-main >&2 || true
+            return 1
+        fi
+
+        if [ "$SECONDS" -ge "$deadline" ]; then
+            echo "Timed out after ${timeout_seconds}s waiting for $url (container: ${container_health:-unknown}, HTTP: ${http_status:-unreachable})." >&2
+            docker compose -p "$PROJECT_NAME" -f "$COMPOSE_FILE" ps >&2 || true
+            docker logs --tail 100 trusted-web-main >&2 || true
+            return 1
+        fi
+
         sleep 2
     done
 }

@@ -70,25 +70,25 @@
       <section>
         <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3 [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_3px_12px_rgba(15,23,42,0.055)]" @fadeInDashboardItem>
           <div class="flex items-center gap-2">
-            <img alt="API Type" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+            <img alt="" aria-hidden="true" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
             <div class="text-sm font-semibold capitalize text-[var(--color-text1)]">{{ 'text analysis' | translate }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'API Type' | translate }}</div>
           </div>
           <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
           <div class="hidden items-center gap-2 md:flex">
-            <img alt="iocTypes.m_url" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+            <img alt="" aria-hidden="true" src="assets/images/shared/results_found.svg" class="h-5 w-5">
             <div class="text-sm font-semibold text-[var(--color-text1)]">{{ result.urls_found || 0 }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'iocTypes.m_url' | translate }}</div>
           </div>
           <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
           <div class="hidden min-w-0 items-center gap-2 lg:flex">
-            <img alt="Verdict" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
-            <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ riskLabel }}</div>
+            <img alt="" aria-hidden="true" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+            <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]">{{ riskLabel | translate }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'Verdict' | translate }}</div>
           </div>
           <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
           <div class="hidden items-center gap-2 xl:flex">
-            <img alt="Fields" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+            <img alt="" aria-hidden="true" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
             <div class="text-sm font-semibold text-[var(--color-text1)]">{{ resultEntries.length }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'Fields' | translate }}</div>
           </div>
@@ -105,11 +105,11 @@
             </div>
             <div data-testid="text-analysis-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px] ui-ioc-row-even [.light-theme_&]:!border-b-[#d8e0e9]" [class.credential_row_expand]="expanded" [attr.aria-expanded]="expanded" (click)="toggleExpanded()" (keydown.enter)="toggleExpanded()" (keydown.space)="$event.preventDefault(); toggleExpanded()">
               <div class="font-mono text-xs">1</div>
-              <div class="truncate" [title]="primaryDetectionLabel">{{ primaryDetectionLabel }}</div>
+              <div class="truncate" [title]="primaryDetectionLabel | translate">{{ primaryDetectionLabel | translate }}</div>
               <div class="truncate">{{ resultEntries.length + (urlResults.length * 4) }} {{ 'Fields' | translate }}</div>
               <div class="text-xs capitalize text-[var(--color-text4)] max-[640px]:hidden">{{ 'text analysis' | translate }}</div>
               <button data-testid="text-analysis-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleExpanded()" [attr.aria-label]="(expanded ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expanded">
-                <img class="h-3 w-3 ui-action-icon" [src]="expanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expanded ? 'Collapse row' : 'Expand row'">
+                <img class="h-3 w-3 ui-action-icon" [src]="expanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" alt="" aria-hidden="true">
               </button>
             </div>
             @if (expanded) {
@@ -128,13 +128,13 @@
 	                    <div class="grid grid-cols-1 gap-[12px] lg:grid-cols-[minmax(0,1fr)_minmax(260px,360px)]">
 	                      <div class="min-w-0 rounded-[8px] border px-[14px] py-[12px]" [ngClass]="primaryDetectionClass">
 	                        <div class="text-[10px] font-[800] uppercase tracking-[0.08em] text-[var(--color-text6)]">{{ 'Primary Detection' | translate }}</div>
-	                        <div data-testid="text-analysis-primary-detection" class="mt-[6px] truncate text-[18px] font-[800]" [title]="primaryDetectionLabel">{{ primaryDetectionLabel }}</div>
-	                        <div class="mt-[4px] text-[12px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ detectionTypeLabel }}</div>
+	                        <div data-testid="text-analysis-primary-detection" class="mt-[6px] truncate text-[18px] font-[800]" [title]="primaryDetectionLabel | translate">{{ primaryDetectionLabel | translate }}</div>
+	                        <div class="mt-[4px] text-[12px] font-[700] uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ detectionTypeLabel | translate }}</div>
 	                      </div>
 	                      <div class="grid grid-cols-2 gap-[8px]">
 	                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px] [body.light-theme_&]:border-[#d7e2ee] [body.light-theme_&]:bg-[#f7faff]">
 	                          <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{ 'Spam Label' | translate }}</div>
-	                          <div class="mt-[5px] truncate text-[13px] font-[700] text-[var(--color-text1)]" [title]="spamLabel">{{ spamLabel }}</div>
+	                          <div class="mt-[5px] truncate text-[13px] font-[700] text-[var(--color-text1)]" [title]="spamLabel | translate">{{ spamLabel | translate }}</div>
 	                        </div>
 	                        <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-790)] px-[12px] py-[10px] [body.light-theme_&]:border-[#d7e2ee] [body.light-theme_&]:bg-[#f7faff]">
 	                          <div class="text-[10px] font-[800] uppercase tracking-[0.06em] text-[var(--color-text6)]">{{ 'Confidence' | translate }}</div>

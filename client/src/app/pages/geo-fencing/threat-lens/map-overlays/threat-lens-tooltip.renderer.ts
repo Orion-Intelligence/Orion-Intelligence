@@ -9,6 +9,8 @@ export class ThreatLensTooltipRenderer {
   private tooltipEl: HTMLDivElement | null = null;
   private tooltipPlacement: 'above' | 'below' = 'below';
 
+  constructor(private readonly translate: (key: string) => string = key => key) {}
+
   init(): void {
     if (typeof window === 'undefined' || this.tooltipEl) {
       return;
@@ -30,7 +32,7 @@ export class ThreatLensTooltipRenderer {
       return;
     }
 
-    const ip = typeof attributes['ip'] === 'string' ? attributes['ip'] : 'Unknown IP';
+    const ip = typeof attributes['ip'] === 'string' ? attributes['ip'] : this.translate('Unknown IP');
     const network = typeof attributes['network'] === 'string' ? attributes['network'] : '';
     const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
     const tooltipContent = document.createElement('div');
@@ -38,14 +40,14 @@ export class ThreatLensTooltipRenderer {
 
     const title = document.createElement('div');
     title.className = ThreatLensTooltipRenderer.ARC_TITLE_CLASS;
-    title.textContent = 'Approximate location';
+    title.textContent = this.translate('Approximate location');
 
-    tooltipContent.append(title, this.buildTooltipRow('IP address', ip));
+    tooltipContent.append(title, this.buildTooltipRow(this.translate('IP address'), ip));
     if (network) {
-      tooltipContent.append(this.buildTooltipRow('Network', network));
+      tooltipContent.append(this.buildTooltipRow(this.translate('Network'), network));
     }
     if (accuracyRadius !== undefined) {
-      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKm(accuracyRadius)));
+      tooltipContent.append(this.buildTooltipRow(this.translate('Approx. radius'), this.formatKm(accuracyRadius)));
     }
     this.show(event, tooltipContent);
   }
@@ -66,19 +68,19 @@ export class ThreatLensTooltipRenderer {
 
     const title = document.createElement('div');
     title.className = ThreatLensTooltipRenderer.ARC_TITLE_CLASS;
-    title.textContent = 'Stacked approximate IPs';
+    title.textContent = this.translate('Stacked approximate IPs');
 
     tooltipContent.append(title);
-    tooltipContent.append(this.buildTooltipRow('Why stacked', String(attributes['stackReason'] || 'Same MaxMind coordinate')));
-    tooltipContent.append(this.buildTooltipRow('IP records', String(count || records.length)));
+    tooltipContent.append(this.buildTooltipRow(this.translate('Why stacked'), String(attributes['stackReason'] || this.translate('Same MaxMind coordinate'))));
+    tooltipContent.append(this.buildTooltipRow(this.translate('IP records'), String(count || records.length)));
     if (networkCount > 0) {
-      tooltipContent.append(this.buildTooltipRow('Prefixes', String(networkCount)));
+      tooltipContent.append(this.buildTooltipRow(this.translate('Prefixes'), String(networkCount)));
     }
     if (accuracyMin !== undefined && accuracyMax !== undefined) {
-      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKmRange(accuracyMin, accuracyMax)));
+      tooltipContent.append(this.buildTooltipRow(this.translate('Approx. radius'), this.formatKmRange(accuracyMin, accuracyMax)));
     }
     else if (accuracyRadius !== undefined) {
-      tooltipContent.append(this.buildTooltipRow('Approx. radius', this.formatKm(accuracyRadius)));
+      tooltipContent.append(this.buildTooltipRow(this.translate('Approx. radius'), this.formatKm(accuracyRadius)));
     }
     const sampleIps = records
       .map((record: any) => String(record?.ip || '').trim())
@@ -86,7 +88,7 @@ export class ThreatLensTooltipRenderer {
       .slice(0, 3)
       .join(', ');
     if (sampleIps) {
-      tooltipContent.append(this.buildTooltipRow('Sample', sampleIps));
+      tooltipContent.append(this.buildTooltipRow(this.translate('Sample'), sampleIps));
     }
     this.show(event, tooltipContent);
   }

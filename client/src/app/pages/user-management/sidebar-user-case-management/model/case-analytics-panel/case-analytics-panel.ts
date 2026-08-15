@@ -2,16 +2,20 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS, TASK_STATUS_OPTIONS } from '../case-management.defaults';
 import { Case, CaseChartItem, CaseStatus, CaseType, IntakeSource, Priority, Severity } from '../case.model';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-case-analytics-panel',
-  imports: [CommonModule],
+  imports: [CommonModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-analytics-panel.html'
 })
 export class CaseAnalyticsPanel {
   @Input() cases: Case[] = [];
   @Input() filteredCases: Case[] = [];
+
+  constructor(private translationService: TranslationService) {}
 
   get activeCaseCount(): number {
     return this.filteredCases.filter(caseItem => caseItem.status !== 'resolved' && caseItem.status !== 'closed').length;
@@ -160,13 +164,14 @@ export class CaseAnalyticsPanel {
   }
 
   getUpdatedLabel(caseItem: Case): string {
+    this.translationService.version();
     const days = this.getDaysSince(caseItem.updatedAt || caseItem.createdAt);
 
     if (days <= 0) {
-      return 'Updated today';
+      return this.translationService.translate('Updated today');
     }
 
-    return `Updated ${days}d ago`;
+    return `${this.translationService.translate('Updated')} ${days}${this.translationService.translate('d ago')}`;
   }
 
   private getChartItem(value: CaseStatus, label: string, field: 'status'): CaseChartItem;

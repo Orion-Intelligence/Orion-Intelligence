@@ -9,6 +9,7 @@ import { SidebarUserFeederAddComponent } from './add/sidebar-user-feeder-add.com
 import { SidebarUserFeederViewComponent } from './view/sidebar-user-feeder-view.component';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from './feeder-rule.utils';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../social-cti/constants/social-platform.constants';
 
@@ -32,7 +33,7 @@ export class SidebarUserFeederComponent implements OnInit {
   isCatalogLoading = true;
   formError = '';
 
-  constructor(private feederService: FeederService, private route: ActivatedRoute, private router: Router) {}
+  constructor(private feederService: FeederService, private route: ActivatedRoute, private router: Router, private translationService: TranslationService) {}
 
   ngOnInit(): void {
     this.selectedRuleKey = this.route.snapshot.queryParamMap.get('rule') || '';
@@ -60,17 +61,19 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   get ruleDropdownOptions(): UiDropdownOption[] {
+    this.translationService.version();
     const options = this.rules.filter(rule => !this.isSocialRule(rule)).map(rule => ({
       key: rule.key,
       label: this.getRuleLabel(rule.key),
     }));
     if (this.socialRules.length) {
-      options.push({ key: this.socialRuleGroupKey, label: 'Social Media' });
+      options.push({ key: this.socialRuleGroupKey, label: this.translationService.translate('Social Media') });
     }
     return options;
   }
 
   get socialRuleDropdownOptions(): UiDropdownOption[] {
+    this.translationService.version();
     return this.socialRules.map(rule => ({
       key: rule.key,
       label: this.getRuleLabel(rule.key),
@@ -129,7 +132,7 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   getRuleLabel(ruleKey: string): string {
-    return this.humanizeKey(ruleKey);
+    return this.translationService.translate(this.humanizeKey(ruleKey));
   }
 
   private loadCatalog(): void {
@@ -154,7 +157,7 @@ export class SidebarUserFeederComponent implements OnInit {
           this.formError = '';
         },
         error: (error) => {
-          this.formError = error?.error?.detail || 'Failed to load feeder categories';
+          this.formError = error?.error?.detail || this.translationService.translate('Failed to load feeder categories');
         }
       });
   }

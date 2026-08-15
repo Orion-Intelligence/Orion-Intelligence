@@ -8,8 +8,8 @@
       <div class="flex min-w-0 flex-col">
         <span class="font-[Inter] text-[18px] font-semibold text-[var(--color-text1)]">{{ (isScanMode() ? 'Scan Notifications' : 'Notifications') | translate }}</span>
       </div>
-      <button data-testid="tenant-notification-close" type="button" (click)="close()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
-        <img alt="close" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon" />
+      <button data-testid="tenant-notification-close" type="button" (click)="close()" [attr.aria-label]="'Close notifications' | translate" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]">
+        <img alt="" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon" />
       </button>
     </div>
     <div class="w-[325px] flex-1 overflow-y-auto px-0 py-2 [scrollbar-color:#667085_transparent] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb]:rounded-[12px] [&::-webkit-scrollbar-thumb]:bg-[#667085] [&::-webkit-scrollbar]:w-[6px] max-[420px]:w-[calc(100%-20px)]">
@@ -48,9 +48,9 @@
           @for (n of alertNotifications; track n.hash) {
             <div class="animate-notif-stagger-in my-[10px] rounded-[12px] border border-[var(--color-border)] p-4 transition-colors will-change-[opacity,transform] hover:bg-[var(--color-blue-810)] [body.light-theme_&]:bg-white [body.light-theme_&]:hover:bg-[var(--color-blue-810)]">
               <div class="flex items-center justify-between">
-                <span class="font-[Inter] text-[16px] font-medium text-[var(--color-text1)]">{{ n.categoryName.charAt(0).toUpperCase() + n.categoryName.slice(1) }}</span>
+                <span class="font-[Inter] text-[16px] font-medium text-[var(--color-text1)]">{{ (n.categoryName.charAt(0).toUpperCase() + n.categoryName.slice(1)) | translate }}</span>
                 <span class="rounded-full border border-[var(--color-border)] px-2 py-1 font-[Inter] text-[12px] font-semibold" [ngClass]="{ 'bg-[rgb(255,0,0,0.15)] text-[#ff4d4f] [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700': n.risk.toLowerCase() === 'critical', 'bg-[rgb(255,165,0,0.15)] text-[#f59e0b] [body.light-theme_&]:bg-amber-50 [body.light-theme_&]:text-amber-700': n.risk.toLowerCase() === 'high', 'bg-[rgb(255,215,0,0.15)] text-[#facc15] [body.light-theme_&]:bg-yellow-50 [body.light-theme_&]:text-yellow-700': n.risk.toLowerCase() === 'medium', 'bg-[rgb(0,255,0,0.15)] text-[#4ade80] [body.light-theme_&]:bg-emerald-50 [body.light-theme_&]:text-emerald-700': n.risk.toLowerCase() === 'low' }">
-                  {{ n.risk }} {{ 'categoryAlerts.fields.risk' | translate }}
+                  {{ n.risk | translate }} {{ 'categoryAlerts.fields.risk' | translate }}
                 </span>
               </div>
               <div class="mt-2 font-[Inter] text-[12px] font-normal text-[var(--color-text1)]">
@@ -59,7 +59,7 @@
               </div>
               <div class="mt-2 mb-0 flex w-full items-center justify-between">
                 <div class="flex items-center gap-1 font-[Inter] text-[12px] font-normal text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">
-                  <span>{{ n.subCategory }}</span>
+                  <span>{{ n.subCategory | translate }}</span>
                   <span class="h-1 w-1 rounded-full bg-[#a0b8d1] [body.light-theme_&]:bg-[var(--color-text4)]"></span>
                   <span>{{ timeAgo(n.lastSeen) }}</span>
                 </div>
@@ -82,8 +82,8 @@
             <div data-testid="scan-notification-card" class="my-[10px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-4 transition-colors" [ngClass]="isScanReportAvailable(job) ? 'cursor-pointer hover:bg-[var(--color-blue-810)]' : 'cursor-default opacity-95'" (click)="openScanReport(job)" (keydown.enter)="openScanReport(job)" (keydown.space)="$event.preventDefault(); openScanReport(job)" [attr.role]="isScanReportAvailable(job) ? 'button' : null" [attr.tabindex]="isScanReportAvailable(job) ? 0 : null">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                  <div class="truncate font-[Inter] text-[15px] font-semibold text-[var(--color-text1)]">{{ job.title || 'Scan' }}</div>
-                  <div class="mt-1 truncate text-[12px] text-[var(--color-text4)]">{{ job.target || 'Scan target' }}</div>
+                  <div class="truncate font-[Inter] text-[15px] font-semibold text-[var(--color-text1)]">{{ job.title || ('Scan' | translate) }}</div>
+                  <div class="mt-1 truncate text-[12px] text-[var(--color-text4)]">{{ job.target || ('Scan target' | translate) }}</div>
                 </div>
                 @if (!isScanCompleted(job)) {
                   <span class="shrink-0 rounded-full border border-[var(--color-border)] px-2 py-1 text-[11px] font-semibold" [ngClass]="{ 'bg-[rgba(87,165,235,0.14)] text-[#57a5eb] [body.light-theme_&]:text-sky-700': isScanPending(job), 'bg-amber-500/15 text-amber-300 [body.light-theme_&]:bg-amber-50 [body.light-theme_&]:text-amber-700': isScanPartial(job), 'bg-[rgba(255,77,79,0.14)] text-[#ff4d4f] [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700': isScanFailed(job) }">
@@ -108,7 +108,7 @@
               </div>
 
               <div class="mt-2 flex items-center justify-between gap-2 text-[12px] text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">
-                <span class="min-w-0 truncate">{{ getScanStep(job) }}</span>
+                <span class="min-w-0 truncate">{{ getScanStep(job) | translate }}</span>
                 <span class="shrink-0">{{ getProgress(job) }}%</span>
               </div>
 

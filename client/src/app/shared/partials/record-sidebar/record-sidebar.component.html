@@ -7,12 +7,16 @@
     <div class="flex items-center justify-between gap-3">
       <div class="min-w-0">
         <h2 class="truncate text-base font-bold text-[var(--color-text1)]">{{ title() | translate }}</h2>
-        <p class="mt-1 truncate text-[12px] text-[var(--color-text4)]" [title]="subtitle() || ''">
-          {{ subtitle() || (records().length + ' records') }}
+        <p class="mt-1 truncate text-[12px] text-[var(--color-text4)]" [title]="(subtitle() || '') | translate">
+          @if (subtitle()) {
+            {{ subtitle() | translate }}
+          } @else {
+            {{ records().length }} {{ 'records' | translate }}
+          }
         </p>
       </div>
       <button type="button" (click)="onClose()" class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Close sidebar' | translate">
-        <img alt="close" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon">
+        <img alt="" height="22" src="assets/images/shared/theme/nav-next.svg" width="22" class="ui-action-icon">
       </button>
     </div>
   </div>
@@ -35,7 +39,7 @@
       </div>
 
       <div class="relative mt-4">
-        <img alt="search" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70 [body.light-theme_&]:[filter:var(--ui-icon-filter-light)]">
+        <img alt="" src="assets/images/shared/theme/magnifyingglasswhite.svg" class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 opacity-70 [body.light-theme_&]:[filter:var(--ui-icon-filter-light)]">
         <input data-testid="record-sidebar-local-search" type="search" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" class="h-10 w-full rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] pl-10 pr-3 text-sm text-[var(--color-text1)] outline-none transition placeholder:text-[var(--color-text4)] focus:border-[var(--color-blue-640)]" [placeholder]="'Search records' | translate">
       </div>
     </div>
@@ -69,7 +73,7 @@
                 }
               </div>
               <span class="mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)]">
-                <img alt="open" src="assets/images/shared/theme/redirect.svg" class="h-4 w-4 ui-action-icon">
+                <img alt="" src="assets/images/shared/theme/redirect.svg" class="h-4 w-4 ui-action-icon">
               </span>
             </div>
           </a>

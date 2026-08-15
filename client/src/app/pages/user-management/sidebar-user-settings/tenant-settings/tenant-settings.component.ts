@@ -16,6 +16,7 @@ import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../
 import { SmtpSettingsBlockComponent } from '../../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
 import { SmtpSettingsForm } from '../../../../shared/partials/smtp-settings-block/model/smtp-settings.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-tenant-settings',
@@ -36,7 +37,7 @@ export class TenantSettingsComponent implements OnInit {
   mailForm: SmtpSettingsForm = { accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   webhookForm: AlertWebhookSettingsForm = this.createWebhookForm();
 
-  constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
@@ -165,7 +166,7 @@ export class TenantSettingsComponent implements OnInit {
         }
       },
       error: (err) => {
-        const message = err?.error?.detail || 'Failed to upload image';
+        const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
         this.messageNotificationService.show(message);
       }
     });

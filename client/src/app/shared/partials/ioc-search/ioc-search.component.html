@@ -5,7 +5,7 @@
     @if (isBasicInvalid()) {
       <div data-testid="ioc-basic-error" class="pointer-events-none absolute right-2 top-1/2 inline-flex max-w-[240px] -translate-y-1/2 items-center gap-1 rounded-md bg-red-500/85 px-2 py-[3px] text-[12px] font-semibold text-white max-[900px]:max-w-[160px] max-[640px]:max-w-[28px]">
         <i class="bi bi-exclamation-triangle-fill text-[12px] text-white"></i>
-        <span class="truncate max-[640px]:hidden">{{ getBasicErrorMessage() }}</span>
+        <span class="truncate max-[640px]:hidden">{{ getBasicErrorMessage() | translate }}</span>
       </div>
     }
   </form>
@@ -16,7 +16,7 @@
     <div class="flex flex-nowrap gap-2 overflow-x-auto max-w-full whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden [mask-image:linear-gradient(to_right,black_0%,black_90%,transparent_100%)]">
       @for (tag of basicTags(); track tag) {
         <div [attr.data-testid]="'ioc-basic-tag-' + tag" (click)="selectBasicTag(tag)" [ngClass]="selectedTag === tag ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] [.light-theme_&]:!border-[var(--color-border)] [.light-theme_&]:!bg-[#f9fbff] [.light-theme_&]:!text-[var(--color-text3)] [.light-theme_&]:hover:!border-[var(--color-border)] [.light-theme_&]:hover:!bg-[var(--color-blue-710)] [.light-theme_&]:hover:!text-[var(--color-text1)]'" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors">
-          {{ filterLabels()[tag] }}
+          {{ filterLabels()[tag] | translate }}
         </div>
       }
     </div>
@@ -24,8 +24,8 @@
 
   @if (isAdvanced) {
     <div class="flex flex-col">
-      <span class="text-sm font-semibold text-[var(--color-text1)]">{{ advancedTitle() }}</span>
-      <span class="text-xs text-[var(--color-text4)]">{{ advancedSubtitle() }}</span>
+      <span class="text-sm font-semibold text-[var(--color-text1)]">{{ advancedTitle() | translate }}</span>
+      <span class="text-xs text-[var(--color-text4)]">{{ advancedSubtitle() | translate }}</span>
     </div>
   }
 
@@ -44,7 +44,7 @@
     <div class="h-6 w-px bg-[var(--color-divider)]"></div>
 
     <label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="ui-cred-toolbar-btn inline-flex h-10 cursor-pointer items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-xs font-semibold text-[var(--color-text2)] transition-[background-color,border-color,color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px] [.light-theme_&]:!border-[#c8d9ea] [.light-theme_&]:!bg-[#f7fbff] [.light-theme_&]:!text-[#2f425e] [.light-theme_&]:hover:!border-[#b9cde4] [.light-theme_&]:hover:!bg-[#f1f8ff] [.light-theme_&&]:!border-[var(--color-border)] [.light-theme_&&]:!bg-[#f9fbff] [.light-theme_&&]:!text-[var(--color-text2)] [.light-theme_&&]:!transform-none [.light-theme_&&]:hover:!border-[var(--color-border)] [.light-theme_&&]:hover:!bg-[var(--color-blue-710)] [.light-theme_&&]:hover:!text-[var(--color-text1)] [.light-theme_&&]:hover:!transform-none">
-      <img alt="Filter Icon" height="16" src="assets/images/shared/theme/filter_icon.svg" priority width="16" class="h-4 w-4 shrink-0 ui-action-icon">
+      <img alt="" height="16" src="assets/images/shared/theme/filter_icon.svg" priority width="16" class="h-4 w-4 shrink-0 ui-action-icon">
       <span>{{ 'Filter' | translate }}</span>
     </label>
   </div>
@@ -65,7 +65,7 @@
         <div class="flex min-w-max items-center gap-2 whitespace-nowrap">
           @for (chip of getAdvancedFilterChips(); track chip.id) {
             <span data-testid="ioc-adv-filter-chip" class="inline-flex h-8 max-w-[280px] shrink-0 items-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-760)] px-3 text-xs font-semibold text-[var(--color-text2)] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
-              <span class="truncate">{{ chip.label }}</span>
+              <span class="truncate">{{ chip.label | translate }}</span>
             </span>
           } @empty {
             <div data-testid="ioc-adv-empty-state" class="min-w-[260px] whitespace-normal py-1">
@@ -111,7 +111,7 @@
             </select>
             <select data-testid="ioc-adv-tag-select" [(ngModel)]="filter.tag" class="-ml-px h-10 w-full rounded-none border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 pr-11 text-xs font-semibold text-[var(--color-text1)] outline-none transition-colors focus:border-[var(--color-blue-640)] [.light-theme_&]:!border-[var(--color-border)] [.light-theme_&]:!bg-[#f9fbff] [.light-theme_&]:hover:!border-[var(--color-border)] [.light-theme_&]:hover:!bg-[var(--color-blue-710)]">
               @for (tag of filterLabels() | keyvalue; track tag.key) {
-                <option [value]="tag.key">{{ tag.value }}</option>
+                <option [value]="tag.key">{{ tag.value | translate }}</option>
               }
             </select>
             <input data-testid="ioc-adv-value-input" [(ngModel)]="filter.value" (ngModelChange)="filter.value = stripUrlPrefixes($event)" type="text" [placeholder]="'Enter value...' | translate" class="-ml-px h-10 w-full rounded-none border bg-[var(--color-blue-720)] px-3 text-xs font-medium text-[var(--color-text1)] placeholder:text-[var(--color-text4)] outline-none transition-colors focus:border-[var(--color-blue-640)] [.light-theme_&]:!border-[var(--color-border)] [.light-theme_&]:!bg-[#f9fbff] [.light-theme_&]:hover:!border-[var(--color-border)] [.light-theme_&]:hover:!bg-[var(--color-blue-710)]" [ngClass]="isAdvancedInvalid(filter) ? 'border-[var(--color-border-red)]' : 'border-[var(--color-border)]'" />

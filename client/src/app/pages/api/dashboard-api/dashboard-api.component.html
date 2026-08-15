@@ -9,7 +9,7 @@
         <div class="min-w-0 flex-1">
           <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white transition-[border-color,box-shadow] [body.light-theme_&]:border-[#c7d5e4] [body.light-theme_&]:focus-within:border-[#70aee8] [body.light-theme_&]:focus-within:shadow-[0_0_0_3px_rgba(43,144,238,0.14)]">
             <div class="flex w-[45px] items-center justify-center bg-white">
-              <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20" class="brightness-0 opacity-80">
+              <img alt="" aria-hidden="true" height="20" ngSrc="../../../../assets/images/shared/user1.svg" priority width="20" class="brightness-0 opacity-80">
             </div>
             <input data-testid="scan-primary-input" [(ngModel)]="q1" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" [ngClass]="{ 'w-[150px]': apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'crypto' }" maxlength="150" [name]="apiType === 'user' ? 'username' : (apiType === 'social' ? 'username' : (apiType === 'wanted' ? 'query' : (apiType === 'national-identity' ? 'cnic' : (apiType === 'cracked' ? 'playstore' : (apiType === 'software' ? 'software' : (apiType === 'crypto' ? 'text' : 'q1'))))))" [placeholder]="(apiType === 'user' || apiType === 'crypto' ? (apiType === 'crypto' ? 'Wallet Address / Transaction Hash' : 'Username') : (apiType === 'social' ? 'Username' : (apiType === 'wanted' ? 'Person Name / Alias' : (apiType === 'national-identity' ? 'CNIC / Mobile Number' : (apiType === 'cracked' ? 'Package / Playstore URL' : (apiType === 'software' ? 'Software Name' : 'Query 1')))))) | translate" [type]="apiType === 'cracked' ? 'url' : 'text'" [required]="(apiType === 'crypto' || apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'software') ? true : (apiType === 'email' ? false : !(q2 && q2.trim()))">
             <input type="hidden" value="1">
@@ -25,7 +25,7 @@
           <div class="min-w-0 flex-1">
             <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white transition-[border-color,box-shadow] [body.light-theme_&]:border-[#c7d5e4] [body.light-theme_&]:focus-within:border-[#70aee8] [body.light-theme_&]:focus-within:shadow-[0_0_0_3px_rgba(43,144,238,0.14)]">
               <div class="flex w-[45px] items-center justify-center bg-white">
-                <img alt="Search" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20" class="brightness-0 opacity-80">
+                <img alt="" aria-hidden="true" height="20" ngSrc="../../../../assets/images/shared/email.svg" priority width="20" class="brightness-0 opacity-80">
               </div>
               <input data-testid="scan-secondary-input" [(ngModel)]="q2" autocapitalize="none" autocomplete="off" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-[var(--color-text4)]" email maxlength="150" name="q2" [placeholder]="(apiType === 'user' || apiType === 'social' ? 'Email' : 'Query 2') | translate" type="email" [required]="apiType === 'email' ? true : !(q1 && q1.trim())">
               <input type="hidden" value="1">
@@ -42,7 +42,7 @@
   <div class="ml-0 mt-3">
     <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_3px_12px_rgba(15,23,42,0.055)]">
       <span>
-        <img alt="Info Icon" class="mr-[8px] inline-block" src="assets/images/shared/hint.svg"/>
+        <img alt="" aria-hidden="true" class="mr-[8px] inline-block" src="assets/images/shared/hint.svg"/>
         <span>{{ (apiType === 'user' ? 'Determines whether the specified user has a presence on any (clearnet) platform.' : apiType === 'social' ? 'Determines whether the provided username exists on (clearnet) social platforms.' : apiType === 'wanted' ? 'Searches OpenSanctions wanted/watchlist records for the provided person query.' : apiType === 'national-identity' ? 'Searches national identity records using the provided CNIC or Mobile Number.' : apiType === 'cracked' ? 'Checks for cracked key signals for the provided Play Store URL.' : apiType === 'software' ? 'Checks for cracked mirrors of known softwares.' : apiType === 'crypto' ? 'Determines whether the provided wallet and transaction hash show any signals.' : '') | translate }}</span>
       </span>
     </div>
@@ -88,7 +88,7 @@
       <section>
         <div data-testid="scan-success-badge" class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3" @fadeInDashboardItem>
           <div class="flex items-center gap-2">
-            <img alt="API Type" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+            <img alt="" aria-hidden="true" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
             <div class="text-sm font-semibold capitalize text-[var(--color-text1)]">{{ apiType || 'api' }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'API Type' | translate }}</div>
           </div>
@@ -96,7 +96,7 @@
           <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
           <div class="hidden items-center gap-2 md:flex">
-            <img alt="Results" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+            <img alt="" aria-hidden="true" src="assets/images/shared/results_found.svg" class="h-5 w-5">
             <div class="text-sm font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? ((cryptoResult?.recent_transactions?.length || 0) || 1) : genericItems.length }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'Results' | translate }}</div>
           </div>
@@ -104,7 +104,7 @@
           <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
           <div class="hidden min-w-0 items-center gap-2 lg:flex">
-            <img alt="Query" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+            <img alt="" aria-hidden="true" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
             <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="((displayQ1 || q1) || ('not found' | translate))">{{ ((displayQ1 || q1) || ('not found' | translate)) }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'Query' | translate }}</div>
           </div>
@@ -112,7 +112,7 @@
           <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
           <div class="hidden items-center gap-2 xl:flex">
-            <img alt="Fields" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+            <img alt="" aria-hidden="true" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
             <div class="text-sm font-semibold text-[var(--color-text1)]">{{ apiType === 'crypto' ? getObjectEntries(cryptoResult).length : getGenericTotalFieldCount() }}</div>
             <div class="text-xs text-[var(--color-text4)]">{{ 'Fields' | translate }}</div>
           </div>
@@ -125,7 +125,7 @@
               <div class="h-6 w-px bg-[var(--color-divider)]"></div>
             }
             <button data-testid="scan-download-report" type="button" [appTooltip]="'Download report' | translate" (click)="openExportChoice()" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text2)] transition-[background-color,border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] hover:-translate-y-[1px]">
-              <img src="assets/images/shared/theme/download.svg" alt="common.actions.download" class="h-4 w-4 ui-action-icon" />
+              <img src="assets/images/shared/theme/download.svg" alt="" aria-hidden="true" class="h-4 w-4 ui-action-icon" />
             </button>
           </div>
         </div>
@@ -307,7 +307,7 @@
                     </div>
                     <div class="truncate" [title]="r?.status || ('not available' | translate)">{{ r?.status || ('not available' | translate) }}</div>
                     <button data-testid="ioc-threat-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleCryptoSummary()" [attr.aria-label]="(cryptoSummaryExpanded ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="cryptoSummaryExpanded">
-                      <img class="h-3 w-3 ui-action-icon" [src]="cryptoSummaryExpanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="cryptoSummaryExpanded ? 'Collapse row' : 'Expand row'">
+                      <img class="h-3 w-3 ui-action-icon" [src]="cryptoSummaryExpanded ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" alt="" aria-hidden="true">
                     </button>
                   </div>
                   @if (cryptoSummaryExpanded) {
@@ -382,13 +382,13 @@
                 @for (item of genericItems; track trackByIndex($index); let idx = $index) {
                   <div data-testid="ioc-threat-row" role="row" tabindex="0" class="ui-ioc-table-row grid min-w-[680px] cursor-pointer grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] px-4 py-3 text-sm text-[var(--color-text1)] transition-colors max-[900px]:grid-cols-[60px_1fr_120px_48px] [.light-theme_&]:!border-b-[#d8e0e9]" [class.ui-ioc-row-even]="idx % 2 === 0" [class.ui-ioc-row-odd]="idx % 2 !== 0" [class.credential_row_expand]="expandedResultIndex === idx" [attr.aria-expanded]="expandedResultIndex === idx" (click)="toggleResultItem(idx)" (keydown.enter)="toggleResultItem(idx)" (keydown.space)="$event.preventDefault(); toggleResultItem(idx)">
                     <div class="font-mono text-xs">{{ idx + 1 }}</div>
-                    <div class="truncate" [title]="item?.m_title || item?.m_app_name || item?.title || ('Result ' + (idx + 1))">
-                      {{ item?.m_title || item?.m_app_name || item?.title || ('Result ' + (idx + 1)) }}
+                    <div class="truncate" [title]="item?.m_title || item?.m_app_name || item?.title || (('Result' | translate) + ' ' + (idx + 1))">
+                      {{ item?.m_title || item?.m_app_name || item?.title || (('Result' | translate) + ' ' + (idx + 1)) }}
                     </div>
-                    <div class="truncate" [title]="getVisibleObjectEntries(item).length + ' Fields'">{{ getVisibleObjectEntries(item).length }} {{ 'Fields' | translate }}</div>
+                    <div class="truncate" [title]="getVisibleObjectEntries(item).length + ' ' + ('Fields' | translate)">{{ getVisibleObjectEntries(item).length }} {{ 'Fields' | translate }}</div>
                     <div class="text-xs capitalize text-[var(--color-text4)] max-[640px]:hidden">{{ apiType || 'api' }}</div>
                     <button data-testid="ioc-threat-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expandedResultIndex === idx">
-                      <img class="h-3 w-3 ui-action-icon" [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'">
+                      <img class="h-3 w-3 ui-action-icon" [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" alt="" aria-hidden="true">
                     </button>
                   </div>
                   @if (expandedResultIndex === idx) {

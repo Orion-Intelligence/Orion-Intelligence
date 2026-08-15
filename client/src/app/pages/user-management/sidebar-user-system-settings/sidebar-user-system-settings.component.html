@@ -52,7 +52,7 @@
             <div class="flex items-center gap-2">
               @if (!configurationEditing) {
                 <button data-testid="system-settings-edit" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Edit configuration' | translate" (click)="toggleConfigurationEdit()">
-                  <img src="assets/images/shared/edit.svg" width="16" alt="edit" class="ui-action-icon" />
+                  <img src="assets/images/shared/edit.svg" width="16" alt="" class="ui-action-icon" />
                 </button>
               }
               @if (configurationEditing) {
@@ -76,7 +76,7 @@
               <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
                 {{ 'App Name' | translate }}
                 @if (configurationEditing) {
-                  <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="ui-action-icon opacity-70" />
+                  <img src="assets/images/shared/edit.svg" width="11" alt="" class="ui-action-icon opacity-70" />
                 }
               </label>
               <input data-testid="system-settings-app-name" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.app_name" [disabled]="!configurationEditing" />
@@ -86,12 +86,12 @@
               <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
                 {{ 'Language' | translate }}
                 @if (configurationEditing) {
-                  <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="ui-action-icon opacity-70" />
+                  <img src="assets/images/shared/edit.svg" width="11" alt="" class="ui-action-icon opacity-70" />
                 }
               </label>
               <select class="h-10 w-full appearance-none rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] pl-3 pr-11 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-70" [(ngModel)]="form.language" [disabled]="!configurationEditing">
                 @for (lang of languageOptions; track lang.code) {
-                  <option [value]="lang.code">{{ lang.name }} ({{ lang.code.toUpperCase() }})</option>
+                  <option [value]="lang.code">{{ lang.name | translate }} ({{ lang.code.toUpperCase() }})</option>
                 }
               </select>
             </div>
@@ -100,7 +100,7 @@
               <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
                 {{ 'Onion Address' | translate }}
                 @if (configurationEditing) {
-                  <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="ui-action-icon opacity-70" />
+                  <img src="assets/images/shared/edit.svg" width="11" alt="" class="ui-action-icon opacity-70" />
                 }
               </label>
               <input data-testid="system-settings-onion-address" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.s_onion" [disabled]="!configurationEditing" [placeholder]="'Enter onion site' | translate" />
@@ -110,7 +110,7 @@
               <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
                 {{ 'Data Sources URL' | translate }}
                 @if (configurationEditing) {
-                  <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="ui-action-icon opacity-70" />
+                  <img src="assets/images/shared/edit.svg" width="11" alt="" class="ui-action-icon opacity-70" />
                 }
               </label>
               <input data-testid="system-settings-data-sources-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.data_sources_url" [disabled]="!configurationEditing" [placeholder]="'Data Sources' | translate" />
@@ -120,7 +120,7 @@
               <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
                 {{ 'Adversaries URL' | translate }}
                 @if (configurationEditing) {
-                  <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="ui-action-icon opacity-70" />
+                  <img src="assets/images/shared/edit.svg" width="11" alt="" class="ui-action-icon opacity-70" />
                 }
               </label>
               <input data-testid="system-settings-adversaries-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.adversaries_url" [disabled]="!configurationEditing" [placeholder]="'Adversaries' | translate" />
@@ -130,7 +130,7 @@
               <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
                 {{ 'Pricing URL' | translate }}
                 @if (configurationEditing) {
-                  <img src="assets/images/shared/edit.svg" width="11" alt="editable" class="ui-action-icon opacity-70" />
+                  <img src="assets/images/shared/edit.svg" width="11" alt="" class="ui-action-icon opacity-70" />
                 }
               </label>
               <input data-testid="system-settings-pricing-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-80" type="text" [(ngModel)]="form.pricing_url" [disabled]="!configurationEditing" [placeholder]="'Pricing' | translate" />

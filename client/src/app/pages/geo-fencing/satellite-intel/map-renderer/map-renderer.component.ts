@@ -9,6 +9,7 @@ import { CountryBoundaryMapRenderer } from '../map-overlays/country-boundary-map
 import { SearchLocationMapRenderer } from '../map-overlays/search-location-map-renderer';
 import { Observable, Subscription } from 'rxjs';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector:    'app-satellite-map-renderer',
@@ -61,7 +62,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<void>();
 
-  constructor(private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private aircraftTrackingService: SatelliteAircraftTrackingService, private shipTrackingService: SatelliteShipTrackingService, private cd: ChangeDetectorRef, private ngZone: NgZone) {}
+  constructor(private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private aircraftTrackingService: SatelliteAircraftTrackingService, private shipTrackingService: SatelliteShipTrackingService, private cd: ChangeDetectorRef, private ngZone: NgZone, private translationService: TranslationService) {}
 
   openSidebarLoading(type: TrackingEntityType, id: string, seedData: any): number {
     const token = ++this.sidebarRequestToken;
@@ -470,7 +471,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     }
     const center = this.leafletMap.getCenter();
     const zoom = this.leafletMap.getZoom();
-    this.zoomLabelElement.nativeElement.textContent = `zoom ${zoom.toFixed(1)}  ·  ${center.lat.toFixed(4)}°N  ${center.lng.toFixed(4)}°E`;
+    this.zoomLabelElement.nativeElement.textContent = `${this.translationService.translate('Zoom')} ${zoom.toFixed(1)}  ·  ${center.lat.toFixed(4)}°N  ${center.lng.toFixed(4)}°E`;
   }
 
   private scheduleViewportEmit(): void {

@@ -3,8 +3,8 @@
     <section role="dialog" aria-modal="true" aria-labelledby="share-response-dialog-title" class="ui-graph-popup-panel [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] origin-top [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] w-full max-w-[540px] overflow-hidden rounded-xl border border-[var(--color-border)] shadow-[0_30px_80px_rgba(2,6,23,0.65)]" (click)="$event.stopPropagation()">
       <div class="flex items-center justify-between gap-4 border-b border-[var(--color-border)] px-5 py-4">
         <div class="min-w-0">
-          <h3 id="share-response-dialog-title" class="!text-[var(--color-text1)] text-[16px] font-semibold">{{ title }}</h3>
-          <p class="mt-0.5 text-[12px] leading-5 text-[var(--color-text4)]">{{ description }}</p>
+          <h3 id="share-response-dialog-title" class="!text-[var(--color-text1)] text-[16px] font-semibold">{{ title | translate }}</h3>
+          <p class="mt-0.5 text-[12px] leading-5 text-[var(--color-text4)]">{{ description | translate }}</p>
         </div>
         <button type="button" (click)="close()" [appTooltip]="'common.actions.close' | translate" class="ui-popup-close inline-flex items-center justify-center p-0 leading-none text-[#ccc] [width:var(--ui-popup-close-width,42px)] [height:var(--ui-popup-close-height,42px)] [border-radius:var(--ui-popup-close-radius,8px)] [font-size:var(--ui-popup-close-font-size,28px)] [transition-property:color,background-color] [transition-duration:var(--ui-popup-close-duration,180ms)] [transition-timing-function:ease] hover:[&&]:!bg-[var(--color-blue-700)] hover:[&&]:!text-[var(--color-blue-640)] [.light-theme_&]:!text-[#667085] [.light-theme_&]:hover:!bg-[#eef5ff] [.light-theme_&]:hover:!text-[#1f2e47] inline-flex [--ui-popup-close-height:36px] [--ui-popup-close-width:36px] shrink-0 items-center justify-center [--ui-popup-close-font-size:18px]" [attr.aria-label]="'common.actions.close' | translate">
           <i class="bi bi-x-lg"></i>
@@ -43,9 +43,9 @@
             }
 
             @for (destination of destinations; track destination.target) {
-              <a [href]="shareUrl(destination.target)" [attr.target]="destination.target === 'email' ? null : '_blank'" [attr.rel]="destination.target === 'email' ? null : 'noopener noreferrer'" [attr.aria-label]="('Share via' | translate) + ' ' + destination.label" (click)="close()" class="group flex min-w-0 flex-col items-center gap-1.5 rounded-lg px-2 py-2.5 text-center transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45 [body.light-theme_&]:hover:bg-[#eaf3ff]">
+              <a [href]="shareUrl(destination.target)" [attr.target]="destination.target === 'email' ? null : '_blank'" [attr.rel]="destination.target === 'email' ? null : 'noopener noreferrer'" [attr.aria-label]="('Share via' | translate) + ' ' + (destination.label | translate)" (click)="close()" class="group flex min-w-0 flex-col items-center gap-1.5 rounded-lg px-2 py-2.5 text-center transition-colors hover:bg-white/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#57A5EB]/45 [body.light-theme_&]:hover:bg-[#eaf3ff]">
                 <i [class]="'bi text-[19px] leading-none transition-colors ' + destination.iconClass" [ngClass]="destination.icon" aria-hidden="true"></i>
-                <span class="w-full truncate text-[10px] font-medium text-[var(--color-text4)] group-hover:text-[var(--color-text2)]">{{ destination.label }}</span>
+                <span class="w-full truncate text-[10px] font-medium text-[var(--color-text4)] group-hover:text-[var(--color-text2)]">{{ destination.label | translate }}</span>
               </a>
             }
           </div>

@@ -8,6 +8,7 @@ import { ApiService } from '../../../../../shared/services/api.service';
 import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { AlertModel, AlertSummary } from '../../../../../shared/model/company-profile/node.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { buildStandardExportOptions } from '../../../../../shared/model/report/export-choice.model';
 import { AlertExportService } from '../../../../../shared/partials/alert-notification/services/alert-export.service';
@@ -33,7 +34,7 @@ export class AdminTenantAlerts implements OnInit {
   selectedExportGroup: AdminTenantAlertGroup | null = null;
   readonly tenantAlertExportOptions = buildStandardExportOptions('case-admin-alert-tenant-export-option', 'report', 'Download all alerts for this tenant.');
 
-  constructor(private apiService: ApiService, private sidebarHomepageService: SidebarHomepageService, private licenseService: LicenseService, private router: Router, private alertExportService: AlertExportService, private messageNotificationService: MessageNotificationService) { }
+  constructor(private apiService: ApiService, private sidebarHomepageService: SidebarHomepageService, private licenseService: LicenseService, private router: Router, private alertExportService: AlertExportService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
     if (this.licenseService.canViewTenantAlerts()) {
@@ -69,8 +70,9 @@ export class AdminTenantAlerts implements OnInit {
   }
 
   get tenantDropdownOptions(): UiDropdownOption[] {
+    this.translationService.version();
     return [
-      { key: ALL_TENANTS_OPTION, label: 'All' },
+      { key: ALL_TENANTS_OPTION, label: this.translationService.translate('All') },
       ...this.tenantAlertGroups
         .filter(group => !!group.tenant.id)
         .map(group => ({
@@ -197,7 +199,7 @@ export class AdminTenantAlerts implements OnInit {
       },
       error: (err) => {
         this.isExportingTenantAlerts = false;
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to download tenant alerts');
+        this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to download tenant alerts'));
       }
     });
   }

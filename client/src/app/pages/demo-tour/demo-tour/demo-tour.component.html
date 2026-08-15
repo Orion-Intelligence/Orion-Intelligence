@@ -40,7 +40,7 @@
                 {{ 'Step' | translate }} {{ currentIndex + 1 }} / {{ totalSteps }}
               </div>
               <h3 class="text-lg font-semibold leading-tight text-white [.light-theme_&]:text-[var(--color-text1)]">
-                {{ step?.title }}
+                {{ step?.title | translate }}
               </h3>
             </div>
           </div>
@@ -70,7 +70,7 @@
         <div class="tour-state-layer tour-state-layer-ready pointer-events-none col-start-1 row-start-1 opacity-0 [transform:translate3d(0,6px,0)] [transition:opacity_220ms_ease-out,transform_220ms_ease-out,filter_220ms_ease-out] [transition-delay:70ms] [will-change:opacity,transform] [&.is-active]:pointer-events-auto [&.is-active]:!opacity-100 [&.is-active]:![transform:translate3d(0,0,0)] [&:not(.is-active)]:![transition-delay:0ms]" [class.is-active]="stepReady">
           <div>
             <p class="text-sm leading-6 text-[var(--color-text2)]">
-              {{ step?.description }}
+              {{ step?.description | translate }}
             </p>
           </div>
         </div>

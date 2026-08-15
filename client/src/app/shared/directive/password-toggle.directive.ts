@@ -1,4 +1,5 @@
 import { AfterViewInit, Directive, DoCheck, ElementRef, inject, Input, OnDestroy, Renderer2 } from '@angular/core';
+import { TranslationService } from '../services/translation.service';
 
 @Directive({
   selector: 'input[appPasswordToggle]',
@@ -7,6 +8,7 @@ import { AfterViewInit, Directive, DoCheck, ElementRef, inject, Input, OnDestroy
 export class PasswordToggleDirective implements AfterViewInit, DoCheck, OnDestroy {
   private readonly inputElementRef = inject(ElementRef) as ElementRef<HTMLInputElement>;
   private readonly renderer = inject(Renderer2);
+  private readonly translationService = inject(TranslationService);
   private buttonElement?: HTMLButtonElement;
   private iconElement?: SVGSVGElement;
   private parentElement?: HTMLElement;
@@ -136,7 +138,7 @@ export class PasswordToggleDirective implements AfterViewInit, DoCheck, OnDestro
     if (!this.buttonElement || !this.iconElement) {
       return;
     }
-    this.renderer.setAttribute(this.buttonElement, 'aria-label', this.isVisible ? 'Hide password' : 'Show password');
+    this.renderer.setAttribute(this.buttonElement, 'aria-label', this.translationService.translate(this.isVisible ? 'Hide password' : 'Show password'));
     this.renderer.setProperty(this.iconElement, 'innerHTML', this.isVisible ? this.eyeSlashMarkup : this.eyeMarkup);
   }
 

@@ -32,11 +32,11 @@
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-divider)] px-4 py-3">
           <div class="text-[14px] font-semibold text-[var(--color-text1)]">{{ 'Entries' | translate }}</div>
           <div class="flex items-center gap-2 text-[12px] text-[var(--color-text4)]">
-            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page <= 1 || loading" (click)="previousPage()" aria-label="Previous page">
+            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page <= 1 || loading" (click)="previousPage()" [attr.aria-label]="'Previous page' | translate">
               <i class="bi bi-chevron-left text-[11px]"></i>
             </button>
             <span>{{ page }} / {{ response.page_count || 1 }}</span>
-            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page >= response.page_count || loading" (click)="nextPage()" aria-label="Next page">
+            <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text1)] disabled:opacity-40" [disabled]="page >= response.page_count || loading" (click)="nextPage()" [attr.aria-label]="'Next page' | translate">
               <i class="bi bi-chevron-right text-[11px]"></i>
             </button>
           </div>

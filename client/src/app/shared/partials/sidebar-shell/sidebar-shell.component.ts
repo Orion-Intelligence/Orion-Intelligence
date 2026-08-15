@@ -1,10 +1,11 @@
 import { Component, ChangeDetectionStrategy, input, output, inject } from '@angular/core';
 import { AppService } from '../../../services/core/app/app.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-graph-sidebar-shell',
   standalone: true,
-  imports: [],
+  imports: [TranslatePipe],
   templateUrl: './sidebar-shell.component.html',
   host: {
     class: 'block h-full w-full min-h-0',
@@ -18,6 +19,8 @@ export class SidebarShellComponent {
   forceDarkLogo = input(false);
   logoAlt = input('Orion Intelligence');
   homeHref = input('/');
+  expandTestId = input('graph-sidebar-expand');
+  collapseTestId = input('graph-sidebar-collapse');
   toggleClicked = output<undefined>();
 
   get logoSrc(): string {

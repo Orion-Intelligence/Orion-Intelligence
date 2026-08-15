@@ -15,7 +15,7 @@
             <p class="mb-0 mt-2 whitespace-pre-line text-[13px] leading-6 text-[var(--color-text4)]" [ngClass]="isDetailDescriptionExpanded(selectedDetailAlert) ? '' : 'max-h-24 overflow-hidden'">{{ selectedDetailAlert.description }}</p>
             @if (shouldShowDescriptionToggle(selectedDetailAlert.description)) {
               <button type="button" class="mt-2 inline-flex border-0 bg-transparent p-0 text-[12px] font-bold text-[var(--color-text1)] transition hover:text-[var(--color-text2)]" (click)="toggleDetailDescription(selectedDetailAlert)">
-                {{ isDetailDescriptionExpanded(selectedDetailAlert) ? 'Show less' : 'Load more' }}
+                {{ (isDetailDescriptionExpanded(selectedDetailAlert) ? 'Show less' : 'Load more') | translate }}
               </button>
             }
           </div>
@@ -47,12 +47,12 @@
               <div class="mt-1 break-all text-[13px] font-medium text-[var(--color-text1)]">{{ selectedDetailAlert.entity }}</div>
             </div>
             <div>
-              <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">Result Date</div>
+              <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">{{ 'Result Date' | translate }}</div>
               <div class="mt-1 text-[13px] font-medium text-[var(--color-text1)]">{{ getAlertCardDate(selectedDetailAlert) | date:'MM/dd/yyyy' }}</div>
             </div>
             @if (selectedDetailAlert.contentTypes.length) {
               <div class="sm:col-span-2">
-                <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">Content Type</div>
+                <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">{{ 'Content Type' | translate }}</div>
                 <div class="mt-2 flex flex-wrap gap-2">
                   @for (contentType of selectedDetailAlert.contentTypes; track contentType) {
                     <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">{{ contentType }}</span>
@@ -62,7 +62,7 @@
             }
             @if (selectedDetailAlert.password) {
               <div class="sm:col-span-2">
-                <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">Password</div>
+                <div class="text-[11px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">{{ 'Password' | translate }}</div>
                 <div class="mt-1 break-all text-[13px] font-medium text-[var(--color-text1)]">{{ selectedDetailAlert.password }}</div>
               </div>
             }
@@ -72,12 +72,12 @@
           <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-900)] [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f8fbff]">
             @for (row of getRawFindingRows(selectedDetailAlert.rawFindings); track $index) {
               <div class="border-b border-[var(--color-divider)] px-3 py-3 last:border-b-0">
-                <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ row.label }}</div>
+                <div class="mb-2 text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ row.label | translate }}</div>
                 <div class="min-w-0 text-[13px] leading-5 text-[var(--color-text2)]">
                   @for (block of getRawFindingValueBlocks(row); track $index; let blockIndex = $index) {
                     <div [ngClass]="(row.valueBlocks?.length || 0) > 1 ? (blockIndex === 0 ? 'rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]' : 'mt-3 rounded-[6px] border border-[#22304a] bg-[#111d31] p-3 [body.light-theme_&]:border-[#c2cfdd] [body.light-theme_&]:bg-[#f4f8fc]') : (blockIndex === 0 ? '' : 'mt-3 border-t border-[#22304a] pt-3 [body.light-theme_&]:border-[#c2cfdd]')">
                       @if ((row.valueBlocks?.length || 0) > 1) {
-                        <div class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--color-text3)] [body.light-theme_&]:text-[#50657a]">Section {{ blockIndex + 1 }}</div>
+                        <div class="mb-2 text-[11px] font-bold uppercase tracking-[0.06em] text-[var(--color-text3)] [body.light-theme_&]:text-[#50657a]">{{ 'Section' | translate }} {{ blockIndex + 1 }}</div>
                       }
                       <div class="whitespace-pre-wrap break-words" [ngClass]="(row.valueBlocks?.length || 0) > 1 ? 'opacity-80' : ''">{{ block }}</div>
                     </div>

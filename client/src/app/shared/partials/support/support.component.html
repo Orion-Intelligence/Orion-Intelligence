@@ -47,7 +47,7 @@
     <div class="[&&]:!border-t [&&]:!border-t-[var(--color-border)] flex items-center justify-end gap-2 px-5 py-4">
       @if (errorMessage) {
         <div class="mr-auto text-xs text-rose-500 [body.light-theme_&]:text-rose-700">
-          {{ errorMessage }}
+          {{ errorMessage | translate }}
         </div>
       }
       <button data-testid="support-cancel" type="button" (click)="close()" class="ui-popup-btn-secondary border [&&]:!border-[#4a5f77] [&&]:!bg-transparent [&&]:!text-[#e1e8f0] [&&]:!px-[14px] [&&]:!py-[6px] [&&]:!h-auto [&&]:!min-w-0 [border-radius:var(--ui-popup-button-radius,6px)] [font-size:var(--ui-popup-button-font-size,13px)] [font-weight:var(--ui-popup-button-font-weight,500)] [transition-property:var(--ui-popup-button-transition,background-color,border-color)] [transition-duration:var(--ui-popup-button-duration,180ms)] [transition-timing-function:ease] hover:[&&&]:!border-[#5a7594] hover:[&&&]:!bg-[rgb(74_95_119/10%)] [--ui-popup-button-font-size:14px] [.light-theme_&&]:!border-[#c7d5e6] [.light-theme_&&]:!bg-transparent [.light-theme_&&]:!text-[#1f2e47] [.light-theme_&&]:hover:!border-[#aac0da] [.light-theme_&&]:hover:!bg-[#eef5ff]">

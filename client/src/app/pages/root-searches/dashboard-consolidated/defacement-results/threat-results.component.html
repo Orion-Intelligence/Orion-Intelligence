@@ -14,22 +14,22 @@
       @if (results_defacement()?.Result?.length && (threatTypeCounts | keyvalue).length > 0) {
         @for (type of threatTypeCounts | keyvalue; track type.key) {
           <div data-testid="defacement-report-chip" class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] pl-[12px] pr-[9px] text-[11px] font-medium text-[var(--color-text5)] [.light-theme_&]:text-[#285f89] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick(type.key, $event)">
-            {{ type.key }} ({{ type.value >= 100 ? '100+' : type.value }})
-            <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
+            {{ type.key | translate }} ({{ type.value >= 100 ? '100+' : type.value }})
+            <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="" aria-hidden="true" class="h-[9px] w-[9px] shrink-0 opacity-95">
           </div>
         }
       }
 
       @if (results_stealerlog()?.Result?.length; as slCount) {
         <div class="flex h-[28px] cursor-pointer items-center justify-center gap-[6px] rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] pl-[12px] pr-[9px] text-[11px] font-medium text-[var(--color-text5)] [.light-theme_&]:text-[#285f89] transition-[background,border-color,transform,filter] duration-200 hover:bg-[var(--color-blue-820)] hover:border-[var(--color-blue-640)] hover:translate-y-[-1px] hover:brightness-[1.02]" (click)="onFilterTypeClick('stealerlog', $event)">
-          stealerlog ({{ slCount >= 100 ? '100+' : slCount }})
-          <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="icon" class="h-[9px] w-[9px] shrink-0 opacity-95">
+          {{ 'stealerlog' | translate }} ({{ slCount >= 100 ? '100+' : slCount }})
+          <img [src]="isLightTheme() ? 'assets/images/shared/theme/magnifyingglassblack.svg' : 'assets/images/shared/theme/magnifyingglasswhite.svg'" alt="" aria-hidden="true" class="h-[9px] w-[9px] shrink-0 opacity-95">
         </div>
       }
       </div>
 
       <div data-testid="defacement-report-toggle" class="relative inline-flex h-[28px] w-[28px] items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-tags)] before:absolute before:inset-[-10px] before:content-['']">
-        <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle Icon" class="h-[12px] w-[12px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
+        <img src="assets/images/shared/theme/cheveron-right.svg" alt="" aria-hidden="true" class="h-[12px] w-[12px] opacity-90 transition-[transform,opacity] duration-300" [ngClass]="{ 'rotate-90 opacity-100': isExpandable }" />
       </div>
     </div>
   </div>

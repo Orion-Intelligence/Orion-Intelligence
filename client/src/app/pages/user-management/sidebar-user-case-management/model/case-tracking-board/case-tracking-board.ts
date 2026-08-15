@@ -10,6 +10,7 @@ import { getEnabledStatusWorkflow } from '../status-board-config.model';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-case-tracking-board',
@@ -36,7 +37,7 @@ export class CaseTrackingBoard implements OnInit {
     return !!caseItem && this.getAllowedStatuses(caseItem.status).includes(drop.data);
   };
 
-  constructor(private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService) { }
+  constructor(private router: Router, private caseService: CaseManagement, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
     this.loadBoardConfig();
@@ -66,7 +67,7 @@ export class CaseTrackingBoard implements OnInit {
       },
       error: err => {
         this.isLoading = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to load cases');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translationService.translate('Failed to load cases'));
       }
     });
   }
@@ -140,7 +141,7 @@ export class CaseTrackingBoard implements OnInit {
     }
 
     if (!this.getAllowedStatuses(caseItem.status).includes(targetStatus)) {
-      this.messageNotificationService.show('Drag cases one workflow lane forward or backward only');
+      this.messageNotificationService.show(this.translationService.translate('Drag cases one workflow lane forward or backward only'));
       return;
     }
 
@@ -193,7 +194,7 @@ export class CaseTrackingBoard implements OnInit {
     const allowedStatuses = this.getAllowedStatuses(caseItem.status);
 
     if (!allowedStatuses.includes(nextStatus)) {
-      this.messageNotificationService.show('Case can only move one step forward or backward');
+      this.messageNotificationService.show(this.translationService.translate('Case can only move one step forward or backward'));
       return;
     }
 
@@ -209,7 +210,7 @@ export class CaseTrackingBoard implements OnInit {
     }
 
     if (!this.statusReason.trim()) {
-      this.messageNotificationService.show('Status change reason is required');
+      this.messageNotificationService.show(this.translationService.translate('Status change reason is required'));
       return;
     }
 
@@ -225,11 +226,11 @@ export class CaseTrackingBoard implements OnInit {
 
         this.isSavingMove = false;
         this.closeReasonModal();
-        this.messageNotificationService.show('Case status updated successfully', 'success');
+        this.messageNotificationService.show(this.translationService.translate('Case status updated successfully'), 'success');
       },
       error: err => {
         this.isSavingMove = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to update case status');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translationService.translate('Failed to update case status'));
       }
     });
   }
@@ -265,7 +266,9 @@ export class CaseTrackingBoard implements OnInit {
   }
 
   getCaseTypeLabel(caseItem: Case): string {
-    return this.formatLabel(caseItem.caseType === 'other' ? caseItem.caseTypeOtherValue : caseItem.caseType);
+    const isCustomType = caseItem.caseType === 'other' && !!caseItem.caseTypeOtherValue;
+    const label = this.formatLabel(isCustomType ? caseItem.caseTypeOtherValue : caseItem.caseType);
+    return isCustomType ? label : this.translationService.translate(label);
   }
 
   getDateLabel(value?: Date | string | null): string {
@@ -356,17 +359,18 @@ export class CaseTrackingBoard implements OnInit {
   }
 
   getAssigneeLabel(caseItem: Case): string {
+    this.translationService.version();
     const count = caseItem.assignedAnalystIds?.length || 0;
 
     if (count === 0) {
-      return 'Unassigned';
+      return this.translationService.translate('Unassigned');
     }
 
     if (count === 1) {
-      return '1 analyst';
+      return `1 ${this.translationService.translate('analyst')}`;
     }
 
-    return `${count} analysts`;
+    return `${count} ${this.translationService.translate('analysts')}`;
   }
 
   getRiskBadgeClass(value?: string | null): string {
@@ -386,14 +390,15 @@ export class CaseTrackingBoard implements OnInit {
   }
 
   getMoveButtonLabel(currentStatus: CaseStatus, targetStatus: CaseStatus): string {
+    this.translationService.version();
     const currentIndex = this.workflow.findIndex(item => item.value === currentStatus);
     const targetIndex = this.workflow.findIndex(item => item.value === targetStatus);
 
     if (targetIndex < currentIndex) {
-      return `Move back to ${this.getStatusLabel(targetStatus)}`;
+      return `${this.translationService.translate('Move back to')} ${this.getStatusLabel(targetStatus)}`;
     }
 
-    return `Move to ${this.getStatusLabel(targetStatus)}`;
+    return `${this.translationService.translate('Move to')} ${this.getStatusLabel(targetStatus)}`;
   }
 
   isForwardMove(currentStatus: CaseStatus, targetStatus: CaseStatus): boolean {

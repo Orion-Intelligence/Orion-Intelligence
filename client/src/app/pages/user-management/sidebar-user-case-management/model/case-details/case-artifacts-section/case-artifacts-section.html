@@ -40,7 +40,7 @@
                             'Type' | translate }}</label>
                         <select [(ngModel)]="artifact.type" (ngModelChange)="artifact.linkedReportSource = ''; artifact.linkedReportId = ''; artifact.linkedReportTitle = ''" name="artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-type-select">
                             @for (type of artifactTypeOptions; track type.value) {
-                            <option [value]="type.value">{{ type.label }}</option>
+                            <option [value]="type.value">{{ type.label | translate }}</option>
                             }
                         </select>
                         @if (artifact.type === 'other') {
@@ -52,7 +52,7 @@
                             'Source' | translate }}</label>
                         <select [(ngModel)]="artifact.source" name="artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-source-select">
                             @for (source of sourceTypeOptions; track source.value) {
-                            <option [value]="source.value">{{ source.label }}</option>
+                            <option [value]="source.value">{{ source.label | translate }}</option>
                             }
                         </select>
                         @if (artifact.source === 'other') {
@@ -90,7 +90,7 @@
                             <option value="">{{ 'Select report source' | translate }}</option>
 
                             @for (source of reportSourceOptions; track source.value) {
-                            <option [value]="source.value">{{ source.label }}</option>
+                            <option [value]="source.value">{{ source.label | translate }}</option>
                             }
                         </select>
                     </div>
@@ -102,7 +102,7 @@
                         </label>
 
                         <div class="relative mt-1">
-                            <input type="text" [ngModel]="store.artifactReportSearchText || artifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(artifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(artifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-report-search-input" />
+                            <input type="text" [ngModel]="store.artifactReportSearchText || artifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(artifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(artifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="artifact-report-search" [placeholder]="'Search reports...' | translate" autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-report-search-input" />
 
                             @if (artifact.linkedReportId) {
                             <div class="mt-2 flex items-center gap-2">
@@ -213,7 +213,7 @@
                     }
                     @if (artifact.type === 'report' && artifact.linkedReportId) {
                     <button type="button" (click)="store.viewArtifactReport(artifact)" class="rounded-full border border-sky-400/30 bg-sky-500/10 px-2.5 py-1 text-xs text-sky-300 hover:text-sky-200 [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800 [body.light-theme_&]:hover:text-sky-900">
-                        View Report
+                        {{ 'View Report' | translate }}
                     </button>
                     }
                 </div>
@@ -230,7 +230,7 @@
                 @if ((artifact.files || []).length) {
                 <div>
                     <span class="text-[var(--color-text4)]">{{ 'Files:' | translate }}</span>
-                    {{ artifact.files.length }} file(s)
+                    {{ artifact.files.length }} {{ (artifact.files.length === 1 ? 'file' : 'files') | translate }}
                 </div>
                 }
             </div>
@@ -303,7 +303,7 @@
                             'Type' | translate }}</label>
                         <select [(ngModel)]="newArtifact.type" (ngModelChange)="newArtifact.linkedReportSource = ''; newArtifact.linkedReportId = ''; newArtifact.linkedReportTitle = ''" name="new-artifact-type" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-type-select">
                             @for (type of artifactTypeOptions; track type.value) {
-                            <option [value]="type.value">{{ type.label }}</option>
+                            <option [value]="type.value">{{ type.label | translate }}</option>
                             }
                         </select>
                         @if (newArtifact.type === 'other') {
@@ -316,7 +316,7 @@
                             'categoryAlerts.fields.source' | translate }}</label>
                         <select [(ngModel)]="newArtifact.source" name="new-artifact-source" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-artifact-source-select">
                             @for (source of sourceTypeOptions; track source.value) {
-                            <option [value]="source.value">{{ source.label }}</option>
+                            <option [value]="source.value">{{ source.label | translate }}</option>
                             }
                         </select>
                         @if (newArtifact.source === 'other') {
@@ -354,7 +354,7 @@
                             <option value="">{{ 'Select report source' | translate }}</option>
 
                             @for (source of reportSourceOptions; track source.value) {
-                            <option [value]="source.value">{{ source.label }}</option>
+                            <option [value]="source.value">{{ source.label | translate }}</option>
                             }
                         </select>
                     </div>
@@ -366,7 +366,7 @@
                         </label>
 
                         <div class="relative mt-1">
-                            <input type="text" [ngModel]="store.artifactReportSearchText || newArtifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(newArtifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(newArtifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="new-artifact-report-search" placeholder="Search reports..." autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-report-search-input" />
+                            <input type="text" [ngModel]="store.artifactReportSearchText || newArtifact.linkedReportTitle || ''" (ngModelChange)="store.searchArtifactReports(newArtifact.linkedReportSource || '', $event)" (focus)="store.isArtifactReportDropdownOpen = true; store.loadArtifactReports(newArtifact.linkedReportSource || '', store.artifactReportSearchText || '')" name="new-artifact-report-search" [placeholder]="'Search reports...' | translate" autocomplete="off" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-artifact-report-search-input" />
 
                             @if (newArtifact.linkedReportId) {
                             <div class="mt-2 flex items-center gap-2">

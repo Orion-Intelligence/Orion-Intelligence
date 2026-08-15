@@ -52,8 +52,18 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       }
     });
 
-    cy.get('[data-testid="sidebar-collapse-button"]').should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
-    cy.get('[data-testid="sidebar-expand-button"]').should('be.visible').click();
+    cy.get('app-dashboard-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('[data-testid="sidebar-collapse-button"]')
+      .should('have.attr', 'aria-label', 'Collapse sidebar')
+      .then(($btn) => ($btn[0] as HTMLButtonElement).click());
+    cy.get('app-dashboard-sidebar [data-sidebar-expanded]').should('not.exist');
+    cy.get('app-dashboard-sidebar [data-sidebar-collapsed]').should('be.visible');
+    cy.get('[data-testid="sidebar-expand-button"]')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Expand sidebar')
+      .click();
+    cy.get('app-dashboard-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('app-dashboard-sidebar [data-sidebar-collapsed]').should('not.exist');
 
     openSidebarGroup('General Intelligence');
 

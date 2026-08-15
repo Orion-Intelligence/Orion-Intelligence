@@ -7,6 +7,7 @@ import { finalize } from 'rxjs';
 import { FeederService } from '../feeder.service';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from '../feeder-rule.utils';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-sidebar-user-feeder-add',
@@ -41,7 +42,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
 
   @Output() scriptUploaded = new EventEmitter<FeederScriptItem>();
 
-  constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService) {}
+  constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['selectedRuleKey'] || changes['rules']) {
@@ -103,7 +104,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] || null;
     if (file && !file.name.toLowerCase().endsWith('.zip')) {
-      this.formError = 'Only ZIP session files are allowed';
+      this.formError = this.translationService.translate('Only ZIP session files are allowed');
       input.value = '';
       this.selectedSessionFile = null;
       return;
@@ -146,19 +147,19 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     this.formError = '';
 
     if (!this.selectedRuleKey) {
-      this.formError = 'Rule is required';
+      this.formError = this.translationService.translate('Rule is required');
       return;
     }
     if (this.uploadMode === 'file' && !this.supportsFileUpload()) {
-      this.formError = 'This rule does not support Python file uploads';
+      this.formError = this.translationService.translate('This rule does not support Python file uploads');
       return;
     }
     if (this.uploadMode === 'values' && !this.supportsValueUpload()) {
-      this.formError = 'This rule does not support URL value uploads';
+      this.formError = this.translationService.translate('This rule does not support URL value uploads');
       return;
     }
     if (this.uploadMode === 'values' && this.isSharedValueBlocked()) {
-      this.formError = 'Upload the parser file before adding values';
+      this.formError = this.translationService.translate('Upload the parser file before adding values');
       return;
     }
     if (this.uploadMode === 'values') {
@@ -166,20 +167,20 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       return;
     }
     if (!this.selectedFiles.length && !this.selectedSessionFile) {
-      this.formError = 'Python file is required';
+      this.formError = this.translationService.translate('Python file is required');
       return;
     }
     if (this.selectedSessionFile && !this.selectedSessionFile.name.toLowerCase().endsWith('.zip')) {
-      this.formError = 'Only ZIP session files are allowed';
+      this.formError = this.translationService.translate('Only ZIP session files are allowed');
       return;
     }
     for (const file of this.selectedFiles) {
       if (!file.name.toLowerCase().endsWith('.py')) {
-        this.formError = 'Only Python files are allowed';
+        this.formError = this.translationService.translate('Only Python files are allowed');
         return;
       }
       if (file.size > this.maxFileSize) {
-        this.formError = 'File size must be 1 MB or less';
+        this.formError = this.translationService.translate('File size must be 1 MB or less');
         return;
       }
     }
@@ -196,13 +197,16 @@ export class SidebarUserFeederAddComponent implements OnChanges {
           const existingSessionScripts = this.findExistingSessionScripts(response?.scripts ?? []);
           if (existingScripts.length) {
             this.replaceConfirmationMessage = existingScripts.length === 1
-              ? `A script named ${this.formatReplacementName(existingScripts[0].file_name)} already exists in this destination. Are you sure you want to replace it?`
-              : `${existingScripts.length} selected scripts already exist in this destination. Are you sure you want to replace them?`;
+              ? this.translationService.translate('A script named {name} already exists in this destination. Are you sure you want to replace it?')
+                .replace('{name}', this.formatReplacementName(existingScripts[0].file_name))
+              : this.translationService.translate('{count} selected scripts already exist in this destination. Are you sure you want to replace them?')
+                .replace('{count}', String(existingScripts.length));
             this.isReplaceConfirmationOpen = true;
             return;
           }
           if (existingSessionScripts.length) {
-            this.replaceConfirmationMessage = `A session file named ${existingSessionScripts[0].session_file_name} already exists in this destination. Are you sure you want to replace it?`;
+            this.replaceConfirmationMessage = this.translationService.translate('A session file named {name} already exists in this destination. Are you sure you want to replace it?')
+              .replace('{name}', existingSessionScripts[0].session_file_name ?? '');
             this.isReplaceConfirmationOpen = true;
             return;
           }
@@ -210,7 +214,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
           this.submitUpload(fileInput);
         },
         error: (error) => {
-          this.formError = error?.error?.detail || 'Failed to check existing feeder scripts';
+          this.formError = error?.error?.detail || this.translationService.translate('Failed to check existing feeder scripts');
         }
       });
   }
@@ -331,16 +335,16 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       }))
       .subscribe({
         next: (response) => {
-          this.messageNotificationService.show(response?.message || 'Upload completed successfully', 'success');
+          this.messageNotificationService.show(response?.message || this.translationService.translate('Upload completed successfully'), 'success');
           fileInput.value = '';
         },
         error: (error) => {
           if (error?.status === 409) {
             this.formError = '';
-            this.messageNotificationService.show(error?.error?.detail || 'Script owner already exists');
+            this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Script owner already exists'));
             return;
           }
-          this.formError = error?.error?.detail || 'Failed to upload feeder script';
+          this.formError = error?.error?.detail || this.translationService.translate('Failed to upload feeder script');
         }
       });
   }
@@ -358,7 +362,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       }))
       .subscribe({
         next: (response) => {
-          this.messageNotificationService.show(response?.message || 'Session file uploaded successfully', 'success');
+          this.messageNotificationService.show(response?.message || this.translationService.translate('Session file uploaded successfully'), 'success');
           this.uploadedSessionFileName = response?.script?.session_file_name || this.selectedSessionFile?.name || '';
           if (this.selectedRuleType === 'shared' && response?.script) {
             this.sharedRuleScripts = [response.script];
@@ -367,7 +371,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
           fileInput.value = '';
         },
         error: (error) => {
-          this.formError = error?.error?.detail || 'Failed to upload session file';
+          this.formError = error?.error?.detail || this.translationService.translate('Failed to upload session file');
         }
       });
   }
@@ -377,7 +381,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     if (!file) {
       this.isSubmitting = false;
       this.resetUploadProgress();
-      this.messageNotificationService.show('Upload completed successfully', 'success');
+      this.messageNotificationService.show(this.translationService.translate('Upload completed successfully'), 'success');
       this.selectedFiles = [];
       this.selectedSessionFile = null;
       fileInput.value = '';
@@ -411,10 +415,10 @@ export class SidebarUserFeederAddComponent implements OnChanges {
           this.resetUploadProgress();
           if (error?.status === 409) {
             this.formError = '';
-            this.messageNotificationService.show(error?.error?.detail || 'Script owner already exists');
+            this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Script owner already exists'));
             return;
           }
-          this.formError = error?.error?.detail || 'Failed to upload feeder script';
+          this.formError = error?.error?.detail || this.translationService.translate('Failed to upload feeder script');
         }
       });
   }

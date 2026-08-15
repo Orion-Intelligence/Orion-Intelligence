@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, output, signal } from '@angular/core';
 import type { ManageProfilesModalData, ManagedPlatform, PlatformResult } from '../../models/social-scan.models';
 import { SocialIconComponent } from '../../../../shared/partials/social-icon/social-icon.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 type ManagedPlatformRow = ManagedPlatform & {
   draftUsername: string;
@@ -10,7 +11,7 @@ type ManagedPlatformRow = ManagedPlatform & {
 @Component({
   selector: 'app-manage-profiles-modal',
   standalone: true,
-  imports: [SocialIconComponent],
+  imports: [SocialIconComponent, TranslatePipe],
   templateUrl: './manage-profiles-modal.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

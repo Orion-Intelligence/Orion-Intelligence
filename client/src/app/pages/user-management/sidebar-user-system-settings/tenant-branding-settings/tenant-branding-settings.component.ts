@@ -6,6 +6,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { AppSettingsModel, ConfigSettings } from '../../../../shared/model/app/config';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { UserImagePickerComponent } from '../../sidebar-user-settings/user-image-picker/user-image-picker.component';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
@@ -30,7 +31,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
   brandingError = '';
   form = { app_name: '0' };
 
-  constructor(private apiService: ApiService, protected appService: AppService, private messageNotificationService: MessageNotificationService) {
+  constructor(private apiService: ApiService, protected appService: AppService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
   }
 
   ngOnInit(): void {
@@ -77,7 +78,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
           this.applySettings(updatedAssets);
         },
         error: (err) => {
-          const message = err?.error?.detail || 'Failed to upload image';
+          const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
           this.messageNotificationService.show(message);
         }
       });
@@ -89,7 +90,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
         this.applySettings({ [key]: DEFAULT_SYSTEM_ASSETS[key] } as Partial<AppSettingsModel>);
       },
       error: (err) => {
-        const message = err?.error?.detail || 'Failed to remove image';
+        const message = err?.error?.detail || this.translationService.translate('Failed to remove image');
         this.messageNotificationService.show(message);
       }
     });

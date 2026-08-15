@@ -10,7 +10,7 @@
             <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
             <div class="hidden items-center gap-2 md:flex">
-              <img alt="Results" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+              <img alt="" aria-hidden="true" src="assets/images/shared/results_found.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.records }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Records' | translate }}</div>
             </div>
@@ -18,7 +18,7 @@
             <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
             <div class="hidden items-center gap-2 lg:flex">
-              <img alt="Affected Sites" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+              <img alt="" aria-hidden="true" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.affectedSites }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Affected Sites' | translate }}</div>
             </div>
@@ -26,7 +26,7 @@
             <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
             <div class="hidden items-center gap-2 xl:flex">
-              <img alt="Actor Groups" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+              <img alt="" aria-hidden="true" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.campaigns }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Actor Groups' | translate }}</div>
             </div>
@@ -128,7 +128,7 @@
                 [records]="getSidebarItems()"
                 [subtitle]="getSidebarSubtitle()"
                 [testId]="'defacement-record-sidebar'"
-                [title]="'Compromise Records'"
+                [title]="'Compromise Records' | translate"
                 (close)="closeRecordSidebar()">
               </app-record-sidebar>
             }

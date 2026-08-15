@@ -34,11 +34,11 @@
     </div>
   } @else {
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-5 [body.light-theme_&]:bg-white">
-      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ panelTitle }}</div>
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ panelTitle | translate }}</div>
       <input data-testid="feeder-file-input" #fileInput hidden type="file" accept=".py" multiple (change)="onFileSelected($event)" (cancel)="isSelectingFiles = false" />
       <input data-testid="feeder-session-file-input" #sessionFileInput hidden type="file" accept=".zip,application/zip" (change)="onSessionFileSelected($event)" />
       @if (panelDescription) {
-        <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ panelDescription }}</div>
+        <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ panelDescription | translate }}</div>
       }
 
       @if (selectedRuleType === 'shared') {

@@ -16,11 +16,12 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/sidebar-shell.component';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
+  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe, SidebarShellComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-sidebar.component.html',
 })

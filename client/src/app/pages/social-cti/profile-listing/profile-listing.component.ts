@@ -18,6 +18,7 @@ import socialPlatformCapabilities from '../../../../assets/data/social-graph/pla
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { SocialDefaultListSectionComponent } from './default-list-section.component';
 import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tabs-section/profile-tabs-section.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface LatestFetchConfirmationData {
   message: string;
@@ -28,7 +29,7 @@ interface LatestFetchConfirmationData {
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
   standalone: true,
-  imports: [SocialIconComponent, ConfirmationPopupComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent],
+  imports: [SocialIconComponent, ConfirmationPopupComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

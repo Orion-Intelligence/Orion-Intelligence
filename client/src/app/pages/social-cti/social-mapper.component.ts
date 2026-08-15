@@ -16,6 +16,7 @@ import { ProfileComponent } from '../../shared/partials/profile/profile.componen
 import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-modal/manage-profiles-modal.component';
 import type { SocialResultSource } from './enums/social-graph.enums';
 import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.component';
+import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-social-graph',
@@ -30,7 +31,8 @@ import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.compon
     ProfileComponent,
     ManageProfilesModalComponent,
     SocialBreadcrumbComponent,
-    NgClass
+    NgClass,
+    TranslatePipe
   ]
 })
 export class SocialMapperComponent {

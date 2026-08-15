@@ -15,12 +15,13 @@ import { ExportChoiceModalComponent } from '../../../../shared/partials/export-c
 import { PROFILE_STEALERLOG_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, SocialProfilePostsSectionComponent, SocialProfileVideosSectionComponent, SocialProfileShortsSectionComponent, ExportChoiceModalComponent],
+  imports: [TooltipDirective, SocialProfilePostsSectionComponent, SocialProfileVideosSectionComponent, SocialProfileShortsSectionComponent, ExportChoiceModalComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {

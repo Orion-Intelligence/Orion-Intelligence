@@ -12,6 +12,7 @@ import { HelperService } from '../../../shared/services/helper.service';
 import { take } from 'rxjs/operators';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 import { ExportChoiceModalComponent } from "../../../shared/partials/export-choice-modal/export-choice-modal.component";
@@ -30,6 +31,7 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
   private helperService = inject(HelperService);
   private sidebarService = inject(SidebarService);
   private reportExportService = inject(ReportExportService);
+  private translationService = inject(TranslationService);
 
   protected aiToolRoutingService = inject(AiToolRoutingService);
   protected data$ = this.auditService.auditData$;
@@ -94,7 +96,7 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
       }
       const payload: GraphReportPayload = {
         graphKind: 'cti',
-        title: 'Audit Logs Export',
+        title: this.translationService.translate('Audit Logs Export'),
         sessionName: 'audit-logs',
         generatedAtIso: new Date().toISOString(),
         nodes: [],
@@ -105,7 +107,7 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
         },
         tables: [
           {
-            title: 'Audit Logs',
+            title: this.translationService.translate('Audit Logs'),
             values: {},
             columns: ['id', 'timestamp', 'actor', 'tenant', 'event'],
             rows: rows.map(row => ({

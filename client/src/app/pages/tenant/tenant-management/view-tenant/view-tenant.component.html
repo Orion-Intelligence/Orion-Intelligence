@@ -65,11 +65,11 @@
                       </td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
                         <span class="inline-flex items-center gap-2">
-                          <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" (click)="tenant._expanded = !tenant._expanded">
-                            <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
+                          <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'Edit tenant' | translate" (click)="tenant._expanded = !tenant._expanded">
+                            <img src="assets/images/shared/edit.svg" width="18" alt="" class="tenant-action-icon" />
                           </button>
-                          <button data-testid="tenant-view-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" (click)="openTenant(tenant)">
-                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon" />
+                          <button data-testid="tenant-view-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'View tenant' | translate" (click)="openTenant(tenant)">
+                            <img src="assets/images/shared/view.svg" width="18" alt="" class="tenant-action-icon" />
                           </button>
                           <button data-testid="tenant-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 p-0 text-red-400 transition hover:bg-red-500/20 [body.light-theme_&]:border-red-200 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-600 [body.light-theme_&]:hover:bg-red-100 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-400/30" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">
                             <i class="bi bi-trash3 text-sm leading-none"></i>
@@ -260,8 +260,8 @@
                       <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ tenant.country || '-' }}</div>
                     </div>
                     <div class="flex items-center gap-2">
-                      <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" (click)="tenant._expanded = !tenant._expanded">
-                        <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
+                      <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'Edit tenant' | translate" (click)="tenant._expanded = !tenant._expanded">
+                        <img src="assets/images/shared/edit.svg" width="18" alt="" class="tenant-action-icon" />
                       </button>
                       <button data-testid="tenant-delete-button" type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20 [body.light-theme_&]:border-red-200 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-600 [body.light-theme_&]:hover:bg-red-100 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-red-400/30" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">
                         <i class="bi bi-trash3 text-sm leading-none"></i>
@@ -445,7 +445,7 @@
     </div>
   }
   @if (tenantToDelete) {
-    <app-confirmation-popup [message]="'Are you sure you want to delete this tenant and its associated users and keys?'" (confirmed)="confirmDeleteTenant($event)"></app-confirmation-popup>
+    <app-confirmation-popup [message]="'Are you sure you want to delete this tenant and its associated users and keys?' | translate" (confirmed)="confirmDeleteTenant($event)"></app-confirmation-popup>
   }
   <span id="bottom"></span>
 </ng-container>

@@ -11,7 +11,7 @@
         <div class="w-full max-w-[500px] flex flex-col items-center">
           <div class="mb-[14px] h-[54px] w-[300px]">
             @if (getSignupLogoSrc()) {
-              <img [src]="getSignupLogoSrc()" width="300" height="54" alt="logo" loading="eager" fetchpriority="high" decoding="async" class="h-[54px] w-[300px] object-contain" />
+              <img [src]="getSignupLogoSrc()" width="300" height="54" [alt]="'Logo' | translate" loading="eager" fetchpriority="high" decoding="async" class="h-[54px] w-[300px] object-contain" />
             } @else {
               <div class="flex h-[54px] w-[300px] items-center justify-center text-[28px] text-[#5a6f85]">-</div>
             }
@@ -22,7 +22,7 @@
           <form #signUpForm="ngForm" (ngSubmit)="onSubmit(signUpForm)" class="w-full flex flex-col gap-2">
             <label class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0">{{ 'Username' | translate }}</label>
             <div class="relative w-full">
-              <img src="/assets/images/shared/profile-icon-dark.svg" alt="profile icon" fetchpriority="high" decoding="async" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+              <img src="/assets/images/shared/profile-icon-dark.svg" alt="" aria-hidden="true" fetchpriority="high" decoding="async" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
               <input [(ngModel)]="user.username" data-testid="signup-username" [placeholder]="'Enter your username' | translate" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black [body.light-theme_&]:border-[#c7d5e6] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:focus:border-[#2b90ee] [body.light-theme_&]:focus:bg-white [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-[#2b90ee]/20" name="username" required type="text" />
             </div>
 
@@ -35,13 +35,13 @@
 
             <label class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">{{ 'Company Mail' | translate }}</label>
             <div class="relative w-full">
-              <img src="/assets/images/shared/email.svg" alt="email icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+              <img src="/assets/images/shared/email.svg" alt="" aria-hidden="true" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
               <input [(ngModel)]="user.mail" data-testid="signup-companymail" [placeholder]="'Enter your company mail' | translate" class="w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] pr-4 box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black [body.light-theme_&]:border-[#c7d5e6] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:focus:border-[#2b90ee] [body.light-theme_&]:focus:bg-white [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-[#2b90ee]/20" name="companymail" required type="email" />
             </div>
 
             <label class="text-[#373637] font-['Inter',sans-serif] font-medium text-[14px] mb-0 mt-2">{{ 'Password' | translate }}</label>
             <div class="relative w-full">
-              <img src="/assets/images/shared/lock.svg" alt="lock icon" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
+              <img src="/assets/images/shared/lock.svg" alt="" aria-hidden="true" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 opacity-40 pointer-events-none" />
               <input [(ngModel)]="user.password" data-testid="signup-password" (input)="onPasswordInput(user.password)" id="id_password" [placeholder]="'Enter your password' | translate" class="!pr-16 w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black [body.light-theme_&]:border-[#c7d5e6] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:focus:border-[#2b90ee] [body.light-theme_&]:focus:bg-white [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-[#2b90ee]/20" name="password" required type="password" appPasswordToggle />
             </div>
 
@@ -52,7 +52,7 @@
                 </div>
                 <ul class="text-xs text-[#5b6780]">
                   @if (currentUnmetCheck) {
-                    <li>{{ currentUnmetCheck }}</li>
+                    <li>{{ currentUnmetCheck | translate }}</li>
                   }
                 </ul>
               </div>
@@ -61,7 +61,7 @@
             @if (errorMessage) {
               <div class="mt-2 w-full max-w-full box-border break-words px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center [body.light-theme_&]:!bg-[#b42318] [body.light-theme_&]:!bg-opacity-100">
                 <i class="bi bi-exclamation-diamond-fill mr-2"></i>
-                {{ errorMessage }}
+                {{ errorMessage | translate }}
               </div>
             }
 
@@ -83,7 +83,7 @@
     </div>
 
     <div class="flex-1 relative overflow-hidden bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),repeating-linear-gradient(90deg,rgba(255,255,255,0.15)_0,rgba(255,255,255,0.25)_1px,transparent_1px,transparent_70px),radial-gradient(circle_at_center,#172a4f_0%,#0E1626_100%)] bg-blend-overlay">
-      <img [src]="getDashboardPreviewSrc()" alt="Dashboard Preview" loading="eager" fetchpriority="high" decoding="async" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
+      <img [src]="getDashboardPreviewSrc()" [alt]="'Dashboard Preview' | translate" loading="eager" fetchpriority="high" decoding="async" class="absolute inset-0 h-full w-full object-cover object-center lg:object-right" />
     </div>
   </div>
 </div>

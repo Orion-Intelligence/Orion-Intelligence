@@ -7,11 +7,12 @@ import { ExportChoiceModalComponent } from '../../../shared/partials/export-choi
 import { STEALERLOG_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-social-stealerlog-section',
   standalone: true,
-  imports: [ExportChoiceModalComponent],
+  imports: [ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './stealerlog-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })

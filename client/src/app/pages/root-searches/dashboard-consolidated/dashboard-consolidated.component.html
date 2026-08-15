@@ -33,7 +33,7 @@
                       </div>
                     </div>
                     <button class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] opacity-50" [disabled]="true">
-                      <img src="assets/images/shared/theme/cheveron-right.svg" alt="Toggle" class="h-4 w-4" />
+                      <img src="assets/images/shared/theme/cheveron-right.svg" alt="" aria-hidden="true" class="h-4 w-4" />
                     </button>
                   </div>
                 </div>
@@ -64,7 +64,7 @@
                         <span (click)="onSectionSelected(getCategoryFromKey('apt_model'))" class="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-blue-640)]">
                           {{ 'Explore' | translate }}
                           <button [appTooltip]="'Open Page' | translate" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)]" [disabled]="!(externalConsolidatedFeedService.actorMalwareResults().length > 0)">
-                            <img alt="background" height="16" src="/client/src/assets/images/shared/theme/explore_icon.svg" width="16">
+                            <img alt="" aria-hidden="true" height="16" src="/client/src/assets/images/shared/theme/explore_icon.svg" width="16">
                           </button>
                         </span>
                       }
@@ -86,7 +86,7 @@
                         <span (click)="onSectionSelected(getCategoryFromKey(index.key))" class="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-blue-640)]">
                           {{ 'Explore' | translate }}
                           <button [appTooltip]="'Open Page' | translate" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)]" [disabled]="!(index.value.length > 0)">
-                            <img alt="background" height="16" src="/client/src/assets/images/shared/theme/explore_icon.svg" width="16">
+                            <img alt="" aria-hidden="true" height="16" src="/client/src/assets/images/shared/theme/explore_icon.svg" width="16">
                           </button>
                         </span>
                       }

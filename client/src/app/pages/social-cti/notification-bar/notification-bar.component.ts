@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import type { NotificationData } from '../models/social-graph.models';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-notification-bar',
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, TranslatePipe],
   templateUrl: './notification-bar.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

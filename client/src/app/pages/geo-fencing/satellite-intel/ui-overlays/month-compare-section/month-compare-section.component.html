@@ -2,7 +2,7 @@
   @if (errorMessage && !isScanning) {
     <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] [body.light-theme_&]:border-rose-200 [body.light-theme_&]:from-rose-50 [body.light-theme_&]:to-white">
       <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)] [body.light-theme_&]:text-rose-800">{{ 'Request Failed' | translate }}</div>
-      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)] [body.light-theme_&]:text-rose-700">{{ errorMessage }}</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)] [body.light-theme_&]:text-rose-700">{{ errorMessage | translate }}</div>
     </div>
   }
 
@@ -33,7 +33,7 @@
           <div class="flex flex-wrap gap-2">
             @for (type of imageTypes; track type.key) {
               <button type="button" class="rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors" [ngClass]="selectedType === type.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:bg-[var(--color-blue-710)]','hover:text-[var(--color-text1)]']" (click)="selectType(type.key)">
-                {{ type.label }}
+                {{ type.label | translate }}
               </button>
             }
           </div>

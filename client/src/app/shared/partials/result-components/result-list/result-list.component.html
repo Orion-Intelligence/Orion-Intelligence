@@ -4,7 +4,7 @@
       @for (item of filteredItems; track $index; let i = $index) {
         <button data-testid="report-metadata-value" type="button" (click)="handleItemClick(item, i)" class="group relative min-w-0 border-b border-[var(--color-divider)] px-3 py-2.5 text-left text-[13px] font-medium text-[var(--color-text3)] transition hover:bg-[rgba(87,165,235,0.10)] hover:text-[var(--color-text1)]">
           @if (isRowLayout()) {
-            <span class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ getRowLabel(i) }}</span>
+            <span class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ getRowLabel(i) | translate }}</span>
             <span [class]="isExpanded(i) ? 'mt-1 block whitespace-pre-wrap break-words text-[13px] leading-5 text-[var(--color-text3)]' : 'mt-1 block overflow-hidden break-words text-[13px] leading-5 text-[var(--color-text3)] [display:-webkit-box] [-webkit-box-orient:vertical] [-webkit-line-clamp:3]'">
               {{ item }}
             </span>

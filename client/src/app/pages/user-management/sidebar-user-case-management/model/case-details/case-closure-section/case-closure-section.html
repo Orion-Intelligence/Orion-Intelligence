@@ -30,7 +30,7 @@
                         'Reason' | translate }}</label>
                     <select [(ngModel)]="newClosure.reason" name="closureReason" class="ui-select h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-closure-reason-select">
                         @for (reason of closureReasonOptions; track reason.value) {
-                        <option [value]="reason.value">{{ reason.label }}</option>
+                        <option [value]="reason.value">{{ reason.label | translate }}</option>
                         }
                     </select>
                     @if (newClosure.reason === 'other') {

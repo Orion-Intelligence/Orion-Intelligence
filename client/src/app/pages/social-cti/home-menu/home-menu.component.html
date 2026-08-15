@@ -6,8 +6,8 @@
       <div class="flex shrink-0 flex-col bg-[var(--color-blue-820-light)]/95 pt-1 backdrop-blur-sm">
         <div data-testid="home-menu-history-heading" class="mx-2 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left">
           <span class="min-w-0">
-            <span class="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">Workspace</span>
-            <span class="mt-0.5 block truncate text-sm font-semibold text-[var(--color-text1)]">Scan History</span>
+            <span class="block text-[11px] font-semibold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ 'Workspace' | translate }}</span>
+            <span class="mt-0.5 block truncate text-sm font-semibold text-[var(--color-text1)]">{{ 'Scan History' | translate }}</span>
           </span>
         </div>
         <div class="mx-3 h-px bg-white/5 [body.light-theme_&]:bg-[var(--color-divider)]"></div>
@@ -48,7 +48,7 @@
                     @if (job.status === 'in_progress' || job.status === 'queued') {
                       <div class="flex shrink-0 items-center gap-1.5">
                         <span class="font-mono text-xs text-[var(--color-text4)]">{{ job.progress }}%</span>
-                        <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" title="Cancel Scan" class="flex h-6 w-6 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
+                        <button (click)="$event.stopPropagation(); cancelScan.emit(job.id)" [title]="'Cancel Scan' | translate" [attr.aria-label]="'Cancel Scan' | translate" class="flex h-6 w-6 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
                           <i class="bi bi-x-lg text-xs leading-none"></i>
                         </button>
                       </div>
@@ -60,28 +60,28 @@
                     <progress class="mt-2 h-[5px] w-full appearance-none overflow-hidden rounded-full border-0 bg-[rgb(148_163_184/25%)] [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-[linear-gradient(90deg,#fb923c_0%,#f97316_100%)] [&::-webkit-progress-bar]:rounded-full [&::-webkit-progress-bar]:bg-[rgb(148_163_184/25%)] [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-[linear-gradient(90deg,#fb923c_0%,#f97316_100%)]" max="100" [value]="job.progress"></progress>
                   }
 
-                  <p class="mb-0 mt-1 truncate text-xs text-[var(--color-text4)]">{{ job.step }}</p>
+                  <p class="mb-0 mt-1 truncate text-xs text-[var(--color-text4)]">{{ job.step | translate }}</p>
 
                   @if (job.status === 'completed' || job.status === 'failed') {
                     <div class="mt-2.5 flex items-center justify-between">
 
                       @if (hasResults(job.username)) {
                         <span class="inline-flex items-center gap-1 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 text-[11px] font-medium text-green-500 [body.light-theme_&]:text-green-700">
-                          <i class="bi bi-check-circle-fill text-[10px]"></i> Results Ready
+                          <i class="bi bi-check-circle-fill text-[10px]"></i> {{ 'Results Ready' | translate }}
                         </span>
                       } @else {
                         <span class="inline-flex items-center gap-1 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text4)]">
-                          <i class="bi bi-dash-circle text-[10px]"></i> No Results
+                          <i class="bi bi-dash-circle text-[10px]"></i> {{ 'No Results' | translate }}
                         </span>
                       }
 
                       <div class="flex items-center gap-1">
                         @if (job.status === 'failed' && !job.displayName) {
-                          <button data-testid="social-history-retry" (click)="$event.stopPropagation(); retryScan.emit(job)" title="Retry Scan" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-640)]/10 hover:text-[var(--color-blue-640)]">
+                          <button data-testid="social-history-retry" (click)="$event.stopPropagation(); retryScan.emit(job)" [title]="'Retry Scan' | translate" [attr.aria-label]="'Retry Scan' | translate" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-[var(--color-blue-640)]/10 hover:text-[var(--color-blue-640)]">
                             <i class="bi bi-arrow-clockwise text-sm leading-none"></i>
                           </button>
                         }
-                        <button (click)="$event.stopPropagation(); deleteRequested.emit(job.username)" title="Delete Profile" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
+                        <button (click)="$event.stopPropagation(); deleteRequested.emit(job.username)" [title]="'Delete Profile' | translate" [attr.aria-label]="'Delete Profile' | translate" class="flex h-7 w-7 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
                           <i class="bi bi-trash3 text-sm leading-none"></i>
                         </button>
                       </div>
@@ -92,7 +92,7 @@
 
           @if (displayJobs().length < jobsWithFilter().length) {
             <button data-testid="social-history-load-more" (click)="loadMoreJobs()" class="mt-2 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-2 text-sm font-semibold text-[var(--color-blue-640)] transition-colors hover:bg-[var(--color-blue-710)]">
-              Load More
+              {{ 'Load More' | translate }}
             </button>
           }
 
@@ -101,8 +101,8 @@
               <div class="mx-auto flex h-11 w-11 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
                 <i class="bi bi-clock-history text-base"></i>
               </div>
-              <p class="mb-0 mt-3 text-sm font-semibold text-[var(--color-text2)]">No scans yet</p>
-              <p class="mb-0 mt-1 text-xs leading-5 text-[var(--color-text4)]">Search a username from the dashboard to create history.</p>
+              <p class="mb-0 mt-3 text-sm font-semibold text-[var(--color-text2)]">{{ 'No scans yet' | translate }}</p>
+              <p class="mb-0 mt-1 text-xs leading-5 text-[var(--color-text4)]">{{ 'Search a username from the dashboard to create history.' | translate }}</p>
             </div>
           }
         </div>

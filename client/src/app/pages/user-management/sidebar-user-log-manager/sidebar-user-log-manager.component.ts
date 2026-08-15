@@ -7,6 +7,7 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { ApiService } from '../../../shared/services/api.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { DatePickerComponent } from '../../../shared/partials/filters/date-picker/date-picker.component';
 import { SystemLogFile, SystemLogResponse } from './model/system-log.models';
@@ -21,7 +22,6 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/
   animations: [fadeInDashboardItem],
 })
 export class SidebarUserLogManagerComponent implements OnInit {
-  readonly typeOptions: UiDropdownOption[] = [{ key: '', label: 'All' }, { key: 'INFO', label: 'INFO' }, { key: 'WARNING', label: 'WARNING' }, { key: 'ERROR', label: 'ERROR' }];
   logType = '';
   logDateRange = '';
   logDateFilters: Record<string, string | null> = { daterange: null };
@@ -32,7 +32,12 @@ export class SidebarUserLogManagerComponent implements OnInit {
   isFlushAllConfirmationOpen = false;
   response: SystemLogResponse = { entries: [], total: 0, page: 1, limit: 100, page_count: 0, available_dates: [], files: [] };
 
-  constructor(private apiService: ApiService, private licenseService: LicenseService, private router: Router) {
+  constructor(private apiService: ApiService, private licenseService: LicenseService, private router: Router, private translationService: TranslationService) {
+  }
+
+  get typeOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return [{ key: '', label: this.translationService.translate('All') }, { key: 'INFO', label: 'INFO' }, { key: 'WARNING', label: 'WARNING' }, { key: 'ERROR', label: 'ERROR' }];
   }
 
   ngOnInit(): void {
@@ -63,7 +68,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
           this.response = response ?? this.emptyResponse();
         },
         error: (error) => {
-          this.errorMessage = error?.error?.detail || 'Failed to load logs';
+          this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to load logs');
         }
       });
   }
@@ -101,7 +106,10 @@ export class SidebarUserLogManagerComponent implements OnInit {
   }
 
   deleteFile(file: SystemLogFile): void {
-    if (!confirm(`Delete ${file.file} from ${file.date}?`)) {
+    const confirmation = this.translationService.translate('Delete {file} from {date}?')
+      .replace('{file}', file.file)
+      .replace('{date}', file.date);
+    if (!confirm(confirmation)) {
       return;
     }
     this.apiService.delete<{ success: boolean }>(`profile/system-logs/${file.date}/${file.file}`).subscribe({
@@ -110,7 +118,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
         this.loadLogs();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.detail || 'Failed to delete log file';
+        this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to delete log file');
       }
     });
   }
@@ -133,7 +141,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
         this.response = this.emptyResponse();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.detail || 'Failed to flush logs';
+        this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to flush logs');
       }
     });
   }

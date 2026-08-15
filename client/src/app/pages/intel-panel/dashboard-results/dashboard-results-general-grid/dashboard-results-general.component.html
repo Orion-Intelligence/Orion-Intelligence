@@ -12,21 +12,21 @@
             @if (!licenseService.isMaintainer() && (type() === 'strategic' || type() === 'general') && item && item.m_url && (item.m_url.endsWith('.onion') || item.m_url.endsWith('.onion/'))) {
               <div (click)="scrollService.openCTI($event, item.m_hash)" [appTooltip]="'Open CTI Graph' | translate" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
                 <div class="p-[0_0_10px_10px]">
-                  <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+                  <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="" aria-hidden="true" class="ui-action-icon" />
                 </div>
               </div>
             } @else {
               @if (type() !== 'Strategic' && type() !== 'general') {
                 <div (click)="scrollService.openCTI($event, item.m_hash)" [appTooltip]="'Open CTI Graph' | translate" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
                   <div class="p-[0_0_10px_10px]">
-                    <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+                    <img height="20" src="assets/images/sidebar/theme/graph.svg" width="20" alt="" aria-hidden="true" class="ui-action-icon" />
                   </div>
                 </div>
               }
             }
             <a id="open-report" (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_hash)" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" data-testid="open-report" [routerLink]="getReportLink(item)" class="ml-auto flex w-auto cursor-pointer justify-center">
               <div class="p-[0_0_10px_10px]">
-                <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
+                <img height="20" src="assets/images/shared/theme/redirect.svg" width="20" alt="" aria-hidden="true" class="ui-action-icon" />
               </div>
             </a>
           </div>
@@ -89,10 +89,10 @@
           <div class="flex items-center justify-start">
             @if (type() === 'Strategic' || type() === 'strategic' || type() === 'general') {
             <span [ngClass]="{ 'bg-[#22c55e]': item.m_crawl_status === 'active', 'bg-[#f59e0b]': item.m_crawl_status === 'stale', 'bg-[#ef4444]': item.m_crawl_status !== 'active' && item.m_crawl_status !== 'stale' }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
-            <span class="font-medium text-[var(--color-text1)]">{{ item.m_crawl_status || 'inactive' }}</span>
+            <span class="font-medium text-[var(--color-text1)]">{{ (item.m_crawl_status || 'inactive') | translate }}</span>
             } @else {
             <span [ngClass]="{ 'bg-[#22c55e]': isWithinDays(item.m_date || '', 183), 'bg-[#f59e0b]': isWithinDays(item.m_date || '', 365) && !isWithinDays(item.m_date || '', 183), 'bg-[#ef4444]': !isWithinDays(item.m_date || '', 365) }" class="mr-2 inline-block h-[8px] w-[8px] shrink-0 rounded-full"></span>
-            <span class="font-medium text-[var(--color-text1)]">{{ isWithinDays(item.m_date || '', 183) ? 'recent' : (isWithinDays(item.m_date || '', 365) ? 'tracked' : 'archive') }}</span>
+            <span class="font-medium text-[var(--color-text1)]">{{ (isWithinDays(item.m_date || '', 183) ? 'recent' : (isWithinDays(item.m_date || '', 365) ? 'tracked' : 'archive')) | translate }}</span>
             }
           </div>
         </div>

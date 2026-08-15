@@ -1,7 +1,7 @@
 <div class="fixed bottom-6 right-6 z-[1180]">
   @if (showLauncher() && !chatOpen) {
-    <button data-testid="chat-widget-open" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button">
-      <span><img src="assets/images/shared/theme/chat.svg" alt="chat" class="h-5 w-5 [filter:brightness(0)_invert(1)]" /></span>
+    <button data-testid="chat-widget-open" class="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--color-blue-640)] shadow-lg transition hover:bg-[var(--color-blue-630)]" (click)="openChat()" type="button" [attr.aria-label]="'Open Nexus chat' | translate">
+      <span><img src="assets/images/shared/theme/chat.svg" alt="" aria-hidden="true" class="h-5 w-5 [filter:brightness(0)_invert(1)]" /></span>
     </button>
   }
 </div>
@@ -17,8 +17,8 @@
           <button type="button" class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="isFullScreen = !isFullScreen" [attr.aria-label]="(isFullScreen ? 'Original size' : 'Full screen') | translate">
             <img [src]="isFullScreen ? 'assets/images/shared/collapse.svg' : 'assets/images/shared/expand.svg'" alt="" class="h-[14px] w-[14px] ui-action-icon [filter:brightness(0)_invert(1)]" />
           </button>
-          <button class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="closeChat()">
-            <img src="assets/images/shared/cross.svg" alt="close" class="h-[14px] w-[14px] ui-action-icon" />
+          <button class="flex h-8 w-8 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] transition hover:bg-[var(--color-blue-710)]" (click)="closeChat()" [attr.aria-label]="'Close chat' | translate">
+            <img src="assets/images/shared/cross.svg" alt="" aria-hidden="true" class="h-[14px] w-[14px] ui-action-icon" />
           </button>
         </div>
       </div>
@@ -39,7 +39,7 @@
                   </div>
                 </div>
                 <div class="mt-1 ml-3.5 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] box-border shadow-[0_8px_20px_var(--color-shadow-medium)] max-[640px]:hidden">
-                  <img alt="user avatar" [src]="this.appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover">
+                  <img [alt]="'User avatar' | translate" [src]="this.appService.userSessionData().user.image || '/api/s/static/user/default.png'" class="block h-full w-full rounded-full object-cover">
                 </div>
               </div>
             }
@@ -78,7 +78,7 @@
             @case ('error') {
               <div class="mx-auto flex w-full min-w-0 max-w-[980px] animate-ai-chat-row-in items-start gap-3.5 max-[640px]:gap-0">
                 <div class="mt-1 inline-block h-10 w-10 shrink-0 overflow-hidden rounded-full border border-[var(--color-border-red)] bg-[var(--color-red-100)] box-border max-[640px]:hidden">
-                  <img alt="chat-icon" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
+                  <img alt="" aria-hidden="true" src="assets/images/shared/chat-icon.svg" class="block h-full w-full rounded-full object-cover">
                 </div>
                 <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full max-[640px]:w-full">
                   <div class="flex min-h-[20px] items-center gap-2 px-1">

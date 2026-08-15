@@ -19,7 +19,7 @@
             <i class="bi bi-arrow-clockwise text-[16px] leading-none"></i>
         </button>
         }
-        <button @caseInlineMotion (click)="store.exportPdf()" type="button" aria-label="Export PDF | translate" appTooltip="Export PDF | translate" class="inline-flex h-9 w-9 items-center justify-center border-0 border-r border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 last:border-r-0" data-testid="case-details-export-pdf" [disabled]="isPdfExporting">
+        <button @caseInlineMotion (click)="store.exportPdf()" type="button" [attr.aria-label]="'Export PDF' | translate" [appTooltip]="'Export PDF' | translate" class="inline-flex h-9 w-9 items-center justify-center border-0 border-r border-[var(--color-border)] bg-transparent text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-60 last:border-r-0" data-testid="case-details-export-pdf" [disabled]="isPdfExporting">
             <i class="bi text-sm leading-none" [ngClass]="isPdfExporting ? 'bi-arrow-repeat animate-spin' : 'bi-download'"></i>
         </button>
         @if (canManageCases()) {

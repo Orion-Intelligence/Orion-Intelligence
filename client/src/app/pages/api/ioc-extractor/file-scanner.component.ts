@@ -1,4 +1,4 @@
-import { Component, ElementRef, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, inject, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +14,7 @@ import { ExportChoiceModalComponent } from '../../../shared/partials/export-choi
 import { FILE_SCAN_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 type ScannerResultItem = { label: string; value: string };
 type ScannerResultSection = { title: string; items: ScannerResultItem[] };
@@ -32,6 +33,8 @@ type ScannerResultSection = { title: string; items: ScannerResultItem[] };
   templateUrl: './file-scanner.component.html'
 })
 export class FileScannerComponent {
+  private readonly translationService = inject(TranslationService);
+
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
   type = 'filescan';
   title = 'File Analysis';
@@ -75,7 +78,7 @@ export class FileScannerComponent {
     if (file.size > MAX_FILE_SIZE_APK) {
       this.hasError = true;
       this.isFileSizeError = true;
-      this.errorMessage = `File size exceeds 30MB. Your file is ${this.formatFileSize(file.size)}.`;
+      this.errorMessage = `${this.translate('File size exceeds 30MB.')} ${this.translate('Your file is')} ${this.formatFileSize(file.size)}.`;
       this.resetFileInput();
       this.isFetched = true;
       return;
@@ -95,7 +98,7 @@ export class FileScannerComponent {
   private scanFile(isApk: boolean): void {
     if (!this.selectedFile) {
       this.hasError = true;
-      this.errorMessage = 'Please select a file to upload.';
+      this.errorMessage = this.translate('Please select a file to upload.');
       this.isFetched = true;
       return;
     }
@@ -139,7 +142,7 @@ export class FileScannerComponent {
     this.progress.set(100);
     if (res?.result == null) {
       this.hasError = true;
-      this.errorMessage = 'No valid result received from server.';
+      this.errorMessage = this.translate('No valid result received from server.');
       return;
     }
     this.applyServerResult(res.result);
@@ -289,11 +292,13 @@ export class FileScannerComponent {
 
   private handleError(err: any): void {
     if (err?.status === 413) {
-      this.errorMessage = `File size exceeds 30MB${this.fileSize ? `. Your file is ${this.fileSize}.` : '.'}`;
+      this.errorMessage = this.fileSize
+        ? `${this.translate('File size exceeds 30MB.')} ${this.translate('Your file is')} ${this.fileSize}.`
+        : this.translate('File size exceeds 30MB.');
       this.isFileSizeError = true;
       return;
     }
-    this.errorMessage = err?.error?.detail || err?.message || 'Upload failed.';
+    this.errorMessage = err?.error?.detail || err?.message || this.translate('Upload failed.');
   }
 
   formatFileSize(bytes: number): string {
@@ -396,5 +401,9 @@ export class FileScannerComponent {
       this.copiedValue.set(value);
       setTimeout(() => this.copiedValue.set(null), 1500);
     });
+  }
+
+  private translate(key: string): string {
+    return this.translationService.translate(key);
   }
 }

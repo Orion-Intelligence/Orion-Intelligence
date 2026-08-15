@@ -71,7 +71,7 @@
     <section class="mt-[15px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] p-[15px]" @fadeInDashboardItem>
       <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
         <div class="flex items-center gap-2">
-          <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
+          <img alt="" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ getActorLabel() }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Access' | translate }}</div>
         </div>
@@ -79,7 +79,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
         <div class="hidden items-center gap-2 md:flex">
-          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
+          <img alt="" src="assets/images/shared/results_found.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ totalHits }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Total Hits' | translate }}</div>
         </div>
@@ -87,15 +87,15 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
         <div class="hidden items-center gap-2 lg:flex">
-          <img alt="Search" src="assets/images/shared/assets_searched.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
-          <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="displayQuery || 'query'">{{ displayQuery || 'query' }}</div>
+          <img alt="" src="assets/images/shared/assets_searched.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
+          <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="displayQuery || ('query' | translate)">{{ displayQuery || ('query' | translate) }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Query' | translate }}</div>
         </div>
 
         <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
         <div class="hidden items-center gap-2 xl:flex">
-          <img alt="Search" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
+          <img alt="" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ currentBatchSize }} / {{ pageCount }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Batch / Pages' | translate }}</div>
         </div>
@@ -140,7 +140,7 @@
                   <td [attr.data-label]="'Date' | translate" class="text-xs text-[var(--color-text4)]">{{ getEventTimestamp(item) }}</td>
                   <td>
                     <button data-testid="siem-log-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expandedResultIndex === idx">
-                      <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" class="h-3 w-3 ui-action-icon" />
+                      <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" class="h-3 w-3 ui-action-icon" />
                     </button>
                   </td>
                 </tr>
@@ -168,7 +168,7 @@
                                 @for (ioc of getExtractedIocs(item); track ioc.name) {
                                   @for (value of ioc.values; track value) {
                                     <div class="min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]">
-                                      <div class="text-[12px] text-[var(--color-text4)]">{{ ioc.name }}</div>
+                                      <div class="text-[12px] text-[var(--color-text4)]">{{ ioc.name | translate }}</div>
                                       <div class="mt-[4px] break-all text-[13px] text-[var(--color-text1)]">{{ value }}</div>
                                     </div>
                                   }

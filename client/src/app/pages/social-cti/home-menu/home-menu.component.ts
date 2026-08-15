@@ -3,12 +3,13 @@ import { Component, ChangeDetectionStrategy, input, output, computed, signal } f
 import { Job } from '../models/social-scan.models';
 import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/sidebar-shell.component';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-home-menu',
   templateUrl: './home-menu.component.html',
   standalone: true,
-  imports: [SidebarShellComponent, TooltipDirective],
+  imports: [SidebarShellComponent, TooltipDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HomeMenuComponent {

@@ -97,7 +97,7 @@
           <div class="flex items-center gap-2">
             @if (!contactEditing) {
               <button data-testid="tenant-contact-edit" type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Edit contact settings' | translate" (click)="toggleContactEdit($event)">
-                <img src="assets/images/shared/edit.svg" width="16" alt="edit" class="ui-action-icon" />
+                <img src="assets/images/shared/edit.svg" width="16" alt="" class="ui-action-icon" />
               </button>
             }
             @if (contactEditing) {
@@ -117,7 +117,7 @@
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
               <span>{{ 'Email Address' | translate }}</span>
               @if (contactEditing) {
-                <img src="assets/images/shared/edit.svg" alt="Edit" class="ui-action-icon h-3 w-3 opacity-70">
+                <img src="assets/images/shared/edit.svg" alt="" class="ui-action-icon h-3 w-3 opacity-70">
               }
             </label>
             <input type="email" [(ngModel)]="userSessionData.user.email" name="tenant_email" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
@@ -126,7 +126,7 @@
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
               <span>{{ 'Phone' | translate }}</span>
               @if (contactEditing) {
-                <img src="assets/images/shared/edit.svg" alt="Edit" class="ui-action-icon h-3 w-3 opacity-70">
+                <img src="assets/images/shared/edit.svg" alt="" class="ui-action-icon h-3 w-3 opacity-70">
               }
             </label>
             <input type="text" [(ngModel)]="userSessionData.tenant.phone" name="tenant_phone" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!contactEditing" [ngClass]="contactEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" [placeholder]="'Enter phone...' | translate" />
@@ -135,7 +135,7 @@
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
               <span>{{ 'Assigned User Quota' | translate }}</span>
               @if (contactEditing) {
-                <img src="assets/images/shared/edit.svg" alt="Edit" class="ui-action-icon h-3 w-3 opacity-70">
+                <img src="assets/images/shared/edit.svg" alt="" class="ui-action-icon h-3 w-3 opacity-70">
               }
             </label>
             <input type="text" [value]="userSessionData.tenant.assignedQuota || '0'" disabled class="h-10 w-full cursor-not-allowed rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-3 text-sm text-[var(--color-text4)]" />
@@ -144,7 +144,7 @@
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
               <span>{{ 'iocTypes.m_country' | translate }}</span>
               @if (contactEditing) {
-                <img src="assets/images/shared/edit.svg" alt="Edit" class="ui-action-icon h-3 w-3 opacity-70">
+                <img src="assets/images/shared/edit.svg" alt="" class="ui-action-icon h-3 w-3 opacity-70">
               }
             </label>
             <input type="text" [(ngModel)]="userSessionData.tenant.country" name="tenant_country" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!contactEditing" [ngClass]="contactEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" [placeholder]="'Enter country...' | translate" />
@@ -153,7 +153,7 @@
             <label class="mb-1 flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">
               <span>{{ 'City/State' | translate }}</span>
               @if (contactEditing) {
-                <img src="assets/images/shared/edit.svg" alt="Edit" class="ui-action-icon h-3 w-3 opacity-70">
+                <img src="assets/images/shared/edit.svg" alt="" class="ui-action-icon h-3 w-3 opacity-70">
               }
             </label>
             <input type="text" [(ngModel)]="userSessionData.tenant.city" name="tenant_city" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none" [disabled]="!contactEditing" [ngClass]="contactEditing ? 'focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20' : ''" [placeholder]="'Enter city/state...' | translate" />
@@ -193,7 +193,7 @@
           <div class="flex items-center gap-2">
             @if (!privacyEditing) {
               <button type="button" class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" [attr.aria-label]="'Edit privacy settings' | translate" (click)="togglePrivacyEdit($event)">
-                <img src="assets/images/shared/edit.svg" width="16" alt="edit" class="ui-action-icon" />
+                <img src="assets/images/shared/edit.svg" width="16" alt="" class="ui-action-icon" />
               </button>
             }
             @if (privacyEditing) {

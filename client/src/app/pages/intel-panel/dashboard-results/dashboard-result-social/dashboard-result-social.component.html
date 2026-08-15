@@ -17,19 +17,19 @@
             <div class="ml-auto flex shrink-0 items-start gap-[20px] self-start">
             <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" [appTooltip]="'Open CTI Graph' | translate" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
               <div class="p-[0_0_10px_10px]">
-                <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+                <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="" aria-hidden="true" class="ui-action-icon" />
               </div>
             </div>
             <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
               <div class="p-[0_0_10px_10px]">
-                <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
+                <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="" aria-hidden="true" class="ui-action-icon" />
               </div>
             </a>
             </div>
           }
         </div>
         <div class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-          <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
+          <img alt="" aria-hidden="true" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
           <h2 class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)] max-[640px]:text-[18px]">
             @if (item.m_sender_name; as senderName) {
               {{ senderName.startsWith('@') ? senderName.substring(1) : senderName }}

@@ -13,8 +13,8 @@
 <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
   <div class="flex flex-wrap items-start justify-between gap-3">
     <div class="min-w-0">
-      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ getSectionTitle() }}</div>
-      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ getSectionDescription() }}</div>
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ getSectionTitle() | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ getSectionDescription() | translate }}</div>
     </div>
     <div class="ml-auto inline-flex max-w-full shrink-0 flex-wrap items-stretch justify-end overflow-hidden rounded-[9px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)] max-[640px]:w-full [body.light-theme_&]:border-[#d6e3ee] [body.light-theme_&]:bg-[#f8fbff]">
       <input data-testid="feeder-search-input" type="text" [value]="searchText" [placeholder]="'Search current page...' | translate" class="h-[38px] min-w-0 w-[260px] rounded-none border-0 bg-transparent px-3 text-sm text-[var(--color-text1)] outline-none transition focus:bg-[rgba(87,165,235,0.06)] max-[640px]:basis-full max-[640px]:w-full max-[640px]:border-b max-[640px]:border-[var(--color-border)] [body.light-theme_&]:bg-transparent" (input)="onSearchInput($any($event.target).value || '')" />
@@ -270,7 +270,7 @@
                   <div data-feeder-text-selectable="true" class="max-w-[260px] truncate font-semibold select-text" [title]="getScriptDisplayName(script)">{{ getScriptDisplayName(script) }}</div>
                 </td>
                 @if (canTransferOwnership()) {
-                  <td [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="px-4 py-2.5 text-[var(--color-text4)] select-text">{{ getOwnerLabel(script) }}</td>
+                  <td [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="px-4 py-2.5 text-[var(--color-text4)] select-text">{{ getOwnerLabel(script) | translate }}</td>
                 }
                 <td class="px-4 py-2.5">
                   <div class="max-w-[320px]">
@@ -395,7 +395,7 @@
             @if (canTransferOwnership()) {
               <div class="px-3 py-2">
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Owner' | translate }}</div>
-                <div [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="mt-0.5 break-all text-sm text-[var(--color-text3)] select-text">{{ getOwnerLabel(script) }}</div>
+                <div [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="mt-0.5 break-all text-sm text-[var(--color-text3)] select-text">{{ getOwnerLabel(script) | translate }}</div>
               </div>
             }
             <div class="px-3 py-2">

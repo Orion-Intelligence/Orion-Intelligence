@@ -5,7 +5,7 @@
 @if (errorMessage && !isScanning) {
   <div class="absolute left-3 right-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-red-500/30 bg-red-500/12 px-[14px] py-[10px] text-[12px] text-red-300 [body.light-theme_&]:border-red-300 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700 max-[943px]:left-2 max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-none max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
     <i class="bi bi-exclamation-triangle-fill"></i>
-    {{ errorMessage }}
+    {{ errorMessage | translate }}
   </div>
 }
 
@@ -55,7 +55,7 @@
         } @else if (sidebarError) {
           <div class="rounded-[12px] border border-rose-400/25 bg-rose-500/10 p-3 [body.light-theme_&]:border-rose-200 [body.light-theme_&]:bg-rose-50">
             <div class="text-[14px] font-medium text-rose-200 [body.light-theme_&]:text-rose-700">{{ 'Unable to load details' | translate }}</div>
-            <p class="mt-1 text-[12px] text-rose-200/80 [body.light-theme_&]:text-rose-600">{{ sidebarError }}</p>
+            <p class="mt-1 text-[12px] text-rose-200/80 [body.light-theme_&]:text-rose-600">{{ sidebarError | translate }}</p>
           </div>
         } @else if (selectedEntity?.type === 'aircraft' && selectedEntity?.data) {
           <app-aircraft-details-panel [aircraft]="selectedEntity!.data"></app-aircraft-details-panel>

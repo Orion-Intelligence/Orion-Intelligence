@@ -5,6 +5,7 @@ import { DashboardService } from '../../../../services/dashboard/dashboard.servi
 import { SubscriptionService } from '../../../../services/dashboard/subscription.service';
 import { NexusChatService } from '../nexus-chat.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-ai-summary',
@@ -24,7 +25,7 @@ export class AiSummaryComponent {
 
   readonly content = input<string | null | undefined>(null);
 
-  constructor(private readonly nexusChatService: NexusChatService, private readonly subscriptionService: SubscriptionService, private readonly dashboardService: DashboardService, destroyRef: DestroyRef) {
+  constructor(private readonly nexusChatService: NexusChatService, private readonly subscriptionService: SubscriptionService, private readonly dashboardService: DashboardService, private readonly translationService: TranslationService, destroyRef: DestroyRef) {
     destroyRef.onDestroy(() => {
       this.activeRequest?.unsubscribe();
     });
@@ -54,12 +55,12 @@ export class AiSummaryComponent {
           return;
         }
 
-        this.summary.set(this.nexusChatService.getNexusSummary(response) || 'No summary available');
+        this.summary.set(this.nexusChatService.getNexusSummary(response) || this.translationService.translate('No summary available'));
         this.step.set('');
         this.isLoading.set(false);
       },
       error: () => {
-        this.summary.set('No summary available');
+        this.summary.set(this.translationService.translate('No summary available'));
         this.step.set('');
         this.isLoading.set(false);
       },

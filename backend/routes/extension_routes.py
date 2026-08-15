@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect, status
 from starlette.responses import JSONResponse
 
 from configs.app_dependency import get_current_user
@@ -79,3 +79,14 @@ async def extension_logout():
     resp = JSONResponse(content={"detail": "Logged out"})
     resp.delete_cookie(ACCESS_COOKIE, path=EXTENSION_COOKIE_PATH)
     return resp
+
+
+@extension_routes.websocket("/api/extension/socket")
+async def extension_socket(websocket: WebSocket):
+    await websocket.accept()
+    await websocket.send_json({"detail": "Connected"})
+    try:
+        while True:
+            await websocket.receive_text()
+    except WebSocketDisconnect:
+        return

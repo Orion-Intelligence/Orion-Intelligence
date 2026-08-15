@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { ProfileComponent } from '../../profile/profile.component';
 import { NavigationEnd, Router, UrlTree } from '@angular/router';
 import { filter } from 'rxjs';
-import { NgClass, NgOptimizedImage, TitleCasePipe } from '@angular/common';
+import { NgClass, NgOptimizedImage } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { SupportComponent } from "../../support/support.component";
@@ -12,7 +12,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
 @Component({
   selector: 'app-dashboard-header',
   standalone: true,
-  imports: [FormsModule, ProfileComponent, NgClass, TitleCasePipe, NgOptimizedImage, SupportComponent, TranslatePipe],
+  imports: [FormsModule, ProfileComponent, NgClass, NgOptimizedImage, SupportComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-header.component.html',
 })

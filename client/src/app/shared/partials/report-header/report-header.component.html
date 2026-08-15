@@ -1,13 +1,13 @@
 <div class="flex justify-end">
   <div class="mr-[12px] mt-[16px] inline-flex items-stretch overflow-visible rounded-[7px] border border-[var(--color-border)] bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-[#c7d5e6] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!shadow-none sm:mr-[35px] sm:mt-[20px] [body.light-theme_&]:[&>.w-px]:!border-l [body.light-theme_&]:[&>.w-px]:!border-l-[#8ea6c1] [body.light-theme_&]:[&>.w-px]:!bg-[#8ea6c1] [body.light-theme_&]:[&>.w-px]:!opacity-100">
     <button (click)="openExportChoice()" [appTooltip]="'Export Report' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-transparent [body.light-theme_&&]:!bg-transparent [body.light-theme_&&]:hover:!bg-[#cfe0f4] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Print" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
+      <img alt="" height="25" ngSrc="assets/images/shared/theme/print.svg" width="25" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
     </button>
 
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
       <div class="report-language-picker relative">
         <button (click)="toggleLanguageDropdown($event)" [appTooltip]="'Translator' | translate" [attr.aria-expanded]="isLanguageDropdownOpen()" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-transparent [body.light-theme_&&]:!bg-transparent [body.light-theme_&&]:hover:!bg-[#cfe0f4] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-          <img alt="background" height="25" ngSrc="assets/images/shared/translate.svg" width="25" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]">
+          <img alt="" height="25" ngSrc="assets/images/shared/translate.svg" width="25" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]">
         </button>
         @if (isLanguageDropdownOpen()) {
           <div class="absolute right-0 top-[calc(100%+8px)] z-[1400] w-[248px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-750)] p-2 shadow-[0_16px_30px_rgba(2,6,23,0.22)]">
@@ -16,7 +16,7 @@
             <div class="max-h-[320px] overflow-y-auto pr-1">
               @for (language of languageOptions; track language.code) {
                 <button type="button" class="flex h-9 w-full items-center justify-between gap-3 rounded-[8px] px-2 text-left text-sm font-medium transition-colors" [ngClass]="getActiveLanguage() === language.code ? 'bg-[var(--color-blue-640)] text-white' : 'text-[var(--color-text1)] hover:bg-[var(--color-blue-810)]'" (click)="langUpdate(language.code)">
-                  <span class="min-w-0 truncate">{{ language.name }}</span>
+                  <span class="min-w-0 truncate">{{ language.name | translate }}</span>
                   <span class="shrink-0 text-[11px] font-semibold uppercase opacity-75">{{ language.code }}</span>
                 </button>
               }
@@ -28,27 +28,27 @@
     @if (appService.getConfig().appSettings.ai_endpoint_enabled && content()) {
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
       <button (click)="aiSuggest()" [appTooltip]="'AI Summary' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-transparent [body.light-theme_&&]:!bg-transparent [body.light-theme_&&]:hover:!bg-[#cfe0f4] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="AI Summary" height="25" ngSrc="assets/images/shared/theme/ai.svg" width="25" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
+        <img alt="" height="25" ngSrc="assets/images/shared/theme/ai.svg" width="25" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
       </button>
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
       <button (click)="shareResult()" [appTooltip]="'Share' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-transparent [body.light-theme_&&]:!bg-transparent [body.light-theme_&&]:hover:!bg-[#cfe0f4] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
+        <img alt="" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
       </button>
     } @else {
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
       <button (click)="shareResult()" [appTooltip]="'Share' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-transparent [body.light-theme_&&]:!bg-transparent [body.light-theme_&&]:hover:!bg-[#cfe0f4] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="Share" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
+        <img alt="" height="22" ngSrc="assets/images/shared/theme/share.svg" width="22" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
       </button>
     }
     <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
 
     <button (click)="redirectToUrl()" [appTooltip]="'Open Breach Link' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-transparent [body.light-theme_&&]:!bg-transparent [body.light-theme_&&]:hover:!bg-[#cfe0f4] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-      <img alt="Open Breach Link" height="16" ngSrc="assets/images/shared/theme/redirect.svg" width="16" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
+      <img alt="" height="16" ngSrc="assets/images/shared/theme/redirect.svg" width="16" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
     </button>
     @if (showCtiGraph()) {
       <div class="my-[10px] w-px bg-[var(--color-border)]"></div>
       <button (click)="open_graph()" [appTooltip]="'Open CTI Graph' | translate" class="flex h-[40px] w-[40px] items-center justify-center border-0 bg-[var(--color-blue-750)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!border-transparent [body.light-theme_&&]:!bg-transparent [body.light-theme_&&]:hover:!bg-[#cfe0f4] p-[5px] transition-colors duration-300 hover:bg-[var(--color-blue-810)]">
-        <img alt="Graph" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
+        <img alt="" height="17" ngSrc="assets/images/sidebar/graph.svg" width="17" class="ui-action-icon [body.light-theme_&]:[filter:brightness(0)_saturate(100%)_invert(21%)_sepia(16%)_saturate(1250%)_hue-rotate(176deg)_brightness(94%)_contrast(89%)] [body.light-theme_&]:!opacity-[92%]" />
       </button>
     }
   </div>

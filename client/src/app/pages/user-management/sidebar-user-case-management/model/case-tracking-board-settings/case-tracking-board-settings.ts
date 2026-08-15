@@ -6,10 +6,12 @@ import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { CaseStatusBoardConfig, CaseStatusBoardItem, DEFAULT_CASE_STATUS_BOARD_CONFIG } from '../status-board-config.model';
+import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-case-tracking-board-settings',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-tracking-board-settings.html'
 })
@@ -19,7 +21,7 @@ export class CaseTrackingBoardSettings implements OnInit {
   isSaving = false;
   errorText = '';
 
-  constructor( private router: Router, private caseService: CaseManagement, private appService: AppService, private messageNotificationService: MessageNotificationService ) { }
+  constructor( private router: Router, private caseService: CaseManagement, private appService: AppService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService ) { }
 
   ngOnInit(): void {
     this.loadConfig();
@@ -34,7 +36,7 @@ export class CaseTrackingBoardSettings implements OnInit {
       },
       error: err => {
         this.isLoading = false;
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to load status board settings');
+        this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to load status board settings'));
       }
     });
   }
@@ -52,11 +54,11 @@ export class CaseTrackingBoardSettings implements OnInit {
       next: config => {
         this.config = this.normalizeConfig(config);
         this.isSaving = false;
-        this.messageNotificationService.show('Status board settings saved', 'success');
+        this.messageNotificationService.show(this.translationService.translate('Status board settings saved'), 'success');
       },
       error: err => {
         this.isSaving = false;
-        this.errorText = err?.error?.detail || 'Failed to save status board settings';
+        this.errorText = err?.error?.detail || this.translationService.translate('Failed to save status board settings');
       }
     });
   }
@@ -88,16 +90,16 @@ export class CaseTrackingBoardSettings implements OnInit {
     const names = this.config.statuses.map(status => (status.label || '').trim().toLowerCase());
     const values = this.config.statuses.map(status => status.value.trim().toLowerCase());
     if (this.config.statuses.some(status => !status.label.trim())) {
-      return 'Every status needs a display name';
+      return this.translationService.translate('Every status needs a display name');
     }
     if (new Set(names).size !== names.length) {
-      return 'Duplicate status display names are not allowed';
+      return this.translationService.translate('Duplicate status display names are not allowed');
     }
     if (new Set(values).size !== values.length) {
-      return 'Duplicate status keys are not allowed';
+      return this.translationService.translate('Duplicate status keys are not allowed');
     }
     if (!this.config.statuses.some(status => status.value === 'new') || !this.config.statuses.some(status => status.value === 'closed')) {
-      return 'New and Closed statuses are required';
+      return this.translationService.translate('New and Closed statuses are required');
     }
     return '';
   }

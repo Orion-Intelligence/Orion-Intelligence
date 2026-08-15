@@ -184,27 +184,28 @@ export class AlertNotificationComponent implements OnChanges {
     const d = new Date(date + 'Z');
     const now = new Date();
     const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+    const formatter = new Intl.RelativeTimeFormat(document.documentElement.lang || 'en', { numeric: 'always' });
     if (seconds < 60) {
-      return `${seconds} sec ago`;
+      return formatter.format(-seconds, 'second');
     }
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) {
-      return `${minutes} min ago`;
+      return formatter.format(-minutes, 'minute');
     }
     const hours = Math.floor(minutes / 60);
     if (hours < 24) {
-      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      return formatter.format(-hours, 'hour');
     }
     const days = Math.floor(hours / 24);
     if (days < 30) {
-      return `${days} day${days > 1 ? 's' : ''} ago`;
+      return formatter.format(-days, 'day');
     }
     const months = Math.floor(days / 30);
     if (months < 12) {
-      return `${months} month${months > 1 ? 's' : ''} ago`;
+      return formatter.format(-months, 'month');
     }
     const years = Math.floor(months / 12);
-    return `${years} year${years > 1 ? 's' : ''} ago`;
+    return formatter.format(-years, 'year');
   }
 
   seeDetails(_category: string, hash: string) {
