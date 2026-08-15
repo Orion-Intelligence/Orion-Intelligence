@@ -4,9 +4,11 @@ export interface ApiEnvelope<T> {
     status?: string;
     message?: unknown;
     result?: T;
-    error_code?: string;
-    login_url?: string;
-    error_platform?: string;
+}
+export interface ScanStatusResponse extends ApiEnvelope<PlatformResult[]> {
+    profile_username?: string;
+    progress?: number;
+    step?: string;
 }
 export interface Job {
     id: string;
@@ -55,7 +57,6 @@ export interface SocialPost {
     source?: string;
     likes: string;
     comments: string;
-    collected_comments_count?: string;
     comment_items?: string[];
     comment_details?: SocialPostComment[];
     shares: string;
@@ -98,7 +99,6 @@ export interface PlatformResult {
     resultSource?: SocialResultSource;
     description?: string;
     followers?: number;
-    joiningDate?: string;
     email?: string;
     allMetadata: Record<string, any>;
     profileDetails?: ProfileDetails | null;

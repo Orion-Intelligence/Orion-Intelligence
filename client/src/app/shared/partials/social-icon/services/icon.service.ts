@@ -171,11 +171,12 @@ export class IconService {
   }
 
   getWhiteIconDataUrl(platformName: string, options: IconOptions = { type: 'default' }): Promise<string> {
-    const cacheKey = `${platformName}-${options.type}`;
+    const safePlatform = platformName ?? '';
+    const cacheKey = `${safePlatform}-${options.type}`;
     if (this.iconCache.has(cacheKey)) {
       return Promise.resolve(this.iconCache.get(cacheKey)!);
     }
-    const lowerCasePlatform = platformName.toLowerCase();
+    const lowerCasePlatform = safePlatform.toLowerCase();
     const slug = iconMap[lowerCasePlatform] || lowerCasePlatform.replace(/[\s.]+/g, '');
     const pathData = this.getSimpleIconPath(slug);
     const svgText = pathData

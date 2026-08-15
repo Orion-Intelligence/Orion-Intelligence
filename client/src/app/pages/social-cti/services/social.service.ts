@@ -2,7 +2,7 @@ import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Job, PlatformResult, ScanEvent } from '../models/social-scan.models';
+import { Job, ScanEvent } from '../models/social-scan.models';
 import { SocialScanService } from './social-scan.service';
 import { SocialStorageService } from './social-storage.service';
 
@@ -12,7 +12,11 @@ export class SocialService {
   private readonly storageService = inject(SocialStorageService);
   private readonly scanCancelSubjects = new Map<string, Subject<void>>();
 
-  initiateScan(username: string, destroyRef: DestroyRef): boolean {
+  initiateScan(rawUsername: string, destroyRef: DestroyRef): boolean {
+    const username = rawUsername.trim().replace(/^@+/, '').toLowerCase();
+    if (!username) {
+      return false;
+    }
     if (this.storageService.sidebarState.jobs().some(job => job.username === username && (job.status === 'in_progress' || job.status === 'queued'))) {
       return false;
     }
@@ -26,7 +30,6 @@ export class SocialService {
       step: shouldQueue ? 'Queued' : 'Starting',
     };
     this.storageService.sidebarState.jobs.update(jobs => [job, ...jobs.filter(currentJob => currentJob.username !== username)]);
-    this.persistProfiles(job.username, [], 'pending', destroyRef);
     if (!shouldQueue) {
       this.runScan(job, this.scanService.performScan(job.username), destroyRef);
     }
@@ -44,7 +47,7 @@ export class SocialService {
       step: `Scanning ${fileName}`,
     };
     this.storageService.sidebarState.jobs.update(jobs => [job, ...jobs]);
-    this.runScan(job, this.scanService.performImageScan(base64Image), destroyRef);
+    this.runScan(job, this.scanService.performImageScan(base64Image, job.username), destroyRef);
   }
 
   cancelScan(jobId: string, destroyRef: DestroyRef): void {
@@ -52,6 +55,7 @@ export class SocialService {
     this.cancelScanRequest(jobId);
     this.storageService.sidebarState.jobs.update(jobs => jobs.filter(job => job.id !== jobId));
     if (cancelledJob?.status === 'in_progress') {
+      this.scanService.cancelScan().pipe(takeUntilDestroyed(destroyRef)).subscribe({ error: () => void 0 });
       this.startNextQueuedScan(destroyRef);
     }
   }
@@ -71,7 +75,7 @@ export class SocialService {
 
     const activeJob = this.storageService.sidebarState.jobs().find(job => job.status === 'in_progress');
     if (activeJob && !this.scanCancelSubjects.has(activeJob.id)) {
-      this.runScan(activeJob, this.scanService.performScan(activeJob.username), destroyRef);
+      this.runScan(activeJob, this.scanService.resumeScan(activeJob.username), destroyRef);
       return;
     }
     this.startNextQueuedScan(destroyRef);
@@ -100,7 +104,7 @@ export class SocialService {
     this.scanCancelSubjects.set(job.id, cancel$);
     scan$.pipe(takeUntil(cancel$), takeUntilDestroyed(destroyRef)).subscribe({
       next: event => this.setScanEvent(job, event, destroyRef),
-      error: () => this.setScanFailed(job, destroyRef),
+      error: (error: unknown) => this.setScanFailed(job, destroyRef, error instanceof Error ? error.message : ''),
       complete: () => this.scanCancelSubjects.delete(job.id),
     });
   }
@@ -118,31 +122,20 @@ export class SocialService {
       keyUsername: job.username,
       resultSource: platform.resultSource ?? ('normal' as const),
     }));
-    this.storageService.profilesState.scanResults.update(results => {
-      const existingPlatforms = results.get(job.username) ?? [];
-      return new Map(results).set(job.username, [...existingPlatforms, ...platforms]);
-    });
+    this.storageService.profilesState.scanResults.update(results => new Map(results).set(job.username, platforms));
     this.storageService.sidebarState.activeUsername.set(job.username);
     this.storageService.sidebarState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
       ? { ...currentJob, status: 'completed', progress: 100, step: 'Completed' }
       : currentJob));
-    this.persistProfiles(job.username, platforms, 'complete', destroyRef);
     this.startNextQueuedScan(destroyRef);
   }
 
-  private setScanFailed(job: Job, destroyRef: DestroyRef): void {
+  private setScanFailed(job: Job, destroyRef: DestroyRef, reason = ''): void {
     this.storageService.sidebarState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
-      ? { ...currentJob, status: 'failed', step: 'Scan failed' }
+      ? { ...currentJob, status: 'failed', step: reason === 'Scan cancelled' ? reason : 'Scan failed' }
       : currentJob));
-    this.persistProfiles(job.username, [], 'failed', destroyRef);
     this.scanCancelSubjects.delete(job.id);
     this.startNextQueuedScan(destroyRef);
-  }
-
-  private persistProfiles(username: string, profiles: PlatformResult[], status: string, destroyRef: DestroyRef): void {
-    this.storageService.saveProfiles(username, profiles, false, status)
-      .pipe(takeUntilDestroyed(destroyRef))
-      .subscribe();
   }
 
   private cancelScanRequest(jobId: string): void {

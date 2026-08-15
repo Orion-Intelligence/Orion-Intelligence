@@ -14,7 +14,6 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 })
 export class HomeMenuComponent {
   isCollapsed = input.required<boolean>();
-  searchTerm = input.required<string>();
   jobs = input.required<Job[]>();
   resultUsernames = input.required<Set<string>>();
   activeUsername = input<string | null>(null);
@@ -24,11 +23,7 @@ export class HomeMenuComponent {
   retryScan = output<Job>();
   deleteRequested = output<string>();
   visibleJobsCount = signal(10);
-  jobsWithFilter = computed(() => {
-    const term = this.searchTerm().toLowerCase();
-    return this.jobs().filter(job => !term || job.username.toLowerCase().includes(term));
-  });
-  displayJobs = computed(() => this.jobsWithFilter().slice(0, this.visibleJobsCount()));
+  displayJobs = computed(() => this.jobs().slice(0, this.visibleJobsCount()));
 
   loadMoreJobs(): void {
     this.visibleJobsCount.update(c => c + 10);

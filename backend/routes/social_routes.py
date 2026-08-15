@@ -14,6 +14,7 @@ from orion.api.interactive.social_manager.social_models.search_social_param_mode
     SocialVideosRequest,
 )
 from orion.api.interactive.social_manager.social_model import social_model
+from orion.api.interactive.social_manager.social_scanner import social_scanner
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 
 social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
@@ -24,7 +25,25 @@ social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTI
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(request: Request, param: SocialReconRequest = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().search_recon(param, current_user, request)
+    return await social_scanner.get_instance().start_recon(current_user, request, param.query)
+
+
+@social_routes.post(
+    "/api/social/recon/status",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def social_scan_status(request: Request, param: SocialReconRequest = Body(...), current_user=Depends(get_current_user)):
+    return await social_scanner.get_instance().status(current_user, request, param.query)
+
+
+@social_routes.post(
+    "/api/social/recon/cancel",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def cancel_social_scan(current_user=Depends(get_current_user)):
+    return await social_scanner.get_instance().cancel(current_user)
 
 
 @social_routes.post(
@@ -68,7 +87,10 @@ async def search_dynamic_online_images(request: Request, param: SocialOnlineImag
     ],
 )
 async def search_dynamic_image(request: Request, payload: dict = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().search_image(payload, current_user, request)
+    image_base64 = (payload or {}).get("image_base64")
+    if not image_base64:
+        return {"status": "error", "message": "image_base64_required"}
+    return await social_scanner.get_instance().start_image_recon(current_user, request, image_base64, (payload or {}).get("profile_username"))
 
 
 @social_routes.post(
@@ -151,8 +173,7 @@ async def append_social_data(data: dict = Body(...), current_user=Depends(get_cu
     profile_username = (data or {}).get("profile_username") or (data or {}).get("root_username") or (data or {}).get("username") or ""
     profiles = (data or {}).get("profiles") or []
     replace = bool((data or {}).get("replace"))
-    status = str((data or {}).get("status") or "complete")
-    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, replace=replace, status=status)
+    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, replace=replace)
 
 
 @social_routes.get(

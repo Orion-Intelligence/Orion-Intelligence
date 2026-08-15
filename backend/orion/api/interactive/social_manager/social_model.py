@@ -48,6 +48,38 @@ class social_model:
         self._engine = mongo_controller.get_instance().get_engine()
 
     @staticmethod
+    def flatten_recon_profile(item: dict, profile_username: str) -> dict:
+        if not isinstance(item, dict) or item.get("platform"):
+            return item
+        metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
+        data = item.get("data") if isinstance(item.get("data"), dict) else {}
+        if not metadata and "platform" not in item:
+            return item
+        ids = (data.get("platform_profile") or {}).get("ids") if isinstance(data.get("platform_profile"), dict) else None
+        if not isinstance(ids, dict):
+            ids = data.get("ids") if isinstance(data.get("ids"), dict) else {}
+        platform = str(metadata.get("platform") or "")
+        followers = ids.get("follower_count", ids.get("followers"))
+        try:
+            followers = int(followers) if followers is not None and str(followers).strip() != "" else None
+        except (TypeError, ValueError):
+            followers = None
+        return {
+            "platform": platform,
+            "platformKey": str(metadata.get("platform_key") or platform.lower()),
+            "username": str(metadata.get("username") or metadata.get("social_handle") or profile_username),
+            "url": str(metadata.get("url") or ""),
+            "timestamp": metadata.get("timestamp"),
+            "status": metadata.get("status") or "active",
+            "isSelected": bool(item.get("isSelected", False)),
+            "keyUsername": item.get("keyUsername") or profile_username,
+            "resultSource": item.get("resultSource") or "normal",
+            "description": ids.get("bio") or ids.get("description"),
+            "followers": followers,
+            "allMetadata": ids,
+        }
+
+    @staticmethod
     def _document_payload(record: dict) -> dict:
         profiles = record.get("profiles")
         if not isinstance(profiles, list):
@@ -56,6 +88,7 @@ class social_model:
             if isinstance(legacy_profile, dict):
                 profiles = [legacy_profile]
         profile_username = record.get("profile_username") or record.get("root_username") or ""
+        profiles = [social_model.flatten_recon_profile(item, profile_username) for item in profiles if isinstance(item, dict)]
         return {
             "user_id": record.get("user_id"),
             "profile_username": profile_username,
@@ -127,6 +160,7 @@ class social_model:
                 "profile_username": profile_username,
                 "profiles": [],
                 "count": 0,
+                "status": payload.get("status"),
                 "updated_at": payload.get("updated_at"),
             })
             current["profiles"].extend(payload.get("profiles") or [])
@@ -134,47 +168,49 @@ class social_model:
             updated_at = payload.get("updated_at")
             if updated_at and (not current.get("updated_at") or updated_at > current["updated_at"]):
                 current["updated_at"] = updated_at
+                current["status"] = payload.get("status")
         return sorted(merged.values(), key=lambda item: item.get("updated_at") or datetime.min.replace(tzinfo=UTC), reverse=True)
 
-    async def social_search(self, model, key: str, current_user=None, request=None) -> Any:
+    async def social_request(self, payload: Any, key: str, headers: dict[str, str]) -> tuple[int, Any]:
         last_error = ""
+        for base_url in self._social_api_base_urls():
+            try:
+                async with httpx.AsyncClient() as client:
+                    if isinstance(payload, dict) and "file_bytes" in payload:
+                        response = await client.post(
+                            f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
+                            files={"file": (payload["filename"], payload["file_bytes"], "application/octet-stream")},
+                            headers=headers,
+                            timeout=120,
+                        )
+                    else:
+                        response = await client.post(
+                            f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
+                            json=payload,
+                            headers=headers,
+                            timeout=120,
+                        )
+                if response.status_code != 200:
+                    return response.status_code, None
+                return 200, response.json()
+            except httpx.RequestError as exc:
+                last_error = str(exc)
+                continue
+        return 0, last_error
+
+    async def social_search(self, model, key: str, current_user=None, request=None) -> Any:
         headers = self._social_headers(current_user, request)
         payload = model.model_dump() if hasattr(model, "model_dump") else model
         payload = self._normalize_social_cursor(payload, key) if isinstance(payload, dict) else payload
         try:
-            for base_url in self._social_api_base_urls():
-                try:
-                    async with httpx.AsyncClient() as client:
-                        if isinstance(model, dict) and "file_bytes" in model:
-                            response = await client.post(
-                                f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
-                                files={"file": (model["filename"], model["file_bytes"], "application/octet-stream")},
-                                headers=headers,
-                                timeout=120,
-                            )
-                        else:
-                            response = await client.post(
-                                f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
-                                json=payload,
-                                headers=headers,
-                                timeout=120,
-                            )
-
-                    if response.status_code != 200:
-                        return JSONResponse(
-                            status_code=response.status_code,
-                            content={"detail": "Social service request failed"},
-                        )
-                    return response.json()
-                except httpx.RequestError as exc:
-                    last_error = str(exc)
-                    continue
+            status_code, body = await self.social_request(payload, key, headers)
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Failed to process social search"})
-        return JSONResponse(status_code=502, content={"detail": "Social service unreachable", "error": last_error})
-
-    async def search_recon(self, param, current_user=None, request=None):
-        return await self.social_search(param, "recon", current_user, request)
+        if status_code == 200:
+            return body
+        if status_code == 0:
+            return JSONResponse(status_code=502, content={"detail": "Social service unreachable", "error": body})
+        return JSONResponse(status_code=status_code, content={"detail": "Social service request failed"})
 
     async def search_forum_profiles(self, param):
         query = (getattr(param, "query", "") or "").strip().lstrip("@").lower()
@@ -291,11 +327,7 @@ class social_model:
             return JSONResponse(status_code=500, content={"detail": "Extension download failed"})
         return JSONResponse(status_code=502, content={"detail": "Social service unreachable", "error": last_error})
 
-    async def search_image(self, payload: dict, current_user=None, request=None):
-        image_base64 = payload.get("image_base64")
-        if not image_base64:
-            return {"status": "error", "message": "image_base64_required"}
-
+    def decode_image_payload(self, image_base64: Any) -> bytes:
         if not isinstance(image_base64, str):
             raise HTTPException(status_code=400, detail="Invalid image_base64")
         image_base64 = image_base64.strip()
@@ -310,10 +342,9 @@ class social_model:
             raise HTTPException(status_code=400, detail="Invalid image_base64") from exc
         if len(file_bytes) > self.SOCIAL_IMAGE_MAX_BYTES:
             raise HTTPException(status_code=413, detail="Image too large! Maximum allowed size is 10 MB")
+        return file_bytes
 
-        return await self.social_search({"file_bytes": file_bytes, "filename": "upload.png"}, "recon/image", current_user, request)
-
-    async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], replace: bool = False, status: str = "complete"):
+    async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], replace: bool = False):
         try:
             normalized_username = profile_username.strip().lstrip("@").lower()
             if not normalized_username:
@@ -337,7 +368,7 @@ class social_model:
                     "profile_username": normalized_username,
                     "created_at": now_utc,
                 },
-                "$set": {"updated_at": now_utc, "status": status},
+                "$set": {"updated_at": now_utc},
             }
             if normalized_profiles:
                 if replace:
@@ -355,7 +386,6 @@ class social_model:
                 "user_id": user_id,
                 "profile_username": normalized_username,
                 "saved": len(normalized_profiles),
-                "status": status,
             }
 
         except Exception:

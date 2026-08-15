@@ -24,8 +24,8 @@ export class SocialStorageService {
       map(() => undefined),);
   }
 
-  saveProfiles(username: string, profiles: PlatformResult[], replace = false, status = 'complete'): Observable<unknown> {
-    return this.api.post('social/data', { profile_username: username, profiles, replace, status });
+  saveProfiles(username: string, profiles: PlatformResult[], replace = false): Observable<unknown> {
+    return this.api.post('social/data', { profile_username: username, profiles, replace });
   }
 
   deleteProfiles(username: string): Observable<unknown> {
@@ -56,8 +56,8 @@ export class SocialStorageService {
     if (document.status === 'pending') {
       return { id: `stored-${document.profile_username}`, username: document.profile_username, status: 'in_progress', progress: 5, step: 'Resuming' };
     }
-    if (document.status === 'failed') {
-      return { id: `stored-${document.profile_username}`, username: document.profile_username, status: 'failed', progress: 0, step: 'Scan failed' };
+    if (document.status === 'failed' || document.status === 'cancelled') {
+      return { id: `stored-${document.profile_username}`, username: document.profile_username, status: 'failed', progress: 0, step: document.status === 'cancelled' ? 'Scan cancelled' : 'Scan failed' };
     }
     return {
       id: `stored-${document.profile_username}`,

@@ -780,15 +780,7 @@ export class SocialProfileListingComponent {
   }
 
   private comparePlatforms(a: PlatformResult, b: PlatformResult): number {
-    const aPriority = this.isPriorityPlatform(a.platform);
-    const bPriority = this.isPriorityPlatform(b.platform);
-    if (aPriority && !bPriority) {
-      return -1;
-    }
-    if (!aPriority && bPriority) {
-      return 1;
-    }
-    return a.platform.localeCompare(b.platform);
+    return (a.platform ?? '').localeCompare(b.platform ?? '');
   }
 
   private getVisiblePlatforms(platforms: PlatformResult[]): PlatformResult[] {
