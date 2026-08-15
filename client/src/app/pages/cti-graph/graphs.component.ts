@@ -23,6 +23,7 @@ import { UiDropdownOption } from '../../shared/partials/ui-dropdown/ui-dropdown.
 import { splitCountryValues } from '../../shared/utils/country-normalization.util';
 import { GraphAdvancedBuilderPopupComponent } from './advanced-builder-popup/advanced-builder-popup.component';
 import { GraphAdvancedFilterChipModel, GraphAdvancedFilterModel, GraphBuilderLogicalOperator, GraphSearchMode, GraphSearchOptionModel, GraphSearchRequestModel } from './model/graph-builder.model';
+import { TranslationService } from '../../shared/services/translation.service';
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
 @Component({
@@ -36,6 +37,7 @@ type GraphNodeColor = NonNullable<ExtendedNode['color']>;
 export class GraphComponent implements OnInit, OnDestroy {
   private readonly proxied_resource = inject(ProxyController);
   private readonly changeDetector = inject(ChangeDetectorRef);
+  private readonly translationService = inject(TranslationService);
   private readonly maxNodeLabelLength = 28;
   private readonly edgeBaseColor = 'rgba(75, 85, 99, 0.8)';
   private readonly edgeHighlightColor = '#a78bfa';
@@ -689,7 +691,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
     return {
       graphKind: 'cti',
-      title: 'CTI Graph Intelligence Report',
+      title: this.translationService.translate('CTI Graph Intelligence Report'),
       sessionName: 'CTI Graph',
       generatedAtIso: new Date().toISOString(),
       nodes,
@@ -2131,7 +2133,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           isGroup: true,
           physics: false,
           subNodes,
-          nodeInfoHtml: `<strong>${this.escapeHtml(clusterLabel)}</strong><br><strong>Type:</strong> Cluster Group<br><strong>Reports:</strong> ${clusterDocumentIds.length}`,
+          nodeInfoHtml: `<strong>${this.escapeHtml(clusterLabel)}</strong><br><strong>${this.escapeHtml(this.translationService.translate('Type'))}:</strong> ${this.escapeHtml(this.translationService.translate('Cluster Group'))}<br><strong>${this.escapeHtml(this.translationService.translate('Reports'))}:</strong> ${clusterDocumentIds.length}`,
           font: { size: 14, color: this.getNodeLabelColor(), strokeWidth: 1 },
           size: 44,
           image: this.createGroupNodeSvg(clusterDocumentIds.length, false, clusterLabel, clusterKey),
@@ -2686,8 +2688,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     const type = this.formatTooltipLabel(node.nodeType || node.nodeClass || 'Node');
     const lines = [
       label ? `<strong>${this.escapeHtml(this.truncateTooltipText(label, 90))}</strong>` : '',
-      type ? `<strong>Type:</strong> ${this.escapeHtml(type)}` : '',
-      node.degree !== undefined ? `<strong>Connections:</strong> ${node.degree}` : ''
+      type ? `<strong>${this.escapeHtml(this.translationService.translate('Type'))}:</strong> ${this.escapeHtml(type)}` : '',
+      node.degree !== undefined ? `<strong>${this.escapeHtml(this.translationService.translate('Connections'))}:</strong> ${node.degree}` : ''
     ].filter(Boolean);
     return lines.join('<br>');
   }

@@ -241,7 +241,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           this.mailErrorState = true;
         }
         else {
-          this.configurationError = this.translationService.translate(`${field.label} is required`);
+          const translatedField = this.translationService.translate(field.label);
+          this.configurationError = this.translationService.translate('{field} is required').replace('{field}', translatedField);
         }
         return false;
       }

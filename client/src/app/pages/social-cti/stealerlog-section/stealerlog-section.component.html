@@ -76,8 +76,8 @@
 
 <app-export-choice-modal
   [visible]="isExportChoiceOpen()"
-  title="Export Records"
-  subtitle="Choose the export format."
+  [title]="'Export Records' | translate"
+  [subtitle]="'Choose the export format.' | translate"
   [options]="reportExportOptions"
   overlayTestId="social-dashboard-stealer-export-overlay"
   modalTestId="social-dashboard-stealer-export-modal"

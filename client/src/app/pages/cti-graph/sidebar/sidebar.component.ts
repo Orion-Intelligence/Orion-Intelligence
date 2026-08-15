@@ -1,7 +1,8 @@
-import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, HostListener, OnChanges, OnInit, SimpleChanges, input, output, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/sidebar-shell.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../model/cti-graph.model';
 
 @Component({
@@ -12,6 +13,8 @@ import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats } from '../model/cti
   imports: [SidebarShellComponent, TranslatePipe, FormsModule],
 })
 export class SidebarComponent implements OnInit, OnChanges {
+  private readonly translationService = inject(TranslationService);
+
   isCollapsed = false;
   isMobile = false;
   localMaxEdge = 25;
@@ -67,16 +70,18 @@ export class SidebarComponent implements OnInit, OnChanges {
   get queryValueLabel(): string {
     const filters = this.filters();
     if (!filters) {
-      return 'All';
+      return this.translationService.translate('All');
     }
     if (filters.selectedType === 'property') {
-      const value = filters.propertyValue || 'All';
+      const value = filters.propertyValue || this.translationService.translate('All');
       const type = filters.propertyType && filters.propertyType !== 'all'
-        ? this.formatLabel(filters.propertyType)
-        : 'Any entity';
+        ? this.translationService.translate(this.formatLabel(filters.propertyType))
+        : this.translationService.translate('Any entity');
       return `${type}: ${value}`;
     }
-    return this.formatLabel(filters.singleInput || 'all');
+    return filters.singleInput
+      ? this.formatLabel(filters.singleInput)
+      : this.translationService.translate('All');
   }
 
   get nodeLimitLabel(): string {

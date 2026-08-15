@@ -3,6 +3,7 @@ import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
 import { Component, ElementRef, HostListener, OnDestroy, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { TranslationService } from '../../services/translation.service';
 
 export interface UiDropdownOption {
   key: string;
@@ -43,6 +44,7 @@ export class UiDropdownComponent implements OnDestroy {
   readonly selectedValues = input<string[] | null | undefined>(null);
   readonly placeholder = input('Select');
   readonly searchPlaceholder = input('Search options');
+  readonly translateLabels = input(false);
   readonly searchable = input(true);
   readonly allowEmpty = input(false);
   readonly multiSelect = input(false);
@@ -61,15 +63,18 @@ export class UiDropdownComponent implements OnDestroy {
   overlayWidth = 0;
   readonly overlayPositions: ConnectedPosition[] = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 0 }];
 
-  constructor(private readonly hostElement: ElementRef<HTMLElement>) {}
+  constructor(private readonly hostElement: ElementRef<HTMLElement>, private readonly translationService: TranslationService) {}
 
   get selectedLabel(): string {
     if (this.multiSelect()) {
       const selectedValues = this.selectedValues() || [];
       if (!selectedValues.length) {
-        return this.placeholder();
+        return this.resolveUiLabel(this.placeholder());
       }
-      const labels = selectedValues.map(value => this.options().find(option => option.key === value)?.label || value);
+      const labels = selectedValues.map(value => {
+        const option = this.options().find(item => item.key === value);
+        return option ? this.resolveOptionLabel(option.label) : value;
+      });
       if (labels.length <= 2) {
         return labels.join(', ');
       }
@@ -78,15 +83,17 @@ export class UiDropdownComponent implements OnDestroy {
 
     const selected = this.selected();
     if (!selected) {
-      return this.placeholder();
+      return this.resolveUiLabel(this.placeholder());
     }
-    return this.options().find(option => option.key === selected)?.label || this.placeholder();
+    const option = this.options().find(item => item.key === selected);
+    return option ? this.resolveOptionLabel(option.label) : this.resolveUiLabel(this.placeholder());
   }
 
   get visibleOptions(): UiDropdownMenuOption[] {
     const query = this.searchTerm.trim().toLowerCase();
     const options: UiDropdownMenuOption[] = this.options().map(option => ({
       ...option,
+      label: this.resolveOptionLabel(option.label),
       trackKey: option.key,
       testKey: option.key,
     }));
@@ -94,7 +101,7 @@ export class UiDropdownComponent implements OnDestroy {
     if (this.shouldShowEmptyOption()) {
       options.unshift({
         key: null,
-        label: this.placeholder(),
+        label: this.resolveUiLabel(this.placeholder()),
         trackKey: '__empty__',
         testKey: null,
       });
@@ -153,7 +160,8 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   selectedChipLabel(value: string): string {
-    return this.options().find(option => option.key === value)?.label || value;
+    const option = this.options().find(item => item.key === value);
+    return option ? this.resolveOptionLabel(option.label) : value;
   }
 
   onButtonKeydown(event: KeyboardEvent): void {
@@ -444,6 +452,18 @@ export class UiDropdownComponent implements OnDestroy {
 
   private isPrintableKey(event: KeyboardEvent): boolean {
     return event.key.length === 1 && !event.altKey && !event.ctrlKey && !event.metaKey;
+  }
+
+  private resolveOptionLabel(label: string): string {
+    if (!this.translateLabels()) {
+      return label;
+    }
+    return this.resolveUiLabel(label);
+  }
+
+  private resolveUiLabel(label: string): string {
+    this.translationService.version();
+    return this.translationService.translate(label);
   }
 
   isLightTheme(): boolean {

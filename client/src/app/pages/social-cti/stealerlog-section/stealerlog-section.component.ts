@@ -8,6 +8,7 @@ import { STEALERLOG_EXPORT_OPTIONS } from '../../../shared/model/report/export-c
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-social-stealerlog-section',
@@ -21,6 +22,7 @@ export class StealerlogSectionComponent {
   private readonly fetchService = inject(SocialFetchService);
   private readonly exportBranding = inject(ExportBrandingService);
   private readonly reportExportService = inject(ReportExportService);
+  private readonly translationService = inject(TranslationService);
   private requestId = 0;
 
   username = input.required<string>();
@@ -127,7 +129,7 @@ export class StealerlogSectionComponent {
     const rows = this.buildExportRows();
     const payload: GraphReportPayload = {
       graphKind: 'social',
-      title: 'Stealer Logs Export',
+      title: this.translationService.translate('Stealer Logs Export'),
       sessionName: this.searchIdentity() || 'stealerlogs',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
@@ -136,7 +138,7 @@ export class StealerlogSectionComponent {
         search_query: this.searchIdentity() || '-',
         total_records: rows.length
       },
-      tables: [{ title: 'Stealer Logs', values: {}, columns: [...this.exportCsvColumns], rows }]
+      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...this.exportCsvColumns], rows }]
     };
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }

@@ -369,8 +369,8 @@
                 </div>
                 <app-export-choice-modal
                   [visible]="!!selectedStealerLogPlatform()"
-                  title="Export Records"
-                  subtitle="Choose the export format."
+                  [title]="'Export Records' | translate"
+                  [subtitle]="'Choose the export format.' | translate"
                   [options]="stealerLogExportOptions"
                   overlayTestId="social-stealerlog-export-overlay"
                   modalTestId="social-stealerlog-export-modal"

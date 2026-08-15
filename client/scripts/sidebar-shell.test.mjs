@@ -121,4 +121,12 @@ test('Sidebar consumers have focused E2E coverage and no stale pre-shell dashboa
     .map(file => fs.readFileSync(file, 'utf8'))
     .join('\n');
   assert(!cypressSource.includes('app-dashboard-sidebar > nav'), 'Cypress must not depend on the pre-shell direct nav structure');
+
+  const dashboardSidebar = fs.readFileSync(
+    path.join(appRoot, 'pages/dashboard/dashboard-sidebar/dashboard-sidebar.component.ts'),
+    'utf8',
+  );
+  assert.match(dashboardSidebar, /addEventListener\(['"]resize['"],\s*this\.resizeHandler\)/);
+  assert.match(dashboardSidebar, /removeEventListener\(['"]resize['"],\s*this\.resizeHandler\)/);
+  assert(!dashboardSidebar.includes("checkScreenWidth.bind(this)"), 'dashboard resize cleanup must use the registered listener reference');
 });

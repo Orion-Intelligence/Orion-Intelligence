@@ -4,9 +4,20 @@ import { TranslationService } from '../services/translation.service';
 @Pipe({ name: 'markdown', standalone: true, pure: false })
 export class MarkdownPipe implements PipeTransform {
   private readonly translationService = inject(TranslationService);
+  private cachedResult = '';
+  private cachedValue: string | null = null;
+  private cachedVersion = -1;
 
   transform(value: string | null | undefined): string {
-    return this.renderBlocks(value ?? '');
+    const normalizedValue = value ?? '';
+    const version = this.translationService.version();
+    if (normalizedValue === this.cachedValue && version === this.cachedVersion) {
+      return this.cachedResult;
+    }
+    this.cachedValue = normalizedValue;
+    this.cachedVersion = version;
+    this.cachedResult = this.renderBlocks(normalizedValue);
+    return this.cachedResult;
   }
 
   private renderBlocks(value: string): string {

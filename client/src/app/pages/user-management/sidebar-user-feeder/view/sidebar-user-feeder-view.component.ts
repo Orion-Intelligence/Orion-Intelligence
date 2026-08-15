@@ -361,7 +361,10 @@ export class SidebarUserFeederViewComponent implements OnChanges {
     this.feederService.setAllForRule(this.selectedRuleKey, enabled)
       .subscribe({
         next: (response) => {
-          this.messageNotificationService.show(response?.message || `${this.translationService.translate('Selected rule entries')} ${this.translationService.translate(enabled ? 'enabled' : 'disabled')} ${this.translationService.translate('successfully')}`, 'success');
+          const successMessage = this.translationService.translate(enabled
+            ? 'Selected rule entries enabled successfully'
+            : 'Selected rule entries disabled successfully');
+          this.messageNotificationService.show(response?.message || successMessage, 'success');
           this.rawScripts = this.rawScripts.map(script => ({ ...script, enabled }));
           this.scripts = this.scripts.map(script => ({ ...script, enabled }));
           this.displayedScripts = this.displayedScripts.map(script => ({ ...script, enabled }));
@@ -371,7 +374,10 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           this.clearScriptSelection();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail || `${this.translationService.translate('Failed to')} ${this.translationService.translate(enabled ? 'enable' : 'disable')} ${this.translationService.translate('selected rule entries')}`);
+          const errorMessage = this.translationService.translate(enabled
+            ? 'Failed to enable selected rule entries'
+            : 'Failed to disable selected rule entries');
+          this.messageNotificationService.show(error?.error?.detail || errorMessage);
         }
       });
   }

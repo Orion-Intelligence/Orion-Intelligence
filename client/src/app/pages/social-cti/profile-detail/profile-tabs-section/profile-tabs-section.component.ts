@@ -16,6 +16,7 @@ import { PROFILE_STEALERLOG_EXPORT_OPTIONS } from '../../../../shared/model/repo
 import { ReportExportService } from '../../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
@@ -27,6 +28,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 export class SocialProfileTabsSectionComponent {
   private readonly exportBranding = inject(ExportBrandingService);
   private readonly reportExportService = inject(ReportExportService);
+  private readonly translationService = inject(TranslationService);
   private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
 
@@ -261,7 +263,7 @@ export class SocialProfileTabsSectionComponent {
     const query = `${platformData.username || platformData.keyUsername} ${this.getPlatformStealerDomain(platformData)}`.trim();
     const payload: GraphReportPayload = {
       graphKind: 'social',
-      title: 'Stealer Logs Export',
+      title: this.translationService.translate('Stealer Logs Export'),
       sessionName: query || 'profile-stealerlogs',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
@@ -270,7 +272,7 @@ export class SocialProfileTabsSectionComponent {
         search_query: query || '-',
         total_records: rows.length
       },
-      tables: [{ title: 'Stealer Logs', values: {}, columns: [...this.stealerLogExportColumns], rows }]
+      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...this.stealerLogExportColumns], rows }]
     };
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }

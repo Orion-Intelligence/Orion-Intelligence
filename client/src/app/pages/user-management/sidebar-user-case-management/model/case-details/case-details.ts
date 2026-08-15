@@ -667,8 +667,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.caseService.revokeCaseShares(this.caseData.caseId).subscribe({
       next: result => {
         this.isShareRevoking = false;
-        this.messageNotificationService.show(
-          this.translate('{count} share links revoked.').replace('{count}', String(result.revokedCount || 0)), 'success');
+        this.messageNotificationService.show(this.translate('{count} share links revoked.').replace('{count}', String(result.revokedCount || 0)), 'success');
       },
       error: err => {
         this.isShareRevoking = false;
@@ -1007,8 +1006,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(
-        this.translate('Related entity {index} is invalid').replace('{index}', String(invalidIndex + 1)));
+      this.messageNotificationService.show(this.translate('Related entity {index} is invalid').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1057,8 +1055,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       || (artifact.type === 'report' && (!artifact.linkedReportSource || !artifact.linkedReportId)));
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(
-        this.translate('Artifact {index} is invalid').replace('{index}', String(invalidIndex + 1)));
+      this.messageNotificationService.show(this.translate('Artifact {index} is invalid').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1165,8 +1162,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const invalidIndex = (this.editedCase.tasks || []).findIndex(task => !task.title.trim());
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(
-        this.translate('Task {index} title is required').replace('{index}', String(invalidIndex + 1)));
+      this.messageNotificationService.show(this.translate('Task {index} title is required').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1227,8 +1223,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const invalidIndex = linkedCases.findIndex(link => !link.targetCaseId);
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(
-        this.translate('Linked case {index} target case is required').replace('{index}', String(invalidIndex + 1)));
+      this.messageNotificationService.show(this.translate('Linked case {index} target case is required').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1449,8 +1444,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (existingFileCount + files.length > this.maxArtifactFiles) {
-      this.messageNotificationService.show(
-        this.translate('Maximum {count} files can be attached to an artifact').replace('{count}', String(this.maxArtifactFiles)));
+      this.messageNotificationService.show(this.translate('Maximum {count} files can be attached to an artifact').replace('{count}', String(this.maxArtifactFiles)));
       return false;
     }
 

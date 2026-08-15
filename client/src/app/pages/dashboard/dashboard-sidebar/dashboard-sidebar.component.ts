@@ -26,6 +26,7 @@ import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/si
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
+  private readonly resizeHandler = () => this.checkScreenWidth();
   private readonly closeForSubscriptionHandler = () => {
     if (this.sidebar_default) {
       this.onToggleSidebar(this.mobile_menu_status);
@@ -63,7 +64,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       .subscribe((e: NavigationEnd) => {
         this.handleProfileRoute(e.urlAfterRedirects);
       });
-    window.addEventListener('resize', this.checkScreenWidth.bind(this));
+    window.addEventListener('resize', this.resizeHandler);
     window.addEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
     this.checkScreenWidth();
   }
@@ -81,7 +82,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    window.removeEventListener('resize', this.checkScreenWidth.bind(this));
+    window.removeEventListener('resize', this.resizeHandler);
     window.removeEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
   }
 

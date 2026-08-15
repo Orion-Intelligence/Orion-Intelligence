@@ -24,6 +24,30 @@ const uiMetadataProperties = new Set([
   'tooltip'
 ]);
 const translatedEnumNames = new Set(['AiWorkspacePrompt', 'SortType']);
+const visibleAttributes = new Set(['alt', 'aria-label', 'label', 'placeholder', 'title']);
+const ignoredVisibleText = new Set(['|', '-', '—', '–', '/', ':', '•', '·', '+', '×']);
+const technicalUiLiterals = new Set([
+  'ASN',
+  'CDN',
+  'CTI',
+  'Ctrl / ⌘',
+  'Enter',
+  'HSTS',
+  'HTTP',
+  'ID',
+  'IP',
+  'ISP',
+  'MW',
+  'RESULT|',
+  'SHA-256',
+  'TX',
+  'TXID',
+  'URL',
+  'URL:',
+  'WAF',
+  'WHERE',
+  'x',
+]);
 
 function walkFiles(root, extension, output = []) {
   for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
@@ -51,6 +75,44 @@ function isTranslationKeyCandidate(value) {
     && !/^(?:https?:\/\/|\/|[a-z]:\\)/i.test(key)
     && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(key)
     && !/^[a-z][a-z\d]*(?:_[a-z\d]+)+$/.test(key);
+}
+
+function isVisibleText(value) {
+  const text = normalizeKey(value);
+  return !!text && !ignoredVisibleText.has(text) && /[\p{L}]/u.test(text);
+}
+
+function isAllowedTechnicalText(value) {
+  const text = normalizeKey(value);
+  return technicalUiLiterals.has(text)
+    || /^(?:https?:\/\/|\/)/i.test(text)
+    || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(text);
+}
+
+function lineForOffset(source, offset) {
+  return source.slice(0, Math.max(0, offset)).split('\n').length;
+}
+
+function hasTranslatePipe(ast, seen = new WeakSet()) {
+  if (!ast || typeof ast !== 'object' || seen.has(ast)) {
+    return false;
+  }
+  seen.add(ast);
+  if (ast.constructor?.name === 'BindingPipe' && ast.name === 'translate') {
+    return true;
+  }
+  for (const [property, value] of Object.entries(ast)) {
+    if (['sourceSpan', 'span', 'nameSpan', 'keySpan', 'valueSpan', 'handlerSpan'].includes(property)) {
+      continue;
+    }
+    if (Array.isArray(value) && value.some(entry => hasTranslatePipe(entry, seen))) {
+      return true;
+    }
+    if (!Array.isArray(value) && hasTranslatePipe(value, seen)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function collectLiteralKeys(ast, output = new Set()) {
@@ -83,6 +145,14 @@ function collectTemplateKeys(source, sourceName, output, errors) {
   }
 
   const seen = new WeakSet();
+  const addHardcodedError = (node, kind, value) => {
+    const text = normalizeKey(value);
+    if (!isVisibleText(text) || isAllowedTechnicalText(text)) {
+      return;
+    }
+    const offset = node.sourceSpan?.start?.offset ?? node.value?.sourceSpan?.start ?? 0;
+    errors.push(`${sourceName}:${lineForOffset(source, offset)} has untranslated ${kind}: ${JSON.stringify(text)}`);
+  };
   const visit = node => {
     if (!node || typeof node !== 'object' || seen.has(node)) {
       return;
@@ -93,6 +163,25 @@ function collectTemplateKeys(source, sourceName, output, errors) {
         if (key) {
           output.add(key);
         }
+      }
+    }
+    else if (node.constructor?.name === 'Text') {
+      addHardcodedError(node, 'text', node.value);
+    }
+    else if (node.constructor?.name === 'BoundText') {
+      const ast = node.value?.ast;
+      if (ast?.constructor?.name === 'Interpolation' && !hasTranslatePipe(ast)) {
+        for (const value of ast.strings ?? []) {
+          addHardcodedError(node, 'interpolation text', value);
+        }
+      }
+    }
+    else if (node.constructor?.name === 'TextAttribute' && visibleAttributes.has(node.name)) {
+      addHardcodedError(node, `${node.name} attribute`, node.value);
+    }
+    else if (node.constructor?.name === 'BoundAttribute' && visibleAttributes.has(node.name) && !hasTranslatePipe(node.value)) {
+      for (const value of collectLiteralKeys(node.value)) {
+        addHardcodedError(node, `${node.name} binding`, value);
       }
     }
     for (const [property, value] of Object.entries(node)) {
