@@ -87,6 +87,7 @@ export class AuthService {
   }
 
   logout(): void {
+    this.appStorageService.clearActiveSession();
     this.authState.next({
       isAuthenticated: false,
       isValidated: true,
@@ -154,6 +155,7 @@ export class AuthService {
   }
 
   public clearAuthentication(error: string | null = null): void {
+    this.appStorageService.clearActiveSession();
     this.tokenRefreshService.stopTokenRefresh();
     this.authState.next({
       isAuthenticated: false,

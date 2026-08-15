@@ -5,7 +5,7 @@ from starlette.responses import JSONResponse
 from configs.limiter_dependency import auth_rate_limit
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs import auth_cookie as auth_cookie_config
-from configs.auth_cookie import ACCESS_COOKIE, EXTENSION_COOKIE_PATH, set_access_cookie, token_from_request
+from configs.auth_cookie import ACCESS_COOKIE, EXTENSION_COOKIE_PATH, clear_session_marker, set_access_cookie, token_from_request
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
@@ -101,6 +101,7 @@ async def logout(request: Request):
     resp.delete_cookie(ACCESS_COOKIE, path="/")
     resp.delete_cookie(ACCESS_COOKIE, path="/admin")
     resp.delete_cookie(ACCESS_COOKIE, path=EXTENSION_COOKIE_PATH)
+    clear_session_marker(resp)
     return resp
 
 

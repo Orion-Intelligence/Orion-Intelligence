@@ -8,7 +8,7 @@ from starlette.status import HTTP_303_SEE_OTHER
 from starlette_admin.auth import AdminConfig, AdminUser, AuthProvider
 from starlette_admin.contrib.odmantic import Admin, ModelView
 
-from configs.auth_cookie import ACCESS_COOKIE, set_access_cookie, token_from_request
+from configs.auth_cookie import ACCESS_COOKIE, clear_session_marker, set_access_cookie, token_from_request
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.services.mongo_manager import *
 from orion.services.session_manager.session_manager import session_manager
@@ -81,6 +81,7 @@ class TokenAuthProvider(AuthProvider):
         redirect = RedirectResponse(url="/login", status_code=HTTP_303_SEE_OTHER)
         redirect.delete_cookie(ACCESS_COOKIE, path="/")
         redirect.delete_cookie(ACCESS_COOKIE, path="/admin")
+        clear_session_marker(redirect)
         return redirect
 
 

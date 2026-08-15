@@ -150,14 +150,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.loginAsAdmin();
 
     getHeatmapComponent().then((comp: any) => {
-      comp.ngOnChanges({
-        data: {
-          firstChange: false,
-          currentValue: [{name: 'Mockland', value: 2}],
-          previousValue: []
-        }
-      });
-
       let appService = comp['appService'];
       let originalWorld = appService.worldJson();
       appService.worldJson.set(null);

@@ -60,11 +60,19 @@ async def test_logout_disconnects_extension_sockets_before_invalidating_session(
     assert response.body == b'{"detail":"Logged out"}'
 
     deleted_cookies = response.headers.getlist("set-cookie")
-    assert len(deleted_cookies) == 3
-    assert all("access_token=" in cookie and "Max-Age=0" in cookie for cookie in deleted_cookies)
-    assert any("Path=/;" in cookie for cookie in deleted_cookies)
-    assert any("Path=/admin;" in cookie for cookie in deleted_cookies)
-    assert any("Path=/api/extension;" in cookie for cookie in deleted_cookies)
+    assert len(deleted_cookies) == 4
+    assert all("Max-Age=0" in cookie for cookie in deleted_cookies)
+
+    access_cookies = [cookie for cookie in deleted_cookies if "access_token=" in cookie]
+    assert len(access_cookies) == 3
+    assert any("Path=/;" in cookie for cookie in access_cookies)
+    assert any("Path=/admin;" in cookie for cookie in access_cookies)
+    assert any("Path=/api/extension;" in cookie for cookie in access_cookies)
+
+    marker_cookies = [cookie for cookie in deleted_cookies if "session_present=" in cookie]
+    assert len(marker_cookies) == 1
+    assert "Path=/;" in marker_cookies[0]
+    assert "Domain=" not in marker_cookies[0]
 
 
 @pytest.mark.anyio
