@@ -72,10 +72,10 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
             cy.get('[data-testid="login-pass"]').clear().type(TEST_USERS.testing4.password, {log: false});
             cy.get('[data-testid="login-button"]').click();
             cy.wait('@twoFaLogin', { timeout: 60000 }).its('response.body.twofa_required').should('eq', true);
-            cy.get('[data-testid="twofa-center"], .twofa-center').should('be.visible');
-            cy.get('img[alt="2FA QR"]').should('exist');
+            cy.get('[data-testid="twofa-center"]').should('be.visible');
+            cy.get('[data-testid="twofa-qr-code"]').should('exist');
             cy.get('input[name="otpCode"]').should('exist');
-            cy.get('[data-testid="twofa-title"], .twofa_title').should('contain.text', 'Enter 2FA code');
+            cy.get('[data-testid="twofa-title"]').should('contain.text', 'Enter 2FA code');
 
             cy.visit('/');
             cy.clearAllEmails();
@@ -106,7 +106,7 @@ describe('Orion Intelligence - Account Settings and Password Reset Flow', () => 
                 cy.get('[data-testid="login-pass"]').clear().type(resolvedNewPassword, {log: false});
                 cy.get('[data-testid="login-button"]').click();
                 cy.waitForLoginRequest();
-                cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+                cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
                     .filter(':visible')
                     .should('have.length.greaterThan', 0);
                 cy.logout();

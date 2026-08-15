@@ -1,5 +1,6 @@
 from cryptography.fernet import Fernet, InvalidToken
-from fastapi import Request, Response
+from fastapi import Response
+from starlette.requests import HTTPConnection
 
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
@@ -36,7 +37,7 @@ def set_extension_cookie(resp: Response, token: str) -> None:
     )
 
 
-def token_from_request(request: Request) -> str | None:
+def token_from_request(request: HTTPConnection) -> str | None:
     auth = request.headers.get("Authorization", "")
     parts = auth.split(" ", 1)
     bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None

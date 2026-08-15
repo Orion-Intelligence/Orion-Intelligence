@@ -38,7 +38,7 @@ export function openFeederAsUser(username: string, password: string) {
   cy.visit('/login');
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, { log: false });
-  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.get('[data-testid="login-button"]').first().should('be.visible').click();
   cy.waitForLoginRequest();
   cy.get('[data-testid="dashboard-main"]').should('be.visible');
   cy.get('[data-testid="sidebar-group-profile"]').should('be.visible').scrollIntoView().click();
@@ -227,7 +227,7 @@ function clearVisibleValueRows(): Cypress.Chainable {
 }
 
 function clearScripts(): Cypress.Chainable {
-  return cy.contains('.ui-section-title', 'Your Scripts', { timeout: 4000 }).should('be.visible').then(() => {
+  return cy.contains('[data-testid="feeder-section-title"]', 'Your Scripts', { timeout: 4000 }).should('be.visible').then(() => {
     return waitForFeederPanelReady()
       .then(() => cy.get('[data-testid="feeder-empty-scripts"], [data-testid^="feeder-script-row-"], [data-testid="feeder-clear-all-button"]', { timeout: 4000 }))
       .should('exist')

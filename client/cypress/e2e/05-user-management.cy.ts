@@ -75,7 +75,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.visit('/login');
     cy.get('[data-testid="login-user"]').should('be.visible').clear().type(user.username);
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(user.password, {log: false});
-    cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+    cy.get('[data-testid="login-button"]').first().should('be.visible').click();
     cy.waitForLoginRequest();
 
     cy.url().should('include', '/reset/');

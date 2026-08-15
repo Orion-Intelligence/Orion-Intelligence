@@ -211,9 +211,9 @@ Cypress.Commands.add("loginAsAdmin", () => {
         waitForLoginForm();
         cy.get('[data-testid="login-user"]').clear().type(ADMIN_USERNAME);
         cy.get('[data-testid="login-pass"]').clear().type(ADMIN_PASSWORD, { log: false });
-        cy.get('[data-testid="login-button"], input.login-button').first().click();
+        cy.get('[data-testid="login-button"]').first().click();
         cy.waitForLoginRequest();
-        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -231,9 +231,9 @@ Cypress.Commands.add("loginAsTest1", () => {
         waitForLoginForm();
         cy.get('[data-testid="login-user"]').clear().type(user.username);
         cy.get('[data-testid="login-pass"]').clear().type(user.password, { log: false });
-        cy.get('[data-testid="login-button"], input.login-button').first().click();
+        cy.get('[data-testid="login-button"]').first().click();
         cy.waitForLoginRequest();
-        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });

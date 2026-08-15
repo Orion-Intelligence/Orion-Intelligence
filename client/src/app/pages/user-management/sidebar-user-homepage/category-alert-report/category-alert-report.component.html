@@ -308,7 +308,7 @@
   }
 
   @if (filterModel && (isFilterOpen$ | async)) {
-    <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
+    <div data-testid="side-filter-overlay" class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
   }
 
   @if (filterModel) {

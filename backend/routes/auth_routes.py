@@ -5,8 +5,9 @@ from starlette.responses import JSONResponse
 from configs.limiter_dependency import auth_rate_limit
 from orion.services.redis_manager.redis_controller import redis_controller
 from configs import auth_cookie as auth_cookie_config
-from configs.auth_cookie import ACCESS_COOKIE, set_access_cookie, token_from_request
+from configs.auth_cookie import ACCESS_COOKIE, EXTENSION_COOKIE_PATH, set_access_cookie, token_from_request
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.payment_manager.model.payment_param_model import PaymentParamModel
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager
 from orion.helper_manager.env_handler import env_handler
@@ -87,10 +88,19 @@ async def refresh_token(request: Request, response: Response = None, cookie_only
 @auth_router.post("/api/logout")
 async def logout(request: Request):
     token = token_from_request(request)
-    await session_manager.get_instance().invalidate_user_session(ptoken=token, tenant_id=getattr(request.state, "tenant", None))
+    tenant_id = getattr(request.state, "tenant", None)
+    session_mgr = session_manager.get_instance()
+    try:
+        current_user = await session_mgr.get_current_user(token, tenant_id=tenant_id)
+    except HTTPException:
+        current_user = None
+    if current_user:
+        await extension_socket_manager.get_instance().disconnect(str(current_user.id))
+    await session_mgr.invalidate_user_session(ptoken=token, tenant_id=tenant_id)
     resp = JSONResponse(content={"detail": "Logged out"})
     resp.delete_cookie(ACCESS_COOKIE, path="/")
     resp.delete_cookie(ACCESS_COOKIE, path="/admin")
+    resp.delete_cookie(ACCESS_COOKIE, path=EXTENSION_COOKIE_PATH)
     return resp
 
 

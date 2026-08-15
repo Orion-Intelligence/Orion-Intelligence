@@ -101,7 +101,7 @@ export function submitLogin(username: string, password: string, tenant?: {slug: 
   }
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.get('[data-testid="login-button"]').first().should('be.visible').click();
   cy.waitForLoginRequest();
 }
 
@@ -172,7 +172,7 @@ export function setTenantAlertVisibility(tenant: CaseAlertTenant, visible: boole
 
 export function loginCaseAlertUser(username: string, password: string) {
   submitLogin(username, password);
-  cy.get('[data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container', {timeout: 60000})
+  cy.get('[data-testid="dashboard-main"], [data-testid="dashboard-container"]', {timeout: 60000})
     .filter(':visible')
     .should('have.length.greaterThan', 0);
 }
@@ -195,7 +195,7 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
     });
     cy.get('[data-testid="login-user"]').should('be.visible').clear().type(tenant.username);
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(tenant.password, {log: false});
-    cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+    cy.get('[data-testid="login-button"]').first().should('be.visible').click();
     cy.get('[data-testid="dashboard-main"], [data-testid="tenant-company-input"]', {timeout: 60000})
       .filter(':visible')
       .should('have.length.greaterThan', 0);
@@ -441,7 +441,7 @@ export function closeFilterSidebar() {
     }
   });
   cy.get('body').should($body => {
-    expect($body.find('.ui-filter-sidebar-overlay:visible').length).to.eq(0);
+    expect($body.find('[data-testid="side-filter-overlay"]:visible').length).to.eq(0);
     expect($body.find('[data-testid="side-filter-close"]:visible').length).to.eq(0);
   });
 }
@@ -577,7 +577,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
     openTenantsPage();
 
     cy.get('body').then($b => {
-      if ($b.find('.badge-false, span:contains("Not Verified")').length) {
+      if ($b.find('[data-testid="tenant-verification-status"]:contains("Not Verified")').length) {
         approveAllTenants(state, tries + 1);
       }
     });
@@ -599,7 +599,7 @@ export function openAuditLogPage() {
   setConfiguredViewport();
   cy.visit('/dashboard/profile/auditlog');
   cy.location('pathname').should('include', '/dashboard/profile/auditlog');
-  cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
+  cy.get('[data-testid="auditlog-page-title"]').should('contain.text', 'Audit Logs');
 }
 
 export function openAuditLogFilter() {

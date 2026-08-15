@@ -99,7 +99,7 @@
               }
               @if (otpDataUrl) {
                 <div class="grid justify-items-start text-left" data-testid="twofa-center">
-                  <img [src]="otpDataUrl" [alt]="'2FA QR code' | translate" width="200" height="200">
+                  <img data-testid="twofa-qr-code" [src]="otpDataUrl" [alt]="'2FA QR code' | translate" width="200" height="200">
                   <div class="mt-[10px] text-[13px] font-semibold text-white/70 [body.light-theme_&]:text-[var(--color-text4)]">{{ 'Scan QR in your authenticator app' | translate }}</div>
                 </div>
               }

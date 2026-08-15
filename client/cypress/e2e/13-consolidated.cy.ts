@@ -86,7 +86,7 @@ describe('Consolidated - IOC Basic Flow', () => {
         cy.get('[data-testid="defacement-report-chip"]').contains(/phishing\s*\(\d+\)/i).scrollIntoView().should('exist');
       });
 
-      cy.get('[data-testid="defacement-report-toggle"] img[alt="Toggle Icon"]')
+      cy.get('[data-testid="defacement-report-toggle-icon"]')
         .first()
         .then(($icon) => {
           const isExpanded = (($icon.attr('class') || '') as string).includes('rotate-90');

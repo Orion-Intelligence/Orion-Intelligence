@@ -48,7 +48,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       clickSidebarSubItem('admin', section);
       if (section === 'Monitoring') {
         cy.get('[data-testid="monitoring-tab-auditlog"]').should('be.visible').click();
-        cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
+        cy.get('[data-testid="auditlog-page-title"]').should('contain.text', 'Audit Logs');
       }
     });
 
@@ -223,7 +223,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.visit('/dashboard/directory');
     waitForDirectoryRequest();
     cy.scrollDashboardToTop()
-    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
+    cy.get('[data-testid="directory-page-title"]').should('contain.text', 'Directory');
     assertDirectoryContentVisible();
     cy.docsScreenshot('directory-monitoring');
 
@@ -262,8 +262,8 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.contains('No links found!').should('be.visible');
 
     resetDirectoryFilters();
-    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
-    cy.get('app-directory .ui-page-description').should('contain.text', 'Live onion services and monitoring status.');
+    cy.get('[data-testid="directory-page-title"]').should('contain.text', 'Directory');
+    cy.get('[data-testid="directory-page-description"]').should('contain.text', 'Live onion services and monitoring status.');
     cy.logout();
   });
 });

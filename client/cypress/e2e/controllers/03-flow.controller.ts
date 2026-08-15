@@ -40,7 +40,7 @@ export function openSidebarGroup(title: string) {
     }
     let isClosed = !sub.length || getComputedStyle(sub[0] as HTMLElement).pointerEvents === 'none';
     if (isClosed) {
-      cy.wrap($group).find('img[alt="Drop Down"]').click();
+      cy.wrap($group).find(`[data-testid="${groupTestId}-toggle"]`).click();
     }
     cy.wrap(sub).should(($ul) => {
       expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
