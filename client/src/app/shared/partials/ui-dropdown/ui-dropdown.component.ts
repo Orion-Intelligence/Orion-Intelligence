@@ -1,9 +1,43 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
-import { ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { Component, ElementRef, HostListener, OnDestroy, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { DomPortalOutlet, TemplatePortal } from '@angular/cdk/portal';
+import { Component, ElementRef, EmbeddedViewRef, HostListener, NgZone, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
+
+// Dropdown palette. The CLOSED trigger follows the app theme (navy in dark, ice in light). The OPEN state
+// is always a white light surface: the trigger turns white and joins the white menu, so an open dropdown
+// reads as a distinct layer over the blue UI instead of merging into it. Only colours live here.
+const UI_DROPDOWN_THEME = {
+  ring: 'focus-visible:ring-[rgba(87,165,235,0.4)] [body.light-theme_&]:focus-visible:ring-[rgba(17,118,212,0.3)]',
+  trigger: 'border-[#2c3d58] !bg-[#131e30] text-[#e6edf6] hover:border-[#3d5175] hover:!bg-[#131e30] focus:border-[#3d5175] focus:!bg-[#131e30] [body.light-theme_&]:border-[#c5d4e6] [body.light-theme_&]:!bg-[#e9f0f8] [body.light-theme_&]:text-[#243b53] [body.light-theme_&]:hover:border-[#9fb6cf] [body.light-theme_&]:hover:!bg-[#e3ecf6] [body.light-theme_&]:focus:border-[#9fb6cf] [body.light-theme_&]:focus:!bg-[#e9f0f8]',
+  triggerOpen: '!border-[#d0d5dd] !border-b-white !bg-white !shadow-none text-[#344054] hover:!border-[#d0d5dd] hover:!border-b-white hover:!bg-white focus:!border-[#d0d5dd] focus:!border-b-white focus:!bg-white [body.light-theme_&]:!border-[#d0d5dd] [body.light-theme_&]:!border-b-white [body.light-theme_&]:!bg-white [body.light-theme_&]:text-[#344054] [body.light-theme_&]:hover:!border-[#d0d5dd] [body.light-theme_&]:hover:!border-b-white [body.light-theme_&]:hover:!bg-white [body.light-theme_&]:focus:!border-[#d0d5dd] [body.light-theme_&]:focus:!border-b-white [body.light-theme_&]:focus:!bg-white',
+  selectedText: 'text-[#e6edf6] [body.light-theme_&]:text-[#243b53]',
+  selectedTextOpen: 'text-[#344054]',
+  placeholder: 'text-[#7f93ac] [body.light-theme_&]:text-[#8aa0b8]',
+  placeholderOpen: 'text-[#98a2b3]',
+  chevron: 'border-[#9fb3c8] [body.light-theme_&]:border-[#7c93ab]',
+  chevronOpen: 'border-[#667085]',
+  menu: 'border-[#d0d5dd] !bg-white !shadow-none',
+  searchDivider: 'border-[#eaecf0]',
+  searchShell: 'border-[#d0d5dd] bg-[#f8fafc]',
+  searchIcon: 'text-[#98a2b3]',
+  searchInput: 'text-[#344054] placeholder:text-[#98a2b3]',
+  clearButton: 'text-[#98a2b3] hover:bg-[#e4e9f0] hover:text-[#344054] focus-visible:ring-[rgba(17,118,212,0.3)]',
+  footerDivider: 'border-[#eaecf0]',
+  clearAllButton: 'text-[#475467] hover:bg-[#e4e9f0] hover:text-[#101828] focus-visible:ring-[rgba(17,118,212,0.3)]',
+  optionRing: 'focus-visible:ring-[rgba(17,118,212,0.3)]',
+  option: 'font-medium text-[#475467] hover:bg-[#e4e9f0] hover:text-[#101828]',
+  optionActive: '!bg-[#e4e9f0] font-medium text-[#101828]',
+  optionSelected: '!bg-[rgba(17,118,212,0.14)] font-semibold text-[#0f172a]',
+  optionNull: 'bg-transparent font-medium text-[#667085] hover:bg-[#e4e9f0] hover:text-[#344054]',
+  checkbox: 'border-[#d0d5dd] bg-white',
+  checkboxSelected: '!border-[#1176d4] !bg-[#1176d4]',
+  muted: 'text-[#667085]',
+  spinner: 'border-[#d0d5dd] border-t-[#667085]',
+  chip: 'border-[rgba(87,165,235,0.3)] bg-[rgba(87,165,235,0.12)] text-[#cfe3f7] [body.light-theme_&]:border-[#cfdcea] [body.light-theme_&]:bg-[#eef4fb] [body.light-theme_&]:text-[#1f3b57]',
+  chipRemove: 'text-[#9fb3c8] hover:bg-[rgba(255,255,255,0.1)] hover:text-white focus-visible:ring-[rgba(87,165,235,0.4)] [body.light-theme_&]:text-[#7c93ab] [body.light-theme_&]:hover:bg-[#dde8f4] [body.light-theme_&]:hover:text-[#172235] [body.light-theme_&]:focus-visible:ring-[rgba(17,118,212,0.3)]',
+};
 
 export interface UiDropdownOption {
   key: string;
@@ -20,7 +54,7 @@ interface UiDropdownMenuOption {
 @Component({
   selector: 'app-ui-dropdown',
   standalone: true,
-  imports: [FormsModule, NgClass, NgTemplateOutlet, OverlayModule, TranslatePipe],
+  imports: [FormsModule, NgClass, NgTemplateOutlet, TranslatePipe],
   host: {
     class: 'block',
   },
@@ -34,6 +68,27 @@ export class UiDropdownComponent implements OnDestroy {
   @ViewChild('triggerButton') private triggerButton?: ElementRef<HTMLButtonElement>;
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
   @ViewChild('listbox') private listbox?: ElementRef<HTMLElement>;
+  @ViewChild('portalMenu', { static: true }) private portalMenu?: TemplateRef<unknown>;
+  private portalOutlet: DomPortalOutlet | null = null;
+  private portalViewRef: EmbeddedViewRef<unknown> | null = null;
+  private readonly onDocumentPointerDown = (event: Event): void => {
+    const target = event.target;
+    if (!(target instanceof Node) || this.hostElement.nativeElement.contains(target)) {
+      return;
+    }
+    if (this.portalViewRef?.rootNodes.some(node => node instanceof Node && node.contains(target))) {
+      return;
+    }
+    this.ngZone.run(() => this.close());
+  };
+  private readonly onDocumentScroll = (event: Event): void => {
+    if (event.target instanceof Node && this.portalOutlet?.outletElement === event.target) {
+      return;
+    }
+    if (this.updatePortalPosition()) {
+      this.portalViewRef?.detectChanges();
+    }
+  };
 
   readonly id = input<string | null>(null);
   readonly menuId = input<string | null>(null);
@@ -57,13 +112,15 @@ export class UiDropdownComponent implements OnDestroy {
   readonly valueChange = output<string | null>();
   readonly valuesChange = output<string[]>();
   readonly searchChange = output<string>();
+  readonly theme = UI_DROPDOWN_THEME;
   isOpen = false;
   searchTerm = '';
   activeIndex = -1;
-  overlayWidth = 0;
-  readonly overlayPositions: ConnectedPosition[] = [{ originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 0 }];
+  menuTop = 0;
+  menuLeft = 0;
+  menuWidth = 0;
 
-  constructor(private readonly hostElement: ElementRef<HTMLElement>, private readonly translationService: TranslationService) {}
+  constructor(private readonly hostElement: ElementRef<HTMLElement>, private readonly translationService: TranslationService, private readonly ngZone: NgZone, private readonly viewContainerRef: ViewContainerRef) {}
 
   get selectedLabel(): string {
     if (this.multiSelect()) {
@@ -153,6 +210,16 @@ export class UiDropdownComponent implements OnDestroy {
     this.valueChange.emit(value);
   }
 
+  hasSelectedValues(): boolean {
+    return this.multiSelect() && !!(this.selectedValues() || []).length;
+  }
+
+  clearAllSelectedValues(event: Event): void {
+    event.stopPropagation();
+    this.valuesChange.emit([]);
+    this.focusSearch();
+  }
+
   removeSelectedValue(value: string, event: Event): void {
     event.stopPropagation();
     const selectedValues = this.selectedValues() || [];
@@ -165,26 +232,40 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   onButtonKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Escape' && this.isOpen) {
+      event.preventDefault();
+      this.close();
+      return;
+    }
     if (!this.canOpen()) {
       return;
     }
 
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
-      this.open();
+      if (this.isOpen) {
+        this.selectActive(event);
+      }
+      else {
+        this.open();
+      }
       return;
     }
 
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
-      this.open();
+      if (!this.isOpen) {
+        this.open();
+      }
       this.moveActive(event.key === 'ArrowDown' ? 1 : -1);
       return;
     }
 
     if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
-      this.open();
+      if (!this.isOpen) {
+        this.open();
+      }
       this.setActiveIndex(event.key === 'Home' ? 0 : this.visibleOptions.length - 1);
       return;
     }
@@ -214,7 +295,7 @@ export class UiDropdownComponent implements OnDestroy {
 
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.close();
+      this.closeAndFocusTrigger();
     }
   }
 
@@ -225,8 +306,14 @@ export class UiDropdownComponent implements OnDestroy {
 
     if (event.key === 'Escape') {
       event.preventDefault();
-      this.close();
+      this.closeAndFocusTrigger();
     }
+  }
+
+  clearSearch(event: Event): void {
+    event.stopPropagation();
+    this.onSearchChange('');
+    window.setTimeout(() => this.searchInput?.nativeElement.focus());
   }
 
   setActiveIndex(index: number): void {
@@ -255,70 +342,50 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   optionClass(option: UiDropdownMenuOption, index: number): string {
-    if (this.isLightTheme()) {
-      if (option.key === null) {
-        return 'bg-transparent font-medium text-[#64748b] hover:bg-transparent hover:text-[#334155]';
-      }
-      if (this.isSelected(option.key)) {
-        return 'border border-[#d8dee8] bg-[#eef1f6] font-semibold text-[#172235]';
-      }
-      if (this.activeIndex === index) {
-        return 'bg-[#f1f4f8] font-medium text-[#172235]';
-      }
-      return 'font-medium text-[#40516a] hover:bg-[#f1f4f8] hover:text-[#172235]';
-    }
-
     if (option.key === null) {
-      return 'bg-transparent font-medium text-[#d6dee8] hover:bg-transparent hover:text-[#f8fafc]';
+      return `${this.theme.optionRing} ${this.theme.optionNull}`;
     }
-    const activeSurfaceClass = this.surface() === 'alert' ? '!bg-[#1a2835]' : '!bg-[#1D2A41]';
     if (this.isSelected(option.key)) {
-      return `${activeSurfaceClass} font-semibold text-[var(--color-text1)]`;
+      return `${this.theme.optionRing} ${this.theme.optionSelected}`;
     }
     if (this.activeIndex === index) {
-      return `${activeSurfaceClass} font-medium text-[var(--color-text1)]`;
+      return `${this.theme.optionRing} ${this.theme.optionActive}`;
     }
-    const hoverSurfaceClass = this.surface() === 'alert' ? 'hover:!bg-[#1a2835]' : 'hover:!bg-[#1D2A41]';
-    return `font-medium text-[var(--color-text3)] ${hoverSurfaceClass} hover:text-[var(--color-text1)]`;
+    return `${this.theme.optionRing} ${this.theme.option}`;
   }
 
   triggerClass(): string {
-    const lightTheme = this.isLightTheme();
     const radiusClass = this.isOpen
       ? (this.size() === 'large' ? 'rounded-t-[10px] rounded-b-none' : 'rounded-t-[7px] rounded-b-none')
       : (this.size() === 'large' ? 'rounded-[10px]' : 'rounded-[7px]');
     const sizeClass = this.size() === 'large'
-      ? `${lightTheme ? 'h-10' : 'h-11'} ${radiusClass} px-3 text-sm`
-      : `${lightTheme ? 'h-9 px-3' : 'h-10 px-[15px]'} ${radiusClass} text-xs`;
-    const openBorderClass = this.isOpen ? '!border-b-transparent hover:!border-b-transparent focus:!border-b-transparent' : '';
-    const darkSurfaceClass = this.surface() === 'alert'
-      ? '!bg-[#152230] hover:!bg-[#152230] focus:!bg-[#152230]'
-      : '!bg-[#131E30] hover:!bg-[#131E30] focus:!bg-[#131E30]';
-    const themeClass = lightTheme
-      ? `border-[#c7d5e6] bg-white text-[#172235] hover:border-[#b8c8dc] hover:bg-[#f8fbff] focus:border-[#b8c8dc] focus:bg-white ${openBorderClass}`
-      : `border-[#2c3a4a] ${darkSurfaceClass} text-[var(--color-text1)] hover:border-[#2c3a4a] focus:border-[#2c3a4a] ${openBorderClass}`;
-    return `${sizeClass} ${themeClass}`;
+      ? `h-11 ${radiusClass} px-3 text-sm`
+      : `h-10 ${radiusClass} px-[13px] text-xs`;
+    // Open and closed palettes are mutually exclusive so hover/focus rules of one state can never
+    // out-rank the other (they share specificity and would otherwise depend on stylesheet order).
+    return `${sizeClass} ${this.theme.ring} ${this.isOpen ? this.theme.triggerOpen : this.theme.trigger}`;
   }
 
   selectedLabelClass(): string {
     const hasSelection = this.multiSelect() ? !!(this.selectedValues() || []).length : !!this.selected();
     const labelSizeClass = this.size() === 'large' ? 'text-sm' : 'text-[13px]';
-    if (hasSelection) {
-      return this.isLightTheme() ? `text-[#172235] ${labelSizeClass}` : `text-[#f8fafc] ${labelSizeClass}`;
+    if (this.isOpen) {
+      return hasSelection ? `${this.theme.selectedTextOpen} ${labelSizeClass}` : `${this.theme.placeholderOpen} ${labelSizeClass}`;
     }
-    return this.isLightTheme() ? `text-[#64748b]/85 ${labelSizeClass}` : `text-[#C7D5E6]/80 ${labelSizeClass}`;
+    return hasSelection ? `${this.theme.selectedText} ${labelSizeClass}` : `${this.theme.placeholder} ${labelSizeClass}`;
+  }
+
+  chevronClass(): string {
+    return `${this.isOpen ? this.theme.chevronOpen : this.theme.chevron} ${this.isOpen ? 'rotate-[225deg] translate-y-1' : 'rotate-45'}`;
   }
 
   searchInputClass(): string {
-    return this.isLightTheme()
-      ? 'bg-white text-[#172235] placeholder:text-[#94a3b8] focus:bg-white'
-      : (this.surface() === 'alert'
-        ? '!bg-[#152230] text-[var(--color-text1)] placeholder:text-[#A0B8D1] focus:!bg-[#152230]'
-        : '!bg-[#131E30] text-[var(--color-text1)] placeholder:text-[#A0B8D1] focus:!bg-[#131E30]');
+    return this.theme.searchInput;
   }
 
-  checkboxClass(): string {
-    return this.isLightTheme() ? 'border-[#c7d5e6] bg-white' : 'border-[#4b5f78] !bg-[#131E30]';
+  checkboxClass(value: string | null): string {
+    const selected = value !== null && this.isSelected(value);
+    return selected ? this.theme.checkboxSelected : this.theme.checkbox;
   }
 
   listboxClass(): string {
@@ -327,22 +394,20 @@ export class UiDropdownComponent implements OnDestroy {
 
   menuClass(): string {
     const surfaceClass = this.surface() === 'alert' ? 'ui-dropdown-menu-alert' : '';
-    const darkSurfaceClass = this.surface() === 'alert' ? '!bg-[#152230]' : '!bg-[#131E30]';
-    const themeSurface = this.isLightTheme()
-      ? 'border-[#d5dde8] bg-white shadow-[0_14px_34px_rgba(15,23,42,0.14)]'
-      : `border-[#2c3a4a] ${darkSurfaceClass} shadow-[0_8px_18px_rgba(0,0,0,0.22)]`;
-    const base = `ui-dropdown-menu ${surfaceClass} box-border w-full min-w-full left-0 right-0 z-[1250] rounded-b-lg rounded-t-none border border-t-0 p-1 ${themeSurface}`;
+    const themeSurface = this.theme.menu;
+    const base = `ui-dropdown-menu ${surfaceClass} box-border w-full min-w-full left-0 right-0 z-[1250] overflow-hidden rounded-b-lg rounded-t-none border border-t-0 p-1 ${themeSurface}`;
     if (this.menuPlacement() === 'static') {
-      return `ui-dropdown-menu ${surfaceClass} box-border w-full min-w-full z-[1250] rounded-b-lg rounded-t-none border border-t-0 p-1 ${themeSurface}`;
+      return `ui-dropdown-menu ${surfaceClass} absolute box-border z-[1250] overflow-hidden rounded-b-lg rounded-t-none border border-t-0 p-1 ${themeSurface}`;
     }
     return `${base} absolute top-full`;
   }
 
-  @HostListener('document:click')
   close(): void {
+    document.removeEventListener('pointerdown', this.onDocumentPointerDown, true);
     this.isOpen = false;
     this.searchTerm = '';
     this.activeIndex = -1;
+    this.detachPortalMenu();
     if (UiDropdownComponent.activeDropdown === this) {
       UiDropdownComponent.activeDropdown = null;
     }
@@ -351,11 +416,13 @@ export class UiDropdownComponent implements OnDestroy {
   @HostListener('window:resize')
   onWindowResize(): void {
     if (this.isOpen) {
-      this.updateOverlayMetrics();
+      this.updatePortalPosition();
     }
   }
 
   ngOnDestroy(): void {
+    document.removeEventListener('pointerdown', this.onDocumentPointerDown, true);
+    this.detachPortalMenu();
     if (UiDropdownComponent.activeDropdown === this) {
       UiDropdownComponent.activeDropdown = null;
     }
@@ -367,16 +434,97 @@ export class UiDropdownComponent implements OnDestroy {
     this.isOpen = true;
     this.searchTerm = searchTerm;
     this.searchChange.emit(searchTerm);
-    this.updateOverlayMetrics();
+    this.attachPortalMenu();
+    this.ngZone.runOutsideAngular(() => document.addEventListener('pointerdown', this.onDocumentPointerDown, true));
     const selectedIndex = this.visibleOptions.findIndex(option => this.isSelected(option.key));
     this.activeIndex = selectedIndex >= 0 ? selectedIndex : (this.visibleOptions.length ? 0 : -1);
     this.focusSearch();
     this.scrollActiveIntoView();
   }
 
-  private updateOverlayMetrics(): void {
-    const triggerRect = this.triggerButton?.nativeElement.getBoundingClientRect() || this.hostElement.nativeElement.getBoundingClientRect();
-    this.overlayWidth = triggerRect.width || 0;
+  private attachPortalMenu(): void {
+    if (this.menuPlacement() !== 'static' || !this.portalMenu || this.portalOutlet) {
+      return;
+    }
+    this.portalOutlet = new DomPortalOutlet(this.findMenuHost());
+    this.updatePortalPosition();
+    this.portalViewRef = this.portalOutlet.attach(new TemplatePortal(this.portalMenu, this.viewContainerRef));
+    this.ngZone.runOutsideAngular(() => document.addEventListener('scroll', this.onDocumentScroll, true));
+  }
+
+  private findMenuHost(): HTMLElement {
+    // 'static' menus live inside the nearest positioned ancestor that really scrolls vertically
+    // (page body, modal shell, ...): they then scroll natively with the trigger and cannot be
+    // clipped by intermediate overflow wrappers such as horizontally scrolling table containers.
+    // A position:fixed ancestor (modal backdrop, drawer) is its own layer: the menu must stay inside it
+    // or it would paint behind the layer's z-index.
+    for (let element = this.hostElement.nativeElement.parentElement; element && element !== document.body; element = element.parentElement) {
+      const { position, overflowY } = getComputedStyle(element);
+      if (position === 'fixed') {
+        return element;
+      }
+      const scrollsVertically = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && element.scrollHeight > element.clientHeight;
+      if (position !== 'static' && scrollsVertically) {
+        return element;
+      }
+    }
+    return document.body;
+  }
+
+  private detachPortalMenu(): void {
+    if (!this.portalOutlet) {
+      return;
+    }
+    document.removeEventListener('scroll', this.onDocumentScroll, true);
+    // detach() only — dispose() would also remove the outlet element, i.e. the page scroller.
+    this.portalOutlet.detach();
+    this.portalOutlet = null;
+    this.portalViewRef = null;
+  }
+
+  private updatePortalPosition(): boolean {
+    const scroller = this.portalOutlet?.outletElement as HTMLElement | undefined;
+    const trigger = this.triggerButton?.nativeElement;
+    if (!scroller || !trigger) {
+      return false;
+    }
+    const triggerRect = this.visibleTriggerRect(trigger, scroller);
+    const scrollerRect = scroller.getBoundingClientRect();
+    // data-top has 2px resolution (snapped downwards so there is never a seam below the trigger);
+    // data-left / data-width have 1px resolution so the menu edges line up with the trigger.
+    const rawTop = triggerRect.bottom - scrollerRect.top + scroller.scrollTop - scroller.clientTop;
+    const top = rawTop > 4000
+      ? Math.min(20000, Math.floor(rawTop / 4) * 4)
+      : this.snapToPositionGrid(rawTop, 2, Math.floor);
+    const left = this.snapToPositionGrid(triggerRect.left - scrollerRect.left + scroller.scrollLeft - scroller.clientLeft, 1);
+    const width = this.snapToPositionGrid(triggerRect.right - triggerRect.left, 1);
+    if (top === this.menuTop && left === this.menuLeft && width === this.menuWidth) {
+      return false;
+    }
+    this.menuTop = top;
+    this.menuLeft = left;
+    this.menuWidth = width;
+    return true;
+  }
+
+  private visibleTriggerRect(trigger: HTMLElement, scroller: HTMLElement): { left: number; right: number; bottom: number } {
+    const rect = trigger.getBoundingClientRect();
+    let left = rect.left;
+    let right = rect.right;
+    for (let element = trigger.parentElement; element && element !== scroller; element = element.parentElement) {
+      const { overflowX, overflowY } = getComputedStyle(element);
+      if (overflowX === 'visible' && overflowY === 'visible') {
+        continue;
+      }
+      const clipRect = element.getBoundingClientRect();
+      left = Math.max(left, clipRect.left + element.clientLeft);
+      right = Math.min(right, clipRect.left + element.clientLeft + element.clientWidth);
+    }
+    return { left, right: Math.max(left, right), bottom: rect.bottom };
+  }
+
+  private snapToPositionGrid(rawValue: number, step: number, round: (value: number) => number = Math.round): number {
+    return Math.max(0, Math.min(4000, round(rawValue / step) * step));
   }
 
   private canOpen(): boolean {
@@ -432,6 +580,11 @@ export class UiDropdownComponent implements OnDestroy {
     this.select(option.key, event);
   }
 
+  private closeAndFocusTrigger(): void {
+    this.close();
+    window.setTimeout(() => this.triggerButton?.nativeElement.focus());
+  }
+
   private focusSearch(): void {
     if (!this.searchable()) {
       return;
@@ -465,9 +618,4 @@ export class UiDropdownComponent implements OnDestroy {
     this.translationService.version();
     return this.translationService.translate(label);
   }
-
-  isLightTheme(): boolean {
-    return typeof document !== 'undefined' && document.body.classList.contains('light-theme');
-  }
-
 }

@@ -1,69 +1,79 @@
 <div class="relative" (click)="$event.stopPropagation()">
-  <button #triggerButton cdkOverlayOrigin #dropdownTrigger="cdkOverlayOrigin" [id]="id()" [attr.data-testid]="testId()" [attr.aria-expanded]="isOpen" [attr.aria-controls]="resolvedMenuId" [attr.aria-activedescendant]="isOpen && activeIndex >= 0 ? optionId(activeIndex) : null" [disabled]="disabled() || (!options().length && !allowEmpty())" aria-haspopup="listbox" type="button" class="flex w-full items-center justify-between border text-left font-medium shadow-[0_1px_2px_0_#1018280d] outline-none transition disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="triggerClass()" (click)="toggle($event)" (keydown)="onButtonKeydown($event)">
-    <span class="min-w-0 truncate" [ngClass]="selectedLabelClass()">{{ selectedLabel }}</span>
-    @if (isOpen) {
-      <span class="ml-3 h-2 w-2 shrink-0 rotate-[225deg] translate-y-1 border-b-2 border-r-2 border-[var(--color-text3)] transition-transform duration-150"></span>
-    } @else {
-      <span class="ml-3 h-2 w-2 shrink-0 rotate-45 border-b-2 border-r-2 border-[var(--color-text3)] transition-transform duration-150"></span>
-    }
-  </button>
-
-  @if (multiSelect() && showSelectedChips() && (selectedValues() || []).length) {
-    <div class="mt-2 flex flex-wrap gap-1.5">
-      @for (value of selectedValues() || []; track value) {
-        <span class="ui-dropdown-selected-chip inline-flex min-h-7 max-w-full items-center rounded-[6px] border border-transparent bg-slate-500/10 px-2.5 py-1 text-[11px] font-semibold text-slate-300 [body.dark-theme_&]:!border-[#334155] [body.light-theme_&]:border-[#cbd5e1] [body.light-theme_&]:bg-[#f1f5f9] [body.light-theme_&]:text-[#334155]">
-          <span class="min-w-0 truncate">{{ selectedChipLabel(value) }}</span>
-        </span>
-      }
-    </div>
-  }
+  <div class="relative">
+    <button #triggerButton [id]="id()" [attr.data-testid]="testId()" [attr.aria-expanded]="isOpen" [attr.aria-controls]="resolvedMenuId" [attr.aria-activedescendant]="isOpen && activeIndex >= 0 ? optionId(activeIndex) : null" [disabled]="disabled() || (!options().length && !allowEmpty())" aria-haspopup="listbox" type="button" class="flex w-full cursor-pointer items-center justify-between border text-left font-medium shadow-[0_1px_2px_rgba(16,24,40,0.05)] focus-visible:outline-none focus-visible:ring-2 disabled:cursor-not-allowed disabled:opacity-60" [ngClass]="triggerClass()" (click)="toggle($event)" (keydown)="onButtonKeydown($event)">
+      <span class="min-w-0 truncate" [ngClass]="selectedLabelClass()">{{ selectedLabel }}</span>
+      <span aria-hidden="true" class="ml-3 h-2 w-2 shrink-0 border-b-2 border-r-2 transition-transform duration-150" [ngClass]="chevronClass()"></span>
+    </button>
 
   <ng-template #dropdownMenuContent>
     @if (searchable()) {
-      <div class="-mx-1 -mt-1 pb-2">
-        <input #searchInput [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)" class="h-9 w-full border-0 px-3 text-xs font-medium outline-none transition" [ngClass]="searchInputClass()" [placeholder]="searchPlaceholder() | translate" type="text" autocomplete="off">
+      <div class="-mx-1 -mt-1 mb-1 border-b p-2" [ngClass]="theme.searchDivider">
+        <div class="relative flex h-9 items-center rounded-[6px] border" [ngClass]="theme.searchShell">
+          <svg aria-hidden="true" viewBox="0 0 20 20" fill="none" class="ml-3 h-4 w-4 shrink-0" [ngClass]="theme.searchIcon"><circle cx="8.75" cy="8.75" r="5.25" stroke="currentColor" stroke-width="1.6"></circle><path d="m12.75 12.75 3.5 3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path></svg>
+          <input #searchInput [ngModel]="searchTerm" (ngModelChange)="onSearchChange($event)" (keydown)="onSearchKeydown($event)" class="h-full min-w-0 flex-1 border-0 bg-transparent px-2.5 text-xs font-medium outline-none" [ngClass]="searchInputClass()" [placeholder]="searchPlaceholder() | translate" [attr.aria-label]="searchPlaceholder() | translate" [attr.aria-controls]="resolvedMenuId" [attr.aria-activedescendant]="activeIndex >= 0 ? optionId(activeIndex) : null" aria-autocomplete="list" aria-expanded="true" role="combobox" type="text" autocomplete="off">
+          @if (searchTerm) {
+            <button type="button" class="mr-1 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] focus-visible:outline-none focus-visible:ring-1" [ngClass]="theme.clearButton" [attr.aria-label]="'Clear search' | translate" (mousedown)="$event.preventDefault()" (click)="clearSearch($event)">
+              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5"><path d="m4.5 4.5 7 7m0-7-7 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+            </button>
+          }
+        </div>
       </div>
     }
 
     <div #listbox [id]="resolvedMenuId" class="overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [ngClass]="listboxClass()" role="listbox" [attr.aria-multiselectable]="multiSelect() ? true : null">
       @if (loading()) {
-        <div class="flex h-9 items-center gap-2 px-3 text-xs font-medium text-[var(--color-text4)]">
-          <span class="h-3 w-3 animate-spin rounded-full border border-white/[0.16] border-t-[var(--color-text2)] [body.light-theme_&]:border-slate-300 [body.light-theme_&]:border-t-[var(--color-text2)]"></span>
+        <div class="flex h-9 items-center gap-2 px-3 text-xs font-medium" [ngClass]="theme.muted">
+          <span class="h-3 w-3 animate-spin rounded-full border" [ngClass]="theme.spinner"></span>
           <span>{{ 'Loading...' | translate }}</span>
         </div>
       } @else {
       @for (option of visibleOptions; track option.trackKey; let index = $index) {
-        @if (index > 0) {
-          <div aria-hidden="true" class="my-[3px] h-px w-full" [ngClass]="isLightTheme() ? 'bg-[#e2e8f0]' : 'bg-white/[0.06]'"></div>
-        }
-        <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isOptionVisuallySelected(option.key)" class="relative flex h-9 w-full items-center rounded-[6px] px-3 text-left text-xs transition" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
+        <button [id]="optionId(index)" [attr.data-dropdown-option-index]="index" [attr.data-testid]="optionTestIdPrefix() && option.testKey ? optionTestIdPrefix() + option.testKey : null" [attr.aria-selected]="isOptionVisuallySelected(option.key)" class="relative mb-0.5 flex min-h-9 w-full cursor-pointer items-center rounded-[6px] border border-transparent px-3 py-2 text-left text-xs last:mb-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset" [ngClass]="optionClass(option, index)" role="option" type="button" (mouseenter)="setActiveIndex(index)" (keydown)="onOptionKeydown($event)" (click)="select(option.key, $event)">
           @if (multiSelect()) {
-            <span class="mr-2 flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border" [ngClass]="checkboxClass()">
+            <span class="mr-2.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-[4px] border" [ngClass]="checkboxClass(option.key)">
               @if (isOptionVisuallySelected(option.key)) {
-                <span class="h-2 w-2 rounded-[2px]" [ngClass]="isLightTheme() ? 'bg-[#475569]' : 'bg-[#cbd5e1]'"></span>
+                <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-3.5 w-3.5 text-white"><path d="m3.5 8.25 2.8 2.8 6.2-6.2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               }
             </span>
           }
           <span class="min-w-0 flex-1 truncate">{{ option.label }}</span>
         </button>
       } @empty {
-        <div class="px-3 py-3 text-xs font-medium text-[var(--color-text5)] [body.light-theme_&]:text-[#2563a8]">{{ 'No results' | translate }}</div>
+        <div class="px-3 py-3 text-xs font-medium" [ngClass]="theme.muted">{{ 'No results' | translate }}</div>
       }
       }
     </div>
-  </ng-template>
 
-  @if (isOpen) {
-    @if (menuPlacement() === 'static') {
-      <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="dropdownTrigger" [cdkConnectedOverlayOpen]="isOpen" [cdkConnectedOverlayPositions]="overlayPositions" [cdkConnectedOverlayWidth]="overlayWidth" [cdkConnectedOverlayPush]="false">
-        <div [ngClass]="menuClass()" (click)="$event.stopPropagation()">
-          <ng-container [ngTemplateOutlet]="dropdownMenuContent"></ng-container>
-        </div>
-      </ng-template>
-    } @else {
-      <div [ngClass]="menuClass()">
-        <ng-container [ngTemplateOutlet]="dropdownMenuContent"></ng-container>
+    @if (hasSelectedValues()) {
+      <div class="-mx-1 -mb-1 mt-1 flex items-center justify-end border-t p-1.5" [ngClass]="theme.footerDivider">
+        <button type="button" class="inline-flex h-7 items-center rounded-[5px] px-2.5 text-xs font-semibold focus-visible:outline-none focus-visible:ring-1" [ngClass]="theme.clearAllButton" [attr.data-testid]="testId() ? testId() + '-clear-all' : null" (mousedown)="$event.preventDefault()" (click)="clearAllSelectedValues($event)">{{ 'Clear all' | translate }}</button>
       </div>
     }
+  </ng-template>
+
+  <ng-template #portalMenu>
+    <div [ngClass]="menuClass()" [attr.data-top]="menuTop" [attr.data-left]="menuLeft" [attr.data-width]="menuWidth" (click)="$event.stopPropagation()">
+      <ng-container [ngTemplateOutlet]="dropdownMenuContent"></ng-container>
+    </div>
+  </ng-template>
+
+  @if (isOpen && menuPlacement() !== 'static') {
+    <div [ngClass]="menuClass()">
+      <ng-container [ngTemplateOutlet]="dropdownMenuContent"></ng-container>
+    </div>
+  }
+  </div>
+
+  @if (multiSelect() && showSelectedChips() && (selectedValues() || []).length) {
+    <div class="mt-2 flex flex-wrap gap-1.5">
+      @for (value of selectedValues() || []; track value) {
+        <span class="ui-dropdown-selected-chip inline-flex min-h-7 max-w-full items-center gap-1 rounded-[6px] border py-1 pr-1 pl-2.5 text-[11px] font-semibold" [ngClass]="theme.chip">
+          <span class="min-w-0 truncate">{{ selectedChipLabel(value) }}</span>
+          <button type="button" class="inline-flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-[4px] focus-visible:outline-none focus-visible:ring-1" [ngClass]="theme.chipRemove" [attr.aria-label]="('Remove' | translate) + ' ' + selectedChipLabel(value)" (click)="removeSelectedValue(value, $event)">
+            <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-3 w-3"><path d="m4.5 4.5 7 7m0-7-7 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"></path></svg>
+          </button>
+        </span>
+      }
+    </div>
   }
 </div>

@@ -8,7 +8,7 @@
           <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Manage user access, status, and licenses.' | translate }}</p>
         </div>
         <span [appTooltip]="getAddUserTooltip()">
-          <button type="button" data-testid="tenant-add-user-button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)]" [ngClass]="isAddUserDisabled() ? 'cursor-not-allowed border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]'" [disabled]="isAddUserDisabled()" (click)="addtenant()">
+          <button type="button" data-testid="tenant-add-user-button" class="inline-flex appearance-none items-center justify-center text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)]" [ngClass]="isAddUserDisabled() ? 'cursor-not-allowed border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text4)]' : 'border-0 bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]'" [disabled]="isAddUserDisabled()" (click)="addtenant()">
             {{ 'Add User' | translate }}
           </button>
         </span>
@@ -33,16 +33,16 @@
                     <th class="w-[130px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
                     <th class="w-[150px] overflow-clip align-middle px-4 py-3.5">{{ 'Subscription' | translate }}</th>
                     <th class="w-[220px] overflow-clip align-middle px-4 py-3.5">{{ 'Licenses' | translate }}</th>
-                    <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
+                    <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center"><span class="sr-only">{{ 'Expand' | translate }}</span></th>
                   </tr>
                 </thead>
               }
               @if ((filteredUsers?.length || 0) > 0) {
                 <tbody class="text-[15px] font-normal text-[var(--color-text3)]" @fadeInDashboardItem>
                   @for (user of filteredUsers; track user.email || user.username || $index; let i = $index) {
-                    <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''">
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                    <tr data-testid="tenant-user-row" tabindex="0" class="cursor-pointer border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--ui-table-row-hover)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-blue-640)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="expandedUserIndex === (i - 1) ? '!border-t-0' : ''" [attr.aria-expanded]="expandedUserIndex === i" [attr.aria-label]="((expandedUserIndex === i ? 'Collapse' : 'Expand') | translate) + ' ' + (user.username || '')" (click)="toggleExpandedUser(i)" (keydown.enter)="toggleExpandedUser(i)" (keydown.space)="$event.preventDefault(); toggleExpandedUser(i)">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <div class="flex items-center gap-2">
                           <span class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/20 bg-[var(--color-blue-820-light)] text-[11px] font-semibold uppercase text-[var(--color-text2)] [body.light-theme_&]:border-[var(--color-border)]">
                             {{ (user.username || '?').slice(0, 1) }}
@@ -50,39 +50,35 @@
                           <a class="inline-block max-w-full truncate font-medium text-[var(--color-text1)] no-underline">{{ user.username }}</a>
                         </div>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="inline-block max-w-full truncate">{{ user.email || '-' }}</span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5 capitalize">
                         <span class="inline-flex rounded-[6px] bg-[var(--tenant-chip-bg)] px-2.5 py-1 text-[12px] font-semibold text-[var(--color-text2)]">
                           {{ user.role | translate }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="mr-0 inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
                           {{ user.status | translate }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="mr-0 inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
                           {{ (user.subscription ? 'Paid' : 'Free') | translate }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="mr-0 inline-flex h-7 max-w-[290px] items-center truncate rounded-[6px] bg-slate-500/10 px-2.5 text-[11px] font-semibold text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700" [attr.title]="getUserLicensesLabel(user)">
                           {{ getUserLicensesLabel(user) }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                        @if (!canEditUser(user)) {
-                          <button type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'View user' | translate" (click)="toggleExpandedUser(i)">
-                            <img src="assets/images/shared/view.svg" width="18" alt="" class="tenant-action-icon cursor-pointer" />
-                          </button>
-                        } @else {
-                          <button id="edit-profile" data-testid="tenant-edit-user-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="('Edit user') | translate" (click)="toggleExpandedUser(i)">
-                            <img src="assets/images/shared/edit.svg" width="18" alt="" class="tenant-action-icon" />
-                          </button>
-                        }
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5 text-center">
+                        <span aria-hidden="true" class="inline-flex h-8 w-8 items-center justify-center text-[var(--color-text4)]">
+                          <svg viewBox="0 0 16 16" fill="none" class="h-4 w-4 transition-transform duration-150" [class.rotate-180]="expandedUserIndex === i">
+                            <path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
+                        </span>
                       </td>
                     </tr>
                     @if (expandedUserIndex === i) {
@@ -92,19 +88,19 @@
                             <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
                               <div class="text-[19px] font-bold text-[var(--color-text1)]">{{ 'User Information' | translate }}</div>
                               <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
-                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                <div class="grid h-11 grid-cols-[140px_1fr] items-center gap-3 overflow-hidden px-1">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Name' | translate }}</div>
-                                  <div class="text-sm font-medium text-[var(--color-text1)]">{{ user.username || '-' }}</div>
+                                  <div class="min-w-0 truncate text-sm font-medium text-[var(--color-text1)]" [attr.title]="user.username || '-'">{{ user.username || '-' }}</div>
                                 </div>
-                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                <div class="grid h-11 grid-cols-[140px_1fr] items-center gap-3 overflow-hidden px-1">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Email' | translate }}</div>
-                                  <div class="break-all text-sm text-[var(--color-text1)]">{{ user.email || '-' }}</div>
+                                  <div class="min-w-0 truncate text-sm text-[var(--color-text1)]" [attr.title]="user.email || '-'">{{ user.email || '-' }}</div>
                                 </div>
-                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                <div class="grid h-11 grid-cols-[140px_1fr] items-center gap-3 overflow-hidden px-1">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
-                                  <div class="text-sm capitalize text-[var(--color-text1)]">{{ user.role | translate }}</div>
+                                  <div class="min-w-0 truncate text-sm capitalize text-[var(--color-text1)]">{{ user.role | translate }}</div>
                                 </div>
-                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                <div class="grid h-11 grid-cols-[140px_1fr] items-center gap-3 overflow-hidden px-1">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
                                   <div>
                                     <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold capitalize" [ngClass]="getStatusBadgeClass(user.status)">
@@ -112,7 +108,7 @@
                                     </span>
                                   </div>
                                 </div>
-                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                <div class="grid h-11 grid-cols-[140px_1fr] items-center gap-3 overflow-hidden px-1">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Subscription' | translate }}</div>
                                   <div>
                                     <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getSubscriptionBadgeClass(user.subscription)">
@@ -120,12 +116,12 @@
                                     </span>
                                   </div>
                                 </div>
-                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                <div class="grid h-11 grid-cols-[140px_1fr] items-center gap-3 overflow-hidden px-1">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Licenses' | translate }}</div>
                                   @if (user.licenses?.length) {
-                                    <div class="flex flex-wrap gap-1.5">
+                                    <div class="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
                                       @for (license of user.licenses; track license) {
-                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
+                                        <span class="shrink-0 rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
                                           {{ licenseService.getLicenseLabel(license) }}
                                         </span>
                                       }
@@ -134,12 +130,12 @@
                                     <div class="text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
                                   }
                                 </div>
-                                <div class="grid grid-cols-[140px_1fr] gap-3 px-1 py-2.5">
+                                <div class="grid h-11 grid-cols-[140px_1fr] items-center gap-3 overflow-hidden px-1">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Permissions' | translate }}</div>
                                   @if (user.permissions?.length) {
-                                    <div class="flex flex-wrap gap-1.5">
+                                    <div class="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
                                       @for (permission of user.permissions; track permission) {
-                                        <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
+                                        <span class="shrink-0 rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
                                           {{ getPermissionLabel(permission) }}
                                         </span>
                                       }
@@ -218,10 +214,10 @@
                                   }
                                 </div>
                                 <div class="mt-3 flex flex-wrap justify-end gap-2">
-                                  <button type="button" data-testid="tenant-delete-user-button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)] hover:bg-[var(--color-red-100)]" (click)="deleteUser(user)">
+                                  <button type="button" data-testid="tenant-delete-user-button" class="ui-delete-button inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] focus-visible:outline-none" (click)="deleteUser(user)">
                                     {{ 'Delete User' | translate }}
                                   </button>
-                                  <button type="button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="updateUser(user)">
+                                  <button type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="updateUser(user)">
                                     {{ 'Save changes' | translate }}
                                   </button>
                                 </div>
@@ -247,14 +243,16 @@
             @if ((filteredUsers?.length || 0) > 0) {
               @for (user of filteredUsers; track user.email || user.username || $index; let i = $index) {
                 <div class="overflow-hidden rounded-[10px] bg-[var(--tenant-row-bg)]">
-                  <div class="flex items-center justify-between px-3 py-2.5">
+                  <div tabindex="0" role="button" class="flex cursor-pointer items-center justify-between px-3 py-2.5 transition-colors hover:bg-[var(--ui-table-row-hover)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-blue-640)]" [attr.aria-expanded]="expandedUserIndex === i" [attr.aria-label]="((expandedUserIndex === i ? 'Collapse' : 'Expand') | translate) + ' ' + (user.username || '')" (click)="toggleExpandedUser(i)" (keydown.enter)="toggleExpandedUser(i)" (keydown.space)="$event.preventDefault(); toggleExpandedUser(i)">
                     <div class="min-w-0">
                       <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ user.username || '-' }}</div>
                       <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ user.role | translate }}</div>
                     </div>
-                    <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="(canEditUser(user) ? 'Edit user' : 'View user') | translate" (click)="toggleExpandedUser(i)">
-                      <img [src]="canEditUser(user) ? 'assets/images/shared/edit.svg' : 'assets/images/shared/view.svg'" width="18" alt="" class="tenant-action-icon" />
-                    </button>
+                    <span aria-hidden="true" class="inline-flex h-8 w-8 shrink-0 items-center justify-center text-[var(--color-text4)]">
+                      <svg viewBox="0 0 16 16" fill="none" class="h-4 w-4 transition-transform duration-150" [class.rotate-180]="expandedUserIndex === i">
+                        <path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </span>
                   </div>
                   <div class="divide-y divide-[var(--tenant-line)] px-3 py-2.5 text-sm text-[var(--color-text2)]">
                     <div class="flex items-center justify-between gap-3 py-2">
@@ -290,24 +288,24 @@
                         <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
                           <div class="text-base font-bold text-[var(--color-text1)]">{{ 'User Information' | translate }}</div>
                           <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
-                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                            <div class="grid h-11 grid-cols-[110px_1fr] items-center gap-2 overflow-hidden">
                               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Name' | translate }}</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ user.username || '-' }}</div>
+                              <div class="min-w-0 truncate text-sm text-[var(--color-text1)]" [attr.title]="user.username || '-'">{{ user.username || '-' }}</div>
                             </div>
-                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                            <div class="grid h-11 grid-cols-[110px_1fr] items-center gap-2 overflow-hidden">
                               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Email' | translate }}</div>
-                              <div class="break-all text-sm text-[var(--color-text1)]">{{ user.email || '-' }}</div>
+                              <div class="min-w-0 truncate text-sm text-[var(--color-text1)]" [attr.title]="user.email || '-'">{{ user.email || '-' }}</div>
                             </div>
-                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                            <div class="grid h-11 grid-cols-[110px_1fr] items-center gap-2 overflow-hidden">
                               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Role' | translate }}</div>
-                              <div class="text-sm text-[var(--color-text1)]">{{ user.role | translate }}</div>
+                              <div class="min-w-0 truncate text-sm text-[var(--color-text1)]">{{ user.role | translate }}</div>
                             </div>
-                            <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
+                            <div class="grid h-11 grid-cols-[110px_1fr] items-center gap-2 overflow-hidden">
                               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Permissions' | translate }}</div>
                               @if (user.permissions?.length) {
-                                <div class="flex flex-wrap gap-1.5">
+                                <div class="flex min-w-0 flex-nowrap items-center gap-1.5 overflow-hidden">
                                   @for (permission of user.permissions; track permission) {
-                                    <span class="rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
+                                    <span class="shrink-0 rounded-[6px] bg-sky-500/10 px-2.5 py-1 text-[11px] font-semibold text-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700">
                                       {{ getPermissionLabel(permission) }}
                                     </span>
                                   }
@@ -374,8 +372,8 @@
                                 (valuesChange)="onUserAlertsAllowedChange(user, $event)"></app-ui-dropdown>
                             }
                             <div class="mt-3 flex flex-wrap justify-end gap-2">
-                              <button type="button" data-testid="tenant-delete-user-button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border-red)] bg-[var(--color-red-200)] text-[var(--color-text1)] hover:bg-[var(--color-red-100)]" (click)="deleteUser(user)">{{ 'Delete User' | translate }}</button>
-                              <button type="button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[rgb(87_165_235/35%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="updateUser(user)">{{ 'Save changes' | translate }}</button>
+                              <button type="button" data-testid="tenant-delete-user-button" class="ui-delete-button inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] focus-visible:outline-none" (click)="deleteUser(user)">{{ 'Delete User' | translate }}</button>
+                              <button type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="updateUser(user)">{{ 'Save changes' | translate }}</button>
                             </div>
                           </div>
                         }
@@ -402,7 +400,7 @@
                   <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
                   <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Subscription' | translate }}</th>
                   <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Licenses' | translate }}</th>
-                  <th class="overflow-clip align-middle px-4 py-3.5">{{ 'Action' | translate }}</th>
+                  <th class="overflow-clip align-middle px-4 py-3.5"><span class="sr-only">{{ 'Expand' | translate }}</span></th>
                 </tr>
               </thead>
               <tbody @fadeInDashboardItem>
