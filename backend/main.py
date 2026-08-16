@@ -29,7 +29,6 @@ from routes.public_api_routes import public_routes
 from routes.tenant_routes import tenant_routes
 from routes.test_routes import test_routes
 from routes.social_routes import social_routes
-from orion.api.interactive.social_manager.social_scanner import social_scanner
 from routes.case_routes import case_routes
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -48,7 +47,6 @@ async def lifespan(p_app: FastAPI):
             await service_manager_instance.init_services(ANGULAR_BUILD_DIR)
             setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
             p_app.include_router(interface)
-            await social_scanner.get_instance().resume_pending()
 
         asyncio.create_task(start_services_in_background())
         yield
@@ -57,7 +55,6 @@ async def lifespan(p_app: FastAPI):
     await service_manager_instance.init_services(ANGULAR_BUILD_DIR)
     setup_admin(mongo_controller.get_instance().get_engine()).mount_to(p_app)
     app.include_router(interface)
-    await social_scanner.get_instance().resume_pending()
     yield
 
 
