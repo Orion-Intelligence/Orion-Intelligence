@@ -70,7 +70,8 @@ ensure_local_ssl_cert() {
         -keyout "$LOCAL_SSL_KEY" \
         -out "$LOCAL_SSL_CERT" \
         -days 365 \
-        -subj "/CN=localhost"
+        -subj "/CN=localhost" \
+        -addext "subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1"
 }
 
 client_build() {

@@ -24,6 +24,7 @@ class session_manager:
     __lock = threading.Lock()
     WEB_SESSION_CLIENT = "web"
     EXTENSION_SESSION_CLIENT = "extension"
+    EXTENSION_SESSION_TTL = 30 * 24 * 60 * 60
 
     @staticmethod
     def get_instance():
@@ -160,20 +161,23 @@ class session_manager:
         if username:
             user = await self._engine.find_one(db_user_account, db_user_account.username == username)
 
-        if not free and user and user.role != user_role.CRAWLER and expires_delta > timedelta(minutes=30):
+        token_client = self._session_client(to_encode)
+        if token_client == self.EXTENSION_SESSION_CLIENT and not free:
+            expires_delta = timedelta(seconds=self.EXTENSION_SESSION_TTL)
+        elif not free and user and user.role != user_role.CRAWLER and expires_delta > timedelta(minutes=30):
             expires_delta = timedelta(minutes=30)
 
         expire = datetime.now(timezone.utc) + expires_delta if not free else None
 
         session_id = None
         if user and user.role != user_role.CRAWLER and not free:
-            session_client = self._session_client(to_encode)
+            session_client = token_client
             session_id = secrets.token_urlsafe(32)
             if session_client == self.WEB_SESSION_CLIENT:
                 user.current_session_id = session_id
                 await self._engine.save(user)
             redis_key = self._session_redis_key(user, session_client)
-            await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
+            await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._client_session_ttl(session_client)])
 
         if session_id:
             to_encode.update({"exp": expire.timestamp(), "sid": session_id})
@@ -321,6 +325,8 @@ class session_manager:
             base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
             if user.role != user_role.CRAWLER:
                 base_expiry = time.time() + 15 * 60
+            if self._session_client(payload) == self.EXTENSION_SESSION_CLIENT:
+                base_expiry = time.time() + self.EXTENSION_SESSION_TTL
 
             if user.role in user_role.CRAWLER:
                 new_token_payload = {"sub": username, "exp": base_expiry}
@@ -403,6 +409,8 @@ class session_manager:
         redis_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
 
         if redis_sid is None:
+            if session_client == self.EXTENSION_SESSION_CLIENT:
+                raise HTTPException(status_code=401, detail=invalid_detail)
             if session_client == self.WEB_SESSION_CLIENT and user.current_session_id != session_id:
                 raise HTTPException(status_code=401, detail=invalid_detail)
             await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
@@ -412,7 +420,12 @@ class session_manager:
             raise HTTPException(status_code=401, detail=invalid_detail)
         if session_client == self.WEB_SESSION_CLIENT and redis_sid != user.current_session_id:
             raise HTTPException(status_code=401, detail=invalid_detail)
-        await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._session_ttl])
+        await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._client_session_ttl(session_client)])
+
+    def _client_session_ttl(self, session_client: str) -> int:
+        if session_client == self.EXTENSION_SESSION_CLIENT:
+            return self.EXTENSION_SESSION_TTL
+        return self._session_ttl
 
     def _session_client(self, payload: dict) -> str:
         client = str((payload or {}).get("client") or "").strip().lower()

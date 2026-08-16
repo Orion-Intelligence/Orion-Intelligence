@@ -12,7 +12,7 @@ from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, UserStatus
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.session_manager.session_manager import session_manager
-from configs.auth_cookie import token_from_request
+from configs.auth_cookie import extension_token_from_request, token_from_request
 from orion.constants import constant
 
 oauth2_scheme = OAuth2PasswordBearer(
@@ -78,13 +78,19 @@ def role_required(required_roles: list[user_role]):
     return verify_role
 
 
-async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
-    session_mgr = session_manager.get_instance()
-    token = get_request_token(request, token)
-    user = await session_mgr.get_current_user(token)
+async def _authenticate_request(request: Request, token: str | None):
+    user = await session_manager.get_instance().get_current_user(token)
     enforce_request_tenant_access(user, request)
     enforce_password_reset(user, request)
     return user
+
+
+async def get_current_user(request: Request, token: str = Depends(oauth2_scheme)):
+    return await _authenticate_request(request, get_request_token(request, token))
+
+
+async def get_extension_user(request: Request, token: str = Depends(oauth2_scheme)):
+    return await _authenticate_request(request, extension_token_from_request(request) or token)
 
 
 async def get_is_free_token(request: Request, token: str = Depends(oauth2_scheme)) -> bool:

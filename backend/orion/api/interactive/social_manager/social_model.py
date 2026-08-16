@@ -1,13 +1,14 @@
 import base64
 import binascii
 import hashlib
+from pathlib import Path
 from datetime import UTC, datetime
 from typing import Any
 
 import httpx
 import jwt
 from fastapi import HTTPException
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 
 from configs.auth_cookie import token_from_request
 from orion.constants.constant import CONSTANTS
@@ -298,34 +299,15 @@ class social_model:
     async def search_metadata(self, param, current_user=None, request=None):
         return await self.social_search(param, "metadata", current_user, request)
 
+    EXTENSION_RAW_DIR = Path(__file__).resolve().parents[4] / "static" / "raw"
+
     async def extension_download(self, browser: str = "chrome"):
-        last_error = ""
-        try:
-            normalized_browser = browser.strip().lower()
-            if normalized_browser in {"firefox", "mozilla"}:
-                path = "extensions/download/firefox"
-            else:
-                path = "extensions/download/chrome"
-            for base_url in self._social_api_base_urls():
-                try:
-                    async with httpx.AsyncClient() as client:
-                        response = await client.get(f"{base_url.rstrip('/')}/{path.lstrip('/')}", headers=self._social_headers(), timeout=60)
-                except httpx.RequestError as exc:
-                    last_error = str(exc)
-                    continue
-                if response.status_code != 200:
-                    return JSONResponse(status_code=response.status_code, content={"detail": "Extension download failed"})
-                return Response(
-                    content=response.content,
-                    media_type=response.headers.get("content-type", "application/octet-stream"),
-                    headers={
-                        "Content-Disposition": response.headers.get("content-disposition", f'attachment; filename="{normalized_browser}-extension"'),
-                        "Cache-Control": "no-store",
-                    },
-                )
-        except Exception:
-            return JSONResponse(status_code=500, content={"detail": "Extension download failed"})
-        return JSONResponse(status_code=502, content={"detail": "Social service unreachable", "error": last_error})
+        target = "firefox" if browser.strip().lower() in {"firefox", "mozilla"} else "chrome"
+        filename = f"orion-extension-{target}.zip"
+        file_path = self.EXTENSION_RAW_DIR / filename
+        if not file_path.is_file():
+            return JSONResponse(status_code=404, content={"detail": "Extension package not found"})
+        return FileResponse(file_path, media_type="application/zip", filename=filename, headers={"Cache-Control": "no-store"})
 
     def decode_image_payload(self, image_base64: Any) -> bytes:
         if not isinstance(image_base64, str):

@@ -87,17 +87,17 @@ export class AuthService {
   }
 
   logout(): void {
+    this.apiService.post('logout', {}).subscribe({ error: () => void 0 });
     this.appStorageService.clearActiveSession();
+    this.tokenRefreshService.stopTokenRefresh();
     this.authState.next({
       isAuthenticated: false,
       isValidated: true,
       error: null,
     });
     this.router.navigate(['/login']).then(() => {
-      this.apiService.post('logout', {}).subscribe();
       localStorage.clear();
       sessionStorage.clear();
-      this.tokenRefreshService.stopTokenRefresh();
       localStorage.setItem('onboarding', String(false));
       this.appStorageService.clearStorage();
       this.appService.clearAll();

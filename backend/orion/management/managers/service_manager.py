@@ -2,6 +2,7 @@ import asyncio
 from asyncio import sleep
 from pathlib import Path
 from migrations.migration import migration_manager
+from orion.api.interactive.social_manager.social_scanner import social_scanner
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.helper_manager.env_handler import env_handler
 from orion.helper_manager.helper_controller import helper_controller
@@ -60,6 +61,7 @@ class service_manager:
                 await arango_controller.get_instance().link_connection()
                 await arango_controller.get_instance().initialize()
                 await test_manager.get_instance().reset_test_arango_and_import_mocks()
+                await social_scanner.get_instance().resume_pending()
 
                 self._is_available = True
                 return True

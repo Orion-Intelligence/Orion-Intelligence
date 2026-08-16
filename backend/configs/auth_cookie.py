@@ -7,7 +7,9 @@ from orion.helper_manager.env_handler import env_handler
 
 ACCESS_COOKIE = "access_token"
 EXTENSION_COOKIE_PATH = "/api/extension"
+EXTENSION_ACCESS_COOKIE = "extension_access_token"
 COOKIE_MAX_AGE = 30 * 60  # 30 minutes
+EXTENSION_COOKIE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days, extension stays signed in until sign out
 COOKIE_CIPHER = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
 
 SESSION_MARKER_COOKIE = "session_present"
@@ -57,14 +59,31 @@ def set_access_cookie(resp: Response, token: str) -> None:
 
 def set_extension_cookie(resp: Response, token: str) -> None:
     resp.set_cookie(
-        key=ACCESS_COOKIE,
+        key=EXTENSION_ACCESS_COOKIE,
         value=COOKIE_CIPHER.encrypt(token.encode()).decode(),
         httponly=True,
         samesite="none",
         secure=True,
         path=EXTENSION_COOKIE_PATH,
-        max_age=COOKIE_MAX_AGE,
+        max_age=EXTENSION_COOKIE_MAX_AGE,
     )
+
+
+def clear_extension_cookie(resp: Response) -> None:
+    resp.delete_cookie(EXTENSION_ACCESS_COOKIE, path=EXTENSION_COOKIE_PATH, secure=True, httponly=True, samesite="none")
+
+
+def extension_token_from_request(request: HTTPConnection) -> str | None:
+    auth = request.headers.get("Authorization", "")
+    parts = auth.split(" ", 1)
+    bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None
+    cookie_token = request.cookies.get(EXTENSION_ACCESS_COOKIE)
+    if cookie_token:
+        try:
+            cookie_token = COOKIE_CIPHER.decrypt(cookie_token.encode()).decode()
+        except InvalidToken:
+            pass
+    return bearer or cookie_token
 
 
 def token_from_request(request: HTTPConnection) -> str | None:

@@ -134,7 +134,7 @@
                     <div class="min-w-0 flex-1">
                       <p class="mb-0 truncate text-xs font-medium text-[var(--color-text2)]">{{ platformData.platform }}</p>
                       <p class="mb-0 truncate text-[10px] text-[var(--color-text4)]">
-                        @if (isFetchTabAllowed(platformData, 'followers') && getStatValue(platformData, 'total_followers') !== missingStatValue) {
+                        @if (isFetchTabAllowed('followers') && getStatValue(platformData, 'total_followers') !== missingStatValue) {
                           {{ getStatValue(platformData, 'total_followers') }} {{ 'followers' | translate }}
                         } @else {
                           {{ platformData.username }}
@@ -155,19 +155,23 @@
         <div class="h-full min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,#000,#000_calc(100%-18px),transparent)] [mask-repeat:no-repeat] custom-scrollbar">
           @if (activeUser(); as user) {
             @if (activeProfilePlatform(); as platformData) {
-              <app-social-profile-tabs-section
-                [user]="user"
-                [platformData]="platformData"
-                [fetchTabs]="getFetchTabs(platformData)"
-                [activeTab]="getActiveTabForPlatform(platformData)"
-                [loadingStates]="getLoadingStates(platformData)"
-                [onlinePresenceSearchTerm]="getOnlinePresenceSearchTerm(platformData)"
-                (tabSelected)="onProfileTabSelected(platformData, $event)"
-                (refetchTab)="onProfileTabRefetch(platformData, $event)"
-                (postCursorFetch)="fetchPostCursor($event)"
-                (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
-                (onlinePresenceSearch)="searchOnlinePresence(platformData)">
-              </app-social-profile-tabs-section>
+              @if (extensionState() === 'ready') {
+                <app-social-profile-tabs-section
+                  [user]="user"
+                  [platformData]="platformData"
+                  [fetchTabs]="getFetchTabs()"
+                  [activeTab]="getActiveTabForPlatform(platformData)"
+                  [loadingStates]="getLoadingStates(platformData)"
+                  [onlinePresenceSearchTerm]="getOnlinePresenceSearchTerm(platformData)"
+                  (tabSelected)="onProfileTabSelected(platformData, $event)"
+                  (refetchTab)="onProfileTabRefetch(platformData, $event)"
+                  (postCursorFetch)="fetchPostCursor($event)"
+                  (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
+                  (onlinePresenceSearch)="searchOnlinePresence(platformData)">
+                </app-social-profile-tabs-section>
+              } @else {
+                <app-social-extension-manager [mode]="extensionState()"></app-social-extension-manager>
+              }
             } @else {
               <app-social-default-list-section
                 [user]="user"

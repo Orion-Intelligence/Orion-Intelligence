@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
-import { map, takeUntil } from 'rxjs/operators';
+import { Observable, Subject, timer } from 'rxjs';
+import { map, switchMap, takeUntil } from 'rxjs/operators';
 import type { PlatformResult, SocialPost } from '../models/social-scan.models';
 import { formatFollowers } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
@@ -13,11 +13,12 @@ import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 import { WantedListSectionComponent } from '../wanted-list-section/wanted-list-section.component';
 import type { FetchMergeMode, FetchStateKey, FetchTabKey, SocialResultSource } from '../enums/social-graph.enums';
-import type { FeedUser, FetchTab, PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../models/social-graph.models';
-import socialPlatformCapabilities from '../../../../assets/data/social-graph/platform-capabilities.json';
+import type { FeedUser, FetchTab, PostCursorFetchRequest } from '../models/social-graph.models';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { SocialDefaultListSectionComponent } from './default-list-section.component';
 import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tabs-section/profile-tabs-section.component';
+import { SocialExtensionManagerComponent } from '../profile-detail/extension-manager/extension-manager.component';
+import { ExtensionState, SocialExtensionService } from '../services/social-extension.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 interface LatestFetchConfirmationData {
@@ -29,27 +30,28 @@ interface LatestFetchConfirmationData {
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
   standalone: true,
-  imports: [SocialIconComponent, ConfirmationPopupComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, TranslatePipe],
+  imports: [SocialIconComponent, ConfirmationPopupComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileListingComponent {
-  private readonly baseFetchTabs: FetchTab[] = [ { key: 'details', label: 'Details', icon: 'bi bi-person-badge' }, { key: 'posts', label: 'Posts', icon: 'bi bi-file-post' }, { key: 'images', label: 'Images', icon: 'bi bi-images' }, { key: 'connections', label: 'Connections', icon: 'bi bi-diagram-3' } ];
-  private readonly mappedFetchTabs: Partial<Record<FetchTabKey, FetchTab>> = { videos: { key: 'videos', label: 'Videos', icon: 'bi bi-play-btn' }, shorts: { key: 'shorts', label: 'Shorts', icon: 'bi bi-play-circle' } };
-  private readonly followerFetchTabs: FetchTab[] = [ { key: 'followers', label: 'Followers', icon: 'bi bi-people' }, { key: 'following', label: 'Following', icon: 'bi bi-person-plus' } ];
+  private readonly detailsTab: FetchTab = { key: 'details', label: 'Details', icon: 'bi bi-person-badge' };
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
   private readonly stealerLogsTab: FetchTab = { key: 'stealerLogs', label: 'Stealer Logs', icon: 'bi bi-shield-exclamation' };
-  private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
+  private readonly profileFetchTabs: FetchTab[] = [this.detailsTab, this.onlinePresenceTab, this.stealerLogsTab];
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly fetchService = inject(SocialFetchService);
+  private readonly extensionService = inject(SocialExtensionService);
   private readonly storageService = inject(SocialStorageService);
   private readonly fetchCancelSubjects = new Map<string, Subject<void>>();
   private appliedProfileQuery = signal(false);
   private readonly loadingByRequestKey = signal<Record<string, boolean>>({});
+  private extensionOpened = false;
 
   readonly scanResults = this.storageService.profilesState.scanResults;
+  readonly extensionState = signal<ExtensionState>('install');
   isInitialLoading = input(false);
   sidebarPlatformClicked = output<string>();
   profileOverviewLabelChanged = output<string | null>();
@@ -93,6 +95,7 @@ export class SocialProfileListingComponent {
   });
 
   constructor() {
+    this.startExtensionHeartbeat();
     effect(() => {
       this.activeUsers();
       this.isInitialLoading();
@@ -117,7 +120,7 @@ export class SocialProfileListingComponent {
   }
 
   openConnectionsOverview(platformId: string, platformData?: PlatformResult): void {
-    if (platformData && !this.isFetchTabAllowed(platformData, 'connections')) {
+    if (platformData && !this.isFetchTabAllowed('connections')) {
       return;
     }
     this.openProfileOverviewTab(platformId, 'connections', platformData);
@@ -135,34 +138,12 @@ export class SocialProfileListingComponent {
     return this.getAllowedTabKey(platformData, this.getActiveTab(this.getPlatformCardId(platformData)));
   }
 
-  getFetchTabs(platformData: PlatformResult): FetchTab[] {
-    const baseTabs = this.baseFetchTabs;
-    if (this.getResultSource(platformData) === 'darkweb') {
-      return [
-        ...baseTabs.filter(tab => tab.key === 'details' || tab.key === 'posts' || tab.key === 'images'),
-        this.onlinePresenceTab,
-        this.stealerLogsTab
-      ];
-    }
-    const sharedTabs = [...baseTabs, this.onlinePresenceTab, this.stealerLogsTab];
-    const tabs = this.isPriorityPlatform(platformData.platform)
-      ? [...baseTabs, ...this.followerFetchTabs, this.onlinePresenceTab, this.stealerLogsTab]
-      : sharedTabs;
-    const globalCapability = this.platformCapabilities['__all__'];
-    const platformKey = platformData.platformKey || platformData.platform;
-    const capability = this.platformCapabilities[platformKey];
-    for (const key of [...(globalCapability?.allow ?? []), ...(capability?.allow ?? [])]) {
-      const mappedTab = this.mappedFetchTabs[key as FetchTabKey];
-      if (mappedTab && !tabs.some(tab => tab.key === mappedTab.key)) {
-        tabs.splice(Math.max(tabs.findIndex(tab => tab.key === 'images'), 2), 0, mappedTab);
-      }
-    }
-    const disabledTabs = new Set([...(globalCapability?.disallow ?? []), ...(capability?.disallow ?? [])]);
-    return tabs.filter(tab => !disabledTabs.has(tab.key));
+  getFetchTabs(): FetchTab[] {
+    return this.profileFetchTabs;
   }
 
-  isFetchTabAllowed(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
-    return this.getFetchTabs(platformData).some(tab => tab.key === tabKey);
+  isFetchTabAllowed(tabKey: FetchTabKey): boolean {
+    return this.profileFetchTabs.some(tab => tab.key === tabKey);
   }
 
   isTabLoading(platformData: PlatformResult, tabKey: FetchTabKey): boolean {
@@ -181,6 +162,20 @@ export class SocialProfileListingComponent {
       return;
     }
     this.refetchTabData(platformData, tabKey);
+  }
+
+  private startExtensionHeartbeat(): void {
+    timer(0, 3000).pipe(switchMap(() => this.extensionService.detect()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
+      this.extensionState.set(state);
+
+      if (state === 'signin' && !this.extensionOpened) {
+        this.extensionOpened = true;
+        this.extensionService.openExtension();
+      }
+      else if (state !== 'signin') {
+        this.extensionOpened = false;
+      }
+    });
   }
 
   refetchTabData(platformData: PlatformResult, tabKey: FetchTabKey): void {
@@ -247,7 +242,7 @@ export class SocialProfileListingComponent {
   }
 
   getLoadingStates(platformData: PlatformResult): Partial<Record<FetchTabKey, boolean>> {
-    return this.getFetchTabs(platformData).reduce<Partial<Record<FetchTabKey, boolean>>>((currentStates, tab) => {
+    return this.getFetchTabs().reduce<Partial<Record<FetchTabKey, boolean>>>((currentStates, tab) => {
       currentStates[tab.key] = this.isTabLoading(platformData, tab.key);
       return currentStates;
     }, {});
@@ -296,10 +291,6 @@ export class SocialProfileListingComponent {
   copyToClipboard(text: any): void {
     const str = this.formatMetadataValue(text);
     void navigator.clipboard?.writeText(str);
-  }
-
-  isPriorityPlatform(platformName?: string): boolean {
-    return !!platformName && !!this.platformCapabilities[platformName];
   }
 
   getFollowers(platformData: PlatformResult): string[] {
@@ -797,6 +788,6 @@ export class SocialProfileListingComponent {
   }
 
   private getAllowedTabKey(platformData: PlatformResult, tabKey: FetchTabKey): FetchTabKey {
-    return this.getFetchTabs(platformData).some(tab => tab.key === tabKey) ? tabKey : 'details';
+    return this.getFetchTabs().some(tab => tab.key === tabKey) ? tabKey : 'details';
   }
 }
