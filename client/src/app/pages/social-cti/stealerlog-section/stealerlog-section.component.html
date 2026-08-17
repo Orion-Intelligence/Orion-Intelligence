@@ -63,7 +63,7 @@
       <div class="mt-1 text-[11px] leading-4 text-[var(--color-text4)]">{{ 'Found as comment username in' | translate }} {{ darkwebPresence().length }} {{ (darkwebPresence().length === 1 ? 'forum source.' : 'forum sources.') | translate }}</div>
       <div class="mt-2 flex flex-wrap gap-1.5">
         @for (platform of darkwebPresence().slice(0, 3); track $index) {
-          <span class="max-w-full truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text3)]" [title]="platform.platform">{{ platform.platform }}</span>
+          <span class="max-w-full truncate rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text3)]" [title]="platform.meta.platform">{{ platform.meta.platform }}</span>
         }
       </div>
     </div>

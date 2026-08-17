@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
-import { PlatformResult, SocialPost, SocialPostComment } from '../../models/social-scan.models';
+import { social_post, social_post_comment, social_profile } from '../../models/social.models';
 import { formatFollowers } from '../../../../shared/utils/formatters';
 import type { PostContentTabKey } from '../../enums/social-graph.enums';
-import type { PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../../models/social-graph.models';
+import type { PostCursorFetchRequest, SocialPlatformCapabilityMap } from '../../models/social-usability.models';
 import { applyImageFallback } from '../../utils/image-fallback.util';
 import socialPlatformCapabilities from '../../../../../assets/data/social-graph/platform-capabilities.json';
 
@@ -23,22 +23,22 @@ export class SocialProfilePostContentSectionComponent {
   private expandedPostCaptions = signal<Record<string, boolean>>({});
 
   readonly onImageError = applyImageFallback;
-  platformData = input.required<PlatformResult>();
+  platformData = input.required<social_profile>();
   contentType = input.required<PostContentTabKey>();
   isLoading = input(false);
   refetch = output<PostContentTabKey>();
   cursorFetch = output<PostCursorFetchRequest>();
 
-  getPostCaption(post: SocialPost | null | undefined): string {
+  getPostCaption(post: social_post | null | undefined): string {
     return post?.caption?.trim() || '';
   }
 
-  isPostCaptionExpanded(post: SocialPost | null | undefined): boolean {
+  isPostCaptionExpanded(post: social_post | null | undefined): boolean {
     const key = this.getPostItemKey(post);
     return !!(key && this.expandedPostCaptions()[key]);
   }
 
-  togglePostCaption(post: SocialPost | null | undefined): void {
+  togglePostCaption(post: social_post | null | undefined): void {
     const key = this.getPostItemKey(post);
     if (!key) {
       return;
@@ -46,19 +46,19 @@ export class SocialProfilePostContentSectionComponent {
     this.expandedPostCaptions.update(current => ({ ...current, [key]: !current[key] }));
   }
 
-  shouldShowPostCaptionToggle(post: SocialPost | null | undefined): boolean {
+  shouldShowPostCaptionToggle(post: social_post | null | undefined): boolean {
     const caption = this.getPostCaption(post);
     return caption.length > 280 || caption.split(/\r?\n/).length > 4;
   }
 
-  hasPostMedia(post: SocialPost | null | undefined): boolean {
+  hasPostMedia(post: social_post | null | undefined): boolean {
     return !!this.getPostMediaUrl(post);
   }
 
-  isVideoPost(post: SocialPost | null | undefined): boolean {
+  isVideoPost(post: social_post | null | undefined): boolean {
     const mediaType = (post?.media_type || '').toLowerCase();
     const mediaUrl = this.getPostMediaUrl(post).toLowerCase();
-    if (this.platformData().platform.toLowerCase() === 'tiktok' && this.contentType() === 'shorts') {
+    if (this.platformData().meta.platform.toLowerCase() === 'tiktok' && this.contentType() === 'shorts') {
       return false;
     }
     const isImageThumbnail = /\.(?:avif|gif|jpe?g|png|webp)(?:$|[?#])/i.test(mediaUrl)
@@ -69,24 +69,24 @@ export class SocialProfilePostContentSectionComponent {
     return mediaType.includes('video') || mediaUrl.includes('.mp4') || mediaUrl.includes('.mov') || mediaUrl.includes('.webm');
   }
 
-  getPostUrl(post: SocialPost | null | undefined): string {
+  getPostUrl(post: social_post | null | undefined): string {
     return post?.post_url || '';
   }
 
-  getPostMediaUrl(post: SocialPost | null | undefined): string {
+  getPostMediaUrl(post: social_post | null | undefined): string {
     const url = post?.media_url || '';
     return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
   }
 
-  getPostMediaTypeLabel(post: SocialPost | null | undefined): string {
+  getPostMediaTypeLabel(post: social_post | null | undefined): string {
     return post?.media_type?.replace(/_/g, ' ') || 'Media';
   }
 
-  isPostMediaLoading(post: SocialPost | null | undefined): boolean {
+  isPostMediaLoading(post: social_post | null | undefined): boolean {
     return this.hasPostMedia(post) && this.postMediaLoading()[this.getPostMediaKey(post)] !== false;
   }
 
-  markPostMediaLoading(post: SocialPost | null | undefined): void {
+  markPostMediaLoading(post: social_post | null | undefined): void {
     const key = this.getPostMediaKey(post);
     if (!key) {
       return;
@@ -94,7 +94,7 @@ export class SocialProfilePostContentSectionComponent {
     this.postMediaLoading.update(current => ({ ...current, [key]: true }));
   }
 
-  markPostMediaLoaded(post: SocialPost | null | undefined): void {
+  markPostMediaLoaded(post: social_post | null | undefined): void {
     const key = this.getPostMediaKey(post);
     if (!key) {
       return;
@@ -106,7 +106,7 @@ export class SocialProfilePostContentSectionComponent {
     return tabKey === 'videos' ? 'Videos' : tabKey === 'shorts' ? 'Shorts' : 'Posts';
   }
 
-  getUniquePosts(platformData: PlatformResult, tabKey: PostContentTabKey): SocialPost[] {
+  getUniquePosts(platformData: social_profile, tabKey: PostContentTabKey): social_post[] {
     const posts = this.getPostContentItems(platformData, tabKey);
     const seen = new Set<string>();
     return posts.filter(post => {
@@ -122,7 +122,7 @@ export class SocialProfilePostContentSectionComponent {
     });
   }
 
-  fetchNew(platformData: PlatformResult, tabKey: PostContentTabKey): void {
+  fetchNew(platformData: social_profile, tabKey: PostContentTabKey): void {
     this.cursorFetch.emit({ platformData, tabKey, mergeMode: 'prepend' });
   }
 
@@ -134,30 +134,30 @@ export class SocialProfilePostContentSectionComponent {
     return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(value);
   }
 
-  getPostComments(post: SocialPost | null | undefined): SocialPostComment[] {
+  getPostComments(post: social_post | null | undefined): social_post_comment[] {
     if (post?.comment_details?.length) {
       return post.comment_details;
     }
-    return (post?.comment_items || []).map(text => ({ text }));
+    return (post?.comment_items || []).map((text: string) => ({ text }));
   }
 
-  areCommentsAllowed(platformData: PlatformResult): boolean {
-    return !this.platformCapabilities[platformData.platformKey || platformData.platform]?.disallow?.includes('comments');
+  areCommentsAllowed(platformData: social_profile): boolean {
+    return !this.platformCapabilities[platformData.meta.platform]?.disallow?.includes('comments');
   }
 
-  getCommentTrackKey(index: number, comment: SocialPostComment): string {
+  getCommentTrackKey(index: number, comment: social_post_comment): string {
     return `${comment.sender_name || ''}|${comment.date || ''}|${comment.text}|${index}`;
   }
 
-  canLoadComments(post: SocialPost | null | undefined): boolean {
-    return this.platformData().resultSource !== 'darkweb' && !!this.getPostCursorId(post);
+  canLoadComments(post: social_post | null | undefined): boolean {
+    return !!this.getPostCursorId(post);
   }
 
-  shouldShowCommentAction(platformData: PlatformResult, post: SocialPost | null | undefined): boolean {
+  shouldShowCommentAction(platformData: social_profile, post: social_post | null | undefined): boolean {
     return this.areCommentsAllowed(platformData) && (this.canLoadComments(post) || this.getPostComments(post).length > 0);
   }
 
-  arePostCommentsVisible(post: SocialPost | null | undefined): boolean {
+  arePostCommentsVisible(post: social_post | null | undefined): boolean {
     const key = this.getPostCommentStateKey(post);
     if (!key) {
       return false;
@@ -169,11 +169,11 @@ export class SocialProfilePostContentSectionComponent {
     return false;
   }
 
-  getCommentFetchLabel(post: SocialPost | null | undefined): string {
+  getCommentFetchLabel(post: social_post | null | undefined): string {
     return this.arePostCommentsVisible(post) ? 'Hide comments' : 'Show comments';
   }
 
-  handleCommentAction(platformData: PlatformResult, tabKey: PostContentTabKey, post: SocialPost): void {
+  handleCommentAction(platformData: social_profile, tabKey: PostContentTabKey, post: social_post): void {
     if (!this.arePostCommentsVisible(post)) {
       this.setPostCommentsVisible(post, true);
       if (this.getPostComments(post).length === 0 && this.canLoadComments(post)) {
@@ -184,7 +184,7 @@ export class SocialProfilePostContentSectionComponent {
     this.setPostCommentsVisible(post, false);
   }
 
-  private loadComments(platformData: PlatformResult, tabKey: PostContentTabKey, post: SocialPost): void {
+  private loadComments(platformData: social_profile, tabKey: PostContentTabKey, post: social_post): void {
     const cursorId = this.getPostCursorId(post);
     if (!cursorId) {
       return;
@@ -192,26 +192,20 @@ export class SocialProfilePostContentSectionComponent {
     this.cursorFetch.emit({ platformData, tabKey, cursorId, commentOffset: this.getPostComments(post).length, maxComments: 10, mergeMode: 'update', commentsOnly: true });
   }
 
-  canFetchRemote(platformData: PlatformResult): boolean {
-    return platformData.resultSource !== 'darkweb';
+  canFetchRemote(_platformData: social_profile): boolean {
+    return true;
   }
 
-  private getPostContentItems(platformData: PlatformResult, tabKey: PostContentTabKey): SocialPost[] {
-    if (tabKey === 'videos') {
-      return platformData.videos || [];
-    }
-    if (tabKey === 'shorts') {
-      return platformData.shorts || [];
-    }
+  private getPostContentItems(platformData: social_profile, _tabKey: PostContentTabKey): social_post[] {
     return platformData.posts || [];
   }
 
-  private getPostMediaKey(post: SocialPost | null | undefined): string {
+  private getPostMediaKey(post: social_post | null | undefined): string {
     const mediaUrl = this.getPostMediaUrl(post);
     return mediaUrl ? `${this.getPostUrl(post)}|${mediaUrl}` : '';
   }
 
-  private setPostCommentsVisible(post: SocialPost | null | undefined, visible: boolean): void {
+  private setPostCommentsVisible(post: social_post | null | undefined, visible: boolean): void {
     const key = this.getPostCommentStateKey(post);
     if (!key) {
       return;
@@ -219,16 +213,16 @@ export class SocialProfilePostContentSectionComponent {
     this.postCommentsVisible.update(current => ({ ...current, [key]: visible }));
   }
 
-  private getPostCommentStateKey(post: SocialPost | null | undefined): string {
+  private getPostCommentStateKey(post: social_post | null | undefined): string {
     return this.getPostCursorId(post) || this.getPostUrl(post) || this.getPostMediaUrl(post) || this.getPostCaption(post);
   }
 
-  private getPostCursorId(post: SocialPost | null | undefined): string | undefined {
+  private getPostCursorId(post: social_post | null | undefined): string | undefined {
     const cursorId = post?.hash_id || post?.post_url;
     return cursorId ? String(cursorId) : undefined;
   }
 
-  private getPostItemKey(post: SocialPost | null | undefined): string {
+  private getPostItemKey(post: social_post | null | undefined): string {
     return post ? String(post.hash_id || post.post_url || post.media_url || post.caption || '') : '';
   }
 

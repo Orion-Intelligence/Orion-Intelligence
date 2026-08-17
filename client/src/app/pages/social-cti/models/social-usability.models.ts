@@ -1,0 +1,82 @@
+import type { WritableSignal } from '@angular/core';
+import type { FetchMergeMode, FetchTabKey, PostContentTabKey, SocialPlatformCapabilityKey } from '../enums/social-graph.enums';
+import type { Job, social_profile } from './social.models';
+
+export type ManagedPlatform = social_profile & {
+    stableKey: string;
+    matches: boolean;
+};
+
+export interface ManageProfilesModalData {
+    username: string;
+    platforms: social_profile[];
+    selectedKeys: string[];
+}
+
+export interface ApiEnvelope<T> {
+    status?: string;
+    message?: unknown;
+    result?: T;
+}
+
+export interface ScanStatusResponse extends ApiEnvelope<social_profile[]> {
+    profile_username?: string;
+    progress?: number;
+    step?: string;
+}
+
+export type ScanEvent = {
+    type: 'progress';
+    payload: Partial<Job>;
+} | {
+    type: 'complete';
+    payload: social_profile[];
+};
+
+export interface FeedUser {
+    username: string;
+    platforms: social_profile[];
+    allPlatforms: social_profile[];
+}
+
+export interface PostCursorFetchRequest {
+    platformData: social_profile;
+    tabKey: PostContentTabKey;
+    cursorId?: string;
+    commentOffset?: number;
+    maxComments?: number;
+    mergeMode: FetchMergeMode;
+    commentsOnly?: boolean;
+}
+
+export interface FetchTab {
+    key: FetchTabKey;
+    label: string;
+    icon: string;
+}
+
+interface SocialPlatformCapability {
+    allow?: string[];
+    disallow?: SocialPlatformCapabilityKey[];
+}
+
+export type SocialPlatformCapabilityMap = Record<string, SocialPlatformCapability>;
+
+export interface NotificationData {
+    message: string;
+    icon: string;
+    style: string;
+}
+
+export interface social_state {
+    scanResults: WritableSignal<Map<string, social_profile[]>>;
+    selectedKeys: WritableSignal<Set<string>>;
+    jobs: WritableSignal<Job[]>;
+    homeMenuSearchTerm: WritableSignal<string>;
+    isHomeMenuCollapsed: WritableSignal<boolean>;
+    activeUsername: WritableSignal<string | null>;
+}
+
+export function socialSelectionKey(ownerUsername: string, platform: social_profile): string {
+  return `${(ownerUsername || '').toLowerCase()}|${(platform.meta.platform || '').toLowerCase()}|${(platform.meta.username || '').toLowerCase()}|${platform.meta.url || ''}`;
+}

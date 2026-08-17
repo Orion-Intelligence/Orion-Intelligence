@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { PlatformResult } from '../models/social-scan.models';
+import { social_profile } from '../models/social.models';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
@@ -26,7 +26,7 @@ export class StealerlogSectionComponent {
   private requestId = 0;
 
   username = input.required<string>();
-  platforms = input<PlatformResult[]>([]);
+  platforms = input<social_profile[]>([]);
   records = signal<any[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
@@ -35,17 +35,7 @@ export class StealerlogSectionComponent {
   searchIdentity = computed(() => this.username());
   hasRecords = computed(() => this.records().length > 0);
   visibleRecords = computed(() => this.records().slice(0, 3));
-  darkwebPresence = computed(() => {
-    const identity = this.searchIdentity();
-    if (!identity) {
-      return [];
-    }
-    return this.platforms().filter(platform => {
-      const commenters = Array.isArray(platform?.allMetadata?.['commenters']) ? platform.allMetadata['commenters'] : [];
-      return platform?.resultSource === 'darkweb'
-        && commenters.includes(identity);
-    });
-  });
+  darkwebPresence = computed<social_profile[]>(() => []);
   hasDarkwebPresence = computed(() => this.darkwebPresence().length > 0);
   displayIdentity = computed(() => {
     const identity = this.searchIdentity();

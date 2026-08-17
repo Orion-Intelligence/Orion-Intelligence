@@ -2,8 +2,7 @@ import { Injectable } from '@angular/core';
 import { Observable, concat, of, timer } from 'rxjs';
 import { map, switchMap, takeWhile } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
-import { ScanEvent, ScanStatusResponse } from '../models/social-scan.models';
-
+import { ScanEvent, ScanStatusResponse } from '../models/social-usability.models';
 @Injectable({ providedIn: 'root' })
 export class SocialScanService {
   constructor(private api: ApiService) {}

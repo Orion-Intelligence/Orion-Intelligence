@@ -4,14 +4,14 @@
       <article data-testid="social-platform-card" [id]="getPlatformCardId(platformData)" [class.highlight-focused-card]="highlightedNodeId() === getPlatformCardId(platformData)" class="animate-social-feed-card-in overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)] will-change-[opacity,transform] motion-reduce:animate-none">
         <div class="relative flex items-start gap-3 px-4 pt-4">
           <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-lg">
-            <app-social-icon [platformName]="platformData.platform"></app-social-icon>
+            <app-social-icon [platformName]="platformData.meta.platform"></app-social-icon>
           </div>
           <div class="min-w-0 flex-1">
             <div class="flex flex-wrap items-center gap-2">
-              <span class="text-sm font-bold text-[var(--color-text1)]">{{ platformData.username || user.username }}</span>
+              <span class="text-sm font-bold text-[var(--color-text1)]">{{ platformData.meta.username || user.username }}</span>
             </div>
             <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-medium text-[var(--color-text4)]">
-              <span class="inline-flex items-center gap-1.5">{{ platformData.platform }}</span>
+              <span class="inline-flex items-center gap-1.5">{{ platformData.meta.platform }}</span>
               @if (getPlatformTimestamp(platformData)) {
                 <span class="inline-flex min-w-0 items-center gap-1.5">
                   <i class="bi bi-clock-history text-[10px]"></i>
@@ -21,12 +21,12 @@
             </div>
           </div>
           <div class="relative z-50 flex flex-shrink-0 items-center gap-1">
-            @if (isPriorityPlatform(platformData.platform)) {
+            @if (isPriorityPlatform(platformData.meta.platform)) {
               <span class="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-medium text-emerald-500 [body.light-theme_&]:text-emerald-700" [title]="'More details available for this platform' | translate">
                 <i class="bi bi-check-circle-fill text-[10px]"></i> {{ 'Verified' | translate }}
               </span>
             }
-            @if (getProfileUrl(platformData, platformData.username || user.username); as profileUrl) {
+            @if (getProfileUrl(platformData, platformData.meta.username || user.username); as profileUrl) {
               @if (profileUrl !== '#') {
                 <a data-testid="social-list-platform-open-link" [href]="profileUrl" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" class="flex h-8 w-8 items-center justify-center overflow-visible text-[var(--color-text4)] transition-colors hover:text-[var(--color-blue-640)]" [title]="'Open actual profile' | translate" [attr.aria-label]="'Open actual profile' | translate">
                   <i class="bi bi-person-circle text-[20px] leading-none"></i>

@@ -1,5 +1,6 @@
-<div data-testid="social-manage-profiles-overlay" class="fixed inset-x-0 bottom-0 top-[60px] z-[1250] bg-[rgba(2,6,23,0.48)] backdrop-blur-[2px] [body.light-theme_&]:bg-[rgba(15,23,42,0.18)]" (click)="close.emit(undefined)">
-  <div data-testid="social-manage-profiles-modal" class="absolute bottom-[10px] right-[10px] top-[10px] flex w-[min(860px,calc(100%-20px))] flex-col overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] text-[var(--color-text2)] shadow-[0_10px_24px_var(--color-shadow-light)] backdrop-blur-sm animate-[ui-popup-panel-in_180ms_ease-out_both] max-[640px]:left-[10px] max-[640px]:right-[10px] max-[640px]:top-[10px] max-[640px]:bottom-[10px] max-[640px]:w-auto [.light-theme_&]:!border-[#d2deec] [.light-theme_&]:!bg-[rgba(247,251,255,0.95)] [.light-theme_&]:!shadow-[0_18px_44px_rgba(15,23,42,0.14)]" (click)="$event.stopPropagation()">
+<div data-testid="social-manage-profiles-overlay" class="fixed inset-0 z-[1500]">
+  <div class="absolute inset-0 bg-black/50 transition-opacity duration-300 [body.light-theme_&]:bg-[rgba(23,34,53,0.18)]" [class.opacity-100]="isOpen()" [class.pointer-events-none]="!isOpen()" [class.opacity-0]="!isOpen()" (click)="requestClose()"></div>
+  <div data-testid="social-manage-profiles-modal" class="absolute right-0 top-0 flex h-full w-full max-w-2xl transform-gpu flex-col overflow-y-auto border-l border-[var(--color-border)] bg-[var(--color-blue-830)] text-[var(--color-text2)] shadow-[-18px_0_40px_rgba(0,0,0,0.34)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-none" [class.translate-x-0]="isOpen()" [class.translate-x-[102%]]="!isOpen()" (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-mono)] px-4 py-3">
       <div class="min-w-0">
         <div class="flex items-center gap-2">
@@ -10,7 +11,7 @@
           {{ data()!.username }} · {{ data()!.platforms.length }} {{ 'platforms found' | translate }}
         </div>
       </div>
-      <button data-testid="social-manage-profiles-close" type="button" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" [attr.aria-label]="'Close manage profiles' | translate" [title]="'Close' | translate" (click)="close.emit(undefined)">
+      <button data-testid="social-manage-profiles-close" type="button" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]" [attr.aria-label]="'Close manage profiles' | translate" [title]="'Close' | translate" (click)="requestClose()">
         <i class="bi bi-x-lg text-[13px]"></i>
       </button>
     </div>
@@ -50,14 +51,14 @@
       @if (hasMatches()) {
         <div class="mx-4 mb-4 flex flex-col gap-2.5">
           @for (platform of displayPlatforms(); track trackByPlatformKey(i, platform); let i = $index) {
-            @if (i > 0 && platform.status !== 'active' && platform.status !== 'informational' && displayPlatforms()[i - 1].status === 'active') {
+            @if (i > 0 && platform.meta.status !== 'active' && platform.meta.status !== 'informational' && displayPlatforms()[i - 1].meta.status === 'active') {
               <div class="flex items-center py-2">
                 <div class="h-px flex-grow bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent"></div>
                 <span class="flex-shrink-0 px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text4)]">{{ 'Suggested Profiles' | translate }}</span>
                 <div class="h-px flex-grow bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent"></div>
               </div>
             }
-            @if (platform.status === 'informational' && (i === 0 || displayPlatforms()[i - 1].status !== 'informational')) {
+            @if (platform.meta.status === 'informational' && (i === 0 || displayPlatforms()[i - 1].meta.status !== 'informational')) {
               <div class="flex items-center py-2">
                 <div class="h-px flex-grow bg-gradient-to-r from-transparent via-emerald-400/20 to-transparent"></div>
                 <span class="flex-shrink-0 px-4 text-[11px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text4)]">{{ 'Informational Links' | translate }}</span>
@@ -68,22 +69,22 @@
             <div data-testid="social-manage-profile-card" (click)="onPlatformCardClick($event, platform)" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)]/35 p-3 shadow-[0_10px_24px_var(--color-shadow-light)] transition-colors hover:!border-[rgba(16,185,129,0.18)] hover:!bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] [&[data-selected='true']]:!border-[rgba(16,185,129,0.18)] [&[data-selected='true']]:!bg-[linear-gradient(145deg,rgba(16,185,129,0.07)_0%,rgba(34,197,94,0.035)_42%,rgba(16,185,129,0.018)_68%,var(--color-blue-820-light)_100%)] [&[data-selected='true']]:!shadow-[0_10px_24px_var(--color-shadow-light),inset_0_0_0_1px_rgba(16,185,129,0.08)]" [attr.data-selected]="platform.isSelected && !isImageExtractedFlow() ? 'true' : 'false'" [class.cursor-pointer]="!isImageExtractedFlow()">
               <div class="flex items-center gap-3">
                 <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-2 text-lg font-bold text-white [body.light-theme_&]:text-[var(--color-text2)]">
-                  <app-social-icon [platformName]="platform.platform"></app-social-icon>
+                  <app-social-icon [platformName]="platform.meta.platform"></app-social-icon>
                 </div>
                 <div class="min-w-0 flex-grow">
                   <div class="flex min-w-0 items-center gap-2">
-                    <p class="mb-0 truncate text-sm font-semibold text-[var(--color-text1)]">{{ platform.platform }}</p>
-                    @if (platform.status === 'active') {
+                    <p class="mb-0 truncate text-sm font-semibold text-[var(--color-text1)]">{{ platform.meta.platform }}</p>
+                    @if (platform.meta.status === 'active') {
                       <span class="rounded border border-emerald-400/25 bg-emerald-400/12 px-2 py-0.5 text-[11px] font-bold text-emerald-300 [.light-theme_&]:!border-[rgba(199,213,230,0.8)] [.light-theme_&]:!text-[#047857]">
                         {{ 'Active' | translate }}
                       </span>
                     }
-                    @if (platform.status === 'informational') {
+                    @if (platform.meta.status === 'informational') {
                       <span class="rounded border border-sky-400/30 bg-sky-400/15 px-2 py-0.5 text-[11px] font-bold text-sky-300 [.light-theme_&]:!border-[rgba(199,213,230,0.8)] [.light-theme_&]:!text-[#1d77c9]">
                         {{ 'Informational' | translate }}
                       </span>
                     }
-                    @if (!isImageExtractedFlow() && platform.status !== 'active' && platform.status !== 'informational') {
+                    @if (!isImageExtractedFlow() && platform.meta.status !== 'active' && platform.meta.status !== 'informational') {
                       <span class="rounded border border-amber-400/25 bg-amber-400/12 px-2 py-0.5 text-[11px] font-bold text-amber-300 [.light-theme_&]:!border-[rgba(199,213,230,0.8)] [.light-theme_&]:!text-[#b45309]">
                         {{ 'Suggested' | translate }}
                       </span>
@@ -95,7 +96,7 @@
                     }
                   </div>
                   @if (!isImageExtractedFlow() && !isInformational(platform)) {
-                    <p class="mb-0 mt-0.5 truncate text-sm text-[var(--color-text4)]">{{ platform.username }}</p>
+                    <p class="mb-0 mt-0.5 truncate text-sm text-[var(--color-text4)]">{{ platform.meta.username }}</p>
                   }
                 </div>
                 @if (!isImageExtractedFlow() && !isInformational(platform)) {

@@ -1,5 +1,4 @@
-import { PlatformResult } from '../models/social-scan.models';
-
+import { social_profile } from '../models/social.models';
 const HIDDEN_PROFILE_DETAIL_KEYS = new Set(['m_scrap_file', 'm_network', 'm_hash_id', 'm_hash', 'm_content_type', 'm_channel_url', 'm_weblink', 'm_date', 'm_sender_name', 'm_message_id']);
 
 function hasProfileDetailValue(value: any): boolean {
@@ -15,14 +14,14 @@ function hasProfileDetailValue(value: any): boolean {
   return true;
 }
 
-export function getProfileDetailEntries(platform: PlatformResult | null): {
+export function getProfileDetailEntries(platform: social_profile | null): {
     key: string;
     value: any;
 }[] {
   if (!platform) {
     return [];
   }
-  const details = platform.profileDetails;
+  const details = platform.profile_details;
   if (!details) {
     return [];
   }

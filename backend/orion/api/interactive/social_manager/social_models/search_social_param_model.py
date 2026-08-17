@@ -28,6 +28,8 @@ class SocialProfileRequest(PlatformUsernameRequest):
     platform: str = Field(..., min_length=1, examples=["tiktok"])
     username: str = Field(..., min_length=1, examples=["@msmannan00"])
     social_data_type: Optional[str] = None
+    url: Optional[str] = None
+    type: Optional[str] = None
 
 
 class SocialPostsRequest(PlatformUsernameRequest):

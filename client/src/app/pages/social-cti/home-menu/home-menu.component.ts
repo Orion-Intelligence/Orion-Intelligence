@@ -1,9 +1,9 @@
 import { Component, ChangeDetectionStrategy, input, output, computed, signal } from '@angular/core';
-
-import { Job } from '../models/social-scan.models';
+import { Job } from '../models/social.models';
 import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/sidebar-shell.component';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { toUsername } from '../utils/username.util';
 
 @Component({
   selector: 'app-home-menu',
@@ -34,17 +34,19 @@ export class HomeMenuComponent {
   }
 
   getJobInitial(job: Job): string {
-    const label = (job.displayName || job.username || '').trim();
+    const label = toUsername(job.id).trim();
     return (label.charAt(0) || '?').toUpperCase();
   }
 
   getJobTooltip(job: Job): string {
-    return job.displayName && job.displayName !== job.username
-      ? `${job.displayName} (${job.username})`
-      : job.username;
+    return toUsername(job.id);
+  }
+
+  getJobLabel(job: Job): string {
+    return toUsername(job.id);
   }
 
   isJobSelected(job: Job): boolean {
-    return this.activeUsername()?.toLowerCase() === job.username.toLowerCase();
+    return this.activeUsername()?.toLowerCase() === job.id.toLowerCase();
   }
 }

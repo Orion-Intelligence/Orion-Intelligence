@@ -1,9 +1,10 @@
 import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
-import { PlatformResult, SocialOnlinePresenceResult, SocialStealerLogRecord } from '../../models/social-scan.models';
+import { social_online_presence_hit, social_profile } from '../../models/social.models';
+import { social_stealer_log } from '../../models/social.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import type { FetchTabKey } from '../../enums/social-graph.enums';
-import type { FeedUser, FetchTab, PostCursorFetchRequest } from '../../models/social-graph.models';
+import type { FeedUser, FetchTab, PostCursorFetchRequest } from '../../models/social-usability.models';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { applyImageFallback } from '../../utils/image-fallback.util';
@@ -33,7 +34,7 @@ export class SocialProfileTabsSectionComponent {
   private failedProfileImages = signal<Set<string>>(new Set<string>());
 
   user = input.required<FeedUser>();
-  platformData = input.required<PlatformResult>();
+  platformData = input.required<social_profile>();
   fetchTabs = input.required<FetchTab[]>();
   activeTab = input.required<FetchTabKey>();
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
@@ -48,7 +49,7 @@ export class SocialProfileTabsSectionComponent {
   readonly isImageUrl = isImageUrl;
   readonly formatKey = formatKey;
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
-  readonly selectedStealerLogPlatform = signal<PlatformResult | null>(null);
+  readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
 
   getTabIcon(tab: FetchTab): string {
     if (tab.key === 'videos') {
@@ -68,16 +69,16 @@ export class SocialProfileTabsSectionComponent {
     this.onlinePresenceSearchTermChanged.emit((event.target as HTMLInputElement | null)?.value ?? '');
   }
 
-  getProfileImageUrl(platformData: PlatformResult): string {
-    return this.getFirstMetadataValue(platformData, ['m_img_src', 'img_src', 'profile_image', 'profileImage', 'avatar', 'image']);
+  getProfileImageUrl(platformData: social_profile): string {
+    return platformData.meta.avatar ?? '';
   }
 
-  isProfileImageFailed(platformData: PlatformResult): boolean {
+  isProfileImageFailed(platformData: social_profile): boolean {
     const imageUrl = this.getProfileImageUrl(platformData);
     return !!imageUrl && this.failedProfileImages().has(imageUrl);
   }
 
-  markProfileImageFailed(platformData: PlatformResult): void {
+  markProfileImageFailed(platformData: social_profile): void {
     const imageUrl = this.getProfileImageUrl(platformData);
     if (!imageUrl) {
       return;
@@ -89,7 +90,7 @@ export class SocialProfileTabsSectionComponent {
     });
   }
 
-  getCoverImageUrl(platformData: PlatformResult): string {
+  getCoverImageUrl(platformData: social_profile): string {
     return this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'image_bg', 'cover_image', 'coverImage', 'banner', 'banner_image']);
   }
 
@@ -121,11 +122,11 @@ export class SocialProfileTabsSectionComponent {
       || /profile_pic/i.test(url);
   }
 
-  getProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
+  getProfileDetailEntries(platformData: social_profile): { key: string; value: any; }[] {
     return getProfileDetailEntries(platformData);
   }
 
-  getVisibleProfileDetailEntries(platformData: PlatformResult): { key: string; value: any; }[] {
+  getVisibleProfileDetailEntries(platformData: social_profile): { key: string; value: any; }[] {
     return this.getProfileDetailEntries(platformData).filter(item => !['img_src', 'm_img_src'].includes(item.key.toLowerCase()));
   }
 
@@ -177,51 +178,39 @@ export class SocialProfileTabsSectionComponent {
     return s === 'true' || s === 'false';
   }
 
-  getFollowers(platformData: PlatformResult): string[] {
-    return platformData.followers_list || [];
+  getOnlinePresence(platformData: social_profile): social_online_presence_hit[] | null {
+    return platformData.online_presence || null;
   }
 
-  getFollowing(platformData: PlatformResult): string[] {
-    return platformData.following_list || [];
+  getOnlinePresenceResults(platformData: social_profile): social_online_presence_hit[] {
+    return platformData.online_presence || [];
   }
 
-  getPostConnections(platformData: PlatformResult): string[] {
-    return platformData.post_connections || [];
+  getStealerLogs(platformData: social_profile): social_stealer_log[] {
+    return platformData.stealer_logs || [];
   }
 
-  getOnlinePresence(platformData: PlatformResult): SocialOnlinePresenceResult | null {
-    return platformData.onlinePresence || null;
+  getPlatformStealerDomain(platformData: social_profile): string {
+    return platformData.meta.url || platformData.meta.platform;
   }
 
-  getOnlinePresenceResults(platformData: PlatformResult): NonNullable<SocialOnlinePresenceResult['results']> {
-    return platformData.onlinePresence?.results || [];
-  }
-
-  getStealerLogs(platformData: PlatformResult): SocialStealerLogRecord[] {
-    return platformData.stealerLogs || [];
-  }
-
-  getPlatformStealerDomain(platformData: PlatformResult): string {
-    return platformData.url || platformData.platform;
-  }
-
-  getStealerRecordHost(record: SocialStealerLogRecord): string {
+  getStealerRecordHost(record: social_stealer_log): string {
     return record?.['source_domain'] || record?.['m_source_domain'] || record?.['domain'] || record?.['m_domain'] || record?.['ip'] || record?.['m_ip'] || record?.['url'] || record?.['m_url'] || record?.['host'] || record?.['m_host'] || record?.['raw'] || '-';
   }
 
-  getStealerRecordIdentity(record: SocialStealerLogRecord): string {
+  getStealerRecordIdentity(record: social_stealer_log): string {
     return record?.['email'] || record?.['m_email'] || record?.['username'] || record?.['m_username'] || record?.['user'] || record?.['m_user'] || record?.['login'] || record?.['m_login'] || record?.['credential'] || record?.['m_credential'] || record?.['raw'] || '-';
   }
 
-  getStealerRecordDate(record: SocialStealerLogRecord): string {
+  getStealerRecordDate(record: social_stealer_log): string {
     return record?.['date'] || record?.['m_date'] || record?.['timestamp'] || record?.['m_timestamp'] || record?.['created_at'] || record?.['m_created_at'] || record?.['updated_at'] || record?.['m_updated_at'] || '-';
   }
 
-  getStealerRecordTrackKey(index: number, record: SocialStealerLogRecord): string {
+  getStealerRecordTrackKey(index: number, record: social_stealer_log): string {
     return `${this.getStealerRecordHost(record)}|${this.getStealerRecordIdentity(record)}|${this.getStealerRecordDate(record)}|${index}`;
   }
 
-  openStealerLogExportChoice(event: Event, platformData: PlatformResult): void {
+  openStealerLogExportChoice(event: Event, platformData: social_profile): void {
     event.stopPropagation();
     this.selectedStealerLogPlatform.set(platformData);
   }
@@ -238,12 +227,12 @@ export class SocialProfileTabsSectionComponent {
     this.closeStealerLogExportChoice();
   }
 
-  private buildStealerLogRows(platformData: PlatformResult): Record<string, string>[] {
+  private buildStealerLogRows(platformData: social_profile): Record<string, string>[] {
     return this.getStealerLogs(platformData).map((item, index) => ({
       tenant_name: this.exportBranding.getTenantName(),
       recordType: 'stealer',
       recordIndex: String(index + 1),
-      searchQuery: `${platformData.username || platformData.keyUsername} ${this.getPlatformStealerDomain(platformData)}`.trim(),
+      searchQuery: `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim(),
       email: String(item?.['email'] || item?.['m_email'] || '-'),
       username: String(item?.['username'] || item?.['m_username'] || '-'),
       domain: String(item?.['domain'] || item?.['m_domain'] || '-'),
@@ -258,9 +247,9 @@ export class SocialProfileTabsSectionComponent {
     }));
   }
 
-  private exportStealerLogs(platformData: PlatformResult, type: 'csv' | 'json' | 'report'): void {
+  private exportStealerLogs(platformData: social_profile, type: 'csv' | 'json' | 'report'): void {
     const rows = this.buildStealerLogRows(platformData);
-    const query = `${platformData.username || platformData.keyUsername} ${this.getPlatformStealerDomain(platformData)}`.trim();
+    const query = `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim();
     const payload: GraphReportPayload = {
       graphKind: 'social',
       title: this.translationService.translate('Stealer Logs Export'),
@@ -277,11 +266,8 @@ export class SocialProfileTabsSectionComponent {
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }
 
-  getProfileUrl(platformData: PlatformResult, username: string): string {
-    if (platformData.resultSource === 'darkweb') {
-      return platformData.url || '#';
-    }
-    return buildSocialProfileUrl(platformData.platform, username, platformData.url);
+  getProfileUrl(platformData: social_profile, username: string): string {
+    return buildSocialProfileUrl(platformData.meta.platform, username, platformData.meta.url);
   }
 
   trackByKey(_index: number, item: { key: string }): string {
@@ -292,8 +278,8 @@ export class SocialProfileTabsSectionComponent {
     return username;
   }
 
-  private getFirstMetadataValue(platformData: PlatformResult, keys: string[]): string {
-    const sources = [platformData.profileDetails, platformData.allMetadata];
+  private getFirstMetadataValue(platformData: social_profile, keys: string[]): string {
+    const sources = [platformData.profile_details, platformData.meta.avatar];
     for (const source of sources) {
       const value = this.getFirstValueFromSource(source, keys);
       if (value) {

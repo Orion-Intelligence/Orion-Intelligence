@@ -3,8 +3,10 @@ import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
-import { Job, ManageProfilesModalData, PlatformResult } from './models/social-scan.models';
-import type { FeedUser, NotificationData } from './models/social-graph.models';
+import { Job, social_profile } from './models/social.models';
+import { socialSelectionKey } from './models/social-usability.models';
+import { ManageProfilesModalData } from './models/social-usability.models';
+import type { FeedUser, NotificationData } from './models/social-usability.models';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { SocialProfileListingComponent } from './profile-listing/profile-listing.component';
 import { NotificationBarComponent } from './notification-bar/notification-bar.component';
@@ -39,8 +41,8 @@ export class SocialMapperComponent {
   private readonly socialService = inject(SocialService);
   private readonly storageService = inject(SocialStorageService);
   private readonly router = inject(Router);
-  private readonly sidebarState = this.storageService.sidebarState;
-  private readonly profilesState = this.storageService.profilesState;
+  private readonly sidebarState = this.storageService.state;
+  private readonly profilesState = this.storageService.state;
   private notificationTimeout: ReturnType<typeof setTimeout> | undefined;
 
   activeUsername = this.storageService.activeUsername;
@@ -49,7 +51,7 @@ export class SocialMapperComponent {
   scanResults = this.profilesState.scanResults;
   resultUsernames = computed(() => new Set([
     ...Array.from(this.scanResults().keys()),
-    ...this.jobs().filter(job => job.status === 'completed').map(job => job.username)
+    ...this.jobs().filter(job => job.status === 'completed').map(job => job.id)
   ]));
   isHomeMenuCollapsed = this.sidebarState.isHomeMenuCollapsed;
   isInitialLoading = signal(true);
@@ -67,7 +69,7 @@ export class SocialMapperComponent {
     }
     const results = this.scanResults();
     const platforms = results.get(username) ?? Array.from(results.entries()).find(([key]) => key.toLowerCase() === username.toLowerCase())?.[1] ?? [];
-    return this.getVisiblePlatforms(platforms);
+    return this.getVisiblePlatforms(username, platforms);
   });
   hasResultSourceTabs = computed(() => this.activeSourcePlatforms().some(platform => this.getResultSource(platform) === 'darkweb'));
   activeResultSource = computed(() => {
@@ -178,7 +180,7 @@ export class SocialMapperComponent {
       return;
     }
     this.profileListing()?.clearProfileOverview();
-    this.sidebarState.activeUsername.set(job.username);
+    this.sidebarState.activeUsername.set(job.id);
   }
 
   private initiateScan(username: string): void {
@@ -196,7 +198,7 @@ export class SocialMapperComponent {
   }
 
   retryScan(job: Job): void {
-    this.initiateScan(job.username);
+    this.initiateScan(job.id);
   }
 
   private resumeIncompleteScans(): void {
@@ -204,7 +206,7 @@ export class SocialMapperComponent {
   }
 
   private removeUserScanData(username: string): void {
-    this.sidebarState.jobs.update(currentJobs => currentJobs.filter(job => job.username !== username));
+    this.sidebarState.jobs.update(currentJobs => currentJobs.filter(job => job.id !== username));
     this.profilesState.scanResults.update(currentMap => {
       const newMap = new Map(currentMap);
       for (const key of newMap.keys()) {
@@ -218,9 +220,9 @@ export class SocialMapperComponent {
   }
 
   openDeleteConfirmation(username: string): void {
-    const job = this.jobs().find(currentJob => currentJob.username === username);
+    const job = this.jobs().find(currentJob => currentJob.id === username);
     this.deleteUsername.set(username);
-    this.deleteConfirmationMessage.set(`Are you sure you want to delete the profile for ${job?.displayName || username}? This will remove all associated data and cannot be undone.`);
+    this.deleteConfirmationMessage.set(`Are you sure you want to delete the profile for ${job?.id || username}? This will remove all associated data and cannot be undone.`);
   }
 
   closeDeleteConfirmation(): void {
@@ -233,38 +235,26 @@ export class SocialMapperComponent {
     if (!results) {
       return;
     }
-    const hasStoredSelection = results.some(platform => platform.isSelected);
-    this.manageProfilesModalData.set({
-      username: user.username,
-      platforms: results.map(platform => ({
-        ...platform,
-        isSelected: hasStoredSelection ? platform.isSelected : platform.status !== 'informational',
-      })),
-    });
+    const owner = user.username;
+    const hasStoredSelection = results.some(platform => this.storageService.isSelected(owner, platform));
+    const selectedKeys = results
+      .filter(platform => hasStoredSelection ? this.storageService.isSelected(owner, platform) : platform.meta.status !== 'informational')
+      .map(platform => socialSelectionKey(owner, platform));
+    this.manageProfilesModalData.set({ username: owner, platforms: results, selectedKeys });
   }
 
   closeManageProfilesModal(): void {
     this.manageProfilesModalData.set(null);
   }
 
-  updateProfilesFromModal(selectedPlatforms: PlatformResult[]): void {
+  updateProfilesFromModal(selectedPlatforms: social_profile[]): void {
     const modalData = this.manageProfilesModalData();
     if (!modalData) {
       return;
     }
-    const selectedKeys = new Set(selectedPlatforms.map(platform => this.getPlatformSelectionKey(platform)));
-    let updatedProfiles: PlatformResult[] = [];
-    this.profilesState.scanResults.update(currentMap => {
-      const nextMap = new Map(currentMap);
-      const currentPlatforms = nextMap.get(modalData.username) ?? [];
-      updatedProfiles = currentPlatforms.map(platform => ({
-        ...platform,
-        isSelected: selectedKeys.has(this.getPlatformSelectionKey(platform)),
-      }));
-      nextMap.set(modalData.username, updatedProfiles);
-      return nextMap;
-    });
-    this.storageService.saveProfiles(modalData.username, updatedProfiles, true)
+    this.storageService.setSelection(modalData.username, selectedPlatforms);
+    const currentPlatforms = this.profilesState.scanResults().get(modalData.username) ?? [];
+    this.storageService.saveProfiles(modalData.username, currentPlatforms, true)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
     this.closeManageProfilesModal();
@@ -316,16 +306,12 @@ export class SocialMapperComponent {
     this.notificationTimeout = setTimeout(() => this.notification.set(null), 3000);
   }
 
-  private getPlatformSelectionKey(platform: PlatformResult): string {
-    return `${platform.keyUsername}|${platform.platform.toLowerCase()}|${platform.username.toLowerCase()}|${platform.url}`;
+  private getResultSource(_platformData: social_profile): SocialResultSource {
+    return 'normal';
   }
 
-  private getResultSource(platformData: PlatformResult): SocialResultSource {
-    return platformData.resultSource ?? 'normal';
-  }
-
-  private getVisiblePlatforms(platforms: PlatformResult[]): PlatformResult[] {
-    const selectedPlatforms = platforms.filter(platform => platform.isSelected);
+  private getVisiblePlatforms(ownerUsername: string, platforms: social_profile[]): social_profile[] {
+    const selectedPlatforms = platforms.filter(platform => this.storageService.isSelected(ownerUsername, platform));
     return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
   }
 }

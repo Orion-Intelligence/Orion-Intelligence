@@ -1,3 +1,4 @@
+import json
 import asyncio
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect, status
@@ -124,11 +125,19 @@ async def extension_socket(websocket: WebSocket):
         await websocket.send_json({"detail": "Connected"})
         while True:
             try:
-                await asyncio.wait_for(websocket.receive_text(), timeout=5)
+                text = await asyncio.wait_for(websocket.receive_text(), timeout=5)
             except TimeoutError:
                 if await socket_user_key(token) != user_key:
                     await websocket.close()
                     return
+                continue
+
+            try:
+                payload = json.loads(text)
+            except (json.JSONDecodeError, TypeError):
+                continue
+            if isinstance(payload, dict) and payload.get("request_id"):
+                socket_manager.resolve(payload["request_id"], payload)
     except WebSocketDisconnect:
         return
     finally:

@@ -14,7 +14,7 @@ from orion.api.interactive.social_manager.social_models.social_scan_model import
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
-from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
+from orion.services.mongo_manager.shared_model.db_social_model import SOCIAL_COLLECTION
 
 
 class social_scanner:
@@ -234,7 +234,7 @@ class social_scanner:
         )
 
     def _collection(self):
-        return mongo_controller.get_instance().get_engine().get_collection(db_social_model)
+        return mongo_controller.get_instance().get_engine().database[SOCIAL_COLLECTION]
 
     async def _load_user(self, user_id: str):
         try:

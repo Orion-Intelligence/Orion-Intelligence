@@ -16,7 +16,7 @@ from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.helper_manager.env_handler import env_handler
-from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
+from orion.services.mongo_manager.shared_model.db_social_model import SOCIAL_COLLECTION, social_profile
 
 
 
@@ -49,36 +49,70 @@ class social_model:
         self._engine = mongo_controller.get_instance().get_engine()
 
     @staticmethod
+    def _recon_profile_details(item: dict) -> dict:
+        followers = item.get("total_followers") or item.get("follower_count") or item.get("followers")
+        details = {
+            "real_name": item.get("full_name") or item.get("name") or item.get("real_name"),
+            "bio": item.get("description") or item.get("bio"),
+            "location": item.get("location"),
+            "profile_url": item.get("url") or item.get("profile_url"),
+            "total_posts": item.get("total_posts") or item.get("post_count"),
+            "total_followers": followers,
+            "total_following": item.get("total_following") or item.get("following_count") or item.get("following"),
+            "total_likes": item.get("total_likes") or item.get("like_count"),
+        }
+        return {key: str(value) for key, value in details.items() if value}
+
+    @staticmethod
+    def _recon_meta(item: dict, metadata: dict, ids: dict, profile_username: str) -> dict:
+        platform = str(item.get("platform") or metadata.get("platform") or "")
+        values = {
+            "platform": platform,
+            "username": str(item.get("username") or metadata.get("username") or metadata.get("social_handle") or profile_username or ""),
+            "url": str(item.get("url") or metadata.get("url") or ""),
+            "target_type": item.get("target_type") or metadata.get("target_type"),
+            "entity_type": item.get("entity_type") or metadata.get("entity_type"),
+            "status": item.get("status") or metadata.get("status") or "active",
+            "timestamp": item.get("timestamp") or metadata.get("timestamp"),
+            "description": item.get("description") or item.get("bio") or ids.get("bio") or ids.get("description"),
+            "avatar": item.get("avatar") or metadata.get("avatar"),
+        }
+        return {key: value for key, value in values.items() if value}
+
+    @staticmethod
     def flatten_recon_profile(item: dict, profile_username: str) -> dict:
-        if not isinstance(item, dict) or item.get("platform"):
+        if not isinstance(item, dict):
             return item
+        if isinstance(item.get("meta"), dict):
+            try:
+                return social_profile.model_validate(item).model_dump(mode="json")
+            except Exception:
+                return item
+
         metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
         data = item.get("data") if isinstance(item.get("data"), dict) else {}
-        if not metadata and "platform" not in item:
+        if not item.get("platform") and not metadata and "platform" not in item:
             return item
+
         ids = (data.get("platform_profile") or {}).get("ids") if isinstance(data.get("platform_profile"), dict) else None
         if not isinstance(ids, dict):
             ids = data.get("ids") if isinstance(data.get("ids"), dict) else {}
-        platform = str(metadata.get("platform") or "")
-        followers = ids.get("follower_count", ids.get("followers"))
+
+        built = {"meta": social_model._recon_meta(item, metadata, ids, profile_username)}
+        details = item.get("profile_details") if isinstance(item.get("profile_details"), dict) else None
+        if not details:
+            details = item.get("profileDetails") if isinstance(item.get("profileDetails"), dict) else None
+        if not details:
+            details = social_model._recon_profile_details({**ids, **item})
+        if details:
+            built["profile_details"] = details
+        for key in ("posts", "online_presence", "stealer_logs"):
+            if item.get(key) is not None:
+                built[key] = item.get(key)
         try:
-            followers = int(followers) if followers is not None and str(followers).strip() != "" else None
-        except (TypeError, ValueError):
-            followers = None
-        return {
-            "platform": platform,
-            "platformKey": str(metadata.get("platform_key") or platform.lower()),
-            "username": str(metadata.get("username") or metadata.get("social_handle") or profile_username),
-            "url": str(metadata.get("url") or ""),
-            "timestamp": metadata.get("timestamp"),
-            "status": metadata.get("status") or "active",
-            "isSelected": bool(item.get("isSelected", False)),
-            "keyUsername": item.get("keyUsername") or profile_username,
-            "resultSource": item.get("resultSource") or "normal",
-            "description": ids.get("bio") or ids.get("description"),
-            "followers": followers,
-            "allMetadata": ids,
-        }
+            return social_profile.model_validate(built).model_dump(mode="json")
+        except Exception:
+            return built
 
     @staticmethod
     def _document_payload(record: dict) -> dict:
@@ -95,7 +129,6 @@ class social_model:
             "profile_username": profile_username,
             "profiles": profiles,
             "count": len(profiles),
-            "status": record.get("status") or "complete",
             "updated_at": record.get("updated_at"),
         }
 
@@ -273,7 +306,25 @@ class social_model:
         return await self.social_search(param, "phone", current_user, request)
 
     async def search_profile(self, param, current_user=None, request=None):
+        payload = param.model_dump() if hasattr(param, "model_dump") else dict(param)
+        if str(payload.get("type") or "") == "details":
+            return await self._fetch_profile_via_extension(payload, current_user)
         return await self.social_search(param, "profile", current_user, request)
+
+    async def _fetch_profile_via_extension(self, payload: dict, current_user=None):
+        from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
+
+        user_key = str(getattr(current_user, "id", "") or "")
+        reply = None
+        if user_key:
+            command = {"command": "crawl", "platform": payload.get("platform"), "type": "details", "url": payload.get("url")}
+            reply = await extension_socket_manager.get_instance().request(user_key, command)
+
+        if not reply:
+            return {"status": "pending"}
+
+        items = reply.get("items") if reply.get("implemented") else []
+        return {"result": {"profile": (items or [{}])[0]}}
 
     async def search_online_images(self, param, current_user=None, request=None):
         return await self.social_search(param, "online/images", current_user, request)
@@ -339,16 +390,13 @@ class social_model:
             for profile in profiles:
                 if not isinstance(profile, dict):
                     continue
-                normalized_profiles.append(social_model._drop_unstorable_ints({
-                    **profile,
-                    "keyUsername": normalized_username,
-                }))
+                shaped = social_model.flatten_recon_profile(profile, normalized_username)
+                normalized_profiles.append(social_model._drop_unstorable_ints(shaped))
 
             update_doc = {
                 "$setOnInsert": {
                     "user_id": user_id,
                     "profile_username": normalized_username,
-                    "created_at": now_utc,
                 },
                 "$set": {"updated_at": now_utc},
             }
@@ -358,7 +406,7 @@ class social_model:
                 else:
                     update_doc["$push"] = {"profiles": {"$each": normalized_profiles}}
 
-            await self._engine.get_collection(db_social_model).update_one(
+            await self._engine.database[SOCIAL_COLLECTION].update_one(
                 {"user_id": user_id, "profile_username": normalized_username},
                 update_doc,
                 upsert=True,
@@ -375,7 +423,7 @@ class social_model:
 
     async def get_social_profiles(self, user_id: str, profile_username: str | None = None):
         try:
-            collection = self._engine.get_collection(db_social_model)
+            collection = self._engine.database[SOCIAL_COLLECTION]
             query = {"user_id": user_id}
             normalized_username = (profile_username or "").strip().lstrip("@").lower()
             if normalized_username:
@@ -401,7 +449,7 @@ class social_model:
     async def delete_social_profiles(self, user_id: str, profile_username: str):
         try:
             normalized_username = (profile_username).strip().lstrip("@").lower()
-            result = await self._engine.get_collection(db_social_model).delete_many({
+            result = await self._engine.database[SOCIAL_COLLECTION].delete_many({
                 "user_id": user_id,
                 "$or": [
                     {"profile_username": normalized_username},

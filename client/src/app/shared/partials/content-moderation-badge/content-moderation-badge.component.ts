@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { SocialPostHateSpeech } from '../../../pages/social-cti/models/social-scan.models';
+import { social_post_hate_speech } from '../../../pages/social-cti/models/social.models';
 import { ModerationMapping, getModerationConfig } from '../../utils/moderation-mapping';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
@@ -12,7 +12,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ContentModerationBadgeComponent {
-  moderation = input<SocialPostHateSpeech | null | undefined>();
+  moderation = input<social_post_hate_speech | null | undefined>();
 
   get config(): ModerationMapping | null {
     const mod = this.moderation();

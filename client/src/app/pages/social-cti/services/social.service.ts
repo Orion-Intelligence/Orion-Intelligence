@@ -2,7 +2,8 @@ import { DestroyRef, Injectable, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Observable, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { Job, ScanEvent } from '../models/social-scan.models';
+import { Job } from '../models/social.models';
+import { ScanEvent } from '../models/social-usability.models';
 import { SocialScanService } from './social-scan.service';
 import { SocialStorageService } from './social-storage.service';
 
@@ -17,43 +18,39 @@ export class SocialService {
     if (!username) {
       return false;
     }
-    if (this.storageService.sidebarState.jobs().some(job => job.username === username && (job.status === 'in_progress' || job.status === 'queued'))) {
+    if (this.storageService.state.jobs().some(job => job.id === username && (job.status === 'in_progress' || job.status === 'queued'))) {
       return false;
     }
 
     const shouldQueue = this.hasRunningJob();
     const job: Job = {
-      id: self.crypto.randomUUID(),
-      username,
+      id: username,
       status: shouldQueue ? 'queued' : 'in_progress',
       progress: shouldQueue ? 0 : 5,
       step: shouldQueue ? 'Queued' : 'Starting',
     };
-    this.storageService.sidebarState.jobs.update(jobs => [job, ...jobs.filter(currentJob => currentJob.username !== username)]);
+    this.storageService.state.jobs.update(jobs => [job, ...jobs.filter(currentJob => currentJob.id !== username)]);
     if (!shouldQueue) {
-      this.runScan(job, this.scanService.performScan(job.username), destroyRef);
+      this.runScan(job, this.scanService.performScan(job.id), destroyRef);
     }
     return true;
   }
 
   initiateImageScan(base64Image: string, fileName: string, destroyRef: DestroyRef): void {
-    const displayName = `Image Scan: ${fileName}`;
     const job: Job = {
-      id: self.crypto.randomUUID(),
-      username: `${displayName} #${self.crypto.randomUUID().substring(0, 4)}`,
-      displayName,
+      id: `Image Scan: ${fileName} #${self.crypto.randomUUID().substring(0, 4)}`,
       status: 'in_progress',
       progress: 5,
       step: `Scanning ${fileName}`,
     };
-    this.storageService.sidebarState.jobs.update(jobs => [job, ...jobs]);
-    this.runScan(job, this.scanService.performImageScan(base64Image, job.username), destroyRef);
+    this.storageService.state.jobs.update(jobs => [job, ...jobs]);
+    this.runScan(job, this.scanService.performImageScan(base64Image, job.id), destroyRef);
   }
 
   cancelScan(jobId: string, destroyRef: DestroyRef): void {
-    const cancelledJob = this.storageService.sidebarState.jobs().find(job => job.id === jobId);
+    const cancelledJob = this.storageService.state.jobs().find(job => job.id === jobId);
     this.cancelScanRequest(jobId);
-    this.storageService.sidebarState.jobs.update(jobs => jobs.filter(job => job.id !== jobId));
+    this.storageService.state.jobs.update(jobs => jobs.filter(job => job.id !== jobId));
     if (cancelledJob?.status === 'in_progress') {
       this.scanService.cancelScan().pipe(takeUntilDestroyed(destroyRef)).subscribe({ error: () => void 0 });
       this.startNextQueuedScan(destroyRef);
@@ -61,11 +58,11 @@ export class SocialService {
   }
 
   resumeIncompleteScans(destroyRef: DestroyRef): void {
-    const inProgressJobs = this.storageService.sidebarState.jobs().filter(job => job.status === 'in_progress');
+    const inProgressJobs = this.storageService.state.jobs().filter(job => job.status === 'in_progress');
     if (inProgressJobs.length > 1) {
       const [activeJob, ...extraJobs] = inProgressJobs;
       const queuedIds = new Set(extraJobs.map(job => job.id));
-      this.storageService.sidebarState.jobs.update(jobs => jobs.map(job => {
+      this.storageService.state.jobs.update(jobs => jobs.map(job => {
         if (job.id === activeJob.id || !queuedIds.has(job.id)) {
           return job;
         }
@@ -73,30 +70,30 @@ export class SocialService {
       }));
     }
 
-    const activeJob = this.storageService.sidebarState.jobs().find(job => job.status === 'in_progress');
+    const activeJob = this.storageService.state.jobs().find(job => job.status === 'in_progress');
     if (activeJob && !this.scanCancelSubjects.has(activeJob.id)) {
-      this.runScan(activeJob, this.scanService.resumeScan(activeJob.username), destroyRef);
+      this.runScan(activeJob, this.scanService.resumeScan(activeJob.id), destroyRef);
       return;
     }
     this.startNextQueuedScan(destroyRef);
   }
 
   private hasRunningJob(): boolean {
-    return this.storageService.sidebarState.jobs().some(job => job.status === 'in_progress');
+    return this.storageService.state.jobs().some(job => job.status === 'in_progress');
   }
 
   private startNextQueuedScan(destroyRef: DestroyRef): void {
     if (this.hasRunningJob()) {
       return;
     }
-    const nextJob = this.storageService.sidebarState.jobs().find(job => job.status === 'queued');
+    const nextJob = this.storageService.state.jobs().find(job => job.status === 'queued');
     if (!nextJob) {
       return;
     }
-    this.storageService.sidebarState.jobs.update(jobs => jobs.map(job => job.id === nextJob.id
+    this.storageService.state.jobs.update(jobs => jobs.map(job => job.id === nextJob.id
       ? { ...job, status: 'in_progress', progress: Math.max(job.progress, 5), step: 'Starting' }
       : job));
-    this.runScan(nextJob, this.scanService.performScan(nextJob.username), destroyRef);
+    this.runScan(nextJob, this.scanService.performScan(nextJob.id), destroyRef);
   }
 
   private runScan(job: Job, scan$: Observable<ScanEvent>, destroyRef: DestroyRef): void {
@@ -111,27 +108,22 @@ export class SocialService {
 
   private setScanEvent(job: Job, event: ScanEvent, destroyRef: DestroyRef): void {
     if (event.type === 'progress') {
-      this.storageService.sidebarState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
+      this.storageService.state.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
         ? { ...currentJob, ...event.payload }
         : currentJob));
       return;
     }
 
-    const platforms = event.payload.map(platform => ({
-      ...platform,
-      keyUsername: job.username,
-      resultSource: platform.resultSource ?? ('normal' as const),
-    }));
-    this.storageService.profilesState.scanResults.update(results => new Map(results).set(job.username, platforms));
-    this.storageService.sidebarState.activeUsername.set(job.username);
-    this.storageService.sidebarState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
+    this.storageService.state.scanResults.update(results => new Map(results).set(job.id, event.payload));
+    this.storageService.state.activeUsername.set(job.id);
+    this.storageService.state.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
       ? { ...currentJob, status: 'completed', progress: 100, step: 'Completed' }
       : currentJob));
     this.startNextQueuedScan(destroyRef);
   }
 
   private setScanFailed(job: Job, destroyRef: DestroyRef, reason = ''): void {
-    this.storageService.sidebarState.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
+    this.storageService.state.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
       ? { ...currentJob, status: 'failed', step: reason === 'Scan cancelled' ? reason : 'Scan failed' }
       : currentJob));
     this.scanCancelSubjects.delete(job.id);
