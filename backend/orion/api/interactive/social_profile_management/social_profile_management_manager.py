@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from fastapi import HTTPException
+from pymongo.errors import DuplicateKeyError
 
 from orion.api.interactive.social_profile_management.models import (
     SocialPersonaCreateRequest,
@@ -73,7 +74,12 @@ class SocialProfileManagementManager:
         return self._persona_response(persona)
 
     async def get_personas(self, current_user) -> SocialPersonaListResponse:
-        record = await self._get_or_create_record(current_user)
+        user_id = str(current_user.id)
+        record = await self._engine.find_one(
+                    db_social_profile_management_model,
+                    (db_social_profile_management_model.user_id == user_id))
+        if not record:
+            return SocialPersonaListResponse()
         return SocialPersonaListResponse(personas=[self._persona_response(persona) for persona in record.personas])
 
     async def update_persona(self, current_user, persona_id: str, data: SocialPersonaUpdateRequest) -> SocialPersonaResponse:
@@ -142,7 +148,12 @@ class SocialProfileManagementManager:
         return self._profile_response(profile, self.PLATFORM_LOGIN_URLS.get(profile.platform))
 
     async def get_profiles(self, current_user) -> SocialProfileListResponse:
-        record = await self._get_or_create_record(current_user)
+        user_id = str(current_user.id)
+        record = await self._engine.find_one(
+                    db_social_profile_management_model,
+                    (db_social_profile_management_model.user_id == user_id))
+        if not record:
+            return SocialProfileListResponse()
         return SocialProfileListResponse(profiles=[self._profile_response(profile) for profile in record.profiles])
 
     async def update_profile(self, current_user, profile_id: str, data: SocialProfileUpdateRequest) -> SocialProfileResponse:
@@ -211,11 +222,21 @@ class SocialProfileManagementManager:
 
     async def _get_or_create_record(self, current_user) -> db_social_profile_management_model:
         user_id = str(current_user.id)
-        record = await self._engine.find_one(db_social_profile_management_model, db_social_profile_management_model.user_id == user_id)
+        record = await self._engine.find_one(
+                    db_social_profile_management_model,
+                    (db_social_profile_management_model.user_id == user_id))
         if record:
             return record
-        record = db_social_profile_management_model(user_id=user_id, tenant_id=str(getattr(current_user, "tenant_uuid", "") or ""))
-        await self._engine.save(record)
+        record = db_social_profile_management_model(user_id=user_id)
+        try:
+            await self._engine.save(record)
+        except DuplicateKeyError:
+            record = await self._engine.find_one(
+            db_social_profile_management_model,
+            (db_social_profile_management_model.user_id == user_id))
+            if record:
+                return record
+            raise
         return record
 
     def _find_persona(self, record: db_social_profile_management_model, persona_id: str) -> SocialPersona:
