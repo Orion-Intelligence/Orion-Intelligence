@@ -199,6 +199,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
+        c !== ProfileSubCategory.SOCIAL_PROFILE_MANAGEMENT &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
         c !== ProfileSubCategory.AUDITLOG &&
@@ -231,6 +232,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         c !== ProfileSubCategory.USERS &&
         c !== ProfileSubCategory.AUDITLOG &&
         c !== ProfileSubCategory.IOC &&
+        c !== ProfileSubCategory.SOCIAL_PROFILE_MANAGEMENT &&
         (canAccessFeeder || c !== ProfileSubCategory.FEEDER) &&
         (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
         c !== ProfileSubCategory.STATISTICS &&
@@ -248,6 +250,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       c !== ProfileSubCategory.USERS &&
       c !== ProfileSubCategory.AUDITLOG &&
       c !== ProfileSubCategory.IOC &&
+      c !== ProfileSubCategory.SOCIAL_PROFILE_MANAGEMENT &&
       (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT) &&
       c !== ProfileSubCategory.STATISTICS &&
       c !== ProfileSubCategory.TENANT_SETTINGS);

@@ -1,0 +1,265 @@
+<div class="mb-[200px] w-full px-[32px] pt-[24px] max-[1200px]:px-[15px] max-[1200px]:pt-[18px] max-[943px]:px-[10px] max-[943px]:pt-[14px]" @fadeInDashboardItem>
+  @if (isDeleteConfirmationOpen) {
+    <app-confirmation-popup [message]="deleteConfirmationMessage()" (confirmed)="confirmDelete($event)"></app-confirmation-popup>
+  }
+
+  <div class="mb-5 flex flex-wrap items-start justify-between gap-3">
+    <div>
+      <h1 class="ui-page-title">Social Profile Management</h1>
+      <p class="ui-page-description">Manage personas, connected social profiles, and profile assignments.</p>
+    </div>
+    @if (activeTab === 'personas') {
+      <button type="button" (click)="openPersonaModal()" class="rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2 text-[12px] font-semibold text-white transition hover:brightness-105">Add Persona</button>
+    }
+    @if (activeTab === 'profiles') {
+      <button type="button" (click)="openProfileModal()" class="rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2 text-[12px] font-semibold text-white transition hover:brightness-105">Connect Social Profile</button>
+    }
+  </div>
+
+  @if (formError) {
+    <div class="mb-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+      {{ formError }}
+    </div>
+  }
+
+  <div class="mb-5 flex max-w-full flex-nowrap gap-2 overflow-x-auto whitespace-nowrap pr-6 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    @for (tab of tabs; track tab.key) {
+      <button type="button" (click)="setActiveTab(tab.key)" class="cursor-pointer rounded-full border px-4 py-1.5 text-[12px] font-semibold transition-colors whitespace-nowrap" [ngClass]="activeTab === tab.key ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.15)]' : 'border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]'">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  @if (isLoading) {
+    @if (activeTab === 'personas') {
+      <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
+        <table class="w-full min-w-[840px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+          <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+              <th class="overflow-clip align-middle px-4 py-3.5">Persona</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Age Group</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Adult Status</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Gender</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Location</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Interests</th>
+              <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+            @for (row of [1,2,3,4,5]; track row) {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0">
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[72%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[54px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[58px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[70px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[78%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[86%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center"><div class="inline-flex items-center justify-center gap-2"><div class="ui-shimmer h-8 w-8 rounded-lg bg-[var(--color-placeholder)]"></div><div class="ui-shimmer h-8 w-8 rounded-lg bg-[var(--color-placeholder)]"></div></div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (activeTab === 'profiles') {
+      <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
+        <table class="w-full min-w-[780px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+          <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+              <th class="overflow-clip align-middle px-4 py-3.5">Platform</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Social Profile</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Username</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Connection Status</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Assigned Persona</th>
+              <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+            @for (row of [1,2,3,4,5]; track row) {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0">
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[82px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[76%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[68%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[74px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[72%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center"><div class="inline-flex items-center justify-center gap-2"><div class="ui-shimmer h-8 w-8 rounded-lg bg-[var(--color-placeholder)]"></div><div class="ui-shimmer h-8 w-8 rounded-lg bg-[var(--color-placeholder)]"></div></div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (activeTab === 'assignments') {
+      <div class="mb-4 grid grid-cols-[minmax(180px,1fr)_minmax(220px,1fr)_auto] gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-4 max-[760px]:grid-cols-1">
+        <div class="ui-shimmer h-10 rounded-[8px] bg-[var(--color-placeholder)]"></div>
+        <div class="ui-shimmer h-10 rounded-[8px] bg-[var(--color-placeholder)]"></div>
+        <div class="ui-shimmer h-10 w-[82px] rounded-[8px] bg-[var(--color-placeholder)] max-[760px]:w-full"></div>
+      </div>
+      <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
+        <table class="w-full min-w-[850px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+          <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+              <th class="overflow-clip align-middle px-4 py-3.5">Persona</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Platform</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Social Profile</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Connection Status</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Assignment Status</th>
+              <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+            @for (row of [1,2,3,4,5]; track row) {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0">
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[72%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[82px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[78%] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[74px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5"><div class="ui-shimmer h-3 w-[78px] rounded bg-[var(--color-placeholder)]"></div></td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center"><div class="ui-shimmer mx-auto h-8 w-8 rounded-lg bg-[var(--color-placeholder)]"></div></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  } @else {
+    @if (activeTab === 'personas') {
+      <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
+        <table class="w-full min-w-[840px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+          <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+              <th class="overflow-clip align-middle px-4 py-3.5">Persona</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Age Group</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Adult Status</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Gender</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Location</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Interests</th>
+              <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+            @for (persona of personas; track persona.persona_id) {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0">
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ persona.name }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ persona.age_group }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ persona.adult_status ? 'Adult' : 'Minor' }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">{{ statusLabel(persona.gender) }}</td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">{{ persona.city || persona.country ? (persona.city || '') + (persona.city && persona.country ? ', ' : '') + (persona.country || '') : '-' }}</td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">
+                  <span class="line-clamp-1">{{ persona.interests.join(', ') || '-' }}</span>
+                </td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                  <div class="inline-flex items-center justify-center gap-2">
+                    <button type="button" (click)="openPersonaModal(persona)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" aria-label="Edit persona" title="Edit persona">
+                      <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="case-action-icon cursor-pointer" />
+                    </button>
+                    <button type="button" (click)="deletePersona(persona)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" aria-label="Delete persona" title="Delete persona">
+                      <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]"><td colspan="7" class="px-4 py-12 text-center text-sm text-[var(--color-text4)]">No personas created yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (activeTab === 'profiles') {
+      <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
+        <table class="w-full min-w-[780px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+          <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+              <th class="overflow-clip align-middle px-4 py-3.5">Platform</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Social Profile</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Username</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Connection Status</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Assigned Persona</th>
+              <th class="w-[110px] overflow-clip align-middle px-4 py-3.5 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+            @for (profile of profiles; track profile.profile_id) {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0">
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ platformLabel(profile.platform) }}</td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">{{ profile.profile_name || 'Pending profile' }}</td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">{{ profile.profile_username || '-' }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">{{ statusLabel(profile.connection_status) }}</td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">{{ personaName(profile.assigned_persona_id) }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                  <div class="inline-flex items-center justify-center gap-2">
+                    <button type="button" [disabled]="profile.connection_status === 'connected' || reconnectingProfileId === profile.profile_id" (click)="reconnectProfile(profile)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] disabled:cursor-not-allowed disabled:opacity-50" aria-label="Reconnect social profile" [title]="profile.connection_status === 'connected' ? 'Connected' : 'Connect again'">
+                      @if (reconnectingProfileId === profile.profile_id) {
+                        <span class="h-4 w-4 animate-spin rounded-full border-2 border-[var(--tenant-line)] border-t-sky-400"></span>
+                      } @else {
+                        <i class="bi bi-arrow-clockwise text-[16px] leading-none"></i>
+                      }
+                    </button>
+                    <button type="button" (click)="deleteProfile(profile)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)]" aria-label="Delete social profile" title="Delete social profile">
+                      <img src="assets/images/shared/theme/bin.svg" width="18" alt="delete" class="case-action-icon cursor-pointer" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]"><td colspan="6" class="px-4 py-12 text-center text-sm text-[var(--color-text4)]">No connected social profiles yet.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    @if (activeTab === 'assignments') {
+      <div class="mb-4 grid grid-cols-[minmax(180px,1fr)_minmax(220px,1fr)_auto] gap-3 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)] p-4 max-[760px]:grid-cols-1">
+        <app-ui-dropdown [options]="personaOptions" [selected]="assignmentPersonaId" placeholder="Select persona" [searchable]="true" (valueChange)="assignmentPersonaId = $event || ''"></app-ui-dropdown>
+        <app-ui-dropdown [options]="assignmentProfileOptions" [selected]="assignmentProfileId" placeholder="Select social profile" [searchable]="true" (valueChange)="assignmentProfileId = $event || ''"></app-ui-dropdown>
+        <button type="button" (click)="assignProfile()" class="rounded-[8px] border border-[var(--color-blue-640)] bg-[var(--color-blue-640)] px-4 py-2 text-[12px] font-semibold text-white transition hover:brightness-105">Assign</button>
+      </div>
+
+      <div class="overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]">
+        <table class="w-full min-w-[850px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
+          <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+            <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
+              <th class="overflow-clip align-middle px-4 py-3.5">Persona</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Platform</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Social Profile</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Connection Status</th>
+              <th class="overflow-clip align-middle px-4 py-3.5">Assignment Status</th>
+              <th class="w-[90px] overflow-clip align-middle px-4 py-3.5 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="text-[15px] font-normal text-[var(--color-text3)]">
+            @for (profile of profiles; track profile.profile_id) {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0">
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ personaName(profile.assigned_persona_id) }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ platformLabel(profile.platform) }}</td>
+                <td class="overflow-hidden text-ellipsis align-middle whitespace-nowrap px-4 py-3.5">{{ profile.profile_name || profile.profile_username || 'Pending profile' }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">{{ statusLabel(profile.connection_status) }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 capitalize">{{ statusLabel(profile.assignment_status) }}</td>
+                <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
+                  <button type="button" [disabled]="!profile.assigned_persona_id" (click)="removeAssignment(profile)" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text2)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] disabled:cursor-not-allowed disabled:opacity-50" aria-label="Remove assignment" title="Remove assignment">
+                    <img src="assets/images/shared/theme/bin.svg" width="18" alt="remove" class="case-action-icon cursor-pointer" />
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr class="border-t !border-[var(--tenant-line)] bg-[var(--color-blue-820-light)]"><td colspan="6" class="px-4 py-12 text-center text-sm text-[var(--color-text4)]">No profiles available for assignment.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (showPersonaModal) {
+    <app-social-management-popup mode="persona" [persona]="selectedPersona" (closed)="closePersonaModal()" (saved)="onPersonaSaved()"></app-social-management-popup>
+  }
+
+  @if (showProfileModal) {
+    <app-social-management-popup mode="profile" (closed)="closeProfileModal()" (saved)="onProfileSaved()"></app-social-management-popup>
+  }
+</div>

@@ -31,6 +31,7 @@ const loadWelcomeComponent = () => import('./pages/welcome/welcome.component').t
 const loadResetPasswordComponent = () => import('./shared/partials/forgot-password/reset-password.component').then(m => m.ResetPasswordComponent);
 const loadSidebarUserStatisticsComponent = () => import('./pages/user-management/sidebar-user-statistics/sidebar-user-statistics.component').then(m => m.SidebarUserStatisticsComponent);
 const loadSidebarUserIocComponent = () => import('./pages/user-management/sidebar-user-ioc/sidebar-user-ioc.component').then(m => m.SidebarUserIocComponent);
+const loadSocialProfileManagementComponent = () => import('./pages/user-management/social-profile-management/social-profile-management.component').then(m => m.SocialProfileManagementComponent);
 const loadSidebarUserMonitoringComponent = () => import('./pages/user-management/sidebar-user-monitoring/sidebar-user-monitoring.component').then(m => m.SidebarUserMonitoringComponent);
 const loadSidebarUserEventManagementComponent = () => import('./pages/user-management/sidebar-user-event-management/sidebar-user-event-management.component').then(m => m.SidebarUserEventManagementComponent);
 const loadSidebarUserLogManagerComponent = () => import('./pages/user-management/sidebar-user-log-manager/sidebar-user-log-manager.component').then(m => m.SidebarUserLogManagerComponent);
@@ -826,6 +827,11 @@ export const routes: Routes = [
           {
             path: 'ioc',
             loadComponent: loadSidebarUserIocComponent,
+            data: { type: 'settings', animation: 'ProfilePage' }
+          },
+          {
+            path: 'social-profile-management',
+            loadComponent: loadSocialProfileManagementComponent,
             data: { type: 'settings', animation: 'ProfilePage' }
           },
           {

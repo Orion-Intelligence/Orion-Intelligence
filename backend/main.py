@@ -30,6 +30,7 @@ from routes.tenant_routes import tenant_routes
 from routes.test_routes import test_routes
 from routes.social_routes import social_routes
 from routes.case_routes import case_routes
+from routes.social_profile_management_routes import social_profile_management_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "build"
@@ -96,6 +97,7 @@ app.include_router(api_routes)
 app.include_router(geo_fencing_routes, include_in_schema=False)
 app.include_router(graph_routes, include_in_schema=False)
 app.include_router(social_routes, include_in_schema=False)
+app.include_router(social_profile_management_routes, include_in_schema=False)
 app.include_router(case_routes, include_in_schema=False)
 
 app.add_exception_handler(Exception, global_exception_handler)

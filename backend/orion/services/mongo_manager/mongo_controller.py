@@ -14,6 +14,7 @@ from orion.services.mongo_manager.shared_model.db_case_model import db_case_mode
 from orion.services.mongo_manager.shared_model.db_scan_job_model import db_scan_job_model
 from orion.services.mongo_manager.shared_model.db_scheduler_model import db_scheduler_model
 from orion.services.mongo_manager.shared_model.db_social_model import db_social_model
+from orion.services.mongo_manager.shared_model.db_social_profile_management_model import db_social_profile_management_model
 from orion.services.mongo_manager.shared_model.db_system_settings import db_system_model
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import db_alert_connector_model
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import db_takedown_request_model
@@ -76,6 +77,7 @@ class mongo_controller:
         await self.__engine.get_collection(db_takedown_request_model).create_index("target_domain", unique=True)
         await self.__engine.get_collection(db_scheduler_model).create_index([("job_key", 1), ("scheduled_for", 1)],unique=True)
         await self.__engine.get_collection(db_social_model).create_index([("user_id", 1), ("profile_username", 1), ("updated_at", -1)])
+        await self.__engine.get_collection(db_social_profile_management_model).create_index([("user_id", 1), ("tenant_id", 1)], unique=True, name="unique_social_profile_management_scope")
         await self.__engine.get_collection(db_alert_connector_model).create_index([("connector_type", 1), ("provider", 1), ("tenant_id", 1)], unique=True, name="unique_alert_connector_scope")
         feeder_collection = self.__engine.get_collection(db_feeder_script_model)
         try:
@@ -159,4 +161,5 @@ class mongo_controller:
         admin.add_view(ModelView(db_case_model, icon="fa fa-folder-open", label="Cases", name="cases"))
         admin.add_view(ModelView(db_scan_job_model, icon="fa fa-tasks", label="Scan Jobs", name="scan_jobs"))
         admin.add_view(ModelView(db_takedown_request_model, icon="fa fa-flag", label="Takedown Requests", name="takedown_requests"))
+        admin.add_view(ModelView(db_social_profile_management_model, icon="fa fa-users", label="Social Profile Management", name="social_profile_management"))
         return admin
