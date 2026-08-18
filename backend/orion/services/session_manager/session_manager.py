@@ -38,10 +38,13 @@ class session_manager:
         if session_manager.__instance is not None:
             raise Exception("This class is a singleton!")
         session_manager.__instance = self
-        from orion.services.mongo_manager.mongo_controller import mongo_controller
-        self._engine = mongo_controller.get_instance().get_engine()
         self._redis = redis_controller.getInstance()
         self._session_ttl = 30 * 60
+
+    @property
+    def _engine(self):
+        from orion.services.mongo_manager.mongo_controller import mongo_controller
+        return mongo_controller.get_instance().get_engine()
 
     @staticmethod
     def tenant_identifier(tenant_or_id) -> str | None:
@@ -172,11 +175,14 @@ class session_manager:
         session_id = None
         if user and user.role != user_role.CRAWLER and not free:
             session_client = token_client
-            session_id = secrets.token_urlsafe(32)
-            if session_client == self.WEB_SESSION_CLIENT:
+            redis_key = self._session_redis_key(user, session_client)
+            if session_client == self.EXTENSION_SESSION_CLIENT:
+                existing_sid = await self._redis.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [redis_key, None, None])
+                session_id = existing_sid or secrets.token_urlsafe(32)
+            else:
+                session_id = secrets.token_urlsafe(32)
                 user.current_session_id = session_id
                 await self._engine.save(user)
-            redis_key = self._session_redis_key(user, session_client)
             await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._client_session_ttl(session_client)])
 
         if session_id:

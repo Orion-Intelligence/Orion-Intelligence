@@ -33,6 +33,14 @@ export interface social_profile_details {
     is_parsed?: boolean;
 }
 
+export interface social_post_hate_speech {
+    is_hate_speech?: boolean;
+    label?: string | null;
+    confidence?: number;
+    explanation?: string | null;
+    model?: string | null;
+}
+
 export interface social_resource {
     type?: string;
     resource_id?: string;
@@ -48,6 +56,7 @@ export interface social_resource {
     likes?: string;
     shares?: string;
     views?: string;
+    hate_speech?: social_post_hate_speech | null;
 }
 
 export interface social_resource_collection {
@@ -109,6 +118,7 @@ export interface social_profile {
     id: string;
     meta: social_meta;
     profile_details?: social_profile_details | null;
+    section_status?: Record<string, string> | null;
     resources?: social_resource_collection[] | null;
     online_presence?: social_online_presence_hit[] | null;
     stealer_logs?: social_stealer_log[] | null;

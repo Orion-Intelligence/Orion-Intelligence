@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import List, Optional
+from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -40,15 +41,8 @@ class social_profile_details(BaseModel):
     total_likes: Optional[str] = None
     avatar: Optional[str] = None
     banner: Optional[str] = None
-
-    model_config = ConfigDict(extra="allow")
-
-
-class social_post_comment(BaseModel):
-    sender_name: Optional[str] = None
-    date: Optional[str] = None
-    likes: Optional[str] = None
-    text: Optional[str] = None
+    crawl_type: List[str] = Field(default_factory=list)
+    is_parsed: bool = False
 
     model_config = ConfigDict(extra="allow")
 
@@ -63,19 +57,30 @@ class social_post_hate_speech(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
-class social_post(BaseModel):
-    post_url: Optional[str] = None
-    datetime: Optional[str] = None
+class social_resource(BaseModel):
+    type: Optional[str] = None
+    resource_id: Optional[str] = None
+    url: Optional[str] = None
+    parent_url: Optional[str] = None
+    title: Optional[str] = None
     caption: Optional[str] = None
     author: Optional[str] = None
-    likes: Optional[str] = None
-    comments: Optional[str] = None
-    shares: Optional[str] = None
-    views: Optional[str] = None
+    datetime: Optional[str] = None
     media_type: Optional[str] = None
     media_url: Optional[str] = None
-    comment_details: List[social_post_comment] = Field(default_factory=list)
+    thumbnail_url: Optional[str] = None
+    likes: Optional[str] = None
+    shares: Optional[str] = None
+    views: Optional[str] = None
     hate_speech: Optional[social_post_hate_speech] = None
+
+    model_config = ConfigDict(extra="allow")
+
+
+class social_resource_collection(BaseModel):
+    id: Optional[str] = None
+    is_parsed: bool = False
+    resources: List[social_resource] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="allow")
 
@@ -128,10 +133,18 @@ class social_wanted(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class social_profile_config(BaseModel):
+    disallowed: List[str] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="allow")
+
+
 class social_profile(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
     meta: social_meta = Field(default_factory=social_meta)
     profile_details: Optional[social_profile_details] = None
-    posts: List[social_post] = Field(default_factory=list)
+    section_status: dict[str, str] = Field(default_factory=dict)
+    resources: List[social_resource_collection] = Field(default_factory=list)
     online_presence: List[social_online_presence_hit] = Field(default_factory=list)
     stealer_logs: List[social_stealer_log] = Field(default_factory=list)
     wanted: List[social_wanted] = Field(default_factory=list)
@@ -143,7 +156,7 @@ class db_social_model(BaseModel):
     user_id: str
     profile_username: Optional[str] = None
     profiles: List[social_profile] = Field(default_factory=list)
-    selected: List[str] = Field(default_factory=list)
+    config: social_profile_config = Field(default_factory=social_profile_config)
     scan: social_scan_status = Field(default_factory=social_scan_status)
     updated_at: Optional[datetime] = None
 

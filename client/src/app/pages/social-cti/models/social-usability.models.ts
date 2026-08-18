@@ -75,4 +75,5 @@ export interface social_state {
     homeMenuSearchTerm: WritableSignal<string>;
     isHomeMenuCollapsed: WritableSignal<boolean>;
     activeUsername: WritableSignal<string | null>;
+    loadingUsernames: WritableSignal<Set<string>>;
 }

@@ -15,7 +15,6 @@ export class SectionStateComponent {
   state = input<SectionState>('empty');
   title = input.required<string>();
   description = input('');
-  icon = input('bi-inbox');
   actionLabel = input('');
   actionIcon = input('bi-arrow-clockwise');
   testId = input('');

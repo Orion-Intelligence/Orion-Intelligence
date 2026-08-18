@@ -2,13 +2,13 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
-import { Job, db_social_model, social_profile } from '../models/social.models';
-import { ApiEnvelope, socialSelectionKey, social_state } from '../models/social-usability.models';
+import { Job, db_social_model, social_profile, social_profile_config } from '../models/social.models';
+import { ApiEnvelope, social_state } from '../models/social-usability.models';
 @Injectable({ providedIn: 'root' })
 export class SocialStorageService {
   private readonly api = inject(ApiService);
 
-  readonly state: social_state = { scanResults: signal(new Map<string, social_profile[]>()), selectedKeys: signal(new Set<string>()), jobs: signal<Job[]>([]), homeMenuSearchTerm: signal(''), isHomeMenuCollapsed: signal(false), activeUsername: signal<string | null>(null) };
+  readonly state: social_state = { scanResults: signal(new Map<string, social_profile[]>()), profileConfigs: signal(new Map<string, social_profile_config>()), jobs: signal<Job[]>([]), homeMenuSearchTerm: signal(''), isHomeMenuCollapsed: signal(false), activeUsername: signal<string | null>(null), loadingUsernames: signal<Set<string>>(new Set<string>()) };
   readonly activeUsername = computed(() => {
     const usernames = Array.from(this.state.scanResults().keys());
     const selectedUsername = this.state.activeUsername();
@@ -18,21 +18,47 @@ export class SocialStorageService {
   });
 
   isSelected(ownerUsername: string, platform: social_profile): boolean {
-    return this.state.selectedKeys().has(socialSelectionKey(ownerUsername, platform));
+    if (!platform.id) {
+      return true;
+    }
+    const config = this.getProfileConfig(ownerUsername);
+    return !config.disallowed.includes(platform.id);
   }
 
-  setSelection(ownerUsername: string, selectedProfiles: social_profile[]): void {
-    const prefix = `${(ownerUsername || '').toLowerCase()}|`;
-    const keys = new Set(this.state.selectedKeys());
-    for (const key of Array.from(keys)) {
-      if (key.startsWith(prefix)) {
-        keys.delete(key);
-      }
-    }
-    for (const platform of selectedProfiles) {
-      keys.add(socialSelectionKey(ownerUsername, platform));
-    }
-    this.state.selectedKeys.set(keys);
+  getProfileConfig(ownerUsername: string): social_profile_config {
+    const configs = this.state.profileConfigs();
+    return configs.get(ownerUsername)
+      ?? Array.from(configs.entries()).find(([username]) => username.toLowerCase() === ownerUsername.toLowerCase())?.[1]
+      ?? { disallowed: [] };
+  }
+
+  setSelection(ownerUsername: string, selectedProfiles: social_profile[]): social_profile_config {
+    const selectedIds = new Set(selectedProfiles.map(platform => platform.id));
+    const allProfiles = this.state.scanResults().get(ownerUsername)
+      ?? Array.from(this.state.scanResults().entries()).find(([username]) => username.toLowerCase() === ownerUsername.toLowerCase())?.[1]
+      ?? [];
+    const previous = { ...this.getProfileConfig(ownerUsername) };
+    delete previous['allowed'];
+    const config: social_profile_config = {
+      ...previous,
+      disallowed: allProfiles.filter(platform => !selectedIds.has(platform.id)).map(platform => platform.id),
+    };
+    this.state.profileConfigs.update(current => {
+      const next = new Map(current);
+      const storedUsername = Array.from(next.keys()).find(username => username.toLowerCase() === ownerUsername.toLowerCase()) ?? ownerUsername;
+      next.set(storedUsername, config);
+      return next;
+    });
+    return config;
+  }
+
+  setScanProfiles(username: string, profiles: social_profile[]): void {
+    this.state.scanResults.update(results => new Map(results).set(username, profiles));
+    this.state.profileConfigs.update(configs => {
+      const next = new Map(configs);
+      next.set(username, { disallowed: [] });
+      return next;
+    });
   }
 
   loadProfiles(): Observable<void> {
@@ -41,10 +67,12 @@ export class SocialStorageService {
       map(() => undefined),);
   }
 
+  saveProfileConfig(username: string, config: social_profile_config): Observable<unknown> {
+    return this.api.post('social/data', { profile_username: username, config });
+  }
+
   saveProfiles(username: string, profiles: social_profile[], replace = false): Observable<unknown> {
-    const prefix = `${(username || '').toLowerCase()}|`;
-    const selected = Array.from(this.state.selectedKeys()).filter(key => key.startsWith(prefix));
-    return this.api.post('social/data', { profile_username: username, profiles, selected, replace });
+    return this.api.post('social/data', { profile_username: username, profiles, config: this.getProfileConfig(username), replace });
   }
 
   deleteProfiles(username: string): Observable<unknown> {
@@ -64,21 +92,9 @@ export class SocialStorageService {
       ];
     });
     this.state.scanResults.set(new Map(storedDocuments.map(document => [document.profile_username ?? '', document.profiles || []])));
-
-    const selectedKeys = new Set<string>();
-    for (const document of storedDocuments) {
-      if (Array.isArray(document.selected) && document.selected.length > 0) {
-        document.selected.forEach((key: string) => selectedKeys.add(key));
-      }
-      else {
-        (document.profiles || []).forEach((platform: social_profile) => {
-          if ((platform as { isSelected?: boolean }).isSelected) {
-            selectedKeys.add(socialSelectionKey(document.profile_username ?? '', platform));
-          }
-        });
-      }
-    }
-    this.state.selectedKeys.set(selectedKeys);
+    this.state.profileConfigs.set(new Map(storedDocuments.map(document => [document.profile_username ?? '', document.config ?? {
+      disallowed: [],
+    }])));
 
     const selectedUsername = this.state.activeUsername();
     if (!selectedUsername || !this.state.scanResults().has(selectedUsername)) {

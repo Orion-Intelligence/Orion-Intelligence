@@ -24,18 +24,22 @@
                     <div class="flex min-w-0 flex-1 items-center gap-2">
 
                       <div class="flex-shrink-0">
-                        @switch (job.status) {
-                          @case ('queued') {
-                            <i class="bi bi-hourglass-split text-amber-400 text-base leading-none [body.light-theme_&]:text-amber-700"></i>
-                          }
-                          @case ('in_progress') {
-                            <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--color-blue-640)]"></div>
-                          }
-                          @case ('completed') {
-                            <i class="bi bi-check-circle-fill text-green-500 text-base leading-none [body.light-theme_&]:text-green-700"></i>
-                          }
-                          @case ('failed') {
-                            <i class="bi bi-x-circle-fill text-red-400 text-base leading-none [body.light-theme_&]:text-red-600"></i>
+                        @if (isJobLoading(job)) {
+                          <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--color-blue-640)]"></div>
+                        } @else {
+                          @switch (job.status) {
+                            @case ('queued') {
+                              <i class="bi bi-hourglass-split text-amber-400 text-base leading-none [body.light-theme_&]:text-amber-700"></i>
+                            }
+                            @case ('in_progress') {
+                              <div class="h-4 w-4 animate-spin rounded-full border-b-2 border-[var(--color-blue-640)]"></div>
+                            }
+                            @case ('completed') {
+                              <i class="bi bi-check-circle-fill text-green-500 text-base leading-none [body.light-theme_&]:text-green-700"></i>
+                            }
+                            @case ('failed') {
+                              <i class="bi bi-x-circle-fill text-red-400 text-base leading-none [body.light-theme_&]:text-red-600"></i>
+                            }
                           }
                         }
                       </div>

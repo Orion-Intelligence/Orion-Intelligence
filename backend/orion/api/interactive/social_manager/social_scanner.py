@@ -111,7 +111,7 @@ class social_scanner:
         collection = self._collection()
         await collection.update_one(
             {"user_id": user_id, "profile_username": profile_username},
-            {"$setOnInsert": {"user_id": user_id, "profile_username": profile_username, "profiles": [], "created_at": now}},
+            {"$setOnInsert": {"user_id": user_id, "profile_username": profile_username, "profiles": [], "config": {"disallowed": []}, "created_at": now}},
             upsert=True,
         )
         stale_before = now - timedelta(seconds=self.HEARTBEAT_STALE_SECONDS)
@@ -200,10 +200,11 @@ class social_scanner:
         await self._collection().update_one(self._owned_filter(scan), {"$set": update})
 
     async def _complete(self, scan: SocialScan, profiles: list[dict]) -> None:
+        config = social_model.default_profile_config(profiles)
         await self._collection().update_one(
             self._owned_filter(scan),
-            {"$set": {"profiles": social_model._drop_unstorable_ints(profiles), "status": "complete", "scan_progress": 100, "scan_step": "Completed", "updated_at": datetime.now(UTC)},
-             "$unset": {"scan_owner": "", "scan_heartbeat": "", "scan_cancel_requested": ""}},
+            {"$set": {"profiles": social_model._drop_unstorable_ints(profiles), "config.disallowed": config["disallowed"], "status": "complete", "scan_progress": 100, "scan_step": "Completed", "updated_at": datetime.now(UTC)},
+             "$unset": {"config.allowed": "", "scan_owner": "", "scan_heartbeat": "", "scan_cancel_requested": ""}},
         )
 
     async def _fail(self, scan: SocialScan, message: str) -> None:
@@ -241,4 +242,3 @@ class social_scanner:
             return await mongo_controller.get_instance().get_engine().find_one(db_user_account, db_user_account.id == ObjectId(user_id))
         except Exception:
             return None
-

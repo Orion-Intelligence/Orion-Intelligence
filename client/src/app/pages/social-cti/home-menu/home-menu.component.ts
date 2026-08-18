@@ -17,6 +17,7 @@ export class HomeMenuComponent {
   jobs = input.required<Job[]>();
   resultUsernames = input.required<Set<string>>();
   activeUsername = input<string | null>(null);
+  loadingUsernames = input<Set<string>>(new Set<string>());
   toggle = output<undefined>();
   jobClicked = output<Job>();
   cancelScan = output<string>();
@@ -31,6 +32,10 @@ export class HomeMenuComponent {
 
   hasResults(username: string): boolean {
     return this.resultUsernames().has(username);
+  }
+
+  isJobLoading(job: Job): boolean {
+    return this.loadingUsernames().has(job.id);
   }
 
   getJobInitial(job: Job): string {

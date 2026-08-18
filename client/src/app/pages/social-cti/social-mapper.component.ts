@@ -47,6 +47,7 @@ export class SocialMapperComponent {
   activeUsername = this.storageService.activeUsername;
   homeMenuSearchTerm = this.sidebarState.homeMenuSearchTerm;
   jobs = this.sidebarState.jobs;
+  loadingUsernames = this.sidebarState.loadingUsernames;
   scanResults = this.profilesState.scanResults;
   resultUsernames = computed(() => new Set([
     ...Array.from(this.scanResults().keys()),

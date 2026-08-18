@@ -45,6 +45,36 @@ export class SocialProfileListingComponent {
   private readonly fetchCancelSubjects = new Map<string, Subject<void>>();
   private appliedProfileQuery = signal(false);
   private readonly loadingByRequestKey = signal<Record<string, boolean>>({});
+  private readonly loadingUsernames = computed(() => {
+    const usernames = new Set<string>();
+    const addFrom = (key: string) => {
+      const username = key.match(/^(?:[^:]*:)?platform-(.+?)\|/)?.[1];
+      if (username) {
+        usernames.add(username);
+      }
+    };
+    for (const [key, state] of Object.entries(this.crawlResults())) {
+      if (state?.loading) {
+        addFrom(key);
+      }
+    }
+    for (const [key, isLoading] of Object.entries(this.loadingByRequestKey())) {
+      if (isLoading) {
+        addFrom(key);
+      }
+    }
+    for (const [username, profiles] of this.storageService.state.scanResults()) {
+      for (const platform of profiles) {
+        if (Object.values(platform.section_status ?? {}).some(status => status === 'fetching')) {
+          usernames.add(username);
+          if (platform.meta?.username) {
+            usernames.add(platform.meta.username);
+          }
+        }
+      }
+    }
+    return usernames;
+  });
   private extensionOpened = false;
 
   readonly scanResults = this.storageService.state.scanResults;
@@ -93,6 +123,13 @@ export class SocialProfileListingComponent {
 
   constructor() {
     this.startExtensionHeartbeat();
+    effect(() => {
+      this.storageService.state.loadingUsernames.set(this.loadingUsernames());
+    });
+    effect(() => {
+      this.storageService.state.scanResults();
+      queueMicrotask(() => this.resumeInFlightSections());
+    });
     effect(() => {
       this.activeUsers();
       this.isInitialLoading();
@@ -155,17 +192,24 @@ export class SocialProfileListingComponent {
   }
 
   private fetchCrawlType(platformData: social_profile, type: FetchTabKey, force = false): void {
-    const existing = (platformData.resources ?? []).find(entry => entry.id === type);
-    if (!force && existing?.is_parsed) {
+    const key = this.crawlKey(platformData, type);
+    if (this.crawlResults()[key]?.loading) {
       return;
     }
-    const key = this.crawlKey(platformData, type);
-    this.crawlResults.update(current => ({ ...current, [key]: { loading: true } }));
+    const existing = (platformData.resources ?? []).find(entry => entry.id === type);
+    const command = (force || !existing?.is_parsed) ? 'crawl' : 'poll';
+    if (command === 'crawl') {
+      this.crawlResults.update(current => ({ ...current, [key]: { loading: true } }));
+      this.setSectionStatus(platformData, type, 'fetching');
+    }
     const url = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
-    this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+    this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, command).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
       this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: result.error } }));
-      if (!result.error) {
+      if (!result.error && result.items) {
         this.setFetchedResourceCollection(platformData, type, result.items as social_resource[]);
+      }
+      else if (result.error) {
+        this.setSectionStatus(platformData, type, 'failed');
       }
     });
   }
@@ -182,7 +226,7 @@ export class SocialProfileListingComponent {
           return platform;
         }
         const others = (platform.resources ?? []).filter(entry => entry.id !== type);
-        return { ...platform, resources: [...others, { id: type, is_parsed: true, resources }] };
+        return { ...platform, section_status: { ...platform.section_status, [type]: 'completed' }, resources: [...others, { id: type, is_parsed: true, resources }] };
       });
       return new Map(results).set(platformResult.meta.username, updatedProfiles);
     });
@@ -193,6 +237,10 @@ export class SocialProfileListingComponent {
 
   isFetchTabAllowed(tabKey: FetchTabKey): boolean {
     return this.profileFetchTabs.some(tab => tab.key === tabKey);
+  }
+
+  isPlatformLoading(platformData: social_profile): boolean {
+    return this.loadingUsernames().has(platformData.meta.username);
   }
 
   isTabLoading(platformData: social_profile, tabKey: FetchTabKey): boolean {
@@ -336,13 +384,13 @@ export class SocialProfileListingComponent {
   }
 
   private fetchProfileDetails(platformData: social_profile): void {
-    this.cancelAllFetchesForUser(platformData.meta.username);
+    this.cancelFetch(platformData, 'profile');
     const profileUrl = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
-    this.fetchData(platformData, 'profile', this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, profileUrl, 'details').pipe(filter(result => result.items.length > 0 && !!result.items[0] && Object.keys(result.items[0] as object).length > 0), map(result => ({ profile: result.items[0] as Record<string, unknown> }))));
+    this.fetchData(platformData, 'profile', this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, profileUrl, 'details').pipe(filter(result => (result.items?.length ?? 0) > 0 && !!result.items?.[0] && Object.keys(result.items[0] as object).length > 0), map(result => ({ profile: (result.items ?? [])[0] as Record<string, unknown> }))));
   }
 
   private fetchOnlinePresence(platformData: social_profile, token: string): void {
-    this.cancelAllFetchesForUser(platformData.meta.username);
+    this.cancelFetch(platformData, 'onlinePresence');
     const tokens = [...new Set([token, platformData.meta.platform ?? '']
       .join(' ')
       .split(/[,\s]+/)
@@ -353,7 +401,7 @@ export class SocialProfileListingComponent {
   }
 
   private fetchStealerLogs(platformData: social_profile): void {
-    this.cancelAllFetchesForUser(platformData.meta.username);
+    this.cancelFetch(platformData, 'stealerLogs');
     const username = platformData.meta.username;
     const domain = this.getPlatformDomain(platformData);
     this.fetchData(platformData, 'stealerLogs', this.fetchService.fetchPlatformStealerLogs(username, domain).pipe(map(stealerLogs => ({ stealerLogs }))));
@@ -367,10 +415,16 @@ export class SocialProfileListingComponent {
     const cancel$ = new Subject<void>();
     this.fetchCancelSubjects.set(requestKey, cancel$);
     this.setLoading(requestKey, true);
+    const section = this.sectionOf(stateKey);
+    this.setSectionStatus(platformResult, section, 'fetching');
     request$.pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe({
       next: response => this.setFetchedPlatformData(platformResult, stateKey, response),
-      error: () => this.finishFetch(requestKey),
-      complete: () => this.finishFetch(requestKey),
+      error: () => {
+        this.setSectionStatus(platformResult, section, 'failed'); this.finishFetch(requestKey); 
+      },
+      complete: () => {
+        this.setSectionStatus(platformResult, section, 'completed'); this.finishFetch(requestKey); 
+      },
     });
   }
 
@@ -384,6 +438,68 @@ export class SocialProfileListingComponent {
       cancel$.complete();
       this.fetchCancelSubjects.delete(requestKey);
       this.setLoading(requestKey, false);
+    }
+  }
+
+  private cancelFetch(platformData: social_profile, stateKey: FetchStateKey): void {
+    const requestKey = this.getRequestKey(stateKey, platformData);
+    const cancel$ = this.fetchCancelSubjects.get(requestKey);
+    if (!cancel$) {
+      return;
+    }
+    cancel$.next();
+    cancel$.complete();
+    this.fetchCancelSubjects.delete(requestKey);
+    this.setLoading(requestKey, false);
+  }
+
+  private sectionOf(stateKey: FetchStateKey): string {
+    return stateKey === 'profile' ? 'details' : stateKey;
+  }
+
+  private isSectionLoadingInMemory(platformData: social_profile, section: string): boolean {
+    if (section === 'details' || section === 'onlinePresence' || section === 'stealerLogs') {
+      const stateKey = (section === 'details' ? 'profile' : section) as FetchStateKey;
+      return !!this.loadingByRequestKey()[this.getRequestKey(stateKey, platformData)];
+    }
+    return !!this.crawlResults()[this.crawlKey(platformData, section as FetchTabKey)]?.loading;
+  }
+
+  private setSectionStatus(platformData: social_profile, section: string, status: string): void {
+    let updatedProfiles: social_profile[] | null = null;
+    this.storageService.state.scanResults.update(results => {
+      const currentProfiles = results.get(platformData.meta.username);
+      if (!currentProfiles) {
+        return results;
+      }
+      let changed = false;
+      const nextProfiles = currentProfiles.map(platform => {
+        if (!this.isSamePlatform(platform, platformData) || (platform.section_status ?? {})[section] === status) {
+          return platform;
+        }
+        changed = true;
+        return { ...platform, section_status: { ...platform.section_status, [section]: status } };
+      });
+      if (!changed) {
+        return results;
+      }
+      updatedProfiles = nextProfiles;
+      return new Map(results).set(platformData.meta.username, nextProfiles);
+    });
+    if (updatedProfiles) {
+      this.storageService.saveProfiles(platformData.meta.username, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    }
+  }
+
+  private resumeInFlightSections(): void {
+    for (const [, profiles] of this.storageService.state.scanResults()) {
+      for (const platform of profiles) {
+        for (const [section, status] of Object.entries(platform.section_status ?? {})) {
+          if (status === 'fetching' && !this.isSectionLoadingInMemory(platform, section)) {
+            this.refetchTabData(platform, section as FetchTabKey);
+          }
+        }
+      }
     }
   }
 
@@ -407,7 +523,7 @@ export class SocialProfileListingComponent {
         return results;
       }
       updatedProfiles = currentProfiles.map(platform => this.isSamePlatform(platform, platformResult)
-        ? { ...platform, ...this.buildFetchedPlatformData(platform, stateKey, data, hasData) }
+        ? { ...platform, ...this.buildFetchedPlatformData(platform, stateKey, data, hasData), section_status: { ...platform.section_status, [this.sectionOf(stateKey)]: 'completed' } }
         : platform);
       return new Map(results).set(platformResult.meta.username, updatedProfiles);
     });

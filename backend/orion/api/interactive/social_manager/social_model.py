@@ -16,7 +16,7 @@ from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.helper_manager.env_handler import env_handler
-from orion.services.mongo_manager.shared_model.db_social_model import SOCIAL_COLLECTION, social_profile
+from orion.services.mongo_manager.shared_model.db_social_model import SOCIAL_COLLECTION, social_profile, social_profile_config
 
 
 
@@ -38,6 +38,10 @@ class social_model:
         if isinstance(value, list):
             return [social_model._drop_unstorable_ints(item) for item in value if not social_model._is_unstorable_int(item)]
         return value
+
+    @staticmethod
+    def default_profile_config(_profiles: list[dict]) -> dict:
+        return social_profile_config(disallowed=[]).model_dump(mode="json")
 
     @staticmethod
     def getInstance():
@@ -106,7 +110,7 @@ class social_model:
             details = social_model._recon_profile_details({**ids, **item})
         if details:
             built["profile_details"] = details
-        for key in ("posts", "online_presence", "stealer_logs"):
+        for key in ("resources", "online_presence", "stealer_logs"):
             if item.get(key) is not None:
                 built[key] = item.get(key)
         try:
@@ -124,11 +128,21 @@ class social_model:
                 profiles = [legacy_profile]
         profile_username = record.get("profile_username") or record.get("root_username") or ""
         profiles = [social_model.flatten_recon_profile(item, profile_username) for item in profiles if isinstance(item, dict)]
+        raw_config = dict(record.get("config")) if isinstance(record.get("config"), dict) else {}
+        raw_config.pop("allowed", None)
+        try:
+            config = social_profile_config.model_validate(raw_config).model_dump(mode="json")
+        except Exception:
+            config = social_profile_config().model_dump(mode="json")
         return {
             "user_id": record.get("user_id"),
             "profile_username": profile_username,
             "profiles": profiles,
+            "config": config,
             "count": len(profiles),
+            "status": record.get("status"),
+            "scan_progress": record.get("scan_progress"),
+            "scan_step": record.get("scan_step"),
             "updated_at": record.get("updated_at"),
         }
 
@@ -193,17 +207,32 @@ class social_model:
                 "user_id": payload.get("user_id"),
                 "profile_username": profile_username,
                 "profiles": [],
+                "config": {
+                    **{key: value for key, value in (payload.get("config") or {}).items() if key != "disallowed"},
+                    "disallowed": [],
+                },
                 "count": 0,
                 "status": payload.get("status"),
+                "scan": cls._scan_status(payload),
                 "updated_at": payload.get("updated_at"),
             })
             current["profiles"].extend(payload.get("profiles") or [])
+            disallowed_ids = set(current["config"]["disallowed"])
+            for profile_id in (payload.get("config") or {}).get("disallowed", []):
+                if profile_id not in disallowed_ids:
+                    current["config"]["disallowed"].append(profile_id)
+                    disallowed_ids.add(profile_id)
             current["count"] = len(current["profiles"])
             updated_at = payload.get("updated_at")
             if updated_at and (not current.get("updated_at") or updated_at > current["updated_at"]):
                 current["updated_at"] = updated_at
                 current["status"] = payload.get("status")
+                current["scan"] = cls._scan_status(payload)
         return sorted(merged.values(), key=lambda item: item.get("updated_at") or datetime.min.replace(tzinfo=UTC), reverse=True)
+
+    @staticmethod
+    def _scan_status(payload: dict) -> dict:
+        return {"status": payload.get("status"), "progress": int(payload.get("scan_progress") or 0), "step": str(payload.get("scan_step") or "")}
 
     async def social_request(self, payload: Any, key: str, headers: dict[str, str]) -> tuple[int, Any]:
         last_error = ""
@@ -307,7 +336,7 @@ class social_model:
 
     async def search_profile(self, param, current_user=None, request=None):
         payload = param.model_dump() if hasattr(param, "model_dump") else dict(param)
-        if str(payload.get("type") or "") == "details":
+        if str(payload.get("command") or "") == "crawl" or str(payload.get("type") or "") == "details":
             return await self._fetch_profile_via_extension(payload, current_user)
         return await self.social_search(param, "profile", current_user, request)
 
@@ -315,16 +344,25 @@ class social_model:
         from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 
         user_key = str(getattr(current_user, "id", "") or "")
-        reply = None
-        if user_key:
-            command = {"command": "crawl", "platform": payload.get("platform"), "type": "details", "url": payload.get("url")}
-            reply = await extension_socket_manager.get_instance().request(user_key, command)
-
-        if not reply:
+        crawl_type = str(payload.get("type") or "details")
+        if not user_key:
             return {"status": "pending"}
 
-        items = reply.get("items") if reply.get("implemented") else []
-        return {"result": {"profile": (items or [{}])[0]}}
+        manager = extension_socket_manager.get_instance()
+        reply = manager.take_result(user_key, crawl_type)
+        if reply is None:
+            if str(payload.get("command") or "") == "poll":
+                return {"status": "pending" if manager.is_inflight(user_key, crawl_type) else "idle"}
+            command = {"command": "crawl", "platform": payload.get("platform"), "type": crawl_type, "url": payload.get("url"), "username": payload.get("username")}
+            await manager.fire(user_key, command)
+            return {"status": "pending"}
+
+        if reply.get("error"):
+            return {"error": reply.get("error")}
+        items = (reply.get("items") if reply.get("implemented") else []) or []
+        if crawl_type == "details":
+            return {"result": {"profile": (items or [{}])[0]}}
+        return {"result": {"items": items}}
 
     async def search_online_images(self, param, current_user=None, request=None):
         return await self.social_search(param, "online/images", current_user, request)
@@ -377,13 +415,23 @@ class social_model:
             raise HTTPException(status_code=413, detail="Image too large! Maximum allowed size is 10 MB")
         return file_bytes
 
-    async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], replace: bool = False):
+    async def append_social_profiles(self, user_id: str, profile_username: str, profiles: list[dict], config: dict | None = None, replace: bool = False):
         try:
             normalized_username = profile_username.strip().lstrip("@").lower()
             if not normalized_username:
                 return JSONResponse(status_code=400, content={"detail": "profile_username is required"})
             if not isinstance(profiles, list):
                 return JSONResponse(status_code=400, content={"detail": "profiles must be a list"})
+
+            config_payload = None
+            if config is not None:
+                if not isinstance(config, dict):
+                    return JSONResponse(status_code=400, content={"detail": "config must be an object"})
+                try:
+                    config_payload = social_profile_config.model_validate(config).model_dump(mode="json")
+                    config_payload.pop("allowed", None)
+                except Exception:
+                    return JSONResponse(status_code=400, content={"detail": "Invalid social profile config"})
 
             now_utc = datetime.now(UTC)
             normalized_profiles = []
@@ -405,7 +453,16 @@ class social_model:
                     update_doc["$set"]["profiles"] = normalized_profiles
                 else:
                     update_doc["$push"] = {"profiles": {"$each": normalized_profiles}}
-
+                if config_payload is None:
+                    profile_ids = [profile["id"] for profile in normalized_profiles if isinstance(profile.get("id"), str) and profile["id"]]
+                    if replace:
+                        default_config = social_model.default_profile_config(normalized_profiles)
+                        update_doc["$set"]["config.disallowed"] = default_config["disallowed"]
+                        update_doc["$unset"] = {"config.allowed": ""}
+                    elif profile_ids:
+                        update_doc["$pullAll"] = {"config.disallowed": profile_ids}
+            if config_payload is not None:
+                update_doc["$set"]["config"] = config_payload
             await self._engine.database[SOCIAL_COLLECTION].update_one(
                 {"user_id": user_id, "profile_username": normalized_username},
                 update_doc,
@@ -416,6 +473,7 @@ class social_model:
                 "user_id": user_id,
                 "profile_username": normalized_username,
                 "saved": len(normalized_profiles),
+                "config": config_payload,
             }
 
         except Exception:
@@ -440,7 +498,7 @@ class social_model:
                 rows.append(row)
             documents = self._merge_profile_documents(rows)
             if normalized_username:
-                return documents[0] if documents else {"user_id": user_id, "profile_username": normalized_username, "profiles": []}
+                return documents[0] if documents else {"user_id": user_id, "profile_username": normalized_username, "profiles": [], "config": social_profile_config().model_dump(mode="json")}
             return {"result": documents}
 
         except Exception:

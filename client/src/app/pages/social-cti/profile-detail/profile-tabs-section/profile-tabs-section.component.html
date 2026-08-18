@@ -65,7 +65,7 @@
               @if (isTabLoading('details') && getVisibleProfileDetailEntries(platformData).length === 0) {
                 <app-section-state state="loading" title="Loading profile details" description="Fetching the latest profile metadata."></app-section-state>
               } @else if (getVisibleProfileDetailEntries(platformData).length === 0) {
-                <app-section-state title="No profile details found" description="Try fetching this section again." icon="bi-person-badge" actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
+                <app-section-state title="No profile details found" description="Try fetching this section again." actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
               } @else {
                 <div class="[&&]:!bg-[rgba(87,165,235,0.035)] [body.light-theme_&&]:!bg-[#f8fbff] overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)]">
                   @for (item of getVisibleProfileDetailEntries(platformData); track trackByKey($index, item)) {
@@ -124,7 +124,7 @@
               @if (isTabLoading('onlinePresence') && !getOnlinePresence(platformData)) {
                 <app-section-state state="loading" title="Loading online presence" description="Searching this username with the platform token."></app-section-state>
               } @else if (!getOnlinePresence(platformData) || getOnlinePresenceResults(platformData).length === 0) {
-                <app-section-state title="No online presence found" description="Run the online presence search again for this profile." icon="bi-globe2" actionLabel="Retry fetch" (action)="refetchTab.emit('onlinePresence')"></app-section-state>
+                <app-section-state title="No online presence found" description="Run the online presence search again for this profile." actionLabel="Retry fetch" (action)="refetchTab.emit('onlinePresence')"></app-section-state>
               } @else {
                 <div class="flex flex-col gap-2.5">
                   @for (result of getOnlinePresenceResults(platformData); track result.url || result.title || $index) {
@@ -172,7 +172,7 @@
               @if (isTabLoading('stealerLogs') && getStealerLogs(platformData).length === 0) {
                 <app-section-state state="loading" title="Checking stealer logs" description="Searching records for this username and domain."></app-section-state>
               } @else if (getStealerLogs(platformData).length === 0) {
-                <app-section-state title="No stealer log match" description="No record matched both this username and domain." icon="bi-shield-check" actionLabel="Retry fetch" (action)="refetchTab.emit('stealerLogs')"></app-section-state>
+                <app-section-state title="No stealer log match" description="No record matched both this username and domain." actionLabel="Retry fetch" (action)="refetchTab.emit('stealerLogs')"></app-section-state>
               } @else {
                 <div data-testid="social-stealerlog-table" class="overflow-hidden rounded-[10px] border border-rose-500/15 bg-rose-500/[0.035]">
                   <div class="hidden border-b border-rose-500/10 bg-rose-500/[0.045] px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:grid md:grid-cols-[1fr_1fr_82px_110px] md:gap-2">
@@ -227,8 +227,6 @@
               </div>
               @if (crawlResult().loading && !crawlResult().items?.length) {
                 <app-section-state state="loading" [title]="'Loading ' + getTabLabel(activeTab())" description="Fetching the latest section data."></app-section-state>
-              } @else if (crawlResult().error) {
-                <app-section-state state="error" [title]="'Unable to load ' + getTabLabel(activeTab())" description="Try fetching this section again." icon="bi-exclamation-circle" actionLabel="Retry fetch" (action)="refetchTab.emit(activeTab())"></app-section-state>
               } @else if (crawlResult().items?.length) {
                 <div class="overflow-hidden rounded-[10px] border border-[var(--color-border)]">
                   @for (item of (crawlResult().items ?? []); track $index) {
@@ -240,6 +238,8 @@
                     </a>
                   }
                 </div>
+              } @else if (crawlResult().error) {
+                <app-section-state state="error" [title]="'Unable to load ' + getTabLabel(activeTab())" description="Try fetching this section again." actionLabel="Retry fetch" (action)="refetchTab.emit(activeTab())"></app-section-state>
               } @else {
                 <app-section-state title="No results found" description="Try fetching this section again." actionLabel="Retry fetch" (action)="refetchTab.emit(activeTab())"></app-section-state>
               }
@@ -251,7 +251,7 @@
             @if (isTabLoading('details')) {
               <app-section-state state="loading" title="Fetching Profile" description="Loading profile details and available sections."></app-section-state>
             } @else {
-              <app-section-state state="prompt" title="Full profile data is not loaded yet" description="Fetch this profile once to unlock its details and available sections." icon="bi-person-lines-fill" actionLabel="Fetch Full Profile Data" actionIcon="bi-cloud-arrow-down" (action)="refetchTab.emit('details')"></app-section-state>
+              <app-section-state state="prompt" title="Full profile data is not loaded yet" description="Fetch this profile once to unlock its details and available sections." actionLabel="Fetch Full Profile Data" actionIcon="bi-cloud-arrow-down" (action)="refetchTab.emit('details')"></app-section-state>
             }
           </div>
         }
