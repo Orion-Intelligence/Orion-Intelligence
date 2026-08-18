@@ -95,11 +95,11 @@
                       </a>
                     }
                   </div>
-                  @if (!isImageExtractedFlow() && !isInformational(platform)) {
+                  @if (!isImageExtractedFlow()) {
                     <p class="mb-0 mt-0.5 truncate text-sm text-[var(--color-text4)]">{{ platform.meta.username }}</p>
                   }
                 </div>
-                @if (!isImageExtractedFlow() && !isInformational(platform)) {
+                @if (!isImageExtractedFlow()) {
                   <div class="ml-1 flex-shrink-0">
                     <button data-testid="social-manage-profile-switch" type="button" (click)="onSelectionSwitchClick($event, platform)" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent bg-[var(--color-blue-720)] transition-colors duration-300 ease-in-out hover:bg-[rgba(16,185,129,0.14)] focus:outline-none focus:ring-2 focus:ring-emerald-400/35 disabled:cursor-not-allowed disabled:opacity-40 [&[data-selected='true']]:bg-[#059669] [&[data-selected='true']]:shadow-[0_0_0_3px_rgba(16,185,129,0.12)] [&[data-selected='true']]:hover:bg-[#10b981] [.light-theme_&]:!shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] [body.light-theme_&[data-selected=false]]:!border-[#c3d2e2] [body.light-theme_&[data-selected=false]]:!bg-[#dbe5f0]" role="switch" [attr.aria-checked]="platform.isSelected" [attr.data-selected]="platform.isSelected ? 'true' : 'false'">
                       <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform duration-300 ease-in-out" [class.translate-x-5]="platform.isSelected" [class.translate-x-0]="!platform.isSelected"></span>

@@ -172,8 +172,9 @@ async def download_social_extension_firefox():
 async def append_social_data(data: dict = Body(...), current_user=Depends(get_current_user)):
     profile_username = (data or {}).get("profile_username") or (data or {}).get("root_username") or (data or {}).get("username") or ""
     profiles = (data or {}).get("profiles") or []
+    config = (data or {}).get("config")
     replace = bool((data or {}).get("replace"))
-    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, replace=replace)
+    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, config=config, replace=replace)
 
 
 @social_routes.get(

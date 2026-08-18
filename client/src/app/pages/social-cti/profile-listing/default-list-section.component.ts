@@ -143,9 +143,8 @@ export class SocialDefaultListSectionComponent {
     return values.find(value => value !== null && value !== undefined && value !== '') ?? null;
   }
 
-  private getPostCollectionCount(platformData: social_profile): number | null {
-    const items = [...(platformData.posts || [])];
-    return items.length ? new Set(items.map(item => item.hash_id || item.post_url || item.media_url || item.caption)).size : null;
+  private getPostCollectionCount(_platformData: social_profile): number | null {
+    return null;
   }
 
   private extractSocialCount(value: unknown): string | null {

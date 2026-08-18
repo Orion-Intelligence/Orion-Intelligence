@@ -29,38 +29,31 @@ export interface social_profile_details {
     total_likes?: string;
     avatar?: string;
     banner?: string;
+    crawl_type?: string[];
+    is_parsed?: boolean;
 }
 
-export interface social_post_comment {
-    sender_name?: string;
-    date?: string;
-    likes?: string;
-    text: string;
-}
-
-export interface social_post_hate_speech {
-    is_hate_speech: boolean;
-    label?: string;
-    confidence: number;
-    explanation?: string | null;
-    model?: string;
-}
-
-export interface social_post {
-    post_url?: string;
-    datetime?: string;
+export interface social_resource {
+    type?: string;
+    resource_id?: string;
+    url?: string;
+    parent_url?: string;
+    title?: string;
     caption?: string;
     author?: string;
-    likes?: string;
-    comments?: string;
-    shares?: string;
-    views?: string;
+    datetime?: string;
     media_type?: string;
     media_url?: string;
-    comment_details?: social_post_comment[];
-    hate_speech?: social_post_hate_speech | null;
-    hash_id?: string;
-    comment_items?: string[];
+    thumbnail_url?: string;
+    likes?: string;
+    shares?: string;
+    views?: string;
+}
+
+export interface social_resource_collection {
+    id?: string;
+    is_parsed?: boolean;
+    resources?: social_resource[];
 }
 
 export interface social_online_presence_hit {
@@ -107,10 +100,16 @@ export interface social_wanted {
     [key: string]: any;
 }
 
+export interface social_profile_config {
+    disallowed: string[];
+    [key: string]: unknown;
+}
+
 export interface social_profile {
+    id: string;
     meta: social_meta;
     profile_details?: social_profile_details | null;
-    posts?: social_post[] | null;
+    resources?: social_resource_collection[] | null;
     online_presence?: social_online_presence_hit[] | null;
     stealer_logs?: social_stealer_log[] | null;
     wanted?: social_wanted[] | null;
@@ -120,7 +119,7 @@ export interface db_social_model {
     user_id: string;
     profile_username?: string;
     profiles: social_profile[];
-    selected?: string[];
+    config: social_profile_config;
     scan: social_scan_status;
     updated_at?: string | null;
 }
@@ -131,4 +130,3 @@ export interface Job {
     progress: number;
     step: string;
 }
-

@@ -3,18 +3,17 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, timer } from 'rxjs';
 import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
-import type { social_post, social_profile } from '../models/social.models';
+import type { social_profile, social_resource } from '../models/social.models';
 import { formatFollowers } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
-import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
 import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 import { WantedListSectionComponent } from '../wanted-list-section/wanted-list-section.component';
-import type { FetchMergeMode, FetchStateKey, FetchTabKey, SocialResultSource } from '../enums/social-graph.enums';
-import type { FeedUser, FetchTab, PostCursorFetchRequest } from '../models/social-usability.models';
+import type { FetchStateKey, FetchTabKey, SocialResultSource } from '../enums/social-graph.enums';
+import type { FeedUser, FetchTab } from '../models/social-usability.models';
 import { toUsername } from '../utils/username.util';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { SocialDefaultListSectionComponent } from './default-list-section.component';
@@ -23,16 +22,11 @@ import { SocialExtensionManagerComponent } from '../profile-detail/extension-man
 import { ExtensionState, SocialExtensionService } from '../services/social-extension.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
-interface LatestFetchConfirmationData {
-  message: string;
-  request: PostCursorFetchRequest;
-}
-
 @Component({
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
   standalone: true,
-  imports: [SocialIconComponent, ConfirmationPopupComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
+  imports: [SocialIconComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -41,6 +35,7 @@ export class SocialProfileListingComponent {
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
   private readonly stealerLogsTab: FetchTab = { key: 'stealerLogs', label: 'Stealer Logs', icon: 'bi bi-shield-exclamation' };
   private readonly profileFetchTabs: FetchTab[] = [this.detailsTab, this.onlinePresenceTab, this.stealerLogsTab];
+  private readonly crawlResults = signal<Record<string, { loading?: boolean; items?: unknown[]; error?: string }>>({});
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -65,16 +60,16 @@ export class SocialProfileListingComponent {
   platformSearchTerm = signal('');
   readonly missingStatValue = 'Not fetched';
   onlinePresenceSearchTerms = signal<Record<string, string>>({});
-  latestFetchConfirmationData = signal<LatestFetchConfirmationData | null>(null);
   activeUsers = computed<FeedUser[]>(() => {
     return Array.from(this.scanResults().entries())
       .map(([username, platforms]) => {
-        const allPlatforms = this.getVisiblePlatforms(username, platforms).sort((a, b) => this.comparePlatforms(a, b));
-        const activeResultSource = this.getActiveResultSource(username, allPlatforms);
+        const allPlatforms = [...platforms].sort((a, b) => this.comparePlatforms(a, b));
+        const visiblePlatforms = this.getVisiblePlatforms(username, platforms).sort((a, b) => this.comparePlatforms(a, b));
+        const activeResultSource = this.getActiveResultSource(username, visiblePlatforms);
         return {
           username,
           allPlatforms,
-          platforms: allPlatforms.filter(platform => this.getResultSource(platform) === activeResultSource)
+          platforms: visiblePlatforms.filter(platform => this.getResultSource(platform) === activeResultSource)
         };
       })
       .filter(user => user.allPlatforms.length > 0);
@@ -141,7 +136,59 @@ export class SocialProfileListingComponent {
   }
 
   getFetchTabs(): FetchTab[] {
-    return this.profileFetchTabs;
+    const types = this.activeProfilePlatform()?.profile_details?.crawl_type ?? [];
+    if (!types.length) {
+      return this.profileFetchTabs;
+    }
+    const crawlTabs: FetchTab[] = types.map(type => ({ key: type as FetchTabKey, label: type.charAt(0).toUpperCase() + type.slice(1), icon: type === 'details' ? 'bi bi-person-badge' : 'bi bi-collection' }));
+    return [...crawlTabs, this.onlinePresenceTab, this.stealerLogsTab];
+  }
+
+  private crawlKey(platformData: social_profile, type: FetchTabKey): string {
+    return `${this.getPlatformCardId(platformData)}:${type}`;
+  }
+
+  crawlResultFor(platformData: social_profile, type: FetchTabKey): { loading?: boolean; items?: unknown[]; error?: string } {
+    const state = this.crawlResults()[this.crawlKey(platformData, type)] ?? {};
+    const collection = (platformData.resources ?? []).find(entry => entry.id === type);
+    return { loading: state.loading, error: state.error, items: collection?.resources ?? state.items };
+  }
+
+  private fetchCrawlType(platformData: social_profile, type: FetchTabKey, force = false): void {
+    const existing = (platformData.resources ?? []).find(entry => entry.id === type);
+    if (!force && existing?.is_parsed) {
+      return;
+    }
+    const key = this.crawlKey(platformData, type);
+    this.crawlResults.update(current => ({ ...current, [key]: { loading: true } }));
+    const url = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
+    this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+      this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: result.error } }));
+      if (!result.error) {
+        this.setFetchedResourceCollection(platformData, type, result.items as social_resource[]);
+      }
+    });
+  }
+
+  private setFetchedResourceCollection(platformResult: social_profile, type: FetchTabKey, resources: social_resource[]): void {
+    let updatedProfiles: social_profile[] | null = null;
+    this.storageService.state.scanResults.update(results => {
+      const currentProfiles = results.get(platformResult.meta.username);
+      if (!currentProfiles) {
+        return results;
+      }
+      updatedProfiles = currentProfiles.map(platform => {
+        if (!this.isSamePlatform(platform, platformResult)) {
+          return platform;
+        }
+        const others = (platform.resources ?? []).filter(entry => entry.id !== type);
+        return { ...platform, resources: [...others, { id: type, is_parsed: true, resources }] };
+      });
+      return new Map(results).set(platformResult.meta.username, updatedProfiles);
+    });
+    if (updatedProfiles) {
+      this.storageService.saveProfiles(platformResult.meta.username, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    }
   }
 
   isFetchTabAllowed(tabKey: FetchTabKey): boolean {
@@ -181,18 +228,12 @@ export class SocialProfileListingComponent {
   }
 
   refetchTabData(platformData: social_profile, tabKey: FetchTabKey): void {
-    if (this.getResultSource(platformData) === 'darkweb' && (tabKey === 'details' || tabKey === 'posts')) {
+    if (this.getResultSource(platformData) === 'darkweb' && tabKey === 'details') {
       return;
     }
     switch (tabKey) {
       case 'details':
         this.fetchProfileDetails(platformData);
-        break;
-      case 'posts':
-        this.fetchSocialPosts(platformData);
-        break;
-      case 'connections':
-        this.fetchSocialPosts(platformData);
         break;
       case 'onlinePresence':
         this.searchOnlinePresence(platformData);
@@ -200,14 +241,27 @@ export class SocialProfileListingComponent {
       case 'stealerLogs':
         this.fetchStealerLogs(platformData);
         break;
+      default:
+        this.fetchCrawlType(platformData, tabKey, true);
+        break;
     }
   }
 
   onProfileTabSelected(platformData: social_profile, tabKey: FetchTabKey): void {
-    this.setActiveTab(this.getPlatformCardId(platformData), tabKey, platformData);
+    this.setActiveTab(this.getPlatformCardId(platformData), tabKey);
+    if (tabKey === 'details' || tabKey === 'onlinePresence' || tabKey === 'stealerLogs') {
+      this.fetchTabData(platformData, tabKey);
+    }
+    else {
+      this.fetchCrawlType(platformData, tabKey);
+    }
   }
 
   onProfileTabRefetch(platformData: social_profile, tabKey: FetchTabKey): void {
+    if (tabKey !== 'details' && tabKey !== 'onlinePresence' && tabKey !== 'stealerLogs') {
+      this.fetchCrawlType(platformData, tabKey, true);
+      return;
+    }
     this.refetchTabData(platformData, tabKey);
   }
 
@@ -238,9 +292,7 @@ export class SocialProfileListingComponent {
   private hasTabData(platformData: social_profile, tabKey: FetchTabKey): boolean {
     switch (tabKey) {
       case 'details':
-        return this.getProfileDetailEntries(platformData).length > 0;
-      case 'posts':
-        return this.getUniquePosts(platformData, 'posts').length > 0;
+        return platformData.profile_details?.is_parsed === true;
       case 'onlinePresence':
         return !!platformData.online_presence;
       case 'stealerLogs':
@@ -283,35 +335,10 @@ export class SocialProfileListingComponent {
     this.fetchOnlinePresence(platformData, this.getOnlinePresenceSearchTerm(platformData).trim());
   }
 
-  fetchPostCursor(request: PostCursorFetchRequest): void {
-    if (request.commentsOnly) {
-      const platformData = request.platformData;
-      this.fetchData(platformData, request.tabKey, this.fetchService.fetchSocialPostComments(platformData.meta.platform, platformData.meta.username, request.tabKey, request.cursorId, request.commentOffset, request.maxComments), 'update');
-      return;
-    }
-    if (request.mergeMode === 'prepend') {
-      this.openLatestFetchConfirmation(request);
-    }
-  }
-
-  onLatestFetchConfirmation(confirmed: boolean): void {
-    const confirmation = this.latestFetchConfirmationData();
-    this.latestFetchConfirmationData.set(null);
-    if (!confirmed || !confirmation) {
-      return;
-    }
-    this.runLatestFetch(confirmation.request);
-  }
-
   private fetchProfileDetails(platformData: social_profile): void {
     this.cancelAllFetchesForUser(platformData.meta.username);
     const profileUrl = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
-    this.fetchData(platformData, 'profile', this.extensionService.crawlProfile(platformData.meta.platform, profileUrl).pipe(filter((profile): profile is Record<string, unknown> => !!profile && Object.keys(profile).length > 0), map(profile => ({ profile }))));
-  }
-
-  private fetchSocialPosts(platformData: social_profile): void {
-    this.cancelAllFetchesForUser(platformData.meta.username);
-    this.fetchData(platformData, 'posts', this.fetchService.fetchSocialPosts(platformData.meta.platform, platformData.meta.username));
+    this.fetchData(platformData, 'profile', this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, profileUrl, 'details').pipe(filter(result => result.items.length > 0 && !!result.items[0] && Object.keys(result.items[0] as object).length > 0), map(result => ({ profile: result.items[0] as Record<string, unknown> }))));
   }
 
   private fetchOnlinePresence(platformData: social_profile, token: string): void {
@@ -332,7 +359,7 @@ export class SocialProfileListingComponent {
     this.fetchData(platformData, 'stealerLogs', this.fetchService.fetchPlatformStealerLogs(username, domain).pipe(map(stealerLogs => ({ stealerLogs }))));
   }
 
-  private fetchData(platformResult: social_profile, stateKey: FetchStateKey, request$: Observable<unknown>, mergeMode?: FetchMergeMode): void {
+  private fetchData(platformResult: social_profile, stateKey: FetchStateKey, request$: Observable<unknown>): void {
     const requestKey = this.getRequestKey(stateKey, platformResult);
     if (this.fetchCancelSubjects.has(requestKey)) {
       return;
@@ -341,7 +368,7 @@ export class SocialProfileListingComponent {
     this.fetchCancelSubjects.set(requestKey, cancel$);
     this.setLoading(requestKey, true);
     request$.pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: response => this.setFetchedPlatformData(platformResult, stateKey, response, mergeMode),
+      next: response => this.setFetchedPlatformData(platformResult, stateKey, response),
       error: () => this.finishFetch(requestKey),
       complete: () => this.finishFetch(requestKey),
     });
@@ -360,27 +387,11 @@ export class SocialProfileListingComponent {
     }
   }
 
-  private openLatestFetchConfirmation(request: PostCursorFetchRequest): void {
-    this.latestFetchConfirmationData.set({
-      request,
-      message: `Fetching latest ${this.getLatestFetchSectionLabel(request)} will delete all existing records in this section and replace them with newly fetched records.`,
-    });
-  }
-
-  private runLatestFetch(request: PostCursorFetchRequest): void {
-    const platformData = request.platformData;
-    this.fetchData(platformData, 'posts', this.fetchService.fetchSocialPosts(platformData.meta.platform, platformData.meta.username));
-  }
-
-  private getLatestFetchSectionLabel(request: PostCursorFetchRequest): string {
-    return request.tabKey === 'videos' ? 'videos' : request.tabKey === 'shorts' ? 'shorts' : 'posts';
-  }
-
   private getPlatformDomain(platformData: social_profile): string {
     return platformData.meta.url || platformData.meta.platform;
   }
 
-  private setFetchedPlatformData(platformResult: social_profile, stateKey: FetchStateKey, response: unknown, mergeMode?: FetchMergeMode): void {
+  private setFetchedPlatformData(platformResult: social_profile, stateKey: FetchStateKey, response: unknown): void {
     if (!response || typeof response !== 'object') {
       return;
     }
@@ -396,7 +407,7 @@ export class SocialProfileListingComponent {
         return results;
       }
       updatedProfiles = currentProfiles.map(platform => this.isSamePlatform(platform, platformResult)
-        ? { ...platform, ...this.buildFetchedPlatformData(platform, stateKey, data, hasData, mergeMode) }
+        ? { ...platform, ...this.buildFetchedPlatformData(platform, stateKey, data, hasData) }
         : platform);
       return new Map(results).set(platformResult.meta.username, updatedProfiles);
     });
@@ -408,27 +419,15 @@ export class SocialProfileListingComponent {
     }
   }
 
-  private buildFetchedPlatformData(platform: social_profile, stateKey: FetchStateKey, data: unknown, hasData: boolean, mergeMode?: FetchMergeMode): Partial<social_profile> {
+  private buildFetchedPlatformData(platform: social_profile, stateKey: FetchStateKey, data: unknown, hasData: boolean): Partial<social_profile> {
     const propertyMap: Partial<Record<FetchStateKey, keyof social_profile>> = {
       profile: 'profile_details',
-      posts: 'posts',
       onlinePresence: 'online_presence',
       stealerLogs: 'stealer_logs',
     };
     const propertyName = propertyMap[stateKey];
     if (!propertyName) {
       return {};
-    }
-
-    if (mergeMode === 'update' && this.isPostStateKey(stateKey) && Array.isArray(data)) {
-      const existingPosts = Array.isArray(platform[propertyName]) ? platform[propertyName] as social_post[] : [];
-      const incomingPosts = data as social_post[];
-      const incomingByKey = new Map(incomingPosts.map(post => [this.getPostItemKey(post), post]));
-      const mergedPosts = existingPosts.map(post => {
-        const updatedPost = incomingByKey.get(this.getPostItemKey(post));
-        return updatedPost ? { ...post, ...updatedPost } : post;
-      });
-      return { [propertyName]: mergedPosts } as Partial<social_profile>;
     }
 
     return { [propertyName]: hasData ? data : null } as Partial<social_profile>;
@@ -438,10 +437,6 @@ export class SocialProfileListingComponent {
     return left.meta.username === right.meta.username
       && left.meta.platform.toLowerCase() === right.meta.platform.toLowerCase()
       && left.meta.username.toLowerCase() === right.meta.username.toLowerCase();
-  }
-
-  private isPostStateKey(stateKey: FetchStateKey): stateKey is 'posts' | 'videos' | 'shorts' {
-    return stateKey === 'posts' || stateKey === 'videos' || stateKey === 'shorts';
   }
 
   private getRequestKey(stateKey: FetchStateKey, platformData: social_profile): string {
@@ -501,26 +496,6 @@ export class SocialProfileListingComponent {
     return 'normal';
   }
 
-  getUniquePosts(platformData: social_profile, tabKey: 'posts' | 'videos' | 'shorts' = 'posts'): social_post[] {
-    const posts = this.getPostContentItems(platformData, tabKey);
-    const seen = new Set<string>();
-    return posts.filter(post => {
-      if (!post) {
-        return false;
-      }
-      const key = this.getPostItemKey(post);
-      if (seen.has(key)) {
-        return false;
-      }
-      seen.add(key);
-      return true;
-    });
-  }
-
-  private getPostContentItems(platformData: social_profile, _tabKey: 'posts' | 'videos' | 'shorts'): social_post[] {
-    return platformData.posts || [];
-  }
-
   getStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): string {
     const profileValue = platformData.profile_details?.[key];
     const rawValue = profileValue ?? this.getFallbackStatValue(platformData, key);
@@ -538,7 +513,7 @@ export class SocialProfileListingComponent {
   private getFallbackStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): string | number | null {
     switch (key) {
       case 'total_posts':
-        return this.firstStatValue(platformData.profile_details?.total_posts, this.getPostCollectionCount(platformData));
+        return this.firstStatValue(platformData.profile_details?.total_posts);
       case 'total_followers':
         return this.firstStatValue(Number(platformData.profile_details?.total_followers ?? 0));
       case 'total_following':
@@ -552,15 +527,6 @@ export class SocialProfileListingComponent {
 
   private firstStatValue(...values: Array<string | number | null | undefined>): string | number | null {
     return values.find(value => value !== null && value !== undefined && value !== '') ?? null;
-  }
-
-  private getPostCollectionCount(platformData: social_profile): number | null {
-    const items = [...(platformData.posts || [])];
-    return items.length ? new Set(items.map(item => this.getPostItemKey(item))).size : null;
-  }
-
-  private getPostItemKey(post: social_post): string {
-    return String(post.hash_id || post.post_url || post.media_url || post.caption || '');
   }
 
   toggleProfileOverview(platformId: string, platformData?: social_profile): void {
@@ -635,15 +601,30 @@ export class SocialProfileListingComponent {
         this.storageService.state.activeUsername.set(user.username);
         this.profileOverviewIds.set(new Set([platformId]));
         this.setActiveTab(platformId, 'details');
-        this.refetchTabData(match, 'details');
+        if (!match.profile_details?.is_parsed) {
+          this.refetchTabData(match, 'details');
+        }
         this.emitProfileOverviewLabel(match);
         this.appliedProfileQuery.set(true);
         return;
       }
     }
-    if (this.activeUsers().length > 0 || !this.isInitialLoading()) {
-      this.appliedProfileQuery.set(true);
+    if (this.isInitialLoading()) {
+      return;
     }
+    const ownerKey = Array.from(this.storageService.state.scanResults().keys()).find(key => key.toLowerCase() === profile.toLowerCase()) ?? profile;
+    const built: social_profile = { id: `${platform}:${ownerKey}`, meta: { platform, username: ownerKey, url: '' } };
+    const platformId = this.getPlatformCardId(built);
+    this.storageService.state.scanResults.update(current => {
+      const existing = current.get(ownerKey) ?? [];
+      return new Map(current).set(ownerKey, [...existing, built]);
+    });
+    this.storageService.state.activeUsername.set(ownerKey);
+    this.profileOverviewIds.set(new Set([platformId]));
+    this.setActiveTab(platformId, 'details');
+    this.refetchTabData(built, 'details');
+    this.emitProfileOverviewLabel(built);
+    this.appliedProfileQuery.set(true);
   }
 
   private setProfileQuery(platformData: social_profile): void {
@@ -683,8 +664,7 @@ export class SocialProfileListingComponent {
   }
 
   private getVisiblePlatforms(ownerUsername: string, platforms: social_profile[]): social_profile[] {
-    const selectedPlatforms = platforms.filter(platform => this.storageService.isSelected(ownerUsername, platform));
-    return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
+    return platforms.filter(platform => this.storageService.isSelected(ownerUsername, platform));
   }
 
   private getActiveResultSource(username: string, platforms: social_profile[]): SocialResultSource {

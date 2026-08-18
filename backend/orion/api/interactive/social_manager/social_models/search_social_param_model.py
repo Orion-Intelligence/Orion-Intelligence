@@ -30,6 +30,7 @@ class SocialProfileRequest(PlatformUsernameRequest):
     social_data_type: Optional[str] = None
     url: Optional[str] = None
     type: Optional[str] = None
+    command: Optional[str] = None
 
 
 class SocialPostsRequest(PlatformUsernameRequest):

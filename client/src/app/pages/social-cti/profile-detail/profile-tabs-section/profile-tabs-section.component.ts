@@ -4,13 +4,10 @@ import { social_stealer_log } from '../../models/social.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import type { FetchTabKey } from '../../enums/social-graph.enums';
-import type { FeedUser, FetchTab, PostCursorFetchRequest } from '../../models/social-usability.models';
+import type { FeedUser, FetchTab } from '../../models/social-usability.models';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { applyImageFallback } from '../../utils/image-fallback.util';
-import { SocialProfilePostsSectionComponent } from '../profile-posts-section/profile-posts-section.component';
-import { SocialProfileVideosSectionComponent } from '../profile-videos-section/profile-videos-section.component';
-import { SocialProfileShortsSectionComponent } from '../profile-shorts-section/profile-shorts-section.component';
 import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { PROFILE_STEALERLOG_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
@@ -18,12 +15,13 @@ import { ReportExportService } from '../../../../shared/services/report-export.s
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { SectionStateComponent } from '../../../../shared/partials/section-state/section-state.component';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, SocialProfilePostsSectionComponent, SocialProfileVideosSectionComponent, SocialProfileShortsSectionComponent, ExportChoiceModalComponent, TranslatePipe],
+  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
@@ -32,6 +30,7 @@ export class SocialProfileTabsSectionComponent {
   private readonly translationService = inject(TranslationService);
   private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
+  private readonly contentTabKeys: FetchTabKey[] = ['details', 'onlinePresence', 'stealerLogs'];
 
   user = input.required<FeedUser>();
   platformData = input.required<social_profile>();
@@ -39,9 +38,9 @@ export class SocialProfileTabsSectionComponent {
   activeTab = input.required<FetchTabKey>();
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
+  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string }>({});
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
-  postCursorFetch = output<PostCursorFetchRequest>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;
@@ -51,18 +50,32 @@ export class SocialProfileTabsSectionComponent {
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
   readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
 
-  getTabIcon(tab: FetchTab): string {
-    if (tab.key === 'videos') {
-      return 'bi bi-camera-video';
-    }
-    if (tab.key === 'shorts') {
-      return 'bi bi-phone';
-    }
-    return tab.icon;
+  getTabLabel(tabKey: FetchTabKey): string {
+    return this.fetchTabs().find(tab => tab.key === tabKey)?.label ?? tabKey;
   }
 
   isTabLoading(tabKey: FetchTabKey): boolean {
     return !!this.loadingStates()[tabKey];
+  }
+
+  isSectionLoading(tabKey: FetchTabKey): boolean {
+    return this.isCrawlContentTab(tabKey) && this.activeTab() === tabKey
+      ? !!this.crawlResult().loading
+      : this.isTabLoading(tabKey);
+  }
+
+  isCrawlContentTab(tabKey: FetchTabKey): boolean {
+    return !this.contentTabKeys.includes(tabKey);
+  }
+
+  crawlItemTitle(item: unknown): string {
+    const record = item as Record<string, unknown>;
+    return String(record?.['title'] ?? record?.['caption'] ?? record?.['url'] ?? '');
+  }
+
+  crawlItemUrl(item: unknown): string {
+    const record = item as Record<string, unknown>;
+    return String(record?.['url'] ?? '');
   }
 
   onOnlinePresenceInput(event: Event): void {
@@ -70,7 +83,20 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getProfileImageUrl(platformData: social_profile): string {
-    return platformData.meta.avatar ?? '';
+    return this.getFirstMetadataValue(platformData, [
+      'avatar',
+      'avatar_url',
+      'avatarUrl',
+      'AvatarUrl',
+      'profile_image',
+      'profileImage',
+      'profile_image_url',
+      'picture',
+      'picture_url',
+      'image_url',
+      'img_src',
+      'm_img_src',
+    ]);
   }
 
   isProfileImageFailed(platformData: social_profile): boolean {
@@ -131,7 +157,24 @@ export class SocialProfileTabsSectionComponent {
   }
 
   formatProfileDetailKey(key: string): string {
-    return formatKey(key.replace(/^m_/, ''));
+    return formatKey(key.replace(/^m_/, '').replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
+  }
+
+  formatProfileDetailValue(key: string, value: any): string {
+    if (typeof value === 'string' && this.isProfileDateKey(key)) {
+      const date = new Date(value);
+      if (!Number.isNaN(date.getTime())) {
+        return date.toLocaleString('en-US', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: true,
+        });
+      }
+    }
+    return this.formatMetadataValue(value);
   }
 
   formatMetadataValue(value: any): string {
@@ -279,7 +322,7 @@ export class SocialProfileTabsSectionComponent {
   }
 
   private getFirstMetadataValue(platformData: social_profile, keys: string[]): string {
-    const sources = [platformData.profile_details, platformData.meta.avatar];
+    const sources = [platformData.profile_details, platformData.meta];
     for (const source of sources) {
       const value = this.getFirstValueFromSource(source, keys);
       if (value) {
@@ -309,6 +352,11 @@ export class SocialProfileTabsSectionComponent {
       }
     }
     return this.getFirstValueFromSource(source.result || source.profile || source.data, keys);
+  }
+
+  private isProfileDateKey(key: string): boolean {
+    const normalizedKey = key.replace(/^m_/i, '').replace(/[_\s-]/g, '').toLowerCase();
+    return ['createdat', 'updatedat', 'date', 'datetime', 'timestamp'].includes(normalizedKey);
   }
 
 }

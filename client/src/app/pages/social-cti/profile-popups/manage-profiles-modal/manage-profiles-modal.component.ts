@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, afterNextRender, computed, effect, input, output, signal } from '@angular/core';
 import type { social_profile } from '../../models/social.models';
 import type { ManageProfilesModalData, ManagedPlatform } from '../../models/social-usability.models';
-import { socialSelectionKey } from '../../models/social-usability.models';
 import { SocialIconComponent } from '../../../../shared/partials/social-icon/social-icon.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
@@ -64,14 +63,14 @@ export class ManageProfilesModalComponent {
         return;
       }
       const isImageFlow = this.isImageFlowUsername(modalData.username);
-      const selectedSet = new Set(modalData.selectedKeys || []);
-      this.platforms.set(modalData.platforms.map((p, index) => ({
+      const disallowedIds = new Set(modalData.config.disallowed);
+      this.platforms.set(modalData.platforms.map(p => ({
         ...p,
-        stableKey: `${index}|${p.meta.platform}|${p.meta.url}`,
+        stableKey: p.id,
         draftUsername: (p.meta.username || '').trim(),
         initialUsername: (p.meta.username || '').trim(),
         matches: !isImageFlow,
-        isSelected: isImageFlow ? false : selectedSet.has(socialSelectionKey(modalData.username, p)),
+        isSelected: isImageFlow ? false : !disallowedIds.has(p.id),
       })).sort((a, b) => {
         const weight = (status?: string) => {
           if (status === 'active') {
@@ -221,7 +220,7 @@ export class ManageProfilesModalComponent {
   }
 
   selectAllVisible(): void {
-    this.updateVisiblePlatforms(p => this.isInformational(p) ? { ...p, isSelected: false } : { ...p, isSelected: true });
+    this.updateVisiblePlatforms(p => ({ ...p, isSelected: true }));
   }
 
   deselectAllVisible(): void {
@@ -233,6 +232,6 @@ export class ManageProfilesModalComponent {
   }
 
   onUpdateGraph(): void {
-    this.updateGraph.emit(this.platforms().filter(p => p.isSelected && !this.isInformational(p)));
+    this.updateGraph.emit(this.platforms().filter(p => p.isSelected));
   }
 }

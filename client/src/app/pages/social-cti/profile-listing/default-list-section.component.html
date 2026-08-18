@@ -1,5 +1,14 @@
 @if (user(); as user) {
   <div class="flex min-w-0 flex-col gap-3">
+    @if (user.platforms.length === 0) {
+      <article data-testid="social-profile-selection-empty" class="flex min-h-[360px] flex-col items-center justify-center overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-10 text-center shadow-[0_10px_24px_var(--color-shadow-light)]">
+        <span class="flex h-12 w-12 items-center justify-center rounded-full border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)]/35 text-xl text-[var(--color-text4)]">
+          <i class="bi bi-person-x" aria-hidden="true"></i>
+        </span>
+        <p class="mt-3 mb-0 text-sm font-semibold text-[var(--color-text2)]">{{ 'No profiles selected' | translate }}</p>
+        <p class="mt-1 mb-0 max-w-[360px] text-xs leading-[1.5] text-[var(--color-text4)]">{{ 'Use Manage Profiles to select profiles to display.' | translate }}</p>
+      </article>
+    }
     @for (platformData of user.platforms; track getPlatformTrackKey($index, platformData)) {
       <article data-testid="social-platform-card" [id]="getPlatformCardId(platformData)" [class.highlight-focused-card]="highlightedNodeId() === getPlatformCardId(platformData)" class="animate-social-feed-card-in overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)] will-change-[opacity,transform] motion-reduce:animate-none">
         <div class="relative flex items-start gap-3 px-4 pt-4">

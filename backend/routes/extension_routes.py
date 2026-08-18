@@ -30,7 +30,7 @@ async def system_session_active(current_user, redis_store: redis_controller) -> 
 async def extension_user_from_token(token: str | None):
     try:
         return await session_manager.get_instance().get_current_user(token)
-    except HTTPException:
+    except Exception:
         return None
 
 

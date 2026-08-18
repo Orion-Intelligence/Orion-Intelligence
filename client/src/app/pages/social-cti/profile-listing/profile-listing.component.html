@@ -125,7 +125,12 @@
                 <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[10px] font-semibold text-[var(--color-text4)]">{{ user.platforms.length }} {{ 'found' | translate }}</span>
               </div>
               <input data-testid="social-platform-search" type="text" [placeholder]="'Search platforms' | translate" [value]="platformSearchTerm()" (input)="onPlatformSearchInput($event)" class="mb-3 h-8 w-full flex-shrink-0 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35">
-              <div class="ui-social-sidebar-platform-list flex min-h-0 flex-1 flex-col overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,transparent,#000_18px,#000_calc(100%-18px),transparent)] [mask-repeat:no-repeat] [&>div:nth-child(1)]:[animation-delay:0ms] [&>div:nth-child(2)]:[animation-delay:22ms] [&>div:nth-child(3)]:[animation-delay:44ms] [&>div:nth-child(4)]:[animation-delay:66ms] [&>div:nth-child(5)]:[animation-delay:88ms] [&>div:nth-child(6)]:[animation-delay:110ms] [&>div:nth-child(7)]:[animation-delay:132ms] [&>div:nth-child(8)]:[animation-delay:154ms] [&>div:nth-child(9)]:[animation-delay:176ms] [&>div:nth-child(10)]:[animation-delay:198ms] [&>div:nth-child(11)]:[animation-delay:220ms] [&>div:nth-child(12)]:[animation-delay:242ms] [&>div:nth-child(13)]:[animation-delay:264ms] [&>div:nth-child(14)]:[animation-delay:286ms] [&>div:nth-child(15)]:[animation-delay:308ms] [&>div:nth-child(16)]:[animation-delay:330ms] [&>div:nth-child(17)]:[animation-delay:352ms] [&>div:nth-child(18)]:[animation-delay:374ms] [&>div:nth-child(19)]:[animation-delay:396ms] [&>div:nth-child(20)]:[animation-delay:418ms] [&>div:nth-child(21)]:[animation-delay:440ms] [&>div:nth-child(22)]:[animation-delay:462ms] [&>div:nth-child(23)]:[animation-delay:484ms] [&>div:nth-child(24)]:[animation-delay:506ms] [&>div:nth-child(25)]:[animation-delay:528ms] [&>div:nth-child(26)]:[animation-delay:550ms] [&>div:nth-child(27)]:[animation-delay:572ms] [&>div:nth-child(28)]:[animation-delay:594ms] [&>div:nth-child(29)]:[animation-delay:616ms] [&>div:nth-child(30)]:[animation-delay:638ms] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              <div class="ui-social-sidebar-platform-list flex min-h-0 flex-1 flex-col overflow-y-auto pr-1 [mask-repeat:no-repeat] [&>div:nth-child(1)]:[animation-delay:0ms] [&>div:nth-child(2)]:[animation-delay:22ms] [&>div:nth-child(3)]:[animation-delay:44ms] [&>div:nth-child(4)]:[animation-delay:66ms] [&>div:nth-child(5)]:[animation-delay:88ms] [&>div:nth-child(6)]:[animation-delay:110ms] [&>div:nth-child(7)]:[animation-delay:132ms] [&>div:nth-child(8)]:[animation-delay:154ms] [&>div:nth-child(9)]:[animation-delay:176ms] [&>div:nth-child(10)]:[animation-delay:198ms] [&>div:nth-child(11)]:[animation-delay:220ms] [&>div:nth-child(12)]:[animation-delay:242ms] [&>div:nth-child(13)]:[animation-delay:264ms] [&>div:nth-child(14)]:[animation-delay:286ms] [&>div:nth-child(15)]:[animation-delay:308ms] [&>div:nth-child(16)]:[animation-delay:330ms] [&>div:nth-child(17)]:[animation-delay:352ms] [&>div:nth-child(18)]:[animation-delay:374ms] [&>div:nth-child(19)]:[animation-delay:396ms] [&>div:nth-child(20)]:[animation-delay:418ms] [&>div:nth-child(21)]:[animation-delay:440ms] [&>div:nth-child(22)]:[animation-delay:462ms] [&>div:nth-child(23)]:[animation-delay:484ms] [&>div:nth-child(24)]:[animation-delay:506ms] [&>div:nth-child(25)]:[animation-delay:528ms] [&>div:nth-child(26)]:[animation-delay:550ms] [&>div:nth-child(27)]:[animation-delay:572ms] [&>div:nth-child(28)]:[animation-delay:594ms] [&>div:nth-child(29)]:[animation-delay:616ms] [&>div:nth-child(30)]:[animation-delay:638ms] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden" [style.mask-image]="getSidebarPlatforms(user).length > 2 ? 'linear-gradient(to bottom, transparent, #000 18px, #000 calc(100% - 18px), transparent)' : 'none'">
+                @if (user.platforms.length === 0) {
+                  <div class="flex flex-1 items-center justify-center rounded-[8px] border border-dashed border-[var(--color-border)] bg-[var(--color-blue-700)]/35 px-3 py-6 text-center text-xs text-[var(--color-text4)]">
+                    {{ 'No platforms selected' | translate }}
+                  </div>
+                }
                 @for (platformData of getSidebarPlatforms(user); track getPlatformTrackKey($index, platformData); let isLast = $last) {
                   <div data-testid="social-sidebar-platform-row" (click)="handleSidebarPlatformClick(getPlatformCardId(platformData))" [class]="highlightedNodeId() === getPlatformCardId(platformData) || isProfileOverviewActive(getPlatformCardId(platformData)) ? '!bg-[rgba(87,165,235,0.12)]' : ''" class="ui-social-sidebar-platform-row flex animate-social-sidebar-platform-row-in cursor-pointer items-center gap-2.5 rounded-[8px] px-2 py-2 [will-change:opacity,filter,transform] motion-reduce:opacity-100 motion-reduce:[filter:none] motion-reduce:transform-none motion-reduce:animate-none transition-colors hover:bg-[rgba(87,165,235,0.10)]">
                     <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[var(--color-blue-720)] text-sm ring-1 ring-[var(--color-border)]">
@@ -165,9 +170,9 @@
                   [onlinePresenceSearchTerm]="getOnlinePresenceSearchTerm(platformData)"
                   (tabSelected)="onProfileTabSelected(platformData, $event)"
                   (refetchTab)="onProfileTabRefetch(platformData, $event)"
-                  (postCursorFetch)="fetchPostCursor($event)"
                   (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
-                  (onlinePresenceSearch)="searchOnlinePresence(platformData)">
+                  (onlinePresenceSearch)="searchOnlinePresence(platformData)"
+                  [crawlResult]="crawlResultFor(platformData, getActiveTabForPlatform(platformData))">
                 </app-social-profile-tabs-section>
               } @else {
                 <app-social-extension-manager [mode]="extensionState()"></app-social-extension-manager>
@@ -187,7 +192,7 @@
 
         <aside class="hidden h-full min-h-0 w-[260px] flex-shrink-0 overflow-y-auto lg:block">
           @if (activeUser(); as user) {
-            <app-social-stealerlog-section class="block" [username]="user.username" [platforms]="user.allPlatforms"></app-social-stealerlog-section>
+            <app-social-stealerlog-section class="block" [username]="user.username" [platforms]="user.platforms"></app-social-stealerlog-section>
             <app-social-wanted-list-section class="mt-3 block" [username]="user.username"></app-social-wanted-list-section>
           }
         </aside>
@@ -196,6 +201,3 @@
   }
 </div>
 
-@if (latestFetchConfirmationData(); as data) {
-  <app-confirmation-popup [message]="data.message" (confirmed)="onLatestFetchConfirmation($event)"></app-confirmation-popup>
-}

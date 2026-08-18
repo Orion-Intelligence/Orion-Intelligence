@@ -1,6 +1,6 @@
 import type { WritableSignal } from '@angular/core';
 import type { FetchMergeMode, FetchTabKey, PostContentTabKey, SocialPlatformCapabilityKey } from '../enums/social-graph.enums';
-import type { Job, social_profile } from './social.models';
+import type { Job, social_profile, social_profile_config } from './social.models';
 
 export type ManagedPlatform = social_profile & {
     stableKey: string;
@@ -10,7 +10,7 @@ export type ManagedPlatform = social_profile & {
 export interface ManageProfilesModalData {
     username: string;
     platforms: social_profile[];
-    selectedKeys: string[];
+    config: social_profile_config;
 }
 
 export interface ApiEnvelope<T> {
@@ -70,13 +70,9 @@ export interface NotificationData {
 
 export interface social_state {
     scanResults: WritableSignal<Map<string, social_profile[]>>;
-    selectedKeys: WritableSignal<Set<string>>;
+    profileConfigs: WritableSignal<Map<string, social_profile_config>>;
     jobs: WritableSignal<Job[]>;
     homeMenuSearchTerm: WritableSignal<string>;
     isHomeMenuCollapsed: WritableSignal<boolean>;
     activeUsername: WritableSignal<string | null>;
-}
-
-export function socialSelectionKey(ownerUsername: string, platform: social_profile): string {
-  return `${(ownerUsername || '').toLowerCase()}|${(platform.meta.platform || '').toLowerCase()}|${(platform.meta.username || '').toLowerCase()}|${platform.meta.url || ''}`;
 }
