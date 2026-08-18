@@ -23,6 +23,7 @@ export class HomeMenuComponent {
   cancelScan = output<string>();
   retryScan = output<Job>();
   deleteRequested = output<string>();
+  stopFetches = output<string>();
   visibleJobsCount = signal(10);
   displayJobs = computed(() => this.jobs().slice(0, this.visibleJobsCount()));
 

@@ -1,5 +1,6 @@
 import json
 import asyncio
+import secrets
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect, status
 from starlette.responses import JSONResponse
@@ -14,6 +15,8 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
 
 extension_routes = APIRouter()
+
+WS_TICKET_TTL_SECONDS = 30
 
 
 async def system_session_active(current_user, redis_store: redis_controller) -> bool:
@@ -109,9 +112,26 @@ async def extension_logout(request: Request):
     return resp
 
 
+@extension_routes.post("/api/extension/ws-ticket")
+async def extension_ws_ticket(request: Request, redis_store: redis_controller = Depends(redis_controller.getInstance)):
+    token = extension_token_from_request(request)
+    if not await extension_user_from_token(token):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
+    ticket = secrets.token_urlsafe(32)
+    await redis_store.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [f"ws_ticket:{ticket}", token, WS_TICKET_TTL_SECONDS])
+    return {"ticket": ticket}
+
+
 @extension_routes.websocket("/api/extension/socket")
 async def extension_socket(websocket: WebSocket):
     token = extension_token_from_request(websocket)
+    if not token:
+        ticket = websocket.query_params.get("ticket")
+        if ticket:
+            redis_store = redis_controller.getInstance()
+            token = await redis_store.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [f"ws_ticket:{ticket}", None, None])
+            if token:
+                await redis_store.invoke_trigger(REDIS_COMMANDS.S_DELETE_KEY, [f"ws_ticket:{ticket}"])
     user_key = await socket_user_key(token)
     if not user_key:
         await websocket.close(code=status.WS_1008_POLICY_VIOLATION)

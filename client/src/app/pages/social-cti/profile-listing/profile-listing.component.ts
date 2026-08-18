@@ -203,7 +203,10 @@ export class SocialProfileListingComponent {
       this.setSectionStatus(platformData, type, 'fetching');
     }
     const url = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
-    this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, command).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+    const cancel$ = new Subject<void>();
+    this.fetchCancelSubjects.set(key, cancel$);
+    this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, command).pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+      this.fetchCancelSubjects.delete(key);
       this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: result.error } }));
       if (!result.error && result.items) {
         this.setFetchedResourceCollection(platformData, type, result.items as social_resource[]);
@@ -212,6 +215,74 @@ export class SocialProfileListingComponent {
         this.setSectionStatus(platformData, type, 'failed');
       }
     });
+  }
+
+  stopPlatformFetches(platformData: social_profile): void {
+    const cardId = this.getPlatformCardId(platformData);
+    for (const [key, cancel$] of Array.from(this.fetchCancelSubjects)) {
+      if (key.includes(cardId)) {
+        cancel$.next();
+        cancel$.complete();
+        this.fetchCancelSubjects.delete(key);
+      }
+    }
+    this.crawlResults.update(current => {
+      const next = { ...current };
+      for (const key of Object.keys(next)) {
+        if (key.startsWith(`${cardId}:`) && next[key]?.loading) {
+          next[key] = { ...next[key], loading: false };
+        }
+      }
+      return next;
+    });
+    this.loadingByRequestKey.update(current => {
+      const next = { ...current };
+      for (const key of Object.keys(next)) {
+        if (key.includes(cardId)) {
+          delete next[key];
+        }
+      }
+      return next;
+    });
+    this.clearFetchingStatus(platformData);
+  }
+
+  stopUserFetches(username: string): void {
+    for (const platform of this.storageService.state.scanResults().get(username) ?? []) {
+      this.stopPlatformFetches(platform);
+    }
+  }
+
+  private clearFetchingStatus(platformData: social_profile): void {
+    let updatedProfiles: social_profile[] | null = null;
+    this.storageService.state.scanResults.update(results => {
+      const currentProfiles = results.get(platformData.meta.username);
+      if (!currentProfiles) {
+        return results;
+      }
+      let changed = false;
+      const nextProfiles = currentProfiles.map(platform => {
+        if (!this.isSamePlatform(platform, platformData)) {
+          return platform;
+        }
+        const status = { ...(platform.section_status ?? {}) };
+        for (const section of Object.keys(status)) {
+          if (status[section] === 'fetching') {
+            delete status[section];
+            changed = true;
+          }
+        }
+        return changed ? { ...platform, section_status: status } : platform;
+      });
+      if (!changed) {
+        return results;
+      }
+      updatedProfiles = nextProfiles;
+      return new Map(results).set(platformData.meta.username, nextProfiles);
+    });
+    if (updatedProfiles) {
+      this.storageService.saveProfiles(platformData.meta.username, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+    }
   }
 
   private setFetchedResourceCollection(platformResult: social_profile, type: FetchTabKey, resources: social_resource[]): void {

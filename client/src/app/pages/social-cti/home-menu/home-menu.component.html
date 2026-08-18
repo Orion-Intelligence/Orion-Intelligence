@@ -57,6 +57,11 @@
                         </button>
                       </div>
                     }
+                    @else if (isJobLoading(job)) {
+                      <button data-testid="social-history-stop" (click)="$event.stopPropagation(); stopFetches.emit(job.id)" [title]="'Stop' | translate" [attr.aria-label]="'Stop' | translate" class="flex h-6 w-6 shrink-0 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-500">
+                        <i class="bi bi-stop-fill text-sm leading-none"></i>
+                      </button>
+                    }
 
                   </div>
 

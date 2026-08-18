@@ -14,7 +14,8 @@
               (jobClicked)="handleCompletedJobClick($event)"
               (cancelScan)="cancelScan($event)"
               (retryScan)="retryScan($event)"
-              (deleteRequested)="openDeleteConfirmation($event)">
+              (deleteRequested)="openDeleteConfirmation($event)"
+              (stopFetches)="onStopFetches($event)">
             </app-home-menu>
 
             <main class="ui-social-dashboard-shell relative flex min-h-0 flex-grow flex-col bg-transparent [.light-theme_&]:!bg-[#e7eff9]">

@@ -147,7 +147,10 @@
                       </p>
                     </div>
                     @if (isPlatformLoading(platformData)) {
-                      <div class="h-3.5 w-3.5 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-t-transparent"></div>
+                      <button type="button" data-testid="social-sidebar-platform-stop" (click)="$event.stopPropagation(); stopPlatformFetches(platformData)" [title]="'Stop' | translate" class="group/stop flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[var(--color-blue-640)] hover:text-red-500">
+                        <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent group-hover/stop:hidden"></span>
+                        <i class="bi bi-stop-fill hidden text-sm leading-none group-hover/stop:block" aria-hidden="true"></i>
+                      </button>
                     } @else {
                       <div class="h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.12)]"></div>
                     }

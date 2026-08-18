@@ -228,6 +228,10 @@ export class SocialMapperComponent {
     this.sidebarState.activeUsername.set(Array.from(this.profilesState.scanResults().keys())[0] ?? null);
   }
 
+  onStopFetches(username: string): void {
+    this.profileListing()?.stopUserFetches(username);
+  }
+
   openDeleteConfirmation(username: string): void {
     const job = this.jobs().find(currentJob => currentJob.id === username);
     this.deleteUsername.set(username);
