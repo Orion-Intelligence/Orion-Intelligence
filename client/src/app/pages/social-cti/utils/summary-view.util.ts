@@ -1,5 +1,5 @@
 import { social_profile } from '../models/social.models';
-const HIDDEN_PROFILE_DETAIL_KEYS = new Set(['m_scrap_file', 'm_network', 'm_hash_id', 'm_hash', 'm_content_type', 'm_channel_url', 'm_weblink', 'm_date', 'm_sender_name', 'm_message_id']);
+const HIDDEN_PROFILE_DETAIL_KEYS = new Set(['m_scrap_file', 'm_network', 'm_hash_id', 'm_hash', 'm_content_type', 'm_channel_url', 'm_weblink', 'm_date', 'm_sender_name', 'm_message_id', 'crawl_type', 'is_parsed']);
 
 function hasProfileDetailValue(value: any): boolean {
   if (value === null || value === undefined) {

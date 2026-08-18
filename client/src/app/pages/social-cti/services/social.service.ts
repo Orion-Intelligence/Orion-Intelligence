@@ -114,7 +114,7 @@ export class SocialService {
       return;
     }
 
-    this.storageService.state.scanResults.update(results => new Map(results).set(job.id, event.payload));
+    this.storageService.setScanProfiles(job.id, event.payload);
     this.storageService.state.activeUsername.set(job.id);
     this.storageService.state.jobs.update(jobs => jobs.map(currentJob => currentJob.id === job.id
       ? { ...currentJob, status: 'completed', progress: 100, step: 'Completed' }

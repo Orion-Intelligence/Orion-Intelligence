@@ -1,0 +1,31 @@
+<div
+  [attr.data-testid]="testId() || null"
+  [attr.aria-live]="state() === 'loading' ? 'polite' : null"
+  class="flex min-h-[180px] w-full flex-col items-center justify-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] px-4 py-8 text-center [body.light-theme_&]:bg-[#f8fbff]"
+  [class.border-dashed]="state() !== 'loading'">
+  @if (state() === 'loading') {
+    <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-blue-640)]">
+      <span class="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+    </div>
+  } @else {
+    <div class="flex h-10 w-10 items-center justify-center rounded-[10px] bg-[var(--color-blue-720)] text-[var(--color-text4)]">
+      <i [class]="'bi ' + icon() + ' text-base'" aria-hidden="true"></i>
+    </div>
+  }
+  <div>
+    <p class="mb-1 text-sm font-semibold text-[var(--color-text2)]">{{ title() | translate }}</p>
+    @if (description()) {
+      <p class="mb-0 text-xs leading-5 text-[var(--color-text4)]">{{ description() | translate }}</p>
+    }
+  </div>
+  @if (actionLabel()) {
+    <button
+      type="button"
+      [attr.data-testid]="actionTestId() || null"
+      (click)="action.emit()"
+      class="inline-flex min-h-8 items-center justify-center gap-1.5 rounded-[8px] bg-[var(--color-blue-640)] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)]">
+      <i [class]="'bi ' + actionIcon() + ' text-[11px]'" aria-hidden="true"></i>
+      {{ actionLabel() | translate }}
+    </button>
+  }
+</div>

@@ -4,7 +4,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
 import { Router } from '@angular/router';
 import { Job, social_profile } from './models/social.models';
-import { socialSelectionKey } from './models/social-usability.models';
 import { ManageProfilesModalData } from './models/social-usability.models';
 import type { FeedUser, NotificationData } from './models/social-usability.models';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
@@ -216,6 +215,15 @@ export class SocialMapperComponent {
       }
       return newMap;
     });
+    this.profilesState.profileConfigs.update(currentMap => {
+      const newMap = new Map(currentMap);
+      for (const key of newMap.keys()) {
+        if (key.toLowerCase() === username.toLowerCase()) {
+          newMap.delete(key);
+        }
+      }
+      return newMap;
+    });
     this.sidebarState.activeUsername.set(Array.from(this.profilesState.scanResults().keys())[0] ?? null);
   }
 
@@ -236,11 +244,7 @@ export class SocialMapperComponent {
       return;
     }
     const owner = user.username;
-    const hasStoredSelection = results.some(platform => this.storageService.isSelected(owner, platform));
-    const selectedKeys = results
-      .filter(platform => hasStoredSelection ? this.storageService.isSelected(owner, platform) : platform.meta.status !== 'informational')
-      .map(platform => socialSelectionKey(owner, platform));
-    this.manageProfilesModalData.set({ username: owner, platforms: results, selectedKeys });
+    this.manageProfilesModalData.set({ username: owner, platforms: results, config: this.storageService.getProfileConfig(owner) });
   }
 
   closeManageProfilesModal(): void {
@@ -252,9 +256,8 @@ export class SocialMapperComponent {
     if (!modalData) {
       return;
     }
-    this.storageService.setSelection(modalData.username, selectedPlatforms);
-    const currentPlatforms = this.profilesState.scanResults().get(modalData.username) ?? [];
-    this.storageService.saveProfiles(modalData.username, currentPlatforms, true)
+    const config = this.storageService.setSelection(modalData.username, selectedPlatforms);
+    this.storageService.saveProfileConfig(modalData.username, config)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe();
     this.closeManageProfilesModal();
@@ -311,7 +314,6 @@ export class SocialMapperComponent {
   }
 
   private getVisiblePlatforms(ownerUsername: string, platforms: social_profile[]): social_profile[] {
-    const selectedPlatforms = platforms.filter(platform => this.storageService.isSelected(ownerUsername, platform));
-    return selectedPlatforms.length > 0 ? selectedPlatforms : [...platforms];
+    return platforms.filter(platform => this.storageService.isSelected(ownerUsername, platform));
   }
 }
