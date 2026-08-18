@@ -10,6 +10,7 @@ import { IocResolver } from './shared/resolvers/ioc.resolver';
 import { ConfigResolver } from './shared/resolvers/config.resolver';
 import { OnboardingGuard } from './shared/guards/onboarding-guar';
 import { NotificationGuard } from './shared/guards/notification.guard';
+const loadPhoneLookupComponent = () => import('./sections/api/phone-lookup/phone-lookup.component').then(m => m.PhoneLookupComponent);
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
@@ -302,6 +303,15 @@ export const routes: Routes = [
               animation: 'TextAnalysisAPI',
               title: 'Text Analysis',
               description: 'Analyze text for spam and malicious URLs'
+            }
+          },
+          {
+            path: 'phone-lookup',
+            loadComponent: loadPhoneLookupComponent,
+            data: {
+              animation: 'TextAnalysisAPI',
+              title: 'Phone & Domain Lookup',
+              description: 'Analyze phone numbers and domains for OSINT intelligence'
             }
           },
           {
