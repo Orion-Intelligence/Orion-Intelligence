@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, inject, input, output, signal } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, timer } from 'rxjs';
@@ -26,7 +27,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
   standalone: true,
-  imports: [SocialIconComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
+  imports: [NgClass, SocialIconComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
