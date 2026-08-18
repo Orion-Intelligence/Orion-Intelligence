@@ -30,6 +30,7 @@ export class SocialProfileTabsSectionComponent {
   private readonly translationService = inject(TranslationService);
   private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
+  private readonly expandedCrawlDescriptions = signal<Set<string>>(new Set<string>());
   private readonly contentTabKeys: FetchTabKey[] = ['details', 'onlinePresence', 'stealerLogs'];
 
   user = input.required<FeedUser>();
@@ -76,6 +77,58 @@ export class SocialProfileTabsSectionComponent {
   crawlItemUrl(item: unknown): string {
     const record = item as Record<string, unknown>;
     return String(record?.['url'] ?? '');
+  }
+
+  crawlItemCaption(item: unknown): string {
+    const record = this.crawlItemRecord(item);
+    return String(record['caption'] ?? record['description'] ?? '');
+  }
+
+  crawlItemType(item: unknown): string {
+    const record = this.crawlItemRecord(item);
+    return String(record['media_type'] ?? record['type'] ?? '');
+  }
+
+  crawlItemImageUrl(item: unknown): string {
+    const record = this.crawlItemRecord(item);
+    const value = record['thumbnail_url'] ?? record['avatar'] ?? record['avatar_url'] ?? record['image_url'];
+    return this.isUrl(value) ? String(value) : '';
+  }
+
+  crawlItemEntries(item: unknown): { key: string; value: unknown }[] {
+    const record = this.crawlItemRecord(item);
+    const headerKeys = new Set(['title', 'url', 'thumbnail_url', 'caption', 'description', 'type', 'media_type']);
+    return Object.entries(record)
+      .filter(([key, value]) => !headerKeys.has(key) && this.hasCrawlItemValue(value))
+      .map(([key, value]) => ({ key, value }));
+  }
+
+  crawlItemTrackKey(index: number, item: unknown): string {
+    const record = this.crawlItemRecord(item);
+    return String(record['resource_id'] ?? record['id'] ?? record['node_id'] ?? record['url'] ?? record['title'] ?? index);
+  }
+
+  shouldShowCrawlDescriptionToggle(item: unknown): boolean {
+    const caption = this.crawlItemCaption(item);
+    return caption.length > 180 || caption.split('\n').length > 3;
+  }
+
+  isCrawlDescriptionExpanded(index: number, item: unknown): boolean {
+    return this.expandedCrawlDescriptions().has(this.crawlDescriptionKey(index, item));
+  }
+
+  toggleCrawlDescription(index: number, item: unknown): void {
+    const key = this.crawlDescriptionKey(index, item);
+    this.expandedCrawlDescriptions.update(current => {
+      const next = new Set(current);
+      if (next.has(key)) {
+        next.delete(key);
+      }
+      else {
+        next.add(key);
+      }
+      return next;
+    });
   }
 
   onOnlinePresenceInput(event: Event): void {
@@ -357,6 +410,29 @@ export class SocialProfileTabsSectionComponent {
   private isProfileDateKey(key: string): boolean {
     const normalizedKey = key.replace(/^m_/i, '').replace(/[_\s-]/g, '').toLowerCase();
     return ['createdat', 'updatedat', 'date', 'datetime', 'timestamp'].includes(normalizedKey);
+  }
+
+  private crawlItemRecord(item: unknown): Record<string, unknown> {
+    return item !== null && typeof item === 'object' && !Array.isArray(item)
+      ? item as Record<string, unknown>
+      : { value: item };
+  }
+
+  private crawlDescriptionKey(index: number, item: unknown): string {
+    return `${this.activeTab()}:${this.crawlItemTrackKey(index, item)}`;
+  }
+
+  private hasCrawlItemValue(value: unknown): boolean {
+    if (value === null || value === undefined) {
+      return false;
+    }
+    if (typeof value === 'string') {
+      return value.trim().length > 0;
+    }
+    if (Array.isArray(value)) {
+      return value.length > 0;
+    }
+    return true;
   }
 
 }

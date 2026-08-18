@@ -23,6 +23,7 @@ from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
 from routes.extension_routes import extension_routes
+from routes.manage_profiles_routes import manage_profiles_routes
 from routes.geo_fencing_routes import geo_fencing_routes
 from routes.graph_routes import graph_routes
 from routes.public_api_routes import public_routes
@@ -83,6 +84,7 @@ def dashboard_admin_redirect():
 
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(extension_routes, include_in_schema=False)
+app.include_router(manage_profiles_routes, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(alert_connector_routes, include_in_schema=False)

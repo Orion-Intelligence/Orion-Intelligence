@@ -230,6 +230,11 @@ export const routes: Routes = [
         data: { animation: 'SocialMapper' }
       },
       {
+        path: 'manage-profiles',
+        loadComponent: () => import('./pages/manage-profiles/manage-profiles.component').then(m => m.ManageProfilesComponent),
+        data: { animation: 'CategoryPage' }
+      },
+      {
         path: 'ai',
         canActivate: [subscriptionGuard],
         loadComponent: loadAiWorkspaceComponent,

@@ -132,7 +132,7 @@
                   </div>
                 }
                 @for (platformData of getSidebarPlatforms(user); track getPlatformTrackKey($index, platformData); let isLast = $last) {
-                  <div data-testid="social-sidebar-platform-row" (click)="handleSidebarPlatformClick(getPlatformCardId(platformData))" [class]="highlightedNodeId() === getPlatformCardId(platformData) || isProfileOverviewActive(getPlatformCardId(platformData)) ? '!bg-[rgba(87,165,235,0.12)]' : ''" class="ui-social-sidebar-platform-row flex animate-social-sidebar-platform-row-in cursor-pointer items-center gap-2.5 rounded-[8px] px-2 py-2 [will-change:opacity,filter,transform] motion-reduce:opacity-100 motion-reduce:[filter:none] motion-reduce:transform-none motion-reduce:animate-none transition-colors hover:bg-[rgba(87,165,235,0.10)]">
+                  <div data-testid="social-sidebar-platform-row" (click)="handleSidebarPlatformClick(getPlatformCardId(platformData))" [class]="highlightedNodeId() === getPlatformCardId(platformData) || isProfileOverviewActive(getPlatformCardId(platformData)) ? '!bg-[rgba(87,165,235,0.12)]' : ''" class="ui-social-sidebar-platform-row relative flex animate-social-sidebar-platform-row-in cursor-pointer items-center gap-2.5 rounded-[8px] px-2 py-2 [will-change:opacity,filter,transform] motion-reduce:opacity-100 motion-reduce:[filter:none] motion-reduce:transform-none motion-reduce:animate-none transition-colors hover:bg-[rgba(87,165,235,0.10)]">
                     <div class="flex h-8 w-8 flex-shrink-0 items-center justify-center overflow-hidden rounded-[8px] bg-[var(--color-blue-720)] text-sm ring-1 ring-[var(--color-border)]">
                       <app-social-icon [platformName]="platformData.meta.platform"></app-social-icon>
                     </div>
@@ -147,12 +147,16 @@
                       </p>
                     </div>
                     @if (isPlatformLoading(platformData)) {
-                      <button type="button" data-testid="social-sidebar-platform-stop" (click)="$event.stopPropagation(); stopPlatformFetches(platformData)" [title]="'Stop' | translate" class="group/stop flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[var(--color-blue-640)] hover:text-red-500">
-                        <span class="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent group-hover/stop:hidden"></span>
-                        <i class="bi bi-stop-fill hidden text-sm leading-none group-hover/stop:block" aria-hidden="true"></i>
+                      <button type="button" data-testid="social-sidebar-platform-stop" (click)="$event.stopPropagation(); stopPlatformFetches(platformData)" [title]="'Stop' | translate" class="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full text-[var(--color-blue-640)] hover:text-red-500">
+                        <i class="bi bi-stop-fill text-sm leading-none" aria-hidden="true"></i>
                       </button>
                     } @else {
                       <div class="h-2 w-2 flex-shrink-0 rounded-full bg-emerald-400 shadow-[0_0_0_3px_rgba(52,211,153,0.12)]"></div>
+                    }
+                    @if (isPlatformLoading(platformData)) {
+                      <span class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 overflow-hidden rounded-b-[8px]">
+                        <span class="block h-full w-full origin-left bg-[var(--color-blue-640)] animate-[loader-indeterminate_0.7s_linear_infinite]"></span>
+                      </span>
                     }
                   </div>
                   @if (!isLast) {
@@ -164,7 +168,7 @@
           }
         </aside>
 
-        <div class="h-full min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,#000,#000_calc(100%-18px),transparent)] [mask-repeat:no-repeat] custom-scrollbar">
+        <div class="h-full min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,#000,#000_calc(100%-18px),transparent)] [mask-repeat:no-repeat] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           @if (activeUser(); as user) {
             @if (activeProfilePlatform(); as platformData) {
               @if (extensionState() === 'ready') {
@@ -207,4 +211,3 @@
     </div>
   }
 </div>
-

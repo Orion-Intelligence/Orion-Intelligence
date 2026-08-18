@@ -38,6 +38,12 @@ class CONSTANTS:
         / "resource"
         / "case_artifacts"
     )
+    S_SESSION_RESOURCE_DIR = (
+        Path(__file__).resolve().parents[2]
+        / "static"
+        / "resource"
+        / "session_data"
+    )
     S_CASE_ARTIFACT_SCREENSHOT_ALLOWED = {"image/png"}
     S_CASE_ARTIFACT_FILE_ALLOWED = {
         "application/pdf",

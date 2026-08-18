@@ -45,6 +45,9 @@
                           </button>
                         </div>
                       </div>
+                      <button data-testid="social-manage-profiles-open" type="button" (click)="openNewProfilePage()" [title]="'Manage Profiles' | translate" [attr.aria-label]="'Manage Profiles' | translate" class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-0 bg-[var(--color-blue-800)]/90 text-[var(--color-text2)] shadow-lg ring-1 ring-inset ring-[var(--color-border)] backdrop-blur-sm transition-colors hover:text-[var(--color-blue-640)] [.dark-theme_&]:!bg-[rgba(51,65,85,0.6)] [.light-theme_&]:!bg-[rgba(255,255,255,0.94)]">
+                        <i class="bi bi-gear text-base" aria-hidden="true"></i>
+                      </button>
                       @if (hasResultSourceTabs()) {
                         <div data-testid="social-result-source-tabs" class="relative inline-flex h-10 shrink-0 items-center overflow-hidden rounded-full border-2 border-white/[0.09] bg-[var(--color-blue-820-light)] px-[3px] shadow-[0_8px_18px_var(--color-shadow-light)] [body.light-theme_&]:border-[#c8d9ea]">
                           <span aria-hidden="true" class="pointer-events-none absolute left-[3px] top-1/2 h-8 w-[calc((100%-6px)/2)] -translate-y-1/2 rounded-full bg-[var(--color-blue-640)] opacity-95 transition-[transform,opacity] duration-[120ms] ease-out" [class.translate-x-full]="activeResultSource() === 'darkweb'"></span>

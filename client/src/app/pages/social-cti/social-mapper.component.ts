@@ -232,6 +232,10 @@ export class SocialMapperComponent {
     this.profileListing()?.stopUserFetches(username);
   }
 
+  openNewProfilePage(): void {
+    window.open('/dashboard/manage-profiles', '_blank', 'noopener');
+  }
+
   openDeleteConfirmation(username: string): void {
     const job = this.jobs().find(currentJob => currentJob.id === username);
     this.deleteUsername.set(username);
