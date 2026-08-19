@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
-import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { ExtensionState, SocialExtensionService } from '../../services/social-extension.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
+import { SocialExtensionService } from '../../services/social-extension.service';
+import { ExtensionState } from '../../model/extension/extension.model';
 
 @Component({
   selector: 'app-social-extension-manager',

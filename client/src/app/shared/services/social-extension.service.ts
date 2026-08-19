@@ -1,19 +1,18 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-
-export type ExtensionState = 'ready' | 'signin' | 'install';
-
-interface ExtensionPresence {
-  source?: string;
-  type?: string;
-  loggedIn?: boolean;
-}
+import { ExtensionPresence, ExtensionSession, ExtensionState } from '../model/extension/extension.model';
 
 @Injectable({ providedIn: 'root' })
 export class SocialExtensionService {
   detect(): Observable<ExtensionState> {
     return new Observable<ExtensionState>(subscriber => {
       let settled = false;
+      let installed = false;
+      let connected = false;
+      let sessionSettled = false;
+      let deadlineReached = false;
+
+      const marker = () => (typeof document !== 'undefined' ? !!document.documentElement.getAttribute('data-orion-extension') : false);
       const finish = (state: ExtensionState) => {
         if (settled) {
           return;
@@ -22,29 +21,48 @@ export class SocialExtensionService {
         subscriber.next(state);
         subscriber.complete();
       };
-      const marker = () => (typeof document !== 'undefined' ? document.documentElement.getAttribute('data-orion-extension') : null);
-
-      fetch('/api/extension/session', { credentials: 'include', cache: 'no-store' }).then(response => {
-        if (response.ok) {
-          finish('ready');
+      const resolveState = () => finish(connected ? 'ready' : installed || marker() ? 'signin' : 'install');
+      const resolveWhenProbesSettle = () => {
+        if (deadlineReached && sessionSettled) {
+          resolveState();
         }
-      }).catch(() => void 0);
+      };
+
+      fetch('/api/extension/session', { credentials: 'include', cache: 'no-store' })
+        .then(response => (response.ok ? response.json() : null))
+        .then((body: ExtensionSession | null) => {
+          connected = body?.extension_connected === true;
+          if (connected) {
+            resolveState();
+          }
+        })
+        .catch(() => void 0)
+        .finally(() => {
+          sessionSettled = true;
+          resolveWhenProbesSettle();
+        });
 
       const onMessage = (event: MessageEvent) => {
         const data = event.data as ExtensionPresence;
         if (event.source !== window || !data || data.source !== 'orion-extension' || data.type !== 'presence') {
           return;
         }
-        finish(data.loggedIn ? 'ready' : 'signin');
+        installed = true;
+        resolveWhenProbesSettle();
       };
 
       window.addEventListener('message', onMessage);
       window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
-      const timer = setTimeout(() => finish(marker() ? 'signin' : 'install'), 2000);
+      const presenceTimer = setTimeout(() => {
+        deadlineReached = true;
+        resolveWhenProbesSettle();
+      }, 2000);
+      const hardTimer = setTimeout(resolveState, 3000);
 
       return () => {
         window.removeEventListener('message', onMessage);
-        clearTimeout(timer);
+        clearTimeout(presenceTimer);
+        clearTimeout(hardTimer);
       };
     });
   }

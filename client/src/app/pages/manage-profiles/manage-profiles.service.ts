@@ -1,50 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, filter, map, of, switchMap, take, timer } from 'rxjs';
-import { ExtensionPresence, PlatformEntry, SessionEntry } from './model/manage-profiles.model';
+import { PlatformEntry, SessionEntry } from './model/manage-profiles.model';
+import { SocialExtensionService } from '../../shared/services/social-extension.service';
 
 export type ManageProfilesExtensionState = 'ready' | 'signin' | 'install';
 
 @Injectable({ providedIn: 'root' })
 export class ManageProfilesService {
   private readonly http = inject(HttpClient);
+  private readonly extension = inject(SocialExtensionService);
 
   detectExtension(): Observable<ManageProfilesExtensionState> {
-    return new Observable<ManageProfilesExtensionState>(subscriber => {
-      let settled = false;
-      const finish = (state: ManageProfilesExtensionState) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        subscriber.next(state);
-        subscriber.complete();
-      };
-      const marker = () => (typeof document !== 'undefined' ? document.documentElement.getAttribute('data-orion-extension') : null);
-
-      fetch('/api/extension/session', { credentials: 'include', cache: 'no-store' }).then(response => {
-        if (response.ok) {
-          finish('ready');
-        }
-      }).catch(() => void 0);
-
-      const onMessage = (event: MessageEvent) => {
-        const data = event.data as ExtensionPresence;
-        if (event.source !== window || !data || data.source !== 'orion-extension' || data.type !== 'presence') {
-          return;
-        }
-        finish(data.loggedIn ? 'ready' : 'signin');
-      };
-
-      window.addEventListener('message', onMessage);
-      window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
-      const timerId = setTimeout(() => finish(marker() ? 'signin' : 'install'), 2000);
-
-      return () => {
-        window.removeEventListener('message', onMessage);
-        clearTimeout(timerId);
-      };
-    });
+    return this.extension.detect();
   }
 
   fetchPlatforms(): Observable<{ items: PlatformEntry[]; error?: string }> {

@@ -23,6 +23,10 @@ export class SocialFetchService {
       catchError(() => of<{ items?: unknown[]; error?: string; idle?: boolean }>({ items: [], error: 'crawl_failed' })));
   }
 
+  cancelProfileCrawl(platform: string, username: string, type: string): Observable<unknown> {
+    return this.api.post('social/profile', { platform, username, url: '', type, command: 'cancel' }).pipe(catchError(() => of(null)));
+  }
+
   fetchStealerLogsByIdentity(query: string): Observable<social_stealer_log[]> {
     const payload = { daterange: '', q: '', url: '', user: query, ioc: `m_search_all:${query}`, type: 'c', page: 1, category: '', fullsearch: false };
     return this.api.post<any>('search/stealer/ioc', payload).pipe(map(response => response?.Result ?? response?.result?.Result ?? response?.data?.Result ?? []),

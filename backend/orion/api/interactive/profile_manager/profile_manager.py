@@ -44,7 +44,7 @@ class ProfileManager:
             return {"status": "pending"}
 
         manager = extension_socket_manager.get_instance()
-        reply = manager.take_result(user_key, PLATFORMS_RESULT_KEY)
+        reply = await manager.take_result(user_key, PLATFORMS_RESULT_KEY)
         if reply is None:
             await manager.fire(user_key, {"command": "platforms", "type": PLATFORMS_RESULT_KEY})
             return {"status": "pending"}
@@ -63,7 +63,7 @@ class ProfileManager:
         result_key = f"session:{platform}"
 
         manager = extension_socket_manager.get_instance()
-        reply = manager.take_result(user_key, result_key)
+        reply = await manager.take_result(user_key, result_key)
         if reply is None:
             existing = await self._engine.count(db_social_session_model, {"user_id": user_key, "platform": safe_platform})
             if existing >= MAX_SESSIONS_PER_PLATFORM:

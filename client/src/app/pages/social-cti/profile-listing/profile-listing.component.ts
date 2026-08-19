@@ -3,7 +3,7 @@ import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, timer } from 'rxjs';
-import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
+import { exhaustMap, filter, map, takeUntil } from 'rxjs/operators';
 import type { social_profile, social_resource } from '../models/social.models';
 import { formatFollowers } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
@@ -15,12 +15,13 @@ import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-sec
 import { WantedListSectionComponent } from '../wanted-list-section/wanted-list-section.component';
 import type { FetchStateKey, FetchTabKey, SocialResultSource } from '../enums/social-graph.enums';
 import type { FeedUser, FetchTab } from '../models/social-usability.models';
+import type { ExtensionState } from '../../../shared/model/extension/extension.model';
 import { toUsername } from '../utils/username.util';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { SocialDefaultListSectionComponent } from './default-list-section.component';
 import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tabs-section/profile-tabs-section.component';
-import { SocialExtensionManagerComponent } from '../profile-detail/extension-manager/extension-manager.component';
-import { ExtensionState, SocialExtensionService } from '../services/social-extension.service';
+import { SocialExtensionManagerComponent } from '../../../shared/partials/extension-manager/extension-manager.component';
+import { SocialExtensionService } from '../../../shared/services/social-extension.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
@@ -46,12 +47,12 @@ export class SocialProfileListingComponent {
   private readonly fetchCancelSubjects = new Map<string, Subject<void>>();
   private appliedProfileQuery = signal(false);
   private readonly loadingByRequestKey = signal<Record<string, boolean>>({});
-  private readonly loadingUsernames = computed(() => {
-    const usernames = new Set<string>();
+  private readonly loadingPlatformIds = computed(() => {
+    const platformIds = new Set<string>();
     const addFrom = (key: string) => {
-      const username = key.match(/^(?:[^:]*:)?platform-(.+?)\|/)?.[1];
-      if (username) {
-        usernames.add(username);
+      const platformId = key.match(/^(?:[^:]*:)?(platform-[^:]+)/)?.[1];
+      if (platformId) {
+        platformIds.add(platformId);
       }
     };
     for (const [key, state] of Object.entries(this.crawlResults())) {
@@ -64,13 +65,27 @@ export class SocialProfileListingComponent {
         addFrom(key);
       }
     }
+    for (const [, profiles] of this.storageService.state.scanResults()) {
+      for (const platform of profiles) {
+        if (Object.values(platform.section_status ?? {}).some(status => status === 'fetching')) {
+          platformIds.add(this.getPlatformCardId(platform));
+        }
+      }
+    }
+    return platformIds;
+  });
+  private readonly loadingUsernames = computed(() => {
+    const usernames = new Set<string>();
+    for (const platformId of this.loadingPlatformIds()) {
+      const username = platformId.match(/^platform-(.+?)\|/)?.[1];
+      if (username) {
+        usernames.add(username);
+      }
+    }
     for (const [username, profiles] of this.storageService.state.scanResults()) {
       for (const platform of profiles) {
         if (Object.values(platform.section_status ?? {}).some(status => status === 'fetching')) {
           usernames.add(username);
-          if (platform.meta?.username) {
-            usernames.add(platform.meta.username);
-          }
         }
       }
     }
@@ -129,6 +144,7 @@ export class SocialProfileListingComponent {
     });
     effect(() => {
       this.storageService.state.scanResults();
+      this.extensionState();
       queueMicrotask(() => this.resumeInFlightSections());
     });
     effect(() => {
@@ -193,6 +209,9 @@ export class SocialProfileListingComponent {
   }
 
   private fetchCrawlType(platformData: social_profile, type: FetchTabKey, force = false): void {
+    if (!this.isExtensionReady()) {
+      return;
+    }
     const key = this.crawlKey(platformData, type);
     if (this.crawlResults()[key]?.loading) {
       return;
@@ -209,11 +228,14 @@ export class SocialProfileListingComponent {
     this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, command).pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe(result => {
       this.fetchCancelSubjects.delete(key);
       this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: result.error } }));
-      if (!result.error && result.items) {
-        this.setFetchedResourceCollection(platformData, type, result.items as social_resource[]);
+      if (result.idle || result.error) {
+        if (command === 'crawl') {
+          this.setSectionStatus(platformData, type, 'failed');
+        }
+        return;
       }
-      else if (result.error) {
-        this.setSectionStatus(platformData, type, 'failed');
+      if (result.items) {
+        this.setFetchedResourceCollection(platformData, type, result.items as social_resource[]);
       }
     });
   }
@@ -225,6 +247,7 @@ export class SocialProfileListingComponent {
         cancel$.next();
         cancel$.complete();
         this.fetchCancelSubjects.delete(key);
+        this.cancelServerCrawl(platformData, key);
       }
     }
     this.crawlResults.update(current => {
@@ -252,6 +275,23 @@ export class SocialProfileListingComponent {
     for (const platform of this.storageService.state.scanResults().get(username) ?? []) {
       this.stopPlatformFetches(platform);
     }
+  }
+
+  private cancelServerCrawl(platformData: social_profile, key: string): void {
+    const crawlType = this.crawlTypeForCancelKey(key);
+    if (!crawlType) {
+      return;
+    }
+    this.fetchService.cancelProfileCrawl(platformData.meta.platform, platformData.meta.username, crawlType)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe();
+  }
+
+  private crawlTypeForCancelKey(key: string): string | null {
+    if (key.startsWith('platform-')) {
+      return key.slice(key.lastIndexOf(':') + 1) || null;
+    }
+    return key.slice(0, key.indexOf(':')) === 'profile' ? 'details' : null;
   }
 
   private clearFetchingStatus(platformData: social_profile): void {
@@ -312,7 +352,7 @@ export class SocialProfileListingComponent {
   }
 
   isPlatformLoading(platformData: social_profile): boolean {
-    return this.loadingUsernames().has(platformData.meta.username);
+    return this.loadingPlatformIds().has(this.getPlatformCardId(platformData));
   }
 
   isTabLoading(platformData: social_profile, tabKey: FetchTabKey): boolean {
@@ -334,7 +374,7 @@ export class SocialProfileListingComponent {
   }
 
   private startExtensionHeartbeat(): void {
-    timer(0, 3000).pipe(switchMap(() => this.extensionService.detect()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
+    timer(0, 3000).pipe(exhaustMap(() => this.extensionService.detect()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
       this.extensionState.set(state);
 
       if (state === 'signin' && !this.extensionOpened) {
@@ -455,10 +495,17 @@ export class SocialProfileListingComponent {
     this.fetchOnlinePresence(platformData, this.getOnlinePresenceSearchTerm(platformData).trim());
   }
 
+  isExtensionReady(): boolean {
+    return this.extensionState() === 'ready';
+  }
+
   private fetchProfileDetails(platformData: social_profile): void {
+    if (!this.isExtensionReady()) {
+      return;
+    }
     this.cancelFetch(platformData, 'profile');
     const profileUrl = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
-    this.fetchData(platformData, 'profile', this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, profileUrl, 'details').pipe(filter(result => (result.items?.length ?? 0) > 0 && !!result.items?.[0] && Object.keys(result.items[0] as object).length > 0), map(result => ({ profile: (result.items ?? [])[0] as Record<string, unknown> }))));
+    this.fetchData(platformData, 'profile', this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, profileUrl, 'details').pipe(filter(result => !!result.idle || !!result.error || ((result.items?.length ?? 0) > 0 && !!result.items?.[0] && Object.keys(result.items[0] as object).length > 0)), map(result => (result.idle || result.error) ? { failed: true } : { profile: (result.items ?? [])[0] as Record<string, unknown> })));
   }
 
   private fetchOnlinePresence(platformData: social_profile, token: string): void {
@@ -489,13 +536,20 @@ export class SocialProfileListingComponent {
     this.setLoading(requestKey, true);
     const section = this.sectionOf(stateKey);
     this.setSectionStatus(platformResult, section, 'fetching');
+    let failed = false;
     request$.pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: response => this.setFetchedPlatformData(platformResult, stateKey, response),
+      next: response => {
+        if ((response as { failed?: boolean } | null)?.failed) {
+          failed = true;
+          return;
+        }
+        this.setFetchedPlatformData(platformResult, stateKey, response);
+      },
       error: () => {
         this.setSectionStatus(platformResult, section, 'failed'); this.finishFetch(requestKey); 
       },
       complete: () => {
-        this.setSectionStatus(platformResult, section, 'completed'); this.finishFetch(requestKey); 
+        this.setSectionStatus(platformResult, section, failed ? 'failed' : 'completed'); this.finishFetch(requestKey); 
       },
     });
   }
@@ -564,6 +618,10 @@ export class SocialProfileListingComponent {
   }
 
   private resumeInFlightSections(): void {
+    if (!this.isExtensionReady()) {
+      return;
+    }
+    this.loadOpenProfileOnceReady();
     for (const [, profiles] of this.storageService.state.scanResults()) {
       for (const platform of profiles) {
         for (const [section, status] of Object.entries(platform.section_status ?? {})) {
@@ -573,6 +631,17 @@ export class SocialProfileListingComponent {
         }
       }
     }
+  }
+
+  private loadOpenProfileOnceReady(): void {
+    const platformData = this.activeProfilePlatform();
+    if (!platformData || platformData.profile_details?.is_parsed === true) {
+      return;
+    }
+    if (this.isTabLoading(platformData, 'details') || (platformData.section_status ?? {})['details'] === 'failed') {
+      return;
+    }
+    this.fetchProfileDetails(platformData);
   }
 
   private getPlatformDomain(platformData: social_profile): string {

@@ -32,7 +32,7 @@
         }
       </div>
     } @else if (state() !== 'ready') {
-      <app-extension-required [mode]="state()!"></app-extension-required>
+      <app-social-extension-manager [mode]="state()!"></app-social-extension-manager>
     } @else if (error()) {
       <div class="rounded-xl border border-red-400/15 bg-red-500/[0.04] p-6 text-center text-sm text-[var(--color-text3)]">{{ 'Unable to load platforms. Try again.' | translate }}</div>
     } @else {

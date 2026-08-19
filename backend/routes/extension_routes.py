@@ -81,6 +81,7 @@ async def extension_session(current_user=Depends(get_extension_user), redis_stor
         "username": getattr(current_user, "username", ""),
         "detail": "Active",
         "system_connected": await system_session_active(current_user, redis_store),
+        "extension_connected": await extension_socket_manager.get_instance().has_live_socket(str(current_user.id)),
     }
 
 
@@ -139,7 +140,7 @@ async def extension_socket(websocket: WebSocket):
 
     socket_manager = extension_socket_manager.get_instance()
     await websocket.accept()
-    socket_manager.register(user_key, websocket)
+    socket_id = await socket_manager.register(user_key, websocket)
 
     try:
         await websocket.send_json({"detail": "Connected"})
@@ -150,15 +151,20 @@ async def extension_socket(websocket: WebSocket):
                 if await socket_user_key(token) != user_key:
                     await websocket.close()
                     return
+                await socket_manager.touch_socket(user_key, socket_id)
                 continue
 
             try:
                 payload = json.loads(text)
             except (json.JSONDecodeError, TypeError):
                 continue
+            await socket_manager.touch_socket(user_key, socket_id)
             if isinstance(payload, dict) and payload.get("request_id"):
-                socket_manager.resolve(payload["request_id"], payload)
+                if payload.get("ack"):
+                    await socket_manager.acknowledge(payload["request_id"])
+                else:
+                    await socket_manager.resolve(payload["request_id"], payload)
     except WebSocketDisconnect:
         return
     finally:
-        socket_manager.unregister(user_key, websocket)
+        await socket_manager.unregister(user_key, websocket, socket_id)

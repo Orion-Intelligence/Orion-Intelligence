@@ -4,8 +4,10 @@ from types import SimpleNamespace
 
 import pytest
 from starlette.requests import Request
+from starlette.websockets import WebSocketState
 
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
+from orion.api.interactive.extension_manager.extension_socket_store import ExtensionSocketStore
 from routes import auth_routes
 
 
@@ -78,6 +80,8 @@ async def test_logout_disconnects_extension_sockets_before_invalidating_session(
 @pytest.mark.anyio
 async def test_socket_manager_disconnect_closes_all_user_sockets_and_forgets_them():
     class _FakeWebSocket:
+        application_state = WebSocketState.CONNECTED
+
         def __init__(self, *, close_error: bool = False):
             self.close_error = close_error
             self.close_calls = 0
@@ -89,13 +93,15 @@ async def test_socket_manager_disconnect_closes_all_user_sockets_and_forgets_the
 
     manager = object.__new__(extension_socket_manager)
     manager._sockets = {}
+    manager._store = ExtensionSocketStore()
+    manager._started = True
     first = _FakeWebSocket()
     already_closed = _FakeWebSocket(close_error=True)
     other_user = _FakeWebSocket()
 
-    manager.register("user-42", first)
-    manager.register("user-42", already_closed)
-    manager.register("other-user", other_user)
+    await manager.register("user-42", first)
+    await manager.register("user-42", already_closed)
+    await manager.register("other-user", other_user)
 
     await manager.disconnect("user-42")
 

@@ -3,12 +3,15 @@ import json
 import threading
 import uuid
 
-import redis.asyncio as redis
 from starlette.websockets import WebSocket, WebSocketState
 
-from orion.services.redis_manager.redis_enums import REDIS_CONNECTIONS
-
-BUS_CHANNEL = "orion_ext_socket_bus"
+from orion.api.interactive.extension_manager.constants.constant import (
+    BUS_CHANNEL,
+    COMPLETION_TIMEOUT_SECONDS,
+    EXTENSION_TIMEOUT_ERROR,
+    RESPONSE_TIMEOUT_SECONDS,
+)
+from orion.api.interactive.extension_manager.extension_socket_store import ExtensionSocketStore
 
 
 class extension_socket_manager:
@@ -28,12 +31,8 @@ class extension_socket_manager:
             raise Exception("This class is a singleton!")
         extension_socket_manager.__instance = self
         self._sockets: dict[str, set[WebSocket]] = {}
-        self._routed: dict[str, str] = {}
-        self._results: dict[str, dict] = {}
-        self._inflight: set[str] = set()
-        self._req_key: dict[str, str] = {}
-        self._worker_id = uuid.uuid4().hex
-        self._redis: redis.Redis | None = None
+        self._store = ExtensionSocketStore()
+        self._watchers: set[asyncio.Task] = set()
         self._listener: asyncio.Task | None = None
         self._started = False
         self._start_lock = asyncio.Lock()
@@ -45,77 +44,128 @@ class extension_socket_manager:
             if self._started:
                 return
             try:
-                self._redis = redis.Redis(
-                    host=REDIS_CONNECTIONS.S_DATABASE_IP,
-                    port=REDIS_CONNECTIONS.S_DATABASE_PORT,
-                    password=REDIS_CONNECTIONS.S_DATABASE_PASSWORD,
-                    decode_responses=True)
+                self._store.connect()
                 self._listener = asyncio.create_task(self._listen())
                 self._started = True
             except Exception as exc:
                 print(f"[EXT-BUS] start failed: {exc}", flush=True)
-                self._redis = None
+                self._store.disable_redis()
 
-    def register(self, user_key: str, websocket: WebSocket) -> None:
-        self._sockets.setdefault(user_key, set()).add(websocket)
-        self._inflight = {key for key in self._inflight if not key.startswith(f"{user_key}:")}
-        try:
-            asyncio.create_task(self.ensure_started())
-        except RuntimeError:
-            pass
+    async def acknowledge(self, request_id: str) -> None:
+        await self._store.acknowledge(request_id)
 
-    def take_result(self, user_key: str, crawl_type: str) -> dict | None:
-        return self._results.pop(f"{user_key}:{crawl_type}", None)
+    async def touch_socket(self, user_key: str, socket_id: str) -> None:
+        await self._store.touch_socket(user_key, socket_id)
 
-    def is_inflight(self, user_key: str, crawl_type: str) -> bool:
-        return f"{user_key}:{crawl_type}" in self._inflight
+    async def has_live_socket(self, user_key: str) -> bool:
+        if self._live_sockets(user_key):
+            return True
+        return await self._store.has_socket(user_key)
 
-    async def fire(self, user_key: str, payload: dict) -> None:
-        """Send a crawl to the user's live sockets and return immediately; the reply is stored for polling."""
+    async def register(self, user_key: str, websocket: WebSocket) -> str:
         await self.ensure_started()
-        result_key = f"{user_key}:{payload.get('type')}"
-        if result_key in self._inflight:
+        had_live_socket = await self.has_live_socket(user_key)
+        socket_id = uuid.uuid4().hex
+        self._sockets.setdefault(user_key, set()).add(websocket)
+        await self.touch_socket(user_key, socket_id)
+        if not had_live_socket:
+            await self._store.clear_inflight_for_user(user_key)
+        return socket_id
+
+    async def unregister(self, user_key: str, websocket: WebSocket, socket_id: str | None = None) -> None:
+        if socket_id:
+            await self._store.drop_socket(user_key, socket_id)
+        sockets = self._sockets.get(user_key)
+        if not sockets:
             return
-        request_id = uuid.uuid4().hex
-        self._req_key[request_id] = result_key
+        sockets.discard(websocket)
+        if not sockets:
+            self._sockets.pop(user_key, None)
+
+    def _spawn_watch(self, request_id: str, user_key: str, timeout: float, can_extend: bool) -> None:
+        try:
+            task = asyncio.create_task(self._watch_request(request_id, user_key, timeout, can_extend))
+        except RuntimeError:
+            return
+        self._watchers.add(task)
+        task.add_done_callback(self._watchers.discard)
+
+    async def _watch_request(self, request_id: str, user_key: str, timeout: float, can_extend: bool) -> None:
+        await asyncio.sleep(timeout)
+        if not await self._store.request_outstanding(request_id):
+            return
+        if can_extend and await self._store.take_ack(request_id):
+            self._spawn_watch(request_id, user_key, COMPLETION_TIMEOUT_SECONDS, False)
+            return
+        result_key = await self._store.pop_request(request_id)
+        if result_key is None:
+            return
+        await self._store.put_result(result_key, {"error": EXTENSION_TIMEOUT_ERROR, "implemented": False, "items": []})
+        await self._store.release_inflight(result_key)
+        await self.reset_sockets(user_key)
+
+    async def reset_sockets(self, user_key: str) -> None:
+        await self._close_local_sockets(user_key)
+        await self._store.reset_sockets(user_key)
+
+    async def _close_local_sockets(self, user_key: str) -> None:
+        for websocket in self._sockets.pop(user_key, set()):
+            try:
+                await websocket.close()
+            except Exception:
+                continue
+
+    async def cancel(self, user_key: str, result_scope: str) -> None:
+        result_key = f"{user_key}:{result_scope}"
+        await self._store.invalidate_request_for_scope(result_key)
+        await self._store.drop_result(result_key)
+        await self._store.release_inflight(result_key)
+
+    async def take_result(self, user_key: str, result_scope: str) -> dict | None:
+        return await self._store.pop_result(f"{user_key}:{result_scope}")
+
+    async def is_inflight(self, user_key: str, result_scope: str) -> bool:
+        return await self._store.is_inflight(f"{user_key}:{result_scope}")
+
+    async def fire(self, user_key: str, payload: dict, result_scope: str | None = None) -> None:
+        await self.ensure_started()
+        scope = result_scope or payload.get("type")
+        if not isinstance(scope, str) or not scope:
+            return
+        result_key = f"{user_key}:{scope}"
+        if not await self._store.claim_inflight(result_key):
+            return
+
         sockets = self._live_sockets(user_key)
+        if not sockets and not await self.has_live_socket(user_key):
+            await self._store.release_inflight(result_key)
+            return
+
+        request_id = uuid.uuid4().hex
+        await self._store.put_request(request_id, result_key)
         if sockets:
-            self._inflight.add(result_key)
-            self._routed[request_id] = self._worker_id
             for websocket in sockets:
                 try:
                     await websocket.send_json({**payload, "request_id": request_id})
                 except Exception:
                     continue
-        elif self._redis is not None:
-            self._inflight.add(result_key)
-            await self._redis.publish(BUS_CHANNEL, json.dumps(
-                {"kind": "request", "user_key": user_key, "request_id": request_id, "origin": self._worker_id, "payload": payload}))
-        else:
-            self._req_key.pop(request_id, None)
-
-    def _store_result(self, request_id: str, payload: dict) -> None:
-        result_key = self._req_key.pop(request_id, None)
-        if result_key is not None:
-            self._results[result_key] = payload
-            self._inflight.discard(result_key)
-
-    def resolve(self, request_id: str, payload: dict) -> None:
-        self._store_result(request_id, payload)
-        origin = self._routed.pop(request_id, None)
-        if origin is not None and origin != self._worker_id and self._redis is not None:
-            asyncio.create_task(self._redis.publish(BUS_CHANNEL, json.dumps(
-                {"kind": "reply", "request_id": request_id, "origin": origin, "payload": payload})))
+            self._spawn_watch(request_id, user_key, RESPONSE_TIMEOUT_SECONDS, True)
             return
-
-    def unregister(self, user_key: str, websocket: WebSocket) -> None:
-        sockets = self._sockets.get(user_key)
-        if not sockets:
+        redis_client = self._store.redis
+        if redis_client is not None:
+            await redis_client.publish(BUS_CHANNEL, json.dumps(
+                {"kind": "request", "user_key": user_key, "request_id": request_id, "payload": payload}))
+            self._spawn_watch(request_id, user_key, RESPONSE_TIMEOUT_SECONDS, True)
             return
+        await self._store.pop_request(request_id)
+        await self._store.release_inflight(result_key)
 
-        sockets.discard(websocket)
-        if not sockets:
-            self._sockets.pop(user_key, None)
+    async def resolve(self, request_id: str, payload: dict) -> None:
+        result_key = await self._store.pop_request(request_id)
+        if result_key is None:
+            return
+        await self._store.put_result(result_key, payload)
+        await self._store.release_inflight(result_key)
 
     async def disconnect(self, user_key: str) -> None:
         for websocket in self._sockets.pop(user_key, set()):
@@ -138,7 +188,10 @@ class extension_socket_manager:
 
     async def _listen(self) -> None:
         try:
-            pubsub = self._redis.pubsub()
+            redis_client = self._store.redis
+            if redis_client is None:
+                return
+            pubsub = redis_client.pubsub()
             await pubsub.subscribe(BUS_CHANNEL)
             async for message in pubsub.listen():
                 if message.get("type") != "message":
@@ -157,18 +210,20 @@ class extension_socket_manager:
 
     async def _on_bus(self, data: dict) -> None:
         kind = data.get("kind")
-        if kind == "request":
-            sockets = self._live_sockets(data.get("user_key"))
-            if not sockets:
-                return
-            request_id = data.get("request_id")
-            self._routed[request_id] = data.get("origin")
-            for websocket in sockets:
-                try:
-                    await websocket.send_json({**(data.get("payload") or {}), "request_id": request_id})
-                except Exception:
-                    continue
-        elif kind == "reply":
-            if data.get("origin") != self._worker_id:
-                return
-            self._store_result(data.get("request_id"), data.get("payload"))
+        user_key = data.get("user_key")
+        if not isinstance(user_key, str):
+            return
+        if kind == "reset":
+            await self._close_local_sockets(user_key)
+            return
+        if kind != "request":
+            return
+        sockets = self._live_sockets(user_key)
+        if not sockets:
+            return
+        request_id = data.get("request_id")
+        for websocket in sockets:
+            try:
+                await websocket.send_json({**(data.get("payload") or {}), "request_id": request_id})
+            except Exception:
+                continue

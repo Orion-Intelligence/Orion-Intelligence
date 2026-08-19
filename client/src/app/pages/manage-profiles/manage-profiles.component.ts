@@ -4,13 +4,13 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ManageProfilesExtensionState, ManageProfilesService } from './manage-profiles.service';
 import { PlatformEntry, SessionEntry } from './model/manage-profiles.model';
-import { ExtensionRequiredComponent } from '../../shared/partials/extension-required/extension-required.component';
+import { SocialExtensionManagerComponent } from '../../shared/partials/extension-manager/extension-manager.component';
 import { SocialIconComponent } from '../../shared/partials/social-icon/social-icon.component';
 
 @Component({
   selector: 'app-manage-profiles',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, ExtensionRequiredComponent, SocialIconComponent],
+  imports: [DatePipe, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './manage-profiles.component.html',
 })
