@@ -2,7 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { UiDropdownComponent, UiDropdownOption } from '../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { SocialPersona, SocialPlatform, SocialProfile } from '../../../shared/model/profile/social-profile-management.model';

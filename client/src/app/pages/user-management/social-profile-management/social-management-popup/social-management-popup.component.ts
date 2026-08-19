@@ -1,7 +1,7 @@
 import { Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { SocialAgeGroup, SocialGender, SocialPersona, SocialPersonaCreateRequest, SocialPlatform } from '../../../../shared/model/profile/social-profile-management.model';
 import { SocialProfileManagementService } from '../social-profile-management.service';
