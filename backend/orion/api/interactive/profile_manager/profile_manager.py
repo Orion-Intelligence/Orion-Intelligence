@@ -353,13 +353,6 @@ class ProfileManager:
             raise
         return record
 
-    # async def _find_social_record(self, current_user) -> db_social_profile_management_model | None:
-    #     user_id = str(current_user.id)
-    #     return await self._engine.find_one(
-    #         db_social_profile_management_model,
-    #         db_social_profile_management_model.user_id == user_id,
-    #     )
-
     async def _validate_profile_session(self, current_user, record: db_social_profile_management_model, platform: str, session_id: str | None, ignored_profile_id: str = "") -> None:
         if not session_id:
             raise HTTPException(status_code=400, detail="Session is required")
