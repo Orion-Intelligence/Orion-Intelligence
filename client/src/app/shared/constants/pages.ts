@@ -79,6 +79,7 @@ export enum ProfileSubCategory {
     LOG_MANAGER = 'Log-Manager',
     FEEDER = 'Feeder',
     IOC = 'IOC',
+    SOCIAL_PROFILE_MANAGEMENT = 'Social-Profile-Management',
     TENANT_SETTINGS = 'Tenant-Settings',
     ACCOUNT = 'Account',
     USERS = 'Users',
