@@ -8,7 +8,7 @@ from orion.services.mongo_manager.shared_model.db_social_profile_management_mode
     SocialPersonaGender,
     SocialProfileAssignmentStatus,
     SocialProfileConnectionStatus,
-    SocialProfilePlatform,
+    SocialProfilePurpose,
 )
 
 
@@ -48,22 +48,28 @@ class SocialPersonaListResponse(BaseModel):
 
 
 class SocialProfileConnectRequest(BaseModel):
-    platform: SocialProfilePlatform
+    platform: str
+    session_id: str | None = None
     profile_name: str | None = None
     profile_username: str | None = None
+    purposes: List[SocialProfilePurpose] = Field(default_factory=list)
 
 
 class SocialProfileUpdateRequest(BaseModel):
     profile_name: str | None = None
     profile_username: str | None = None
     connection_status: SocialProfileConnectionStatus | None = None
+    session_id: str | None = None
+    purposes: List[SocialProfilePurpose] | None = None
 
 
 class SocialProfileResponse(BaseModel):
     profile_id: str
-    platform: SocialProfilePlatform
+    platform: str
     profile_name: str | None = None
     profile_username: str | None = None
+    session_id: str | None = None
+    purposes: List[SocialProfilePurpose] = Field(default_factory=list)
     assigned_persona_id: str | None = None
     connection_status: SocialProfileConnectionStatus
     assignment_status: SocialProfileAssignmentStatus
@@ -90,7 +96,7 @@ class SocialProfileAssignmentResponse(BaseModel):
 
 class SocialProfileCallbackRequest(BaseModel):
     profile_id: str
-    platform: SocialProfilePlatform
+    platform: str
     payload: Dict[str, Any] | None = None
 
 

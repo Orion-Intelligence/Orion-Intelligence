@@ -80,7 +80,7 @@ class mongo_controller:
         await self.__engine.get_collection(db_social_session_model).create_index([("user_id", 1), ("platform", 1), ("created_at", -1)])
 # =======
         # await self.__engine.get_collection(db_social_model).create_index([("user_id", 1), ("profile_username", 1), ("updated_at", -1)])
-        await self.__engine.get_collection(db_social_profile_management_model).create_index([("user_id", 1), ("tenant_id", 1)], unique=True, name="unique_social_profile_management_scope")
+        self.__engine.get_collection(db_social_profile_management_model).create_index([("user_id", 1)], unique=True)
 # >>>>>>> social_profile_management
         await self.__engine.get_collection(db_alert_connector_model).create_index([("connector_type", 1), ("provider", 1), ("tenant_id", 1)], unique=True, name="unique_alert_connector_scope")
         feeder_collection = self.__engine.get_collection(db_feeder_script_model)

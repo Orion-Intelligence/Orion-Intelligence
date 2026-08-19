@@ -11,11 +11,6 @@ def utc_now() -> datetime:
     return datetime.now(UTC)
 
 
-class SocialProfilePlatform(str, Enum):
-    FACEBOOK = "facebook"
-    X = "x"
-
-
 class SocialPersonaAgeGroup(str, Enum):
     AGE_13_17 = "13-17"
     AGE_18_24 = "18-24"
@@ -44,6 +39,12 @@ class SocialProfileAssignmentStatus(str, Enum):
     UNASSIGNED = "unassigned"
 
 
+class SocialProfilePurpose(str, Enum):
+    POSTING = "posting"
+    AD_MONITORING = "ad_monitoring"
+    HATE_SPEECH_MONITORING = "hate_speech_monitoring"
+
+
 class SocialPersona(EmbeddedModel):
     persona_id: str = Field(index=True)
     name: str
@@ -59,9 +60,11 @@ class SocialPersona(EmbeddedModel):
 
 class ManagedSocialProfile(EmbeddedModel):
     profile_id: str = Field(index=True)
-    platform: SocialProfilePlatform
+    platform: str
     profile_name: str | None = None
     profile_username: str | None = None
+    session_id: str | None = None
+    purposes: List[SocialProfilePurpose] = Field(default_factory=list)
     assigned_persona_id: str | None = None
     connection_status: SocialProfileConnectionStatus = SocialProfileConnectionStatus.PENDING
     assignment_status: SocialProfileAssignmentStatus = SocialProfileAssignmentStatus.UNASSIGNED
@@ -73,7 +76,6 @@ class ManagedSocialProfile(EmbeddedModel):
 
 class db_social_profile_management_model(Model):
     user_id: str = Field(index=True)
-    tenant_id: str | None = Field(default=None, index=True)
     personas: List[SocialPersona] = Field(default_factory=list)
     profiles: List[ManagedSocialProfile] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
