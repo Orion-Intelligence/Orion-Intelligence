@@ -1,6 +1,6 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
 import { Job, db_social_model, social_exposure_signals, social_phone_lookup, social_profile, social_profile_config, social_wanted } from '../models/social.models';
 import { ApiEnvelope, social_state } from '../models/social-usability.models';
@@ -87,6 +87,14 @@ export class SocialStorageService {
     return this.saveProfileData(username, profile => profile.wanted_query !== null && profile.wanted_query !== undefined, profile => ({ ...profile, wanted_query: query, wanted: records }));
   }
 
+  clearPhoneLookup(username: string): Observable<unknown> {
+    return this.saveProfileData(username, profile => !!profile.phone_lookup, profile => ({ ...profile, phone_lookup: null }));
+  }
+
+  clearWantedList(username: string): Observable<unknown> {
+    return this.saveProfileData(username, profile => (profile.wanted_query !== null && profile.wanted_query !== undefined) || !!profile.wanted?.length, profile => ({ ...profile, wanted_query: null, wanted: [] }));
+  }
+
   private saveProfileData(username: string, matches: (profile: social_profile) => boolean, update: (profile: social_profile) => social_profile): Observable<unknown> {
     const storedUsername = Array.from(this.state.scanResults().keys()).find(key => key.toLowerCase() === username.toLowerCase()) ?? username;
     const profiles = this.state.scanResults().get(storedUsername) ?? [];
@@ -97,7 +105,12 @@ export class SocialStorageService {
     const targetIndex = matchingIndex >= 0 ? matchingIndex : 0;
     const updatedProfiles = profiles.map((profile, index) => index === targetIndex ? update(profile) : profile);
     this.state.scanResults.update(results => new Map(results).set(storedUsername, updatedProfiles));
-    return this.saveProfiles(storedUsername, updatedProfiles, true);
+    return this.saveProfiles(storedUsername, updatedProfiles, true).pipe(catchError(error => {
+      this.state.scanResults.update(results => results.get(storedUsername) === updatedProfiles
+        ? new Map(results).set(storedUsername, profiles)
+        : results);
+      return throwError(() => error);
+    }));
   }
 
   deleteProfiles(username: string): Observable<unknown> {

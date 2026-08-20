@@ -20,18 +20,21 @@ export class WantedListSectionComponent implements OnDestroy {
   private requestId = 0;
   private activeProfileKey = '';
   private subscription: Subscription | null = null;
+  private persistenceSubscription: Subscription | null = null;
 
   username = input.required<string>();
   platforms = input<social_profile[]>([]);
   query = signal('');
   records = signal<any[]>([]);
   isLoading = signal(false);
+  isClearing = signal(false);
   errorMessage = signal('');
   profileKey = computed(() => this.username());
   storedWantedProfile = computed<social_profile | null>(() => this.platforms().find(platform => platform.wanted_query !== null && platform.wanted_query !== undefined)
     ?? this.platforms().find(platform => !!platform.wanted?.length)
     ?? null);
   hasRecords = computed(() => this.records().length > 0);
+  hasSavedWantedList = computed(() => !!this.storedWantedProfile() || this.records().length > 0);
   visibleRecords = computed(() => this.records().slice(0, 3));
 
   constructor() {
@@ -44,16 +47,19 @@ export class WantedListSectionComponent implements OnDestroy {
 
       this.activeProfileKey = profileKey;
       this.subscription?.unsubscribe();
+      this.persistenceSubscription?.unsubscribe();
       this.requestId++;
       this.query.set(storedProfile?.wanted_query ?? '');
       this.records.set(storedProfile?.wanted ?? []);
       this.errorMessage.set('');
       this.isLoading.set(false);
+      this.isClearing.set(false);
     });
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+    this.persistenceSubscription?.unsubscribe();
   }
 
   onQueryInput(event: Event): void {
@@ -63,11 +69,12 @@ export class WantedListSectionComponent implements OnDestroy {
   search(event?: Event): void {
     event?.stopPropagation();
     const query = this.query().trim();
-    if (!query || this.isLoading()) {
+    if (!query || this.isLoading() || this.isClearing()) {
       return;
     }
     const currentRequestId = ++this.requestId;
     this.subscription?.unsubscribe();
+    this.persistenceSubscription?.unsubscribe();
     this.isLoading.set(true);
     this.errorMessage.set('');
     this.records.set([]);
@@ -79,7 +86,7 @@ export class WantedListSectionComponent implements OnDestroy {
         const savedRecords = Array.isArray(records) ? records : [];
         this.records.set(savedRecords);
         this.isLoading.set(false);
-        this.storageService.saveWantedList(this.profileKey(), query, savedRecords).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        this.persistenceSubscription = this.storageService.saveWantedList(this.profileKey(), query, savedRecords).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           error: () => {
             if (currentRequestId === this.requestId) {
               this.errorMessage.set('Wanted list loaded but could not be saved.');
@@ -94,6 +101,38 @@ export class WantedListSectionComponent implements OnDestroy {
         this.records.set([]);
         this.errorMessage.set('Could not search wanted list.');
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  clearSavedWantedList(event: Event): void {
+    event.stopPropagation();
+    if (this.isLoading() || this.isClearing()) {
+      return;
+    }
+
+    const previousQuery = this.query();
+    const previousRecords = this.records();
+    const currentRequestId = ++this.requestId;
+    this.subscription?.unsubscribe();
+    this.persistenceSubscription?.unsubscribe();
+    this.query.set('');
+    this.records.set([]);
+    this.errorMessage.set('');
+    this.isClearing.set(true);
+    this.persistenceSubscription = this.storageService.clearWantedList(this.profileKey()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      error: () => {
+        if (currentRequestId === this.requestId) {
+          this.query.set(previousQuery);
+          this.records.set(previousRecords);
+          this.errorMessage.set('Could not clear saved wanted list.');
+          this.isClearing.set(false);
+        }
+      },
+      complete: () => {
+        if (currentRequestId === this.requestId) {
+          this.isClearing.set(false);
+        }
       }
     });
   }

@@ -21,16 +21,19 @@ export class PhoneLookupSectionComponent implements OnDestroy {
   private requestId = 0;
   private activeProfileKey = '';
   private subscription: Subscription | null = null;
+  private persistenceSubscription: Subscription | null = null;
 
   username = input.required<string>();
   platforms = input<social_profile[]>([]);
   query = signal('');
   result = signal<any>(null);
   isLoading = signal(false);
+  isClearing = signal(false);
   errorMessage = signal('');
   profileKey = computed(() => this.username());
   associatedPhone = computed(() => this.findAssociatedPhone(this.platforms()));
   storedLookup = computed<social_phone_lookup | null>(() => this.platforms().find(platform => !!platform.phone_lookup)?.phone_lookup ?? null);
+  hasSavedLookup = computed(() => !!this.storedLookup() || this.result() !== null);
   hasKnowledgeGraph = computed(() => {
     const knowledgeGraph = this.result()?.knowledge_graph;
     return knowledgeGraph && typeof knowledgeGraph === 'object' ? Object.keys(knowledgeGraph).length > 0 : !!knowledgeGraph;
@@ -59,16 +62,19 @@ export class PhoneLookupSectionComponent implements OnDestroy {
 
       this.activeProfileKey = profileKey;
       this.subscription?.unsubscribe();
+      this.persistenceSubscription?.unsubscribe();
       this.requestId++;
       this.query.set(storedLookup?.query ?? associatedPhone);
       this.result.set(storedLookup?.result ?? null);
       this.errorMessage.set('');
       this.isLoading.set(false);
+      this.isClearing.set(false);
     });
   }
 
   ngOnDestroy(): void {
     this.subscription?.unsubscribe();
+    this.persistenceSubscription?.unsubscribe();
   }
 
   onQueryInput(event: Event): void {
@@ -78,12 +84,13 @@ export class PhoneLookupSectionComponent implements OnDestroy {
   search(event?: Event): void {
     event?.stopPropagation();
     const query = this.query().trim();
-    if (!query || this.isLoading()) {
+    if (!query || this.isLoading() || this.isClearing()) {
       return;
     }
 
     const currentRequestId = ++this.requestId;
     this.subscription?.unsubscribe();
+    this.persistenceSubscription?.unsubscribe();
     this.isLoading.set(true);
     this.errorMessage.set('');
     this.result.set(null);
@@ -94,7 +101,7 @@ export class PhoneLookupSectionComponent implements OnDestroy {
         }
         this.result.set(result);
         this.isLoading.set(false);
-        this.storageService.savePhoneLookup(this.profileKey(), { query, result }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        this.persistenceSubscription = this.storageService.savePhoneLookup(this.profileKey(), { query, result }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
           error: () => {
             if (currentRequestId === this.requestId) {
               this.errorMessage.set('Phone intelligence loaded but could not be saved.');
@@ -109,6 +116,37 @@ export class PhoneLookupSectionComponent implements OnDestroy {
         this.result.set(null);
         this.errorMessage.set('Could not search phone intelligence.');
         this.isLoading.set(false);
+      }
+    });
+  }
+
+  clearSavedLookup(event: Event): void {
+    event.stopPropagation();
+    if (this.isLoading() || this.isClearing()) {
+      return;
+    }
+
+    const previousLookup = this.storedLookup() ?? { query: this.query(), result: this.result() };
+    const currentRequestId = ++this.requestId;
+    this.subscription?.unsubscribe();
+    this.persistenceSubscription?.unsubscribe();
+    this.query.set(this.associatedPhone());
+    this.result.set(null);
+    this.errorMessage.set('');
+    this.isClearing.set(true);
+    this.persistenceSubscription = this.storageService.clearPhoneLookup(this.profileKey()).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      error: () => {
+        if (currentRequestId === this.requestId) {
+          this.query.set(previousLookup.query);
+          this.result.set(previousLookup.result);
+          this.errorMessage.set('Could not clear saved phone intelligence.');
+          this.isClearing.set(false);
+        }
+      },
+      complete: () => {
+        if (currentRequestId === this.requestId) {
+          this.isClearing.set(false);
+        }
       }
     });
   }
