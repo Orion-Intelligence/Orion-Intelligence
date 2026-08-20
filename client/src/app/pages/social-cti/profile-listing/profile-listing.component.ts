@@ -13,6 +13,7 @@ import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 import { WantedListSectionComponent } from '../wanted-list-section/wanted-list-section.component';
+import { PhoneLookupSectionComponent } from '../phone-lookup-section/phone-lookup-section.component';
 import type { FetchStateKey, FetchTabKey, SocialResultSource } from '../enums/social-graph.enums';
 import type { FeedUser, FetchTab } from '../models/social-usability.models';
 import type { ExtensionState } from '../../../shared/model/extension/extension.model';
@@ -28,7 +29,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
   standalone: true,
-  imports: [NgClass, SocialIconComponent, StealerlogSectionComponent, WantedListSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
+  imports: [NgClass, SocialIconComponent, StealerlogSectionComponent, WantedListSectionComponent, PhoneLookupSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

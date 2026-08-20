@@ -111,7 +111,7 @@ class social_model:
             details = social_model._recon_profile_details({**ids, **item})
         if details:
             built["profile_details"] = details
-        for key in ("resources", "online_presence", "stealer_logs"):
+        for key in ("resources", "online_presence", "stealer_logs", "wanted", "wanted_query", "exposure_signals", "phone_lookup"):
             if item.get(key) is not None:
                 built[key] = item.get(key)
         try:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -133,6 +133,20 @@ class social_wanted(BaseModel):
     model_config = ConfigDict(extra="allow")
 
 
+class social_exposure_signals(BaseModel):
+    query: str = ""
+    records: List[social_stealer_log] = Field(default_factory=list)
+
+    model_config = ConfigDict(extra="allow")
+
+
+class social_phone_lookup(BaseModel):
+    query: str = ""
+    result: dict[str, Any] = Field(default_factory=dict)
+
+    model_config = ConfigDict(extra="allow")
+
+
 class social_profile_config(BaseModel):
     disallowed: List[str] = Field(default_factory=list)
 
@@ -148,6 +162,9 @@ class social_profile(BaseModel):
     online_presence: List[social_online_presence_hit] = Field(default_factory=list)
     stealer_logs: List[social_stealer_log] = Field(default_factory=list)
     wanted: List[social_wanted] = Field(default_factory=list)
+    wanted_query: Optional[str] = None
+    exposure_signals: Optional[social_exposure_signals] = None
+    phone_lookup: Optional[social_phone_lookup] = None
 
     model_config = ConfigDict(extra="allow")
 

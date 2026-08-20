@@ -1,8 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
-import { Job, db_social_model, social_profile, social_profile_config } from '../models/social.models';
+import { Job, db_social_model, social_exposure_signals, social_phone_lookup, social_profile, social_profile_config, social_wanted } from '../models/social.models';
 import { ApiEnvelope, social_state } from '../models/social-usability.models';
 @Injectable({ providedIn: 'root' })
 export class SocialStorageService {
@@ -73,6 +73,31 @@ export class SocialStorageService {
 
   saveProfiles(username: string, profiles: social_profile[], replace = false): Observable<unknown> {
     return this.api.post('social/data', { profile_username: username, profiles, config: this.getProfileConfig(username), replace });
+  }
+
+  savePhoneLookup(username: string, phoneLookup: social_phone_lookup): Observable<unknown> {
+    return this.saveProfileData(username, profile => !!profile.phone_lookup, profile => ({ ...profile, phone_lookup: phoneLookup }));
+  }
+
+  saveExposureSignals(username: string, exposureSignals: social_exposure_signals): Observable<unknown> {
+    return this.saveProfileData(username, profile => !!profile.exposure_signals, profile => ({ ...profile, exposure_signals: exposureSignals }));
+  }
+
+  saveWantedList(username: string, query: string, records: social_wanted[]): Observable<unknown> {
+    return this.saveProfileData(username, profile => profile.wanted_query !== null && profile.wanted_query !== undefined, profile => ({ ...profile, wanted_query: query, wanted: records }));
+  }
+
+  private saveProfileData(username: string, matches: (profile: social_profile) => boolean, update: (profile: social_profile) => social_profile): Observable<unknown> {
+    const storedUsername = Array.from(this.state.scanResults().keys()).find(key => key.toLowerCase() === username.toLowerCase()) ?? username;
+    const profiles = this.state.scanResults().get(storedUsername) ?? [];
+    if (!profiles.length) {
+      return throwError(() => new Error('No social profile is available to save this data.'));
+    }
+    const matchingIndex = profiles.findIndex(matches);
+    const targetIndex = matchingIndex >= 0 ? matchingIndex : 0;
+    const updatedProfiles = profiles.map((profile, index) => index === targetIndex ? update(profile) : profile);
+    this.state.scanResults.update(results => new Map(results).set(storedUsername, updatedProfiles));
+    return this.saveProfiles(storedUsername, updatedProfiles, true);
   }
 
   deleteProfiles(username: string): Observable<unknown> {

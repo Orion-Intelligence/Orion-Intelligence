@@ -1,0 +1,151 @@
+import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, computed, effect, inject, input, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
+import { social_phone_lookup, social_profile } from '../models/social.models';
+import { SocialFetchService } from '../services/social-fetch.service';
+import { SocialStorageService } from '../services/social-storage.service';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+
+@Component({
+  selector: 'app-social-phone-lookup-section',
+  standalone: true,
+  imports: [TranslatePipe],
+  templateUrl: './phone-lookup-section.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class PhoneLookupSectionComponent implements OnDestroy {
+  private static readonly phoneKeys = new Set(['phone', 'phonenumber', 'phonenumbers', 'mobile', 'mobilenumber', 'telephone', 'contactnumber', 'whatsapp', 'whatsappnumber']);
+  private readonly fetchService = inject(SocialFetchService);
+  private readonly storageService = inject(SocialStorageService);
+  private readonly destroyRef = inject(DestroyRef);
+  private requestId = 0;
+  private activeProfileKey = '';
+  private subscription: Subscription | null = null;
+
+  username = input.required<string>();
+  platforms = input<social_profile[]>([]);
+  query = signal('');
+  result = signal<any>(null);
+  isLoading = signal(false);
+  errorMessage = signal('');
+  profileKey = computed(() => this.username());
+  associatedPhone = computed(() => this.findAssociatedPhone(this.platforms()));
+  storedLookup = computed<social_phone_lookup | null>(() => this.platforms().find(platform => !!platform.phone_lookup)?.phone_lookup ?? null);
+  hasKnowledgeGraph = computed(() => {
+    const knowledgeGraph = this.result()?.knowledge_graph;
+    return knowledgeGraph && typeof knowledgeGraph === 'object' ? Object.keys(knowledgeGraph).length > 0 : !!knowledgeGraph;
+  });
+  hasEntityIdentification = computed(() => {
+    const result = this.result();
+    return !!(result?.name || result?.formatted_address || result?.rating || result?.website || result?.phone_numbers?.length);
+  });
+  hasOpenSourceFootprints = computed(() => {
+    const result = this.result();
+    return !!(this.hasKnowledgeGraph() || result?.emails?.length || result?.web_footprints?.length);
+  });
+
+  constructor() {
+    effect(() => {
+      const profileKey = this.profileKey();
+      const associatedPhone = this.associatedPhone();
+      const storedLookup = this.storedLookup();
+
+      if (profileKey === this.activeProfileKey) {
+        if (associatedPhone && !untracked(() => this.query().trim())) {
+          this.query.set(associatedPhone);
+        }
+        return;
+      }
+
+      this.activeProfileKey = profileKey;
+      this.subscription?.unsubscribe();
+      this.requestId++;
+      this.query.set(storedLookup?.query ?? associatedPhone);
+      this.result.set(storedLookup?.result ?? null);
+      this.errorMessage.set('');
+      this.isLoading.set(false);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
+  }
+
+  onQueryInput(event: Event): void {
+    this.query.set((event.target as HTMLInputElement | null)?.value ?? '');
+  }
+
+  search(event?: Event): void {
+    event?.stopPropagation();
+    const query = this.query().trim();
+    if (!query || this.isLoading()) {
+      return;
+    }
+
+    const currentRequestId = ++this.requestId;
+    this.subscription?.unsubscribe();
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.result.set(null);
+    this.subscription = this.fetchService.fetchPhoneLookup(query).subscribe({
+      next: result => {
+        if (currentRequestId !== this.requestId) {
+          return;
+        }
+        this.result.set(result);
+        this.isLoading.set(false);
+        this.storageService.savePhoneLookup(this.profileKey(), { query, result }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+          error: () => {
+            if (currentRequestId === this.requestId) {
+              this.errorMessage.set('Phone intelligence loaded but could not be saved.');
+            }
+          }
+        });
+      },
+      error: () => {
+        if (currentRequestId !== this.requestId) {
+          return;
+        }
+        this.result.set(null);
+        this.errorMessage.set('Could not search phone intelligence.');
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  private findAssociatedPhone(platforms: social_profile[]): string {
+    for (const platform of platforms) {
+      const sources = [platform.profile_details, platform.meta, platform] as Array<Record<string, any> | null | undefined>;
+      for (const source of sources) {
+        for (const [key, value] of Object.entries(source ?? {})) {
+          if (!PhoneLookupSectionComponent.phoneKeys.has(key.toLowerCase().replace(/[^a-z]/g, ''))) {
+            continue;
+          }
+          const phone = this.normalizePhoneValue(value);
+          if (phone) {
+            return phone;
+          }
+        }
+      }
+    }
+    return '';
+  }
+
+  private normalizePhoneValue(value: any): string {
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        const phone = this.normalizePhoneValue(item);
+        if (phone) {
+          return phone;
+        }
+      }
+      return '';
+    }
+    if (value && typeof value === 'object') {
+      return this.normalizePhoneValue(value.number ?? value.value ?? value.phone ?? '');
+    }
+    const phone = String(value ?? '').trim();
+    const digitCount = phone.replace(/\D/g, '').length;
+    return digitCount >= 7 && digitCount <= 15 ? phone : '';
+  }
+}

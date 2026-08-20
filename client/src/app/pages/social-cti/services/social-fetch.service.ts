@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, throwError, timer } from 'rxjs';
-import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
+import { EMPTY, Observable, of, throwError, timer } from 'rxjs';
+import { catchError, expand, filter, map, switchMap, take } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
 import { social_online_presence_hit } from '../models/social.models';
 import { social_stealer_log } from '../models/social.models';
@@ -42,6 +42,20 @@ export class SocialFetchService {
   fetchWantedList(query: string): Observable<any[]> {
     return this.api.post<any>('dynamic/wanted', { text: { query } }).pipe(map(response => response?.cards_data ?? response?.data?.cards_data ?? response?.result?.cards_data ?? response?.result ?? []),
       catchError(() => throwError(() => new Error('Failed to fetch wanted list'))));
+  }
+
+  fetchPhoneLookup(query: string): Observable<any> {
+    const request = () => this.api.post<any>('phone/universal_search', { text: { query } });
+    return request().pipe(expand(response => response?.status === 'pending' || response?.status === 'processing' ? timer(3000).pipe(switchMap(() => request())) : EMPTY),
+      filter(response => response?.status !== 'pending' && response?.status !== 'processing'),
+      take(1),
+      map(response => {
+        if (response?.status === 'error') {
+          throw new Error(response?.message || response?.error_message || 'Phone lookup failed');
+        }
+        return response?.result ?? response;
+      }),
+      catchError(() => throwError(() => new Error('Failed to fetch phone intelligence'))));
   }
 
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<social_online_presence_hit[]> {
