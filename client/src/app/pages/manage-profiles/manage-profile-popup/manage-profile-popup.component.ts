@@ -5,6 +5,8 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { ManageProfilesService } from '../manage-profiles.service';
 import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPlatform, SocialProfile, SocialProfileConnectRequest, SocialProfilePurpose } from '../model/manage-profiles.model';
+import { CaseEditDrawerComponent } from '../../user-management/sidebar-user-case-management/model/case-details/case-edit-drawer/case-edit-drawer';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export type ManageProfilePopupMode = 'persona' | 'profile';
 export type ManageProfilePopupSaveEvent = 'persona' | 'profile';
@@ -12,7 +14,7 @@ export type ManageProfilePopupSaveEvent = 'persona' | 'profile';
 @Component({
   selector: 'app-manage-profile-popup',
   standalone: true,
-  imports: [FormsModule, UiDropdownComponent],
+  imports: [FormsModule, UiDropdownComponent, CaseEditDrawerComponent, TranslatePipe],
   templateUrl: './manage-profile-popup.component.html',
 })
 export class ManageProfilePopupComponent {
