@@ -1,22 +1,15 @@
-<div class="mx-auto w-full max-w-[2400px] px-5 pb-[200px] lg:px-8">
+<div class="mx-auto w-full max-w-[2400px] px-5 pb-4 lg:px-8">
 
 
   <form (ngSubmit)="analyzeText($event)" novalidate class="mt-6 flex items-center">
-    <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3 max-[800px]:flex-col max-[800px]:items-stretch max-w-[800px]">
+    <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3 max-[800px]:flex-col max-[800px]:items-stretch xl:max-w-[620px] [.light-theme_&]:!border-[#d3deea] [.light-theme_&]:!bg-[#f7faff] [.light-theme_&]:!shadow-[0_5px_18px_rgba(15,23,42,0.065)]">
       <div class="min-w-0 flex-1">
-        <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+        <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white transition-[border-color,box-shadow] [body.light-theme_&]:border-[#c7d5e4] [body.light-theme_&]:focus-within:border-[#70aee8] [body.light-theme_&]:focus-within:shadow-[0_0_0_3px_rgba(43,144,238,0.14)]">
           <div class="flex w-[45px] items-center justify-center bg-white">
-            <i class="bi bi-person text-[16px] text-gray-400"></i>
+            <img alt="" aria-hidden="true" src="assets/images/shared/user1.svg" width="20" height="20" class="brightness-0 opacity-80">
           </div>
-          <input data-testid="scan-primary-input"
-                 class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-gray-400"
-                 [placeholder]="'Phone Number (e.g., +92...) or Domain URL' | translate"
-                 type="text"
-                 [(ngModel)]="query" name="query" required autocomplete="off">
-          <button data-testid="scan-search-button"
-                  class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-600/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  type="submit"
-                  [disabled]="loading || !query.trim()">
+          <input data-testid="scan-primary-input" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-gray-400" [placeholder]="'Phone Number (e.g., +92...) or Domain URL' | translate" type="text" [(ngModel)]="query" name="query" required autocomplete="off">
+          <button data-testid="scan-search-button" class="inline-flex h-full min-w-[112px] shrink-0 items-center justify-center rounded-r-[8px] border border-l border-sky-300/20 bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] px-5 text-sm font-semibold leading-none text-white transition-[background-color,border-color,color] duration-150 hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] disabled:cursor-not-allowed disabled:opacity-40" type="submit" [disabled]="loading || !query.trim()">
             {{ 'Search' | translate }}
           </button>
         </div>
@@ -25,45 +18,45 @@
   </form>
 
 
-  <div class="mt-4 mb-8 flex items-center gap-[8px] text-[13px] text-[var(--color-text3)]">
-    <span class="text-[14px] text-[#eab308]">💡</span>
-    <span>{{ 'Extracts intelligence from Phone Numbers and Domains using Maps & Web OSINT.' | translate }}</span>
+  <div class="ml-0 mt-3">
+    <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_3px_12px_rgba(15,23,42,0.055)]">
+      <img alt="" aria-hidden="true" class="mr-[8px] inline-block" src="assets/images/shared/hint.svg">
+      <span>{{ 'Extracts intelligence from Phone Numbers and Domains using Maps & Web OSINT.' | translate }}</span>
+    </div>
   </div>
 
 
   @if (!queryTriggered && !loading && !result && !errorMessage) {
-    <div class="mt-[80px] flex flex-col items-center justify-center text-center">
-
-      <div class="relative mb-4 flex h-[90px] w-[120px] flex-col items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-sm">
-         <div class="absolute top-2 left-2 flex gap-1">
-           <div class="h-2 w-2 rounded-full bg-red-400"></div>
-           <div class="h-2 w-2 rounded-full bg-yellow-400"></div>
-           <div class="h-2 w-2 rounded-full bg-green-400"></div>
-         </div>
-         <i class="bi bi-search mt-2 text-[35px] text-blue-400"></i>
-      </div>
-      <div class="text-[16px] font-bold text-[var(--color-text1)]">{{ 'No Keyword Entered Yet!' | translate }}</div>
-      <div class="mt-1 text-[13.5px] text-[var(--color-text4)]">{{ 'Enter a keyword to see results' | translate }}</div>
-    </div>
+    <app-empty-query></app-empty-query>
   }
 
 
   @if (queryTriggered && loading) {
-    <div class="mt-[15px] ml-0 max-w-[800px]">
-      <div class="mb-[6px] text-[12px] font-medium capitalize text-[var(--color-text1)]">{{ currentStep }}</div>
-      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-        <div class="ui-progress-indeterminate-bar" [ngClass]="'ui-wpct-' + progress"></div>
+    @if (progress < 100) {
+      <div class="mt-[12px] ml-0 max-w-[720px]">
+        <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ currentStep || ('Scanning...' | translate) }} ({{ progressValue }}%)</div>
+        <div class="h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+          <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
+        </div>
       </div>
-    </div>
+    }
 
-
-    <div class="ui-ioc-table-shell mt-4 max-w-[800px] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-      <div class="space-y-2 px-4 py-4">
-        @for (i of [1,2,3]; track i) {
-          <div class="grid items-center gap-2 grid-cols-[60px_1fr_120px]">
-            <div class="ui-shimmer h-3 w-8 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-full max-w-[300px] rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
+    <div data-testid="ioc-threat-table-loading" class="ui-ioc-table-shell mt-3 overflow-x-auto rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]" @fadeInDashboardItem>
+      <div class="ui-ioc-table-head grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 border-b border-[var(--color-divider)] bg-[var(--color-blue-700)] px-4 py-3 text-xs font-semibold text-[var(--color-text4)] max-[900px]:grid-cols-[60px_1fr_120px_48px] [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
+        <div>#</div>
+        <div>{{ 'Result' | translate }}</div>
+        <div>{{ 'Fields' | translate }}</div>
+        <div class="max-[640px]:hidden">{{ 'API Type' | translate }}</div>
+        <div></div>
+      </div>
+      <div class="space-y-2 px-4 py-3">
+        @for (i of [1,2,3,4,5]; track i) {
+          <div class="grid min-w-[680px] grid-cols-[60px_1fr_120px_120px_48px] items-center gap-2 max-[900px]:grid-cols-[60px_1fr_120px_48px]">
+            <div class="ui-shimmer relative isolate box-border h-3 w-8 max-w-full overflow-hidden rounded [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:content-[''] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)]"></div>
+            <div class="ui-shimmer relative isolate box-border h-3 w-44 max-w-full overflow-hidden rounded [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:content-[''] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)]"></div>
+            <div class="ui-shimmer relative isolate box-border h-3 w-20 max-w-full overflow-hidden rounded [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:content-[''] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)]"></div>
+            <div class="ui-shimmer relative isolate box-border h-3 w-20 max-w-full overflow-hidden rounded [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:content-[''] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] max-[640px]:hidden [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)]"></div>
+            <div class="ui-shimmer relative isolate box-border h-7 w-7 max-w-full overflow-hidden rounded-md [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] before:content-[''] after:pointer-events-none after:absolute after:inset-0 after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:content-[''] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)]"></div>
           </div>
         }
       </div>
@@ -71,7 +64,7 @@
   }
 
   @if (queryTriggered && !loading && errorMessage) {
-    <section class="mt-[15px] max-w-[800px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center">
+    <section class="mt-[15px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center [.light-theme_&]:border-rose-200 [.light-theme_&]:bg-rose-50" @fadeInDashboardItem>
       <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Target Intelligence Failed' | translate }}</div>
       <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ errorMessage }}</div>
     </section>
@@ -79,11 +72,12 @@
 
 
   @if (queryTriggered && !loading && result && !errorMessage) {
-    <div class="mt-[20px] grid grid-cols-1 gap-[16px] lg:grid-cols-2">
+    @if (hasEntityIdentification || hasOpenSourceFootprints) {
+    <div class="mt-[20px] space-y-[16px]" @fadeInDashboardItem>
 
 
-      @if (result.name || result.formatted_address || result.phone_numbers) {
-        <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
+      @if (hasEntityIdentification) {
+        <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
           <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
             <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#10b981]">
               <i class="bi bi-building"></i> <span>{{ 'Entity Identification' | translate }}</span>
@@ -116,8 +110,8 @@
         </div>
       }
 
-      @if (result.web_footprints || result.knowledge_graph || result.emails?.length) {
-        <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
+      @if (hasOpenSourceFootprints) {
+        <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
           <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
             <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#3b82f6]">
               <i class="bi bi-globe2"></i> <span>{{ 'Open Source Footprints' | translate }}</span>
@@ -125,7 +119,7 @@
           </div>
           <div class="px-[16px] py-[12px] space-y-[14px]">
 
-            @if(result.knowledge_graph) {
+            @if(hasKnowledgeGraph) {
               <div>
                 <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Knowledge Graph ({{ result.knowledge_graph.description }})</span>
                 <p class="mt-1 text-[13px] text-[var(--color-text2)] leading-5">{{ result.knowledge_graph.detailed_desc || 'No detailed background verified.' }}</p>
@@ -160,5 +154,13 @@
         </div>
       }
     </div>
+    } @else {
+      <div class="mt-[15px] mx-0" @fadeInDashboardItem>
+        <section class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-790)] p-[20px] text-center">
+          <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'No response was found' | translate }}</div>
+          <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ 'Try a different query and run the scan again.' | translate }}</div>
+        </section>
+      </div>
+    }
   }
 </div>

@@ -7,11 +7,12 @@ import { expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ApiService } from '../../../shared/services/api.service';
+import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 
 @Component({
   selector: 'app-phone-lookup',
   standalone: true,
-  imports: [FormsModule, NgClass, TranslatePipe],
+  imports: [FormsModule, NgClass, TranslatePipe, EmptyQueryComponent],
   animations: [fadeInDashboardItem],
   templateUrl: './phone-lookup.component.html'
 })
@@ -23,6 +24,36 @@ export class PhoneLookupComponent implements OnInit {
   result: any = null;
   progress = 0;
   currentStep = '';
+
+  get progressValue(): number {
+    const progress = Number(this.progress);
+    return Number.isFinite(progress) ? Math.max(0, Math.min(100, Math.round(progress))) : 0;
+  }
+
+  get hasEntityIdentification(): boolean {
+    return !!(
+      this.result?.name ||
+      this.result?.formatted_address ||
+      this.result?.rating ||
+      this.result?.website ||
+      this.result?.phone_numbers?.length
+    );
+  }
+
+  get hasKnowledgeGraph(): boolean {
+    const knowledgeGraph = this.result?.knowledge_graph;
+    return knowledgeGraph && typeof knowledgeGraph === 'object'
+      ? Object.keys(knowledgeGraph).length > 0
+      : !!knowledgeGraph;
+  }
+
+  get hasOpenSourceFootprints(): boolean {
+    return !!(
+      this.hasKnowledgeGraph ||
+      this.result?.emails?.length ||
+      this.result?.web_footprints?.length
+    );
+  }
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {}
 
