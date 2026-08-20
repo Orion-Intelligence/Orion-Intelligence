@@ -68,7 +68,6 @@ class ManagedSocialProfile(EmbeddedModel):
     assigned_persona_id: str | None = None
     connection_status: SocialProfileConnectionStatus = SocialProfileConnectionStatus.PENDING
     assignment_status: SocialProfileAssignmentStatus = SocialProfileAssignmentStatus.UNASSIGNED
-    session_data: Dict[str, Any] | None = None
     last_session_check: datetime | None = None
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)

@@ -42,7 +42,6 @@ export interface SocialProfile {
   assigned_persona_id?: string | null;
   connection_status: SocialConnectionStatus;
   assignment_status: SocialAssignmentStatus;
-  session_data?: Record<string, unknown> | null;
   last_session_check?: string | null;
   login_url?: string | null;
   created_at: string;

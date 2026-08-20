@@ -73,7 +73,6 @@ class SocialProfileResponse(BaseModel):
     assigned_persona_id: str | None = None
     connection_status: SocialProfileConnectionStatus
     assignment_status: SocialProfileAssignmentStatus
-    session_data: Dict[str, Any] | None = None
     last_session_check: datetime | None = None
     login_url: str | None = None
     created_at: datetime
