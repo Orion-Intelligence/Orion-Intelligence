@@ -1,6 +1,7 @@
 import base64
 import binascii
 import hashlib
+import re
 from pathlib import Path
 from datetime import UTC, datetime
 from typing import Any
@@ -336,7 +337,7 @@ class social_model:
 
     async def search_profile(self, param, current_user=None, request=None):
         payload = param.model_dump() if hasattr(param, "model_dump") else dict(param)
-        if str(payload.get("command") or "") == "crawl" or str(payload.get("type") or "") == "details":
+        if str(payload.get("command") or "") in {"crawl", "poll", "cancel"} or str(payload.get("type") or "") == "details":
             return await self._fetch_profile_via_extension(payload, current_user)
         return await self.social_search(param, "profile", current_user, request)
 
@@ -348,13 +349,22 @@ class social_model:
         if not user_key:
             return {"status": "pending"}
 
+        platform_scope = re.sub(r"[^a-z0-9]", "", str(payload.get("platform") or "").lower())
+        result_scope = f"{platform_scope}:{crawl_type}"
+
         manager = extension_socket_manager.get_instance()
-        reply = manager.take_result(user_key, crawl_type)
+        if str(payload.get("command") or "") == "cancel":
+            await manager.cancel(user_key, result_scope)
+            return {"status": "idle"}
+
+        reply = await manager.take_result(user_key, result_scope)
         if reply is None:
             if str(payload.get("command") or "") == "poll":
-                return {"status": "pending" if manager.is_inflight(user_key, crawl_type) else "idle"}
+                return {"status": "pending" if await manager.is_inflight(user_key, result_scope) else "idle"}
+            if not await manager.has_live_socket(user_key):
+                return {"status": "idle"}
             command = {"command": "crawl", "platform": payload.get("platform"), "type": crawl_type, "url": payload.get("url"), "username": payload.get("username")}
-            await manager.fire(user_key, command)
+            await manager.fire(user_key, command, result_scope)
             return {"status": "pending"}
 
         if reply.get("error"):

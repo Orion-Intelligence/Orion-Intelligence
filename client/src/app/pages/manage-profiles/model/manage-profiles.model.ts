@@ -6,12 +6,10 @@ export interface PlatformEntry {
 export interface SessionEntry {
   id: string;
   capturedAt: string;
-}
-
-export interface ExtensionPresence {
-  source?: string;
-  type?: string;
-  loggedIn?: boolean;
+  username?: string;
+  verified?: boolean;
+  verifyError?: string;
+  verifiedAt?: string | null;
 }
 
 export type SocialPlatform = string;

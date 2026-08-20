@@ -1,50 +1,18 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, filter, map, of, switchMap, take, timer } from 'rxjs';
-import { ExtensionPresence, PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaUpdateRequest, SocialProfile, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileUpdateRequest } from './model/manage-profiles.model';
+import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaUpdateRequest, SocialProfile, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileUpdateRequest } from './model/manage-profiles.model';
+import { SocialExtensionService } from '../../shared/services/social-extension.service';
 
 export type ManageProfilesExtensionState = 'ready' | 'signin' | 'install';
 
 @Injectable({ providedIn: 'root' })
 export class ManageProfilesService {
   private readonly http = inject(HttpClient);
+  private readonly extension = inject(SocialExtensionService);
 
   detectExtension(): Observable<ManageProfilesExtensionState> {
-    return new Observable<ManageProfilesExtensionState>(subscriber => {
-      let settled = false;
-      const finish = (state: ManageProfilesExtensionState) => {
-        if (settled) {
-          return;
-        }
-        settled = true;
-        subscriber.next(state);
-        subscriber.complete();
-      };
-      const marker = () => (typeof document !== 'undefined' ? document.documentElement.getAttribute('data-orion-extension') : null);
-
-      fetch('/api/extension/session', { credentials: 'include', cache: 'no-store' }).then(response => {
-        if (response.ok) {
-          finish('ready');
-        }
-      }).catch(() => void 0);
-
-      const onMessage = (event: MessageEvent) => {
-        const data = event.data as ExtensionPresence;
-        if (event.source !== window || !data || data.source !== 'orion-extension' || data.type !== 'presence') {
-          return;
-        }
-        finish(data.loggedIn ? 'ready' : 'signin');
-      };
-
-      window.addEventListener('message', onMessage);
-      window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
-      const timerId = setTimeout(() => finish(marker() ? 'signin' : 'install'), 2000);
-
-      return () => {
-        window.removeEventListener('message', onMessage);
-        clearTimeout(timerId);
-      };
-    });
+    return this.extension.detect();
   }
 
   fetchPlatforms(): Observable<{ items: PlatformEntry[]; error?: string }> {
@@ -56,8 +24,8 @@ export class ManageProfilesService {
       catchError(() => of<{ items: PlatformEntry[]; error?: string }>({ items: [], error: 'load_failed' })));
   }
 
-  fetchSession(platform: string, url: string): Observable<{ platform?: string; saved?: boolean; error?: string }> {
-    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { platform?: string; saved?: boolean }; error?: string; status?: string }>('/api/manage-profiles/session', { platform, url }, { withCredentials: true })),
+  fetchSession(platform: string, url: string, sessionId = ''): Observable<{ platform?: string; saved?: boolean; error?: string }> {
+    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { platform?: string; saved?: boolean }; error?: string; status?: string }>('/api/manage-profiles/session', { platform, url, session_id: sessionId }, { withCredentials: true })),
       map(response => ({ pending: response?.status === 'pending', platform: response?.result?.platform, saved: response?.result?.saved, error: response?.error })),
       filter(result => !result.pending),
       take(1),
@@ -65,13 +33,18 @@ export class ManageProfilesService {
       catchError(() => of<{ platform?: string; saved?: boolean; error?: string }>({ error: 'session_failed' })));
   }
 
+  verifySession(platform: string, url: string, sessionId: string): Observable<{ verified?: boolean; username?: string; error?: string }> {
+    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { verified?: boolean; username?: string }; error?: string; status?: string }>('/api/manage-profiles/session/verify', { platform, url, session_id: sessionId }, { withCredentials: true })),
+      map(response => ({ pending: response?.status === 'pending', verified: response?.result?.verified, username: response?.result?.username, error: response?.error })),
+      filter(result => !result.pending),
+      take(1),
+      map(result => ({ verified: result.verified, username: result.username, error: result.error })),
+      catchError(() => of<{ verified?: boolean; username?: string; error?: string }>({ error: 'verify_failed' })));
+  }
+
   loadCapturedSessions(): Observable<Record<string, SessionEntry[]>> {
     return this.http.post<{ result?: { platforms?: Record<string, SessionEntry[]> } }>('/api/manage-profiles/sessions', {}, { withCredentials: true }).pipe(map(response => response?.result?.platforms ?? {}),
       catchError(() => of<Record<string, SessionEntry[]>>({})));
-  }
-
-  sessionDownloadUrl(platform: string, sessionId: string): string {
-    return `/api/manage-profiles/session/download/${encodeURIComponent(platform)}/${encodeURIComponent(sessionId)}`;
   }
 
   deleteSession(platform: string, sessionId: string): Observable<void> {
