@@ -27,6 +27,7 @@ class config_controller:
         AllowedKeys.VERSION.value,
         AllowedKeys.LANGUAGE_ALLOWED.value,
         AllowedKeys.ADMIN_ROOT_ALLOWED.value,
+        AllowedKeys.BACKUP_SCHEDULE.value,
         AllowedKeys.S_ONION.value,
     }
     SYSTEM_RESOURCE_FILENAMES = {
@@ -301,6 +302,7 @@ class config_controller:
             AllowedKeys.META_INFO.value: AllowedKeys.META_INFO,
             AllowedKeys.AI_ENDPOINT_ENABLED.value: AllowedKeys.AI_ENDPOINT_ENABLED,
             AllowedKeys.ADMIN_ROOT_ALLOWED.value: AllowedKeys.ADMIN_ROOT_ALLOWED,
+            AllowedKeys.BACKUP_SCHEDULE.value: AllowedKeys.BACKUP_SCHEDULE,
             AllowedKeys.S_ONION.value: AllowedKeys.S_ONION,
         }
         system_settings = dict(self._configs.get(resolved_tenant_id, {}))

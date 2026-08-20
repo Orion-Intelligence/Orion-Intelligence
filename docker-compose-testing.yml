@@ -22,6 +22,7 @@ services:
       - ./backend/static:/app/static:cached
       - ./backend/migrations:/app/migrations:cached
       - ./client/build:/app/build:delegated
+      - ./build/backups:/app/build/backups:delegated
     expose:
       - "8070"
     networks:

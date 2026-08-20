@@ -3,10 +3,12 @@ from fastapi.responses import RedirectResponse
 
 from configs.app_dependency import license_required, status_required, role_required, get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.backup_manager.backup_manager import BackupManager
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
+from orion.services.mongo_manager.shared_model.db_backup_model import BackupType
 from orion.services.mail_manager.mail_manager import mail_manager
 
 admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
@@ -65,6 +67,19 @@ async def update_public_config(request: Request, param: config_data, current_use
 )
 async def delete_system_image(request: Request, key: str, current_user=Depends(tenant_branding_editor)):
     return await ResourceManager.get_instance().delete_system_image(current_user, key, tenant=request.state.tenant)
+
+
+@admin_routes.post(
+    "/api/system/backup/instant",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def create_instant_backup():
+    backup = await BackupManager.get_instance().create_backup(BackupType.INSTANT)
+    return {
+        "filename": backup.filename,
+        "backup_datetime": backup.backup_datetime.isoformat(),
+        "backup_type": backup.backup_type.value,
+    }
 
 @admin_routes.put(
     "/api/system/image",

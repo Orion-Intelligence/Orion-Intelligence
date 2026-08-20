@@ -36,8 +36,9 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   configurationError = '';
   mailErrorState = false;
   webhookErrorState = false;
-  form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
+  form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, backup_schedule: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   webhookForm: AlertWebhookSettingsForm = this.createWebhookForm();
+  instantBackupInProgress = false;
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
   onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
@@ -90,6 +91,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.app_name = settings.app_name?.trim() || DEFAULT_APP_NAME;
     this.form.ai_endpoint_enabled = settings.ai_endpoint_enabled;
     this.form.admin_root_allowed = settings.admin_root_allowed;
+    this.form.backup_schedule = settings.backup_schedule;
     this.form.s_onion = settings.s_onion;
     this.form.data_sources_url = typeof metaInfo['S_HOME_HEADER_DATA_SOURCES'] === 'string' ? metaInfo['S_HOME_HEADER_DATA_SOURCES'] : '';
     this.form.adversaries_url = typeof metaInfo['S_HOME_HEADER_ADVERSARIES'] === 'string' ? metaInfo['S_HOME_HEADER_ADVERSARIES'] : '';
@@ -254,6 +256,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         app_name: this.form.app_name,
         ai_endpoint_enabled: this.form.ai_endpoint_enabled ? '1' : '0',
         admin_root_allowed: this.form.admin_root_allowed ? '1' : '0',
+        backup_schedule: this.form.backup_schedule ? '1' : '0',
         s_onion: this.form.s_onion,
         meta_info: JSON.stringify(this.buildMetaInfo('configuration'))
       }
@@ -348,6 +351,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       this.form.pricing_url,
       this.form.ai_endpoint_enabled,
       this.form.admin_root_allowed,
+      this.form.backup_schedule,
       this.form.documentation_allowed,
       this.form.whistle_blowing_allowed
     ]);
@@ -390,6 +394,24 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   get displayVersion(): string {
     return (this.form.version || '').replaceAll('_', '.');
+  }
+
+  createInstantBackup(): void {
+    if (this.instantBackupInProgress) {
+      return;
+    }
+    this.instantBackupInProgress = true;
+    this.apiService.post<any>('system/backup/instant', {}).subscribe({
+      next: () => {
+        this.instantBackupInProgress = false;
+        this.messageNotificationService.show(this.translationService.translate('Backup created successfully'),'success');
+      },
+      error: (err) => {
+        this.instantBackupInProgress = false;
+        const message = err?.error?.detail || this.translationService.translate('Failed to create backup');
+        this.messageNotificationService.show(message,'fail');
+      }
+    });
   }
 
   private getInitialTab(): SystemSettingsTab {

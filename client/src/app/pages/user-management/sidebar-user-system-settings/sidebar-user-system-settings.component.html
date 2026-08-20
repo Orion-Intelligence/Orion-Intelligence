@@ -134,12 +134,27 @@
               </label>
             </div>
 
+            <div class="lg:col-span-2">
+              <label class="flex cursor-pointer items-center justify-between rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2">
+                <span class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Backup Schedule' | translate }}</span>
+                <span class="relative inline-flex items-center">
+                  <input data-testid="system-settings-backup-schedule" type="checkbox" class="sr-only peer" [attr.aria-label]="'Backup schedule' | translate" [(ngModel)]="form.backup_schedule" />
+                  <span class="relative h-[18px] w-[32px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820-light)] transition-colors duration-300 peer-checked:bg-sky-500/70 peer-disabled:opacity-60 [body.light-theme_&]:peer-checked:bg-sky-700">
+                    <span class="absolute left-[1px] top-0 mt-[1px] h-[14px] w-[14px] rounded-full bg-white transition-transform duration-300" [ngClass]="form.backup_schedule ? 'translate-x-[14px]' : 'translate-x-0'"></span>
+                  </span>
+                </span>
+              </label>
+            </div>
+
             @if (configurationError) {
               <div class="lg:col-span-2 rounded-[8px] border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
                 {{ configurationError }}
               </div>
             }
-            <div class="flex justify-end lg:col-span-2">
+            <div class="flex items-center justify-between gap-3 lg:col-span-2">
+              <button data-testid="system-settings-instant-backup" type="button" class="ui-settings-save-button" [disabled]="instantBackupInProgress" (click)="createInstantBackup()">
+                {{ (instantBackupInProgress ? 'Creating backup...' : 'Instant Backup') | translate }}
+              </button>
               <button data-testid="system-settings-save" type="button" class="ui-settings-save-button" [disabled]="!isConfigurationDirty()" (click)="save('configuration')">
                 {{ 'Save changes' | translate }}
               </button>
