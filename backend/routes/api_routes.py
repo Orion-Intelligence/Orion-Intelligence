@@ -1,4 +1,5 @@
 import asyncio
+import requests
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, UploadFile, File
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
@@ -1115,3 +1116,25 @@ async def delete_completed_scan_jobs(current_user=Depends(get_current_user)):
 )
 async def delete_scan_job(scan_id: str, current_user=Depends(get_current_user)):
     return await ScanJobManager.get_instance().delete_job(scan_id, current_user)
+
+
+@api_routes.post(
+    "/api/phone/universal_search",
+    summary="Phone and Domain OSINT Lookup",
+    tags=["Entity Scans"],
+    dependencies=SCANNING_DEPS,
+)
+async def phone_universal_search_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
+    def forward_to_micros():
+        url = f"http://api:8010/api/phone/universal_search/{current_user.id}"
+        response = requests.post(url, json=payload, timeout=30)
+
+        if response.status_code != 200:
+            raise Exception(f"Failed with status {response.status_code}: {response.text}")
+
+        return response.json()
+
+    try:
+        return await asyncio.to_thread(forward_to_micros)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Microservice Connection Failed: {str(e)}")
