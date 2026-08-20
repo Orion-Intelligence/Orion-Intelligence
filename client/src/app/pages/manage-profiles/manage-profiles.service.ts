@@ -24,13 +24,22 @@ export class ManageProfilesService {
       catchError(() => of<{ items: PlatformEntry[]; error?: string }>({ items: [], error: 'load_failed' })));
   }
 
-  fetchSession(platform: string, url: string): Observable<{ platform?: string; saved?: boolean; error?: string }> {
-    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { platform?: string; saved?: boolean }; error?: string; status?: string }>('/api/manage-profiles/session', { platform, url }, { withCredentials: true })),
+  fetchSession(platform: string, url: string, sessionId = ''): Observable<{ platform?: string; saved?: boolean; error?: string }> {
+    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { platform?: string; saved?: boolean }; error?: string; status?: string }>('/api/manage-profiles/session', { platform, url, session_id: sessionId }, { withCredentials: true })),
       map(response => ({ pending: response?.status === 'pending', platform: response?.result?.platform, saved: response?.result?.saved, error: response?.error })),
       filter(result => !result.pending),
       take(1),
       map(result => ({ platform: result.platform, saved: result.saved, error: result.error })),
       catchError(() => of<{ platform?: string; saved?: boolean; error?: string }>({ error: 'session_failed' })));
+  }
+
+  verifySession(platform: string, url: string, sessionId: string): Observable<{ verified?: boolean; username?: string; error?: string }> {
+    return timer(0, 2500).pipe(switchMap(() => this.http.post<{ result?: { verified?: boolean; username?: string }; error?: string; status?: string }>('/api/manage-profiles/session/verify', { platform, url, session_id: sessionId }, { withCredentials: true })),
+      map(response => ({ pending: response?.status === 'pending', verified: response?.result?.verified, username: response?.result?.username, error: response?.error })),
+      filter(result => !result.pending),
+      take(1),
+      map(result => ({ verified: result.verified, username: result.username, error: result.error })),
+      catchError(() => of<{ verified?: boolean; username?: string; error?: string }>({ error: 'verify_failed' })));
   }
 
   loadCapturedSessions(): Observable<Record<string, SessionEntry[]>> {

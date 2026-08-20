@@ -191,6 +191,11 @@ class ExtensionSocketStore:
                     "1",
                     ex=INFLIGHT_TTL_SECONDS,
                 )
+                result_key = await self._redis.get(f"{REQUEST_KEY}:{request_id}")
+                if result_key:
+                    await self._redis.expire(f"{REQUEST_KEY}:{request_id}", INFLIGHT_TTL_SECONDS)
+                    await self._redis.expire(f"{SCOPE_REQUEST_KEY}:{result_key}", INFLIGHT_TTL_SECONDS)
+                    await self._redis.expire(f"{INFLIGHT_KEY}:{result_key}", INFLIGHT_TTL_SECONDS)
                 return
             except Exception:
                 pass

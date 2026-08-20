@@ -7,7 +7,6 @@ from starlette.websockets import WebSocket, WebSocketState
 
 from orion.api.interactive.extension_manager.constants.constant import (
     BUS_CHANNEL,
-    COMPLETION_TIMEOUT_SECONDS,
     EXTENSION_TIMEOUT_ERROR,
     RESPONSE_TIMEOUT_SECONDS,
 )
@@ -82,20 +81,20 @@ class extension_socket_manager:
         if not sockets:
             self._sockets.pop(user_key, None)
 
-    def _spawn_watch(self, request_id: str, user_key: str, timeout: float, can_extend: bool) -> None:
+    def _spawn_watch(self, request_id: str, user_key: str) -> None:
         try:
-            task = asyncio.create_task(self._watch_request(request_id, user_key, timeout, can_extend))
+            task = asyncio.create_task(self._watch_request(request_id, user_key))
         except RuntimeError:
             return
         self._watchers.add(task)
         task.add_done_callback(self._watchers.discard)
 
-    async def _watch_request(self, request_id: str, user_key: str, timeout: float, can_extend: bool) -> None:
-        await asyncio.sleep(timeout)
+    async def _watch_request(self, request_id: str, user_key: str) -> None:
+        await asyncio.sleep(RESPONSE_TIMEOUT_SECONDS)
         if not await self._store.request_outstanding(request_id):
             return
-        if can_extend and await self._store.take_ack(request_id):
-            self._spawn_watch(request_id, user_key, COMPLETION_TIMEOUT_SECONDS, False)
+        if await self._store.take_ack(request_id):
+            self._spawn_watch(request_id, user_key)
             return
         result_key = await self._store.pop_request(request_id)
         if result_key is None:
@@ -149,13 +148,13 @@ class extension_socket_manager:
                     await websocket.send_json({**payload, "request_id": request_id})
                 except Exception:
                     continue
-            self._spawn_watch(request_id, user_key, RESPONSE_TIMEOUT_SECONDS, True)
+            self._spawn_watch(request_id, user_key)
             return
         redis_client = self._store.redis
         if redis_client is not None:
             await redis_client.publish(BUS_CHANNEL, json.dumps(
                 {"kind": "request", "user_key": user_key, "request_id": request_id, "payload": payload}))
-            self._spawn_watch(request_id, user_key, RESPONSE_TIMEOUT_SECONDS, True)
+            self._spawn_watch(request_id, user_key)
             return
         await self._store.pop_request(request_id)
         await self._store.release_inflight(result_key)

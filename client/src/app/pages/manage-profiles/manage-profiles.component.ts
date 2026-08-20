@@ -1,6 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { timer } from 'rxjs';
+import { exhaustMap } from 'rxjs/operators';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ManageProfilesExtensionState, ManageProfilesService } from './manage-profiles.service';
 import { PlatformEntry, SessionEntry } from './model/manage-profiles.model';
@@ -25,46 +27,67 @@ export class ManageProfilesComponent {
   readonly shimmerRows = [1, 2, 3, 4, 5];
   readonly maxSessions = 10;
   readonly sessionFetching = signal<Set<string>>(new Set<string>());
+  readonly sessionVerifying = signal<Set<string>>(new Set<string>());
   readonly sessions = signal<Record<string, SessionEntry[]>>({});
   readonly expanded = signal<Set<string>>(new Set<string>());
 
   constructor() {
-    this.service.detectExtension().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(state => {
+    timer(0, 3000).pipe(exhaustMap(() => this.service.detectExtension()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
+      const previous = this.state();
       this.state.set(state);
-      if (state === 'ready') {
+      if (state === 'ready' && previous !== 'ready') {
         this.loadPlatforms();
         this.loadCapturedSessions();
       }
     });
   }
 
-  fetchSession(entry: PlatformEntry): void {
+  editSession(entry: PlatformEntry, sessionId: string): void {
+    this.fetchSession(entry, sessionId);
+  }
+
+  fetchSession(entry: PlatformEntry, sessionId = ''): void {
     if (this.sessionFetching().has(entry.platform)) {
       return;
     }
-    if (this.sessionCount(entry.platform) >= this.maxSessions) {
-      window.alert(`Maximum of ${this.maxSessions} sessions reached for ${entry.platform}. Delete one to capture a new session.`);
+    if (!sessionId && this.sessionCount(entry.platform) >= this.maxSessions) {
       return;
     }
     this.sessionFetching.update(current => new Set(current).add(entry.platform));
-    this.service.fetchSession(entry.platform, entry.base).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+    this.service.fetchSession(entry.platform, entry.base, sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(result => {
       this.sessionFetching.update(current => {
         const next = new Set(current);
         next.delete(entry.platform);
         return next;
       });
       if (result.error === 'session_limit') {
-        window.alert(`Maximum of ${this.maxSessions} sessions reached for ${entry.platform}. Delete one to capture a new session.`);
         this.loadCapturedSessions();
         return;
       }
       if (result.error) {
-        window.alert(`Session fetch failed for ${entry.platform}.`);
         return;
       }
       this.expanded.update(current => new Set(current).add(this.safePlatform(entry.platform)));
       this.loadCapturedSessions();
-      window.alert(`Session data for ${entry.platform} was fetched successfully.`);
+    });
+  }
+
+  isVerifying(sessionId: string): boolean {
+    return this.sessionVerifying().has(sessionId);
+  }
+
+  verifySession(entry: PlatformEntry, sessionId: string): void {
+    if (this.sessionVerifying().has(sessionId)) {
+      return;
+    }
+    this.sessionVerifying.update(current => new Set(current).add(sessionId));
+    this.service.verifySession(entry.platform, entry.base, sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.sessionVerifying.update(current => {
+        const next = new Set(current);
+        next.delete(sessionId);
+        return next;
+      });
+      this.loadCapturedSessions();
     });
   }
 

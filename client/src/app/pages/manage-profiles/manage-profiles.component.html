@@ -85,15 +85,39 @@
                     @for (session of sessionsFor(entry.platform); track session.id) {
                       <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] px-3 py-2 transition-colors last:border-b-0 hover:bg-[var(--color-blue-810)] [body.light-theme_&]:hover:bg-[#eef5fc]">
                         <span class="flex min-w-0 items-center gap-2">
-                          <span class="flex min-w-0 flex-col leading-tight">
-                            <span class="truncate font-mono text-[11px] font-semibold text-[var(--color-text2)]">{{ 'Session' | translate }} #{{ session.id.slice(0, 8) }}</span>
-                            <span class="mt-0.5 inline-flex items-center gap-1 text-[10px] text-[var(--color-text4)]">
-                              <i class="bi bi-clock-history text-[10px]" aria-hidden="true"></i>
+                          <span class="flex min-w-0 flex-col leading-relaxed">
+                            <span class="truncate font-mono text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Session' | translate }} #{{ session.id.slice(0, 8) }}</span>
+                            <span class="mt-1 inline-flex items-center gap-1 text-[11px] text-[var(--color-text4)]">
+                              @if (session.verified) {
+                                <i class="bi bi-shield-check text-[11px] text-emerald-400" aria-hidden="true"></i>
+                              } @else {
+                                <i class="bi bi-shield-exclamation text-[11px] text-red-400" aria-hidden="true"></i>
+                              }
                               <span class="truncate">{{ session.capturedAt | date: 'medium' }}</span>
+                              @if (session.username) {
+                                <span class="truncate">&middot; &#64;{{ session.username }}</span>
+                              }
+                              @if (session.verifyError) {
+                                <span class="truncate text-red-400" [title]="session.verifyError">| {{ session.verifyError }}</span>
+                              }
                             </span>
                           </span>
                         </span>
                         <div class="flex shrink-0 items-center gap-1.5">
+                          <button type="button" data-testid="manage-profiles-session-verify" (click)="verifySession(entry, session.id)" [disabled]="isVerifying(session.id)" [class]="session.verified ? '!border-emerald-400/40 !bg-emerald-400/10 !text-emerald-400' : '!border-red-400/40 !bg-red-400/10 !text-red-400'" [title]="'Verify session' | translate" [attr.aria-label]="'Verify session' | translate" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[var(--color-text2)] outline-none transition-colors hover:border-emerald-400/25 hover:bg-emerald-400/[0.07] hover:text-emerald-400 focus-visible:ring-2 focus-visible:ring-emerald-400/30 disabled:cursor-not-allowed disabled:opacity-50">
+                            @if (isVerifying(session.id)) {
+                              <span class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                            } @else {
+                              <i class="bi bi-shield-check text-[11px]" aria-hidden="true"></i>
+                            }
+                          </button>
+                          <button type="button" data-testid="manage-profiles-session-edit" (click)="editSession(entry, session.id)" [disabled]="sessionFetching().has(entry.platform)" [title]="'Edit session' | translate" [attr.aria-label]="'Edit session' | translate" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[var(--color-text2)] outline-none transition-colors hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] focus-visible:ring-2 focus-visible:ring-sky-400/30 disabled:cursor-not-allowed disabled:opacity-50">
+                            @if (sessionFetching().has(entry.platform)) {
+                              <span class="h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+                            } @else {
+                              <i class="bi bi-pencil text-[11px]" aria-hidden="true"></i>
+                            }
+                          </button>
                           <button type="button" data-testid="manage-profiles-session-download" (click)="downloadSession(entry.platform, session.id)" [title]="'Download session' | translate" [attr.aria-label]="'Download session' | translate" class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[var(--color-text2)] outline-none transition-colors hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] focus-visible:ring-2 focus-visible:ring-sky-400/30">
                             <i class="bi bi-download text-[11px]" aria-hidden="true"></i>
                           </button>
