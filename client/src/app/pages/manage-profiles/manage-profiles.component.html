@@ -23,7 +23,7 @@
 
     <div class="mb-5 flex max-w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       @for (tab of tabs; track tab.key) {
-        <button type="button" (click)="setTab(tab.key)" class="h-9 shrink-0 rounded-lg border px-3 text-[12px] font-semibold transition-colors" [ngClass]="activeTab() === tab.key ? 'border-sky-400/30 bg-sky-400/[0.12] text-[var(--color-text1)]' : 'border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text2)]'">
+        <button type="button" (click)="setTab(tab.key)" [disabled]="!canOpenTab(tab.key)" class="h-9 shrink-0 rounded-lg border px-3 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45" [ngClass]="activeTab() === tab.key ? 'border-sky-400/30 bg-sky-400/[0.12] text-[var(--color-text1)]' : 'border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text2)]'">
           {{ tab.label | translate }}
         </button>
       }

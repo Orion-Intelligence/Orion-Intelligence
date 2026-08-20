@@ -66,6 +66,9 @@ export class ManageProfilesComponent {
     timer(0, 3000).pipe(exhaustMap(() => this.service.detectExtension()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
       const previous = this.state();
       this.state.set(state);
+      if (state !== 'ready' && this.activeTab() !== 'sessions') {
+        this.activeTab.set('sessions');
+      }
       if (state === 'ready' && previous !== 'ready') {
         this.loadPlatforms();
         this.loadCapturedSessions();
@@ -74,8 +77,15 @@ export class ManageProfilesComponent {
   }
 
   setTab(tab: ManageProfilesTab): void {
+    if (!this.canOpenTab(tab)) {
+      return;
+    }
     this.activeTab.set(tab);
     this.formError.set('');
+  }
+
+  canOpenTab(tab: ManageProfilesTab): boolean {
+    return tab === 'sessions' || (this.state() === 'ready' && !this.loading() && !this.error());
   }
 
   editSession(entry: PlatformEntry, sessionId: string): void {
@@ -172,6 +182,10 @@ export class ManageProfilesComponent {
   }
 
   deleteConfirmationMessage(sessionId: string): string {
+    const profiles = this.profiles().filter(profile => profile.session_id === sessionId);
+    if (profiles.length) {
+      return `Delete Session #${sessionId.slice(0, 8)}? This session is used by ${profiles.length} profile${profiles.length === 1 ? '' : 's'}. Deleting it will remove the session from those profiles and mark them disconnected.`;
+    }
     return `Delete Session #${sessionId.slice(0, 8)}? This action cannot be undone.`;
   }
 
@@ -186,6 +200,7 @@ export class ManageProfilesComponent {
   deleteSession(platform: string, sessionId: string): void {
     this.service.deleteSession(platform, sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
       this.loadCapturedSessions();
+      this.loadSocialData();
       this.notification.show('Session deleted successfully', 'success');
     });
   }
@@ -221,6 +236,11 @@ export class ManageProfilesComponent {
     this.selectedPersona.set(persona);
     this.selectedProfile.set(null);
     this.confirmationAction.set('persona');
+    const profiles = this.profiles().filter(profile => profile.assigned_persona_id === persona.persona_id);
+    if (profiles.length) {
+      this.confirmationMessage.set(`Delete persona "${persona.name}"? This persona is assigned to ${profiles.length} profile${profiles.length === 1 ? '' : 's'}. Deleting it will remove those assignments.`);
+      return;
+    }
     this.confirmationMessage.set(`Are you sure you want to delete persona "${persona.name}"?`);
   }
 

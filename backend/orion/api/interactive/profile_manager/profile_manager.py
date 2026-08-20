@@ -9,6 +9,7 @@ from uuid import uuid4
 from cryptography.fernet import Fernet
 from fastapi import HTTPException
 from fastapi.responses import Response
+from bson import ObjectId
 from pymongo.errors import DuplicateKeyError
 
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
@@ -38,6 +39,7 @@ from orion.services.mongo_manager.shared_model.db_social_profile_management_mode
     db_social_profile_management_model,
 )
 from orion.services.mongo_manager.shared_model.db_social_session_model import db_social_session_model
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 
 
 class ProfileManager:
@@ -207,6 +209,27 @@ class ProfileManager:
         state["cookies"] = [c for c in (state.get("cookies") or []) if isinstance(c, dict) and c.get("name")]
         return state
 
+    async def get_all_social_profile_records(self) -> list[db_social_profile_management_model]:
+        return await self._engine.find(db_social_profile_management_model)
+
+    async def get_user_for_social_record(self, record: db_social_profile_management_model):
+        try:
+            return await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(record.user_id))
+        except Exception:
+            return None
+
+    async def read_profile_session_state(self, current_user, profile: ManagedSocialProfile):
+        user_key = self._user_key(current_user)
+        if not user_key or not profile.session_id:
+            return None
+        session = await self._engine.find_one(
+            db_social_session_model,
+            {"user_id": user_key, "platform": self._safe_platform(profile.platform), "session_id": profile.session_id},
+        )
+        if session is None:
+            return None
+        return await self._read_session_state(current_user, user_key, session.platform, session.file_name)
+
     @staticmethod
     def _seed_payload(state: dict) -> dict:
         origin = (state.get("origins") or [{}])[0] if state.get("origins") else {}
@@ -261,6 +284,19 @@ class ProfileManager:
             if path.exists():
                 path.unlink()
             await self._engine.delete(record)
+            social_record = await self._engine.find_one(db_social_profile_management_model, db_social_profile_management_model.user_id == user_key)
+            if social_record:
+                now = datetime.now(UTC)
+                changed = False
+                for profile in social_record.profiles:
+                    if profile.session_id == safe_session:
+                        profile.session_id = None
+                        profile.connection_status = SocialProfileConnectionStatus.DISCONNECTED
+                        profile.updated_at = now
+                        changed = True
+                if changed:
+                    social_record.updated_at = now
+                    await self._engine.save(social_record)
         return {"result": {"deleted": True}}
 
     async def create_persona(self, current_user, data: SocialPersonaCreateRequest) -> SocialPersonaResponse:

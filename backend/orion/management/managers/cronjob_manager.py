@@ -5,6 +5,7 @@ from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
 from orion.management.jobs.alert.alert_job import alert_job
+from orion.management.jobs.social_profile.social_profile_job import social_profile_job
 from orion.api.interactive.scheduler_manager.scheduler_manager import DailySchedulerConfig, SchedulerManager
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
@@ -17,6 +18,9 @@ class cronjob_manager:
     DEFAULT_ALERT_HOUR = 2
     DEFAULT_ALERT_MINUTE = 0
     ALERT_JOB_KEY = "auto_alert_scan"
+    DEFAULT_SOCIAL_PROFILE_HOUR = 3
+    DEFAULT_SOCIAL_PROFILE_MINUTE = 0
+    SOCIAL_PROFILE_JOB_KEY = "social_profile_daily"
 
     @staticmethod
     def get_instance():
@@ -53,6 +57,7 @@ class cronjob_manager:
         await self.__init_handles()
         asyncio.create_task(cronjob_manager.purge_loop())
         asyncio.create_task(cronjob_manager.iocs_alert_loop())
+        asyncio.create_task(cronjob_manager.social_profile_loop())
 
     @staticmethod
     async def iocs_alert_loop():
@@ -104,5 +109,25 @@ class cronjob_manager:
                     await SchedulerManager.get_instance().run_due_daily_job(tenant_job_config, reason="startup_or_tenant_schedule_check")
             except Exception as e:
                 log.g().e(f"IOC alert loop failed: {e}")
+
+            await asyncio.sleep(600)
+
+    @staticmethod
+    async def social_profile_loop():
+        job_config = DailySchedulerConfig(
+            job_key=cronjob_manager.SOCIAL_PROFILE_JOB_KEY,
+            hour=cronjob_manager.DEFAULT_SOCIAL_PROFILE_HOUR,
+            minute=cronjob_manager.DEFAULT_SOCIAL_PROFILE_MINUTE,
+            timezone_name=cronjob_manager.ALERT_TIMEZONE,
+            handler=social_profile_job.get_instance().run_daily_social_profiles,
+            stale_after=timedelta(minutes=15),
+            heartbeat_interval=timedelta(seconds=60),
+        )
+
+        while True:
+            try:
+                await SchedulerManager.get_instance().run_due_daily_job(job_config, reason="startup_or_schedule_check")
+            except Exception as e:
+                log.g().e(f"Social profile loop failed: {e}")
 
             await asyncio.sleep(600)
