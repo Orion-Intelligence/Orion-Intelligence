@@ -47,10 +47,6 @@ export class ManageProfilesService {
       catchError(() => of<Record<string, SessionEntry[]>>({})));
   }
 
-  sessionDownloadUrl(platform: string, sessionId: string): string {
-    return `/api/manage-profiles/session/download/${encodeURIComponent(platform)}/${encodeURIComponent(sessionId)}`;
-  }
-
   deleteSession(platform: string, sessionId: string): Observable<void> {
     return this.http.delete(`/api/manage-profiles/session/${encodeURIComponent(platform)}/${encodeURIComponent(sessionId)}`, { withCredentials: true }).pipe(map(() => undefined),
       catchError(() => of(undefined)));

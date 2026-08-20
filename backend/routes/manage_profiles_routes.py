@@ -21,10 +21,6 @@ async def manage_profiles_sessions(current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().list_sessions(current_user)
 
 
-@manage_profiles_routes.get("/api/manage-profiles/session/download/{platform}/{session_id}", include_in_schema=False)
-async def manage_profiles_session_download(platform: str, session_id: str, current_user=Depends(get_current_user)):
-    return await ProfileManager.get_instance().download_session(current_user, platform, session_id)
-
 
 @manage_profiles_routes.delete("/api/manage-profiles/session/{platform}/{session_id}", include_in_schema=False)
 async def manage_profiles_session_delete(platform: str, session_id: str, current_user=Depends(get_current_user)):

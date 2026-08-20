@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { timer } from 'rxjs';
 import { exhaustMap } from 'rxjs/operators';
@@ -8,11 +8,17 @@ import { ManageProfilesExtensionState, ManageProfilesService } from './manage-pr
 import { PlatformEntry, SessionEntry } from './model/manage-profiles.model';
 import { SocialExtensionManagerComponent } from '../../shared/partials/extension-manager/extension-manager.component';
 import { SocialIconComponent } from '../../shared/partials/social-icon/social-icon.component';
+import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
+
+interface PendingSessionDelete {
+  platform: string;
+  sessionId: string;
+}
 
 @Component({
   selector: 'app-manage-profiles',
   standalone: true,
-  imports: [DatePipe, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent],
+  imports: [DatePipe, NgClass, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent, ConfirmationPopupComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './manage-profiles.component.html',
 })
@@ -30,6 +36,7 @@ export class ManageProfilesComponent {
   readonly sessionVerifying = signal<Set<string>>(new Set<string>());
   readonly sessions = signal<Record<string, SessionEntry[]>>({});
   readonly expanded = signal<Set<string>>(new Set<string>());
+  readonly sessionPendingDelete = signal<PendingSessionDelete | null>(null);
 
   constructor() {
     timer(0, 3000).pipe(exhaustMap(() => this.service.detectExtension()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
@@ -103,8 +110,20 @@ export class ManageProfilesComponent {
     return this.sessionsFor(platform).length;
   }
 
+  unverifiedSessionCount(platform: string): number {
+    return this.sessionsFor(platform).filter(session => !session.verified).length;
+  }
+
   isExpanded(platform: string): boolean {
     return this.expanded().has(this.safePlatform(platform));
+  }
+
+  toggleRow(entry: PlatformEntry, event?: Event): void {
+    if (this.sessionCount(entry.platform) <= 0) {
+      return;
+    }
+    event?.preventDefault();
+    this.toggleExpand(entry.platform);
   }
 
   toggleExpand(platform: string): void {
@@ -121,13 +140,20 @@ export class ManageProfilesComponent {
     });
   }
 
-  downloadSession(platform: string, sessionId: string): void {
-    const anchor = document.createElement('a');
-    anchor.href = this.service.sessionDownloadUrl(platform, sessionId);
-    anchor.rel = 'noopener';
-    document.body.appendChild(anchor);
-    anchor.click();
-    anchor.remove();
+  requestDeleteSession(platform: string, sessionId: string): void {
+    this.sessionPendingDelete.set({ platform, sessionId });
+  }
+
+  deleteConfirmationMessage(sessionId: string): string {
+    return `Delete Session #${sessionId.slice(0, 8)}? This action cannot be undone.`;
+  }
+
+  handleDeleteConfirmation(confirmed: boolean): void {
+    const pending = this.sessionPendingDelete();
+    this.sessionPendingDelete.set(null);
+    if (confirmed && pending) {
+      this.deleteSession(pending.platform, pending.sessionId);
+    }
   }
 
   deleteSession(platform: string, sessionId: string): void {

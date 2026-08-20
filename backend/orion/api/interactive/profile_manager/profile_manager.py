@@ -8,7 +8,6 @@ from uuid import uuid4
 
 from cryptography.fernet import Fernet
 from fastapi import HTTPException
-from fastapi.responses import Response
 
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.profile_manager.constants.constant import MAX_SESSIONS_PER_PLATFORM, PLATFORMS_RESULT_KEY
@@ -223,34 +222,6 @@ class ProfileManager:
         for sessions in platforms.values():
             sessions.sort(key=lambda item: item["capturedAt"], reverse=True)
         return {"result": {"platforms": platforms}}
-
-    async def download_session(self, current_user, platform: str, session_id: str):
-        user_key = self._user_key(current_user)
-        safe_platform = re.sub(r"[^a-z0-9]", "", str(platform or "").lower())
-        safe_session = re.sub(r"[^a-zA-Z0-9-]", "", str(session_id or ""))
-
-        record = await self._engine.find_one(
-            db_social_session_model,
-            {"user_id": user_key, "platform": safe_platform, "session_id": safe_session},
-        )
-        if record is None:
-            raise HTTPException(status_code=404, detail="No session data")
-
-        path = CONSTANTS.S_SESSION_RESOURCE_DIR / user_key / safe_platform / record.file_name
-        if not path.exists():
-            raise HTTPException(status_code=404, detail="No session data")
-
-        try:
-            cipher = await self._tenant_cipher(current_user)
-            data = cipher.decrypt(path.read_bytes())
-        except Exception:
-            raise HTTPException(status_code=500, detail="Failed to decrypt session data")
-
-        return Response(
-            content=data,
-            media_type="application/zip",
-            headers={"Content-Disposition": f'attachment; filename="{safe_platform}-{safe_session}-session.zip"'},
-        )
 
     async def delete_session(self, current_user, platform: str, session_id: str):
         user_key = self._user_key(current_user)
