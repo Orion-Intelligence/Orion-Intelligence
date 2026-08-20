@@ -21,6 +21,7 @@ interface PendingSessionDelete {
   imports: [DatePipe, NgClass, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent, ConfirmationPopupComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './manage-profiles.component.html',
+  styleUrls: ['./manage-profiles.component.scss'],
 })
 export class ManageProfilesComponent {
   private readonly service = inject(ManageProfilesService);

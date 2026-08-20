@@ -167,7 +167,18 @@ class ProfileManager:
         items = (reply.get("items") if reply.get("implemented") else []) or []
         entry = items[0] if items and isinstance(items[0], dict) else {}
         verified = bool(reply.get("implemented")) and not reply.get("error")
-        return await self._store_verification(record, verified, str(entry.get("username") or ""), str(reply.get("error") or ""))
+        username = str(entry.get("username") or "")
+        if verified and username:
+            duplicate = await self._engine.find_one(
+                db_social_session_model,
+                (db_social_session_model.user_id == user_key)
+                & (db_social_session_model.platform == safe_platform)
+                & (db_social_session_model.username == username)
+                & (db_social_session_model.session_id != record.session_id),
+            )
+            if duplicate is not None:
+                return await self._store_verification(record, False, username, "user_already_exists")
+        return await self._store_verification(record, verified, username, str(reply.get("error") or ""))
 
     async def _read_session_state(self, current_user, user_key: str, safe_platform: str, file_name: str):
         path = CONSTANTS.S_SESSION_RESOURCE_DIR / user_key / safe_platform / file_name

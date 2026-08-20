@@ -6,12 +6,6 @@
         <h1 class="mb-0 text-xl font-semibold leading-tight text-[var(--color-text1)]">{{ 'Manage Profiles' | translate }}</h1>
         <p class="mb-0 mt-1 max-w-2xl text-xs leading-5 text-[var(--color-text4)]">{{ 'Supported platforms available through the Orion extension.' | translate }}</p>
       </div>
-      @if (state() === 'ready' && !loading() && !error() && platforms().length > 0) {
-        <span class="inline-flex h-7 flex-shrink-0 items-center gap-1.5 rounded-md border border-sky-400/15 bg-sky-400/[0.06] px-2.5 text-[9px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]">
-          <span class="font-mono text-xs font-bold tabular-nums text-[var(--color-text2)]">{{ platforms().length }}</span>
-          <span>{{ 'platforms' | translate }}</span>
-        </span>
-      }
     </header>
 
     @if (state() === null || loading()) {
@@ -41,7 +35,7 @@
           <section data-testid="manage-profiles-platform" class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
             <div [ngClass]="isExpanded(entry.platform) ? 'w-0.5' : 'w-0 group-hover:w-0.5'" class="pointer-events-none absolute inset-y-0 left-0 z-[1] bg-[var(--color-blue-640)] transition-[width]"></div>
             <div (click)="toggleRow(entry)" (keydown.enter)="toggleRow(entry, $event)" (keydown.space)="toggleRow(entry, $event)" [class.cursor-pointer]="sessionCount(entry.platform) > 0" [ngClass]="isExpanded(entry.platform) ? '!bg-[#1b2a40] [body.light-theme_&]:!bg-[#eef5fc]' : ''" [attr.role]="sessionCount(entry.platform) > 0 ? 'button' : null" [attr.tabindex]="sessionCount(entry.platform) > 0 ? 0 : null" [attr.aria-expanded]="sessionCount(entry.platform) > 0 ? isExpanded(entry.platform) : null" [attr.aria-controls]="sessionCount(entry.platform) > 0 ? ('manage-profiles-session-list-' + safePlatform(entry.platform)) : null" class="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-2 px-3 py-2.5 transition-colors duration-[160ms] ease-[ease] hover:bg-[var(--ui-table-row-hover)] sm:flex sm:px-4 sm:py-3">
-              <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1.5 text-white shadow-sm [body.light-theme_&]:text-[var(--color-text2)]">
+              <span [attr.data-platform]="safePlatform(entry.platform)" class="manage-profile-logo-tile flex h-8 w-8 flex-shrink-0 self-start items-center justify-center overflow-hidden rounded-[9px] p-1 text-white shadow-[0_4px_12px_rgba(0,0,0,0.22),inset_0_1px_0_rgba(255,255,255,0.08)] ring-1 ring-inset ring-white/[0.06] [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:shadow-[0_3px_8px_rgba(15,23,42,0.09),inset_0_1px_0_rgba(255,255,255,0.85)] [body.light-theme_&]:ring-[#d5e2ee]/70">
                 <app-social-icon [platformName]="entry.platform"></app-social-icon>
               </span>
               <div class="min-w-0 flex-1">
@@ -54,20 +48,19 @@
                     }
                   }
                   <h2 class="mb-0 truncate text-[13px] font-semibold leading-5 text-[var(--color-text1)]">{{ entry.platform }}</h2>
+                  @if (sessionCount(entry.platform) > 0) {
+                    <span data-testid="manage-profiles-session-count" [attr.id]="'manage-profiles-session-count-' + safePlatform(entry.platform)" class="inline-flex shrink-0 items-baseline gap-1 whitespace-nowrap text-[10px] font-medium text-[var(--color-text4)]">
+                      <span aria-hidden="true" class="text-[var(--ui-table-row-border-hover)]">·</span>
+                      <span class="font-mono tabular-nums">{{ sessionCount(entry.platform) }}/{{ maxSessions }}</span>
+                      <span>{{ 'saved' | translate }}</span>
+                    </span>
+                  }
                 </div>
                 <a [href]="entry.base" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" class="mt-0.5 inline-flex max-w-full items-center gap-1 text-[11px] font-medium text-[var(--color-blue-640)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35">
                   <span class="truncate">{{ entry.base }}</span>
                 </a>
               </div>
               <div class="col-start-2 flex min-w-0 items-center gap-2 sm:ml-auto sm:shrink-0">
-                @if (sessionCount(entry.platform) > 0) {
-                  <button type="button" data-testid="manage-profiles-session-toggle" (click)="$event.stopPropagation(); toggleExpand(entry.platform)" (keydown)="$event.stopPropagation()" [attr.id]="'manage-profiles-session-toggle-' + safePlatform(entry.platform)" [attr.aria-controls]="'manage-profiles-session-list-' + safePlatform(entry.platform)" [attr.aria-expanded]="isExpanded(entry.platform)" [attr.aria-label]="('Saved sessions' | translate) + ': ' + sessionCount(entry.platform) + '/' + maxSessions + (unverifiedSessionCount(entry.platform) > 0 ? ', ' + unverifiedSessionCount(entry.platform) + ' ' + ('Not Verified' | translate) : '')" [title]="'Saved sessions' | translate" class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-[6px] border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2.5 text-[10px] font-semibold text-[var(--color-text3)] outline-none transition-[background-color,border-color,color] hover:border-[var(--ui-table-row-border-hover)] hover:bg-[var(--ui-table-row-hover)] hover:text-[var(--color-text1)] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/35 [body.light-theme_&]:bg-[#f5f9fe]">
-                    <i class="bi bi-collection text-[11px] text-[var(--color-blue-640)]" aria-hidden="true"></i>
-                    <span class="font-mono tabular-nums">{{ sessionCount(entry.platform) }}/{{ maxSessions }}</span>
-                    <span>{{ 'saved' | translate }}</span>
-                    <i class="bi bi-chevron-down text-[8px] transition-transform duration-[180ms]" [class.rotate-180]="isExpanded(entry.platform)" aria-hidden="true"></i>
-                  </button>
-                }
                 <button type="button" data-testid="manage-profiles-session-fetch" (click)="$event.stopPropagation(); fetchSession(entry)" (keydown)="$event.stopPropagation()" [disabled]="sessionFetching().has(entry.platform) || sessionCount(entry.platform) >= maxSessions" [title]="(sessionCount(entry.platform) >= maxSessions ? 'Maximum sessions reached' : 'Fetch session') | translate" class="inline-flex h-8 shrink-0 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-[11px] font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color,transform] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/35 enabled:hover:-translate-y-px enabled:hover:border-[#28557d] enabled:hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] disabled:cursor-not-allowed disabled:opacity-50 [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:enabled:hover:border-[#8fb3d8] [.light-theme_&]:enabled:hover:bg-[#e4effa]">
                   @if (sessionFetching().has(entry.platform)) {
                     {{ 'Fetching…' | translate }}
@@ -81,7 +74,7 @@
             </div>
 
             @if (sessionCount(entry.platform) > 0) {
-              <div [class]="(isExpanded(entry.platform) ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0') + ' grid transition-[grid-template-rows,opacity] duration-[180ms] ease-out motion-reduce:transition-none'" [attr.id]="'manage-profiles-session-list-' + safePlatform(entry.platform)" [attr.aria-labelledby]="'manage-profiles-session-toggle-' + safePlatform(entry.platform)" [attr.aria-hidden]="!isExpanded(entry.platform)" [attr.inert]="!isExpanded(entry.platform) ? '' : null" role="region">
+              <div [class]="(isExpanded(entry.platform) ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0') + ' grid transition-[grid-template-rows,opacity] duration-[180ms] ease-out motion-reduce:transition-none'" [attr.id]="'manage-profiles-session-list-' + safePlatform(entry.platform)" [attr.aria-labelledby]="'manage-profiles-session-count-' + safePlatform(entry.platform)" [attr.aria-hidden]="!isExpanded(entry.platform)" [attr.inert]="!isExpanded(entry.platform) ? '' : null" role="region">
                 <div class="min-h-0 overflow-hidden">
                   <div data-testid="manage-profiles-session-list" class="relative border-t border-[var(--ui-table-row-border)] !bg-[#1b2a40] [body.light-theme_&]:!bg-[#eef5fc]">
                     <div class="pointer-events-none absolute inset-y-0 left-[27px] w-px bg-[var(--ui-table-row-border)] sm:left-[31px]"></div>
@@ -98,12 +91,10 @@
                                   <i class="bi bi-calendar3 shrink-0 text-[10px]" aria-hidden="true"></i>
                                   <span class="truncate">{{ session.capturedAt | date: 'medium' }}</span>
                                 </span>
-                                @if (session.username) {
-                                  <span class="inline-flex min-w-0 items-center gap-1.5">
-                                    <i class="bi bi-person-circle shrink-0 text-[10px]" aria-hidden="true"></i>
-                                    <span class="truncate">&#64;{{ session.username }}</span>
-                                  </span>
-                                }
+                                <span class="inline-flex min-w-0 items-center gap-1.5">
+                                  <i class="bi bi-person-circle shrink-0 text-[10px]" aria-hidden="true"></i>
+                                  <span class="truncate">{{ session.verified && session.username ? '&#64;' + session.username : '-' }}</span>
+                                </span>
                               </div>
 
                               @if (session.verifyError) {
