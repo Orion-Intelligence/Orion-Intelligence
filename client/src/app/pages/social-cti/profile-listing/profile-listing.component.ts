@@ -298,7 +298,7 @@ export class SocialProfileListingComponent {
   private clearFetchingStatus(platformData: social_profile): void {
     let updatedProfiles: social_profile[] | null = null;
     this.storageService.state.scanResults.update(results => {
-      const currentProfiles = results.get(platformData.meta.username);
+      const currentProfiles = results.get(this.getProfileGroupKey(platformData));
       if (!currentProfiles) {
         return results;
       }
@@ -320,17 +320,17 @@ export class SocialProfileListingComponent {
         return results;
       }
       updatedProfiles = nextProfiles;
-      return new Map(results).set(platformData.meta.username, nextProfiles);
+      return new Map(results).set(this.getProfileGroupKey(platformData), nextProfiles);
     });
     if (updatedProfiles) {
-      this.storageService.saveProfiles(platformData.meta.username, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      this.storageService.saveProfiles(this.getProfileGroupKey(platformData), updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
   }
 
   private setFetchedResourceCollection(platformResult: social_profile, type: FetchTabKey, resources: social_resource[]): void {
     let updatedProfiles: social_profile[] | null = null;
     this.storageService.state.scanResults.update(results => {
-      const currentProfiles = results.get(platformResult.meta.username);
+      const currentProfiles = results.get(this.getProfileGroupKey(platformResult));
       if (!currentProfiles) {
         return results;
       }
@@ -341,10 +341,10 @@ export class SocialProfileListingComponent {
         const others = (platform.resources ?? []).filter(entry => entry.id !== type);
         return { ...platform, section_status: { ...platform.section_status, [type]: 'completed' }, resources: [...others, { id: type, is_parsed: true, resources }] };
       });
-      return new Map(results).set(platformResult.meta.username, updatedProfiles);
+      return new Map(results).set(this.getProfileGroupKey(platformResult), updatedProfiles);
     });
     if (updatedProfiles) {
-      this.storageService.saveProfiles(platformResult.meta.username, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      this.storageService.saveProfiles(this.getProfileGroupKey(platformResult), updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
   }
 
@@ -595,7 +595,7 @@ export class SocialProfileListingComponent {
   private setSectionStatus(platformData: social_profile, section: string, status: string): void {
     let updatedProfiles: social_profile[] | null = null;
     this.storageService.state.scanResults.update(results => {
-      const currentProfiles = results.get(platformData.meta.username);
+      const currentProfiles = results.get(this.getProfileGroupKey(platformData));
       if (!currentProfiles) {
         return results;
       }
@@ -611,10 +611,10 @@ export class SocialProfileListingComponent {
         return results;
       }
       updatedProfiles = nextProfiles;
-      return new Map(results).set(platformData.meta.username, nextProfiles);
+      return new Map(results).set(this.getProfileGroupKey(platformData), nextProfiles);
     });
     if (updatedProfiles) {
-      this.storageService.saveProfiles(platformData.meta.username, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+      this.storageService.saveProfiles(this.getProfileGroupKey(platformData), updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
   }
 
@@ -660,18 +660,18 @@ export class SocialProfileListingComponent {
     let updatedProfiles: social_profile[] | null = null;
 
     this.storageService.state.scanResults.update(results => {
-      const currentProfiles = results.get(platformResult.meta.username);
+      const currentProfiles = results.get(this.getProfileGroupKey(platformResult));
       if (!currentProfiles) {
         return results;
       }
       updatedProfiles = currentProfiles.map(platform => this.isSamePlatform(platform, platformResult)
         ? { ...platform, ...this.buildFetchedPlatformData(platform, stateKey, data, hasData), section_status: { ...platform.section_status, [this.sectionOf(stateKey)]: 'completed' } }
         : platform);
-      return new Map(results).set(platformResult.meta.username, updatedProfiles);
+      return new Map(results).set(this.getProfileGroupKey(platformResult), updatedProfiles);
     });
 
     if (updatedProfiles) {
-      this.storageService.saveProfiles(platformResult.meta.username, updatedProfiles, true)
+      this.storageService.saveProfiles(this.getProfileGroupKey(platformResult), updatedProfiles, true)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe();
     }
@@ -691,10 +691,22 @@ export class SocialProfileListingComponent {
     return { [propertyName]: hasData ? data : null } as Partial<social_profile>;
   }
 
+  private getProfileGroupKey(platform: social_profile): string {
+    const results = this.storageService.state.scanResults();
+    if (results.has(platform.meta.username)) {
+      return platform.meta.username;
+    }
+    for (const [key, profiles] of results) {
+      if (profiles.some(entry => this.isSamePlatform(entry, platform))) {
+        return key;
+      }
+    }
+    return platform.meta.username;
+  }
+
   private isSamePlatform(left: social_profile, right: social_profile): boolean {
     return left.meta.username === right.meta.username
-      && left.meta.platform.toLowerCase() === right.meta.platform.toLowerCase()
-      && left.meta.username.toLowerCase() === right.meta.username.toLowerCase();
+      && left.meta.platform.toLowerCase() === right.meta.platform.toLowerCase();
   }
 
   private getRequestKey(stateKey: FetchStateKey, platformData: social_profile): string {
