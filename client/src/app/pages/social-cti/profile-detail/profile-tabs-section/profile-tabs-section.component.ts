@@ -39,9 +39,10 @@ export class SocialProfileTabsSectionComponent {
   activeTab = input.required<FetchTabKey>();
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
-  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string }>({});
+  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; has_more?: boolean }>({});
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
+  loadMore = output<void>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;

@@ -63,6 +63,8 @@ export interface social_resource_collection {
     id?: string;
     is_parsed?: boolean;
     resources?: social_resource[];
+    next_cursor?: string;
+    has_more?: boolean;
 }
 
 export interface social_online_presence_hit {

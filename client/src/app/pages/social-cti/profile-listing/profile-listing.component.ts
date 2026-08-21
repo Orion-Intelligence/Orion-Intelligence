@@ -203,10 +203,10 @@ export class SocialProfileListingComponent {
     return `${this.getPlatformCardId(platformData)}:${type}`;
   }
 
-  crawlResultFor(platformData: social_profile, type: FetchTabKey): { loading?: boolean; items?: unknown[]; error?: string } {
+  crawlResultFor(platformData: social_profile, type: FetchTabKey): { loading?: boolean; items?: unknown[]; error?: string; has_more?: boolean } {
     const state = this.crawlResults()[this.crawlKey(platformData, type)] ?? {};
     const collection = (platformData.resources ?? []).find(entry => entry.id === type);
-    return { loading: state.loading, error: state.error, items: collection?.resources ?? state.items };
+    return { loading: state.loading, error: state.error, items: collection?.resources ?? state.items, has_more: collection?.has_more };
   }
 
   private fetchCrawlType(platformData: social_profile, type: FetchTabKey, force = false): void {
@@ -219,24 +219,42 @@ export class SocialProfileListingComponent {
     }
     const existing = (platformData.resources ?? []).find(entry => entry.id === type);
     const command = (force || !existing?.is_parsed) ? 'crawl' : 'poll';
+    this.runCrawl(platformData, type, command, '');
+  }
+
+  loadMore(platformData: social_profile, type: FetchTabKey): void {
+    if (!this.isExtensionReady() || this.crawlResults()[this.crawlKey(platformData, type)]?.loading) {
+      return;
+    }
+    const collection = (platformData.resources ?? []).find(entry => entry.id === type);
+    if (!collection?.has_more || !collection?.next_cursor) {
+      return;
+    }
+    this.runCrawl(platformData, type, 'crawl', collection.next_cursor);
+  }
+
+  private runCrawl(platformData: social_profile, type: FetchTabKey, command: string, cursor: string): void {
+    const key = this.crawlKey(platformData, type);
     if (command === 'crawl') {
       this.crawlResults.update(current => ({ ...current, [key]: { loading: true } }));
-      this.setSectionStatus(platformData, type, 'fetching');
+      if (!cursor) {
+        this.setSectionStatus(platformData, type, 'fetching');
+      }
     }
     const url = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
     const cancel$ = new Subject<void>();
     this.fetchCancelSubjects.set(key, cancel$);
-    this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, command).pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe(result => {
+    this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, command, cursor).pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe(result => {
       this.fetchCancelSubjects.delete(key);
       this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: result.error } }));
       if (result.idle || result.error) {
-        if (command === 'crawl') {
+        if (command === 'crawl' && !cursor) {
           this.setSectionStatus(platformData, type, 'failed');
         }
         return;
       }
-      if (result.items) {
-        this.setFetchedResourceCollection(platformData, type, result.items as social_resource[]);
+      if (result.items && (!cursor || result.items.length)) {
+        this.setFetchedResourceCollection(platformData, type, result.items as social_resource[], cursor, result.next_cursor, result.has_more);
       }
     });
   }
@@ -327,7 +345,7 @@ export class SocialProfileListingComponent {
     }
   }
 
-  private setFetchedResourceCollection(platformResult: social_profile, type: FetchTabKey, resources: social_resource[]): void {
+  private setFetchedResourceCollection(platformResult: social_profile, type: FetchTabKey, resources: social_resource[], cursor = '', nextCursor?: string, hasMore?: boolean): void {
     let updatedProfiles: social_profile[] | null = null;
     this.storageService.state.scanResults.update(results => {
       const currentProfiles = results.get(this.getProfileGroupKey(platformResult));
@@ -339,13 +357,32 @@ export class SocialProfileListingComponent {
           return platform;
         }
         const others = (platform.resources ?? []).filter(entry => entry.id !== type);
-        return { ...platform, section_status: { ...platform.section_status, [type]: 'completed' }, resources: [...others, { id: type, is_parsed: true, resources }] };
+        const previous = cursor ? ((platform.resources ?? []).find(entry => entry.id === type)?.resources ?? []) : [];
+        const merged = this.mergeResourcesById(previous, resources);
+        return { ...platform, section_status: { ...platform.section_status, [type]: 'completed' }, resources: [...others, { id: type, is_parsed: true, resources: merged, next_cursor: nextCursor, has_more: !!hasMore }] };
       });
       return new Map(results).set(this.getProfileGroupKey(platformResult), updatedProfiles);
     });
     if (updatedProfiles) {
       this.storageService.saveProfiles(this.getProfileGroupKey(platformResult), updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
+  }
+
+  private mergeResourcesById(previous: social_resource[], incoming: social_resource[]): social_resource[] {
+    const seen = new Set(previous.map(item => this.resourceKey(item)));
+    const merged = [...previous];
+    for (const item of incoming) {
+      const key = this.resourceKey(item);
+      if (!seen.has(key)) {
+        seen.add(key);
+        merged.push(item);
+      }
+    }
+    return merged;
+  }
+
+  private resourceKey(item: social_resource): string {
+    return String(item?.resource_id ?? item?.url ?? JSON.stringify(item));
   }
 
   isFetchTabAllowed(tabKey: FetchTabKey): boolean {

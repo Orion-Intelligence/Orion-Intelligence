@@ -346,11 +346,12 @@ class social_model:
 
         user_key = str(getattr(current_user, "id", "") or "")
         crawl_type = str(payload.get("type") or "details")
+        cursor = str(payload.get("cursor") or "").strip()
         if not user_key:
             return {"status": "pending"}
 
         platform_scope = re.sub(r"[^a-z0-9]", "", str(payload.get("platform") or "").lower())
-        result_scope = f"{platform_scope}:{crawl_type}"
+        result_scope = f"{platform_scope}:{crawl_type}:{cursor}" if cursor else f"{platform_scope}:{crawl_type}"
 
         manager = extension_socket_manager.get_instance()
         if str(payload.get("command") or "") == "cancel":
@@ -363,7 +364,7 @@ class social_model:
                 return {"status": "pending" if await manager.is_inflight(user_key, result_scope) else "idle"}
             if not await manager.has_live_socket(user_key):
                 return {"status": "idle"}
-            command = {"command": "crawl", "platform": payload.get("platform"), "type": crawl_type, "url": payload.get("url"), "username": payload.get("username")}
+            command = {"command": "crawl", "platform": payload.get("platform"), "type": crawl_type, "url": payload.get("url"), "username": payload.get("username"), "payload": {"url": payload.get("url"), "username": payload.get("username"), "cursor": cursor}}
             await manager.fire(user_key, command, result_scope)
             return {"status": "pending"}
 
@@ -372,7 +373,7 @@ class social_model:
         items = (reply.get("items") if reply.get("implemented") else []) or []
         if crawl_type == "details":
             return {"result": {"profile": (items or [{}])[0]}}
-        return {"result": {"items": items}}
+        return {"result": {"items": items, "next_cursor": reply.get("next_cursor"), "has_more": bool(reply.get("has_more"))}}
 
     async def search_online_images(self, param, current_user=None, request=None):
         return await self.social_search(param, "online/images", current_user, request)

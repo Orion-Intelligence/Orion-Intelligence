@@ -31,6 +31,7 @@ class SocialProfileRequest(PlatformUsernameRequest):
     url: Optional[str] = None
     type: Optional[str] = None
     command: Optional[str] = None
+    cursor: Optional[str] = None
 
 
 class SocialPostsRequest(PlatformUsernameRequest):

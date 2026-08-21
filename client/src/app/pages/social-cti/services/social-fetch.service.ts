@@ -9,18 +9,20 @@ import { ApiEnvelope } from '../models/social-usability.models';
 export class SocialFetchService {
   constructor(private api: ApiService) {}
 
-  crawlProfile(platform: string, username: string, url: string, type: string, command = 'crawl'): Observable<{ items?: unknown[]; error?: string; idle?: boolean }> {
-    return timer(0, 3000).pipe(switchMap(() => this.api.post<{ result?: { profile?: unknown; items?: unknown[] }; error?: string; status?: string }>('social/profile', { platform, username, url, type, command })),
+  crawlProfile(platform: string, username: string, url: string, type: string, command = 'crawl', cursor = ''): Observable<{ items?: unknown[]; error?: string; idle?: boolean; next_cursor?: string; has_more?: boolean }> {
+    return timer(0, 3000).pipe(switchMap(() => this.api.post<{ result?: { profile?: unknown; items?: unknown[]; next_cursor?: string; has_more?: boolean }; error?: string; status?: string }>('social/profile', { platform, username, url, type, command, cursor })),
       map(response => ({
         pending: response?.status === 'pending',
         idle: response?.status === 'idle',
         items: (response?.result?.items ?? (response?.result?.profile ? [response.result.profile] : [])) as unknown[],
+        next_cursor: response?.result?.next_cursor,
+        has_more: response?.result?.has_more,
         error: response?.error,
       })),
       filter(result => !result.pending),
       take(1),
-      map(result => result.idle ? { idle: true } : { items: result.items, error: result.error }),
-      catchError(() => of<{ items?: unknown[]; error?: string; idle?: boolean }>({ items: [], error: 'crawl_failed' })));
+      map(result => result.idle ? { idle: true } : { items: result.items, next_cursor: result.next_cursor, has_more: result.has_more, error: result.error }),
+      catchError(() => of<{ items?: unknown[]; error?: string; idle?: boolean; next_cursor?: string; has_more?: boolean }>({ items: [], error: 'crawl_failed' })));
   }
 
   cancelProfileCrawl(platform: string, username: string, type: string): Observable<unknown> {
