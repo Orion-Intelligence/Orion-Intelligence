@@ -47,13 +47,16 @@
                       <span class="h-2 w-2 shrink-0 rounded-full bg-emerald-400 ring-2 ring-emerald-400/10" role="img" [attr.aria-label]="'Verified' | translate" [title]="'Verified' | translate"></span>
                     }
                   }
-                  <h2 class="mb-0 truncate text-[13px] font-semibold leading-5 text-[var(--color-text1)]">{{ entry.platform }}</h2>
+                  <h2 class="mb-0 w-[68px] shrink-0 truncate text-[13px] font-semibold leading-5 text-[var(--color-text1)]">{{ entry.platform }}</h2>
                   @if (sessionCount(entry.platform) > 0) {
                     <span data-testid="manage-profiles-session-count" [attr.id]="'manage-profiles-session-count-' + safePlatform(entry.platform)" class="inline-flex shrink-0 items-baseline gap-1 whitespace-nowrap text-[10px] font-medium text-[var(--color-text4)]">
                       <span aria-hidden="true" class="text-[var(--ui-table-row-border-hover)]">·</span>
                       <span class="font-mono tabular-nums">{{ sessionCount(entry.platform) }}/{{ maxSessions }}</span>
                       <span>{{ 'saved' | translate }}</span>
                     </span>
+                  }
+                  @if (sessionCount(entry.platform) > 0) {
+                    <i class="bi bi-chevron-down shrink-0 text-[10px] leading-none text-[var(--color-text4)] transition-transform duration-200" [class.rotate-180]="isExpanded(entry.platform)" aria-hidden="true"></i>
                   }
                 </div>
                 <a [href]="entry.base" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" class="mt-0.5 inline-flex max-w-full items-center gap-1 text-[11px] font-medium text-[var(--color-blue-640)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35">
