@@ -48,6 +48,7 @@ async def get_public_config(request: Request):
         tenant_id=str(request.state.tenant.id),
     )
     config.settings["app_url"] = env_handler.get_instance().env("APP_URL", "")
+    config.settings["orion_mail_url"] = env_handler.get_instance().env("ORION_MAIL_PUBLIC_URL", "http://mail.localhost:4200")
     return config
 
 

@@ -22,6 +22,7 @@ from routes.ai_routes import ai_routes
 from routes.api_micros import micro_routes
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
+from routes.mail_sso_routes import mail_sso_routes
 from routes.crawl_routes import crawl_routes
 from routes.geo_fencing_routes import geo_fencing_routes
 from routes.graph_routes import graph_routes
@@ -83,6 +84,7 @@ def dashboard_admin_redirect():
 
 configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
+app.include_router(mail_sso_routes, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(alert_connector_routes, include_in_schema=False)
