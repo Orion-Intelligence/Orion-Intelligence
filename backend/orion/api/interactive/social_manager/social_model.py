@@ -369,7 +369,7 @@ class social_model:
             return {"status": "pending"}
 
         if reply.get("error"):
-            return {"error": reply.get("error")}
+            return {"error": reply.get("error"), "login_url": reply.get("login_url")}
         items = (reply.get("items") if reply.get("implemented") else []) or []
         if crawl_type == "details":
             return {"result": {"profile": (items or [{}])[0]}}

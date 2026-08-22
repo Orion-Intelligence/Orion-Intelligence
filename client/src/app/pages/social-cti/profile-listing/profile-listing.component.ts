@@ -38,7 +38,7 @@ export class SocialProfileListingComponent {
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
   private readonly stealerLogsTab: FetchTab = { key: 'stealerLogs', label: 'Stealer Logs', icon: 'bi bi-shield-exclamation' };
   private readonly profileFetchTabs: FetchTab[] = [this.detailsTab, this.onlinePresenceTab, this.stealerLogsTab];
-  private readonly crawlResults = signal<Record<string, { loading?: boolean; items?: unknown[]; error?: string }>>({});
+  private readonly crawlResults = signal<Record<string, { loading?: boolean; items?: unknown[]; error?: string; login_url?: string }>>({});
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -203,10 +203,10 @@ export class SocialProfileListingComponent {
     return `${this.getPlatformCardId(platformData)}:${type}`;
   }
 
-  crawlResultFor(platformData: social_profile, type: FetchTabKey): { loading?: boolean; items?: unknown[]; error?: string; has_more?: boolean } {
+  crawlResultFor(platformData: social_profile, type: FetchTabKey): { loading?: boolean; items?: unknown[]; error?: string; has_more?: boolean; login_url?: string } {
     const state = this.crawlResults()[this.crawlKey(platformData, type)] ?? {};
     const collection = (platformData.resources ?? []).find(entry => entry.id === type);
-    return { loading: state.loading, error: state.error, items: collection?.resources ?? state.items, has_more: collection?.has_more };
+    return { loading: state.loading, error: state.error, items: collection?.resources ?? state.items, has_more: collection?.has_more, login_url: state.login_url };
   }
 
   private fetchCrawlType(platformData: social_profile, type: FetchTabKey, force = false): void {
@@ -246,7 +246,7 @@ export class SocialProfileListingComponent {
     this.fetchCancelSubjects.set(key, cancel$);
     this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, command, cursor).pipe(takeUntil(cancel$), takeUntilDestroyed(this.destroyRef)).subscribe(result => {
       this.fetchCancelSubjects.delete(key);
-      this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: result.error } }));
+      this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: result.error, login_url: result.login_url } }));
       if (result.idle || result.error) {
         if (command === 'crawl' && !cursor) {
           this.setSectionStatus(platformData, type, 'failed');

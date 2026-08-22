@@ -315,6 +315,8 @@
                     {{ (crawlResult().loading ? 'Loading' : 'Load more') | translate }}
                   </button>
                 }
+              } @else if (crawlResult().login_url) {
+                <app-section-state state="error" [title]="'Login required for ' + getTabLabel(activeTab())" [description]="'You must be logged in to ' + platformData.meta.platform + ' to load this section.'" actionLabel="Login" (action)="openLogin(crawlResult().login_url!)"></app-section-state>
               } @else if (crawlResult().error) {
                 <app-section-state state="error" [title]="'Unable to load ' + getTabLabel(activeTab())" description="Try fetching this section again." actionLabel="Retry fetch" (action)="refetchTab.emit(activeTab())"></app-section-state>
               } @else {

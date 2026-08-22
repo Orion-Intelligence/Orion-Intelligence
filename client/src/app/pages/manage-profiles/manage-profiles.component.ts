@@ -111,8 +111,22 @@ export class ManageProfilesComponent {
     return this.sessionsFor(platform).length;
   }
 
-  unverifiedSessionCount(platform: string): number {
-    return this.sessionsFor(platform).filter(session => !session.verified).length;
+  sessionStatus(session: SessionEntry): 'verified' | 'failed' | 'pending' {
+    if (session.verified) {
+      return 'verified';
+    }
+    return session.verifiedAt ? 'failed' : 'pending';
+  }
+
+  platformStatus(platform: string): 'verified' | 'failed' | 'pending' {
+    const sessions = this.sessionsFor(platform);
+    if (sessions.some(session => this.sessionStatus(session) === 'failed')) {
+      return 'failed';
+    }
+    if (sessions.some(session => this.sessionStatus(session) === 'verified')) {
+      return 'verified';
+    }
+    return 'pending';
   }
 
   isExpanded(platform: string): boolean {

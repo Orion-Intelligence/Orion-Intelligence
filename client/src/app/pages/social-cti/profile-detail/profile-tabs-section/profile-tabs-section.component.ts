@@ -39,7 +39,7 @@ export class SocialProfileTabsSectionComponent {
   activeTab = input.required<FetchTabKey>();
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
-  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; has_more?: boolean }>({});
+  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; has_more?: boolean; login_url?: string }>({});
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
   loadMore = output<void>();
@@ -51,6 +51,13 @@ export class SocialProfileTabsSectionComponent {
   readonly formatKey = formatKey;
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
   readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
+
+  openLogin(url: string): void {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+    this.refetchTab.emit(this.activeTab());
+  }
 
   getTabLabel(tabKey: FetchTabKey): string {
     return this.fetchTabs().find(tab => tab.key === tabKey)?.label ?? tabKey;
