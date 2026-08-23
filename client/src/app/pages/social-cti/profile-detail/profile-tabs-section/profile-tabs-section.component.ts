@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { social_online_presence_hit, social_profile } from '../../models/social.models';
 import { social_stealer_log } from '../../models/social.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
@@ -16,12 +16,17 @@ import { GraphReportPayload } from '../../../../shared/model/report/report-expor
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { SectionStateComponent } from '../../../../shared/partials/section-state/section-state.component';
+import { categoryFor, primaryKeysFor } from '../../constants/resource-category.constants';
+import { SocialResourceWorkSectionComponent } from '../resource-work-section/resource-work-section.component';
+import { SocialResourcePeopleSectionComponent } from '../resource-people-section/resource-people-section.component';
+import { SocialResourceFeedSectionComponent } from '../resource-feed-section/resource-feed-section.component';
+import { SocialResourceMediaSectionComponent } from '../resource-media-section/resource-media-section.component';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, TranslatePipe],
+  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
@@ -31,6 +36,7 @@ export class SocialProfileTabsSectionComponent {
   private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlDescriptions = signal<Set<string>>(new Set<string>());
+  private readonly expandedCrawlProperties = signal<Set<string>>(new Set<string>());
   private readonly contentTabKeys: FetchTabKey[] = ['details', 'onlinePresence', 'stealerLogs'];
 
   user = input.required<FeedUser>();
@@ -51,6 +57,8 @@ export class SocialProfileTabsSectionComponent {
   readonly formatKey = formatKey;
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
   readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
+  resourceCategory = computed(() => categoryFor(this.platformData().meta.platform, this.activeTab()));
+  hasResourcePresenter = computed(() => ['work', 'people', 'feed', 'media'].includes(this.resourceCategory()));
 
   openLogin(url: string): void {
     if (url) {
@@ -103,12 +111,39 @@ export class SocialProfileTabsSectionComponent {
     return this.isUrl(value) ? String(value) : '';
   }
 
+  crawlItemHighlights(item: unknown): { key: string; value: unknown }[] {
+    const record = this.crawlItemRecord(item);
+    return primaryKeysFor(this.resourceCategory())
+      .filter(key => this.hasCrawlItemValue(record[key]))
+      .slice(0, 6)
+      .map(key => ({ key, value: record[key] }));
+  }
+
   crawlItemEntries(item: unknown): { key: string; value: unknown }[] {
     const record = this.crawlItemRecord(item);
     const headerKeys = new Set(['title', 'url', 'thumbnail_url', 'caption', 'description', 'type', 'media_type']);
+    const highlighted = new Set(this.crawlItemHighlights(item).map(entry => entry.key));
     return Object.entries(record)
-      .filter(([key, value]) => !headerKeys.has(key) && this.hasCrawlItemValue(value))
+      .filter(([key, value]) => !headerKeys.has(key) && !highlighted.has(key) && this.hasCrawlItemValue(value))
       .map(([key, value]) => ({ key, value }));
+  }
+
+  isCrawlPropertiesExpanded(index: number, item: unknown): boolean {
+    return this.expandedCrawlProperties().has(this.crawlDescriptionKey(index, item));
+  }
+
+  toggleCrawlProperties(index: number, item: unknown): void {
+    const key = this.crawlDescriptionKey(index, item);
+    this.expandedCrawlProperties.update(current => {
+      const next = new Set(current);
+      if (next.has(key)) {
+        next.delete(key);
+      }
+      else {
+        next.add(key);
+      }
+      return next;
+    });
   }
 
   crawlItemTrackKey(index: number, item: unknown): string {
@@ -442,5 +477,4 @@ export class SocialProfileTabsSectionComponent {
     }
     return true;
   }
-
 }

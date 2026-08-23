@@ -68,7 +68,7 @@
               } @else if (getVisibleProfileDetailEntries(platformData).length === 0) {
                 <app-section-state title="No profile details found" description="Try fetching this section again." actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
               } @else {
-                <div class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
+                <div class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
                   @for (item of getVisibleProfileDetailEntries(platformData); track trackByKey($index, item)) {
                     <div class="group grid grid-cols-[minmax(0,1fr)_32px] gap-x-3 gap-y-1.5 border-b border-[rgba(148,163,184,0.10)] bg-transparent px-3.5 py-3 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.065)] sm:grid-cols-[144px_minmax(0,1fr)_32px] sm:items-start sm:gap-x-4 [body.light-theme_&]:border-[#dce6f1] [body.light-theme_&]:hover:bg-[#edf5fd]">
                       <div class="flex min-w-0 items-center self-start pt-0.5">
@@ -241,8 +241,17 @@
                 <app-section-state state="loading" [title]="'Loading ' + getTabLabel(activeTab())" description="Fetching the latest section data."></app-section-state>
               } @else if (crawlResult().items?.length) {
                 <div class="flex flex-col gap-3">
-                  @for (item of (crawlResult().items ?? []); track crawlItemTrackKey($index, item)) {
-                    <article data-testid="social-crawl-resource-card" class="group/card relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[background-color,border-color,box-shadow] hover:border-sky-400/25 hover:bg-[var(--color-blue-810)] hover:shadow-[0_10px_28px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] [body.light-theme_&]:hover:!border-[#b8cde4] [body.light-theme_&]:hover:!bg-[#f7fbff] [body.light-theme_&]:hover:!shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
+                  @if (resourceCategory() === 'work') {
+                    <app-social-resource-work [items]="crawlResult().items ?? []"></app-social-resource-work>
+                  } @else if (resourceCategory() === 'people') {
+                    <app-social-resource-people [items]="crawlResult().items ?? []"></app-social-resource-people>
+                  } @else if (resourceCategory() === 'feed') {
+                    <app-social-resource-feed [items]="crawlResult().items ?? []" [profileAvatar]="getProfileImageUrl(platformData)" [profileName]="platformData.profile_details?.real_name ?? ''" [profileUsername]="platformData.meta.username || user.username"></app-social-resource-feed>
+                  } @else if (resourceCategory() === 'media') {
+                    <app-social-resource-media [items]="crawlResult().items ?? []"></app-social-resource-media>
+                  }
+                  @for (item of (hasResourcePresenter() ? [] : (crawlResult().items ?? [])); track crawlItemTrackKey($index, item)) {
+                    <article data-testid="social-crawl-resource-card" class="group/card relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[background-color,border-color,box-shadow] hover:border-sky-400/25 hover:bg-[var(--color-blue-810)] hover:shadow-[0_10px_28px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] [body.light-theme_&]:hover:!border-[#b8cde4] [body.light-theme_&]:hover:!bg-[#f7fbff] [body.light-theme_&]:hover:!shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
                       <div class="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-sky-400 via-blue-500/70 to-indigo-500/20"></div>
                       <header class="relative flex items-start gap-4 px-5 py-5 sm:px-6">
                         @if (crawlItemImageUrl(item)) {
@@ -279,14 +288,31 @@
                         </div>
                       </header>
 
+                      @if (crawlItemHighlights(item); as highlights) {
+                        @if (highlights.length) {
+                          <div class="flex flex-wrap items-center gap-1.5 px-5 pt-3 sm:px-6">
+                            @for (highlight of highlights; track highlight.key) {
+                              <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)]/[0.25] px-2 py-0.5 text-[10px] font-semibold">
+                                <span class="uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ formatProfileDetailKey(highlight.key) | translate }}</span>
+                                <span class="max-w-[220px] truncate text-[var(--color-text1)]" [class.tabular-nums]="isNumeric(highlight.value)">{{ formatProfileDetailValue(highlight.key, highlight.value) }}</span>
+                              </span>
+                            }
+                          </div>
+                        }
+                      }
+
                       @if (crawlItemEntries(item); as entries) {
                         @if (entries.length) {
                           <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-700)]/[0.12] px-5 py-4 sm:px-6">
-                            <div class="mb-3 flex items-center justify-between gap-3">
+                            <button type="button" (click)="toggleCrawlProperties($index, item)" [attr.aria-expanded]="isCrawlPropertiesExpanded($index, item)" class="mb-0 flex w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent p-0 text-left outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
                               <span class="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ 'Properties' | translate }}</span>
-                              <span class="font-mono text-[9px] tabular-nums text-[var(--color-text4)]">{{ entries.length }}</span>
-                            </div>
-                            <dl class="mb-0 grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-3 xl:grid-cols-4">
+                              <span class="flex items-center gap-1.5">
+                                <span class="font-mono text-[9px] tabular-nums text-[var(--color-text4)]">{{ entries.length }}</span>
+                                <i class="bi text-[9px] leading-none text-[var(--color-text4)]" [class.bi-chevron-up]="isCrawlPropertiesExpanded($index, item)" [class.bi-chevron-down]="!isCrawlPropertiesExpanded($index, item)" aria-hidden="true"></i>
+                              </span>
+                            </button>
+                            @if (isCrawlPropertiesExpanded($index, item)) {
+                            <dl class="mb-0 mt-3 grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-3 xl:grid-cols-4">
                             @for (entry of entries; track entry.key) {
                               <div class="min-w-0 border-l border-sky-400/20 pl-3">
                                 <dt class="min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]" [title]="formatProfileDetailKey(entry.key) | translate">{{ formatProfileDetailKey(entry.key) | translate }}</dt>
@@ -303,6 +329,7 @@
                               </div>
                             }
                             </dl>
+                            }
                           </div>
                         }
                       }
@@ -329,6 +356,10 @@
           <div data-testid="social-profile-fetch-gate" class="flex min-h-[220px] items-center justify-center bg-[var(--color-blue-820-light)] px-4 py-8">
             @if (isTabLoading('details')) {
               <app-section-state state="loading" title="Fetching Profile" description="Loading profile details and available sections."></app-section-state>
+            } @else if (crawlResult().login_url) {
+              <app-section-state state="error" title="Login required" [description]="'You must be logged in to ' + platformData.meta.platform + ' in your browser to fetch this profile.'" actionLabel="Login" (action)="openLogin(crawlResult().login_url!)"></app-section-state>
+            } @else if (crawlResult().error) {
+              <app-section-state state="error" title="Unable to fetch profile" description="The extension could not load this profile. Try again." actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
             } @else {
               <app-section-state state="prompt" title="Full profile data is not loaded yet" description="Fetch this profile once to unlock its details and available sections." actionLabel="Fetch Full Profile Data" actionIcon="bi-cloud-arrow-down" (action)="refetchTab.emit('details')"></app-section-state>
             }
