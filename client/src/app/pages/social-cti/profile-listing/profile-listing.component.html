@@ -181,9 +181,11 @@
                   [onlinePresenceSearchTerm]="getOnlinePresenceSearchTerm(platformData)"
                   (tabSelected)="onProfileTabSelected(platformData, $event)"
                   (refetchTab)="onProfileTabRefetch(platformData, $event)"
+                  (syncAll)="onProfileTabSyncAll(platformData, $event)"
+                  (syncCatchup)="onProfileTabSyncCatchup(platformData, $event)"
+                  (stopSync)="onProfileTabStopSync(platformData, $event)"
                   (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
                   (onlinePresenceSearch)="searchOnlinePresence(platformData)"
-                  (loadMore)="loadMore(platformData, getActiveTabForPlatform(platformData))"
                   [crawlResult]="crawlResultFor(platformData, getActiveTabForPlatform(platformData))">
                 </app-social-profile-tabs-section>
               } @else {
@@ -213,3 +215,4 @@
     </div>
   }
 </div>
+

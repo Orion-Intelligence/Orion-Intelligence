@@ -77,3 +77,16 @@ export interface social_state {
     activeUsername: WritableSignal<string | null>;
     loadingUsernames: WritableSignal<Set<string>>;
 }
+
+export interface CrawlResultState {
+    loading?: boolean;
+    items?: unknown[];
+    error?: string;
+    login_url?: string;
+    count?: number;
+    log?: string;
+}
+
+export interface CrawlResultView extends CrawlResultState {
+    lastSynced?: string;
+}

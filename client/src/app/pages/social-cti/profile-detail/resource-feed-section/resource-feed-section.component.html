@@ -1,6 +1,7 @@
-<div data-testid="social-feed-list" class="mx-auto flex w-full max-w-[560px] flex-col gap-2.5">
+<div data-testid="social-feed-list" class="mx-auto flex w-full max-w-[560px] flex-col gap-2.5 min-[1700px]:max-w-none">
   @for (view of views(); track view.key) {
-    <article data-testid="social-feed-post" (click)="openPost(view, $event)" [class.cursor-pointer]="!!view.url" class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] hover:border-sky-400/25 [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
+    <div class="group flex flex-col gap-2.5 min-[1700px]:flex-row min-[1700px]:items-stretch min-[1700px]:justify-center min-[1700px]:gap-0">
+    <article data-testid="social-feed-post" (click)="openPost(view, $event)" [class.cursor-pointer]="!!view.url" class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] group-hover:border-sky-400/25 [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] min-[1700px]:w-[560px] min-[1700px]:flex-shrink-0 min-[1700px]:rounded-r-none min-[1700px]:border-r-0">
       @if (view.flags.length || view.replyTo || view.hateSpeech) {
         <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-[rgba(148,163,184,0.10)] px-4 py-1 text-[11px] font-semibold text-[var(--color-text4)] [body.light-theme_&]:border-[#dce6f1]">
           @if (view.hateSpeech) {
@@ -134,7 +135,7 @@
       }
 
       @if (hasEngagement(view) || view.extra.length) {
-        <footer class="mx-3 mt-2 flex items-center gap-1 border-t border-[rgba(148,163,184,0.10)] py-1 text-[13px] text-[var(--color-text4)] [body.light-theme_&]:border-[#dce6f1]">
+        <footer class="mx-3 flex items-center gap-1 border-t border-[rgba(148,163,184,0.10)] py-1 text-[13px] text-[var(--color-text4)] [body.light-theme_&]:border-[#dce6f1]">
           <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Likes' | translate"><i class="bi bi-heart-fill text-[14px]" [class.text-rose-400]="view.likes" aria-hidden="true"></i>{{ view.likes || '' }}</span>
           <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Comments' | translate"><i class="bi bi-chat-dots text-[14px]" aria-hidden="true"></i>{{ view.comments || '' }}</span>
           <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Shares' | translate"><i class="bi bi-arrow-repeat text-[14px]" aria-hidden="true"></i>{{ view.shares || '' }}</span>
@@ -148,7 +149,7 @@
             <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Views' | translate"><i class="bi bi-eye text-[14px]" aria-hidden="true"></i>{{ view.views }}</span>
           }
           @if (view.extra.length) {
-            <button type="button" (click)="toggle(view)" [attr.aria-expanded]="isExpanded(view)" [title]="view.extra.length + ' more fields'" class="ml-auto inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-[var(--color-text4)] outline-none transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
+            <button type="button" (click)="toggle(view)" [attr.aria-expanded]="isExpanded(view)" [title]="view.extra.length + ' more fields'" class="ml-auto inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-[var(--color-text4)] outline-none transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 min-[1700px]:hidden">
               <i class="bi bi-three-dots text-[16px]" aria-hidden="true"></i>
             </button>
           }
@@ -157,16 +158,25 @@
         <div class="mt-2"></div>
       }
 
-      @if (isExpanded(view)) {
-        <dl class="mb-0 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-[rgba(148,163,184,0.10)] bg-[var(--color-blue-720)]/40 px-3 py-2.5 [body.light-theme_&]:border-[#dce6f1] md:grid-cols-3">
-          @for (entry of view.extra; track entry.key) {
-            <div class="min-w-0">
-              <dt class="min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]" [title]="formatKeyLabel(entry.key)">{{ formatKeyLabel(entry.key) }}</dt>
-              <dd class="mb-0 mt-0.5 min-w-0 break-words text-[11px] font-medium leading-4 text-[var(--color-text2)]">{{ entry.value }}</dd>
-            </div>
-          }
-        </dl>
-      }
     </article>
+      @if (view.extra.length) {
+        <div data-testid="social-feed-extra" class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] min-[1700px]:relative min-[1700px]:min-w-0 min-[1700px]:flex-1 min-[1700px]:!block min-[1700px]:rounded-l-none min-[1700px]:border-l-[rgba(148,163,184,0.10)] transition-[border-color] group-hover:border-sky-400/25 min-[1700px]:group-hover:border-l-[rgba(148,163,184,0.10)]" [class.hidden]="!isExpanded(view)">
+          <div class="flex flex-col min-[1700px]:absolute min-[1700px]:inset-0">
+            <div class="flex flex-shrink-0 items-center gap-2 border-b border-[rgba(148,163,184,0.12)] bg-[var(--color-blue-720)]/45 px-3 py-2 [body.light-theme_&]:border-[#dce6f1] [body.light-theme_&]:bg-[#eef4fb]">
+              <i class="bi bi-card-list text-[12px] text-[var(--color-text4)]" aria-hidden="true"></i>
+              <span class="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text3)]">{{ 'Details' | translate }}</span>
+            </div>
+            <dl class="mb-0 grid grid-cols-2 md:grid-cols-3 min-[1700px]:!block min-[1700px]:min-h-0 min-[1700px]:flex-1 min-[1700px]:overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+              @for (entry of view.extra; track entry.key) {
+                <div class="min-w-0 border-b border-[rgba(148,163,184,0.07)] px-3 py-1.5 [body.light-theme_&]:border-[#eef2f8]">
+                  <dt class="min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]" [title]="formatKeyLabel(entry.key)">{{ formatKeyLabel(entry.key) }}</dt>
+                  <dd class="mb-0 mt-0.5 min-w-0 break-words text-[11px] font-medium leading-4 text-[var(--color-text2)]">{{ entry.value }}</dd>
+                </div>
+              }
+            </dl>
+          </div>
+        </div>
+      }
+    </div>
   }
 </div>

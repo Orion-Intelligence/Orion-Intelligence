@@ -64,6 +64,7 @@ export interface social_resource_collection {
     resources?: social_resource[];
     next_cursor?: string;
     has_more?: boolean;
+    last_synced?: string;
 }
 
 export interface social_online_presence_hit {

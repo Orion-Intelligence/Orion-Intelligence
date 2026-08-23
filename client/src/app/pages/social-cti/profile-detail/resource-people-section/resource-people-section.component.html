@@ -90,6 +90,10 @@
           }
         </dl>
       }
+
+      @if (!view.handle && !view.bio && !view.followers && !view.posts && !view.location && !view.company && !view.website && !view.joined.date && !view.tags.length && !view.extra.length) {
+        <div class="mt-2 text-[11px] leading-4 text-[var(--color-text4)]">-</div>
+      }
     </article>
   }
 </div>

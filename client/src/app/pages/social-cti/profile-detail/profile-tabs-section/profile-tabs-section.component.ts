@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { social_online_presence_hit, social_profile } from '../../models/social.models';
 import { social_stealer_log } from '../../models/social.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
@@ -26,7 +27,7 @@ import { SocialResourceMediaSectionComponent } from '../resource-media-section/r
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, TranslatePipe],
+  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, DatePipe, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
@@ -38,6 +39,11 @@ export class SocialProfileTabsSectionComponent {
   private readonly expandedCrawlDescriptions = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlProperties = signal<Set<string>>(new Set<string>());
   private readonly contentTabKeys: FetchTabKey[] = ['details', 'onlinePresence', 'stealerLogs'];
+  private readonly displayLimit = signal(50);
+  private readonly resetDisplayLimit = effect(() => {
+    this.activeTab(); this.displayLimit.set(50); 
+  });
+  private readonly forceStale = false;
 
   user = input.required<FeedUser>();
   platformData = input.required<social_profile>();
@@ -45,10 +51,12 @@ export class SocialProfileTabsSectionComponent {
   activeTab = input.required<FetchTabKey>();
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
-  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; has_more?: boolean; login_url?: string }>({});
+  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; login_url?: string; count?: number; log?: string; lastSynced?: string }>({});
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
-  loadMore = output<void>();
+  syncAll = output<FetchTabKey>();
+  syncCatchup = output<FetchTabKey>();
+  stopSync = output<FetchTabKey>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;
@@ -59,6 +67,39 @@ export class SocialProfileTabsSectionComponent {
   readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
   resourceCategory = computed(() => categoryFor(this.platformData().meta.platform, this.activeTab()));
   hasResourcePresenter = computed(() => ['work', 'people', 'feed', 'media'].includes(this.resourceCategory()));
+  readonly displayedItems = computed<unknown[]>(() => (this.crawlResult().items ?? []).slice(0, this.displayLimit()));
+  readonly canLoadMoreDb = computed(() => (this.crawlResult().items?.length ?? 0) > this.displayLimit());
+  readonly isStale = computed(() => {
+    if (this.forceStale) {
+      return true;
+    }
+    const result = this.crawlResult();
+    if (!(result.items?.length)) {
+      return false;
+    }
+    const last = result.lastSynced;
+    if (!last) {
+      return true;
+    }
+    const parsed = Date.parse(last);
+    return !Number.isFinite(parsed) || (Date.now() - parsed) > 86400000;
+  });
+
+  showMoreFromDb(): void {
+    this.displayLimit.update(current => current + 50);
+  }
+
+  syncAllNow(): void {
+    this.syncAll.emit(this.activeTab());
+  }
+
+  syncCatchupNow(): void {
+    this.syncCatchup.emit(this.activeTab());
+  }
+
+  stopSyncNow(): void {
+    this.stopSync.emit(this.activeTab());
+  }
 
   openLogin(url: string): void {
     if (url) {
