@@ -506,14 +506,6 @@ async def test_social_followers(payload: dict = Body(...)):
 
 
 @test_routes.post(
-    "/api/social/following",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_following(payload: dict = Body(...)):
-    return TestRouteHelper.pending_or_elastic_mock("social_following", "social_following.json")
-
-
-@test_routes.post(
     "/api/social/entity",
     dependencies=SCAN_DEPS,
 )

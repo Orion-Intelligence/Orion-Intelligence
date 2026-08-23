@@ -16,7 +16,6 @@ export interface people_item_view {
   verified: boolean;
   flags: string[];
   followers: string;
-  following: string;
   posts: string;
   location: string;
   company: string;
@@ -79,7 +78,6 @@ export class SocialResourcePeopleSectionComponent {
       verified: pickFlag(record, 'is_verified', 'verified'),
       flags,
       followers: pickCount(record, 'followers', 'followers_count', 'follower_count', 'total_followers'),
-      following: pickCount(record, 'following', 'following_count', 'total_following'),
       posts: pickCount(record, 'posts', 'post_count', 'statuses_count', 'public_repos', 'repositories', 'total_posts'),
       location: pickText(record, 'location'),
       company: pickText(record, 'company'),

@@ -3,7 +3,6 @@ from fastapi import APIRouter, Body, Depends, Request
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.social_manager.social_models.search_social_param_model import (
     SocialFollowersRequest,
-    SocialFollowingRequest,
     SocialForumRequest,
     SocialMetadataRequest,
     SocialPostsRequest,
@@ -99,14 +98,6 @@ async def search_dynamic_image(request: Request, payload: dict = Body(...), curr
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_followers(request: Request, param: SocialFollowersRequest = Body(...), current_user=Depends(get_current_user)):
     return await social_model.getInstance().search_followers(param, current_user, request)
-
-
-@social_routes.post(
-    "/api/social/following",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_following(request: Request, param: SocialFollowingRequest = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().search_following(param, current_user, request)
 
 
 @social_routes.post(

@@ -193,7 +193,7 @@ export class SocialProfileListingComponent {
   }
 
   getFetchTabs(): FetchTab[] {
-    const types = this.activeProfilePlatform()?.profile_details?.crawl_type ?? [];
+    const types = (this.activeProfilePlatform()?.profile_details?.crawl_type ?? []).filter(type => type !== 'following');
     if (!types.length) {
       return this.profileFetchTabs;
     }
@@ -843,8 +843,6 @@ export class SocialProfileListingComponent {
         return this.firstStatValue(platformData.profile_details?.total_posts);
       case 'total_followers':
         return this.firstStatValue(Number(platformData.profile_details?.total_followers ?? 0));
-      case 'total_following':
-        return this.firstStatValue(platformData.profile_details?.total_following);
       case 'total_likes':
         return this.firstStatValue(platformData.profile_details?.total_likes);
       default:

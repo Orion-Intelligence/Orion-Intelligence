@@ -69,14 +69,6 @@ export class SocialResourceFeedSectionComponent {
   private readonly expandedKeys = signal<Set<string>>(new Set<string>());
   private readonly expandedBodies = signal<Set<string>>(new Set<string>());
   private readonly revealedWarnings = signal<Set<string>>(new Set<string>());
-
-  items = input.required<unknown[]>();
-  profileAvatar = input('');
-  profileName = input('');
-  profileUsername = input('');
-  readonly onImageError = applyImageFallback;
-  readonly formatKeyLabel = formatKeyLabel;
-  views = computed<feed_item_view[]>(() => this.items().map((item, index) => this.toView(item, index)));
   private readonly ownAvatar = computed(() => ({ avatar: this.profileAvatar().trim(), names: new Set([this.profileName(), this.profileUsername()].map(normalizeName).filter(Boolean)) }));
   private readonly siblingAvatars = computed<Map<string, string>>(() => {
     const map = new Map<string, string>();
@@ -90,6 +82,14 @@ export class SocialResourceFeedSectionComponent {
     });
     return map;
   });
+
+  items = input.required<unknown[]>();
+  profileAvatar = input('');
+  profileName = input('');
+  profileUsername = input('');
+  readonly onImageError = applyImageFallback;
+  readonly formatKeyLabel = formatKeyLabel;
+  views = computed<feed_item_view[]>(() => this.items().map((item, index) => this.toView(item, index)));
 
   isExpanded(view: feed_item_view): boolean {
     return this.expandedKeys().has(view.key);

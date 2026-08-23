@@ -37,7 +37,6 @@ class social_profile_details(BaseModel):
     profile_url: Optional[str] = None
     total_posts: Optional[str] = None
     total_followers: Optional[str] = None
-    total_following: Optional[str] = None
     total_likes: Optional[str] = None
     avatar: Optional[str] = None
     banner: Optional[str] = None

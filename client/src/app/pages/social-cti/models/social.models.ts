@@ -25,7 +25,6 @@ export interface social_profile_details {
     profile_url?: string;
     total_posts?: string;
     total_followers?: string;
-    total_following?: string;
     total_likes?: string;
     avatar?: string;
     banner?: string;

@@ -46,7 +46,7 @@ export class SocialDefaultListSectionComponent {
     if (globalCapability?.disallow?.includes(tabKey) || capability?.disallow?.includes(tabKey)) {
       return false;
     }
-    if (tabKey === 'followers' || tabKey === 'following') {
+    if (tabKey === 'followers') {
       return this.isPriorityPlatform(platformData.meta.platform) || !!globalCapability?.allow?.includes(tabKey) || !!capability?.allow?.includes(tabKey);
     }
     if (tabKey === 'videos' || tabKey === 'shorts') {
@@ -59,16 +59,8 @@ export class SocialDefaultListSectionComponent {
     return [];
   }
 
-  getFollowing(_platformData: social_profile): string[] {
-    return [];
-  }
-
   getFollowerPreview(platformData: social_profile): string[] {
     return this.getFollowers(platformData).slice(0, 3);
-  }
-
-  getFollowingPreview(platformData: social_profile): string[] {
-    return this.getFollowing(platformData).slice(0, 3);
   }
 
   getProfileBio(platformData: social_profile): string {
@@ -130,8 +122,6 @@ export class SocialDefaultListSectionComponent {
         return this.firstStatValue(metadata['totalPosts'], metadata['posts_count'], metadata['m_post_count'], this.getPostCollectionCount(platformData));
       case 'total_followers':
         return this.firstStatValue(Number(platformData.profile_details?.total_followers ?? 0), metadata['followers'], metadata['followers_count'], metadata['m_followers'], this.extractSocialCount(metadata['m_group_info']));
-      case 'total_following':
-        return this.firstStatValue(metadata['following'], metadata['following_count'], metadata['m_following']);
       case 'total_likes':
         return this.firstStatValue(metadata['totalLikes'], metadata['likes'], metadata['m_likes'], metadata['m_post_likes']);
       default:

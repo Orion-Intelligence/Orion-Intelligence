@@ -35,15 +35,11 @@
         <p class="mb-0 mt-2 line-clamp-2 text-[11px] leading-4 text-[var(--color-text3)]">{{ view.bio }}</p>
       }
 
-      @if (view.followers || view.following || view.posts) {
-        <div class="mt-2.5 grid grid-cols-3 divide-x divide-[var(--color-border)] rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)]/40 text-center">
+      @if (view.followers || view.posts) {
+        <div class="mt-2.5 grid grid-cols-2 divide-x divide-[var(--color-border)] rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-720)]/40 text-center">
           <div class="px-1 py-1.5">
             <div class="font-mono text-[12px] font-bold tabular-nums text-[var(--color-text1)]">{{ view.followers || '—' }}</div>
             <div class="text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ 'Followers' | translate }}</div>
-          </div>
-          <div class="px-1 py-1.5">
-            <div class="font-mono text-[12px] font-bold tabular-nums text-[var(--color-text1)]">{{ view.following || '—' }}</div>
-            <div class="text-[9px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ 'Following' | translate }}</div>
           </div>
           <div class="px-1 py-1.5">
             <div class="font-mono text-[12px] font-bold tabular-nums text-[var(--color-text1)]">{{ view.posts || '—' }}</div>

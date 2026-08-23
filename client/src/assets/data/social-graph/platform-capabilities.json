@@ -2,8 +2,7 @@
   "__all__": {
     "disallow": [
       "connections",
-      "followers",
-      "following"
+      "followers"
     ]
   },
   "blogger": {},

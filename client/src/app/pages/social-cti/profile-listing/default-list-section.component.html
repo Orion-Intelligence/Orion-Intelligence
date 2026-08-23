@@ -85,7 +85,7 @@
           }
         }
 
-        @if ((isFetchTabAllowed(platformData, 'followers') && getFollowers(platformData).length > 0) || (isFetchTabAllowed(platformData, 'following') && getFollowing(platformData).length > 0)) {
+        @if (isFetchTabAllowed(platformData, 'followers') && getFollowers(platformData).length > 0) {
           <div class="flex items-center justify-between px-4 pt-3 text-xs text-[var(--color-text4)]">
             @if (isFetchTabAllowed(platformData, 'followers') && getFollowers(platformData).length > 0) {
               <div class="flex cursor-pointer items-center gap-2 hover:underline" (click)="profileTab.emit({ platformData, tabKey: 'followers' })">
@@ -101,25 +101,11 @@
             } @else {
               <div></div>
             }
-            @if (isFetchTabAllowed(platformData, 'following') && getFollowing(platformData).length > 0) {
-              <div class="flex cursor-pointer items-center gap-2 hover:underline" (click)="profileTab.emit({ platformData, tabKey: 'following' })">
-                <span>{{ getFollowing(platformData).length }} {{ 'following' | translate }}</span>
-                <div class="flex -space-x-1.5 flex-row-reverse">
-                  @for (username of getFollowingPreview(platformData); track trackByUsername($index, username)) {
-                    <div class="relative z-10 flex h-5 w-5 items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[8px] font-bold text-cyan-600" [title]="username">
-                      {{ username.charAt(0).toUpperCase() }}
-                    </div>
-                  }
-                </div>
-              </div>
-            } @else {
-              <div></div>
-            }
           </div>
         }
 
         <div class="border-t !border-[var(--color-divider)] !bg-transparent px-4 py-1">
-          <div class="grid grid-cols-2 gap-y-0 sm:grid-cols-4">
+          <div class="grid grid-cols-2 gap-y-0 sm:grid-cols-3">
             <div class="flex min-w-0 items-center gap-1.5 border-0 border-l border-l-[color-mix(in_srgb,var(--color-text4)_8%,transparent)] bg-transparent px-2 py-1 odd:border-l-0 sm:odd:border-l sm:first:border-l-0">
               <span class="flex h-4 w-4 flex-shrink-0 items-center justify-center text-amber-400 [body.light-theme_&]:text-amber-700">
                 <i class="bi bi-file-post text-[11px]"></i>
@@ -136,15 +122,6 @@
               <div class="flex min-w-0 items-baseline gap-1.5">
                 <span [class]="getStatValue(platformData, 'total_followers') === missingStatValue ? 'ui-social-stat-value shrink-0 text-[10px] font-medium tabular-nums !text-[var(--color-text4)]' : 'ui-social-stat-value shrink-0 text-[11px] font-semibold tabular-nums text-[var(--color-text1)]'">{{ getStatValue(platformData, 'total_followers') }}</span>
                 <span class="truncate text-[9px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Followers' | translate }}</span>
-              </div>
-            </div>
-            <div class="flex min-w-0 items-center gap-1.5 border-0 border-l border-l-[color-mix(in_srgb,var(--color-text4)_8%,transparent)] bg-transparent px-2 py-1 odd:border-l-0 sm:odd:border-l sm:first:border-l-0">
-              <span class="flex h-4 w-4 flex-shrink-0 items-center justify-center text-cyan-400 [body.light-theme_&]:text-cyan-700">
-                <i class="bi bi-person-plus text-[11px]"></i>
-              </span>
-              <div class="flex min-w-0 items-baseline gap-1.5">
-                <span [class]="getStatValue(platformData, 'total_following') === missingStatValue ? 'ui-social-stat-value shrink-0 text-[10px] font-medium tabular-nums !text-[var(--color-text4)]' : 'ui-social-stat-value shrink-0 text-[11px] font-semibold tabular-nums text-[var(--color-text1)]'">{{ getStatValue(platformData, 'total_following') }}</span>
-                <span class="truncate text-[9px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Following' | translate }}</span>
               </div>
             </div>
             <div class="flex min-w-0 items-center gap-1.5 border-0 border-l border-l-[color-mix(in_srgb,var(--color-text4)_8%,transparent)] bg-transparent px-2 py-1 odd:border-l-0 sm:odd:border-l sm:first:border-l-0">

@@ -66,10 +66,6 @@ class SocialOnlineImages(PlatformUsernameRequest):
     max_images: int = Field(default=10, ge=1, le=100)
 
 
-class SocialFollowingRequest(PlatformUsernameRequest):
-    max_following: int = Field(default=50, ge=1, le=5000)
-
-
 class SocialMetadataRequest(BaseModel):
     tokens: List[str] = Field(..., min_length=1)
     username: str = Field(..., min_length=1)

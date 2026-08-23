@@ -63,7 +63,6 @@ class social_model:
             "profile_url": item.get("url") or item.get("profile_url"),
             "total_posts": item.get("total_posts") or item.get("post_count"),
             "total_followers": followers,
-            "total_following": item.get("total_following") or item.get("following_count") or item.get("following"),
             "total_likes": item.get("total_likes") or item.get("like_count"),
         }
         return {key: str(value) for key, value in details.items() if value}
@@ -380,9 +379,6 @@ class social_model:
 
     async def search_followers(self, param, current_user=None, request=None):
         return await self.social_search(param, "followers", current_user, request)
-
-    async def search_following(self, param, current_user=None, request=None):
-        return await self.social_search(param, "following", current_user, request)
 
     async def search_posts(self, param, current_user=None, request=None):
         return await self.social_search(param, "posts", current_user, request)
