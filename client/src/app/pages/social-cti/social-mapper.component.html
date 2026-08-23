@@ -4,7 +4,7 @@
         <div class="flex h-full min-h-0 w-full flex-col overflow-hidden [.light-theme_&]:!bg-[#e7eff9]">
           <div class="relative flex min-h-0 flex-grow flex-row">
             <app-home-menu
-              class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff]"
+              class="flex flex-shrink-0 flex-col overflow-hidden border-r border-[#ffffff12] bg-[#172235]"
               [isCollapsed]="isHomeMenuCollapsed()"
               [jobs]="jobs()"
               [resultUsernames]="resultUsernames()"
@@ -40,7 +40,7 @@
                           <button data-testid="social-image-upload-trigger" type="button" [title]="'Scan by image' | translate" [attr.aria-label]="'Scan by image' | translate" (click)="$event.stopPropagation(); triggerImageUpload()" class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-text2)] transition-colors hover:bg-[var(--color-blue-710)]">
                             <i class="bi bi-image"></i>
                           </button>
-                          <button data-testid="social-scan-submit" type="button" (click)="triggerScan()" [disabled]="homeMenuSearchTerm().trim().length === 0" [ngClass]="homeMenuSearchTerm().trim() ? '[.dark-theme_&&]:!bg-[var(--color-blue-640)] [.dark-theme_&&]:hover:!bg-[var(--color-blue-640)] [.dark-theme_&&]:active:!bg-[var(--color-blue-640)] [.light-theme_&&]:!bg-[var(--color-blue-640)] [.light-theme_&&]:hover:!bg-[var(--color-blue-630)] [.light-theme_&&]:active:!bg-[var(--color-blue-630)]' : ''" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)] disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)] [.dark-theme_&]:!bg-slate-600 [.dark-theme_&]:hover:!bg-slate-700 [.dark-theme_&]:disabled:hover:!text-white [.light-theme_&]:!bg-[var(--color-blue-640)] [.light-theme_&]:hover:!bg-[var(--color-blue-630)] [.light-theme_&]:disabled:hover:!text-[var(--color-text4)]">
+                          <button data-testid="social-scan-submit" type="button" (click)="triggerScan()" [disabled]="homeMenuSearchTerm().trim().length === 0" [ngClass]="homeMenuSearchTerm().trim() ? '[.dark-theme_&&]:!bg-[var(--color-blue-640)] [.dark-theme_&&]:hover:!bg-[var(--color-blue-640)] [.dark-theme_&&]:active:!bg-[var(--color-blue-640)] [.light-theme_&&]:!bg-[var(--color-blue-640)] [.light-theme_&&]:hover:!bg-[var(--color-blue-630)] [.light-theme_&&]:active:!bg-[var(--color-blue-630)]' : ''" class="ui-graph-toolbar-search-btn ml-1 flex h-8 items-center rounded-full bg-[var(--color-blue-640)] px-4 text-sm font-semibold text-white transition-colors hover:bg-[var(--color-blue-630)] disabled:cursor-not-allowed disabled:bg-[var(--color-blue-710)] disabled:text-[var(--color-text4)] [.dark-theme_&]:!bg-slate-600 [.dark-theme_&]:hover:!bg-slate-700 [.dark-theme_&]:disabled:hover:!text-white [.light-theme_&]:!bg-[var(--color-blue-640)] [.light-theme_&]:hover:!bg-[var(--color-blue-630)] [.light-theme_&]:disabled:!bg-[#d9e3ef] [.light-theme_&]:disabled:hover:!bg-[#d9e3ef] [.light-theme_&]:disabled:!text-[#7d90a6] [.light-theme_&]:disabled:hover:!text-[#7d90a6]">
                             {{ 'Search' | translate }}
                           </button>
                         </div>
