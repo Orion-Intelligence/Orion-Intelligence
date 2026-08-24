@@ -511,6 +511,36 @@ class social_model:
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Failed to fetch social profiles"})
 
+    async def search_connections(self, user_id: str, profile_username: str, platform: str = "", query: str = "", limit: int = 500):
+        document = await self.get_social_profiles(user_id)
+        documents = document.get("result") if isinstance(document, dict) else None
+        if not isinstance(documents, list):
+            return {"result": {"items": [], "total": 0}}
+        needle = (query or "").strip().lstrip("@").lower()
+        platform_key = (platform or "").strip().lower()
+        username_key = (profile_username or "").strip().lstrip("@").lower()
+        fields = ("author", "name", "username", "handle", "screen_name", "acct", "login", "url", "caption")
+        matches = []
+        for doc in documents:
+            for profile in doc.get("profiles") or []:
+                meta = profile.get("meta") or {}
+                if platform_key and str(meta.get("platform", "")).lower() != platform_key:
+                    continue
+                if username_key and str(meta.get("username", "")).strip().lstrip("@").lower() != username_key:
+                    continue
+                for collection in profile.get("resources") or []:
+                    if collection.get("id") != "connections":
+                        continue
+                    for item in collection.get("resources") or []:
+                        if not needle:
+                            matches.append(item)
+                            continue
+                        haystack = " ".join(str(item.get(field, "")) for field in fields).lower()
+                        if needle in haystack:
+                            matches.append(item)
+        capped = max(1, min(int(limit or 500), 1000))
+        return {"result": {"items": matches[:capped], "total": len(matches)}}
+
     async def delete_social_profiles(self, user_id: str, profile_username: str):
         try:
             normalized_username = (profile_username).strip().lstrip("@").lower()

@@ -15,6 +15,7 @@ const TYPE_CATEGORY: Record<string, ResourceCategory> = {
   tracks: 'media',
   followers: 'people',
   friends: 'people',
+  connections: 'people',
   organizations: 'people',
   repositories: 'work',
   projects: 'work',

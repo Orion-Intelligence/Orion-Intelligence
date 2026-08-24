@@ -51,12 +51,16 @@ export class SocialProfileTabsSectionComponent {
   activeTab = input.required<FetchTabKey>();
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
+  connectionsLoading = input<Set<string>>(new Set<string>());
   crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; login_url?: string; count?: number; log?: string; lastSynced?: string }>({});
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
   syncAll = output<FetchTabKey>();
   syncCatchup = output<FetchTabKey>();
   stopSync = output<FetchTabKey>();
+  loadConnections = output<string>();
+  syncAllConnections = output<void>();
+  connectionSearch = output<string>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;
@@ -65,10 +69,17 @@ export class SocialProfileTabsSectionComponent {
   readonly formatKey = formatKey;
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
   readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
+  connectionSearchResults = input<unknown[] | null>(null);
   resourceCategory = computed(() => categoryFor(this.platformData().meta.platform, this.activeTab()));
   hasResourcePresenter = computed(() => ['work', 'people', 'feed', 'media'].includes(this.resourceCategory()));
-  readonly displayedItems = computed<unknown[]>(() => (this.crawlResult().items ?? []).slice(0, this.displayLimit()));
-  readonly canLoadMoreDb = computed(() => (this.crawlResult().items?.length ?? 0) > this.displayLimit());
+  readonly displayedItems = computed<unknown[]>(() => {
+    const results = this.connectionSearchResults();
+    if (results) {
+      return results;
+    }
+    return (this.crawlResult().items ?? []).slice(0, this.displayLimit());
+  });
+  readonly canLoadMoreDb = computed(() => this.connectionSearchResults() === null && (this.crawlResult().items?.length ?? 0) > this.displayLimit());
   readonly isStale = computed(() => {
     if (this.forceStale) {
       return true;
@@ -89,6 +100,10 @@ export class SocialProfileTabsSectionComponent {
     this.displayLimit.update(current => current + 50);
   }
 
+  onConnectionSearch(event: Event): void {
+    this.connectionSearch.emit((event.target as HTMLInputElement | null)?.value ?? '');
+  }
+
   syncAllNow(): void {
     this.syncAll.emit(this.activeTab());
   }
@@ -99,6 +114,10 @@ export class SocialProfileTabsSectionComponent {
 
   stopSyncNow(): void {
     this.stopSync.emit(this.activeTab());
+  }
+
+  syncAllConnectionsNow(): void {
+    this.syncAllConnections.emit();
   }
 
   openLogin(url: string): void {

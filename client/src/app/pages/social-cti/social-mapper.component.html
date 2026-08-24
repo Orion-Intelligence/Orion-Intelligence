@@ -69,7 +69,8 @@
                   [highlightedNodeId]="highlightedNodeId()"
                   (sidebarPlatformClicked)="onSidebarPlatformClicked($event)"
                   (manageProfilesRequested)="openManageProfiles($event)"
-                  (profileOverviewLabelChanged)="onProfileOverviewLabelChanged($event)">
+                  (profileOverviewLabelChanged)="onProfileOverviewLabelChanged($event)"
+                  (scanInProgress)="showScanInProgressNotification()">
                 </app-social-profile-listing>
               </div>
             </main>

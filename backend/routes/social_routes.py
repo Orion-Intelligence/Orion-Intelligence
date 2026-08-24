@@ -157,6 +157,21 @@ async def download_social_extension_firefox():
 
 
 @social_routes.post(
+    "/api/social/connections",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
+async def search_social_connections(data: dict = Body(...), current_user=Depends(get_current_user)):
+    return await social_model.getInstance().search_connections(
+        str(current_user.id),
+        (data or {}).get("profile_username") or (data or {}).get("username") or "",
+        (data or {}).get("platform") or "",
+        (data or {}).get("query") or "",
+        (data or {}).get("limit") or 500,
+    )
+
+
+@social_routes.post(
     "/api/social/data",
     include_in_schema=False,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced"]))])

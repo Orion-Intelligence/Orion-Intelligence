@@ -1,6 +1,6 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject, takeUntil, timeout } from 'rxjs';
 import type { social_profile, social_resource } from '../models/social.models';
 import type { CrawlResultState, CrawlResultView } from '../models/social-usability.models';
 import type { FetchTabKey } from '../enums/social-graph.enums';
@@ -8,6 +8,7 @@ import { SocialFetchService } from './social-fetch.service';
 import { SocialStorageService } from './social-storage.service';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { crawlKey, getPlatformCardId, getProfileGroupKey, isSamePlatform, mergeResourcesById, resourceKey } from '../utils/social-profile.util';
+import { categoryFor } from '../constants/resource-category.constants';
 
 @Injectable()
 export class SocialLiveSyncService {
@@ -19,6 +20,129 @@ export class SocialLiveSyncService {
   readonly crawlResults = signal<Record<string, CrawlResultState>>({});
   readonly liveStop = new Set<string>();
   readonly stoppedPlatformIds = new Set<string>();
+  readonly connectionsLoading = signal<Set<string>>(new Set<string>());
+  private readonly activePlatforms = new Set<string>();
+  private readonly stopSignals = new Map<string, Subject<void>>();
+
+  private stopSignalFor(key: string): Subject<void> {
+    let signal = this.stopSignals.get(key);
+    if (!signal) {
+      signal = new Subject<void>();
+      this.stopSignals.set(key, signal);
+    }
+    return signal;
+  }
+
+  private fireStop(key: string): void {
+    this.stopSignals.get(key)?.next();
+  }
+
+  stopPlatform(cardId: string): void {
+    for (const [key, signal] of this.stopSignals) {
+      if (key.startsWith(`${cardId}:`)) {
+        signal.next();
+      }
+    }
+  }
+
+  private platformKey(platformData: social_profile): string {
+    return (platformData.meta.platform ?? '').toLowerCase();
+  }
+
+  isScanning(platformData: social_profile): boolean {
+    return this.activePlatforms.has(this.platformKey(platformData));
+  }
+
+  async loadConnections(platformData: social_profile, postUrl: string): Promise<void> {
+    const url = String(postUrl ?? '');
+    if (!url || this.activePlatforms.has(this.platformKey(platformData)) || this.connectionsLoading().has(url)) {
+      return;
+    }
+    this.connectionsLoading.update(current => new Set(current).add(url));
+    try {
+      await this.startLiveFetch(platformData, 'connections', 'all', url);
+    }
+    finally {
+      this.connectionsLoading.update(current => {
+        const next = new Set(current);
+        next.delete(url);
+        return next;
+      });
+    }
+  }
+
+  async syncAllConnections(platformData: social_profile): Promise<void> {
+    const platform = this.platformKey(platformData);
+    const cardId = getPlatformCardId(platformData);
+    const key = crawlKey(platformData, 'connections');
+    if (this.activePlatforms.has(platform) || this.crawlResults()[key]?.loading) {
+      return;
+    }
+    this.activePlatforms.add(platform);
+    const stopKey = key;
+    this.liveStop.delete(stopKey);
+    this.stoppedPlatformIds.delete(cardId);
+    const stopped = () => this.liveStop.has(stopKey) || this.stoppedPlatformIds.has(cardId);
+    const existing = (this.findPlatform(platformData)?.resources ?? platformData.resources ?? []).find(entry => entry.id === 'connections');
+    const seen = new Set((existing?.resources ?? []).map(item => resourceKey(item as social_resource)));
+    const postUrls = this.collectPostUrls(platformData);
+    this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: '' } }));
+    try {
+      for (const postUrl of postUrls) {
+        if (stopped()) {
+          break;
+        }
+        let result;
+        try {
+          result = await firstValueFrom(this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, postUrl, 'connections', 'crawl', '').pipe(takeUntil(this.stopSignalFor(key)), timeout(120000)));
+        }
+        catch {
+          continue;
+        }
+        if (stopped()) {
+          break;
+        }
+        if (!result || result.idle || result.error) {
+          continue;
+        }
+        const items = ((result.items ?? []) as social_resource[]).slice(0, 50);
+        items.forEach(item => seen.add(resourceKey(item)));
+        if (items.length) {
+          this.storeLive(platformData, 'connections', items);
+        }
+        const last = items[items.length - 1];
+        this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : current[key]?.log } }));
+      }
+    }
+    finally {
+      this.crawlResults.update(current => ({ ...current, [key]: { loading: false, count: seen.size } }));
+      this.activePlatforms.delete(platform);
+    }
+  }
+
+  private collectPostUrls(platformData: social_profile): string[] {
+    const platform = platformData.meta.platform;
+    const source = this.findPlatform(platformData)?.resources ?? platformData.resources ?? [];
+    const seen = new Set<string>();
+    const items: { url: string; time: number }[] = [];
+    for (const collection of source) {
+      const category = categoryFor(platform, String(collection.id));
+      if (category !== 'feed' && category !== 'media') {
+        continue;
+      }
+      for (const item of collection.resources ?? []) {
+        const record = item as { url?: string; datetime?: string; created_at?: string; published_at?: string };
+        const url = String(record.url ?? '');
+        if (!url || seen.has(url)) {
+          continue;
+        }
+        seen.add(url);
+        const parsed = Date.parse(String(record.datetime ?? record.created_at ?? record.published_at ?? ''));
+        items.push({ url, time: Number.isFinite(parsed) ? parsed : 0 });
+      }
+    }
+    return items.sort((a, b) => b.time - a.time).map(item => item.url);
+  }
 
   crawlResultFor(platformData: social_profile, type: FetchTabKey): CrawlResultView {
     const state = this.crawlResults()[crawlKey(platformData, type)] ?? {};
@@ -29,17 +153,21 @@ export class SocialLiveSyncService {
   stopSync(platformData: social_profile, type: FetchTabKey): void {
     const key = crawlKey(platformData, type);
     this.liveStop.add(key);
+    this.fireStop(key);
     this.crawlResults.update(current => ({ ...current, [key]: { ...current[key], loading: false } }));
     this.setSectionStatus(platformData, type, 'completed');
     this.fetchService.cancelProfileCrawl(platformData.meta.platform, platformData.meta.username, type).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
-  async startLiveFetch(platformData: social_profile, type: FetchTabKey, mode: 'all' | 'catchup'): Promise<void> {
+  async startLiveFetch(platformData: social_profile, type: FetchTabKey, mode: 'all' | 'catchup', urlOverride?: string): Promise<void> {
     const cardId = getPlatformCardId(platformData);
     const key = crawlKey(platformData, type);
-    if (this.crawlResults()[key]?.loading) {
+    const platform = this.platformKey(platformData);
+    if (this.activePlatforms.has(platform) || this.crawlResults()[key]?.loading) {
       return;
     }
+    this.activePlatforms.add(platform);
+    const trackStatus = !urlOverride;
     const stopKey = key;
     this.liveStop.delete(stopKey);
     this.stoppedPlatformIds.delete(cardId);
@@ -47,13 +175,15 @@ export class SocialLiveSyncService {
     const seen = new Set((existing?.resources ?? []).map(item => resourceKey(item as social_resource)));
     const hadPrior = seen.size > 0;
     this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: '' } }));
-    this.setSectionStatus(platformData, type, 'fetching');
-    const url = buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
+    if (trackStatus) {
+      this.setSectionStatus(platformData, type, 'fetching');
+    }
+    const url = urlOverride || buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
     const stopped = () => this.liveStop.has(stopKey) || this.stoppedPlatformIds.has(cardId);
     const runPage = async (cursor: string): Promise<{ items: social_resource[]; next?: string; more: boolean } | 'error' | null> => {
       let result;
       try {
-        result = await firstValueFrom(this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, 'crawl', cursor));
+        result = await firstValueFrom(this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, url, type, 'crawl', cursor).pipe(takeUntil(this.stopSignalFor(stopKey))));
       }
       catch {
         return null;
@@ -67,49 +197,58 @@ export class SocialLiveSyncService {
       return { items: (result.items ?? []) as social_resource[], next: result.next_cursor, more: !!result.has_more };
     };
 
-    let cursor = '';
-    let stamped = false;
-    while (!stopped()) {
-      const page = await runPage(cursor);
-      if (page === null) {
-        break;
-      }
-      if (page === 'error') {
-        this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: 'crawl_failed' } }));
-        this.setSectionStatus(platformData, type, 'failed');
-        return;
-      }
-      if (stopped()) {
-        break;
-      }
-      const fresh = page.items.filter(item => {
-        const itemKey = resourceKey(item); if (seen.has(itemKey)) {
-          return false;
-        } seen.add(itemKey); return true;
-      });
-      if (page.items.length) {
-        this.storeLive(platformData, type, page.items);
-        if (!stamped) {
-          this.markSynced(platformData, type);
-          stamped = true;
+    try {
+      let cursor = '';
+      let stamped = false;
+      while (!stopped()) {
+        const page = await runPage(cursor);
+        if (page === null) {
+          break;
         }
+        if (page === 'error') {
+          this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: 'crawl_failed' } }));
+          if (trackStatus) {
+            this.setSectionStatus(platformData, type, 'failed');
+          }
+          return;
+        }
+        if (stopped()) {
+          break;
+        }
+        const fresh = page.items.filter(item => {
+          const itemKey = resourceKey(item); if (seen.has(itemKey)) {
+            return false;
+          } seen.add(itemKey); return true;
+        });
+        if (page.items.length) {
+          this.storeLive(platformData, type, page.items);
+          if (!stamped) {
+            this.markSynced(platformData, type);
+            stamped = true;
+          }
+        }
+        const last = page.items[page.items.length - 1];
+        this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : current[key]?.log } }));
+        if (seen.size >= this.maxSyncItems) {
+          break;
+        }
+        if (mode === 'catchup' && hadPrior && fresh.length === 0) {
+          break;
+        }
+        if (!page.more || !page.next) {
+          break;
+        }
+        cursor = page.next;
       }
-      const last = page.items[page.items.length - 1];
-      this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : current[key]?.log } }));
-      if (seen.size >= this.maxSyncItems) {
-        break;
-      }
-      if (mode === 'catchup' && hadPrior && fresh.length === 0) {
-        break;
-      }
-      if (!page.more || !page.next) {
-        break;
-      }
-      cursor = page.next;
-    }
 
-    this.setSectionStatus(platformData, type, 'completed');
-    this.crawlResults.update(current => ({ ...current, [key]: { loading: false, count: seen.size } }));
+      if (trackStatus) {
+        this.setSectionStatus(platformData, type, 'completed');
+      }
+      this.crawlResults.update(current => ({ ...current, [key]: { loading: false, count: seen.size } }));
+    }
+    finally {
+      this.activePlatforms.delete(platform);
+    }
   }
 
   setSectionStatus(platformData: social_profile, section: string, status: string): void {

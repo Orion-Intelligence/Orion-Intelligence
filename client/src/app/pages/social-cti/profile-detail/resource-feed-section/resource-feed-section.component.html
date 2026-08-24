@@ -158,6 +158,13 @@
         <div class="mt-2"></div>
       }
 
+      @if (connectionsEnabled() && view.url) {
+        <div class="mx-3 flex items-center border-t border-[rgba(148,163,184,0.10)] py-1 [body.light-theme_&]:border-[#dce6f1]">
+          <button data-testid="social-feed-load-connections" type="button" (click)="onLoadConnections(view, $event)" [disabled]="isConnectionsLoading(view)" [title]="'Pull this post\'s commenters into Connections' | translate" class="ml-auto inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(148,163,184,0.22)] bg-transparent px-3 text-[12px] font-semibold text-[var(--color-text3)] outline-none transition-colors hover:border-sky-400/40 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-60 [.light-theme_&]:border-[#d7e2ee] [.light-theme_&]:hover:bg-[#eef5fc]">
+            <i class="bi text-[13px]" [class.bi-people]="!isConnectionsLoading(view)" [class.bi-arrow-repeat]="isConnectionsLoading(view)" [class.animate-spin]="isConnectionsLoading(view)" aria-hidden="true"></i>{{ (isConnectionsLoading(view) ? 'Loading…' : 'Connections') | translate }}
+          </button>
+        </div>
+      }
     </article>
       @if (view.extra.length) {
         <div data-testid="social-feed-extra" class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] min-[1700px]:relative min-[1700px]:min-w-0 min-[1700px]:flex-1 min-[1700px]:!block min-[1700px]:rounded-l-none min-[1700px]:border-l-[rgba(148,163,184,0.10)] transition-[border-color] group-hover:border-sky-400/25 min-[1700px]:group-hover:border-l-[rgba(148,163,184,0.10)]" [class.hidden]="!isExpanded(view)">

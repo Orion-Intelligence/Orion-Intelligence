@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, DestroyRef, computed, effect, injec
 import { NgClass } from '@angular/common';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, Subject, timer } from 'rxjs';
-import { exhaustMap, map, takeUntil } from 'rxjs/operators';
+import { Observable, Subject, of, timer } from 'rxjs';
+import { debounceTime, exhaustMap, map, switchMap, takeUntil } from 'rxjs/operators';
 import type { social_profile } from '../models/social.models';
 import { formatFollowers } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
@@ -38,6 +38,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 })
 export class SocialProfileListingComponent {
   private readonly detailsTab: FetchTab = { key: 'details', label: 'Details', icon: 'bi bi-person-badge' };
+  private readonly connectionsTab: FetchTab = { key: 'connections', label: 'Connections', icon: 'bi bi-people' };
   private readonly onlinePresenceTab: FetchTab = { key: 'onlinePresence', label: 'Online Presence', icon: 'bi bi-globe2' };
   private readonly stealerLogsTab: FetchTab = { key: 'stealerLogs', label: 'Stealer Logs', icon: 'bi bi-shield-exclamation' };
   private readonly profileFetchTabs: FetchTab[] = [this.detailsTab, this.onlinePresenceTab, this.stealerLogsTab];
@@ -80,17 +81,13 @@ export class SocialProfileListingComponent {
   });
   private readonly loadingUsernames = computed(() => {
     const usernames = new Set<string>();
-    for (const platformId of this.loadingPlatformIds()) {
-      const username = platformId.match(/^platform-(.+?)\|/)?.[1];
-      if (username) {
-        usernames.add(username);
-      }
-    }
+    const loadingIds = this.loadingPlatformIds();
     for (const [username, profiles] of this.storageService.state.scanResults()) {
-      for (const platform of profiles) {
-        if (Object.values(platform.section_status ?? {}).some(status => status === 'fetching')) {
-          usernames.add(username);
-        }
+      const loading = profiles.some(platform =>
+        loadingIds.has(this.getPlatformCardId(platform))
+        || Object.values(platform.section_status ?? {}).some(status => status === 'fetching'));
+      if (loading) {
+        usernames.add(username);
       }
     }
     return usernames;
@@ -103,6 +100,7 @@ export class SocialProfileListingComponent {
   sidebarPlatformClicked = output<string>();
   profileOverviewLabelChanged = output<string | null>();
   manageProfilesRequested = output<FeedUser>();
+  scanInProgress = output<void>();
   highlightedNodeId = input<string | null>(null);
   activeTabs = signal<Record<string, FetchTabKey | null>>({});
   profileOverviewIds = signal<Set<string>>(new Set<string>());
@@ -141,8 +139,25 @@ export class SocialProfileListingComponent {
     return platformId ? this.getPlatformById(platformId) ?? null : null;
   });
 
+  private readonly connectionSearchResults = signal<Record<string, unknown[] | null>>({});
+  private readonly connectionSearch$ = new Subject<{ platformData: social_profile; term: string }>();
+
   constructor() {
     this.startExtensionHeartbeat();
+    this.connectionSearch$.pipe(
+      debounceTime(250),
+      switchMap(({ platformData, term }) => {
+        const key = this.getPlatformCardId(platformData);
+        const query = term.trim();
+        if (!query) {
+          return of({ key, items: null as unknown[] | null });
+        }
+        return this.fetchService.searchConnections(platformData.meta.platform, platformData.meta.username, query).pipe(map(items => ({ key, items: items as unknown[] | null })));
+      }),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(({ key, items }) => {
+      this.connectionSearchResults.update(current => ({ ...current, [key]: items }));
+    });
     effect(() => {
       this.storageService.state.loadingUsernames.set(this.loadingUsernames());
     });
@@ -200,7 +215,7 @@ export class SocialProfileListingComponent {
       return this.profileFetchTabs;
     }
     const crawlTabs: FetchTab[] = types.map(type => ({ key: type as FetchTabKey, label: type.charAt(0).toUpperCase() + type.slice(1), icon: type === 'details' ? 'bi bi-person-badge' : 'bi bi-collection' }));
-    return [...crawlTabs, this.onlinePresenceTab, this.stealerLogsTab];
+    return [...crawlTabs, this.connectionsTab, this.onlinePresenceTab, this.stealerLogsTab];
   }
 
   crawlResultFor(platformData: social_profile, type: FetchTabKey): CrawlResultView {
@@ -210,6 +225,7 @@ export class SocialProfileListingComponent {
   stopPlatformFetches(platformData: social_profile): void {
     const cardId = this.getPlatformCardId(platformData);
     this.liveSync.stoppedPlatformIds.add(cardId);
+    this.liveSync.stopPlatform(cardId);
     for (const [key, cancel$] of Array.from(this.fetchCancelSubjects)) {
       if (key.includes(cardId)) {
         cancel$.next();
@@ -335,18 +351,54 @@ export class SocialProfileListingComponent {
 
   onProfileTabSyncAll(platformData: social_profile, tabKey: FetchTabKey): void {
     if (this.isExtensionReady()) {
+      if (this.liveSync.isScanning(platformData)) {
+        this.scanInProgress.emit();
+      }
       void this.liveSync.startLiveFetch(platformData, tabKey, 'all');
     }
   }
 
   onProfileTabSyncCatchup(platformData: social_profile, tabKey: FetchTabKey): void {
     if (this.isExtensionReady()) {
+      if (this.liveSync.isScanning(platformData)) {
+        this.scanInProgress.emit();
+      }
       void this.liveSync.startLiveFetch(platformData, tabKey, 'catchup');
     }
   }
 
   onProfileTabStopSync(platformData: social_profile, tabKey: FetchTabKey): void {
     this.liveSync.stopSync(platformData, tabKey);
+  }
+
+  onProfileTabLoadConnections(platformData: social_profile, postUrl: string): void {
+    if (this.isExtensionReady() && postUrl) {
+      if (this.liveSync.isScanning(platformData)) {
+        this.scanInProgress.emit();
+      }
+      void this.liveSync.loadConnections(platformData, postUrl);
+    }
+  }
+
+  onProfileTabSyncAllConnections(platformData: social_profile): void {
+    if (this.isExtensionReady()) {
+      if (this.liveSync.isScanning(platformData)) {
+        this.scanInProgress.emit();
+      }
+      void this.liveSync.syncAllConnections(platformData);
+    }
+  }
+
+  onProfileConnectionSearch(platformData: social_profile, term: string): void {
+    this.connectionSearch$.next({ platformData, term });
+  }
+
+  getConnectionSearchResults(platformData: social_profile): unknown[] | null {
+    return this.connectionSearchResults()[this.getPlatformCardId(platformData)] ?? null;
+  }
+
+  connectionsLoading(): Set<string> {
+    return this.liveSync.connectionsLoading();
   }
 
   onProfileOnlinePresenceTermChanged(platformData: social_profile, term: string): void {
@@ -374,6 +426,9 @@ export class SocialProfileListingComponent {
   }
 
   private isSectionBusy(platformData: social_profile, tabKey: FetchTabKey): boolean {
+    if (tabKey === 'connections') {
+      return false;
+    }
     if (tabKey === 'details' || tabKey === 'onlinePresence' || tabKey === 'stealerLogs') {
       return this.isTabLoading(platformData, tabKey);
     }

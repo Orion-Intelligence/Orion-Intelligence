@@ -308,7 +308,7 @@ export class SocialMapperComponent {
     this.profileBreadcrumbLabel.set(label);
   }
 
-  private showScanInProgressNotification(): void {
+  protected showScanInProgressNotification(): void {
     clearTimeout(this.notificationTimeout);
     this.notification.set({
       message: 'A scan for this user is already in progress.',

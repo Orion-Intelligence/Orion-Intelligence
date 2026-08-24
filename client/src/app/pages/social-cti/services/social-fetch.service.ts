@@ -30,6 +30,11 @@ export class SocialFetchService {
     return this.api.post('social/profile', { platform, username, url: '', type, command: 'cancel' }).pipe(catchError(() => of(null)));
   }
 
+  searchConnections(platform: string, username: string, query: string): Observable<unknown[]> {
+    return this.api.post<ApiEnvelope<{ items?: unknown[] }>>('social/connections', { platform, username, query })
+      .pipe(map(response => response?.result?.items ?? []), catchError(() => of<unknown[]>([])));
+  }
+
   fetchStealerLogsByIdentity(query: string): Observable<social_stealer_log[]> {
     const payload = { daterange: '', q: '', url: '', user: query, ioc: `m_search_all:${query}`, type: 'c', page: 1, category: '', fullsearch: false };
     return this.api.post<any>('search/stealer/ioc', payload).pipe(map(response => response?.Result ?? response?.result?.Result ?? response?.data?.Result ?? []),

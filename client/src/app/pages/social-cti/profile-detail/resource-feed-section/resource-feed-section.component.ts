@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { applyImageFallback } from '../../utils/image-fallback.util';
@@ -87,9 +87,23 @@ export class SocialResourceFeedSectionComponent {
   profileAvatar = input('');
   profileName = input('');
   profileUsername = input('');
+  connectionsEnabled = input(false);
+  connectionsLoading = input<Set<string>>(new Set<string>());
+  loadConnections = output<string>();
   readonly onImageError = applyImageFallback;
   readonly formatKeyLabel = formatKeyLabel;
   views = computed<feed_item_view[]>(() => this.items().map((item, index) => this.toView(item, index)));
+
+  isConnectionsLoading(view: feed_item_view): boolean {
+    return !!view.url && this.connectionsLoading().has(view.url);
+  }
+
+  onLoadConnections(view: feed_item_view, event: Event): void {
+    event.stopPropagation();
+    if (view.url) {
+      this.loadConnections.emit(view.url);
+    }
+  }
 
   isExpanded(view: feed_item_view): boolean {
     return this.expandedKeys().has(view.key);
