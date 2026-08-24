@@ -1,0 +1,163 @@
+<div class="mx-auto w-full max-w-[2400px] px-5 pb-[200px] lg:px-8">
+
+
+  <form (ngSubmit)="analyzeText($event)" novalidate class="mt-6 flex items-center">
+    <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3 max-[800px]:flex-col max-[800px]:items-stretch max-w-[800px]">
+      <div class="min-w-0 flex-1">
+        <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white">
+          <div class="flex w-[45px] items-center justify-center bg-white">
+            <i class="bi bi-person text-[16px] text-gray-400"></i>
+          </div>
+          <input data-testid="scan-primary-input" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-gray-400" [placeholder]="'Phone Number (e.g., +92...) or Domain URL' | translate" type="text" [(ngModel)]="query" name="query" required autocomplete="off">
+          <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-600/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit" [disabled]="loading || !query.trim()">{{ 'Search' | translate }}</button>
+        </div>
+      </div>
+    </div>
+  </form>
+
+  <div class="mt-4 mb-8 flex items-center gap-[8px] text-[13px] text-[var(--color-text3)]">
+    <span class="text-[14px] text-[#eab308]">💡</span>
+    <span>{{ 'Extracts intelligence from Phone Numbers and Domains using Maps & Web OSINT.' | translate }}</span>
+  </div>
+
+
+  @if (!queryTriggered && !loading && !result && !errorMessage) {
+    <div class="mt-[80px] flex flex-col items-center justify-center text-center">
+      <div class="relative mb-4 flex h-[90px] w-[120px] flex-col items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-sm">
+         <div class="absolute top-2 left-2 flex gap-1">
+           <div class="h-2 w-2 rounded-full bg-red-400"></div>
+           <div class="h-2 w-2 rounded-full bg-yellow-400"></div>
+           <div class="h-2 w-2 rounded-full bg-green-400"></div>
+         </div>
+         <i class="bi bi-search mt-2 text-[35px] text-blue-400"></i>
+      </div>
+      <div class="text-[16px] font-bold text-[var(--color-text1)]">{{ 'No Keyword Entered Yet!' | translate }}</div>
+      <div class="mt-1 text-[13.5px] text-[var(--color-text4)]">{{ 'Enter a keyword to see results' | translate }}</div>
+    </div>
+  }
+
+
+  @if (queryTriggered && loading) {
+    <div class="mt-[15px] ml-0 max-w-[800px]">
+      <div class="mb-[6px] text-[12px] font-medium capitalize text-[var(--color-text1)]">{{ currentStep }}</div>
+      <div class="ui-progress-track h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+        <div class="ui-progress-indeterminate-bar" [ngClass]="'ui-wpct-' + progress"></div>
+      </div>
+    </div>
+    <div class="ui-ioc-table-shell mt-4 max-w-[800px] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
+      <div class="space-y-2 px-4 py-4">
+        @for (i of [1,2,3]; track i) {
+          <div class="grid items-center gap-2 grid-cols-[60px_1fr_120px]">
+            <div class="ui-shimmer h-3 w-8 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer h-3 w-full max-w-[300px] rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-720)]"></div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+
+  @if (queryTriggered && !loading && errorMessage) {
+    <section class="mt-[15px] max-w-[800px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center">
+      <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Target Intelligence Failed' | translate }}</div>
+      <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ errorMessage }}</div>
+    </section>
+  }
+
+
+  @if (queryTriggered && !loading && result && !errorMessage) {
+    <div class="mt-[20px] grid grid-cols-1 gap-[16px] lg:grid-cols-2">
+
+
+      <div class="w-full h-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
+        <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+          <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#10b981]">
+            <i class="bi bi-building"></i> <span>{{ 'Entity Identification' | translate }}</span>
+          </div>
+        </div>
+        <div class="px-[16px] py-[16px] space-y-[10px] min-h-[150px]">
+           @if(result.name || result.formatted_address || result.phone_numbers?.length) {
+             @if(result.name) {
+               <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Name</span><br><span class="text-[14px] font-[600]">{{ result.name }}</span></div>
+             }
+             @if(result.formatted_address) {
+               <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Physical Location</span><br><span class="text-[13px]">{{ result.formatted_address }}</span></div>
+             }
+             @if(result.rating) {
+               <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Public Rating</span><br><span class="text-[13px]">⭐ {{ result.rating }} ({{ result.user_ratings_total }} User Reviews)</span></div>
+             }
+             @if(result.website) {
+               <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Official Portal</span><br><a [href]="result.website" target="_blank" class="text-[13px] font-mono text-blue-400 hover:underline">{{ result.website }}</a></div>
+             }
+             @if(result.phone_numbers?.length) {
+               <div>
+                  <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Associated Numbers</span>
+                  <ul class="mt-1 space-y-1">
+                    @for(num of result.phone_numbers; track num) {
+                      <li class="font-mono text-[13px] font-[600] text-[var(--color-text1)]">{{ num }}</li>
+                    }
+                  </ul>
+               </div>
+             }
+           } @else {
+
+              <div class="flex h-full flex-col items-center justify-center text-center text-[var(--color-text4)] mt-4">
+                <i class="bi bi-geo-alt text-[24px] mb-2 opacity-40"></i>
+                <span class="text-[13px]">{{ 'No physical entity or business verified on Maps.' | translate }}</span>
+              </div>
+           }
+        </div>
+      </div>
+
+
+      <div class="w-full h-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
+        <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+          <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#3b82f6]">
+            <i class="bi bi-globe2"></i> <span>{{ 'Open Source Footprints' | translate }}</span>
+          </div>
+        </div>
+        <div class="px-[16px] py-[16px] space-y-[14px] min-h-[150px]">
+          @if (result.web_footprints?.length || result.knowledge_graph || result.emails?.length) {
+            @if(result.knowledge_graph) {
+              <div>
+                <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Knowledge Graph ({{ result.knowledge_graph.description }})</span>
+                <p class="mt-1 text-[13px] text-[var(--color-text2)] leading-5">{{ result.knowledge_graph.detailed_desc || 'No detailed background verified.' }}</p>
+              </div>
+            }
+            @if(result.emails?.length) {
+              <div>
+                 <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Discovered Emails</span>
+                 <ul class="mt-1 space-y-1">
+                   @for(email of result.emails; track email) {
+                     <li class="font-mono text-[13px] text-[#fbbf24]">{{ email }}</li>
+                   }
+                 </ul>
+              </div>
+            }
+            @if (result.web_footprints?.length) {
+              <div>
+                 <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Web Mentions ({{ result.web_footprints.length }} Hits)</span>
+                 <div class="mt-2 space-y-3">
+                    @for(footprint of result.web_footprints; track footprint.link) {
+                        <div class="border-b border-[var(--color-divider)] pb-2 last:border-0 last:pb-0">
+                            <a [href]="footprint.link" target="_blank" class="block truncate text-[13px] font-semibold text-blue-400 hover:underline">{{ footprint.title }}</a>
+                            <p class="mt-[4px] text-[12px] leading-[18px] text-[var(--color-text4)]">{{ footprint.snippet }}</p>
+                        </div>
+                    }
+                 </div>
+              </div>
+            }
+          } @else {
+
+              <div class="flex h-full flex-col items-center justify-center text-center text-[var(--color-text4)] mt-4">
+                <i class="bi bi-search text-[24px] mb-2 opacity-40"></i>
+                <span class="text-[13px]">{{ 'No public footprints found for this query.' | translate }}</span>
+              </div>
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+</div>
