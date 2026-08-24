@@ -8,22 +8,12 @@
           <div class="flex w-[45px] items-center justify-center bg-white">
             <i class="bi bi-person text-[16px] text-gray-400"></i>
           </div>
-          <input data-testid="scan-primary-input"
-                 class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-gray-400"
-                 [placeholder]="'Phone Number (e.g., +92...) or Domain URL' | translate"
-                 type="text"
-                 [(ngModel)]="query" name="query" required autocomplete="off">
-          <button data-testid="scan-search-button"
-                  class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-600/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40"
-                  type="submit"
-                  [disabled]="loading || !query.trim()">
-            {{ 'Search' | translate }}
-          </button>
+          <input data-testid="scan-primary-input" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-gray-400" [placeholder]="'Phone Number (e.g., +92...) or Domain URL' | translate" type="text" [(ngModel)]="query" name="query" required autocomplete="off">
+          <button data-testid="scan-search-button" class="ui-btn ui-btn-primary h-full min-w-[112px] shrink-0 rounded-none rounded-r-[8px] border-l border-sky-600/20 px-5 text-white disabled:cursor-not-allowed disabled:opacity-40" type="submit" [disabled]="loading || !query.trim()">{{ 'Search' | translate }}</button>
         </div>
       </div>
     </div>
   </form>
-
 
   <div class="mt-4 mb-8 flex items-center gap-[8px] text-[13px] text-[var(--color-text3)]">
     <span class="text-[14px] text-[#eab308]">💡</span>
@@ -33,7 +23,6 @@
 
   @if (!queryTriggered && !loading && !result && !errorMessage) {
     <div class="mt-[80px] flex flex-col items-center justify-center text-center">
-
       <div class="relative mb-4 flex h-[90px] w-[120px] flex-col items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-sm">
          <div class="absolute top-2 left-2 flex gap-1">
            <div class="h-2 w-2 rounded-full bg-red-400"></div>
@@ -55,8 +44,6 @@
         <div class="ui-progress-indeterminate-bar" [ngClass]="'ui-wpct-' + progress"></div>
       </div>
     </div>
-
-
     <div class="ui-ioc-table-shell mt-4 max-w-[800px] overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
       <div class="space-y-2 px-4 py-4">
         @for (i of [1,2,3]; track i) {
@@ -70,6 +57,7 @@
     </div>
   }
 
+
   @if (queryTriggered && !loading && errorMessage) {
     <section class="mt-[15px] max-w-[800px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center">
       <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Target Intelligence Failed' | translate }}</div>
@@ -82,14 +70,14 @@
     <div class="mt-[20px] grid grid-cols-1 gap-[16px] lg:grid-cols-2">
 
 
-      @if (result.name || result.formatted_address || result.phone_numbers) {
-        <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
-          <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
-            <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#10b981]">
-              <i class="bi bi-building"></i> <span>{{ 'Entity Identification' | translate }}</span>
-            </div>
+      <div class="w-full h-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
+        <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+          <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#10b981]">
+            <i class="bi bi-building"></i> <span>{{ 'Entity Identification' | translate }}</span>
           </div>
-          <div class="px-[16px] py-[12px] space-y-[10px]">
+        </div>
+        <div class="px-[16px] py-[16px] space-y-[10px] min-h-[150px]">
+           @if(result.name || result.formatted_address || result.phone_numbers?.length) {
              @if(result.name) {
                <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Name</span><br><span class="text-[14px] font-[600]">{{ result.name }}</span></div>
              }
@@ -112,26 +100,31 @@
                   </ul>
                </div>
              }
+           } @else {
+
+              <div class="flex h-full flex-col items-center justify-center text-center text-[var(--color-text4)] mt-4">
+                <i class="bi bi-geo-alt text-[24px] mb-2 opacity-40"></i>
+                <span class="text-[13px]">{{ 'No physical entity or business verified on Maps.' | translate }}</span>
+              </div>
+           }
+        </div>
+      </div>
+
+
+      <div class="w-full h-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
+        <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+          <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#3b82f6]">
+            <i class="bi bi-globe2"></i> <span>{{ 'Open Source Footprints' | translate }}</span>
           </div>
         </div>
-      }
-
-      @if (result.web_footprints || result.knowledge_graph || result.emails?.length) {
-        <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm">
-          <div class="border-b border-[var(--color-divider)] px-[16px] py-[12px]">
-            <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#3b82f6]">
-              <i class="bi bi-globe2"></i> <span>{{ 'Open Source Footprints' | translate }}</span>
-            </div>
-          </div>
-          <div class="px-[16px] py-[12px] space-y-[14px]">
-
+        <div class="px-[16px] py-[16px] space-y-[14px] min-h-[150px]">
+          @if (result.web_footprints?.length || result.knowledge_graph || result.emails?.length) {
             @if(result.knowledge_graph) {
               <div>
                 <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Knowledge Graph ({{ result.knowledge_graph.description }})</span>
                 <p class="mt-1 text-[13px] text-[var(--color-text2)] leading-5">{{ result.knowledge_graph.detailed_desc || 'No detailed background verified.' }}</p>
               </div>
             }
-
             @if(result.emails?.length) {
               <div>
                  <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Discovered Emails</span>
@@ -142,7 +135,6 @@
                  </ul>
               </div>
             }
-
             @if (result.web_footprints?.length) {
               <div>
                  <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Web Mentions ({{ result.web_footprints.length }} Hits)</span>
@@ -156,9 +148,16 @@
                  </div>
               </div>
             }
-          </div>
+          } @else {
+
+              <div class="flex h-full flex-col items-center justify-center text-center text-[var(--color-text4)] mt-4">
+                <i class="bi bi-search text-[24px] mb-2 opacity-40"></i>
+                <span class="text-[13px]">{{ 'No public footprints found for this query.' | translate }}</span>
+              </div>
+          }
         </div>
-      }
+      </div>
+
     </div>
   }
 </div>
