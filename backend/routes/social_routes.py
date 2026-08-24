@@ -168,6 +168,7 @@ async def search_social_connections(data: dict = Body(...), current_user=Depends
         (data or {}).get("platform") or "",
         (data or {}).get("query") or "",
         (data or {}).get("limit") or 500,
+        (data or {}).get("post_url") or "",
     )
 
 

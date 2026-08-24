@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { SocialConnectionsPopupComponent } from '../connections-popup/social-connections-popup.component';
 import { applyImageFallback } from '../../utils/image-fallback.util';
 import { asRecord, formatKeyLabel, initialOf, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, resource_entry, resource_time, toggleKey } from '../../utils/resource-view.util';
 
@@ -62,7 +63,7 @@ function normalizeName(value: string): string {
   selector: 'app-social-resource-feed',
   templateUrl: './resource-feed-section.component.html',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [DatePipe, TranslatePipe, SocialConnectionsPopupComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialResourceFeedSectionComponent {
@@ -84,11 +85,13 @@ export class SocialResourceFeedSectionComponent {
   });
 
   items = input.required<unknown[]>();
+  platform = input('');
   profileAvatar = input('');
   profileName = input('');
   profileUsername = input('');
   connectionsEnabled = input(false);
   connectionsLoading = input<Set<string>>(new Set<string>());
+  connectionsByPost = input<ReadonlyMap<string, unknown[]>>(new Map());
   loadConnections = output<string>();
   readonly onImageError = applyImageFallback;
   readonly formatKeyLabel = formatKeyLabel;

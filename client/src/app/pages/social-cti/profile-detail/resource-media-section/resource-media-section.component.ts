@@ -1,6 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { SocialConnectionsPopupComponent } from '../connections-popup/social-connections-popup.component';
 import { applyImageFallback } from '../../utils/image-fallback.util';
 import { asRecord, formatKeyLabel, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, resource_entry, resource_time, toggleKey } from '../../utils/resource-view.util';
 
@@ -43,16 +44,33 @@ const CLAIMED_KEYS = new Set([
   selector: 'app-social-resource-media',
   templateUrl: './resource-media-section.component.html',
   standalone: true,
-  imports: [DatePipe, TranslatePipe],
+  imports: [DatePipe, TranslatePipe, SocialConnectionsPopupComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialResourceMediaSectionComponent {
   private readonly expandedKeys = signal<Set<string>>(new Set<string>());
 
   items = input.required<unknown[]>();
+  platform = input('');
+  profileUsername = input('');
+  connectionsEnabled = input(false);
+  connectionsLoading = input<Set<string>>(new Set<string>());
+  connectionsByPost = input<ReadonlyMap<string, unknown[]>>(new Map());
+  loadConnections = output<string>();
   readonly onImageError = applyImageFallback;
   readonly formatKeyLabel = formatKeyLabel;
   views = computed<media_item_view[]>(() => this.items().map((item, index) => this.toView(item, index)));
+
+  isConnectionsLoading(view: media_item_view): boolean {
+    return !!view.url && this.connectionsLoading().has(view.url);
+  }
+
+  onLoadConnections(view: media_item_view, event: Event): void {
+    event.stopPropagation();
+    if (view.url) {
+      this.loadConnections.emit(view.url);
+    }
+  }
   isImageGrid = computed(() => this.views().length > 0 && this.views().every(view => !view.isVideo));
   fillers = computed<number[]>(() => {
     if (!this.isImageGrid()) {
@@ -74,6 +92,7 @@ export class SocialResourceMediaSectionComponent {
     const record = asRecord(item);
     const kind = pickText(record, 'photo_type', 'media_type', 'content_type').toLowerCase().replace(/^lockup_content_type_/, '');
     const isVideo = pickFlag(record, 'is_video') || VIDEO_TYPES.has(kind) || VIDEO_TYPES.has(pickText(record, 'type').toLowerCase());
+    const isCollection = /playlist|album|set/.test(kind);
     const rawTitle = pickText(record, 'title_text', 'title');
     const title = rawTitle && rawTitle.toLowerCase() !== kind ? rawTitle : '';
     const author = pickText(record, 'author_name', 'channel_title', 'channel', 'display_name', 'author', 'preferred_username');
@@ -95,7 +114,7 @@ export class SocialResourceMediaSectionComponent {
       isVideo,
       isVertical: VERTICAL_TYPES.has(kind) || VERTICAL_TYPES.has(pickText(record, 'type').toLowerCase()),
       isLive: pickFlag(record, 'is_live'),
-      image: isVideo ? pickText(record, 'thumbnail_max', 'thumbnail_url', 'thumbnail_default', 'thumbnail_frame', 'thumbnail', 'image_url') : pickText(record, 'media_url', 'photo_url', 'image_url', 'thumbnail_url', 'thumbnail', 'url'),
+      image: isVideo || isCollection ? pickText(record, 'thumbnail_max', 'thumbnail_url', 'thumbnail_source', 'thumbnail_default', 'thumbnail_frame', 'thumbnail', 'image_url') : pickText(record, 'media_url', 'photo_url', 'image_url', 'thumbnail_url', 'thumbnail', 'url'),
       fullImage: pickText(record, 'media_url', 'photo_url', 'image_url', 'thumbnail_max', 'thumbnail_url'),
       url: pickText(record, 'url', 'short_url', 'media_url'),
       duration: pickText(record, 'duration_text', 'duration', 'video_duration'),

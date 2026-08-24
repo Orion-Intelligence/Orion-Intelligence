@@ -210,7 +210,8 @@ export class SocialProfileListingComponent {
   }
 
   getFetchTabs(): FetchTab[] {
-    const types = (this.activeProfilePlatform()?.profile_details?.crawl_type ?? []).filter(type => type !== 'following');
+    const appended = new Set(['following', 'connections', 'onlinePresence', 'stealerLogs']);
+    const types = (this.activeProfilePlatform()?.profile_details?.crawl_type ?? []).filter(type => !appended.has(type));
     if (!types.length) {
       return this.profileFetchTabs;
     }
@@ -354,16 +355,7 @@ export class SocialProfileListingComponent {
       if (this.liveSync.isScanning(platformData)) {
         this.scanInProgress.emit();
       }
-      void this.liveSync.startLiveFetch(platformData, tabKey, 'all');
-    }
-  }
-
-  onProfileTabSyncCatchup(platformData: social_profile, tabKey: FetchTabKey): void {
-    if (this.isExtensionReady()) {
-      if (this.liveSync.isScanning(platformData)) {
-        this.scanInProgress.emit();
-      }
-      void this.liveSync.startLiveFetch(platformData, tabKey, 'catchup');
+      void this.liveSync.startLiveFetch(platformData, tabKey);
     }
   }
 
@@ -399,6 +391,10 @@ export class SocialProfileListingComponent {
 
   connectionsLoading(): Set<string> {
     return this.liveSync.connectionsLoading();
+  }
+
+  connectionsByPost(): ReadonlyMap<string, unknown[]> {
+    return this.liveSync.connectionsByPost();
   }
 
   onProfileOnlinePresenceTermChanged(platformData: social_profile, term: string): void {
@@ -607,7 +603,7 @@ export class SocialProfileListingComponent {
             this.refetchTabData(platform, section as FetchTabKey);
           }
           else {
-            void this.liveSync.startLiveFetch(platform, section as FetchTabKey, 'all');
+            void this.liveSync.startLiveFetch(platform, section as FetchTabKey);
           }
         }
       }

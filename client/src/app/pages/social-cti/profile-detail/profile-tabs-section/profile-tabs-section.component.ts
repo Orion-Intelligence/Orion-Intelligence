@@ -52,11 +52,11 @@ export class SocialProfileTabsSectionComponent {
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
   connectionsLoading = input<Set<string>>(new Set<string>());
+  connectionsByPost = input<ReadonlyMap<string, unknown[]>>(new Map());
   crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; login_url?: string; count?: number; log?: string; lastSynced?: string }>({});
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
   syncAll = output<FetchTabKey>();
-  syncCatchup = output<FetchTabKey>();
   stopSync = output<FetchTabKey>();
   loadConnections = output<string>();
   syncAllConnections = output<void>();
@@ -96,6 +96,13 @@ export class SocialProfileTabsSectionComponent {
     return !Number.isFinite(parsed) || (Date.now() - parsed) > 86400000;
   });
 
+  scrollToActiveConnectionPost(): void {
+    const element = document.querySelector('.ui-connection-beam');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
   showMoreFromDb(): void {
     this.displayLimit.update(current => current + 50);
   }
@@ -106,10 +113,6 @@ export class SocialProfileTabsSectionComponent {
 
   syncAllNow(): void {
     this.syncAll.emit(this.activeTab());
-  }
-
-  syncCatchupNow(): void {
-    this.syncCatchup.emit(this.activeTab());
   }
 
   stopSyncNow(): void {
@@ -158,11 +161,6 @@ export class SocialProfileTabsSectionComponent {
   crawlItemCaption(item: unknown): string {
     const record = this.crawlItemRecord(item);
     return String(record['caption'] ?? record['description'] ?? '');
-  }
-
-  crawlItemType(item: unknown): string {
-    const record = this.crawlItemRecord(item);
-    return String(record['media_type'] ?? record['type'] ?? '');
   }
 
   crawlItemImageUrl(item: unknown): string {
@@ -280,30 +278,6 @@ export class SocialProfileTabsSectionComponent {
     return this.formatMetadataValue(value);
   }
 
-  getDisplayImageUrl(value: any): string {
-    const url = this.getDisplayUrl(value);
-    return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
-  }
-
-  getSocialImageHref(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
-    return image?.image_url || image?.thumbnail || '';
-  }
-
-  getSocialImageSrc(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
-    const url = image?.thumbnail || image?.image_url || '';
-    return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
-  }
-
-  getDisplayableSocialImages<T extends { image_url?: string; thumbnail?: string }>(images: T[] | null | undefined): T[] {
-    return (images || []).filter(image => !!this.getSocialImageSrc(image));
-  }
-
-  private isBlockedInstagramProfileImageUrl(url: string): boolean {
-    return /\/t51\.[^/]+-19\//i.test(url)
-      || /[?&]efg=[^&]*profile/i.test(url)
-      || /profile_pic/i.test(url);
-  }
-
   getProfileDetailEntries(platformData: social_profile): { key: string; value: any; }[] {
     return getProfileDetailEntries(platformData);
   }
@@ -367,14 +341,6 @@ export class SocialProfileTabsSectionComponent {
     }
     const s = String(value);
     return !isNaN(Number(s.replace(/,/g, ''))) && s.trim() !== '';
-  }
-
-  isBool(value: any): boolean {
-    if (typeof value === 'boolean') {
-      return true;
-    }
-    const s = String(value).toLowerCase().trim();
-    return s === 'true' || s === 'false';
   }
 
   getOnlinePresence(platformData: social_profile): social_online_presence_hit[] | null {

@@ -21,6 +21,7 @@ export class SocialLiveSyncService {
   readonly liveStop = new Set<string>();
   readonly stoppedPlatformIds = new Set<string>();
   readonly connectionsLoading = signal<Set<string>>(new Set<string>());
+  readonly connectionsByPost = signal<ReadonlyMap<string, social_resource[]>>(new Map());
   private readonly activePlatforms = new Set<string>();
   private readonly stopSignals = new Map<string, Subject<void>>();
 
@@ -60,7 +61,7 @@ export class SocialLiveSyncService {
     }
     this.connectionsLoading.update(current => new Set(current).add(url));
     try {
-      await this.startLiveFetch(platformData, 'connections', 'all', url);
+      await this.startLiveFetch(platformData, 'connections', url);
     }
     finally {
       this.connectionsLoading.update(current => {
@@ -159,7 +160,7 @@ export class SocialLiveSyncService {
     this.fetchService.cancelProfileCrawl(platformData.meta.platform, platformData.meta.username, type).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
-  async startLiveFetch(platformData: social_profile, type: FetchTabKey, mode: 'all' | 'catchup', urlOverride?: string): Promise<void> {
+  async startLiveFetch(platformData: social_profile, type: FetchTabKey, urlOverride?: string): Promise<void> {
     const cardId = getPlatformCardId(platformData);
     const key = crawlKey(platformData, type);
     const platform = this.platformKey(platformData);
@@ -173,7 +174,6 @@ export class SocialLiveSyncService {
     this.stoppedPlatformIds.delete(cardId);
     const existing = (this.findPlatform(platformData)?.resources ?? platformData.resources ?? []).find(entry => entry.id === type);
     const seen = new Set((existing?.resources ?? []).map(item => resourceKey(item as social_resource)));
-    const hadPrior = seen.size > 0;
     this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: '' } }));
     if (trackStatus) {
       this.setSectionStatus(platformData, type, 'fetching');
@@ -194,7 +194,8 @@ export class SocialLiveSyncService {
       if (result.error) {
         return 'error';
       }
-      return { items: (result.items ?? []) as social_resource[], next: result.next_cursor, more: !!result.has_more };
+      const items = ((result.items ?? []) as social_resource[]).map(item => type === 'connections' && urlOverride ? { ...item, parent_url: urlOverride } : item);
+      return { items, next: result.next_cursor, more: !!result.has_more };
     };
 
     try {
@@ -215,12 +216,11 @@ export class SocialLiveSyncService {
         if (stopped()) {
           break;
         }
-        const fresh = page.items.filter(item => {
-          const itemKey = resourceKey(item); if (seen.has(itemKey)) {
-            return false;
-          } seen.add(itemKey); return true;
-        });
+        page.items.forEach(item => seen.add(resourceKey(item)));
         if (page.items.length) {
+          if (type === 'connections' && urlOverride) {
+            this.storePostConnections(urlOverride, page.items);
+          }
           this.storeLive(platformData, type, page.items);
           if (!stamped) {
             this.markSynced(platformData, type);
@@ -230,9 +230,6 @@ export class SocialLiveSyncService {
         const last = page.items[page.items.length - 1];
         this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : current[key]?.log } }));
         if (seen.size >= this.maxSyncItems) {
-          break;
-        }
-        if (mode === 'catchup' && hadPrior && fresh.length === 0) {
           break;
         }
         if (!page.more || !page.next) {
@@ -333,6 +330,17 @@ export class SocialLiveSyncService {
     if (updatedProfiles) {
       this.storageService.saveProfiles(groupKey, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
+  }
+
+  private storePostConnections(postUrl: string, resources: social_resource[]): void {
+    if (!resources.length) {
+      return;
+    }
+    this.connectionsByPost.update(current => {
+      const next = new Map(current);
+      next.set(postUrl, mergeResourcesById(next.get(postUrl) ?? [], resources));
+      return next;
+    });
   }
 
   private markSynced(platformData: social_profile, type: FetchTabKey): void {

@@ -30,8 +30,8 @@ export class SocialFetchService {
     return this.api.post('social/profile', { platform, username, url: '', type, command: 'cancel' }).pipe(catchError(() => of(null)));
   }
 
-  searchConnections(platform: string, username: string, query: string): Observable<unknown[]> {
-    return this.api.post<ApiEnvelope<{ items?: unknown[] }>>('social/connections', { platform, username, query })
+  searchConnections(platform: string, username: string, query: string, postUrl = ''): Observable<unknown[]> {
+    return this.api.post<ApiEnvelope<{ items?: unknown[] }>>('social/connections', { platform, username, query, post_url: postUrl })
       .pipe(map(response => response?.result?.items ?? []), catchError(() => of<unknown[]>([])));
   }
 

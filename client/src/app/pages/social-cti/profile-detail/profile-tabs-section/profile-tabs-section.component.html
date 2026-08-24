@@ -82,13 +82,11 @@
                             </a>
                             <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-[6px] px-1.5 py-1 text-[11px] font-semibold text-[var(--color-blue-640)] outline-none transition hover:bg-sky-500/10 focus-visible:ring-2 focus-visible:ring-sky-400/35">
                               {{ 'View image' | translate }}
-                              <i class="bi bi-arrow-up-right text-[9px]" aria-hidden="true"></i>
                             </a>
                           </div>
                         } @else if (isUrl(item.value)) {
                           <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex max-w-full items-start gap-1.5 rounded-[5px] text-[var(--color-blue-640)] outline-none transition hover:text-sky-300 hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35 [body.light-theme_&]:hover:text-[#1767ad]">
                             <span class="min-w-0 break-all">{{ getDisplayUrl(item.value) }}</span>
-                            <i class="bi bi-arrow-up-right mt-0.5 flex-shrink-0 text-[9px]" aria-hidden="true"></i>
                           </a>
                         } @else {
                           <span class="whitespace-pre-wrap">{{ formatProfileDetailValue(item.key, item.value) }}</span>
@@ -255,6 +253,15 @@
                   </div>
                 }
               }
+              @if (connectionsLoading().size && (resourceCategory() === 'feed' || resourceCategory() === 'media')) {
+                <div data-testid="social-connections-fetch-band" class="mb-3 flex w-full items-center gap-2.5 rounded-[10px] border border-sky-500/25 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/30 [.light-theme_&]:!bg-sky-50">
+                  <span class="h-3.5 w-3.5 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-r-transparent"></span>
+                  <span class="min-w-0 flex-1 truncate text-[11px] font-medium text-[var(--color-blue-640)]">{{ 'Fetching connections from post…' | translate }}</span>
+                  <button data-testid="social-connections-scroll-active" type="button" (click)="scrollToActiveConnectionPost()" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                    <i class="bi bi-arrow-down-circle" aria-hidden="true"></i>{{ 'Scroll to post' | translate }}
+                  </button>
+                </div>
+              }
               @if (activeTab() !== 'connections') {
               @if (crawlResult().loading) {
                 <div class="mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-sky-500/25 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/30 [.light-theme_&]:!bg-sky-50">
@@ -312,9 +319,6 @@
                 }
               }
               }
-              @if (activeTab() === 'connections' && !crawlResult().loading && !crawlResult().items?.length) {
-                <app-section-state title="No connections yet" description="Use Sync all above to pull commenters from every post, or open a post and use its Connections button."></app-section-state>
-              }
               @if (crawlResult().loading && !crawlResult().items?.length && activeTab() !== 'connections') {
                 <app-section-state state="loading" [title]="'Loading ' + getTabLabel(activeTab())" description="Fetching the latest section data."></app-section-state>
               } @else if (crawlResult().items?.length) {
@@ -324,9 +328,9 @@
                   } @else if (resourceCategory() === 'people') {
                     <app-social-resource-people [items]="displayedItems()"></app-social-resource-people>
                   } @else if (resourceCategory() === 'feed') {
-                    <app-social-resource-feed [items]="displayedItems()" [profileAvatar]="getProfileImageUrl(platformData)" [profileName]="platformData.profile_details?.real_name ?? ''" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="platformData.meta.platform.toLowerCase() === 'facebook'" [connectionsLoading]="connectionsLoading()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-feed>
+                    <app-social-resource-feed [items]="displayedItems()" [platform]="platformData.meta.platform" [profileAvatar]="getProfileImageUrl(platformData)" [profileName]="platformData.profile_details?.real_name ?? ''" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-feed>
                   } @else if (resourceCategory() === 'media') {
-                    <app-social-resource-media [items]="displayedItems()"></app-social-resource-media>
+                    <app-social-resource-media [items]="displayedItems()" [platform]="platformData.meta.platform" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-media>
                   }
                   @for (item of (hasResourcePresenter() ? [] : (displayedItems())); track crawlItemTrackKey($index, item)) {
                     <article data-testid="social-crawl-resource-card" class="group/card relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[background-color,border-color,box-shadow] hover:border-sky-400/25 hover:bg-[var(--color-blue-810)] hover:shadow-[0_10px_28px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] [body.light-theme_&]:hover:!border-[#b8cde4] [body.light-theme_&]:hover:!bg-[#f7fbff] [body.light-theme_&]:hover:!shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
@@ -398,7 +402,6 @@
                                   @if (isUrl(entry.value)) {
                                     <a [href]="getDisplayUrl(entry.value)" target="_blank" rel="noopener noreferrer" class="inline-flex max-w-full items-start gap-1.5 text-[var(--color-blue-640)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35">
                                       <span class="min-w-0 break-all">{{ getDisplayUrl(entry.value) }}</span>
-                                      <i class="bi bi-arrow-up-right mt-1 flex-shrink-0 text-[8px]" aria-hidden="true"></i>
                                     </a>
                                   } @else {
                                     <span class="whitespace-pre-wrap">{{ formatProfileDetailValue(entry.key, entry.value) }}</span>
@@ -424,7 +427,7 @@
                 <app-section-state state="error" [title]="'Login required for ' + getTabLabel(activeTab())" [description]="'You must be logged in to ' + platformData.meta.platform + ' to load this section.'" actionLabel="Login" (action)="openLogin(crawlResult().login_url!)"></app-section-state>
               } @else if (crawlResult().error) {
                 <app-section-state state="error" [title]="'Unable to load ' + getTabLabel(activeTab())" description="Try fetching this section again." actionLabel="Sync all" (action)="syncAllNow()"></app-section-state>
-              } @else {
+              } @else if (activeTab() !== 'connections') {
                 <app-section-state title="Not fetched yet" description="Sync this section to load its data." actionLabel="Sync all" (action)="syncAllNow()"></app-section-state>
               }
             </div>

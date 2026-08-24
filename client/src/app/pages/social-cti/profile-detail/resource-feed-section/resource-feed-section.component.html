@@ -1,6 +1,6 @@
 <div data-testid="social-feed-list" class="mx-auto flex w-full max-w-[560px] flex-col gap-2.5 min-[1700px]:max-w-none">
   @for (view of views(); track view.key) {
-    <div class="group flex flex-col gap-2.5 min-[1700px]:flex-row min-[1700px]:items-stretch min-[1700px]:justify-center min-[1700px]:gap-0">
+    <div [class.ui-connection-beam]="isConnectionsLoading(view)" class="group flex flex-col gap-2.5 rounded-[12px] min-[1700px]:flex-row min-[1700px]:items-stretch min-[1700px]:justify-center min-[1700px]:gap-0">
     <article data-testid="social-feed-post" (click)="openPost(view, $event)" [class.cursor-pointer]="!!view.url" class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] group-hover:border-sky-400/25 [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] min-[1700px]:w-[560px] min-[1700px]:flex-shrink-0 min-[1700px]:rounded-r-none min-[1700px]:border-r-0">
       @if (view.flags.length || view.replyTo || view.hateSpeech) {
         <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 border-b border-[rgba(148,163,184,0.10)] px-4 py-1 text-[11px] font-semibold text-[var(--color-text4)] [body.light-theme_&]:border-[#dce6f1]">
@@ -134,11 +134,16 @@
         }
       }
 
-      @if (hasEngagement(view) || view.extra.length) {
+      @if (hasEngagement(view) || view.extra.length || (connectionsEnabled() && view.url)) {
         <footer class="mx-3 flex items-center gap-1 border-t border-[rgba(148,163,184,0.10)] py-1 text-[13px] text-[var(--color-text4)] [body.light-theme_&]:border-[#dce6f1]">
-          <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Likes' | translate"><i class="bi bi-heart-fill text-[14px]" [class.text-rose-400]="view.likes" aria-hidden="true"></i>{{ view.likes || '' }}</span>
-          <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Comments' | translate"><i class="bi bi-chat-dots text-[14px]" aria-hidden="true"></i>{{ view.comments || '' }}</span>
-          <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Shares' | translate"><i class="bi bi-arrow-repeat text-[14px]" aria-hidden="true"></i>{{ view.shares || '' }}</span>
+          @if (hasEngagement(view) || view.extra.length) {
+            <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Likes' | translate"><i class="bi bi-heart-fill text-[14px]" [class.text-rose-400]="view.likes" aria-hidden="true"></i>{{ view.likes || '' }}</span>
+            <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Comments' | translate"><i class="bi bi-chat-dots text-[14px]" aria-hidden="true"></i>{{ view.comments || '' }}</span>
+            <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Shares' | translate"><i class="bi bi-arrow-repeat text-[14px]" aria-hidden="true"></i>{{ view.shares || '' }}</span>
+          }
+          @if (connectionsEnabled() && view.url) {
+            <app-social-connections [postUrl]="view.url" [platform]="platform()" [profileUsername]="profileUsername()" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-connections>
+          }
           @if (view.quotes) {
             <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Quotes' | translate"><i class="bi bi-chat-dots text-[14px]" aria-hidden="true"></i>{{ view.quotes }}</span>
           }
@@ -148,22 +153,21 @@
           @if (view.views) {
             <span class="inline-flex h-8 items-center gap-1.5 rounded-md px-2 tabular-nums" [title]="'Views' | translate"><i class="bi bi-eye text-[14px]" aria-hidden="true"></i>{{ view.views }}</span>
           }
-          @if (view.extra.length) {
-            <button type="button" (click)="toggle(view)" [attr.aria-expanded]="isExpanded(view)" [title]="view.extra.length + ' more fields'" class="ml-auto inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-[var(--color-text4)] outline-none transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 min-[1700px]:hidden">
-              <i class="bi bi-three-dots text-[16px]" aria-hidden="true"></i>
-            </button>
-          }
+          <div class="relative ml-auto flex items-center gap-1">
+            @if (view.extra.length) {
+              <button type="button" (click)="toggle(view)" [attr.aria-expanded]="isExpanded(view)" [title]="view.extra.length + ' more fields'" class="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-0 bg-transparent text-[var(--color-text4)] outline-none transition-colors hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 min-[1700px]:hidden">
+                <i class="bi bi-three-dots text-[16px]" aria-hidden="true"></i>
+              </button>
+            }
+            @if (connectionsEnabled() && view.url) {
+              <button data-testid="social-feed-load-connections" type="button" (click)="onLoadConnections(view, $event)" [disabled]="isConnectionsLoading(view)" [title]="'Pull this post\'s commenters into Connections' | translate" class="inline-flex h-8 cursor-pointer items-center gap-1.5 border-0 bg-transparent px-1.5 text-[12px] font-semibold text-[var(--color-text3)] outline-none transition-colors hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-60">
+                {{ (isConnectionsLoading(view) ? 'Loading…' : 'Connections') | translate }}
+              </button>
+            }
+          </div>
         </footer>
       } @else {
         <div class="mt-2"></div>
-      }
-
-      @if (connectionsEnabled() && view.url) {
-        <div class="mx-3 flex items-center border-t border-[rgba(148,163,184,0.10)] py-1 [body.light-theme_&]:border-[#dce6f1]">
-          <button data-testid="social-feed-load-connections" type="button" (click)="onLoadConnections(view, $event)" [disabled]="isConnectionsLoading(view)" [title]="'Pull this post\'s commenters into Connections' | translate" class="ml-auto inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-full border border-[rgba(148,163,184,0.22)] bg-transparent px-3 text-[12px] font-semibold text-[var(--color-text3)] outline-none transition-colors hover:border-sky-400/40 hover:bg-[var(--color-blue-720)] hover:text-[var(--color-text1)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-60 [.light-theme_&]:border-[#d7e2ee] [.light-theme_&]:hover:bg-[#eef5fc]">
-            <i class="bi text-[13px]" [class.bi-people]="!isConnectionsLoading(view)" [class.bi-arrow-repeat]="isConnectionsLoading(view)" [class.animate-spin]="isConnectionsLoading(view)" aria-hidden="true"></i>{{ (isConnectionsLoading(view) ? 'Loading…' : 'Connections') | translate }}
-          </button>
-        </div>
       }
     </article>
       @if (view.extra.length) {

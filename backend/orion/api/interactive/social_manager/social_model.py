@@ -511,7 +511,7 @@ class social_model:
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Failed to fetch social profiles"})
 
-    async def search_connections(self, user_id: str, profile_username: str, platform: str = "", query: str = "", limit: int = 500):
+    async def search_connections(self, user_id: str, profile_username: str, platform: str = "", query: str = "", limit: int = 500, post_url: str = ""):
         document = await self.get_social_profiles(user_id)
         documents = document.get("result") if isinstance(document, dict) else None
         if not isinstance(documents, list):
@@ -519,6 +519,7 @@ class social_model:
         needle = (query or "").strip().lstrip("@").lower()
         platform_key = (platform or "").strip().lower()
         username_key = (profile_username or "").strip().lstrip("@").lower()
+        post_url_key = (post_url or "").strip().rstrip("/")
         fields = ("author", "name", "username", "handle", "screen_name", "acct", "login", "url", "caption")
         matches = []
         for doc in documents:
@@ -532,6 +533,8 @@ class social_model:
                     if collection.get("id") != "connections":
                         continue
                     for item in collection.get("resources") or []:
+                        if post_url_key and str(item.get("parent_url") or "").strip().rstrip("/") != post_url_key:
+                            continue
                         if not needle:
                             matches.append(item)
                             continue
