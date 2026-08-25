@@ -61,6 +61,7 @@ class social_resource(BaseModel):
     resource_id: Optional[str] = None
     url: Optional[str] = None
     parent_url: Optional[str] = None
+    parent_urls: Optional[List[str]] = None
     title: Optional[str] = None
     caption: Optional[str] = None
     author: Optional[str] = None

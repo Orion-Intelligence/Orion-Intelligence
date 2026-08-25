@@ -45,6 +45,7 @@ export interface social_resource {
     resource_id?: string;
     url?: string;
     parent_url?: string;
+    parent_urls?: string[];
     title?: string;
     caption?: string;
     author?: string;

@@ -934,18 +934,16 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
   background: conic-gradient(from var(--ui-beam-angle),
     transparent 0deg,
     transparent 198deg,
-    rgba(56, 189, 248, 0.04) 234deg,
-    rgba(56, 189, 248, 0.14) 288deg,
-    rgba(56, 189, 248, 0.42) 330deg,
-    rgba(56, 189, 248, 0.85) 350deg,
+    rgb(56 189 248 / 4%) 234deg,
+    rgb(56 189 248 / 14%) 288deg,
+    rgb(56 189 248 / 42%) 330deg,
+    rgb(56 189 248 / 85%) 350deg,
     #7dd3fc 356deg,
-    rgba(125, 211, 252, 0.10) 359deg,
+    rgb(125 211 252 / 10%) 359deg,
     transparent 360deg);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  filter: drop-shadow(0 0 3px rgba(56, 189, 248, 0.65));
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  filter: drop-shadow(0 0 3px rgb(56 189 248 / 65%));
   pointer-events: none;
   animation: ui-connection-beam-rotate 1.9s linear infinite;
 }

@@ -60,6 +60,14 @@ export class SocialResourceMediaSectionComponent {
   readonly onImageError = applyImageFallback;
   readonly formatKeyLabel = formatKeyLabel;
   views = computed<media_item_view[]>(() => this.items().map((item, index) => this.toView(item, index)));
+  isImageGrid = computed(() => this.views().length > 0 && this.views().every(view => !view.isVideo));
+  fillers = computed<number[]>(() => {
+    if (!this.isImageGrid()) {
+      return [];
+    }
+    const remainder = this.views().length % 3;
+    return remainder ? Array.from({ length: 3 - remainder }, (_, index) => index) : [];
+  });
 
   isConnectionsLoading(view: media_item_view): boolean {
     return !!view.url && this.connectionsLoading().has(view.url);
@@ -71,14 +79,6 @@ export class SocialResourceMediaSectionComponent {
       this.loadConnections.emit(view.url);
     }
   }
-  isImageGrid = computed(() => this.views().length > 0 && this.views().every(view => !view.isVideo));
-  fillers = computed<number[]>(() => {
-    if (!this.isImageGrid()) {
-      return [];
-    }
-    const remainder = this.views().length % 3;
-    return remainder ? Array.from({ length: 3 - remainder }, (_, index) => index) : [];
-  });
 
   isExpanded(view: media_item_view): boolean {
     return this.expandedKeys().has(view.key);

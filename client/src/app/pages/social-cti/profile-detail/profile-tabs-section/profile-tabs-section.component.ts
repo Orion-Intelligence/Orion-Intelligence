@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { social_online_presence_hit, social_profile } from '../../models/social.models';
 import { social_stealer_log } from '../../models/social.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
@@ -7,6 +7,8 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import type { FetchTabKey } from '../../enums/social-graph.enums';
 import type { FeedUser, FetchTab } from '../../models/social-usability.models';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
+import { SocialFetchService } from '../../services/social-fetch.service';
+import { take } from 'rxjs/operators';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { applyImageFallback } from '../../utils/image-fallback.util';
 import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
@@ -27,7 +29,7 @@ import { SocialResourceMediaSectionComponent } from '../resource-media-section/r
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, DatePipe, TranslatePipe],
+  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, DatePipe, TranslatePipe, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
@@ -44,6 +46,24 @@ export class SocialProfileTabsSectionComponent {
     this.activeTab(); this.displayLimit.set(50); 
   });
   private readonly forceStale = false;
+  private readonly fetchService = inject(SocialFetchService);
+  private darkwebFetchedFor = '';
+  private readonly darkwebFetchEffect = effect(() => {
+    if (!this.isDarkweb()) {
+      return;
+    }
+    const username = this.platformData()?.meta?.username ?? '';
+    if (!username || this.darkwebFetchedFor === username) {
+      return;
+    }
+    this.darkwebFetchedFor = username;
+    this.darkwebLoaded.set(false);
+    this.fetchService.fetchDarkwebReport(username).pipe(take(1)).subscribe(rows => {
+      this.darkwebReport.set(rows);
+      this.darkwebLoaded.set(true);
+    });
+  });
+  private readonly darkwebEntryBlocked = new Set(['m_embedding', '_id', '_score', '_rank', '_index', 'rank_index', 'm_hash', 'm_hash_id', 'm_scrap_file', 'm_cluster_id', 'm_document_id']);
 
   user = input.required<FeedUser>();
   platformData = input.required<social_profile>();
@@ -70,6 +90,24 @@ export class SocialProfileTabsSectionComponent {
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
   readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
   connectionSearchResults = input<unknown[] | null>(null);
+  readonly isDarkweb = computed(() => {
+    const platform = String(this.platformData()?.meta?.platform ?? '').toLowerCase();
+    const kind = `${this.platformData()?.meta?.entity_type ?? ''} ${this.platformData()?.meta?.target_type ?? ''}`.toLowerCase();
+    return ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'].some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum');
+  });
+  readonly darkwebReport = signal<Record<string, any>[]>([]);
+  readonly darkwebLoaded = signal(false);
+  readonly detailEntries = computed<{ key: string; value: any }[]>(() =>
+    getProfileDetailEntries(this.platformData()).filter(item => !['img_src', 'm_img_src'].includes(item.key.toLowerCase())));
+  readonly darkwebSections = computed<{ title: string; date: string; entries: { key: string; value: any }[] }[]>(() =>
+    this.darkwebReport().map((doc, index) => {
+      const entries = Object.entries(doc ?? {})
+        .filter(([key, value]) => !this.darkwebEntryBlocked.has(key.toLowerCase()) && value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0))
+        .map(([key, value]) => ({ key, value }));
+      const label = String(doc?.['m_channel_name'] ?? doc?.['m_title'] ?? doc?.['m_platform'] ?? `Record ${index + 1}`);
+      const stamp = doc?.['m_date'] ?? doc?.['m_creation_date'] ?? '';
+      return { title: label, date: stamp ? String(stamp).slice(0, 19).replace('T', ' ') : '', entries };
+    }).filter(section => section.entries.length));
   resourceCategory = computed(() => categoryFor(this.platformData().meta.platform, this.activeTab()));
   hasResourcePresenter = computed(() => ['work', 'people', 'feed', 'media'].includes(this.resourceCategory()));
   readonly displayedItems = computed<unknown[]>(() => {

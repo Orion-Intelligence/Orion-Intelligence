@@ -7,7 +7,7 @@ import type { FetchTabKey } from '../enums/social-graph.enums';
 import { SocialFetchService } from './social-fetch.service';
 import { SocialStorageService } from './social-storage.service';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
-import { crawlKey, getPlatformCardId, getProfileGroupKey, isSamePlatform, mergeResourcesById, resourceKey } from '../utils/social-profile.util';
+import { crawlKey, getPlatformCardId, getProfileGroupKey, isSamePlatform, mergeResourcesById, resourceKey, sortByContentDate } from '../utils/social-profile.util';
 import { categoryFor } from '../constants/resource-category.constants';
 
 @Injectable()
@@ -16,14 +16,14 @@ export class SocialLiveSyncService {
   private readonly storageService = inject(SocialStorageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly maxSyncItems = 5000;
+  private readonly activePlatforms = new Set<string>();
+  private readonly stopSignals = new Map<string, Subject<void>>();
 
   readonly crawlResults = signal<Record<string, CrawlResultState>>({});
   readonly liveStop = new Set<string>();
   readonly stoppedPlatformIds = new Set<string>();
   readonly connectionsLoading = signal<Set<string>>(new Set<string>());
   readonly connectionsByPost = signal<ReadonlyMap<string, social_resource[]>>(new Map());
-  private readonly activePlatforms = new Set<string>();
-  private readonly stopSignals = new Map<string, Subject<void>>();
 
   private stopSignalFor(key: string): Subject<void> {
     let signal = this.stopSignals.get(key);
@@ -148,7 +148,7 @@ export class SocialLiveSyncService {
   crawlResultFor(platformData: social_profile, type: FetchTabKey): CrawlResultView {
     const state = this.crawlResults()[crawlKey(platformData, type)] ?? {};
     const collection = (platformData.resources ?? []).find(entry => entry.id === type);
-    return { loading: state.loading, error: state.error, items: collection?.resources ?? state.items, login_url: state.login_url, count: state.count, log: state.log, lastSynced: collection?.last_synced };
+    return { loading: state.loading, error: state.error, items: collection?.resources ? sortByContentDate(collection.resources) : state.items, login_url: state.login_url, count: state.count, log: state.log, lastSynced: collection?.last_synced };
   }
 
   stopSync(platformData: social_profile, type: FetchTabKey): void {
@@ -180,6 +180,7 @@ export class SocialLiveSyncService {
     }
     const url = urlOverride || buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
     const stopped = () => this.liveStop.has(stopKey) || this.stoppedPlatformIds.has(cardId);
+    let pendingLoginUrl: string | undefined;
     const runPage = async (cursor: string): Promise<{ items: social_resource[]; next?: string; more: boolean } | 'error' | null> => {
       let result;
       try {
@@ -192,6 +193,7 @@ export class SocialLiveSyncService {
         return null;
       }
       if (result.error) {
+        pendingLoginUrl = result.login_url ? String(result.login_url) : undefined;
         return 'error';
       }
       const items = ((result.items ?? []) as social_resource[]).map(item => type === 'connections' && urlOverride ? { ...item, parent_url: urlOverride } : item);
@@ -207,7 +209,7 @@ export class SocialLiveSyncService {
           break;
         }
         if (page === 'error') {
-          this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: 'crawl_failed' } }));
+          this.crawlResults.update(current => ({ ...current, [key]: { loading: false, error: 'crawl_failed', login_url: pendingLoginUrl } }));
           if (trackStatus) {
             this.setSectionStatus(platformData, type, 'failed');
           }

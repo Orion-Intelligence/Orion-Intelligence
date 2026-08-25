@@ -4,6 +4,7 @@ from configs.app_dependency import get_current_user, license_required, role_requ
 from orion.api.interactive.social_manager.social_models.search_social_param_model import (
     SocialFollowersRequest,
     SocialForumRequest,
+    SocialGraphDataRequest,
     SocialMetadataRequest,
     SocialPostsRequest,
     SocialOnlineImages,
@@ -190,6 +191,14 @@ async def append_social_data(data: dict = Body(...), current_user=Depends(get_cu
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
 async def get_social_data(current_user=Depends(get_current_user)):
     return await social_model.getInstance().get_social_profiles(str(current_user.id))
+
+
+@social_routes.post(
+    "/api/social/graph/data",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
+async def get_social_graph_data(param: SocialGraphDataRequest = Body(...), current_user=Depends(get_current_user)):
+    return await social_model.getInstance().get_graph_data(str(current_user.id), param.usernames, param.priority, param.limit)
 
 
 @social_routes.get(

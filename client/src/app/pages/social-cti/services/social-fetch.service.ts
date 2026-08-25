@@ -66,6 +66,12 @@ export class SocialFetchService {
       catchError(() => throwError(() => new Error('Failed to fetch phone intelligence'))));
   }
 
+  fetchDarkwebReport(username: string, limit?: number): Observable<Record<string, any>[]> {
+    return this.api.post<any>('search/social', { q: username, category: 'all', network: 'all', page: 1, ...(limit ? { platform_result_count: Math.max(1, Math.min(limit, 100)) } : {}) })
+      .pipe(map(response => (response?.Result ?? response?.data?.Result ?? response?.result?.Result ?? []) as Record<string, any>[]),
+        catchError(() => of<Record<string, any>[]>([])));
+  }
+
   fetchProfileMetadataTokens(tokens: string[], username: string, platform?: string): Observable<social_online_presence_hit[]> {
     const payload: { tokens: string[]; username: string; platform?: string } = { tokens, username };
     if (platform) {

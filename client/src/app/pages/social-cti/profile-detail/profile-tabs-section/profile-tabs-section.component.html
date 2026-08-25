@@ -37,7 +37,7 @@
           </div>
         </div>
 
-        @if (platformData.profile_details?.is_parsed === true) {
+        @if (platformData.profile_details?.is_parsed === true || isDarkweb()) {
         <div class="flex overflow-x-auto border-b border-[var(--color-border)] bg-[var(--color-blue-700)] px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           @for (tab of fetchTabs(); track tab.key) {
             <button data-testid="social-fetch-tab" [attr.data-tab-key]="tab.key" (click)="tabSelected.emit(tab.key)" class="relative flex shrink-0 items-center whitespace-nowrap px-4 py-3 text-xs font-semibold transition-colors [.light-theme_&.text-sky-400]:!text-[#1d77c9] [.light-theme_&.text-slate-400]:!text-[var(--color-text4)]" [class.text-sky-400]="activeTab() === tab.key" [class.text-slate-400]="activeTab() !== tab.key">
@@ -63,39 +63,65 @@
                   {{ (isTabLoading('details') ? 'Reloading' : 'Reload') | translate }}
                 </button>
               </div>
-              @if (isTabLoading('details') && getVisibleProfileDetailEntries(platformData).length === 0) {
+              <ng-template #detailRow let-item>
+                <div class="group grid grid-cols-[minmax(0,1fr)_32px] gap-x-3 gap-y-1.5 border-b border-[rgba(148,163,184,0.10)] bg-transparent px-3.5 py-3 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.065)] sm:grid-cols-[144px_minmax(0,1fr)_32px] sm:items-center sm:gap-x-4 [body.light-theme_&]:border-[#dce6f1] [body.light-theme_&]:hover:bg-[#edf5fd]">
+                  <div class="flex min-w-0 items-center">
+                    <span class="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--color-text4)]" [title]="formatProfileDetailKey(item.key) | translate">{{ formatProfileDetailKey(item.key) | translate }}</span>
+                  </div>
+                  <div class="col-span-2 row-start-2 min-w-0 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)] sm:col-span-1 sm:col-start-2 sm:row-start-1" [class.tabular-nums]="isNumeric(item.value)">
+                    @if (isImageUrl(item.value)) {
+                      <div class="flex min-w-0 items-center gap-2.5">
+                        <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="flex h-10 w-10 flex-shrink-0 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] outline-none transition hover:border-sky-400/40 focus-visible:ring-2 focus-visible:ring-sky-400/35">
+                          <img [src]="getDisplayUrl(item.value)" [alt]="item.key" referrerpolicy="no-referrer" (error)="onImageError($event)" class="h-full w-full object-cover">
+                        </a>
+                        <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-[6px] px-1.5 py-1 text-[11px] font-semibold text-[var(--color-blue-640)] outline-none transition hover:bg-sky-500/10 focus-visible:ring-2 focus-visible:ring-sky-400/35">
+                          {{ 'View image' | translate }}
+                        </a>
+                      </div>
+                    } @else if (isUrl(item.value)) {
+                      <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex max-w-full items-start gap-1.5 rounded-[5px] text-[var(--color-blue-640)] outline-none transition hover:text-sky-300 hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35 [body.light-theme_&]:hover:text-[#1767ad]">
+                        <span class="min-w-0 break-all">{{ getDisplayUrl(item.value) }}</span>
+                      </a>
+                    } @else {
+                      <span class="whitespace-pre-wrap">{{ formatProfileDetailValue(item.key, item.value) }}</span>
+                    }
+                  </div>
+                  <button type="button" (click)="copyToClipboard(item.value)" class="col-start-2 row-start-1 flex h-8 w-8 flex-shrink-0 items-center justify-center self-center rounded-[8px] border border-transparent text-[var(--color-text4)] opacity-70 outline-none transition-all hover:border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-300 focus-visible:border-emerald-500/30 focus-visible:ring-2 focus-visible:ring-emerald-500/25 group-hover:opacity-100 sm:col-start-3 [body.light-theme_&]:hover:text-[#06724f]" [title]="'Copy value' | translate" [attr.aria-label]="'Copy value' | translate">
+                    <i class="bi bi-copy text-[11px]" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </ng-template>
+
+              @if (isDarkweb() && !darkwebLoaded()) {
+                <app-section-state state="loading" title="Loading dark web report" description="Fetching records for this identity."></app-section-state>
+              } @else if (isDarkweb()) {
+                @if (darkwebSections().length === 0) {
+                  <app-section-state title="No dark web records found" description="No indexed records matched this identity."></app-section-state>
+                } @else {
+                  <div class="flex flex-col gap-3">
+                    @for (section of darkwebSections(); track $index) {
+                      <div class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
+                        <div class="flex flex-col gap-0.5 border-b border-[var(--color-border)] bg-[var(--color-blue-640)] px-3.5 py-2.5">
+                          <span class="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.06em] text-white" [title]="section.title">{{ section.title }}</span>
+                          @if (section.date) {
+                            <span class="text-[10px] font-medium text-white/75">{{ section.date }}</span>
+                          }
+                        </div>
+                        @for (item of section.entries; track $index) {
+                          <ng-container [ngTemplateOutlet]="detailRow" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              } @else if (isTabLoading('details') && detailEntries().length === 0) {
                 <app-section-state state="loading" title="Loading profile details" description="Fetching the latest profile metadata."></app-section-state>
-              } @else if (getVisibleProfileDetailEntries(platformData).length === 0) {
+              } @else if (detailEntries().length === 0) {
                 <app-section-state title="No profile details found" description="Try fetching this section again." actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
               } @else {
                 <div class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
-                  @for (item of getVisibleProfileDetailEntries(platformData); track trackByKey($index, item)) {
-                    <div class="group grid grid-cols-[minmax(0,1fr)_32px] gap-x-3 gap-y-1.5 border-b border-[rgba(148,163,184,0.10)] bg-transparent px-3.5 py-3 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.065)] sm:grid-cols-[144px_minmax(0,1fr)_32px] sm:items-start sm:gap-x-4 [body.light-theme_&]:border-[#dce6f1] [body.light-theme_&]:hover:bg-[#edf5fd]">
-                      <div class="flex min-w-0 items-center self-start pt-0.5">
-                        <span class="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--color-text4)]" [title]="formatProfileDetailKey(item.key) | translate">{{ formatProfileDetailKey(item.key) | translate }}</span>
-                      </div>
-                      <div class="col-span-2 row-start-2 min-w-0 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)] sm:col-span-1 sm:col-start-2 sm:row-start-1" [class.tabular-nums]="isNumeric(item.value)">
-                        @if (isImageUrl(item.value)) {
-                          <div class="flex min-w-0 items-center gap-2.5">
-                            <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="flex h-10 w-10 flex-shrink-0 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] outline-none transition hover:border-sky-400/40 focus-visible:ring-2 focus-visible:ring-sky-400/35">
-                              <img [src]="getDisplayUrl(item.value)" [alt]="item.key" referrerpolicy="no-referrer" (error)="onImageError($event)" class="h-full w-full object-cover">
-                            </a>
-                            <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-[6px] px-1.5 py-1 text-[11px] font-semibold text-[var(--color-blue-640)] outline-none transition hover:bg-sky-500/10 focus-visible:ring-2 focus-visible:ring-sky-400/35">
-                              {{ 'View image' | translate }}
-                            </a>
-                          </div>
-                        } @else if (isUrl(item.value)) {
-                          <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex max-w-full items-start gap-1.5 rounded-[5px] text-[var(--color-blue-640)] outline-none transition hover:text-sky-300 hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35 [body.light-theme_&]:hover:text-[#1767ad]">
-                            <span class="min-w-0 break-all">{{ getDisplayUrl(item.value) }}</span>
-                          </a>
-                        } @else {
-                          <span class="whitespace-pre-wrap">{{ formatProfileDetailValue(item.key, item.value) }}</span>
-                        }
-                      </div>
-                      <button type="button" (click)="copyToClipboard(item.value)" class="col-start-2 row-start-1 flex h-8 w-8 flex-shrink-0 items-center justify-center self-start rounded-[8px] border border-transparent text-[var(--color-text4)] opacity-70 outline-none transition-all hover:border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-300 focus-visible:border-emerald-500/30 focus-visible:ring-2 focus-visible:ring-emerald-500/25 group-hover:opacity-100 sm:col-start-3 [body.light-theme_&]:hover:text-[#06724f]" [title]="'Copy value' | translate" [attr.aria-label]="'Copy value' | translate">
-                        <i class="bi bi-copy text-[11px]" aria-hidden="true"></i>
-                      </button>
-                    </div>
+                  @for (item of detailEntries(); track $index) {
+                    <ng-container [ngTemplateOutlet]="detailRow" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
                   }
                 </div>
               }
@@ -223,7 +249,7 @@
             <div data-testid="social-tab-panel-crawl" class="px-[13px] py-[11px]">
               @if (activeTab() === 'connections') {
                 @if (crawlResult().loading) {
-                  <div class="mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-sky-500/25 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/30 [.light-theme_&]:!bg-sky-50">
+                  <div class="mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] px-3.5 py-2 [body.light-theme_&]:bg-[#f8fbff]">
                     <div class="flex min-w-0 flex-1 flex-col gap-1">
                       <div class="flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-[var(--color-blue-640)]">
                         <span class="h-3 w-3 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-r-transparent"></span>
@@ -264,7 +290,7 @@
               }
               @if (activeTab() !== 'connections') {
               @if (crawlResult().loading) {
-                <div class="mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-sky-500/25 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/30 [.light-theme_&]:!bg-sky-50">
+                <div class="mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] px-3.5 py-2 [body.light-theme_&]:bg-[#f8fbff]">
                   <div class="flex min-w-0 flex-1 flex-col gap-1">
                     <div class="flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-[var(--color-blue-640)]">
                       <span class="h-3 w-3 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-r-transparent"></span>
@@ -328,9 +354,9 @@
                   } @else if (resourceCategory() === 'people') {
                     <app-social-resource-people [items]="displayedItems()"></app-social-resource-people>
                   } @else if (resourceCategory() === 'feed') {
-                    <app-social-resource-feed [items]="displayedItems()" [platform]="platformData.meta.platform" [profileAvatar]="getProfileImageUrl(platformData)" [profileName]="platformData.profile_details?.real_name ?? ''" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-feed>
+                    <app-social-resource-feed [items]="displayedItems()" [platform]="platformData.meta.platform" [profileAvatar]="getProfileImageUrl(platformData)" [profileName]="platformData.profile_details?.real_name ?? ''" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube', 'mastodon', 'bluesky', 'hackernews', 'reddit', 'habr', 'devcommunity', 'stackoverflow', 'stackexchange'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-feed>
                   } @else if (resourceCategory() === 'media') {
-                    <app-social-resource-media [items]="displayedItems()" [platform]="platformData.meta.platform" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-media>
+                    <app-social-resource-media [items]="displayedItems()" [platform]="platformData.meta.platform" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube', 'mastodon', 'bluesky', 'hackernews', 'reddit', 'habr', 'devcommunity', 'stackoverflow', 'stackexchange'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-media>
                   }
                   @for (item of (hasResourcePresenter() ? [] : (displayedItems())); track crawlItemTrackKey($index, item)) {
                     <article data-testid="social-crawl-resource-card" class="group/card relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[background-color,border-color,box-shadow] hover:border-sky-400/25 hover:bg-[var(--color-blue-810)] hover:shadow-[0_10px_28px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] [body.light-theme_&]:hover:!border-[#b8cde4] [body.light-theme_&]:hover:!bg-[#f7fbff] [body.light-theme_&]:hover:!shadow-[0_10px_24px_rgba(15,23,42,0.10)]">

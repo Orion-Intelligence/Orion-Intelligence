@@ -36,7 +36,6 @@ export class SocialConnectionsPopupComponent {
   connectionsLoading = input<Set<string>>(new Set<string>());
   connectionsByPost = input<ReadonlyMap<string, unknown[]>>(new Map());
   loadConnections = output<string>();
-
   readonly onImageError = applyImageFallback;
   readonly searchTerm = signal('');
   readonly isOpen = signal(false);
@@ -63,12 +62,8 @@ export class SocialConnectionsPopupComponent {
       };
     });
   });
-  readonly displayedUsers = computed<connection_user_view[]>(() =>
-    this.searchTerm().trim() ? this.users() : this.users().slice(0, this.limit()),
-  );
-  readonly canLoadMore = computed(() =>
-    !this.searchTerm().trim() && this.users().length > this.limit(),
-  );
+  readonly displayedUsers = computed<connection_user_view[]>(() => this.searchTerm().trim() ? this.users() : this.users().slice(0, this.limit()));
+  readonly canLoadMore = computed(() => !this.searchTerm().trim() && this.users().length > this.limit());
 
   constructor() {
     this.search$.pipe(switchMap(term => {

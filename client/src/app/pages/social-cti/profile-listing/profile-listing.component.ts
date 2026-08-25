@@ -93,6 +93,8 @@ export class SocialProfileListingComponent {
     return usernames;
   });
   private extensionOpened = false;
+  private readonly connectionSearchResults = signal<Record<string, unknown[] | null>>({});
+  private readonly connectionSearch$ = new Subject<{ platformData: social_profile; term: string }>();
 
   readonly scanResults = this.storageService.state.scanResults;
   readonly extensionState = signal<ExtensionState>('install');
@@ -139,23 +141,16 @@ export class SocialProfileListingComponent {
     return platformId ? this.getPlatformById(platformId) ?? null : null;
   });
 
-  private readonly connectionSearchResults = signal<Record<string, unknown[] | null>>({});
-  private readonly connectionSearch$ = new Subject<{ platformData: social_profile; term: string }>();
-
   constructor() {
     this.startExtensionHeartbeat();
-    this.connectionSearch$.pipe(
-      debounceTime(250),
-      switchMap(({ platformData, term }) => {
-        const key = this.getPlatformCardId(platformData);
-        const query = term.trim();
-        if (!query) {
-          return of({ key, items: null as unknown[] | null });
-        }
-        return this.fetchService.searchConnections(platformData.meta.platform, platformData.meta.username, query).pipe(map(items => ({ key, items: items as unknown[] | null })));
-      }),
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe(({ key, items }) => {
+    this.connectionSearch$.pipe(debounceTime(250), switchMap(({ platformData, term }) => {
+      const key = this.getPlatformCardId(platformData);
+      const query = term.trim();
+      if (!query) {
+        return of({ key, items: null as unknown[] | null });
+      }
+      return this.fetchService.searchConnections(platformData.meta.platform, platformData.meta.username, query).pipe(map(items => ({ key, items: items as unknown[] | null })));
+    }), takeUntilDestroyed(this.destroyRef)).subscribe(({ key, items }) => {
       this.connectionSearchResults.update(current => ({ ...current, [key]: items }));
     });
     effect(() => {
@@ -210,6 +205,10 @@ export class SocialProfileListingComponent {
   }
 
   getFetchTabs(): FetchTab[] {
+    const active = this.activeProfilePlatform();
+    if (active && this.getResultSource(active) === 'darkweb') {
+      return [this.detailsTab, this.onlinePresenceTab];
+    }
     const appended = new Set(['following', 'connections', 'onlinePresence', 'stealerLogs']);
     const types = (this.activeProfilePlatform()?.profile_details?.crawl_type ?? []).filter(type => !appended.has(type));
     if (!types.length) {
@@ -722,8 +721,11 @@ export class SocialProfileListingComponent {
     });
   }
 
-  getResultSource(_platformData: social_profile): SocialResultSource {
-    return 'normal';
+  getResultSource(platformData: social_profile): SocialResultSource {
+    const platform = String(platformData?.meta?.platform ?? '').toLowerCase();
+    const kind = `${platformData?.meta?.entity_type ?? ''} ${platformData?.meta?.target_type ?? ''}`.toLowerCase();
+    const darkweb = ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'];
+    return darkweb.some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum') ? 'darkweb' : 'normal';
   }
 
   getStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): string {
