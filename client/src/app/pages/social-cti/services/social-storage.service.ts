@@ -1,9 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, throwError } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
 import { Job, db_social_model, social_exposure_signals, social_phone_lookup, social_profile, social_profile_config, social_wanted } from '../models/social.models';
 import { ApiEnvelope, social_state } from '../models/social-usability.models';
+const SOCIAL_GRAPH_TYPE = 'social-users';
+
 @Injectable({ providedIn: 'root' })
 export class SocialStorageService {
   private readonly api = inject(ApiService);
@@ -115,6 +117,17 @@ export class SocialStorageService {
 
   deleteProfiles(username: string): Observable<unknown> {
     return this.api.delete(`social/data/${encodeURIComponent(username)}`);
+  }
+
+  loadGraphUsers(): Observable<string[]> {
+    return this.api.get<{ extra?: { usernames?: unknown } }>(`graph/session/tabs?graph_type=${SOCIAL_GRAPH_TYPE}`).pipe(map(response => {
+      const usernames = response?.extra?.usernames;
+      return Array.isArray(usernames) ? usernames.filter((value): value is string => typeof value === 'string' && !!value.trim()) : [];
+    }), catchError(() => of<string[]>([])));
+  }
+
+  saveGraphUsers(usernames: string[]): Observable<unknown> {
+    return this.api.post(`graph/session/upsert?graph_type=${SOCIAL_GRAPH_TYPE}`, { graph_type: SOCIAL_GRAPH_TYPE, extra: { usernames } }).pipe(catchError(() => of(undefined)));
   }
 
   private setStoredSocialProfiles(documents: db_social_model[]): void {

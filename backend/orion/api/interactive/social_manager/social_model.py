@@ -1,8 +1,10 @@
 import base64
 import binascii
 import hashlib
+import random
 import re
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 from datetime import UTC, datetime
 from typing import Any
 
@@ -510,6 +512,92 @@ class social_model:
 
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Failed to fetch social profiles"})
+
+    GRAPH_PEOPLE_IDS = {"followers", "following", "friends", "connections", "organizations", "contacts", "members", "subscribers"}
+
+    @staticmethod
+    def _graph_handle(value) -> str:
+        text = str(value or "").strip()
+        if not text:
+            return ""
+        if re.match(r"^https?://", text, re.IGNORECASE):
+            try:
+                parsed = urlparse(text)
+                ids = parse_qs(parsed.query).get("id") or []
+                if ids and str(ids[0]).strip():
+                    return str(ids[0]).strip().lower()
+                segments = [segment for segment in parsed.path.split("/") if segment]
+                return (segments[-1] if segments else "").strip().lstrip("@").lower()
+            except Exception:
+                return ""
+        return text.lstrip("@").rstrip("/").lower()
+
+    @classmethod
+    def _graph_person_handle(cls, item: dict) -> str:
+        if not isinstance(item, dict):
+            return ""
+        raw = next((str(item.get(key)).strip() for key in ("handle", "screen_name", "acct", "username", "login", "author") if str(item.get(key) or "").strip()), "")
+        url = next((str(item.get(key)).strip() for key in ("url", "media_url", "profile_url") if str(item.get(key) or "").strip()), "")
+        if raw and not re.search(r"\s", raw):
+            return cls._graph_handle(raw)
+        return cls._graph_handle(url) or cls._graph_handle(raw)
+
+    async def get_graph_data(self, user_id: str, usernames: list[str], priority: list[str], limit: int = 200):
+        response = await self.get_social_profiles(user_id)
+        documents = response.get("result") if isinstance(response, dict) else None
+        if not isinstance(documents, list):
+            return response
+        limit = max(1, min(int(limit or 200), 500))
+        requested = {self._graph_handle(username) for username in usernames if self._graph_handle(username)}
+        pinned = set(requested) | {self._graph_handle(handle) for handle in priority if self._graph_handle(handle)}
+        by_owner = {str(document.get("profile_username") or "").strip().lstrip("@").lower(): document for document in documents if isinstance(document, dict)}
+        for owner in requested:
+            for profile in (by_owner.get(owner) or {}).get("profiles") or []:
+                alias = self._graph_handle((profile.get("meta") or {}).get("username")) if isinstance(profile, dict) else ""
+                if alias:
+                    pinned.add(alias)
+        owners_by_handle: dict[str, set[str]] = {}
+        for owner in requested:
+            for profile in (by_owner.get(owner) or {}).get("profiles") or []:
+                for collection in (profile.get("resources") if isinstance(profile, dict) else None) or []:
+                    if str(collection.get("id") or "").lower() not in self.GRAPH_PEOPLE_IDS:
+                        continue
+                    for item in collection.get("resources") or []:
+                        handle = self._graph_person_handle(item)
+                        if handle:
+                            owners_by_handle.setdefault(handle, set()).add(owner)
+        trimmed = []
+        for document in documents:
+            if not isinstance(document, dict):
+                continue
+            owner = str(document.get("profile_username") or "").strip().lstrip("@").lower()
+            profiles_out = []
+            for profile in document.get("profiles") or []:
+                if not isinstance(profile, dict):
+                    continue
+                resources_out = []
+                for collection in profile.get("resources") or []:
+                    items = collection.get("resources") or []
+                    if str(collection.get("id") or "").lower() not in self.GRAPH_PEOPLE_IDS or len(items) <= limit:
+                        resources_out.append(collection)
+                        continue
+                    first, second, rest = [], [], []
+                    for item in items:
+                        handle = self._graph_person_handle(item)
+                        if handle and handle in pinned:
+                            first.append(item)
+                        elif handle and (owners_by_handle.get(handle, set()) - {owner}):
+                            second.append(item)
+                        else:
+                            rest.append(item)
+                    keep = (first + second)[:limit]
+                    remaining = limit - len(keep)
+                    if remaining > 0 and rest:
+                        keep = keep + random.sample(rest, min(remaining, len(rest)))
+                    resources_out.append({**collection, "resources": keep, "trimmed_from": len(items)})
+                profiles_out.append({**profile, "resources": resources_out})
+            trimmed.append({**document, "profiles": profiles_out})
+        return {"result": trimmed}
 
     async def search_connections(self, user_id: str, profile_username: str, platform: str = "", query: str = "", limit: int = 500, post_url: str = ""):
         document = await self.get_social_profiles(user_id)
