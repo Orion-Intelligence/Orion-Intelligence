@@ -14,7 +14,7 @@ export class SocialExtensionManagerComponent {
   private readonly extensionService = inject(SocialExtensionService);
 
   readonly mode = input<ExtensionState>('install');
-  readonly installSteps = ['Install for Firefox and approve the prompt, or download the Chrome package.', 'On Chrome, unzip it and load it from chrome://extensions with Developer mode on.', 'This profile loads automatically once the extension is installed.'];
+  readonly installSteps = ['Install for Firefox and approve the prompt, or download the Chromium package.', 'On Chromium, unzip it and load it from chrome://extensions with Developer mode on.', 'This profile loads automatically once the extension is installed.'];
 
   open(): void {
     this.extensionService.openExtension();
@@ -22,5 +22,9 @@ export class SocialExtensionManagerComponent {
 
   downloadUrl(browser: 'chrome' | 'firefox'): string {
     return this.extensionService.downloadUrl(browser);
+  }
+
+  browserUrl(browser: 'chromium' | 'firefox'): string {
+    return browser === 'firefox' ? 'https://www.mozilla.org/firefox/new/' : 'https://www.chromium.org/getting-involved/download-chromium/';
   }
 }

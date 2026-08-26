@@ -19,7 +19,7 @@ export function assertInstallPrompt() {
     .should('contain.text', 'Install for Firefox')
     .and('have.attr', 'href', '/api/social/extensions/download/firefox');
   cy.get('[data-testid="social-extension-download-chrome"]')
-    .should('contain.text', 'Download for Chrome')
+    .should('contain.text', 'Download for Chromium')
     .and('have.attr', 'href', '/api/social/extensions/download/chrome');
   cy.get(MANAGER).find('a[data-testid^="social-extension-download-"]').first()
     .should('have.attr', 'data-testid', 'social-extension-download-firefox');

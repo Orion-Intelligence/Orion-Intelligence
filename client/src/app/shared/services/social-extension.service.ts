@@ -116,6 +116,17 @@ export class SocialExtensionService {
   }
 
   private isSupportedBrowser(): boolean {
-    return typeof navigator !== 'undefined' && /(?:Firefox|Chrome|Chromium)\//.test(navigator.userAgent);
+    if (typeof navigator === 'undefined') {
+      return false;
+    }
+    if (/Firefox\//.test(navigator.userAgent)) {
+      return true;
+    }
+    const brands = (navigator as Navigator & { userAgentData?: { brands?: Array<{ brand: string }> } }).userAgentData?.brands;
+    if (!brands?.length) {
+      return false;
+    }
+    const names = brands.map(entry => entry.brand);
+    return names.some(name => /chromium/i.test(name)) && !names.some(name => /google chrome|opera|edge|brave|vivaldi|yandex|samsung/i.test(name));
   }
 }
