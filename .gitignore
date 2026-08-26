@@ -31,6 +31,7 @@ backend/env/
 client/node_modules/
 client/.angular/cache/
 backend_cov_app/*
+backend/build/
 backend/workspace/build/
 backend/workspace/build/*
 client/build/
