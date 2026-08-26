@@ -29,6 +29,7 @@ export class AppComponent {
   isVisible = true;
 
   constructor(private router: Router, private errorStore: ErrorStoreService, protected appService: AppService, private loadingService: LoadingService) {
+    window.postMessage({ source: 'orion-app', type: 'register' }, window.location.origin);
     effect(() => {
       const theme = this.appService.userSessionData()?.user?.theme ?? 'dark-theme';
       this.applyTheme(theme);
