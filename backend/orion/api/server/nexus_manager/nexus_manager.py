@@ -3,6 +3,7 @@ from fastapi.responses import StreamingResponse
 from starlette.responses import JSONResponse
 
 from orion.api.server.nexus_manager.model.nexus_chat_model import NexusTextAnalysisRequest, ReportChatRequest
+from orion.api.server.nexus_manager.nexus_chat_gateway import nexus_chat_gateway
 from orion.api.server.nexus_manager.stream_manager import NexusStreamManager
 from orion.helper_manager.env_handler import env_handler
 
@@ -26,6 +27,10 @@ class nexus_manager:
         try:
             session_id = str(model.session_id or "").strip()
             session_type = str(model.session_type or "persistent").strip() or "persistent"
+            gateway = nexus_chat_gateway.getInstance()
+            if gateway.is_temporary_session(session_id):
+                await self.cancel_chat(user_id=user_id)
+                session_id = await gateway.ensure_shared_session(user_id) or session_id
             stream = self.stream_manager.stream_response(
                 model.message,
                 user_id=user_id,
