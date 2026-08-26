@@ -27,6 +27,8 @@ import { SocialExtensionManagerComponent } from '../../../shared/partials/extens
 import { SocialExtensionService } from '../../../shared/services/social-extension.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
+const EXTENSION_MISS_LIMIT = 4;
+
 @Component({
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
@@ -93,6 +95,7 @@ export class SocialProfileListingComponent {
     return usernames;
   });
   private extensionOpened = false;
+  private extensionMisses = 0;
   private readonly connectionSearchResults = signal<Record<string, unknown[] | null>>({});
   private readonly connectionSearch$ = new Subject<{ platformData: social_profile; term: string }>();
 
@@ -306,6 +309,13 @@ export class SocialProfileListingComponent {
 
   private startExtensionHeartbeat(): void {
     timer(0, 3000).pipe(exhaustMap(() => this.extensionService.detect()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
+      if (state === 'ready') {
+        this.extensionMisses = 0;
+      }
+      else if (this.extensionState() === 'ready' && (this.extensionMisses += 1) < EXTENSION_MISS_LIMIT) {
+        return;
+      }
+
       this.extensionState.set(state);
 
       if (state === 'signin' && !this.extensionOpened) {
