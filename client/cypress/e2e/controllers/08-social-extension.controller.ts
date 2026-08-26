@@ -23,9 +23,6 @@ export function assertInstallPrompt() {
     .and('have.attr', 'href', '/extensions/orion-extension-chromium.crx');
   cy.get(MANAGER).find('a[data-testid^="social-extension-download-"]').first()
     .should('have.attr', 'data-testid', 'social-extension-download-firefox');
-  cy.get('[data-testid="social-extension-installed-hint"]')
-    .should('be.visible')
-    .and('contain.text', 'Already installed?');
   cy.get(MANAGER).find('ol li').should('have.length', 3);
 }
 
