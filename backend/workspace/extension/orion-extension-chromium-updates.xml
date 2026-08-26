@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gupdate xmlns="http://www.google.com/update2/response" protocol="2.0">
   <app appid="bdeeejjkjcdgidganomplkaifcneakoi">
-    <updatecheck codebase="https://127.0.0.1:8443/extensions/orion-extension-chromium.crx" version="0.2.94" />
+    <updatecheck codebase="https://127.0.0.1:8443/extensions/orion-extension-chromium.crx" version="0.2.95" />
   </app>
 </gupdate>
