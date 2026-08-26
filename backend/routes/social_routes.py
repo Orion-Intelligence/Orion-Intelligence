@@ -157,6 +157,14 @@ async def download_social_extension_firefox():
     return await social_model.getInstance().extension_download("firefox")
 
 
+@social_routes.get(
+    "/api/social/extensions/version",
+    status_code=200,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), ], )
+async def social_extension_version():
+    return await social_model.getInstance().extension_version()
+
+
 @social_routes.post(
     "/api/social/connections",
     status_code=200,

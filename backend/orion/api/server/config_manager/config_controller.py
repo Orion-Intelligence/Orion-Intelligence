@@ -25,6 +25,7 @@ class config_controller:
     TENANT_EDITABLE_SETTINGS = {AllowedKeys.APP_NAME.value}
     ADMIN_SETTING_KEYS = {
         AllowedKeys.VERSION.value,
+        AllowedKeys.EXTENSION_VERSION.value,
         AllowedKeys.LANGUAGE_ALLOWED.value,
         AllowedKeys.ADMIN_ROOT_ALLOWED.value,
         AllowedKeys.S_ONION.value,
@@ -302,6 +303,7 @@ class config_controller:
             AllowedKeys.AI_ENDPOINT_ENABLED.value: AllowedKeys.AI_ENDPOINT_ENABLED,
             AllowedKeys.ADMIN_ROOT_ALLOWED.value: AllowedKeys.ADMIN_ROOT_ALLOWED,
             AllowedKeys.S_ONION.value: AllowedKeys.S_ONION,
+            AllowedKeys.EXTENSION_VERSION.value: AllowedKeys.EXTENSION_VERSION,
         }
         system_settings = dict(self._configs.get(resolved_tenant_id, {}))
         for key_str, value in settings.items():

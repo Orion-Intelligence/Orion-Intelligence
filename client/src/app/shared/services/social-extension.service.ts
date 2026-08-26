@@ -2,8 +2,13 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ExtensionPresence, ExtensionSession, ExtensionState } from '../model/extension/extension.model';
 
+const LATEST_TTL_MS = 60_000;
+
 @Injectable({ providedIn: 'root' })
 export class SocialExtensionService {
+  private latest = '';
+  private latestAt = 0;
+
   detect(): Observable<ExtensionState> {
     return new Observable<ExtensionState>(subscriber => {
       if (!this.isSupportedBrowser()) {
@@ -17,8 +22,8 @@ export class SocialExtensionService {
       let connected = false;
       let sessionSettled = false;
       let deadlineReached = false;
+      let installedVersion = '';
 
-      const marker = () => (typeof document !== 'undefined' ? !!document.documentElement.getAttribute('data-orion-extension') : false);
       const finish = (state: ExtensionState) => {
         if (settled) {
           return;
@@ -27,7 +32,13 @@ export class SocialExtensionService {
         subscriber.next(state);
         subscriber.complete();
       };
-      const resolveState = () => finish(connected ? 'ready' : installed || marker() ? 'signin' : 'install');
+      const resolveState = () => {
+        if (installed && this.outdated(installedVersion)) {
+          finish('update');
+          return;
+        }
+        finish(connected ? 'ready' : installed ? 'signin' : 'install');
+      };
       const resolveWhenProbesSettle = () => {
         if (deadlineReached && sessionSettled) {
           resolveState();
@@ -54,9 +65,11 @@ export class SocialExtensionService {
           return;
         }
         installed = true;
+        installedVersion = typeof data.version === 'string' ? data.version : '';
         resolveWhenProbesSettle();
       };
 
+      void this.refreshLatest();
       window.addEventListener('message', onMessage);
       window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
       const presenceTimer = setTimeout(() => {
@@ -106,6 +119,48 @@ export class SocialExtensionService {
         clearTimeout(timer);
       };
     });
+  }
+
+  async refreshLatest(): Promise<void> {
+    if (this.latest && Date.now() - this.latestAt < LATEST_TTL_MS) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/social/extensions/version', { credentials: 'include', cache: 'no-store' });
+      if (!response.ok) {
+        return;
+      }
+      const body = await response.json() as { chrome?: string; firefox?: string };
+      const value = /firefox/i.test(navigator.userAgent) ? body?.firefox : body?.chrome;
+      if (typeof value === 'string' && value) {
+        this.latest = value;
+        this.latestAt = Date.now();
+      }
+    }
+    catch {
+      void 0;
+    }
+  }
+
+  latestVersion(): string {
+    return this.latest;
+  }
+
+  private outdated(installed: string): boolean {
+    if (!installed || !this.latest) {
+      return false;
+    }
+
+    const current = installed.split('.').map(part => Number.parseInt(part, 10) || 0);
+    const target = this.latest.split('.').map(part => Number.parseInt(part, 10) || 0);
+    for (let i = 0; i < Math.max(current.length, target.length); i += 1) {
+      const diff = (current[i] ?? 0) - (target[i] ?? 0);
+      if (diff !== 0) {
+        return diff < 0;
+      }
+    }
+    return false;
   }
 
   downloadUrl(browser: 'chrome' | 'firefox'): string {

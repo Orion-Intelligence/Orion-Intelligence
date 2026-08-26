@@ -11,6 +11,7 @@ from pydantic import field_validator
 class AllowedKeys(str, Enum):
     SYSTEM_SETTINGS = "system_settings"
     VERSION = "version"
+    EXTENSION_VERSION = "extension_version"
     APP_NAME = "app_name"
     META_INFO = "meta_info"
     LANGUAGE_ALLOWED = "language_allowed"

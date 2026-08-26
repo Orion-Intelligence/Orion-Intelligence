@@ -20,6 +20,10 @@ export class SocialExtensionManagerComponent {
     this.extensionService.openExtension();
   }
 
+  latestVersion(): string {
+    return this.extensionService.latestVersion();
+  }
+
   downloadUrl(browser: 'chrome' | 'firefox'): string {
     return this.extensionService.downloadUrl(browser);
   }

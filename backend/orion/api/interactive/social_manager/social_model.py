@@ -399,6 +399,13 @@ class social_model:
 
     EXTENSION_RAW_DIR = Path(__file__).resolve().parents[4] / "workspace" / "extension"
 
+    async def extension_version(self):
+        from orion.api.server.config_manager.config_controller import config_controller
+        from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys
+
+        version = config_controller.getInstance().get(AllowedKeys.EXTENSION_VERSION.value, "") or ""
+        return {"chrome": version, "firefox": version}
+
     async def extension_download(self, browser: str = "chrome"):
         target = "firefox" if browser.strip().lower() in {"firefox", "mozilla"} else "chrome"
         if target == "firefox":
