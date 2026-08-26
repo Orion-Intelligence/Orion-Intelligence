@@ -1,4 +1,5 @@
 import asyncio
+import contextlib
 import json
 import threading
 import uuid
@@ -109,10 +110,8 @@ class extension_socket_manager:
 
     async def _close_local_sockets(self, user_key: str) -> None:
         for websocket in self._sockets.pop(user_key, set()):
-            try:
+            with contextlib.suppress(Exception):
                 await websocket.close()
-            except Exception:
-                continue
 
     async def cancel(self, user_key: str, result_scope: str) -> None:
         result_key = f"{user_key}:{result_scope}"
@@ -144,10 +143,8 @@ class extension_socket_manager:
         await self._store.put_request(request_id, result_key)
         if sockets:
             for websocket in sockets:
-                try:
+                with contextlib.suppress(Exception):
                     await websocket.send_json({**payload, "request_id": request_id})
-                except Exception:
-                    continue
             self._spawn_watch(request_id, user_key)
             return
         redis_client = self._store.redis
@@ -222,7 +219,5 @@ class extension_socket_manager:
             return
         request_id = data.get("request_id")
         for websocket in sockets:
-            try:
+            with contextlib.suppress(Exception):
                 await websocket.send_json({**(data.get("payload") or {}), "request_id": request_id})
-            except Exception:
-                continue

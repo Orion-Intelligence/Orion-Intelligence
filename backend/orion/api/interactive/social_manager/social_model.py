@@ -11,7 +11,7 @@ from typing import Any
 import httpx
 import jwt
 from fastapi import HTTPException
-from fastapi.responses import FileResponse, JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse
 
 from configs.auth_cookie import token_from_request
 from orion.constants.constant import CONSTANTS

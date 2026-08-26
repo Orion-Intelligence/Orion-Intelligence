@@ -7,7 +7,6 @@ from datetime import UTC, datetime, timezone
 from uuid import uuid4
 
 from cryptography.fernet import Fernet
-from fastapi import HTTPException
 
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.profile_manager.constants.constant import MAX_SESSIONS_PER_PLATFORM, PLATFORMS_RESULT_KEY
