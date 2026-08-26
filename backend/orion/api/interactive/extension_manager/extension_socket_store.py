@@ -1,3 +1,4 @@
+import contextlib
 import json
 import uuid
 
@@ -45,7 +46,7 @@ class ExtensionSocketStore:
 
     async def claim_inflight(self, result_key: str) -> bool:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 claimed = await self._redis.set(
                     f"{INFLIGHT_KEY}:{result_key}",
                     "1",
@@ -53,8 +54,6 @@ class ExtensionSocketStore:
                     ex=INFLIGHT_TTL_SECONDS,
                 )
                 return bool(claimed)
-            except Exception:
-                pass
         if result_key in self._local_inflight:
             return False
         self._local_inflight.add(result_key)
@@ -62,60 +61,50 @@ class ExtensionSocketStore:
 
     async def release_inflight(self, result_key: str) -> None:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 await self._redis.delete(f"{INFLIGHT_KEY}:{result_key}")
-            except Exception:
-                pass
         self._local_inflight.discard(result_key)
 
     async def clear_inflight_for_user(self, user_key: str) -> None:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 async for key in self._redis.scan_iter(
                     match=f"{INFLIGHT_KEY}:{user_key}:*",
                     count=200,
                 ):
                     await self._redis.delete(key)
-            except Exception:
-                pass
         self._local_inflight = {
             key for key in self._local_inflight if not key.startswith(f"{user_key}:")
         }
 
     async def put_result(self, result_key: str, payload: dict) -> None:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 await self._redis.set(
                     f"{RESULT_KEY}:{result_key}",
                     json.dumps(payload),
                     ex=RESULT_TTL_SECONDS,
                 )
                 return
-            except Exception:
-                pass
         self._local_results[result_key] = payload
 
     async def pop_result(self, result_key: str) -> dict | None:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 raw = await self._redis.getdel(f"{RESULT_KEY}:{result_key}")
                 if raw:
                     return json.loads(raw)
-            except Exception:
-                pass
         return self._local_results.pop(result_key, None)
 
     async def drop_result(self, result_key: str) -> None:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 await self._redis.delete(f"{RESULT_KEY}:{result_key}")
-            except Exception:
-                pass
         self._local_results.pop(result_key, None)
 
     async def put_request(self, request_id: str, result_key: str) -> None:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 await self._redis.set(
                     f"{REQUEST_KEY}:{request_id}",
                     result_key,
@@ -127,8 +116,6 @@ class ExtensionSocketStore:
                     ex=INFLIGHT_TTL_SECONDS,
                 )
                 return
-            except Exception:
-                pass
         self._local_requests[request_id] = result_key
         self._local_scope_requests[result_key] = request_id
 
@@ -145,19 +132,15 @@ class ExtensionSocketStore:
             self._local_requests.pop(request_id, None)
         if result_key is not None:
             if self._redis is not None:
-                try:
+                with contextlib.suppress(Exception):
                     await self._redis.delete(f"{SCOPE_REQUEST_KEY}:{result_key}")
-                except Exception:
-                    pass
             self._local_scope_requests.pop(result_key, None)
         return result_key
 
     async def request_outstanding(self, request_id: str) -> bool:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 return bool(await self._redis.exists(f"{REQUEST_KEY}:{request_id}"))
-            except Exception:
-                pass
         return request_id in self._local_requests
 
     async def invalidate_request_for_scope(self, result_key: str) -> None:
@@ -173,19 +156,17 @@ class ExtensionSocketStore:
         if not request_id:
             return
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 await self._redis.delete(
                     f"{REQUEST_KEY}:{request_id}",
                     f"{ACK_KEY}:{request_id}",
                 )
-            except Exception:
-                pass
         self._local_requests.pop(request_id, None)
         self._local_acks.discard(request_id)
 
     async def acknowledge(self, request_id: str) -> None:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 await self._redis.set(
                     f"{ACK_KEY}:{request_id}",
                     "1",
@@ -197,16 +178,12 @@ class ExtensionSocketStore:
                     await self._redis.expire(f"{SCOPE_REQUEST_KEY}:{result_key}", INFLIGHT_TTL_SECONDS)
                     await self._redis.expire(f"{INFLIGHT_KEY}:{result_key}", INFLIGHT_TTL_SECONDS)
                 return
-            except Exception:
-                pass
         self._local_acks.add(request_id)
 
     async def take_ack(self, request_id: str) -> bool:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 return bool(await self._redis.getdel(f"{ACK_KEY}:{request_id}"))
-            except Exception:
-                pass
         if request_id not in self._local_acks:
             return False
         self._local_acks.discard(request_id)
@@ -215,40 +192,34 @@ class ExtensionSocketStore:
     async def touch_socket(self, user_key: str, socket_id: str) -> None:
         if self._redis is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             await self._redis.set(
                 f"{SOCKET_KEY}:{user_key}:{socket_id}",
                 self._worker_id,
                 ex=SOCKET_TTL_SECONDS,
             )
-        except Exception:
-            pass
 
     async def drop_socket(self, user_key: str, socket_id: str) -> None:
         if self._redis is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             await self._redis.delete(f"{SOCKET_KEY}:{user_key}:{socket_id}")
-        except Exception:
-            pass
 
     async def has_socket(self, user_key: str) -> bool:
         if self._redis is None:
             return False
-        try:
+        with contextlib.suppress(Exception):
             async for _ in self._redis.scan_iter(
                 match=f"{SOCKET_KEY}:{user_key}:*",
                 count=50,
             ):
                 return True
-        except Exception:
-            pass
         return False
 
     async def reset_sockets(self, user_key: str) -> None:
         if self._redis is None:
             return
-        try:
+        with contextlib.suppress(Exception):
             async for key in self._redis.scan_iter(
                 match=f"{SOCKET_KEY}:{user_key}:*",
                 count=50,
@@ -258,13 +229,9 @@ class ExtensionSocketStore:
                 BUS_CHANNEL,
                 json.dumps({"kind": "reset", "user_key": user_key}),
             )
-        except Exception:
-            pass
 
     async def is_inflight(self, result_key: str) -> bool:
         if self._redis is not None:
-            try:
+            with contextlib.suppress(Exception):
                 return bool(await self._redis.exists(f"{INFLIGHT_KEY}:{result_key}"))
-            except Exception:
-                pass
         return result_key in self._local_inflight

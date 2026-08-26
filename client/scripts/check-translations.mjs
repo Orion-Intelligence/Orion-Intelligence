@@ -10,7 +10,6 @@ const appRoot = path.join(clientRoot, 'src/app');
 const localeRoot = path.join(clientRoot, 'src/assets/translate');
 const languageConfigPath = path.join(appRoot, 'shared/constants/shared-enums.ts');
 const demoTourPath = path.join(clientRoot, 'src/assets/data/demo_tour/demo_tour.json');
-const entitiesPath = path.join(clientRoot, 'src/assets/data/entities_data/entities.json');
 const uiMetadataProperties = new Set([
   'actionLabel',
   'ariaLabel',
@@ -225,16 +224,6 @@ function collectDemoTourKeys(output) {
   }
 }
 
-function collectEntityKeys(output) {
-  const entities = JSON.parse(fs.readFileSync(entitiesPath, 'utf8'));
-  for (const entity of entities) {
-    const title = normalizeKey(entity?.title);
-    if (title) {
-      output.add(title);
-    }
-  }
-}
-
 const errors = [];
 const referencedKeys = new Set();
 
@@ -284,7 +273,6 @@ for (const file of walkFiles(appRoot, '.ts')) {
 }
 
 collectDemoTourKeys(referencedKeys);
-collectEntityKeys(referencedKeys);
 
 const configuredLanguages = collectConfiguredLanguages();
 const configuredLocales = configuredLanguages.locales;

@@ -1,8 +1,8 @@
 import base64
 import binascii
 import hashlib
-import random
 import re
+import secrets
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 from datetime import UTC, datetime
@@ -597,7 +597,7 @@ class social_model:
                     keep = (first + second)[:limit]
                     remaining = limit - len(keep)
                     if remaining > 0 and rest:
-                        keep = keep + random.sample(rest, min(remaining, len(rest)))
+                        keep = keep + secrets.SystemRandom().sample(rest, min(remaining, len(rest)))
                     resources_out.append({**collection, "resources": keep, "trimmed_from": len(items)})
                 profiles_out.append({**profile, "resources": resources_out})
             trimmed.append({**document, "profiles": profiles_out})
