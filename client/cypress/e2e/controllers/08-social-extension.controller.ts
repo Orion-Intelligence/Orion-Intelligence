@@ -13,14 +13,14 @@ export function assertInstallPrompt() {
   cy.get(MANAGER, { timeout: TIMEOUT })
     .should('be.visible')
     .and('contain.text', 'Orion extension required')
-    .and('contain.text', 'Firefox installs in one click');
+    .and('contain.text', 'Install the signed Firefox or Chromium package');
   cy.get('[data-testid="social-extension-open"]').should('not.exist');
   cy.get('[data-testid="social-extension-download-firefox"]')
     .should('contain.text', 'Install for Firefox')
-    .and('have.attr', 'href', '/api/social/extensions/download/firefox');
+    .and('have.attr', 'href', '/extensions/orion-extension-firefox.xpi');
   cy.get('[data-testid="social-extension-download-chrome"]')
-    .should('contain.text', 'Download for Chromium')
-    .and('have.attr', 'href', '/api/social/extensions/download/chrome');
+    .should('contain.text', 'Install for Chromium')
+    .and('have.attr', 'href', '/extensions/orion-extension-chromium.crx');
   cy.get(MANAGER).find('a[data-testid^="social-extension-download-"]').first()
     .should('have.attr', 'data-testid', 'social-extension-download-firefox');
   cy.get('[data-testid="social-extension-installed-hint"]')

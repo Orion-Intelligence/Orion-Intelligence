@@ -112,7 +112,9 @@ export class SocialExtensionService {
   }
 
   downloadUrl(browser: 'chrome' | 'firefox'): string {
-    return `/api/social/extensions/download/${browser}`;
+    return browser === 'firefox'
+      ? '/extensions/orion-extension-firefox.xpi'
+      : '/extensions/orion-extension-chromium.crx';
   }
 
   private isSupportedBrowser(): boolean {

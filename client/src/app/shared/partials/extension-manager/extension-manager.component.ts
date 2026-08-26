@@ -14,7 +14,7 @@ export class SocialExtensionManagerComponent {
   private readonly extensionService = inject(SocialExtensionService);
 
   readonly mode = input<ExtensionState>('install');
-  readonly installSteps = ['Install for Firefox and approve the prompt, or download the Chromium package.', 'On Chromium, unzip it and load it from chrome://extensions with Developer mode on.', 'This profile loads automatically once the extension is installed.'];
+  readonly installSteps = ['Choose Firefox or Chromium and approve the browser installation prompt.', 'Orion keeps the installed extension updated automatically.', 'This profile loads automatically once the extension is installed.'];
 
   open(): void {
     this.extensionService.openExtension();
