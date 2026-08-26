@@ -34,7 +34,7 @@ export class SocialExtensionService {
         subscriber.complete();
       };
       const resolveState = () => {
-        if (installed && this.outdated(this.installedVersion)) {
+        if (connected && this.outdated(this.installedVersion)) {
           finish('update');
           return;
         }

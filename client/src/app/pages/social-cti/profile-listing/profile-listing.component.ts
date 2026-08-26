@@ -490,7 +490,11 @@ export class SocialProfileListingComponent {
   }
 
   isExtensionReady(): boolean {
-    return this.extensionState() === 'ready';
+    return this.extensionState() === 'ready' || this.extensionState() === 'update';
+  }
+
+  extensionUpdateUrl(): string {
+    return this.extensionService.downloadUrl(/firefox/i.test(navigator.userAgent) ? 'firefox' : 'chrome');
   }
 
   private fetchProfileDetails(platformData: social_profile): void {
