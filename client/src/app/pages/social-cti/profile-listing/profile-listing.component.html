@@ -199,12 +199,7 @@
                   (onlinePresenceSearch)="searchOnlinePresence(platformData)"
                   [crawlResult]="crawlResultFor(platformData, getActiveTabForPlatform(platformData))">
                 </app-social-profile-tabs-section>
-              } @else if (extensionState() === 'checking') {
-                <div class="flex h-full min-h-[220px] flex-col items-center justify-center gap-3">
-                  <span class="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-t-transparent" aria-hidden="true"></span>
-                  <span class="text-xs text-[var(--color-text4)]">{{ 'Checking the Orion extension…' | translate }}</span>
-                </div>
-              } @else {
+              } @else if (extensionState() !== 'checking') {
                 <app-social-extension-manager [mode]="extensionState()"></app-social-extension-manager>
               }
             } @else {
