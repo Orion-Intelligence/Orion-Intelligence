@@ -8,6 +8,7 @@ const LATEST_TTL_MS = 60_000;
 export class SocialExtensionService {
   private latest = '';
   private latestAt = 0;
+  private installedVersion = '';
 
   detect(): Observable<ExtensionState> {
     return new Observable<ExtensionState>(subscriber => {
@@ -22,7 +23,7 @@ export class SocialExtensionService {
       let connected = false;
       let sessionSettled = false;
       let deadlineReached = false;
-      let installedVersion = '';
+      let latestSettled = false;
 
       const finish = (state: ExtensionState) => {
         if (settled) {
@@ -33,14 +34,14 @@ export class SocialExtensionService {
         subscriber.complete();
       };
       const resolveState = () => {
-        if (installed && this.outdated(installedVersion)) {
+        if (installed && this.outdated(this.installedVersion)) {
           finish('update');
           return;
         }
         finish(connected ? 'ready' : installed ? 'signin' : 'install');
       };
       const resolveWhenProbesSettle = () => {
-        if (deadlineReached && sessionSettled) {
+        if (deadlineReached && sessionSettled && latestSettled) {
           resolveState();
         }
       };
@@ -49,7 +50,7 @@ export class SocialExtensionService {
         .then(response => (response.ok ? response.json() : null))
         .then((body: ExtensionSession | null) => {
           connected = body?.extension_connected === true;
-          if (connected) {
+          if (connected && latestSettled) {
             resolveState();
           }
         })
@@ -65,11 +66,16 @@ export class SocialExtensionService {
           return;
         }
         installed = true;
-        installedVersion = typeof data.version === 'string' ? data.version : '';
+        if (typeof data.version === 'string' && data.version) {
+          this.installedVersion = data.version;
+        }
         resolveWhenProbesSettle();
       };
 
-      void this.refreshLatest();
+      void this.refreshLatest().finally(() => {
+        latestSettled = true;
+        resolveWhenProbesSettle();
+      });
       window.addEventListener('message', onMessage);
       window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
       const presenceTimer = setTimeout(() => {
