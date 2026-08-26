@@ -14,7 +14,7 @@ export class SocialExtensionManagerComponent {
   private readonly extensionService = inject(SocialExtensionService);
 
   readonly mode = input<ExtensionState>('install');
-  readonly installSteps = ['Download the signed package for your browser.', 'Open the downloaded package and approve the installation prompt.', 'This profile loads automatically once the extension is installed.'];
+  readonly installSteps = ['Install for Firefox and approve the prompt, or download the Chrome package.', 'On Chrome, unzip it and load it from chrome://extensions with Developer mode on.', 'This profile loads automatically once the extension is installed.'];
 
   open(): void {
     this.extensionService.openExtension();
