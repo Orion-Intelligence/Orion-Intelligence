@@ -1479,6 +1479,25 @@ Common view actions include:
 
 Use graph view when you want to understand how entities connect. Use list view when you want a more structured review of profiles, links, summaries, and platform records.
 
+The graph is a view of the Social Intel dashboard rather than a separate page. The round diagram button beside the gear switches between the profile list and the graph, and lights up while the graph is shown. Everything around it — scan history, scan box, breadcrumb — stays in place.
+
+In graph view:
+
+- clicking a scan in the left history adds that user's node instead of opening the profile
+- the `Find a username in this graph...` box lists only users already in the graph, and offers `Add @handle` for one that is not
+- each account node carries badges for the relationship sets found on it, such as `Followers` and `Commenters`
+- right-clicking an unscanned contact offers `Scan @handle`, which starts a normal scan and refreshes the graph when it finishes
+- removing a user is done from its own node panel
+
+The set of users in the graph is saved per account, so reopening Social Intel restores the same relationship picture.
+
+```{figure} ../screenshots/social-relationship-graph-20260326.png
+:alt: Social Intel relationship graph view
+:width: 100%
+
+Relationship graph view showing a scanned account, its platform node, and follower and commenter badges.
+```
+
 #### Session Management
 
 Social Intel supports multiple sessions in the same way the CTI workspace supports multiple investigative tabs.
@@ -1558,6 +1577,26 @@ Manage-profiles modal used to filter, inspect, fetch, and push discovered accoun
 Social Intel list-view mode for profile-by-profile review after graph ingestion.
 ```
 
+#### Browser Extension and Captured Sessions
+
+Profile fetching runs through the Orion browser extension, so the profile tabs stay gated until the extension is installed and signed in. When it is missing, Social Intel and the Manage Profiles page show an install prompt: Firefox installs the signed build in one click, while the Chrome package is downloaded and loaded manually from `chrome://extensions` with Developer mode on.
+
+```{figure} ../screenshots/social-extension-install-20260326.png
+:alt: Orion extension install prompt
+:width: 100%
+
+Install prompt shown while the Orion extension is not available to the browser.
+```
+
+The Manage Profiles page lists every supported platform with the number of sessions saved for it. From here users can fetch a session for a platform, and expand a platform to verify, re-capture, or delete an individual saved session.
+
+```{figure} ../screenshots/social-manage-profiles-page-20260326.png
+:alt: Manage Profiles captured sessions
+:width: 100%
+
+Manage Profiles page listing supported platforms and their captured session counts.
+```
+
 #### Summary Popup and Metadata Search
 
 The summary popup provides deeper profile inspection beyond the main graph or list node.
@@ -1606,6 +1645,19 @@ Covered actions include:
 - selecting all imported results and updating the graph
 
 In practice, this means Social Intel can expand an investigation outward from one profile into a broader relationship set rather than staying limited to the original target.
+
+A `connection` is someone who **engaged** with the profile, not someone who follows it. Orion reads the commenters off each of the profile's own posts and deduplicates them into a single people list, remembering which posts each person commented on. One handle therefore appears once in `Connections` even when it commented on several posts, and the count of those posts is kept with it.
+
+The graph carries the same relation. Commenters hang off the account node as a `Commenters` badge; an individual commenter's edge reads `commented on @handle`, and the edge weight and its node panel show how many distinct posts that person commented on. When a commenter is also a scanned user, the two users are joined through the platform node they share. One that has not been scanned yet can be added to the graph as its own user, or scanned directly from its node.
+
+Each fetch section keeps its own state: a band above the results shows whether the section is up to date and when it was last synced, `Sync all` refetches it, and the section resumes on its own if the page is reloaded while a fetch is still running.
+
+```{figure} ../screenshots/social-followers-popup-20260326.png
+:alt: Social Intel profile fetch tabs
+:width: 100%
+
+Profile fetch tabs with the per-section sync band, alongside exposure, wanted-list, and phone-lookup panels.
+```
 
 #### Images, Followers, and Re-Scan Controls
 

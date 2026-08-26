@@ -3,7 +3,10 @@
     <img src="assets/images/sidebar/search_nav_logo.png" [alt]="'Orion' | translate" class="h-7 w-auto flex-shrink-0 object-contain [body.light-theme_&]:[filter:var(--ui-icon-filter-light)]">
   </div>
 
-  @if (mode() === 'signin') {
+  @if (mode() === 'unsupported') {
+    <h3 data-testid="social-extension-unsupported" class="mb-0 mt-4 text-base font-bold text-[var(--color-text1)]">{{ 'Unsupported browser' | translate }}</h3>
+    <p class="mb-0 mt-0.5 text-xs text-[var(--color-text4)]">{{ 'The Orion extension is available only in Chromium-based browsers and Firefox. Open this page in a supported browser to continue.' | translate }}</p>
+  } @else if (mode() === 'signin') {
     <h3 class="mb-0 mt-4 text-base font-bold text-[var(--color-text1)]">{{ 'Waiting for the Orion extension' | translate }}</h3>
     <p class="mb-0 mt-0.5 text-xs text-[var(--color-text4)]">{{ 'The extension is installed but signed out. Sign in from the popup and this profile loads automatically.' | translate }}</p>
 

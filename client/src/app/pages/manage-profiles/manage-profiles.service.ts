@@ -4,7 +4,7 @@ import { Observable, catchError, filter, map, of, switchMap, take, timer } from 
 import { PlatformEntry, SessionEntry } from './model/manage-profiles.model';
 import { SocialExtensionService } from '../../shared/services/social-extension.service';
 
-export type ManageProfilesExtensionState = 'ready' | 'signin' | 'install';
+export type ManageProfilesExtensionState = 'ready' | 'signin' | 'install' | 'unsupported';
 
 @Injectable({ providedIn: 'root' })
 export class ManageProfilesService {

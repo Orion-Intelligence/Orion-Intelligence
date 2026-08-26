@@ -6,6 +6,12 @@ import { ExtensionPresence, ExtensionSession, ExtensionState } from '../model/ex
 export class SocialExtensionService {
   detect(): Observable<ExtensionState> {
     return new Observable<ExtensionState>(subscriber => {
+      if (!this.isSupportedBrowser()) {
+        subscriber.next('unsupported');
+        subscriber.complete();
+        return;
+      }
+
       let settled = false;
       let installed = false;
       let connected = false;
@@ -107,5 +113,9 @@ export class SocialExtensionService {
 
   downloadUrl(browser: 'chrome' | 'firefox'): string {
     return `/api/social/extensions/download/${browser}`;
+  }
+
+  private isSupportedBrowser(): boolean {
+    return typeof navigator !== 'undefined' && /(?:Firefox|Chrome|Chromium)\//.test(navigator.userAgent);
   }
 }
