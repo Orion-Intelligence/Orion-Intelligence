@@ -46,7 +46,7 @@ class TenantManager:
     def __init__(self):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "profile"
+        self.IMAGE_DIR = self.BASE_DIR / "workspace" / "resource" / "profile"
         self._engine = mongo_controller.get_instance().get_engine()
 
         if TenantManager.__instance is not None:

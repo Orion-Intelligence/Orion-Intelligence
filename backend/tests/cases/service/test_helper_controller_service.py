@@ -11,7 +11,7 @@ from orion.constants import constant
 from orion.constants.constant import allowed_key_titles
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.redis_manager.redis_enums import REDIS_KEYS
-from tests.fake_model.fakes import FakeElastic, FakeRedis
+from tests.cases.fake_model.fakes import FakeElastic, FakeRedis
 
 
 def test_parse_filters_json_returns_mapping_and_invalid_input():

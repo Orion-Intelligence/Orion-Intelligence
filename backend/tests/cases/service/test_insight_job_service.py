@@ -10,7 +10,7 @@ from orion.management.jobs.insight_job import insight_job
 from orion.management.models.insight_model import InsightData
 from orion.services.elastic_manager.elastic_enums import ELASTIC_ENUMS, ELASTIC_INDEX, ELASTIC_KEYS
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
-from tests.fake_model.fakes import FakeRedis
+from tests.cases.fake_model.fakes import FakeRedis
 
 
 def test_populate_comparison_model_calculates_daily_and_weekly_changes():

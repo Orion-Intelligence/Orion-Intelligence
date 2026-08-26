@@ -12,7 +12,7 @@ class SystemLogManager:
     __lock = threading.Lock()
 
     READ_CHUNK_SIZE = 64 * 1024
-    LOG_ROOT = Path(__file__).resolve().parents[3] / "logs"
+    LOG_ROOT = Path(__file__).resolve().parents[4] / "workspace" / "logs"
     LOG_DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
     LOG_FILE_PATTERN = re.compile(r"^log_\d+\.log$")
     LOG_LINE_PATTERN = re.compile(r"^(?:\[APP-LOG\]\s*)?(?P<type>[A-Z]+) - (?P<timestamp>\d{2}/\d{2}/\d{4} \d{2}:\d{2}:\d{2}) : (?P<message>.*)$")
@@ -171,9 +171,8 @@ class SystemLogManager:
         candidates = [
             self.LOG_ROOT,
             Path("/app/crawler_logs"),
-            Path.cwd() / "orion" / "logs",
-            Path.cwd() / "logs",
-            Path.cwd() / "backend" / "orion" / "logs",
+            Path.cwd() / "workspace" / "logs",
+            Path.cwd() / "backend" / "workspace" / "logs",
             Path.cwd().parent / "Orion-Crawler" / "app" / "logs",
         ]
         roots = []

@@ -35,7 +35,7 @@ from orion.api.server.crawl_manager.crawl_index_generator import crawl_index_gen
 from orion.api.server.crawl_manager.crawl_model import crawl_model
 from orion.constants.constant import CONSTANTS
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX, ELASTIC_KEYS
-from tests.fake_model.fakes import FakeAsyncClient, FakeBloom, FakeDoc, FakeElastic, FakeMongoEngine, FakeResponse
+from tests.cases.fake_model.fakes import FakeAsyncClient, FakeBloom, FakeDoc, FakeElastic, FakeMongoEngine, FakeResponse
 
 
 def _run(coro):

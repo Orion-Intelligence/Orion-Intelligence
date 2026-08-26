@@ -253,7 +253,7 @@ When changing APIs or data behavior, common touchpoints include:
 - route handlers and managers in `backend/`
 - generated docs helpers in `backend/routes/docs/`
 - test coverage under `backend/tests/`
-- mock search data under `backend/static/test/mocks/`
+- mock search data under `backend/tests/mock/`
 
 Backend changes should be validated against both API behavior and the frontend workflows that consume those responses.
 

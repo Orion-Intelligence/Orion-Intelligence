@@ -23,7 +23,7 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-from tests.fake_model.fakes import FakeEngine, FakeRedis
+from tests.cases.fake_model.fakes import FakeEngine, FakeRedis
 
 
 def _run(coro):
@@ -52,8 +52,8 @@ def _make_user(**overrides):
 
 
 def _make_manager(*, user=None, find_one_results=None):
-    manager = object.__new__(session_manager)
-    manager._engine = FakeEngine(user, find_one_results=find_one_results)
+    engine = FakeEngine(user, find_one_results=find_one_results)
+    manager = object.__new__(type("session_manager_under_test", (session_manager,), {"_engine": property(lambda _self: engine)}))
     manager._redis = FakeRedis()
     manager._session_ttl = 1800
     return manager

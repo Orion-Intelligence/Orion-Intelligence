@@ -16,7 +16,7 @@ from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus
-from tests.fake_model.fakes import FakeAuditManager, FakeDoc, FakeMongoEngine
+from tests.cases.fake_model.fakes import FakeAuditManager, FakeDoc, FakeMongoEngine
 
 
 def _run(coro):

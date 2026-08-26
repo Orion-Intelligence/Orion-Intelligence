@@ -10,7 +10,7 @@ from orion.api.server.crawl_manager.class_model.log_model import (
     SiemSearchRequestModel,
 )
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from tests.fake_model.fakes import FakeElastic, FakeMongoEngine
+from tests.cases.fake_model.fakes import FakeElastic, FakeMongoEngine
 
 
 def _run(coro):

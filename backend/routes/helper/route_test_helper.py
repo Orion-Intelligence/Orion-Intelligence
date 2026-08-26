@@ -23,8 +23,8 @@ from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStat
 class TestRouteHelper:
     __test__ = False
 
-    MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "api"
-    ELASTIC_MOCKS_DIR = Path(__file__).resolve().parents[2] / "static" / "test" / "mocks" / "elastic"
+    MOCKS_DIR = Path(__file__).resolve().parents[2] / "tests" / "mock" / "api"
+    ELASTIC_MOCKS_DIR = Path(__file__).resolve().parents[2] / "tests" / "mock" / "elastic"
     _MOCK_STEPS: dict[str, int] = {}
     _MOCK_STEPS_LOCK = Lock()
     STATIC_TEST_CHAT_RESPONSE = "how may i help you"

@@ -25,9 +25,9 @@ services:
         condition: service_started
     volumes:
       - ./backend/orion:/app/orion:ro
-      - ./backend/orion/logs:/app/orion/logs:rw
       - ./backend/routes:/app/routes:ro
       - ./backend/static:/app/static:rw
+      - ./backend/workspace:/app/workspace:cached
       - ./backend/migrations:/app/migrations:ro
       - ./client/build:/client_build:ro
       - bloom-data:/app/bloom_data:rw
@@ -153,6 +153,7 @@ services:
     volumes:
       - ./nginx/nginx-prod.conf:/etc/nginx/nginx.conf:ro
       - ./backend/static:/app/static:ro
+      - ./backend/workspace:/app/workspace:cached
       - ./client/build:/client_build:ro
       - letsencrypt-webroot:/var/www/letsencrypt:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro

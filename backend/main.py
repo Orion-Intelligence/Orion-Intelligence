@@ -33,7 +33,7 @@ from routes.social_routes import social_routes
 from routes.case_routes import case_routes
 
 BASE_DIR = Path(__file__).resolve().parent
-ANGULAR_BUILD_DIR = BASE_DIR / "build"
+ANGULAR_BUILD_DIR = BASE_DIR / "workspace" / "build"
 SWAGGER_STATIC_DIR = BASE_DIR / "static"
 
 

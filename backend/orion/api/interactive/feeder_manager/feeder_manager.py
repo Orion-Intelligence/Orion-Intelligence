@@ -28,8 +28,7 @@ class FeederManager:
 
     def __init__(self):
         engine = mongo_controller.get_instance().get_engine()
-        static_root = Path(__file__).resolve().parent.parent.parent.parent.parent / "static" / ".well-known"
-        parser_root = static_root / "parser_files"
+        parser_root = Path(__file__).resolve().parents[4] / "workspace" / "parser" / "parser_files"
         self._engine = engine
         self._helper = FeederHelper(engine, parser_root)
         if FeederManager.__instance is not None:

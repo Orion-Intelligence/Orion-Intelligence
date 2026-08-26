@@ -6,7 +6,7 @@ import json
 from orion.api.interactive.hompage_manager.homepage_model import homepage_model
 from orion.management.models.insight_model_comparison import InsightComparisonModel
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS, REDIS_KEYS
-from tests.fake_model.fakes import FakeElastic, FakeRedis
+from tests.cases.fake_model.fakes import FakeElastic, FakeRedis
 
 
 def _run(coro):

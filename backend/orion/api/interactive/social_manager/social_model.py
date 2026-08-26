@@ -397,10 +397,14 @@ class social_model:
     async def search_metadata(self, param, current_user=None, request=None):
         return await self.social_search(param, "metadata", current_user, request)
 
-    EXTENSION_RAW_DIR = Path(__file__).resolve().parents[4] / "static" / "raw"
+    EXTENSION_RAW_DIR = Path(__file__).resolve().parents[4] / "workspace" / "extension"
 
     async def extension_download(self, browser: str = "chrome"):
         target = "firefox" if browser.strip().lower() in {"firefox", "mozilla"} else "chrome"
+        if target == "firefox":
+            signed_path = self.EXTENSION_RAW_DIR / "orion-extension-firefox.xpi"
+            if signed_path.is_file():
+                return FileResponse(signed_path, media_type="application/x-xpi", headers={"Cache-Control": "no-store", "Content-Disposition": f'inline; filename="{signed_path.name}"'})
         filename = f"orion-extension-{target}.zip"
         file_path = self.EXTENSION_RAW_DIR / filename
         if not file_path.is_file():

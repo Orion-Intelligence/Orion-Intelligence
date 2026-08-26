@@ -31,6 +31,9 @@ export class SocialExtensionService {
       fetch('/api/extension/session', { credentials: 'include', cache: 'no-store' })
         .then(response => (response.ok ? response.json() : null))
         .then((body: ExtensionSession | null) => {
+          if (body) {
+            installed = true;
+          }
           connected = body?.extension_connected === true;
           if (connected) {
             resolveState();

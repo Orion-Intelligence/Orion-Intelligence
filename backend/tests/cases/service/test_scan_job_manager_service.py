@@ -7,7 +7,7 @@ from types import SimpleNamespace
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
 from orion.services.mongo_manager.shared_model.db_scan_job_model import ScanJobStatus, db_scan_job_model
 from routes.helper.route_test_helper import TestRouteHelper
-from tests.fake_model.fakes import FakeAsyncClient, FakeMongoEngine, FakeResponse
+from tests.cases.fake_model.fakes import FakeAsyncClient, FakeMongoEngine, FakeResponse
 
 
 def _run(coro):

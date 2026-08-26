@@ -8,7 +8,7 @@ from orion.services.alert_webhook_manager import alert_webhook_manager as webhoo
 from orion.services.alert_webhook_manager.alert_webhook_manager import AlertWebhookManager
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import AlertConnectorProvider
 from routes.alert_connector_routes import alert_connector_routes
-from tests.fake_model.fakes import FakeAlertConnectorManager, FakeSlackConnectorProvider
+from tests.cases.fake_model.fakes import FakeAlertConnectorManager, FakeSlackConnectorProvider
 
 
 def test_alert_webhook_sends_only_to_requested_tenant_webhook(monkeypatch):

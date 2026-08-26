@@ -19,7 +19,7 @@ from orion.api.interactive.search_manager.search_model import search_model
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
-from tests.fake_model.fakes import FakeElastic
+from tests.cases.fake_model.fakes import FakeElastic
 
 
 def _run(coro):

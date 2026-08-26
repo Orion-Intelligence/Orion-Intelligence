@@ -45,7 +45,7 @@ class config_controller:
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
+        self.SYSTEM_DIR = self.BASE_DIR / "workspace" / "resource" / "system"
         self.SYSTEM_DIR.mkdir(parents=True, exist_ok=True)
 
         if config_controller.__instance is not None:
@@ -232,7 +232,7 @@ class config_controller:
         return config_data(settings=fresh_config)
 
     async def get_system_info(self, include_email_config: bool = False, tenant_id: str | None = None) -> config_data:
-        self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
+        self.SYSTEM_DIR = self.BASE_DIR / "workspace" / "resource" / "system"
         tenant = await self._get_tenant(tenant_id)
         if tenant is None:
             raise RuntimeError("Tenant configuration is unavailable")
