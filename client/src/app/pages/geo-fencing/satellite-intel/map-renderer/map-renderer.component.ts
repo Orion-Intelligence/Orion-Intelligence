@@ -1,5 +1,5 @@
-import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild } from '@angular/core';
-import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, TrackingEntityState, TrackingEntityType, TrackingSidebarBridge } from '../../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from '../map-entities/aircraft/aircraft-tracking.service';
 import { EntityRenderer } from '../map-entities/entity-renderer';
@@ -9,11 +9,13 @@ import { CountryBoundaryMapRenderer } from '../map-overlays/country-boundary-map
 import { SearchLocationMapRenderer } from '../map-overlays/search-location-map-renderer';
 import { Observable, Subscription } from 'rxjs';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector:    'app-satellite-map-renderer',
   imports: [TranslatePipe],
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './map-renderer.component.html',
 })
 export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy {
@@ -60,7 +62,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<void>();
 
-  constructor(private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private aircraftTrackingService: SatelliteAircraftTrackingService, private shipTrackingService: SatelliteShipTrackingService, private cd: ChangeDetectorRef, private ngZone: NgZone) {}
+  constructor(private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private aircraftTrackingService: SatelliteAircraftTrackingService, private shipTrackingService: SatelliteShipTrackingService, private cd: ChangeDetectorRef, private ngZone: NgZone, private translationService: TranslationService) {}
 
   openSidebarLoading(type: TrackingEntityType, id: string, seedData: any): number {
     const token = ++this.sidebarRequestToken;
@@ -469,7 +471,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     }
     const center = this.leafletMap.getCenter();
     const zoom = this.leafletMap.getZoom();
-    this.zoomLabelElement.nativeElement.textContent = `zoom ${zoom.toFixed(1)}  ·  ${center.lat.toFixed(4)}°N  ${center.lng.toFixed(4)}°E`;
+    this.zoomLabelElement.nativeElement.textContent = `${this.translationService.translate('Zoom')} ${zoom.toFixed(1)}  ·  ${center.lat.toFixed(4)}°N  ${center.lng.toFixed(4)}°E`;
   }
 
   private scheduleViewportEmit(): void {

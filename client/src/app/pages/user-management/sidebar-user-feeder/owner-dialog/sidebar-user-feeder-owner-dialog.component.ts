@@ -1,17 +1,19 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 
-import { FeederOwnerUser, FeederScriptItem } from '../../../../shared/model/profile/feeder.model';
+import { FeederOwnerUser, FeederScriptItem } from '../model/feeder.model';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { FeederService } from '../feeder.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-sidebar-user-feeder-owner-dialog',
   standalone: true,
   imports: [FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-feeder-owner-dialog.component.html',
 })
 export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
@@ -25,7 +27,7 @@ export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
 
-  constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService) {}
+  constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['script'] && this.script) {
@@ -50,11 +52,11 @@ export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
       }))
       .subscribe({
         next: (response) => {
-          this.messageNotificationService.show(response?.message || 'Script owner updated successfully', 'success');
+          this.messageNotificationService.show(response?.message || this.translationService.translate('Script owner updated successfully'), 'success');
           this.saved.emit();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail || 'Failed to update script owner');
+          this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Failed to update script owner'));
         }
       });
   }
@@ -74,7 +76,7 @@ export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
         },
         error: (error) => {
           this.closed.emit();
-          this.messageNotificationService.show(error?.error?.detail || 'Failed to load feeder users');
+          this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Failed to load feeder users'));
         }
       });
   }

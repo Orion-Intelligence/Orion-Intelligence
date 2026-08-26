@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { lastValueFrom, Observable, Subscription } from 'rxjs';
-import { finalize, map, takeUntil, tap } from 'rxjs/operators';
+import { map, takeUntil, tap } from 'rxjs/operators';
 import { GeoCameraResponse, NetworkIntelScanResponse, ResolveIpResponse } from '../../model/network-intel/network-intel-api.models';
 import { IpPortData, VulnerabilityScanDepth } from '../../model/network-intel/network-intel.model';
 import { ScanHelperMethodsService } from '../../partials/scan-helper-methods/scan-helper-methods-service.service';
@@ -338,14 +338,6 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     finally {
       this.completeCancelSubject(cancel$);
     }
-  }
-
-  private fetchPolledResult$<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Observable<any> {
-    const cancel$ = this.createCancelSubject();
-    return this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs)
-      .pipe(map((response) => this.unwrapPolledResult(response)), finalize(() => {
-        this.completeCancelSubject(cancel$);
-      }));
   }
 
   private unwrapPolledResult<T>(response: T): any {

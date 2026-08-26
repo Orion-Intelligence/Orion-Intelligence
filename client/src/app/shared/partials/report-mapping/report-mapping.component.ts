@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { ApiService } from '../../services/api.service';
@@ -9,12 +9,13 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { RelatedReportItem, STRONG_RELATED_MAPPING_KEYS } from '../../model/report-mapping/report-mapping.model';
+import { RelatedReportItem, STRONG_RELATED_MAPPING_KEYS } from './model/report-mapping.model';
 
 @Component({
   selector: 'app-report-mapping',
   templateUrl: './report-mapping.component.html',
   imports: [CommonModule, NgClass, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class ReportMappingComponent {

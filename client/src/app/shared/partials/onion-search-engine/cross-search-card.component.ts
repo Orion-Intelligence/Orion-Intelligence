@@ -1,16 +1,17 @@
-import { Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { EMPTY, Observable, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
 import { ProxyController } from '../../services/proxy-controller';
-import { CrossSearchEntry, CrossSearchResponse } from '../../model/results/cross-search/cross-search.model';
+import { CrossSearchEntry, CrossSearchResponse } from './model/cross-search.model';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-cross-search-card',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './cross-search-card.component.html',
 })
 export class CrossSearchCardComponent {

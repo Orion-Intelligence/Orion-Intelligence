@@ -39,14 +39,13 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
     cy.get('[data-testid="sidebar-subitem-profile-system-settings"]').filter(':visible').first().scrollIntoView().click();
     cy.url().should('include', 'system-settings');
-    cy.get('[data-testid="system-settings-mail-edit"]').should('be.visible').click();
     cy.get('[data-testid="system-settings-account-mail"]').scrollIntoView().should('be.visible').clear().type('cypress-mailer@example.test');
     cy.get('[data-testid="system-settings-account-mail-password"]').scrollIntoView().should('be.visible').clear().type('1#VSC&cuad)d', {log: false});
     cy.get('[data-testid="system-settings-account-smtp-server"]').scrollIntoView().should('be.visible').clear().type('mailpit');
     cy.get('[data-testid="system-settings-account-smtp-port"]').scrollIntoView().should('be.visible').clear().type('1025');
     cy.scrollDashboardToTop();
-    cy.get('[data-testid="system-settings-mail-save"]').should('be.visible').click();
-    cy.get('[data-testid="system-settings-mail-edit"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="system-settings-mail-save"]', {timeout: 30000}).should('be.disabled');
 
     cy.visit('/dashboard/profile/users');
     cy.get('[data-testid="tenant-add-user-button"]').should('not.be.disabled');
@@ -75,7 +74,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.visit('/login');
     cy.get('[data-testid="login-user"]').should('be.visible').clear().type(user.username);
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(user.password, {log: false});
-    cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+    cy.get('[data-testid="login-button"]').first().should('be.visible').click();
     cy.waitForLoginRequest();
 
     cy.url().should('include', '/reset/');
@@ -256,9 +255,174 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     licenses: ['Enterprise']
   };
 
-  const waitForTourStep = (stepNumber: number, totalSteps = 6) => {
+  const waitForTourStep = (expectedCurrent: number, expectedTotal: number) => {
     cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
-    cy.get('[data-testid="demo-tour-step"]').should('contain', `Step ${stepNumber} / ${totalSteps}`);
+    cy.get('[data-testid="demo-tour-step"]').should('be.visible').invoke('text').should(rawProgress => {
+      const progress = rawProgress.match(/^\s*Step\s+(\d+)\s*\/\s*(\d+)\s*$/);
+      expect(progress, 'tour progress').to.not.be.null;
+      expect(Number(progress![1]), 'current tour step').to.eq(expectedCurrent);
+      expect(Number(progress![2]), 'total tour steps').to.eq(expectedTotal);
+    });
+    cy.get('[data-testid="demo-tour-next"]').should('be.visible').and('not.be.disabled');
+  };
+
+  const assertTourStep = (current: number, total: number, title?: string) => {
+    waitForTourStep(current, total);
+    if (title) {
+      cy.get('[data-testid="demo-tour-title"]').should('be.visible').invoke('text').should(rawTitle => {
+        expect(rawTitle.trim(), `title for tour step ${current}`).to.eq(title);
+      });
+    }
+  };
+
+  const advanceToTourStep = (current: number, target: number, total: number) => {
+    for (let stepNumber = current; stepNumber < target; stepNumber += 1) {
+      assertTourStep(stepNumber, total);
+      cy.get('[data-testid="demo-tour-next"]').should('be.visible').and('not.be.disabled').click();
+    }
+    assertTourStep(target, total);
+  };
+
+  const interceptDocumentationAvailability = (enabled: boolean) => {
+    cy.intercept('GET', '**/api/public', (req) => {
+      req.continue((res) => {
+        const settings = res.body?.settings;
+        if (!settings) {
+          return;
+        }
+        let metaInfo: Record<string, unknown> = {};
+        try {
+          const parsedMetaInfo = typeof settings.meta_info === 'string' ? JSON.parse(settings.meta_info) : settings.meta_info;
+          metaInfo = parsedMetaInfo && typeof parsedMetaInfo === 'object' && !Array.isArray(parsedMetaInfo)
+            ? parsedMetaInfo as Record<string, unknown>
+            : {};
+        }
+        catch {
+          metaInfo = {};
+        }
+        metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] = enabled;
+        settings.meta_info = JSON.stringify(metaInfo);
+      });
+    }).as(enabled ? 'publicConfigWithDocumentation' : 'publicConfigWithoutDocumentation');
+  };
+
+  const resetDocumentationScroll = () => {
+    cy.get('[data-sidebar-expanded] [data-testid="dashboard-sidebar-scroll"]').should('have.length', 1).then($scrollers => {
+      const scroller = $scrollers[0] as HTMLElement;
+      const documentation = scroller.querySelector<HTMLElement>('[data-testid="sidebar-documentation"]');
+
+      expect(documentation, 'Documentation belongs to the visible sidebar scroller').to.not.be.null;
+      expect(scroller.scrollHeight, 'sidebar has scrollable content').to.be.greaterThan(scroller.clientHeight);
+
+      scroller.scrollTop = 0;
+
+      const scrollerRect = scroller.getBoundingClientRect();
+      const documentationRect = documentation!.getBoundingClientRect();
+      const viewportHeight = scroller.ownerDocument.defaultView?.innerHeight ?? scrollerRect.bottom;
+      const visibleBottom = Math.min(scrollerRect.bottom - 12, viewportHeight - 12);
+      expect(scroller.scrollTop, 'sidebar starts at the top').to.eq(0);
+      expect(documentationRect.bottom, 'Documentation initially extends below the visible sidebar viewport').to.be.greaterThan(visibleBottom + 1);
+    });
+  };
+
+  const assertDocumentationScrolledIntoView = () => {
+    cy.get('[data-sidebar-expanded] [data-testid="dashboard-sidebar-scroll"]').should('have.length', 1).then($scrollers => {
+      const scroller = $scrollers[0] as HTMLElement;
+      const documentation = scroller.querySelector<HTMLElement>('[data-testid="sidebar-documentation"]');
+
+      expect(documentation, 'Documentation remains in the visible sidebar scroller').to.not.be.null;
+      const scrollerRect = scroller.getBoundingClientRect();
+      const documentationRect = documentation!.getBoundingClientRect();
+      const viewportHeight = scroller.ownerDocument.defaultView?.innerHeight ?? scrollerRect.bottom;
+      const visibleTop = Math.max(scrollerRect.top + 12, 12);
+      const visibleBottom = Math.min(scrollerRect.bottom - 12, viewportHeight - 12);
+      expect(scroller.scrollTop, 'Documentation step scrolls the sidebar').to.be.greaterThan(0);
+      expect(documentationRect.top, 'Documentation top is inside the visible sidebar viewport').to.be.at.least(visibleTop - 3);
+      expect(documentationRect.bottom, 'Documentation bottom is inside the visible sidebar viewport').to.be.at.most(visibleBottom + 3);
+    });
+    cy.get('[data-testid="sidebar-documentation"]').should('be.visible');
+  };
+
+  const advanceToFinalTourStep = (visitedTitles: string[] = [], expectedTotal: number): Cypress.Chainable<string[]> => {
+    waitForTourStep(visitedTitles.length + 1, expectedTotal);
+    return cy.get('[data-testid="demo-tour-step"]').should('be.visible').invoke('text').then(rawProgress => {
+      const progress = rawProgress.match(/^\s*Step\s+(\d+)\s*\/\s*(\d+)\s*$/);
+      expect(progress, 'tour progress').to.not.be.null;
+      const current = Number(progress![1]);
+      const total = Number(progress![2]);
+
+      expect(total, 'stable tour step count').to.eq(expectedTotal);
+      expect(current, 'sequential tour step').to.eq(visitedTitles.length + 1);
+
+      return cy.get('[data-testid="demo-tour-title"]').should('be.visible').invoke('text').then(rawTitle => {
+        const title = rawTitle.trim();
+        visitedTitles.push(title);
+
+        if (current === total) {
+          return cy.wrap(visitedTitles, { log: false });
+        }
+
+        cy.get('[data-testid="demo-tour-next"]').should('be.visible').and('not.be.disabled').click();
+        return advanceToFinalTourStep(visitedTitles, expectedTotal);
+      });
+    });
+  };
+
+  const assertBackWorksDuringLoading = (total: number) => {
+    assertTourStep(1, total, 'Global Threat Search');
+    cy.get('[data-testid="demo-tour-back"]').should('not.exist');
+    cy.get('[data-testid="demo-tour-next"]').should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="demo-tour-tooltip"]').should('have.attr', 'aria-busy', 'true');
+    cy.get('[data-testid="demo-tour-back"]').should('be.visible').and('not.be.disabled').then($back => {
+      cy.get('[data-testid="demo-tour-tooltip"]').should('have.attr', 'aria-busy', 'true');
+      cy.wrap($back).click();
+    });
+    assertTourStep(1, total, 'Global Threat Search');
+    cy.get('#homeSearch input[type="text"]').should('have.value', 'jessidig@amazon.com');
+    cy.get('[data-testid="demo-tour-back"]').should('not.exist');
+  };
+
+  const assertSharedStepBackSequence = () => {
+    assertTourStep(7, 10, 'Collapse sidebar');
+    cy.get('[data-testid="sidebar-collapse-button"]').should('exist');
+
+    cy.get('[data-testid="demo-tour-next"]').click();
+    assertTourStep(8, 10, 'Expand sidebar');
+    cy.get('[data-testid="sidebar-expand-button"]').should('exist');
+
+    cy.get('[data-testid="demo-tour-back"]').should('be.visible').and('not.be.disabled').click();
+    assertTourStep(7, 10, 'Collapse sidebar');
+    cy.get('[data-testid="sidebar-collapse-button"]').should('exist');
+
+    cy.get('[data-testid="demo-tour-next"]').click();
+    assertTourStep(8, 10, 'Expand sidebar');
+    cy.get('[data-testid="sidebar-expand-button"]').should('exist');
+
+    cy.get('[data-testid="demo-tour-next"]').click();
+    assertTourStep(9, 10, 'Profile menu');
+    cy.get('[data-testid="profile-dropdown-menu"]').should('exist');
+
+    cy.get('[data-testid="demo-tour-back"]').should('be.visible').and('not.be.disabled').click();
+    assertTourStep(8, 10, 'Expand sidebar');
+    cy.get('[data-testid="sidebar-expand-button"]').should('exist');
+
+    cy.get('[data-testid="demo-tour-next"]').click();
+    assertTourStep(9, 10, 'Profile menu');
+    cy.get('[data-testid="profile-dropdown-menu"]').should('exist');
+
+    resetDocumentationScroll();
+    cy.get('[data-testid="demo-tour-next"]').click();
+    assertTourStep(10, 10, 'Documentation');
+    assertDocumentationScrolledIntoView();
+
+    cy.get('[data-testid="demo-tour-back"]').should('be.visible').and('not.be.disabled').click();
+    assertTourStep(9, 10, 'Profile menu');
+    cy.get('[data-testid="profile-dropdown-menu"]').should('exist');
+
+    resetDocumentationScroll();
+    cy.get('[data-testid="demo-tour-next"]').click();
+    assertTourStep(10, 10, 'Documentation');
+    assertDocumentationScrolledIntoView();
   };
 
   before(() => {
@@ -289,14 +453,11 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.logout();
   });
 
-  it('blocks page interaction during the tour and only allows next and skip', () => {
-    cy.intercept('POST', '**/api/update/current/user', (req) => {
-      req.reply({ statusCode: 200, body: { message: 'updated' } });
-    }).as('updateCurrentUser');
+  it('blocks background interaction while tour controls remain available', () => {
+    interceptDocumentationAvailability(true);
 
     loginAsUser(enterpriseUser.username, enterpriseUser.password);
     cy.wait('@enterpriseTenantNode');
-    waitForTourStep(1);
 
     cy.get('html').should('have.class', 'no-scroll');
     cy.get('body').should('have.class', 'no-scroll');
@@ -307,37 +468,34 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
 
       expect(overlay, 'demo tour overlay').to.not.be.null;
       expect(profileButton, 'profile sidebar button').to.not.be.null;
+      expect(win.document.querySelector('[data-testid="sidebar-documentation"]'), 'Documentation is enabled for this tour').to.not.be.null;
 
-      const clickEvent = new win.MouseEvent('click', { bubbles: true, cancelable: true });
-      const clickResult = profileButton!.dispatchEvent(clickEvent);
-      expect(clickResult).to.eq(false);
-      expect(clickEvent.defaultPrevented).to.eq(true);
+      const profileRect = profileButton!.getBoundingClientRect();
+      const topmostElement = win.document.elementFromPoint(profileRect.left + (profileRect.width / 2), profileRect.top + (profileRect.height / 2));
+      expect(topmostElement?.closest('[data-testid="demo-tour-overlay"]'), 'overlay blocks the sidebar control').to.not.be.null;
     });
 
-    for (let stepNumber = 1; stepNumber < 6; stepNumber += 1) {
-      cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
-      waitForTourStep(stepNumber + 1);
-    }
-
-    cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
+    assertBackWorksDuringLoading(10);
+    cy.reload();
+    cy.wait('@enterpriseTenantNode');
+    advanceToTourStep(1, 7, 10);
+    assertSharedStepBackSequence();
   });
 
   it('marks demo_tour true after the enterprise tour completes', () => {
+    interceptDocumentationAvailability(false);
     cy.intercept('POST', '**/api/update/current/user', (req) => {
       req.reply({ statusCode: 200, body: { message: 'updated' } });
     }).as('updateCurrentUser');
 
     loginAsUser(enterpriseUser.username, enterpriseUser.password);
     cy.wait('@enterpriseTenantNode');
-    waitForTourStep(1);
-
-    for (let stepNumber = 1; stepNumber <= 6; stepNumber += 1) {
-      cy.get('[data-testid="demo-tour-next"]').should('be.visible').click();
-
-      if (stepNumber < 6) {
-        waitForTourStep(stepNumber + 1);
-      }
-    }
+    assertTourStep(1, 9, 'Global Threat Search');
+    cy.get('[data-testid="sidebar-documentation"]').should('not.exist');
+    advanceToFinalTourStep([], 9).then(visitedTitles => {
+      expect(visitedTitles).not.to.include('Documentation');
+      cy.get('[data-testid="demo-tour-next"]').should('be.visible').and('not.be.disabled').click();
+    });
 
     cy.wait('@updateCurrentUser').then(({ request }) => {
       expect(request.body.demo_tour).to.eq(true);

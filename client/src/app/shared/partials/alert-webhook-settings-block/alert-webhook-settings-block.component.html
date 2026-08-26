@@ -1,0 +1,124 @@
+<div class="alert-webhook-card">
+  <div class="alert-webhook-header">
+    <div>
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Alert Integrations' | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Forward alert notifications to Slack and Jira.' | translate }}</div>
+    </div>
+
+  </div>
+
+  <div class="connector-list">
+    @if (isSystemContext || form.slack_configured) {
+    <details data-testid="alert-integration-slack" class="connector-row">
+      <summary class="connector-summary">
+        <div>
+          <div class="connector-name">{{ 'Slack' | translate }}</div>
+          <div class="connector-status">
+            {{ isSystemContext ? (form.slack_configured ? ('OAuth credentials saved' | translate) : ('OAuth credentials missing' | translate)) : (form.alert_slack_connected ? ('Connected' | translate) : ('Not connected' | translate)) }}
+          </div>
+          @if (isTenantContext && (form.alert_slack_channel || form.alert_slack_team)) {
+            <div class="connector-detail">{{ form.alert_slack_team }}{{ form.alert_slack_team && form.alert_slack_channel ? ' / ' : '' }}{{ form.alert_slack_channel }}</div>
+          }
+        </div>
+
+        <div class="connector-summary-actions">
+          @if (isTenantContext) {
+            <a data-testid="tenant-settings-connect-slack" [attr.href]="form.slack_configured ? '/api/alert-connectors/slack/connect' : null" target="_blank" rel="noopener noreferrer" class="connect-link" [class.is-disabled]="!form.slack_configured" [attr.aria-disabled]="!form.slack_configured" (click)="$event.stopPropagation()">
+              {{ form.alert_slack_connected ? ('Reconnect' | translate) : ('Connect' | translate) }}
+            </a>
+          }
+          <i class="bi bi-chevron-down connector-chevron"></i>
+        </div>
+      </summary>
+
+      @if (isSystemContext && isAdmin) {
+        <div class="connector-fields">
+          <div>
+            <label class="connector-label">{{ 'SLACK CLIENT ID' | translate }}</label>
+            <input data-testid="system-settings-slack-client-id" class="connector-input" type="text" [(ngModel)]="form.slack_client_id" placeholder="1234567890.1234567890" />
+          </div>
+
+          <div>
+            <label class="connector-label">{{ 'SLACK CLIENT SECRET' | translate }}</label>
+            <input data-testid="system-settings-slack-client-secret" class="connector-input" type="password" [(ngModel)]="form.slack_client_secret" [placeholder]="form.slack_configured ? ('Configured' | translate) : ''" />
+          </div>
+
+          <div class="redirect-note" data-testid="system-settings-slack-redirect-uri">
+            <div class="redirect-note-tag">{{ 'Connection notes' | translate }}</div>
+            <div class="redirect-note-box">
+              <div class="redirect-note-content">
+                <div class="redirect-note-title">{{ 'Slack OAuth redirect URI for tenant connections' | translate }}</div>
+                <div class="redirect-note-uri">{{ slackRedirectUri }}</div>
+                <div class="redirect-note-hint">{{ 'Tenants connect or reconnect Slack from Tenant Settings in a new tab.' | translate }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </details>
+    }
+
+    @if (isSystemContext || form.jira_configured) {
+    <details data-testid="alert-integration-jira" class="connector-row">
+      <summary class="connector-summary">
+        <div>
+          <div class="connector-name">{{ 'Jira' | translate }}</div>
+          <div class="connector-status">
+            {{ isSystemContext ? (form.jira_configured ? ('OAuth credentials saved' | translate) : ('OAuth credentials missing' | translate)) : (form.alert_jira_connected ? ('Connected' | translate) : ('Not connected' | translate)) }}
+          </div>
+          @if (isTenantContext && (form.alert_jira_site_name || form.alert_jira_site_url)) {
+            <div class="connector-detail">{{ form.alert_jira_site_name || form.alert_jira_site_url }}</div>
+          }
+        </div>
+
+        <div class="connector-summary-actions">
+          @if (isTenantContext) {
+            <a data-testid="tenant-settings-connect-jira" [attr.href]="form.jira_configured ? '/api/alert-connectors/jira/connect' : null" target="_blank" rel="noopener noreferrer" class="connect-link" [class.is-disabled]="!form.jira_configured" [attr.aria-disabled]="!form.jira_configured" (click)="$event.stopPropagation()">
+              {{ form.alert_jira_connected ? ('Reconnect' | translate) : ('Connect' | translate) }}
+            </a>
+          }
+          <i class="bi bi-chevron-down connector-chevron"></i>
+        </div>
+      </summary>
+
+      @if (isSystemContext && isAdmin) {
+        <div class="connector-fields">
+          <div>
+            <label class="connector-label">{{ 'JIRA CLIENT ID' | translate }}</label>
+            <input data-testid="system-settings-jira-client-id" class="connector-input" type="text" [(ngModel)]="form.jira_client_id" [placeholder]="'Atlassian OAuth client ID' | translate" />
+          </div>
+
+          <div>
+            <label class="connector-label">{{ 'JIRA CLIENT SECRET' | translate }}</label>
+            <input data-testid="system-settings-jira-client-secret" class="connector-input" type="password" [(ngModel)]="form.jira_client_secret" [placeholder]="form.jira_configured ? ('Configured' | translate) : ''" />
+          </div>
+
+          <div class="redirect-note" data-testid="system-settings-jira-redirect-uri">
+            <div class="redirect-note-tag">{{ 'Connection notes' | translate }}</div>
+            <div class="redirect-note-box">
+              <div class="redirect-note-content">
+                <div class="redirect-note-title">{{ 'Jira OAuth callback URI for tenant connections' | translate }}</div>
+                <div class="redirect-note-uri">{{ jiraRedirectUri }}</div>
+                <div class="redirect-note-hint">{{ 'Tenants connect or reconnect Jira from Tenant Settings in a new tab.' | translate }}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </details>
+    }
+
+    @if (errorState) {
+      <div class="connector-error">
+        {{ 'Alert integration configuration is invalid' | translate }}
+      </div>
+    }
+    @if (isSystemContext && isAdmin) {
+      <div class="flex justify-end">
+        <button data-testid="system-settings-alert-integrations-save" type="button" class="ui-settings-save-button" [disabled]="!isDirty" (click)="save.emit()">
+          {{ 'Save changes' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

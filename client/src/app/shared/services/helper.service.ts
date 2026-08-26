@@ -5,7 +5,7 @@ import { LANGUAGE_MAP } from '../constants/shared-enums';
 import { ConsolidatedParamModel } from '../model/results/consolidated/consolidated.param.model';
 import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
-import { PublicUserActivityItem } from '../../sections/report/social-interactions/models/public-user-data.model';
+import { PublicUserActivityItem } from '../partials/report-interactions/models/public-user-data.model';
 import { ExportBrandingService } from './export/export-branding.service';
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 @Injectable({

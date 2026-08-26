@@ -3,10 +3,12 @@ from pathlib import Path
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import FileResponse, HTMLResponse
 
+from configs.auth_cookie import sync_session_marker
+
 interface = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parent
-ANGULAR_BUILD_DIR = (BASE_DIR / "build").resolve()
+ANGULAR_BUILD_DIR = (BASE_DIR / "workspace" / "build").resolve()
 CSP_NONCE_PLACEHOLDER = "__CSP_NONCE__"
 
 
@@ -20,7 +22,9 @@ def _frontend_index_response(request: Request) -> HTMLResponse:
     html = html.replace(CSP_NONCE_PLACEHOLDER, nonce)
     if not nonce:
         html = html.replace(' ngCspNonce=""', "").replace(' ngcspnonce=""', "").replace(' nonce=""', "")
-    return HTMLResponse(html)
+    response = HTMLResponse(html)
+    sync_session_marker(request, response)
+    return response
 
 
 @interface.get("/{full_path:path}", include_in_schema=False)

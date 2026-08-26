@@ -1,33 +1,33 @@
-<div class="ui-graph-popup-overlay fixed inset-0 z-[1400] flex items-center justify-center p-4" @popupAnimation data-role="backdrop" (click)="onBackdrop($event)">
-  <div data-testid="takedown-rejection-popup" class="ui-graph-popup-panel ui-popup-shell relative w-full max-w-[520px] rounded-xl p-6">
+<div class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-[1400] flex items-center justify-center p-4 [body.light-theme_&&]:!bg-[rgba(23,34,53,0.18)]" @popupAnimation data-role="backdrop" (click)="onBackdrop($event)">
+  <div data-testid="takedown-rejection-popup" class="ui-graph-popup-panel [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] origin-top [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] relative w-full max-w-[520px] rounded-xl p-6">
     <div class="pr-8">
-      <div class="ui-popup-title text-lg font-semibold">Reject takedown request</div>
-      <div class="mt-2 text-sm leading-6 text-[var(--color-text3)]">Provide the reason admins will see in the request history.</div>
+      <div class="!text-[var(--color-text1)] text-lg font-semibold">{{ 'Reject takedown request' | translate }}</div>
+      <div class="mt-2 text-sm leading-6 text-[var(--color-text3)]">{{ 'Provide the reason admins will see in the request history.' | translate }}</div>
     </div>
 
-    <button type="button" class="absolute right-5 top-5 text-[26px] leading-none text-[#ccc] hover:text-white disabled:cursor-not-allowed disabled:opacity-50" aria-label="Close" [disabled]="isSubmitting()" (click)="cancel()">&times;</button>
+    <button type="button" class="absolute right-5 top-5 text-[26px] leading-none text-[#ccc] hover:text-white disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:text-[var(--color-text4)] [body.light-theme_&]:hover:text-[var(--color-text1)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" [attr.aria-label]="'Close' | translate" [disabled]="isSubmitting()" (click)="cancel()">&times;</button>
 
     @if (target()) {
       <div class="mt-5 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd]">
-        <div class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">Target</div>
+        <div class="text-[11px] font-semibold uppercase tracking-[0.05em] text-[var(--color-text4)]">{{ 'Target' | translate }}</div>
         <div class="mt-1 truncate text-[13px] font-medium text-[var(--color-text1)]" [title]="target()">{{ target() }}</div>
       </div>
     }
 
-    <label class="mt-5 mb-2 block text-[13px] font-semibold text-[var(--color-text2)]" for="takedown-rejection-reason">Rejection reason</label>
-    <textarea triggerAutoFocus id="takedown-rejection-reason" data-testid="takedown-rejection-reason" name="takedown-rejection-reason" [(ngModel)]="reason" maxlength="500" rows="5" class="min-h-[132px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-[14px] leading-6 text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" placeholder="Why is this takedown request being rejected?" [disabled]="isSubmitting()"></textarea>
+    <label class="mt-5 mb-2 block text-[13px] font-semibold text-[var(--color-text2)]" for="takedown-rejection-reason">{{ 'Rejection reason' | translate }}</label>
+    <textarea triggerAutoFocus id="takedown-rejection-reason" data-testid="takedown-rejection-reason" name="takedown-rejection-reason" [(ngModel)]="reason" maxlength="500" rows="5" class="min-h-[132px] w-full resize-y rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-3 text-[14px] leading-6 text-[var(--color-text1)] outline-none transition focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 disabled:cursor-not-allowed disabled:opacity-60 placeholder:text-[var(--color-text4)] [body.light-theme_&]:border-[#cfd9e7] [body.light-theme_&]:bg-[#edf5fd] [body.light-theme_&]:text-[#1f2e47]" [placeholder]="'Why is this takedown request being rejected?' | translate" [disabled]="isSubmitting()"></textarea>
 
     <div class="mt-2 flex items-center justify-between gap-3">
       <span class="text-[12px] text-[var(--color-text4)]">{{ reason.length }}/500</span>
       @if (!trimmedReason && reason.length > 0) {
-        <span class="text-[12px] text-[#ff8a8a]">Reason cannot be blank.</span>
+        <span class="text-[12px] text-[#ff8a8a] [body.light-theme_&]:text-red-700">{{ 'Reason cannot be blank.' | translate }}</span>
       }
     </div>
 
     <div class="mt-6 flex flex-wrap justify-end gap-2">
-      <button type="button" class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" [disabled]="isSubmitting()" (click)="cancel()">Cancel</button>
-      <button type="button" data-testid="takedown-rejection-submit" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-50" [disabled]="!canSubmit" (click)="submit()">
-        {{ isSubmitting() ? 'Rejecting...' : 'Reject request' }}
+      <button type="button" class="ui-popup-btn-secondary border [&&]:!border-[#4a5f77] [&&]:!bg-transparent [&&]:!text-[#e1e8f0] [&&]:!px-[14px] [&&]:!py-[6px] [&&]:!h-auto [&&]:!min-w-0 [border-radius:var(--ui-popup-button-radius,6px)] [font-size:var(--ui-popup-button-font-size,13px)] [font-weight:var(--ui-popup-button-font-weight,500)] [transition-property:var(--ui-popup-button-transition,background-color,border-color)] [transition-duration:var(--ui-popup-button-duration,180ms)] [transition-timing-function:ease] hover:[&&&]:!border-[#5a7594] hover:[&&&]:!bg-[rgb(74_95_119/10%)] [--ui-popup-button-font-size:14px] [--ui-popup-button-font-weight:600] [.light-theme_&&]:!border-[#c7d5e6] [.light-theme_&&]:!bg-transparent [.light-theme_&&]:!text-[#1f2e47] [.light-theme_&&]:hover:!border-[#aac0da] [.light-theme_&&]:hover:!bg-[#eef5ff]" [disabled]="isSubmitting()" (click)="cancel()">{{ 'Cancel' | translate }}</button>
+      <button type="button" data-testid="takedown-rejection-submit" class="ui-popup-btn-primary [&&]:!border-0 [&&]:!bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] [&&]:!text-white [&&]:!shadow-[0_1px_4px_rgb(87_165_235/25%)] [&&]:!px-[14px] [&&]:!py-[6px] [&&]:!h-auto [&&]:!min-w-0 [border-radius:var(--ui-popup-button-radius,6px)] [font-size:var(--ui-popup-button-font-size,13px)] [font-weight:var(--ui-popup-button-font-weight,500)] [transition-property:var(--ui-popup-button-transition,background-color,transform,box-shadow)] [transition-duration:var(--ui-popup-button-duration,180ms)] [transition-timing-function:ease] hover:[&&&]:!bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:[&&&]:!-translate-y-px hover:[&&&]:!shadow-[0_2px_6px_rgb(87_165_235/30%)] active:[&&&]:!translate-y-0 [--ui-popup-button-font-size:14px] [--ui-popup-button-font-weight:600] disabled:cursor-not-allowed disabled:opacity-50" [disabled]="!canSubmit" (click)="submit()">
+        {{ (isSubmitting() ? 'Rejecting...' : 'Reject request') | translate }}
       </button>
     </div>
   </div>

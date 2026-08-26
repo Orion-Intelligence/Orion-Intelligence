@@ -1,9 +1,23 @@
-import { Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform, inject } from '@angular/core';
+import { TranslationService } from '../services/translation.service';
 
-@Pipe({ name: 'markdown', standalone: true, pure: true })
+@Pipe({ name: 'markdown', standalone: true, pure: false })
 export class MarkdownPipe implements PipeTransform {
+  private readonly translationService = inject(TranslationService);
+  private cachedResult = '';
+  private cachedValue: string | null = null;
+  private cachedVersion = -1;
+
   transform(value: string | null | undefined): string {
-    return this.renderBlocks(value ?? '');
+    const normalizedValue = value ?? '';
+    const version = this.translationService.version();
+    if (normalizedValue === this.cachedValue && version === this.cachedVersion) {
+      return this.cachedResult;
+    }
+    this.cachedValue = normalizedValue;
+    this.cachedVersion = version;
+    this.cachedResult = this.renderBlocks(normalizedValue);
+    return this.cachedResult;
   }
 
   private renderBlocks(value: string): string {
@@ -152,8 +166,13 @@ export class MarkdownPipe implements PipeTransform {
       ? `<tbody>${rows.map(row => `<tr>${headers.map((header, cellIndex) => `<td data-label="${this.escapeAttribute(header)}">${this.renderInline(row[cellIndex] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody>`
       : '';
 
-    const wideClass = headers.length > 3 ? ' ui-ai-table-shell-wide' : '';
-    return { html: `<div class="ui-ai-table-shell${wideClass}" role="region" aria-label="Result table" tabindex="0"><table>${thead}${tbody}</table></div>`, endIndex };
+    const tableShellClasses = 'w-full max-w-full mt-3 mb-1 overflow-x-auto rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] shadow-[inset_0_1px_0_rgb(255_255_255/3%)] [scrollbar-color:color-mix(in_srgb,var(--color-blue-640)_55%,transparent)_transparent] [scrollbar-width:thin] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue-640)]';
+    const wideTableClasses = headers.length > 3
+      ? ' [&&]:overflow-visible [&&]:border-0 [&&]:bg-transparent [&&]:shadow-none [&&_table]:block [&&_tbody]:block [&&_table]:w-full [&&_tbody]:w-full [&&_table]:min-w-0 [&&_tbody]:min-w-0 [&_thead]:absolute [&_thead]:-m-px [&_thead]:h-px [&_thead]:w-px [&_thead]:overflow-hidden [&_thead]:whitespace-nowrap [&_thead]:border-0 [&_thead]:p-0 [&_thead]:[clip-path:inset(50%)] [&_tr]:grid [&_tr]:grid-cols-[repeat(auto-fit,minmax(240px,1fr))] [&_tr]:overflow-hidden [&_tr]:rounded-xl [&_tr]:border [&_tr]:border-[var(--ui-table-shell-border)] [&_tr]:bg-[var(--ui-table-row-odd)] [&_tr]:shadow-[0_8px_22px_color-mix(in_srgb,var(--color-shadow-medium)_70%,transparent)] [&_tr+tr]:mt-2.5 [&&_td]:grid [&&_td]:grid-cols-[minmax(96px,0.42fr)_minmax(0,1fr)] [&&_td]:gap-2.5 [&&_td]:min-w-0 [&&_td]:max-w-none [&&_td]:border-r-0 [&&_td]:border-t-0 [&&_td]:border-b [&&_td]:border-b-[var(--ui-table-row-border)] [&&_td]:bg-transparent [&&_td]:px-[11px] [&&_td]:py-[9px] [&_td]:before:content-[attr(data-label)] [&_td]:before:text-[10px] [&_td]:before:font-bold [&_td]:before:uppercase [&_td]:before:leading-[1.5] [&_td]:before:tracking-[0.05em] [&_td]:before:text-[var(--color-text5)] [&_td]:before:[overflow-wrap:anywhere] [&_td:first-child]:bg-[color-mix(in_srgb,var(--color-blue-640)_7%,transparent)] max-[480px]:[&_tr]:grid-cols-1 max-[480px]:[&&_td]:grid-cols-[minmax(88px,0.38fr)_minmax(0,1fr)]'
+      : '';
+
+    const tableLabel = this.escapeAttribute(this.translationService.translate('Result table'));
+    return { html: `<div class="${tableShellClasses}${wideTableClasses}" role="region" aria-label="${tableLabel}" tabindex="0"><table>${thead}${tbody}</table></div>`, endIndex };
   }
 
   private parseTableCells(line: string): string[] {

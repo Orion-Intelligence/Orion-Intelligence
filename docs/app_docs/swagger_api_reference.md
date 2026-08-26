@@ -1474,7 +1474,7 @@ Response content type: `application/json` `SiemSearchResponseModel`.
 
 **Description**
 
-Search defacement intelligence reports for hacked or phishing websites; returns a paginated list of defacement events and their metadata. Request body (`search_defacement_param_model`): - **q** — free-text search over URL, IP, team, attacker handle and content fields (default: empty string) - **category** — optional category filter (default `all`) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` (default `all`) - **datera...
+Search defacement intelligence reports for hacked or phishing websites; returns a paginated list of defacement events and their metadata. Request body (`search_consolidated_param_model`): - **q** — free-text search over URL, IP, team, attacker handle and content fields (default: empty string) - **category** — optional category filter (default `all`) - **page** — page number of the paginated result set (1-based) - **network** — one of: `all`, `clearnet`, `onion`, `i2p` (default `all`) - **datera...
 
 **Parameters**
 
@@ -2235,7 +2235,7 @@ Response content type: `application/json`.
 
 **Description**
 
-Search breach / leak intelligence reports aggregated from ransomware blogs, extortion sites, leak forums, and darkweb data-dump portals; returns a paginated list of breach announcements and related metadata. Request body (`search_leak_param_model`): - **q** — free-text search term applied across title, content, location, industry, team name, domains, etc. (default: empty string) - **category** — logical content bucket. `"all"` searches across consolidated leak indices; other values may restri...
+Search breach / leak intelligence reports aggregated from ransomware blogs, extortion sites, leak forums, and darkweb data-dump portals; returns a paginated list of breach announcements and related metadata. Request body (`search_consolidated_param_model`): - **q** — free-text search term applied across title, content, location, industry, team name, domains, etc. (default: empty string) - **category** — logical content bucket. `"all"` searches across consolidated leak indices; other values may restri...
 
 **Parameters**
 

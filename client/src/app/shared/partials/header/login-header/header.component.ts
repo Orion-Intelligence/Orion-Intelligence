@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass, NgOptimizedImage } from '@angular/common';
 import { ProfileComponent } from '../../profile/profile.component';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../pipes/translate.pipe';
     ProfileComponent,
     NgOptimizedImage,
     NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './header.component.html',
 })
 export class HeaderComponent {

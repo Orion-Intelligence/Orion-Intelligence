@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { FormsModule } from '@angular/forms';
@@ -6,14 +6,15 @@ import { AppService } from '../../../services/core/app/app.service';
 import { AppSettingsModel, ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
-import { SmtpSettingsBlockComponent } from '../../../shared/components/smtp-settings-block/smtp-settings-block.component';
-import { AlertWebhookSettingsBlockComponent } from '../../../shared/components/alert-webhook-settings-block/alert-webhook-settings-block.component';
+import { SmtpSettingsBlockComponent } from '../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
+import { AlertWebhookSettingsBlockComponent } from '../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 import { ActivatedRoute } from '@angular/router';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
-import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/model/alert-webhook-settings/alert-webhook-settings.model';
+import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
 import { UserImagePickerComponent } from '../sidebar-user-settings/user-image-picker/user-image-picker.component';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
@@ -23,13 +24,15 @@ type SystemSettingsTab = 'branding' | 'platform';
   selector: 'app-sidebar-user-system-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TenantBrandingSettingsComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-system-settings.component.html'
 })
 export class SidebarProfileSystemSettingsComponent implements OnInit {
+  private configurationSnapshot = '';
+  private mailSnapshot = '';
+  private webhookSnapshot = '';
+
   activeTab: SystemSettingsTab = 'platform';
-  configurationEditing = false;
-  mailEditing = false;
-  webhookEditing = false;
   configurationError = '';
   mailErrorState = false;
   webhookErrorState = false;
@@ -41,12 +44,14 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   smtpServerPattern = /^(?=.{1,253}$)(localhost|[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?|([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}|(\d{1,3}\.){3}\d{1,3})$/;
 
-  constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) {
+  constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
   }
 
   ngOnInit(): void {
     this.activeTab = this.getInitialTab();
     this.loadSettings();
+    this.webhookSnapshot = this.webhookState();
+    this.loadAlertConnectorSettings();
   }
 
   canEditTenantBranding(): boolean {
@@ -64,8 +69,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       return;
     }
     this.activeTab = tab;
-    this.configurationEditing = false;
-    this.mailEditing = false;
     this.loadSettings();
     this.loadAlertConnectorSettings();
   }
@@ -100,6 +103,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.configurationError = '';
     this.mailErrorState = false;
     this.webhookErrorState = false;
+    this.configurationSnapshot = this.configurationState();
+    this.mailSnapshot = this.mailState();
   }
 
   loadAlertConnectorSettings() {
@@ -111,55 +116,16 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     });
   }
 
-  toggleConfigurationEdit() {
-    if (this.configurationEditing) {
-      if (this.save('configuration')) {
-        this.configurationEditing = false;
-      }
-      return;
-    }
-    this.mailEditing = false;
-    this.webhookEditing = false;
-    this.configurationEditing = true;
+  isConfigurationDirty(): boolean {
+    return this.configurationState() !== this.configurationSnapshot;
   }
 
-  cancelConfigurationEdit() {
-    this.loadSettings();
-    this.configurationEditing = false;
+  isMailDirty(): boolean {
+    return this.mailState() !== this.mailSnapshot;
   }
 
-  toggleMailEdit() {
-    if (this.mailEditing) {
-      if (this.save('mail')) {
-        this.mailEditing = false;
-      }
-      return;
-    }
-    this.configurationEditing = false;
-    this.webhookEditing = false;
-    this.mailEditing = true;
-  }
-
-  cancelMailEdit() {
-    this.loadSettings();
-    this.mailEditing = false;
-  }
-
-  toggleWebhookEdit() {
-    if (this.webhookEditing) {
-      if (this.save('webhooks')) {
-        this.webhookEditing = false;
-      }
-      return;
-    }
-    this.configurationEditing = false;
-    this.mailEditing = false;
-    this.webhookEditing = true;
-  }
-
-  cancelWebhookEdit() {
-    this.loadAlertConnectorSettings();
-    this.webhookEditing = false;
+  isWebhookDirty(): boolean {
+    return this.webhookState() !== this.webhookSnapshot;
   }
 
   updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
@@ -186,7 +152,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           }
         },
         error: (err) => {
-          const message = err?.error?.detail || 'Failed to upload image';
+          const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
           this.messageNotificationService.show(message);
         }
       });
@@ -239,7 +205,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           this.mailErrorState = true;
         }
         else {
-          this.configurationError = `${field.label} is required`;
+          const translatedField = this.translationService.translate(field.label);
+          this.configurationError = this.translationService.translate('{field} is required').replace('{field}', translatedField);
         }
         return false;
       }
@@ -255,13 +222,13 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.accounts_smtp_server = this.form.accounts_smtp_server.trim();
     this.form.accounts_smtp_port = this.form.accounts_smtp_port.trim();
     if (section === 'configuration' && this.form.s_onion && !this.onionPattern.test(this.form.s_onion)) {
-      this.messageNotificationService.show('Invalid onion address');
+      this.messageNotificationService.show(this.translationService.translate('Invalid onion address'));
       return false;
     }
     if (section === 'configuration' && ((this.form.data_sources_url && !this.urlPattern.test(this.form.data_sources_url)) ||
       (this.form.adversaries_url && !this.urlPattern.test(this.form.adversaries_url)) ||
       (this.form.pricing_url && !this.urlPattern.test(this.form.pricing_url)))) {
-      this.configurationError = 'Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://';
+      this.configurationError = this.translationService.translate('Data Sources URL, Adversaries URL, and Pricing URL must start with http:// or https://');
       return false;
     }
     if (section === 'mail' && !this.emailPattern.test(this.form.accounts_mail)) {
@@ -297,20 +264,20 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       next: (response) => {
         if (response?.settings) {
           this.applySettings(response.settings);
-          const s = this.appService.configData()?.appSettings;
-          if (s) {
-            this.loadSettings();
+          if (section === 'configuration') {
+            this.configurationSnapshot = this.configurationState();
+          }
+          else {
+            this.mailSnapshot = this.mailState();
           }
         }
       },
       error: () => {
         if (section === 'mail') {
           this.mailErrorState = true;
-          this.mailEditing = true;
         }
         else {
-          this.configurationError = 'Failed to save configuration';
-          this.configurationEditing = true;
+          this.configurationError = this.translationService.translate('Failed to save configuration');
         }
       }
     });
@@ -348,7 +315,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       },
       error: () => {
         this.webhookErrorState = true;
-        this.webhookEditing = true;
       }
     });
   }
@@ -369,6 +335,40 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       alert_jira_site_name: response?.tenant?.jira_site_name || ''
     };
     this.webhookErrorState = false;
+    this.webhookSnapshot = this.webhookState();
+  }
+
+  private configurationState(): string {
+    return JSON.stringify([
+      this.form.app_name,
+      this.form.language,
+      this.form.s_onion,
+      this.form.data_sources_url,
+      this.form.adversaries_url,
+      this.form.pricing_url,
+      this.form.ai_endpoint_enabled,
+      this.form.admin_root_allowed,
+      this.form.documentation_allowed,
+      this.form.whistle_blowing_allowed
+    ]);
+  }
+
+  private mailState(): string {
+    return JSON.stringify([
+      this.form.accounts_mail,
+      this.form.accounts_mail_password,
+      this.form.accounts_smtp_server,
+      this.form.accounts_smtp_port
+    ]);
+  }
+
+  private webhookState(): string {
+    return JSON.stringify([
+      this.webhookForm.slack_client_id,
+      this.webhookForm.slack_client_secret,
+      this.webhookForm.jira_client_id,
+      this.webhookForm.jira_client_secret
+    ]);
   }
 
   private createWebhookForm(): AlertWebhookSettingsForm {

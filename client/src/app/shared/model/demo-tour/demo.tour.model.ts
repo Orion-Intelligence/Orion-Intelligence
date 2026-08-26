@@ -20,6 +20,10 @@ export interface TourStep {
   disableSelectors?: string[];
   triggerSubmitOnShow?: boolean;
   triggerSubmitOnNext?: boolean;
+  sidebarState?: 'expanded' | 'collapsed';
+  profileMenuState?: 'open' | 'closed';
+  showWhenSelector?: string;
+  targetInteractive?: boolean;
 }
 
 export type DemoTourConfig = Record<string, TourStep[]>;

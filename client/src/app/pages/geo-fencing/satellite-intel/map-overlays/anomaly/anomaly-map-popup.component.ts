@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { SatelliteAnomalyResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { SatelliteAnomalyResponse } from '../../model/satellite-intel-api.models';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-anomaly-map-popup',
   standalone:  true,
   imports:     [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './anomaly-map-popup.component.html',
 })
 export class AnomalyMapPopupComponent {
@@ -23,14 +24,14 @@ export class AnomalyMapPopupComponent {
 
   get alertClass(): string {
     if (this.alertLevel === 'critical') {
-      return 'text-rose-300';
+      return 'text-rose-300 [body.light-theme_&]:text-rose-700';
     }
     if (this.alertLevel === 'warning') {
-      return 'text-amber-300';
+      return 'text-amber-300 [body.light-theme_&]:text-amber-700';
     }
     if (this.alertLevel === 'nominal') {
-      return 'text-emerald-300';
+      return 'text-emerald-300 [body.light-theme_&]:text-emerald-700';
     }
-    return 'text-sky-300';
+    return 'text-sky-300 [body.light-theme_&]:text-sky-700';
   }
 }

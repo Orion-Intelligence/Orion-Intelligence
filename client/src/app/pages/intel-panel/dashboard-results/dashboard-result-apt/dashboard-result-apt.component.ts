@@ -1,11 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, effect, inject, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
+import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
 import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } from '../../../../shared/model/results/apt-intel/apt-intel.callback.model';
-import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
+import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 
 const STAGGER_RENDER_BATCH_SIZE = 10;
@@ -17,6 +17,7 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   standalone: true,
   imports: [CommonModule, DatePipe, TranslatePipe, RouterLink, RecordSidebarComponent],
   templateUrl: './dashboard-result-apt.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDestroy {
@@ -342,8 +343,8 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
 
   getBadgeClass(item: AptIntelResultItem): string {
     return this.isMalware(item)
-      ? 'border-rose-400/30 bg-rose-400/10 text-rose-200'
-      : 'border-sky-400/30 bg-sky-400/10 text-sky-200';
+      ? 'border-rose-400/30 bg-rose-400/10 text-rose-200 [body.light-theme_&]:border-rose-300 [body.light-theme_&]:bg-rose-50 [body.light-theme_&]:text-rose-700'
+      : 'border-sky-400/30 bg-sky-400/10 text-sky-200 [body.light-theme_&]:border-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700';
   }
 
   isMalware(item: AptIntelResultItem): boolean {

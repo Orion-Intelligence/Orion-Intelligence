@@ -1,12 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { AppService } from '../../../../../services/core/app/app.service';
-import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../../../../../shared/model/case-management/case.model';
+import type { SharedCaseComment, SharedCaseEntity, SharedCaseReport } from '../case.model';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { CasePdfExportService } from '../../case-management-service/case-pdf-export.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { CASE_SHARE_EXPORT_OPTIONS } from '../../../../../shared/model/report/export-choice.model';
 import { ReportExportService } from '../../../../../shared/services/report-export.service';
@@ -16,11 +17,10 @@ import { GraphReportPayload } from '../../../../../shared/model/report/report-ex
 @Component({
   selector: 'app-case-share',
   imports: [CommonModule, TranslatePipe, ExportChoiceModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-share.component.html',
 })
-export class CaseShareComponent implements OnInit, OnDestroy {
-  private previousTheme: 'light-theme' | 'dark-theme' | null = null;
-
+export class CaseShareComponent implements OnInit {
   report: SharedCaseReport | null = null;
   isLoading = true;
   errorMessage = '';
@@ -30,17 +30,16 @@ export class CaseShareComponent implements OnInit, OnDestroy {
   isExportChoiceOpen = false;
   readonly reportExportOptions = CASE_SHARE_EXPORT_OPTIONS;
 
-  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, private reportExportService: ReportExportService, public appService: AppService) { }
+  constructor(private route: ActivatedRoute, private api: ApiService, private casePdfExportService: CasePdfExportService, private reportExportService: ReportExportService, public appService: AppService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
-    this.forceDarkTheme();
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
     });
     const shareId = this.route.snapshot.paramMap.get('shareId') || '';
     const token = this.route.snapshot.queryParamMap.get('token') || '';
     if (!shareId || !token) {
-      this.errorMessage = 'Invalid share link.';
+      this.errorMessage = this.translationService.translate('Invalid share link.');
       this.isLoading = false;
       return;
     }
@@ -58,17 +57,10 @@ export class CaseShareComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: err => {
-        this.errorMessage = err?.error?.detail || 'This share link is unavailable.';
+        this.errorMessage = err?.error?.detail || this.translationService.translate('This share link is unavailable.');
         this.isLoading = false;
       }
     });
-  }
-
-  ngOnDestroy(): void {
-    document.body.classList.remove('light-theme', 'dark-theme');
-    if (this.previousTheme) {
-      document.body.classList.add(this.previousTheme);
-    }
   }
 
   toggleArtifact(artifactId: string): void {
@@ -111,7 +103,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       reportLabel: 'Shared Case Report'
     }).subscribe({
       error: () => {
-        this.errorMessage = 'Unable to export PDF.';
+        this.errorMessage = this.translationService.translate('Unable to export PDF.');
       }
     });
   }
@@ -122,7 +114,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
     }
     const payload: GraphReportPayload = {
       graphKind: 'cti',
-      title: 'Shared Case Report',
+      title: this.translationService.translate('Shared Case Report'),
       sessionName: this.report.title || this.report.caseId || 'shared-case',
       generatedAtIso: new Date().toISOString(),
       nodes: [],
@@ -136,7 +128,7 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       },
       tables: [
         {
-          title: 'Case Data',
+          title: this.translationService.translate('Case Data'),
           values: {
             case_id: this.report.caseId || '-',
             title: this.report.title || '-',
@@ -188,12 +180,12 @@ export class CaseShareComponent implements OnInit, OnDestroy {
 
   formatLabel(value?: string | null, otherValue?: string | null): string {
     if (value === 'other' && otherValue?.trim()) {
-      return `Other: ${otherValue}`;
+      return `${this.translationService.translate('Other')}: ${otherValue}`;
     }
     if (!value) {
       return '-';
     }
-    return value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+    return this.translationService.translate(value.replace(/[_-]/g, ' ').replace(/\b\w/g, char => char.toUpperCase()));
   }
 
   formatDate(value?: string | null): string {
@@ -215,15 +207,10 @@ export class CaseShareComponent implements OnInit, OnDestroy {
       return '/assets/images/shared/logo-wide-light.svg';
     }
     const settings = this.appService.getConfig().appSettings;
-    return settings.logo_wide_dark || settings.logo_wide_light || '/assets/images/shared/logo-wide-light.svg';
-  }
-
-  private forceDarkTheme(): void {
-    this.previousTheme = document.body.classList.contains('light-theme') ? 'light-theme'
-      : document.body.classList.contains('dark-theme') ? 'dark-theme'
-        : null;
-    document.body.classList.remove('light-theme');
-    document.body.classList.add('dark-theme');
+    const isLightTheme = this.appService.userSessionData()?.user?.theme === 'light-theme';
+    return isLightTheme
+      ? settings.logo_wide_light || settings.logo_wide_dark || '/assets/images/shared/logo-wide-light.svg'
+      : settings.logo_wide_dark || settings.logo_wide_light || '/assets/images/shared/logo-wide-light.svg';
   }
 
   getAppName(): string {

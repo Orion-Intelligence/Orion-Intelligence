@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { EMPTY, lastValueFrom, Observable, timer } from 'rxjs';
 import { expand, switchMap, takeWhile } from 'rxjs/operators';
-import { SatelliteGeocodeResponse, SatelliteGeocodeResult } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteGeocodeResponse, SatelliteGeocodeResult } from '../../satellite-intel/model/satellite-intel-api.models';
 import { ApiService } from '../../../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })

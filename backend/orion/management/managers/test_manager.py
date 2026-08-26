@@ -82,7 +82,7 @@ class test_manager:
             except Exception as ex:
                 log.g().e(f"Failed to drop test collection {c}: {ex}")
 
-        mocks_dir = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "mongo"
+        mocks_dir = Path(__file__).resolve().parents[3] / "tests" / "mock" / "mongo"
         if mocks_dir.exists():
             for fp in sorted(mocks_dir.glob("*.json")):
                 parts = fp.name.split(".")
@@ -234,9 +234,8 @@ class test_manager:
 
             mocks_dir = (
                     Path(__file__).resolve().parents[3]
-                    / "static"
-                    / "test"
-                    / "mocks"
+                    / "tests"
+                    / "mock"
                     / "elastic"
             )
             print(f"Mocks dir: {mocks_dir}", flush=True)
@@ -347,7 +346,7 @@ class test_manager:
         if env_handler.get_instance().env("TESTING_ENABLED", "0") != "1":
             return
 
-        dumps_root = Path(__file__).resolve().parents[3] / "static" / "test" / "mocks" / "arango"
+        dumps_root = Path(__file__).resolve().parents[3] / "tests" / "mock" / "arango"
         if not dumps_root.exists():
             return
 

@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectorRef, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subscription, timer } from 'rxjs';
 import { NexusChatService } from '../nexus-chat.service';
-import { NexusWorkspaceFileNode, NexusWorkspaceImportResponse } from '../../../../shared/model/nexus/ai-chat-session.model';
+import { NexusWorkspaceFileNode, NexusWorkspaceImportResponse } from '../model/ai-chat-session.model';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 type AiDirectoryViewMode = 'chat' | 'directory' | 'split';
 type AiDirectoryTab = 'files' | 'logs';
@@ -20,7 +22,8 @@ interface WorkspaceLogEntry {
 @Component({
   selector: 'app-ai-directory',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ai-directory.html',
 })
 export class AiDirectory implements OnChanges, OnDestroy {
@@ -52,7 +55,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
   @Output() importRequested = new EventEmitter<string>();
 
-  constructor(private readonly nexusChatService: NexusChatService, private readonly cdr: ChangeDetectorRef) { }
+  constructor(private readonly nexusChatService: NexusChatService, private readonly cdr: ChangeDetectorRef, private readonly translationService: TranslationService) { }
 
   get filteredWorkspaceLogs(): WorkspaceLogEntry[] {
     const search = this.workspaceLogSearch.trim().toLowerCase();
@@ -147,7 +150,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
     this.workspaceStatusRequest?.unsubscribe();
 
-    this.updateWorkspaceStatus('loading', 'Repository import started. Downloading and scanning...');
+    this.updateWorkspaceStatus('loading', this.translate('Repository import started. Downloading and scanning...'));
     this.resetWorkspace(true);
 
     this.nexusChatService.importGithubRepo(sessionId, this.repositoryRepoUrl).subscribe({
@@ -156,7 +159,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
         if (result.status === 'processing') {
           this.updateWorkspaceStatus('loading',
-            result.message || 'Repository is being processed...',
+            result.message || this.translate('Repository is being processed...'),
             result.scan_output,);
           this.pollWorkspaceStatus(sessionId);
           return;
@@ -197,7 +200,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
           this.workspaceTree = null;
           this.updateWorkspaceStatus('failed',
-            result.message || 'Repository scanned, but file tree was not found.',);
+            result.message || this.translate('Repository scanned, but file tree was not found.'),);
           return;
         }
 
@@ -236,7 +239,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
         }
 
         this.workspaceTree = null;
-        this.updateWorkspaceStatus('failed', 'Unable to load repository file tree.');
+        this.updateWorkspaceStatus('failed', this.translate('Unable to load repository file tree.'));
       },
     });
   }
@@ -304,7 +307,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
           if (reset) {
             this.selectedWorkspaceFileContent =
-              this.getApiErrorMessage(error) || 'Unable to read file.';
+              this.getApiErrorMessage(error) || this.translate('Unable to read file.');
             this.selectedWorkspaceFileLines = this.selectedWorkspaceFileContent.split('\n');
           }
 
@@ -342,7 +345,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
           if (result.status === 'processing') {
             this.updateWorkspaceStatus('loading',
-              result.message || 'Repository is still processing...',
+              result.message || this.translate('Repository is still processing...'),
               result.scan_output,);
             return;
           }
@@ -365,7 +368,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
     if (result.status === 'approved') {
       this.updateWorkspaceStatus('approved',
-        result.message || 'Repository imported and scanned successfully.',
+        result.message || this.translate('Repository imported and scanned successfully.'),
         result.scan_output,);
       this.loadWorkspaceTree();
       return;
@@ -373,13 +376,13 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
     if (result.status === 'infected') {
       this.updateWorkspaceStatus('infected',
-        result.message || 'Repository blocked because a threat was detected.',
+        result.message || this.translate('Repository blocked because a threat was detected.'),
         result.scan_output || result.error,);
       return;
     }
 
     this.updateWorkspaceStatus('failed',
-      result.message || result.error || 'Repository import failed.',
+      result.message || result.error || this.translate('Repository import failed.'),
       result.error || result.scan_output,);
   }
 
@@ -408,7 +411,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
       return detail;
     }
 
-    return detail?.message || detail?.error || error?.message || 'Request failed.';
+    return detail?.message || detail?.error || error?.message || this.translate('Request failed.');
   }
 
   private clearWorkspaceStatus(): void {
@@ -458,6 +461,10 @@ export class AiDirectory implements OnChanges, OnDestroy {
     ].slice(0, 100);
   }
 
+  private translate(key: string): string {
+    return this.translationService.translate(key);
+  }
+
   private loadExistingWorkspaceStatus(): void {
     const sessionId = this.activeWorkspaceSessionId || this.sessionId;
 
@@ -473,7 +480,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
         if (result.status === 'approved') {
           this.updateWorkspaceStatus('approved',
-            result.message || 'Repository is ready.',
+            result.message || this.translate('Repository is ready.'),
             result.scan_output,);
           this.loadWorkspaceTree();
           return;
@@ -481,7 +488,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
         if (result.status === 'processing') {
           this.updateWorkspaceStatus('loading',
-            result.message || 'Repository is still processing...',
+            result.message || this.translate('Repository is still processing...'),
             result.scan_output,);
           this.pollWorkspaceStatus(sessionId);
           return;
@@ -489,14 +496,14 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
         if (result.status === 'infected') {
           this.updateWorkspaceStatus('infected',
-            result.message || 'Repository blocked because a threat was detected.',
+            result.message || this.translate('Repository blocked because a threat was detected.'),
             result.scan_output || result.error,);
           return;
         }
 
         if (['failed', 'timeout', 'error'].includes(result.status)) {
           this.updateWorkspaceStatus('failed',
-            result.message || result.error || 'Repository import failed.',
+            result.message || result.error || this.translate('Repository import failed.'),
             result.error || result.scan_output,);
           this.workspaceTree = null;
           return;

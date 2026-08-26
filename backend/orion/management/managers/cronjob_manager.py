@@ -33,7 +33,7 @@ class cronjob_manager:
 
     @staticmethod
     def build_assets():
-        build_dir = BASE_DIR / "build"
+        build_dir = BASE_DIR / "workspace" / "build"
         helper_controller.build_assets(build_dir)
 
 

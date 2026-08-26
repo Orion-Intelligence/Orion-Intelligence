@@ -10,7 +10,7 @@
             <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
             <div class="hidden items-center gap-2 md:flex">
-              <img alt="Results" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+              <img alt="" aria-hidden="true" src="assets/images/shared/results_found.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.records }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Records' | translate }}</div>
             </div>
@@ -18,7 +18,7 @@
             <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
             <div class="hidden items-center gap-2 lg:flex">
-              <img alt="Affected Sites" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
+              <img alt="" aria-hidden="true" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.affectedSites }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Affected Sites' | translate }}</div>
             </div>
@@ -26,7 +26,7 @@
             <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
             <div class="hidden items-center gap-2 xl:flex">
-              <img alt="Actor Groups" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+              <img alt="" aria-hidden="true" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
               <div class="text-sm font-semibold text-[var(--color-text1)]">{{ headerSummary.campaigns }}</div>
               <div class="text-xs text-[var(--color-text4)]">{{ 'Actor Groups' | translate }}</div>
             </div>
@@ -45,13 +45,13 @@
             @if (getDefacementGroups().length > 0) {
               <div class="grid grid-cols-3 gap-3 max-[1280px]:grid-cols-2 max-[760px]:grid-cols-1">
                 @for (group of groups; track group.key) {
-                  <div data-testid="defacement-group-card" class="ui-stagger-result-card ui-result-card ui-result-card-hover relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]">
+                  <div data-testid="defacement-group-card" class="[animation:ui-stagger-result-card-enter_200ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:!animate-none ui-result-card [&&]:!bg-[var(--color-blue-700)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] [body.light-theme_&]:transition-[background-color,border-color,box-shadow] [body.light-theme_&]:duration-200 [body.light-theme_&]:ease-[ease] [body.light-theme_&]:hover:!border-[#b8cde4] [body.light-theme_&]:hover:!bg-[#f7fbff] [body.light-theme_&]:hover:!shadow-[0_10px_24px_rgba(15,23,42,0.10)] relative h-[252px] overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] shadow-[0_10px_24px_rgba(0,0,0,0.16)] transition hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-810)] max-[760px]:h-auto max-[760px]:min-h-[252px]">
                     <div class="absolute inset-y-0 left-0 w-1" [ngClass]="{ 'bg-red-500': group.risk === 'High', 'bg-yellow-400': group.risk === 'Medium', 'bg-emerald-400': group.risk === 'Low' }"></div>
                     <button type="button" class="group flex h-full w-full flex-col p-4 pl-5 text-left outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-blue-700)]" (click)="toggleGroup(group.key)" [attr.aria-expanded]="isGroupExpanded(group.key)" [attr.aria-label]="((isGroupExpanded(group.key) ? 'Collapse group' : 'Expand group') | translate) + ': ' + group.title">
                       <div class="flex h-[88px] items-start justify-between gap-4">
                         <div class="min-w-0 flex-1">
                           <div class="flex h-9 min-w-0 flex-col justify-start overflow-hidden">
-                            <span class="truncate text-[11px] font-bold uppercase tracking-[0.04em]" [ngClass]="{ 'text-red-300': group.risk === 'High', 'text-yellow-300': group.risk === 'Medium', 'text-emerald-300': group.risk === 'Low' }">
+                            <span class="truncate text-[11px] font-bold uppercase tracking-[0.04em]" [ngClass]="{ 'text-red-300 [.light-theme_&]:text-red-700': group.risk === 'High', 'text-yellow-300 [.light-theme_&]:text-amber-700': group.risk === 'Medium', 'text-emerald-300 [.light-theme_&]:text-emerald-700': group.risk === 'Low' }">
                               {{ group.risk | translate }}
                             </span>
                             <span class="mt-0.5 truncate text-[11px] text-[var(--color-text4)]">{{ group.latestSeen ? (group.latestSeen | date:'MMM d, y') : '-' }}</span>
@@ -59,7 +59,7 @@
                           <div class="mt-3 h-6 truncate text-[17px] font-semibold leading-6 text-[var(--color-text1)]" [appTooltip]="group.title" [title]="group.title">{{ group.title }}</div>
                           <div class="mt-1 flex h-5 min-w-0 items-center gap-x-2 overflow-hidden text-[12px] text-[var(--color-text4)]" [appTooltip]="getPrimarySite(group) + ' / ' + group.subtitle">
                             <span class="min-w-0 truncate" [title]="getPrimarySite(group)">{{ getPrimarySite(group) }}</span>
-                            <span class="text-[var(--color-text5)]">/</span>
+                            <span class="text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">/</span>
                             <span class="shrink-0">{{ group.subtitle | translate }}</span>
                           </div>
                         </div>
@@ -111,7 +111,7 @@
                             <span class="max-w-full truncate rounded-full bg-[var(--color-tags)] px-2 py-0.5 text-[10px] leading-4 text-[var(--color-text2)]" [appTooltip]="server" [title]="server">{{ server }}</span>
                           }
                         } @else {
-                          <span class="truncate text-[10px] font-medium text-[var(--color-text5)]">{{ 'No server data' | translate }}</span>
+                          <span class="truncate text-[10px] font-medium text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{ 'No server data' | translate }}</span>
                         }
                       </div>
                     </button>
@@ -128,7 +128,7 @@
                 [records]="getSidebarItems()"
                 [subtitle]="getSidebarSubtitle()"
                 [testId]="'defacement-record-sidebar'"
-                [title]="'Compromise Records'"
+                [title]="'Compromise Records' | translate"
                 (close)="closeRecordSidebar()">
               </app-record-sidebar>
             }

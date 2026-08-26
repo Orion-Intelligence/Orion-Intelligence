@@ -1,6 +1,6 @@
 <div [class]="isCollapsed ? 'dark-theme flex h-full w-[70px] min-w-[70px] flex-col overflow-hidden bg-[var(--color-blue-900)] px-[7px] py-[8px] transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]' : 'dark-theme flex h-full w-[300px] min-w-[300px] flex-col overflow-y-auto bg-[var(--color-blue-900)] p-0 transition-[width,padding] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [scrollbar-color:var(--color-blue-880)_transparent]'">
-  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" (toggleClicked)="toggleCollapsed()">
-    <div sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
+  <app-graph-sidebar-shell [isCollapsed]="isCollapsed" [forceDarkLogo]="true" expandTestId="ai-chat-sidebar-expand" collapseTestId="ai-chat-sidebar-collapse" (toggleClicked)="toggleCollapsed()">
+    <div data-sidebar-expanded class="flex h-full flex-col bg-[var(--color-blue-820-light)]">
       <div class="flex shrink-0 flex-col bg-[var(--color-blue-820-light)]/95 pt-1 backdrop-blur-sm">
         <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="hasEmptyChat || creatingChat() || clearingChats()" [attr.aria-busy]="creatingChat()" class="ai-new-chat-button mx-2 flex items-center justify-between gap-3 rounded-[10px] px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-blue-710)] disabled:cursor-not-allowed disabled:opacity-50">
           <span class="min-w-0">
@@ -23,13 +23,13 @@
           <i class="bi bi-search shrink-0 text-[14px] text-[var(--color-text4)]" aria-hidden="true"></i>
           <input data-testid="ai-chat-search-input" type="search" [(ngModel)]="searchQuery" (keydown.escape)="closeSearch()" [attr.aria-label]="'Search Chats' | translate" [placeholder]="'Search Chats...' | translate" class="min-w-0 flex-1 border-0 bg-transparent p-0 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)]" autofocus />
           @if (searchQuery) {
-          <button data-testid="ai-chat-search-clear" type="button" (click)="clearSearch()" [attr.aria-label]="'Clear search' | translate" [appTooltip]="'Clear search' | translate" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-[var(--color-text4)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)]">
+          <button data-testid="ai-chat-search-clear" type="button" (click)="clearSearch()" [attr.aria-label]="'Clear search' | translate" [appTooltip]="'Clear search' | translate" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-[7px] text-[var(--color-text4)] transition-colors hover:bg-white/[0.07] hover:text-[var(--color-text1)] [.light-theme_&]:hover:bg-[#eaf2fb]">
             <i class="bi bi-x-lg text-[11px]" aria-hidden="true"></i>
           </button>
           }
         </div>
         } @else {
-        <button data-testid="ai-chat-search-toggle" type="button" (click)="toggleSearch($event)" class="flex h-10 w-full items-center gap-3 rounded-[9px] px-3 text-left text-sm font-medium text-[var(--color-text3)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)]">
+        <button data-testid="ai-chat-search-toggle" type="button" (click)="toggleSearch($event)" class="flex h-10 w-full items-center gap-3 rounded-[9px] px-3 text-left text-sm font-medium text-[var(--color-text3)] transition-colors hover:bg-white/[0.06] hover:text-[var(--color-text1)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] [.light-theme_&]:hover:bg-[#eaf2fb]">
           <i class="bi bi-search text-[14px]" aria-hidden="true"></i>
           <span>{{ 'Search Chats' | translate }}</span>
         </button>
@@ -41,7 +41,7 @@
           <span class="text-[11px] font-semibold tracking-[0.02em] text-[var(--color-text4)]">
             {{ 'Recent Chats' | translate }}
           </span>
-          <button data-testid="ai-clear-all-chats-button" type="button" (click)="requestClearChats($event)" [disabled]="!canClearChats" [attr.aria-label]="'Clear all chats' | translate" [appTooltip]="'Clear all chats' | translate" class="flex h-7 w-7 items-center justify-center rounded-[7px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(248,113,113,0.35)] disabled:cursor-not-allowed disabled:opacity-40">
+          <button data-testid="ai-clear-all-chats-button" type="button" (click)="requestClearChats($event)" [disabled]="!canClearChats" [attr.aria-label]="'Clear all chats' | translate" [appTooltip]="'Clear all chats' | translate" class="flex h-7 w-7 items-center justify-center rounded-[7px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(248,113,113,0.35)] disabled:cursor-not-allowed disabled:opacity-40 [.light-theme_&]:hover:text-red-700">
             <i [ngClass]="clearingChats() ? 'bi-arrow-repeat animate-spin' : 'bi-trash3'" class="bi text-[12px]" aria-hidden="true"></i>
           </button>
         </div>
@@ -55,7 +55,7 @@
                 <i class="bi bi-chat-left-text text-[13px]" aria-hidden="true"></i>
               </span>
               <span class="min-w-0 flex-1">
-                <span class="block truncate text-[13px] font-medium leading-[18px]" title="New Chat">{{ 'New Chat' | translate }}</span>
+                <span class="block truncate text-[13px] font-medium leading-[18px]" [title]="'New Chat' | translate">{{ 'New Chat' | translate }}</span>
                 <span class="mt-0.5 flex items-center gap-1.5 text-[10px] leading-[14px] text-[var(--color-text4)]">
                   <span class="h-2.5 w-2.5 shrink-0 animate-spin rounded-full border border-[var(--color-blue-640)]/25 border-t-[var(--color-blue-640)]" aria-hidden="true"></span>
                   <span>{{ 'Creating chat…' | translate }}</span>
@@ -67,7 +67,7 @@
 
           @for (chat of filteredSessions; track chat.sessionId) {
           <div @chatRowAnimation class="group relative mb-1 select-none">
-            <button type="button" (click)="selectChat(chat)" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.075] text-[var(--color-text1)]' : 'text-[var(--color-text2)] hover:bg-white/[0.05] hover:text-[var(--color-text1)]'" class="ui-ai-chat-history-row relative flex min-h-[50px] w-full cursor-pointer items-center gap-2.5 rounded-[9px] border border-transparent px-2.5 py-2 pr-[42px] text-left transition-[background-color,color,border-color] focus-visible:z-[1] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55">
+            <button type="button" (click)="selectChat(chat)" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.075] text-[var(--color-text1)] [.light-theme_&]:bg-[#eaf2fb]' : 'text-[var(--color-text2)] hover:bg-white/[0.05] hover:text-[var(--color-text1)] [.light-theme_&]:hover:bg-[#f1f5fb]'" class="ui-ai-chat-history-row relative flex min-h-[50px] w-full cursor-pointer items-center gap-2.5 rounded-[9px] border border-transparent px-2.5 py-2 pr-[42px] text-left transition-[background-color,color,border-color] focus-visible:z-[1] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55">
               @if (activeSessionId() === chat.sessionId) {
               <span class="absolute inset-y-3 left-0 w-[3px] rounded-r-full bg-[var(--color-blue-640)]" aria-hidden="true"></span>
               }
@@ -83,13 +83,13 @@
             </button>
 
             @if (!isChatEmpty(chat)) {
-              <button type="button" (click)="toggleChatMenu(chat, $event)" [disabled]="isChatBusy(chat)" [attr.data-testid]="'ai-chat-options-' + chat.sessionId" [attr.aria-label]="'Options' | translate" aria-haspopup="menu" [attr.aria-expanded]="openedSessionMenuId === chat.sessionId" [ngClass]="openedSessionMenuId === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-text1)] opacity-100' : activeSessionId() === chat.sessionId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'" class="absolute right-[7px] top-1/2 flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-[background-color,color,opacity] hover:bg-white/[0.08] hover:text-[var(--color-text1)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-40">
+              <button type="button" (click)="toggleChatMenu(chat, $event)" [disabled]="isChatBusy(chat)" [attr.data-testid]="'ai-chat-options-' + chat.sessionId" [attr.aria-label]="'Options' | translate" aria-haspopup="menu" [attr.aria-expanded]="openedSessionMenuId === chat.sessionId" [ngClass]="openedSessionMenuId === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-text1)] opacity-100 [.light-theme_&]:bg-[#dfeaf6]' : activeSessionId() === chat.sessionId ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-focus-within:opacity-100'" class="absolute right-[7px] top-1/2 flex h-[30px] w-[30px] -translate-y-1/2 items-center justify-center rounded-[8px] text-[var(--color-text4)] transition-[background-color,color,opacity] hover:bg-white/[0.08] hover:text-[var(--color-text1)] focus-visible:opacity-100 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-40 [.light-theme_&]:hover:bg-[#dfeaf6]">
                 <i class="bi bi-three-dots text-[16px]" aria-hidden="true"></i>
               </button>
             }
 
             @if (!isChatEmpty(chat) && !isChatBusy(chat) && openedSessionMenuId === chat.sessionId) {
-            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'bottom-[44px] ui-ai-chat-dropdown-above' : 'top-[44px]'" class="ui-profile-dropdown absolute right-[5px] z-[999] w-[176px] overflow-visible rounded-[9px] border border-slate-200 !bg-slate-50 p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5">
+            <div role="menu" (click)="$event.stopPropagation()" [attr.data-testid]="'ai-chat-menu-' + chat.sessionId" [ngClass]="shouldOpenMenuAbove(chat) ? 'animate-ai-chat-dropdown-above-in bottom-[44px] origin-bottom-right' : 'top-[44px] [animation:ui-profile-dropdown-in_160ms_cubic-bezier(0.16,1,0.3,1)_both]'" class="absolute right-[5px] z-[999] w-[176px] origin-top-right overflow-visible rounded-[9px] border border-slate-200 !bg-slate-50 p-1.5 shadow-[0_14px_32px_rgba(2,6,23,0.2),0_2px_6px_rgba(2,6,23,0.1)] ring-1 ring-black/5 will-change-[opacity,transform] motion-reduce:animate-none">
               @if (shouldOpenMenuAbove(chat)) {
               <span class="pointer-events-none absolute bottom-[-7px] right-[11px] h-0 w-0 border-l-[6px] border-r-[6px] border-t-[7px] border-l-transparent border-r-transparent border-t-slate-50" aria-hidden="true"></span>
               } @else {
@@ -126,21 +126,21 @@
       }
     </div>
 
-    <div sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
+    <div data-sidebar-collapsed class="flex h-full flex-col items-center bg-[var(--color-blue-820-light)]">
       <div class="flex min-h-0 w-full flex-1 flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <button data-testid="ai-new-chat-button" type="button" (click)="startNewChat()" [disabled]="hasEmptyChat || creatingChat() || clearingChats()" [attr.aria-label]="'New Chat' | translate" [attr.aria-busy]="creatingChat()" [appTooltip]="'New Chat' | translate" class="mx-2 flex h-10 w-10 items-center justify-center rounded-[9px] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-640)]/10 hover:text-[var(--color-blue-640)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(87,165,235,0.35)] disabled:cursor-not-allowed disabled:opacity-50">
           <i class="bi bi-plus-lg" aria-hidden="true"></i>
         </button>
 
         @if (sessions().length) {
-        <button data-testid="ai-clear-all-chats-button" type="button" (click)="requestClearChats($event)" [disabled]="!canClearChats" [attr.aria-label]="'Clear all chats' | translate" [appTooltip]="'Clear all chats' | translate" class="mx-2 mt-1 flex h-10 w-10 items-center justify-center rounded-[9px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(248,113,113,0.35)] disabled:cursor-not-allowed disabled:opacity-40">
+        <button data-testid="ai-clear-all-chats-button" type="button" (click)="requestClearChats($event)" [disabled]="!canClearChats" [attr.aria-label]="'Clear all chats' | translate" [appTooltip]="'Clear all chats' | translate" class="mx-2 mt-1 flex h-10 w-10 items-center justify-center rounded-[9px] text-[var(--color-text4)] transition-colors hover:bg-red-500/10 hover:text-red-400 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgba(248,113,113,0.35)] disabled:cursor-not-allowed disabled:opacity-40 [.light-theme_&]:hover:text-red-700">
           <i [ngClass]="clearingChats() ? 'bi-arrow-repeat animate-spin' : 'bi-trash3'" class="bi text-[13px]" aria-hidden="true"></i>
         </button>
         }
 
         @for (chat of filteredSessions; track chat.sessionId) {
         <div @chatRowAnimation class="relative my-1 select-none">
-          <button type="button" (click)="selectChat(chat)" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [appTooltip]="getChatTooltip(chat)" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-blue-640)]' : 'text-[var(--color-text3)] hover:bg-white/[0.05] hover:text-[var(--color-text1)]'" class="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-[9px] border border-transparent text-[12px] font-semibold transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55">
+          <button type="button" (click)="selectChat(chat)" [attr.data-testid]="'ai-chat-session-' + chat.sessionId" [attr.data-selected]="activeSessionId() === chat.sessionId ? 'true' : null" [attr.aria-current]="activeSessionId() === chat.sessionId ? 'page' : null" [appTooltip]="getChatTooltip(chat)" [ngClass]="activeSessionId() === chat.sessionId ? 'bg-white/[0.08] text-[var(--color-blue-640)] [.light-theme_&]:bg-[#eaf2fb]' : 'text-[var(--color-text3)] hover:bg-white/[0.05] hover:text-[var(--color-text1)] [.light-theme_&]:hover:bg-[#f1f5fb]'" class="relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-[9px] border border-transparent text-[12px] font-semibold transition-[background-color,color,border-color] focus-visible:outline-none focus-visible:border-[var(--color-blue-640)]/55">
             {{ getChatInitial(chat) }}
           </button>
         </div>
@@ -161,9 +161,9 @@
 }
 
 @if (renameChatTarget) {
-<div class="ui-graph-popup-overlay fixed inset-0 z-50 flex items-center justify-center p-4" data-role="backdrop" (click)="onRenameBackdrop($event)">
-  <div data-testid="ai-chat-rename-modal" class="ui-graph-popup-panel ui-popup-shell w-full max-w-[420px] rounded-xl p-6" (click)="$event.stopPropagation()">
-    <div class="ui-popup-title text-lg font-semibold">
+<div class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-50 flex items-center justify-center p-4" data-role="backdrop" (click)="onRenameBackdrop($event)">
+  <div data-testid="ai-chat-rename-modal" class="ui-graph-popup-panel [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] origin-top [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] w-full max-w-[420px] rounded-xl p-6" (click)="$event.stopPropagation()">
+    <div class="!text-[var(--color-text1)] text-lg font-semibold">
       {{ 'Rename Chat' | translate }}
     </div>
 
@@ -171,14 +171,14 @@
       {{ 'Update the chat name below.' | translate }}
     </div>
 
-    <input data-testid="ai-chat-rename-input" type="text" [(ngModel)]="renameChatDraft" class="mt-4 h-[40px] w-full rounded-[8px] border border-[var(--color-blue-640)]/25 bg-[#102236] px-3 text-sm text-white outline-none placeholder:text-[#A0B8D1]" [placeholder]="'Chat name' | translate" (keydown.enter)="confirmRenameChat()" autofocus />
+    <input data-testid="ai-chat-rename-input" type="text" [(ngModel)]="renameChatDraft" class="mt-4 h-[40px] w-full rounded-[8px] border border-[var(--color-blue-640)]/25 bg-[#102236] px-3 text-sm text-white outline-none placeholder:text-[#A0B8D1] [.light-theme_&]:border-[#c7d5e6] [.light-theme_&]:bg-white [.light-theme_&]:text-[#172235] [.light-theme_&]:placeholder:text-[#64748b] [.light-theme_&]:focus:border-[var(--color-blue-640)]" [placeholder]="'Chat name' | translate" (keydown.enter)="confirmRenameChat()" autofocus />
 
     <div class="mt-6 flex justify-end gap-2">
-      <button data-testid="ai-chat-rename-confirm" type="button" class="ui-popup-btn-primary px-4 py-2 text-sm font-semibold" [disabled]="!renameChatDraft.trim()" (click)="confirmRenameChat()">
+      <button data-testid="ai-chat-rename-confirm" type="button" class="ui-popup-btn-primary [&&]:!border-0 [&&]:!bg-[linear-gradient(135deg,#57a5eb_0%,#0ea5e9_100%)] [&&]:!text-white [&&]:!shadow-[0_1px_4px_rgb(87_165_235/25%)] [&&]:!px-[14px] [&&]:!py-[6px] [&&]:!h-auto [&&]:!min-w-0 [border-radius:var(--ui-popup-button-radius,6px)] [font-size:var(--ui-popup-button-font-size,13px)] [font-weight:var(--ui-popup-button-font-weight,500)] [transition-property:var(--ui-popup-button-transition,background-color,transform,box-shadow)] [transition-duration:var(--ui-popup-button-duration,180ms)] [transition-timing-function:ease] hover:[&&&]:!bg-[linear-gradient(135deg,#6bb5ff_0%,#1eb5f9_100%)] hover:[&&&]:!-translate-y-px hover:[&&&]:!shadow-[0_2px_6px_rgb(87_165_235/30%)] active:[&&&]:!translate-y-0 [--ui-popup-button-font-size:14px] [--ui-popup-button-font-weight:600]" [disabled]="!renameChatDraft.trim()" (click)="confirmRenameChat()">
         {{ 'confirmation.yesConfirm' | translate }}
       </button>
 
-      <button data-testid="ai-chat-rename-cancel" type="button" class="ui-popup-btn-secondary px-4 py-2 text-sm font-semibold" (click)="closeRenameChatPopup()">
+      <button data-testid="ai-chat-rename-cancel" type="button" class="ui-popup-btn-secondary border [&&]:!border-[#4a5f77] [&&]:!bg-transparent [&&]:!text-[#e1e8f0] [&&]:!px-[14px] [&&]:!py-[6px] [&&]:!h-auto [&&]:!min-w-0 [border-radius:var(--ui-popup-button-radius,6px)] [font-size:var(--ui-popup-button-font-size,13px)] [font-weight:var(--ui-popup-button-font-weight,500)] [transition-property:var(--ui-popup-button-transition,background-color,border-color)] [transition-duration:var(--ui-popup-button-duration,180ms)] [transition-timing-function:ease] hover:[&&&]:!border-[#5a7594] hover:[&&&]:!bg-[rgb(74_95_119/10%)] [--ui-popup-button-font-size:14px] [--ui-popup-button-font-weight:600] [.light-theme_&&]:!border-[#c7d5e6] [.light-theme_&&]:!bg-transparent [.light-theme_&&]:!text-[#1f2e47] [.light-theme_&&]:hover:!border-[#aac0da] [.light-theme_&&]:hover:!bg-[#eef5ff]" (click)="closeRenameChatPopup()">
         {{ 'common.actions.cancel' | translate }}
       </button>
     </div>

@@ -131,6 +131,7 @@ class ScanJobManager:
             scan_id=str(job.id),
             title=job.title,
             target=self._scan_target(job, target),
+            api_reference=job.api_reference,
             status=self._scan_status_value(job, status_value),
             seen=job.seen,
             created_at=job.created_at,
@@ -142,7 +143,6 @@ class ScanJobManager:
         notification = self._build_scan_notification(job, status_value, target)
         return ScanJobDetailResponse(
             **notification.model_dump(),
-            api_reference=job.api_reference,
             payload=job.payload,
             response=job.response,
         )

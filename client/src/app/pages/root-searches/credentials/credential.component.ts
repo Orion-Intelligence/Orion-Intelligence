@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
@@ -46,6 +46,7 @@ type IocResultTab = 'stealers' | 'threats';
     ScrollTopComponent,
     TranslatePipe],
   templateUrl: './credential.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class CredentialComponent implements OnInit {

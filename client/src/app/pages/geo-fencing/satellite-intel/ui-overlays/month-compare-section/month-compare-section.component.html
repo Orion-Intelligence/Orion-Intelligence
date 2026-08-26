@@ -1,8 +1,8 @@
 <div class="px-4 py-4 md:px-6">
   @if (errorMessage && !isScanning) {
-    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px]">
-      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Request Failed' | translate }}</div>
-      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage }}</div>
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] [body.light-theme_&]:border-rose-200 [body.light-theme_&]:from-rose-50 [body.light-theme_&]:to-white">
+      <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)] [body.light-theme_&]:text-rose-800">{{ 'Request Failed' | translate }}</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)] [body.light-theme_&]:text-rose-700">{{ errorMessage | translate }}</div>
     </div>
   }
 
@@ -33,7 +33,7 @@
           <div class="flex flex-wrap gap-2">
             @for (type of imageTypes; track type.key) {
               <button type="button" class="rounded-full border px-3 py-1 text-[11px] font-semibold transition-colors" [ngClass]="selectedType === type.key ? ['border-[var(--color-blue-640)]','bg-[var(--color-blue-640)]','text-white'] : ['border-[var(--color-border)]','bg-[var(--color-blue-720)]','text-[var(--color-text3)]','hover:bg-[var(--color-blue-710)]','hover:text-[var(--color-text1)]']" (click)="selectType(type.key)">
-                {{ type.label }}
+                {{ type.label | translate }}
               </button>
             }
           </div>
@@ -64,9 +64,9 @@
     <div class="grid grid-cols-3 gap-3 max-[420px]:grid-cols-1">
       @for (_ of [1,2,3,4]; track $index) {
         <div class="overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-700)]">
-          <div class="ui-shimmer aspect-square w-full rounded-none bg-[var(--color-blue-720)]"></div>
+          <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] aspect-square w-full rounded-none bg-[var(--color-blue-720)]"></div>
           <div class="px-3 py-2">
-            <div class="ui-shimmer h-2.5 w-20 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-2.5 w-20 rounded bg-[var(--color-blue-720)]"></div>
           </div>
         </div>
       }

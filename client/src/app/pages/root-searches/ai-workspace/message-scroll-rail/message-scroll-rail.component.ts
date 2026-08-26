@@ -1,11 +1,12 @@
-import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy } from '@angular/core';
-import { ScrollRailMarker, ScrollRailMessage, ScrollRailPrompt } from '../../../../shared/model/chat/message-scroll-rail.model';
+import { ChangeDetectorRef, Component, Input, OnChanges, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { ScrollRailMarker, ScrollRailMessage, ScrollRailPrompt } from '../model/message-scroll-rail.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-message-scroll-rail',
   imports: [TranslatePipe],
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './message-scroll-rail.component.html',
 })
 export class MessageScrollRailComponent implements OnChanges, OnDestroy {

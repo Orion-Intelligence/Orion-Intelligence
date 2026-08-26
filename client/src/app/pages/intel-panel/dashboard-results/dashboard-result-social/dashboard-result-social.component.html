@@ -1,7 +1,7 @@
 <div [ngClass]="isConsolidatedView ? 'w-full min-w-0' : 'w-full max-w-[910px] min-w-0 px-2 sm:px-0 max-[640px]:px-0'">
   @for (item of searchResults().slice(0, getResultDisplayLimit()); track item.m_message_id || item.m_hash || item.m_message_sharable_link || $index) {
     <div class="mb-[20px]" [@fadeInDashboardItem]>
-      <div data-testid="result-card" [attr.data-result-index]="$index" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] ui-result-card ui-result-card-hover bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]" (click)="openExternalUrl(item?.m_message_sharable_link)">
+      <div data-testid="result-card" [attr.data-result-index]="$index" [id]="'item-' + item.m_message_id" [ngClass]="isConsolidatedView ? 'ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] [&&&&]:![background-image:repeating-linear-gradient(135deg,rgb(255_255_255/1.4%)_0,rgb(255_255_255/1.4%)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&&&]:![background-image:repeating-linear-gradient(135deg,rgb(15_23_42/2.2%)_0,rgb(15_23_42/2.2%)_1px,transparent_1px,transparent_12px)]' : ''" class="mb-5 w-full overflow-hidden rounded-[15px] border border-[var(--color-border)] ui-result-card [&&]:!bg-[var(--color-blue-700)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] [body.light-theme_&]:transition-[background-color,border-color,box-shadow] [body.light-theme_&]:duration-200 [body.light-theme_&]:ease-[ease] [body.light-theme_&]:hover:!border-[#b8cde4] [body.light-theme_&]:hover:!bg-[#f7fbff] [body.light-theme_&]:hover:!shadow-[0_10px_24px_rgba(15,23,42,0.10)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] px-[20px] pb-[20px] pt-[15px] transition-all duration-300 ease-in-out hover:bg-[var(--color-blue-810)] dark:bg-[var(--color-consolidated-secondary)] max-[640px]:px-[12px] max-[640px]:pt-[12px] max-[640px]:pb-[14px]" (click)="openExternalUrl(item?.m_message_sharable_link)">
         <div class="mb-[10px] flex items-start gap-[10px]">
           <div class="flex min-w-0 flex-1 flex-wrap gap-[10px]">
             @if (item.m_content_type?.length) {
@@ -17,19 +17,19 @@
             <div class="ml-auto flex shrink-0 items-start gap-[20px] self-start">
             <div (click)="scrollService.openCTI($event, item.m_hash ?? '')" [appTooltip]="'Open CTI Graph' | translate" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-cti-graph">
               <div class="p-[0_0_10px_10px]">
-                <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="graph" class="ui-action-icon" />
+                <img height="20" src="/assets/images/sidebar/theme/graph.svg" width="20" alt="" aria-hidden="true" class="ui-action-icon" />
               </div>
             </div>
             <a (click)="$event.stopPropagation(); scrollService.saveCurrentPosition(item.m_message_id ?? item.m_hash ?? '')" [queryParams]="queryParams" [appTooltip]="'Open Report' | translate" [routerLink]="[currentUrl, item.m_hash]" class="ml-auto flex w-auto cursor-pointer justify-center" data-testid="open-report">
               <div class="p-[0_0_10px_10px]">
-                <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="redirect" class="ui-action-icon" />
+                <img height="20" src="/assets/images/shared/theme/redirect.svg" width="20" alt="" aria-hidden="true" class="ui-action-icon" />
               </div>
             </a>
             </div>
           }
         </div>
         <div class="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-          <img alt="Channel" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
+          <img alt="" aria-hidden="true" height="20" src="/assets/images/shared/theme/channel.svg" width="20" class="shrink-0 ui-action-icon" />
           <h2 class="mb-0 ml-2 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[24px] font-[500] text-[var(--color-text1)] max-[640px]:text-[18px]">
             @if (item.m_sender_name; as senderName) {
               {{ senderName.startsWith('@') ? senderName.substring(1) : senderName }}
@@ -39,7 +39,7 @@
           </h2>
         </div>
         @if (item.m_message_sharable_link) {
-          <div class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)]">
+          <div class="mt-[5px] mb-[20px] block overflow-hidden text-ellipsis whitespace-nowrap font-[Roboto] text-[12px] font-[500] text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
             <a [href]="item.m_message_sharable_link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
               {{ item.m_message_sharable_link }}
             </a>
@@ -47,15 +47,15 @@
         }
         @if (item.m_platform !== 'forum') {
           @if (hasCodeType(item)) {
-            <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
+            <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f] select-text">
             {{ 'Code snippet - content not available' | translate }}</p>
-            <div class="mb-[12px] mt-[10px] max-h-[300px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px]">
+            <div class="mb-[12px] mt-[10px] max-h-[300px] overflow-y-auto rounded-[8px] border border-[var(--color-border)] bg-[rgb(0,0,0,0.161)] p-[12px] [.light-theme_&]:bg-[#f7f9fc]">
               <code [innerText]="getContentWithoutEmptyLines(item.m_content)" class="text-[14px] text-[var(--color-text1)]"></code>
             </div>
           } @else {
             @if (item.m_content) {
               <h5 class="mb-[10px] mt-3 font-[Inter] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Content' | translate }}</h5>
-              <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] select-text">
+              <p class="mt-[10px] mb-[12px] overflow-hidden break-all font-[Roboto] text-[14px] font-[400] text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f] select-text">
                 @for (part of item.m_content.slice(0, 300).split(' - ') | slice:0:5; track $index; let last = $last) {
                   {{ part }}@if (!last) {
                   <br />
@@ -74,7 +74,7 @@
             @for (section of sections; track $index; let i = $index; let isLast = $last) {
               <div class="p-0">
                 <h3 class="m-0 text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Section' | translate }} {{ i + 1 }}</h3>
-                <p class="mt-[4px] mb-[8px] break-all text-[14px] font-normal text-[var(--color-text8)] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
+                <p class="mt-[4px] mb-[8px] break-all text-[14px] font-normal text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f] select-text" [class.mb-0]="isLast">{{ section.length > 150 ? (section | slice:0:150) + '...' : section }}</p>
               </div>
             }
           </div>
@@ -84,7 +84,7 @@
       @if (item.m_weblink?.length) {
         <h5 class="mt-[12px] mb-[10px] text-[20px] font-medium text-[var(--color-text1)]">{{ 'Embedded URL' | translate }}</h5>
         @for (link of item.m_weblink | slice:0:3; track $index) {
-          <div class="block truncate text-[12px] font-medium text-[var(--color-text8)]">
+          <div class="block truncate text-[12px] font-medium text-[var(--color-text8)] [body.light-theme_&]:text-[#52677f]">
             <a [href]="link" target="_blank" rel="noopener noreferrer" class="hover:underline" (click)="$event.stopPropagation()">
               {{ link }}
             </a>
@@ -109,7 +109,7 @@
 
 @if (isExpandAble() && searchResults().length > 2) {
   <div class="flex justify-center">
-    <span class="ui-see-more-btn cursor-pointer" (click)="toggleCollapsed()" data-testid="consolidated-section-see-more">
+    <span class="inline-flex min-h-[34px] cursor-pointer items-center justify-center rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-[6px] text-[13px] font-semibold leading-none text-[var(--color-blue-640)] [transition:background-color_.2s_ease,border-color_.2s_ease,color_.2s_ease,transform_.15s_ease] hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-710)]" (click)="toggleCollapsed()" data-testid="consolidated-section-see-more">
       {{ (isCollapsed ? 'See More' : 'See Less') | translate }}
     </span>
   </div>

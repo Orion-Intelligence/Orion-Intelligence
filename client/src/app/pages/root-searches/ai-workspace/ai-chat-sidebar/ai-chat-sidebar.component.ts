@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { animate, style, transition, trigger } from '@angular/animations';
-import { Component, HostListener, input, output } from '@angular/core';
+import { Component, HostListener, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
-import { AiChatSession, NexusChatSession } from '../../../../shared/model/nexus/ai-chat-session.model';
+import { AiChatSession, NexusChatSession } from '../model/ai-chat-session.model';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-import { SidebarShellComponent } from '../../../graphs/shared/sidebar-shell/sidebar-shell.component';
+import { SidebarShellComponent } from '../../../../shared/partials/sidebar-shell/sidebar-shell.component';
 import { NexusChatService } from '../nexus-chat.service';
 
 const chatRowAnimation = trigger('chatRowAnimation', [
@@ -26,6 +26,7 @@ const chatRowAnimation = trigger('chatRowAnimation', [
   imports: [CommonModule, FormsModule, ConfirmationPopupComponent, SidebarShellComponent, TooltipDirective, TranslatePipe],
   templateUrl: './ai-chat-sidebar.component.html',
   styleUrls: ['./ai-chat-sidebar.component.css'],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [chatRowAnimation],
 })
 export class AiChatSidebarComponent {
@@ -54,6 +55,9 @@ export class AiChatSidebarComponent {
   toggleCollapsed(): void {
     this.isCollapsed = !this.isCollapsed;
     this.closeChatMenu();
+    if (this.isCollapsed) {
+      this.closeSearch();
+    }
   }
 
   startNewChat(): void {

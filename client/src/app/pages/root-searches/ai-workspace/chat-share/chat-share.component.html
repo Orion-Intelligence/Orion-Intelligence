@@ -1,23 +1,24 @@
-<app-header data-testid="chat-share-header" [forceDark]="true"></app-header>
-
-<div data-testid="chat-share-root" class="ui-dashboard-grid-bg min-h-[calc(100dvh-60px)] text-[var(--color-text1)]">
-  <header class="border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
-    <div class="mx-auto flex h-[64px] w-full max-w-[980px] items-center justify-between gap-4 px-4">
-      <div class="min-w-0">
-        <h1 class="truncate text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Shared Chat' | translate }}</h1>
-        <p class="mt-0.5 text-[11px] font-medium text-[var(--color-text5)]">{{ 'Read only' | translate }}@if (expiresAt) { · {{ 'Expires' | translate }} {{ expiresAt | date : 'medium' }} }</p>
+<div data-testid="chat-share-root" class="[&&]:![background:repeating-linear-gradient(0deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,var(--color-blue-830)_0%,var(--color-blue-850)_100%)] [body.light-theme_&&]:![background:repeating-linear-gradient(0deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,#e7eff9_0%,#e7eff9_100%)] relative min-h-screen overflow-hidden text-[var(--color-text1)]">
+  <div data-testid="chat-share-header" class="relative z-[1] border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
+    <header class="mx-auto flex h-[64px] w-full max-w-[1280px] items-center justify-between gap-4 px-3 sm:px-5">
+      <div class="flex min-w-0 items-center gap-3">
+        <img [src]="getLogoSrc()" [alt]="getAppName()" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
+        <div class="hidden h-7 w-px bg-white/10 sm:block [body.light-theme_&]:bg-[var(--color-divider)]"></div>
+        <div class="hidden min-w-0 text-sm font-semibold text-[var(--color-text2)] sm:block">{{ 'Shared Intelligence Report' | translate }}
+        </div>
       </div>
-      <span class="rounded-full border border-[var(--color-divider)] bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">{{ 'Read Only' | translate }}</span>
-    </div>
-  </header>
+      <div class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white">
+        {{ 'Read Only' | translate }}</div>
+    </header>
+  </div>
 
   <app-message-scroll-rail [messages]="messages"></app-message-scroll-rail>
 
   <main class="mx-auto w-full max-w-[980px] px-4 py-6">
     @if (isLoading) {
-      <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 text-sm text-[var(--color-text3)]">{{ 'Loading shared chat...' | translate }}</div>
+      <div class="rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 text-sm text-[var(--color-text3)] [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_3px_12px_rgba(15,23,42,0.055)]">{{ 'Loading shared chat...' | translate }}</div>
     } @else if (errorMessage) {
-      <div class="rounded-[8px] border border-red-400/20 bg-red-950/30 p-4 text-sm font-medium text-red-200">{{ errorMessage }}</div>
+      <div class="rounded-[8px] border border-red-400/20 bg-red-950/30 p-4 text-sm font-medium text-red-200 [.light-theme_&]:border-red-200 [.light-theme_&]:bg-red-50 [.light-theme_&]:text-red-700">{{ errorMessage }}</div>
     } @else {
       <div class="space-y-5 pb-[400px]">
         @for (message of messages; track trackMessage($index)) {
@@ -25,13 +26,13 @@
             <div class="max-w-[78%] space-y-1.5 max-[640px]:max-w-full">
               @if ($index === 0 || messages[$index - 1].sender !== message.sender) {
                 <div class="flex items-center gap-2" [ngClass]="message.sender === 'user' ? 'justify-end px-1' : 'justify-start px-4'">
-                  <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)]">{{ (message.sender === 'user' ? 'Analyst' : 'Nexus') | translate }}</span>
+                  <span class="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--color-text5)] [body.light-theme_&]:text-[#356789]">{{ (message.sender === 'user' ? 'Analyst' : 'Nexus') | translate }}</span>
                   <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2 py-0.5 text-[11px] font-medium text-[var(--color-text3)]">{{ message.time | date : 'h:mm a' }}</span>
                 </div>
               }
-              <div class="rounded-[20px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)]" [class.ui-ai-chat-share-bubble-bot]="message.sender === 'bot'" [ngClass]="message.sender === 'user' ? 'rounded-tr-[8px] bg-[#57A5EB]/20 text-[var(--color-text1)]' : 'rounded-tl-[8px] bg-[var(--color-blue-820-light)] text-[var(--color-text1)]'">
+              <div class="rounded-[20px] border border-[var(--color-border)] px-4 py-3 shadow-[0_10px_28px_var(--color-shadow-medium)] [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:shadow-[0_5px_16px_rgba(15,23,42,0.07)]" [class.ui-ai-chat-share-bubble-bot]="message.sender === 'bot'" [ngClass]="message.sender === 'user' ? 'rounded-tr-[8px] bg-[#57A5EB]/20 text-[var(--color-text1)] [body.light-theme_&]:bg-[#e4f1fc]' : 'rounded-tl-[8px] bg-[var(--color-blue-820-light)] text-[var(--color-text1)] [body.light-theme_&]:bg-white'">
                 @if (message.sender === 'bot') {
-                  <div class="ui-ai-markdown text-[15px] leading-7" [innerHTML]="message.text | markdown"></div>
+                  <div class="min-w-0 max-w-full [overflow-wrap:anywhere] [&_*]:min-w-0 [&_*]:max-w-full [&_table]:table [&_table]:w-full [&_table]:min-w-max [&_table]:max-w-none [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:overflow-visible [&_table]:text-left [&_table]:text-[13px] [&_table]:leading-[1.5] [&_table]:text-[var(--color-text2)] [&_th]:box-border [&_td]:box-border [&_th]:min-w-[120px] [&_td]:min-w-[120px] [&_th]:max-w-[280px] [&_td]:max-w-[280px] [&_th]:border-r [&_td]:border-r [&_th]:border-r-[var(--ui-table-row-border)] [&_td]:border-r-[var(--ui-table-row-border)] [&_th]:px-3 [&_td]:px-3 [&_th]:py-2.5 [&_td]:py-2.5 [&_th]:align-top [&_td]:align-top [&_th]:whitespace-normal [&_td]:whitespace-normal [&_th]:[overflow-wrap:anywhere] [&_td]:[overflow-wrap:anywhere] [&_th:last-child]:border-r-0 [&_td:last-child]:border-r-0 [&_th]:sticky [&_th]:top-0 [&_th]:z-[1] [&_th]:whitespace-nowrap [&_th]:bg-[var(--color-blue-820-light)] [&_th]:text-[11px] [&_th]:font-bold [&_th]:uppercase [&_th]:tracking-[0.06em] [&_th]:text-[var(--color-text6)] [&_td]:border-t [&_td]:border-t-[var(--ui-table-row-border)] [&_tbody_tr:nth-child(odd)]:bg-[var(--ui-table-row-odd)] [&_tbody_tr:nth-child(even)]:bg-[var(--ui-table-row-even)] [&_tbody_tr:hover]:bg-[var(--ui-table-row-hover)] [&_a]:[overflow-wrap:anywhere] [&_code]:[overflow-wrap:anywhere] [&_li]:[overflow-wrap:anywhere] [&_p]:[overflow-wrap:anywhere] [&_strong]:[overflow-wrap:anywhere] [&_em]:[overflow-wrap:anywhere] [&_pre]:box-border [&_pre]:max-w-full [&_pre]:overflow-x-auto [&_pre]:whitespace-pre-wrap [&_pre_code]:block [&_pre_code]:max-w-full [&_pre_code]:whitespace-pre-wrap [&_pre_code]:[overflow-wrap:anywhere] text-[15px] leading-7" [innerHTML]="message.text | markdown"></div>
                 } @else {
                   <p class="whitespace-pre-wrap text-[14px] leading-7">{{ message.text }}</p>
                 }

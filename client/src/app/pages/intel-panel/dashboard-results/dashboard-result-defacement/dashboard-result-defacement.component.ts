@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, effect, input, signal, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -6,8 +6,8 @@ import { DefacementGroup, DefacementGroupCallbackItem, DefacementRecord, Defacem
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { RecordSidebarComponent } from '../../../../shared/components/record-sidebar/record-sidebar.component';
-import { RecordSidebarItem } from '../../../../shared/model/record-sidebar/record-sidebar.model';
+import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
+import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
 
 const STAGGER_RENDER_BATCH_SIZE = 10;
 const STAGGER_RENDER_DELAY_MS = 16;
@@ -17,6 +17,7 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   selector: 'app-dashboard-result-defacement',
   standalone: true, imports: [NgClass, DatePipe, TooltipDirective, TranslatePipe, RecordSidebarComponent],
   templateUrl: './dashboard-result-defacement.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class DashboardResultDefacementComponent implements OnInit, AfterViewInit, OnDestroy {

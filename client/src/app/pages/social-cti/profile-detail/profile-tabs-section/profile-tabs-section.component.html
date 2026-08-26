@@ -1,0 +1,478 @@
+@if (platformData(); as platformData) {
+  @if (user(); as user) {
+    <article data-testid="social-platform-card" class="mb-4 overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] shadow-[0_10px_24px_var(--color-shadow-light)]">
+      <div class="animate-social-profile-overview-in will-change-[opacity,transform] motion-reduce:animate-none">
+        <div class="relative min-h-[152px] overflow-hidden border-b border-[var(--color-border)] bg-[linear-gradient(135deg,rgba(87,165,235,0.18),rgba(15,23,42,0.28))]">
+          @if (getCoverImageUrl(platformData)) {
+            <img [src]="getCoverImageUrl(platformData)" [alt]="(platformData.meta.username || user.username) + ' cover'" referrerpolicy="no-referrer" (error)="onImageError($event)" class="absolute inset-0 h-full w-full object-cover">
+          } @else {
+            <div class="absolute inset-0 bg-[radial-gradient(circle_at_22%_18%,rgba(125,211,252,0.18),transparent_28%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.10),transparent_24%),linear-gradient(135deg,rgba(30,41,59,0.78),rgba(15,23,42,0.94))] [body.light-theme_&]:bg-[radial-gradient(circle_at_22%_18%,rgba(56,189,248,0.16),transparent_30%),radial-gradient(circle_at_82%_22%,rgba(34,197,94,0.10),transparent_26%),linear-gradient(135deg,#eaf4ff,#f8fbff)]"></div>
+            <div class="absolute inset-0 opacity-[0.16] [background-image:linear-gradient(rgba(148,163,184,0.22)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.22)_1px,transparent_1px)] [background-size:22px_22px] [body.light-theme_&]:opacity-[0.28] [body.light-theme_&]:[background-image:linear-gradient(rgba(79,112,148,0.13)_1px,transparent_1px),linear-gradient(90deg,rgba(79,112,148,0.13)_1px,transparent_1px)]"></div>
+          }
+          <div class="absolute inset-0 bg-gradient-to-t from-[var(--color-blue-820-light)] via-[rgba(15,23,42,0.58)] to-[rgba(15,23,42,0.10)] [body.light-theme_&]:bg-[linear-gradient(to_top,#f9fbff_0%,rgba(249,251,255,0.90)_42%,rgba(249,251,255,0.10)_100%)]"></div>
+          <div class="relative z-[1] flex min-h-[152px] items-center gap-4 px-4 py-5">
+            @if (getProfileUrl(platformData, platformData.meta.username || user.username); as profileUrl) {
+              <a [attr.href]="profileUrl !== '#' ? profileUrl : null" [attr.target]="profileUrl !== '#' ? '_blank' : null" rel="noopener noreferrer" [class.cursor-pointer]="profileUrl !== '#'" class="group flex min-w-0 flex-1 items-center gap-4 rounded-[10px] outline-none focus-visible:ring-2 focus-visible:ring-sky-400/35">
+                <div class="flex h-[82px] w-[82px] flex-shrink-0 items-center justify-center overflow-hidden rounded-full border-[4px] border-[var(--color-blue-820-light)] bg-[var(--color-blue-720)] text-lg shadow-[0_6px_16px_rgba(0,0,0,0.20)] transition-colors group-hover:border-sky-400/25">
+                  @if (getProfileImageUrl(platformData) && !isProfileImageFailed(platformData)) {
+                    <img [src]="getProfileImageUrl(platformData)" [alt]="platformData.meta.username || user.username" referrerpolicy="no-referrer" (error)="markProfileImageFailed(platformData)" class="h-full w-full object-cover">
+                  } @else {
+                    <i class="bi bi-person-fill text-[34px] text-[var(--color-text3)]"></i>
+                  }
+                </div>
+                <div class="min-w-0">
+                  <h3 class="mb-0 truncate text-lg font-bold leading-tight text-[var(--color-text1)] transition-colors group-hover:text-[var(--color-blue-640)]">{{ platformData.meta.username || user.username }}</h3>
+                  <div class="mt-1.5 flex flex-wrap items-center gap-2 text-[12px] font-medium">
+                    <span class="text-[var(--color-text3)]">{{ platformData.meta.platform }}</span>
+                    @if (profileUrl !== '#') {
+                      <span class="h-1 w-1 rounded-full bg-[var(--color-text4)]" aria-hidden="true"></span>
+                      <span class="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--color-blue-640)]">
+                        {{ 'Open Profile' | translate }}
+                      </span>
+                    }
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        </div>
+
+        @if (platformData.profile_details?.is_parsed === true || isDarkweb()) {
+        <div class="flex overflow-x-auto border-b border-[var(--color-border)] bg-[var(--color-blue-700)] px-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          @for (tab of fetchTabs(); track tab.key) {
+            <button data-testid="social-fetch-tab" [attr.data-tab-key]="tab.key" (click)="tabSelected.emit(tab.key)" class="relative flex shrink-0 items-center whitespace-nowrap px-4 py-3 text-xs font-semibold transition-colors [.light-theme_&.text-sky-400]:!text-[#1d77c9] [.light-theme_&.text-slate-400]:!text-[var(--color-text4)]" [class.text-sky-400]="activeTab() === tab.key" [class.text-slate-400]="activeTab() !== tab.key">
+              {{ tab.label | translate }}
+              @if (!$last) {
+                <span aria-hidden="true" class="pointer-events-none absolute bottom-2.5 right-0 top-2.5 w-px bg-[var(--color-border)] opacity-35"></span>
+              }
+              @if (isSectionLoading(tab.key)) {
+                <span class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 overflow-hidden">
+                  <span class="block h-full w-full origin-left bg-[var(--color-blue-640)] animate-[loader-indeterminate_0.7s_linear_infinite]"></span>
+                </span>
+              }
+            </button>
+          }
+        </div>
+
+        <div class="bg-[var(--color-blue-820-light)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
+          @if (activeTab() === 'details') {
+            <div data-testid="social-tab-panel-details" class="px-[13px] py-[11px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Details' | translate }}</p>
+                <button data-testid="social-details-reload" type="button" (click)="refetchTab.emit('details')" [disabled]="isTabLoading('details')" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] disabled:cursor-not-allowed disabled:opacity-60">
+                  {{ (isTabLoading('details') ? 'Reloading' : 'Reload') | translate }}
+                </button>
+              </div>
+              <ng-template #detailRow let-item>
+                <div class="group grid grid-cols-[minmax(0,1fr)_32px] gap-x-3 gap-y-1.5 border-b border-[rgba(148,163,184,0.10)] bg-transparent px-3.5 py-3 transition-colors last:border-b-0 hover:bg-[rgba(87,165,235,0.065)] sm:grid-cols-[144px_minmax(0,1fr)_32px] sm:items-center sm:gap-x-4 [body.light-theme_&]:border-[#dce6f1] [body.light-theme_&]:hover:bg-[#edf5fd]">
+                  <div class="flex min-w-0 items-center">
+                    <span class="min-w-0 truncate text-[10px] font-bold uppercase tracking-[0.08em] text-[var(--color-text4)]" [title]="formatProfileDetailKey(item.key) | translate">{{ formatProfileDetailKey(item.key) | translate }}</span>
+                  </div>
+                  <div class="col-span-2 row-start-2 min-w-0 break-words text-[13px] font-medium leading-5 text-[var(--color-text2)] sm:col-span-1 sm:col-start-2 sm:row-start-1" [class.tabular-nums]="isNumeric(item.value)">
+                    @if (isImageUrl(item.value)) {
+                      <div class="flex min-w-0 items-center gap-2.5">
+                        <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="flex h-10 w-10 flex-shrink-0 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] outline-none transition hover:border-sky-400/40 focus-visible:ring-2 focus-visible:ring-sky-400/35">
+                          <img [src]="getDisplayUrl(item.value)" [alt]="item.key" referrerpolicy="no-referrer" (error)="onImageError($event)" class="h-full w-full object-cover">
+                        </a>
+                        <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 rounded-[6px] px-1.5 py-1 text-[11px] font-semibold text-[var(--color-blue-640)] outline-none transition hover:bg-sky-500/10 focus-visible:ring-2 focus-visible:ring-sky-400/35">
+                          {{ 'View image' | translate }}
+                        </a>
+                      </div>
+                    } @else if (isUrl(item.value)) {
+                      <a [href]="getDisplayUrl(item.value)" target="_blank" rel="noopener noreferrer" class="inline-flex max-w-full items-start gap-1.5 rounded-[5px] text-[var(--color-blue-640)] outline-none transition hover:text-sky-300 hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35 [body.light-theme_&]:hover:text-[#1767ad]">
+                        <span class="min-w-0 break-all">{{ getDisplayUrl(item.value) }}</span>
+                      </a>
+                    } @else {
+                      <span class="whitespace-pre-wrap">{{ formatProfileDetailValue(item.key, item.value) }}</span>
+                    }
+                  </div>
+                  <button type="button" (click)="copyToClipboard(item.value)" class="col-start-2 row-start-1 flex h-8 w-8 flex-shrink-0 items-center justify-center self-center rounded-[8px] border border-transparent text-[var(--color-text4)] opacity-70 outline-none transition-all hover:border-emerald-500/20 hover:bg-emerald-500/10 hover:text-emerald-300 focus-visible:border-emerald-500/30 focus-visible:ring-2 focus-visible:ring-emerald-500/25 group-hover:opacity-100 sm:col-start-3 [body.light-theme_&]:hover:text-[#06724f]" [title]="'Copy value' | translate" [attr.aria-label]="'Copy value' | translate">
+                    <i class="bi bi-copy text-[11px]" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </ng-template>
+
+              @if (isDarkweb() && !darkwebLoaded()) {
+                <app-section-state state="loading" title="Loading dark web report" description="Fetching records for this identity."></app-section-state>
+              } @else if (isDarkweb()) {
+                @if (darkwebSections().length === 0) {
+                  <app-section-state title="No dark web records found" description="No indexed records matched this identity."></app-section-state>
+                } @else {
+                  <div class="flex flex-col gap-3">
+                    @for (section of darkwebSections(); track $index) {
+                      <div class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
+                        <div class="flex flex-col gap-0.5 border-b border-[var(--color-border)] bg-[var(--color-blue-640)] px-3.5 py-2.5">
+                          <span class="min-w-0 truncate text-[11px] font-bold uppercase tracking-[0.06em] text-white" [title]="section.title">{{ section.title }}</span>
+                          @if (section.date) {
+                            <span class="text-[10px] font-medium text-white/75">{{ section.date }}</span>
+                          }
+                        </div>
+                        @for (item of section.entries; track $index) {
+                          <ng-container [ngTemplateOutlet]="detailRow" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              } @else if (isTabLoading('details') && detailEntries().length === 0) {
+                <app-section-state state="loading" title="Loading profile details" description="Fetching the latest profile metadata."></app-section-state>
+              } @else if (detailEntries().length === 0) {
+                <app-section-state title="No profile details found" description="Try fetching this section again." actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
+              } @else {
+                <div class="overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
+                  @for (item of detailEntries(); track $index) {
+                    <ng-container [ngTemplateOutlet]="detailRow" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+
+
+
+
+          @if (activeTab() === 'onlinePresence') {
+            <div data-testid="social-tab-panel-online-presence" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Online Presence' | translate }}</p>
+                <div class="flex flex-shrink-0 items-center gap-2">
+                  @if (getOnlinePresence(platformData); as presence) {
+                    <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-text3)]">{{ presence.length }} {{ 'results' | translate }}</span>
+                  }
+                  <button data-testid="social-online-presence-reload" type="button" (click)="refetchTab.emit('onlinePresence')" [disabled]="isTabLoading('onlinePresence')" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] disabled:cursor-not-allowed disabled:opacity-60">
+                    {{ (isTabLoading('onlinePresence') ? 'Reloading' : 'Reload') | translate }}
+                  </button>
+                </div>
+              </div>
+              <div class="mb-3 flex min-w-0 items-center gap-2">
+                <input data-testid="social-online-presence-input" type="text" [placeholder]="'Search online presence' | translate" [value]="onlinePresenceSearchTerm()" (input)="onOnlinePresenceInput($event)" (keydown.enter)="onlinePresenceSearch.emit()" class="h-8 w-full min-w-[180px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-2.5 text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35">
+                <button data-testid="social-online-presence-submit" type="button" [title]="'Search online presence' | translate" [attr.aria-label]="'Search online presence' | translate" (click)="onlinePresenceSearch.emit()" [disabled]="isTabLoading('onlinePresence')" class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)] disabled:cursor-not-allowed disabled:opacity-50">
+                  <i class="bi bi-search text-xs"></i>
+                </button>
+              </div>
+              @if (isTabLoading('onlinePresence') && !getOnlinePresence(platformData)) {
+                <app-section-state state="loading" title="Loading online presence" description="Searching this username with the platform token."></app-section-state>
+              } @else if (!getOnlinePresence(platformData) || getOnlinePresenceResults(platformData).length === 0) {
+                <app-section-state title="No online presence found" description="Run the online presence search again for this profile." actionLabel="Retry fetch" (action)="refetchTab.emit('onlinePresence')"></app-section-state>
+              } @else {
+                <div class="flex flex-col gap-2.5">
+                  @for (result of getOnlinePresenceResults(platformData); track result.url || result.title || $index) {
+                    <div data-testid="social-online-presence-result" class="rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] p-3 transition-colors hover:bg-[rgba(87,165,235,0.06)]">
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
+                          <p class="mb-1 break-words text-sm font-semibold leading-5 text-[var(--color-text2)]">{{ result.title || result.url || ('Online result' | translate) }}</p>
+                          @if (result.url) {
+                            <a [href]="result.url" target="_blank" rel="noopener noreferrer" class="block truncate text-xs text-[var(--color-blue-640)] hover:underline">{{ result.url }}</a>
+                          }
+                          @if (result.snippet) {
+                            <p class="mb-0 mt-2 text-xs leading-5 text-[var(--color-text4)]">{{ result.snippet }}</p>
+                          }
+                          @if (result.timestamp) {
+                            <p class="mb-0 mt-2 text-[11px] font-medium text-[var(--color-text4)]">{{ result.timestamp }}</p>
+                          }
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+
+          @if (activeTab() === 'stealerLogs') {
+            <div data-testid="social-tab-panel-stealer-logs" class="px-[13px] pt-[11px] pb-[13px]">
+              <div class="mb-3 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="mb-0 text-xs font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Stealer Logs' | translate }}</p>
+                  <p class="mb-0 mt-1 truncate font-mono text-[11px] text-[var(--color-text4)]">{{ platformData.meta.username }} · {{ getPlatformStealerDomain(platformData) }}</p>
+                </div>
+                <div class="flex flex-shrink-0 items-center gap-2">
+                  <button data-testid="social-stealer-logs-reload" type="button" (click)="refetchTab.emit('stealerLogs')" [disabled]="isTabLoading('stealerLogs')" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] disabled:cursor-not-allowed disabled:opacity-60">
+                    {{ (isTabLoading('stealerLogs') ? 'Reloading' : 'Reload') | translate }}
+                  </button>
+                  @if (getStealerLogs(platformData).length > 0) {
+                    <button data-testid="social-stealerlog-download" type="button" (click)="openStealerLogExportChoice($event, platformData)" [title]="'Download records' | translate" [attr.aria-label]="'Download stealer log records' | translate" class="flex h-8 w-8 items-center justify-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] text-[var(--color-text3)] transition-colors hover:bg-[var(--color-blue-710)] hover:text-[var(--color-text1)]">
+                      <i class="bi bi-download text-xs"></i>
+                    </button>
+                  }
+                </div>
+              </div>
+              @if (isTabLoading('stealerLogs') && getStealerLogs(platformData).length === 0) {
+                <app-section-state state="loading" title="Checking stealer logs" description="Searching records for this username and domain."></app-section-state>
+              } @else if (getStealerLogs(platformData).length === 0) {
+                <app-section-state title="No stealer log match" description="No record matched both this username and domain." actionLabel="Retry fetch" (action)="refetchTab.emit('stealerLogs')"></app-section-state>
+              } @else {
+                <div data-testid="social-stealerlog-table" class="overflow-hidden rounded-[10px] border border-rose-500/15 bg-rose-500/[0.035]">
+                  <div class="hidden border-b border-rose-500/10 bg-rose-500/[0.045] px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:grid md:grid-cols-[1fr_1fr_82px_110px] md:gap-2">
+                    <div>{{ 'Domain' | translate }}</div>
+                    <div>{{ 'Identity' | translate }}</div>
+                    <div>{{ 'Password' | translate }}</div>
+                    <div class="text-right">{{ 'Date' | translate }}</div>
+                  </div>
+                  @for (record of getStealerLogs(platformData); track getStealerRecordTrackKey($index, record)) {
+                    <div data-testid="social-stealerlog-row" class="grid gap-2 border-b border-rose-500/10 bg-rose-500/[0.025] px-3 py-3 transition-colors last:border-b-0 hover:bg-rose-500/[0.055] md:grid-cols-[1fr_1fr_82px_110px]">
+                      <div class="min-w-0">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">{{ 'Domain' | translate }}</div>
+                        <div class="mt-0.5 truncate text-[12px] font-semibold text-[var(--color-text2)] md:mt-0" [title]="getStealerRecordHost(record)">{{ getStealerRecordHost(record) }}</div>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">{{ 'Identity' | translate }}</div>
+                        <div class="mt-0.5 truncate font-mono text-[11px] text-[var(--color-text3)] md:mt-0" [title]="getStealerRecordIdentity(record)">{{ getStealerRecordIdentity(record) }}</div>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">{{ 'Password' | translate }}</div>
+                        <div class="mt-0.5 inline-flex cursor-not-allowed font-mono text-[11px] font-semibold text-[var(--color-text3)] md:mt-0" [appTooltip]="'Restricted' | translate" [title]="'Restricted' | translate" [attr.aria-label]="'Password restricted' | translate">****</div>
+                      </div>
+                      <div class="min-w-0 md:text-right">
+                        <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)] md:hidden">{{ 'Date' | translate }}</div>
+                        <div class="mt-0.5 truncate text-[11px] font-medium text-[var(--color-text3)] md:mt-0" [title]="getStealerRecordDate(record)">{{ getStealerRecordDate(record) }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <app-export-choice-modal
+                  [visible]="!!selectedStealerLogPlatform()"
+                  [title]="'Export Records' | translate"
+                  [subtitle]="'Choose the export format.' | translate"
+                  [options]="stealerLogExportOptions"
+                  overlayTestId="social-stealerlog-export-overlay"
+                  modalTestId="social-stealerlog-export-modal"
+                  closeTestId="social-stealerlog-export-close"
+                  (closed)="closeStealerLogExportChoice()"
+                  (optionSelected)="selectStealerLogExport($event)">
+                </app-export-choice-modal>
+              }
+            </div>
+          }
+          @if (isCrawlContentTab(activeTab())) {
+            <div data-testid="social-tab-panel-crawl" class="px-[13px] py-[11px]">
+              @if (activeTab() === 'connections') {
+                @if (crawlResult().loading) {
+                  <div class="mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] px-3.5 py-2 [body.light-theme_&]:bg-[#f8fbff]">
+                    <div class="flex min-w-0 flex-1 flex-col gap-1">
+                      <div class="flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-[var(--color-blue-640)]">
+                        <span class="h-3 w-3 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-r-transparent"></span>
+                        <span>{{ 'Scanning connections…' | translate }} {{ crawlResult().count ?? 0 }}</span>
+                      </div>
+                      @if (crawlResult().log) {
+                        <span class="min-w-0 truncate text-[10.5px] leading-tight text-[var(--color-text4)]">{{ 'Scanned' | translate }} {{ crawlResult().log }}</span>
+                      }
+                    </div>
+                    <button data-testid="social-crawl-section-stop" type="button" (click)="stopSyncNow()" class="inline-flex h-8 flex-shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[8px] border border-[#5c2a33] bg-[linear-gradient(135deg,rgba(235,87,110,0.20),rgba(238,60,80,0.10))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-rose-400/55 hover:border-[#7d2836] hover:bg-[linear-gradient(135deg,rgba(235,87,110,0.28),rgba(238,60,80,0.16))] [.light-theme_&]:border-[#e6c1c8] [.light-theme_&]:bg-[#fdeef0] [.light-theme_&]:hover:border-[#d89aa4] [.light-theme_&]:hover:bg-[#fae2e6]">
+                      <i class="bi bi-stop-fill" aria-hidden="true"></i>{{ 'Stop' | translate }}
+                    </button>
+                  </div>
+                } @else {
+                  <div data-testid="social-connections-cap-note" class="mb-3 flex w-full items-center gap-2.5 rounded-[10px] border border-sky-500/25 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/30 [.light-theme_&]:!bg-sky-50">
+                    <i class="bi bi-info-circle-fill flex-shrink-0 text-[13px] text-sky-400/80 [.light-theme_&]:text-sky-600" aria-hidden="true"></i>
+                    <span class="min-w-0 flex-1 truncate text-[11px] font-medium text-[var(--color-text3)]">{{ 'Pull commenters from every post into Connections (up to 50 per post).' | translate }}</span>
+                    <button data-testid="social-crawl-section-fetch" type="button" (click)="syncAllConnectionsNow()" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                      <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>{{ 'Sync all' | translate }}
+                    </button>
+                  </div>
+                }
+                @if (crawlResult().items?.length) {
+                  <div class="relative mb-3">
+                    <i class="bi bi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[12px] text-[var(--color-text4)]" aria-hidden="true"></i>
+                    <input type="text" data-testid="social-connections-search" (input)="onConnectionSearch($event)" [placeholder]="'Search connections by username' | translate" class="h-9 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] pl-9 pr-3 text-[12px] text-[var(--color-text1)] outline-none transition-colors placeholder:text-[var(--color-text4)] focus-visible:border-[var(--color-blue-640)] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/45 [.light-theme_&]:border-[#c7d5e6] [.light-theme_&]:bg-[#f8fbff]" />
+                  </div>
+                }
+              }
+              @if (connectionsLoading().size && (resourceCategory() === 'feed' || resourceCategory() === 'media')) {
+                <div data-testid="social-connections-fetch-band" class="mb-3 flex w-full items-center gap-2.5 rounded-[10px] border border-sky-500/25 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/30 [.light-theme_&]:!bg-sky-50">
+                  <span class="h-3.5 w-3.5 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-r-transparent"></span>
+                  <span class="min-w-0 flex-1 truncate text-[11px] font-medium text-[var(--color-blue-640)]">{{ 'Fetching connections from post…' | translate }}</span>
+                  <button data-testid="social-connections-scroll-active" type="button" (click)="scrollToActiveConnectionPost()" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                    <i class="bi bi-arrow-down-circle" aria-hidden="true"></i>{{ 'Scroll to post' | translate }}
+                  </button>
+                </div>
+              }
+              @if (activeTab() !== 'connections') {
+              @if (crawlResult().loading) {
+                <div class="mb-3 flex items-center justify-between gap-3 rounded-[10px] border border-[var(--color-border)] bg-[rgba(87,165,235,0.035)] px-3.5 py-2 [body.light-theme_&]:bg-[#f8fbff]">
+                  <div class="flex min-w-0 flex-1 flex-col gap-1">
+                    <div class="flex min-w-0 items-center gap-1.5 text-[11px] font-semibold text-[var(--color-blue-640)]">
+                      <span class="h-3 w-3 flex-shrink-0 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-r-transparent"></span>
+                      <span>{{ 'Scanning…' | translate }} {{ crawlResult().count ?? 0 }}</span>
+                    </div>
+                    @if (crawlResult().log) {
+                      <span class="min-w-0 truncate text-[10.5px] leading-tight text-[var(--color-text4)]">{{ 'Scanned' | translate }} {{ crawlResult().log }}</span>
+                    } @else {
+                      <span class="min-w-0 truncate text-[10.5px] leading-tight text-[var(--color-text4)]">{{ 'Connecting…' | translate }}</span>
+                    }
+                  </div>
+                  <button data-testid="social-crawl-section-stop" type="button" (click)="stopSyncNow()" class="inline-flex h-8 flex-shrink-0 cursor-pointer items-center justify-center gap-2 rounded-[8px] border border-[#5c2a33] bg-[linear-gradient(135deg,rgba(235,87,110,0.20),rgba(238,60,80,0.10))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-rose-400/55 hover:border-[#7d2836] hover:bg-[linear-gradient(135deg,rgba(235,87,110,0.28),rgba(238,60,80,0.16))] [.light-theme_&]:border-[#e6c1c8] [.light-theme_&]:bg-[#fdeef0] [.light-theme_&]:hover:border-[#d89aa4] [.light-theme_&]:hover:bg-[#fae2e6]">
+                    <i class="bi bi-stop-fill" aria-hidden="true"></i>{{ 'Stop' | translate }}
+                  </button>
+                </div>
+              } @else if (isStale() && activeTab() !== 'followers') {
+                <div data-testid="social-crawl-stale-band" class="mb-3 flex w-full items-center gap-3 rounded-[10px] border border-amber-500/25 bg-amber-500/[0.1] px-3.5 py-2 [.light-theme_&]:border-amber-500/30 [.light-theme_&]:bg-amber-50">
+                  <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-amber-500/20 text-amber-300 [.light-theme_&]:bg-amber-500/15 [.light-theme_&]:text-amber-700">
+                    <i class="bi bi-clock-history text-[14px]" aria-hidden="true"></i>
+                  </span>
+                  <span class="min-w-0 flex-1">
+                    <span class="block text-[12px] font-bold leading-tight text-amber-200 [.light-theme_&]:text-amber-800">{{ 'Out of date' | translate }}</span>
+                    <span class="mt-0.5 block truncate text-[11px] font-medium leading-tight text-amber-300/80 [.light-theme_&]:text-amber-700/90">@if (crawlResult().lastSynced) {{{ 'Last synced' | translate }} {{ crawlResult().lastSynced | date:'medium' }}} @else {{{ 'Not synced recently' | translate }}}</span>
+                  </span>
+                  <button data-testid="social-crawl-section-fetch" type="button" (click)="syncAllNow()" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                    <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>{{ 'Sync all' | translate }}
+                  </button>
+                </div>
+              } @else {
+                @if (activeTab() === 'followers' && platformData.meta.platform.toLowerCase() === 'facebook') {
+                  <div data-testid="social-followers-cap-note" [title]="'Facebook caps the public followers list — this shows only a small sample, not the full follower count.' | translate" class="mb-3 flex w-full items-center gap-2.5 rounded-[10px] border border-sky-500/25 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/30 [.light-theme_&]:!bg-sky-50">
+                    <i class="bi bi-info-circle-fill flex-shrink-0 text-[13px] text-sky-400/80 [.light-theme_&]:text-sky-600" aria-hidden="true"></i>
+                    <span class="min-w-0 flex-1 truncate text-[11px] font-medium text-[var(--color-text3)]">{{ 'Facebook caps the public followers list — this shows only a small sample, not the full follower count.' | translate }}</span>
+                    <button data-testid="social-crawl-section-fetch" type="button" (click)="syncAllNow()" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                    <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>{{ 'Sync all' | translate }}
+                  </button>
+                  </div>
+                } @else if (crawlResult().items?.length || crawlResult().lastSynced) {
+                  <div data-testid="social-crawl-fresh-band" class="mb-3 flex w-full items-center gap-2.5 rounded-[10px] border border-sky-500/10 bg-sky-500/[0.08] px-3.5 py-2 [.light-theme_&]:!border-sky-500/15 [.light-theme_&]:!bg-sky-50">
+                    <i class="bi bi-check-circle-fill flex-shrink-0 text-[13px] text-sky-400/80 [.light-theme_&]:text-sky-600" aria-hidden="true"></i>
+                    <span class="min-w-0 flex-1 truncate text-[11px] font-medium text-[var(--color-text3)]">@if (crawlResult().lastSynced) {{{ 'Up to date' | translate }} · {{ 'Last synced' | translate }} {{ crawlResult().lastSynced | date:'medium' }}} @else {{{ 'Up to date' | translate }}}</span>
+                    <button data-testid="social-crawl-section-fetch" type="button" (click)="syncAllNow()" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                    <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>{{ 'Sync all' | translate }}
+                  </button>
+                  </div>
+                } @else {
+                  <div class="mb-3 flex items-center justify-end">
+                    <button data-testid="social-crawl-section-fetch" type="button" (click)="syncAllNow()" class="inline-flex h-8 flex-shrink-0 items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                    <i class="bi bi-cloud-arrow-down" aria-hidden="true"></i>{{ 'Sync all' | translate }}
+                  </button>
+                  </div>
+                }
+              }
+              }
+              @if (crawlResult().loading && !crawlResult().items?.length && activeTab() !== 'connections') {
+                <app-section-state state="loading" [title]="'Loading ' + getTabLabel(activeTab())" description="Fetching the latest section data."></app-section-state>
+              } @else if (crawlResult().items?.length) {
+                <div class="flex flex-col gap-3">
+                  @if (resourceCategory() === 'work') {
+                    <app-social-resource-work [items]="displayedItems()"></app-social-resource-work>
+                  } @else if (resourceCategory() === 'people') {
+                    <app-social-resource-people [items]="displayedItems()"></app-social-resource-people>
+                  } @else if (resourceCategory() === 'feed') {
+                    <app-social-resource-feed [items]="displayedItems()" [platform]="platformData.meta.platform" [profileAvatar]="getProfileImageUrl(platformData)" [profileName]="platformData.profile_details?.real_name ?? ''" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube', 'mastodon', 'bluesky', 'hackernews', 'reddit', 'habr', 'devcommunity', 'stackoverflow', 'stackexchange'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-feed>
+                  } @else if (resourceCategory() === 'media') {
+                    <app-social-resource-media [items]="displayedItems()" [platform]="platformData.meta.platform" [profileUsername]="platformData.meta.username || user.username" [connectionsEnabled]="['facebook', 'youtube', 'mastodon', 'bluesky', 'hackernews', 'reddit', 'habr', 'devcommunity', 'stackoverflow', 'stackexchange'].includes(platformData.meta.platform.toLowerCase())" [connectionsLoading]="connectionsLoading()" [connectionsByPost]="connectionsByPost()" (loadConnections)="loadConnections.emit($event)"></app-social-resource-media>
+                  }
+                  @for (item of (hasResourcePresenter() ? [] : (displayedItems())); track crawlItemTrackKey($index, item)) {
+                    <article data-testid="social-crawl-resource-card" class="group/card relative w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[background-color,border-color,box-shadow] hover:border-sky-400/25 hover:bg-[var(--color-blue-810)] hover:shadow-[0_10px_28px_var(--color-shadow-light)] [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)] [body.light-theme_&]:hover:!border-[#b8cde4] [body.light-theme_&]:hover:!bg-[#f7fbff] [body.light-theme_&]:hover:!shadow-[0_10px_24px_rgba(15,23,42,0.10)]">
+                      <div class="absolute inset-y-0 left-0 w-[3px] bg-gradient-to-b from-sky-400 via-blue-500/70 to-indigo-500/20"></div>
+                      <header class="relative flex items-start gap-4 px-5 py-5 sm:px-6">
+                        @if (crawlItemImageUrl(item)) {
+                          <img [src]="crawlItemImageUrl(item)" [alt]="crawlItemTitle(item)" referrerpolicy="no-referrer" (error)="onImageError($event)" class="h-14 w-14 flex-shrink-0 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] object-cover shadow-sm sm:h-[68px] sm:w-[68px]">
+                        } @else {
+                          <span class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-720)] text-sky-300 sm:h-[68px] sm:w-[68px] [.light-theme_&]:text-sky-600">
+                            <i class="bi bi-collection text-lg" aria-hidden="true"></i>
+                          </span>
+                        }
+                        <div class="min-w-0 flex-1 pt-0.5">
+                          <div class="flex min-w-0 items-baseline gap-2">
+                            <span class="flex-shrink-0 font-mono text-[10px] font-semibold tabular-nums text-[var(--color-text4)]">#{{ $index + 1 }}</span>
+                            <h4 class="mb-0 min-w-0 break-words text-base font-bold leading-6 text-[var(--color-text1)]">{{ crawlItemTitle(item) || ('Untitled record' | translate) }}</h4>
+                          </div>
+                          @if (crawlItemUrl(item)) {
+                            <a [href]="crawlItemUrl(item)" target="_blank" rel="noopener noreferrer" class="mt-1 inline-flex max-w-full items-center gap-1.5 rounded text-[11px] font-medium text-[var(--color-blue-640)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35">
+                              <i class="bi bi-link-45deg flex-shrink-0 text-xs" aria-hidden="true"></i>
+                              <span class="truncate">{{ crawlItemUrl(item) }}</span>
+                            </a>
+                          }
+                          @if (crawlItemCaption(item)) {
+                            @if (isCrawlDescriptionExpanded($index, item)) {
+                              <p class="mb-0 mt-2 line-clamp-[8] max-w-4xl whitespace-pre-wrap text-xs leading-[1.55] text-[var(--color-text3)]">{{ crawlItemCaption(item) }}</p>
+                            } @else {
+                              <p class="mb-0 mt-2 line-clamp-3 max-w-4xl whitespace-pre-wrap text-xs leading-[1.55] text-[var(--color-text3)]">{{ crawlItemCaption(item) }}</p>
+                            }
+                            @if (shouldShowCrawlDescriptionToggle(item)) {
+                              <button type="button" (click)="toggleCrawlDescription($index, item)" class="mt-1.5 inline-flex items-center gap-1 rounded text-[10px] font-semibold text-[var(--color-blue-640)] outline-none transition-colors hover:text-sky-300 focus-visible:ring-2 focus-visible:ring-sky-400/35 [.light-theme_&]:hover:text-sky-700" [attr.aria-expanded]="isCrawlDescriptionExpanded($index, item)">
+                                {{ (isCrawlDescriptionExpanded($index, item) ? 'Show less' : 'Show more') | translate }}
+                                <i class="bi text-[8px]" [class.bi-chevron-up]="isCrawlDescriptionExpanded($index, item)" [class.bi-chevron-down]="!isCrawlDescriptionExpanded($index, item)" aria-hidden="true"></i>
+                              </button>
+                            }
+                          }
+                        </div>
+                      </header>
+
+                      @if (crawlItemHighlights(item); as highlights) {
+                        @if (highlights.length) {
+                          <div class="flex flex-wrap items-center gap-1.5 px-5 pt-3 sm:px-6">
+                            @for (highlight of highlights; track highlight.key) {
+                              <span class="inline-flex items-center gap-1.5 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)]/[0.25] px-2 py-0.5 text-[10px] font-semibold">
+                                <span class="uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ formatProfileDetailKey(highlight.key) | translate }}</span>
+                                <span class="max-w-[220px] truncate text-[var(--color-text1)]" [class.tabular-nums]="isNumeric(highlight.value)">{{ formatProfileDetailValue(highlight.key, highlight.value) }}</span>
+                              </span>
+                            }
+                          </div>
+                        }
+                      }
+
+                      @if (crawlItemEntries(item); as entries) {
+                        @if (entries.length) {
+                          <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-700)]/[0.12] px-5 py-4 sm:px-6">
+                            <button type="button" (click)="toggleCrawlProperties($index, item)" [attr.aria-expanded]="isCrawlPropertiesExpanded($index, item)" class="mb-0 flex w-full cursor-pointer items-center justify-between gap-3 border-0 bg-transparent p-0 text-left outline-none focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55">
+                              <span class="text-[9px] font-bold uppercase tracking-[0.12em] text-[var(--color-text4)]">{{ 'Properties' | translate }}</span>
+                              <span class="flex items-center gap-1.5">
+                                <span class="font-mono text-[9px] tabular-nums text-[var(--color-text4)]">{{ entries.length }}</span>
+                                <i class="bi text-[9px] leading-none text-[var(--color-text4)]" [class.bi-chevron-up]="isCrawlPropertiesExpanded($index, item)" [class.bi-chevron-down]="!isCrawlPropertiesExpanded($index, item)" aria-hidden="true"></i>
+                              </span>
+                            </button>
+                            @if (isCrawlPropertiesExpanded($index, item)) {
+                            <dl class="mb-0 mt-3 grid grid-cols-2 gap-x-6 gap-y-4 md:grid-cols-3 xl:grid-cols-4">
+                            @for (entry of entries; track entry.key) {
+                              <div class="min-w-0 border-l border-sky-400/20 pl-3">
+                                <dt class="min-w-0 truncate text-[9px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text4)]" [title]="formatProfileDetailKey(entry.key) | translate">{{ formatProfileDetailKey(entry.key) | translate }}</dt>
+                                <dd class="mb-0 mt-1 min-w-0 break-words text-xs font-semibold leading-5 text-[var(--color-text2)]" [class.tabular-nums]="isNumeric(entry.value)">
+                                  @if (isUrl(entry.value)) {
+                                    <a [href]="getDisplayUrl(entry.value)" target="_blank" rel="noopener noreferrer" class="inline-flex max-w-full items-start gap-1.5 text-[var(--color-blue-640)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35">
+                                      <span class="min-w-0 break-all">{{ getDisplayUrl(entry.value) }}</span>
+                                    </a>
+                                  } @else {
+                                    <span class="whitespace-pre-wrap">{{ formatProfileDetailValue(entry.key, entry.value) }}</span>
+                                  }
+                                </dd>
+                              </div>
+                            }
+                            </dl>
+                            }
+                          </div>
+                        }
+                      }
+                    </article>
+                  }
+                </div>
+                @if (canLoadMoreDb()) {
+                  <button data-testid="social-crawl-load-more" type="button" (click)="showMoreFromDb()" class="mt-3 inline-flex h-9 w-full items-center justify-center gap-2 rounded-[8px] border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-xs font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]">
+                  <i class="bi bi-arrow-down-circle" aria-hidden="true"></i>
+                  {{ 'Load more' | translate }}
+                </button>
+                }
+              } @else if (crawlResult().login_url) {
+                <app-section-state state="error" [title]="'Login required for ' + getTabLabel(activeTab())" [description]="'You must be logged in to ' + platformData.meta.platform + ' to load this section.'" actionLabel="Login" (action)="openLogin(crawlResult().login_url!)"></app-section-state>
+              } @else if (crawlResult().error) {
+                <app-section-state state="error" [title]="'Unable to load ' + getTabLabel(activeTab())" description="Try fetching this section again." actionLabel="Sync all" (action)="syncAllNow()"></app-section-state>
+              } @else if (activeTab() !== 'connections') {
+                <app-section-state title="Not fetched yet" description="Sync this section to load its data." actionLabel="Sync all" (action)="syncAllNow()"></app-section-state>
+              }
+            </div>
+          }
+        </div>
+        } @else {
+          <div data-testid="social-profile-fetch-gate" class="flex min-h-[220px] items-center justify-center bg-[var(--color-blue-820-light)] px-4 py-8">
+            @if (isTabLoading('details')) {
+              <app-section-state state="loading" title="Fetching Profile" description="Loading profile details and available sections."></app-section-state>
+            } @else if (crawlResult().login_url) {
+              <app-section-state state="error" title="Login required" [description]="'You must be logged in to ' + platformData.meta.platform + ' in your browser to fetch this profile.'" actionLabel="Login" (action)="openLogin(crawlResult().login_url!)"></app-section-state>
+            } @else if (crawlResult().error) {
+              <app-section-state state="error" title="Unable to fetch profile" description="The extension could not load this profile. Try again." actionLabel="Retry fetch" (action)="refetchTab.emit('details')"></app-section-state>
+            } @else {
+              <app-section-state state="prompt" title="Full profile data is not loaded yet" description="Fetch this profile once to unlock its details and available sections." actionLabel="Fetch Full Profile Data" actionIcon="bi-cloud-arrow-down" (action)="refetchTab.emit('details')"></app-section-state>
+            }
+          </div>
+        }
+      </div>
+    </article>
+  }
+}

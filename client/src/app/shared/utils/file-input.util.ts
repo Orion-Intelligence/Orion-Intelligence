@@ -10,10 +10,6 @@ export function getFirstFileFromInputEvent(event: Event): SelectedFileFromInput 
   }
   return { input: inputElement, file };
 }
-export function readTextInputValue(event: Event): string {
-  const inputElement = event.target as HTMLInputElement | null;
-  return inputElement?.value ?? '';
-}
 function readFile(file: Blob, readMode: 'text' | 'dataUrl'): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();

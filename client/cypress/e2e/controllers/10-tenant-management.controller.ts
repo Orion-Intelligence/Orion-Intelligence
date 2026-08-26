@@ -93,7 +93,7 @@ export function submitLogin(username: string, password: string, tenant?: {slug: 
   if (tenant) {
     const loginUrl = tenantLoginUrl(tenant.slug);
     cy.clearCookies({log: false});
-    cy.clearLocalStorage(undefined, {log: false});
+    cy.clearLocalStorage();
     cy.visit(loginUrl);
     cy.location('hostname').should('eq', new URL(loginUrl).hostname);
   } else {
@@ -101,7 +101,7 @@ export function submitLogin(username: string, password: string, tenant?: {slug: 
   }
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+  cy.get('[data-testid="login-button"]').first().should('be.visible').click();
   cy.waitForLoginRequest();
 }
 
@@ -143,7 +143,6 @@ export function setCurrentTenantAlertVisibility(tenant: CaseAlertTenant, visible
   });
   cy.contains('h1', 'Tenant Data').should('be.visible');
   cy.scrollDashboardToBottom();
-  cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
   cy.contains('label', 'Allow Admin Alert Visibility')
     .scrollIntoView()
     .closest('div.rounded-lg')
@@ -153,16 +152,13 @@ export function setCurrentTenantAlertVisibility(tenant: CaseAlertTenant, visible
         cy.wrap($toggle).click({force: true});
       }
 
-      if (isVisible === visible) {
-        cy.get('button[aria-label="Cancel privacy edit"]').scrollIntoView().should('be.visible').click({force: true});
-        return;
+      if (isVisible !== visible) {
+        cy.intercept('POST', '**/api/update/tenants').as(`saveAlertVisibility${tenant.username}`);
+        cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').click({force: true});
+        cy.wait(`@saveAlertVisibility${tenant.username}`, {timeout: 60000})
+          .its('response.statusCode')
+          .should('be.oneOf', [200, 201]);
       }
-
-      cy.intercept('POST', '**/api/update/tenants').as(`saveAlertVisibility${tenant.username}`);
-      cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click({force: true});
-      cy.wait(`@saveAlertVisibility${tenant.username}`, {timeout: 60000})
-        .its('response.statusCode')
-        .should('be.oneOf', [200, 201]);
     });
 }
 
@@ -172,7 +168,7 @@ export function setTenantAlertVisibility(tenant: CaseAlertTenant, visible: boole
 
 export function loginCaseAlertUser(username: string, password: string) {
   submitLogin(username, password);
-  cy.get('[data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container', {timeout: 60000})
+  cy.get('[data-testid="dashboard-main"], [data-testid="dashboard-container"]', {timeout: 60000})
     .filter(':visible')
     .should('have.length.greaterThan', 0);
 }
@@ -195,7 +191,7 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
     });
     cy.get('[data-testid="login-user"]').should('be.visible').clear().type(tenant.username);
     cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(tenant.password, {log: false});
-    cy.get('[data-testid="login-button"], input.login-button').first().should('be.visible').click();
+    cy.get('[data-testid="login-button"]').first().should('be.visible').click();
     cy.get('[data-testid="dashboard-main"], [data-testid="tenant-company-input"]', {timeout: 60000})
       .filter(':visible')
       .should('have.length.greaterThan', 0);
@@ -216,7 +212,6 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
 
     cy.visit('/dashboard/profile/tenant-settings');
     cy.contains('h1', 'Tenant Data').should('be.visible');
-    cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
     cy.contains('label', 'Allow Admin Alert Visibility')
       .scrollIntoView()
       .closest('div.rounded-lg')
@@ -224,12 +219,10 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
         const isVisible = ($toggle.text() || '').includes('Tenant alerts are visible to admin');
         if (isVisible !== visible) {
           cy.wrap($toggle).click({force: true});
-          cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click({force: true});
-        } else {
-          cy.get('button[aria-label="Cancel privacy edit"]').scrollIntoView().should('be.visible').click({force: true});
+          cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').click({force: true});
         }
       });
-    cy.get('button[aria-label="Edit privacy settings"]', {timeout: 60000}).should('be.visible');
+    cy.get('[data-testid="tenant-privacy-save"]', {timeout: 60000}).should('be.disabled');
 
     cy.get('[data-testid="profile-menu"]').filter(':visible').first().scrollIntoView().click({force: true});
     cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({force: true});
@@ -239,9 +232,12 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
 
 export function deleteTenant(tenant: any) {
   cy.intercept('DELETE', '**/api/tenants/*').as('deleteTenant');
-  cy.contains('tbody tr', tenant.email).within(() => {
-    cy.get('[data-testid="tenant-delete-button"]').click({force: true});
-  });
+  cy.contains('tbody tr[data-testid="tenant-row"]', tenant.email)
+    .scrollIntoView()
+    .should('be.visible')
+    .as('tenantRow')
+    .click();
+  cy.get('@tenantRow').next().find('[data-testid="tenant-delete-button"]').click({force: true});
   cy.contains('Are you sure you want to delete this tenant and its associated users and keys?').should('be.visible');
   cy.get('[data-testid="confirmation-yes-button"]').click();
   cy.wait('@deleteTenant').its('response.statusCode').should('eq', 200);
@@ -249,13 +245,11 @@ export function deleteTenant(tenant: any) {
 }
 
 export function openTenantEditor(tenant: any) {
-  cy.contains('tbody tr', tenant.email)
+  cy.contains('tbody tr[data-testid="tenant-row"]', tenant.email)
     .scrollIntoView()
     .should('be.visible')
     .as('tenantRow');
-  cy.get('@tenantRow').within(() => {
-    cy.get('[data-testid="tenant-edit-button"]').first().scrollIntoView().click({force: true});
-  });
+  cy.get('@tenantRow').click({force: true});
   cy.get('@tenantRow')
     .next()
     .as('tenantEditor')
@@ -441,7 +435,7 @@ export function closeFilterSidebar() {
     }
   });
   cy.get('body').should($body => {
-    expect($body.find('.ui-filter-sidebar-overlay:visible').length).to.eq(0);
+    expect($body.find('[data-testid="side-filter-overlay"]:visible').length).to.eq(0);
     expect($body.find('[data-testid="side-filter-close"]:visible').length).to.eq(0);
   });
 }
@@ -498,12 +492,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
       });
 
     cy.wrap(rows.eq(0)).find('td').last().scrollIntoView();
-    cy.wrap(rows.eq(0))
-      .find('[data-testid="tenant-edit-button"], #edit-tenant, #edit-profile')
-      .first()
-      .scrollIntoView()
-      .should('be.visible')
-      .click();
+    cy.wrap(rows.eq(0)).should('be.visible').click();
     cy.wrap(false).as('changed');
     cy.get('[data-testid="tenant-edit-panel"]').filter(':visible').first().as('tenantEditPanel').should('be.visible');
 
@@ -577,7 +566,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
     openTenantsPage();
 
     cy.get('body').then($b => {
-      if ($b.find('.badge-false, span:contains("Not Verified")').length) {
+      if ($b.find('[data-testid="tenant-verification-status"]:contains("Not Verified")').length) {
         approveAllTenants(state, tries + 1);
       }
     });
@@ -599,7 +588,7 @@ export function openAuditLogPage() {
   setConfiguredViewport();
   cy.visit('/dashboard/profile/auditlog');
   cy.location('pathname').should('include', '/dashboard/profile/auditlog');
-  cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
+  cy.get('[data-testid="auditlog-page-title"]').should('contain.text', 'Audit Logs');
 }
 
 export function openAuditLogFilter() {
@@ -755,8 +744,8 @@ export function flushTenantAlertsIfPresent() {
     const poll = (): Cypress.Chainable => {
       return cy.request('GET', `${origin}/api/get/tenant/alert/summary`).then((response) => {
         expect(response.status).to.eq(200);
-        const counts = Object.values(response.body?.counts_by_type || {});
-        const total = counts.reduce((sum, count) => sum + Number(count || 0), 0);
+        const counts = Object.values((response.body?.counts_by_type || {}) as Record<string, unknown>);
+        const total = counts.reduce<number>((sum, count) => sum + Number(count || 0), 0);
         if (total === 0) {
           return cy.wrap(null);
         }
@@ -778,7 +767,7 @@ export function waitForTenantAlertScanComplete(timeoutMs = 180000) {
   let observedRunning = false;
 
   return cy.location('origin').then((origin) => {
-    const poll = (): Cypress.Chainable<unknown> => {
+    const poll = (): Cypress.Chainable<any> => {
       return cy.request('POST', `${origin}/api/profile/alert/scan/status`, {}).then((response) => {
         expect(response.status).to.eq(200);
         if (response.body?.scan_running) {

@@ -1,4 +1,4 @@
-import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, HostListener, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -9,7 +9,7 @@ import { GeoFencingGeocodeService } from '../shared/services/geo-fencing-geocode
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
-import { SatelliteLiveAircraft, SatelliteLiveShip } from '../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteLiveAircraft, SatelliteLiveShip } from './model/satellite-intel-api.models';
 import { ThreatLensComponent } from '../threat-lens/threat-lens';
 import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType } from '../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from './map-entities/aircraft/aircraft-tracking.service';
@@ -31,6 +31,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector:    'app-satellite-intel',
   templateUrl: './satellite-intel.html',
   standalone:  true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     CommonModule,
     GeocodeModalComponent,

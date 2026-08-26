@@ -59,8 +59,21 @@ describe('Orion Intelligence - CTI Graph Management Flows', () => {
     cy.get('[data-testid="cti-graph-adv-clear-all"]').filter(':visible').first().should('not.be.disabled').click();
     cy.get('[data-testid="cti-graph-adv-empty-state"]').filter(':visible').should('contain', 'No builder values selected');
     waitForCtiGraphReady();
-    cy.get('[data-testid="graph-sidebar-collapse"]').filter(':visible').first().click();
-    cy.get('[data-testid="graph-sidebar-expand"]').filter(':visible').first().click();
+    cy.get('graph-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('[data-testid="graph-sidebar-collapse"]')
+      .filter(':visible')
+      .first()
+      .should('have.attr', 'aria-label', 'Collapse sidebar')
+      .click();
+    cy.get('graph-sidebar [data-sidebar-expanded]').should('not.exist');
+    cy.get('graph-sidebar [data-sidebar-collapsed]').should('be.visible');
+    cy.get('[data-testid="graph-sidebar-expand"]')
+      .filter(':visible')
+      .first()
+      .should('have.attr', 'aria-label', 'Expand sidebar')
+      .click();
+    cy.get('graph-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('graph-sidebar [data-sidebar-collapsed]').should('not.exist');
   });
 
   it('covers CTI report export option selection', () => {

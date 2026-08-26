@@ -1,5 +1,5 @@
 import { ComponentRef } from '@angular/core';
-import { SatelliteAnomalyResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteAnomalyResponse } from '../../model/satellite-intel-api.models';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import { AnomalyMapPopupComponent } from './anomaly-map-popup.component';
 

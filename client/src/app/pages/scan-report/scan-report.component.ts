@@ -1,5 +1,5 @@
 import { CommonModule, NgClass } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
@@ -15,6 +15,7 @@ import { ValuePresentationBase } from '../../shared/utils/value-presentation.bas
 import { DnsSectionComponent } from '../root-searches/network-intel/dns-section/dns-section.component';
 import { ShodanSectionComponent } from '../root-searches/network-intel/shodan-section/shodan-section.component';
 import { VulnerabilitySectionComponent } from '../root-searches/network-intel/vulnerability-section/vulnerability-section.component';
+import { TranslationService } from '../../shared/services/translation.service';
 
 type ScanReportField = { label: string; value: any };
 type ScanReportSection = { title: string; items: ScanReportField[] };
@@ -25,9 +26,11 @@ const SCAN_REPORT_EXPORT_OPTIONS = buildStandardExportOptions('scan-report-expor
   standalone: true,
   imports: [CommonModule, NgClass, TooltipDirective, ExportChoiceModalComponent, TranslatePipe, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
   templateUrl: './scan-report.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class ScanReportComponent extends ValuePresentationBase implements OnInit {
+  private readonly translationService = inject(TranslationService);
   private cachedResultSections: ScanReportSection[] | undefined;
 
   job: ScanJob | null = null;
@@ -51,7 +54,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     const scanId = this.route.snapshot.paramMap.get('scanId') || '';
     if (!scanId) {
       this.loading = false;
-      this.errorMessage = 'Scan report not found.';
+      this.errorMessage = this.translationService.translate('Scan report not found.');
       return;
     }
 
@@ -67,7 +70,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
       },
       error: err => {
         this.loading = false;
-        this.errorMessage = err?.error?.detail || 'Unable to load scan report.';
+        this.errorMessage = err?.error?.detail || this.translationService.translate('Unable to load scan report.');
       },
     });
   }
@@ -100,7 +103,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   get targetText(): string {
-    return this.job?.target || this.result?.domain || this.result?.host || this.result?.url || this.result?.ip || this.result?.query || 'Scan target';
+    return this.job?.target || this.result?.domain || this.result?.host || this.result?.url || this.result?.ip || this.result?.query || this.translationService.translate('Scan target');
   }
 
   get isHostReconReport(): boolean {

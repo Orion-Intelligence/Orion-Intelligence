@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
@@ -13,6 +13,7 @@ import { MonitoringTab, MonitoringTabId } from './model/monitoring-tab.models';
   selector: 'app-sidebar-user-monitoring',
   standalone: true,
   imports: [CommonModule, TranslatePipe, AuditlogComponent, SidebarUserEventManagementComponent, SidebarUserLogManagerComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-monitoring.component.html',
 })
 export class SidebarUserMonitoringComponent implements OnInit {

@@ -3,8 +3,8 @@ from fastapi import APIRouter, Body, Depends, Request
 from configs.app_dependency import get_current_user, license_required, role_required, status_required
 from orion.api.interactive.social_manager.social_models.search_social_param_model import (
     SocialFollowersRequest,
-    SocialFollowingRequest,
     SocialForumRequest,
+    SocialGraphDataRequest,
     SocialMetadataRequest,
     SocialPostsRequest,
     SocialOnlineImages,
@@ -14,13 +14,10 @@ from orion.api.interactive.social_manager.social_models.search_social_param_mode
     SocialVideosRequest,
 )
 from orion.api.interactive.social_manager.social_model import social_model
+from orion.api.interactive.social_manager.social_scanner import social_scanner
 from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, user_role
 
 social_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
-
-
-def _field_was_sent(model, field_name: str) -> bool:
-    return field_name in getattr(model, "model_fields_set", getattr(model, "__fields_set__", set()))
 
 
 @social_routes.post(
@@ -28,7 +25,25 @@ def _field_was_sent(model, field_name: str) -> bool:
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_email(request: Request, param: SocialReconRequest = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().search_recon(param, current_user, request)
+    return await social_scanner.get_instance().start_recon(current_user, request, param.query)
+
+
+@social_routes.post(
+    "/api/social/recon/status",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def social_scan_status(request: Request, param: SocialReconRequest = Body(...), current_user=Depends(get_current_user)):
+    return await social_scanner.get_instance().status(current_user, request, param.query)
+
+
+@social_routes.post(
+    "/api/social/recon/cancel",
+    status_code=200,
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
+async def cancel_social_scan(current_user=Depends(get_current_user)):
+    return await social_scanner.get_instance().cancel(current_user)
 
 
 @social_routes.post(
@@ -72,7 +87,10 @@ async def search_dynamic_online_images(request: Request, param: SocialOnlineImag
     ],
 )
 async def search_dynamic_image(request: Request, payload: dict = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().search_image(payload, current_user, request)
+    image_base64 = (payload or {}).get("image_base64")
+    if not image_base64:
+        return {"status": "error", "message": "image_base64_required"}
+    return await social_scanner.get_instance().start_image_recon(current_user, request, image_base64, (payload or {}).get("profile_username"))
 
 
 @social_routes.post(
@@ -81,14 +99,6 @@ async def search_dynamic_image(request: Request, payload: dict = Body(...), curr
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
 async def search_dynamic_followers(request: Request, param: SocialFollowersRequest = Body(...), current_user=Depends(get_current_user)):
     return await social_model.getInstance().search_followers(param, current_user, request)
-
-
-@social_routes.post(
-    "/api/social/following",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_dynamic_following(request: Request, param: SocialFollowingRequest = Body(...), current_user=Depends(get_current_user)):
-    return await social_model.getInstance().search_following(param, current_user, request)
 
 
 @social_routes.post(
@@ -132,14 +142,6 @@ async def search_social_metadata(request: Request, param: SocialMetadataRequest 
 
 
 @social_routes.get(
-    "/api/social/extensions/status",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def get_social_extension_status():
-    return await social_model.getInstance().extension_status()
-
-
-@social_routes.get(
     "/api/social/extensions/download/chrome",
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
@@ -156,27 +158,19 @@ async def download_social_extension_firefox():
 
 
 @social_routes.post(
-    "/api/social/extensions/profile",
+    "/api/social/connections",
     status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_extension_profile(request: Request, param: SocialProfileRequest = Body(...), current_user=Depends(get_current_user)):
-    if not _field_was_sent(param, "max_posts"):
-        param.max_posts = 20
-    param.use_extension = True
-    return await social_model.getInstance().search_profile(param, current_user, request)
-
-
-@social_routes.post(
-    "/api/social/extensions/posts",
-    status_code=200,
-    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning")), ], )
-async def search_extension_posts(request: Request, param: SocialPostsRequest = Body(...), current_user=Depends(get_current_user)):
-    if not _field_was_sent(param, "max_posts"):
-        param.max_posts = 20
-    if not _field_was_sent(param, "max_comments"):
-        param.max_comments = 25
-    param.use_extension = True
-    return await social_model.getInstance().search_posts(param, current_user, request)
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
+async def search_social_connections(data: dict = Body(...), current_user=Depends(get_current_user)):
+    return await social_model.getInstance().search_connections(
+        str(current_user.id),
+        (data or {}).get("profile_username") or (data or {}).get("username") or "",
+        (data or {}).get("platform") or "",
+        (data or {}).get("query") or "",
+        (data or {}).get("limit") or 500,
+        (data or {}).get("post_url") or "",
+    )
 
 
 @social_routes.post(
@@ -186,8 +180,9 @@ async def search_extension_posts(request: Request, param: SocialPostsRequest = B
 async def append_social_data(data: dict = Body(...), current_user=Depends(get_current_user)):
     profile_username = (data or {}).get("profile_username") or (data or {}).get("root_username") or (data or {}).get("username") or ""
     profiles = (data or {}).get("profiles") or []
+    config = (data or {}).get("config")
     replace = bool((data or {}).get("replace"))
-    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, replace=replace)
+    return await social_model.getInstance().append_social_profiles(str(current_user.id), profile_username, profiles, config=config, replace=replace)
 
 
 @social_routes.get(
@@ -196,6 +191,14 @@ async def append_social_data(data: dict = Body(...), current_user=Depends(get_cu
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
 async def get_social_data(current_user=Depends(get_current_user)):
     return await social_model.getInstance().get_social_profiles(str(current_user.id))
+
+
+@social_routes.post(
+    "/api/social/graph/data",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced", "social_mapper"]))])
+async def get_social_graph_data(param: SocialGraphDataRequest = Body(...), current_user=Depends(get_current_user)):
+    return await social_model.getInstance().get_graph_data(str(current_user.id), param.usernames, param.priority, param.limit)
 
 
 @social_routes.get(

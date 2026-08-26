@@ -26,9 +26,9 @@ class ResourceManager:
 
     def __init__(self):
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.USER_DIR = self.BASE_DIR / "static" / "resource" / "profile"
-        self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "tenant"
-        self.SYSTEM_DIR = self.BASE_DIR / "static" / "resource" / "system"
+        self.USER_DIR = self.BASE_DIR / "workspace" / "resource" / "profile"
+        self.TENANT_DIR = self.BASE_DIR / "workspace" / "resource" / "tenant"
+        self.SYSTEM_DIR = self.BASE_DIR / "workspace" / "resource" / "system"
         self.ROBOTS_FILE = self.BASE_DIR / "static" / "robots.txt"
 
         self.USER_DIR.mkdir(parents=True, exist_ok=True)

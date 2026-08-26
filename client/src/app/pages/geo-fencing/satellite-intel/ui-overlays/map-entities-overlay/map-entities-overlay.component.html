@@ -5,7 +5,7 @@
 @if (errorMessage && !isScanning) {
   <div class="absolute left-3 right-3 z-[900] max-w-[min(520px,calc(100%-24px))] rounded-lg border border-red-500/30 bg-red-500/12 px-[14px] py-[10px] text-[12px] text-red-300 [body.light-theme_&]:border-red-300 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700 max-[943px]:left-2 max-[943px]:right-2 max-[943px]:top-[52px] max-[943px]:max-w-none max-[520px]:top-[96px]" [ngClass]="topControlsInset ? 'top-[76px]' : 'top-3'">
     <i class="bi bi-exclamation-triangle-fill"></i>
-    {{ errorMessage }}
+    {{ errorMessage | translate }}
   </div>
 }
 
@@ -24,7 +24,7 @@
               @else { {{ 'Live ship details and telemetry.' | translate }} }
             </div>
           </div>
-          <button type="button" [attr.aria-label]="'Close popup' | translate" class="ui-popup-close right-5 top-5 h-[42px] w-[42px] rounded-[8px] border-none bg-transparent text-[28px] leading-none text-[#ccc] transition-[color,background-color] duration-200 hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)] [body.light-theme_&]:text-[#667085] [body.light-theme_&]:hover:bg-[#eef5ff] [body.light-theme_&]:hover:text-[#1f2e47] max-[420px]:h-9 max-[420px]:w-9" (click)="closeSidebar.emit()">
+          <button type="button" [attr.aria-label]="'Close popup' | translate" class="ui-popup-close inline-flex items-center justify-center p-0 leading-none text-[#ccc] [width:var(--ui-popup-close-width,42px)] [height:var(--ui-popup-close-height,42px)] [border-radius:var(--ui-popup-close-radius,8px)] [font-size:var(--ui-popup-close-font-size,28px)] [transition-property:color,background-color] [transition-duration:var(--ui-popup-close-duration,180ms)] [transition-timing-function:ease] hover:[&&]:!bg-[var(--color-blue-700)] hover:[&&]:!text-[var(--color-blue-640)] [.light-theme_&]:!text-[#667085] [.light-theme_&]:hover:!bg-[#eef5ff] [.light-theme_&]:hover:!text-[#1f2e47] right-5 top-5 border-none bg-transparent leading-none text-[#ccc] [--ui-popup-close-duration:200ms] hover:bg-[var(--color-blue-700)] hover:text-[var(--color-blue-640)] [body.light-theme_&]:text-[#667085] [body.light-theme_&]:hover:bg-[#eef5ff] [body.light-theme_&]:hover:text-[#1f2e47] max-[420px]:[--ui-popup-close-height:36px] max-[420px]:[--ui-popup-close-width:36px]" (click)="closeSidebar.emit()">
             ×
           </button>
         </div>
@@ -55,7 +55,7 @@
         } @else if (sidebarError) {
           <div class="rounded-[12px] border border-rose-400/25 bg-rose-500/10 p-3 [body.light-theme_&]:border-rose-200 [body.light-theme_&]:bg-rose-50">
             <div class="text-[14px] font-medium text-rose-200 [body.light-theme_&]:text-rose-700">{{ 'Unable to load details' | translate }}</div>
-            <p class="mt-1 text-[12px] text-rose-200/80 [body.light-theme_&]:text-rose-600">{{ sidebarError }}</p>
+            <p class="mt-1 text-[12px] text-rose-200/80 [body.light-theme_&]:text-rose-600">{{ sidebarError | translate }}</p>
           </div>
         } @else if (selectedEntity?.type === 'aircraft' && selectedEntity?.data) {
           <app-aircraft-details-panel [aircraft]="selectedEntity!.data"></app-aircraft-details-panel>

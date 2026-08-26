@@ -1,18 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { SidebarHomepageService } from '../../../../../services/dashboard/sidebar.service';
 import { ApiService } from '../../../../../shared/services/api.service';
-import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../../../shared/model/alert-notification/alert.notification.model';
+import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { AlertModel, AlertSummary } from '../../../../../shared/model/company-profile/node.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 import { ExportChoiceModalComponent } from '../../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { buildStandardExportOptions } from '../../../../../shared/model/report/export-choice.model';
-import { AlertExportService } from '../../../../../shared/services/export/alert-export.service';
+import { AlertExportService } from '../../../../../shared/partials/alert-notification/services/alert-export.service';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { AdminTenantAlertGroup, AdminTenantAlertsPage, AdminTenantAlertsResponse } from './admin-tenant-alerts.model';
 
 const ALL_TENANTS_OPTION = 'all';
@@ -21,6 +22,7 @@ const ALL_TENANTS_OPTION = 'all';
   selector: 'app-admin-tenant-alerts',
   imports: [CommonModule, ExportChoiceModalComponent, TranslatePipe, UiDropdownComponent],
   host: { class: 'block mb-[100px]' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './admin-tenant-alerts.html'
 })
 export class AdminTenantAlerts implements OnInit {
@@ -32,7 +34,7 @@ export class AdminTenantAlerts implements OnInit {
   selectedExportGroup: AdminTenantAlertGroup | null = null;
   readonly tenantAlertExportOptions = buildStandardExportOptions('case-admin-alert-tenant-export-option', 'report', 'Download all alerts for this tenant.');
 
-  constructor(private apiService: ApiService, private sidebarHomepageService: SidebarHomepageService, private licenseService: LicenseService, private router: Router, private alertExportService: AlertExportService, private messageNotificationService: MessageNotificationService) { }
+  constructor(private apiService: ApiService, private sidebarHomepageService: SidebarHomepageService, private licenseService: LicenseService, private router: Router, private alertExportService: AlertExportService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
     if (this.licenseService.canViewTenantAlerts()) {
@@ -68,8 +70,9 @@ export class AdminTenantAlerts implements OnInit {
   }
 
   get tenantDropdownOptions(): UiDropdownOption[] {
+    this.translationService.version();
     return [
-      { key: ALL_TENANTS_OPTION, label: 'All' },
+      { key: ALL_TENANTS_OPTION, label: this.translationService.translate('All') },
       ...this.tenantAlertGroups
         .filter(group => !!group.tenant.id)
         .map(group => ({
@@ -196,7 +199,7 @@ export class AdminTenantAlerts implements OnInit {
       },
       error: (err) => {
         this.isExportingTenantAlerts = false;
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to download tenant alerts');
+        this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to download tenant alerts'));
       }
     });
   }

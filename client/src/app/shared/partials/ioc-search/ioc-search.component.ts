@@ -1,4 +1,4 @@
-import { Component, OnInit, input, output } from '@angular/core';
+import { Component, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { KeyValuePipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -21,6 +21,7 @@ interface SharedSearchAdvancedChip { id: string; label: string }
   selector: 'app-ioc-search',
   imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, NgTemplateOutlet, ChatWidgetComponent, TranslatePipe],
   templateUrl: './ioc-search.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem, advancedRowMotionAnimation, popupAnimation],
 })
 export class IocSearchComponent implements OnInit {

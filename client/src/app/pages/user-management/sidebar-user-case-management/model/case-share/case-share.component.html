@@ -1,13 +1,13 @@
-<div class="ui-dashboard-grid-bg relative min-h-screen overflow-hidden text-[var(--color-text1)] [print-color-adjust:exact] print:min-h-0 print:overflow-visible [-webkit-print-color-adjust:exact]">
+<div class="[&&]:![background:repeating-linear-gradient(0deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(255,255,255,0.009)_0,rgba(255,255,255,0.009)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,var(--color-blue-830)_0%,var(--color-blue-850)_100%)] [body.light-theme_&&]:![background:repeating-linear-gradient(0deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),repeating-linear-gradient(90deg,rgba(15,23,42,0.013)_0,rgba(15,23,42,0.013)_1px,transparent_1px,transparent_26px),linear-gradient(180deg,#e7eff9_0%,#e7eff9_100%)] relative min-h-screen overflow-hidden text-[var(--color-text1)] [print-color-adjust:exact] print:min-h-0 print:overflow-visible [-webkit-print-color-adjust:exact]">
   <div class="relative z-[1] border-b border-[var(--color-border)] bg-[var(--color-blue-850)]/80 backdrop-blur">
     <header class="mx-auto flex h-[64px] w-full max-w-[1280px] items-center justify-between gap-4 px-3 sm:px-5">
       <div class="flex min-w-0 items-center gap-3">
         <img [src]="getLogoSrc()" [alt]="getAppName()" class="h-9 w-auto max-w-[220px] object-contain brightness-0 invert [body.light-theme_&]:filter-none">
-        <div class="hidden h-7 w-px bg-white/10 sm:block"></div>
+        <div class="hidden h-7 w-px bg-white/10 sm:block [body.light-theme_&]:bg-[var(--color-divider)]"></div>
         <div class="hidden min-w-0 text-sm font-semibold text-[var(--color-text2)] sm:block">{{ 'Shared Intelligence Report' | translate }}
         </div>
       </div>
-      <div class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)]">
+      <div class="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.06em] text-[var(--color-text4)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white">
         {{ 'Read Only' | translate }}</div>
     </header>
   </div>
@@ -19,7 +19,7 @@
         {{ 'Export PDF' | translate }}
       </button>
     </div>
-    <div class="mb-5 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+    <div class="mb-5 overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
       <div class="grid gap-4 p-4 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
         <div class="min-w-0">
           <div class="text-[11px] font-semibold uppercase tracking-[0.08em] text-[var(--color-text4)]">{{ 'Shared Case Report' | translate }}</div>
@@ -44,26 +44,26 @@
     </div>
 
     @if (isLoading) {
-    <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+    <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
       <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
-        <div class="ui-shimmer h-4 w-32 rounded bg-[var(--color-blue-720)]"></div>
-        <div class="ui-shimmer h-7 w-44 rounded bg-[var(--color-blue-720)]"></div>
+        <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-4 w-32 rounded bg-[var(--color-blue-720)]"></div>
+        <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-7 w-44 rounded bg-[var(--color-blue-720)]"></div>
       </div>
       <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
         <div class="p-4">
-          <div class="ui-shimmer h-5 w-72 max-w-full rounded bg-[var(--color-blue-720)]"></div>
+          <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-5 w-72 max-w-full rounded bg-[var(--color-blue-720)]"></div>
           <div class="mt-4 space-y-2">
-            <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-10/12 rounded bg-[var(--color-blue-720)]"></div>
-            <div class="ui-shimmer h-3 w-7/12 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-full rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-10/12 rounded bg-[var(--color-blue-720)]"></div>
+            <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-7/12 rounded bg-[var(--color-blue-720)]"></div>
           </div>
         </div>
         <div class="border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/35 p-4 lg:border-l lg:border-t-0">
           <div class="grid grid-cols-2 gap-4">
             @for (field of [1, 2, 3, 4]; track field) {
             <div>
-              <div class="ui-shimmer h-2.5 w-16 rounded bg-[var(--color-blue-720)]"></div>
-              <div class="ui-shimmer mt-2 h-3.5 w-24 rounded bg-[var(--color-blue-720)]"></div>
+              <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-2.5 w-16 rounded bg-[var(--color-blue-720)]"></div>
+              <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] mt-2 h-3.5 w-24 rounded bg-[var(--color-blue-720)]"></div>
             </div>
             }
           </div>
@@ -71,15 +71,15 @@
       </div>
     </div>
     } @else if (errorMessage) {
-    <div class="overflow-hidden rounded-[8px] border border-red-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_90%,#7f1d1d_10%)]">
-      <div class="border-b border-red-400/15 bg-red-500/10 px-4 py-3">
-        <h2 class="m-0 text-[16px] font-bold leading-tight text-red-100">{{ 'Share Link Unavailable' | translate }}</h2>
+    <div class="overflow-hidden rounded-[8px] border border-red-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_90%,#7f1d1d_10%)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-50">
+      <div class="border-b border-red-400/15 bg-red-500/10 px-4 py-3 [body.light-theme_&]:border-red-600/25 [body.light-theme_&]:bg-red-50">
+        <h2 class="m-0 text-[16px] font-bold leading-tight text-red-100 [body.light-theme_&]:text-red-800">{{ 'Share Link Unavailable' | translate }}</h2>
       </div>
-      <div class="p-4 text-sm font-medium text-red-200">{{ errorMessage }}</div>
+      <div class="p-4 text-sm font-medium text-red-200 [body.light-theme_&]:text-red-700">{{ errorMessage }}</div>
     </div>
     } @else if (report) {
     <div class="space-y-5">
-      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         <div class="flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 lg:flex-row lg:items-center lg:justify-between">
           <div class="min-w-0">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Case Summary' | translate }}</h2>
@@ -88,21 +88,21 @@
             </div>
           </div>
           <div class="grid w-full grid-cols-3 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/60 lg:w-[480px]">
-            <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-blue-500/10 text-blue-300': report.status === 'new' || report.status === 'triaged' || report.status === 'assigned', 'bg-yellow-500/10 text-yellow-300': report.status === 'investigating' || report.status === 'waiting_on_response' || report.status === 'remediating' || report.status === 'review', 'bg-emerald-500/10 text-emerald-300': report.status === 'resolved', 'bg-slate-500/10 text-slate-300': report.status !== 'new' && report.status !== 'triaged' && report.status !== 'assigned' && report.status !== 'investigating' && report.status !== 'waiting_on_response' && report.status !== 'remediating' && report.status !== 'review' && report.status !== 'resolved' }">
+            <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': report.status === 'new' || report.status === 'triaged' || report.status === 'assigned', 'bg-yellow-500/10 text-yellow-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': report.status === 'investigating' || report.status === 'waiting_on_response' || report.status === 'remediating' || report.status === 'review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': report.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': report.status !== 'new' && report.status !== 'triaged' && report.status !== 'assigned' && report.status !== 'investigating' && report.status !== 'waiting_on_response' && report.status !== 'remediating' && report.status !== 'review' && report.status !== 'resolved' }">
               <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Status' | translate }}</div>
               <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold text-[var(--color-text1)]">
                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
                 <span class="truncate">{{ formatLabel(report.status) }}</span>
               </div>
             </div>
-            <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': report.severity === 'critical', 'bg-orange-500/10 text-orange-300': report.severity === 'high', 'bg-yellow-500/10 text-yellow-300': report.severity === 'medium', 'bg-green-500/10 text-green-300': report.severity !== 'critical' && report.severity !== 'high' && report.severity !== 'medium' }">
+            <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': report.severity === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': report.severity === 'high', 'bg-yellow-500/10 text-yellow-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': report.severity === 'medium', 'bg-green-500/10 text-green-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': report.severity !== 'critical' && report.severity !== 'high' && report.severity !== 'medium' }">
               <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Severity' | translate }}</div>
               <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
                 <span class="truncate">{{ formatLabel(report.severity) }}</span>
               </div>
             </div>
-            <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300': report.priority === 'critical', 'bg-orange-500/10 text-orange-300': report.priority === 'high', 'bg-yellow-500/10 text-yellow-300': report.priority === 'medium', 'bg-green-500/10 text-green-300': report.priority !== 'critical' && report.priority !== 'high' && report.priority !== 'medium' }">
+            <div class="min-w-0 px-3 py-2" [ngClass]="{ 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': report.priority === 'critical', 'bg-orange-500/10 text-orange-300 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': report.priority === 'high', 'bg-yellow-500/10 text-yellow-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': report.priority === 'medium', 'bg-green-500/10 text-green-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': report.priority !== 'critical' && report.priority !== 'high' && report.priority !== 'medium' }">
               <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Priority' | translate }}</div>
               <div class="mt-1 flex items-center gap-1.5 truncate text-xs font-semibold capitalize text-[var(--color-text1)]">
                 <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-current"></span>
@@ -153,7 +153,7 @@
       </div>
 
       @if (getPrimaryEntity(); as primaryEntity) {
-      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         <div class="flex flex-col gap-1 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
           <div class="flex flex-wrap items-center justify-between gap-2">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Primary Entity' | translate }}</h2>
@@ -257,14 +257,14 @@
           <div class="flex flex-wrap gap-2">
             @for (profile of primaryEntity.socialProfiles; track $index) {
             <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
-              <span class="font-semibold text-sky-400">{{ formatLabel(profile.platform, profile.platformOtherValue)
+              <span class="font-semibold text-sky-400 [body.light-theme_&]:text-sky-700">{{ formatLabel(profile.platform, profile.platformOtherValue)
                 }}</span>
               <span class="ml-1 text-[var(--color-text2)]">{{ profile.username }}</span>
               @if (profile.displayName) {
               <span class="ml-1 text-[var(--color-text4)]">({{ profile.displayName }})</span>
               }
               @if (profile.profileUrl) {
-              <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-1 text-sky-300 hover:text-sky-200">URL</a>
+              <a [href]="profile.profileUrl" target="_blank" rel="noopener" class="ml-1 text-sky-300 hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:hover:text-sky-800">URL</a>
               }
             </div>
             }
@@ -279,7 +279,7 @@
           <div class="flex flex-wrap gap-2">
             @for (identifier of primaryEntity.identifiers; track $index) {
             <div class="max-w-full rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-xs break-words">
-              <span class="font-semibold text-green-400">{{ formatLabel(identifier.type,
+              <span class="font-semibold text-green-400 [body.light-theme_&]:text-emerald-700">{{ formatLabel(identifier.type,
                 identifier.identifierTypeOtherValue)
                 }}</span>
               <span class="ml-1 text-[var(--color-text2)]">{{ identifier.value }}</span>
@@ -287,7 +287,7 @@
               <span class="ml-1 text-[var(--color-text4)]">{{ 'Issuer' | translate }}: {{ identifier.issuer }}</span>
               }
               @if (identifier.verified) {
-              <span class="ml-1 text-green-300">{{ 'Verified' | translate }}</span>
+              <span class="ml-1 text-green-300 [body.light-theme_&]:text-emerald-700">{{ 'Verified' | translate }}</span>
               }
             </div>
             }
@@ -298,7 +298,7 @@
       }
 
       @if (getRelatedEntities().length > 0) {
-      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
           <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Related Entities' | translate }}</h2>
         </div>
@@ -380,7 +380,7 @@
                     <div class="mt-1 text-xs text-[var(--color-text4)]">{{ profile.displayName }}</div>
                     }
                     @if (profile.profileUrl) {
-                    <div class="mt-1 break-all text-xs text-sky-300">{{ profile.profileUrl }}</div>
+                    <div class="mt-1 break-all text-xs text-sky-300 [body.light-theme_&]:text-sky-700">{{ profile.profileUrl }}</div>
                     }
                   </div>
                   }
@@ -401,7 +401,7 @@
                     <div class="mt-1 text-xs text-[var(--color-text4)]">{{ 'Issuer' | translate }}: {{ identifier.issuer }}</div>
                     }
                     @if (identifier.verified) {
-                    <div class="mt-1 text-xs text-emerald-300">{{ 'Verified' | translate }}</div>
+                    <div class="mt-1 text-xs text-emerald-300 [body.light-theme_&]:text-emerald-700">{{ 'Verified' | translate }}</div>
                     }
                   </div>
                   }
@@ -427,8 +427,8 @@
       }
 
       @if (report.closure || report.closedAt) {
-      <div class="overflow-hidden rounded-[8px] border border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
-        <div class="border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)] px-4 py-3">
+      <div class="overflow-hidden rounded-[8px] border border-emerald-400/20 bg-[color-mix(in_srgb,var(--tenant-expand-bg)_92%,#064e3b_8%)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
+        <div class="border-b border-emerald-400/15 bg-[color-mix(in_srgb,var(--color-blue-820-light)_90%,#064e3b_10%)] px-4 py-3 [body.light-theme_&]:border-emerald-600/25">
           <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Closure' | translate }}</h2>
         </div>
         <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,55%)_minmax(0,45%)]">
@@ -445,7 +445,7 @@
             <div class="text-sm leading-6 text-[var(--color-text2)]">{{ report.closure?.resolution }}</div>
             }
           </div>
-          <div class="border-t border-emerald-400/15 p-4 lg:border-l lg:border-t-0">
+          <div class="border-t border-emerald-400/15 p-4 [body.light-theme_&]:border-emerald-600/25 lg:border-l lg:border-t-0">
             <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Closed At' | translate }}</div>
             <div class="mt-1 text-sm font-medium text-[var(--color-text1)]">{{ formatDate(report.closedAt ||
               report.closure?.closedAt) }}</div>
@@ -454,7 +454,7 @@
       </div>
       }
 
-      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
           <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Artifacts' | translate }}</h2>
           <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text4)]">
@@ -477,14 +477,14 @@
                   }
                 </div>
               </div>
-              <span class="shrink-0 text-xs font-semibold text-sky-300">{{ (isArtifactExpanded(artifact.artifactId) ?
+              <span class="shrink-0 text-xs font-semibold text-sky-300 [body.light-theme_&]:text-sky-700">{{ (isArtifactExpanded(artifact.artifactId) ?
                 'Hide details' : 'View details') | translate }}</span>
             </button>
             @if (isArtifactExpanded(artifact.artifactId)) {
             <div class="border-t border-[var(--color-divider)] px-3 py-3">
               <div class="text-sm leading-6 text-[var(--color-text3)]">{{ (artifact.description || 'No artifact description provided.') | translate }}</div>
               @if (artifact.url) {
-              <a [href]="artifact.url" target="_blank" rel="noopener" class="mt-2 block truncate text-sm font-medium text-sky-300 hover:text-sky-200">{{ artifact.url }}</a>
+              <a [href]="artifact.url" target="_blank" rel="noopener" class="mt-2 block truncate text-sm font-medium text-sky-300 hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:hover:text-sky-800">{{ artifact.url }}</a>
               }
               <div class="mt-3 grid gap-x-6 gap-y-2 border-t border-[var(--color-divider)] pt-2 text-xs sm:grid-cols-2">
                 <div class="flex items-start justify-between gap-3 border-b border-[var(--color-divider)] py-2">
@@ -515,7 +515,7 @@
         </div>
       </div>
 
-      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
           <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Tasks' | translate }}</h2>
           <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text4)]">
@@ -559,7 +559,7 @@
         </div>
       </div>
 
-      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
           <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Linked Cases' | translate }}</h2>
           <span class="rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1 text-[11px] font-semibold text-[var(--color-text4)]">
@@ -588,7 +588,7 @@
         </div>
       </div>
 
-      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+      <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
         <div class="flex items-center border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4 py-3">
           <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Comments' | translate }}</h2>
         </div>
@@ -621,7 +621,7 @@
   </main>
 
   <footer class="relative z-[1] mx-auto mt-3 w-full max-w-[1280px] px-3 pb-6 sm:px-5">
-    <div class="flex flex-col gap-2 border-t border-white/10 pt-4 text-xs text-[var(--color-text4)] sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-2 border-t border-white/10 pt-4 text-xs text-[var(--color-text4)] sm:flex-row sm:items-center sm:justify-between [body.light-theme_&]:border-[var(--color-divider)]">
       <div>{{ 'Shared report generated by' | translate }} {{ getAppName() }}</div>
       <div>{{ 'Confidential intelligence. Do not redistribute without authorization.' | translate }}</div>
     </div>

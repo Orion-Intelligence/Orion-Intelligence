@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, map, Observable, tap } from 'rxjs';
 import { ApiService } from '../../shared/services/api.service';
 import { Router } from '@angular/router';
-import { AuthModel } from '../../shared/model/auth/auth.model';
+import { AuthModel } from './model/auth.model';
 import { TokenRefreshService } from './token-refresh.service';
 import { HttpHeaders } from '@angular/common/http';
 import { AppStorageService } from '../core/app/app-storage.service';
@@ -87,16 +87,17 @@ export class AuthService {
   }
 
   logout(): void {
+    this.apiService.post('logout', {}).subscribe({ error: () => void 0 });
+    this.appStorageService.clearActiveSession();
+    this.tokenRefreshService.stopTokenRefresh();
     this.authState.next({
       isAuthenticated: false,
       isValidated: true,
       error: null,
     });
     this.router.navigate(['/login']).then(() => {
-      this.apiService.post('logout', {}).subscribe();
       localStorage.clear();
       sessionStorage.clear();
-      this.tokenRefreshService.stopTokenRefresh();
       localStorage.setItem('onboarding', String(false));
       this.appStorageService.clearStorage();
       this.appService.clearAll();
@@ -154,6 +155,7 @@ export class AuthService {
   }
 
   public clearAuthentication(error: string | null = null): void {
+    this.appStorageService.clearActiveSession();
     this.tokenRefreshService.stopTokenRefresh();
     this.authState.next({
       isAuthenticated: false,
@@ -219,13 +221,4 @@ export class AuthService {
     return true;
   }
 
-  private toBool(v: any): boolean {
-    if (typeof v === 'boolean') {
-      return v;
-    }
-    if (typeof v === 'string') {
-      return v === 'true';
-    }
-    return !!v;
-  }
 }

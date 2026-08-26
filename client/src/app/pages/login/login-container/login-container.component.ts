@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 import QRCode from 'qrcode';
 import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
-import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
+import { PasswordToggleDirective } from '../../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { isSignupHost } from '../../../shared/utils/auth-host.util';
 
@@ -15,6 +15,7 @@ import { isSignupHost } from '../../../shared/utils/auth-host.util';
   selector: 'app-login-container',
   standalone: true,
   imports: [FormsModule, CommonModule, HeaderComponent, PasswordToggleDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './login-container.component.html',
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
@@ -87,6 +88,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
 
   getDashboardPreviewSrc(): string {
     return this.appService.getConfig().appSettings.auth_dashboard_icon || LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
+  }
+
+  isLightTheme(): boolean {
+    return typeof document !== 'undefined' && document.body.classList.contains('light-theme');
   }
 
   copyToClipboard(text: string): void {

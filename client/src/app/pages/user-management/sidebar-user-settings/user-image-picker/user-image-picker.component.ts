@@ -1,10 +1,11 @@
-import { Component, effect, input, output } from '@angular/core';
+import { Component, effect, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-user-image-picker',
   imports: [NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-image-picker.component.html'
 })
 export class UserImagePickerComponent {
@@ -15,7 +16,7 @@ export class UserImagePickerComponent {
   selectedImage?: string;
   readonly id = input('');
   imageUrl!: string;
-  readonly defaultImage = input<string>('assets/images/tenant/logo_url_default.png');
+  readonly defaultImage = input<string>('/api/s/static/tenant/logo_url_default.png');
   readonly wide = input(false);
   readonly onImageSelected = output<File>();
   readonly onClear = output<string>();

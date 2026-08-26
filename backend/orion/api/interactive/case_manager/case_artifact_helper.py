@@ -33,9 +33,6 @@ class CaseArtifactHelper:
 
         raise HTTPException(status_code=400, detail="This artifact type does not accept file uploads")
     
-    def generate_sha256_hash(self, raw: bytes) -> str:
-        return hashlib.sha256(raw).hexdigest()
-
     async def read_limited_file(self, file: UploadFile) -> bytes:
         if getattr(file, "size", None) is not None and file.size > self.MAX_FILE_SIZE:
             raise HTTPException(status_code=413, detail=f"File too large! Maximum allowed size is {self.MAX_FILE_SIZE_MB} MB")

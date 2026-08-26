@@ -1,14 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../../../../shared/model/satellite-intel/satellite-intel.model';
-import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SATELLITE_IMAGE_TYPES, SatelliteImageType } from '../../model/satellite-intel.model';
+import { SatelliteAnomalyResponse, SatelliteCompareResponse } from '../../model/satellite-intel-api.models';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 
 @Component({
   selector:    'app-satellite-month-compare',
   standalone:  true,
   imports:     [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './month-compare-section.component.html',
 })
 export class MonthCompareSectionComponent {
@@ -37,15 +38,15 @@ export class MonthCompareSectionComponent {
   get anomalyAlertClass(): string {
     const level = this.anomalyResult?.alert_level;
     if (level === 'critical') {
-      return 'text-rose-300';
+      return 'text-rose-300 [body.light-theme_&]:text-rose-700';
     }
     if (level === 'warning') {
-      return 'text-amber-300';
+      return 'text-amber-300 [body.light-theme_&]:text-amber-700';
     }
     if (level === 'nominal') {
-      return 'text-emerald-300';
+      return 'text-emerald-300 [body.light-theme_&]:text-emerald-700';
     }
-    return 'text-sky-300';
+    return 'text-sky-300 [body.light-theme_&]:text-sky-700';
   }
 
   selectType(key: string): void {

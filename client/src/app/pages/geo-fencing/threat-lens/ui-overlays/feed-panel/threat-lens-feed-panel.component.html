@@ -1,20 +1,20 @@
-<div [attr.data-testid]="'threat-lens-feed-panel-' + feedType" class="map-overlay-menu flex h-full flex-col overflow-hidden rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white max-[1100px]:h-auto max-[1100px]:overflow-visible max-[640px]:rounded-[12px]">
-  <div class="border-b border-[rgba(143,166,190,0.20)] px-3 py-2" [ngClass]="{ '!border-b-0': collapsed }">
+<div [attr.data-testid]="'threat-lens-feed-panel-' + feedType" class="map-overlay-menu flex h-full flex-col overflow-hidden rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text2)] [body.light-theme_&]:ring-[#d7e2ef] max-[1100px]:h-auto max-[1100px]:overflow-visible max-[640px]:rounded-[12px]">
+  <div class="border-b border-[rgba(143,166,190,0.20)] px-3 py-2 [body.light-theme_&]:border-[#d7e2ef]" [ngClass]="{ '!border-b-0': collapsed }">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
         <div class="flex items-center gap-2">
           <p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">
-            {{ title }}
+            {{ title | translate }}
           </p>
         </div>
 
         <p class="mt-1 text-[11px] text-[var(--color-text4)]">
-          {{ description }}
+          {{ description | translate }}
         </p>
       </div>
 
-      <button [attr.data-testid]="'threat-lens-feed-toggle-' + feedType" type="button" (click)="toggleCollapsed()" [attr.aria-label]="(collapsed ? 'Expand' : 'Collapse') | translate" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[rgba(22,34,48,0.88)] text-[#C4D4E6] shadow-sm ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white">
-        <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 opacity-80 transition duration-200 [filter:saturate(0.55)_brightness(1.12)] [body.light-theme_&]:opacity-100 [body.light-theme_&]:filter-none" [ngClass]="{ 'rotate-180': !collapsed }" />
+      <button [attr.data-testid]="'threat-lens-feed-toggle-' + feedType" type="button" (click)="toggleCollapsed()" [attr.aria-label]="(collapsed ? 'Expand' : 'Collapse') | translate" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-[8px] bg-[rgba(22,34,48,0.88)] text-[#C4D4E6] shadow-sm ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]">
+        <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="" class="h-4 w-4 opacity-80 transition duration-200 [filter:saturate(0.55)_brightness(1.12)] [body.light-theme_&]:opacity-100 [body.light-theme_&]:filter-none" [ngClass]="{ 'rotate-180': !collapsed }" />
       </button>
     </div>
 
@@ -23,7 +23,7 @@
         <div class="pointer-events-none absolute inset-y-0 left-0 z-10 flex items-center pl-4">
           <i class="bi bi-search h-5 w-5 leading-none text-[var(--color-text4)]" aria-hidden="true"></i>
         </div>
-        <input [attr.data-testid]="'threat-lens-feed-search-' + feedType" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" type="text" [placeholder]="searchPlaceholder" class="relative z-0 block h-10 w-full rounded-[10px] border-0 bg-[rgba(22,34,48,0.88)] pl-11 pr-4 text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-[rgba(124,154,186,0.48)] [body.light-theme_&]:!bg-white [body.light-theme_&]:text-[var(--color-gray-900)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,0.08)] [body.light-theme_&]:ring-[#d7e2ef] sm:text-sm sm:leading-6" />
+        <input [attr.data-testid]="'threat-lens-feed-search-' + feedType" [ngModel]="searchTerm" (ngModelChange)="onSearchTermChange($event)" type="text" [placeholder]="searchPlaceholder | translate" class="relative z-0 block h-10 w-full rounded-[10px] border-0 bg-[rgba(22,34,48,0.88)] pl-11 pr-4 text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm placeholder:text-[var(--color-text4)] focus:outline-none focus:ring-2 focus:ring-[rgba(124,154,186,0.48)] [body.light-theme_&]:!bg-white [body.light-theme_&]:text-[var(--color-gray-900)] [body.light-theme_&]:shadow-[0_8px_22px_rgba(15,23,42,0.08)] [body.light-theme_&]:ring-[#d7e2ef] sm:text-sm sm:leading-6" />
       </div>
 
       @if (searchTerm) {
@@ -34,8 +34,8 @@
 
       <div class="mt-3 flex flex-wrap gap-2">
         @for (range of ranges; track range.key) {
-          <button [attr.data-testid]="'threat-lens-feed-range-' + feedType + '-' + range.key" type="button" (click)="setRange(range.key)" class="rounded-[9px] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="selectedRange === range.key ? [ 'bg-[rgba(78,102,130,0.52)]', 'text-white' ] : [ 'bg-[rgba(22,34,48,0.88)]', 'text-[#C4D4E6]', 'hover:text-white', 'hover:bg-[rgba(65,86,110,0.64)]' ]">
-            {{ range.label }}
+          <button [attr.data-testid]="'threat-lens-feed-range-' + feedType + '-' + range.key" type="button" (click)="setRange(range.key)" class="rounded-[9px] px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors" [ngClass]="selectedRange === range.key ? [ 'bg-[rgba(78,102,130,0.52)]', 'text-white', '[body.light-theme_&]:!bg-[#e3effc]', '[body.light-theme_&]:!text-[#0f5fa8]', '[body.light-theme_&]:ring-[#b9cee4]' ] : [ 'bg-[rgba(22,34,48,0.88)]', 'text-[#C4D4E6]', 'hover:text-white', 'hover:bg-[rgba(65,86,110,0.64)]', '[body.light-theme_&]:!bg-white', '[body.light-theme_&]:!text-[var(--color-text2)]', '[body.light-theme_&]:ring-[#d7e2ef]', '[body.light-theme_&]:hover:!bg-[#eef5ff]', '[body.light-theme_&]:hover:!text-[var(--color-text1)]' ]">
+            {{ range.label | translate }}
           </button>
         }
       </div>
@@ -49,14 +49,14 @@
         @if (displayItems.length) {
           <div class="grid grid-cols-1 gap-2 max-[1100px]:grid-cols-2 max-[640px]:grid-cols-1">
             @for (item of displayItems; track item.id) {
-              <button [attr.data-testid]="'threat-lens-feed-item-' + feedType" type="button" (click)="openFeedItem(item)" class="block w-full rounded-[10px] bg-[rgba(22,34,48,0.88)] p-3 text-left ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors hover:bg-[rgba(65,86,110,0.64)] [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white">
+              <button [attr.data-testid]="'threat-lens-feed-item-' + feedType" type="button" (click)="openFeedItem(item)" class="block w-full rounded-[10px] bg-[rgba(22,34,48,0.88)] p-3 text-left ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors hover:bg-[rgba(65,86,110,0.64)] [body.light-theme_&]:!bg-white [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff]">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2">
                       <svg viewBox="0 0 12 12" class="h-3 w-3 shrink-0" [attr.color]="item.colorHex" aria-hidden="true">
                         <circle cx="6" cy="6" r="5" [attr.fill]="item.colorHex"></circle>
                       </svg>
-                      <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text2)]">{{ item.categoryLabel }}</span>
+                      <span class="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text2)]">{{ item.categoryLabel | translate }}</span>
                     </div>
 
                     <p class="mt-2 line-clamp-2 text-[13px] font-semibold text-[var(--color-text1)]">
@@ -78,7 +78,7 @@
                 @if (item.highlights.length) {
                   <div class="mt-3 flex flex-wrap gap-1.5">
                     @for (highlight of item.highlights; track highlight) {
-                      <span class="rounded-[8px] bg-[rgba(22,34,48,0.88)] px-2 py-1 text-[10px] text-[#C4D4E6] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-white">
+                      <span class="rounded-[8px] bg-[rgba(22,34,48,0.88)] px-2 py-1 text-[10px] text-[#C4D4E6] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-[#f7fbff] [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef]">
                         {{ highlight }}
                       </span>
                     }
@@ -89,8 +89,8 @@
           </div>
         }
         @else {
-          <div [attr.data-testid]="'threat-lens-feed-empty-' + feedType" class="flex h-full min-h-[140px] items-center justify-center rounded-[10px] bg-[rgba(22,34,48,0.88)] px-4 text-center text-[12px] text-[var(--color-text4)] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-white max-[1100px]:h-auto">
-            {{ emptyMessage }}
+          <div [attr.data-testid]="'threat-lens-feed-empty-' + feedType" class="flex h-full min-h-[140px] items-center justify-center rounded-[10px] bg-[rgba(22,34,48,0.88)] px-4 text-center text-[12px] text-[var(--color-text4)] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] [body.light-theme_&]:!bg-[#f7fbff] [body.light-theme_&]:ring-[#d7e2ef] max-[1100px]:h-auto">
+            {{ emptyMessage | translate }}
           </div>
         }
       </div>

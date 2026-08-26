@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { EntityDetailsComponent } from '../../entity-details/entity-details';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
-import { Case, CaseEntity } from '../../../../../../shared/model/case-management/case.model';
+import { Case, CaseEntity } from '../../case.model';
 import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
 import { caseModeSwapMotion, caseSectionMotion } from '../case-details.animations';
 import { formatCaseConfidence, formatCaseLabel, getCaseDisplayLabel, getFormattedCaseDateTime, getPrimaryCaseEntity } from '../case-details-formatters';
@@ -14,6 +14,7 @@ import { CaseEditDrawerComponent } from '../case-edit-drawer/case-edit-drawer';
   imports: [CommonModule, EntityDetailsComponent, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseModeSwapMotion, caseSectionMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-primary-entity-section.html'
 })
 export class CasePrimaryEntitySectionComponent {

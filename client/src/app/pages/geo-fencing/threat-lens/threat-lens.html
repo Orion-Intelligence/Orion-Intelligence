@@ -1,4 +1,4 @@
-<section data-testid="threat-lens-page" class="ui-consolidated-theme relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black [body.light-theme_&]:![background:#e7eff9]">
+<section data-testid="threat-lens-page" class="ui-consolidated-theme [--ui-consolidated-main-bg:#f9fbff] [--ui-consolidated-sub-bg:#fff] [--ui-consolidated-border:#d4e0ed] [--ui-consolidated-divider:#dde7f2] [--ui-consolidated-sub-hover:#fbfdff] [.dark-theme_&]:[--ui-consolidated-main-bg:#101A2B] [.dark-theme_&]:[--ui-consolidated-sub-bg:#172235] [.dark-theme_&]:[--ui-consolidated-border:#ffffff1a] [.dark-theme_&]:[--ui-consolidated-divider:#ffffff14] [.dark-theme_&]:[--ui-consolidated-sub-hover:#172235] relative flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden bg-black [body.light-theme_&]:![background:#e7eff9]">
 	<div class="flex min-h-0 flex-1 flex-col overflow-hidden max-[1100px]:overflow-x-hidden max-[1100px]:overflow-y-auto max-[1100px]:pb-3">
 		<div class="relative grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)] overflow-hidden max-[1100px]:block max-[1100px]:overflow-visible">
 			<div class="relative min-h-0 min-w-0 overflow-hidden max-[1100px]:!h-[70vh] max-[1100px]:!min-h-[70vh] max-[1100px]:shrink-0">
@@ -22,10 +22,10 @@
 	<app-map-loading-badges [items]="ipScanLoadingBadges"></app-map-loading-badges>
 
 	<div class="absolute bottom-3 right-3 z-[930] hidden gap-2 p-px max-[1100px]:flex">
-		<button data-testid="threat-lens-reset-position-mobile" type="button" (click)="resetGlobePosition()" [attr.aria-label]="'Reset View' | translate" [appTooltip]="'Reset View' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white">
+		<button data-testid="threat-lens-reset-position-mobile" type="button" (click)="resetGlobePosition()" [attr.aria-label]="'Reset View' | translate" [appTooltip]="'Reset View' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]">
 			<i class="bi bi-crosshair" aria-hidden="true"></i>
 		</button>
-		<button data-testid="threat-lens-reset-country-mobile" type="button" (click)="resetSelectedCountry()" [attr.aria-label]="'Clear Country' | translate" [appTooltip]="'Clear Country' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white">
+		<button data-testid="threat-lens-reset-country-mobile" type="button" (click)="resetSelectedCountry()" [attr.aria-label]="'Clear Country' | translate" [appTooltip]="'Clear Country' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]">
 			<i class="bi bi-x-lg" aria-hidden="true"></i>
 		</button>
 	</div>
@@ -39,11 +39,11 @@
 					</div>
 					<div class="min-w-0">
 						<p class="text-[12px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text1)]">{{ 'Loading Threat Lens' | translate }}</p>
-						<p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ statusMessage }}</p>
+						<p class="mt-1 truncate text-[12px] text-[var(--color-text3)]">{{ statusMessage | translate }}</p>
 					</div>
 				</div>
-				<div class="ui-progress-track mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] [body.light-theme_&]:!bg-white">
-					<div class="ui-progress-indeterminate-bar"></div>
+				<div class="relative overflow-hidden mt-4 h-[5px] rounded-full border border-[var(--color-border)] bg-[var(--color-blue-790)] [body.light-theme_&]:!bg-white">
+					<div class="absolute inset-0 overflow-hidden after:absolute after:bottom-0 after:top-0 after:w-[40%] after:rounded-full after:bg-[linear-gradient(90deg,#4ea2f1_0%,#2c7ac5_50%,#7cc2ff_100%)] after:shadow-[0_0_3px_rgb(78_162_241/18%)] after:content-[''] after:[animation:ui-progress-sweep-primary_1.3s_linear_infinite]"></div>
 				</div>
 			</div>
 		</div>
@@ -56,7 +56,7 @@
 			[isLoading]="isLoading"
 			(search)="onTopicSearch($event)">
 		</app-threat-lens-topic-search-panel>
-    <div data-testid="threat-lens-search-panel" class="map-overlay-menu min-h-0 overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] p-3 text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white max-[1100px]:overflow-visible max-[640px]:rounded-[12px]">
+    <div data-testid="threat-lens-search-panel" class="map-overlay-menu min-h-0 overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] p-3 text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text2)] [body.light-theme_&]:ring-[#d7e2ef] max-[1100px]:overflow-visible max-[640px]:rounded-[12px]">
 			<div class="flex items-center justify-between gap-3">
 				<div class="min-w-0">
 					<p class="text-[13px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text3)]">{{ 'Search' | translate }}</p>
@@ -64,8 +64,8 @@
 						@if (currentQuery) { {{ 'Active keyword:' | translate }} {{ currentQuery }} } @else { {{ 'All threat records' | translate }} }
 					</p>
 				</div>
-				<button data-testid="threat-lens-search-toggle" type="button" (click)="toggleSearchPanel()" [attr.aria-label]="(isSearchPanelCollapsed ? 'Expand' : 'Collapse') | translate" class="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[rgba(22,34,48,0.88)] text-[#C4D4E6] shadow-sm ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white">
-  <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="toggle icon" class="h-4 w-4 opacity-80 transition duration-200 [filter:saturate(0.55)_brightness(1.12)] [body.light-theme_&]:opacity-100 [body.light-theme_&]:filter-none" [ngClass]="{ 'rotate-180': !isSearchPanelCollapsed }" />
+				<button data-testid="threat-lens-search-toggle" type="button" (click)="toggleSearchPanel()" [attr.aria-label]="(isSearchPanelCollapsed ? 'Expand' : 'Collapse') | translate" class="flex h-8 w-8 items-center justify-center rounded-[8px] bg-[rgba(22,34,48,0.88)] text-[#C4D4E6] shadow-sm ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]">
+  <img src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg" alt="" class="h-4 w-4 opacity-80 transition duration-200 [filter:saturate(0.55)_brightness(1.12)] [body.light-theme_&]:opacity-100 [body.light-theme_&]:filter-none" [ngClass]="{ 'rotate-180': !isSearchPanelCollapsed }" />
 </button>
 			</div>
 			@if (!isSearchPanelCollapsed) {
@@ -87,7 +87,7 @@
 					</div>
 					<div class="mt-2 grid max-h-[220px] grid-cols-2 gap-2 overflow-auto pr-1 max-[640px]:max-h-[170px] max-[420px]:grid-cols-1">
 						@for (item of topCountries; track item.country) {
-							<button data-testid="threat-lens-top-country" type="button" (click)="onTopCountrySelect(item.country)" class="group flex min-h-[38px] w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-[12px] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white" [ngClass]="currentQuery === item.country ? 'bg-[rgba(78,102,130,0.52)] text-white' : 'bg-[rgba(22,34,48,0.88)] text-[#C4D4E6] hover:bg-[rgba(65,86,110,0.64)] hover:text-white'">
+							<button data-testid="threat-lens-top-country" type="button" (click)="onTopCountrySelect(item.country)" class="group flex min-h-[38px] w-full items-center gap-2 rounded-[10px] px-3 py-2 text-left text-[12px] ring-1 ring-inset ring-[rgba(143,166,190,0.20)] transition-colors" [ngClass]="currentQuery === item.country ? 'bg-[rgba(78,102,130,0.52)] text-white [body.light-theme_&]:!bg-[#e3effc] [body.light-theme_&]:!text-[#0f5fa8] [body.light-theme_&]:ring-[#b9cee4]' : 'bg-[rgba(22,34,48,0.88)] text-[#C4D4E6] hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text2)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]'">
 								<span class="h-2 w-2 shrink-0 rounded-full bg-[#8FAECC] opacity-70 transition group-hover:opacity-100" [ngClass]="{ 'opacity-100': currentQuery === item.country }"></span>
 								<span class="min-w-0 flex-1 truncate font-medium">{{ item.country }}</span>
 							</button>
@@ -101,7 +101,7 @@
 		</div>
 
 		@if (categoryLegend.length) {
-			<div data-testid="threat-lens-category-layers-panel" class="map-overlay-menu min-h-0 w-full shrink-0 overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] p-3 text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm max-[1100px]:overflow-visible [body.light-theme_&]:!bg-white max-[640px]:rounded-[12px]">
+			<div data-testid="threat-lens-category-layers-panel" class="map-overlay-menu min-h-0 w-full shrink-0 overflow-y-auto rounded-[10px] border-0 bg-[rgba(28,39,53,0.94)] p-3 text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm max-[1100px]:overflow-visible [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text2)] [body.light-theme_&]:ring-[#d7e2ef] max-[640px]:rounded-[12px]">
 				<app-threat-lens-category-layers
 					[categoryLegend]="categoryLegend"
 					[selectedArcCategoryKey]="selectedArcCategoryKey"
@@ -116,17 +116,17 @@
 
 	<div class="absolute right-4 top-4 bottom-4 z-20 flex min-h-0 w-[min(25rem,calc(100%-2rem))] flex-col gap-0 overflow-visible max-[1100px]:relative max-[1100px]:left-auto max-[1100px]:right-auto max-[1100px]:top-auto max-[1100px]:bottom-auto max-[1100px]:z-10 max-[1100px]:mt-3 max-[1100px]:w-full max-[1100px]:overflow-visible max-[1100px]:px-3 max-[1100px]:pb-3">
 		<div class="absolute -left-11 top-[54px] z-[930] flex flex-col gap-2 p-px max-[1100px]:hidden">
-			<button data-testid="threat-lens-reset-position" type="button" (click)="resetGlobePosition()" [attr.aria-label]="'Reset View' | translate" [appTooltip]="'Reset View' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white">
+			<button data-testid="threat-lens-reset-position" type="button" (click)="resetGlobePosition()" [attr.aria-label]="'Reset View' | translate" [appTooltip]="'Reset View' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]">
 				<i class="bi bi-crosshair" aria-hidden="true"></i>
 			</button>
-			<button data-testid="threat-lens-reset-country" type="button" (click)="resetSelectedCountry()" [attr.aria-label]="'Clear Country' | translate" [appTooltip]="'Clear Country' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white">
+			<button data-testid="threat-lens-reset-country" type="button" (click)="resetSelectedCountry()" [attr.aria-label]="'Clear Country' | translate" [appTooltip]="'Clear Country' | translate" class="flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(28,39,53,0.94)] text-[13px] text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white active:translate-y-px [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)]">
 				<i class="bi bi-x-lg" aria-hidden="true"></i>
 			</button>
 		</div>
 		@if (showFilterButton) {
 		<div class="flex justify-end gap-2 max-[550px]:flex-col">
-				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="map-overlay-menu inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-full bg-[rgba(28,39,53,0.94)] px-[14px] text-[13px] font-medium text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:hover:!bg-white max-[550px]:w-full max-[550px]:justify-center">
-					<img alt="Filter Icon" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
+				<label data-testid="side-filter-open" (click)="sidebarService.openSidebar()" [appTooltip]="'Customize Results' | translate" class="map-overlay-menu inline-flex h-[40px] cursor-pointer items-center gap-[8px] rounded-full bg-[rgba(28,39,53,0.94)] px-[14px] text-[13px] font-medium text-[#C4D4E6] shadow-lg ring-1 ring-inset ring-[rgba(143,166,190,0.20)] backdrop-blur-sm transition hover:bg-[rgba(65,86,110,0.64)] hover:text-white [body.light-theme_&]:!bg-white [body.light-theme_&]:!text-[var(--color-text3)] [body.light-theme_&]:ring-[#d7e2ef] [body.light-theme_&]:hover:!bg-[#eef5ff] [body.light-theme_&]:hover:!text-[var(--color-text1)] max-[550px]:w-full max-[550px]:justify-center">
+					<img alt="" height="20" src="assets/images/shared/theme/filter_icon.svg" priority width="20" class="ui-filter-icon">
 					<span>{{ 'Filter' | translate }}</span>
 				</label>
 		</div>
@@ -159,12 +159,12 @@
 
 
  @if (filterModel && (isFilterOpen$ | async)) {
-    <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
+    <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()">
     </div>
   }
 
   @if (filterModel) {
-    <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[var(--color-border)] bg-[var(--color-blue-700)] transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
+    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[var(--color-border)] bg-[var(--color-blue-700)] transition-transform duration-200 max-[450px]:w-full" [ngClass]="{ 'translate-x-full': !(isFilterOpen$ | async), 'translate-x-0': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="onSearch()" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }

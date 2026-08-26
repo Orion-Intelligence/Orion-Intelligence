@@ -64,7 +64,7 @@ class log:
 
     def __write_to_file(self, log_message, lines_per_file=10000):
         try:
-            log_directory = os.path.join(os.getcwd(), 'orion/logs', datetime.datetime.now().strftime("%Y-%m-%d"))
+            log_directory = os.path.join(os.getcwd(), 'workspace/logs', datetime.datetime.now().strftime("%Y-%m-%d"))
             if not os.path.exists(log_directory):
                 os.makedirs(log_directory, exist_ok=True)
                 self.__cleanup_old_logs()
@@ -111,7 +111,7 @@ class log:
             log.__last_cleanup_date = now
             cutoff_date = now - datetime.timedelta(days=retention_days)
 
-            log_root = os.path.join(os.getcwd(), 'logs')
+            log_root = os.path.join(os.getcwd(), 'workspace/logs')
 
             for log_dir in os.listdir(log_root):
                 log_path = os.path.join(log_root, log_dir)

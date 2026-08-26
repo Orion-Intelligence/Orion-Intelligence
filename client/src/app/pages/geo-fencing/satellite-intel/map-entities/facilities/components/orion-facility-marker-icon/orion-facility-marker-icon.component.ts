@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { OrionSatelliteFeatureType } from '../../../../../models/geo-fencing.models';
 
 @Component({
   selector:    'app-orion-facility-marker-icon',
   standalone:  true,
   imports:     [CommonModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './orion-facility-marker-icon.component.html',
 })
 export class OrionFacilityMarkerIconComponent {

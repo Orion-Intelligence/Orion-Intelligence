@@ -1,14 +1,16 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { TakedownActionResponse, TakedownActionResult } from '../../model/takedown/takedown.model';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-takedown-action',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass, TooltipDirective],
+  imports: [CommonModule, FormsModule, NgClass, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './takedown-action.component.html'
 })
 export class TakedownActionComponent implements OnChanges {
@@ -76,24 +78,24 @@ export class TakedownActionComponent implements OnChanges {
 
   get buttonClasses(): string {
     if (this.isTakingDown) {
-      return 'border-[rgba(87,165,235,0.42)] bg-[rgba(87,165,235,0.14)] text-[#8bc8ff] shadow-[0_0_0_1px_rgba(87,165,235,0.10),0_8px_18px_rgba(87,165,235,0.10)] cursor-wait';
+      return '[&&]:border-[rgba(87,165,235,0.42)] [&&]:bg-[rgba(87,165,235,0.14)] [&&]:text-[#8bc8ff] [body.light-theme_&&]:border-[#9cc8ed] [body.light-theme_&&]:bg-[#eaf5ff] [body.light-theme_&&]:text-[#1d5f9e] shadow-[0_0_0_1px_rgba(87,165,235,0.10),0_8px_18px_rgba(87,165,235,0.10)] cursor-wait';
     }
     if (this.buttonClass && this.canInitiateTakedown) {
       return 'shadow-[0_8px_18px_rgba(44,122,197,0.18)] hover:-translate-y-[1px] active:translate-y-0';
     }
     if (this.canInitiateTakedown) {
-      return 'border-[rgba(87,165,235,0.55)] bg-[var(--color-blue-640)] text-white shadow-[0_8px_18px_rgba(44,122,197,0.22)] hover:-translate-y-[1px] hover:bg-[rgba(87,165,235,0.92)] active:translate-y-0';
+      return '[&&]:border-[rgba(87,165,235,0.55)] [&&]:bg-[var(--color-blue-640)] [&&]:text-white shadow-[0_8px_18px_rgba(44,122,197,0.22)] hover:-translate-y-[1px] hover:[&&]:bg-[rgba(87,165,235,0.92)] active:translate-y-0';
     }
     if (this.isTakedownAccepted) {
-      return 'border-[rgba(40,167,69,0.42)] bg-[rgba(40,167,69,0.14)] text-[#7ee787] shadow-[0_0_0_1px_rgba(40,167,69,0.10),0_8px_18px_rgba(40,167,69,0.10)] cursor-default';
+      return '[&&]:border-[rgba(40,167,69,0.42)] [&&]:bg-[rgba(40,167,69,0.14)] [&&]:text-[#7ee787] [body.light-theme_&&]:border-[#a7d7b2] [body.light-theme_&&]:bg-[#edf9f0] [body.light-theme_&&]:text-[#166534] shadow-[0_0_0_1px_rgba(40,167,69,0.10),0_8px_18px_rgba(40,167,69,0.10)] cursor-default';
     }
     if (this.isTakedownDenied) {
-      return 'border-[rgba(255,107,107,0.42)] bg-[rgba(255,107,107,0.13)] text-[#ff8a8a] shadow-[0_0_0_1px_rgba(255,107,107,0.10),0_8px_18px_rgba(255,107,107,0.08)] cursor-default';
+      return '[&&]:border-[rgba(255,107,107,0.42)] [&&]:bg-[rgba(255,107,107,0.13)] [&&]:text-[#ff8a8a] [body.light-theme_&&]:border-[#efb6b6] [body.light-theme_&&]:bg-[#fff1f1] [body.light-theme_&&]:text-[#b42318] shadow-[0_0_0_1px_rgba(255,107,107,0.10),0_8px_18px_rgba(255,107,107,0.08)] cursor-default';
     }
     if (this.isTakedownInProgress) {
-      return 'border-[rgba(87,165,235,0.42)] bg-[rgba(87,165,235,0.14)] text-[#8bc8ff] shadow-[0_0_0_1px_rgba(87,165,235,0.10),0_8px_18px_rgba(87,165,235,0.10)] cursor-default';
+      return '[&&]:border-[rgba(87,165,235,0.42)] [&&]:bg-[rgba(87,165,235,0.14)] [&&]:text-[#8bc8ff] [body.light-theme_&&]:border-[#9cc8ed] [body.light-theme_&&]:bg-[#eaf5ff] [body.light-theme_&&]:text-[#1d5f9e] shadow-[0_0_0_1px_rgba(87,165,235,0.10),0_8px_18px_rgba(87,165,235,0.10)] cursor-default';
     }
-    return 'border-[var(--color-border)] bg-[var(--color-blue-760)] text-[var(--color-text4)] opacity-80 cursor-not-allowed';
+    return '[&&]:border-[var(--color-border)] [&&]:bg-[var(--color-blue-760)] [&&]:text-[var(--color-text4)] opacity-80 cursor-not-allowed';
   }
 
   get buttonBaseClasses(): string {

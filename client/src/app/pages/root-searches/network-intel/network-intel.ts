@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, computed, effect, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EMPTY, Subject, Subscription } from 'rxjs';
@@ -26,6 +26,7 @@ import { NETWORK_INTEL_EXPORT_OPTIONS } from '../../../shared/model/report/expor
   templateUrl: './network-intel.html',
   standalone:  true,
   imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, SeoRepoScanSectionComponent, TranslatePipe, ExportChoiceModalComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {
@@ -1109,7 +1110,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           type: 'url' as const
         }))
       ];
-      const edges = scannedUrls.slice(0, 25).map((url: string, index: number) => ({
+      const edges = scannedUrls.slice(0, 25).map((_: string, index: number) => ({
         id: `host-${host}-url-${index}`,
         from: `host-${host}`,
         to: `url-${index}`,

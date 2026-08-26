@@ -1,5 +1,5 @@
-<div class="relative m-[30px] overflow-hidden rounded-[16px] border border-[var(--color-border)] bg-[#172235] px-[20px] pb-[20px] pt-[12px] max-[1024px]:m-[15px]">
-  <div class="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]"></div>
+<div class="relative m-[30px] overflow-hidden rounded-[16px] border border-[var(--color-border)] bg-[#172235] px-[20px] pb-[20px] pt-[12px] max-[1024px]:m-[15px] [body.light-theme_&]:bg-[var(--color-consolidated-primary)]">
+  <div class="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]"></div>
   <div class="relative z-[1]">
     @if (onboardingData?.iocs) {
       <app-tenant-ioc-selector

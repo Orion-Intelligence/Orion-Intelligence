@@ -16,12 +16,9 @@ if (Cypress.expose("coverage")) {
 Cypress.on("window:before:load", (win) => {
     const doc = win.document;
     const originalDocumentGetAnimations = win.Document.prototype.getAnimations?.bind(doc);
-    const forceInstantBehavior = (options?: ScrollIntoViewOptions | ScrollToOptions | boolean) => {
-        if (typeof options === "boolean" || options == null) {
-            return options;
-        }
-        return { ...options, behavior: "auto" as const };
-    };
+    const forceInstantBehavior = <T extends ScrollIntoViewOptions | ScrollToOptions>(options?: T): T | undefined => (
+        options ? { ...options, behavior: "auto" } : undefined
+    );
 
     const originalAnimate = win.Element.prototype.animate;
     win.Element.prototype.animate = function (...args: Parameters<typeof originalAnimate>) {
@@ -32,23 +29,24 @@ Cypress.on("window:before:load", (win) => {
 
     const originalScrollIntoView = win.Element.prototype.scrollIntoView;
     win.Element.prototype.scrollIntoView = function (arg?: boolean | ScrollIntoViewOptions) {
-        return originalScrollIntoView.call(this, forceInstantBehavior(arg));
+        const nextArg = typeof arg === "boolean" ? arg : forceInstantBehavior(arg);
+        return Reflect.apply(originalScrollIntoView, this, [nextArg]);
     };
 
     const originalWindowScrollTo = win.scrollTo.bind(win);
     win.scrollTo = ((...args: [ScrollToOptions?] | [number, number]) => {
         if (typeof args[0] === "object") {
-            return originalWindowScrollTo(forceInstantBehavior(args[0]));
+            return Reflect.apply(originalWindowScrollTo, win, [forceInstantBehavior(args[0])]);
         }
-        return originalWindowScrollTo(...args);
+        return Reflect.apply(originalWindowScrollTo, win, args);
     }) as typeof win.scrollTo;
 
     const originalElementScrollTo = win.Element.prototype.scrollTo;
     win.Element.prototype.scrollTo = function (...args: [ScrollToOptions?] | [number, number]) {
         if (typeof args[0] === "object") {
-            return originalElementScrollTo.call(this, forceInstantBehavior(args[0]));
+            return Reflect.apply(originalElementScrollTo, this, [forceInstantBehavior(args[0])]);
         }
-        return originalElementScrollTo.call(this, ...args);
+        return Reflect.apply(originalElementScrollTo, this, args);
     };
 
     if (win.matchMedia) {
@@ -68,7 +66,8 @@ Cypress.on("window:before:load", (win) => {
 
     let animationFlushQueued = false;
     const stopAllAnimations = () => {
-        const animations = originalDocumentGetAnimations?.({ subtree: true }) ?? [];
+        const getAnimations = originalDocumentGetAnimations as ((options?: { subtree?: boolean }) => Animation[]) | undefined;
+        const animations = getAnimations?.({ subtree: true }) ?? [];
         animations.forEach((animation) => {
             try {
                 animation.finish();

@@ -1,42 +1,42 @@
 <div class="space-y-4">
-  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-keyword">
+  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_18px_rgba(15,23,42,0.05)]" data-testid="insights-section-keyword">
     <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isKeywordExpanded')" data-testid="insights-toggle-keyword">
       <span class="text-sm font-semibold text-[var(--color-text1)]">{{ 'Keyword insights' | translate }}</span>
       <div [attr.aria-label]="(isSectionExpanded('isKeywordExpanded') ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
-        <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isKeywordExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+        <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isKeywordExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [.light-theme_&]:invert-0 [.light-theme_&]:opacity-70" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
       </div>
     </div>
 
     @if (isSectionExpanded('isKeywordExpanded')) {
       <div class="mt-4 grid gap-3 sm:grid-cols-2">
         @for (item of keywordData; track item.label; let i = $index) {
-          <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-keyword-item-' + i">
+          <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-keyword-item-' + i">
             <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
-            <div class="text-xs text-[var(--color-text4)]">{{ item.label }}</div>
+            <div class="text-xs text-[var(--color-text4)]">{{ item.label | translate }}</div>
           </div>
         }
       </div>
     }
   </div>
 
-  <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-coverage">
+  <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_18px_rgba(15,23,42,0.05)]" data-testid="insights-section-coverage">
     <div class="flex cursor-pointer items-center justify-between" (click)="toggleSection('isCoverageExpanded')" data-testid="insights-toggle-coverage">
       <span class="text-sm font-semibold text-[var(--color-text1)]">{{ 'Results General Coverage' | translate }}</span>
       <div [attr.aria-label]="(isSectionExpanded('isCoverageExpanded') ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
-        <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isCoverageExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+        <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isCoverageExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [.light-theme_&]:invert-0 [.light-theme_&]:opacity-70" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
       </div>
     </div>
 
     @if (isSectionExpanded('isCoverageExpanded')) {
       <div class="mt-4 grid gap-3 sm:grid-cols-2">
         @for (item of coverageData; track item.label; let i = $index) {
-          <div class="ui-consolidated-sub rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-coverage-item-' + i">
+          <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] rounded-lg border border-[var(--color-border)] p-3" [attr.data-testid]="'insights-coverage-item-' + i">
             <div class="text-lg font-semibold text-[var(--color-text1)]">{{ item.value }}</div>
             <div class="flex items-center gap-2 text-xs text-[var(--color-text4)]">
               @if (item.color) {
                 <span class="h-2.5 w-2.5 rounded-full" [ngClass]="coverageDotClass(item)"></span>
               }
-              {{ item.label }}
+              {{ item.label | translate }}
             </div>
           </div>
         }
@@ -45,7 +45,7 @@
   </div>
 
   @if (result_count()>0) {
-    <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-threat-actor">
+    <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_18px_rgba(15,23,42,0.05)]" data-testid="insights-section-threat-actor">
       <div class="flex cursor-pointer items-start justify-between gap-3" (click)="toggleSection('isThreatExpanded')" data-testid="insights-toggle-threat-actor">
         <div class="min-w-0">
           <span class="block truncate text-sm font-semibold text-[var(--color-text1)]">{{ 'Search in Threat Actor' | translate }}</span>
@@ -54,28 +54,28 @@
           </span>
         </div>
         <div [attr.aria-label]="(isSectionExpanded('isThreatExpanded') ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
-          <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isThreatExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+          <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isThreatExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [.light-theme_&]:invert-0 [.light-theme_&]:opacity-70" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
         </div>
       </div>
       @if (isSectionExpanded('isThreatExpanded')) {
         <div class="mt-4 space-y-4">
-          <div class="ui-consolidated-sub flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2">
-            <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="magnifier" class="h-4 w-4">
+          <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 focus-within:!border-[var(--color-blue-640)] focus-within:shadow-[0_0_0_2px_rgb(43_144_238/14%)]">
+            <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="" aria-hidden="true" class="h-4 w-4 [.light-theme_&]:brightness-0 [.light-theme_&]:opacity-60">
             <input type="text" [placeholder]="'common.actions.search' | translate" [(ngModel)]="searchQuery" class="flex-1 bg-transparent text-sm text-[var(--color-text1)] outline-none" data-testid="insights-threat-search-input" />
           </div>
           <div class="flex flex-wrap gap-2">
             @for (option of filterOptions; track option) {
-              <button type="button" class="rounded-full border px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-720)]" [ngClass]="selectedFilter === option ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'ui-consolidated-sub border-[var(--color-border)] text-[var(--color-text3)]'" (click)="toggleFilter(option)" [attr.data-testid]="'insights-threat-filter-' + (option | lowercase)">
-                {{ option }}
+              <button type="button" class="rounded-full border px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-720)]" [ngClass]="selectedFilter === option ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-640)] text-white' : 'ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] border-[var(--color-border)] text-[var(--color-text3)]'" (click)="toggleFilter(option)" [attr.data-testid]="'insights-threat-filter-' + (option | lowercase)">
+                {{ option | translate }}
               </button>
             }
           </div>
           @if (threatResults(); as threatItems) {
             <div class="relative overflow-hidden rounded-md">
               <div class="pointer-events-none absolute inset-x-0 top-0 z-10 h-5 bg-gradient-to-b from-[var(--ui-consolidated-main-bg)] to-transparent"></div>
-              <div class="ui-stagger-result-card flex max-h-48 flex-wrap gap-2 overflow-y-auto px-0.5 py-1 pr-1">
+              <div class="[animation:ui-stagger-result-card-enter_200ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:!animate-none flex max-h-48 flex-wrap gap-2 overflow-y-auto px-0.5 py-1 pr-1">
                 @for (item of threatItems; track item; let i = $index) {
-                  <button type="button" class="ui-consolidated-sub inline-flex max-w-full cursor-pointer items-center gap-2 rounded-full border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-text3)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-720)]" [ngClass]="copiedInsightItemKey === 'threat-' + i ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-720)]' : ''" (click)="copyInsightItem(item, 'threat', i, $event)" [attr.data-testid]="'insights-threat-item-' + i" [title]="(copiedInsightItemKey === 'threat-' + i ? ('Copied' | translate) : ('Copy' | translate)) + ': ' + item">
+                  <button type="button" class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] inline-flex max-w-full cursor-pointer items-center gap-2 rounded-full border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-text3)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-720)]" [ngClass]="copiedInsightItemKey === 'threat-' + i ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-720)]' : ''" (click)="copyInsightItem(item, 'threat', i, $event)" [attr.data-testid]="'insights-threat-item-' + i" [title]="(copiedInsightItemKey === 'threat-' + i ? ('Copied' | translate) : ('Copy' | translate)) + ': ' + item">
                     <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-blue-640)] opacity-80"></span>
                     <span class="min-w-0 truncate font-medium text-[var(--color-text1)]">{{ item }}</span>
                   </button>
@@ -93,7 +93,7 @@
   }
 
   @if (result_count()>0) {
-    <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" data-testid="insights-section-unique-urls">
+    <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_18px_rgba(15,23,42,0.05)]" data-testid="insights-section-unique-urls">
       <div class="flex cursor-pointer items-start justify-between gap-3" (click)="toggleSection('isUrlsExpanded')" data-testid="insights-toggle-unique-urls">
         <div class="min-w-0">
           <span class="block truncate text-sm font-semibold text-[var(--color-text1)]">{{ 'Unique URLs' | translate }}</span>
@@ -102,18 +102,18 @@
           </span>
         </div>
         <div [attr.aria-label]="(isSectionExpanded('isUrlsExpanded') ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
-          <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isUrlsExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+          <img [ngClass]="{ 'rotate-180': !isSectionExpanded('isUrlsExpanded') }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [.light-theme_&]:invert-0 [.light-theme_&]:opacity-70" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
         </div>
       </div>
       @if (isSectionExpanded('isUrlsExpanded')) {
-        <div class="ui-consolidated-sub mt-3 flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2" (click)="$event.stopPropagation()">
-          <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="search" class="h-3.5 w-3.5 ui-action-icon opacity-70">
-          <input type="text" [(ngModel)]="uniqueUrlSearchQuery" [placeholder]="('common.actions.search' | translate) + ' ' + ('Unique URLs' | translate)" class="min-w-0 flex-1 bg-transparent text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text5)]" [attr.aria-label]="('common.actions.search' | translate) + ' ' + ('Unique URLs' | translate)">
+        <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] mt-3 flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 focus-within:!border-[var(--color-blue-640)] focus-within:shadow-[0_0_0_2px_rgb(43_144_238/14%)]" (click)="$event.stopPropagation()">
+          <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="" aria-hidden="true" class="h-3.5 w-3.5 ui-action-icon opacity-70">
+          <input type="text" [(ngModel)]="uniqueUrlSearchQuery" [placeholder]="('common.actions.search' | translate) + ' ' + ('Unique URLs' | translate)" class="min-w-0 flex-1 bg-transparent text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text5)] [.light-theme_&]:placeholder:text-[#667b92]" [attr.aria-label]="('common.actions.search' | translate) + ' ' + ('Unique URLs' | translate)">
         </div>
         @if (getFilteredUniqueUrls(); as filteredUrls) {
           <div class="relative mt-3 overflow-hidden rounded-md">
             <div class="pointer-events-none absolute inset-x-0 top-0 z-10 h-5 bg-gradient-to-b from-[var(--ui-consolidated-main-bg)] to-transparent"></div>
-            <div class="ui-stagger-result-card max-h-64 overflow-y-auto py-1">
+            <div class="[animation:ui-stagger-result-card-enter_200ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:!animate-none max-h-64 overflow-y-auto py-1">
               @for (url of filteredUrls; track url.url; let i = $index) {
                 <button type="button" class="block w-full min-w-0 cursor-pointer border-b border-[var(--color-border)] px-3 py-2.5 text-left transition-colors last:border-b-0 hover:bg-[var(--color-blue-720)] focus-visible:bg-[var(--color-blue-720)] focus-visible:outline-none" [ngClass]="copiedUniqueUrlKey === url.url + '-' + i ? 'border-[var(--color-blue-640)]' : ''" (click)="copyUniqueUrl(url, i, $event)" [attr.data-testid]="'insights-unique-url-item-' + i" [title]="(copiedUniqueUrlKey === url.url + '-' + i ? ('Copied' | translate) : ('Copy' | translate)) + ': ' + url.url">
                   <div class="flex min-w-0 items-center gap-2">
@@ -138,29 +138,29 @@
   @for (section of dataSections; track section.key) {
     <div>
       @if (section.data?.length) {
-        <div class="ui-consolidated-main rounded-xl border border-[var(--color-border)] p-4" [attr.data-testid]="'insights-section-' + section.key">
+        <div class="ui-consolidated-main [&&&]:![background:var(--ui-consolidated-main-bg,#f1f5fb)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] rounded-xl border border-[var(--color-border)] p-4 [.light-theme_&]:shadow-[0_6px_18px_rgba(15,23,42,0.05)]" [attr.data-testid]="'insights-section-' + section.key">
           <div class="flex cursor-pointer items-start justify-between gap-3" (click)="toggleSection(section.key)" [attr.data-testid]="'insights-toggle-' + section.key">
             <div class="min-w-0">
-              <span class="block truncate text-sm font-semibold text-[var(--color-text1)]">{{ section.title }}</span>
+              <span class="block truncate text-sm font-semibold text-[var(--color-text1)]">{{ section.title | translate }}</span>
               <span class="mt-0.5 block truncate text-[11px] text-[var(--color-text4)]">
                 {{ section.data.length }} {{ 'items' | translate }} · {{ section.data[0] }}@if (section.data[1]) { · {{ section.data[1] }} }
               </span>
             </div>
             <div [attr.aria-label]="(isSectionExpanded(section.key) ? 'Collapse' : 'Expand') | translate" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-transparent transition-[border-color,transform] duration-150 hover:border-[var(--color-blue-640)] hover:-translate-y-[1px]">
-              <img [ngClass]="{ 'rotate-180': !isSectionExpanded(section.key) }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
+              <img [ngClass]="{ 'rotate-180': !isSectionExpanded(section.key) }" alt="" aria-hidden="true" class="h-5 w-5 brightness-0 invert transition-transform duration-150 [.light-theme_&]:invert-0 [.light-theme_&]:opacity-70" src="/assets/images/shared/theme/search_side_dropdown_icon_dark.svg">
             </div>
           </div>
           @if (isSectionExpanded(section.key)) {
-            <div class="ui-consolidated-sub mt-3 flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2" (click)="$event.stopPropagation()">
-              <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="search" class="h-3.5 w-3.5 ui-action-icon opacity-70">
-              <input type="text" [(ngModel)]="sectionSearchQueries[section.key]" [placeholder]="('common.actions.search' | translate) + ' ' + section.title" class="min-w-0 flex-1 bg-transparent text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text5)]" [attr.aria-label]="('common.actions.search' | translate) + ' ' + section.title">
+            <div class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] mt-3 flex items-center gap-2 rounded-lg border border-[var(--color-border)] px-3 py-2 focus-within:!border-[var(--color-blue-640)] focus-within:shadow-[0_0_0_2px_rgb(43_144_238/14%)]" (click)="$event.stopPropagation()">
+              <img src="/assets/images/shared/theme/magnifyingglasswhite.svg" alt="" aria-hidden="true" class="h-3.5 w-3.5 ui-action-icon opacity-70">
+              <input type="text" [(ngModel)]="sectionSearchQueries[section.key]" [placeholder]="('common.actions.search' | translate) + ' ' + (section.title | translate)" class="min-w-0 flex-1 bg-transparent text-xs text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text5)] [.light-theme_&]:placeholder:text-[#667b92]" [attr.aria-label]="('common.actions.search' | translate) + ' ' + (section.title | translate)">
             </div>
             @if (getFilteredSectionData(section); as filteredItems) {
               <div class="relative mt-3 overflow-hidden rounded-md">
                 <div class="pointer-events-none absolute inset-x-0 top-0 z-10 h-5 bg-gradient-to-b from-[var(--ui-consolidated-main-bg)] to-transparent"></div>
-                <div class="ui-stagger-result-card flex max-h-64 flex-wrap gap-2 overflow-y-auto px-0.5 py-1 pr-1">
+                <div class="[animation:ui-stagger-result-card-enter_200ms_cubic-bezier(0.22,1,0.36,1)_both] motion-reduce:!animate-none flex max-h-64 flex-wrap gap-2 overflow-y-auto px-0.5 py-1 pr-1">
                   @for (item of filteredItems; track item; let i = $index; let isLast = $last) {
-                    <button type="button" class="ui-consolidated-sub inline-flex max-w-full cursor-pointer items-center gap-2 rounded-full border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-text3)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-720)]" [ngClass]="copiedInsightItemKey === section.key + '-' + i ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-720)]' : ''" (click)="copyInsightItem(item, section.key, i, $event)" [attr.data-testid]="'insights-item-' + section.key + '-' + i" [title]="(copiedInsightItemKey === section.key + '-' + i ? ('Copied' | translate) : ('Copy' | translate)) + ': ' + item">
+                    <button type="button" class="ui-consolidated-sub [&&&]:![background:var(--ui-consolidated-sub-bg,#fff)] [&&&]:![border-color:var(--ui-consolidated-border,#d7e2ef)] hover:[&&&]:![background:var(--ui-consolidated-sub-hover,#fbfdff)] inline-flex max-w-full cursor-pointer items-center gap-2 rounded-full border border-[var(--color-border)] px-2.5 py-1.5 text-xs text-[var(--color-text3)] transition-colors hover:border-[var(--color-blue-640)] hover:bg-[var(--color-blue-720)]" [ngClass]="copiedInsightItemKey === section.key + '-' + i ? 'border-[var(--color-blue-640)] bg-[var(--color-blue-720)]' : ''" (click)="copyInsightItem(item, section.key, i, $event)" [attr.data-testid]="'insights-item-' + section.key + '-' + i" [title]="(copiedInsightItemKey === section.key + '-' + i ? ('Copied' | translate) : ('Copy' | translate)) + ': ' + item">
                       <span class="h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-blue-640)] opacity-80"></span>
                       <span class="min-w-0 truncate font-medium text-[var(--color-text1)]">{{ item }}</span>
                     </button>

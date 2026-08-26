@@ -1,8 +1,8 @@
 <div class="w-full p-3 pb-[150px] md:p-4 md:pb-[150px]">
-  <div class="ui-page-container w-full max-w-[2400px]">
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]">
     <div class="mb-4 flex items-center justify-between gap-3 max-[640px]:flex-col max-[640px]:items-start">
       <div>
-        <h1 class="ui-page-title">{{ 'Alert Scanners' | translate }}</h1>
+        <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Alert Scanners' | translate }}</h1>
         <p class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Enable or disable alert scanners from running during tenant scans.' | translate }}</p>
       </div>
       <button type="button" class="inline-flex h-9 items-center gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 text-[13px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)]" (click)="backToHome()">

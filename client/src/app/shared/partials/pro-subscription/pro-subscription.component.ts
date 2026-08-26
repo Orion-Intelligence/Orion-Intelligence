@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-pro-subscription',
   standalone: true,
   imports: [CommonModule, FormsModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './pro-subscription.component.html'
 })
 export class ProSubscriptionComponent {

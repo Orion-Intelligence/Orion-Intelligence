@@ -1,5 +1,5 @@
 import { AsyncPipe, DatePipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpParams } from '@angular/common/http';
 import { Router } from '@angular/router';
@@ -20,6 +20,7 @@ import { TakedownActionComponent } from '../../../shared/partials/takedown-actio
   selector: 'app-takedown-requests',
   standalone: true,
   imports: [FormsModule, DatePipe, NgClass, NgOptimizedImage, AsyncPipe, FiltersComponent, PaginationComponent, TranslatePipe, TakedownRejectionPopupComponent, TakedownActionComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './takedown-requests.component.html'
 })
 export class TakedownRequestsComponent implements OnInit, AfterViewInit {
@@ -165,13 +166,13 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
   statusClass(status: string): string {
     switch (status) {
       case 'accepted':
-        return 'border-[rgba(40,167,69,0.35)] bg-[rgba(40,167,69,0.1)] text-[#7ee787]';
+        return 'border-[rgba(40,167,69,0.35)] bg-[rgba(40,167,69,0.1)] text-[#7ee787] [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800';
       case 'denied':
-        return 'border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.1)] text-[#ff8a8a]';
+        return 'border-[rgba(220,53,69,0.35)] bg-[rgba(220,53,69,0.1)] text-[#ff8a8a] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800';
       case 'failed':
-        return 'border-[rgba(255,193,7,0.35)] bg-[rgba(255,193,7,0.1)] text-[#ffd866]';
+        return 'border-[rgba(255,193,7,0.35)] bg-[rgba(255,193,7,0.1)] text-[#ffd866] [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800';
       default:
-        return 'border-[rgba(87,165,235,0.35)] bg-[rgba(87,165,235,0.1)] text-[var(--color-blue-640)]';
+        return 'border-[rgba(87,165,235,0.35)] bg-[rgba(87,165,235,0.1)] text-[var(--color-blue-640)] [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800';
     }
   }
 

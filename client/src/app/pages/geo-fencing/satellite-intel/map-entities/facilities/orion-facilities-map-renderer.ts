@@ -151,7 +151,9 @@ export class OrionFacilitiesMapRenderer {
     });
     marker.__orionFacilityIconRef = markerIcon.componentRef;
     marker.__orionFacilityPopupRef = popup.componentRef;
-    marker.bindPopup(popup.element, { className: 'orion-popup' });
+    marker.bindPopup(popup.element, {
+      className: 'orion-popup [&_.leaflet-popup-content-wrapper]:!border-0 [&_.leaflet-popup-content-wrapper]:!bg-transparent [&_.leaflet-popup-content-wrapper]:!p-0 [&_.leaflet-popup-content-wrapper]:!shadow-none [&_.leaflet-popup-content]:!m-0 [&_.leaflet-popup-tip]:!bg-transparent [&_.leaflet-popup-tip]:!shadow-none',
+    });
     marker.orionFeature = feature;
     marker.on('click', () => {
       this.onFeatureSelected(feature);

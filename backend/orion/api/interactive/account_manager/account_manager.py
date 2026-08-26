@@ -34,11 +34,11 @@ class AccountManager:
     def __init__(self):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "profile"
+        self.IMAGE_DIR = self.BASE_DIR / "workspace" / "resource" / "profile"
         self._engine = mongo_controller.get_instance().get_engine()
 
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.TENANT_DIR = self.BASE_DIR / "static" / "resource" / "tenant"
+        self.TENANT_DIR = self.BASE_DIR / "workspace" / "resource" / "tenant"
         self.TENANT_DIR.mkdir(parents=True, exist_ok=True)
         if AccountManager.__instance is not None:
             raise Exception("This class is a singleton!")

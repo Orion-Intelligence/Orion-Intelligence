@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, input, output } from '@angular/core';
+import { Component, HostListener, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AlertAllIoc, AlertModel } from '../../../../shared/model/company-profile/node.model';
 import { FormsModule } from '@angular/forms';
@@ -9,11 +9,13 @@ import { map } from 'rxjs';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { overlayAnimation, popupAnimation } from '../../../../shared/animations/popup.animations';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 @Component({
   selector: 'app-add-custom-alert',
   imports: [CommonModule, FormsModule, TranslatePipe],
   templateUrl: './add-custom-alert.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [overlayAnimation, popupAnimation],
 })
 export class AddCustomAlertComponent implements OnInit {
@@ -29,7 +31,7 @@ export class AddCustomAlertComponent implements OnInit {
   readonly editAlertData = input<AlertModel | null>(null);
   readonly cancle = output<boolean>();
 
-  constructor(public appService: AppService, public apiService: ApiService, public router: Router, public route: ActivatedRoute, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService) { }
+  constructor(public appService: AppService, public apiService: ApiService, public router: Router, public route: ActivatedRoute, private messageNotificationService: MessageNotificationService, private licenseService: LicenseService, private translationService: TranslationService) { }
 
   get allowedIocTypes() {
     return this.appService.entities();
@@ -148,7 +150,7 @@ export class AddCustomAlertComponent implements OnInit {
         this.cancleAlert(true);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || 'alert operation failed');
+        this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Alert operation failed'));
       }
     });
   }

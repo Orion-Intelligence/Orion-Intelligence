@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { popupAnimation } from '../../animations/popup.animations';
 import { TranslatePipe } from '../../pipes/translate.pipe';
@@ -7,6 +7,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-password-confirmation-popup',
   imports: [FormsModule, TranslatePipe],
   templateUrl: './password-confirmation-popup.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [popupAnimation],
 })
 export class PasswordConfirmationPopupComponent {

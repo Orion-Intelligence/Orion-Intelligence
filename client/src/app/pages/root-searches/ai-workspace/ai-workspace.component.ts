@@ -1,11 +1,11 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { AppService } from '../../../services/core/app/app.service';
-import { AiWorkspaceMessage, AiWorkspaceTrigger } from '../../../shared/model/chat/ai-workspace-message.model';
+import { AiWorkspaceMessage, AiWorkspaceTrigger } from './model/ai-workspace-message.model';
 import { AiWorkspacePrompt } from '../../../shared/constants/shared-enums';
 import { ResultRowHelperService } from '../../../shared/services/result-row-helper.service';
 import { NexusChatService } from './nexus-chat.service';
@@ -13,10 +13,11 @@ import { BotMessageActionsComponent } from './bot-message-actions/bot-message-ac
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { AiChatSession, NexusChatMessage } from '../../../shared/model/nexus/ai-chat-session.model';
+import { AiChatSession, NexusChatMessage } from './model/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { AiDirectory } from './ai-directory/ai-directory';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
 
@@ -31,6 +32,7 @@ interface PendingNexusStream {
   selector: 'app-ai-workspace',
   standalone: true,
   imports: [CommonModule, DatePipe, FormsModule, BotMessageActionsComponent, MessageScrollRailComponent, AiChatSidebarComponent, AiDirectory, MarkdownPipe, ProfileComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ai-workspace.component.html',
 })
 export class AiWorkspaceComponent implements OnInit, OnDestroy {
@@ -70,7 +72,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   activeSessionId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
-  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef) { }
+  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef, private readonly translationService: TranslationService) { }
 
   ngOnInit(): void {
     const requestedView = this.route.snapshot.queryParamMap.get('view');
@@ -227,7 +229,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
         }
         this.activeChatRequest = undefined;
       };
-      const fail = (errorText = 'Something went wrong. Try again.') => {
+      const fail = (errorText = this.translationService.translate('Something went wrong. Try again.')) => {
         if (finished) {
           return;
         }
@@ -243,7 +245,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           return;
         }
         if (!reply.trim()) {
-          fail('Nexus returned no response. Try again.');
+          fail(this.translationService.translate('Nexus returned no response. Try again.'));
           return;
         }
         finished = true;
@@ -267,7 +269,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }
           if (chunk.error) {
-            fail(chunk.response || 'Something went wrong. Try again.');
+            fail(chunk.response || this.translationService.translate('Something went wrong. Try again.'));
             return;
           }
           if (chunk.delta) {
@@ -662,11 +664,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.activeChatRequest = undefined;
   }
 
-  private createErrorMessage(text: string, errorText = 'Something went wrong. Try again.'): AiWorkspaceMessage {
+  private createErrorMessage(text: string, errorText = this.translationService.translate('Something went wrong. Try again.')): AiWorkspaceMessage {
     return {
       id: crypto.randomUUID(),
       sender: 'error',
-      text: errorText.trim() || 'Something went wrong. Try again.',
+      text: errorText.trim() || this.translationService.translate('Something went wrong. Try again.'),
       time: new Date(),
       retryPayload: text,
     };

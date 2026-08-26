@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseAnalyst, CaseClosure } from '../../../../../../shared/model/case-management/case.model';
-import { CLOSURE_REASON_OPTIONS } from '../../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseAnalyst, CaseClosure } from '../../case.model';
+import { CLOSURE_REASON_OPTIONS } from '../../case-management.defaults';
 import { TooltipDirective } from '../../../../../../shared/directive/tooltip-directive.directive';
 import { caseInlineMotion, caseModeSwapMotion } from '../case-details.animations';
 import { getCaseAnalystLabel, getCaseDisplayLabel, getFormattedCaseDateTime } from '../case-details-formatters';
@@ -15,6 +15,7 @@ import { TranslatePipe } from '../../../../../../shared/pipes/translate.pipe';
   imports: [CommonModule, FormsModule, TooltipDirective, CaseEditDrawerComponent, TranslatePipe],
   animations: [caseInlineMotion, caseModeSwapMotion],
   host: { class: 'block' },
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-closure-section.html'
 })
 export class CaseClosureSectionComponent {

@@ -1,13 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Case, CaseAnalyst, Priority, Severity } from '../../../shared/model/case-management/case.model';
+import { Case, CaseAnalyst, Priority, Severity } from './model/case.model';
 import { AddNewCase } from './model/add-new-case/add-new-case';
 import { CaseManagement } from './case-management-service/case-management';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { CaseDialog } from './model/case-dialog/case-dialog';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { finalize } from 'rxjs';
@@ -18,6 +19,7 @@ import { AdminTenantAlerts } from './model/admin-tenant-alerts/admin-tenant-aler
 @Component({
   selector: 'app-sidebar-user-case-management',
   imports: [CommonModule, FormsModule, AddNewCase, ConfirmationPopupComponent, TranslatePipe, CaseDialog, CaseFilterRowComponent, CaseAnalyticsPanel, AdminTenantAlerts],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-case-management.html'
 })
 export class SidebarUserCaseManagement implements OnInit {
@@ -35,7 +37,7 @@ export class SidebarUserCaseManagement implements OnInit {
   caseFilters: CaseListFilters = { ...DEFAULT_CASE_LIST_FILTERS };
   caseManagementMode: 'list' | 'analytics' | 'alerts' = 'list';
 
-  constructor(private router: Router, private route: ActivatedRoute, private caseService: CaseManagement, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService) { }
+  constructor(private router: Router, private route: ActivatedRoute, private caseService: CaseManagement, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
     this.restoreModeFromRoute();
@@ -195,9 +197,9 @@ export class SidebarUserCaseManagement implements OnInit {
     if (!value) {
       return '-';
     }
-    return value
+    return this.translationService.translate(value
       .replace(/[_-]/g, ' ')
-      .replace(/\b\w/g, char => char.toUpperCase());
+      .replace(/\b\w/g, char => char.toUpperCase()));
   }
 
   toggleArchivedCases(): void {
@@ -237,7 +239,7 @@ export class SidebarUserCaseManagement implements OnInit {
           this.analysts = analysts || [];
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail || 'Failed to load analysts');
+          this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Failed to load analysts'));
           this.closeAssignAnalystDialog();
         }
       });
@@ -272,13 +274,13 @@ export class SidebarUserCaseManagement implements OnInit {
       .pipe(finalize(() => this.isAssignAnalystSaving = false))
       .subscribe({
         next: (updatedCase) => {
-          this.messageNotificationService.show('Case analyst assigned successfully', 'success');
+          this.messageNotificationService.show(this.translationService.translate('Case analyst assigned successfully'), 'success');
           this.cases = this.cases.map(item =>
             item.caseId === updatedCase.caseId ? updatedCase : item);
           this.closeAssignAnalystDialog();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail || 'Failed to assign analyst');
+          this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Failed to assign analyst'));
         }
       });
   }

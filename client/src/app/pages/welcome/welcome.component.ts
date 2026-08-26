@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { HeaderComponent } from "../../shared/partials/header/login-header/header.component";
 import { ActivatedRoute } from '@angular/router';
@@ -9,6 +9,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-welcome',
   imports: [HeaderComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './welcome.component.html',
 })
 export class WelcomeComponent implements OnInit {

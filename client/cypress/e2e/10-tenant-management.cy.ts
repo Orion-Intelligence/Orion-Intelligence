@@ -142,7 +142,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     cy.location('pathname').should('include', '/dashboard/profile/tenant');
-    cy.get('[data-testid="tenant-edit-button"]').first().click({ force: true });
+    cy.get('[data-testid="tenant-row"]').first().click({ force: true });
     cy.get('[data-testid="tenant-edit-form-panel"]')
       .first()
       .as('tenantEditFormPanel')
@@ -338,23 +338,21 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     openTenantSettings();
     cy.contains('app-smtp-settings-block', 'Network Configuration').should('be.visible');
 
-    cy.get('[data-testid="system-settings-mail-edit"]').scrollIntoView().should('be.visible').click();
     fillTenantNetworkConfiguration('localhost', '1');
     cy.intercept('POST', '**/api/update/tenants').as('saveWrongTenantMail');
-    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveWrongTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('eq', 424);
     cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('be.visible');
 
-    cy.get('[data-testid="system-settings-mail-edit"]').scrollIntoView().should('be.visible').click();
     fillTenantNetworkConfiguration('mailpit', '1025');
     cy.intercept('POST', '**/api/update/tenants').as('saveRightTenantMail');
-    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="system-settings-mail-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveRightTenantMail', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
-    cy.get('[data-testid="system-settings-mail-edit"]', {timeout: 30000}).should('be.visible');
+    cy.get('[data-testid="system-settings-mail-save"]', {timeout: 30000}).should('be.disabled');
     cy.contains('app-smtp-settings-block', 'Mail configuration is not working').should('not.exist');
     cy.logout();
   });
@@ -413,19 +411,17 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.scrollDashboardToBottom()
     cy.contains('div', 'Privacy').should('be.visible');
 
-    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
     cy.get('input[name="tenant_phone"]').scrollIntoView().should('be.visible').clear().type(phoneValue);
     cy.get('input[name="tenant_country"]').scrollIntoView().should('be.visible').clear().type(countryValue);
     cy.get('input[name="tenant_city"]').scrollIntoView().should('be.visible').clear().type(cityValue);
 
     cy.intercept('POST', '**/api/update/tenants').as('saveTenantContact');
-    cy.get('[data-testid="tenant-contact-edit"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-contact-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveTenantContact', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
 
     cy.scrollDashboardToBottom();
-    cy.get('button[aria-label="Edit privacy settings"]').scrollIntoView().should('be.visible').click();
     cy.contains('label', 'Allow User Profile Visibility')
       .scrollIntoView()
       .closest('div.rounded-lg')
@@ -436,7 +432,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       });
 
     cy.intercept('POST', '**/api/update/tenants').as('saveTenantPrivacy');
-    cy.get('button[aria-label="Save privacy settings"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
     cy.wait('@saveTenantPrivacy', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);

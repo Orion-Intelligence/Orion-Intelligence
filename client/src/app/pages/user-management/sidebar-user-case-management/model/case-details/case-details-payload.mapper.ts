@@ -1,5 +1,5 @@
-import { Case, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseTask, CaseTaskRequest, CaseUpdateRequest } from '../../../../../shared/model/case-management/case.model';
-import { DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE } from '../../../../../shared/model/case-management/case-management.defaults';
+import { Case, CaseArtifact, CaseArtifactRequest, CaseClosure, CaseClosureRequest, CaseComment, CaseCommentRequest, CaseEntity, CaseEntityRequest, CaseTask, CaseTaskRequest, CaseUpdateRequest } from '../case.model';
+import { DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE } from '../case-management.defaults';
 import { getPrimaryCaseEntity, getRelatedCaseEntities } from './case-details-formatters';
 
 export function createCaseId(): string {

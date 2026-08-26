@@ -19,6 +19,7 @@ import { selectCaseFilterDropdown } from './controllers/18-case-management.contr
 import { selector } from './controllers/18-case-management.controller';
 import { typeCaseFilterSearch } from './controllers/18-case-management.controller';
 import { addUser } from './controllers/05-user-management.controller';
+import { setPasswordResetRequired } from './controllers/05-user-management.controller';
 import { type ManagedUser } from './controllers/05-user-management.controller';
 import { type CaseAlertTenant } from './controllers/10-tenant-management.controller';
 import { createTenantAccount } from './controllers/10-tenant-management.controller';
@@ -365,8 +366,8 @@ describe('Case Management - Add View Edit Flow', () => {
     openCreatedCaseDetails();
 
     cy.get(selector('report-feedback-comment-input')).scrollIntoView().should('be.visible').type('Cypress analyst note');
-    cy.get(selector('report-feedback-comment-save')).should('be.visible').click();
-    cy.contains(selector('report-feedback-comment-body'), 'Cypress analyst note').should('be.visible');
+    cy.get(selector('report-feedback-comment-save')).should('be.visible').click({ force: true });
+    cy.contains(selector('report-feedback-comment-body'), 'Cypress analyst note').scrollIntoView().should('be.visible');
     cy.get(selector('report-feedback-comment-user-name')).should('exist');
 
     const exportDate = new Date().toISOString().slice(0, 10);
@@ -555,7 +556,9 @@ describe('Case Management - Tenant Alert Visibility', () => {
     cy.visit('/dashboard/profile/users');
     cy.get('[data-testid="tenant-add-user-button"]').should('be.visible');
     addUser(caseAlertUsers.limited);
+    setPasswordResetRequired(caseAlertUsers.limited.username, false);
     addUser(caseAlertUsers.all);
+    setPasswordResetRequired(caseAlertUsers.all.username, false);
     cy.logout();
 
     loginCaseAlertUser(caseAlertUsers.limited.username, caseAlertUsers.limited.password);

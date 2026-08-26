@@ -1,4 +1,4 @@
-<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)]">
+<div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
     <div class="flex h-12 items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-4">
         <div class="flex items-center gap-1.5">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Tasks' | translate }}</h2>
@@ -41,7 +41,7 @@
                         <select [(ngModel)]="task.status" name="task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35" data-testid="case-task-status-select">
                             @for (status of getTaskStatusOptions(task); track status.value) {
                             <option [value]="status.value" [disabled]="isReadonlyTaskStatusOption(status.value)">
-                                {{ status.label }}
+                                {{ status.label | translate }}
                             </option>
                             }
                         </select>
@@ -143,7 +143,7 @@
                             'Status' | translate }}</label>
                         <select [(ngModel)]="newTask.status" name="new-task-status" class="ui-select mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" data-testid="case-task-status-select">
                             @for (status of taskStatusOptions; track status.value) {
-                            <option [value]="status.value">{{ status.label }}</option>
+                            <option [value]="status.value">{{ status.label | translate }}</option>
                             }
                         </select>
                     </div>

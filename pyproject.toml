@@ -21,8 +21,6 @@ elasticsearch = "9.3.0"
 termcolor = "3.3.0"
 redis = "7.3.0"
 motor = "3.7.1"
-brotli-asgi = "1.6.0"
-aiohttp = "3.14.3"
 uvicorn = "0.42.0"
 httpx = "0.28.1"
 gunicorn = "25.1.0"
@@ -43,6 +41,7 @@ markers = [
     "journey: end-to-end user journey tests; monkeypatch fixture is forbidden",
 ]
 filterwarnings = [
+    'ignore:Field name "schema" in "social_wanted" shadows an attribute in parent "BaseModel".*:UserWarning',
     "ignore:`FieldValidationInfo` is deprecated, use `ValidationInfo` instead.:DeprecationWarning:pydantic_core.*",
     "ignore:Pydantic V1 style `@root_validator` validators are deprecated.*",
     "ignore:Support for class-based `config` is deprecated, use ConfigDict instead.*:DeprecationWarning:pydantic.*",

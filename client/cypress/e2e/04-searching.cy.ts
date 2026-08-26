@@ -15,7 +15,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
   it('runs General Intelligence search flow for All, General, and Forums', () => {
     openSidebarGroup('General Intelligence');
     typeDashboardSearchSlow('bitcoin');
-    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
     cy.docsScreenshot('general-intelligence-results');
     cy.openSideFilter();
     cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
@@ -77,7 +77,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.visit('/dashboard/breach/tracking?page=1');
     waitForSearchReady();
     typeDashboardSearchSlow('elena.pierce@samplemail.test');
-    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"], app-json-api-viewer')
+    cy.get('[data-testid="result-card"], app-json-api-viewer')
       .should('have.length.greaterThan', 0);
     cy.docsScreenshot('data-breach-tracking');
   });
@@ -144,7 +144,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Exploit');
     typeDashboardSearchSlow('exploit');
-    cy.get('[data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]').should('have.length.greaterThan', 0);
+    cy.get('[data-testid="result-card"]').should('have.length.greaterThan', 0);
     cy.docsScreenshot('exploit-results');
     clickOpenExploitReport();
 
@@ -182,7 +182,7 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     openSidebarGroup('Actors & Malware');
     waitForSearchReady();
     typeDashboardSearchSlow('malware');
-    cy.get('[data-testid="apt-intel-result-card"], [data-testid="result-card"], tbody tr.cursor-pointer[id^="item-"]', { timeout: 60000 })
+    cy.get('[data-testid="apt-intel-result-card"], [data-testid="result-card"]', { timeout: 60000 })
       .should('have.length.greaterThan', 0);
     cy.docsScreenshot('actors-malware-results');
   });

@@ -233,14 +233,12 @@ export function addUser(user: ManagedUser) {
 }
 
 export function openUserEditor(username: string) {
-  cy.contains('tbody tr', username)
+  cy.contains('tbody tr[data-testid="tenant-user-row"]', username)
     .scrollIntoView()
     .should('be.visible')
-    .within(() => {
-      cy.get('[data-testid="tenant-edit-user-button"]').first().scrollIntoView().should('be.visible').click();
-    });
+    .click();
 
-  cy.contains('tbody tr', username)
+  cy.contains('tbody tr[data-testid="tenant-user-row"]', username)
     .next()
     .as('expandedUserEditor')
     .should('contain.text', 'Edit User');
@@ -274,19 +272,19 @@ export function setPasswordResetRequired(username: string, required: boolean) {
   });
 
   cy.get('@expandedUserEditor').within(() => {
-    cy.contains('button', 'Save changes').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="tenant-save-user-changes"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
   });
 }
 
 export function loginAsUser(username: string, password: string) {
   cy.intercept({ method: 'POST', pathname: '**/api/token' }).as('loginRequest');
-  cy.visit('/login');
+  cy.visitLoginWithCleanAuthState();
   cy.get('[data-testid="login-user"]').should('be.visible').clear().type(username);
   cy.get('[data-testid="login-pass"]').should('be.visible').clear().type(password, {log: false});
-  cy.get('[data-testid="login-button"], input.login-button').filter(':visible').first().should('be.visible').click({ force: true });
+  cy.get('[data-testid="login-button"]').filter(':visible').first().should('be.visible').click({ force: true });
   cy.waitForLoginRequest();
 
-  cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"], .dashboard_container')
+  cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
     .filter(':visible')
     .should('have.length.greaterThan', 0);
   cy.scrollDashboardToBottom();
@@ -317,14 +315,14 @@ export function loginAndClickSidebar(username: string, sidebarItems: string[], t
 
     if (username === 'testing5' && itemName === 'Stealer logs') {
       cy.get('body').then(($b) => {
-        if ($b.find('.pro-subscription_container').length) {
-          cy.get('.pro-subscription_container').should('be.visible');
-          cy.get('.pro-subscription_subscription-options input[type="radio"][value="annual"]').check();
+        if ($b.find('[data-testid="pro-subscription-overlay"]').length) {
+          cy.get('[data-testid="pro-subscription-overlay"]').should('be.visible');
+          cy.get('[data-testid="pro-subscription-options"] input[type="radio"][value="annual"]').check();
           cy.get('input#name').clear().type(testData.stealer_upgrade_name);
           cy.get('input#phone').clear().type('03001234567');
           cy.get('input#email').clear().type(testData.stealer_upgrade_email);
-          cy.get('form.pro-subscription_payment-form').submit();
-          cy.get('button.pro-subscription_btn-close').should('be.visible').click();
+          cy.get('[data-testid="pro-subscription-payment-form"]').submit();
+          cy.get('[data-testid="pro-subscription-close"]').should('be.visible').click();
         }
       });
     }
@@ -340,7 +338,7 @@ export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => 
       body: {message: 'sent'}
     });
   });
-  const subscriptionPopupSelector = '.ui-graph-popup-overlay';
+  const subscriptionPopupSelector = '[data-testid="pro-subscription-overlay"]';
 
   cy.get(subscriptionPopupSelector).should('be.visible');
   cy.contains('h2', 'Upgrade to Dark Web Shield Pro').should('be.visible');
@@ -395,21 +393,16 @@ export function deleteUsersByUsername(usernames: string[], usersUrl = '/dashboar
     const [username, ...rest] = remaining;
 
     openUsersList(usersUrl);
-    cy.contains('tbody tr', username).then(($row) => {
+    cy.contains('tbody tr[data-testid="tenant-user-row"]', username).then(($row) => {
       if (!$row.length) {
         cy.log(`User ${username} not found. Skip.`);
         deleteNext(rest);
         return;
       }
 
-      cy.wrap($row)
-        .find('[data-testid="tenant-edit-user-button"]')
-        .first()
-        .scrollIntoView()
-        .should('be.visible')
-        .click();
+      cy.wrap($row).scrollIntoView().should('be.visible').click();
 
-      cy.contains('tbody tr', username)
+      cy.contains('tbody tr[data-testid="tenant-user-row"]', username)
         .next()
         .within(() => {
           cy.get('[data-testid="tenant-delete-user-button"]').first().scrollIntoView().click({force: true});

@@ -1,15 +1,16 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { ApiService } from '../../../shared/services/api.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
-import { TenantIocSelectorComponent } from '../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
+import { TenantIocSelectorComponent } from '../../../shared/partials/tenant-ioc-selector/tenant-ioc-selector.component';
 
 @Component({
   selector: 'app-sidebar-user-ioc',
   imports: [CommonModule, TenantIocSelectorComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-ioc.component.html',
 })
 export class SidebarUserIocComponent implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, output } from '@angular/core';
+import { Component, OnDestroy, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -16,14 +16,17 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/sidebar-shell.component';
 
 @Component({
   selector: 'app-dashboard-sidebar',
   standalone: true,
-  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe],
+  imports: [NgOptimizedImage, NgClass, RouterLink, AsyncPipe, DashboardSidebarItemsComponent, SidebarSectionComponent, TooltipDirective, ChatWidgetComponent, TranslatePipe, SidebarShellComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
+  private readonly resizeHandler = () => this.checkScreenWidth();
   private readonly closeForSubscriptionHandler = () => {
     if (this.sidebar_default) {
       this.onToggleSidebar(this.mobile_menu_status);
@@ -61,7 +64,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
       .subscribe((e: NavigationEnd) => {
         this.handleProfileRoute(e.urlAfterRedirects);
       });
-    window.addEventListener('resize', this.checkScreenWidth.bind(this));
+    window.addEventListener('resize', this.resizeHandler);
     window.addEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
     this.checkScreenWidth();
   }
@@ -79,7 +82,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    window.removeEventListener('resize', this.checkScreenWidth.bind(this));
+    window.removeEventListener('resize', this.resizeHandler);
     window.removeEventListener('close-dashboard-sidebar', this.closeForSubscriptionHandler);
   }
 

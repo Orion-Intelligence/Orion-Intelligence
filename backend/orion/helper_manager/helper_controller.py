@@ -2,7 +2,6 @@ import asyncio
 import copy
 import json
 import hashlib
-import locale
 import re
 from pathlib import Path
 from datetime import datetime, timezone
@@ -13,7 +12,6 @@ from jinja2 import FileSystemLoader
 from urllib.parse import urlparse, urlunparse
 
 from deep_translator import GoogleTranslator
-from starlette.requests import Request
 from stopwords import get_stopwords
 
 from orion.constants import constant
@@ -42,11 +40,6 @@ class helper_controller:
         except json.JSONDecodeError as e:
             print(f"Invalid JSON: {e}")
             return {}
-
-    @staticmethod
-    def create_template_context(request: Request, response_data: dict) -> dict:
-        return {"request": request, "vars": response_data}
-
 
     @staticmethod
     def extract_stealer_hash(log):
@@ -121,13 +114,6 @@ class helper_controller:
         else:
             raise ValueError("Input must be a dictionary or a string")
         return hashlib.sha256(data_string.encode('utf-8')).hexdigest()
-
-    @staticmethod
-    def on_create_random_search_count(p_doc_size):
-        locale.setlocale(locale.LC_ALL, '')
-        m_doc_size = 1000 * p_doc_size / 10
-        m_doc_size = int(m_doc_size * 2.36 + ((m_doc_size * 2.36) / 2) * 3)
-        return f'{m_doc_size * 100:n}'
 
     @staticmethod
     def detect_and_translate(text: str, target_lang: str) -> str:
@@ -226,8 +212,7 @@ class helper_controller:
             autoescape=True
         )
         satellite_asset = map_entities_env.get_template(CONSTANTS.S_SATELLITE_ASSET_FILE_NAME).render()
-        version, data = helper_controller.parse_satellite_asset(satellite_asset)
-        constant.map_entities_version = version
+        _, data = helper_controller.parse_satellite_asset(satellite_asset)
         constant.map_entities_data = data
 
     @staticmethod
@@ -268,7 +253,6 @@ class helper_controller:
             REDIS_COMMANDS.S_GET_STRING, [REDIS_KEYS.SATELLITE_ASSET_VERSION, None, None])
         stored_version = int(stored_version or 0)
 
-        constant.map_entities_version = version
         constant.map_entities_data = data
 
         if stored_version and version <= stored_version:
@@ -353,13 +337,6 @@ class helper_controller:
                 domain = domain[4:]
             domains.add(domain)
         return sorted(domains)
-
-    @staticmethod
-    def strip_query(query, size=20):
-        query["size"] = size
-        query.pop("highlight", None)
-        query.pop("suggest", None)
-        return query
 
     @staticmethod
     def transform_query_match(query: str, matchtype: str) -> str:

@@ -3,7 +3,7 @@ import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/r
 import { Observable } from 'rxjs';
 import { shareReplay } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
-import { InsightCallbackModel } from '../model/homepage/stats_insight.model';
+import { InsightCallbackModel } from '../../pages/homepage/model/stats_insight.model';
 @Injectable({ providedIn: 'root' })
 export class InsightResolver implements Resolve<InsightCallbackModel> {
   private cache$?: Observable<InsightCallbackModel>;

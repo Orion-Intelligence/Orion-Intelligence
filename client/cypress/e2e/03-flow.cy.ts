@@ -48,12 +48,22 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       clickSidebarSubItem('admin', section);
       if (section === 'Monitoring') {
         cy.get('[data-testid="monitoring-tab-auditlog"]').should('be.visible').click();
-        cy.get('app-auditlog .ui-page-title').should('contain.text', 'Audit Logs');
+        cy.get('[data-testid="auditlog-page-title"]').should('contain.text', 'Audit Logs');
       }
     });
 
-    cy.get('[data-testid="sidebar-collapse-button"]').should('exist').then(($btn) => ($btn[0] as HTMLButtonElement).click());
-    cy.get('[data-testid="sidebar-expand-button"]').should('be.visible').click();
+    cy.get('app-dashboard-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('[data-testid="sidebar-collapse-button"]')
+      .should('have.attr', 'aria-label', 'Collapse sidebar')
+      .then(($btn) => ($btn[0] as HTMLButtonElement).click());
+    cy.get('app-dashboard-sidebar [data-sidebar-expanded]').should('not.exist');
+    cy.get('app-dashboard-sidebar [data-sidebar-collapsed]').should('be.visible');
+    cy.get('[data-testid="sidebar-expand-button"]')
+      .should('be.visible')
+      .and('have.attr', 'aria-label', 'Expand sidebar')
+      .click();
+    cy.get('app-dashboard-sidebar [data-sidebar-expanded]').should('be.visible');
+    cy.get('app-dashboard-sidebar [data-sidebar-collapsed]').should('not.exist');
 
     openSidebarGroup('General Intelligence');
 
@@ -140,14 +150,6 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.loginAsAdmin();
 
     getHeatmapComponent().then((comp: any) => {
-      comp.ngOnChanges({
-        data: {
-          firstChange: false,
-          currentValue: [{name: 'Mockland', value: 2}],
-          previousValue: []
-        }
-      });
-
       let appService = comp['appService'];
       let originalWorld = appService.worldJson();
       appService.worldJson.set(null);
@@ -171,13 +173,13 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
       let reports = comp.getReportsByCountry('Canada');
       expect(reports.length).to.be.greaterThan(0);
       comp['openCountryReport']('Canada');
-      expect(comp.isOpenCountryReport).to.equal(true);
-      expect(Array.isArray(comp.selectedCountryReports)).to.equal(true);
+      expect(comp.isOpenCountryReport()).to.equal(true);
+      expect(Array.isArray(comp.selectedCountryReports())).to.equal(true);
       comp.closeCountryReport();
-      expect(comp.isOpenCountryReport).to.equal(false);
+      expect(comp.isOpenCountryReport()).to.equal(false);
       comp['onCountryClick']({});
       comp['onCountryClick']({properties: {name: 'Canada'}});
-      expect(comp.isOpenCountryReport).to.equal(true);
+      expect(comp.isOpenCountryReport()).to.equal(true);
       comp.closeCountryReport();
       comp['allCategoryReports'] = originalAll;
       comp.ngOnDestroy();
@@ -213,7 +215,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.visit('/dashboard/directory');
     waitForDirectoryRequest();
     cy.scrollDashboardToTop()
-    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
+    cy.get('[data-testid="directory-page-title"]').should('contain.text', 'Directory');
     assertDirectoryContentVisible();
     cy.docsScreenshot('directory-monitoring');
 
@@ -252,8 +254,8 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     cy.contains('No links found!').should('be.visible');
 
     resetDirectoryFilters();
-    cy.get('app-directory .ui-page-title').should('contain.text', 'Directory');
-    cy.get('app-directory .ui-page-description').should('contain.text', 'Live onion services and monitoring status.');
+    cy.get('[data-testid="directory-page-title"]').should('contain.text', 'Directory');
+    cy.get('[data-testid="directory-page-description"]').should('contain.text', 'Live onion services and monitoring status.');
     cy.logout();
   });
 });

@@ -28,8 +28,6 @@ export interface EntityOption {
 export class AppService {
   private sessionLoad$: Observable<void> | null = null;
   private configLoad$: Observable<void> | null = null;
-  private entitiesCache: EntityOption[] | null = null;
-  private sessionLoadPromise: Promise<void> | null = null;
   private demoTourLoadPromise: Promise<void> | null = null;
 
   public configData = signal<ConfigSettings>(new ConfigSettings());
@@ -116,9 +114,14 @@ export class AppService {
     this.appStorageService.setupWatcher(this.configData);
   }
 
-  loadSession(_forced = false): Observable<void> {
+  loadSession(forced = false): Observable<void> {
     if (this.sessionLoad$) {
       return this.sessionLoad$;
+    }
+
+    if (!forced && !this.appStorageService.hasActiveSession()) {
+      this.userSessionData.set(this.createEmptyUserSessionData());
+      return of(void 0);
     }
 
     this.sessionLoad$ = this.apiService.post<userSessionData>('get/tenant/node', {}).pipe(tap((session) => {

@@ -1,5 +1,5 @@
-import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { Case } from '../../../../../shared/model/case-management/case.model';
+import { ReportFeedbackModel } from '../../../../../shared/partials/report-interactions/models/report-feedback.model';
+import { Case } from '../case.model';
 
 export function buildCaseCommentsFeedback(caseData: Case | null, getAnalystLabel: (userId?: string) => string): ReportFeedbackModel {
   const comments = (caseData?.comments || []).map(comment => ({

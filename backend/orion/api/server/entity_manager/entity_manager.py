@@ -831,20 +831,6 @@ class entity_manager:
                 )
             )
 
-    async def clear_cti_graph(self):
-        try:
-            await run_in_threadpool(lambda: self.__db.collection("cti_edges").truncate())
-            await run_in_threadpool(lambda: self.__db.collection("cti_vertices").truncate())
-            await self._ensure_default_clusters()
-            return {
-                "status": "success",
-                "message": "CTI graph collections cleared and default clusters recreated.",
-                "schema_version": self.GRAPH_SCHEMA_VERSION,
-            }
-        except Exception as ex:
-            log.g().e(f"ARANGO CTI GRAPH CLEAR ERROR: {ex}")
-            raise HTTPException(status_code=500, detail="ARANGO CTI GRAPH CLEAR ERROR")
-
     async def get_entity_relations(self, query: EntityQueryModel):
         try:
             normalized_value = self._sanitize(self._normalize_key(query.query_value))

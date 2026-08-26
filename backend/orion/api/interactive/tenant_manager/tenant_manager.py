@@ -46,7 +46,7 @@ class TenantManager:
     def __init__(self):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
         self.BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-        self.IMAGE_DIR = self.BASE_DIR / "static" / "resource" / "profile"
+        self.IMAGE_DIR = self.BASE_DIR / "workspace" / "resource" / "profile"
         self._engine = mongo_controller.get_instance().get_engine()
 
         if TenantManager.__instance is not None:
@@ -844,7 +844,7 @@ class TenantManager:
                 alerts_allowed_all=alerts_allowed_all,
                 alerts_allowed_tenant_ids=alerts_allowed_tenant_ids,
                 tenant_uuid=tenant_uuid,
-                password_reset_required=False, )
+                password_reset_required=True, )
             
             await mail_manager.get_instance().validate_mail_configuration(tenant_id=tenant_uuid)
             await engine.save(user)

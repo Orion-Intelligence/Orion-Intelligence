@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { finalize } from 'rxjs';
@@ -18,6 +18,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { IocSearchComponent } from '../../../shared/partials/ioc-search/ioc-search.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 
 @Component({
@@ -26,11 +27,11 @@ import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.s
   imports: [CommonModule, PaginationComponent, FiltersComponent, EmptyQueryComponent, EmptyResultComponent, LoadingFormComponent, IocSearchComponent, TranslatePipe],
   templateUrl: './sidebar-user-event-management.component.html',
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sidebar-user-event-management.component.css'],
 })
 export class SidebarUserEventManagementComponent extends ValuePresentationBase implements OnInit, AfterViewInit {
   readonly searchBuilderTags = ['all', 'domain', 'email', 'ip'];
-  readonly searchBuilderLabels: Record<string, string> = { all: 'All', domain: 'Domain', email: 'Email', ip: 'IP Address', event_type: 'Event Type', source: 'Source', host: 'Host', user: 'User' };
   readonly searchBuilderValueValidators: RegExp[] = [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/];
   readonly searchBuilderTagValidators: Record<string, RegExp> = { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, domain: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, ip: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/ };
   query = '';
@@ -48,9 +49,15 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   sidebarReady = false;
   trackByIndex = (index: number) => index;
 
-  constructor(private apiService: ApiService, private appService: AppService, private licenseService: LicenseService, private router: Router, private dashboardService: DashboardService, public sidebarService: SidebarService, protected aiToolRoutingService: AiToolRoutingService) {
+  constructor(private apiService: ApiService, private appService: AppService, private licenseService: LicenseService, private router: Router, private dashboardService: DashboardService, public sidebarService: SidebarService, protected aiToolRoutingService: AiToolRoutingService, private translationService: TranslationService) {
     super();
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
+  }
+
+  get searchBuilderLabels(): Record<string, string> {
+    this.translationService.version();
+    return Object.fromEntries(Object.entries({ all: 'All', domain: 'Domain', email: 'Email', ip: 'IP Address', event_type: 'Event Type', source: 'Source', host: 'Host', user: 'User' })
+      .map(([key, label]) => [key, this.translationService.translate(label)]));
   }
 
   ngOnInit(): void {
@@ -150,7 +157,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
           this.expandedResultIndex = this.records.length === 1 ? 0 : null;
         },
         error: (error) => {
-          this.errorMessage = error?.error?.detail || 'Failed to search SIEM events';
+          this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to search SIEM events');
           this.displayQuery = this.query;
         }
       });
@@ -228,7 +235,8 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
 
   getActorLabel(): string {
     const user = this.appService.userSessionData().user;
-    const access = this.licenseService.isAdmin() ? 'Admin' : 'Maintainer';
+    this.translationService.version();
+    const access = this.translationService.translate(this.licenseService.isAdmin() ? 'Admin' : 'Maintainer');
     return `${access}: ${user.username}`;
   }
 }

@@ -9,7 +9,6 @@ from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from configs.token_auth_provider import setup_admin
 from configs.exception_handlers import global_exception_handler, validation_exception_handler
-from configs.swagger_config import configure_swagger
 from interface import interface
 from orion.helper_manager.env_handler import env_handler
 from orion.management.managers.service_manager import service_manager
@@ -23,6 +22,8 @@ from routes.api_micros import micro_routes
 from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.crawl_routes import crawl_routes
+from routes.extension_routes import extension_routes
+from routes.manage_profiles_routes import manage_profiles_routes
 from routes.geo_fencing_routes import geo_fencing_routes
 from routes.graph_routes import graph_routes
 from routes.public_api_routes import public_routes
@@ -32,7 +33,7 @@ from routes.social_routes import social_routes
 from routes.case_routes import case_routes
 
 BASE_DIR = Path(__file__).resolve().parent
-ANGULAR_BUILD_DIR = BASE_DIR / "build"
+ANGULAR_BUILD_DIR = BASE_DIR / "workspace" / "build"
 SWAGGER_STATIC_DIR = BASE_DIR / "static"
 
 
@@ -81,8 +82,9 @@ def dashboard_admin_redirect():
     return RedirectResponse(url="/admin/")
 
 
-configure_swagger(app)
 app.include_router(auth_router, include_in_schema=False)
+app.include_router(extension_routes, include_in_schema=False)
+app.include_router(manage_profiles_routes, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(alert_connector_routes, include_in_schema=False)

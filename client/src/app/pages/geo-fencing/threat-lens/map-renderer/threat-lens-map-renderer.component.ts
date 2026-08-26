@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, EventEmitter, NgZone, OnDestroy, Output, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { loadModules, setDefaultOptions } from 'esri-loader';
 import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey } from '../../models/geo-fencing.models';
 import { ThreatLensService } from '../threat-lens.service';
@@ -9,17 +9,20 @@ import { ThreatLensCountryLayerRenderer } from '../map-overlays/threat-lens-coun
 import { ThreatLensIpMarkerRenderer } from '../map-overlays/threat-lens-ip-marker.renderer';
 import { ThreatLensTooltipRenderer } from '../map-overlays/threat-lens-tooltip.renderer';
 import { ThreatLensArcBatchStatus, ThreatLensArcRenderResult, ThreatLensArcSelection, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensCountrySelection, ThreatLensIpRecord, ThreatLensIpViewportScanRequest } from '../models/threat-lens-map.types';
+import { TranslationService } from '../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-threat-lens-map-renderer',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './threat-lens-map-renderer.component.html',
 })
 export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy {
   @ViewChild('mapContainer', { static: true }) private mapContainer?: ElementRef<HTMLDivElement>;
   private view: any | null = null;
   private countryRenderer = new ThreatLensCountryLayerRenderer();
-  private tooltipRenderer = new ThreatLensTooltipRenderer();
+  private readonly translationService = inject(TranslationService);
+  private tooltipRenderer = new ThreatLensTooltipRenderer(key => this.translationService.translate(key));
   private arcRenderer: ThreatLensArcRenderer | null = null;
   private ipMarkerRenderer: ThreatLensIpMarkerRenderer | null = null;
   private geometryEngine: any | null = null;
@@ -338,8 +341,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     if (container) {
       const fallback = document.createElement('div');
       fallback.setAttribute('data-testid', 'threat-lens-map-fallback');
-      fallback.className = 'flex h-full w-full items-center justify-center bg-black text-[12px] text-[var(--color-text3)]';
-      fallback.textContent = 'Threat Lens map fallback';
+      fallback.className = 'flex h-full w-full items-center justify-center bg-black text-[12px] text-[var(--color-text3)] [body.light-theme_&]:bg-[#edf4fb]';
+      fallback.textContent = this.translationService.translate('Threat Lens map fallback');
       container.replaceChildren(fallback);
     }
     this.ngZone.run(() => this.mapReady.emit());
@@ -749,18 +752,6 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     return this.toThreatLensCoordinates(point);
-  }
-
-  private getExtentCenterCoordinates(extent: any): ThreatLensCoordinates | null {
-    const xmin = Number(extent?.xmin);
-    const xmax = Number(extent?.xmax);
-    const ymin = Number(extent?.ymin);
-    const ymax = Number(extent?.ymax);
-    if (![xmin, xmax, ymin, ymax].every(Number.isFinite)) {
-      return null;
-    }
-
-    return this.toThreatLensCoordinates({ x: (xmin + xmax) / 2, y: (ymin + ymax) / 2 });
   }
 
   private getExtentCornerCoordinates(extent: any): ThreatLensCoordinates[] {

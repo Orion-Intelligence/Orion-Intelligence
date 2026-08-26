@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FiltersComponent } from '../../shared/partials/filters/filters.component';
@@ -8,13 +8,14 @@ import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../shared/model/filter/filter.model';
 import { directory_filters } from '../../shared/constants/filters';
 import { SidebarService } from '../../shared/services/sidebar.service';
-import { DirectoryService } from '../../services/directory/directory.service';
-import { DirectoryCallbackModel } from '../../shared/model/directory/directory.model';
+import { DirectoryService } from './services/directory.service';
+import { DirectoryCallbackModel } from './model/directory.model';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-directory',
   templateUrl: './directory.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [
     FiltersComponent,
     DirectoryListComponent,

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 import hashlib
 import threading
-from typing import Any, List
+from typing import Any
 
 from bson import ObjectId
 from cryptography.fernet import Fernet
@@ -52,12 +52,6 @@ class AlertManager:
         from orion.management.jobs.alert.alert_job import alert_job
         return alert_job
 
-
-    async def get_user_alerts(self, user_id: str) -> db_alert_model | None:
-        alerts_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == user_id)
-        if alerts_doc:
-            alerts_doc.alerts = visible_alerts(alerts_doc.alerts)
-        return alerts_doc
 
     def _smart_hash(*parts) -> str:
         base = "|".join(str(p).strip().lower() for p in parts if p is not None)
@@ -320,59 +314,6 @@ class AlertManager:
 
         await self._summary_helper.invalidate_alert_summary_cache(tenantId)
         return {"created": created_count, "updated": updated_count}
-
-    async def upsert_alert(self, tenantId: str, category: str, ioc_type: str, ioc_value: str, title: str, url: str, description: str, source: str, all_ioc: List[alert_all_ioc], content_types: List[str], data_hash='', risk: str = '', raw_findings: dict[str, Any] | None = None):
-
-        if (data_hash == ''):
-            data_hash = self._smart_hash(category, ioc_type, ioc_value, source, url)
-
-        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenantId)
-        alert_updated = False
-
-        if existing_doc and existing_doc.alerts:
-            for alert in visible_alerts(existing_doc.alerts):
-                if (
-                    (alert.data_hash or "") == data_hash
-                    and (alert.type or "") == category
-                    and (alert.ioc_value or "") == ioc_value
-                ):
-                    if raw_findings:
-                        alert.raw_findings = raw_findings
-                    alert.last_seen = datetime.now(timezone.utc)
-
-                    alert_updated = True
-                    break
-
-        if not alert_updated:
-            new_alert = AlertModel(
-                alert_id=f"{data_hash}-{ioc_value}",
-                type=category,
-                ioc_type=ioc_type,
-                ioc_value=ioc_value,
-                data_hash=data_hash,
-                title=title,
-                description=description,
-                url=url,
-                source=source,
-                risk=risk,
-                content_types=content_types,
-                raw_findings=raw_findings or {},
-                status=alert_status.ACTIVE,
-                first_seen=datetime.now(timezone.utc),
-                last_seen=datetime.now(timezone.utc),
-                all_ioc=all_ioc, )
-
-            if existing_doc:
-                existing_doc.alerts.append(new_alert)
-                doc_to_save = existing_doc
-            else:
-                doc_to_save = db_alert_model(tenant_id=tenantId, alerts=[new_alert])
-        else:
-            doc_to_save = existing_doc
-
-        await self._engine.save(doc_to_save)
-        await self._summary_helper.invalidate_alert_summary_cache(tenantId)
-        return "Updated" if alert_updated else "Created"
 
     async def add_custom_alert(self, data: AlertModel, current_user):
         tenant_uuid = str(current_user.tenant_uuid)

@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnInit, SimpleChanges, effect, inject, input } from '@angular/core';
+import { Component, OnChanges, OnInit, SimpleChanges, effect, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DefacementCallbackModel, DefacementResultItem } from '../../../../shared/model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
@@ -12,6 +12,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-defacement-results',
   imports: [CommonModule, TooltipDirective, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './threat-results.component.html',
 })
 export class ThreatResultsComponent implements OnInit, OnChanges {

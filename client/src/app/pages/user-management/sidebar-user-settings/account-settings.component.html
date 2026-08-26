@@ -1,5 +1,5 @@
 <div class="w-full p-3 md:p-4">
-  <form data-testid="account-settings-form" class="ui-page-container w-full max-w-[2400px]" (ngSubmit)="updateUser()" @fadeInDashboardItem>
+  <form data-testid="account-settings-form" class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]" (ngSubmit)="updateUser()" @fadeInDashboardItem>
     <div class="mb-4 flex items-start gap-3">
       <div class="h-[88px] w-[88px] shrink-0 rounded-full border border-[var(--color-border)] bg-[var(--color-blue-700)] p-[0.2rem]">
         <app-user-image-picker class="block h-full w-full" [imageUrl]="userSessionData.user.image || ''"
@@ -8,8 +8,8 @@
         </app-user-image-picker>
       </div>
       <div class="pt-1">
-        <h1 data-testid="account-settings-title" class="ui-page-title">{{ (isAdmin() ? 'Admin Profile' : 'User Profile Form') | translate }}</h1>
-        <p class="ui-page-description">{{ 'Account details and preferences.' | translate }}</p>
+        <h1 data-testid="account-settings-title" class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ (isAdmin() ? 'Admin Profile' : 'User Profile Form') | translate }}</h1>
+        <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Account details and preferences.' | translate }}</p>
         <p class="mt-1 text-xs font-medium text-[var(--color-text4)]">
           {{ 'Version' | translate }} <span class="font-semibold text-[var(--color-text2)]">{{ displayVersion }}</span>
         </p>
@@ -17,45 +17,45 @@
     </div>
 
     <div class="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="ui-section-title">{{ 'Profile' | translate }}</div>
-      <div class="ui-section-description">{{ 'Manage profile identity and assigned access.' | translate }}</div>
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Profile' | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Manage profile identity and assigned access.' | translate }}</div>
 
       <div class="mt-3 grid gap-3 sm:grid-cols-2">
         <div>
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Username' | translate }}</label>
-          <input type="text" [(ngModel)]="editableUsername" name="username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" />
+          <input type="text" [(ngModel)]="editableUsername" name="username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20 [body.light-theme_&]:disabled:cursor-not-allowed [body.light-theme_&]:disabled:bg-[#f1f4f8] [body.light-theme_&]:disabled:text-[#52657e]" />
         </div>
 
         <div>
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Role' | translate }}</label>
-          <input type="text" [value]="(appService.userSessionData().user.role | titlecase)" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+          <input type="text" [value]="(appService.userSessionData().user.role | titlecase)" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:disabled:cursor-not-allowed [body.light-theme_&]:disabled:bg-[#f1f4f8] [body.light-theme_&]:disabled:text-[#52657e]" />
         </div>
 
         <div>
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Tenant / Location' | translate }}</label>
-          <input type="text" [value]="getLocationDisplay() || appService.userSessionData().user.username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+          <input type="text" [value]="getLocationDisplay() || appService.userSessionData().user.username" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:disabled:cursor-not-allowed [body.light-theme_&]:disabled:bg-[#f1f4f8] [body.light-theme_&]:disabled:text-[#52657e]" />
         </div>
 
         <div>
           <label class="mb-1 block text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Licenses' | translate }}</label>
-          <input type="text" [value]="getUserLicensesLabel(userSessionData.user) || ('No licenses assigned' | translate)" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)]" />
+          <input type="text" [value]="getUserLicensesLabel(userSessionData.user) || ('No licenses assigned' | translate)" disabled class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:disabled:cursor-not-allowed [body.light-theme_&]:disabled:bg-[#f1f4f8] [body.light-theme_&]:disabled:text-[#52657e]" />
         </div>
       </div>
     </div>
 
     <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="ui-section-title">{{ 'Recovery Key' | translate }}</div>
-      <div class="ui-section-description">{{ 'Generate a key for account recovery. A new key replaces the previous one.' | translate }}</div>
-      <button type="button" class="ui-btn ui-btn-primary mt-3" (click)="requestSensitiveAction('recovery')">
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Recovery Key' | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Generate a key for account recovery. A new key replaces the previous one.' | translate }}</div>
+      <button type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] mt-3" (click)="requestSensitiveAction('recovery')">
         {{ 'Generate / replace recovery key' | translate }}
       </button>
     </div>
 
     <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
-      <div class="ui-section-title">{{ 'Preferences' | translate }}</div>
-      <div class="ui-section-description">{{ 'Security, language, and appearance settings.' | translate }}</div>
+      <div class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ 'Preferences' | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Security, language, and appearance settings.' | translate }}</div>
       <div class="mt-3 space-y-3">
-        <div data-testid="account-settings-twofa-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="requestSensitiveAction('twofa')">
+        <div data-testid="account-settings-twofa-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35 [body.light-theme_&]:hover:bg-[var(--color-blue-810)]" (click)="requestSensitiveAction('twofa')">
           <div class="flex items-center justify-between gap-3">
             <div>
               <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ '2 Factor Authentication' | translate }}</label>
@@ -69,7 +69,7 @@
           </div>
         </div>
 
-        <div data-testid="account-settings-theme-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isDarkMode = !isDarkMode; toggleTheme()">
+        <div data-testid="account-settings-theme-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35 [body.light-theme_&]:hover:bg-[var(--color-blue-810)]" (click)="isDarkMode = !isDarkMode; toggleTheme()">
           <div class="flex items-center justify-between gap-3">
             <div>
               <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Theme' | translate }}</label>
@@ -83,7 +83,7 @@
         </div>
 
         @if (isTenantProfileVisibilityEnabled()) {
-          <div data-testid="account-settings-profile-visibility-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35" (click)="isProfileVisible = !isProfileVisible; toggleProfileVisibility()">
+          <div data-testid="account-settings-profile-visibility-toggle" class="cursor-pointer rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-3 transition hover:border-sky-400/35 [body.light-theme_&]:hover:bg-[var(--color-blue-810)]" (click)="isProfileVisible = !isProfileVisible; toggleProfileVisibility()">
             <div class="flex items-center justify-between gap-3">
               <div>
                 <label class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Profile Visibility' | translate }}</label>
@@ -101,7 +101,7 @@
           <label for="account-settings-language" class="block text-sm font-semibold text-[var(--color-text1)]">{{ 'Language' | translate }}</label>
           <select id="account-settings-language" name="language" class="mt-2 h-10 w-full appearance-none rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] pl-3 pr-11 text-sm font-medium text-[var(--color-text1)] outline-none focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" [(ngModel)]="selectedLanguage" (change)="changeLanguage()">
             @for (lang of languageOptions; track lang.code) {
-              <option [value]="lang.code">{{ lang.name }} ({{ lang.code.toUpperCase() }})</option>
+              <option [value]="lang.code">{{ lang.name | translate }} ({{ lang.code.toUpperCase() }})</option>
             }
           </select>
         </div>
@@ -112,8 +112,8 @@
     <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4">
       <button data-testid="account-settings-password-toggle" type="button" class="flex w-full items-center justify-between gap-3 text-left" [attr.aria-expanded]="isPasswordSectionOpen" (click)="togglePasswordSection()">
         <span class="min-w-0">
-          <span class="ui-section-title block">{{ 'Change Password' | translate }}</span>
-          <span class="ui-section-description block">{{ 'Set a new password for your account.' | translate }}</span>
+          <span class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)] block">{{ 'Change Password' | translate }}</span>
+          <span class="mt-1 text-[12px] font-normal text-[var(--color-text6)] block">{{ 'Set a new password for your account.' | translate }}</span>
         </span>
         <i class="bi bi-chevron-down mr-3 shrink-0 text-[14px] leading-none text-[var(--color-text4)] transition-transform duration-200" [class.rotate-180]="isPasswordSectionOpen" aria-hidden="true"></i>
       </button>
@@ -127,8 +127,8 @@
               </div>
               @if (showPasswordMeter) {
                 <div class="mt-2">
-                  <div class="ui-password-meter-track">
-                    <div class="ui-password-meter-bar" [ngClass]="{ 'bg-[#dc354580] w-1/3': passwordStrength === 'weak', 'bg-[#ffc10780] w-2/3': passwordStrength === 'medium', 'bg-[#19875480] w-full': passwordStrength === 'strong' }"></div>
+                  <div class="mt-2 h-[6px] w-full overflow-hidden rounded-[4px] bg-[#e0e0e0]">
+                    <div class="h-full transition-[width] duration-300 ease-[ease]" [ngClass]="{ 'bg-[#dc354580] w-1/3': passwordStrength === 'weak', 'bg-[#ffc10780] w-2/3': passwordStrength === 'medium', 'bg-[#19875480] w-full': passwordStrength === 'strong' }"></div>
                   </div>
                   @if (currentUnmetCheck) {
                     <p class="mt-2 text-xs text-[var(--color-text4)]">{{ currentUnmetCheck }}</p>
@@ -142,13 +142,13 @@
                 <input id="account-settings-confirm-password" data-testid="account-settings-confirm-password" type="password" [(ngModel)]="confirmPassword" name="confirmPassword" [placeholder]="'Confirm new password' | translate" autocomplete="new-password" class="!pr-12 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" appPasswordToggle="dark" />
               </div>
               @if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-                <p class="mt-2 text-xs text-red-400">{{ 'Password and confirm password do not match.' | translate }}</p>
+                <p class="mt-2 text-xs text-red-400 [body.light-theme_&]:text-red-700">{{ 'Password and confirm password do not match.' | translate }}</p>
               }
             </div>
           </div>
 
           <div class="mt-4 flex justify-end">
-            <button data-testid="account-settings-password-submit" type="button" class="ui-btn ui-btn-primary" [disabled]="!newPassword || !confirmPassword || newPassword !== confirmPassword || !allPasswordRequirementsMet" (click)="requestSensitiveAction('password')">
+            <button data-testid="account-settings-password-submit" type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] [body.light-theme_&]:disabled:cursor-not-allowed [body.light-theme_&]:disabled:!border-[#c8d6e8] [body.light-theme_&]:disabled:!bg-[#c8d6e8] [body.light-theme_&]:disabled:!text-[#667085]" [disabled]="!newPassword || !confirmPassword || newPassword !== confirmPassword || !allPasswordRequirementsMet" (click)="requestSensitiveAction('password')">
               {{ 'Update Password' | translate }}
             </button>
           </div>

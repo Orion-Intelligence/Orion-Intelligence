@@ -1,4 +1,4 @@
-import { AlertCategorySummary } from '../../../../../shared/model/alert-notification/alert.notification.model';
+import { AlertCategorySummary } from '../../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { AlertModel, AlertSummary } from '../../../../../shared/model/company-profile/node.model';
 import { TenantModel } from '../../../../../shared/model/tenant/tenant.model';
 

@@ -6,8 +6,6 @@ from fastapi import Request, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import RedirectResponse, JSONResponse
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_422_UNPROCESSABLE_CONTENT
-from passlib.exc import PasswordSizeError
-from starlette_admin.exceptions import FormValidationError
 
 from configs import config
 from orion.shared_models.expection_handlers.expection_handlers_models import ErrorResponseModel, ValidationErrorDetail, ValidationErrorResponseModel
@@ -53,15 +51,3 @@ async def validation_exception_handler(request: Request, exc: Exception):
         return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_CONTENT, content=error_response.model_dump())
 
     return RedirectResponse(url=f"/{HTTP_422_UNPROCESSABLE_CONTENT}")
-
-
-async def password_size_exception_handler(_: Request, exc: PasswordSizeError):
-    return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": "Password too long"})
-
-
-async def value_error_exception_handler(_: Request, exc: ValueError):
-    return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": str(exc)})
-
-
-async def form_validation_exception_handler(_: Request, exc: FormValidationError):
-    return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_CONTENT, content={"detail": exc.messages})

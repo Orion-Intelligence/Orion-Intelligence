@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
@@ -11,7 +11,7 @@ import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.a
 import { LicenseName } from '../../../shared/model/licenses/license.rules';
 import { getTenantLocationDisplay } from './sidebar-settings.util';
 import { areAllPasswordRequirementsMet, createEmptyPasswordChecks, evaluatePasswordInput, PasswordChecks, PasswordStrength } from '../../../shared/utils/auth-form.util';
-import { PasswordToggleDirective } from '../../../shared/directives/password-toggle.directive';
+import { PasswordToggleDirective } from '../../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
 import { TranslationService } from '../../../shared/services/translation.service';
@@ -24,6 +24,7 @@ type SensitiveAction = 'twofa' | 'password' | 'recovery';
   selector: 'app-sidebar-profile-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective, TranslatePipe, RecoveryKeyPopupComponent, PasswordConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './account-settings.component.html'
 })
 export class AccountSettingsComponent implements OnInit {
@@ -234,7 +235,7 @@ export class AccountSettingsComponent implements OnInit {
           this.userSessionData.user.twofa_enabled = this.twoFactorEnabled;
         }
         else {
-          this.messageNotificationService.show('Password updated successfully', 'success');
+          this.messageNotificationService.show(this.translationService.translate('Password updated successfully'), 'success');
           this.resetPasswordForm();
           this.isPasswordSectionOpen = false;
         }
@@ -267,7 +268,7 @@ export class AccountSettingsComponent implements OnInit {
         }
       },
       error: (err) => {
-        const message = err?.error?.detail || 'Failed to upload image';
+        const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
         this.messageNotificationService.show(message);
       }
     });

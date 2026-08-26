@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { IpDetail } from '../../../../../shared/model/network-intel/network-intel.model';
 import { NetworkIntelScanService } from '../../../../../shared/services/network-intel/network-intel-scan.service';
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector: 'app-threat-lens-ip-detail-popup',
   standalone: true,
   imports: [CommonModule, IpDetailComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ip-detail-popup.component.html',
 })
 export class IpDetailPopupComponent implements OnChanges, OnDestroy {

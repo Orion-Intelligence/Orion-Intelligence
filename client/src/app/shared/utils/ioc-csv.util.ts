@@ -19,10 +19,6 @@ export const IOC_CSV_MAX_FILE_SIZE_BYTES = 1024 * 1024;
 const entityDefinitions = (entitiesData as EntityDefinition[]).filter(entity => !!entity.key);
 const entityByKey = new Map(entityDefinitions.map(entity => [entity.key, entity]));
 
-export function getIocEntityDefinitions(): EntityDefinition[] {
-  return entityDefinitions;
-}
-
 export function getIocEntityTitle(key: string): string {
   return entityByKey.get(key)?.title ?? key;
 }

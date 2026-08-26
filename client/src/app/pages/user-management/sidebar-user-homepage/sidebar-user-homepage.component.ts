@@ -1,18 +1,18 @@
-import { Component, effect, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, effect, OnDestroy, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { Router } from '@angular/router';
 import { HomeSearchComponent } from "../../homepage/home-search/home-search.component";
-import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../shared/model/alert-notification/alert.notification.model';
+import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../shared/partials/alert-notification/model/alert.notification.model';
 import { AlertModel } from '../../../shared/model/company-profile/node.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { ApiService } from '../../../shared/services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from "../../../shared/partials/confirmation-popup/confirmation-popup.component";
 import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loading.component";
-import { AlertService } from '../../../services/alerts/alerts.service';
+import { AlertService } from './services/alerts.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { HomepageComponent } from "../../homepage/homepage.component";
 import { HomeInsightComponent } from "../../homepage/home-insight/home-insight.component";
@@ -23,14 +23,16 @@ import { countFilterValues } from '../../../shared/utils/filter-values.util';
 import { Subscription } from 'rxjs';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { buildStandardExportOptions } from '../../../shared/model/report/export-choice.model';
-import { AlertExportService } from '../../../shared/services/export/alert-export.service';
+import { AlertExportService } from '../../../shared/partials/alert-notification/services/alert-export.service';
 import { SidebarHomepageService } from '../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-sidebar-user-homepage',
   imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './sidebar-user-homepage.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [overlayAnimation],
 })
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
@@ -50,7 +52,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   readonly alertLicenseWarning = "You don't have license to view this";
   readonly alertExportOptions = buildStandardExportOptions('home-alert-export-option', 'report', 'Generate PDF export for alerts.');
 
-  constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService) {
+  constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService, private translationService: TranslationService) {
     effect(() => {
       if (!this.alertService.isAlertScanLoading()) {
         this.initializeData();
@@ -167,7 +169,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
       return;
     }
     if (!this.licenseService.canViewAlert(type)) {
-      this.messageNotificationService.show(this.alertLicenseWarning);
+      this.messageNotificationService.show(this.translationService.translate(this.alertLicenseWarning));
       return;
     }
     this.router.navigate([`/dashboard/profile/alerts/${type}`]).then();
@@ -175,7 +177,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   scanIOCs() {
     if (this.isPrivilegedIoc()) {
-      this.messageNotificationService.show(this.iocPermissionWarning);
+      this.messageNotificationService.show(this.translationService.translate(this.iocPermissionWarning));
       return;
     }
     const iocs = this.appService.tenantData().iocs;
@@ -215,7 +217,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.alertService.isAlertScanLoading.set(false);
-          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete');
+          this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to delete'));
         },
       });
     }
@@ -252,7 +254,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
           ? alerts
           : (Array.isArray(alerts?.items) ? alerts.items : []);
         if (!normalizedAlerts.length) {
-          this.messageNotificationService.show('No alerts available to export right now.');
+          this.messageNotificationService.show(this.translationService.translate('No alerts available to export right now.'));
           this.closeExportChoice();
           return;
         }

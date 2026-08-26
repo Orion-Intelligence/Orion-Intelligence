@@ -72,14 +72,14 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p \
-            backend/static/resource/profile \
-            backend/static/resource/tenant \
-            backend/static/resource/system \
-            backend/static/resource/case_artifacts \
-            backend/static/.well-known/parser_files
+            backend/workspace/resource/profile \
+            backend/workspace/resource/tenant \
+            backend/workspace/resource/system \
+            backend/workspace/resource/case_artifacts \
+            backend/workspace/parser/parser_files
           chmod -R a+rwX \
-            backend/static/resource \
-            backend/static/.well-known/parser_files
+            backend/workspace/resource \
+            backend/workspace/parser/parser_files
 
       - run: |
           set -euo pipefail
@@ -103,11 +103,11 @@ jobs:
           SKIP_BACKEND_TESTS=1 ./run.sh build -t
           docker compose -p trusted-search -f docker-compose-testing.yml exec -T web sh -lc '
             for path in \
-              /app/static/resource/profile \
-              /app/static/resource/tenant \
-              /app/static/resource/system \
-              /app/static/resource/case_artifacts \
-              /app/static/.well-known/parser_files; do
+              /app/workspace/resource/profile \
+              /app/workspace/resource/tenant \
+              /app/workspace/resource/system \
+              /app/workspace/resource/case_artifacts \
+              /app/workspace/parser/parser_files; do
               if [ ! -w "$path" ]; then
                 echo "Client-test runtime path is not writable: $path" >&2
                 exit 1

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
-import { SatelliteAnomalyResponse, SatelliteCompareMonth, SatelliteCompareResponse, SatelliteImageResponse } from '../../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteAnomalyResponse, SatelliteCompareMonth, SatelliteCompareResponse, SatelliteImageResponse } from '../../model/satellite-intel-api.models';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 

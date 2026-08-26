@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, ElementRef, HostListener, OnChanges, SimpleChanges, ViewChild, input, output } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnChanges, SimpleChanges, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
   selector: 'app-geo-coordinates-modal',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './geo-coordinates-modal.component.html',
 })
 export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {

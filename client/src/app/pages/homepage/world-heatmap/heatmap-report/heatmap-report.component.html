@@ -1,22 +1,22 @@
-<div data-testid="heatmap-report-overlay" class="ui-graph-popup-overlay fixed inset-0 z-[1000] flex items-center justify-center max-[768px]:items-start max-[768px]:p-4" (click)="closePopup()">
-  <div class="ui-popup-shell flex max-h-[82vh] w-[760px] flex-col overflow-hidden rounded-[12px] max-[768px]:mt-2 max-[768px]:w-full max-[768px]:max-w-full" (click)="$event.stopPropagation()">
+<div data-testid="heatmap-report-overlay" class="[&&]:!z-[9999] [&&]:!bg-[rgba(2,6,23,0.64)] backdrop-blur-[4px] overflow-y-auto [animation:uiModalOverlayFade_200ms_ease-out_both] [&.items-center]:[align-items:safe_center] fixed inset-0 z-[1000] flex items-center justify-center max-[768px]:items-start max-[768px]:p-4" (click)="closePopup()">
+  <div class="ui-popup-shell [&&]:!border [&&]:!border-[#2c3a4a] [&&]:!bg-[#1b2a3b] [&&]:!text-[#e1e8f0] [&&]:!shadow-[0_12px_40px_rgba(0,0,0,0.40)] [animation:slideUp_0.2s_ease-out_both] [body.light-theme_&&]:!border-[#d2deec] [body.light-theme_&&]:!bg-[#f7fbff] [body.light-theme_&&]:!text-[#172235] [body.light-theme_&&]:!shadow-[0_10px_28px_rgba(15,23,42,0.14)] flex max-h-[82vh] w-[760px] flex-col overflow-hidden rounded-[12px] max-[768px]:mt-2 max-[768px]:w-full max-[768px]:max-w-full" (click)="$event.stopPropagation()">
     <div class="flex items-center justify-between border-b border-[var(--tenant-line)] px-4 py-3.5">
       <div class="flex items-center gap-2">
         <h3 class="m-0 text-[18px] font-semibold text-[var(--color-text1)]">{{ 'Reports' | translate }}</h3>
         <span class="inline-flex rounded-full border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-2 py-0.5 text-[11px] font-semibold text-[var(--color-text2)]">{{ reports().length || 0 }}</span>
       </div>
-      <button type="button" data-testid="heatmap-report-close" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[18px] leading-none text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="closePopup($event)" [attr.aria-label]="'common.actions.close' | translate">&times;</button>
+      <button type="button" data-testid="heatmap-report-close" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] text-[18px] leading-none text-[var(--color-text2)] outline-none transition hover:bg-[var(--tenant-chip-hover)] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/35 [body.light-theme_&]:bg-white [body.light-theme_&]:hover:border-[#b6c8db] [body.light-theme_&]:hover:bg-[#eef5fc]" (click)="closePopup($event)" [attr.aria-label]="'common.actions.close' | translate">&times;</button>
     </div>
 
     <div class="overflow-y-auto p-4 max-[768px]:p-3">
       @if (loading() && !reports().length) {
-        <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)] px-3.5 py-3 text-[13px] font-semibold text-[var(--color-text2)]">
+        <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)] px-3.5 py-3 text-[13px] font-semibold text-[var(--color-text2)] [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_3px_10px_rgba(15,23,42,0.05)]">
           {{ 'common.actions.loading' | translate }}
         </div>
       }
 
       @for (report of reports(); track report?.m_hash || report?.m_url || report?.m_title || $index) {
-        <div class="mb-3 rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)] last:mb-0">
+        <div class="mb-3 rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)] transition-[border-color,box-shadow] last:mb-0 [body.light-theme_&]:border-[#d4dfeb] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-[0_4px_14px_rgba(15,23,42,0.06)] [body.light-theme_&]:hover:border-[#bacbdb] [body.light-theme_&]:hover:shadow-[0_7px_18px_rgba(15,23,42,0.085)]">
           <div class="border-b border-[var(--tenant-line)] px-3.5 py-2.5">
             <h4 class="m-0 text-[15px] font-semibold text-[var(--color-text1)]">{{ report?.m_title || ('Untitled Report' | translate) }}</h4>
           </div>
@@ -53,7 +53,7 @@
 
       @if (hasMore()) {
         <div class="mt-4 flex justify-center">
-          <button type="button" data-testid="heatmap-report-load-more" class="inline-flex min-w-[120px] items-center justify-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-4 py-2 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] disabled:cursor-not-allowed disabled:opacity-70" [disabled]="loadingMore()" (click)="onLoadMore($event)">
+          <button type="button" data-testid="heatmap-report-load-more" class="inline-flex min-w-[120px] items-center justify-center gap-2 rounded-[8px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-4 py-2 text-[12px] font-semibold text-[var(--color-text2)] outline-none transition hover:bg-[var(--tenant-chip-hover)] focus-visible:ring-2 focus-visible:ring-[var(--color-blue-640)]/35 disabled:cursor-not-allowed disabled:opacity-70 [body.light-theme_&]:bg-white [body.light-theme_&]:hover:border-[#a9c0d8] [body.light-theme_&]:hover:bg-[#eef5fc] [body.light-theme_&]:disabled:bg-[#f2f5f8]" [disabled]="loadingMore()" (click)="onLoadMore($event)">
             @if (loadingMore()) {
               <span class="h-3.5 w-3.5 animate-spin rounded-full border border-[var(--tenant-line)] border-t-[var(--color-text2)]"></span>
             }

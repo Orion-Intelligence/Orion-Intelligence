@@ -149,7 +149,7 @@ Do not place real credentials in documentation, examples, screenshots, or commit
 | Command | Purpose | What it does |
 | --- | --- | --- |
 | `./run.sh` | start default local stack | uses `docker-compose.yml` and starts the application without rebuilding images |
-| `./run.sh stop` | stop local stack | runs compose shutdown, removes orphans, clears `staticfiles`, and removes the standalone nginx container if present |
+| `./run.sh stop` | stop local stack | runs compose shutdown, removes orphans, and removes the standalone nginx container if present |
 | `./run.sh production` | start production-oriented runtime | uses `docker-compose-production.yml` and starts the stack without rebuilding |
 | `./run.sh -doc` | generate documentation screenshots | aliases the docs workflow by first running `./run.sh build -t`, then clearing old screenshots and running the Cypress screenshot job |
 | `./run.sh -docs` | generate documentation screenshots | aliases the docs workflow by first running `./run.sh build -t`, then running the Cypress screenshot job without clearing existing screenshots first |
@@ -253,7 +253,7 @@ When changing APIs or data behavior, common touchpoints include:
 - route handlers and managers in `backend/`
 - generated docs helpers in `backend/routes/docs/`
 - test coverage under `backend/tests/`
-- mock search data under `backend/static/test/mocks/`
+- mock search data under `backend/tests/mock/`
 
 Backend changes should be validated against both API behavior and the frontend workflows that consume those responses.
 

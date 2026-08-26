@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ApiService } from '../../../../shared/services/api.service';
 import { HttpHeaders } from '@angular/common/http';
@@ -15,12 +15,14 @@ import { finalize, switchMap, tap } from 'rxjs';
 import { NodeResolver } from '../../../../shared/resolvers/session-data-resolver.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 @Component({
   selector: 'app-view-profile',
   imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective, TranslatePipe, UiDropdownComponent],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './manage-profile.component.html',
 })
 export class ManageProfileComponent implements OnInit {
@@ -31,10 +33,7 @@ export class ManageProfileComponent implements OnInit {
   users: User[] = [];
   userSearch = '';
   licenseList = Object.values(LicenseName);
-  permissionOptions: UiDropdownOption[] = [{ key: 'case_management', label: 'Case Management' }];
   alertTenantOptions: AlertAllowedTenantOption[] = [];
-  statusOptions: UiDropdownOption[] = [{ key: 'active', label: 'Active' }, { key: 'disable', label: 'Disable' }];
-  passwordResetOptions: UiDropdownOption[] = [{ key: 'false', label: 'No password reset' }, { key: 'true', label: 'Require password reset' }];
   isLoading = true;
   selectedUserId: string | null = null;
   expandedUserIndex: number | null = null;
@@ -42,7 +41,28 @@ export class ManageProfileComponent implements OnInit {
   userToDelete: User | null = null;
   isDeleteConfirmationOpen = signal<boolean>(false);
 
-  constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService) {
+  constructor(public apiService: ApiService, protected appService: AppService, private nodeResolver: NodeResolver, protected licenseService: LicenseService, private translationService: TranslationService) {
+  }
+
+  get permissionOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return [{ key: 'case_management', label: this.translationService.translate('Case Management') }];
+  }
+
+  get statusOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return [
+      { key: 'active', label: this.translationService.translate('Active') },
+      { key: 'disable', label: this.translationService.translate('Disable') }
+    ];
+  }
+
+  get passwordResetOptions(): UiDropdownOption[] {
+    this.translationService.version();
+    return [
+      { key: 'false', label: this.translationService.translate('No password reset') },
+      { key: 'true', label: this.translationService.translate('Require password reset') }
+    ];
   }
 
   ngOnInit(): void {
@@ -106,8 +126,9 @@ export class ManageProfileComponent implements OnInit {
   }
 
   get alertAllowedOptions(): UiDropdownOption[] {
+    this.translationService.version();
     return [
-      { key: this.allAlertsOption, label: 'All' },
+      { key: this.allAlertsOption, label: this.translationService.translate('All') },
       ...this.alertTenantOptions.map(tenant => ({
         key: tenant.id,
         label: tenant.name || tenant.email || tenant.id
@@ -266,14 +287,14 @@ export class ManageProfileComponent implements OnInit {
 
   getUserLicensesLabel(user: any): string {
     if (!user.licenses || user.licenses.length === 0) {
-      return 'None';
+      return this.translationService.translate('None');
     }
     return user.licenses.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
   }
 
   getUserPermissionsLabel(user: User): string {
     if (!user.permissions || user.permissions.length === 0) {
-      return 'None';
+      return this.translationService.translate('None');
     }
     return user.permissions.map(permission => this.getPermissionLabel(permission)).join(', ');
   }
@@ -287,27 +308,17 @@ export class ManageProfileComponent implements OnInit {
   }
 
   getStatusBadgeClass(status: string): string {
-    const isLightTheme = document.body.classList.contains('light-theme');
     if (status === 'active') {
-      return isLightTheme
-        ? 'bg-emerald-100 text-emerald-800'
-        : 'bg-emerald-500/10 text-emerald-300';
+      return 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800';
     }
-    return isLightTheme
-      ? 'bg-rose-100 text-rose-800'
-      : 'bg-rose-500/10 text-rose-300';
+    return 'bg-rose-500/10 text-rose-300 [body.light-theme_&]:bg-rose-100 [body.light-theme_&]:text-rose-800';
   }
 
   getSubscriptionBadgeClass(subscription?: boolean): string {
-    const isLightTheme = document.body.classList.contains('light-theme');
     if (subscription) {
-      return isLightTheme
-        ? 'bg-sky-100 text-sky-800'
-        : 'bg-sky-500/10 text-sky-300';
+      return 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800';
     }
-    return isLightTheme
-      ? 'bg-slate-100 text-slate-700'
-      : 'bg-slate-500/10 text-slate-300';
+    return 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700';
   }
 
   isAddUserDisabled(): boolean {
@@ -316,10 +327,10 @@ export class ManageProfileComponent implements OnInit {
 
   getAddUserTooltip(): string {
     if (this.appService.userSessionData().tenant.quotaExceeded) {
-      return 'Access blocked';
+      return this.translationService.translate('Access blocked');
     }
     if (!this.appService.getConfig().appSettings.smtp_configured) {
-      return 'SMTP configuration is incomplete';
+      return this.translationService.translate('SMTP configuration is incomplete');
     }
     return '';
   }

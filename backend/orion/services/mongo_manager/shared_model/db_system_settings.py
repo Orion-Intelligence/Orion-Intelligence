@@ -25,7 +25,6 @@ class AllowedKeys(str, Enum):
 VALID_LANGUAGE_CODES = {"en", "fr", "es", "de", "it", "pt", "ru", "zh", "ja", "ko", "ar", "hi", "bn", "tr", "nl", "sv",
     "pl", "cs"}
 
-IMAGE_URL_REGEX = re.compile(r"^https?://.+\.(png|jpg|jpeg|svg|webp)$", re.IGNORECASE)
 ONION_ADDRESS_REGEX = re.compile(r"^(?:https?://)?[a-z2-7]{56}\.onion/?$", re.IGNORECASE)
 
 

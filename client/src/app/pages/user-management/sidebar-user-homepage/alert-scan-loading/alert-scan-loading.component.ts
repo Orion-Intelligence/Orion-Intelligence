@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { AlertService } from '../../../../services/alerts/alerts.service';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
+import { AlertService } from '../services/alerts.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { NgClass } from '@angular/common';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   selector: 'app-alert-scan-loading',
   imports: [NgClass, TranslatePipe],
   templateUrl: './alert-scan-loading.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [
     trigger('scanOverlayAnimation', [
       transition(':enter', [

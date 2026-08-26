@@ -29,14 +29,20 @@ class CONSTANTS:
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
     S_ENCRYPTION_KEY = env_handler.get_instance().env("ENCRYPTION_KEY")
 
-    BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent.parent
-    IMAGE_DIR = BASE_DIR / "static" / "resource" / "tenant"
+    BASE_DIR = Path(__file__).resolve().parents[2]
+    IMAGE_DIR = BASE_DIR / "workspace" / "resource" / "tenant"
     S_SATELLITE_ASSET_FILE_NAME = "satellite_assets.json"
     S_CASE_ARTIFACT_RESOURCE_DIR = (
         Path(__file__).resolve().parents[2]
-        / "static"
+        / "workspace"
         / "resource"
         / "case_artifacts"
+    )
+    S_SESSION_RESOURCE_DIR = (
+        Path(__file__).resolve().parents[2]
+        / "workspace"
+        / "resource"
+        / "session_data"
     )
     S_CASE_ARTIFACT_SCREENSHOT_ALLOWED = {"image/png"}
     S_CASE_ARTIFACT_FILE_ALLOWED = {
@@ -53,4 +59,3 @@ alert_mail_template = None
 license_rules = {}
 url_rules = {}
 map_entities_data = {}
-map_entities_version = 0

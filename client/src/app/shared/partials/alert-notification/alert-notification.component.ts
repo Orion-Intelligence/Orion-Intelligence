@@ -1,14 +1,14 @@
-import { Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
-import { AlertNotification } from '../../model/alert-notification/alert.notification.model';
+import { AlertNotification } from './model/alert.notification.model';
 import { AlertModel } from '../../model/company-profile/node.model';
 import { ApiService } from '../../services/api.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { overlayAnimation, sidebarAnimation } from '../../animations/sidebar.animations';
 import { ExportChoiceModalComponent } from '../export-choice-modal/export-choice-modal.component';
 import { ALERT_REPORT_EXPORT_OPTIONS } from '../../model/report/export-choice.model';
-import { AlertExportService } from '../../services/export/alert-export.service';
+import { AlertExportService } from './services/alert-export.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ScanNotificationService } from '../../services/scan-notification.service';
 import { ScanJob } from '../../model/scan-jobs/scan-job.model';
@@ -23,6 +23,7 @@ type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
   selector: 'app-alert-notification',
   imports: [CommonModule, NgClass, ExportChoiceModalComponent, ConfirmationPopupComponent, TranslatePipe],
   templateUrl: './alert-notification.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [sidebarAnimation, overlayAnimation],
 })
 export class AlertNotificationComponent implements OnChanges {
@@ -183,27 +184,28 @@ export class AlertNotificationComponent implements OnChanges {
     const d = new Date(date + 'Z');
     const now = new Date();
     const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+    const formatter = new Intl.RelativeTimeFormat(document.documentElement.lang || 'en', { numeric: 'always' });
     if (seconds < 60) {
-      return `${seconds} sec ago`;
+      return formatter.format(-seconds, 'second');
     }
     const minutes = Math.floor(seconds / 60);
     if (minutes < 60) {
-      return `${minutes} min ago`;
+      return formatter.format(-minutes, 'minute');
     }
     const hours = Math.floor(minutes / 60);
     if (hours < 24) {
-      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+      return formatter.format(-hours, 'hour');
     }
     const days = Math.floor(hours / 24);
     if (days < 30) {
-      return `${days} day${days > 1 ? 's' : ''} ago`;
+      return formatter.format(-days, 'day');
     }
     const months = Math.floor(days / 30);
     if (months < 12) {
-      return `${months} month${months > 1 ? 's' : ''} ago`;
+      return formatter.format(-months, 'month');
     }
     const years = Math.floor(months / 12);
-    return `${years} year${years > 1 ? 's' : ''} ago`;
+    return formatter.format(-years, 'year');
   }
 
   seeDetails(_category: string, hash: string) {
@@ -293,6 +295,13 @@ export class AlertNotificationComponent implements OnChanges {
     this.scanDeleteTarget = job;
     this.scanDeleteMode = 'single-delete';
     this.isScanDeleteConfirmationOpen = true;
+  }
+
+  stopScan(job: ScanJob, event?: Event): void {
+    event?.stopPropagation();
+    this.scanNotificationService.deleteScan(job).subscribe({
+      error: err => this.messageNotificationService.show(err?.error?.detail || 'Failed to stop scan'),
+    });
   }
 
   requestClearAllScans(): void {
@@ -424,6 +433,11 @@ export class AlertNotificationComponent implements OnChanges {
 
   isScanFailed(job: ScanJob): boolean {
     return this.scanNotificationService.getStatus(job) === 'error';
+  }
+
+  isNetworkScan(job: ScanJob): boolean {
+    const reference = String(job.api_reference || '').replace(/^\/?api\//, '');
+    return reference.startsWith('netintel/') || reference.startsWith('urlscan/');
   }
 
   getProgress(job: ScanJob): number {

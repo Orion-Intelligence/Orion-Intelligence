@@ -1,4 +1,4 @@
-import { Component, OnDestroy, effect, input, output } from '@angular/core';
+import { Component, OnDestroy, effect, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription, Subject } from 'rxjs';
@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-scan-helper',
   standalone: true,
   imports: [CommonModule, FormsModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './scan-helper-methods.component.html'
 })
 export class ScanHelperMethods implements OnDestroy {

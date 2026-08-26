@@ -1,10 +1,9 @@
-import { Component, OnInit, input, output } from '@angular/core';
+import { Component, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { filter_mapping } from '../../../shared/constants/filters';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { Router } from '@angular/router';
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
@@ -12,6 +11,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-selected-filter-bar',
   imports: [CommonModule, TranslatePipe],
   templateUrl: './selected-filter-bar.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem],
 })
 export class SelectedFilterBarComponent implements OnInit {
@@ -33,7 +33,7 @@ export class SelectedFilterBarComponent implements OnInit {
     return document.body.classList.contains('light-theme');
   }
 
-  constructor(protected app_service: AppService, protected dashboardService: DashboardService, private router: Router) {
+  constructor(protected app_service: AppService, protected dashboardService: DashboardService) {
   }
 
   isConsolidatedRoute(): boolean {

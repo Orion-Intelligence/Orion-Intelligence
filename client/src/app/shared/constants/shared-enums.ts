@@ -37,19 +37,6 @@ export enum SortType {
     NEWEST_FIRST = 'Newest first',
     OLDEST_FIRST = 'Oldest first'
 }
-export enum GraphType {
-    Cluster = 'cluster',
-    Document = 'document',
-    Property = 'property'
-}
-export enum GraphClusterType {
-    All = 'all',
-    General = 'general',
-    Leak = 'leak',
-    Defacement = 'defacement',
-    Chat = 'chat',
-    Exploit = 'exploit'
-}
 export enum AiWorkspacePrompt {
     INFOSTEALER_BREACH = 'How can I protect myself after an infostealer data breach?',
     LEAKED_CREDENTIALS = 'How can I check if my email or passwords were leaked?',

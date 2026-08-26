@@ -85,10 +85,6 @@ class insight_generator:
         return ELASTIC_INDEX.S_GENERIC_INDEX, insight_generator.on_shared_data_query()
 
     @staticmethod
-    def on_insight_exploitdata():
-        return ELASTIC_INDEX.S_GENERIC_INDEX, insight_generator.on_shared_data_query()
-
-    @staticmethod
     def on_insight_defacement_data():
         from_ = 0
         size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
@@ -97,16 +93,6 @@ class insight_generator:
             {"m_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
 
         return ELASTIC_INDEX.S_DEFACEMENT_INDEX, query_statement
-
-    @staticmethod
-    def on_insight_telegram_data():
-        from_ = 0
-        size = CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE
-
-        query_statement = {"query": {"match_all": {}}, "sort": [
-            {"m_date": {"order": "desc"}}], "from": from_, "size": size, "track_total_hits": True}
-
-        return ELASTIC_INDEX.S_CHATS_INDEX, query_statement
 
     def on_insight_consolidated_data(self):
         queries = []

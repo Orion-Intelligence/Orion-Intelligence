@@ -1,6 +1,6 @@
-import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output } from '@angular/core';
-import { Case, CaseEntity, CaseEntityRequest, CaseRequest, CaseTag } from '../../../../../shared/model/case-management/case.model';
-import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Case, CaseEntity, CaseEntityRequest, CaseRequest, CaseTag } from '../case.model';
+import { CASE_STATUS_OPTIONS, CASE_TAG_OPTIONS, CASE_TYPE_OPTIONS, DEFAULT_CASE_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_REQUEST_TEMPLATE, DEFAULT_PRIMARY_CASE_ENTITY_TEMPLATE, INTAKE_SOURCE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../case-management.defaults';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { EntityDetailsComponent } from '../entity-details/entity-details';
@@ -8,10 +8,12 @@ import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { CaseEditDrawerComponent } from '../case-details/case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 
 @Component({
   selector: 'app-add-new-case',
   imports: [CommonModule, FormsModule, EntityDetailsComponent, CaseEditDrawerComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './add-new-case.html'
 })
 export class AddNewCase {
@@ -28,7 +30,7 @@ export class AddNewCase {
   @Output() close = new EventEmitter<void>();
   @Output() caseAdded = new EventEmitter<Case>();
 
-  constructor(private cdr: ChangeDetectorRef, private caseService: CaseManagement, private host: ElementRef<HTMLElement>, private messageNotificationService: MessageNotificationService) { }
+  constructor(private cdr: ChangeDetectorRef, private caseService: CaseManagement, private host: ElementRef<HTMLElement>, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) { }
 
   ngOnInit(): void {
     this.generateCaseId();
@@ -186,13 +188,13 @@ export class AddNewCase {
 
     this.caseService.createCase(request).subscribe({
       next: (savedCase) => {
-        this.messageNotificationService.show('Case added successfully', 'success');
+        this.messageNotificationService.show(this.translationService.translate('Case added successfully'), 'success');
         this.caseAdded.emit(savedCase);
         this.closePopup();
       },
       error: (err) => {
         console.error('Failed to save case:', err);
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to save case');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translationService.translate('Failed to save case'));
       }
     });
   }

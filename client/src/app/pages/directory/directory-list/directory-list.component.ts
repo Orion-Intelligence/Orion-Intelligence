@@ -1,8 +1,8 @@
-import { Component, AfterViewInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, AfterViewInit, OnDestroy, ElementRef, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
-import { DirectoryCallbackModel } from '../../../shared/model/directory/directory.model';
-import { DirectoryService } from '../../../services/directory/directory.service';
+import { DirectoryCallbackModel } from '../model/directory.model';
+import { DirectoryService } from '../services/directory.service';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
@@ -11,6 +11,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   templateUrl: './directory-list.component.html',
   standalone: true,
   imports: [CommonModule, NgClass, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [fadeInDashboardItem]
 })
 export class DirectoryListComponent implements AfterViewInit, OnDestroy {

@@ -1,8 +1,8 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable, Subscription, concat } from 'rxjs';
 import { finalize, map } from 'rxjs/operators';
-import { ConsolidatedApiService } from '../../../../shared/services/consolidated.api.service';
+import { ConsolidatedApiService } from '../services/consolidated.api.service';
 import { ConsolidatedScanResults, ConsolidatedLiveApiResults, ConsolidatedLiveApis } from '../../../../shared/model/results/consolidated/consolidated.callback.model';
 import { RouterLink } from '@angular/router';
 import { scanAnimation } from '../../../../shared/animations/scan.animations';
@@ -20,12 +20,12 @@ interface PendingMsg {
   standalone: true,
   imports: [CommonModule, RouterLink, TranslatePipe],
   templateUrl: './consolidated-scan.component.html',
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [scanAnimation]
 })
 export class ConsolidatedScanComponent {
   private resultsByType: Partial<Record<Exclude<ScanKey, 'liveapi'>, ConsolidatedScanResults[]>> = {};
   private progressByType: Partial<Record<ScanKey, number>> = {};
-  private liveApiEntities: ConsolidatedLiveApis[] = [];
   private scanSub?: Subscription;
 
   today = new Date();
@@ -54,7 +54,6 @@ export class ConsolidatedScanComponent {
     this.resultsByType = {};
     this.progressByType = {};
     this.liveApiResults = [];
-    this.liveApiEntities = [];
     if (!keepExpectedTypes) {
       this.expectedTypes = [];
     }
@@ -165,7 +164,6 @@ export class ConsolidatedScanComponent {
       this.progressByType[t] = 0;
     }
     this.isProcessing = true;
-    this.liveApiEntities = liveApiEntities;
     this.scanSub = concat(...scans.map(({ t, o }) =>o.pipe(map(v => ({ t, v })))))
       .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({
@@ -330,10 +328,10 @@ export class ConsolidatedScanComponent {
     const g = (grade || '').toUpperCase();
     const baseClass = 'inline-flex items-center justify-center rounded-[999px] border px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] whitespace-nowrap';
     if (g === 'D') {
-      return `${baseClass} border-[rgba(248,113,113,0.45)] bg-[rgba(127,29,29,0.42)] text-red-100`;
+      return `${baseClass} border-[rgba(248,113,113,0.45)] bg-[rgba(127,29,29,0.42)] text-red-100 [body.light-theme_&]:border-red-300 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700`;
     }
     if (g === 'C' || g === 'F') {
-      return `${baseClass} border-[var(--color-border)] bg-[var(--color-banner)] text-[var(--color-text5)]`;
+      return `${baseClass} border-[var(--color-border)] bg-[var(--color-banner)] text-[var(--color-text5)] [body.light-theme_&]:border-amber-300 [body.light-theme_&]:bg-amber-50 [body.light-theme_&]:text-amber-800`;
     }
     return `${baseClass} border-[var(--color-border)] text-[var(--color-text1)]`;
   }

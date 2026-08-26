@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../../../../../shared/model/case-management/case-management.defaults';
-import { CaseStatus, CaseType, Priority, Severity } from '../../../../../shared/model/case-management/case.model';
+import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, PRIORITY_OPTIONS, SEVERITY_OPTIONS } from '../case-management.defaults';
+import { CaseStatus, CaseType, Priority, Severity } from '../case.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { TranslationService } from '../../../../../shared/services/translation.service';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 export type CaseFilterValue<T extends string> = T | 'all';
 export type CaseSortValue = 'updated_desc' | 'updated_asc' | 'priority_desc' | 'severity_desc';
@@ -30,16 +31,11 @@ export const DEFAULT_CASE_LIST_FILTERS: CaseListFilters = {
 @Component({
   selector: 'app-case-filter-row',
   imports: [CommonModule, FormsModule, TranslatePipe, UiDropdownComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-filter-row.html'
 })
 export class CaseFilterRowComponent {
   isMobileFiltersOpen = false;
-  readonly viewOptions: UiDropdownOption[] = [ { key: 'open', label: 'Open' }, { key: 'archived', label: 'Archived' } ];
-  readonly statusFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Statuses' }, ...CASE_STATUS_OPTIONS.map(option => ({ key: option.value, label: option.label })) ];
-  readonly severityFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Severities' }, ...SEVERITY_OPTIONS.map(severity => ({ key: severity, label: this.formatLabel(severity) })) ];
-  readonly priorityFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Priorities' }, ...PRIORITY_OPTIONS.map(priority => ({ key: priority, label: this.formatLabel(priority) })) ];
-  readonly caseTypeFilterOptions: UiDropdownOption[] = [ { key: 'all', label: 'All Types' }, ...CASE_TYPE_OPTIONS.map(option => ({ key: option.value, label: option.label })) ];
-  readonly sortOptions: UiDropdownOption[] = [ { key: 'updated_desc', label: 'Newest Updated' }, { key: 'updated_asc', label: 'Oldest Updated' }, { key: 'priority_desc', label: 'Highest Priority' }, { key: 'severity_desc', label: 'Highest Severity' } ];
 
   @Input() filters: CaseListFilters = { ...DEFAULT_CASE_LIST_FILTERS };
   @Input() showArchivedCases = false;
@@ -47,6 +43,32 @@ export class CaseFilterRowComponent {
 
   @Output() filtersChange = new EventEmitter<CaseListFilters>();
   @Output() archivedChange = new EventEmitter<boolean>();
+
+  constructor(private translationService: TranslationService) {}
+
+  get viewOptions(): UiDropdownOption[] {
+    return this.translateOptions([ { key: 'open', label: 'Open' }, { key: 'archived', label: 'Archived' } ]);
+  }
+
+  get statusFilterOptions(): UiDropdownOption[] {
+    return this.translateOptions([ { key: 'all', label: 'All Statuses' }, ...CASE_STATUS_OPTIONS.map(option => ({ key: option.value, label: option.label })) ]);
+  }
+
+  get severityFilterOptions(): UiDropdownOption[] {
+    return this.translateOptions([ { key: 'all', label: 'All Severities' }, ...SEVERITY_OPTIONS.map(severity => ({ key: severity, label: this.formatLabel(severity) })) ]);
+  }
+
+  get priorityFilterOptions(): UiDropdownOption[] {
+    return this.translateOptions([ { key: 'all', label: 'All Priorities' }, ...PRIORITY_OPTIONS.map(priority => ({ key: priority, label: this.formatLabel(priority) })) ]);
+  }
+
+  get caseTypeFilterOptions(): UiDropdownOption[] {
+    return this.translateOptions([ { key: 'all', label: 'All Types' }, ...CASE_TYPE_OPTIONS.map(option => ({ key: option.value, label: option.label })) ]);
+  }
+
+  get sortOptions(): UiDropdownOption[] {
+    return this.translateOptions([ { key: 'updated_desc', label: 'Newest Updated' }, { key: 'updated_asc', label: 'Oldest Updated' }, { key: 'priority_desc', label: 'Highest Priority' }, { key: 'severity_desc', label: 'Highest Severity' } ]);
+  }
 
   get selectedView(): string {
     return this.showArchivedCases ? 'archived' : 'open';
@@ -96,5 +118,10 @@ export class CaseFilterRowComponent {
     return value
       .replace(/[_-]/g, ' ')
       .replace(/\b\w/g, char => char.toUpperCase());
+  }
+
+  private translateOptions(options: UiDropdownOption[]): UiDropdownOption[] {
+    this.translationService.version();
+    return options.map(option => ({ ...option, label: this.translationService.translate(option.label) }));
   }
 }

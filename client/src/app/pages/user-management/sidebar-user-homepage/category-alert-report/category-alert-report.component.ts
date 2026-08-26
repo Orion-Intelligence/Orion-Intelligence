@@ -1,8 +1,8 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CategoryAlerts } from '../../../../shared/model/alert-notification/alert.notification.model';
+import { CategoryAlerts } from '../../../../shared/partials/alert-notification/model/alert.notification.model';
 import { AlertAllIoc, AlertModel } from '../../../../shared/model/company-profile/node.model';
 import { map, Observable } from 'rxjs';
 import { AppService } from '../../../../services/core/app/app.service';
@@ -21,14 +21,16 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { EmptyResultComponent } from '../../../../shared/partials/empty-result/empty-result.component';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { buildStandardExportOptions } from '../../../../shared/model/report/export-choice.model';
-import { AlertExportService } from '../../../../shared/services/export/alert-export.service';
+import { AlertExportService } from '../../../../shared/partials/alert-notification/services/alert-export.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { CategoryAlertDetailDrawerComponent } from './alert-detail-drawer/category-alert-detail-drawer.component';
 
 @Component({
   selector: 'app-category-alert-report',
   imports: [CommonModule, FormsModule, AddCustomAlertComponent, FiltersComponent, ConfirmationPopupComponent, TooltipDirective, EmptyResultComponent, ExportChoiceModalComponent, TranslatePipe, CategoryAlertDetailDrawerComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './category-alert-report.component.html',
 })
 export class CategoryAlertReportComponent implements OnInit {
@@ -66,9 +68,8 @@ export class CategoryAlertReportComponent implements OnInit {
   adminTenantId: string | null = null;
   readonly alertExportOptions = buildStandardExportOptions('category-alert-export-option', 'report', 'Generate PDF export for selected alert.');
   expandedAlertIds = new Set<string>();
-  hoveredReportTool: 'add' | 'export' | 'flush' | 'sidebar' | null = null;
 
-  constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService ) {
+  constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService, private translationService: TranslationService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -85,10 +86,6 @@ export class CategoryAlertReportComponent implements OnInit {
 
   isLightTheme(): boolean {
     return document.body.classList.contains('light-theme');
-  }
-
-  setReportToolHover(tool: 'add' | 'export' | 'flush' | 'sidebar' | null): void {
-    this.hoveredReportTool = tool;
   }
 
   applySearch(value: string): void {
@@ -226,7 +223,7 @@ export class CategoryAlertReportComponent implements OnInit {
           this.router.navigate(["/dashboard"], {});
         },
         error: (err) => {
-          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete')
+          this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to delete'))
         },
       });
     }
@@ -340,11 +337,11 @@ export class CategoryAlertReportComponent implements OnInit {
 
     this.apiService.post('alert/delete', id).subscribe({
       next: () => {
-        this.messageNotificationService.show('Alert deleted successfully!', 'success');
+        this.messageNotificationService.show(this.translationService.translate('Alert deleted successfully!'), 'success');
         this.getLatestAlerts();
       },
       error: (err) => {
-        const mess = err?.error?.detail || 'delete alert failed'
+        const mess = err?.error?.detail || this.translationService.translate('Failed to delete alert');
         this.messageNotificationService.show(mess)
       },
     });
@@ -425,7 +422,7 @@ export class CategoryAlertReportComponent implements OnInit {
           ? response
           : (Array.isArray(response?.items) ? response.items : []);
         if (!alerts.length) {
-          this.messageNotificationService.show('No alerts available to export right now.');
+          this.messageNotificationService.show(this.translationService.translate('No alerts available to export right now.'));
           this.closeExportChoice();
           return;
         }
@@ -544,7 +541,7 @@ export class CategoryAlertReportComponent implements OnInit {
         }
       }
       else {
-        this.messageNotificationService.show("Please purchase enterprise license to view reports")
+        this.messageNotificationService.show(this.translationService.translate('Please purchase enterprise license to view reports'))
       }
     });
 
@@ -647,23 +644,31 @@ export class CategoryAlertReportComponent implements OnInit {
   getRiskIconColorClass(risk: string): string {
     switch ((risk || '').toLowerCase()) {
       case 'critical':
-        return 'category_report_status-critical';
+        return '[&_i]:text-[#ef4444] [body.light-theme_&]:[&_i]:text-red-700';
       case 'high':
-        return 'category_report_status-high';
+        return '[&_i]:text-[#f97316] [body.light-theme_&]:[&_i]:text-orange-700';
       case 'medium':
-        return 'category_report_status-medium';
+        return '[&_i]:text-[#f59e0b] [body.light-theme_&]:[&_i]:text-amber-700';
       case 'low':
-        return 'category_report_status-low';
+        return '[&_i]:text-[#60a5fa] [body.light-theme_&]:[&_i]:text-sky-700';
       default:
-        return '';
+        return '[body.light-theme_&]:[&_i]:text-sky-700';
     }
   }
 
   getRiskLabelClass(risk: string): string {
-    const normalized = (risk || '').toLowerCase();
-    return ['critical', 'high', 'medium', 'low'].includes(normalized)
-      ? `category_report_alert-label-${normalized}`
-      : '';
+    switch ((risk || '').toLowerCase()) {
+      case 'critical':
+        return 'border border-[var(--color-border)] bg-[rgb(255_76_76/10%)] text-[#ff4c4c] [body.light-theme_&]:border-[#f3b6bb] [body.light-theme_&]:bg-[#feecec] [body.light-theme_&]:text-[#dc2626]';
+      case 'high':
+        return 'border border-[var(--color-border)] bg-[rgb(255_179_71/10%)] text-[#ffb347] [body.light-theme_&]:border-[#efcd98] [body.light-theme_&]:bg-[#fff5e8] [body.light-theme_&]:text-[#c66a08]';
+      case 'medium':
+        return 'border border-[var(--color-border)] bg-[rgb(255_217_102/10%)] text-[#ffd966] [body.light-theme_&]:border-[#e8d694] [body.light-theme_&]:bg-[#fffbe6] [body.light-theme_&]:text-[#a16207]';
+      case 'low':
+        return 'border border-[var(--color-border)] bg-[rgb(108_207_126/10%)] text-[#6ccf7e] [body.light-theme_&]:border-[#b7dec0] [body.light-theme_&]:bg-[#e8f8ec] [body.light-theme_&]:text-[#166534]';
+      default:
+        return '';
+    }
   }
 
   sliceString(text: string, maxLength: number): string {
@@ -926,7 +931,7 @@ export class CategoryAlertReportComponent implements OnInit {
         const jsonData = JSON.parse(reader.result as string);
 
         if (Array.isArray(jsonData)) {
-          this.messageNotificationService.show('Only one STIX bundle is allowed per upload');
+          this.messageNotificationService.show(this.translationService.translate('Only one STIX bundle is allowed per upload'));
           return;
         }
 
@@ -936,17 +941,17 @@ export class CategoryAlertReportComponent implements OnInit {
         this.apiService.post('alert/add', this.importedAlert).subscribe({
           next: () => {
             this.getLatestAlerts();
-            this.messageNotificationService.show('Alert imported successfully!', 'success');
+            this.messageNotificationService.show(this.translationService.translate('Alert imported successfully!'), 'success');
           },
           error: (err) => {
-            const mess = err?.error?.detail || 'Add alert failed';
+            const mess = err?.error?.detail || this.translationService.translate('Failed to add alert');
             this.messageNotificationService.show(mess);
           },
         });
 
       }
       catch (error: any) {
-        this.messageNotificationService.show(error.message || 'Invalid JSON file');
+        this.messageNotificationService.show(error.message || this.translationService.translate('Invalid JSON file'));
       }
     };
 

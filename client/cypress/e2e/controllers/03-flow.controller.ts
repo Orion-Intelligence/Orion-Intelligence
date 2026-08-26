@@ -40,7 +40,7 @@ export function openSidebarGroup(title: string) {
     }
     let isClosed = !sub.length || getComputedStyle(sub[0] as HTMLElement).pointerEvents === 'none';
     if (isClosed) {
-      cy.wrap($group).find('img[alt="Drop Down"]').click();
+      cy.wrap($group).find(`[data-testid="${groupTestId}-toggle"]`).click();
     }
     cy.wrap(sub).should(($ul) => {
       expect(getComputedStyle($ul[0] as HTMLElement).pointerEvents).not.to.equal('none');
@@ -231,7 +231,8 @@ export function assertFreeModeDashboardChrome() {
     .filter(':visible')
     .should('have.length.at.least', 1);
 
-  cy.get('[data-testid="dashboard-sidebar"] > app-dashboard-sidebar > nav > div.overflow-y-auto')
+  cy.get('[data-testid="dashboard-sidebar"] app-graph-sidebar-shell [data-sidebar-expanded] > div.overflow-y-auto, [data-testid="dashboard-sidebar"] app-graph-sidebar-shell [data-sidebar-collapsed] > div.overflow-y-auto')
+    .filter(':visible')
     .first()
     .scrollTo('bottom', { ensureScrollable: false });
 

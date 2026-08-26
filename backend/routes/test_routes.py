@@ -465,74 +465,6 @@ async def test_social_metadata(payload: dict = Body(...)):
     return TestRouteHelper.pending_or_elastic_mock("social_online_presence", "social_online_presence.json")
 
 
-def _test_social_extension_result(data: dict):
-    return {
-        "job_id": "mock-social-extension",
-        "status": "done",
-        "result": {
-            "platform": "extension",
-            "executor": "extension",
-            "source": "browser_extension",
-            "trusted": False,
-            "untrusted": True,
-            "validation_status": "sanitized",
-            "data": data,
-        },
-    }
-
-
-@test_routes.get(
-    "/api/social/extensions/status",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_extension_status():
-    return TestRouteHelper.load_elastic_mock("social_extensions.json")["status_response"]
-
-
-@test_routes.post(
-    "/api/social/extensions/profile",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_extension_profile(payload: dict = Body(...)):
-    profile = TestRouteHelper.load_elastic_mock("social_profile.json").get("result", {}).get("profile", {})
-    posts = TestRouteHelper.load_elastic_mock("social_posts.json").get("result", {}).get("posts", [])
-    videos = TestRouteHelper.load_elastic_mock("social_videos.json").get("result", {}).get("videos", [])
-    shorts = TestRouteHelper.load_elastic_mock("social_shorts.json").get("result", {}).get("shorts", [])
-    images = TestRouteHelper.load_elastic_mock("social_online_images.json").get("result", {}).get("images", [])
-    followers = TestRouteHelper.load_elastic_mock("social_followers.json").get("result", {}).get("followers", [])
-    following = TestRouteHelper.load_elastic_mock("social_following.json").get("result", {}).get("following", [])
-    return _test_social_extension_result(
-        {
-            "platform": str((payload or {}).get("platform") or "").lower(),
-            "requested_username": (payload or {}).get("username"),
-            "profile": profile,
-            "posts": posts,
-            "videos": videos,
-            "shorts": shorts,
-            "images": images,
-            "followers": followers,
-            "following": following,
-        }
-    )
-
-
-@test_routes.post(
-    "/api/social/extensions/posts",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_extension_posts(payload: dict = Body(...)):
-    posts = TestRouteHelper.load_elastic_mock("social_posts.json").get("result", {}).get("posts", [])
-    post_offset = int((payload or {}).get("post_offset") or 0)
-    max_posts = int((payload or {}).get("max_posts") or 20)
-    existing_urls = set((payload or {}).get("existing_post_urls") or [])
-    filtered_posts = [
-        post
-        for post in posts
-        if (post.get("url") or post.get("post_url") or post.get("hash_id")) not in existing_urls
-    ]
-    return _test_social_extension_result({"posts": filtered_posts[post_offset:post_offset + max_posts]})
-
-
 @test_routes.post(
     "/api/social/data",
     dependencies=SCAN_DEPS,
@@ -571,14 +503,6 @@ async def test_social_data_delete(profile_username: str):
 )
 async def test_social_followers(payload: dict = Body(...)):
     return TestRouteHelper.pending_or_elastic_mock("social_followers", "social_followers.json")
-
-
-@test_routes.post(
-    "/api/social/following",
-    dependencies=SCAN_DEPS,
-)
-async def test_social_following(payload: dict = Body(...)):
-    return TestRouteHelper.pending_or_elastic_mock("social_following", "social_following.json")
 
 
 @test_routes.post(

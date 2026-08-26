@@ -1,31 +1,31 @@
 <ng-container>
   <span id="top"></span>
   <div class="w-full px-[32px] pb-[100px] pt-3 max-[1200px]:px-[15px] max-[943px]:px-[10px] md:pt-4">
-    <div class="ui-page-container w-full max-w-[2400px]">
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 class="ui-page-title">{{ 'Audit Logs' | translate }}</h1>
-          <p class="ui-page-description">{{ 'Track user and tenant activity across the platform.' | translate }}</p>
+          <h1 data-testid="auditlog-page-title" class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Audit Logs' | translate }}</h1>
+          <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Track user and tenant activity across the platform.' | translate }}</p>
         </div>
         <div class="flex items-center gap-2">
           <div class="relative">
             <i class="bi bi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[var(--color-text4)]"></i>
             <input data-testid="auditlog-user-search" type="text" [(ngModel)]="selectedActor" (keyup.enter)="onActorChange()" [placeholder]="'Search username' | translate" class="h-10 w-[280px] rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-730)] py-[6px] pl-9 pr-3 font-[Inter] text-[14px] text-[var(--color-text1)] outline-none transition-[border-color,box-shadow,background-color] duration-300 ease-out focus:border-sky-400/35 focus:bg-[var(--color-blue-720)] focus:ring-2 focus:ring-sky-400/20 max-[1024px]:w-[220px] max-[760px]:w-full placeholder:text-[var(--color-text4)]" />
           </div>
-          <button data-testid="auditlog-export-button" type="button" class="ui-btn ui-btn-primary" (click)="openExportChoice()">
+          <button data-testid="auditlog-export-button" type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="openExportChoice()">
             <i class="bi bi-download me-2"></i>
             {{ 'common.actions.export' | translate }}
 
           </button>
           <button data-testid="auditlog-filter-open" type="button" (click)="openSidebar()" class="inline-flex h-10 items-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-680)] px-3 text-[15px] font-medium text-[var(--color-text1)] transition hover:bg-[var(--color-blue-750)]">
-            <img alt="Filter Icon" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16" class="ui-filter-icon">
+            <img alt="" height="16" ngSrc="assets/images/shared/theme/filter_icon.svg" priority width="16" class="ui-filter-icon">
             <span class="ml-2">{{ 'Filter' | translate }}</span>
           </button>
           @if (sidebarReady && (isFilterOpen$ | async)) {
-            <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="closeSidebar()"></div>
+            <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="closeSidebar()"></div>
           }
           @if (sidebarReady) {
-            <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+            <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full [body.light-theme_&]:border-l-[var(--color-border)]" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
               <app-filters (filterChanged)="applyFilters($event)" (filterClose)="closeSidebar()"
                 (filterReset)="resetFilters()" [filterModel]="filterModel"
               [isFilterOpen]="isFilterOpen$ | async"></app-filters>

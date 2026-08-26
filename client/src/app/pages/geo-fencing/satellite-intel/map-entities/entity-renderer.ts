@@ -1,5 +1,5 @@
 import { ApplicationRef, EnvironmentInjector } from '@angular/core';
-import { SatelliteAnomalyResponse, SatelliteLiveAircraft, SatelliteLiveShip } from '../../../../shared/model/satellite-intel/satellite-intel-api.models';
+import { SatelliteAnomalyResponse, SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, TrackingSidebarBridge } from '../../models/geo-fencing.models';
 import { AnomalyMapRenderer } from '../map-overlays/anomaly/anomaly-map-renderer';
 import { AircraftMapRenderer } from './aircraft/aircraft-map-renderer';

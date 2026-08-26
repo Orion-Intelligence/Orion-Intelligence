@@ -1,24 +1,24 @@
 <ng-container>
   <span id="top"></span>
   <div class="w-full max-w-[2400px] rounded-[12px] p-5 max-[1300px]:p-0 max-[550px]:px-[10px] max-[550px]:py-[10px]">
-    <div class="ui-page-container max-[1300px]:p-0 md:p-5 max-[550px]:px-[10px]">
+    <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none max-[1300px]:p-0 md:p-5 max-[550px]:px-[10px]">
       <div data-testid="tenant-page-header" class="mb-4 flex items-center justify-between">
         <div>
-          <h1 class="ui-page-title">{{ 'Tenants' | translate }}</h1>
-          <p class="ui-page-description">{{ 'Manage tenant configuration, status, and licenses.' | translate }}</p>
+          <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Tenants' | translate }}</h1>
+          <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Manage tenant configuration, status, and licenses.' | translate }}</p>
         </div>
       </div>
 
       <div class="my-5 h-px w-full bg-[var(--color-divider)]"></div>
       <div class="mb-3 flex justify-end">
-        <input data-testid="tenant-search-input" type="text" [(ngModel)]="tenantSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 sm:max-w-[320px]">
+        <input data-testid="tenant-search-input" type="text" [(ngModel)]="tenantSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-sky-400/20 sm:max-w-[320px]">
       </div>
 
-      <div class="tenant-table-shell m-0 overflow-visible md:overflow-hidden rounded-[8px] border !border-[var(--tenant-line)] shadow-none">
+      <div class="m-0 overflow-visible rounded-[8px] border !border-[var(--tenant-line)] [box-shadow:rgba(0,0,0,0.06)_0_4px_6px_-1px,rgba(0,0,0,0.035)_0_2px_4px_-1px] md:overflow-hidden">
         @if (!isLoading) {
-          <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
+          <div class="relative hidden overflow-x-auto overflow-y-visible md:block [.light-theme_&]:!shadow-none">
             <table class="w-full min-w-[1220px] table-fixed border-collapse text-left text-[15px] text-[var(--color-text1)]">
-              <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+              <thead class="sticky top-0 z-[1] border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)] [.light-theme_&]:!shadow-none">
                 <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
                   <th class="w-[70px] overflow-clip align-middle px-4 py-3.5">{{ 'Sr #' | translate }}</th>
                   <th class="w-[140px] overflow-clip align-middle px-4 py-3.5">{{ 'Company Name' | translate }}</th>
@@ -28,52 +28,46 @@
                   <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'User Quota' | translate }}</th>
                   <th class="w-[120px] overflow-clip align-middle px-4 py-3.5">{{ 'Status' | translate }}</th>
                   <th class="w-[210px] overflow-clip align-middle px-4 py-3.5">{{ 'Licenses' | translate }}</th>
-                  <th class="w-[150px] overflow-clip align-middle px-4 py-3.5 text-center">{{ 'Action' | translate }}</th>
+                  <th class="w-[150px] overflow-clip align-middle px-4 py-3.5 text-center"><span class="sr-only">{{ 'Expand' | translate }}</span></th>
                 </tr>
               </thead>
               @if ((filteredTenants?.length || 0) > 0) {
                 <tbody @fadeInDashboardItem>
                   @for (tenant of filteredTenants; track tenant.id || tenant.name || tenant.companyName || $index; let i = $index) {
-                    <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--tenant-row-bg)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="tenant._expanded ? '!border-t-0' : ''">
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                    <tr data-testid="tenant-row" tabindex="0" class="cursor-pointer border-t !border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] transition-colors hover:!border-[var(--tenant-line)] hover:bg-[var(--ui-table-row-hover)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-blue-640)] last:border-b-0 max-[1300px]:last:border-b max-[1300px]:last:border-[var(--tenant-line)]" [ngClass]="tenant._expanded ? '!border-t-0' : ''" [attr.aria-expanded]="tenant._expanded === true" [attr.aria-label]="((tenant._expanded ? 'Collapse' : 'Expand') | translate) + ' ' + (tenant.companyName || tenant.name || '')" (click)="tenant._expanded = !tenant._expanded" (keydown.enter)="tenant._expanded = !tenant._expanded" (keydown.space)="$event.preventDefault(); tenant._expanded = !tenant._expanded">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5 text-[14px] font-medium text-[var(--color-text2)]">{{ i + 1 }}</td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="inline-block max-w-full truncate font-medium text-[var(--color-text1)]">
                           {{ tenant.companyName || tenant.name || '-' }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.email || '-' }}</td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">{{ tenant.email || '-' }}</td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getSubscriptionBadgeClass(tenant.subscription)">
                           {{ (tenant.subscription ? 'Paid' : 'Free') | translate }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
-                        <span class="inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
+                        <span data-testid="tenant-verification-status" class="inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
                           {{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">{{ tenant.user_quota || 0 }}</td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">{{ tenant.user_quota || 0 }}</td>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="inline-flex rounded-[6px] px-3 py-1.5 text-[12px] font-semibold" [ngClass]="getTenantStatusBadgeClass(tenant.status)">
                           {{ getStatusLabel(tenant.status) }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5">
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <span class="mr-0 block max-w-[290px] truncate rounded-[6px] border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 py-1.5 text-[12px] font-medium text-[var(--color-text2)]" [attr.title]="getTenantLicensesLabel(tenant)">
                           {{ getTenantLicensesLabel(tenant) }}
                         </span>
                       </td>
-                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-3.5 text-center">
-                        <span class="inline-flex items-center gap-2">
-                          <button id="edit-tenant" data-testid="tenant-edit-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="tenant._expanded = !tenant._expanded">
-                            <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
-                          </button>
-                          <button data-testid="tenant-view-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] p-0 text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)]" (click)="openTenant(tenant)">
-                            <img src="assets/images/shared/view.svg" width="18" alt="view" class="tenant-action-icon" />
-                          </button>
-                          <button data-testid="tenant-delete-button" type="button" class="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 p-0 text-red-400 transition hover:bg-red-500/20" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">
-                            <i class="bi bi-trash3 text-sm leading-none"></i>
-                          </button>
+                      <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5 text-center">
+                        <span aria-hidden="true" class="inline-flex h-8 w-8 items-center justify-center text-[var(--color-text4)]">
+                          <svg viewBox="0 0 16 16" fill="none" class="h-4 w-4 transition-transform duration-150" [class.rotate-180]="tenant._expanded">
+                            <path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                          </svg>
                         </span>
                       </td>
                     </tr>
@@ -82,7 +76,13 @@
                         <td colspan="9" class="px-4 py-4">
                           <div class="space-y-4">
                             <div data-testid="tenant-edit-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-4">
-                              <div class="text-[19px] font-bold text-[var(--color-text1)]">{{ 'Tenant Information' | translate }}</div>
+                              <div class="flex items-center justify-between gap-3">
+                                <div class="text-[19px] font-bold text-[var(--color-text1)]">{{ 'Tenant Information' | translate }}</div>
+                                <button data-testid="tenant-view-button" type="button" class="inline-flex h-8 shrink-0 items-center justify-center gap-2 rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'View tenant' | translate" (click)="$event.stopPropagation(); openTenant(tenant)">
+                                  <img src="assets/images/shared/view.svg" width="18" alt="" class="tenant-action-icon" />
+                                  <span>{{ 'View tenant' | translate }}</span>
+                                </button>
+                              </div>
                               <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                                 <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Company Name' | translate }}</div>
@@ -119,7 +119,7 @@
                                 <div class="grid grid-cols-[160px_1fr] gap-3 px-1 py-2.5">
                                   <div class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Verified' | translate }}</div>
                                   <div>
-                                    <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
+                                    <span data-testid="tenant-verification-status" class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">
                                       {{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}
                                     </span>
                                   </div>
@@ -184,7 +184,7 @@
                                 </label>
                                 <div>
                                   <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Quota' | translate }}</label>
-                                  <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
+                                  <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none [body.light-theme_&]:focus:border-sky-400/35 [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-sky-400/20" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                                 </div>
                                 <div>
                                   <label class="block text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</label>
@@ -222,14 +222,25 @@
                                   </label>
                                 }
                                 @if (canManageTenantIocs(tenant)) {
-                                  <button data-testid="tenant-ioc-selector-open" type="button" class="flex items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 text-left transition hover:border-sky-400/35" (click)="openIocSelector(tenant, $event)">
-                                    <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Add IOCs' | translate }}</span>
-                                    <span class="rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-2 py-0.5 text-[11px] font-semibold text-[#8bc6f7]">{{ getTenantIocCount(tenant) }}</span>
+                                  <button data-testid="tenant-ioc-selector-open" type="button" class="group flex w-full items-center gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 text-left transition hover:border-sky-400/35" (click)="openIocSelector(tenant, $event)">
+                                    <span class="min-w-0 flex-1 text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Add IOCs' | translate }}</span>
+                                    <span class="flex max-w-[65%] min-w-0 shrink items-center justify-end gap-1 overflow-hidden">
+                                      @for (value of getTenantIocPreview(tenant); track $index) {
+                                        <span class="max-w-[100px] shrink-0 truncate rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-2.5 py-1 text-[12px] font-semibold text-[#8bc6f7] [body.light-theme_&]:border-sky-200 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700" [attr.title]="value">{{ value }}</span>
+                                      } @empty {
+                                        <span class="text-[11px] text-[var(--color-text4)]">{{ 'None' | translate }}</span>
+                                      }
+                                      @if (getTenantIocCount(tenant) > 5) {
+                                        <span class="shrink-0 text-[12px] font-semibold text-[var(--color-text4)]">…</span>
+                                      }
+                                    </span>
+                                    <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-4 w-4 shrink-0 -rotate-90 text-[var(--color-text4)] transition-transform duration-150 group-hover:translate-x-0.5"><path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                                   </button>
                                 }
                               </div>
                               <div class="mt-3 flex justify-end gap-2">
-                                <button data-testid="tenant-save-changes" type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">
+                                <button data-testid="tenant-delete-button" type="button" class="ui-delete-button rounded-md border px-2 py-1 text-[12px] font-semibold" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">{{ 'Delete' | translate }}</button>
+                                <button data-testid="tenant-save-changes" type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="updateTenant(tenant)">
                                   {{ 'Save changes' | translate }}
                                 </button>
                               </div>
@@ -250,22 +261,21 @@
               }
             </table>
           </div>
-          <div class="space-y-3 p-3 md:hidden" @fadeInDashboardItem>
+          <div class="space-y-3 p-3 md:hidden [.light-theme_&]:[&>div]:!shadow-none" @fadeInDashboardItem>
             @if ((filteredTenants?.length || 0) > 0) {
               @for (tenant of filteredTenants; track tenant.id || tenant.name || tenant.companyName || $index; let i = $index) {
                 <div class="overflow-visible md:overflow-hidden rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)]">
-                  <div class="flex items-center justify-between border-b border-[var(--tenant-line)] px-3 py-2.5">
+                  <div tabindex="0" role="button" class="flex cursor-pointer items-center justify-between border-b border-[var(--tenant-line)] px-3 py-2.5 transition-colors hover:bg-[var(--ui-table-row-hover)] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-[-1px] focus-visible:outline-[var(--color-blue-640)]" [attr.aria-expanded]="tenant._expanded === true" [attr.aria-label]="((tenant._expanded ? 'Collapse' : 'Expand') | translate) + ' ' + (tenant.companyName || tenant.name || '')" (click)="tenant._expanded = !tenant._expanded" (keydown.enter)="tenant._expanded = !tenant._expanded" (keydown.space)="$event.preventDefault(); tenant._expanded = !tenant._expanded">
                     <div class="min-w-0">
                       <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ tenant.companyName || tenant.name || '-' }}</div>
                       <div class="mt-0.5 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ tenant.country || '-' }}</div>
                     </div>
                     <div class="flex items-center gap-2">
-                      <button type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)]" (click)="tenant._expanded = !tenant._expanded">
-                        <img src="assets/images/shared/edit.svg" width="18" alt="edit" class="tenant-action-icon" />
-                      </button>
-                      <button data-testid="tenant-delete-button" type="button" class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 text-red-400 transition hover:bg-red-500/20" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">
-                        <i class="bi bi-trash3 text-sm leading-none"></i>
-                      </button>
+                      <span aria-hidden="true" class="inline-flex h-8 w-8 shrink-0 items-center justify-center text-[var(--color-text4)]">
+                        <svg viewBox="0 0 16 16" fill="none" class="h-4 w-4 transition-transform duration-150" [class.rotate-180]="tenant._expanded">
+                          <path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </span>
                     </div>
                   </div>
                   <div class="space-y-2 px-3 py-2.5 text-sm text-[var(--color-text2)]">
@@ -275,7 +285,7 @@
                     </div>
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Verified' | translate }}</span>
-                      <span class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">{{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}</span>
+                      <span data-testid="tenant-verification-status" class="inline-flex rounded-[6px] px-2.5 py-1 text-[11px] font-semibold" [ngClass]="getVerifiedBadgeClass(tenant.verified)">{{ (tenant.verified ? 'Verified' : 'Not Verified') | translate }}</span>
                     </div>
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-[11px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</span>
@@ -294,7 +304,13 @@
                     <div class="border-t border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] px-3 py-3">
                       <div class="space-y-3">
                         <div data-testid="tenant-edit-form-panel" class="rounded-[10px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] p-3">
-                          <div class="text-base font-bold text-[var(--color-text1)]">{{ 'Tenant Information' | translate }}</div>
+                          <div class="flex items-center justify-between gap-3">
+                            <div class="text-base font-bold text-[var(--color-text1)]">{{ 'Tenant Information' | translate }}</div>
+                            <button data-testid="tenant-view-button" type="button" class="inline-flex h-8 shrink-0 items-center justify-center gap-2 rounded-lg border border-[var(--tenant-line)] bg-[var(--tenant-chip-bg)] px-3 text-[12px] font-semibold text-[var(--color-text2)] transition hover:bg-[var(--tenant-chip-hover)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-400/30" [attr.aria-label]="'View tenant' | translate" (click)="$event.stopPropagation(); openTenant(tenant)">
+                              <img src="assets/images/shared/view.svg" width="18" alt="" class="tenant-action-icon" />
+                              <span>{{ 'View tenant' | translate }}</span>
+                            </button>
+                          </div>
                           <div class="mt-2 divide-y !divide-[var(--tenant-line)]">
                             <div class="grid grid-cols-[110px_1fr] gap-2 py-2">
                               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Company' | translate }}</div>
@@ -329,7 +345,7 @@
                             <div class="mt-2 text-xs text-[var(--color-text4)]">{{ 'No licenses assigned.' | translate }}</div>
                           }
                           <label class="mt-2 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'User Quota' | translate }}</label>
-                          <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
+                          <input data-testid="tenant-user-quota-input" type="number" class="mt-1 h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none [body.light-theme_&]:focus:border-sky-400/35 [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-sky-400/20" [(ngModel)]="tenant.user_quota" [min]="1" [max]="8">
                           <label class="mt-3 block text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Status' | translate }}</label>
                           <label data-testid="tenant-status-toggle" class="mt-1 flex cursor-pointer items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 transition hover:border-sky-400/35">
                             <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Active' | translate }}</span>
@@ -364,13 +380,24 @@
                                   </label>
                           }
                           @if (canManageTenantIocs(tenant)) {
-                            <button data-testid="tenant-ioc-selector-open" type="button" class="mt-3 flex w-full items-center justify-between gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 text-left transition hover:border-sky-400/35" (click)="openIocSelector(tenant, $event)">
-                              <span class="text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Add IOCs' | translate }}</span>
-                              <span class="rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-2 py-0.5 text-[11px] font-semibold text-[#8bc6f7]">{{ getTenantIocCount(tenant) }}</span>
+                            <button data-testid="tenant-ioc-selector-open" type="button" class="group mt-3 flex w-full items-center gap-3 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2.5 text-left transition hover:border-sky-400/35" (click)="openIocSelector(tenant, $event)">
+                              <span class="min-w-0 flex-1 text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Add IOCs' | translate }}</span>
+                              <span class="flex max-w-[65%] min-w-0 shrink items-center justify-end gap-1 overflow-hidden">
+                                @for (value of getTenantIocPreview(tenant); track $index) {
+                                  <span class="max-w-[100px] shrink-0 truncate rounded-[999px] border border-[#57a5eb55] bg-[#57a5eb1f] px-2.5 py-1 text-[12px] font-semibold text-[#8bc6f7] [body.light-theme_&]:border-sky-200 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700" [attr.title]="value">{{ value }}</span>
+                                } @empty {
+                                  <span class="text-[11px] text-[var(--color-text4)]">{{ 'None' | translate }}</span>
+                                }
+                                @if (getTenantIocCount(tenant) > 5) {
+                                  <span class="shrink-0 text-[12px] font-semibold text-[var(--color-text4)]">…</span>
+                                }
+                              </span>
+                              <svg aria-hidden="true" viewBox="0 0 16 16" fill="none" class="h-4 w-4 shrink-0 -rotate-90 text-[var(--color-text4)] transition-transform duration-150 group-hover:translate-x-0.5"><path d="m3.5 6 4.5 4 4.5-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                             </button>
                           }
-                          <div class="mt-3 flex justify-end">
-                            <button type="button" class="ui-btn ui-btn-primary" (click)="updateTenant(tenant)">{{ 'Save changes' | translate }}</button>
+                          <div class="mt-3 flex justify-end gap-2">
+                            <button data-testid="tenant-delete-button" type="button" class="ui-delete-button rounded-md border px-2 py-1 text-[12px] font-semibold" [attr.aria-label]="'Delete tenant' | translate" (click)="openDeleteConfirmation(tenant, $event)">{{ 'Delete' | translate }}</button>
+                            <button data-testid="tenant-save-changes" type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="updateTenant(tenant)">{{ 'Save changes' | translate }}</button>
                           </div>
                         </div>
                       </div>
@@ -385,9 +412,9 @@
             }
           </div>
         } @else {
-          <div class="relative hidden overflow-x-auto overflow-y-visible md:block">
+          <div class="relative hidden overflow-x-auto overflow-y-visible md:block [.light-theme_&]:!shadow-none">
             <table class="w-full min-w-[1220px] text-left text-sm">
-              <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)]">
+              <thead class="border-b-2 border-b-[rgba(87,165,235,.3764705882)] bg-[var(--color-blue-820-light)] [.light-theme_&]:!shadow-none">
                 <tr class="text-[12px] font-semibold uppercase tracking-[0.07em] text-[var(--color-text3)]">
                   <th class="px-4 py-3.5 font-semibold">{{ 'Sr #' | translate }}</th>
                   <th class="px-4 py-3.5 font-semibold">{{ 'Company Name' | translate }}</th>
@@ -397,32 +424,32 @@
                   <th class="px-4 py-3.5 font-semibold">{{ 'User Quota' | translate }}</th>
                   <th class="px-4 py-3.5 font-semibold">{{ 'Status' | translate }}</th>
                   <th class="px-4 py-3.5 font-semibold">{{ 'Licenses' | translate }}</th>
-                  <th class="px-4 py-3.5 font-semibold">{{ 'Action' | translate }}</th>
+                  <th class="px-4 py-3.5 font-semibold"><span class="sr-only">{{ 'Expand' | translate }}</span></th>
                 </tr>
               </thead>
               <tbody @fadeInDashboardItem>
                 <tr class="border-t !border-[var(--tenant-line)] bg-[var(--tenant-expand-bg)]">
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-12 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-14 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-16 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
-                  <td class="px-4 py-3"><div class="ui-shimmer h-3 w-10 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-12 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-24 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-14 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-16 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-20 rounded bg-[var(--color-blue-760)]"></div></td>
+                  <td class="px-4 py-3"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-10 rounded bg-[var(--color-blue-760)]"></div></td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <div class="space-y-3 p-3 md:hidden">
+          <div class="space-y-3 p-3 md:hidden [.light-theme_&]:[&>div]:!shadow-none">
             @for (_ of [1,2,3]; track _) {
               <div class="rounded-[10px] border border-[var(--tenant-line)] bg-[var(--tenant-row-bg)] p-3">
-                <div class="ui-shimmer h-4 w-1/2 rounded bg-[var(--color-blue-760)]"></div>
+                <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-4 w-1/2 rounded bg-[var(--color-blue-760)]"></div>
                 <div class="mt-3 space-y-2">
-                  <div class="ui-shimmer h-3 w-full rounded bg-[var(--color-blue-760)]"></div>
-                  <div class="ui-shimmer h-3 w-4/5 rounded bg-[var(--color-blue-760)]"></div>
-                  <div class="ui-shimmer h-3 w-3/5 rounded bg-[var(--color-blue-760)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-full rounded bg-[var(--color-blue-760)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-4/5 rounded bg-[var(--color-blue-760)]"></div>
+                  <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-3/5 rounded bg-[var(--color-blue-760)]"></div>
                 </div>
               </div>
             }
@@ -433,19 +460,24 @@
     </div>
   </div>
   @if (isIocSelectorOpen && activeIocTenant) {
-    <div data-testid="tenant-ioc-selector-overlay" class="ui-graph-popup-overlay fixed inset-0 z-[9999] flex items-center justify-center p-4" (click)="closeIocSelector()">
-      <div data-testid="tenant-ioc-selector-modal" class="ui-popup-shell relative w-full max-w-[1000px] rounded-[16px] border border-[#fcfcfc12] bg-[#172235] p-8 shadow-2xl max-[1024px]:p-6" (click)="$event.stopPropagation()">
-        <app-tenant-ioc-selector [iocs]="iocDraft"></app-tenant-ioc-selector>
-
-        <div class="mt-4 flex justify-end gap-2 border-t border-[#fcfcfc0d] pt-3">
-          <button data-testid="tenant-ioc-selector-cancel" type="button" class="ui-btn ui-btn-secondary" (click)="closeIocSelector()">{{ 'common.actions.cancel' | translate }}</button>
-          <button data-testid="tenant-ioc-selector-save" type="button" class="ui-btn ui-btn-primary" (click)="saveIocSelector()">{{ 'Save changes' | translate }}</button>
+    <div data-testid="tenant-ioc-selector-overlay" class="fixed inset-0 z-[1500]">
+      <div class="absolute inset-0 bg-black/50 transition-opacity duration-300 [body.light-theme_&]:bg-[rgba(23,34,53,0.18)]" [ngClass]="isIocSelectorDrawerOpen ? 'opacity-100' : 'pointer-events-none opacity-0'" (click)="closeIocSelector()"></div>
+      <aside data-testid="tenant-ioc-selector-modal" class="absolute right-0 top-0 flex h-full w-full max-w-2xl transform-gpu flex-col border-l border-[var(--color-border)] bg-[var(--color-blue-830)] text-[var(--color-text1)] shadow-[-18px_0_40px_rgba(0,0,0,0.34)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] [body.light-theme_&]:bg-white [body.light-theme_&]:shadow-none" [class.translate-x-0]="isIocSelectorDrawerOpen" [class.translate-x-[102%]]="!isIocSelectorDrawerOpen" (click)="$event.stopPropagation()">
+        <div class="shrink-0 border-b border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-3 backdrop-blur [body.light-theme_&]:bg-white/95">
+          <h2 class="text-[16px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Add IOCs' | translate }}</h2>
         </div>
-      </div>
+        <div class="min-h-0 flex-1 overflow-y-auto bg-[var(--color-blue-830)] p-6 [body.light-theme_&]:bg-white">
+          <app-tenant-ioc-drawer-content [iocs]="iocDraft"></app-tenant-ioc-drawer-content>
+        </div>
+        <div class="shrink-0 flex justify-end gap-3 border-t border-[var(--color-border)] bg-[var(--color-blue-830)]/95 px-6 py-4 backdrop-blur [body.light-theme_&]:bg-white/95">
+          <button data-testid="tenant-ioc-selector-cancel" type="button" class="inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] border-[var(--color-border)] text-[var(--color-text1)] hover:bg-[var(--tenant-chip-hover)]" (click)="closeIocSelector()">{{ 'common.actions.cancel' | translate }}</button>
+          <button data-testid="tenant-ioc-selector-save" type="button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="saveIocSelector()">{{ 'Save changes' | translate }}</button>
+        </div>
+      </aside>
     </div>
   }
   @if (tenantToDelete) {
-    <app-confirmation-popup [message]="'Are you sure you want to delete this tenant and its associated users and keys?'" (confirmed)="confirmDeleteTenant($event)"></app-confirmation-popup>
+    <app-confirmation-popup [message]="'Are you sure you want to delete this tenant and its associated users and keys?' | translate" (confirmed)="confirmDeleteTenant($event)"></app-confirmation-popup>
   }
   <span id="bottom"></span>
 </ng-container>

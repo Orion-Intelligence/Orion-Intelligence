@@ -1,7 +1,7 @@
 <div class="mb-[200px] w-full px-[32px] max-[1200px]:px-[15px] max-[943px]:px-[10px]" @fadeInDashboardItem>
-  <div class="ui-page-container w-full max-w-[2400px]">
-    <h1 class="ui-page-title">{{ 'Event Management' | translate }}</h1>
-    <p class="ui-page-description">{{ 'Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.' | translate }}</p>
+  <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-consolidated-primary)] [body.light-theme_&]:border-[#d7e2ef] [body.light-theme_&]:bg-[#f9fbff] [body.light-theme_&]:shadow-none p-5 w-full max-w-[2400px]">
+    <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Event Management' | translate }}</h1>
+    <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Search SIEM events for your own tenant only. Admin and maintainer access is tenant-scoped.' | translate }}</p>
 
   <div class="mt-4" @fadeInDashboardItem>
     <app-ioc-search
@@ -34,17 +34,17 @@
   </div>
 
   @if (sidebarReady && (isFilterOpen$ | async)) {
-    <div class="ui-filter-sidebar-overlay fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
+    <div class="!bg-[rgba(7,12,20,0.42)] [animation:ui-overlay-fade-in_180ms_ease-out] [body.light-theme_&]:!bg-[rgba(23,34,53,0.18)] fixed inset-0 z-[1190]" (click)="sidebarService.closeSidebar()"></div>
   }
 
   @if (sidebarReady) {
-    <div class="ui-filter-sidebar-panel fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] shadow-[0_3px_8px_rgba(0,0,0,0.24)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
+    <div class="ui-filter-sidebar-panel !shadow-none will-change-transform [backface-visibility:hidden] [contain:layout_paint] fixed top-0 right-0 z-[1200] h-screen w-[300px] overflow-hidden rounded-tl-[15px] border-l border-l-[#ffffff15] bg-[var(--color-blue-700)] transform-gpu transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] max-[450px]:w-full [body.light-theme_&]:border-l-[var(--color-border)]" [ngClass]="{ 'translate-x-[102%] pointer-events-none': !(isFilterOpen$ | async), 'translate-x-0 pointer-events-auto': (isFilterOpen$ | async) }">
       <app-filters (filterClose)="sidebarService.closeSidebar()" (filterChanged)="reloadFilters($event)" (filterReset)="reloadFilters({})" [filterModel]="filterModel" [isFilterOpen]="isFilterOpen$ | async"></app-filters>
     </div>
   }
 
   @if (errorMessage) {
-    <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)]">
+    <div class="mt-4 rounded-[10px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.28)] px-4 py-3 text-sm text-[var(--color-text1)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
       {{ errorMessage }}
     </div>
   }
@@ -71,7 +71,7 @@
     <section class="mt-[15px] rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-770)] p-[15px]" @fadeInDashboardItem>
       <div class="flex min-h-[50px] w-full flex-wrap items-center gap-8 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blur-920)] px-3 py-[6px] max-[640px]:gap-3">
         <div class="flex items-center gap-2">
-          <img alt="Search" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5">
+          <img alt="" src="assets/images/shared/search_elapsed_time.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ getActorLabel() }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Access' | translate }}</div>
         </div>
@@ -79,7 +79,7 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] md:block"></div>
 
         <div class="hidden items-center gap-2 md:flex">
-          <img alt="Search" src="assets/images/shared/results_found.svg" class="h-5 w-5">
+          <img alt="" src="assets/images/shared/results_found.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ totalHits }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Total Hits' | translate }}</div>
         </div>
@@ -87,23 +87,23 @@
         <div class="hidden h-6 w-px bg-[var(--color-divider)] lg:block"></div>
 
         <div class="hidden items-center gap-2 lg:flex">
-          <img alt="Search" src="assets/images/shared/assets_searched.svg" class="h-5 w-5">
-          <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="displayQuery || 'query'">{{ displayQuery || 'query' }}</div>
+          <img alt="" src="assets/images/shared/assets_searched.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
+          <div class="max-w-[220px] truncate text-sm font-semibold text-[var(--color-text1)]" [title]="displayQuery || ('query' | translate)">{{ displayQuery || ('query' | translate) }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Query' | translate }}</div>
         </div>
 
         <div class="hidden h-6 w-px bg-[var(--color-divider)] xl:block"></div>
 
         <div class="hidden items-center gap-2 xl:flex">
-          <img alt="Search" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5">
+          <img alt="" src="assets/images/shared/aggregated_data_well.svg" class="h-5 w-5 [body.light-theme_&]:brightness-[0.65]">
           <div class="text-sm font-semibold text-[var(--color-text1)]">{{ currentBatchSize }} / {{ pageCount }}</div>
           <div class="text-xs text-[var(--color-text4)]">{{ 'Batch / Pages' | translate }}</div>
         </div>
       </div>
 
       <div class="mt-[16px]">
-        <div class="ui-table-shell !mt-0">
-          <table class="ui-table">
+        <div class="overflow-x-auto border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] [border-width:var(--ui-table-shell-border-width,1.5px)] [margin-top:var(--ui-table-shell-mt,16px)] [border-radius:var(--ui-table-shell-radius,10px)] [-webkit-overflow-scrolling:touch] [--ui-table-shell-mt:0px]">
+          <table class="w-full border-collapse text-left text-sm text-[var(--color-text1)] [min-width:var(--ui-table-min-width,920px)] max-md:[min-width:var(--ui-table-mobile-min-width,680px)] max-md:text-[13px] [&_thead]:border-b-2 [&_thead]:border-b-[rgb(87_165_235/37.6%)] [&_thead]:bg-[var(--color-blue-820-light)] [&_thead]:text-[13px] [&_thead]:uppercase [&_thead]:tracking-[.04em] [&_thead]:text-[var(--color-text6)] max-md:[&_thead]:text-xs [&_th]:p-3 [&_td]:p-3 max-md:[&_th]:p-2.5 max-md:[&_td]:p-2.5 [&_tbody_tr]:border-t [&_tbody_tr]:border-t-[var(--ui-table-row-border)] [&_tbody_tr]:text-[var(--color-text3)] [&_tbody_tr]:transition-[background-color,border-color] [&_tbody_tr]:duration-[160ms] [&_tbody_tr]:ease-[ease] [&_tbody_tr:nth-child(odd)]:bg-[var(--ui-table-row-odd)] [&_tbody_tr:nth-child(even)]:bg-[var(--ui-table-row-even)] [&_tbody_tr:hover]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:hover]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-visible]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:outline-none [&_tbody_tr:focus-within]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-within]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-within]:outline-none [&_tbody_tr:active]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:active]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:active]:outline-none [&_tbody_td]:whitespace-nowrap">
             <thead>
               <tr>
                 <th>#</th>
@@ -129,7 +129,7 @@
                     <div class="mt-[2px] truncate text-xs text-[var(--color-text4)]" [title]="getRawPreview(item)">{{ getRawPreview(item) }}</div>
                   </td>
                   <td [attr.data-label]="'Severity' | translate">
-                    <span class="inline-flex items-center rounded-full border px-[8px] py-[2px] text-[11px] font-semibold uppercase" [ngClass]="{ 'border-red-400/30 bg-red-500/10 text-red-300': stringifyPrimitive(item?.severity).toLowerCase() === 'critical', 'border-orange-400/30 bg-orange-500/10 text-orange-300': stringifyPrimitive(item?.severity).toLowerCase() === 'high', 'border-amber-400/30 bg-amber-500/10 text-amber-300': stringifyPrimitive(item?.severity).toLowerCase() === 'medium', 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300': stringifyPrimitive(item?.severity).toLowerCase() === 'low', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text2)]': !['critical', 'high', 'medium', 'low'].includes(stringifyPrimitive(item?.severity).toLowerCase()) }">
+                    <span class="inline-flex items-center rounded-full border px-[8px] py-[2px] text-[11px] font-semibold uppercase" [ngClass]="{ 'border-red-400/30 bg-red-500/10 text-red-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800': stringifyPrimitive(item?.severity).toLowerCase() === 'critical', 'border-orange-400/30 bg-orange-500/10 text-orange-300 [body.light-theme_&]:border-orange-600/30 [body.light-theme_&]:bg-orange-100 [body.light-theme_&]:text-orange-800': stringifyPrimitive(item?.severity).toLowerCase() === 'high', 'border-amber-400/30 bg-amber-500/10 text-amber-300 [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': stringifyPrimitive(item?.severity).toLowerCase() === 'medium', 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': stringifyPrimitive(item?.severity).toLowerCase() === 'low', 'border-[var(--color-border)] bg-[var(--color-blue-730)] text-[var(--color-text2)]': !['critical', 'high', 'medium', 'low'].includes(stringifyPrimitive(item?.severity).toLowerCase()) }">
                       {{ stringifyPrimitive(item?.severity) }}
                     </span>
                   </td>
@@ -140,7 +140,7 @@
                   <td [attr.data-label]="'Date' | translate" class="text-xs text-[var(--color-text4)]">{{ getEventTimestamp(item) }}</td>
                   <td>
                     <button data-testid="siem-log-row-toggle" type="button" class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[var(--color-border)] bg-[var(--color-blue-720)] transition-colors hover:bg-[var(--color-blue-710)]" (click)="$event.stopPropagation(); toggleResultItem(idx)" [attr.aria-label]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" [attr.aria-pressed]="expandedResultIndex === idx">
-                      <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="expandedResultIndex === idx ? 'Collapse row' : 'Expand row'" class="h-3 w-3 ui-action-icon" />
+                      <img [src]="expandedResultIndex === idx ? 'assets/images/shared/theme/dash.svg' : 'assets/images/shared/theme/plus.svg'" [alt]="(expandedResultIndex === idx ? 'Collapse row' : 'Expand row') | translate" class="h-3 w-3 ui-action-icon" />
                     </button>
                   </td>
                 </tr>
@@ -168,7 +168,7 @@
                                 @for (ioc of getExtractedIocs(item); track ioc.name) {
                                   @for (value of ioc.values; track value) {
                                     <div class="min-w-[180px] max-w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] p-[10px]">
-                                      <div class="text-[12px] text-[var(--color-text4)]">{{ ioc.name }}</div>
+                                      <div class="text-[12px] text-[var(--color-text4)]">{{ ioc.name | translate }}</div>
                                       <div class="mt-[4px] break-all text-[13px] text-[var(--color-text1)]">{{ value }}</div>
                                     </div>
                                   }

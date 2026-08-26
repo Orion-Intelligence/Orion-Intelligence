@@ -74,12 +74,6 @@ class alert_job:
             return bool(allowed_categories.intersection(SCANNING_ALERT_CATEGORIES))
         return cls._normalize_alert_category(category) in allowed_categories
 
-    async def _handle_scanning_alert(self, tenant_id: str, ioc_value: str, ioc_type: str, scan_type: str):
-        return await self._scanning_processor.handle_scanning_alert(tenant_id, ioc_value, ioc_type, scan_type)
-
-    async def _handle_dynamic_scanning_alert( self, tenant_id: str, ioc_type: str, ioc_value: str, scan_type: str, search_payload: dict, dynamic_search_category: str, model_cls):
-        return await self._dynamic_scanning_processor.handle_dynamic_scanning_alert( tenant_id, ioc_type, ioc_value, scan_type, search_payload, dynamic_search_category, model_cls,)
-
     async def _process_tenant_alerts(self, tenant: db_tenant_model, category: str, allowed_categories: set[str] | None = None):
         tenant_key = self._cancellation_service.ensure_tenant(self._value(tenant, "id", ""))
         summary = AlertSummaryHelper.new_scan_summary()
@@ -229,9 +223,6 @@ class alert_job:
             "compromised_tenant_count": len(compromised_tenants),
             "admin_mail_sent": admin_mail_sent,
         }
-
-    async def run_all_categories(self):
-        return await self.run_tenant_batch()
 
     async def run_default_scheduled_categories(self):
         return await self.run_tenant_batch(

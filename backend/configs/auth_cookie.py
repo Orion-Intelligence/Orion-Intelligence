@@ -1,29 +1,92 @@
 from cryptography.fernet import Fernet, InvalidToken
-from fastapi import Request, Response
+from fastapi import Response
+from starlette.requests import HTTPConnection
 
 from orion.constants.constant import CONSTANTS
 from orion.helper_manager.env_handler import env_handler
 
 ACCESS_COOKIE = "access_token"
+EXTENSION_COOKIE_PATH = "/api/extension"
+EXTENSION_ACCESS_COOKIE = "extension_access_token"
 COOKIE_MAX_AGE = 30 * 60  # 30 minutes
+EXTENSION_COOKIE_MAX_AGE = 30 * 24 * 60 * 60  # 30 days, extension stays signed in until sign out
 COOKIE_CIPHER = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+
+SESSION_MARKER_COOKIE = "session_present"
+SESSION_MARKER_VALUE = "1"
+
+
+def _is_debug() -> bool:
+    return env_handler.get_instance().env("PRODUCTION", "0") != "1"
+
+
+def set_session_marker(resp: Response) -> None:
+    resp.set_cookie(
+        key=SESSION_MARKER_COOKIE,
+        value=SESSION_MARKER_VALUE,
+        httponly=False,
+        samesite="lax",
+        secure=not _is_debug(),
+        path="/",
+        max_age=COOKIE_MAX_AGE,
+    )
+
+
+def clear_session_marker(resp: Response) -> None:
+    resp.delete_cookie(SESSION_MARKER_COOKIE, path="/")
+
+
+def sync_session_marker(request: HTTPConnection, resp: Response) -> None:
+    if request.cookies.get(ACCESS_COOKIE):
+        set_session_marker(resp)
+    else:
+        clear_session_marker(resp)
 
 
 def set_access_cookie(resp: Response, token: str) -> None:
-    is_debug = env_handler.get_instance().env("PRODUCTION", "0") != "1"
     resp.set_cookie(
         key=ACCESS_COOKIE,
         value=COOKIE_CIPHER.encrypt(token.encode()).decode(),
         httponly=True,
         samesite="lax",
-        secure=not is_debug,
+        secure=not _is_debug(),
         path="/",
         max_age=COOKIE_MAX_AGE,
     )
+    set_session_marker(resp)
     resp.delete_cookie(ACCESS_COOKIE, path="/admin")
 
 
-def token_from_request(request: Request) -> str | None:
+def set_extension_cookie(resp: Response, token: str) -> None:
+    resp.set_cookie(
+        key=EXTENSION_ACCESS_COOKIE,
+        value=COOKIE_CIPHER.encrypt(token.encode()).decode(),
+        httponly=True,
+        samesite="none",
+        secure=True,
+        path=EXTENSION_COOKIE_PATH,
+        max_age=EXTENSION_COOKIE_MAX_AGE,
+    )
+
+
+def clear_extension_cookie(resp: Response) -> None:
+    resp.delete_cookie(EXTENSION_ACCESS_COOKIE, path=EXTENSION_COOKIE_PATH, secure=True, httponly=True, samesite="none")
+
+
+def extension_token_from_request(request: HTTPConnection) -> str | None:
+    auth = request.headers.get("Authorization", "")
+    parts = auth.split(" ", 1)
+    bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None
+    cookie_token = request.cookies.get(EXTENSION_ACCESS_COOKIE)
+    if cookie_token:
+        try:
+            cookie_token = COOKIE_CIPHER.decrypt(cookie_token.encode()).decode()
+        except InvalidToken:
+            pass
+    return bearer or cookie_token
+
+
+def token_from_request(request: HTTPConnection) -> str | None:
     auth = request.headers.get("Authorization", "")
     parts = auth.split(" ", 1)
     bearer = parts[1] if len(parts) == 2 and parts[0] == "Bearer" else None

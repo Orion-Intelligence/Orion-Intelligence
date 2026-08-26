@@ -1,25 +1,37 @@
-import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core';
-import { DemoTourService } from '../../../shared/services/demo.tour.service';
-import { RenderedGeometry } from '../../../shared/model/demo-tour/modal/rendered-geometry.interface';
+import { AfterViewInit, ChangeDetectorRef, Component, HostBinding, HostListener, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { DemoTourService } from '../services/demo.tour.service';
+import { RenderedGeometry } from '../model/rendered-geometry.interface';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-demo-tour',
   imports: [TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './demo-tour.component.html'
 })
 export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private static readonly hostRuntimeSelector = 'app-demo-tour.demo-tour-runtime';
   private static readonly bodyRuntimeSelector = 'body.demo-tour-scroll-locked';
+  private static readonly activeElementUtilityClasses = ['!z-[1001]', 'isolate', '!transition-none'] as const;
+  private static readonly activeElementRelativeClass = '!relative';
+  private static readonly activeElementPointerClass = '!pointer-events-auto';
+  private static readonly activeElementBlockedPointerClass = '!pointer-events-none';
   private readonly fallbackPositions: NonNullable<TourStep['position']>[] = ['bottom', 'top', 'right', 'left'];
   private readonly minimumLoadingMs = 350;
   private readonly geometryTolerancePx = 1.5;
   private readonly geometryTrackingWindowMs = 100;
   private readonly cutoutTransitionMs = 220;
+  private readonly sidebarSpotlightPadding = 6;
+  private readonly tooltipGap = 14;
   private activeElement: HTMLElement | null = null;
+  private activeElementAddedRelativeClass = false;
+  private activeElementAddedPointerClass: string | null = null;
   private animationFrameId: number | null = null;
   private geometryTrackingFrameId: number | null = null;
+  private geometryTrackingResolve: (() => void) | null = null;
   private cutoutAnimationFrameId: number | null = null;
   private activeElementResizeObserver: ResizeObserver | null = null;
   private activeElementMutationObserver: MutationObserver | null = null;
@@ -27,48 +39,54 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private activeInput: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | null = null;
   private activeInputWasDisabled = false;
   private disabledElements: { element: HTMLButtonElement | HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement; wasDisabled: boolean; }[] = [];
-  private nextTransitionInProgress = false;
   private scrollLockY = 0;
   private preparingStep = false;
   private loadingStartedAt = 0;
   private geometryFrozen = false;
   private lastRenderedGeometry: RenderedGeometry | null = null;
-  private readonly spotlightCornerRadius = 10;
+  private lastTargetCutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[] = [];
+  private readonly stepUrls = new Map<number, string>();
+  private readonly completedStepIndexes = new Set<number>();
+  private pendingPreparationDirection: 'forward' | 'backward' = 'forward';
+  private currentStepRestoreOnly = false;
+  private initialSidebarExpanded: boolean | null = null;
+  private initialSidebarScrollTop: number | null = null;
+  private focusBeforeTour: HTMLElement | null = null;
+  private readonly spotlightCornerRadius = 12;
   private runtimeStyleSheet: CSSStyleSheet | null = null;
   private stepIndexTimerId: number | null = null;
   private startTourTimerId: number | null = null;
+  private currentStepSubscription: Subscription | null = null;
 
+  nextTransitionInProgress = false;
   step: TourStep | null = null;
   visible = false;
   stepReady = false;
   loadingVisible = false;
   positionStyle: Record<string, string> = {};
   cutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[] = [];
+  showDashboardSpotlightBorder = false;
   currentIndex = 0;
   totalSteps = 0;
-  spotlightRevealVariant = 0;
-  tourAccent = '#34d399';
-  tourAccentStrong = '#10b981';
-  spotlightTop = '0px';
-  spotlightLeft = '0px';
-  spotlightWidth = '0px';
-  spotlightHeight = '0px';
   tooltipTop = '0px';
   tooltipLeft = '0px';
   tooltipBottom = 'auto';
-  tooltipWidth = '320px';
+  tooltipWidth = '360px';
   progressWidth = '0%';
   @HostBinding('class.demo-tour-runtime') readonly runtimeClass = true;
-  @HostBinding('class.tour-loading') readonly tourLoadingClass = true;
+
+  @HostBinding('class.tour-loading') get tourLoadingClass(): boolean {
+    return this.visible && !this.stepReady;
+  }
 
   @HostBinding('class.tour-tooltip-positioned') get isTooltipPositioned(): boolean {
     return this.tooltipTop !== '0px' || this.tooltipLeft !== '0px' || this.tooltipBottom !== 'auto';
   }
 
-  constructor(private tourService: DemoTourService, private cdr: ChangeDetectorRef, private ngZone: NgZone) {}
+  constructor(private tourService: DemoTourService, private cdr: ChangeDetectorRef, private ngZone: NgZone, private router: Router) {}
 
   ngOnInit() {
-    this.tourService.currentStep$.subscribe(index => {
+    this.currentStepSubscription = this.tourService.currentStep$.subscribe(index => {
       if (this.stepIndexTimerId !== null) {
         window.clearTimeout(this.stepIndexTimerId);
       }
@@ -83,6 +101,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.captureInitialSidebarState();
     this.startTourTimerId = window.setTimeout(() => {
       this.startTourTimerId = null;
       void this.tourService.startTourForCurrentLicense();
@@ -90,13 +109,24 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private applyStepIndex(index: number): void {
+    const preparationDirection = this.pendingPreparationDirection;
+    this.pendingPreparationDirection = 'forward';
+    this.stepPreparationToken += 1;
+    this.nextTransitionInProgress = false;
+    this.cancelPendingVisualWork();
+    this.clearActiveElementStyles();
+
+    if (index >= 0 && !this.visible && document.activeElement instanceof HTMLElement) {
+      this.focusBeforeTour = document.activeElement;
+    }
+
     this.visible = index !== -1;
     this.stepReady = false;
     this.lastRenderedGeometry = null;
+    this.lastTargetCutoutRects = [];
     this.geometryFrozen = false;
     this.currentIndex = index;
     this.step = this.tourService.getCurrentStep();
-    this.updateAccentTheme(this.step);
     this.syncRuntimeStyles();
 
     if (this.visible && this.step) {
@@ -104,7 +134,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       this.loadingVisible = true;
       this.lockPageScroll();
       this.totalSteps = this.tourService.getTotalSteps();
-      void this.prepareStep(this.step);
+      void this.prepareStep(this.step, preparationDirection);
+      this.focusTourDialog();
       return;
     }
 
@@ -112,31 +143,25 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.resetHostStyles();
   }
 
-  private updateAccentTheme(_step: TourStep | null): void {
-    this.tourAccent = '#34d399';
-    this.tourAccentStrong = '#10b981';
-  }
-
   ngOnDestroy(): void {
+    this.stepPreparationToken += 1;
+    this.currentStepSubscription?.unsubscribe();
+    this.currentStepSubscription = null;
     if (this.startTourTimerId !== null) {
       window.clearTimeout(this.startTourTimerId);
+      this.startTourTimerId = null;
     }
     if (this.stepIndexTimerId !== null) {
       window.clearTimeout(this.stepIndexTimerId);
+      this.stepIndexTimerId = null;
     }
-    if (this.animationFrameId !== null) {
-      cancelAnimationFrame(this.animationFrameId);
-    }
-    if (this.geometryTrackingFrameId !== null) {
-      cancelAnimationFrame(this.geometryTrackingFrameId);
-    }
-    if (this.cutoutAnimationFrameId !== null) {
-      cancelAnimationFrame(this.cutoutAnimationFrameId);
-    }
-    this.clearRuntimeStyles();
-    this.disconnectActiveElementObservers();
+    this.cancelPendingVisualWork();
     this.clearActiveElementStyles();
+    this.restoreInitialSidebarState();
+    void this.setProfileMenuState('closed');
+    this.restoreFocusBeforeTour();
     this.unlockPageScroll();
+    this.clearRuntimeStyles();
   }
 
   @HostListener('window:resize')
@@ -149,7 +174,22 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
   @HostListener('document:keydown', ['$event'])
   onDocumentKeydown(event: KeyboardEvent): void {
-    if (!this.visible || !this.step || event.key !== 'Enter' || !this.activeElement) {
+    if (!this.visible) {
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.skip();
+      return;
+    }
+
+    if (event.key === 'Tab') {
+      this.trapTourFocus(event);
+      return;
+    }
+
+    if (!this.stepReady || this.nextTransitionInProgress || !this.step || event.key !== 'Enter' || !this.activeElement) {
       return;
     }
 
@@ -164,8 +204,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.step.endOnEnter) {
-      this.clearActiveElementStyles();
-      this.tourService.end();
+      this.skip();
     }
   }
 
@@ -174,7 +213,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const spotlightElement = this.getStepElement(this.step);
+    const stepElement = this.getStepElement(this.step);
+    const spotlightElement = stepElement
+      ? this.getSpotlightAnchorElement(stepElement, this.step.elementId)
+      : null;
     const tooltipElement = this.preparingStep
       ? this.getTooltipAnchorElement(this.step) ?? spotlightElement
       : spotlightElement;
@@ -184,12 +226,11 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (spotlightElement) {
-      this.activeElement = spotlightElement;
       this.applyActiveElementStyles(spotlightElement);
-      this.applyStepInputState(spotlightElement, this.step);
+      this.applyStepInputState(stepElement ?? spotlightElement, this.step);
     }
 
-    const basePadding = this.step.padding ?? 10;
+    const basePadding = this.step.padding ?? this.getDefaultSpotlightPadding(this.step.elementId);
     const paddingTop = this.step.paddingTop ?? basePadding;
     const paddingRight = this.step.paddingRight ?? basePadding;
     const paddingBottom = this.step.paddingBottom ?? basePadding;
@@ -227,18 +268,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
 
-      if (this.isCompactViewport() && this.isSidebarRelatedStep(this.step)) {
-        const compactSidebarTopLimit = this.getCompactTooltipReservedTop();
-        top = Math.max(top, compactSidebarTopLimit);
-        height = Math.max(bottom - top, 0);
-      }
-
-      const additionalSpotlightStyles = this.getAdditionalSpotlightStyles(this.step, {
-        top: paddingTop,
-        right: paddingRight,
-        bottom: paddingBottom,
-        left: paddingLeft
-      });
+      const additionalSpotlightStyles = this.getAdditionalSpotlightStyles(this.step);
       nextCutoutRects = [
         { top, left, width, height, rx: this.spotlightCornerRadius, ry: this.spotlightCornerRadius },
         ...additionalSpotlightStyles.map(spotlight => ({
@@ -271,21 +301,18 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       spotlightLeft: left,
       spotlightWidth: width,
       spotlightHeight: height,
-      tooltipTop: Number.parseFloat(this.positionStyle['top'] || '0'),
-      tooltipLeft: Number.parseFloat(this.positionStyle['left'] || '0')
+      tooltipTop: Number.parseFloat(this.positionStyle['top'] || '0') || 0,
+      tooltipLeft: Number.parseFloat(this.positionStyle['left'] || '0') || 0
     };
 
-    if (this.shouldSkipGeometryUpdate(nextGeometry)) {
+    if (this.shouldSkipGeometryUpdate(nextGeometry, nextCutoutRects)) {
       this.progressWidth = `${this.totalSteps > 0 ? ((this.currentIndex + 1) / this.totalSteps) * 100 : 0}%`;
       return;
     }
 
     this.lastRenderedGeometry = nextGeometry;
+    this.lastTargetCutoutRects = nextCutoutRects.map(rect => ({ ...rect }));
     this.animateCutoutRects(nextCutoutRects);
-    this.spotlightTop = `${top}px`;
-    this.spotlightLeft = `${left}px`;
-    this.spotlightWidth = `${width}px`;
-    this.spotlightHeight = `${height}px`;
     this.tooltipTop = this.positionStyle['top'] || '0px';
     this.tooltipLeft = this.positionStyle['left'] || '0px';
     this.tooltipBottom = this.positionStyle['bottom'] || 'auto';
@@ -293,7 +320,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.syncRuntimeStyles();
   }
 
-  private shouldSkipGeometryUpdate(nextGeometry: RenderedGeometry): boolean {
+  private shouldSkipGeometryUpdate(nextGeometry: RenderedGeometry, nextCutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[]): boolean {
     if (!this.lastRenderedGeometry) {
       return false;
     }
@@ -303,7 +330,19 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       this.isWithinTolerance(this.lastRenderedGeometry.spotlightWidth, nextGeometry.spotlightWidth) &&
       this.isWithinTolerance(this.lastRenderedGeometry.spotlightHeight, nextGeometry.spotlightHeight) &&
       this.isWithinTolerance(this.lastRenderedGeometry.tooltipTop, nextGeometry.tooltipTop) &&
-      this.isWithinTolerance(this.lastRenderedGeometry.tooltipLeft, nextGeometry.tooltipLeft);
+      this.isWithinTolerance(this.lastRenderedGeometry.tooltipLeft, nextGeometry.tooltipLeft) &&
+      this.areCutoutRectsStable(nextCutoutRects);
+  }
+
+  private areCutoutRectsStable(nextCutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[]): boolean {
+    return this.lastTargetCutoutRects.length === nextCutoutRects.length &&
+      nextCutoutRects.every((rect, index) => {
+        const previousRect = this.lastTargetCutoutRects[index];
+        return this.isWithinTolerance(previousRect.top, rect.top) &&
+          this.isWithinTolerance(previousRect.left, rect.left) &&
+          this.isWithinTolerance(previousRect.width, rect.width) &&
+          this.isWithinTolerance(previousRect.height, rect.height);
+      });
   }
 
   private isWithinTolerance(previousValue: number, nextValue: number): boolean {
@@ -326,8 +365,13 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private async prepareStep(step: TourStep): Promise<void> {
+  private async prepareStep(step: TourStep, direction: 'forward' | 'backward' = 'forward'): Promise<void> {
     const token = ++this.stepPreparationToken;
+    const restoreOnly = direction === 'backward' || this.completedStepIndexes.has(this.currentIndex);
+    this.currentStepRestoreOnly = restoreOnly;
+    if (this.initialSidebarExpanded === null) {
+      this.captureInitialSidebarState();
+    }
     this.preparingStep = true;
     this.loadingVisible = true;
     this.loadingStartedAt = performance.now();
@@ -336,14 +380,22 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     await this.ensureMobileViewportState(step);
 
     if (token !== this.stepPreparationToken || this.step !== step) {
-      this.preparingStep = false;
+      return;
+    }
+
+    await this.ensureRequestedUiState(step);
+
+    if (token !== this.stepPreparationToken || this.step !== step) {
       return;
     }
 
     this.schedulePositionUpdate(true);
 
-    if (step.activateSelector) {
-      const trigger = document.querySelector(step.activateSelector);
+    if (!restoreOnly && step.activateSelector && !this.isWaitTargetRendered(step)) {
+      const trigger = await this.waitForRenderedSelector(step.activateSelector);
+      if (token !== this.stepPreparationToken || this.step !== step) {
+        return;
+      }
       if (trigger instanceof HTMLElement) {
         trigger.click();
         await this.waitForAnimationFrames(2);
@@ -355,27 +407,34 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
-      this.preparingStep = false;
       return;
     }
 
-    const element = this.getStepElement(step);
+    if (!this.hasStepTarget(step)) {
+      await this.waitForStepTarget(step, direction === 'backward' ? 2500 : 1500);
+    }
+
+    if (token !== this.stepPreparationToken || this.step !== step) {
+      return;
+    }
+
+    const candidateElement = this.getStepElement(step);
+    const element = candidateElement && this.isElementEffectivelyVisible(candidateElement)
+      ? candidateElement
+      : null;
     if (element && step.scrollIntoView) {
-      element.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
-      await this.waitForAnimationFrames(1);
+      await this.scrollStepTargetIntoView(step, element);
       this.schedulePositionUpdate(true);
     }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
-      this.preparingStep = false;
       return;
     }
 
     if (element) {
-      this.triggerSpotlightReveal();
       this.updatePosition();
       this.cdr.markForCheck();
-      await this.trackGeometryForWindow(step, this.geometryTrackingWindowMs);
+      await this.trackGeometryForWindow(step, this.geometryTrackingWindowMs, token);
     }
 
     if (element) {
@@ -383,23 +442,72 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       await this.waitForSidebarRectStability(step, element);
     }
 
-    if (element && step.triggerSubmitOnShow) {
+    if (token !== this.stepPreparationToken || this.step !== step) {
+      return;
+    }
+
+    if (!restoreOnly && element && step.triggerSubmitOnShow) {
       this.applyStepInputState(element, step);
       this.triggerStepSubmit(element, step);
       await this.waitForStepStability(step, element);
     }
 
+    if (token !== this.stepPreparationToken || this.step !== step) {
+      return;
+    }
+
+    if (element) {
+      this.geometryFrozen = false;
+      this.updatePosition();
+      this.geometryFrozen = true;
+      this.cdr.markForCheck();
+    }
+
     const tooltipAnchor = this.getTooltipAnchorElement(step);
+    if (token !== this.stepPreparationToken || this.step !== step) {
+      return;
+    }
+
     if (!element && !tooltipAnchor) {
+      if (direction === 'backward') {
+        const elapsedLoadingMs = performance.now() - this.loadingStartedAt;
+        if (elapsedLoadingMs < this.minimumLoadingMs) {
+          await this.wait(this.minimumLoadingMs - elapsedLoadingMs);
+        }
+        if (token !== this.stepPreparationToken || this.step !== step || !this.visible) {
+          return;
+        }
+
+        const { width, height, margin } = this.getTooltipMetrics();
+        this.cutoutRects = [];
+        this.tooltipTop = `${Math.max((window.innerHeight - height) / 2, margin)}px`;
+        this.tooltipLeft = `${Math.max((window.innerWidth - width) / 2, margin)}px`;
+        this.tooltipBottom = 'auto';
+        this.progressWidth = `${this.totalSteps > 0 ? ((this.currentIndex + 1) / this.totalSteps) * 100 : 0}%`;
+        this.stepReady = true;
+        this.loadingVisible = false;
+        this.preparingStep = false;
+        this.syncRuntimeStyles();
+        this.cdr.markForCheck();
+        this.focusPrimaryTourAction(token, step);
+        return;
+      }
+
       this.preparingStep = false;
       this.loadingVisible = false;
       this.cdr.markForCheck();
-      window.setTimeout(() => this.tourService.next(), 0);
+      window.setTimeout(() => {
+        if (token === this.stepPreparationToken && this.step === step && this.visible) {
+          if (direction === 'forward') {
+            this.pendingPreparationDirection = 'forward';
+            this.tourService.next();
+          }
+        }
+      }, 0);
       return;
     }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
-      this.preparingStep = false;
       return;
     }
 
@@ -409,37 +517,92 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (token !== this.stepPreparationToken || this.step !== step) {
-      this.preparingStep = false;
+      return;
+    }
+
+    if (!restoreOnly) {
+      await this.waitForRouterUrlStability(step, token);
+    }
+
+    if (token !== this.stepPreparationToken || this.step !== step) {
       return;
     }
 
     this.stepReady = true;
     this.loadingVisible = false;
     this.preparingStep = false;
+    if (!restoreOnly) {
+      this.stepUrls.set(this.currentIndex, this.router.url);
+      this.completedStepIndexes.add(this.currentIndex);
+    }
     this.cdr.markForCheck();
+    this.focusPrimaryTourAction(token, step);
+    requestAnimationFrame(() => {
+      if (token !== this.stepPreparationToken || this.step !== step || !this.visible) {
+        return;
+      }
+      this.geometryFrozen = false;
+      this.updatePosition();
+      this.geometryFrozen = true;
+      this.cdr.markForCheck();
+    });
   }
 
   private applyActiveElementStyles(element: HTMLElement): void {
     if (this.activeElement === element) {
+      this.showDashboardSpotlightBorder = this.isDashboardContentTarget(element);
+      this.updateActiveElementPointerState(element);
       return;
     }
 
     this.clearActiveElementStyles();
+    this.showDashboardSpotlightBorder = this.isDashboardContentTarget(element);
     this.activeElement = element;
-    this.activeElement.classList.add('demo-tour-active');
+    this.activeElement.classList.add('demo-tour-active', ...DemoTourComponent.activeElementUtilityClasses);
+    if (window.getComputedStyle(element).position === 'static' && !element.classList.contains(DemoTourComponent.activeElementRelativeClass)) {
+      element.classList.add(DemoTourComponent.activeElementRelativeClass);
+      this.activeElementAddedRelativeClass = true;
+    }
+    this.updateActiveElementPointerState(element);
     this.observeActiveElement(element);
+  }
+
+  private updateActiveElementPointerState(element: HTMLElement): void {
+    const pointerClass = this.step?.targetInteractive === false
+      ? DemoTourComponent.activeElementBlockedPointerClass
+      : DemoTourComponent.activeElementPointerClass;
+    if (this.activeElementAddedPointerClass === pointerClass) {
+      return;
+    }
+    if (this.activeElementAddedPointerClass) {
+      element.classList.remove(this.activeElementAddedPointerClass);
+      this.activeElementAddedPointerClass = null;
+    }
+    if (!element.classList.contains(pointerClass)) {
+      element.classList.add(pointerClass);
+      this.activeElementAddedPointerClass = pointerClass;
+    }
   }
 
   private clearActiveElementStyles(): void {
     this.restoreActiveInputState();
     this.restoreDisabledElements();
     this.disconnectActiveElementObservers();
+    this.showDashboardSpotlightBorder = false;
 
     if (!this.activeElement) {
       return;
     }
 
-    this.activeElement.classList.remove('demo-tour-active');
+    this.activeElement.classList.remove('demo-tour-active', ...DemoTourComponent.activeElementUtilityClasses);
+    if (this.activeElementAddedRelativeClass) {
+      this.activeElement.classList.remove(DemoTourComponent.activeElementRelativeClass);
+    }
+    if (this.activeElementAddedPointerClass) {
+      this.activeElement.classList.remove(this.activeElementAddedPointerClass);
+    }
+    this.activeElementAddedRelativeClass = false;
+    this.activeElementAddedPointerClass = null;
     this.activeElement = null;
   }
 
@@ -478,10 +641,16 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       const isSidebarRelatedStep = !!this.step && this.isSidebarRelatedStep(this.step);
       const isDashboardStep = this.step?.elementId === 'dashboard-consolidated';
       const isFinalSidebarStep = this.currentIndex >= Math.max(this.totalSteps - 2, 0);
+      const targetCenter = spotlightBounds
+        ? spotlightBounds.top + (spotlightBounds.height / 2)
+        : rect.top + (rect.height / 2);
+      const dockAtTop = isSidebarRelatedStep
+        ? targetCenter >= window.innerHeight / 2
+        : isDashboardStep || isFinalSidebarStep;
       return {
-        top: (isSidebarRelatedStep || isDashboardStep || isFinalSidebarStep) ? '10px' : 'auto',
+        top: dockAtTop ? '10px' : 'auto',
         left: '10px',
-        bottom: (isSidebarRelatedStep || isDashboardStep || isFinalSidebarStep) ? 'auto' : '10px'
+        bottom: dockAtTop ? 'auto' : '10px'
       };
     }
 
@@ -490,7 +659,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       : preferredPosition;
 
     if (effectivePreferredPosition === 'bottom' && this.step?.elementId === 'homeSearch' && spotlightBounds) {
-      const homeSearchAlignedTooltip = this.getBelowLeftAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
+      const homeSearchAlignedTooltip = this.getBelowLeftAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, this.tooltipGap);
       if (this.fitsInViewport(homeSearchAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
         return homeSearchAlignedTooltip;
       }
@@ -517,7 +686,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (effectivePreferredPosition === 'right' && this.step?.elementId.startsWith('sidebar-') && spotlightBounds) {
-      const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
+      const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, this.tooltipGap);
       if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
         return sidebarAlignedTooltip;
       }
@@ -545,7 +714,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
           bottom: sidebarRect.bottom,
           width: sidebarRect.width,
           height: sidebarRect.height
-        }, tooltipWidth, tooltipHeight, 20);
+        }, tooltipWidth, tooltipHeight, this.tooltipGap);
 
         if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
           return sidebarAlignedTooltip;
@@ -561,14 +730,18 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       ...this.fallbackPositions.filter(position => position !== primaryPosition)
     ];
 
+    const positioningRect = spotlightBounds
+      ? new DOMRect(spotlightBounds.left, spotlightBounds.top, spotlightBounds.width, spotlightBounds.height)
+      : rect;
+
     for (const position of positions) {
-      const tooltip = this.calculateTooltipCoordinates(rect, position, tooltipWidth, tooltipHeight, margin);
+      const tooltip = this.calculateTooltipCoordinates(positioningRect, position, tooltipWidth, tooltipHeight, this.tooltipGap);
       if (this.fitsInViewport(tooltip, tooltipWidth, tooltipHeight, margin)) {
         return tooltip;
       }
     }
 
-    return this.clampTooltipToViewport(this.calculateTooltipCoordinates(rect, effectivePreferredPosition ?? 'bottom', tooltipWidth, tooltipHeight, margin),
+    return this.clampTooltipToViewport(this.calculateTooltipCoordinates(positioningRect, effectivePreferredPosition ?? 'bottom', tooltipWidth, tooltipHeight, this.tooltipGap),
       tooltipWidth,
       tooltipHeight,
       margin);
@@ -576,12 +749,17 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private getTooltipMetrics(): { width: number; height: number; margin: number; compact: boolean } {
     const viewportWidth = window.innerWidth;
-    const compact = viewportWidth <= 640;
+    const compact = viewportWidth <= 900;
     const margin = compact ? 10 : 12;
     const width = compact
-      ? Math.max(viewportWidth - 20, 240)
-      : 320;
-    const height = compact ? 260 : 220;
+      ? Math.min(Math.max(viewportWidth - 20, 240), 360)
+      : 360;
+    const tooltipElement = document.querySelector('[data-testid="demo-tour-tooltip"]');
+    const fallbackHeight = compact ? 270 : 240;
+    const measuredHeight = tooltipElement instanceof HTMLElement && tooltipElement.offsetHeight > 0
+      ? tooltipElement.offsetHeight
+      : fallbackHeight;
+    const height = Math.min(measuredHeight, Math.max(window.innerHeight - (margin * 2), 180));
 
     this.tooltipWidth = `${width}px`;
 
@@ -597,7 +775,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getSidebarAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
-    return this.clampTooltipToViewport({ top: `${spotlightBounds.top}px`, left: `${spotlightBounds.right + gap}px` }, tooltipWidth, tooltipHeight, 12);
+    const centeredTop = spotlightBounds.top + (spotlightBounds.height / 2) - (tooltipHeight / 2);
+    return this.clampTooltipToViewport({ top: `${centeredTop}px`, left: `${spotlightBounds.right + gap}px` }, tooltipWidth, tooltipHeight, 12);
   }
 
   private getBelowLeftAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
@@ -613,7 +792,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getAlertSummaryAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number): Record<string, string> {
-    return this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, 20);
+    return this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, this.tooltipGap);
   }
 
   private calculateTooltipCoordinates( rect: DOMRect, position: NonNullable<TourStep['position']>, tooltipWidth: number, tooltipHeight: number, margin: number ): Record<string, string> {
@@ -671,6 +850,28 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.getStepFallbackElement(step);
   }
 
+  private getSpotlightAnchorElement(element: HTMLElement, elementId: string): HTMLElement {
+    if (!elementId.startsWith('sidebar-')) {
+      return element;
+    }
+
+    if (element.matches('[data-testid^="sidebar-group-"]')) {
+      return element;
+    }
+
+    const groupControl = element.querySelector<HTMLElement>('[data-testid^="sidebar-group-"]');
+    if (groupControl && this.isElementRendered(groupControl)) {
+      return groupControl;
+    }
+
+    const directControl = element.querySelector<HTMLElement>(':scope > a, :scope > button, :scope > [role="button"]');
+    return directControl && this.isElementRendered(directControl) ? directControl : element;
+  }
+
+  private getDefaultSpotlightPadding(elementId: string): number {
+    return elementId.startsWith('sidebar-') ? this.sidebarSpotlightPadding : 10;
+  }
+
   private getStepFallbackElement(step: TourStep): HTMLElement | null {
     if (step.elementId !== 'alert-summery') {
       return null;
@@ -721,6 +922,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     return step.elementId.startsWith('sidebar-');
   }
 
+  private isDashboardContentTarget(element: HTMLElement): boolean {
+    return element.closest('[data-testid="dashboard-body"]') instanceof HTMLElement;
+  }
+
   private isSidebarRelatedStep(step: TourStep): boolean {
     return this.isSidebarStep(step) ||
       step.elementId === 'alert-summery' ||
@@ -733,7 +938,12 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (this.isSidebarStep(step)) {
-      await this.ensureMobileSidebarExpanded();
+      if (step.sidebarState === 'collapsed') {
+        await this.ensureMobileSidebarCollapsed();
+      }
+      else {
+        await this.ensureMobileSidebarExpanded();
+      }
       return;
     }
 
@@ -769,6 +979,102 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private isExpandedSidebarVisible(): boolean {
     const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
     return !(expandButton instanceof HTMLElement);
+  }
+
+  private getSidebarExpandedState(): boolean | null {
+    if (document.querySelector('[data-testid="sidebar-collapse-button"]') instanceof HTMLElement) {
+      return true;
+    }
+    if (document.querySelector('[data-testid="sidebar-expand-button"]') instanceof HTMLElement) {
+      return false;
+    }
+    return null;
+  }
+
+  private async ensureRequestedUiState(step: TourStep): Promise<void> {
+    const sidebarState = step.sidebarState ?? (this.isSidebarStep(step) ? 'expanded' : null);
+    if (sidebarState) {
+      await this.setSidebarState(sidebarState);
+    }
+    if (step.profileMenuState) {
+      await this.setProfileMenuState(step.profileMenuState);
+    }
+  }
+
+  private async setSidebarState(state: NonNullable<TourStep['sidebarState']>): Promise<void> {
+    let expanded = this.getSidebarExpandedState();
+    if (expanded === null) {
+      await this.waitForSidebarControl();
+      expanded = this.getSidebarExpandedState();
+    }
+
+    const shouldBeExpanded = state === 'expanded';
+    if (expanded !== null && expanded !== shouldBeExpanded) {
+      const selector = shouldBeExpanded
+        ? '[data-testid="sidebar-expand-button"]'
+        : '[data-testid="sidebar-collapse-button"]';
+      this.getRenderedSelectorElement(selector)?.click();
+    }
+
+    await this.waitForSidebarProjection(state);
+  }
+
+  private async setProfileMenuState(state: NonNullable<TourStep['profileMenuState']>): Promise<void> {
+    const menuOpen = document.getElementById('profile-dropdown-menu') instanceof HTMLElement;
+    const shouldBeOpen = state === 'open';
+    if (menuOpen !== shouldBeOpen) {
+      const trigger = await this.waitForRenderedSelector('[data-testid="profile-menu"]');
+      trigger?.click();
+    }
+
+    await this.waitForProfileMenuState(state);
+  }
+
+  private restoreInitialSidebarState(): void {
+    const initialState = this.initialSidebarExpanded;
+    const initialScrollTop = this.initialSidebarScrollTop;
+    const currentState = this.getSidebarExpandedState();
+    this.initialSidebarExpanded = null;
+    this.initialSidebarScrollTop = null;
+
+    const restoreScrollPosition = () => {
+      if (initialScrollTop === null) {
+        return;
+      }
+      const scroller = this.getRenderedSelectorElement('[data-testid="dashboard-sidebar-scroll"]');
+      if (scroller) {
+        scroller.scrollTop = initialScrollTop;
+      }
+    };
+
+    if (initialState === null || currentState === null || initialState === currentState) {
+      if (initialState === null) {
+        restoreScrollPosition();
+        return;
+      }
+      const state = initialState ? 'expanded' : 'collapsed';
+      void this.waitForSidebarProjection(state).then(restoreScrollPosition);
+      return;
+    }
+
+    const selector = initialState
+      ? '[data-testid="sidebar-expand-button"]'
+      : '[data-testid="sidebar-collapse-button"]';
+    const toggle = document.querySelector(selector);
+    if (toggle instanceof HTMLElement) {
+      toggle.click();
+      const state = initialState ? 'expanded' : 'collapsed';
+      void this.waitForSidebarProjection(state).then(restoreScrollPosition);
+      return;
+    }
+
+    restoreScrollPosition();
+  }
+
+  private captureInitialSidebarState(): void {
+    this.initialSidebarExpanded = this.getSidebarExpandedState();
+    const scroller = this.getRenderedSelectorElement('[data-testid="dashboard-sidebar-scroll"]');
+    this.initialSidebarScrollTop = scroller?.scrollTop ?? null;
   }
 
   private waitForCompactSidebarState(expanded: boolean): Promise<void> {
@@ -818,40 +1124,46 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private getAdditionalSpotlightStyles(step: TourStep, padding: { top: number; right: number; bottom: number; left: number; }): Record<string, string>[] {
+  private getAdditionalSpotlightStyles(step: TourStep): Record<string, string>[] {
     if (!step.additionalElementIds?.length) {
       return [];
     }
 
-    const minimumPadding = step.padding ?? 10;
-    const additionalPadding = {
-      top: Math.max(padding.top, minimumPadding),
-      right: Math.max(padding.right, minimumPadding),
-      bottom: Math.max(padding.bottom, minimumPadding),
-      left: Math.max(padding.left, minimumPadding)
-    };
-
     const styles: Record<string, string>[] = [];
     for (const elementId of step.additionalElementIds) {
+      if (this.isCompactViewport() && elementId.startsWith('sidebar-') && !this.isSidebarStep(step)) {
+        continue;
+      }
+
       const element = document.getElementById(elementId);
       if (!element) {
         continue;
       }
 
-      const rect = element.getBoundingClientRect();
+      const spotlightAnchor = this.getSpotlightAnchorElement(element, elementId);
+      if (!this.isElementEffectivelyVisible(spotlightAnchor)) {
+        continue;
+      }
+      const rect = spotlightAnchor.getBoundingClientRect();
+      const defaultPadding = step.padding ?? this.getDefaultSpotlightPadding(elementId);
+      const additionalPadding = elementId.startsWith('sidebar-')
+        ? { top: defaultPadding, right: defaultPadding, bottom: defaultPadding, left: defaultPadding }
+        : {
+          top: Math.max(step.paddingTop ?? defaultPadding, defaultPadding),
+          right: Math.max(step.paddingRight ?? defaultPadding, defaultPadding),
+          bottom: Math.max(step.paddingBottom ?? defaultPadding, defaultPadding),
+          left: Math.max(step.paddingLeft ?? defaultPadding, defaultPadding)
+        };
       const top = Math.max(rect.top - additionalPadding.top, 8);
       const left = Math.max(rect.left - additionalPadding.left, 8);
       const right = Math.min(rect.right + additionalPadding.right, window.innerWidth - 8);
       const bottom = Math.min(rect.bottom + additionalPadding.bottom, window.innerHeight - 8);
-      const adjustedTop = this.isCompactViewport() && elementId.startsWith('sidebar-')
-        ? Math.max(top, this.getCompactTooltipReservedTop())
-        : top;
 
       styles.push({
-        top: `${adjustedTop}px`,
+        top: `${top}px`,
         left: `${left}px`,
         width: `${Math.max(right - left, 0)}px`,
-        height: `${Math.max(bottom - adjustedTop, 0)}px`
+        height: `${Math.max(bottom - top, 0)}px`
       });
     }
 
@@ -888,9 +1200,15 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.activeInputWasDisabled = input.disabled;
 
     if (typeof step.presetValue === 'string') {
-      input.value = step.presetValue;
-      input.dispatchEvent(new Event('input', { bubbles: true }));
-      this.tourService.setCapturedValue(step.elementId, step.presetValue);
+      if (input.value !== step.presetValue) {
+        input.value = step.presetValue;
+        if (!this.currentStepRestoreOnly) {
+          input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+      if (!this.currentStepRestoreOnly) {
+        this.tourService.setCapturedValue(step.elementId, step.presetValue);
+      }
     }
 
     if (step.disableInput) {
@@ -996,10 +1314,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private resetHostStyles(): void {
-    this.spotlightTop = '0px';
-    this.spotlightLeft = '0px';
-    this.spotlightWidth = '0px';
-    this.spotlightHeight = '0px';
+    this.clearActiveElementStyles();
+    this.cancelPendingVisualWork();
     this.tooltipTop = '0px';
     this.tooltipLeft = '0px';
     this.tooltipBottom = 'auto';
@@ -1009,21 +1325,112 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.preparingStep = false;
     this.geometryFrozen = false;
     this.lastRenderedGeometry = null;
+    this.lastTargetCutoutRects = [];
+    this.currentStepRestoreOnly = false;
+    this.stepUrls.clear();
+    this.completedStepIndexes.clear();
+    this.restoreInitialSidebarState();
+    void this.setProfileMenuState('closed');
+    this.restoreFocusBeforeTour();
+    this.syncRuntimeStyles();
+  }
+
+  private focusTourDialog(): void {
+    requestAnimationFrame(() => {
+      if (!this.visible) {
+        return;
+      }
+      const tooltip = document.querySelector('[data-testid="demo-tour-tooltip"]');
+      if (tooltip instanceof HTMLElement) {
+        tooltip.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  private focusPrimaryTourAction(token: number, step: TourStep): void {
+    requestAnimationFrame(() => {
+      if (token !== this.stepPreparationToken || this.step !== step || !this.visible || !this.stepReady) {
+        return;
+      }
+      const nextButton = document.querySelector('[data-testid="demo-tour-next"]');
+      if (nextButton instanceof HTMLButtonElement) {
+        nextButton.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  private trapTourFocus(event: KeyboardEvent): void {
+    const tooltip = document.querySelector('[data-testid="demo-tour-tooltip"]');
+    if (!(tooltip instanceof HTMLElement)) {
+      return;
+    }
+
+    const controls = Array.from(tooltip.querySelectorAll<HTMLElement>('button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'))
+      .filter(control => control.getClientRects().length > 0);
+    if (!controls.length) {
+      event.preventDefault();
+      tooltip.focus({ preventScroll: true });
+      return;
+    }
+
+    const firstControl = controls[0];
+    const lastControl = controls[controls.length - 1];
+    const activeControl = document.activeElement;
+    if (!(activeControl instanceof HTMLElement) || !controls.includes(activeControl)) {
+      event.preventDefault();
+      (event.shiftKey ? lastControl : firstControl).focus({ preventScroll: true });
+      return;
+    }
+    if (event.shiftKey && activeControl === firstControl) {
+      event.preventDefault();
+      lastControl.focus({ preventScroll: true });
+      return;
+    }
+    if (!event.shiftKey && activeControl === lastControl) {
+      event.preventDefault();
+      firstControl.focus({ preventScroll: true });
+    }
+  }
+
+  private restoreFocusBeforeTour(): void {
+    const previousFocus = this.focusBeforeTour;
+    this.focusBeforeTour = null;
+    if (previousFocus?.isConnected) {
+      previousFocus.focus({ preventScroll: true });
+    }
+  }
+
+  private cancelPendingVisualWork(): void {
+    if (this.animationFrameId !== null) {
+      cancelAnimationFrame(this.animationFrameId);
+      this.animationFrameId = null;
+    }
     if (this.cutoutAnimationFrameId !== null) {
       cancelAnimationFrame(this.cutoutAnimationFrameId);
       this.cutoutAnimationFrameId = null;
     }
+    this.cancelGeometryTracking();
+  }
+
+  private cancelGeometryTracking(): void {
     if (this.geometryTrackingFrameId !== null) {
       cancelAnimationFrame(this.geometryTrackingFrameId);
       this.geometryTrackingFrameId = null;
     }
-    this.syncRuntimeStyles();
+    const resolve = this.geometryTrackingResolve;
+    this.geometryTrackingResolve = null;
+    resolve?.();
   }
 
   private animateCutoutRects(nextCutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[]): void {
     if (this.cutoutAnimationFrameId !== null) {
       cancelAnimationFrame(this.cutoutAnimationFrameId);
       this.cutoutAnimationFrameId = null;
+    }
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      this.cutoutRects = nextCutoutRects;
+      return;
     }
 
     if (!this.cutoutRects.length || this.cutoutRects.length !== nextCutoutRects.length) {
@@ -1074,12 +1481,6 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.upsertRuntimeRule(styleSheet, DemoTourComponent.hostRuntimeSelector, [
-      `--tour-accent: ${this.tourAccent}`,
-      `--tour-accent-strong: ${this.tourAccentStrong}`,
-      `--tour-spotlight-top: ${this.spotlightTop}`,
-      `--tour-spotlight-left: ${this.spotlightLeft}`,
-      `--tour-spotlight-width: ${this.spotlightWidth}`,
-      `--tour-spotlight-height: ${this.spotlightHeight}`,
       `--tour-tooltip-top: ${this.tooltipTop}`,
       `--tour-tooltip-left: ${this.tooltipLeft}`,
       `--tour-tooltip-bottom: ${this.tooltipBottom}`,
@@ -1139,26 +1540,114 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  private triggerSpotlightReveal(): void {
-    this.spotlightRevealVariant = this.spotlightRevealVariant === 0 ? 1 : 0;
-  }
-
   async next() {
-    if (this.nextTransitionInProgress) {
+    if (!this.stepReady || this.nextTransitionInProgress) {
       return;
     }
-    if (this.step?.triggerSubmitOnNext && this.activeElement) {
-      this.nextTransitionInProgress = true;
-      this.triggerStepSubmit(this.activeElement, this.step);
 
-      const nextStep = this.tourService.getStep(this.currentIndex + 1);
-      if (nextStep) {
-        await this.waitForElement(nextStep.elementId);
+    const activeStep = this.step;
+    const transitionToken = this.stepPreparationToken;
+    const nextIndex = this.currentIndex + 1;
+    const savedNextUrl = this.stepUrls.get(nextIndex);
+    this.nextTransitionInProgress = true;
+    try {
+      if (savedNextUrl && savedNextUrl !== this.router.url) {
+        const navigated = await this.router.navigateByUrl(savedNextUrl);
+        if (!navigated) {
+          this.nextTransitionInProgress = false;
+          return;
+        }
+        await this.waitForAnimationFrames(2);
+      }
+      else if (activeStep?.triggerSubmitOnNext && this.activeElement && !savedNextUrl) {
+        this.triggerStepSubmit(this.activeElement, activeStep);
+
+        const nextStep = this.tourService.getStep(nextIndex);
+        if (nextStep) {
+          await this.waitForElement(nextStep.elementId);
+        }
       }
 
+      if (transitionToken !== this.stepPreparationToken || this.step !== activeStep || !this.visible) {
+        return;
+      }
+
+      this.pendingPreparationDirection = 'forward';
+      this.tourService.next();
+    }
+    catch {
       this.nextTransitionInProgress = false;
     }
-    this.tourService.next();
+  }
+
+  async previous(): Promise<void> {
+    if (!this.visible || this.currentIndex <= 0 || this.nextTransitionInProgress) {
+      return;
+    }
+
+    if (!this.stepUrls.has(this.currentIndex)) {
+      this.stepUrls.set(this.currentIndex, this.router.url);
+    }
+    const previousIndex = this.currentIndex - 1;
+    const previousUrl = this.stepUrls.get(previousIndex);
+    const activeStep = this.step;
+    this.nextTransitionInProgress = true;
+    this.stepReady = false;
+    this.loadingVisible = true;
+    this.stepPreparationToken += 1;
+    const transitionToken = this.stepPreparationToken;
+    this.preparingStep = false;
+    this.cancelPendingVisualWork();
+    this.clearActiveElementStyles();
+    this.cdr.markForCheck();
+
+    try {
+      if (previousUrl && previousUrl !== this.router.url) {
+        const navigated = await this.router.navigateByUrl(previousUrl);
+        if (!navigated) {
+          this.resumeCurrentStepPreparation(activeStep, transitionToken);
+          return;
+        }
+        await this.waitForAnimationFrames(2);
+      }
+
+      if (transitionToken !== this.stepPreparationToken || this.step !== activeStep || !this.visible) {
+        return;
+      }
+
+      this.pendingPreparationDirection = 'backward';
+      this.tourService.prev();
+    }
+    catch {
+      this.resumeCurrentStepPreparation(activeStep, transitionToken);
+    }
+  }
+
+  private resumeCurrentStepPreparation(step: TourStep | null, transitionToken: number): void {
+    if (!step || transitionToken !== this.stepPreparationToken || this.step !== step || !this.visible) {
+      return;
+    }
+
+    this.nextTransitionInProgress = false;
+    this.stepReady = false;
+    this.loadingVisible = true;
+    this.preparingStep = true;
+    this.cdr.markForCheck();
+    void this.prepareStep(step, 'forward');
+  }
+
+  skip(): void {
+    if (!this.visible) {
+      return;
+    }
+    this.stepPreparationToken += 1;
+    this.nextTransitionInProgress = false;
+    this.stepReady = false;
+    this.loadingVisible = false;
+    this.preparingStep = false;
+    this.cancelPendingVisualWork();
+    this.clearActiveElementStyles();
+    this.tourService.end();
   }
 
   private triggerStepSubmit(element: HTMLElement, step: TourStep): void {
@@ -1171,7 +1660,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     form.requestSubmit();
   }
 
-  private waitForStepTarget(step: TourStep): Promise<void> {
+  private waitForStepTarget(step: TourStep, timeoutMs = 1500): Promise<void> {
     return new Promise(resolve => {
       if (this.hasStepTarget(step)) {
         resolve();
@@ -1196,18 +1685,57 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       window.setTimeout(() => {
         observer.disconnect();
         resolve();
-      }, 1500);
+      }, timeoutMs);
     });
+  }
+
+  private waitForRenderedSelector(selector: string, timeoutMs = 1500): Promise<HTMLElement | null> {
+    return new Promise(resolve => {
+      const existing = this.getRenderedSelectorElement(selector);
+      if (existing) {
+        resolve(existing);
+        return;
+      }
+
+      let settled = false;
+      const finish = (element: HTMLElement | null) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        observer.disconnect();
+        window.clearTimeout(timeoutId);
+        resolve(element);
+      };
+      const observer = new MutationObserver(() => {
+        const element = this.getRenderedSelectorElement(selector);
+        if (element) {
+          finish(element);
+        }
+      });
+      const timeoutId = window.setTimeout(() => finish(this.getRenderedSelectorElement(selector)), timeoutMs);
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true
+      });
+    });
+  }
+
+  private getRenderedSelectorElement(selector: string): HTMLElement | null {
+    return Array.from(document.querySelectorAll<HTMLElement>(selector))
+      .find(element => this.isElementEffectivelyVisible(element)) ?? null;
   }
 
   private hasStepTarget(step: TourStep): boolean {
     const element = this.getStepElement(step);
-    if (!element) {
+    if (!element || !this.isElementEffectivelyVisible(element)) {
       return false;
     }
     if (step.waitForSelector) {
-      const nestedElement = document.querySelector(step.waitForSelector);
-      if (!(nestedElement instanceof HTMLElement) || !this.isElementRendered(nestedElement)) {
+      const nestedElement = this.getRenderedSelectorElement(step.waitForSelector);
+      if (!nestedElement) {
         return false;
       }
     }
@@ -1215,6 +1743,13 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return true;
     }
     return !!this.getStepInput(element, step);
+  }
+
+  private isWaitTargetRendered(step: TourStep): boolean {
+    if (!step.waitForSelector) {
+      return false;
+    }
+    return !!this.getRenderedSelectorElement(step.waitForSelector);
   }
 
   private wait(ms: number): Promise<void> {
@@ -1238,19 +1773,182 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
+  private waitForRouterUrlStability(step: TourStep, token: number): Promise<void> {
+    return new Promise(resolve => {
+      let previousUrl = this.router.url;
+      let stableFrames = 0;
+      let frameId = 0;
+      let navigationPending = this.router.getCurrentNavigation() !== null;
+      let settled = false;
+
+      const finish = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        if (frameId) {
+          cancelAnimationFrame(frameId);
+        }
+        window.clearTimeout(timeoutId);
+        routerEventsSubscription.unsubscribe();
+        resolve();
+      };
+
+      const routerEventsSubscription = this.router.events.subscribe(event => {
+        if (event instanceof NavigationStart) {
+          navigationPending = true;
+          stableFrames = 0;
+          return;
+        }
+        if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+          navigationPending = false;
+          previousUrl = this.router.url;
+          stableFrames = 0;
+        }
+      });
+      const timeoutId = window.setTimeout(finish, 2000);
+
+      const tick = () => {
+        if (token !== this.stepPreparationToken || this.step !== step || !this.visible) {
+          finish();
+          return;
+        }
+
+        navigationPending = navigationPending || this.router.getCurrentNavigation() !== null;
+        const currentUrl = this.router.url;
+        if (navigationPending || currentUrl !== previousUrl) {
+          previousUrl = currentUrl;
+          stableFrames = 0;
+        }
+        else {
+          stableFrames += 1;
+          if (stableFrames >= 3) {
+            finish();
+            return;
+          }
+        }
+
+        frameId = requestAnimationFrame(tick);
+      };
+
+      frameId = requestAnimationFrame(tick);
+    });
+  }
+
+  private async scrollStepTargetIntoView(step: TourStep, element: HTMLElement): Promise<void> {
+    const target = this.getSpotlightAnchorElement(element, step.elementId);
+    const sidebarScroller = target.closest<HTMLElement>('[data-testid="dashboard-sidebar-scroll"]');
+
+    if (!sidebarScroller || !this.isElementRendered(sidebarScroller)) {
+      target.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'auto' });
+      await this.waitForAnimationFrames(2);
+      return;
+    }
+
+    const alignTarget = () => {
+      const scrollerRect = sidebarScroller.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const visibleTop = Math.max(scrollerRect.top + 12, 12);
+      const visibleBottom = Math.min(scrollerRect.bottom - 12, window.innerHeight - 12);
+      const visibleHeight = Math.max(visibleBottom - visibleTop, 0);
+      const desiredTop = visibleTop + Math.max((visibleHeight - targetRect.height) / 2, 0);
+      const maximumScrollTop = Math.max(sidebarScroller.scrollHeight - sidebarScroller.clientHeight, 0);
+      const desiredScrollTop = sidebarScroller.scrollTop + targetRect.top - desiredTop;
+
+      sidebarScroller.scrollTop = Math.min(Math.max(desiredScrollTop, 0), maximumScrollTop);
+    };
+
+    const isWithinVisibleBounds = () => {
+      const scrollerRect = sidebarScroller.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const visibleTop = Math.max(scrollerRect.top + 12, 12);
+      const visibleBottom = Math.min(scrollerRect.bottom - 12, window.innerHeight - 12);
+      return targetRect.top >= visibleTop && targetRect.bottom <= visibleBottom;
+    };
+
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      alignTarget();
+      await this.waitForAnimationFrames(2);
+      if (isWithinVisibleBounds()) {
+        return;
+      }
+    }
+
+    target.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'auto' });
+    await this.waitForAnimationFrames(2);
+  }
+
+  private waitForSidebarControl(timeoutMs = 1500): Promise<boolean> {
+    return this.waitForDomCondition(() => this.getSidebarExpandedState() !== null, timeoutMs);
+  }
+
+  private waitForSidebarProjection(state: NonNullable<TourStep['sidebarState']>, timeoutMs = 1500): Promise<boolean> {
+    const expanded = state === 'expanded';
+    const projectionSelector = expanded ? '[data-sidebar-expanded]' : '[data-sidebar-collapsed]';
+    const toggleSelector = expanded
+      ? '[data-testid="sidebar-collapse-button"]'
+      : '[data-testid="sidebar-expand-button"]';
+
+    return this.waitForDomCondition(() => {
+      const scroller = this.getRenderedSelectorElement(`${projectionSelector} [data-testid="dashboard-sidebar-scroll"]`);
+      const toggle = this.getRenderedSelectorElement(toggleSelector);
+      return !!scroller && !!toggle;
+    }, timeoutMs);
+  }
+
+  private waitForProfileMenuState(state: NonNullable<TourStep['profileMenuState']>, timeoutMs = 1500): Promise<boolean> {
+    const shouldBeOpen = state === 'open';
+    return this.waitForDomCondition(() => {
+      const menu = document.getElementById('profile-dropdown-menu');
+      return (menu instanceof HTMLElement && this.isElementRendered(menu)) === shouldBeOpen;
+    }, timeoutMs);
+  }
+
+  private waitForDomCondition(predicate: () => boolean, timeoutMs: number): Promise<boolean> {
+    return new Promise(resolve => {
+      if (predicate()) {
+        resolve(true);
+        return;
+      }
+
+      let settled = false;
+      const finish = (result: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        observer.disconnect();
+        window.clearTimeout(timeoutId);
+        resolve(result);
+      };
+      const observer = new MutationObserver(() => {
+        if (predicate()) {
+          finish(true);
+        }
+      });
+      const timeoutId = window.setTimeout(() => finish(predicate()), timeoutMs);
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true
+      });
+    });
+  }
+
   private getTooltipAnchorElement(step: TourStep): HTMLElement | null {
     const finalElement = this.getStepElement(step);
-    if (finalElement && this.isElementRendered(finalElement)) {
+    if (finalElement && this.isElementEffectivelyVisible(finalElement)) {
       return finalElement;
     }
 
     if (!step.activateSelector) {
-      return finalElement;
+      return null;
     }
 
-    const trigger = document.querySelector(step.activateSelector);
-    if (!(trigger instanceof HTMLElement)) {
-      return finalElement;
+    const trigger = this.getRenderedSelectorElement(step.activateSelector);
+    if (!trigger) {
+      return null;
     }
 
     const triggerContainer = trigger.closest('[id]');
@@ -1258,19 +1956,38 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return triggerContainer;
     }
 
-    return this.isElementRendered(trigger) ? trigger : finalElement;
+    return trigger;
   }
 
-  private trackGeometryForWindow(step: TourStep, durationMs: number): Promise<void> {
+  private trackGeometryForWindow(step: TourStep, durationMs: number, token: number): Promise<void> {
     this.geometryFrozen = false;
 
     return new Promise(resolve => {
       const startedAt = performance.now();
+      let settled = false;
+
+      const finish = (freezeGeometry: boolean) => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        if (this.geometryTrackingFrameId !== null) {
+          cancelAnimationFrame(this.geometryTrackingFrameId);
+          this.geometryTrackingFrameId = null;
+        }
+        if (this.geometryTrackingResolve === cancel) {
+          this.geometryTrackingResolve = null;
+        }
+        if (freezeGeometry) {
+          this.geometryFrozen = true;
+        }
+        resolve();
+      };
+      const cancel = () => finish(false);
 
       const tick = () => {
-        if (this.step !== step || !this.visible || this.preparingStep) {
-          this.geometryTrackingFrameId = null;
-          resolve();
+        if (token !== this.stepPreparationToken || this.step !== step || !this.visible) {
+          finish(false);
           return;
         }
 
@@ -1278,19 +1995,15 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cdr.markForCheck();
 
         if (performance.now() - startedAt >= durationMs) {
-          this.geometryFrozen = true;
-          this.geometryTrackingFrameId = null;
-          resolve();
+          finish(true);
           return;
         }
 
         this.geometryTrackingFrameId = requestAnimationFrame(tick);
       };
 
-      if (this.geometryTrackingFrameId !== null) {
-        cancelAnimationFrame(this.geometryTrackingFrameId);
-      }
-
+      this.cancelGeometryTracking();
+      this.geometryTrackingResolve = cancel;
       this.geometryTrackingFrameId = requestAnimationFrame(tick);
     });
   }
@@ -1302,8 +2015,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
       const observedElements = new Set<HTMLElement>([element]);
       if (step.waitForSelector) {
-        const nested = document.querySelector(step.waitForSelector);
-        if (nested instanceof HTMLElement) {
+        const nested = this.getRenderedSelectorElement(step.waitForSelector);
+        if (nested) {
           observedElements.add(nested);
         }
       }
@@ -1405,6 +2118,28 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private isElementRendered(element: HTMLElement): boolean {
     const rect = element.getBoundingClientRect();
     return rect.width > 0 && rect.height > 0;
+  }
+
+  private isElementEffectivelyVisible(element: HTMLElement): boolean {
+    if (!this.isElementRendered(element)) {
+      return false;
+    }
+
+    let current: HTMLElement | null = element;
+    while (current) {
+      const style = window.getComputedStyle(current);
+      if (style.display === 'none' || style.visibility === 'hidden' || style.visibility === 'collapse' || Number(style.opacity) === 0) {
+        return false;
+      }
+      const clipsVertically = style.overflowY === 'hidden' || style.overflowY === 'clip';
+      const clipsHorizontally = style.overflowX === 'hidden' || style.overflowX === 'clip';
+      if ((clipsVertically && current.clientHeight === 0) || (clipsHorizontally && current.clientWidth === 0)) {
+        return false;
+      }
+      current = current.parentElement;
+    }
+
+    return true;
   }
 
   private waitForElement(elementId: string): Promise<void> {

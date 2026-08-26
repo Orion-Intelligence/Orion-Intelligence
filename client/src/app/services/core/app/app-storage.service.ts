@@ -4,6 +4,8 @@ import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../s
   providedIn: 'root'
 })
 export class AppStorageService {
+  private readonly sessionMarkerCookie = 'session_present';
+
   public readonly watchList: (keyof LocalSettingsModel)[] = [ 'enable_advanced_tools', 'advance_setting_toggle', 'iocExpanded', 'entityFilterCondition', 'entityfilterCategories', 'isSidebarOpen', 'matchType', 'sortType' ];
 
   getFromStorage<T>(key: string, parseJson = false): T | undefined {
@@ -60,6 +62,16 @@ export class AppStorageService {
         }
       });
     });
+  }
+
+  hasActiveSession(): boolean {
+    return document.cookie
+      .split(';')
+      .some(entry => entry.trim().split('=')[0] === this.sessionMarkerCookie);
+  }
+
+  clearActiveSession(): void {
+    document.cookie = `${this.sessionMarkerCookie}=; Max-Age=0; path=/; SameSite=Lax`;
   }
 
   clearStorage(): void {

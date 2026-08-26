@@ -1,56 +1,56 @@
-<img alt="background" src="/assets/images/shared/Bg.webp" class="app-background app-background-dark img-fluid w-100 h-100 object-fit-cover opacity-[0.35]">
+<img alt="" src="/assets/images/shared/Bg.webp" class="pointer-events-none fixed inset-0 z-0 h-screen w-screen object-cover object-center opacity-[0.35]">
 
 <ng-container>
   <app-header [forceDark]="true"></app-header>
 </ng-container>
 
 <div class="relative z-[1] min-h-[calc(100dvh-60px)] w-screen">
-  <div class="flex min-h-[calc(100dvh-60px)] w-full items-center justify-center bg-[#0e1626d9] px-4">
-    <div class="mt-[-100px] flex h-[687px] w-[1000px] max-w-[95vw] flex-col justify-between rounded-[16px] border border-[#fcfcfc12] bg-[#172235] p-8 max-[1024px]:mt-0 max-[1024px]:h-auto max-[1024px]:w-[90vw] max-[1024px]:p-6">
+  <div class="flex min-h-[calc(100dvh-60px)] w-full items-center justify-center bg-[#0e1626d9] px-4 [body.light-theme_&]:bg-white/[0.85]">
+    <div class="mt-[-100px] flex h-[687px] w-[1000px] max-w-[95vw] flex-col justify-between rounded-[16px] border border-[#fcfcfc12] bg-[#172235] p-8 [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-[var(--color-consolidated-secondary)] [body.light-theme_&]:shadow-[0_20px_50px_rgb(15_23_42/10%)] max-[1024px]:mt-0 max-[1024px]:h-auto max-[1024px]:w-[90vw] max-[1024px]:p-6">
       <div class="flex items-center gap-4 overflow-x-auto">
         <div class="flex items-center gap-2">
-          <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'">
+          <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d] [body.light-theme_&]:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[var(--color-text3)]'">
             @if (currentStep > 1) {
-              <img src="assets/images/shared/onboarding_tick.svg" alt="tick" class="h-[15px] w-[15px]">
+              <img src="assets/images/shared/onboarding_tick.svg" alt="" class="h-[15px] w-[15px]">
             } @else {
               1
             }
           </div>
-          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 1 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">{{ 'Company Info' | translate }}</span>
+          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 1 ? 'text-[#57a5eb] [body.light-theme_&]:text-sky-700' : 'text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]'">{{ 'Company Info' | translate }}</span>
         </div>
 
-        <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'"></div>
+        <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 1 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d] [body.light-theme_&]:bg-[var(--color-blue-810)]'"></div>
 
         <div class="flex items-center gap-2">
-          <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'">
+          <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full text-[14px] font-medium text-white" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d] [body.light-theme_&]:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[var(--color-text3)]'">
             @if (currentStep > 2) {
-              <img src="assets/images/shared/onboarding_tick.svg" alt="tick" class="h-[15px] w-[15px]">
+              <img src="assets/images/shared/onboarding_tick.svg" alt="" class="h-[15px] w-[15px]">
             } @else {
               2
             }
           </div>
-          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 2 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">{{ 'Add IOCs' | translate }}</span>
+          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep >= 2 ? 'text-[#57a5eb] [body.light-theme_&]:text-sky-700' : 'text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]'">{{ 'Add IOCs' | translate }}</span>
         </div>
 
-        <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d]'"></div>
+        <div class="h-[4px] w-[213px] shrink-0 rounded-[4px] max-[1200px]:w-[120px] max-[640px]:w-[60px]" [ngClass]="currentStep > 2 ? 'bg-[#57a5eb]' : 'bg-[#fcfcfc0d] [body.light-theme_&]:bg-[var(--color-blue-810)]'"></div>
 
         <div class="flex items-center gap-2">
-          <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full bg-[#fcfcfc0d] text-[14px] font-medium text-white">3</div>
-          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep === 3 ? 'text-[#57a5eb]' : 'text-[#a0b8d1]'">{{ 'Confirmation' | translate }}</span>
+          <div class="flex h-[31px] w-[31px] items-center justify-center rounded-full bg-[#fcfcfc0d] text-[14px] font-medium text-white [body.light-theme_&]:bg-[var(--color-blue-810)] [body.light-theme_&]:text-[var(--color-text3)]">3</div>
+          <span class="whitespace-nowrap text-[14px] font-medium" [ngClass]="currentStep === 3 ? 'text-[#57a5eb] [body.light-theme_&]:text-sky-700' : 'text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]'">{{ 'Confirmation' | translate }}</span>
         </div>
       </div>
 
-      <div class="my-5 h-[2px] w-full bg-[#fcfcfc0d]"></div>
+      <div class="my-5 h-[2px] w-full bg-[#fcfcfc0d] [body.light-theme_&]:bg-[var(--color-divider)]"></div>
 
       <div class="min-h-0 flex-1">
         @switch (currentStep) {
           @case (1) {
             <div>
-              <h2 class="mb-2 text-[20px] font-bold text-white">{{ 'Welcome to' | translate }} {{ this.appService.getConfig().appSettings.app_name }}</h2>
-              <p class="mb-6 text-[14px] font-normal text-[#a0b8d1]">{{ 'Let us know a little about your company' | translate }}</p>
+              <h2 class="mb-2 text-[20px] font-bold text-white [body.light-theme_&]:text-[var(--color-text1)]">{{ 'Welcome to' | translate }} {{ this.appService.getConfig().appSettings.app_name }}</h2>
+              <p class="mb-6 text-[14px] font-normal text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">{{ 'Let us know a little about your company' | translate }}</p>
               <div class="flex flex-col gap-2">
-                <label for="company" class="text-[14px] font-normal text-white">{{ 'Company name' | translate }}</label>
-                <input id="company" data-testid="tenant-company-input" type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none" [placeholder]="'Enter company name' | translate" [(ngModel)]="onboardingData.name" />
+                <label for="company" class="text-[14px] font-normal text-white [body.light-theme_&]:text-[var(--color-text2)]">{{ 'Company name' | translate }}</label>
+                <input id="company" data-testid="tenant-company-input" type="text" class="h-[44px] w-full rounded-[8px] border border-[#d0d5dd] bg-white px-4 text-[14px] text-[#0e1626] shadow-[0_1px_2px_#1018280d] outline-none [body.light-theme_&]:focus:border-[#57a5eb] [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-[#57a5eb]/20" [placeholder]="'Enter company name' | translate" [(ngModel)]="onboardingData.name" />
               </div>
             </div>
           }
@@ -59,23 +59,23 @@
           }
           @case (3) {
             <div>
-              <h2 class="mb-[25px] mt-[15px] text-[20px] font-bold text-white">{{ 'Confirm Your Information' | translate }}</h2>
+              <h2 class="mb-[25px] mt-[15px] text-[20px] font-bold text-white [body.light-theme_&]:text-[var(--color-text1)]">{{ 'Confirm Your Information' | translate }}</h2>
               <div class="mb-2">
-                <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">{{ 'Company Name' | translate }}</p>
-                <p class="text-[14px] font-medium text-white">{{ onboardingData.name }}</p>
+                <p class="mb-2 text-[14px] font-medium text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">{{ 'Company Name' | translate }}</p>
+                <p class="text-[14px] font-medium text-white [body.light-theme_&]:text-[var(--color-text1)]">{{ onboardingData.name }}</p>
               </div>
               <hr class="my-4 h-[2px] border-0 bg-[var(--color-border)]" />
-              <p class="mb-2 text-[14px] font-medium text-[#a0b8d1]">{{ 'Added IOCs' | translate }}</p>
+              <p class="mb-2 text-[14px] font-medium text-[#a0b8d1] [body.light-theme_&]:text-[var(--color-text4)]">{{ 'Added IOCs' | translate }}</p>
               <div class="max-h-[290px] overflow-y-auto">
                 @if (hasIocsWithValues()) {
                   <div>
                     @for (ioc of onboardingData.iocs; track ioc.ioc_id) {
                       <div>
                         @if (ioc.values.length > 0) {
-                          <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb]">{{ ioc.name }}</p>
+                          <p class="my-[12px] mb-2 text-[14px] font-medium text-[#57a5eb] [body.light-theme_&]:text-sky-700">{{ ioc.name | translate }}</p>
                           <div class="flex flex-wrap gap-2">
                             @for (value of ioc.values; track value) {
-                              <div class="flex cursor-pointer items-center gap-2 rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-1 text-[12px] font-normal text-[var(--color-text1)] hover:bg-[#FCFCFC20]">
+                              <div class="flex cursor-pointer items-center gap-2 rounded-[5px] border border-[var(--color-border)] bg-[#FCFCFC0D] px-[10px] py-1 text-[12px] font-normal text-[var(--color-text1)] hover:bg-[#FCFCFC20] [body.light-theme_&]:bg-[var(--color-tags)] [body.light-theme_&]:hover:bg-[var(--color-blue-810)]">
                                 <span>{{ value }}</span>
                                 @if (!isPrivilegedIoc()) {
                                   <span (click)="removeIoc(ioc.ioc_id, value)">✕</span>
@@ -97,23 +97,23 @@
       </div>
 
       <div class="mt-auto flex items-center justify-between max-[1024px]:mt-[30px]">
-        <button class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] border border-[#57a5eb] bg-transparent text-[13px] font-medium text-[#a0b8d1] shadow-[0_1px_2px_#1018280d] disabled:cursor-not-allowed disabled:opacity-50" (click)="goBack()" [disabled]="currentStep === 1">
+        <button class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] border border-[#57a5eb] bg-transparent text-[13px] font-medium text-[#a0b8d1] shadow-[0_1px_2px_#1018280d] disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:text-[var(--color-text2)] [body.light-theme_&]:hover:bg-[var(--color-blue-810)] [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-[#57a5eb]/30" (click)="goBack()" [disabled]="currentStep === 1">
           {{ 'Back' | translate }}
         </button>
 
         @switch (currentStep) {
           @case (1) {
-            <button data-testid="tenant-onboarding-next-step1" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] transition disabled:cursor-not-allowed disabled:opacity-50" (click)="goNext()" [disabled]="!onboardingData.name">
+            <button data-testid="tenant-onboarding-next-step1" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] transition disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" (click)="goNext()" [disabled]="!onboardingData.name">
               {{ 'Next' | translate }}
             </button>
           }
           @case (2) {
-            <button data-testid="tenant-onboarding-next-step2" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d]" (click)="goNext()">
+            <button data-testid="tenant-onboarding-next-step2" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" (click)="goNext()">
               {{ (hasIocsWithValues() ? 'Next' : 'Skip') | translate }}
             </button>
           }
           @case (3) {
-            <button data-testid="tenant-onboarding-confirm" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d]" (click)="confirm()">
+            <button data-testid="tenant-onboarding-confirm" class="flex h-[44px] w-[110px] items-center justify-center rounded-[8px] bg-[#57a5eb] text-[13px] font-medium text-white shadow-[0_1px_2px_#1018280d] [body.light-theme_&]:bg-sky-700 [body.light-theme_&]:hover:bg-sky-800 [body.light-theme_&]:focus-visible:outline-none [body.light-theme_&]:focus-visible:ring-2 [body.light-theme_&]:focus-visible:ring-sky-500/30" (click)="confirm()">
               {{ 'Confirm' | translate }}
             </button>
           }

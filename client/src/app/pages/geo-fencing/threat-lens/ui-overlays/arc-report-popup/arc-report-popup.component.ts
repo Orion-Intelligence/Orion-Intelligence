@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, ChangeDetectionStrategy } from '@angular/core';
 import { ThreatLensDisplayFeedItem, ThreatLensFeedItem } from '../../../models/geo-fencing.models';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ThreatLensArcSelection } from '../../models/threat-lens-map.types';
@@ -8,6 +8,7 @@ import { ThreatLensArcSelection } from '../../models/threat-lens-map.types';
   selector: 'app-threat-lens-arc-report-popup',
   standalone: true,
   imports: [CommonModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './arc-report-popup.component.html',
 })
 export class ArcReportPopupComponent implements OnChanges {

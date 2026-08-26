@@ -1,14 +1,14 @@
 <div [ngClass]="isEmbedded() ? 'py-4' : 'px-4 py-4 md:px-6'">
   @if (errorMessage() && !isScanning()) {
-    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)]">
+    <div class="mb-4 rounded-[12px] border border-rose-400/30 bg-gradient-to-br from-[var(--color-blue-820-light)] to-[var(--color-blue-790)] p-[14px] shadow-[0_8px_22px_rgba(0,0,0,0.18)] [.light-theme_&]:border-rose-200 [.light-theme_&]:from-rose-50 [.light-theme_&]:to-white [.light-theme_&]:shadow-none">
       <div class="text-[17px] font-semibold leading-tight text-[var(--color-text1)]">{{ 'Request Failed' | translate }}</div>
-      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage() }}</div>
+      <div class="mt-[4px] text-[13px] leading-5 text-[var(--color-text2)]">{{ errorMessage() | translate }}</div>
     </div>
   }
 
   @if (showShell) {
-    <div class="ui-ioc-table-shell overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-[0_12px_30px_rgba(0,0,0,0.16)]">
-      <div class="ui-ioc-table-head flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-760)] px-4 py-3">
+    <div class="ui-ioc-table-shell overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-790)] shadow-[0_12px_30px_rgba(0,0,0,0.16)] [.light-theme_&]:!border-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_8px_24px_rgba(15,23,42,0.07)]">
+      <div class="ui-ioc-table-head flex items-center justify-between gap-3 border-b border-[var(--color-divider)] bg-[var(--color-blue-760)] px-4 py-3 [.light-theme_&]:!border-b-[#d7e2ef] [.light-theme_&]:!bg-white [.light-theme_&]:!text-[#3a4f6a]">
         <div class="min-w-0">
           <div class="text-[10px] font-bold uppercase tracking-widest text-[var(--color-text4)]">{{ normalizedScanType }} {{ 'Scan' | translate }}</div>
           <div class="mt-1 truncate font-mono text-[13px] font-semibold text-[var(--color-text1)]">{{ meta()?.URL || displayHost }}</div>
@@ -24,18 +24,18 @@
       @if (isScanning() && !meta()) {
         <div class="px-4 py-5" @fadeInDashboardItem>
           <div class="mb-[6px] flex items-center justify-between gap-3">
-            <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel }}</span>
-            <span class="text-[12px] font-semibold text-sky-400">{{ progressValue }}%</span>
+            <span class="truncate text-[12px] font-medium text-[var(--color-text1)]">{{ loadingStepLabel | translate }}</span>
+            <span class="text-[12px] font-semibold text-sky-400 [.light-theme_&]:!text-[#2d6f9f]">{{ progressValue }}%</span>
           </div>
-          <div class="ui-progress-track h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+          <div class="relative overflow-hidden h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
             <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + progressValue"></div>
           </div>
 
           <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
             @for (_ of [1,2,3]; track $index) {
               <div class="rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-760)] p-4">
-                <div class="ui-shimmer h-3 w-24 rounded bg-[var(--color-blue-720)]"></div>
-                <div class="ui-shimmer mt-3 h-6 w-16 rounded bg-[var(--color-blue-720)]"></div>
+                <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-3 w-24 rounded bg-[var(--color-blue-720)]"></div>
+                <div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] mt-3 h-6 w-16 rounded bg-[var(--color-blue-720)]"></div>
               </div>
             }
           </div>
@@ -71,9 +71,9 @@
           }
 
           <div>
-            <div class="mb-2 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400">
+            <div class="mb-2 flex items-center gap-2 text-[12px] font-bold uppercase tracking-[1.7px] text-sky-400 [.light-theme_&]:!text-[#2d6f9f]">
               <span>{{ 'Findings' | translate }}</span>
-              <span class="rounded border border-sky-400/20 bg-sky-400/10 px-2 py-0.5 text-[11px] font-semibold text-sky-300">{{ totalFindings }}</span>
+              <span class="rounded border border-sky-400/20 bg-sky-400/10 px-2 py-0.5 text-[11px] font-semibold text-sky-300 [.light-theme_&]:!text-[#4e81ae]">{{ totalFindings }}</span>
               <span class="h-px flex-1 bg-[var(--color-divider)]"></span>
             </div>
             @if (categories().length) {
@@ -82,7 +82,7 @@
                   <div class="overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-760)] shadow-[0_6px_16px_rgba(0,0,0,0.14)]">
                     <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-720)] px-4 py-3">
                       <span class="truncate text-[14px] font-bold text-[var(--color-text1)]">{{ category.name }}</span>
-                      <span class="rounded border border-sky-400/20 bg-sky-400/12 px-2.5 py-0.5 text-xs font-semibold text-sky-300">{{ category.total }} {{ 'Items' | translate }}</span>
+                      <span class="rounded border border-sky-400/20 bg-sky-400/12 px-2.5 py-0.5 text-xs font-semibold text-sky-300 [.light-theme_&]:!text-[#4e81ae]">{{ category.total }} {{ 'Items' | translate }}</span>
                     </div>
                     <div class="flex flex-col gap-2.5 p-3">
                       @for (item of category.items; track item.header + $index) {

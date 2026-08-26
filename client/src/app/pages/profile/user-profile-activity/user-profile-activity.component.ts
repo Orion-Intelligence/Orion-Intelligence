@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../../shared/services/api.service';
-import { PublicUserActivityItem, PublicUserActivityResponse } from '../../../sections/report/social-interactions/models/public-user-data.model';
+import { PublicUserActivityItem, PublicUserActivityResponse } from '../../../shared/partials/report-interactions/models/public-user-data.model';
 import { HelperService } from '../../../shared/services/helper.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
@@ -10,6 +10,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   selector: 'app-user-profile-activity',
   standalone: true,
   imports: [CommonModule, RouterModule, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './user-profile-activity.component.html',
 })
 export class UserProfileActivityComponent {

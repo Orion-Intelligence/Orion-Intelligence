@@ -1,4 +1,4 @@
-import { Component, effect, OnInit, input, output } from '@angular/core';
+import { Component, effect, OnInit, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
@@ -9,14 +9,15 @@ import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ScrollService } from '../../services/scroll.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../components/ui-dropdown/ui-dropdown.component';
-import { SuggestionService } from '../../../services/entity_filter_suggestions/suggestions.service';
+import { UiDropdownComponent, UiDropdownOption } from '../ui-dropdown/ui-dropdown.component';
+import { SuggestionService } from './services/suggestions.service';
 
 @Component({
   selector: 'app-filters',
   templateUrl: './filters.component.html',
   standalone: true,
   imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent, TranslatePipe, UiDropdownComponent],
+  changeDetection: ChangeDetectionStrategy.Eager,
   animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {

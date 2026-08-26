@@ -34,7 +34,8 @@ export enum ApiSubCategory {
     SOFTWARE = 'Software-Scanner',
     FILE = 'File-Scanner',
     TEXT_ANALYSIS = 'Text-Analysis',
-    CRYPTO = 'Crypto-Scanner'
+    CRYPTO = 'Crypto-Scanner',
+    PHONE_LOOKUP = 'Phone-Lookup'
 }
 export enum SocialSubCategory {
     ALL = 'All',
@@ -67,16 +68,6 @@ export enum FeedSubCategory {
     TRACKING = 'Tracking'
 }
 export enum TenantSubCategory {
-    VIEW_PROFILE = 'View-Profiles',
-    VIEW_TENANT = 'View-Tenants',
-    AUDITLOG = 'Auditlog'
-}
-export enum NETINTSubCategory {
-    VIEW_PROFILE = 'View-Profiles',
-    VIEW_TENANT = 'View-Tenants',
-    AUDITLOG = 'Auditlog'
-}
-export enum SatelliteIntelSubCategory {
     VIEW_PROFILE = 'View-Profiles',
     VIEW_TENANT = 'View-Tenants',
     AUDITLOG = 'Auditlog'

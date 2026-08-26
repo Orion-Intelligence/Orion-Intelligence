@@ -1,4 +1,4 @@
-import { Component, effect, input } from '@angular/core';
+import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 import { StealerLogCallbackModel } from '../../../../shared/model/results/credentials/credential.callback.model';
@@ -15,6 +15,7 @@ type IocResultTab = 'stealers' | 'threats';
   standalone: true,
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem, expandFadeRow],
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [ExpandedRowComponent, DatePipe, TranslatePipe]
 })
 export class CredentialListComponent {

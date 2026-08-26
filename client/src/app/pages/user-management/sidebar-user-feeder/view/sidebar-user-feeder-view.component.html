@@ -13,8 +13,8 @@
 <div class="mt-4 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
   <div class="flex flex-wrap items-start justify-between gap-3">
     <div class="min-w-0">
-      <div class="ui-section-title">{{ getSectionTitle() }}</div>
-      <div class="ui-section-description">{{ getSectionDescription() }}</div>
+      <div data-testid="feeder-section-title" class="text-[16px] font-semibold leading-[1.25] text-[var(--color-text1)]">{{ getSectionTitle() | translate }}</div>
+      <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ getSectionDescription() | translate }}</div>
     </div>
     <div class="ml-auto inline-flex max-w-full shrink-0 flex-wrap items-stretch justify-end overflow-hidden rounded-[9px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)] max-[640px]:w-full [body.light-theme_&]:border-[#d6e3ee] [body.light-theme_&]:bg-[#f8fbff]">
       <input data-testid="feeder-search-input" type="text" [value]="searchText" [placeholder]="'Search current page...' | translate" class="h-[38px] min-w-0 w-[260px] rounded-none border-0 bg-transparent px-3 text-sm text-[var(--color-text1)] outline-none transition focus:bg-[rgba(87,165,235,0.06)] max-[640px]:basis-full max-[640px]:w-full max-[640px]:border-b max-[640px]:border-[var(--color-border)] [body.light-theme_&]:bg-transparent" (input)="onSearchInput($any($event.target).value || '')" />
@@ -56,15 +56,15 @@
         <tbody>
           @for (row of shimmerRows; track row) {
             <tr class="border-b border-[var(--color-border)] last:border-b-0">
-              <td class="px-4 py-2.5"><div class="ui-shimmer h-[12px] w-[52px] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
-              <td class="px-4 py-2.5"><div class="ui-shimmer h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
+              <td class="px-4 py-2.5"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[12px] w-[52px] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
+              <td class="px-4 py-2.5"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
               @if (canTransferOwnership()) {
-                <td class="px-4 py-2.5"><div class="ui-shimmer h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
+                <td class="px-4 py-2.5"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
               }
-              <td class="px-4 py-2.5"><div class="ui-shimmer h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
-              <td class="px-4 py-2.5"><div class="ui-shimmer h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
-              <td class="px-4 py-2.5"><div class="ui-shimmer h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
-              <td class="px-4 py-2.5"><div class="ui-shimmer h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
+              <td class="px-4 py-2.5"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[12px] w-full rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
+              <td class="px-4 py-2.5"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
+              <td class="px-4 py-2.5"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[12px] w-[50%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
+              <td class="px-4 py-2.5"><div class="ui-shimmer relative isolate box-border max-w-full overflow-hidden [--ui-shimmer-base:rgb(255_255_255/6%)] [--ui-shimmer-edge:rgb(255_255_255/2%)] [--ui-shimmer-slide-highlight:rgb(255_255_255/16%)] [&&]:!bg-[linear-gradient(180deg,var(--ui-shimmer-base),var(--ui-shimmer-base))] before:pointer-events-none before:absolute before:inset-0 before:content-[''] before:bg-[linear-gradient(180deg,var(--ui-shimmer-edge),transparent)] after:pointer-events-none after:absolute after:inset-0 after:content-[''] after:bg-[linear-gradient(110deg,transparent_20%,var(--ui-shimmer-slide-highlight)_48%,transparent_76%)] after:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[--ui-shimmer-base:#cfdceb] [.light-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/42%)] [.light-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/88%)] [.dark-theme_&]:[--ui-shimmer-base:rgb(255_255_255/9%)] [.dark-theme_&]:[--ui-shimmer-edge:rgb(255_255_255/4.5%)] [.dark-theme_&]:[--ui-shimmer-slide-highlight:rgb(255_255_255/20%)] h-[12px] w-[75%] rounded-[4px] bg-[var(--color-placeholder)]"></div></td>
             </tr>
           }
         </tbody>
@@ -81,8 +81,8 @@
       <div class="mt-1 text-sm text-[var(--color-text4)]">{{ getEmptyStateDescription() }}</div>
     </div>
   } @else if (entryType === 'values') {
-    <div class="ui-table-shell hidden min-[1401px]:block">
-        <table class="ui-table">
+    <div class="overflow-x-auto border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] [border-width:var(--ui-table-shell-border-width,1.5px)] [margin-top:var(--ui-table-shell-mt,16px)] [border-radius:var(--ui-table-shell-radius,10px)] [-webkit-overflow-scrolling:touch] hidden min-[1401px]:block">
+        <table class="w-full border-collapse text-left text-sm text-[var(--color-text1)] [min-width:var(--ui-table-min-width,920px)] max-md:[min-width:var(--ui-table-mobile-min-width,680px)] max-md:text-[13px] [&_thead]:border-b-2 [&_thead]:border-b-[rgb(87_165_235/37.6%)] [&_thead]:bg-[var(--color-blue-820-light)] [&_thead]:text-[13px] [&_thead]:uppercase [&_thead]:tracking-[.04em] [&_thead]:text-[var(--color-text6)] max-md:[&_thead]:text-xs [&_th]:p-3 [&_td]:p-3 max-md:[&_th]:p-2.5 max-md:[&_td]:p-2.5 [&_tbody_tr]:border-t [&_tbody_tr]:border-t-[var(--ui-table-row-border)] [&_tbody_tr]:text-[var(--color-text3)] [&_tbody_tr]:transition-[background-color,border-color] [&_tbody_tr]:duration-[160ms] [&_tbody_tr]:ease-[ease] [&_tbody_tr:nth-child(odd)]:bg-[var(--ui-table-row-odd)] [&_tbody_tr:nth-child(even)]:bg-[var(--ui-table-row-even)] [&_tbody_tr:hover]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:hover]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-visible]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:outline-none [&_tbody_tr:focus-within]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-within]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-within]:outline-none [&_tbody_tr:active]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:active]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:active]:outline-none [&_tbody_td]:whitespace-nowrap">
           <thead class="bg-[var(--color-blue-820-light)] text-[11px] uppercase tracking-[0.08em] text-[var(--color-text6)]">
             <tr>
               <th class="w-[72px] px-4 py-3">ID</th>
@@ -119,7 +119,7 @@
                       <button [attr.data-testid]="'feeder-value-view-button-' + rowIndex" type="button" class="inline-flex h-[32px] items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[11px] font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleValuePreview(value)">
                       {{ (selectedValueUrl === value.url ? 'Hide' : 'View') | translate }}
                     </button>
-                    <button [attr.data-testid]="'feeder-value-delete-button-' + rowIndex" type="button" class="inline-flex h-[32px] w-[32px] items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:text-[#b42318]" [title]="'Delete Value' | translate" (click)="openConfirmation('deleteValue', valuesRecord, value.url)">
+                    <button [attr.data-testid]="'feeder-value-delete-button-' + rowIndex" type="button" class="inline-flex h-[32px] w-[32px] items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70" [title]="'Delete Value' | translate" (click)="openConfirmation('deleteValue', valuesRecord, value.url)">
                       <svg viewBox="0 0 24 24" class="h-[15px] w-[15px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 6h18"></path>
                         <path d="M8 6V4h8v2"></path>
@@ -136,12 +136,12 @@
                   <td colspan="5" class="px-4 py-4">
                     <div class="grid gap-4 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-4 [body.light-theme_&]:bg-[#f8fbff]">
                       <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300">{{ 'Last Success' | translate }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300 [body.light-theme_&]:text-emerald-800">{{ 'Last Success' | translate }}</div>
                         <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ value.last_success_date ? (value.last_success_date | date:'medium') : '-' }}</div>
                         <pre class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(value.last_success_message) }}</pre>
                       </div>
                       <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300">{{ 'Last Failure' | translate }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300 [body.light-theme_&]:text-amber-800">{{ 'Last Failure' | translate }}</div>
                         <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ value.last_failure_date ? (value.last_failure_date | date:'medium') : '-' }}</div>
                         <pre class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(value.last_failure_message || value.last_error) }}</pre>
                       </div>
@@ -162,7 +162,7 @@
               {{ getValueStatus(value) }}
             </span>
           </div>
-          <div class="divide-y divide-white/10">
+          <div class="divide-y divide-white/10 [body.light-theme_&]:divide-[var(--color-divider)]">
             <div class="px-3 py-2">
               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Value' | translate }}</div>
               <div class="mt-0.5 break-all font-mono text-sm text-[var(--color-text3)]">{{ value.url }}</div>
@@ -176,7 +176,7 @@
                 <button type="button" class="inline-flex h-[32px] items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-[11px] font-semibold text-[var(--color-text1)] transition hover:bg-[var(--color-blue-710)] [body.light-theme_&]:bg-[#edf4fb] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleValuePreview(value)">
                   {{ (selectedValueUrl === value.url ? 'Hide' : 'View') | translate }}
                 </button>
-                <button [attr.data-testid]="'feeder-value-delete-button-' + rowIndex" type="button" class="inline-flex h-[32px] w-[32px] items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:text-[#b42318]" [title]="'Delete Value' | translate" (click)="openConfirmation('deleteValue', valuesRecord, value.url)">
+                <button [attr.data-testid]="'feeder-value-delete-button-' + rowIndex" type="button" class="inline-flex h-[32px] w-[32px] items-center justify-center rounded-[8px] border border-[rgba(239,68,68,0.28)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:border-[rgba(239,68,68,0.42)] hover:bg-[rgba(127,29,29,0.34)] [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:border-red-700/40 [body.light-theme_&]:hover:bg-red-200/70" [title]="'Delete Value' | translate" (click)="openConfirmation('deleteValue', valuesRecord, value.url)">
                   <svg viewBox="0 0 24 24" class="h-[15px] w-[15px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 6h18"></path>
                     <path d="M8 6V4h8v2"></path>
@@ -190,12 +190,12 @@
             @if (selectedValueUrl === value.url && hasValuePreview(value)) {
               <div class="grid gap-4 border-t border-[var(--color-border)] bg-[rgba(87,165,235,0.04)] p-3">
                 <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                  <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300">{{ 'Last Success' | translate }}</div>
+                  <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300 [body.light-theme_&]:text-emerald-800">{{ 'Last Success' | translate }}</div>
                   <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ value.last_success_date ? (value.last_success_date | date:'medium') : '-' }}</div>
                   <pre class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(value.last_success_message) }}</pre>
                 </div>
                 <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                  <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300">{{ 'Last Failure' | translate }}</div>
+                  <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300 [body.light-theme_&]:text-amber-800">{{ 'Last Failure' | translate }}</div>
                   <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ value.last_failure_date ? (value.last_failure_date | date:'medium') : '-' }}</div>
                   <pre class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(value.last_failure_message || value.last_error) }}</pre>
                 </div>
@@ -206,8 +206,8 @@
       }
     </div>
   } @else {
-    <div class="ui-table-shell hidden min-[1401px]:block">
-        <table class="ui-table">
+    <div class="overflow-x-auto border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] [border-width:var(--ui-table-shell-border-width,1.5px)] [margin-top:var(--ui-table-shell-mt,16px)] [border-radius:var(--ui-table-shell-radius,10px)] [-webkit-overflow-scrolling:touch] hidden min-[1401px]:block">
+        <table class="w-full border-collapse text-left text-sm text-[var(--color-text1)] [min-width:var(--ui-table-min-width,920px)] max-md:[min-width:var(--ui-table-mobile-min-width,680px)] max-md:text-[13px] [&_thead]:border-b-2 [&_thead]:border-b-[rgb(87_165_235/37.6%)] [&_thead]:bg-[var(--color-blue-820-light)] [&_thead]:text-[13px] [&_thead]:uppercase [&_thead]:tracking-[.04em] [&_thead]:text-[var(--color-text6)] max-md:[&_thead]:text-xs [&_th]:p-3 [&_td]:p-3 max-md:[&_th]:p-2.5 max-md:[&_td]:p-2.5 [&_tbody_tr]:border-t [&_tbody_tr]:border-t-[var(--ui-table-row-border)] [&_tbody_tr]:text-[var(--color-text3)] [&_tbody_tr]:transition-[background-color,border-color] [&_tbody_tr]:duration-[160ms] [&_tbody_tr]:ease-[ease] [&_tbody_tr:nth-child(odd)]:bg-[var(--ui-table-row-odd)] [&_tbody_tr:nth-child(even)]:bg-[var(--ui-table-row-even)] [&_tbody_tr:hover]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:hover]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-visible]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-visible]:outline-none [&_tbody_tr:focus-within]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:focus-within]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:focus-within]:outline-none [&_tbody_tr:active]:border-t-[var(--ui-table-row-border-hover)] [&_tbody_tr:active]:bg-[var(--ui-table-row-hover)] [&_tbody_tr:active]:outline-none [&_tbody_td]:whitespace-nowrap">
           <thead class="bg-[var(--color-blue-820-light)] text-[11px] uppercase tracking-[0.08em] text-[var(--color-text6)]">
             <tr>
               <th class="w-[72px] px-4 py-3">ID</th>
@@ -260,7 +260,7 @@
           </thead>
           <tbody>
             @for (script of displayedScripts; track script.id; let rowIndex = $index) {
-              <tr [attr.data-testid]="'feeder-script-row-' + script.file_name" data-feeder-script-row="true" class="cursor-pointer select-none border-t border-[var(--color-border)] text-sm text-[var(--color-text1)] hover:bg-[rgba(125,211,252,0.14)]" [ngClass]="{ 'bg-[rgba(125,211,252,0.10)] border-t-[color:rgba(125,211,252,0.22)]': selectedScript?.id === script.id || isScriptSelected(script) }" (mousedown)="beginScriptSelection($event, script)" (mouseover)="extendScriptSelection(script)" (mouseleave)="leaveScriptSelection(script)" (dragstart)="$event.preventDefault()">
+              <tr [attr.data-testid]="'feeder-script-row-' + script.file_name" data-feeder-script-row="true" data-table-row-hover="custom" class="cursor-pointer select-none border-t border-[var(--color-border)] text-sm text-[var(--color-text1)] hover:bg-[rgba(125,211,252,0.14)] [body.light-theme_&]:hover:bg-sky-50" [ngClass]="{ 'bg-[rgba(125,211,252,0.10)] border-t-[color:rgba(125,211,252,0.22)] [body.light-theme_&]:border-t-sky-600/30 [body.light-theme_&]:bg-sky-100': selectedScript?.id === script.id || isScriptSelected(script) }" (mousedown)="beginScriptSelection($event, script)" (mouseover)="extendScriptSelection(script)" (mouseleave)="leaveScriptSelection(script)" (dragstart)="$event.preventDefault()">
                 <td class="px-4 py-2.5" [ngClass]="script.enabled ? 'border-l-4 border-l-emerald-400' : 'border-l-4 border-l-slate-700'">
                   <div class="flex items-center gap-2 font-mono text-[12px] text-[var(--color-text4)]">
                     <span data-feeder-text-selectable="true" class="select-text">{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</span>
@@ -270,7 +270,7 @@
                   <div data-feeder-text-selectable="true" class="max-w-[260px] truncate font-semibold select-text" [title]="getScriptDisplayName(script)">{{ getScriptDisplayName(script) }}</div>
                 </td>
                 @if (canTransferOwnership()) {
-                  <td [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="px-4 py-2.5 text-[var(--color-text4)] select-text">{{ getOwnerLabel(script) }}</td>
+                  <td [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="px-4 py-2.5 text-[var(--color-text4)] select-text">{{ getOwnerLabel(script) | translate }}</td>
                 }
                 <td class="px-4 py-2.5">
                   <div class="max-w-[320px]">
@@ -278,7 +278,7 @@
                   </div>
                 </td>
                 <td class="px-4 py-2.5">
-                  <span [attr.data-testid]="'feeder-script-active-status-' + script.file_name" data-feeder-text-selectable="true" class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize select-text" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
+                  <span [attr.data-testid]="'feeder-script-active-status-' + script.file_name" data-feeder-text-selectable="true" class="mr-0 inline-flex rounded-full px-3 py-1.5 text-[12px] font-semibold capitalize select-text" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
                     {{ script.enabled ? 'enabled' : 'disabled' }}
                   </span>
                 </td>
@@ -290,7 +290,7 @@
                 <td data-feeder-text-selectable="true" class="px-4 py-2.5 text-[var(--color-text4)] select-text">{{ script.last_success_date ? (script.last_success_date | date:'medium') : '-' }}</td>
                 <td data-feeder-text-selectable="true" class="px-4 py-2.5 text-[var(--color-text4)] select-text">{{ script.updated_at ? (script.updated_at | date:'medium') : '-' }}</td>
                 <td class="px-4 py-2.5">
-                  <div class="inline-flex items-center justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)]">
+                  <div class="inline-flex items-center justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white">
                     <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
                       {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                     </button>
@@ -315,7 +315,7 @@
                         </svg>
                       </button>
                     }
-                    <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:bg-[rgba(127,29,29,0.30)] [body.light-theme_&]:text-[#b42318]" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
+                    <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:bg-[rgba(127,29,29,0.30)] [body.light-theme_&]:border-l-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:bg-red-200/70" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
                       <svg viewBox="0 0 24 24" class="h-[15px] w-[15px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                         <path d="M3 6h18"></path>
                         <path d="M8 6V4h8v2"></path>
@@ -348,12 +348,12 @@
                             </div>
                           }
                           <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                            <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300">{{ 'Last Success' | translate }}</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300 [body.light-theme_&]:text-emerald-800">{{ 'Last Success' | translate }}</div>
                             <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ script.last_success_date ? (script.last_success_date | date:'medium') : '-' }}</div>
                             <pre class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(script.last_success_message) }}</pre>
                           </div>
                           <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                            <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300">{{ 'Last Failure' | translate }}</div>
+                            <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300 [body.light-theme_&]:text-amber-800">{{ 'Last Failure' | translate }}</div>
                             <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ script.last_failure_date ? (script.last_failure_date | date:'medium') : '-' }}</div>
                             <pre class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(script.last_failure_message) }}</pre>
                           </div>
@@ -373,13 +373,13 @@
     </div>
     <div class="mt-4 space-y-3 min-[1401px]:hidden">
       @for (script of displayedScripts; track script.id; let rowIndex = $index) {
-        <div data-feeder-script-row="true" class="cursor-pointer select-none overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-830)] hover:bg-[rgba(125,211,252,0.14)]" [ngClass]="{ 'border-l-4 border-l-emerald-400': script.enabled, 'border-l-4 border-l-slate-700': !script.enabled, 'bg-[rgba(125,211,252,0.10)] border-[color:rgba(125,211,252,0.22)]': isScriptSelected(script) }" (mousedown)="beginScriptSelection($event, script)" (mouseover)="extendScriptSelection(script)" (mouseleave)="leaveScriptSelection(script)" (dragstart)="$event.preventDefault()">
+        <div data-feeder-script-row="true" class="cursor-pointer select-none overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-830)] hover:bg-[rgba(125,211,252,0.14)] [body.light-theme_&]:hover:bg-sky-50" [ngClass]="{ 'border-l-4 border-l-emerald-400': script.enabled, 'border-l-4 border-l-slate-700 [body.light-theme_&]:border-l-slate-300': !script.enabled, 'bg-[rgba(125,211,252,0.10)] border-[color:rgba(125,211,252,0.22)] [body.light-theme_&]:border-sky-600/30 [body.light-theme_&]:bg-sky-100': isScriptSelected(script) }" (mousedown)="beginScriptSelection($event, script)" (mouseover)="extendScriptSelection(script)" (mouseleave)="leaveScriptSelection(script)" (dragstart)="$event.preventDefault()">
           <div class="flex items-center justify-between gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-3 py-2">
             <div class="flex items-center gap-2 text-xs font-semibold tracking-wide text-[var(--color-text4)]">
               <span data-feeder-text-selectable="true" class="select-text">#{{ ((currentPage - 1) * 1000) + rowIndex + 1 }}</span>
             </div>
             <div class="flex items-center gap-2">
-              <span [attr.data-testid]="'feeder-script-active-status-' + script.file_name" data-feeder-text-selectable="true" class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize select-text" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
+              <span [attr.data-testid]="'feeder-script-active-status-' + script.file_name" data-feeder-text-selectable="true" class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize select-text" [ngClass]="script.enabled ? 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800' : 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700'">
                 {{ script.enabled ? 'enabled' : 'disabled' }}
               </span>
               <span data-feeder-text-selectable="true" class="inline-flex rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize select-text" [ngClass]="getRuntimeStatus(script) === 'failed' ? 'bg-red-500/10 text-red-300 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-700' : getRuntimeStatus(script) === 'success' ? 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-700' : getRuntimeStatus(script) === 'warning' ? 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-700' : 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:text-slate-600'">
@@ -387,7 +387,7 @@
               </span>
             </div>
           </div>
-          <div class="divide-y divide-white/10">
+          <div class="divide-y divide-white/10 [body.light-theme_&]:divide-[var(--color-divider)]">
             <div class="px-3 py-2">
               <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'File' | translate }}</div>
               <div data-feeder-text-selectable="true" class="mt-0.5 break-all text-sm font-semibold text-[var(--color-text3)] select-text">{{ getScriptDisplayName(script) }}</div>
@@ -395,7 +395,7 @@
             @if (canTransferOwnership()) {
               <div class="px-3 py-2">
                 <div class="text-[10px] font-semibold uppercase tracking-wide text-[var(--color-text4)]">{{ 'Owner' | translate }}</div>
-                <div [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="mt-0.5 break-all text-sm text-[var(--color-text3)] select-text">{{ getOwnerLabel(script) }}</div>
+                <div [attr.data-testid]="'feeder-script-owner-label-' + script.file_name" data-feeder-text-selectable="true" class="mt-0.5 break-all text-sm text-[var(--color-text3)] select-text">{{ getOwnerLabel(script) | translate }}</div>
               </div>
             }
             <div class="px-3 py-2">
@@ -415,7 +415,7 @@
               </div>
             </div>
             <div class="px-3 py-2">
-              <div class="inline-flex max-w-full flex-wrap justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)]">
+              <div class="inline-flex max-w-full flex-wrap justify-end overflow-hidden rounded-[8px] border border-[rgba(125,211,252,0.20)] bg-[rgba(255,255,255,0.04)] [body.light-theme_&]:border-[var(--color-border)] [body.light-theme_&]:bg-white">
                 <button [attr.data-testid]="'feeder-script-view-button-' + script.file_name" type="button" class="inline-flex h-[36px] items-center border-0 bg-transparent px-3.5 text-[12px] font-semibold text-[var(--color-text1)] transition hover:bg-[rgba(125,211,252,0.10)] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:hover:bg-[#dfeefb]" (click)="toggleScript(script)">
                   {{ selectedScript?.id === script.id ? ('Hide' | translate) : ('View' | translate) }}
                 </button>
@@ -440,7 +440,7 @@
                     </svg>
                   </button>
                 }
-                <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:bg-[rgba(127,29,29,0.30)] [body.light-theme_&]:text-[#b42318]" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
+                <button [attr.data-testid]="'feeder-script-delete-button-' + script.file_name" type="button" class="inline-flex h-[36px] w-[36px] items-center justify-center border-0 border-l border-[rgba(125,211,252,0.18)] bg-[rgba(127,29,29,0.22)] text-[var(--color-text1)] transition hover:bg-[rgba(127,29,29,0.30)] [body.light-theme_&]:border-l-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800 [body.light-theme_&]:hover:bg-red-200/70" [title]="'common.actions.delete' | translate" (click)="openConfirmation('delete', script)">
                   <svg viewBox="0 0 24 24" class="h-[15px] w-[15px] fill-none stroke-current" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M3 6h18"></path>
                     <path d="M8 6V4h8v2"></path>
@@ -470,12 +470,12 @@
                         </div>
                       }
                       <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300">{{ 'Last Success' | translate }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-300 [body.light-theme_&]:text-emerald-800">{{ 'Last Success' | translate }}</div>
                         <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ script.last_success_date ? (script.last_success_date | date:'medium') : '-' }}</div>
                         <pre data-feeder-text-selectable="true" class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] select-text [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(script.last_success_message) }}</pre>
                       </div>
                       <div class="min-w-0 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] p-4 [body.light-theme_&]:bg-white">
-                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300">{{ 'Last Failure' | translate }}</div>
+                        <div class="text-xs font-semibold uppercase tracking-[0.08em] text-amber-300 [body.light-theme_&]:text-amber-800">{{ 'Last Failure' | translate }}</div>
                         <div class="mt-1 text-[11px] text-[var(--color-text4)]">{{ script.last_failure_date ? (script.last_failure_date | date:'medium') : '-' }}</div>
                         <pre data-feeder-text-selectable="true" class="mt-3 max-w-full overflow-x-auto whitespace-pre-wrap break-all rounded-[10px] border border-[var(--color-border)] bg-[#09101c] p-4 text-[12px] leading-6 text-[#d9e7f5] select-text [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:text-[#23415a] [body.light-theme_&]:border-[#d7e2ef]">{{ formatPreviewMessage(script.last_failure_message) }}</pre>
                       </div>

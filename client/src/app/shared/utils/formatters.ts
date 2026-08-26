@@ -1,16 +1,3 @@
-const platformColorCache = new Map<string, string>();
-export function getPlatformColor(platformName: string): string {
-  if (platformColorCache.has(platformName)) {
-    return platformColorCache.get(platformName)!;
-  }
-  let hash = 0;
-  for (let i = 0; i < platformName.length; i++) {
-    hash = platformName.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const color = `hsl(${hash % 360}, 50%, 40%)`;
-  platformColorCache.set(platformName, color);
-  return color;
-}
 export function formatFollowers(count?: number): string {
   if (count === undefined) {
     return 'N/A';

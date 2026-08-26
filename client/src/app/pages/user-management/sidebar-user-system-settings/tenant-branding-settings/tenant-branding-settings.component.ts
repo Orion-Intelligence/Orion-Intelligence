@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
@@ -6,6 +6,7 @@ import { AppService } from '../../../../services/core/app/app.service';
 import { AppSettingsModel, ConfigSettings } from '../../../../shared/model/app/config';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../shared/services/translation.service';
 import { UserImagePickerComponent } from '../../sidebar-user-settings/user-image-picker/user-image-picker.component';
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
@@ -22,14 +23,16 @@ const DEFAULT_SYSTEM_ASSETS: Record<SystemResourceKey, string> = {
   selector: 'app-tenant-branding-settings',
   standalone: true,
   imports: [CommonModule, FormsModule, UserImagePickerComponent, TranslatePipe],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './tenant-branding-settings.component.html'
 })
 export class TenantBrandingSettingsComponent implements OnInit {
-  brandingEditing = false;
+  private appNameSnapshot = '';
+
   brandingError = '';
   form = { app_name: '0' };
 
-  constructor(private apiService: ApiService, protected appService: AppService, private messageNotificationService: MessageNotificationService) {
+  constructor(private apiService: ApiService, protected appService: AppService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
   }
 
   ngOnInit(): void {
@@ -43,21 +46,11 @@ export class TenantBrandingSettingsComponent implements OnInit {
     }
     this.form.app_name = settings.app_name?.trim() || DEFAULT_APP_NAME;
     this.brandingError = '';
+    this.appNameSnapshot = this.form.app_name;
   }
 
-  toggleBrandingEdit(): void {
-    if (this.brandingEditing) {
-      if (this.save()) {
-        this.brandingEditing = false;
-      }
-      return;
-    }
-    this.brandingEditing = true;
-  }
-
-  cancelBrandingEdit(): void {
-    this.loadSettings();
-    this.brandingEditing = false;
+  isBrandingDirty(): boolean {
+    return this.form.app_name !== this.appNameSnapshot;
   }
 
   updateUserResource(file: File, key: SystemResourceKey = 'logo_url'): void {
@@ -76,7 +69,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
           this.applySettings(updatedAssets);
         },
         error: (err) => {
-          const message = err?.error?.detail || 'Failed to upload image';
+          const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
           this.messageNotificationService.show(message);
         }
       });
@@ -88,7 +81,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
         this.applySettings({ [key]: DEFAULT_SYSTEM_ASSETS[key] } as Partial<AppSettingsModel>);
       },
       error: (err) => {
-        const message = err?.error?.detail || 'Failed to remove image';
+        const message = err?.error?.detail || this.translationService.translate('Failed to remove image');
         this.messageNotificationService.show(message);
       }
     });
@@ -110,7 +103,6 @@ export class TenantBrandingSettingsComponent implements OnInit {
       },
       error: () => {
         this.brandingError = 'Failed to save tenant branding';
-        this.brandingEditing = true;
       }
     });
     return true;

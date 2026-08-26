@@ -4,7 +4,7 @@
 
 Search defacement intelligence reports by keyword, threat group, or affected domain; returns metadata for matching defacement reports.
 
-This endpoint corresponds to `/api/search/defacement` and expects a JSON body matching the `search_defacement_param_model` schema.
+This endpoint corresponds to `/api/search/defacement` and expects a JSON body matching the `search_consolidated_param_model` schema.
 
 Supported request fields:
 - **q** — free-text search query over normalized titles, content and metadata (e.g. banner text, domains).

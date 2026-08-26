@@ -103,7 +103,8 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
       ]);
       const isSilentLogout = silentLogoutMessages.has(message);
       const isPublicCaseShareRequest = error instanceof HttpErrorResponse && authReq.url.includes('public/case-shares/');
-      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && (error.status === 401 || isSilentLogout)) {
+      const isExtensionRequest = authReq.url.includes('api/extension/');
+      if (error instanceof HttpErrorResponse && !isPublicCaseShareRequest && !isExtensionRequest && (error.status === 401 || isSilentLogout)) {
         authService.clearAuthentication();
         localStorage.clear();
         sessionStorage.clear();
@@ -113,7 +114,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         msg.show(message);
       }
     }
-    else if (error instanceof HttpErrorResponse && error.status === 401) {
+    else if (error instanceof HttpErrorResponse && error.status === 401 && !authReq.url.includes('api/extension/')) {
       authService?.clearAuthentication();
       localStorage.clear();
       sessionStorage.clear();

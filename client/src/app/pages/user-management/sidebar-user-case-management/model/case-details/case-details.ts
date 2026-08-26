@@ -1,9 +1,9 @@
-import { ChangeDetectorRef, Component, forwardRef, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, forwardRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { ReportFeedbackModel } from '../../../../../sections/report/templates/report_general/models/report-feedback.model';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseCommentRequest, CaseEntity, CaseLink, CaseTask, CaseUpdateRequest, TaskStatus } from '../../../../../shared/model/case-management/case.model';
-import { DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE } from '../../../../../shared/model/case-management/case-management.defaults';
+import { ReportFeedbackModel } from '../../../../../shared/partials/report-interactions/models/report-feedback.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseArtifact, CaseArtifactFile, CaseClosure, CaseCommentRequest, CaseEntity, CaseLink, CaseTask, CaseUpdateRequest, TaskStatus } from '../case.model';
+import { DEFAULT_CASE_ARTIFACT_TEMPLATE, DEFAULT_CASE_TASK_TEMPLATE, DEFAULT_RELATED_CASE_ENTITY_TEMPLATE } from '../case-management.defaults';
 import { CaseManagement } from '../../case-management-service/case-management';
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { ConfirmationPopupComponent } from '../../../../../shared/partials/confirmation-popup/confirmation-popup.component';
@@ -25,6 +25,7 @@ import { buildCaseCommentsFeedback } from './case-details-feedback.mapper';
 import { buildCasePdfReport } from './case-details-pdf.mapper';
 import { cleanCaseForSave, cleanComment, createCaseId, ensureArtifactDefaults, ensureEntityDefaults, ensurePrimaryEntity, ensureTaskDefaults } from './case-details-payload.mapper';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { TranslationService } from '../../../../../shared/services/translation.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
@@ -48,6 +49,7 @@ import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat
     { provide: CaseDetailsStore, useExisting: forwardRef(() => CaseDetails) }
   ],
   animations: [caseSectionMotion],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './case-details.html',
 })
 export class CaseDetails extends CaseDetailsStore implements OnInit {
@@ -89,8 +91,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isUnarchiveConfirmationOpen = false;
   isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService, private translationService: TranslationService) {
     super();
+  }
+
+  private translate(key: string): string {
+    this.translationService.version();
+    return this.translationService.translate(key);
   }
 
   ngOnInit(): void {
@@ -155,7 +162,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     if (!caseId) {
       this.isLoading = false;
-      this.messageNotificationService.show('No case ID provided');
+      this.messageNotificationService.show(this.translate('No case ID provided'));
       this.router.navigate(['/dashboard/profile/case-management']);
       return;
     }
@@ -183,7 +190,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         });
       },
       error: () => {
-        this.messageNotificationService.show('Case not found');
+        this.messageNotificationService.show(this.translate('Case not found'));
         this.router.navigate(['/dashboard/profile/case-management']);
         this.isLoading = false;
       }
@@ -206,11 +213,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
     if (!this.canManageCases() && section !== 'tasks') {
-      this.messageNotificationService.show('Analysts can only edit tasks and comments');
+      this.messageNotificationService.show(this.translate('Analysts can only edit tasks and comments'));
       return;
     }
     if (this.caseData.closure) {
-      this.messageNotificationService.show('Closed cases cannot be edited');
+      this.messageNotificationService.show(this.translate('Closed cases cannot be edited'));
       return;
     }
     const editedCase: Case = JSON.parse(JSON.stringify(this.caseData));
@@ -261,7 +268,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   uploadArtifactFiles(artifact: CaseArtifact, fileInput: HTMLInputElement): void {
     if (!this.canManageCases()) {
-      this.messageNotificationService.show('Analysts cannot upload artifact files');
+      this.messageNotificationService.show(this.translate('Analysts cannot upload artifact files'));
       return;
     }
     if (!this.caseData || !artifact.artifactId) {
@@ -285,11 +292,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.patchArtifactFiles(artifact.artifactId, nextFiles);
 
         fileInput.value = '';
-        this.messageNotificationService.show('Files uploaded successfully', 'success');
+        this.messageNotificationService.show(this.translate('Files uploaded successfully'), 'success');
       },
       error: err => {
         fileInput.value = '';
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to upload files');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to upload files'));
       }
     });
   }
@@ -311,7 +318,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       error: err => {
         this.artifactReports = [];
         this.isArtifactReportsLoading = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to load reports');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to load reports'));
       }
     });
   }
@@ -365,7 +372,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const url = this.getArtifactReportViewUrl(artifact);
 
     if (!url) {
-      this.messageNotificationService.show('Report link is not available');
+      this.messageNotificationService.show(this.translate('Report link is not available'));
       return;
     }
 
@@ -413,7 +420,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const artifactFile = (artifact.files || []).find(file => file.fileId === fileId);
 
     if (artifactFile && this.isArtifactFileIntegrityFailed(artifactFile)) {
-      this.messageNotificationService.show('File integrity check failed');
+      this.messageNotificationService.show(this.translate('File integrity check failed'));
       return;
     }
 
@@ -432,14 +439,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
           artifactFile.integrityStatus = 'failed';
         }
 
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('File integrity check failed'));
       }
     });
   }
 
   deleteArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.canManageCases()) {
-      this.messageNotificationService.show('Analysts cannot delete artifact files');
+      this.messageNotificationService.show(this.translate('Analysts cannot delete artifact files'));
       return;
     }
     if (!this.caseData || !artifact.artifactId) {
@@ -452,10 +459,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
         this.patchArtifactFiles(artifact.artifactId, nextFiles);
 
-        this.messageNotificationService.show('File deleted successfully', 'success');
+        this.messageNotificationService.show(this.translate('File deleted successfully'), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to delete file');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to delete file'));
       }
     });
   }
@@ -502,7 +509,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isPdfExporting = false;
-        this.messageNotificationService.show(err?.message || 'Failed to export PDF');
+        this.messageNotificationService.show(err?.message || this.translate('Failed to export PDF'));
       }
     });
   }
@@ -568,10 +575,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   getShareConfirmationMessage(): string {
     if (this.pendingShareAction === 'create') {
-      return 'Creating a share link will allow anyone with the link to access this case report until the link expires. Do you want to continue?';
+      return this.translate('Creating a share link will allow anyone with the link to access this case report until the link expires. Do you want to continue?');
     }
     if (this.pendingShareAction === 'revoke') {
-      return 'Revoking share links will expire all previously shared links for this case. Do you want to continue?';
+      return this.translate('Revoking share links will expire all previously shared links for this case. Do you want to continue?');
     }
     return '';
   }
@@ -591,11 +598,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         if (this.caseData) {
           this.caseData.isArchived = true;
         }
-        this.messageNotificationService.show('Case archived successfully', 'success');
+        this.messageNotificationService.show(this.translate('Case archived successfully'), 'success');
       },
       error: err => {
         this.isArchivingCase = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to archive case');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to archive case'));
       }
     });
   }
@@ -617,11 +624,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
           this.caseData.archivedAt = undefined;
           this.caseData.archivedBy = '';
         }
-        this.messageNotificationService.show('Case unarchived successfully', 'success');
+        this.messageNotificationService.show(this.translate('Case unarchived successfully'), 'success');
       },
       error: err => {
         this.isArchivingCase = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to unarchive case');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to unarchive case'));
       }
     });
   }
@@ -647,7 +654,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isShareCreating = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to create share link');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to create share link'));
       }
     });
   }
@@ -660,11 +667,11 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.caseService.revokeCaseShares(this.caseData.caseId).subscribe({
       next: result => {
         this.isShareRevoking = false;
-        this.messageNotificationService.show(`${result.revokedCount || 0} share links revoked.`, 'success');
+        this.messageNotificationService.show(this.translate('{count} share links revoked.').replace('{count}', String(result.revokedCount || 0)), 'success');
       },
       error: err => {
         this.isShareRevoking = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to revoke share links');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to revoke share links'));
       }
     });
   }
@@ -864,10 +871,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   getCloseCaseTooltip(): string {
     if (this.canCloseCase()) {
-      return 'Close case';
+      return this.translate('Close case');
     }
 
-    return 'Case cannot be closed until it reaches Resolved status';
+    return this.translate('Case cannot be closed until it reaches Resolved status');
   }
 
   openCloseCase(): void {
@@ -879,7 +886,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.canCloseCase()) {
-      this.messageNotificationService.show('Case cannot be closed until it reaches Resolved status');
+      this.messageNotificationService.show(this.translate('Case cannot be closed until it reaches Resolved status'));
       return;
     }
 
@@ -929,10 +936,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.editedCase = null;
         this.cancelAllSectionModes();
 
-        this.messageNotificationService.show(successMessage, 'success');
+        this.messageNotificationService.show(this.translate(successMessage), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to save changes');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to save changes'));
       }
     });
   }
@@ -946,7 +953,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.editedCase.title.trim()) {
-      this.messageNotificationService.show('Case title is required');
+      this.messageNotificationService.show(this.translate('Case title is required'));
       return;
     }
 
@@ -971,7 +978,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const primaryEntity = ensurePrimaryEntity(this.editedCase);
 
     if (!primaryEntity.value.trim()) {
-      this.messageNotificationService.show('Primary entity value is required');
+      this.messageNotificationService.show(this.translate('Primary entity value is required'));
       return;
     }
 
@@ -999,7 +1006,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       || (entity.source === 'other' && !entity.entitySourceOtherValue?.trim()));
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Related entity ${invalidIndex + 1} is invalid`);
+      this.messageNotificationService.show(this.translate('Related entity {index} is invalid').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1015,7 +1022,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newRelatedEntity.value.trim()) {
-      this.messageNotificationService.show('Related entity value is required');
+      this.messageNotificationService.show(this.translate('Related entity value is required'));
       return;
     }
 
@@ -1048,7 +1055,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       || (artifact.type === 'report' && (!artifact.linkedReportSource || !artifact.linkedReportId)));
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Artifact ${invalidIndex + 1} is invalid`);
+      this.messageNotificationService.show(this.translate('Artifact {index} is invalid').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1064,7 +1071,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newArtifact.title.trim()) {
-      this.messageNotificationService.show('Artifact title is required');
+      this.messageNotificationService.show(this.translate('Artifact title is required'));
       return;
     }
 
@@ -1077,17 +1084,17 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (this.newArtifact.type === 'url_capture' && !this.newArtifact.url?.trim()) {
-      this.messageNotificationService.show('URL is required');
+      this.messageNotificationService.show(this.translate('URL is required'));
       return;
     }
 
     if (this.newArtifact.type === 'report' && (!this.newArtifact.linkedReportSource || !this.newArtifact.linkedReportId)) {
-      this.messageNotificationService.show('Please select a report');
+      this.messageNotificationService.show(this.translate('Please select a report'));
       return;
     }
 
     if ((this.newArtifact.type === 'screenshot' || this.newArtifact.type === 'file') && !this.pendingNewArtifactFiles.length) {
-      this.messageNotificationService.show('Please select at least one file');
+      this.messageNotificationService.show(this.translate('Please select at least one file'));
       return;
     }
 
@@ -1123,12 +1130,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
               this.pendingNewArtifactFileInput = null;
               this.cancelAllSectionModes();
 
-              this.messageNotificationService.show('Artifact added successfully', 'success');
+              this.messageNotificationService.show(this.translate('Artifact added successfully'), 'success');
             },
             error: err => {
               this.pendingNewArtifactFiles = [];
               this.pendingNewArtifactFileInput = null;
-              this.messageNotificationService.show(err?.error?.detail || err?.message || 'Artifact saved, but file upload failed');
+              this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Artifact saved, but file upload failed'));
             }
           });
 
@@ -1139,10 +1146,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.pendingNewArtifactFileInput = null;
         this.cancelAllSectionModes();
 
-        this.messageNotificationService.show('Artifact added successfully', 'success');
+        this.messageNotificationService.show(this.translate('Artifact added successfully'), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'Failed to add artifact');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to add artifact'));
       }
     });
   }
@@ -1155,7 +1162,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const invalidIndex = (this.editedCase.tasks || []).findIndex(task => !task.title.trim());
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Task ${invalidIndex + 1} title is required`);
+      this.messageNotificationService.show(this.translate('Task {index} title is required').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
@@ -1179,7 +1186,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       });
 
       if (invalidTask) {
-        this.messageNotificationService.show('Analysts can only update their assigned task status to In Progress or Under Review');
+        this.messageNotificationService.show(this.translate('Analysts can only update their assigned task status to In Progress or Under Review'));
         return;
       }
     }
@@ -1193,7 +1200,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newTask.title.trim()) {
-      this.messageNotificationService.show('Task title is required');
+      this.messageNotificationService.show(this.translate('Task title is required'));
       return;
     }
 
@@ -1216,12 +1223,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     const invalidIndex = linkedCases.findIndex(link => !link.targetCaseId);
 
     if (invalidIndex >= 0) {
-      this.messageNotificationService.show(`Linked case ${invalidIndex + 1} target case is required`);
+      this.messageNotificationService.show(this.translate('Linked case {index} target case is required').replace('{index}', String(invalidIndex + 1)));
       return;
     }
 
     if (this.hasDuplicateLinkedCases(linkedCases)) {
-      this.messageNotificationService.show('Same case cannot be linked more than once');
+      this.messageNotificationService.show(this.translate('Same case cannot be linked more than once'));
       return;
     }
 
@@ -1237,7 +1244,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.newLinkedCase.targetCaseId) {
-      this.messageNotificationService.show('Target case is required');
+      this.messageNotificationService.show(this.translate('Target case is required'));
       return;
     }
 
@@ -1245,7 +1252,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       .some(link => link.targetCaseId === this.newLinkedCase?.targetCaseId);
 
     if (alreadyLinked) {
-      this.messageNotificationService.show('This case is already linked');
+      this.messageNotificationService.show(this.translate('This case is already linked'));
       return;
     }
 
@@ -1264,7 +1271,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (this.newClosure.reason === 'other' && !this.newClosure.closureReasonOtherValue?.trim()) {
-      this.messageNotificationService.show('Other closure reason is required');
+      this.messageNotificationService.show(this.translate('Other closure reason is required'));
       return;
     }
 
@@ -1303,14 +1310,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isCommentSaving = false;
-        this.commentErrorMessage = err?.error?.detail || err?.message || 'Unable to save comment.';
+        this.commentErrorMessage = err?.error?.detail || err?.message || this.translate('Unable to save comment.');
       }
     });
   }
 
   getAnalystLabel(userId?: string): string {
     if (!userId) {
-      return 'Unassigned';
+      return this.translate('Unassigned');
     }
 
     const analyst = [
@@ -1384,7 +1391,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   verifyArtifactFile(artifact: CaseArtifact, fileId: string): void {
     if (!this.canManageCases()) {
-      this.messageNotificationService.show('Analysts cannot verify artifact files');
+      this.messageNotificationService.show(this.translate('Analysts cannot verify artifact files'));
       return;
     }
     if (!this.caseData || !artifact.artifactId) {
@@ -1394,12 +1401,12 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.caseService.verifyArtifactFile(this.caseData.caseId, artifact.artifactId, fileId).subscribe({
       next: result => {
         this.setArtifactFileStatus(artifact, fileId, result.status);
-        this.messageNotificationService.show(result.success ? 'File integrity verified' : 'File integrity check failed',
+        this.messageNotificationService.show(this.translate(result.success ? 'File integrity verified' : 'File integrity check failed'),
           result.success ? 'success' : undefined);
       },
       error: err => {
         this.setArtifactFileStatus(artifact, fileId, 'failed');
-        this.messageNotificationService.show(err?.error?.detail || err?.message || 'File integrity check failed');
+        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('File integrity check failed'));
       }
     });
   }
@@ -1417,7 +1424,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
   private validateOtherValue(value: string | undefined | null, otherValue: string | undefined | null, message: string): boolean {
     if (value === 'other' && !otherValue?.trim()) {
-      this.messageNotificationService.show(message);
+      this.messageNotificationService.show(this.translate(message));
       return false;
     }
     return true;
@@ -1437,18 +1444,18 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (existingFileCount + files.length > this.maxArtifactFiles) {
-      this.messageNotificationService.show(`Maximum ${this.maxArtifactFiles} files can be attached to an artifact`);
+      this.messageNotificationService.show(this.translate('Maximum {count} files can be attached to an artifact').replace('{count}', String(this.maxArtifactFiles)));
       return false;
     }
 
     for (const file of files) {
       if (artifact.type === 'screenshot' && file.type !== 'image/png') {
-        this.messageNotificationService.show('Screenshots must be PNG images');
+        this.messageNotificationService.show(this.translate('Screenshots must be PNG images'));
         return false;
       }
 
       if (artifact.type === 'file' && !this.artifactAllowedFileTypes.includes(file.type)) {
-        this.messageNotificationService.show('Allowed file types: PDF, JPG, PNG, TXT, DOCX');
+        this.messageNotificationService.show(this.translate('Allowed file types: PDF, JPG, PNG, TXT, DOCX'));
         return false;
       }
     }
@@ -1461,7 +1468,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return true;
     }
 
-    this.messageNotificationService.show('Analysts can only edit tasks and comments');
+    this.messageNotificationService.show(this.translate('Analysts can only edit tasks and comments'));
     return false;
   }
 }

@@ -35,40 +35,12 @@ export function getBearingDegrees(fromLat: number, fromLon: number, toLat: numbe
   return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
 }
 
-export function getGridBucketKey(latitude: number, longitude: number): string {
-  return `grid:${Math.floor((latitude + 90) / 10)}:${Math.floor((longitude + 180) / 10)}`;
-}
-
 export function stableHash(key: string): number {
   let hash = 0;
   for (let i = 0; i < key.length; i++) {
     hash = ((hash << 5) - hash + key.charCodeAt(i)) | 0;
   }
   return hash;
-}
-
-export function sampleByBucket<T>(items: T[], ratio: number, getBucketKey: (item: T) => string, getStableKey: (item: T) => string): T[] {
-  const buckets = new Map<string, T[]>();
-
-  items.forEach(item => {
-    const bucketKey = getBucketKey(item);
-    const bucketItems = buckets.get(bucketKey) ?? [];
-    bucketItems.push(item);
-    buckets.set(bucketKey, bucketItems);
-  });
-
-  const sampled: T[] = [];
-  buckets.forEach(bucketItems => {
-    const keepCount = Math.max(1, Math.ceil(bucketItems.length * ratio));
-    if (keepCount >= bucketItems.length) {
-      sampled.push(...bucketItems);
-      return;
-    }
-
-    sampled.push(...bucketItems.slice().sort((left, right) => stableHash(getStableKey(left)) - stableHash(getStableKey(right))).slice(0, keepCount));
-  });
-
-  return sampled;
 }
 
 export function getResponseStatus(res: any): string | undefined {

@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
@@ -9,20 +9,24 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/components/ui-dropdown/ui-dropdown.component';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { search_filter_labels } from '../../../../shared/constants/shared-enums';
-import { TenantIocSelectorComponent } from '../../../../shared/components/tenant-ioc-selector/tenant-ioc-selector.component';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { AppService } from '../../../../services/core/app/app.service';
+import { TenantIocDrawerContentComponent } from './tenant-ioc-drawer-content/tenant-ioc-drawer-content.component';
 
 @Component({
   selector: 'app-view-tenant',
   standalone: true,
-  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent, TenantIocSelectorComponent, ConfirmationPopupComponent],
+  imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent, TenantIocDrawerContentComponent, ConfirmationPopupComponent],
   animations: [fadeInDashboardItem],
+  changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './view-tenant.component.html',
 })
 export class ViewTenantComponent implements OnInit {
+  private isIocSelectorClosing = false;
+
   protected readonly JSON = JSON;
 
   tenants: any[] = [];
@@ -32,11 +36,12 @@ export class ViewTenantComponent implements OnInit {
   selectedTenantId: string | null = null;
   TenantStatus = TenantStatusValues;
   isIocSelectorOpen = false;
+  isIocSelectorDrawerOpen = false;
   activeIocTenant: any | null = null;
   iocDraft: IocCategory[] = [];
   tenantToDelete: any | null = null;
 
-  constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService) {
+  constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService, private translationService: TranslationService) {
   }
 
   get tenantLicenseOptions(): UiDropdownOption[] {
@@ -94,13 +99,14 @@ export class ViewTenantComponent implements OnInit {
   }
 
   getStatusLabel(status: TenantStatus): string {
+    this.translationService.version();
     switch (status) {
       case TenantStatusValues.ONBOARDING:
-        return 'Disable';
+        return this.translationService.translate('Disable');
       case TenantStatusValues.ACTIVE:
-        return 'Active';
+        return this.translationService.translate('Active');
       case TenantStatusValues.DISABLE:
-        return 'Disable';
+        return this.translationService.translate('Disable');
       default:
         return '';
     }
@@ -203,6 +209,22 @@ export class ViewTenantComponent implements OnInit {
     return (tenant?.iocs || []).reduce((total: number, ioc: IocCategory) => total + (ioc.values?.length || 0), 0);
   }
 
+  getTenantIocPreview(tenant: any): string[] {
+    const preview: string[] = [];
+    for (const ioc of tenant?.iocs || []) {
+      for (const value of ioc.values || []) {
+        const normalized = String(value).trim();
+        if (normalized) {
+          preview.push(normalized);
+        }
+        if (preview.length === 5) {
+          return preview;
+        }
+      }
+    }
+    return preview;
+  }
+
   openIocSelector(tenant: any, event?: Event): void {
     event?.stopPropagation();
     if (!this.canManageTenantIocs(tenant)) {
@@ -210,13 +232,25 @@ export class ViewTenantComponent implements OnInit {
     }
     this.activeIocTenant = tenant;
     this.iocDraft = this.buildIocDraft(tenant.iocs || []);
+    this.isIocSelectorClosing = false;
     this.isIocSelectorOpen = true;
+    setTimeout(() => {
+      this.isIocSelectorDrawerOpen = true;
+    }, 10);
   }
 
   closeIocSelector(): void {
-    this.isIocSelectorOpen = false;
-    this.activeIocTenant = null;
-    this.iocDraft = [];
+    if (this.isIocSelectorClosing) {
+      return;
+    }
+    this.isIocSelectorClosing = true;
+    this.isIocSelectorDrawerOpen = false;
+    setTimeout(() => {
+      this.isIocSelectorOpen = false;
+      this.activeIocTenant = null;
+      this.iocDraft = [];
+      this.isIocSelectorClosing = false;
+    }, 300);
   }
 
   buildIocDraft(existingIocs: IocCategory[]): IocCategory[] {
@@ -269,7 +303,7 @@ export class ViewTenantComponent implements OnInit {
 
   getTenantLicensesLabel(tenant: any): string {
     if (!tenant.licenses || tenant.licenses.length === 0) {
-      return 'None';
+      return this.translationService.translate('None');
     }
     return tenant.licenses
       .map((l: LicenseName) => this.licenseService.getLicenseLabel(l))
@@ -277,38 +311,23 @@ export class ViewTenantComponent implements OnInit {
   }
 
   getTenantStatusBadgeClass(status: TenantStatus): string {
-    const isLightTheme = document.body.classList.contains('light-theme');
     if (status === TenantStatusValues.ACTIVE) {
-      return isLightTheme
-        ? 'bg-emerald-100 text-emerald-800'
-        : 'bg-emerald-500/10 text-emerald-300';
+      return 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800';
     }
-    return isLightTheme
-      ? 'bg-rose-100 text-rose-800'
-      : 'bg-rose-500/10 text-rose-300';
+    return 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800';
   }
 
   getSubscriptionBadgeClass(subscription?: boolean): string {
-    const isLightTheme = document.body.classList.contains('light-theme');
     if (subscription) {
-      return isLightTheme
-        ? 'bg-sky-100 text-sky-800'
-        : 'bg-sky-500/10 text-sky-300';
+      return 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800';
     }
-    return isLightTheme
-      ? 'bg-slate-100 text-slate-700'
-      : 'bg-slate-500/10 text-slate-300';
+    return 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700';
   }
 
   getVerifiedBadgeClass(verified?: boolean): string {
-    const isLightTheme = document.body.classList.contains('light-theme');
     if (verified) {
-      return isLightTheme
-        ? 'bg-sky-100 text-sky-800'
-        : 'bg-sky-500/10 text-sky-300';
+      return 'bg-sky-500/10 text-sky-300 [body.light-theme_&]:bg-sky-100 [body.light-theme_&]:text-sky-800';
     }
-    return isLightTheme
-      ? 'bg-rose-100 text-rose-800'
-      : 'bg-rose-500/10 text-rose-300';
+    return 'bg-amber-500/10 text-amber-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800';
   }
 }
