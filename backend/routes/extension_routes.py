@@ -148,10 +148,9 @@ async def extension_socket(websocket: WebSocket):
             try:
                 text = await asyncio.wait_for(websocket.receive_text(), timeout=5)
             except TimeoutError:
-                revalidated = await extension_user_from_token(token)
-                if not revalidated or str(revalidated.id) != user_key:
-                    await websocket.close()
-                    return
+                # The socket was authenticated at connect via the ws-ticket; keep it alive
+                # for the connection's lifetime instead of re-validating the token every 5s
+                # (which the web session competes for and would close the socket repeatedly).
                 await socket_manager.touch_socket(user_key, socket_id)
                 continue
 
