@@ -1,4 +1,4 @@
-export type ExtensionState = 'checking' | 'ready' | 'signin' | 'install' | 'update' | 'unsupported';
+export type ExtensionState = 'checking' | 'ready' | 'signin' | 'install' | 'unsupported';
 
 export interface ExtensionPresence {
   source?: string;

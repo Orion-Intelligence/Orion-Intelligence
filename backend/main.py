@@ -1,5 +1,4 @@
 import asyncio
-import mimetypes
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -35,7 +34,6 @@ from routes.case_routes import case_routes
 
 BASE_DIR = Path(__file__).resolve().parent
 ANGULAR_BUILD_DIR = BASE_DIR / "workspace" / "build"
-EXTENSION_BUILD_DIR = BASE_DIR / "workspace" / "extension"
 SWAGGER_STATIC_DIR = BASE_DIR / "static"
 
 
@@ -64,10 +62,7 @@ async def lifespan(p_app: FastAPI):
 app = FastAPI(title="API Access", lifespan=lifespan, docs_url=None, redoc_url=None)
 setup_middlewares(app)
 
-mimetypes.add_type("application/x-chrome-extension", ".crx")
-mimetypes.add_type("application/x-xpinstall", ".xpi")
 app.mount("/assets", StaticFiles(directory=ANGULAR_BUILD_DIR / "assets"), name="assets")
-app.mount("/extensions", StaticFiles(directory=EXTENSION_BUILD_DIR), name="extensions")
 app.mount("/swagger-static", StaticFiles(directory=SWAGGER_STATIC_DIR), name="swagger-static")
 
 

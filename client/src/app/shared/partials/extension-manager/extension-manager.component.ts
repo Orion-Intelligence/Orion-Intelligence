@@ -14,18 +14,14 @@ export class SocialExtensionManagerComponent {
   private readonly extensionService = inject(SocialExtensionService);
 
   readonly mode = input<ExtensionState>('install');
-  readonly installSteps = ['Choose Firefox or Chromium and approve the browser installation prompt.', 'Orion keeps the installed extension updated automatically.', 'This profile loads automatically once the extension is installed.'];
+  readonly installSteps = ['Add the Orion extension to Firefox or Chrome from the browser add-on store.', 'Your browser keeps the extension updated automatically.', 'This profile loads automatically once the extension is installed and signed in.'];
 
   open(): void {
     this.extensionService.openExtension();
   }
 
-  latestVersion(): string {
-    return this.extensionService.latestVersion();
-  }
-
-  downloadUrl(browser: 'chrome' | 'firefox'): string {
-    return this.extensionService.downloadUrl(browser);
+  storeUrl(browser: 'chrome' | 'firefox'): string {
+    return this.extensionService.storeUrl(browser);
   }
 
   browserUrl(browser: 'chromium' | 'firefox'): string {

@@ -49,8 +49,6 @@ export class ExtensionPrivacyComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   ngOnInit() {
-    // A public legal page reads best as a clean white document, so force the light theme here
-    // regardless of the visitor's app theme, and restore their theme when they leave.
     this.previousTheme = document.body.classList.contains('dark-theme')
       ? 'dark-theme'
       : document.body.classList.contains('light-theme')

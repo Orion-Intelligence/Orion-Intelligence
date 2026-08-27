@@ -21,18 +21,18 @@ import {
   visitWithoutExtension
 } from './controllers/08-social-extension.controller';
 
-function scanUsername(username = SOCIAL_USERNAME) {
+function scanUsername(username = SOCIAL_USERNAME, platform: string | RegExp = SOCIAL_PLATFORM) {
   cy.get('[data-testid="social-scan-input"]').clear().type(username);
   cy.get('[data-testid="social-scan-submit"]').should('not.be.disabled').click();
   cy.wait('@socialRecon', { timeout: FETCH_TIMEOUT });
   cy.contains('[data-testid="social-history-job"]', username, { timeout: SCAN_TIMEOUT })
     .should('contain.text', 'Results Ready')
     .click();
-  cy.contains(PLATFORM_CARD, SOCIAL_PLATFORM, { timeout: FETCH_TIMEOUT }).scrollIntoView().should('be.visible');
+  cy.contains(PLATFORM_CARD, platform, { timeout: FETCH_TIMEOUT }).scrollIntoView().should('be.visible');
 }
 
-function openProfile() {
-  cy.contains(PLATFORM_CARD, SOCIAL_PLATFORM, { timeout: FETCH_TIMEOUT }).scrollIntoView().within(() => {
+function openProfile(platform: string | RegExp = SOCIAL_PLATFORM) {
+  cy.contains(PLATFORM_CARD, platform, { timeout: FETCH_TIMEOUT }).scrollIntoView().within(() => {
     cy.get('[data-testid="social-profile-overview-button"]').click();
   });
   cy.get('[data-testid="social-header-back"]').should('be.visible');
@@ -149,6 +149,51 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     cy.contains(PLATFORM_CARD, /telegram/i, { timeout: FETCH_TIMEOUT }).should('be.visible');
     cy.get('[data-testid="social-result-source-tabs"]').contains('button', 'Normal').click();
     cy.contains(PLATFORM_CARD, SOCIAL_PLATFORM, { timeout: FETCH_TIMEOUT }).should('be.visible');
+  });
+
+  it('queries stealer logs only for the username on the opened profile', () => {
+    const scanUsernameValue = 'investigation_root';
+    const openedUsername = 'opened_profile_handle';
+    cy.intercept('POST', '**/api/social/recon', {
+      statusCode: 200,
+      body: {
+        job_id: 'cypress',
+        result: [{
+          id: `youtube:${openedUsername}`,
+          meta: { platform: 'YouTube', username: openedUsername, url: `https://www.youtube.com/@${openedUsername}`, status: 'active' },
+          profile_details: { real_name: 'Opened Profile', is_parsed: true },
+          stealer_logs: [{ m_username: 'wrong_cached_handle', m_domain: 'youtube.com' }],
+          exposure_signals: { query: scanUsernameValue, records: [{ m_username: 'wrong_cached_handle', m_domain: 'youtube.com' }] },
+        }],
+      },
+    }).as('socialRecon');
+    cy.intercept('POST', '**/api/search/stealer/ioc', (request) => {
+      request.reply({
+        statusCode: 200,
+        body: { Result: [{ m_username: request.body.user, m_domain: 'unrelated.example', m_password: '********' }] },
+      });
+    }).as('socialStealerLogs');
+
+    scanUsername(scanUsernameValue, /youtube/i);
+    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
+      expect(request.body.ioc).to.eq(`m_username:${scanUsernameValue}`);
+      expect(request.body.user).to.eq(scanUsernameValue);
+      expect(request.body.url).to.eq('');
+    });
+
+    openProfile(/youtube/i);
+    clickTab('stealerLogs');
+    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
+      expect(request.body.ioc).to.eq(`m_username:${openedUsername}`);
+      expect(request.body.user).to.eq(openedUsername);
+      expect(request.body.url).to.eq('');
+      expect(request.body.ioc).not.to.contain('m_domain');
+      expect(request.body.ioc).not.to.contain('youtube.com');
+    });
+    cy.get('[data-testid="social-stealerlog-row"]', { timeout: FETCH_TIMEOUT })
+      .should('contain.text', openedUsername)
+      .and('contain.text', 'unrelated.example')
+      .and('not.contain.text', 'wrong_cached_handle');
   });
 
   it('covers the scan history panel, phone intelligence and a failed scan retry', () => {

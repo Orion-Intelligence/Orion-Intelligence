@@ -317,7 +317,7 @@ export class SocialProfileListingComponent {
       if (state === 'checking') {
         indeterminateMisses += 1;
         const previous = this.extensionState();
-        if ((previous === 'ready' || previous === 'update' || previous === 'signin') && indeterminateMisses < 3) {
+        if ((previous === 'ready' || previous === 'signin') && indeterminateMisses < 3) {
           return;
         }
         this.extensionState.set(indeterminateMisses >= 3 ? 'install' : 'checking');
@@ -500,11 +500,7 @@ export class SocialProfileListingComponent {
   }
 
   isExtensionReady(): boolean {
-    return this.extensionState() === 'ready' || this.extensionState() === 'update';
-  }
-
-  extensionUpdateUrl(): string {
-    return this.extensionService.downloadUrl(/firefox/i.test(navigator.userAgent) ? 'firefox' : 'chrome');
+    return this.extensionState() === 'ready';
   }
 
   private fetchProfileDetails(platformData: social_profile): void {

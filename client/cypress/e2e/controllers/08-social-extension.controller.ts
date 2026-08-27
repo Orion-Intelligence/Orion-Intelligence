@@ -13,14 +13,16 @@ export function assertInstallPrompt() {
   cy.get(MANAGER, { timeout: TIMEOUT })
     .should('be.visible')
     .and('contain.text', 'Orion extension required')
-    .and('contain.text', 'Install the signed Firefox or Chromium package');
+    .and('contain.text', 'Install the Orion extension from your browser');
   cy.get('[data-testid="social-extension-open"]').should('not.exist');
   cy.get('[data-testid="social-extension-download-firefox"]')
     .should('contain.text', 'Install for Firefox')
-    .and('have.attr', 'href', '/extensions/orion-extension-firefox.xpi');
+    .and('have.attr', 'href', 'https://addons.mozilla.org/en-US/firefox/addon/orion-social/')
+    .and('have.attr', 'target', '_blank');
   cy.get('[data-testid="social-extension-download-chrome"]')
-    .should('contain.text', 'Install for Chromium')
-    .and('have.attr', 'href', '/extensions/orion-extension-chromium.crx');
+    .should('contain.text', 'Install for Chrome')
+    .and('have.attr', 'href', 'https://addons.mozilla.org/en-US/firefox/addon/orion-social/')
+    .and('have.attr', 'target', '_blank');
   cy.get(MANAGER).find('a[data-testid^="social-extension-download-"]').first()
     .should('have.attr', 'data-testid', 'social-extension-download-firefox');
   cy.get(MANAGER).find('ol li').should('have.length', 3);

@@ -172,12 +172,6 @@
           @if (activeUser(); as user) {
             @if (activeProfilePlatform(); as platformData) {
               @if (isExtensionReady()) {
-                @if (extensionState() === 'update') {
-                  <div class="ext-state-fade mb-2 flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
-                    <span class="text-[11px] text-[var(--color-text2)]"><i class="bi bi-arrow-up-circle me-1" aria-hidden="true"></i>{{ 'A newer Orion extension is available.' | translate }}</span>
-                    <a [href]="extensionUpdateUrl()" class="inline-flex h-7 items-center justify-center rounded-[6px] bg-[var(--color-blue-640)] px-3 text-[11px] font-semibold text-white transition hover:brightness-110">{{ 'Update' | translate }}</a>
-                  </div>
-                }
                 <app-social-profile-tabs-section
                   [user]="user"
                   [platformData]="platformData"

@@ -3,7 +3,6 @@ import binascii
 import hashlib
 import re
 import secrets
-from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 from datetime import UTC, datetime
 from typing import Any
@@ -11,7 +10,7 @@ from typing import Any
 import httpx
 import jwt
 from fastapi import HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import JSONResponse
 
 from configs.auth_cookie import token_from_request
 from orion.constants.constant import CONSTANTS
@@ -398,27 +397,6 @@ class social_model:
 
     async def search_metadata(self, param, current_user=None, request=None):
         return await self.social_search(param, "metadata", current_user, request)
-
-    EXTENSION_RAW_DIR = Path(__file__).resolve().parents[4] / "workspace" / "extension"
-
-    async def extension_version(self):
-        from orion.api.server.config_manager.config_controller import config_controller
-        from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys
-
-        version = config_controller.getInstance().get(AllowedKeys.EXTENSION_VERSION.value, "") or ""
-        return {"chrome": version, "firefox": version}
-
-    async def extension_download(self, browser: str = "chrome"):
-        target = "firefox" if browser.strip().lower() in {"firefox", "mozilla"} else "chrome"
-        if target == "firefox":
-            signed_path = self.EXTENSION_RAW_DIR / "orion-extension-firefox.xpi"
-            if signed_path.is_file():
-                return FileResponse(signed_path, media_type="application/x-xpi", headers={"Cache-Control": "no-store", "Content-Disposition": f'inline; filename="{signed_path.name}"'})
-        filename = f"orion-extension-{target}.zip"
-        file_path = self.EXTENSION_RAW_DIR / filename
-        if not file_path.is_file():
-            return JSONResponse(status_code=404, content={"detail": "Extension package not found"})
-        return FileResponse(file_path, media_type="application/zip", filename=filename, headers={"Cache-Control": "no-store"})
 
     def decode_image_payload(self, image_base64: Any) -> bytes:
         if not isinstance(image_base64, str):
