@@ -35,7 +35,12 @@ export class SocialExtensionService {
         // No presence has arrived this probe -> indeterminate, not "not installed".
         // A slow round-trip (e.g. the page is busy crawling) must never flash the install/connect gate.
         if (!installed) {
-          finish('checking');
+          // No presence this probe. The content script stamps the page on load, so its absence means the
+          // extension is genuinely removed -> conclude 'install' fast (no long loader on an obvious case).
+          // If it IS stamped, the extension is present but slow to answer -> stay indeterminate ('checking').
+          const stamped = typeof document !== 'undefined'
+            && document.documentElement?.getAttribute('data-orion-extension') === 'installed';
+          finish(stamped ? 'checking' : 'install');
           return;
         }
         if (connected && this.outdated(this.installedVersion)) {
