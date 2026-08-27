@@ -49,13 +49,19 @@ export class SocialFetchService {
   }
 
   fetchStealerLogsByIdentity(query: string): Observable<social_stealer_log[]> {
-    const payload = { daterange: '', q: '', url: '', user: query, ioc: `m_search_all:${query}`, type: 'c', page: 1, category: '', fullsearch: false };
-    return this.api.post<any>('search/stealer/ioc', payload).pipe(map(response => response?.Result ?? response?.result?.Result ?? response?.data?.Result ?? []),
-      catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
+    return this.fetchStealerLogsByUsername(query);
   }
 
-  fetchPlatformStealerLogs(username: string, domain: string): Observable<social_stealer_log[]> {
-    const payload = { daterange: '', q: '', url: domain || '', user: username, ioc: domain ? `m_username:${username} AND m_domain:${domain}` : `m_search_all:${username}`, type: 'c', page: 1, category: '', fullsearch: false };
+  fetchPlatformStealerLogs(username: string): Observable<social_stealer_log[]> {
+    return this.fetchStealerLogsByUsername(username);
+  }
+
+  private fetchStealerLogsByUsername(username: string): Observable<social_stealer_log[]> {
+    const normalizedUsername = username.trim().replace(/^@+/, '');
+    if (!normalizedUsername) {
+      return of([]);
+    }
+    const payload = { daterange: '', q: '', url: '', user: normalizedUsername, ioc: `m_username:${normalizedUsername}`, type: 'c', page: 1, category: '', fullsearch: false };
     return this.api.post<any>('search/stealer/ioc', payload).pipe(map(response => response?.Result ?? response?.result?.Result ?? response?.data?.Result ?? []),
       catchError(() => throwError(() => new Error('Failed to fetch stealer logs'))));
   }

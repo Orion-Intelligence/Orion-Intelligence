@@ -216,7 +216,10 @@ export class SocialProfileListingComponent {
       return this.profileFetchTabs;
     }
     const crawlTabs: FetchTab[] = types.map(type => ({ key: type as FetchTabKey, label: type.charAt(0).toUpperCase() + type.slice(1), icon: type === 'details' ? 'bi bi-person-badge' : 'bi bi-collection' }));
-    return [...crawlTabs, this.connectionsTab, this.onlinePresenceTab, this.stealerLogsTab];
+    // "details" is a universal profile tab, not a crawl content type, so crawl_type usually omits it.
+    // Keep it present (and first) so the active details tab never vanishes mid-load and bounces the user to posts.
+    const withDetails = crawlTabs.some(tab => tab.key === 'details') ? crawlTabs : [this.detailsTab, ...crawlTabs];
+    return [...withDetails, this.connectionsTab, this.onlinePresenceTab, this.stealerLogsTab];
   }
 
   crawlResultFor(platformData: social_profile, type: FetchTabKey): CrawlResultView {
@@ -299,7 +302,7 @@ export class SocialProfileListingComponent {
   }
 
   private fetchTabData(platformData: social_profile, tabKey: FetchTabKey): void {
-    if (this.hasTabData(platformData, tabKey) && !this.isTabLoading(platformData, tabKey)) {
+    if (tabKey !== 'stealerLogs' && this.hasTabData(platformData, tabKey) && !this.isTabLoading(platformData, tabKey)) {
       return;
     }
     this.refetchTabData(platformData, tabKey);
@@ -533,8 +536,7 @@ export class SocialProfileListingComponent {
   private fetchStealerLogs(platformData: social_profile): void {
     this.cancelFetch(platformData, 'stealerLogs');
     const username = platformData.meta.username;
-    const domain = this.getPlatformDomain(platformData);
-    this.fetchData(platformData, 'stealerLogs', this.fetchService.fetchPlatformStealerLogs(username, domain).pipe(map(stealerLogs => ({ stealerLogs }))));
+    this.fetchData(platformData, 'stealerLogs', this.fetchService.fetchPlatformStealerLogs(username).pipe(map(stealerLogs => ({ stealerLogs }))));
   }
 
   private fetchData(platformResult: social_profile, stateKey: FetchStateKey, request$: Observable<unknown>): void {
@@ -640,10 +642,6 @@ export class SocialProfileListingComponent {
       return;
     }
     this.fetchProfileDetails(platformData);
-  }
-
-  private getPlatformDomain(platformData: social_profile): string {
-    return platformData.meta.url || platformData.meta.platform;
   }
 
   private setFetchedPlatformData(platformResult: social_profile, stateKey: FetchStateKey, response: unknown): void {

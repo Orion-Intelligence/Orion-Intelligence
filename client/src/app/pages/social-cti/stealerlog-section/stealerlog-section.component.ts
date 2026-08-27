@@ -69,7 +69,7 @@ export class StealerlogSectionComponent implements OnDestroy {
       this.records.set(storedSignals?.records ?? []);
       this.errorMessage.set('');
 
-      if (!identity || storedSignals) {
+      if (!identity) {
         this.isLoading.set(false);
         return;
       }

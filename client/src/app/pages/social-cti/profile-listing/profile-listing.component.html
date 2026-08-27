@@ -171,7 +171,7 @@
         <div class="h-full min-h-0 flex-1 overflow-y-auto pr-1 [mask-image:linear-gradient(to_bottom,#000,#000_calc(100%-18px),transparent)] [mask-repeat:no-repeat] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           @if (activeUser(); as user) {
             @if (activeProfilePlatform(); as platformData) {
-              @if (isExtensionReady() || extensionState() === 'checking') {
+              @if (isExtensionReady()) {
                 @if (extensionState() === 'update') {
                   <div class="ext-state-fade mb-2 flex flex-wrap items-center justify-between gap-2 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 py-2">
                     <span class="text-[11px] text-[var(--color-text2)]"><i class="bi bi-arrow-up-circle me-1" aria-hidden="true"></i>{{ 'A newer Orion extension is available.' | translate }}</span>
@@ -199,6 +199,12 @@
                   (onlinePresenceSearch)="searchOnlinePresence(platformData)"
                   [crawlResult]="crawlResultFor(platformData, getActiveTabForPlatform(platformData))">
                 </app-social-profile-tabs-section>
+              } @else if (extensionState() === 'checking') {
+                <!-- Extension state not yet known: show a neutral loader, never the profile content or the
+                     install gate, so a logged-out / no-extension open can't flash details before the gate. -->
+                <div class="ext-state-fade flex min-h-[220px] items-center justify-center bg-[var(--color-blue-820-light)] px-4 py-8">
+                  <span class="h-6 w-6 animate-spin rounded-full border-2 border-[var(--color-blue-640)] border-t-transparent" aria-hidden="true"></span>
+                </div>
               } @else {
                 <div class="ext-state-fade" [attr.data-state]="extensionState()">
                   <app-social-extension-manager [mode]="extensionState()"></app-social-extension-manager>
