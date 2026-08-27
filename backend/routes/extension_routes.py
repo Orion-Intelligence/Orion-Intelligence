@@ -148,7 +148,8 @@ async def extension_socket(websocket: WebSocket):
             try:
                 text = await asyncio.wait_for(websocket.receive_text(), timeout=5)
             except TimeoutError:
-                if await socket_user_key(token) != user_key:
+                revalidated = await extension_user_from_token(token)
+                if not revalidated or str(revalidated.id) != user_key:
                     await websocket.close()
                     return
                 await socket_manager.touch_socket(user_key, socket_id)

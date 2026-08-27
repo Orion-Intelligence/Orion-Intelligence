@@ -102,7 +102,6 @@ class extension_socket_manager:
             return
         await self._store.put_result(result_key, {"error": EXTENSION_TIMEOUT_ERROR, "implemented": False, "items": []})
         await self._store.release_inflight(result_key)
-        await self.reset_sockets(user_key)
 
     async def reset_sockets(self, user_key: str) -> None:
         await self._close_local_sockets(user_key)
