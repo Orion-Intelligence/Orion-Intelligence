@@ -12,6 +12,7 @@ import { OnboardingGuard } from './shared/guards/onboarding-guard';
 import { NotificationGuard } from './shared/guards/notification.guard';
 const loadPhoneLookupComponent = () => import('./sections/api/phone-lookup/phone-lookup.component').then(m => m.PhoneLookupComponent);
 const loadLoginComponent = () => import('./pages/login/login.component').then(m => m.LoginComponent);
+const loadExtensionPrivacyComponent = () => import('./pages/legal/extension-privacy/extension-privacy.component').then(m => m.ExtensionPrivacyComponent);
 const loadSignupComponent = () => import('./pages/signup/signup.component').then(m => m.SignupComponent);
 const loadDashboardComponent = () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent);
 const loadHomepageComponent = () => import('./pages/homepage/homepage.component').then(m => m.HomepageComponent);
@@ -133,6 +134,16 @@ export const routes: Routes = [
     path: 'login',
     loadComponent: loadLoginComponent,
     data: { animation: 'LoginPage' }
+  },
+  {
+    path: 'privacy/extension',
+    loadComponent: loadExtensionPrivacyComponent,
+    data: { animation: 'ExtensionPrivacyPage' }
+  },
+  {
+    path: 'privacy',
+    redirectTo: 'privacy/extension',
+    pathMatch: 'full'
   },
   {
     path: 'case-share/:shareId',

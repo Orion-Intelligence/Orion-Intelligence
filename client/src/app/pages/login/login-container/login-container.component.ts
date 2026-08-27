@@ -20,7 +20,7 @@ import { isSignupHost } from '../../../shared/utils/auth-host.util';
 })
 export class LoginContainerComponent implements OnInit, OnDestroy {
   private static readonly DEFAULT_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
-  private static readonly DEFAULT_AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
+  private static readonly DEFAULT_AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_map.png';
   private authSubscription!: Subscription;
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
@@ -88,6 +88,11 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
 
   getDashboardPreviewSrc(): string {
     return this.appService.getConfig().appSettings.auth_dashboard_icon || LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
+  }
+
+  isDefaultDashboardPreview(): boolean {
+    const configuredPreview = this.appService.getConfig().appSettings.auth_dashboard_icon;
+    return !configuredPreview || configuredPreview.includes('auth_dashboard_icon_default.png');
   }
 
   isLightTheme(): boolean {

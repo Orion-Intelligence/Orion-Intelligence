@@ -365,7 +365,7 @@ else
 fi
 
 mkdir -p backend/workspace/parser/parser_files
-chmod -R a+rwX backend/workspace/parser/parser_files
+chmod -R a+rwX backend/workspace/parser/parser_files 2>/dev/null || true
 
 docker network create --driver bridge shared_bridge 2>/dev/null || true
 docker network create --driver bridge orion_nexus_backend 2>/dev/null || true

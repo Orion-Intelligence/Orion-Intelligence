@@ -5,7 +5,8 @@ import { bootstrapIconRegistry, BootstrapIconName } from './app/shared/icons/boo
 import '@angular/localize/init';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
-const AUTH_ICON_SRC = '/assets/images/shared/auth_dashboard_icon.svg';
+const AUTH_FRAME_SRC = '/assets/images/shared/auth_dashboard_frame_base.svg';
+const AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_map.png';
 const SEARCH_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
 const DEFAULT_DASHBOARD_LOGO_SRC = '/api/s/static/system/logo_wide_dark_default.png';
 const preloadImageHref = (href: string) => {
@@ -23,11 +24,8 @@ preload.rel = 'preload';
 preload.as = 'image';
 preload.href = PLACEHOLDER_SRC;
 document.head.prepend(preload);
-const preloadAuthIcon = document.createElement('link');
-preloadAuthIcon.rel = 'preload';
-preloadAuthIcon.as = 'image';
-preloadAuthIcon.href = AUTH_ICON_SRC;
-document.head.prepend(preloadAuthIcon);
+preloadImageHref(AUTH_FRAME_SRC);
+preloadImageHref(AUTH_DASHBOARD_SRC);
 const preloadSearchLogo = document.createElement('link');
 preloadSearchLogo.rel = 'preload';
 preloadSearchLogo.as = 'image';
@@ -36,8 +34,10 @@ document.head.prepend(preloadSearchLogo);
 preloadImageHref(DEFAULT_DASHBOARD_LOGO_SRC);
 const preloadPlaceholder = new Image();
 preloadPlaceholder.src = PLACEHOLDER_SRC;
-const preloadAuth = new Image();
-preloadAuth.src = AUTH_ICON_SRC;
+const preloadAuthFrame = new Image();
+preloadAuthFrame.src = AUTH_FRAME_SRC;
+const preloadAuthDashboard = new Image();
+preloadAuthDashboard.src = AUTH_DASHBOARD_SRC;
 const preloadSearch = new Image();
 preloadSearch.src = SEARCH_LOGO_SRC;
 const preloadDashboardLogo = new Image();
@@ -108,7 +108,8 @@ const mark = (img: HTMLImageElement) => {
     if (alt === 'background' ||
         src.endsWith('Bg.webp') ||
         src.endsWith('hint.svg') ||
-        src.endsWith('auth_dashboard_icon.svg') ||
+        src.endsWith('auth_dashboard_frame_base.svg') ||
+        src.endsWith('auth_dashboard_map.png') ||
         src.includes('search_nav_logo.png') ||
         img.classList.contains('auth-wrapper__image')) {
         return;
