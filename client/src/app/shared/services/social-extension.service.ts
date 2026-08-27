@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ExtensionPresence, ExtensionSession, ExtensionState } from '../model/extension/extension.model';
+import { ExtensionPresence, ExtensionState } from '../model/extension/extension.model';
 
 const LATEST_TTL_MS = 60_000;
 
@@ -21,7 +21,6 @@ export class SocialExtensionService {
       let settled = false;
       let installed = false;
       let connected = false;
-      let sessionSettled = false;
       let deadlineReached = false;
       let latestSettled = false;
 
@@ -41,24 +40,10 @@ export class SocialExtensionService {
         finish(connected ? 'ready' : installed ? 'signin' : 'install');
       };
       const resolveWhenProbesSettle = () => {
-        if (deadlineReached && sessionSettled && latestSettled) {
+        if (deadlineReached && latestSettled) {
           resolveState();
         }
       };
-
-      fetch('/api/extension/session', { credentials: 'include', cache: 'no-store' })
-        .then(response => (response.ok ? response.json() : null))
-        .then((body: ExtensionSession | null) => {
-          connected = body?.extension_connected === true;
-          if (connected && latestSettled) {
-            resolveState();
-          }
-        })
-        .catch(() => void 0)
-        .finally(() => {
-          sessionSettled = true;
-          resolveWhenProbesSettle();
-        });
 
       const onMessage = (event: MessageEvent) => {
         const data = event.data as ExtensionPresence;
@@ -66,8 +51,12 @@ export class SocialExtensionService {
           return;
         }
         installed = true;
+        connected = data.connected === true;
         if (typeof data.version === 'string' && data.version) {
           this.installedVersion = data.version;
+        }
+        if (connected && latestSettled) {
+          resolveState();
         }
         resolveWhenProbesSettle();
       };

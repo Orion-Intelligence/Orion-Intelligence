@@ -72,7 +72,7 @@ async def extension_login(request: Request, response: Response = None, username:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="login_failed")
 
     set_extension_cookie(response, access_token)
-    return {"detail": "Logged in"}
+    return {"detail": "Logged in", "access_token": access_token}
 
 
 @extension_routes.get("/api/extension/session")
@@ -97,7 +97,7 @@ async def extension_refresh(request: Request, response: Response = None):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="refresh_failed")
 
     set_extension_cookie(response, access_token)
-    return {"detail": "Refreshed"}
+    return {"detail": "Refreshed", "access_token": access_token}
 
 
 @extension_routes.post("/api/extension/logout")

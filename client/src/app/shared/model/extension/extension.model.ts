@@ -4,6 +4,7 @@ export interface ExtensionPresence {
   source?: string;
   type?: string;
   loggedIn?: boolean;
+  connected?: boolean;
   version?: string;
 }
 
