@@ -1,10 +1,13 @@
 import { Injectable } from '@angular/core';
 import { EMPTY, Observable, of, throwError, timer } from 'rxjs';
-import { catchError, expand, filter, map, switchMap, take } from 'rxjs/operators';
+import { catchError, expand, filter, map, scan, switchMap, take } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
 import { social_online_presence_hit } from '../models/social.models';
 import { social_stealer_log } from '../models/social.models';
 import { ApiEnvelope } from '../models/social-usability.models';
+const CRAWL_IDLE_RETRIES = 5;
+const EMPTY_CRAWL: { items?: unknown[]; error?: string; idle?: boolean; next_cursor?: string; has_more?: boolean; login_url?: string } = { idle: true };
+
 @Injectable({ providedIn: 'root' })
 export class SocialFetchService {
   constructor(private api: ApiService) {}
@@ -20,9 +23,19 @@ export class SocialFetchService {
         error: response?.error,
         login_url: response?.login_url,
       })),
-      filter(result => !result.pending),
+      scan((state: { result: typeof EMPTY_CRAWL; idles: number; done: boolean }, result) => {
+        if (result.pending) {
+          return { ...state, done: false };
+        }
+        if (result.idle) {
+          const idles = state.idles + 1;
+          return { result: { idle: true }, idles, done: idles >= CRAWL_IDLE_RETRIES };
+        }
+        return { result: { items: result.items, next_cursor: result.next_cursor, has_more: result.has_more, error: result.error, login_url: result.login_url }, idles: state.idles, done: true };
+      }, { result: EMPTY_CRAWL, idles: 0, done: false }),
+      filter(state => state.done),
       take(1),
-      map(result => result.idle ? { idle: true } : { items: result.items, next_cursor: result.next_cursor, has_more: result.has_more, error: result.error, login_url: result.login_url }),
+      map(state => state.result),
       catchError(() => of<{ items?: unknown[]; error?: string; idle?: boolean; next_cursor?: string; has_more?: boolean; login_url?: string }>({ items: [], error: 'crawl_failed' })));
   }
 
