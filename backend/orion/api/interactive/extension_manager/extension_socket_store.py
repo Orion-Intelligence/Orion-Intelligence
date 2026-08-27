@@ -10,6 +10,7 @@ from orion.api.interactive.extension_manager.constants.constant import (
     INFLIGHT_KEY,
     INFLIGHT_TTL_SECONDS,
     REQUEST_KEY,
+    REQUEST_PAYLOAD_KEY,
     RESULT_KEY,
     RESULT_TTL_SECONDS,
     SCOPE_REQUEST_KEY,
@@ -25,6 +26,7 @@ class ExtensionSocketStore:
         self._local_inflight: set[str] = set()
         self._local_requests: dict[str, str] = {}
         self._local_scope_requests: dict[str, str] = {}
+        self._local_request_payloads: dict[str, dict] = {}
         self._local_acks: set[str] = set()
         self._worker_id = uuid.uuid4().hex
         self._redis: redis.Redis | None = None
@@ -77,6 +79,35 @@ class ExtensionSocketStore:
             key for key in self._local_inflight if not key.startswith(f"{user_key}:")
         }
 
+    async def outstanding_requests_for_user(self, user_key: str) -> list[tuple[str, dict]]:
+        """Return (request_id, payload) for requests still awaiting a response for this user,
+        so a freshly (re)connected socket can be re-sent whatever the previous one never answered."""
+        out: list[tuple[str, dict]] = []
+        seen: set[str] = set()
+        if self._redis is not None:
+            with contextlib.suppress(Exception):
+                async for key in self._redis.scan_iter(
+                    match=f"{SCOPE_REQUEST_KEY}:{user_key}:*",
+                    count=200,
+                ):
+                    request_id = await self._redis.get(key)
+                    if not request_id or request_id in seen:
+                        continue
+                    seen.add(request_id)
+                    raw = await self._redis.get(f"{REQUEST_PAYLOAD_KEY}:{request_id}")
+                    if not raw:
+                        continue
+                    with contextlib.suppress(Exception):
+                        out.append((request_id, json.loads(raw)))
+        for result_key, request_id in list(self._local_scope_requests.items()):
+            if not result_key.startswith(f"{user_key}:") or request_id in seen:
+                continue
+            payload = self._local_request_payloads.get(request_id)
+            if payload is not None:
+                seen.add(request_id)
+                out.append((request_id, payload))
+        return out
+
     async def put_result(self, result_key: str, payload: dict) -> None:
         if self._redis is not None:
             with contextlib.suppress(Exception):
@@ -102,7 +133,7 @@ class ExtensionSocketStore:
                 await self._redis.delete(f"{RESULT_KEY}:{result_key}")
         self._local_results.pop(result_key, None)
 
-    async def put_request(self, request_id: str, result_key: str) -> None:
+    async def put_request(self, request_id: str, result_key: str, payload: dict | None = None) -> None:
         if self._redis is not None:
             with contextlib.suppress(Exception):
                 await self._redis.set(
@@ -115,9 +146,17 @@ class ExtensionSocketStore:
                     request_id,
                     ex=INFLIGHT_TTL_SECONDS,
                 )
+                if payload is not None:
+                    await self._redis.set(
+                        f"{REQUEST_PAYLOAD_KEY}:{request_id}",
+                        json.dumps(payload),
+                        ex=INFLIGHT_TTL_SECONDS,
+                    )
                 return
         self._local_requests[request_id] = result_key
         self._local_scope_requests[result_key] = request_id
+        if payload is not None:
+            self._local_request_payloads[request_id] = payload
 
     async def pop_request(self, request_id: str) -> str | None:
         result_key = None
@@ -135,6 +174,10 @@ class ExtensionSocketStore:
                 with contextlib.suppress(Exception):
                     await self._redis.delete(f"{SCOPE_REQUEST_KEY}:{result_key}")
             self._local_scope_requests.pop(result_key, None)
+        if self._redis is not None:
+            with contextlib.suppress(Exception):
+                await self._redis.delete(f"{REQUEST_PAYLOAD_KEY}:{request_id}")
+        self._local_request_payloads.pop(request_id, None)
         return result_key
 
     async def request_outstanding(self, request_id: str) -> bool:

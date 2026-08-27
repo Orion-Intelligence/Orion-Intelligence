@@ -5,6 +5,7 @@ INFLIGHT_KEY = "orion:ext:inflight"
 RESULT_KEY = "orion:ext:result"
 REQUEST_KEY = "orion:ext:req"
 SCOPE_REQUEST_KEY = "orion:ext:screq"
+REQUEST_PAYLOAD_KEY = "orion:ext:reqpayload"
 ACK_KEY = "orion:ext:ack"
 
 SOCKET_TTL_SECONDS = 20

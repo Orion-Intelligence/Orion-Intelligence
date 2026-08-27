@@ -69,7 +69,17 @@ class extension_socket_manager:
         self._sockets.setdefault(user_key, set()).add(websocket)
         await self.touch_socket(user_key, socket_id)
         if not had_live_socket:
-            await self._store.clear_inflight_for_user(user_key)
+            # A socket (re)connected after the previous one dropped. Rather than discard the user's
+            # in-flight crawl -- which is what left a running "Sync all" stuck whenever the popup or
+            # background briefly recycled the socket -- re-deliver any outstanding requests to this
+            # fresh socket so the scan resumes. Results are getdel-keyed, so a duplicate answer from a
+            # late/other socket is harmless, and each re-delivery re-arms its own timeout watchdog.
+            with contextlib.suppress(Exception):
+                outstanding = await self._store.outstanding_requests_for_user(user_key)
+                for request_id, payload in outstanding:
+                    with contextlib.suppress(Exception):
+                        await websocket.send_json({**payload, "request_id": request_id})
+                    self._spawn_watch(request_id, user_key)
         return socket_id
 
     async def unregister(self, user_key: str, websocket: WebSocket, socket_id: str | None = None) -> None:
@@ -139,7 +149,7 @@ class extension_socket_manager:
             return
 
         request_id = uuid.uuid4().hex
-        await self._store.put_request(request_id, result_key)
+        await self._store.put_request(request_id, result_key, payload)
         if sockets:
             for websocket in sockets:
                 with contextlib.suppress(Exception):
