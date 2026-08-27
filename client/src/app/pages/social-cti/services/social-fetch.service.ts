@@ -5,7 +5,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { social_online_presence_hit } from '../models/social.models';
 import { social_stealer_log } from '../models/social.models';
 import { ApiEnvelope } from '../models/social-usability.models';
-const CRAWL_IDLE_RETRIES = 5;
+const CRAWL_IDLE_RETRIES = 15;
 const EMPTY_CRAWL: { items?: unknown[]; error?: string; idle?: boolean; next_cursor?: string; has_more?: boolean; login_url?: string } = { idle: true };
 
 @Injectable({ providedIn: 'root' })
