@@ -33,6 +33,13 @@ export interface media_item_view {
 const VIDEO_TYPES = new Set(['video', 'videos', 'reel', 'reels', 'short', 'shorts', 'clip', 'stream', 'track', 'tracks', 'audio']);
 const VERTICAL_TYPES = new Set(['short', 'shorts', 'reel', 'reels', 'story', 'pin', 'pins']);
 
+// YouTube's frame0.jpg is the video's first frame (often black for shorts) — it loads (200) but shows
+// nothing, so onImageError never fires. Rewrite it to hqdefault.jpg (the real thumbnail) at display time,
+// which repairs already-stored rows without re-crawling.
+function reliableYtThumb(url: string): string {
+  return typeof url === 'string' ? url.replace(/(i\.ytimg\.com|img\.youtube\.com)\/vi\/([^/]+)\/frame0\.jpg/, '$1/vi/$2/hqdefault.jpg') : url;
+}
+
 const CLAIMED_KEYS = new Set([
   'type', 'resource_id', 'video_id', 'entity_id', 'id', 'url', 'short_url', 'embed_url', 'parent_url', 'title', 'title_text', 'caption', 'description', 'author', 'author_name', 'display_name', 'preferred_username', 'channel', 'channel_id', 'channel_title',
   'datetime', 'published_at', 'published_text', 'updated_at', 'created_at', 'media_type', 'photo_type', 'content_type', 'media_url', 'photo_url', 'image_url', 'thumbnail_url', 'thumbnail', 'thumbnail_default', 'thumbnail_max', 'thumbnail_frame', 'thumbnail_source', 'thumbnail_count',
@@ -114,8 +121,8 @@ export class SocialResourceMediaSectionComponent {
       isVideo,
       isVertical: VERTICAL_TYPES.has(kind) || VERTICAL_TYPES.has(pickText(record, 'type').toLowerCase()),
       isLive: pickFlag(record, 'is_live'),
-      image: isVideo || isCollection ? pickText(record, 'thumbnail_max', 'thumbnail_url', 'thumbnail_source', 'thumbnail_default', 'thumbnail_frame', 'thumbnail', 'image_url') : pickText(record, 'media_url', 'photo_url', 'image_url', 'thumbnail_url', 'thumbnail', 'url'),
-      fullImage: pickText(record, 'media_url', 'photo_url', 'image_url', 'thumbnail_max', 'thumbnail_url'),
+      image: reliableYtThumb(isVideo || isCollection ? pickText(record, 'thumbnail_max', 'thumbnail_url', 'thumbnail_source', 'thumbnail_default', 'thumbnail_frame', 'thumbnail', 'image_url') : pickText(record, 'media_url', 'photo_url', 'image_url', 'thumbnail_url', 'thumbnail', 'url')),
+      fullImage: reliableYtThumb(pickText(record, 'media_url', 'photo_url', 'image_url', 'thumbnail_max', 'thumbnail_url')),
       url: pickText(record, 'url', 'short_url', 'media_url'),
       duration: pickText(record, 'duration_text', 'duration', 'video_duration'),
       views: pickCount(record, 'views', 'views_count', 'view_count'),
