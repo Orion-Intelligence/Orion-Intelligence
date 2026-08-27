@@ -198,6 +198,11 @@ class ExtensionSocketStore:
                 self._worker_id,
                 ex=SOCKET_TTL_SECONDS,
             )
+            await self._redis.set(
+                f"{SOCKET_KEY}:{user_key}",
+                "1",
+                ex=SOCKET_TTL_SECONDS,
+            )
 
     async def drop_socket(self, user_key: str, socket_id: str) -> None:
         if self._redis is None:
@@ -209,6 +214,8 @@ class ExtensionSocketStore:
         if self._redis is None:
             return False
         with contextlib.suppress(Exception):
+            if await self._redis.exists(f"{SOCKET_KEY}:{user_key}"):
+                return True
             async for _ in self._redis.scan_iter(
                 match=f"{SOCKET_KEY}:{user_key}:*",
                 count=50,

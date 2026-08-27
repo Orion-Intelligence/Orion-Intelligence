@@ -194,7 +194,7 @@ class NexusStreamManager:
             if auth_token:
                 headers["Authorization"] = auth_token
             arguments = {"prompt": prompt, "session_id": session_id}
-            if selected_tool == "api_payload":
+            if type_name and type_name != "default":
                 arguments["request_type"] = type_name
             payload = NexusRpcPayloadModel.tool_call(request_id=key[1], name=selected_tool, arguments=arguments)
             async for line, answer, failed in self._stream(client, payload, headers):
