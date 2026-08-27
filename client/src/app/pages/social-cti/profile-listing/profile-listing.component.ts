@@ -27,8 +27,6 @@ import { SocialExtensionManagerComponent } from '../../../shared/partials/extens
 import { SocialExtensionService } from '../../../shared/services/social-extension.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
-const EXTENSION_MISS_LIMIT = 4;
-const EXTENSION_SETTLE_MISSES = 2;
 
 @Component({
   selector: 'app-social-profile-listing',
@@ -96,8 +94,6 @@ export class SocialProfileListingComponent {
     return usernames;
   });
   private extensionOpened = false;
-  private extensionMisses = 0;
-  private extensionPending: ExtensionState | null = null;
   private readonly connectionSearchResults = signal<Record<string, unknown[] | null>>({});
   private readonly connectionSearch$ = new Subject<{ platformData: social_profile; term: string }>();
 
@@ -311,22 +307,7 @@ export class SocialProfileListingComponent {
 
   private startExtensionHeartbeat(): void {
     timer(0, 3000).pipe(exhaustMap(() => this.extensionService.detect()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
-      const current = this.extensionState();
-      const working = state === 'ready' || state === 'update';
-
-      if (working) {
-        this.extensionPending = state;
-        this.extensionMisses = 0;
-      }
-      else {
-        this.extensionMisses = state === this.extensionPending ? this.extensionMisses + 1 : 1;
-        this.extensionPending = state;
-        const required = current === 'ready' || current === 'update' ? EXTENSION_MISS_LIMIT : EXTENSION_SETTLE_MISSES;
-        if (state !== current && this.extensionMisses < required) {
-          return;
-        }
-      }
-
+      // Apply state instantly — the socket is stable, so detection no longer flaps.
       this.extensionState.set(state);
 
       if (state === 'signin' && !this.extensionOpened) {

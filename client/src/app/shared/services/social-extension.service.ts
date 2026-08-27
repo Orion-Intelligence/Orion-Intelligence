@@ -40,7 +40,7 @@ export class SocialExtensionService {
         finish(connected ? 'ready' : installed ? 'signin' : 'install');
       };
       const resolveWhenProbesSettle = () => {
-        if (deadlineReached && latestSettled) {
+        if (deadlineReached) {
           resolveState();
         }
       };
@@ -55,10 +55,8 @@ export class SocialExtensionService {
         if (typeof data.version === 'string' && data.version) {
           this.installedVersion = data.version;
         }
-        if (connected && latestSettled) {
-          resolveState();
-        }
-        resolveWhenProbesSettle();
+        // Presence arrived -> we know install/signin/ready instantly; latest (for 'update') is best-effort.
+        resolveState();
       };
 
       void this.refreshLatest().finally(() => {
@@ -70,8 +68,8 @@ export class SocialExtensionService {
       const presenceTimer = setTimeout(() => {
         deadlineReached = true;
         resolveWhenProbesSettle();
-      }, 2000);
-      const hardTimer = setTimeout(resolveState, 3000);
+      }, 1000);
+      const hardTimer = setTimeout(resolveState, 1500);
 
       return () => {
         window.removeEventListener('message', onMessage);
