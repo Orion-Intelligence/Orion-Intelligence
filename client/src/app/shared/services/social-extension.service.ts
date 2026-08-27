@@ -22,7 +22,6 @@ export class SocialExtensionService {
       let installed = false;
       let connected = false;
       let deadlineReached = false;
-      let latestSettled = false;
 
       const finish = (state: ExtensionState) => {
         if (settled) {
@@ -59,10 +58,7 @@ export class SocialExtensionService {
         resolveState();
       };
 
-      void this.refreshLatest().finally(() => {
-        latestSettled = true;
-        resolveWhenProbesSettle();
-      });
+      void this.refreshLatest().finally(() => resolveWhenProbesSettle());
       window.addEventListener('message', onMessage);
       window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
       const presenceTimer = setTimeout(() => {
