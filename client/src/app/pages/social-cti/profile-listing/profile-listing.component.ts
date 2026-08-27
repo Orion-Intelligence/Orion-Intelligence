@@ -306,8 +306,23 @@ export class SocialProfileListingComponent {
   }
 
   private startExtensionHeartbeat(): void {
+    let indeterminateMisses = 0;
     timer(0, 3000).pipe(exhaustMap(() => this.extensionService.detect()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
-      // Apply state instantly — the socket is stable, so detection no longer flaps.
+      // 'checking' means the probe could not confirm this round (e.g. a busy round-trip while
+      // crawling). Hold the last confirmed state through brief indeterminate polls so the connect
+      // gate never flashes; only conclude "not installed" after presence stays absent several polls.
+      if (state === 'checking') {
+        indeterminateMisses += 1;
+        const previous = this.extensionState();
+        if ((previous === 'ready' || previous === 'update' || previous === 'signin') && indeterminateMisses < 3) {
+          return;
+        }
+        this.extensionState.set(indeterminateMisses >= 3 ? 'install' : 'checking');
+        return;
+      }
+      indeterminateMisses = 0;
+
+      // Confirmed states apply instantly (ready / update / signin / install / unsupported).
       this.extensionState.set(state);
 
       if (state === 'signin' && !this.extensionOpened) {

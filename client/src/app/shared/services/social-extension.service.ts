@@ -32,11 +32,17 @@ export class SocialExtensionService {
         subscriber.complete();
       };
       const resolveState = () => {
+        // No presence has arrived this probe -> indeterminate, not "not installed".
+        // A slow round-trip (e.g. the page is busy crawling) must never flash the install/connect gate.
+        if (!installed) {
+          finish('checking');
+          return;
+        }
         if (connected && this.outdated(this.installedVersion)) {
           finish('update');
           return;
         }
-        finish(connected ? 'ready' : installed ? 'signin' : 'install');
+        finish(connected ? 'ready' : 'signin');
       };
       const resolveWhenProbesSettle = () => {
         if (deadlineReached) {
