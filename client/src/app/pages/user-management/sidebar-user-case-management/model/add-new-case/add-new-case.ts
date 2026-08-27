@@ -40,6 +40,11 @@ export class AddNewCase {
     this.caseService.getNextCaseId().subscribe({
       next: (res) => {
         this.caseForm.caseId = res.nextCaseId;
+        delete this.validationErrors['caseId'];
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.validationErrors['caseId'] = 'Unable to generate Case ID. Please retry.';
         this.cdr.detectChanges();
       }
     });

@@ -678,10 +678,10 @@ class CaseManager:
         return {"success": True}
 
     async def get_next_case_id(self, current_user) -> dict:
-        records = await self._engine.find(
+        case_count = await self._engine.count(
             db_case_model, db_case_model.tenant_uuid == str(current_user.tenant_uuid)
         )
-        next_id = str(len(records) + 1).zfill(5)
+        next_id = str(case_count + 1).zfill(5)
         return {"nextCaseId": next_id}
     
     async def upload_artifact_files(self, case_id: str, artifact_id: str, files: list[UploadFile], current_user) -> dict:

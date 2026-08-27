@@ -45,6 +45,9 @@
               @if (!$last) {
                 <span aria-hidden="true" class="pointer-events-none absolute bottom-2.5 right-0 top-2.5 w-px bg-[var(--color-border)] opacity-35"></span>
               }
+              @if (activeTab() === tab.key) {
+                <span aria-hidden="true" class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 bg-[var(--color-blue-640)]"></span>
+              }
               @if (isSectionLoading(tab.key)) {
                 <span class="pointer-events-none absolute inset-x-0 bottom-0 h-0.5 overflow-hidden">
                   <span class="block h-full w-full origin-left bg-[var(--color-blue-640)] animate-[loader-indeterminate_0.7s_linear_infinite]"></span>
