@@ -115,6 +115,7 @@ class ProfileManager:
                 existing_record.username = str(session_file.get("username") or existing_record.username or "")
                 existing_record.verified = False
                 existing_record.verify_error = ""
+                existing_record.verified_at = None
                 await self._engine.save(existing_record)
                 session_id = target_session_id
             else:

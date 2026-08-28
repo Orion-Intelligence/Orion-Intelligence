@@ -1,7 +1,9 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
-import { social_profile } from '../models/social.models';
+import { social_exposure_signals, social_profile } from '../models/social.models';
 import { SocialFetchService } from '../services/social-fetch.service';
+import { SocialStorageService } from '../services/social-storage.service';
 import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { STEALERLOG_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
@@ -17,13 +19,17 @@ import { TranslationService } from '../../../shared/services/translation.service
   templateUrl: './stealerlog-section.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class StealerlogSectionComponent {
+export class StealerlogSectionComponent implements OnDestroy {
   private readonly exportCsvColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly fetchService = inject(SocialFetchService);
+  private readonly storageService = inject(SocialStorageService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly exportBranding = inject(ExportBrandingService);
   private readonly reportExportService = inject(ReportExportService);
   private readonly translationService = inject(TranslationService);
   private requestId = 0;
+  private activeProfileKey = '';
+  private subscription: Subscription | null = null;
 
   username = input.required<string>();
   platforms = input<social_profile[]>([]);
@@ -35,6 +41,12 @@ export class StealerlogSectionComponent {
   searchIdentity = computed(() => this.username());
   hasRecords = computed(() => this.records().length > 0);
   visibleRecords = computed(() => this.records().slice(0, 3));
+  storedExposureSignals = computed<social_exposure_signals | null>(() => {
+    const identity = this.searchIdentity().toLowerCase();
+    return this.platforms()
+      .map(platform => platform.exposure_signals)
+      .find(signals => signals?.query?.toLowerCase() === identity) ?? null;
+  });
   darkwebPresence = computed<social_profile[]>(() => []);
   hasDarkwebPresence = computed(() => this.darkwebPresence().length > 0);
   displayIdentity = computed(() => {
@@ -43,27 +55,41 @@ export class StealerlogSectionComponent {
   });
 
   constructor() {
-    effect((onCleanup) => {
+    effect(() => {
       const identity = this.searchIdentity();
-      const currentRequestId = ++this.requestId;
-      let subscription: Subscription | null = null;
+      const storedSignals = this.storedExposureSignals();
+      if (identity === this.activeProfileKey) {
+        return;
+      }
 
-      this.records.set([]);
+      this.activeProfileKey = identity;
+      const currentRequestId = ++this.requestId;
+      this.subscription?.unsubscribe();
+
+      this.records.set(storedSignals?.records ?? []);
       this.errorMessage.set('');
 
-      if (!identity) {
+      if (!identity || storedSignals) {
         this.isLoading.set(false);
         return;
       }
 
       this.isLoading.set(true);
-      subscription = this.fetchService.fetchStealerLogsByIdentity(identity).subscribe({
+      this.subscription = this.fetchService.fetchStealerLogsByIdentity(identity).subscribe({
         next: (records) => {
           if (currentRequestId !== this.requestId) {
             return;
           }
-          this.records.set(Array.isArray(records) ? records : []);
+          const savedRecords = Array.isArray(records) ? records : [];
+          this.records.set(savedRecords);
           this.isLoading.set(false);
+          this.storageService.saveExposureSignals(identity, { query: identity, records: savedRecords }).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            error: () => {
+              if (currentRequestId === this.requestId) {
+                this.errorMessage.set('Exposure signals loaded but could not be saved.');
+              }
+            }
+          });
         },
         error: () => {
           if (currentRequestId !== this.requestId) {
@@ -74,9 +100,11 @@ export class StealerlogSectionComponent {
           this.isLoading.set(false);
         }
       });
-
-      onCleanup(() => subscription?.unsubscribe());
     });
+  }
+
+  ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 
   openExportChoice(event: Event): void {

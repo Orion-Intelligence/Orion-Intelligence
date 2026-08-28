@@ -179,8 +179,16 @@
                   [activeTab]="getActiveTabForPlatform(platformData)"
                   [loadingStates]="getLoadingStates(platformData)"
                   [onlinePresenceSearchTerm]="getOnlinePresenceSearchTerm(platformData)"
+                  [connectionsLoading]="connectionsLoading()"
+                  [connectionsByPost]="connectionsByPost()"
+                  (loadConnections)="onProfileTabLoadConnections(platformData, $event)"
+                  (syncAllConnections)="onProfileTabSyncAllConnections(platformData)"
+                  (connectionSearch)="onProfileConnectionSearch(platformData, $event)"
+                  [connectionSearchResults]="getConnectionSearchResults(platformData)"
                   (tabSelected)="onProfileTabSelected(platformData, $event)"
                   (refetchTab)="onProfileTabRefetch(platformData, $event)"
+                  (syncAll)="onProfileTabSyncAll(platformData, $event)"
+                  (stopSync)="onProfileTabStopSync(platformData, $event)"
                   (onlinePresenceSearchTermChanged)="onProfileOnlinePresenceTermChanged(platformData, $event)"
                   (onlinePresenceSearch)="searchOnlinePresence(platformData)"
                   [crawlResult]="crawlResultFor(platformData, getActiveTabForPlatform(platformData))">
@@ -203,11 +211,13 @@
 
         <aside class="hidden h-full min-h-0 w-[260px] flex-shrink-0 overflow-y-auto lg:block">
           @if (activeUser(); as user) {
-            <app-social-stealerlog-section class="block" [username]="user.username" [platforms]="user.platforms"></app-social-stealerlog-section>
-            <app-social-wanted-list-section class="mt-3 block" [username]="user.username"></app-social-wanted-list-section>
+            <app-social-stealerlog-section class="block" [username]="user.username" [platforms]="user.allPlatforms"></app-social-stealerlog-section>
+            <app-social-wanted-list-section class="mt-3 block" [username]="user.username" [platforms]="user.allPlatforms"></app-social-wanted-list-section>
+            <app-social-phone-lookup-section class="mt-3 block" [username]="user.username" [platforms]="user.allPlatforms"></app-social-phone-lookup-section>
           }
         </aside>
       </div>
     </div>
   }
 </div>
+

@@ -8,6 +8,7 @@ import { ManageProfilesModalData } from './models/social-usability.models';
 import type { FeedUser, NotificationData } from './models/social-usability.models';
 import { HomeMenuComponent } from './home-menu/home-menu.component';
 import { SocialProfileListingComponent } from './profile-listing/profile-listing.component';
+import { SocialUserGraphComponent } from './user-graph/social-user-graph.component';
 import { NotificationBarComponent } from './notification-bar/notification-bar.component';
 import { SocialService } from './services/social.service';
 import { SocialStorageService } from './services/social-storage.service';
@@ -27,6 +28,7 @@ import { TranslatePipe } from '../../shared/pipes/translate.pipe';
   imports: [
     HomeMenuComponent,
     SocialProfileListingComponent,
+    SocialUserGraphComponent,
     ConfirmationPopupComponent,
     NotificationBarComponent,
     ProfileComponent,
@@ -55,6 +57,8 @@ export class SocialMapperComponent {
   ]));
   isHomeMenuCollapsed = this.sidebarState.isHomeMenuCollapsed;
   isInitialLoading = signal(true);
+  graphView = signal(false);
+  graphUsernames = signal<string[]>([]);
   notification = signal<NotificationData | null>(null);
   deleteConfirmationMessage = signal<string | null>(null);
   deleteUsername = signal<string | null>(null);
@@ -90,6 +94,11 @@ export class SocialMapperComponent {
       this.isInitialLoading.set(false);
       this.resumeIncompleteScans();
     })).subscribe();
+    this.storageService.loadGraphUsers().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(usernames => {
+      if (usernames.length && !this.graphUsernames().length) {
+        this.graphUsernames.set(usernames);
+      }
+    });
   }
 
   onHomeMenuSearchChanged(term: string): void {
@@ -176,11 +185,48 @@ export class SocialMapperComponent {
   }
 
   handleCompletedJobClick(job: Job): void {
+    if (this.graphView()) {
+      this.sidebarState.activeUsername.set(job.id);
+      this.addGraphUser(job.id);
+      return;
+    }
     if (job.status !== 'completed') {
       return;
     }
     this.profileListing()?.clearProfileOverview();
     this.sidebarState.activeUsername.set(job.id);
+  }
+
+  toggleGraphView(): void {
+    const next = !this.graphView();
+    if (next) {
+      const active = this.activeUsername();
+      if (active && !this.graphUsernames().length) {
+        this.graphUsernames.set([active]);
+      }
+    }
+    this.graphView.set(next);
+  }
+
+  addGraphUser(username: string): void {
+    const handle = username.trim().replace(/^@+/, '').toLowerCase();
+    if (!handle || this.graphUsernames().includes(handle)) {
+      return;
+    }
+    this.setGraphUsers([...this.graphUsernames(), handle]);
+  }
+
+  onGraphUsernamesChange(usernames: string[]): void {
+    this.setGraphUsers(usernames);
+    const last = usernames[usernames.length - 1];
+    if (last) {
+      this.sidebarState.activeUsername.set(last);
+    }
+  }
+
+  private setGraphUsers(usernames: string[]): void {
+    this.graphUsernames.set(usernames);
+    this.storageService.saveGraphUsers(usernames).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   private initiateScan(username: string): void {
@@ -308,7 +354,7 @@ export class SocialMapperComponent {
     this.profileBreadcrumbLabel.set(label);
   }
 
-  private showScanInProgressNotification(): void {
+  protected showScanInProgressNotification(): void {
     clearTimeout(this.notificationTimeout);
     this.notification.set({
       message: 'A scan for this user is already in progress.',
@@ -318,8 +364,11 @@ export class SocialMapperComponent {
     this.notificationTimeout = setTimeout(() => this.notification.set(null), 3000);
   }
 
-  private getResultSource(_platformData: social_profile): SocialResultSource {
-    return 'normal';
+  private getResultSource(platformData: social_profile): SocialResultSource {
+    const platform = String(platformData?.meta?.platform ?? '').toLowerCase();
+    const kind = `${platformData?.meta?.entity_type ?? ''} ${platformData?.meta?.target_type ?? ''}`.toLowerCase();
+    const darkweb = ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'];
+    return darkweb.some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum') ? 'darkweb' : 'normal';
   }
 
   private getVisiblePlatforms(ownerUsername: string, platforms: social_profile[]): social_profile[] {

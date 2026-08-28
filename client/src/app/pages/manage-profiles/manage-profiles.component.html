@@ -40,20 +40,27 @@
               </span>
               <div class="min-w-0 flex-1">
                 <div class="flex min-w-0 flex-wrap items-center gap-2">
-                  @if (sessionCount(entry.platform) > 0) {
-                    @if (unverifiedSessionCount(entry.platform) > 0) {
+                  @switch (platformStatus(entry.platform)) {
+                    @case ('failed') {
                       <span class="h-2 w-2 shrink-0 rounded-full bg-red-400 ring-2 ring-red-400/10" role="img" [attr.aria-label]="'Not Verified' | translate" [title]="'Not Verified' | translate"></span>
-                    } @else {
+                    }
+                    @case ('pending') {
+                      <span class="h-2 w-2 shrink-0 rounded-full bg-slate-400 ring-2 ring-slate-400/15" role="img" [attr.aria-label]="'Not Scanned' | translate" [title]="'Not Scanned' | translate"></span>
+                    }
+                    @default {
                       <span class="h-2 w-2 shrink-0 rounded-full bg-emerald-400 ring-2 ring-emerald-400/10" role="img" [attr.aria-label]="'Verified' | translate" [title]="'Verified' | translate"></span>
                     }
                   }
-                  <h2 class="mb-0 truncate text-[13px] font-semibold leading-5 text-[var(--color-text1)]">{{ entry.platform }}</h2>
+                  <h2 class="mb-0 w-[68px] shrink-0 truncate text-[13px] font-semibold leading-5 text-[var(--color-text1)]">{{ entry.platform }}</h2>
                   @if (sessionCount(entry.platform) > 0) {
                     <span data-testid="manage-profiles-session-count" [attr.id]="'manage-profiles-session-count-' + safePlatform(entry.platform)" class="inline-flex shrink-0 items-baseline gap-1 whitespace-nowrap text-[10px] font-medium text-[var(--color-text4)]">
                       <span aria-hidden="true" class="text-[var(--ui-table-row-border-hover)]">·</span>
                       <span class="font-mono tabular-nums">{{ sessionCount(entry.platform) }}/{{ maxSessions }}</span>
                       <span>{{ 'saved' | translate }}</span>
                     </span>
+                  }
+                  @if (sessionCount(entry.platform) > 0) {
+                    <i class="bi bi-chevron-down shrink-0 text-[10px] leading-none text-[var(--color-text4)] transition-transform duration-200" [class.rotate-180]="isExpanded(entry.platform)" aria-hidden="true"></i>
                   }
                 </div>
                 <a [href]="entry.base" target="_blank" rel="noopener noreferrer" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" class="mt-0.5 inline-flex max-w-full items-center gap-1 text-[11px] font-medium text-[var(--color-blue-640)] outline-none hover:underline focus-visible:ring-2 focus-visible:ring-sky-400/35">
@@ -80,7 +87,7 @@
                     <div class="pointer-events-none absolute inset-y-0 left-[27px] w-px bg-[var(--ui-table-row-border)] sm:left-[31px]"></div>
                     @for (session of sessionsFor(entry.platform); track session.id) {
                           <article class="relative grid gap-2.5 border-b border-[var(--ui-table-row-border)] py-2.5 pl-[55px] pr-3 transition-colors last:border-b-0 hover:bg-[var(--ui-table-row-hover)] sm:pl-[59px] sm:pr-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-                            <span [ngClass]="session.verified ? 'bg-emerald-400 ring-emerald-400/10' : 'bg-red-400 ring-red-400/10'" class="absolute left-[24px] top-[18px] h-2 w-2 rounded-full ring-2 sm:left-[28px]" aria-hidden="true"></span>
+                            <span [ngClass]="sessionStatus(session) === 'verified' ? 'bg-emerald-400 ring-emerald-400/10' : sessionStatus(session) === 'failed' ? 'bg-red-400 ring-red-400/10' : 'bg-slate-400 ring-slate-400/15'" class="absolute left-[24px] top-[18px] h-2 w-2 rounded-full ring-2 sm:left-[28px]" aria-hidden="true"></span>
                             <div class="min-w-0">
                               <div class="flex min-w-0 flex-wrap items-center gap-2">
                                 <h4 class="mb-0 truncate font-mono text-[12px] font-semibold text-[var(--color-text2)]">{{ 'Session' | translate }} #{{ session.id.slice(0, 8) }}</h4>
@@ -93,7 +100,7 @@
                                 </span>
                                 <span class="inline-flex min-w-0 items-center gap-1.5">
                                   <i class="bi bi-person-circle shrink-0 text-[10px]" aria-hidden="true"></i>
-                                  <span class="truncate">{{ session.verified && session.username ? '&#64;' + session.username : '-' }}</span>
+                                  <span class="truncate">{{ session.verified && session.username ? '@' + session.username : '-' }}</span>
                                 </span>
                               </div>
 

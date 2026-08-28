@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output, signal } from '@angular/core';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { social_online_presence_hit, social_profile } from '../../models/social.models';
 import { social_stealer_log } from '../../models/social.models';
 import { formatKey, isImageUrl, isUrl } from '../../../../shared/utils/formatters';
@@ -6,6 +7,8 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import type { FetchTabKey } from '../../enums/social-graph.enums';
 import type { FeedUser, FetchTab } from '../../models/social-usability.models';
 import { getProfileDetailEntries } from '../../utils/summary-view.util';
+import { SocialFetchService } from '../../services/social-fetch.service';
+import { take } from 'rxjs/operators';
 import { buildSocialProfileUrl } from '../../utils/profile-url.util';
 import { applyImageFallback } from '../../utils/image-fallback.util';
 import { ExportBrandingService } from '../../../../shared/services/export/export-branding.service';
@@ -16,12 +19,17 @@ import { GraphReportPayload } from '../../../../shared/model/report/report-expor
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { SectionStateComponent } from '../../../../shared/partials/section-state/section-state.component';
+import { categoryFor, primaryKeysFor } from '../../constants/resource-category.constants';
+import { SocialResourceWorkSectionComponent } from '../resource-work-section/resource-work-section.component';
+import { SocialResourcePeopleSectionComponent } from '../resource-people-section/resource-people-section.component';
+import { SocialResourceFeedSectionComponent } from '../resource-feed-section/resource-feed-section.component';
+import { SocialResourceMediaSectionComponent } from '../resource-media-section/resource-media-section.component';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, TranslatePipe],
+  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, DatePipe, TranslatePipe, NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
@@ -31,7 +39,31 @@ export class SocialProfileTabsSectionComponent {
   private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlDescriptions = signal<Set<string>>(new Set<string>());
+  private readonly expandedCrawlProperties = signal<Set<string>>(new Set<string>());
   private readonly contentTabKeys: FetchTabKey[] = ['details', 'onlinePresence', 'stealerLogs'];
+  private readonly displayLimit = signal(50);
+  private readonly resetDisplayLimit = effect(() => {
+    this.activeTab(); this.displayLimit.set(50); 
+  });
+  private readonly forceStale = false;
+  private readonly fetchService = inject(SocialFetchService);
+  private darkwebFetchedFor = '';
+  private readonly darkwebFetchEffect = effect(() => {
+    if (!this.isDarkweb()) {
+      return;
+    }
+    const username = this.platformData()?.meta?.username ?? '';
+    if (!username || this.darkwebFetchedFor === username) {
+      return;
+    }
+    this.darkwebFetchedFor = username;
+    this.darkwebLoaded.set(false);
+    this.fetchService.fetchDarkwebReport(username).pipe(take(1)).subscribe(rows => {
+      this.darkwebReport.set(rows);
+      this.darkwebLoaded.set(true);
+    });
+  });
+  private readonly darkwebEntryBlocked = new Set(['m_embedding', '_id', '_score', '_rank', '_index', 'rank_index', 'm_hash', 'm_hash_id', 'm_scrap_file', 'm_cluster_id', 'm_document_id']);
 
   user = input.required<FeedUser>();
   platformData = input.required<social_profile>();
@@ -39,9 +71,16 @@ export class SocialProfileTabsSectionComponent {
   activeTab = input.required<FetchTabKey>();
   loadingStates = input<Partial<Record<FetchTabKey, boolean>>>({});
   onlinePresenceSearchTerm = input('');
-  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string }>({});
+  connectionsLoading = input<Set<string>>(new Set<string>());
+  connectionsByPost = input<ReadonlyMap<string, unknown[]>>(new Map());
+  crawlResult = input<{ loading?: boolean; items?: unknown[]; error?: string; login_url?: string; count?: number; log?: string; lastSynced?: string }>({});
   tabSelected = output<FetchTabKey>();
   refetchTab = output<FetchTabKey>();
+  syncAll = output<FetchTabKey>();
+  stopSync = output<FetchTabKey>();
+  loadConnections = output<string>();
+  syncAllConnections = output<void>();
+  connectionSearch = output<string>();
   onlinePresenceSearchTermChanged = output<string>();
   onlinePresenceSearch = output<void>();
   readonly isUrl = isUrl;
@@ -50,6 +89,84 @@ export class SocialProfileTabsSectionComponent {
   readonly formatKey = formatKey;
   readonly stealerLogExportOptions = PROFILE_STEALERLOG_EXPORT_OPTIONS;
   readonly selectedStealerLogPlatform = signal<social_profile | null>(null);
+  connectionSearchResults = input<unknown[] | null>(null);
+  readonly isDarkweb = computed(() => {
+    const platform = String(this.platformData()?.meta?.platform ?? '').toLowerCase();
+    const kind = `${this.platformData()?.meta?.entity_type ?? ''} ${this.platformData()?.meta?.target_type ?? ''}`.toLowerCase();
+    return ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'].some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum');
+  });
+  readonly darkwebReport = signal<Record<string, any>[]>([]);
+  readonly darkwebLoaded = signal(false);
+  readonly detailEntries = computed<{ key: string; value: any }[]>(() =>
+    getProfileDetailEntries(this.platformData()).filter(item => !['img_src', 'm_img_src'].includes(item.key.toLowerCase())));
+  readonly darkwebSections = computed<{ title: string; date: string; entries: { key: string; value: any }[] }[]>(() =>
+    this.darkwebReport().map((doc, index) => {
+      const entries = Object.entries(doc ?? {})
+        .filter(([key, value]) => !this.darkwebEntryBlocked.has(key.toLowerCase()) && value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0))
+        .map(([key, value]) => ({ key, value }));
+      const label = String(doc?.['m_channel_name'] ?? doc?.['m_title'] ?? doc?.['m_platform'] ?? `Record ${index + 1}`);
+      const stamp = doc?.['m_date'] ?? doc?.['m_creation_date'] ?? '';
+      return { title: label, date: stamp ? String(stamp).slice(0, 19).replace('T', ' ') : '', entries };
+    }).filter(section => section.entries.length));
+  resourceCategory = computed(() => categoryFor(this.platformData().meta.platform, this.activeTab()));
+  hasResourcePresenter = computed(() => ['work', 'people', 'feed', 'media'].includes(this.resourceCategory()));
+  readonly displayedItems = computed<unknown[]>(() => {
+    const results = this.connectionSearchResults();
+    if (results) {
+      return results;
+    }
+    return (this.crawlResult().items ?? []).slice(0, this.displayLimit());
+  });
+  readonly canLoadMoreDb = computed(() => this.connectionSearchResults() === null && (this.crawlResult().items?.length ?? 0) > this.displayLimit());
+  readonly isStale = computed(() => {
+    if (this.forceStale) {
+      return true;
+    }
+    const result = this.crawlResult();
+    if (!(result.items?.length)) {
+      return false;
+    }
+    const last = result.lastSynced;
+    if (!last) {
+      return true;
+    }
+    const parsed = Date.parse(last);
+    return !Number.isFinite(parsed) || (Date.now() - parsed) > 86400000;
+  });
+
+  scrollToActiveConnectionPost(): void {
+    const element = document.querySelector('.ui-connection-beam');
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }
+
+  showMoreFromDb(): void {
+    this.displayLimit.update(current => current + 50);
+  }
+
+  onConnectionSearch(event: Event): void {
+    this.connectionSearch.emit((event.target as HTMLInputElement | null)?.value ?? '');
+  }
+
+  syncAllNow(): void {
+    this.syncAll.emit(this.activeTab());
+  }
+
+  stopSyncNow(): void {
+    this.stopSync.emit(this.activeTab());
+  }
+
+  syncAllConnectionsNow(): void {
+    this.syncAllConnections.emit();
+  }
+
+  openLogin(url: string): void {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+    this.refetchTab.emit(this.activeTab());
+  }
 
   getTabLabel(tabKey: FetchTabKey): string {
     return this.fetchTabs().find(tab => tab.key === tabKey)?.label ?? tabKey;
@@ -84,23 +201,45 @@ export class SocialProfileTabsSectionComponent {
     return String(record['caption'] ?? record['description'] ?? '');
   }
 
-  crawlItemType(item: unknown): string {
-    const record = this.crawlItemRecord(item);
-    return String(record['media_type'] ?? record['type'] ?? '');
-  }
-
   crawlItemImageUrl(item: unknown): string {
     const record = this.crawlItemRecord(item);
     const value = record['thumbnail_url'] ?? record['avatar'] ?? record['avatar_url'] ?? record['image_url'];
     return this.isUrl(value) ? String(value) : '';
   }
 
+  crawlItemHighlights(item: unknown): { key: string; value: unknown }[] {
+    const record = this.crawlItemRecord(item);
+    return primaryKeysFor(this.resourceCategory())
+      .filter(key => this.hasCrawlItemValue(record[key]))
+      .slice(0, 6)
+      .map(key => ({ key, value: record[key] }));
+  }
+
   crawlItemEntries(item: unknown): { key: string; value: unknown }[] {
     const record = this.crawlItemRecord(item);
     const headerKeys = new Set(['title', 'url', 'thumbnail_url', 'caption', 'description', 'type', 'media_type']);
+    const highlighted = new Set(this.crawlItemHighlights(item).map(entry => entry.key));
     return Object.entries(record)
-      .filter(([key, value]) => !headerKeys.has(key) && this.hasCrawlItemValue(value))
+      .filter(([key, value]) => !headerKeys.has(key) && !highlighted.has(key) && this.hasCrawlItemValue(value))
       .map(([key, value]) => ({ key, value }));
+  }
+
+  isCrawlPropertiesExpanded(index: number, item: unknown): boolean {
+    return this.expandedCrawlProperties().has(this.crawlDescriptionKey(index, item));
+  }
+
+  toggleCrawlProperties(index: number, item: unknown): void {
+    const key = this.crawlDescriptionKey(index, item);
+    this.expandedCrawlProperties.update(current => {
+      const next = new Set(current);
+      if (next.has(key)) {
+        next.delete(key);
+      }
+      else {
+        next.add(key);
+      }
+      return next;
+    });
   }
 
   crawlItemTrackKey(index: number, item: unknown): string {
@@ -177,30 +316,6 @@ export class SocialProfileTabsSectionComponent {
     return this.formatMetadataValue(value);
   }
 
-  getDisplayImageUrl(value: any): string {
-    const url = this.getDisplayUrl(value);
-    return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
-  }
-
-  getSocialImageHref(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
-    return image?.image_url || image?.thumbnail || '';
-  }
-
-  getSocialImageSrc(image: { image_url?: string; thumbnail?: string } | null | undefined): string {
-    const url = image?.thumbnail || image?.image_url || '';
-    return this.isBlockedInstagramProfileImageUrl(url) ? '' : url;
-  }
-
-  getDisplayableSocialImages<T extends { image_url?: string; thumbnail?: string }>(images: T[] | null | undefined): T[] {
-    return (images || []).filter(image => !!this.getSocialImageSrc(image));
-  }
-
-  private isBlockedInstagramProfileImageUrl(url: string): boolean {
-    return /\/t51\.[^/]+-19\//i.test(url)
-      || /[?&]efg=[^&]*profile/i.test(url)
-      || /profile_pic/i.test(url);
-  }
-
   getProfileDetailEntries(platformData: social_profile): { key: string; value: any; }[] {
     return getProfileDetailEntries(platformData);
   }
@@ -264,14 +379,6 @@ export class SocialProfileTabsSectionComponent {
     }
     const s = String(value);
     return !isNaN(Number(s.replace(/,/g, ''))) && s.trim() !== '';
-  }
-
-  isBool(value: any): boolean {
-    if (typeof value === 'boolean') {
-      return true;
-    }
-    const s = String(value).toLowerCase().trim();
-    return s === 'true' || s === 'false';
   }
 
   getOnlinePresence(platformData: social_profile): social_online_presence_hit[] | null {
@@ -434,5 +541,4 @@ export class SocialProfileTabsSectionComponent {
     }
     return true;
   }
-
 }

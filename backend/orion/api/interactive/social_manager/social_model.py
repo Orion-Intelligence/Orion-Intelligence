@@ -1,8 +1,10 @@
 import base64
 import binascii
 import hashlib
+import random
 import re
 from pathlib import Path
+from urllib.parse import parse_qs, urlparse
 from datetime import UTC, datetime
 from typing import Any
 
@@ -63,7 +65,6 @@ class social_model:
             "profile_url": item.get("url") or item.get("profile_url"),
             "total_posts": item.get("total_posts") or item.get("post_count"),
             "total_followers": followers,
-            "total_following": item.get("total_following") or item.get("following_count") or item.get("following"),
             "total_likes": item.get("total_likes") or item.get("like_count"),
         }
         return {key: str(value) for key, value in details.items() if value}
@@ -111,7 +112,7 @@ class social_model:
             details = social_model._recon_profile_details({**ids, **item})
         if details:
             built["profile_details"] = details
-        for key in ("resources", "online_presence", "stealer_logs"):
+        for key in ("resources", "online_presence", "stealer_logs", "wanted", "wanted_query", "exposure_signals", "phone_lookup"):
             if item.get(key) is not None:
                 built[key] = item.get(key)
         try:
@@ -346,11 +347,12 @@ class social_model:
 
         user_key = str(getattr(current_user, "id", "") or "")
         crawl_type = str(payload.get("type") or "details")
+        cursor = str(payload.get("cursor") or "").strip()
         if not user_key:
             return {"status": "pending"}
 
         platform_scope = re.sub(r"[^a-z0-9]", "", str(payload.get("platform") or "").lower())
-        result_scope = f"{platform_scope}:{crawl_type}"
+        result_scope = f"{platform_scope}:{crawl_type}:{cursor}" if cursor else f"{platform_scope}:{crawl_type}"
 
         manager = extension_socket_manager.get_instance()
         if str(payload.get("command") or "") == "cancel":
@@ -363,25 +365,22 @@ class social_model:
                 return {"status": "pending" if await manager.is_inflight(user_key, result_scope) else "idle"}
             if not await manager.has_live_socket(user_key):
                 return {"status": "idle"}
-            command = {"command": "crawl", "platform": payload.get("platform"), "type": crawl_type, "url": payload.get("url"), "username": payload.get("username")}
+            command = {"command": "crawl", "platform": payload.get("platform"), "type": crawl_type, "url": payload.get("url"), "username": payload.get("username"), "payload": {"url": payload.get("url"), "username": payload.get("username"), "cursor": cursor}}
             await manager.fire(user_key, command, result_scope)
             return {"status": "pending"}
 
         if reply.get("error"):
-            return {"error": reply.get("error")}
+            return {"error": reply.get("error"), "login_url": reply.get("login_url")}
         items = (reply.get("items") if reply.get("implemented") else []) or []
         if crawl_type == "details":
             return {"result": {"profile": (items or [{}])[0]}}
-        return {"result": {"items": items}}
+        return {"result": {"items": items, "next_cursor": reply.get("next_cursor"), "has_more": bool(reply.get("has_more"))}}
 
     async def search_online_images(self, param, current_user=None, request=None):
         return await self.social_search(param, "online/images", current_user, request)
 
     async def search_followers(self, param, current_user=None, request=None):
         return await self.social_search(param, "followers", current_user, request)
-
-    async def search_following(self, param, current_user=None, request=None):
-        return await self.social_search(param, "following", current_user, request)
 
     async def search_posts(self, param, current_user=None, request=None):
         return await self.social_search(param, "posts", current_user, request)
@@ -398,10 +397,14 @@ class social_model:
     async def search_metadata(self, param, current_user=None, request=None):
         return await self.social_search(param, "metadata", current_user, request)
 
-    EXTENSION_RAW_DIR = Path(__file__).resolve().parents[4] / "static" / "raw"
+    EXTENSION_RAW_DIR = Path(__file__).resolve().parents[4] / "workspace" / "extension"
 
     async def extension_download(self, browser: str = "chrome"):
         target = "firefox" if browser.strip().lower() in {"firefox", "mozilla"} else "chrome"
+        if target == "firefox":
+            signed_path = self.EXTENSION_RAW_DIR / "orion-extension-firefox.xpi"
+            if signed_path.is_file():
+                return FileResponse(signed_path, media_type="application/x-xpi", headers={"Cache-Control": "no-store", "Content-Disposition": f'inline; filename="{signed_path.name}"'})
         filename = f"orion-extension-{target}.zip"
         file_path = self.EXTENSION_RAW_DIR / filename
         if not file_path.is_file():
@@ -513,6 +516,125 @@ class social_model:
 
         except Exception:
             return JSONResponse(status_code=500, content={"detail": "Failed to fetch social profiles"})
+
+    GRAPH_PEOPLE_IDS = {"followers", "following", "friends", "connections", "organizations", "contacts", "members", "subscribers"}
+
+    @staticmethod
+    def _graph_handle(value) -> str:
+        text = str(value or "").strip()
+        if not text:
+            return ""
+        if re.match(r"^https?://", text, re.IGNORECASE):
+            try:
+                parsed = urlparse(text)
+                ids = parse_qs(parsed.query).get("id") or []
+                if ids and str(ids[0]).strip():
+                    return str(ids[0]).strip().lower()
+                segments = [segment for segment in parsed.path.split("/") if segment]
+                return (segments[-1] if segments else "").strip().lstrip("@").lower()
+            except Exception:
+                return ""
+        return text.lstrip("@").rstrip("/").lower()
+
+    @classmethod
+    def _graph_person_handle(cls, item: dict) -> str:
+        if not isinstance(item, dict):
+            return ""
+        raw = next((str(item.get(key)).strip() for key in ("handle", "screen_name", "acct", "username", "login", "author") if str(item.get(key) or "").strip()), "")
+        url = next((str(item.get(key)).strip() for key in ("url", "media_url", "profile_url") if str(item.get(key) or "").strip()), "")
+        if raw and not re.search(r"\s", raw):
+            return cls._graph_handle(raw)
+        return cls._graph_handle(url) or cls._graph_handle(raw)
+
+    async def get_graph_data(self, user_id: str, usernames: list[str], priority: list[str], limit: int = 200):
+        response = await self.get_social_profiles(user_id)
+        documents = response.get("result") if isinstance(response, dict) else None
+        if not isinstance(documents, list):
+            return response
+        limit = max(1, min(int(limit or 200), 500))
+        requested = {self._graph_handle(username) for username in usernames if self._graph_handle(username)}
+        pinned = set(requested) | {self._graph_handle(handle) for handle in priority if self._graph_handle(handle)}
+        by_owner = {str(document.get("profile_username") or "").strip().lstrip("@").lower(): document for document in documents if isinstance(document, dict)}
+        for owner in requested:
+            for profile in (by_owner.get(owner) or {}).get("profiles") or []:
+                alias = self._graph_handle((profile.get("meta") or {}).get("username")) if isinstance(profile, dict) else ""
+                if alias:
+                    pinned.add(alias)
+        owners_by_handle: dict[str, set[str]] = {}
+        for owner in requested:
+            for profile in (by_owner.get(owner) or {}).get("profiles") or []:
+                for collection in (profile.get("resources") if isinstance(profile, dict) else None) or []:
+                    if str(collection.get("id") or "").lower() not in self.GRAPH_PEOPLE_IDS:
+                        continue
+                    for item in collection.get("resources") or []:
+                        handle = self._graph_person_handle(item)
+                        if handle:
+                            owners_by_handle.setdefault(handle, set()).add(owner)
+        trimmed = []
+        for document in documents:
+            if not isinstance(document, dict):
+                continue
+            owner = str(document.get("profile_username") or "").strip().lstrip("@").lower()
+            profiles_out = []
+            for profile in document.get("profiles") or []:
+                if not isinstance(profile, dict):
+                    continue
+                resources_out = []
+                for collection in profile.get("resources") or []:
+                    items = collection.get("resources") or []
+                    if str(collection.get("id") or "").lower() not in self.GRAPH_PEOPLE_IDS or len(items) <= limit:
+                        resources_out.append(collection)
+                        continue
+                    first, second, rest = [], [], []
+                    for item in items:
+                        handle = self._graph_person_handle(item)
+                        if handle and handle in pinned:
+                            first.append(item)
+                        elif handle and (owners_by_handle.get(handle, set()) - {owner}):
+                            second.append(item)
+                        else:
+                            rest.append(item)
+                    keep = (first + second)[:limit]
+                    remaining = limit - len(keep)
+                    if remaining > 0 and rest:
+                        keep = keep + random.sample(rest, min(remaining, len(rest)))
+                    resources_out.append({**collection, "resources": keep, "trimmed_from": len(items)})
+                profiles_out.append({**profile, "resources": resources_out})
+            trimmed.append({**document, "profiles": profiles_out})
+        return {"result": trimmed}
+
+    async def search_connections(self, user_id: str, profile_username: str, platform: str = "", query: str = "", limit: int = 500, post_url: str = ""):
+        document = await self.get_social_profiles(user_id)
+        documents = document.get("result") if isinstance(document, dict) else None
+        if not isinstance(documents, list):
+            return {"result": {"items": [], "total": 0}}
+        needle = (query or "").strip().lstrip("@").lower()
+        platform_key = (platform or "").strip().lower()
+        username_key = (profile_username or "").strip().lstrip("@").lower()
+        post_url_key = (post_url or "").strip().rstrip("/")
+        fields = ("author", "name", "username", "handle", "screen_name", "acct", "login", "url", "caption")
+        matches = []
+        for doc in documents:
+            for profile in doc.get("profiles") or []:
+                meta = profile.get("meta") or {}
+                if platform_key and str(meta.get("platform", "")).lower() != platform_key:
+                    continue
+                if username_key and str(meta.get("username", "")).strip().lstrip("@").lower() != username_key:
+                    continue
+                for collection in profile.get("resources") or []:
+                    if collection.get("id") != "connections":
+                        continue
+                    for item in collection.get("resources") or []:
+                        if post_url_key and str(item.get("parent_url") or "").strip().rstrip("/") != post_url_key:
+                            continue
+                        if not needle:
+                            matches.append(item)
+                            continue
+                        haystack = " ".join(str(item.get(field, "")) for field in fields).lower()
+                        if needle in haystack:
+                            matches.append(item)
+        capped = max(1, min(int(limit or 500), 1000))
+        return {"result": {"items": matches[:capped], "total": len(matches)}}
 
     async def delete_social_profiles(self, user_id: str, profile_username: str):
         try:

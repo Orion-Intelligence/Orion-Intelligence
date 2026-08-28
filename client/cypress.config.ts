@@ -1,6 +1,7 @@
 import { defineConfig } from "cypress";
 import registerCodeCoverageTasks from "@cypress/code-coverage/task";
 import fs from "node:fs";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 
 const isCi =
@@ -8,6 +9,74 @@ const isCi =
     process.env["GITHUB_ACTIONS"] === "true" ||
     process.env["GITLAB_CI"] === "true";
 const coverageEnabled = isCi || process.env["ORION_COVERAGE"] === "true";
+
+const isUnpackedExtension = (candidate: string) =>
+    fs.existsSync(path.join(candidate, "manifest.json"));
+
+const latestSiblingExtensionBuild = (root: string): string | null => {
+    if (!fs.existsSync(root)) {
+        return null;
+    }
+    const builds = fs
+        .readdirSync(root)
+        .filter((name) => name.startsWith("build-"))
+        .map((name) => path.join(root, name, "orion-extension-chrome-dev"))
+        .filter(isUnpackedExtension)
+        .sort((first, second) => fs.statSync(second).mtimeMs - fs.statSync(first).mtimeMs);
+    return builds[0] ?? null;
+};
+
+const unpackCrx = (crxPath: string, outDir: string): string | null => {
+    const buffer = fs.readFileSync(crxPath);
+    if (buffer.subarray(0, 4).toString("utf8") !== "Cr24") {
+        return null;
+    }
+    const version = buffer.readUInt32LE(4);
+    const zipStart = version === 3
+        ? 12 + buffer.readUInt32LE(8)
+        : 16 + buffer.readUInt32LE(8) + buffer.readUInt32LE(12);
+
+    fs.rmSync(outDir, { recursive: true, force: true });
+    fs.mkdirSync(outDir, { recursive: true });
+    const zipPath = path.join(outDir, "extension.zip");
+    fs.writeFileSync(zipPath, buffer.subarray(zipStart));
+    execFileSync("unzip", ["-oq", zipPath, "-d", outDir]);
+    fs.unlinkSync(zipPath);
+    return isUnpackedExtension(outDir) ? outDir : null;
+};
+
+const resolveOrionExtensionPath = (projectRoot: string): string | null => {
+    const explicit = process.env["ORION_EXTENSION_PATH"];
+    if (explicit) {
+        return isUnpackedExtension(explicit) ? explicit : null;
+    }
+
+    const siblingRoot = process.env["ORION_EXTENSION_ROOT"] ?? path.resolve(projectRoot, "..", "..", "orion-extension");
+    const unpacked = latestSiblingExtensionBuild(siblingRoot);
+    if (unpacked) {
+        return unpacked;
+    }
+
+    if (!fs.existsSync(siblingRoot)) {
+        return null;
+    }
+    const crx = fs
+        .readdirSync(siblingRoot)
+        .filter((name) => name.startsWith("build-"))
+        .flatMap((name) => {
+            const dir = path.join(siblingRoot, name);
+            return fs.readdirSync(dir).filter((f) => f.endsWith(".crx")).map((f) => path.join(dir, f));
+        })
+        .sort((first, second) => fs.statSync(second).mtimeMs - fs.statSync(first).mtimeMs)[0];
+    if (!crx) {
+        return null;
+    }
+    try {
+        return unpackCrx(crx, path.join(projectRoot, "cypress", "downloads", "orion-extension-unpacked"));
+    } catch {
+        return null;
+    }
+};
 
 export default defineConfig({
     allowCypressEnv: false,
@@ -176,11 +245,23 @@ export default defineConfig({
             if (coverageEnabled) {
                 registerCodeCoverageTasks(on, config);
             }
+            const extensionPath = resolveOrionExtensionPath(config.projectRoot);
+            const extensionManifest = extensionPath
+                ? JSON.parse(fs.readFileSync(path.join(extensionPath, "manifest.json"), "utf8"))
+                : null;
+            config.env["extensionLoaded"] = extensionPath !== null;
+            config.env["extensionPath"] = extensionPath ?? "";
+            config.env["extensionName"] = String(extensionManifest?.name ?? "");
+            config.env["extensionVersion"] = String(extensionManifest?.version ?? "");
+            config.env["extensionManifestVersion"] = Number(extensionManifest?.manifest_version ?? 0);
             on("before:browser:launch", (browser, launchOptions) => {
-                if (browser.family === "chromium") {
+                if (browser.family === "chromium" && browser.name !== "electron") {
                     launchOptions.args.push("--start-maximized");
                     launchOptions.args.push("--window-size=1920,1080");
                     launchOptions.args.push("--force-device-scale-factor=1");
+                    if (extensionPath) {
+                        launchOptions.extensions.push(extensionPath);
+                    }
                 }
                 return launchOptions;
             });

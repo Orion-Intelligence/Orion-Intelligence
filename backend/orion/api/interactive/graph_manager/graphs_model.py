@@ -29,6 +29,7 @@ class graphs_model:
                     "total_tabs": 0,
                     "max_tabs_allowed": 5,
                     "tabs": [],
+                    "extra": {},
                 }
 
             tabs = existing.tabs or []
@@ -39,6 +40,7 @@ class graphs_model:
                 "total_tabs": len(tabs),
                 "max_tabs_allowed": 5,
                 "tabs": tabs,
+                "extra": existing.extra or {},
             }
 
         except Exception:

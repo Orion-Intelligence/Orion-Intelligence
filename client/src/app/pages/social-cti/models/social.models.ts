@@ -25,7 +25,6 @@ export interface social_profile_details {
     profile_url?: string;
     total_posts?: string;
     total_followers?: string;
-    total_following?: string;
     total_likes?: string;
     avatar?: string;
     banner?: string;
@@ -46,6 +45,7 @@ export interface social_resource {
     resource_id?: string;
     url?: string;
     parent_url?: string;
+    parent_urls?: string[];
     title?: string;
     caption?: string;
     author?: string;
@@ -63,6 +63,9 @@ export interface social_resource_collection {
     id?: string;
     is_parsed?: boolean;
     resources?: social_resource[];
+    next_cursor?: string;
+    has_more?: boolean;
+    last_synced?: string;
 }
 
 export interface social_online_presence_hit {
@@ -109,6 +112,18 @@ export interface social_wanted {
     [key: string]: any;
 }
 
+export interface social_phone_lookup {
+    query: string;
+    result: Record<string, any>;
+    [key: string]: any;
+}
+
+export interface social_exposure_signals {
+    query: string;
+    records: social_stealer_log[];
+    [key: string]: any;
+}
+
 export interface social_profile_config {
     disallowed: string[];
     [key: string]: unknown;
@@ -123,6 +138,9 @@ export interface social_profile {
     online_presence?: social_online_presence_hit[] | null;
     stealer_logs?: social_stealer_log[] | null;
     wanted?: social_wanted[] | null;
+    wanted_query?: string | null;
+    exposure_signals?: social_exposure_signals | null;
+    phone_lookup?: social_phone_lookup | null;
 }
 
 export interface db_social_model {
