@@ -1612,9 +1612,15 @@ Genesis Technologies requires that:
 
 ### 5. Backup Frequency
 
-Orion Intelligence backups are supported through scheduled hosting-level backups.
+Orion Intelligence backups are supported through scheduled hosting-level backups and through application-level backups produced by the platform itself.
 
-Backup frequency must be reviewed periodically to ensure it remains appropriate for business and recovery needs.
+Application-level scheduled backups are controlled by the Scheduled Backup setting in System Settings. When enabled, Orion Intelligence creates a backup automatically every 3 days without administrator interaction. Administrators may also create an on-demand backup at any time from the Backup and Restore page.
+
+Each application-level backup captures MongoDB collections, ArangoDB collections, Elasticsearch indices, application logs, and static resource files.
+
+The platform retains only the 5 most recent backups. When a new backup would exceed that limit, the oldest existing backup is deleted automatically. This retention limit is shared between scheduled and on-demand backups, and must be accounted for when determining whether platform-managed backups alone satisfy recovery requirements. Where longer retention is required, hosting-level or off-platform backups must be used in addition to platform-managed backups.
+
+Backup frequency and retention must be reviewed periodically to ensure they remain appropriate for business and recovery needs.
 
 ### 6. Roles and Responsibilities
 

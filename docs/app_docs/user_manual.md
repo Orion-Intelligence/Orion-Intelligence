@@ -2648,6 +2648,14 @@ Editable platform settings can include:
 
 Administrators configure platform OAuth credentials for alert webhook integrations from System Settings. System Settings stores the Slack and Jira app credentials and redirect URI notes only; tenants connect their own webhook destinations from Tenant Settings.
 
+#### Backup
+
+The Backup card controls whether Orion Intelligence creates backups on its own schedule.
+
+When Scheduled Backup is enabled, the platform creates a backup automatically every 3 days. The toggle saves immediately; there is no separate save action for it.
+
+Only the 5 most recent backups are retained. When a new backup would exceed that limit, the oldest existing backup is deleted first. This retention limit is shared across scheduled and manually created backups, so enabling the schedule will eventually displace older manual backups.
+
 ```{figure} ../screenshots/alert-integrations-system-slack-config-20260326.png
 :alt: System Slack alert integration configuration
 :width: 100%
@@ -2661,6 +2669,30 @@ System alert webhook integration settings for configuring Slack OAuth credential
 
 Administrative settings and platform-management view.
 ```
+
+### Backup and Restore
+
+Backup and Restore lists every backup held by the platform and allows administrators to create, restore, and delete them.
+
+Each backup captures:
+
+- MongoDB collections
+- ArangoDB collections
+- Elasticsearch indices
+- application logs
+- static resource files
+
+The listing shows a sequence number, backup name, type, and creation date. Backup type is either `auto` for backups produced by the 3-day schedule, or `instant` for backups created manually.
+
+Administrators can:
+
+- **Instant Backup** — create a backup immediately. The button shows a progress indicator and stays disabled until the operation finishes.
+- **Restore** — replace current data with the contents of the selected backup. The platform enters maintenance mode until the restore completes.
+- **Delete** — permanently remove a stored backup.
+
+Each action asks for confirmation before it runs. When the platform already holds 5 backups, the Instant Backup confirmation warns that the oldest backup will be removed if the operation proceeds.
+
+Restoring is destructive: collections are cleared before the backup contents are written back. Only administrators can reach these operations.
 
 ## Detailed UI Coverage Appendix
 

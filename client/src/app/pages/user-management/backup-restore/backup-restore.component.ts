@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import { finalize } from 'rxjs';
 
 import { AppService } from '../../../services/core/app/app.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
-import { ConfigSettings } from '../../../shared/model/app/config';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { ApiService } from '../../../shared/services/api.service';
@@ -22,7 +20,7 @@ interface BackupRecord {
 @Component({
   selector: 'app-backup-restore',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmationPopupComponent, TranslatePipe],
+  imports: [CommonModule, ConfirmationPopupComponent, TranslatePipe],
   animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './backup-restore.component.html',
@@ -30,13 +28,13 @@ interface BackupRecord {
 export class BackupRestoreComponent implements OnInit {
   backups: BackupRecord[] = [];
   isLoading = true;
-  scheduledBackup = false;
   backupToDelete: BackupRecord | null = null;
   backupToRestore: BackupRecord | null = null;
   isInstantConfirmationOpen = signal<boolean>(false);
   isDeleteConfirmationOpen = signal<boolean>(false);
   isRestoreConfirmationOpen = signal<boolean>(false);
   isRestoring = false;
+  isCreating = false;
   readonly MAX_BACKUPS = 5;
   instantConfirmationMessage = 'Start instant backup now?';
 
@@ -44,7 +42,6 @@ export class BackupRestoreComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.scheduledBackup = this.appService.getConfig().appSettings.backup_schedule;
     this.loadBackups();
   }
 
@@ -70,9 +67,9 @@ export class BackupRestoreComponent implements OnInit {
     if (!value) {
       return;
     }
-    this.isLoading = true;
+    this.isCreating = true;
     this.apiService.post<BackupRecord>('admin/backups/instant', {})
-      .pipe(finalize(() => (this.isLoading = false)))
+      .pipe(finalize(() => (this.isCreating = false)))
       .subscribe({
         next: () => {
           this.messageNotificationService.show(this.translationService.translate('Backup created successfully'),'success');
@@ -80,26 +77,6 @@ export class BackupRestoreComponent implements OnInit {
         },
         error: () => this.messageNotificationService.show(this.translationService.translate('Failed to create backup'))
       });
-  }
-
-  updateScheduledBackup(): void {
-    const value = this.scheduledBackup;
-    this.apiService.post<any>('public/update', {
-      settings: {
-        backup_schedule: value ? '1' : '0'
-      }
-    }).subscribe({
-      next: (response) => {
-        const current = this.appService.configData();
-        const appSettings = { ...current.appSettings, ...(response?.settings || response?.appSettings || {}), backup_schedule: value ? '1' : '0' };
-        this.appService.configData.set(new ConfigSettings(appSettings, current.localSettings));
-        this.messageNotificationService.show(this.translationService.translate('Settings updated successfully'),'success');
-      },
-      error: () => {
-        this.scheduledBackup = !value;
-        this.messageNotificationService.show(this.translationService.translate('Failed to update settings'));
-      }
-    });
   }
 
   openDeleteConfirmation(backup: BackupRecord): void {

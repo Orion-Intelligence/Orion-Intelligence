@@ -122,6 +122,10 @@ client_build() {
         mv "$backups_holding" backend/build/backups
         rmdir "$(dirname "$backups_holding")" 2>/dev/null || true
     fi
+    mkdir -p backend/build/backups
+    if [ "$(stat -c %u backend/build/backups)" != "${APP_UID:-1000}" ]; then
+        sudo chown -R "${APP_UID:-1000}:${APP_GID:-1000}" backend/build/backups
+    fi
     rm -rf backend/workspace/build
     mkdir -p backend/workspace/build
     cp -r client/build/* backend/workspace/build/
@@ -294,7 +298,6 @@ if [ "$1" = "restore" ]; then
     exit $?
 fi
 
-if [ "$1" = "-doc" ]; then
 if [ "$1" = "-doc" ] || [ "$1" = "-docs" ]; then
     docker compose -p "$PROJECT_NAME" -f docker-compose-testing.yml down -v --remove-orphans
     "$0" build -t

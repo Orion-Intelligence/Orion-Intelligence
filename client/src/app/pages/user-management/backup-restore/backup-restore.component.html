@@ -7,24 +7,13 @@
           <h1 class="text-[20px] font-semibold leading-[1.2] text-[var(--color-text1)]">{{ 'Backup & Restore' | translate }}</h1>
           <p class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Manage system backups and scheduled backup status.' | translate }}</p>
         </div>
-        <button type="button" data-testid="instant-backup-button" class="inline-flex appearance-none items-center justify-center border-0 text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] [transition-property:var(--ui-btn-transition-properties,background-color,border-color,color)] [transition-duration:var(--ui-btn-transition-duration,160ms)] [transition-timing-function:ease] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)]" (click)="openInstantConfirmation()">
-          {{ 'Instant Backup' | translate }}
+        <button type="button" data-testid="instant-backup-button" [disabled]="isCreating" class="inline-flex h-7 shrink-0 appearance-none items-center justify-center gap-1.5 border-0 rounded-[8px] px-3 text-[11px] font-semibold leading-none transition-[background-color] duration-150 focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] text-white hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] disabled:cursor-not-allowed disabled:opacity-65" (click)="openInstantConfirmation()">
+          @if (isCreating) { <svg class="h-3 w-3 animate-spin" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8v4a4 4 0 0 0-4 4H4z"></path></svg> }
+          {{ (isCreating ? 'Creating...' : 'Instant Backup') | translate }}
         </button>
       </div>
 
       <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
-
-      <div class="mb-4 flex items-center justify-between rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 py-3">
-        <div>
-          <div class="text-sm font-semibold text-[var(--color-text1)]">{{ 'Scheduled Backup' | translate }}</div>
-          <div class="mt-1 text-[12px] text-[var(--color-text4)]">{{ 'Run an automatic backup every 3 days.' | translate }}</div>
-        </div>
-        <label class="relative inline-flex h-[18px] w-[34px] cursor-pointer items-center">
-          <input data-testid="scheduled-backup-toggle" type="checkbox" class="sr-only peer" [attr.aria-label]="'Scheduled Backup' | translate" [(ngModel)]="scheduledBackup" (ngModelChange)="updateScheduledBackup()" />
-          <span class="absolute inset-0 rounded-full bg-[var(--color-blue-700)] transition-colors duration-300 peer-checked:bg-[var(--color-blue-640)] border border-[var(--color-border)]"></span>
-          <span class="absolute left-[1px] top-0 mt-[1px] h-[16px] w-[16px] rounded-full bg-white transition-transform duration-300" [ngClass]="scheduledBackup ? 'translate-x-[16px]' : 'translate-x-0'"></span>
-        </label>
-      </div>
 
       <div class="m-0 overflow-hidden rounded-none border-0 [box-shadow:rgba(0,0,0,0.06)_0_4px_6px_-1px,rgba(0,0,0,0.035)_0_2px_4px_-1px] md:rounded-[8px] md:border md:!border-[var(--tenant-line)]">
         @if (!isLoading) {
@@ -55,8 +44,8 @@
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">{{ formatDate(backup.created_at) }}</td>
                       <td class="overflow-clip align-middle whitespace-nowrap px-4 py-2.5">
                         <div class="flex justify-end gap-2">
-                          <button type="button" [disabled]="isRestoring" class="inline-flex items-center justify-center border border-[var(--color-border)] bg-[var(--color-blue-720)] text-sm font-semibold text-[var(--color-text2)] leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] hover:bg-[var(--color-blue-700)] disabled:opacity-50" (click)="openRestoreConfirmation(backup)">{{ (isRestoring && backupToRestore?.id === backup.id ? 'Restoring...' : 'Restore') | translate }}</button>
-                          <button type="button" class="ui-delete-button inline-flex items-center justify-center border text-sm font-semibold leading-none [height:var(--ui-btn-height,36px)] [padding:var(--ui-btn-py,0)_var(--ui-btn-px,16px)] [border-radius:var(--ui-btn-radius,10px)] focus-visible:outline-none" (click)="openDeleteConfirmation(backup)">{{ 'Delete' | translate }}</button>
+                          <button type="button" [disabled]="isRestoring" class="group inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-[7px] border px-2.5 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]" (click)="openRestoreConfirmation(backup)">{{ (isRestoring && backupToRestore?.id === backup.id ? 'Restoring...' : 'Restore') | translate }}</button>
+                          <button type="button" class="group inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-[7px] border px-2.5 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#5c2424] bg-[linear-gradient(135deg,rgba(235,107,107,0.22),rgba(224,72,72,0.12))] text-[var(--color-text1)] hover:border-[#7d2c2c] hover:bg-[linear-gradient(135deg,rgba(235,107,107,0.30),rgba(224,72,72,0.18))] [.light-theme_&]:border-[#e1bcbc] [.light-theme_&]:bg-[#fcefef] [.light-theme_&]:hover:border-[#d89898] [.light-theme_&]:hover:bg-[#fae5e5]" (click)="openDeleteConfirmation(backup)">{{ 'Delete' | translate }}</button>
                         </div>
                       </td>
                     </tr>
@@ -79,8 +68,8 @@
                   <div class="truncate text-sm font-semibold text-[var(--color-text1)]">{{ backup.filename }}</div>
                   <div class="mt-1 text-[11px] text-[var(--color-text4)]">#{{ i + 1 }} • {{ backup.backup_type | translate }} • {{ formatDate(backup.created_at) }}</div>
                   <div class="mt-3 flex justify-end gap-2">
-                    <button type="button" [disabled]="isRestoring" class="inline-flex h-9 items-center rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-720)] px-3 text-sm font-semibold text-[var(--color-text2)] disabled:opacity-50" (click)="openRestoreConfirmation(backup)">{{ (isRestoring && backupToRestore?.id === backup.id ? 'Restoring...' : 'Restore') | translate }}</button>
-                    <button type="button" class="ui-delete-button inline-flex h-9 items-center rounded-[8px] border px-3 text-sm font-semibold" (click)="openDeleteConfirmation(backup)">{{ 'Delete' | translate }}</button>
+                    <button type="button" [disabled]="isRestoring" class="group inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-[7px] border px-2.5 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa]" (click)="openRestoreConfirmation(backup)">{{ (isRestoring && backupToRestore?.id === backup.id ? 'Restoring...' : 'Restore') | translate }}</button>
+                    <button type="button" class="group inline-flex h-7 shrink-0 items-center justify-center gap-1.5 rounded-[7px] border px-2.5 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#5c2424] bg-[linear-gradient(135deg,rgba(235,107,107,0.22),rgba(224,72,72,0.12))] text-[var(--color-text1)] hover:border-[#7d2c2c] hover:bg-[linear-gradient(135deg,rgba(235,107,107,0.30),rgba(224,72,72,0.18))] [.light-theme_&]:border-[#e1bcbc] [.light-theme_&]:bg-[#fcefef] [.light-theme_&]:hover:border-[#d89898] [.light-theme_&]:hover:bg-[#fae5e5]" (click)="openDeleteConfirmation(backup)">{{ 'Delete' | translate }}</button>
                   </div>
                 </div>
               }

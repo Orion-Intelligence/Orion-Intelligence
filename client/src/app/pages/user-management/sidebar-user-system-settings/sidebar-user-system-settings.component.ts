@@ -41,6 +41,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   configurationError = '';
   mailErrorState = false;
   webhookErrorState = false;
+  scheduledBackup = false;
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   webhookForm: AlertWebhookSettingsForm = this.createWebhookForm();
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
@@ -54,6 +55,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   ngOnInit(): void {
     this.activeTab = this.getInitialTab();
+    this.scheduledBackup = this.appService.getConfig().appSettings.backup_schedule;
     this.loadSettings();
     this.webhookSnapshot = this.webhookState();
     this.loadAlertConnectorSettings();
@@ -342,6 +344,26 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     };
     this.webhookErrorState = false;
     this.webhookSnapshot = this.webhookState();
+  }
+
+  updateScheduledBackup(): void {
+    const value = this.scheduledBackup;
+    this.apiService.post<any>('public/update', {
+      settings: {
+        backup_schedule: value ? '1' : '0'
+      }
+    }).subscribe({
+      next: (response) => {
+        const current = this.appService.configData();
+        const appSettings = { ...current.appSettings, ...(response?.settings || response?.appSettings || {}), backup_schedule: value ? '1' : '0' };
+        this.appService.configData.set(new ConfigSettings(appSettings, current.localSettings));
+        this.messageNotificationService.show(this.translationService.translate('Settings updated successfully'),'success');
+      },
+      error: () => {
+        this.scheduledBackup = !value;
+        this.messageNotificationService.show(this.translationService.translate('Failed to update settings'));
+      }
+    });
   }
 
   private configurationState(): string {
