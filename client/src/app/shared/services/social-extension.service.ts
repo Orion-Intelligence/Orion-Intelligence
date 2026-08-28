@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { EXTENSION_LATEST_TTL_MS, EXTENSION_STORE_URL } from '../constants/extension';
+import { EXTENSION_DOWNLOAD_URLS, EXTENSION_LATEST_TTL_MS } from '../constants/extension';
 import { ExtensionPresence, ExtensionState } from '../model/extension/extension.model';
 
 @Injectable({ providedIn: 'root' })
@@ -126,7 +126,7 @@ export class SocialExtensionService {
         return;
       }
       const body = await response.json() as { chrome?: string; firefox?: string };
-      const value = /firefox/i.test(navigator.userAgent) ? body?.firefox : body?.chrome;
+      const value = this.browserKind() === 'firefox' ? body?.firefox : body?.chrome;
       if (typeof value === 'string' && value) {
         this.latest = value;
       }
@@ -140,8 +140,12 @@ export class SocialExtensionService {
     return this.latest;
   }
 
-  storeUrl(_browser: 'chrome' | 'firefox'): string {
-    return EXTENSION_STORE_URL;
+  browserKind(): 'chrome' | 'firefox' {
+    return typeof navigator !== 'undefined' && /Firefox\//.test(navigator.userAgent) ? 'firefox' : 'chrome';
+  }
+
+  downloadUrl(browser: 'chrome' | 'firefox' = this.browserKind()): string {
+    return EXTENSION_DOWNLOAD_URLS[browser];
   }
 
   private outdated(installed: string): boolean {

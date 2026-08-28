@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { social_profile } from '../models/social.models';
 import { formatFollowers, formatKey } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
@@ -10,6 +10,9 @@ import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 
+const DEDUPE_MIN_LENGTH = 12;
+const METADATA_PRIORITY = ['real_name', 'description', 'bio', 'location', 'country', 'joined_date', 'total_followers', 'total_posts', 'total_views', 'status', 'url', 'profile_url'];
+
 @Component({
   selector: 'app-social-default-list-section',
   templateUrl: './default-list-section.component.html',
@@ -19,6 +22,7 @@ import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 })
 export class SocialDefaultListSectionComponent {
   private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
+  private readonly expandedMetadata = signal<ReadonlySet<string>>(new Set<string>());
 
   user = input.required<FeedUser>();
   highlightedNodeId = input<string | null>(null);
@@ -28,6 +32,7 @@ export class SocialDefaultListSectionComponent {
   copyValue = output<unknown>();
   readonly formatKey = formatKey;
   readonly missingStatValue = 'Not fetched';
+  readonly metadataPreviewCount = 6;
 
   getPlatformCardId(platformData: social_profile): string {
     return `platform-${platformData.meta.username}|${platformData.meta.platform}|${platformData.meta.username}`;
@@ -85,13 +90,53 @@ export class SocialDefaultListSectionComponent {
   }
 
   getFilteredMetadataEntries(platformData: social_profile): { key: string; value: unknown; }[] {
-    return getMetadataEntries({
+    const entries = getMetadataEntries({
       ...asUnknownRecord(platformData.meta),
       ...asUnknownRecord(platformData.profile_details),
     })
       .filter(entry => entry.key.toLowerCase().replace(/[\s_-]+/g, '') !== 'timestamp')
       .filter(entry => entry.value !== null && entry.value !== undefined && entry.value !== '')
       .filter(entry => typeof entry.value !== 'object');
+    const keys = new Set(entries.map(entry => entry.key.toLowerCase()));
+    const seen = new Set<string>();
+    const deduped = entries.filter(entry => {
+      const key = entry.key.toLowerCase();
+      if (key.endsWith('_text') && keys.has(key.slice(0, -5))) {
+        return false;
+      }
+      const fingerprint = this.formatMetadataValue(entry.value).trim().toLowerCase();
+      if (fingerprint.length < DEDUPE_MIN_LENGTH) {
+        return true;
+      }
+      if (seen.has(fingerprint)) {
+        return false;
+      }
+      seen.add(fingerprint);
+      return true;
+    });
+    return deduped.sort((first, second) => this.metadataRank(first.key) - this.metadataRank(second.key));
+  }
+
+  private metadataRank(key: string): number {
+    const rank = METADATA_PRIORITY.indexOf(key.toLowerCase());
+    return rank === -1 ? METADATA_PRIORITY.length : rank;
+  }
+
+  getVisibleMetadataEntries(platformData: social_profile, entries: { key: string; value: unknown; }[]): { key: string; value: unknown; }[] {
+    return this.isMetadataExpanded(platformData) ? entries : entries.slice(0, this.metadataPreviewCount);
+  }
+
+  isMetadataExpanded(platformData: social_profile): boolean {
+    return this.expandedMetadata().has(this.getPlatformCardId(platformData));
+  }
+
+  toggleMetadata(platformData: social_profile): void {
+    const cardId = this.getPlatformCardId(platformData);
+    const expanded = new Set(this.expandedMetadata());
+    if (!expanded.delete(cardId)) {
+      expanded.add(cardId);
+    }
+    this.expandedMetadata.set(expanded);
   }
 
   formatMetadataValue(value: unknown): string {

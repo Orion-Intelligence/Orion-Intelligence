@@ -68,19 +68,22 @@ export function assertInstallPrompt() {
   void cy.get(MANAGER, { timeout: TIMEOUT })
     .should('be.visible')
     .and('contain.text', 'Orion extension required')
-    .and('contain.text', 'Install the Orion extension from your browser');
+    .and('contain.text', 'Download the signed Orion package for your browser');
   void cy.get('[data-testid="social-extension-open"]').should('not.exist');
   void cy.get('[data-testid="social-extension-download-firefox"]')
     .should('contain.text', 'Install for Firefox')
-    .and('have.attr', 'href', 'https://addons.mozilla.org/en-US/firefox/addon/orion-social/')
-    .and('have.attr', 'target', '_blank');
+    .and('have.attr', 'href', '/ext/firefox/orion-social-firefox.xpi');
   void cy.get('[data-testid="social-extension-download-chrome"]')
-    .should('contain.text', 'Install for Chrome')
-    .and('have.attr', 'href', 'https://addons.mozilla.org/en-US/firefox/addon/orion-social/')
-    .and('have.attr', 'target', '_blank');
+    .should('contain.text', 'Download for Chromium')
+    .and('not.have.attr', 'href')
+    .click();
+  void cy.contains('Chromium install is coming soon').should('be.visible');
+  void cy.get('[data-testid="tenant-message-dismiss"]').click();
   void cy.get(MANAGER).find('a[data-testid^="social-extension-download-"]').first()
     .should('have.attr', 'data-testid', 'social-extension-download-firefox');
-  void cy.get(MANAGER).find('ol li').should('have.length', 3);
+  void cy.get('[data-testid="social-extension-steps-firefox"]').find('li').should('have.length', 3);
+  void cy.get('[data-testid="social-extension-steps-chrome"]').find('li').should('have.length', 3);
+  void cy.get('[data-testid="social-extension-steps-chrome"]').should('contain.text', 'chrome://extensions');
 }
 
 export function setupManageProfilesStubs() {

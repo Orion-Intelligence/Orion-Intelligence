@@ -1,9 +1,10 @@
 import json
 import asyncio
 import secrets
+from pathlib import Path
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Request, Response, WebSocket, WebSocketDisconnect, status
-from starlette.responses import JSONResponse
+from starlette.responses import FileResponse, JSONResponse
 
 from configs.app_dependency import get_extension_user
 from configs.auth_cookie import clear_extension_cookie, extension_token_from_request, set_extension_cookie
@@ -18,6 +19,17 @@ from orion.services.session_manager.session_manager import session_manager
 extension_routes = APIRouter()
 
 WS_TICKET_TTL_SECONDS = 30
+EXTENSION_DIR = Path(__file__).resolve().parents[1] / "workspace" / "extension"
+EXTENSION_ARTIFACTS = {
+    "chrome/orion-social-chrome.crx": ("application/x-chrome-extension", False),
+    "chrome/orion-social-chrome-unpacked.zip": ("application/zip", True),
+    "chrome/updates.xml": ("application/xml", False),
+    "chrome/policy/linux/orion-social.json": ("application/json", True),
+    "chrome/policy/windows/orion-social.reg": ("application/octet-stream", True),
+    "chrome/policy/macos/orion-social.mobileconfig": ("application/x-apple-aspen-config", True),
+    "firefox/orion-social-firefox.xpi": ("application/x-xpinstall", False),
+    "firefox/updates.json": ("application/json", False),
+}
 
 
 async def system_session_active(current_user, redis_store: redis_controller) -> bool:
@@ -169,3 +181,22 @@ async def extension_socket(websocket: WebSocket):
         return
     finally:
         await socket_manager.unregister(user_key, websocket, socket_id)
+
+
+@extension_routes.get("/ext/{artifact:path}")
+async def extension_artifact(artifact: str):
+    entry = EXTENSION_ARTIFACTS.get(artifact)
+    if not entry:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Extension package not found")
+
+    media_type, as_attachment = entry
+    file_path = EXTENSION_DIR / artifact
+    if not file_path.is_file():
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Extension package not found")
+
+    return FileResponse(
+        file_path,
+        media_type=media_type,
+        filename=file_path.name if as_attachment else None,
+        headers={"Cache-Control": "no-store"},
+    )

@@ -503,7 +503,7 @@ export class SocialProfileListingComponent {
   }
 
   extensionUpdateUrl(): string {
-    return this.extensionService.storeUrl(/firefox/i.test(navigator.userAgent) ? 'firefox' : 'chrome');
+    return this.extensionService.downloadUrl();
   }
 
   private fetchProfileDetails(platformData: social_profile): void {
