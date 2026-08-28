@@ -12,12 +12,22 @@ import {
   clickTab,
   findStealerRow,
   setupSocialStubs,
-  stubPhoneIntelligence
+  stubBulkCrawlSection,
+  stubPhoneIntelligence,
+  stubSlowCrawlSection
 } from './controllers/08-social-management.controller';
 import {
   assertInstallPrompt,
+  assertPlatformLoadFailure,
+  assertSessionCapacityReached,
   assertSessionProfiles,
+  assertSignedOutPrompt,
+  assertUnsupportedBrowserPrompt,
+  setupManageProfilesAtCapacityStubs,
+  setupManageProfilesFailureStubs,
   setupManageProfilesStubs,
+  visitWithSignedOutExtension,
+  visitWithUnsupportedBrowser,
   visitWithoutExtension
 } from './controllers/08-social-extension.controller';
 
@@ -274,6 +284,9 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     cy.wait('@socialConnections', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
       expect(request.body.query).to.eq('loislane');
     });
+    cy.get('[data-testid="social-tab-panel-crawl"]', { timeout: FETCH_TIMEOUT })
+      .should('contain.text', 'loislane')
+      .and('not.contain.text', 'jimmyolsen');
 
     clickTab('onlinePresence');
     cy.get('[data-testid="social-online-presence-input"]', { timeout: FETCH_TIMEOUT }).clear().type(SOCIAL_USERNAME);
@@ -348,6 +361,111 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     cy.get('[data-testid="social-list-view"]', { timeout: FETCH_TIMEOUT }).should('be.visible');
   });
 
+  it('renders the empty result state when a scan returns no platforms', () => {
+    cy.intercept('POST', '**/api/social/recon', { statusCode: 200, body: { job_id: 'cypress', result: [] } }).as('socialRecon');
+
+    cy.get('[data-testid="social-scan-input"]').clear().type('nobody_at_all');
+    cy.get('[data-testid="social-scan-submit"]').should('not.be.disabled').click();
+    cy.wait('@socialRecon', { timeout: FETCH_TIMEOUT });
+    cy.contains('[data-testid="social-history-job"]', 'nobody_at_all', { timeout: SCAN_TIMEOUT })
+      .should('contain.text', 'Results Ready')
+      .click();
+
+    cy.get('[data-testid="social-list-empty"]', { timeout: FETCH_TIMEOUT }).should('be.visible');
+    cy.get('[data-testid="social-profile-empty-card"]').should('be.visible');
+    cy.get('[data-testid="social-list-empty-manage-profiles"]').should('be.disabled');
+    cy.get('[data-testid="social-platform-search-empty"]').should('be.disabled');
+    cy.get(PLATFORM_CARD).should('not.exist');
+  });
+
+  it('reports clean stealer and phone lookups with explicit empty states', () => {
+    cy.intercept('POST', '**/api/search/stealer/ioc', { statusCode: 200, body: { Result: [] } }).as('socialStealerLogs');
+    cy.intercept('POST', '**/api/phone/universal_search', { statusCode: 200, delay: 300, body: {} }).as('socialPhone');
+
+    scanUsername();
+
+    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-dashboard-stealer-empty"]', { timeout: FETCH_TIMEOUT })
+      .should('be.visible')
+      .and('contain.text', 'No record found');
+    cy.get('[data-testid="social-dashboard-stealer-row"]').should('not.exist');
+
+    cy.get('[data-testid="social-phone-search-input"]').clear().type('15550199');
+    cy.get('[data-testid="social-phone-search-button"]').should('not.be.disabled').click();
+    cy.wait('@socialPhone', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-phone-empty"]', { timeout: FETCH_TIMEOUT })
+      .should('be.visible')
+      .and('contain.text', 'No record found');
+    cy.get('[data-testid="social-phone-entity"]').should('not.exist');
+  });
+
+  it('stops an in-flight section sync from the crawl band', () => {
+    scanUsername();
+    openProfile();
+    stubSlowCrawlSection('posts');
+
+    clickTab('posts');
+    cy.get('[data-testid="social-crawl-section-fetch"]', { timeout: FETCH_TIMEOUT }).first().click();
+    cy.get('[data-testid="social-crawl-section-stop"]', { timeout: FETCH_TIMEOUT })
+      .should('be.visible')
+      .and('contain.text', 'Stop')
+      .click();
+    cy.wait('@socialCrawl', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-crawl-section-stop"]').should('not.exist');
+    cy.get('[data-testid="social-crawl-section-fetch"]').should('be.visible');
+  });
+
+  it('pages a large crawl result through the load more control', () => {
+    scanUsername();
+    openProfile();
+    stubBulkCrawlSection('posts', 62);
+
+    clickTab('posts');
+    cy.get('[data-testid="social-crawl-section-fetch"]', { timeout: FETCH_TIMEOUT }).first().click();
+    cy.wait('@socialCrawl', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-feed-post"]', { timeout: FETCH_TIMEOUT }).should('have.length', 50);
+    cy.get('[data-testid="social-crawl-load-more"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="social-feed-post"]').should('have.length', 62);
+    cy.get('[data-testid="social-crawl-load-more"]').should('not.exist');
+  });
+
+  it('opens the post connections popup from a feed post', () => {
+    cy.intercept('POST', '**/api/social/recon', {
+      statusCode: 200,
+      body: {
+        job_id: 'cypress',
+        result: [{
+          id: 'youtube:superman0011',
+          meta: { platform: 'YouTube', username: SOCIAL_USERNAME, url: `https://www.youtube.com/@${SOCIAL_USERNAME}`, status: 'active' },
+          profile_details: { real_name: 'Clark Kent', crawl_type: ['details', 'posts'] },
+        }],
+      },
+    }).as('socialRecon');
+
+    scanUsername(SOCIAL_USERNAME, /youtube/i);
+    openProfile(/youtube/i);
+
+    clickTab('posts');
+    cy.get('[data-testid="social-crawl-section-fetch"]', { timeout: FETCH_TIMEOUT }).first().click();
+    cy.wait('@socialCrawl', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-feed-post"]', { timeout: FETCH_TIMEOUT }).should('have.length.greaterThan', 0);
+
+    cy.get('[data-testid="social-feed-view-connections"]').first().click({ force: true });
+    cy.get('[data-testid="social-feed-connections-popup"][open]', { timeout: FETCH_TIMEOUT }).should('be.visible');
+    cy.wait('@socialConnections', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
+      expect(request.body.query).to.eq('');
+      expect(request.body.post_url).to.contain('/status/');
+    });
+
+    cy.get('[data-testid="social-feed-connections-popup"][open]')
+      .find('[data-testid="social-feed-connections-search"]')
+      .type('loislane');
+    cy.wait('@socialConnections', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
+      expect(request.body.query).to.eq('loislane');
+    });
+    cy.get('[data-testid="social-feed-connections-popup"][open]').should('contain.text', 'loislane');
+  });
+
   it('covers sidebar collapse and header back navigation', () => {
     cy.get('app-home-menu [data-sidebar-expanded]').should('be.visible');
     cy.get('[data-testid="graph-sidebar-collapse"]').should('have.attr', 'aria-label', 'Collapse sidebar').click();
@@ -374,6 +492,16 @@ describe('Orion Intelligence - Social Extension', () => {
     assertInstallPrompt();
     cy.docsScreenshot('social-extension-install');
   });
+
+  it('waits for sign-in when the extension is installed but signed out', () => {
+    visitWithSignedOutExtension('/dashboard/manage-profiles');
+    assertSignedOutPrompt();
+  });
+
+  it('explains the unsupported browser case', () => {
+    visitWithUnsupportedBrowser('/dashboard/manage-profiles');
+    assertUnsupportedBrowserPrompt();
+  });
 });
 
 describe('Orion Intelligence - Social Extension Session Profiles', () => {
@@ -389,5 +517,27 @@ describe('Orion Intelligence - Social Extension Session Profiles', () => {
   it('manages captured platform sessions', () => {
     cy.visit('/dashboard/manage-profiles');
     assertSessionProfiles();
+  });
+});
+
+describe('Orion Intelligence - Social Extension Session Limits', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('blocks a new capture once every session slot is used', () => {
+    setupManageProfilesAtCapacityStubs();
+    cy.visit('/dashboard/manage-profiles');
+    assertSessionCapacityReached();
+  });
+
+  it('surfaces a platform load failure', () => {
+    setupManageProfilesFailureStubs();
+    cy.visit('/dashboard/manage-profiles');
+    assertPlatformLoadFailure();
   });
 });

@@ -155,7 +155,7 @@ Cypress.on("window:before:load", (win) => {
 
 beforeEach(() => {
     void cy.intercept('POST', '**/api/get/tenant/node', (req) => {
-        req.continue((res) => {
+        req.on('before:response', (res) => {
             if (res.body?.user) {
                 res.body.user.demo_tour = true;
             }

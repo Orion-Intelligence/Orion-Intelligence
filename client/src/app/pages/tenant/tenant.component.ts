@@ -95,7 +95,7 @@ export class TenantComponent implements OnInit {
           if (!state) {
             return state;
           }
-          const updated = {
+          return {
             ...state,
             tenant: res.tenant ? {
               ...state.tenant,
@@ -116,15 +116,14 @@ export class TenantComponent implements OnInit {
             } : state.tenant,
             alerts: res.alerts ?? state.alerts
           };
-          this.appService.tenantData.set({
-            name: (res.tenant?.name ?? this.appService.tenantData().name) || '',
-            iocs: (res.tenant?.iocs ?? this.appService.tenantData().iocs) || [],
-            privileged_ioc: res.tenant?.privileged_ioc ?? this.appService.tenantData().privileged_ioc
-          });
-          this.appService.setOnboardingStatus(false);
-          this.router.navigate(['/dashboard']).then();
-          return updated;
         });
+        this.appService.tenantData.set({
+          name: (res.tenant?.name ?? this.appService.tenantData().name) || '',
+          iocs: (res.tenant?.iocs ?? this.appService.tenantData().iocs) || [],
+          privileged_ioc: res.tenant?.privileged_ioc ?? this.appService.tenantData().privileged_ioc
+        });
+        this.appService.setOnboardingStatus(false);
+        this.router.navigate(['/dashboard']).then();
       },
     });
   }

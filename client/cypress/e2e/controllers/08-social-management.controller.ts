@@ -1,3 +1,5 @@
+import { stubExtensionPresence } from './08-social-extension.controller';
+
 export const PLATFORM_CARD = '[data-testid="social-platform-card"]';
 const CRAWL_PANEL = '[data-testid="social-tab-panel-crawl"]';
 export const GRAPH_ROOT = '[data-testid="social-user-graph-root"]';
@@ -14,7 +16,7 @@ export const SOCIAL_DOMAIN = 'twitter.com';
 const CRAWL_TYPES = ['details', 'posts', 'videos', 'images', 'followers', 'repositories'];
 
 function asRecord(value: unknown): Record<string, unknown> {
-  return value as Record<string, unknown>;
+  return (value ?? {}) as Record<string, unknown>;
 }
 
 export function findStealerRow(rows: JQuery, limit?: number) {
@@ -52,7 +54,18 @@ function crawlItemsFor(type: string, mocks: Record<string, unknown>): unknown[] 
     case 'repositories':
       return [{ resource_id: 'repo-1', name: 'orion-recon', url: 'https://github.com/superman0011/orion-recon', description: 'Recon helpers for Orion.', language: 'TypeScript', stars: 128, forks: 12 }];
     case 'connections':
-      return items('followers', 'followers').map((entry) => ({ ...asRecord(entry), type: 'connections', parent_url: 'https://twitter.com/superman0011/status/1' }));
+      return items('followers', 'followers').map((entry, index) => {
+        const record = asRecord(entry);
+        const handle = typeof entry === 'string' ? entry : String(record['handle'] ?? record['username'] ?? `connection-${index}`);
+        return {
+          resource_id: `connection-${handle}`,
+          handle,
+          title: handle,
+          url: `https://twitter.com/${handle}`,
+          type: 'connections',
+          parent_url: `https://twitter.com/${SOCIAL_USERNAME}/status/1`,
+        };
+      });
     default:
       return null;
   }
@@ -95,8 +108,63 @@ function graphDocumentFor(username: string) {
   };
 }
 
+let loadedMocks: Record<string, unknown> = {};
+
+function replyWithCrawlMock(request: { body?: Record<string, unknown>; reply(response: unknown): void }, type: string) {
+  if (type === 'details') {
+    const details = JSON.parse(JSON.stringify(asRecord(loadedMocks['profile'])['result'] ?? {})) as Record<string, unknown>;
+    details['profile'] = { ...asRecord(details['profile']), crawl_type: CRAWL_TYPES };
+    request.reply({ statusCode: 200, body: { status: 'done', result: details } });
+    return;
+  }
+  const items = crawlItemsFor(type, loadedMocks);
+  request.reply({ statusCode: 200, body: items === null ? { status: 'idle' } : { status: 'done', result: { items, has_more: false } } });
+}
+
+export function stubSlowCrawlSection(slowType: string, delay = 30000) {
+  void cy.intercept('POST', '**/api/social/profile', (request) => {
+    const type = String(request.body?.type ?? '');
+    if (request.body?.command === 'cancel') {
+      request.reply({ statusCode: 200, body: { status: 'done' } });
+      return;
+    }
+    if (type === slowType) {
+      request.reply({ statusCode: 200, delay, body: { status: 'done', result: { items: [], has_more: false } } });
+      return;
+    }
+    replyWithCrawlMock(request, type);
+  }).as('socialCrawl');
+}
+
+export function stubBulkCrawlSection(bulkType: string, count: number) {
+  const items = Array.from({ length: count }, (_, index) => ({
+    resource_id: `bulk-${index}`,
+    id: `bulk-${index}`,
+    caption: `Bulk ${bulkType} entry ${index}`,
+    title: `Bulk ${bulkType} entry ${index}`,
+    handle: `bulk_handle_${index}`,
+    url: `https://twitter.com/${SOCIAL_USERNAME}/status/${index}`,
+    datetime: '2026-06-13T10:00:00Z',
+  }));
+  void cy.intercept('POST', '**/api/social/profile', (request) => {
+    const type = String(request.body?.type ?? '');
+    if (request.body?.command === 'cancel') {
+      request.reply({ statusCode: 200, body: { status: 'done' } });
+      return;
+    }
+    if (type === bulkType) {
+      request.reply({ statusCode: 200, body: { status: 'done', result: { items, has_more: false } } });
+      return;
+    }
+    replyWithCrawlMock(request, type);
+  }).as('socialCrawl');
+}
+
 export function setupSocialStubs() {
+  stubExtensionPresence(true);
+
   const mocks: Record<string, unknown> = {};
+  loadedMocks = mocks;
   const remember = (key: string, filename: string) => loadMock(ELASTIC_MOCKS, filename).then((mock) => {
     mocks[key] = mock;
   });
@@ -126,14 +194,7 @@ export function setupSocialStubs() {
       request.reply({ statusCode: 200, body: { status: 'done' } });
       return;
     }
-    if (type === 'details') {
-      const details = JSON.parse(JSON.stringify(asRecord(mocks['profile'])['result'] ?? {})) as Record<string, unknown>;
-      details['profile'] = { ...asRecord(details['profile']), crawl_type: CRAWL_TYPES };
-      request.reply({ statusCode: 200, body: { status: 'done', result: details } });
-      return;
-    }
-    const items = crawlItemsFor(type, mocks);
-    request.reply({ statusCode: 200, body: items === null ? { status: 'idle' } : { status: 'done', result: { items, has_more: false } } });
+    replyWithCrawlMock(request, type);
   }).as('socialCrawl');
 
   void cy.intercept('POST', '**/api/social/connections', (request) => {
@@ -148,7 +209,6 @@ export function setupSocialStubs() {
     request.reply({ statusCode: 200, body: { result: usernames.map(graphDocumentFor) } });
   }).as('socialGraphData');
 
-  void cy.intercept('GET', '**/api/extension/session', { statusCode: 200, body: { extension_connected: true } });
   void cy.intercept('POST', '**/api/social/recon/status', { statusCode: 200, body: { status: 'pending', progress: 90, step: 'Scanning' } });
   void cy.intercept('POST', '**/api/search/social', { statusCode: 200, body: { Result: [], Total_Hits: 0 } });
   void cy.intercept('POST', '**/api/phone/universal_search', { statusCode: 200, body: { cards_data: [] } }).as('socialPhone');
@@ -174,6 +234,7 @@ export function assertCrawlTabs() {
     void cy.get(CRAWL_PANEL, { timeout: FETCH_TIMEOUT }).should('be.visible');
     void cy.get(list, { timeout: FETCH_TIMEOUT }).should('be.visible');
     void cy.get(item).should('have.length.greaterThan', 0);
+    void cy.get('[data-testid="social-crawl-fresh-band"], [data-testid="social-crawl-stale-band"]').should('have.length.greaterThan', 0);
   });
   void cy.get('[data-testid="social-work-row"]').first().should('contain.text', 'orion-recon').and('contain.text', 'TypeScript');
   void cy.docsScreenshot('social-followers-popup');
