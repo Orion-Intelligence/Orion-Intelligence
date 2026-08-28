@@ -9,7 +9,7 @@
       <div class="!text-[var(--color-text1)] text-lg font-semibold">{{ 'confirmation.title' | translate }}</div>
     }
 
-    <div class="mt-3 break-all text-sm text-[var(--color-text3)]" [ngClass]="warning() ? (message().includes('\n') ? ['whitespace-pre-line'] : ['whitespace-nowrap', 'max-[480px]:whitespace-normal']) : []">
+    <div class="mt-3 break-all text-sm text-[var(--color-text3)]" [ngClass]="message().includes('\n') ? ['whitespace-pre-line'] : []">
       {{ message() | translate }}
     </div>
 

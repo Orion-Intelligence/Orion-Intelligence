@@ -14,6 +14,7 @@ export class AppSettingsModel {
   home_header_pricing_allowed: boolean = true;
   home_header_whistle_blowing_allowed: boolean = false;
   ai_endpoint_enabled: boolean = true;
+  backup_schedule: boolean = false;
   admin_root_allowed: boolean = false;
   smtp_configured: boolean = false;
   s_onion: string = '';
@@ -22,6 +23,7 @@ export class AppSettingsModel {
     if (data) {
       const hasAiEndpointEnabled = data.ai_endpoint_enabled !== undefined;
       this.ai_endpoint_enabled = data.ai_endpoint_enabled === true || data.ai_endpoint_enabled === '1' || (!hasAiEndpointEnabled && this.ai_endpoint_enabled);
+      this.backup_schedule = data.backup_schedule === true || data.backup_schedule === '1';
       this.admin_root_allowed = data.admin_root_allowed === true || data.admin_root_allowed === '1' || data.admin_root_allowed === 'true';
       this.version = (data.version as string) || this.version;
       this.app_url = (data.app_url as string) || this.app_url;

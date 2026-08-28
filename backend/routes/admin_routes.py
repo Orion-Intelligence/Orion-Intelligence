@@ -3,11 +3,13 @@ from fastapi.responses import RedirectResponse
 
 from configs.app_dependency import license_required, status_required, role_required, get_current_user
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.backup_manager.backup_manager import BackupManager
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.server.config_manager.model.config_data import config_data
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from orion.services.mail_manager.mail_manager import mail_manager
+from orion.services.mongo_manager.shared_model.db_backup_model import BackupType
 
 admin_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 
@@ -87,3 +89,35 @@ async def verify_mail_configuration(current_user=Depends(get_current_user)):
         raise
     except Exception as exc:
         raise HTTPException(status_code=400, detail="Mail configuration is not working") from exc
+
+
+@admin_routes.get(
+    "/api/admin/backups",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def list_backups():
+    return await BackupManager.get_instance().list_backups()
+
+
+@admin_routes.post(
+    "/api/admin/backups/instant",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def create_instant_backup():
+    return await BackupManager.get_instance().create_backup(BackupType.INSTANT)
+
+
+@admin_routes.delete(
+    "/api/admin/backups/{backup_id}",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def delete_backup(backup_id: str):
+    return await BackupManager.get_instance().delete_backup(backup_id)
+
+
+@admin_routes.post(
+    "/api/admin/backups/{backup_id}/restore",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def restore_backup(backup_id: str):
+    return await BackupManager.get_instance().restore_backup_by_id(backup_id)

@@ -36,6 +36,8 @@ services:
       - ./backend/workspace:/app/workspace:cached
       - ./backend/tests:/app/tests:cached
       - ./backend/migrations:/app/migrations:cached
+      - ./backend/build/backups:/app/backups:delegated
+      - ./client/build:/app/build:delegated
       - ./client/build:/app/workspace/build:delegated
     expose:
       - "8070"
@@ -91,6 +93,9 @@ services:
       - ./backend/workspace:/app/workspace:cached
       - ./backend/tests:/app/tests:cached
       - ./backend/migrations:/app/migrations:cached
+      - ./backend/build/backups:/app/backups:delegated
+      - ./client/build:/app/build:delegated
+      - ./client/src/assets/data:/app/build/assets/data:ro
       - ./client/build:/app/workspace/build:delegated
       - ./client/src/assets/data:/app/workspace/build/assets/data:ro
     expose:

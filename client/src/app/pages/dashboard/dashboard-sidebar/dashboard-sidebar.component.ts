@@ -215,6 +215,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
+        c !== ProfileSubCategory.BACKUP_RESTORE &&
         c !== ProfileSubCategory.TAKEDOWN &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
@@ -227,6 +228,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.isAnalyst()) {
       return categories.filter(c => c !== ProfileSubCategory.TENANT &&
         c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+        c !== ProfileSubCategory.BACKUP_RESTORE &&
         c !== ProfileSubCategory.TAKEDOWN &&
         c !== ProfileSubCategory.MONITORING &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
@@ -241,6 +243,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     return categories.filter(c => c !== ProfileSubCategory.TENANT &&
       c !== ProfileSubCategory.SYSTEM_SETTINGS &&
+      c !== ProfileSubCategory.BACKUP_RESTORE &&
       c !== ProfileSubCategory.TAKEDOWN &&
       c !== ProfileSubCategory.MONITORING &&
       c !== ProfileSubCategory.EVENT_MANAGEMENT &&

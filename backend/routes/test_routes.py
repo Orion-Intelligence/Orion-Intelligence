@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+from fastapi import APIRouter, Body, Depends, File, Query, UploadFile
 from typing import Any
 from fastapi import APIRouter, Body, Depends, File, HTTPException, Query, Request, UploadFile
 from configs.app_dependency import get_current_user, license_required, role_required
@@ -9,7 +11,9 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, NetIntelDeepScanRequest, ResolveIPRequest
 from orion.management.managers.service_manager import service_manager
+from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_backup_model import BackupType, db_backup_model
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import TakedownCreateRequest
 from routes.helper.route_test_helper import TestRouteHelper
 
@@ -41,6 +45,36 @@ async def test_ready():
     if not service_manager.get_instance().check_status():
         raise HTTPException(status_code=503, detail="Test services are not ready")
     return {"ready": True}
+
+
+@test_routes.post(
+    "/api/admin/backups/{backup_id}/restore",
+    include_in_schema=False,
+    dependencies=ADMIN_DEPS,
+)
+async def test_restore_backup(backup_id: str):
+    return {"status": "restored", "filename": backup_id}
+
+
+@test_routes.post(
+    "/api/admin/backups/instant",
+    include_in_schema=False,
+    dependencies=ADMIN_DEPS,
+)
+async def test_create_instant_backup():
+    created_at = datetime.now(timezone.utc)
+    backup = db_backup_model(
+        filename=created_at.strftime("%Y_%m_%d_%H_%M_%S_%f"),
+        backup_type=BackupType.INSTANT,
+        created_at=created_at,
+    )
+    await mongo_controller.get_instance().get_engine().save(backup)
+    return {
+        "id": str(backup.id),
+        "filename": backup.filename,
+        "backup_type": backup.backup_type.value,
+        "created_at": backup.created_at,
+    }
 
 
 @test_routes.post(

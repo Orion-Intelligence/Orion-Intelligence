@@ -29,6 +29,7 @@ class config_controller:
         AllowedKeys.LANGUAGE_ALLOWED.value,
         AllowedKeys.ADMIN_ROOT_ALLOWED.value,
         AllowedKeys.S_ONION.value,
+        AllowedKeys.BACKUP_SCHEDULE.value,
     }
     SYSTEM_RESOURCE_FILENAMES = {
         AllowedKeys.LOGO_URL: "logo_url_custom.png",
@@ -197,6 +198,10 @@ class config_controller:
             return False
         return cls._is_smtp_values_configured(meta_info if isinstance(meta_info, dict) else {})
 
+    @staticmethod
+    async def _is_backup_schedule() -> bool:
+        return await config_controller.getInstance().get_cached(AllowedKeys.BACKUP_SCHEDULE, "0")
+
     def _redact_sensitive_meta_info(self, meta_info_raw: str, include_email_config: bool = False) -> str:
         try:
             meta_info = json.loads(meta_info_raw) if isinstance(meta_info_raw, str) else {}
@@ -310,6 +315,7 @@ class config_controller:
             AllowedKeys.APP_NAME.value: AllowedKeys.APP_NAME,
             AllowedKeys.META_INFO.value: AllowedKeys.META_INFO,
             AllowedKeys.AI_ENDPOINT_ENABLED.value: AllowedKeys.AI_ENDPOINT_ENABLED,
+            AllowedKeys.BACKUP_SCHEDULE.value: AllowedKeys.BACKUP_SCHEDULE,
             AllowedKeys.ADMIN_ROOT_ALLOWED.value: AllowedKeys.ADMIN_ROOT_ALLOWED,
             AllowedKeys.S_ONION.value: AllowedKeys.S_ONION,
             AllowedKeys.EXTENSION_VERSION.value: AllowedKeys.EXTENSION_VERSION,

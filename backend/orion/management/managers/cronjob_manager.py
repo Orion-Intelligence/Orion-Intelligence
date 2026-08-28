@@ -2,12 +2,15 @@ import asyncio
 from datetime import timedelta
 from interface import BASE_DIR
 from orion.constants.constant import allowed_key_titles
+from orion.api.interactive.backup_manager.backup_manager import BackupManager
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
 from orion.management.jobs.alert.alert_job import alert_job
+from orion.api.server.config_manager.config_controller import config_controller
 from orion.api.interactive.scheduler_manager.scheduler_manager import DailySchedulerConfig, SchedulerManager
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
+from orion.services.mongo_manager.shared_model.db_backup_model import BackupType
 from orion.services.redis_manager.redis_enums import REDIS_KEYS
 
 
@@ -53,6 +56,7 @@ class cronjob_manager:
         await self.__init_handles()
         asyncio.create_task(cronjob_manager.purge_loop())
         asyncio.create_task(cronjob_manager.iocs_alert_loop())
+        asyncio.create_task(cronjob_manager.backup_loop())
 
     @staticmethod
     async def iocs_alert_loop():
@@ -106,3 +110,15 @@ class cronjob_manager:
                 log.g().e(f"IOC alert loop failed: {e}")
 
             await asyncio.sleep(600)
+
+    @staticmethod
+    async def backup_loop():
+        while True:
+            try:
+                enabled = await config_controller.getInstance()._is_backup_schedule()
+                if enabled == "1":
+                    await BackupManager.get_instance().create_backup(BackupType.AUTO)
+            except Exception as e:
+                log.g().e(f"Backup loop failed: {e}")
+
+            await asyncio.sleep(259200)

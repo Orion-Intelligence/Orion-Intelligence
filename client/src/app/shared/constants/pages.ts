@@ -87,5 +87,6 @@ export enum ProfileSubCategory {
     AUDITLOG = 'Auditlog',
     TENANT = 'Tenant',
     SYSTEM_SETTINGS = 'System-Settings',
+    BACKUP_RESTORE = 'Backup-Restore',
     CASE_MANAGEMENT = 'Case-Management'
 }
