@@ -401,6 +401,13 @@ class social_model:
     async def search_metadata(self, param, current_user=None, request=None):
         return await self.social_search(param, "metadata", current_user, request)
 
+    async def extension_version(self):
+        from orion.api.server.config_manager.config_controller import config_controller
+        from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys
+
+        version = config_controller.getInstance().get(AllowedKeys.EXTENSION_VERSION.value, "") or ""
+        return {"chrome": version, "firefox": version}
+
     def decode_image_payload(self, image_base64: Any) -> bytes:
         if not isinstance(image_base64, str):
             raise HTTPException(status_code=400, detail="Invalid image_base64")

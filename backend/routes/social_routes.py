@@ -141,6 +141,14 @@ async def search_social_metadata(request: Request, param: SocialMetadataRequest 
     return await social_model.getInstance().search_metadata(param, current_user, request)
 
 
+@social_routes.get(
+    "/api/social/extensions/version",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST]))])
+async def social_extension_version():
+    return await social_model.getInstance().extension_version()
+
+
 @social_routes.post(
     "/api/social/connections",
     status_code=200,

@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { EXTENSION_LATEST_TTL_MS, EXTENSION_STORE_URL } from '../constants/extension';
 import { ExtensionPresence, ExtensionState } from '../model/extension/extension.model';
-
-const EXTENSION_STORE_URL = 'https://addons.mozilla.org/en-US/firefox/addon/orion-social/';
 
 @Injectable({ providedIn: 'root' })
 export class SocialExtensionService {
+  private latest = '';
+  private latestAt = 0;
+  private installedVersion = '';
+
   detect(): Observable<ExtensionState> {
     return new Observable<ExtensionState>(subscriber => {
       if (!this.isSupportedBrowser()) {
@@ -17,6 +20,7 @@ export class SocialExtensionService {
       let settled = false;
       let installed = false;
       let connected = false;
+      let deadlineReached = false;
 
       const finish = (state: ExtensionState) => {
         if (settled) {
@@ -27,18 +31,22 @@ export class SocialExtensionService {
         subscriber.complete();
       };
       const resolveState = () => {
-
-
         if (!installed) {
-
-
-
           const stamped = typeof document !== 'undefined'
             && document.documentElement?.getAttribute('data-orion-extension') === 'installed';
           finish(stamped ? 'checking' : 'install');
           return;
         }
+        if (connected && this.outdated(this.installedVersion)) {
+          finish('update');
+          return;
+        }
         finish(connected ? 'ready' : 'signin');
+      };
+      const resolveWhenProbesSettle = () => {
+        if (deadlineReached) {
+          resolveState();
+        }
       };
 
       const onMessage = (event: MessageEvent) => {
@@ -48,12 +56,19 @@ export class SocialExtensionService {
         }
         installed = true;
         connected = data.connected === true;
+        if (typeof data.version === 'string' && data.version) {
+          this.installedVersion = data.version;
+        }
         resolveState();
       };
 
+      void this.refreshLatest().finally(() => resolveWhenProbesSettle());
       window.addEventListener('message', onMessage);
       window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
-      const presenceTimer = setTimeout(resolveState, 1000);
+      const presenceTimer = setTimeout(() => {
+        deadlineReached = true;
+        resolveWhenProbesSettle();
+      }, 1000);
       const hardTimer = setTimeout(resolveState, 1500);
 
       return () => {
@@ -99,8 +114,50 @@ export class SocialExtensionService {
     });
   }
 
+  async refreshLatest(): Promise<void> {
+    if (this.latestAt && Date.now() - this.latestAt < EXTENSION_LATEST_TTL_MS) {
+      return;
+    }
+    this.latestAt = Date.now();
+
+    try {
+      const response = await fetch('/api/social/extensions/version', { credentials: 'include', cache: 'no-store' });
+      if (!response.ok) {
+        return;
+      }
+      const body = await response.json() as { chrome?: string; firefox?: string };
+      const value = /firefox/i.test(navigator.userAgent) ? body?.firefox : body?.chrome;
+      if (typeof value === 'string' && value) {
+        this.latest = value;
+      }
+    }
+    catch {
+      void 0;
+    }
+  }
+
+  latestVersion(): string {
+    return this.latest;
+  }
+
   storeUrl(_browser: 'chrome' | 'firefox'): string {
     return EXTENSION_STORE_URL;
+  }
+
+  private outdated(installed: string): boolean {
+    if (!installed || !this.latest) {
+      return false;
+    }
+
+    const current = installed.split('.').map(part => Number.parseInt(part, 10) || 0);
+    const target = this.latest.split('.').map(part => Number.parseInt(part, 10) || 0);
+    for (let i = 0; i < Math.max(current.length, target.length); i += 1) {
+      const diff = (current[i] ?? 0) - (target[i] ?? 0);
+      if (diff !== 0) {
+        return diff < 0;
+      }
+    }
+    return false;
   }
 
   private isSupportedBrowser(): boolean {
