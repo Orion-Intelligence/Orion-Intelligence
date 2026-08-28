@@ -21,6 +21,7 @@ services:
       - ./backend/routes:/app/routes:cached
       - ./backend/static:/app/static:cached
       - ./backend/migrations:/app/migrations:cached
+      - ./backend/build/backups:/app/backups:cached
       - ./client/build:/app/build:delegated
     expose:
       - "8070"

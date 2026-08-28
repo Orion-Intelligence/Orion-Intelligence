@@ -87,9 +87,20 @@ client_build() {
     rsync -a build-next/ build/
     rm -rf build-next
     cd ..
+    local backups_holding
+    backups_holding=""
+    if [ -d backend/build/backups ]; then
+        backups_holding="$(mktemp -d)/backups"
+        mv backend/build/backups "$backups_holding"
+    fi
     rm -rf backend/build
     mkdir -p backend/build
     cp -r client/build/* backend/build/
+    if [ -n "$backups_holding" ]; then
+        rm -rf backend/build/backups
+        mv "$backups_holding" backend/build/backups
+        rmdir "$(dirname "$backups_holding")" 2>/dev/null || true
+    fi
 }
 
 install_client_dependencies() {
@@ -257,6 +268,20 @@ if [ "$1" = "stop" ]; then
     stop_docker
     echo "Orion Intelligence service stopped"
     exit 0
+fi
+
+if [ "$1" = "restore" ]; then
+    BACKUP_NAME="$2"
+    if [ -z "$BACKUP_NAME" ]; then
+        echo "Usage: $0 restore <backup_name>"
+        exit 1
+    fi
+    if ! docker inspect -f '{{.State.Running}}' trusted-web-main 2>/dev/null | grep -qx true; then
+        echo "trusted-web-main is not running. Start the stack first."
+        exit 1
+    fi
+    docker exec trusted-web-main python3 restore_backup.py "$BACKUP_NAME"
+    exit $?
 fi
 
 if [ "$1" = "-doc" ]; then

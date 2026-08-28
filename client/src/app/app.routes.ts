@@ -47,6 +47,7 @@ const loadAlertScannerSettingsComponent = () => import('./pages/user-management/
 const loadManageProfileComponent = () => import('./pages/tenant/tenant-management/view-profile/manage-profile.component').then(m => m.ManageProfileComponent);
 const loadViewTenantComponent = () => import('./pages/tenant/tenant-management/view-tenant/view-tenant.component').then(m => m.ViewTenantComponent);
 const loadSidebarProfileSystemSettingsComponent = () => import('./pages/user-management/sidebar-user-system-settings/sidebar-user-system-settings.component').then(m => m.SidebarProfileSystemSettingsComponent);
+const loadBackupRestoreComponent = () => import('./pages/user-management/backup-restore/backup-restore.component').then(m => m.BackupRestoreComponent);
 const loadTenantSettingsComponent = () => import('./pages/user-management/sidebar-user-settings/tenant-settings/tenant-settings.component').then(m => m.TenantSettingsComponent);
 const loadFileScannerComponent = () => import('./pages/api/ioc-extractor/file-scanner.component').then(m => m.FileScannerComponent);
 const loadTextAnalysisComponent = () => import('./pages/api/text-analysis/text-analysis.component').then(m => m.TextAnalysisComponent);
@@ -887,6 +888,11 @@ export const routes: Routes = [
             path: 'system-settings',
             loadComponent: loadSidebarProfileSystemSettingsComponent,
             data: { type: 'srttings', animation: 'CategoryPage' }
+          },
+          {
+            path: 'backup-restore',
+            loadComponent: loadBackupRestoreComponent,
+            data: { type: 'backup-restore', animation: 'CategoryPage' }
           },
           {
             path: 'case-management',

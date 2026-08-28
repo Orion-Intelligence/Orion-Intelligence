@@ -29,6 +29,7 @@ services:
       - ./backend/routes:/app/routes:ro
       - ./backend/static:/app/static:rw
       - ./backend/migrations:/app/migrations:ro
+      - ./backend/build/backups:/app/backups:rw
       - ./client/build:/client_build:ro
       - bloom-data:/app/bloom_data:rw
       - ../Orion-Crawler/app/logs:/app/crawler_logs:ro
