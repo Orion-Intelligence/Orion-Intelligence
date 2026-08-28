@@ -13,20 +13,18 @@ import { BotMessageActionsComponent } from './bot-message-actions/bot-message-ac
 import { MessageScrollRailComponent } from './message-scroll-rail/message-scroll-rail.component';
 import { MarkdownPipe } from '../../../shared/pipes/markdown.pipe';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { AiChatSession, NexusChatMessage } from './model/ai-chat-session.model';
+import { AiChatSession, NexusChatMessage, NexusChatSession } from './model/ai-chat-session.model';
 import { AiChatSidebarComponent } from './ai-chat-sidebar/ai-chat-sidebar.component';
 import { ProfileComponent } from '../../../shared/partials/profile/profile.component';
 import { AiDirectory } from './ai-directory/ai-directory';
 import { TranslationService } from '../../../shared/services/translation.service';
+import type { PendingNexusStream } from './model/ai-workspace.model';
+export type { PendingNexusStream } from './model/ai-workspace.model';
+
 
 type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
 
-interface PendingNexusStream {
-  requestId: string;
-  sessionId: string;
-  message: string;
-  baselineMessageCount: number;
-}
+
 
 @Component({
   selector: 'app-ai-workspace',
@@ -689,7 +687,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       sessionStorage.setItem(this.pendingStreamStorageKey, JSON.stringify(pending));
     }
     catch {
-      // Reconnection is unavailable when browser session storage is blocked.
+
     }
   }
 
@@ -717,7 +715,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       sessionStorage.removeItem(this.pendingStreamStorageKey);
     }
     catch {
-      // Nothing to clear when browser session storage is blocked.
+
     }
   }
 
@@ -834,9 +832,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     panels?.style.setProperty('--ai-directory-panel-grow', String(this.directorySplitPercent));
   }
 
-  private mapSession(session: any): AiChatSession {
+  private mapSession(session: NexusChatSession): AiChatSession {
     return {
-      sessionId: session.session_id || session.id,
+      sessionId: session.session_id || session.id!,
       title: session.title,
       updatedAt: session.updated_at,
       messageCount: session.message_count ?? (Array.isArray(session.messages) ? session.messages.length : 0),

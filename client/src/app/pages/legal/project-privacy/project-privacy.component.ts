@@ -1,11 +1,11 @@
 import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
+import type { TocItem } from './model/project-privacy.model';
+export type { TocItem } from './model/project-privacy.model';
 
-interface TocItem {
-  id: string;
-  label: string;
-}
+
+
 
 const TOC: TocItem[] = [
   { id: 'scope', label: 'Scope and responsibility' },

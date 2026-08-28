@@ -1,15 +1,24 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
-import { ApiService } from '../../services/api.service';
-import { TooltipDirective } from '../../directive/tooltip-directive.directive';
-import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { ProxyController } from '../../services/proxy-controller';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { ApiService } from '../../services/api.service';
+import { ProxyController } from '../../services/proxy-controller';
+import type { MappingEdge, MappingGraphItem, MappingVertex } from './model/report-mapping.interfaces.model';
 import { RelatedReportItem, STRONG_RELATED_MAPPING_KEYS } from './model/report-mapping.model';
+export type { MappingEdge,MappingGraphItem,MappingVertex } from './model/report-mapping.interfaces.model';
+
+
+
+
+
+
+
 
 @Component({
   selector: 'app-report-mapping',
@@ -24,7 +33,7 @@ export class ReportMappingComponent {
 
   readonly skeletonItems = [0, 1];
   loading = true;
-  result: any[] = [];
+  result: MappingGraphItem[] = [];
   filteredItems: RelatedReportItem[] = [];
   isExpanded = false;
 
@@ -54,7 +63,7 @@ export class ReportMappingComponent {
     this.loading = true;
     this.filteredItems = [];
     this.api.get<{
-            results: any[];
+            results: MappingGraphItem[];
             limit_reached: boolean;
         }>('graph', { params }).subscribe({
           next: response => {
@@ -71,7 +80,7 @@ export class ReportMappingComponent {
         });
   }
 
-  getUniqueSortedItems(result: any[], length: number): RelatedReportItem[] {
+  getUniqueSortedItems(result: MappingGraphItem[], length: number): RelatedReportItem[] {
     const currentId = this.getCurrentReportId();
     const seenIds = new Set<string>();
     const items: RelatedReportItem[] = [];
@@ -99,7 +108,7 @@ export class ReportMappingComponent {
     this.proxied_resource.open(baseUrl);
   }
 
-  private toRelatedReportItem(item: any, vertex: any, id: string, rawMappingKey: string): RelatedReportItem {
+  private toRelatedReportItem(item: MappingGraphItem, vertex: MappingVertex | null, id: string, rawMappingKey: string): RelatedReportItem {
     const mappingKey = this.formatLabel(rawMappingKey);
     const mappingValue = this.extractMappingValue(item);
     const title = this.cleanText(vertex?.title || vertex?.display_value || vertex?.label) || `Related report ${this.compactId(id)}`;
@@ -120,8 +129,8 @@ export class ReportMappingComponent {
     };
   }
 
-  private getRelatedDocumentVertex(item: any, currentId: string): any {
-    const candidates = [item?.vertex, ...(item?.path?.vertices ?? [])];
+  private getRelatedDocumentVertex(item: MappingGraphItem, currentId: string): MappingVertex | null {
+    const candidates = [item.vertex, ...(item.path?.vertices ?? [])].filter((vertex): vertex is MappingVertex => !!vertex);
     return candidates.find(vertex => {
       if (String(vertex?.type || '').toLowerCase() !== 'document') {
         return false;
@@ -131,14 +140,14 @@ export class ReportMappingComponent {
     }) || null;
   }
 
-  private getDocumentId(vertex: any): string {
+  private getDocumentId(vertex: MappingVertex | null | undefined): string {
     return this.extractDocumentId(vertex?.doc_id)
       || this.extractDocumentId(vertex?.m_document_id)
       || this.extractDocumentId(vertex?._key)
       || this.extractDocumentId(vertex?._id);
   }
 
-  private extractDocumentIdFromEdge(edge: any, currentId: string): string {
+  private extractDocumentIdFromEdge(edge: MappingEdge | undefined, currentId: string): string {
     const candidates = [edge?._from, edge?._to];
     for (const candidate of candidates) {
       const id = this.extractDocumentId(candidate);
@@ -170,14 +179,14 @@ export class ReportMappingComponent {
     return /^[a-f0-9]{64}$/i.test(value);
   }
 
-  private extractMappingKeyRaw(item: any): string {
-    const edge = item?.edge || {};
-    const key = this.extractProperty(edge?._id, 'key', true)
-      || this.extractProperty(edge?._to, 'key', true)
-      || edge?.label
-      || edge?.relationship_type
-      || edge?.edge_type
-      || edge?.type;
+  private extractMappingKeyRaw(item: MappingGraphItem): string {
+    const edge = item.edge || {};
+    const key = this.extractProperty(edge._id || '', 'key', true)
+      || this.extractProperty(edge._to || '', 'key', true)
+      || edge.label
+      || edge.relationship_type
+      || edge.edge_type
+      || edge.type;
     return String(key || '').replace(/^has_/, '').replace(/^derived_/, '');
   }
 
@@ -185,13 +194,13 @@ export class ReportMappingComponent {
     return STRONG_RELATED_MAPPING_KEYS.has(key);
   }
 
-  private extractMappingValue(item: any): string {
-    const edge = item?.edge || {};
-    const edgeValue = this.extractProperty(edge?._id, 'value') || this.extractProperty(edge?._to, 'value');
+  private extractMappingValue(item: MappingGraphItem): string {
+    const edge = item.edge || {};
+    const edgeValue = this.extractProperty(edge._id || '', 'value') || this.extractProperty(edge._to || '', 'value');
     if (edgeValue) {
       return this.normalizeDisplayValue(edgeValue);
     }
-    const propertyVertex = [item?.vertex, ...(item?.path?.vertices ?? [])].find(vertex => {
+    const propertyVertex = [item.vertex, ...(item.path?.vertices ?? [])].filter((vertex): vertex is MappingVertex => !!vertex).find(vertex => {
       const type = String(vertex?.type || '').toLowerCase();
       return type && type !== 'document' && type !== 'cluster';
     });

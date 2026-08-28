@@ -245,24 +245,24 @@ export class ManageProfileComponent implements OnInit {
     return user;
   }
 
-  toggleUserLicense(user: any, license: LicenseName) {
+  toggleUserLicense(user: User, license: LicenseName) {
     if (!user.licenses) {
       user.licenses = [];
     }
     if (user.licenses.includes(license)) {
-      user.licenses = user.licenses.filter((l: LicenseName) => l !== license);
+      user.licenses = user.licenses.filter((l) => l !== license);
       return;
     }
     if (license === LicenseName.FREE || license === LicenseName.ENTERPRISE) {
       user.licenses = [license];
       return;
     }
-    user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.FREE && l !== LicenseName.ENTERPRISE);
+    user.licenses = user.licenses.filter((l) => l !== LicenseName.FREE && l !== LicenseName.ENTERPRISE);
     if (license === LicenseName.OSINT_BASIC) {
-      user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.OSINT_ADVANCED);
+      user.licenses = user.licenses.filter((l) => l !== LicenseName.OSINT_ADVANCED);
     }
     if (license === LicenseName.OSINT_ADVANCED) {
-      user.licenses = user.licenses.filter((l: LicenseName) => l !== LicenseName.OSINT_BASIC);
+      user.licenses = user.licenses.filter((l) => l !== LicenseName.OSINT_BASIC);
     }
     user.licenses.push(license);
   }
@@ -285,11 +285,11 @@ export class ManageProfileComponent implements OnInit {
     })).subscribe();
   }
 
-  getUserLicensesLabel(user: any): string {
+  getUserLicensesLabel(user: User): string {
     if (!user.licenses || user.licenses.length === 0) {
       return this.translationService.translate('None');
     }
-    return user.licenses.map((l: LicenseName) => this.licenseService.getLicenseLabel(l)).join(', ');
+    return user.licenses.map((l) => this.licenseService.getLicenseLabel(l)).join(', ');
   }
 
   getUserPermissionsLabel(user: User): string {

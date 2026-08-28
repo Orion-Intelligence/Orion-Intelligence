@@ -1,10 +1,10 @@
 import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-import { StealerLogCallbackModel } from '../../../../shared/model/results/credentials/credential.callback.model';
+import { StealerLogCallbackModel, StealerLogResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../../shared/animations/row.animations';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
-import { RankedCallbackModel } from '../../../../shared/model/results/consolidated/ranked.callback.model';
+import { RankedCallbackModel, RankedResultItem } from '../../../../shared/model/results/consolidated/ranked.callback.model';
 import { ExpandedRowComponent } from '../expanded-row/expanded-row.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
@@ -67,7 +67,7 @@ export class CredentialListComponent {
     }
   }
 
-  getStealerDomainValues(item: any): string[] {
+  getStealerDomainValues(item: StealerLogResultItem): string[] {
     if (!item || item['type'] === 'bin') {
       return [];
     }
@@ -80,7 +80,7 @@ export class CredentialListComponent {
     return this.normalizeValues(item['ip']);
   }
 
-  getStealerDomainTitle(item: any): string {
+  getStealerDomainTitle(item: StealerLogResultItem): string {
     const values = this.getStealerDomainValues(item);
     return values.length ? values.join(', ') : 'Not available';
   }
@@ -92,20 +92,20 @@ export class CredentialListComponent {
     return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
   }
 
-  getThreatPrimaryUrl(result: any): string {
+  getThreatPrimaryUrl(result: RankedResultItem): string {
     if (!result) {
       return '-';
     }
-    const domain = Array.isArray(result.m_domain) ? result.m_domain[0] : '';
-    const weblink = Array.isArray(result.m_weblink) ? result.m_weblink[0] : '';
-    return result.m_url || result.m_base_url || domain || weblink || '-';
+    const candidates = [result.m_url, result.m_base_url, result.m_domain, result.m_weblink]
+      .flatMap(value => this.normalizeValues(value));
+    return candidates[0] || '-';
   }
 
-  getThreatPrimaryUrlShort(result: any, maxLength: number = 25): string {
+  getThreatPrimaryUrlShort(result: RankedResultItem, maxLength: number = 25): string {
     return this.sliceText(this.getThreatPrimaryUrl(result), maxLength) || '-';
   }
 
-  getThreatSourceIndex(result: any): string {
+  getThreatSourceIndex(result: RankedResultItem): string {
     const raw = result?.rank_index ?? result?.m_rank_index ?? result?.m_index ?? result?.index ?? result?.type ?? result?.file_type;
     if (!raw) {
       return '-';
@@ -119,7 +119,7 @@ export class CredentialListComponent {
     return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
   }
 
-  private normalizeValues(value: any): string[] {
+  private normalizeValues(value: unknown): string[] {
     const values = Array.isArray(value) ? value : [value];
     return Array.from(new Set(values.map(v => v == null ? '' : String(v).trim()).filter(Boolean)));
   }

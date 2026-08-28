@@ -1,8 +1,8 @@
-import { ArcPair, ArcPoint2D, LngLat } from '../models/threat-lens-map.types';
+import { ArcPair, ArcPoint2D, EsriGeometry, EsriGeometryEngine, EsriWebMercatorUtils, LngLat, ThreatLensMapGraphic } from '../models/threat-lens-map.types';
 
 export class ThreatLensMapUtils {
-  static buildCountryFeatureIndex(features: any[], countryNameFields: string[], normalizeCountryLabel: (value: string) => string, toCountryKey: (value: string) => string, countryCodeFields: string[] = []): Map<string, any> {
-    const selected = new Map<string, { feature: any; priority: number; area: number }>();
+  static buildCountryFeatureIndex(features: ThreatLensMapGraphic[], countryNameFields: string[], normalizeCountryLabel: (value: string) => string, toCountryKey: (value: string) => string, countryCodeFields: string[] = []): Map<string, ThreatLensMapGraphic> {
+    const selected = new Map<string, { feature: ThreatLensMapGraphic; priority: number; area: number }>();
     const priorityByField: Record<string, number> = {
       COUNTRY: 1,
       NAME: 2,
@@ -13,7 +13,7 @@ export class ThreatLensMapUtils {
 
     for (const feature of features) {
       const attributes = feature?.attributes || {};
-      const area = Number(attributes.Shape__Area || 0);
+      const area = Number(attributes['Shape__Area'] || 0);
       const candidateFields = [
         ...countryCodeFields,
         ...countryNameFields,
@@ -39,7 +39,7 @@ export class ThreatLensMapUtils {
       }
     }
 
-    const index = new Map<string, any>();
+    const index = new Map<string, ThreatLensMapGraphic>();
     for (const [key, value] of selected.entries()) {
       index.set(key, value.feature);
     }
@@ -47,7 +47,7 @@ export class ThreatLensMapUtils {
     return index;
   }
 
-  static collectArcPairs(documentCountryGroups: string[][], toCountryKey: (value: string) => string, countryFeatureIndex: Map<string, any>, maxArcCount: number, minArcWeight: number): ArcPair[] {
+  static collectArcPairs(documentCountryGroups: string[][], toCountryKey: (value: string) => string, countryFeatureIndex: Map<string, ThreatLensMapGraphic>, maxArcCount: number, minArcWeight: number): ArcPair[] {
     const pairCount = new Map<string, number>();
 
     for (const group of documentCountryGroups) {
@@ -79,7 +79,7 @@ export class ThreatLensMapUtils {
     });
   }
 
-  static getFeatureAnchor(feature: any, geometryEngine: any, webMercatorUtils: any): LngLat | null {
+  static getFeatureAnchor(feature: ThreatLensMapGraphic | null, geometryEngine: EsriGeometryEngine, webMercatorUtils: EsriWebMercatorUtils): LngLat | null {
     const geometry = feature?.geometry;
     if (!geometry) {
       return null;
@@ -128,7 +128,7 @@ export class ThreatLensMapUtils {
     return Number.isFinite(lon) && Number.isFinite(lat) && lon >= -180 && lon <= 180 && lat >= -90 && lat <= 90;
   }
 
-  private static toValidLngLat(point: any, webMercatorUtils: any): LngLat | null {
+  private static toValidLngLat(point: EsriGeometry | null | undefined, webMercatorUtils: EsriWebMercatorUtils): LngLat | null {
     if (!point) {
       return null;
     }
@@ -362,12 +362,12 @@ export class ThreatLensMapUtils {
     return lon;
   }
 
-  private static isAnchorInsideGeometry(anchor: LngLat, geometry: any, webMercatorUtils: any): boolean {
+  private static isAnchorInsideGeometry(anchor: LngLat, geometry: EsriGeometry, webMercatorUtils: EsriWebMercatorUtils): boolean {
     return ThreatLensMapUtils.getConvertedRings(geometry, webMercatorUtils)
       .some((ring) => ThreatLensMapUtils.isPointInRing(anchor, ring));
   }
 
-  private static getLargestRingAnchor(geometry: any, webMercatorUtils: any): LngLat | null {
+  private static getLargestRingAnchor(geometry: EsriGeometry, webMercatorUtils: EsriWebMercatorUtils): LngLat | null {
     const rings = ThreatLensMapUtils.getConvertedRings(geometry, webMercatorUtils)
       .filter((ring) => ring.length >= 3)
       .sort((a, b) => Math.abs(ThreatLensMapUtils.getRingArea(b)) - Math.abs(ThreatLensMapUtils.getRingArea(a)));
@@ -392,12 +392,14 @@ export class ThreatLensMapUtils {
     return null;
   }
 
-  private static getConvertedRings(geometry: any, webMercatorUtils: any): LngLat[][] {
+  private static getConvertedRings(geometry: EsriGeometry, webMercatorUtils: EsriWebMercatorUtils): LngLat[][] {
     const rings = Array.isArray(geometry?.rings) ? geometry.rings : [];
     return rings
-      .map((ring: any[]) => Array.isArray(ring)
+      .map((ring: unknown[]) => Array.isArray(ring)
         ? ring
-          .map((point) => ThreatLensMapUtils.toValidLngLat(Array.isArray(point) ? { x: point[0], y: point[1] } : point, webMercatorUtils))
+          .map((point) => ThreatLensMapUtils.toValidLngLat(Array.isArray(point)
+            ? { x: Number(point[0]), y: Number(point[1]) }
+            : point && typeof point === 'object' ? point as EsriGeometry : null, webMercatorUtils))
           .filter((point): point is LngLat => ThreatLensMapUtils.isValidLngLat(point))
         : [])
       .filter((ring: LngLat[]) => ring.length >= 3);

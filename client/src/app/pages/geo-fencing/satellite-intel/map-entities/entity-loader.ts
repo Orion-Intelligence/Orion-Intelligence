@@ -1,4 +1,4 @@
-import { SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
+import { SatelliteFacilitiesResponse, SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
 import { MapEntityLoadingBridge, OrionSatelliteFeature, SatelliteTrackingViewport } from '../../models/geo-fencing.models';
 import { SatelliteAircraftTrackingController } from './aircraft/aircraft-tracking.controller';
 import { SatelliteAircraftTrackingService } from './aircraft/aircraft-tracking.service';
@@ -61,7 +61,7 @@ export class EntityLoader {
     return this.facilitiesController.visible;
   }
 
-  get facilitiesData(): any | null {
+  get facilitiesData(): SatelliteFacilitiesResponse['result'] | null {
     return this.facilitiesController.data;
   }
 

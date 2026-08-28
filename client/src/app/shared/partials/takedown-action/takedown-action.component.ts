@@ -226,7 +226,7 @@ export class TakedownActionComponent implements OnChanges {
       status_label: record.status_label || this.takedownLabel || 'Takedown request created',
       takedown_type: takedownType,
       action_url: actionUrl
-    } as any;
+    };
 
     this.requestCreated.emit(record);
   }

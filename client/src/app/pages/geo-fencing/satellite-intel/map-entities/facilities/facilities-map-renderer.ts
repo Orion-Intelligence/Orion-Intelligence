@@ -2,12 +2,13 @@ import { ComponentRef } from '@angular/core';
 import { OrionSatelliteFeature } from '../../../models/geo-fencing.models';
 import { FacilityPopupComponent } from './components/facility-popup/facility-popup.component';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
+import type * as Leaflet from 'leaflet';
 
 export class FacilitiesMapRenderer {
-  private featureLayer: any = null;
+  private featureLayer: Leaflet.LayerGroup | null = null;
   private featurePopupRefs = new Set<ComponentRef<FacilityPopupComponent>>();
 
-  constructor(private L: any, private map: any, private componentRenderer: LeafletComponentRenderer) {}
+  constructor(private L: typeof Leaflet, private map: Leaflet.Map, private componentRenderer: LeafletComponentRenderer) {}
 
   init(): void {
     if (!this.L || !this.map || this.featureLayer) {
@@ -21,8 +22,9 @@ export class FacilitiesMapRenderer {
     if (!this.featureLayer) {
       return;
     }
+    const featureLayer = this.featureLayer;
     this.destroyPopupRefs(this.featurePopupRefs);
-    this.featureLayer.clearLayers();
+    featureLayer.clearLayers();
 
     (features || []).forEach((feature) => {
       if (!Array.isArray(feature.coordinates) || feature.coordinates.length < 2) {
@@ -44,7 +46,7 @@ export class FacilitiesMapRenderer {
         name: feature.name,
         kind: feature.rawType || feature.type,
       }, this.featurePopupRefs);
-      marker.addTo(this.featureLayer);
+      marker.addTo(featureLayer);
     });
   }
 
@@ -67,7 +69,7 @@ export class FacilitiesMapRenderer {
     this.featureLayer = null;
   }
 
-  private bindPopup(layer: any, properties: { name?: string; kind?: string }, refs: Set<ComponentRef<FacilityPopupComponent>>): void {
+  private bindPopup(layer: Leaflet.Layer, properties: { name?: string; kind?: string }, refs: Set<ComponentRef<FacilityPopupComponent>>): void {
     const popup = this.componentRenderer.create(FacilityPopupComponent, {
       name: String(properties.name || ''),
       kind: String(properties.kind || ''),

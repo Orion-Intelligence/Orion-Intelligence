@@ -41,7 +41,7 @@ export class SecurityScanComponent implements OnInit {
   meta: UrlScanMeta | null = null;
   categories: { name: string; total: number; items: UrlScanThreatItem[]; }[] = [];
   requestedUrl = '';
-  searchQuery: any = '';
+  searchQuery = '';
   requestedDomain = '';
   isLoading = false;
   isFetched = false;
@@ -113,7 +113,7 @@ export class SecurityScanComponent implements OnInit {
       .scanDomain(this.requestedUrl, this.scanType)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
-        next: (res: any) => {
+        next: (res) => {
           if (res?.result?.status === 'busy' || res?.result?.status === 'pending' || res?.status === 'pending') {
             const p = res?.result?.progress ?? res?.progress;
             if (typeof p === 'number' && !Number.isNaN(p)) {
@@ -126,34 +126,34 @@ export class SecurityScanComponent implements OnInit {
             return;
           }
           this.isFetched = true;
-          const safe = !!(res?.result?.meta);
-          if (!safe) {
+          const result = res.result;
+          if (!result?.meta) {
             this.hasError = true;
             this.errorMessage = 'No data received from scanner.';
             return;
           }
-          const m = res.result.meta;
+          const m = result.meta;
           this.meta = {
             ...m,
             Host: (m?.Host?.trim()) || this.extractHost(m?.URL) || this.requestedDomain,
             URL: m?.URL || this.requestedUrl,
           };
-          this.grade = res.result.grade || '';
-          this.gradeCounts = res.result.grade_counts || { high: 0, medium: 0, low: 0, informational: 0 };
+          this.grade = result.grade || '';
+          this.gradeCounts = result.grade_counts || { high: 0, medium: 0, low: 0, informational: 0 };
           const proofMap = new Map<string, string>();
-          const proofs = res.result.proofs || {};
+          const proofs = result.proofs || {};
           Object.entries(proofs).forEach(([cat, items]) => {
-            (items as any[] || []).forEach((p: any) => {
+            items.forEach((p) => {
               const k = cat + '|' + (p.header || '').trim().toLowerCase();
               if (p.proof && !proofMap.has(k)) {
                 proofMap.set(k, p.proof);
               }
             });
           });
-          const entries = Object.entries(res.result.threats || {});
+          const entries = Object.entries(result.threats || {});
           this.categories = entries
             .map(([name, items]) => {
-              const list: any[] = Array.isArray(items) ? items : [];
+              const list: UrlScanThreatItem[] = Array.isArray(items) ? items : [];
               const seen = new Set<string>();
               const uniqueItems = list
                 .filter((it) => {
@@ -169,7 +169,7 @@ export class SecurityScanComponent implements OnInit {
                   const mergedProof = proofMap.get(name + '|' + key);
                   return mergedProof ? { ...it, proof: mergedProof } : it;
                 });
-              return { name, total: list.length, items: uniqueItems as UrlScanThreatItem[] };
+              return { name, total: list.length, items: uniqueItems };
             })
             .filter((c) => c.items.length > 0);
         },

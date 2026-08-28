@@ -9,7 +9,7 @@ import { GeoFencingGeocodeService } from '../shared/services/geo-fencing-geocode
 import { MapRendererComponent } from './map-renderer/map-renderer.component';
 import { GeocodeModalComponent } from '../../../shared/partials/geocode-modal/geocode-modal.component';
 import { MonthCompareSectionComponent } from './ui-overlays/month-compare-section/month-compare-section.component';
-import { SatelliteLiveAircraft, SatelliteLiveShip } from './model/satellite-intel-api.models';
+import { SatelliteFacilitiesResponse, SatelliteLiveAircraft, SatelliteLiveShip } from './model/satellite-intel-api.models';
 import { ThreatLensComponent } from '../threat-lens/threat-lens';
 import { OrionSatelliteDashboardFilter, OrionSatelliteFeature, OrionSatelliteFeatureType } from '../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from './map-entities/aircraft/aircraft-tracking.service';
@@ -197,7 +197,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     return this.entityLoader.facilitiesVisible;
   }
 
-  get facilitiesData(): any | null {
+  get facilitiesData(): SatelliteFacilitiesResponse['result'] | null {
     return this.entityLoader.facilitiesData;
   }
 

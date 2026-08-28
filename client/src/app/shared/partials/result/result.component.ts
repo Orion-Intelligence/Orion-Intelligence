@@ -7,7 +7,7 @@ import { LoadingFormComponent } from '../loading-form/loading-form.component';
 import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { SidebarService } from '../../services/sidebar.service';
 import { FiltersComponent } from '../filters/filters.component';
-import { FilterCategory, FilterModel } from '../../model/filter/filter.model';
+import { FilterCategory, FilterModel, FilterOption } from '../../model/filter/filter.model';
 import { SortType } from '../../constants/shared-enums';
 import { EmptyQueryComponent } from '../empty-query/empty-query.component';
 import { query } from '@angular/animations';
@@ -203,7 +203,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
-      const newFilters: any = {};
+      const newFilters: Record<string, FilterOption> = {};
       if (this.filterModel) {
         Object.keys(this.filterModel.filters).forEach(key => {
           const base = this.filterModel.filters[key];
@@ -238,7 +238,7 @@ export class ResultComponent implements OnInit, OnChanges {
     this.result_triggered = true;
     this.showScans = false;
     this.updateQuery.emit(query);
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.reloadData.emit(undefined);
     this.init_domains();
   }
@@ -335,7 +335,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
   hasIOCs(): boolean {
     const categories = this.app_service.configData().localSettings.entityfilterCategories;
-    return Object.values(categories).some((arr: any) => Array.isArray(arr) && arr.length > 0);
+    return Object.values(categories).some((arr) => Array.isArray(arr) && arr.length > 0);
   }
 
   onSearchInput(event: Event): void {

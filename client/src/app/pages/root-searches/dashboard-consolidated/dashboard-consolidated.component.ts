@@ -35,6 +35,12 @@ import { CrossSearchCardComponent } from '../../../shared/partials/onion-search-
 import { SatelliteIntel } from "../../geo-fencing/satellite-intel/satellite-intel";
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ExternalConsolidatedFeedService } from './services/external-consolidated-feed.service';
+import type { GeneralResultItem } from '../../../shared/model/results/general/general.callback.model';
+import type { LeakResultItem } from '../../../shared/model/results/leak/leak.callback.model';
+import type { AptIntelResultItem } from '../../../shared/model/results/apt-intel/apt-intel.callback.model';
+import type { ExploitResultItem } from '../../../shared/model/results/exploit/exploit.callback.model';
+import type { SocialResultItem } from '../../../shared/model/results/social/social.callback.model';
+import type { ChatResultItem } from '../../../shared/model/results/chat/chat.callback.model';
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -52,8 +58,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
   public consolidatedCallbackModel: ConsolidatedCallbackModel = new ConsolidatedCallbackModel();
   public stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
-  public groupedResults: Record<string, any[]> = {};
-  public response: any;
+  public groupedResults: Record<string, unknown[]> = {};
+  public response: ConsolidatedCallbackModel | null = null;
   public pageCounts: Record<string, number> = {};
   isGrouped = false;
   isIOC = true;
@@ -70,7 +76,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
-  rankedApiTime: any;
+  rankedApiTime: unknown;
   showScanCard = computed(() => {
     const isLoading = this.isLoading();
     const isStealerLogLoading = this.isStealerLogLoading();
@@ -107,6 +113,26 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   get hasDefacementOrStealerResults(): boolean {
     return (this.defacementResultCount + this.stealerlogResultCount) > 0;
+  }
+
+  asGeneralResults(results: unknown[]): Array<GeneralResultItem | LeakResultItem> {
+    return results as Array<GeneralResultItem | LeakResultItem>;
+  }
+
+  asAptResults(results: unknown[]): AptIntelResultItem[] {
+    return results as AptIntelResultItem[];
+  }
+
+  asExploitResults(results: unknown[]): ExploitResultItem[] {
+    return results as ExploitResultItem[];
+  }
+
+  asSocialResults(results: unknown[]): SocialResultItem[] {
+    return results as SocialResultItem[];
+  }
+
+  asChatResults(results: unknown[]): ChatResultItem[] {
+    return results as ChatResultItem[];
   }
 
   ngAfterViewInit(): void {
@@ -170,13 +196,13 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         replaceUrl: true,
       }).then();
     }
-    const cleanedParams: any = {};
+    const cleanedParams: Record<string, unknown> = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       if (value != null && value !== '') {
         cleanedParams[key] = value;
       }
     });
-    cleanedParams.tab = this.getActiveConsolidatedTab();
+    cleanedParams['tab'] = this.getActiveConsolidatedTab();
     this.router.navigate([], {
       queryParams: cleanedParams, queryParamsHandling: 'merge', replaceUrl: true, relativeTo: this.route
     }).then(() => {
@@ -197,7 +223,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     this.dashboardService.fetchConsolidatedGroupedResults('search/consolidated', this.dashboardService.consolidatedParamModel).pipe(switchMap(response => timer(0).pipe(map(() => response)))).subscribe(response => {
       if (response.success && response.data) {
         this.response = response.data;
-        this.consolidatedCallbackModel = this.response;
+        this.consolidatedCallbackModel = response.data;
         this.dashboardService.consolidatedCallbackModel = this.consolidatedCallbackModel;
         this.populateGroupedResults();
       }
@@ -222,7 +248,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         .subscribe(response => {
           if (response.success && response.data) {
             const seen = new Set<string>();
-            response.data.Result = response.data.Result.filter((item: any) => {
+            response.data.Result = response.data.Result.filter((item) => {
               const raw = item?.raw;
               if (!raw) {
                 return true;
@@ -466,7 +492,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   hasIOCs(): boolean {
     const categories = this.appService.configData().localSettings.entityfilterCategories;
-    return Object.values(categories).some((arr: any) => Array.isArray(arr) && arr.length > 0);
+    return Object.values(categories).some((arr) => Array.isArray(arr) && arr.length > 0);
   }
 
   shouldShowSection(): boolean {

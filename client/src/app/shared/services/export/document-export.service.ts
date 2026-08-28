@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
 import type jsPDF from 'jspdf';
-import type { RowInput } from 'jspdf-autotable';
+import type { CellHookData, HookData, RowInput } from 'jspdf-autotable';
 import { GraphReportMeta, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 import { GraphExportService } from './graph-export.service';
 import { drawInstitutionalContentTitle, drawInstitutionalCover, drawInstitutionalFooter, drawInstitutionalPageHeader, PDF_EXPORT_LAYOUT } from './pdf-export-layout';
 import { PdfExportFontData, registerPdfExportFonts } from './pdf-export-fonts';
 import { PdfExportTheme } from './pdf-export-theme';
 import { preparePdfValue } from './pdf-text.util';
+import { AutoTableDocument } from './pdf-autotable.types';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentExportService extends GraphExportService {
@@ -46,18 +47,18 @@ export class DocumentExportService extends GraphExportService {
       didParseCell: this.makeFirstColumnDidParse(theme?.firstColumnFillRgb),
       didDrawPage: hooks.didDrawPage
     });
-    this.drawRoundedTableContainer(doc, margin, contentW, firstSectionY, (doc as any).lastAutoTable?.finalY ?? firstSectionY);
+    this.drawRoundedTableContainer(doc, margin, contentW, firstSectionY, (doc as AutoTableDocument).lastAutoTable.finalY ?? firstSectionY);
     if (this.isJpegDataUrl(payload.graphImageDataUrl)) {
       const snapshotHeight = this.getScreenshotPreviewHeight(doc, payload.graphImageDataUrl!, contentW, 260);
-      const snapshotMarkerY = this.resolveMarkerY(doc, (doc as any).lastAutoTable.finalY + 14, PDF_EXPORT_LAYOUT.contentStartY, undefined, snapshotHeight + 18);
+      const snapshotMarkerY = this.resolveMarkerY(doc, (doc as AutoTableDocument).lastAutoTable.finalY + 14, PDF_EXPORT_LAYOUT.contentStartY, undefined, snapshotHeight + 18);
       this.drawInfoSectionMarker(doc, snapshotMarkerY, contentW, 'Network Snapshot', theme?.sectionHeaderRgb);
       const snapshotBottom = this.drawScreenshotPreview(doc, payload.graphImageDataUrl!, margin, snapshotMarkerY + 18, contentW, 260);
-      if ((doc as any).lastAutoTable) {
-        (doc as any).lastAutoTable.finalY = snapshotBottom;
+      if ((doc as AutoTableDocument).lastAutoTable) {
+        (doc as AutoTableDocument).lastAutoTable.finalY = snapshotBottom;
       }
     }
     if (payload.nodes.length) {
-      const requestedNodeY = Math.max((doc as any).lastAutoTable?.finalY ?? 160, 160) + 18;
+      const requestedNodeY = Math.max((doc as AutoTableDocument).lastAutoTable.finalY ?? 160, 160) + 18;
       const nodeMarkerY = this.resolveMarkerY(doc, requestedNodeY, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
       this.drawInfoSectionMarker(doc, nodeMarkerY, contentW, 'Nodes', theme?.sectionHeaderRgb);
       autoTable(doc, {
@@ -76,7 +77,7 @@ export class DocumentExportService extends GraphExportService {
         didParseCell: this.makeHeaderRowDidParse(theme?.headerRowFillRgb, false),
         didDrawPage: hooks.didDrawPage
       });
-      this.drawRoundedTableContainer(doc, margin, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
+      this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 0, (doc as AutoTableDocument).lastAutoTable.finalY ?? 0);
     }
     if (payload.tables?.length) {
       const hasMultipleRecordGroups = payload.tables.filter(table => Boolean(table.recordBlocks?.length)).length > 1;
@@ -89,11 +90,11 @@ export class DocumentExportService extends GraphExportService {
         const structuredRows = this.buildStructuredSectionRows(t);
         const hasStructuredRows = structuredRows.length > 1;
         const tableRows = hasStructuredRows ? structuredRows : this.buildReportSectionRows(t.values ?? {});
-        let markerY = ((doc as any).lastAutoTable.finalY ?? 160) + 18;
+        let markerY = ((doc as AutoTableDocument).lastAutoTable.finalY ?? 160) + 18;
         markerY = this.resolveMarkerY(doc, markerY, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle, theme?.sectionHeaderRgb);
         const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
-        const reportSectionDidDrawPage = (data: any) => {
+        const reportSectionDidDrawPage = (data: HookData) => {
           hooks.didDrawPage(data);
           const pageNo = (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? data?.pageNumber ?? sectionStartPage;
           if (pageNo !== sectionStartPage) {
@@ -122,21 +123,21 @@ export class DocumentExportService extends GraphExportService {
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
         if (screenshotDataUrl) {
-          const lastY = (doc as any).lastAutoTable?.finalY ?? (markerY + 12);
+          const lastY = (doc as AutoTableDocument).lastAutoTable.finalY ?? (markerY + 12);
           const previewHeight = this.getScreenshotPreviewHeight(doc, screenshotDataUrl, contentW, 180);
           const imageY = this.resolveMarkerY(doc, lastY + 10, 98, () => {
             this.drawInfoSectionMarker(doc, 82, contentW, sectionTitle, theme?.sectionHeaderRgb);
           }, previewHeight);
           const imageBottom = this.drawScreenshotPreview(doc, screenshotDataUrl, margin, imageY, contentW, 180);
-          if ((doc as any).lastAutoTable) {
-            (doc as any).lastAutoTable.finalY = imageBottom;
+          if ((doc as AutoTableDocument).lastAutoTable) {
+            (doc as AutoTableDocument).lastAutoTable.finalY = imageBottom;
           }
         }
-        this.drawRoundedTableContainer(doc, margin, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
+        this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 0, (doc as AutoTableDocument).lastAutoTable.finalY ?? 0);
       });
     }
     if ((payload.edges || []).length > 0) {
-      const edgeMarkerY = this.resolveMarkerY(doc, (doc as any).lastAutoTable.finalY + 18, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
+      const edgeMarkerY = this.resolveMarkerY(doc, (doc as AutoTableDocument).lastAutoTable.finalY + 18, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
       this.drawInfoSectionMarker(doc, edgeMarkerY, contentW, 'Connection Matrix', theme?.sectionHeaderRgb);
       autoTable(doc, {
         startY: edgeMarkerY + 12,
@@ -155,13 +156,13 @@ export class DocumentExportService extends GraphExportService {
         didParseCell: this.makeHeaderRowDidParse(theme?.headerRowFillRgb, false),
         didDrawPage: hooks.didDrawPage
       });
-      this.drawRoundedTableContainer(doc, margin, contentW, (doc as any).lastAutoTable?.startY ?? 0, (doc as any).lastAutoTable?.finalY ?? 0);
+      this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 0, (doc as AutoTableDocument).lastAutoTable.finalY ?? 0);
     }
     this.finalizeDocumentPages(doc, payload, meta, theme);
     return this.docToBytes(doc);
   }
 
-  private drawRecordBlockSection(doc: jsPDF, autoTable: typeof import('jspdf-autotable').default, table: GraphReportTableRow, sectionTitle: string, contentWidth: number, margin: number, didDrawPage: (data: any) => void, theme: PdfExportTheme | null, reportKind: string, showGroupLabel: boolean): void {
+  private drawRecordBlockSection(doc: jsPDF, autoTable: typeof import('jspdf-autotable').default, table: GraphReportTableRow, sectionTitle: string, contentWidth: number, margin: number, didDrawPage: (data: HookData) => void, theme: PdfExportTheme | null, reportKind: string, showGroupLabel: boolean): void {
     const recordBlocks = table.recordBlocks ?? [];
     const isCredentialRegister = reportKind === 'Credentials';
     const registerTitle = `${recordBlocks.length} ${isCredentialRegister ? 'Source Records' : 'Alert Records'}`;
@@ -211,12 +212,12 @@ export class DocumentExportService extends GraphExportService {
         didDrawCell: this.makeRecordBlockDidDraw(new Set([0]), theme, labelColumnWidth + valueTextInset),
         didDrawPage
       });
-      startY = ((doc as any).lastAutoTable?.finalY ?? startY) + 14.3;
+      startY = ((doc as AutoTableDocument).lastAutoTable.finalY ?? startY) + 14.3;
     });
   }
 
-  private makeRecordBlockDidParse(titleRowIndexes: Set<number>, theme: PdfExportTheme | null): (data: any) => void {
-    return (data: any) => {
+  private makeRecordBlockDidParse(titleRowIndexes: Set<number>, theme: PdfExportTheme | null): (data: CellHookData) => void {
+    return (data: CellHookData) => {
       if (titleRowIndexes.has(data?.row?.index)) {
         data.cell.styles.fillColor = theme?.whiteRgb ?? this.PDF_THEME.whiteRgb;
         data.cell.styles.textColor = theme?.whiteRgb ?? this.PDF_THEME.whiteRgb;
@@ -243,8 +244,8 @@ export class DocumentExportService extends GraphExportService {
     };
   }
 
-  private makeRecordBlockDidDraw(titleRowIndexes: Set<number>, theme: PdfExportTheme | null, identityOffset: number): (data: any) => void {
-    return (data: any) => {
+  private makeRecordBlockDidDraw(titleRowIndexes: Set<number>, theme: PdfExportTheme | null, identityOffset: number): (data: CellHookData) => void {
+    return (data: CellHookData) => {
       if (!titleRowIndexes.has(data?.row?.index) || data?.column?.index !== 0) {
         return;
       }
@@ -318,7 +319,7 @@ export class DocumentExportService extends GraphExportService {
   }
 
   private makeHeaderFooterHooks(payload: GraphReportPayload, meta: GraphReportMeta, theme: PdfExportTheme | null): {
-    didDrawPage: (data: any) => void;
+    didDrawPage: (data: HookData) => void;
   } {
     void payload;
     void meta;

@@ -7,14 +7,14 @@ import { ListService } from '../../../../shared/directive/base.listing.directive
 export class AuditlogService implements ListService {
   private auditDataSubject = new BehaviorSubject<AuditLogCallbackModel | null>(null);
   private currentPageSubject = new BehaviorSubject<number>(1);
-  private lastParams: any = { page: 1 };
+  private lastParams: unknown = { page: 1 };
 
   auditData$ = this.auditDataSubject.asObservable();
   currentPage$ = this.currentPageSubject.asObservable();
 
   constructor(private apiService: ApiService) { }
 
-  reloadAuditData(params?: any): void {
+  reloadAuditData(params?: unknown): void {
     this.lastParams = params ?? this.lastParams;
     this.apiService.post<AuditLogCallbackModel>('audit/logs', params).subscribe((data) => {
       this.auditDataSubject.next(data);
@@ -27,7 +27,7 @@ export class AuditlogService implements ListService {
     }
   }
 
-  reload(params?: any): void {
+  reload(params?: unknown): void {
     this.lastParams = params ?? this.lastParams;
     this.apiService.post<AuditLogCallbackModel>('audit/logs', params).subscribe(data => {
       this.auditDataSubject.next(data);

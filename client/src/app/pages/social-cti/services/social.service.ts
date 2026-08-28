@@ -101,7 +101,7 @@ export class SocialService {
     this.scanCancelSubjects.set(job.id, cancel$);
     scan$.pipe(takeUntil(cancel$), takeUntilDestroyed(destroyRef)).subscribe({
       next: event => this.setScanEvent(job, event, destroyRef),
-      error: (error: unknown) => this.setScanFailed(job, destroyRef, error instanceof Error ? error.message : ''),
+      error: (error) => this.setScanFailed(job, destroyRef, error instanceof Error ? error.message : ''),
       complete: () => this.scanCancelSubjects.delete(job.id),
     });
   }

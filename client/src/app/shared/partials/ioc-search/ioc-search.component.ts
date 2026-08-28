@@ -13,9 +13,12 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
+import type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './model/ioc-search.model';
+export type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './model/ioc-search.model';
 
-interface SharedSearchAdvancedFilter { id: string; tag: string; value: string; operator: '&&' | '||' }
-interface SharedSearchAdvancedChip { id: string; label: string }
+
+
+
 
 @Component({
   selector: 'app-ioc-search',

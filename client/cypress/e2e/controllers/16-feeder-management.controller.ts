@@ -1,4 +1,6 @@
-let feederValidationData: any = null;
+import type { FeederValidationCategory, FeederValidationData } from '../model/16-feeder-management.model';
+
+let feederValidationData: FeederValidationData | null = null;
 export const FEEDER_RULE_KEYS = [
   'apt',
   'defacement',
@@ -54,8 +56,8 @@ function getFixtureFileName(path: string) {
   return path.split('/').pop() || path;
 }
 
-function waitForScriptRowReady(category: any) {
-  const fileName = getFixtureFileName(category.fileFixture);
+function waitForScriptRowReady(category: FeederValidationCategory) {
+  const fileName = getFixtureFileName(category.fileFixture!);
   const rowSelector = `[data-testid="feeder-script-row-${fileName}"]`;
   const statusSelector = `[data-testid="feeder-script-active-status-${fileName}"]`;
 
@@ -70,6 +72,9 @@ function waitForScriptRowReady(category: any) {
 }
 
 function getWrongFileCategory(ruleKey: string) {
+  if (!feederValidationData) {
+    throw new Error('Feeder validation data is not loaded');
+  }
   const currentIndex = FILE_RULE_KEYS.indexOf(ruleKey);
   const nextIndex = currentIndex === -1 ? 0 : (currentIndex + 1) % FILE_RULE_KEYS.length;
   return feederValidationData.categories[FILE_RULE_KEYS[nextIndex]];
@@ -141,7 +146,7 @@ function openTabIfPresent(testId: string, callback: () => Cypress.Chainable): Cy
   });
 }
 
-function uploadScript(category: any): Cypress.Chainable {
+function uploadScript(category: FeederValidationCategory): Cypress.Chainable {
   if (!category.fileFixture || !category.fileName) {
     return cy.wrap(null, { log: false });
   }
@@ -163,7 +168,7 @@ function uploadScript(category: any): Cypress.Chainable {
   return cy.wait(250);
 }
 
-function expectWrongFileUploadError(category: any): Cypress.Chainable {
+function expectWrongFileUploadError(category: FeederValidationCategory): Cypress.Chainable {
   const wrongCategory = getWrongFileCategory(category.ruleKey);
   if (!wrongCategory?.fileFixture) {
     return cy.wrap(null, { log: false });
@@ -334,20 +339,21 @@ function toggleAllStatuses(enabled: boolean) {
 }
 
 export function loadFeederValidationData() {
-  return cy.fixture('feeder/collector-validation.json').then((data) => {
+  return cy.fixture<FeederValidationData>('feeder/collector-validation.json').then((data) => {
     feederValidationData = data;
     return data;
   });
 }
 
 export function clearAllFeederRecords() {
-  if (!feederValidationData) {
+  const validationData = feederValidationData;
+  if (!validationData) {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  const ruleKeys: string[] = feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
+  const ruleKeys: string[] = validationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
   cy.wrap(ruleKeys).each((ruleKey: string) => {
-    const category = feederValidationData.categories[ruleKey];
+    const category = validationData.categories[ruleKey];
 
     return cy.then(() => {
       return selectFeederRule(category.ruleKey).then(() => {
@@ -364,19 +370,20 @@ export function clearAllFeederRecords() {
 }
 
 export function uploadFixtureRecordsForAllFeederRules() {
-  if (!feederValidationData) {
+  const validationData = feederValidationData;
+  if (!validationData) {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  const ruleKeys: string[] = feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
+  const ruleKeys: string[] = validationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
   cy.wrap(ruleKeys).each((ruleKey: string) => {
-    const category = feederValidationData.categories[ruleKey];
+    const category = validationData.categories[ruleKey];
 
     return cy.then(() => {
       return selectFeederRule(category.ruleKey).then(() => {
         return openAddTab().then(() => {
           if (category.ruleType === 'generic') {
-            return uploadFirstValue(category.valuesFixture);
+            return uploadFirstValue(category.valuesFixture!);
           }
 
           return cy.then(() => uploadScript(category)).then(() => {
@@ -392,19 +399,20 @@ export function uploadFixtureRecordsForAllFeederRules() {
 }
 
 export function validateFixtureOperationsForAllFeederRules() {
-  if (!feederValidationData) {
+  const validationData = feederValidationData;
+  if (!validationData) {
     throw new Error('Feeder validation data is not loaded');
   }
 
-  const ruleKeys: string[] = feederValidationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
+  const ruleKeys: string[] = validationData.ruleKeys.slice(0, FEEDER_TEST_RULE_LIMIT);
   cy.wrap(ruleKeys).each((ruleKey: string) => {
-    const category = feederValidationData.categories[ruleKey];
+    const category = validationData.categories[ruleKey];
 
     return cy.then(() => {
       return selectFeederRule(category.ruleKey).then(() => {
         return openAddTab().then(() => {
           if (category.ruleType === 'generic') {
-            return uploadFirstValue(category.valuesFixture).then(() => {
+            return uploadFirstValue(category.valuesFixture!).then(() => {
               if (category.invalidValuesFixture) {
                 return expectWrongValueUploadError(category.invalidValuesFixture);
               }

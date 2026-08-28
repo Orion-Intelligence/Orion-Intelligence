@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
 import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
+import type { IconOptions } from './model/icon.model';
+export type { IconOptions } from './model/icon.model';
+
 const iconMap: Record<string, string> = {
   'x': 'x',
   'twitter': 'x',
@@ -141,9 +144,7 @@ const fallbackPlatformColorMap: Record<string, string> = {
   linkedin: '#0a66c2',
   googleplus: '#db4437',
 };
-export interface IconOptions {
-    type?: 'default' | 'graph';
-}
+
 @Injectable({ providedIn: 'root' })
 export class IconService {
   private iconCache = new Map<string, string>();

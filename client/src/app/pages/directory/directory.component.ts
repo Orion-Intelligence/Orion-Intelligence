@@ -5,7 +5,7 @@ import { FiltersComponent } from '../../shared/partials/filters/filters.componen
 import { DirectoryListComponent } from './directory-list/directory-list.component';
 import { PaginationComponent } from '../../shared/partials/pagination/pagination.component';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { FilterModel } from '../../shared/model/filter/filter.model';
+import { FilterModel, FilterOption } from '../../shared/model/filter/filter.model';
 import { directory_filters } from '../../shared/constants/filters';
 import { SidebarService } from '../../shared/services/sidebar.service';
 import { DirectoryService } from './services/directory.service';
@@ -45,12 +45,12 @@ export class DirectoryComponent implements OnInit {
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
       const baseFilters = this.filterModel.filters;
-      const newFilters: any = {};
+      const newFilters: Record<string, FilterOption> = {};
       const initialSelectedFilters: Record<string, string> = {};
       for (const key of Object.keys(baseFilters)) {
         const base = baseFilters[key];
         const paramValue = params[key];
-        const match = base.options?.find((opt: any) => opt.key.toLowerCase() === paramValue?.toLowerCase());
+        const match = base.options?.find((opt) => opt.key.toLowerCase() === paramValue?.toLowerCase());
         if (paramValue && match) {
           newFilters[key] = {
             ...base,
@@ -93,7 +93,10 @@ export class DirectoryComponent implements OnInit {
   resetFilters() {
     this.selectedFilters = {};
     Object.keys(this.filterModel.filters).forEach(key => {
-      delete (this.filterModel.filters as any)[key].selected;
+      const filter = this.filterModel.filters[key];
+      if (filter) {
+        delete filter.selected;
+      }
     });
     this.router.navigate([], {
       relativeTo: this.route,

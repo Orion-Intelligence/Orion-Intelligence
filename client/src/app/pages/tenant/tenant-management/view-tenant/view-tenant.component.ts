@@ -1,20 +1,27 @@
-import { Component, HostListener, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpHeaders } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { ApiService } from '../../../../shared/services/api.service';
-import { LicenseName } from '../../../../shared/model/licenses/license.rules';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
-import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
-import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { TranslationService } from '../../../../shared/services/translation.service';
-import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
-import { search_filter_labels } from '../../../../shared/constants/shared-enums';
-import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { AppService } from '../../../../services/core/app/app.service';
+import { LicenseService } from '../../../../services/licenses/licenses.service';
+import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { search_filter_labels } from '../../../../shared/constants/shared-enums';
+import { LicenseName } from '../../../../shared/model/licenses/license.rules';
+import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
+import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ApiService } from '../../../../shared/services/api.service';
+import { TranslationService } from '../../../../shared/services/translation.service';
+import type { ManagedTenant, TenantUpdateResponse } from './model/view-tenant.model';
 import { TenantIocDrawerContentComponent } from './tenant-ioc-drawer-content/tenant-ioc-drawer-content.component';
+export type { ManagedTenant,TenantUpdateResponse } from './model/view-tenant.model';
+
+
+
+
+
 
 @Component({
   selector: 'app-view-tenant',
@@ -29,7 +36,7 @@ export class ViewTenantComponent implements OnInit {
 
   protected readonly JSON = JSON;
 
-  tenants: any[] = [];
+  tenants: ManagedTenant[] = [];
   tenantSearch = '';
   licenseList = Object.values(LicenseName).filter((license) => license !== LicenseName.FEEDER);
   isLoading = true;
@@ -37,9 +44,9 @@ export class ViewTenantComponent implements OnInit {
   TenantStatus = TenantStatusValues;
   isIocSelectorOpen = false;
   isIocSelectorDrawerOpen = false;
-  activeIocTenant: any | null = null;
+  activeIocTenant: ManagedTenant | null = null;
   iocDraft: IocCategory[] = [];
-  tenantToDelete: any | null = null;
+  tenantToDelete: ManagedTenant | null = null;
 
   constructor(public apiService: ApiService, protected licenseService: LicenseService, private appService: AppService, private translationService: TranslationService) {
   }
@@ -50,7 +57,7 @@ export class ViewTenantComponent implements OnInit {
       .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
   }
 
-  get filteredTenants(): any[] {
+  get filteredTenants(): ManagedTenant[] {
     const search = this.tenantSearch.trim().toLowerCase();
     if (!search) {
       return this.tenants;
@@ -72,9 +79,9 @@ export class ViewTenantComponent implements OnInit {
 
   ngOnInit(): void {
     const headers = new HttpHeaders({});
-    this.apiService.post<any[]>('tenants/get', headers).subscribe({
+    this.apiService.post<ManagedTenant[]>('tenants/get', headers).subscribe({
       next: (data) => {
-        this.tenants = (data || []).map((tenant: any) => ({
+        this.tenants = (data || []).map((tenant) => ({
           ...tenant,
           verified: tenant.verified ?? false,
           privileged_ioc: tenant.privileged_ioc ?? false,
@@ -87,7 +94,7 @@ export class ViewTenantComponent implements OnInit {
             ? tenant.status
             : TenantStatusValues.ACTIVE,
           licenses: tenant.licenses?.length
-            ? tenant.licenses.filter((license: LicenseName) => license !== LicenseName.FEEDER)
+            ? tenant.licenses.filter((license) => license !== LicenseName.FEEDER)
             : [LicenseName.FREE],
         }));
         this.isLoading = false;
@@ -120,7 +127,7 @@ export class ViewTenantComponent implements OnInit {
     return this.isAdmin() && this.appService.configData().appSettings.ai_endpoint_enabled === true;
   }
 
-  openTenant(tenant: any): void {
+  openTenant(tenant: ManagedTenant): void {
     const url = new URL(window.location.origin);
     url.hostname = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
       ? `${tenant.slug}.localhost`
@@ -128,7 +135,7 @@ export class ViewTenantComponent implements OnInit {
     window.open(url.toString(), '_blank', 'noopener,noreferrer');
   }
 
-  updateTenant(tenant: any): void {
+  updateTenant(tenant: ManagedTenant): void {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];
     }
@@ -137,7 +144,7 @@ export class ViewTenantComponent implements OnInit {
       delete payload.ai_endpoint_enabled;
     }
     this.isLoading = true;
-    this.apiService.post<any>('update/tenants', payload).subscribe({
+    this.apiService.post<TenantUpdateResponse>('update/tenants', payload).subscribe({
       next: (res) => {
         if (res?.tenant) {
           tenant.iocs = res.tenant.iocs ?? tenant.iocs;
@@ -153,7 +160,7 @@ export class ViewTenantComponent implements OnInit {
     });
   }
 
-  openDeleteConfirmation(tenant: any, event?: Event): void {
+  openDeleteConfirmation(tenant: ManagedTenant, event?: Event): void {
     event?.stopPropagation();
     this.tenantToDelete = tenant;
   }
@@ -165,7 +172,7 @@ export class ViewTenantComponent implements OnInit {
       return;
     }
     this.isLoading = true;
-    this.apiService.delete(`tenants/${tenant.id}`).subscribe({
+    this.apiService.delete<void>(`tenants/${tenant.id}`).subscribe({
       next: () => {
         this.tenants = this.tenants.filter(item => item.id !== tenant.id);
         this.isLoading = false;
@@ -184,7 +191,7 @@ export class ViewTenantComponent implements OnInit {
     }
   }
 
-  toggleTenantLicense(tenant: any, license: LicenseName): void {
+  toggleTenantLicense(tenant: ManagedTenant, license: LicenseName): void {
     if (!tenant.licenses) {
       tenant.licenses = [];
     }
@@ -197,19 +204,19 @@ export class ViewTenantComponent implements OnInit {
     }
   }
 
-  onTenantLicenseDropdownChange(tenant: any, licenses: string[]): void {
+  onTenantLicenseDropdownChange(tenant: ManagedTenant, licenses: string[]): void {
     tenant.licenses = licenses;
   }
 
-  canManageTenantIocs(tenant: any): boolean {
+  canManageTenantIocs(tenant: ManagedTenant): boolean {
     return this.isAdmin() && tenant?.privileged_ioc !== true && tenant?._saved_privileged_ioc !== true;
   }
 
-  getTenantIocCount(tenant: any): number {
+  getTenantIocCount(tenant: ManagedTenant): number {
     return (tenant?.iocs || []).reduce((total: number, ioc: IocCategory) => total + (ioc.values?.length || 0), 0);
   }
 
-  getTenantIocPreview(tenant: any): string[] {
+  getTenantIocPreview(tenant: ManagedTenant): string[] {
     const preview: string[] = [];
     for (const ioc of tenant?.iocs || []) {
       for (const value of ioc.values || []) {
@@ -225,7 +232,7 @@ export class ViewTenantComponent implements OnInit {
     return preview;
   }
 
-  openIocSelector(tenant: any, event?: Event): void {
+  openIocSelector(tenant: ManagedTenant, event?: Event): void {
     event?.stopPropagation();
     if (!this.canManageTenantIocs(tenant)) {
       return;
@@ -278,20 +285,21 @@ export class ViewTenantComponent implements OnInit {
     if (!this.activeIocTenant) {
       return;
     }
+    const activeTenant = this.activeIocTenant;
     const selectedIocs = this.iocDraft.filter(ioc => ioc.values?.length > 0);
     const payload = {
-      ...this.activeIocTenant,
+      ...activeTenant,
       iocs: selectedIocs
     };
     if (!this.canEditTenantAiEndpoint()) {
       delete payload.ai_endpoint_enabled;
     }
     this.isLoading = true;
-    this.apiService.post<any>('update/tenants', payload).subscribe({
+    this.apiService.post<TenantUpdateResponse>('update/tenants', payload).subscribe({
       next: (res) => {
-        this.activeIocTenant.iocs = res?.tenant?.iocs ?? selectedIocs;
-        this.activeIocTenant.privileged_ioc = res?.tenant?.privileged_ioc ?? this.activeIocTenant.privileged_ioc;
-        this.activeIocTenant._saved_privileged_ioc = this.activeIocTenant.privileged_ioc ?? false;
+        activeTenant.iocs = res?.tenant?.iocs ?? selectedIocs;
+        activeTenant.privileged_ioc = res?.tenant?.privileged_ioc ?? activeTenant.privileged_ioc;
+        activeTenant._saved_privileged_ioc = activeTenant.privileged_ioc ?? false;
         this.isLoading = false;
         this.closeIocSelector();
       },
@@ -301,12 +309,12 @@ export class ViewTenantComponent implements OnInit {
     });
   }
 
-  getTenantLicensesLabel(tenant: any): string {
+  getTenantLicensesLabel(tenant: ManagedTenant): string {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       return this.translationService.translate('None');
     }
     return tenant.licenses
-      .map((l: LicenseName) => this.licenseService.getLicenseLabel(l))
+      .map(l => this.licenseService.getLicenseLabel(l as LicenseName))
       .join(', ');
   }
 

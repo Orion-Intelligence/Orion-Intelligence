@@ -15,9 +15,15 @@ import { ScanJob } from '../../model/scan-jobs/scan-job.model';
 import { ConfirmationPopupComponent } from '../confirmation-popup/confirmation-popup.component';
 import { Router } from '@angular/router';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { asUnknownRecord } from '../../utils/type-guards.util';
+import type { AlertListPage, AlertNotificationPage } from './model/alert-notification.model';
+export type { AlertListPage, AlertNotificationPage } from './model/alert-notification.model';
+
 
 type NotificationMode = 'alerts' | 'scans';
 type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
+
+
 
 @Component({
   selector: 'app-alert-notification',
@@ -104,9 +110,9 @@ export class AlertNotificationComponent implements OnChanges {
     this.clearAppendTimer();
     const nextPage = reset ? 1 : this.currentPage + 1;
     this.isLoadingMore = true;
-    this.apiService.get<any>(`profile/alerts?paginate=true&compact=true&unseen_only=true&include_counts=true&page=${nextPage}&limit=${this.batchSize}`).subscribe({
+    this.apiService.get<AlertNotificationPage>(`profile/alerts?paginate=true&compact=true&unseen_only=true&include_counts=true&page=${nextPage}&limit=${this.batchSize}`).subscribe({
       next: response => {
-        const items = (response?.items || []).map((n: any) => ({
+        const items = (response.items || []).map((n: AlertNotification) => ({
           ...n,
           lastSeen: n?.lastSeen ? new Date(n.lastSeen) : n?.lastSeen
         }));
@@ -215,7 +221,7 @@ export class AlertNotificationComponent implements OnChanges {
       return;
     }
     this.isFetchingDetail = true;
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<AlertModel[] | AlertListPage>('profile/alerts').subscribe({
       next: response => {
         const alerts: AlertModel[] = Array.isArray(response)
           ? response
@@ -369,7 +375,7 @@ export class AlertNotificationComponent implements OnChanges {
 
     this.scanNotificationService.deleteAllScans().subscribe({
       next: response => {
-        const deleted = Number(response?.deleted || 0);
+        const deleted = Number(asUnknownRecord(response)['deleted'] || 0);
         if (deleted > 0) {
           this.messageNotificationService.show('Scans deleted successfully!', 'success');
         }
@@ -456,12 +462,12 @@ export class AlertNotificationComponent implements OnChanges {
     if (this.isScanMode()) {
       this.scanNotificationService.closePanel();
     }
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.closeNotification.emit(undefined);
   }
 
   clearAll() {
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<AlertModel[] | AlertListPage>('profile/alerts').subscribe({
       next: (alerts) => {
         const allAlerts: AlertModel[] = Array.isArray(alerts)
           ? alerts
@@ -496,7 +502,7 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   getLatestAlerts() {
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<AlertModel[] | AlertListPage>('profile/alerts').subscribe({
       next: response => {
         this.appService.userSessionData().alerts = Array.isArray(response)
           ? response

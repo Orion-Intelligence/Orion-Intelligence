@@ -2,10 +2,11 @@ import { Injectable, inject, signal } from '@angular/core';
 import { lastValueFrom, Observable, Subscription } from 'rxjs';
 import { map, takeUntil, tap } from 'rxjs/operators';
 import { GeoCameraResponse, NetworkIntelScanResponse, ResolveIpResponse } from '../../model/network-intel/network-intel-api.models';
-import { IpPortData, VulnerabilityScanDepth } from '../../model/network-intel/network-intel.model';
+import { IpDetail, IpPortData, ScanTaskResponse, VulnerabilityScanDepth } from '../../model/network-intel/network-intel.model';
 import { ScanHelperMethodsService } from '../../partials/scan-helper-methods/scan-helper-methods-service.service';
 import { ScanNotificationService } from '../scan-notification.service';
 import { SubdomainResponse } from '../../model/scanners/scanner.models';
+import { asUnknownRecord } from '../../utils/type-guards.util';
 
 @Injectable({ providedIn: 'root' })
 export class NetworkIntelScanService extends ScanHelperMethodsService {
@@ -13,11 +14,10 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
 
   isRunning = signal(false);
 
-  protected override getPendingStatus<T extends { result?: { status?: string } | null; status?: string }>(res: T): string | undefined {
+  protected override getPendingStatus<T extends { result?: { status?: string; progress?: number; step?: string } | null; status?: string; progress?: number; step?: string }>(res: T): string | undefined {
     const status = super.getPendingStatus(res);
-    const payload = res as any;
-    const progress = Number(payload?.result?.progress ?? payload?.progress);
-    const step = String(payload?.result?.step ?? payload?.step ?? '').toLowerCase();
+    const progress = Number(res.result?.progress ?? res.progress);
+    const step = String(res.result?.step ?? res.step ?? '').toLowerCase();
     if ((status === 'pending' || status === 'busy') && progress >= 100 && step.includes('done')) {
       return 'done';
     }
@@ -40,7 +40,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     this.isRunning.set(false);
   }
 
-  protected override handleTaskValue<T>(value: T): void {
+  protected override handleTaskValue<T extends object>(value: T): void {
     const responseError = this.getResponseError(value);
     if (responseError) {
       this.onDone.set(null);
@@ -69,7 +69,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   scanUrlVulnerability(domain: string, depth: VulnerabilityScanDepth): Subscription {
-    return this.runTrackedScan<any>('netintel/url_vulnerability_scan', { domain, depth }, {
+    return this.runTrackedScan<ScanTaskResponse>('netintel/url_vulnerability_scan', { domain, depth }, {
       title: 'URL Vulnerability Scan',
       target: domain,
       page_reference: 'network-intel',
@@ -77,17 +77,17 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     });
   }
 
-  async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<any> {
-    return this.fetchPolledResult<NetworkIntelScanResponse>(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
+  async fetchShodanIpDetail(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Promise<IpDetail> {
+    return this.fetchPolledResult(() => this.api.post<NetworkIntelScanResponse>('netintel/ipscanner', { ip }), onEach);
   }
 
-  fetchShodanIpDetail$(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Observable<any> {
+  fetchShodanIpDetail$(ip: string, onEach?: (response: NetworkIntelScanResponse) => void): Observable<IpDetail> {
     return this.scanNotifications.runApiScanAsResponse<NetworkIntelScanResponse>({
       apiReference: 'netintel/ipscanner',
       payload: { ip },
       metadata: { title: 'Deep IP Scan', target: ip, section: 'deep-scan' },
       pollDelayMs: this.pollDelayMs,
-    }).pipe(tap(response => onEach?.(response)), map(response => this.unwrapPolledResult(response)));
+    }).pipe(tap(response => onEach?.(response)), map(response => this.unwrapIpDetail(response)));
   }
 
   scanThreatLensGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
@@ -276,7 +276,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     };
   }
 
-  safeEntries(obj: Record<string, any> | undefined | null): [string, any][] {
+  safeEntries(obj: Record<string, unknown> | undefined | null): [string, unknown][] {
     if (!obj) {
       return [];
     }
@@ -294,7 +294,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     });
   }
 
-  hasItems(arr: any[] | undefined | null): boolean {
+  hasItems(arr: unknown[] | undefined | null): boolean {
     return Array.isArray(arr) && arr.length > 0;
   }
 
@@ -312,42 +312,53 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     return Object.entries(sec).filter(([, value]) => value).map(([key]) => key);
   }
 
-  private getResponseError(value: any): { message: string } | null {
-    const status = this.getPendingStatus(value);
+  private getResponseError(value: unknown): { message: string } | null {
+    const response = asUnknownRecord(value);
+    const result = asUnknownRecord(response['result']);
+    const status = String(result['status'] || response['status'] || '');
     if (status !== 'error') {
       return null;
     }
-    return { message: value?.result?.message || value?.message || 'Request failed' };
+    return { message: String(result['message'] || response['message'] || 'Request failed') };
   }
 
-  private runTrackedScan<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>( apiReference: string, payload: Record<string, any>, metadata: Record<string, any>, pollDelayMs = this.pollDelayMs, reusePrevious = false, ): Subscription {
+  private runTrackedScan<T extends object>( apiReference: string, payload: Record<string, unknown>, metadata: Record<string, unknown>, pollDelayMs = this.pollDelayMs, reusePrevious = false, ): Subscription {
     return this.runTask<T>((cancel$) => this.scanNotifications.runApiScanAsResponse<T>({
       apiReference,
       payload,
       metadata,
       pollDelayMs,
       reusePrevious,
-    }).pipe(tap((response: T) => this.updateProgress((response as any)?.result?.progress ?? (response as any)?.progress)),
-      takeUntil(cancel$),));
+    }).pipe(tap((response: T) => {
+      const record = asUnknownRecord(response);
+      const result = asUnknownRecord(record['result']);
+      const progress = result['progress'] ?? record['progress'];
+      this.updateProgress(typeof progress === 'number' ? progress : null);
+    }),
+    takeUntil(cancel$),));
   }
 
-  private async fetchPolledResult<T extends { result?: { status?: string } | null; status?: string }>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<any> {
+  private async fetchPolledResult<T extends ScanTaskResponse>(call: () => Observable<T>, onEach?: (response: T) => void): Promise<IpDetail> {
     const cancel$ = this.createCancelSubject();
     try {
       const response = await lastValueFrom(this.poll<T>(call, (value) => this.getPendingStatus(value), (value) => onEach?.(value), cancel$, this.pollDelayMs));
-      return this.unwrapPolledResult(response);
+      return this.unwrapIpDetail(response);
     }
     finally {
       this.completeCancelSubject(cancel$);
     }
   }
 
-  private unwrapPolledResult<T>(response: T): any {
+  private unwrapIpDetail<T extends ScanTaskResponse>(response: T): IpDetail {
     const responseError = this.getResponseError(response);
     if (responseError) {
       throw new Error(responseError.message);
     }
-    return (response as any)?.result ?? response;
+    const payload = response.result ?? response;
+    if (!payload.ip) {
+      throw new Error('IP scan returned no IP details');
+    }
+    return { ...payload, ip: payload.ip };
   }
 
   private isValidDomain(value: string): boolean {

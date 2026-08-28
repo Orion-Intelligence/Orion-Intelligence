@@ -1,18 +1,18 @@
 import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { NgClass } from '@angular/common';
 import { CredentialListComponent } from './credential-list/credential-list.component';
-import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
+import { CredentialResultItem, StealerLogCallbackModel, StealerLogResultItem } from '../../../shared/model/results/credentials/credential.callback.model';
 import { SortType } from '../../../shared/constants/shared-enums';
 import { HelperService } from '../../../shared/services/helper.service';
 import { stealer_filters } from '../../../shared/constants/filters';
 import { FormsModule } from '@angular/forms';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
-import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
+import { RankedCallbackModel, RankedResultItem } from '../../../shared/model/results/consolidated/ranked.callback.model';
 import { IocSearchComponent } from "../../../shared/partials/ioc-search/ioc-search.component";
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
@@ -62,14 +62,14 @@ export class CredentialComponent implements OnInit {
   searchQuery: string = '';
   isLoading: boolean = false;
   firstTrigger: boolean = true;
-  user: any;
+  user: string = '';
   url: string = '';
-  ioc: any;
+  ioc: string = '';
   type: string;
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
-  breachesApiTime: any = 0;
-  allSearchApiTime: any = 0;
+  breachesApiTime = 0;
+  allSearchApiTime = 0;
   showPasswordscheme = false;
   showSubdomains = false;
   isExportChoiceOpen = false;
@@ -200,7 +200,7 @@ export class CredentialComponent implements OnInit {
     this.dashboardService.consolidatedParamModel.page = 1;
     this.isLoadingMore = false;
     this.resetIocPaginationState();
-    const cleanedParams: any = {};
+    const cleanedParams: Params = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       cleanedParams[key] = value;
     });
@@ -261,7 +261,7 @@ export class CredentialComponent implements OnInit {
       this.fetchRanked();
       return;
     }
-    this.stealerlogCallbackModel.Result = this.helperService.sortByKey<any>(this.stealerlogCallbackModel.Result, key, order);
+    this.stealerlogCallbackModel.Result = this.helperService.sortByKey<StealerLogResultItem>(this.stealerlogCallbackModel.Result, key, order);
     this.cdr.detectChanges();
   }
 
@@ -510,7 +510,7 @@ export class CredentialComponent implements OnInit {
     }));
   }
 
-  private buildStealerPdfBlocks(records: any[]): GraphReportTableRow {
+  private buildStealerPdfBlocks(records: StealerLogResultItem[]): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
       const identity = this.firstAvailableExportValue(item?.['email'], item?.['username'], item?.['user']);
       const domain = this.firstAvailableExportValue(item?.['domain'], item?.['source_domain'], item?.['ip']);
@@ -569,7 +569,7 @@ export class CredentialComponent implements OnInit {
     };
   }
 
-  private buildRankedPdfBlocks(records: any[], recordOffset = 0): GraphReportTableRow {
+  private buildRankedPdfBlocks(records: RankedResultItem[], recordOffset = 0): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
       const title = this.firstAvailableExportValue(item?.['m_title'], item?.['m_important_content'], item?.['m_url']);
       const primaryUrl = this.firstAvailableExportValue(item?.['m_url'], item?.['m_base_url'], item?.['m_domain'], item?.['m_weblink']);
@@ -744,7 +744,7 @@ export class CredentialComponent implements OnInit {
     return added;
   }
 
-  private appendUniqueResults(existing: any[], incoming: any[]): { merged: any[]; added: number } {
+  private appendUniqueResults<T extends CredentialResultItem>(existing: T[], incoming: T[]): { merged: T[]; added: number } {
     const seen = new Set(existing.map((item, index) => this.getResultIdentity(item, `existing-${index}`)));
     const additions = incoming.filter((item, index) => {
       const key = this.getResultIdentity(item, `incoming-${index}`);
@@ -757,7 +757,7 @@ export class CredentialComponent implements OnInit {
     return { merged: [...existing, ...additions], added: additions.length };
   }
 
-  private getResultIdentity(item: any, fallback: string): string {
+  private getResultIdentity(item: CredentialResultItem, fallback: string): string {
     return String(item?.raw || item?._id || item?.id || item?.m_hash || item?.hash || item?.m_message_id || item?.m_url || fallback);
   }
 

@@ -5,7 +5,7 @@ import { ConsolidatedParamModel } from '../../../shared/model/results/consolidat
 import { ApiService } from '../../../shared/services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { normalizeCountryLabel, splitCountryValues, toCountryKey } from '../../../shared/utils/country-normalization.util';
-import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
+import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDocument, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 
 const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
 
@@ -36,18 +36,18 @@ export class ThreatLensService {
   }
 
   private buildThreatLensPayload(payload?: Partial<ThreatLensRequestPayload>): ThreatLensRequestPayload {
-    const request = Object.assign(new ConsolidatedParamModel(), this.dashboardService.selectedFilters(), payload) as ThreatLensRequestPayload & Record<string, any>;
+    const request = Object.assign(new ConsolidatedParamModel(), this.dashboardService.selectedFilters(), payload) as ThreatLensRequestPayload & Record<string, unknown>;
 
     if (!String(request.q ?? '').trim()) {
       request.q = '';
     }
 
-    return this.removeEmptyOrDefaultValues(request) as ThreatLensRequestPayload;
+    return this.removeEmptyOrDefaultValues(request) as unknown as ThreatLensRequestPayload;
   }
 
-  private removeEmptyOrDefaultValues(params: ThreatLensRequestPayload & Record<string, any>): Record<string, any> {
-    const defaultParams = new ConsolidatedParamModel() as Record<string, any>;
-    const cleanedParams: Record<string, any> = {};
+  private removeEmptyOrDefaultValues(params: ThreatLensRequestPayload & Record<string, unknown>): Record<string, unknown> {
+    const defaultParams = new ConsolidatedParamModel() as unknown as Record<string, unknown>;
+    const cleanedParams: Record<string, unknown> = {};
 
     for (const key of Object.keys(params)) {
       const value = params[key];
@@ -94,7 +94,7 @@ export class ThreatLensService {
     const normalizedResponses = responses.map((response) => new ConsolidatedCallbackModel(response));
     const overallCountryCounts = new Map<string, number>();
     const overallCountryNames = new Map<string, string>();
-    const categoryDocuments = new Map<ThreatLensCategoryModelKey, any[]>();
+    const categoryDocuments = new Map<ThreatLensCategoryModelKey, ThreatLensDocument[]>();
     const categoryData: ThreatLensCategoryMapData[] = [];
     const feedItems: ThreatLensFeedItem[] = [];
     let totalResults = 0;
@@ -176,8 +176,10 @@ export class ThreatLensService {
     };
   }
 
-  private extractResultItems(model: { Result?: any[] } | undefined): any[] {
-    return Array.isArray(model?.Result) ? model.Result : [];
+  private extractResultItems(model: { Result?: unknown[] } | undefined): ThreatLensDocument[] {
+    return Array.isArray(model?.Result)
+      ? model.Result.filter((item): item is ThreatLensDocument => typeof item === 'object' && item !== null && !Array.isArray(item))
+      : [];
   }
 
   private rankCountryCounts(countryCounts: Map<string, number>, countryNames: Map<string, string>): ThreatCountryCount[] {
@@ -189,8 +191,8 @@ export class ThreatLensService {
       .sort((a, b) => b.count - a.count);
   }
 
-  private dedupeDocuments(documents: any[]): any[] {
-    const result: any[] = [];
+  private dedupeDocuments(documents: ThreatLensDocument[]): ThreatLensDocument[] {
+    const result: ThreatLensDocument[] = [];
     const seen = new Set<string>();
 
     for (const document of documents) {
@@ -206,7 +208,7 @@ export class ThreatLensService {
     return result;
   }
 
-  private getDocumentIdentity(document: any): string {
+  private getDocumentIdentity(document: ThreatLensDocument): string {
     const parts = [
       document?.m_hash,
       document?.doc_id,
@@ -224,7 +226,7 @@ export class ThreatLensService {
     return identity || JSON.stringify(document || {});
   }
 
-  private extractCountries(document: any): string[] {
+  private extractCountries(document: ThreatLensDocument): string[] {
     const countries: string[] = [];
 
     for (const fieldName of COUNTRY_FIELDS) {
@@ -246,7 +248,7 @@ export class ThreatLensService {
     return splitCountryValues(value);
   }
 
-  private buildFeedItem(category: typeof THREAT_LENS_CATEGORY_CONFIG[number], document: any, countriesForDoc: string[]): ThreatLensFeedItem | null {
+  private buildFeedItem(category: typeof THREAT_LENS_CATEGORY_CONFIG[number], document: ThreatLensDocument, countriesForDoc: string[]): ThreatLensFeedItem | null {
     const { isoDate, timestamp } = this.extractDocumentDate(document);
     const title = this.extractDocumentTitle(document, category.label);
     const summary = this.extractDocumentSummary(document);
@@ -273,7 +275,7 @@ export class ThreatLensService {
     };
   }
 
-  private extractDocumentDate(document: any): { isoDate: string; timestamp: number } {
+  private extractDocumentDate(document: ThreatLensDocument): { isoDate: string; timestamp: number } {
     const candidates = [
       document?.m_date,
       document?.m_creation_date,
@@ -295,7 +297,7 @@ export class ThreatLensService {
     return { isoDate: '', timestamp: 0 };
   }
 
-  private extractDocumentTitle(document: any, fallbackLabel: string): string {
+  private extractDocumentTitle(document: ThreatLensDocument, fallbackLabel: string): string {
     const candidates = [
       document?.m_title,
       document?.m_name,
@@ -318,7 +320,7 @@ export class ThreatLensService {
     return `${fallbackLabel} item`;
   }
 
-  private extractDocumentSummary(document: any): string {
+  private extractDocumentSummary(document: ThreatLensDocument): string {
     const candidates = [
       document?.m_important_content,
       Array.isArray(document?.m_summary) ? document.m_summary.join(' ') : '',
@@ -338,7 +340,7 @@ export class ThreatLensService {
     return '';
   }
 
-  private extractDocumentLink(document: any): string {
+  private extractDocumentLink(document: ThreatLensDocument): string {
     const candidates = [
       document?.m_url,
       document?.m_message_sharable_link,
@@ -376,7 +378,7 @@ export class ThreatLensService {
     return '';
   }
 
-  private extractDocumentHighlights(document: any): string[] {
+  private extractDocumentHighlights(document: ThreatLensDocument): string[] {
     const entries = [
       document?.m_platform,
       document?.m_remote_type,

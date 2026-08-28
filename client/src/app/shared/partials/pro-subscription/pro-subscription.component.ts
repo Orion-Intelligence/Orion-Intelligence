@@ -25,7 +25,7 @@ export class ProSubscriptionComponent {
   }
 
   closePopup() {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.close.emit(undefined);
   }
 

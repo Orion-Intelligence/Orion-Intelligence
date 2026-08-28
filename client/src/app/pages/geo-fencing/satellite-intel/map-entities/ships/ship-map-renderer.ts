@@ -6,6 +6,13 @@ import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-rend
 import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-marker-icon.component';
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
+import type * as Leaflet from 'leaflet';
+import { asUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+
+type ShipMarker = Leaflet.Marker & {
+  __orionShipIconRef: ComponentRef<ShipMarkerIconComponent> | null;
+  __orionShipIconState: string;
+};
 
 type ShipDistributionCell = {
   key: string;
@@ -15,13 +22,13 @@ type ShipDistributionCell = {
 };
 
 export class ShipMapRenderer {
-  private cluster: any = null;
+  private cluster: Leaflet.LayerGroup | null = null;
   private renderKey = '';
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
   private renderVersion = 0;
-  private markers = new Map<string, any>();
+  private markers = new Map<string, ShipMarker>();
   private markerTargets = new Map<string, string>();
-  private animationFrames = new Map<string, { marker: any; startLat: number; startLon: number; targetLat: number; targetLon: number; startedAt: number }>();
+  private animationFrames = new Map<string, { marker: ShipMarker; startLat: number; startLon: number; targetLat: number; targetLon: number; startedAt: number }>();
   private animationFrame: number | null = null;
   private detailSub?: Subscription;
   private markerZoomBucket = 0;
@@ -30,14 +37,14 @@ export class ShipMapRenderer {
   private readonly crowdedShipAreaThreshold = 100;
   private readonly minimumSampledShipsPerArea = 12;
   private readonly maxAnimatedShips = 80;
-  private readonly L: any;
-  private readonly map: any;
+  private readonly L: typeof Leaflet;
+  private readonly map: Leaflet.Map;
   private readonly service: SatelliteShipTrackingService;
   private readonly sidebar: TrackingSidebarBridge;
   private readonly componentRenderer: LeafletComponentRenderer;
   private readonly getData: () => SatelliteLiveShip[];
 
-  constructor(config: { L: any; map: any; service: SatelliteShipTrackingService; sidebar: TrackingSidebarBridge; componentRenderer: LeafletComponentRenderer; getData: () => SatelliteLiveShip[] }) {
+  constructor(config: { L: typeof Leaflet; map: Leaflet.Map; service: SatelliteShipTrackingService; sidebar: TrackingSidebarBridge; componentRenderer: LeafletComponentRenderer; getData: () => SatelliteLiveShip[] }) {
     this.L = config.L;
     this.map = config.map;
     this.service = config.service;
@@ -183,7 +190,7 @@ export class ShipMapRenderer {
     this.updateMarkerRotation(existing, rotationDegrees);
   }
 
-  private updateMarkerMotion(markerId: string, marker: any, ship: SatelliteLiveShip): void {
+  private updateMarkerMotion(markerId: string, marker: ShipMarker, ship: SatelliteLiveShip): void {
     const lat = ship.latitude as number;
     const lon = ship.longitude as number;
     const motionKey = [
@@ -251,7 +258,7 @@ export class ShipMapRenderer {
     return this.markers.size <= this.maxAnimatedShips || this.isSelected(shipId);
   }
 
-  private animateMarker(markerId: string, marker: any, targetLat: number, targetLon: number): void {
+  private animateMarker(markerId: string, marker: ShipMarker, targetLat: number, targetLon: number): void {
     if (typeof window === 'undefined') {
       marker.setLatLng([targetLat, targetLon]);
       return;
@@ -323,14 +330,14 @@ export class ShipMapRenderer {
     }
   }
 
-  private createMarker(ship: SatelliteLiveShip): any {
+  private createMarker(ship: SatelliteLiveShip): ShipMarker {
     const mmsiId = normalizeEntityId(ship.mmsi);
     const isSelected = this.isSelected(mmsiId);
     const isLoading = this.isLoading(mmsiId);
     const renderedIcon = this.createIcon(ship, isSelected, isLoading);
     const marker = this.L.marker([ship.latitude!, ship.longitude!], {
       icon: renderedIcon.icon,
-    });
+    }) as ShipMarker;
     marker.__orionShipIconRef = renderedIcon.componentRef;
     if (mmsiId) {
       marker.bindTooltip(`${escapeTooltipText(mmsiId)}`, {
@@ -379,7 +386,7 @@ export class ShipMapRenderer {
     });
   }
 
-  private getMovementRotation(marker: any, ship: SatelliteLiveShip): number {
+  private getMovementRotation(marker: ShipMarker, ship: SatelliteLiveShip): number {
     if (Number.isFinite(ship.course)) {
       return ship.course as number;
     }
@@ -406,7 +413,7 @@ export class ShipMapRenderer {
     return 0;
   }
 
-  private createIcon(ship: SatelliteLiveShip, isSelected: boolean, isLoading: boolean, rotationDegrees = Number.isFinite(ship.course) ? ship.course as number : Number.isFinite(ship.true_heading) ? ship.true_heading as number : 0): { icon: any; componentRef: ComponentRef<ShipMarkerIconComponent> } {
+  private createIcon(ship: SatelliteLiveShip, isSelected: boolean, isLoading: boolean, rotationDegrees = Number.isFinite(ship.course) ? ship.course as number : Number.isFinite(ship.true_heading) ? ship.true_heading as number : 0): { icon: Leaflet.DivIcon; componentRef: ComponentRef<ShipMarkerIconComponent> } {
     const size = getMarkerBaseSize(this.map, 'ship');
     const half = Math.round(size / 2);
     const rendered = this.componentRenderer.create(ShipMarkerIconComponent, {
@@ -427,12 +434,12 @@ export class ShipMapRenderer {
     };
   }
 
-  private destroyMarkerIcon(marker: any): void {
+  private destroyMarkerIcon(marker: ShipMarker): void {
     this.componentRenderer.destroy(marker.__orionShipIconRef);
     marker.__orionShipIconRef = null;
   }
 
-  private updateMarkerRotation(marker: any, rotationDegrees: number): void {
+  private updateMarkerRotation(marker: ShipMarker, rotationDegrees: number): void {
     const componentRef = marker.__orionShipIconRef as ComponentRef<ShipMarkerIconComponent> | null | undefined;
     if (componentRef) {
       componentRef.instance.rotationDegrees = rotationDegrees;
@@ -464,13 +471,15 @@ export class ShipMapRenderer {
     const bounds = this.map?.getBounds?.();
     const zoom = this.map?.getZoom?.() ?? 3;
     const visible = this.getData().filter(ship => {
-      if (!Number.isFinite(ship.latitude) || !Number.isFinite(ship.longitude)) {
+      const latitude = ship.latitude;
+      const longitude = ship.longitude;
+      if (typeof latitude !== 'number' || typeof longitude !== 'number' || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
         return false;
       }
       if (!bounds) {
         return true;
       }
-      return bounds.pad(0.18).contains([ship.latitude, ship.longitude]);
+      return bounds.pad(0.18).contains([latitude, longitude]);
     });
     if (visible.length <= 1200) {
       return visible;
@@ -730,11 +739,13 @@ export class ShipMapRenderer {
   }
 
   private getScreenCell(ship: SatelliteLiveShip, gridSize: number): { row: number; col: number } | null {
-    if (!this.map?.latLngToContainerPoint || !Number.isFinite(ship.latitude) || !Number.isFinite(ship.longitude)) {
+    const latitude = ship.latitude;
+    const longitude = ship.longitude;
+    if (!this.map?.latLngToContainerPoint || typeof latitude !== 'number' || typeof longitude !== 'number' || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return null;
     }
 
-    const point = this.map.latLngToContainerPoint([ship.latitude, ship.longitude]);
+    const point = this.map.latLngToContainerPoint([latitude, longitude]);
     if (!Number.isFinite(point?.x) || !Number.isFinite(point?.y)) {
       return null;
     }
@@ -827,26 +838,27 @@ export class ShipMapRenderer {
     return normalizeEntityId(ship.mmsi) ?? `${ship.latitude}:${ship.longitude}`;
   }
 
-  private extractDetails(res: any): SatelliteLiveShip | null {
-    const payload = res?.result ?? res;
+  private extractDetails(res: unknown): SatelliteLiveShip | null {
+    const response = asUnknownRecord(res);
+    const payload = asUnknownRecord(response['result'] ?? res);
     const ships = this.service.extractItems(payload);
     if (ships?.length) {
       return ships[0];
     }
-    if (Array.isArray(payload?.ships) && payload.ships.length > 0) {
-      return payload.ships[0] as SatelliteLiveShip;
+    if (Array.isArray(payload['ships']) && payload['ships'].length > 0) {
+      return payload['ships'][0] as SatelliteLiveShip;
     }
-    if (payload?.ship && typeof payload.ship === 'object' && !Array.isArray(payload.ship)) {
-      return payload.ship as SatelliteLiveShip;
+    if (payload['ship'] && typeof payload['ship'] === 'object' && !Array.isArray(payload['ship'])) {
+      return payload['ship'] as SatelliteLiveShip;
     }
-    if (payload?.ships && typeof payload.ships === 'object' && !Array.isArray(payload.ships)) {
-      return payload.ships as SatelliteLiveShip;
+    if (payload['ships'] && typeof payload['ships'] === 'object' && !Array.isArray(payload['ships'])) {
+      return payload['ships'] as SatelliteLiveShip;
     }
-    if (payload && typeof payload === 'object' && payload.mmsi != null) {
-      return payload as SatelliteLiveShip;
+    if (payload['mmsi'] != null) {
+      return payload as unknown as SatelliteLiveShip;
     }
-    if (res && typeof res === 'object' && res.mmsi != null) {
-      return res as SatelliteLiveShip;
+    if (response['mmsi'] != null) {
+      return response as unknown as SatelliteLiveShip;
     }
     return null;
   }

@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../model/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
+import { asUnknownRecord, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteShipTrackingService {
@@ -44,7 +45,7 @@ export class SatelliteShipTrackingService {
     ].map(value => Number(value).toFixed(2)).join(':');
   }
 
-  extractItems(payload: any): SatelliteLiveShip[] | null {
+  extractItems(payload: unknown): SatelliteLiveShip[] | null {
     const items = this.extractShipArray(payload);
     if (items) {
       return items
@@ -52,7 +53,7 @@ export class SatelliteShipTrackingService {
         .filter((ship): ship is SatelliteLiveShip => ship !== null);
     }
 
-    const status = String(payload?.status || '').toLowerCase();
+    const status = String(asUnknownRecord(payload)['status'] || '').toLowerCase();
     if (status === 'pending' || status === 'busy') {
       return null;
     }
@@ -60,22 +61,23 @@ export class SatelliteShipTrackingService {
     return this.getPayloadCount(payload) === 0 ? [] : null;
   }
 
-  getFeedIssue(payload: any): string | null {
-    const payloadError = payload?.error || payload?.error_message || payload?.last_error || null;
+  getFeedIssue(payload: unknown): string | null {
+    const record = asUnknownRecord(payload);
+    const payloadError = record['error'] || record['error_message'] || record['last_error'] || null;
     if (payloadError) {
-      return payloadError;
+      return String(payloadError);
     }
 
-    if (payload?.connected === false || payload?.aisstream?.connected === false) {
+    if (record['connected'] === false || asUnknownRecord(record['aisstream'])['connected'] === false) {
       return 'ship feed disconnected';
     }
 
     return null;
   }
 
-  private buildBoundsPayload(lat: number, lon: number, delta: number, aisstreamApiKey?: string): Record<string, any> {
+  private buildBoundsPayload(lat: number, lon: number, delta: number, aisstreamApiKey?: string): Record<string, unknown> {
     const boundsDelta = Math.max(delta, this.minimumBoundsDelta);
-    const payload: Record<string, any> = {
+    const payload: Record<string, unknown> = {
       lat_min: this.clampLatitude(lat - boundsDelta),
       lat_max: this.clampLatitude(lat + boundsDelta),
       lon_min: this.clampLongitude(lon - boundsDelta),
@@ -89,8 +91,8 @@ export class SatelliteShipTrackingService {
     return payload;
   }
 
-  private buildGlobalPayload(aisstreamApiKey?: string): Record<string, any> {
-    const payload: Record<string, any> = {
+  private buildGlobalPayload(aisstreamApiKey?: string): Record<string, unknown> {
+    const payload: Record<string, unknown> = {
       lat_min: -90,
       lat_max: 90,
       lon_min: -180,
@@ -104,21 +106,24 @@ export class SatelliteShipTrackingService {
     return payload;
   }
 
-  private extractShipArray(payload: any): any[] | null {
+  private extractShipArray(payload: unknown): unknown[] | null {
+    const record = asUnknownRecord(payload);
+    const result = asUnknownRecord(record['result']);
+    const data = asUnknownRecord(record['data']);
     const candidates = [
-      payload?.ships,
-      payload?.result?.ships,
-      payload?.data?.ships,
-      payload?.ship,
-      payload?.result?.ship,
-      payload?.data?.ship,
-      payload?.vessels,
-      payload?.result?.vessels,
-      payload?.data?.vessels,
-      payload?.items,
-      payload?.result?.items,
-      payload?.data?.items,
-      payload?.Result,
+      record['ships'],
+      result['ships'],
+      data['ships'],
+      record['ship'],
+      result['ship'],
+      data['ship'],
+      record['vessels'],
+      result['vessels'],
+      data['vessels'],
+      record['items'],
+      result['items'],
+      data['items'],
+      record['Result'],
     ];
 
     for (const candidate of candidates) {
@@ -131,8 +136,8 @@ export class SatelliteShipTrackingService {
     return null;
   }
 
-  private normalizeShip(item: any): SatelliteLiveShip | null {
-    if (!item || typeof item !== 'object') {
+  private normalizeShip(item: unknown): SatelliteLiveShip | null {
+    if (!isUnknownRecord(item)) {
       return null;
     }
 
@@ -155,20 +160,20 @@ export class SatelliteShipTrackingService {
     return {
       ...item,
       mmsi,
-      name: this.readString(item, ['name', 'ship_name', 'vessel_name', 'VesselName'], [['MetaData', 'ShipName'], ['MetaData', 'ship_name']]) ?? item.name ?? null,
+      name: this.readString(item, ['name', 'ship_name', 'vessel_name', 'VesselName'], [['MetaData', 'ShipName'], ['MetaData', 'ship_name']]) ?? (typeof item['name'] === 'string' ? item['name'] : null),
       latitude,
       longitude,
       speed: this.readNumber(item, ['speed', 'sog', 'SOG', 'Speed'], [['Message', 'PositionReport', 'Sog'], ['Message', 'PositionReport', 'SpeedOverGround']]),
       course: this.readNumber(item, ['course', 'cog', 'COG', 'Course'], [['Message', 'PositionReport', 'Cog'], ['Message', 'PositionReport', 'CourseOverGround']]),
       true_heading: this.readNumber(item, ['true_heading', 'heading', 'HDG', 'Heading'], [['Message', 'PositionReport', 'TrueHeading']]),
       nav_status: this.readNumber(item, ['nav_status', 'navigational_status', 'status_code']),
-      call_sign: this.readString(item, ['call_sign', 'callsign', 'CallSign'], [['MetaData', 'CallSign']]) ?? item.call_sign ?? null,
-      destination: this.readString(item, ['destination', 'Destination'], [['MetaData', 'Destination']]) ?? item.destination ?? null,
+      call_sign: this.readString(item, ['call_sign', 'callsign', 'CallSign'], [['MetaData', 'CallSign']]) ?? (typeof item['call_sign'] === 'string' ? item['call_sign'] : null),
+      destination: this.readString(item, ['destination', 'Destination'], [['MetaData', 'Destination']]) ?? (typeof item['destination'] === 'string' ? item['destination'] : null),
       ship_type: this.readNumber(item, ['ship_type', 'ShipType', 'type']),
     };
   }
 
-  private readNumber(item: any, keys: string[], paths: string[][] = []): number | null {
+  private readNumber(item: unknown, keys: string[], paths: string[][] = []): number | null {
     const value = this.readValue(item, keys, paths);
     if (typeof value === 'number') {
       return Number.isFinite(value) ? value : null;
@@ -180,7 +185,7 @@ export class SatelliteShipTrackingService {
     return null;
   }
 
-  private toShipArray(candidate: any): any[] | null {
+  private toShipArray(candidate: unknown): unknown[] | null {
     if (Array.isArray(candidate)) {
       return candidate;
     }
@@ -197,21 +202,22 @@ export class SatelliteShipTrackingService {
     return values.length ? values : null;
   }
 
-  private hasShipFields(candidate: any): boolean {
+  private hasShipFields(candidate: unknown): boolean {
+    const record = asUnknownRecord(candidate);
     return [
-      candidate?.mmsi,
-      candidate?.MMSI,
-      candidate?.latitude,
-      candidate?.lat,
-      candidate?.longitude,
-      candidate?.lon,
-      candidate?.lng,
-      candidate?.position,
-      candidate?.location,
+      record['mmsi'],
+      record['MMSI'],
+      record['latitude'],
+      record['lat'],
+      record['longitude'],
+      record['lon'],
+      record['lng'],
+      record['position'],
+      record['location'],
     ].some((value) => value !== null && value !== undefined && value !== '');
   }
 
-  private readString(item: any, keys: string[], paths: string[][] = []): string | null {
+  private readString(item: unknown, keys: string[], paths: string[][] = []): string | null {
     const value = this.readValue(item, keys, paths);
     if (value === null || value === undefined) {
       return null;
@@ -220,17 +226,23 @@ export class SatelliteShipTrackingService {
     return text || null;
   }
 
-  private readValue(item: any, keys: string[], paths: string[][] = []): unknown {
+  private readValue(item: unknown, keys: string[], paths: string[][] = []): unknown {
+    const record = asUnknownRecord(item);
     for (const key of keys) {
-      if (item[key] !== null && item[key] !== undefined && item[key] !== '') {
-        return item[key];
+      if (record[key] !== null && record[key] !== undefined && record[key] !== '') {
+        return record[key];
       }
     }
 
     for (const path of paths) {
       let value = item;
       for (const segment of path) {
-        value = value?.[segment];
+        if (Array.isArray(value)) {
+          value = value[Number(segment)];
+        }
+        else {
+          value = asUnknownRecord(value)[segment];
+        }
       }
       if (value !== null && value !== undefined && value !== '') {
         return value;
@@ -248,8 +260,9 @@ export class SatelliteShipTrackingService {
     return Number.isFinite(value) && (value as number) >= -180 && (value as number) <= 180;
   }
 
-  private getPayloadCount(payload: any): number | null {
-    const count = payload?.count ?? payload?.total ?? payload?.result?.count ?? payload?.data?.count;
+  private getPayloadCount(payload: unknown): number | null {
+    const record = asUnknownRecord(payload);
+    const count = record['count'] ?? record['total'] ?? asUnknownRecord(record['result'])['count'] ?? asUnknownRecord(record['data'])['count'];
     if (typeof count === 'number') {
       return Number.isFinite(count) ? count : null;
     }
@@ -268,7 +281,9 @@ export class SatelliteShipTrackingService {
     return Math.max(-180, Math.min(180, value));
   }
 
-  private getPollStatus(res: any): string | undefined {
-    return res?.result?.status || res?.status;
+  private getPollStatus(res: unknown): string | undefined {
+    const response = asUnknownRecord(res);
+    const status = asUnknownRecord(response['result'])['status'] ?? response['status'];
+    return typeof status === 'string' ? status : undefined;
   }
 }

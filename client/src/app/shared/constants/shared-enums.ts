@@ -1,3 +1,5 @@
+import { LicenseRule } from '../model/licenses/license.rules';
+
 export const LANGUAGE_MAP: Record<string, {
     iso1: string;
     name: string;
@@ -101,4 +103,4 @@ export const ALLOWED_CONSOLIDATED_RANKED_SINGLETON: Set<string> = new Set<string
   "zeroday"
 ]);
 export const search_filter_labels: Record<string, string> = {};
-export const license_rules: Record<string, any> = {};
+export const license_rules: Record<string, LicenseRule> = {};

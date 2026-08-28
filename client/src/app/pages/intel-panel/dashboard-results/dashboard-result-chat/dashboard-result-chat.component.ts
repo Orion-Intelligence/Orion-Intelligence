@@ -1,5 +1,5 @@
 import { AfterViewInit, Component, ElementRef, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
 import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callback.model';
 import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
@@ -27,7 +27,7 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   private readonly proxied_resource = inject(ProxyController);
 
   currentUrl = '';
-  queryParams: any = {};
+  queryParams: Params = {};
   isCollapsed = true;
   isConsolidatedView = false;
   readonly searchResults = input<ChatResultItem[]>([]);

@@ -36,8 +36,8 @@ export class WelcomeComponent implements OnInit {
     const token = this.route.snapshot.paramMap.get('token');
     if (token !== null) {
       this.hasToken = true;
-      this.apiService.post(`verify/${token}`, null).subscribe({
-        next: (res: any) => {
+      this.apiService.post<{ message?: string; access_url?: string | null }>(`verify/${token}`, null).subscribe({
+        next: (res) => {
           this.heading = "Verification Successful!";
           this.message = res.message || "Your email has been verified successfully. You may continue onboarding.";
           this.accessUrl = res.access_url || null;

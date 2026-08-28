@@ -35,20 +35,20 @@
       <div data-testid="social-phone-entity" class="mt-3 border-t border-[var(--color-border)] pt-3">
         <div class="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text4)]">{{ 'Entity Identification' | translate }}</div>
         <div class="mt-2 space-y-2">
-          @if (result()?.name) {
-            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Name' | translate }}</div><div class="mt-0.5 break-words text-[11px] font-semibold text-[var(--color-text2)]">{{ result().name }}</div></div>
+          @if (displayedResult().name) {
+            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Name' | translate }}</div><div class="mt-0.5 break-words text-[11px] font-semibold text-[var(--color-text2)]">{{ displayedResult().name }}</div></div>
           }
-          @if (result()?.formatted_address) {
-            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Physical Location' | translate }}</div><div class="mt-0.5 break-words text-[11px] leading-4 text-[var(--color-text3)]">{{ result().formatted_address }}</div></div>
+          @if (displayedResult().formatted_address) {
+            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Physical Location' | translate }}</div><div class="mt-0.5 break-words text-[11px] leading-4 text-[var(--color-text3)]">{{ displayedResult().formatted_address }}</div></div>
           }
-          @if (result()?.rating) {
-            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Public Rating' | translate }}</div><div class="mt-0.5 text-[11px] text-[var(--color-text3)]">⭐ {{ result().rating }} ({{ result().user_ratings_total }} {{ 'User Reviews' | translate }})</div></div>
+          @if (displayedResult().rating) {
+            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Public Rating' | translate }}</div><div class="mt-0.5 text-[11px] text-[var(--color-text3)]">⭐ {{ displayedResult().rating }} ({{ displayedResult().user_ratings_total }} {{ 'User Reviews' | translate }})</div></div>
           }
-          @if (result()?.website) {
-            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Official Portal' | translate }}</div><a [href]="result().website" target="_blank" rel="noopener" class="mt-0.5 block truncate font-mono text-[10px] text-sky-400 hover:underline" [title]="result().website">{{ result().website }}</a></div>
+          @if (displayedResult().website) {
+            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Official Portal' | translate }}</div><a [href]="displayedResult().website" target="_blank" rel="noopener" class="mt-0.5 block truncate font-mono text-[10px] text-sky-400 hover:underline" [title]="displayedResult().website">{{ displayedResult().website }}</a></div>
           }
-          @if (result()?.phone_numbers?.length) {
-            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Associated Numbers' | translate }}</div><div class="mt-1 space-y-1">@for (phone of result().phone_numbers; track phone) { <div class="truncate font-mono text-[10px] text-[var(--color-text3)]">{{ phone }}</div> }</div></div>
+          @if (displayedResult().phone_numbers?.length) {
+            <div><div class="text-[9px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Associated Numbers' | translate }}</div><div class="mt-1 space-y-1">@for (phone of displayedResult().phone_numbers; track phone) { <div class="truncate font-mono text-[10px] text-[var(--color-text3)]">{{ phone }}</div> }</div></div>
           }
         </div>
       </div>
@@ -59,13 +59,13 @@
         <div class="text-[10px] font-semibold uppercase tracking-[0.1em] text-[var(--color-text4)]">{{ 'Open Source Footprints' | translate }}</div>
         <div class="mt-2 space-y-2">
           @if (hasKnowledgeGraph()) {
-            <div class="text-[11px] leading-4 text-[var(--color-text3)]">{{ result().knowledge_graph.description || result().knowledge_graph.detailed_desc }}</div>
+            <div class="text-[11px] leading-4 text-[var(--color-text3)]">{{ displayedResult().knowledge_graph?.description || displayedResult().knowledge_graph?.detailed_desc }}</div>
           }
-          @if (result()?.emails?.length) {
-            <div class="space-y-1">@for (email of result().emails; track email) { <div class="truncate font-mono text-[10px] text-amber-300" [title]="email">{{ email }}</div> }</div>
+          @if (displayedResult().emails?.length) {
+            <div class="space-y-1">@for (email of displayedResult().emails; track email) { <div class="truncate font-mono text-[10px] text-amber-300" [title]="email">{{ email }}</div> }</div>
           }
-          @if (result()?.web_footprints?.length) {
-            <div class="space-y-1.5">@for (footprint of result().web_footprints.slice(0, 3); track $index) { <a [href]="footprint.link" target="_blank" rel="noopener" class="block truncate text-[11px] font-semibold text-sky-400 hover:underline" [title]="footprint.title">{{ footprint.title }}</a> }</div>
+          @if (displayedWebFootprints().length) {
+            <div class="space-y-1.5">@for (footprint of displayedWebFootprints().slice(0, 3); track $index) { <a [href]="footprint.link" target="_blank" rel="noopener" class="block truncate text-[11px] font-semibold text-sky-400 hover:underline" [title]="footprint.title">{{ footprint.title }}</a> }</div>
           }
         </div>
       </div>

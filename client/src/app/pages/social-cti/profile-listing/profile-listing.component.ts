@@ -216,8 +216,8 @@ export class SocialProfileListingComponent {
       return this.profileFetchTabs;
     }
     const crawlTabs: FetchTab[] = types.map(type => ({ key: type as FetchTabKey, label: type.charAt(0).toUpperCase() + type.slice(1), icon: type === 'details' ? 'bi bi-person-badge' : 'bi bi-collection' }));
-    // "details" is a universal profile tab, not a crawl content type, so crawl_type usually omits it.
-    // Keep it present (and first) so the active details tab never vanishes mid-load and bounces the user to posts.
+
+
     const withDetails = crawlTabs.some(tab => tab.key === 'details') ? crawlTabs : [this.detailsTab, ...crawlTabs];
     return [...withDetails, this.connectionsTab, this.onlinePresenceTab, this.stealerLogsTab];
   }
@@ -311,9 +311,9 @@ export class SocialProfileListingComponent {
   private startExtensionHeartbeat(): void {
     let indeterminateMisses = 0;
     timer(0, 3000).pipe(exhaustMap(() => this.extensionService.detect()), takeUntilDestroyed(this.destroyRef)).subscribe(state => {
-      // 'checking' means the probe could not confirm this round (e.g. a busy round-trip while
-      // crawling). Hold the last confirmed state through brief indeterminate polls so the connect
-      // gate never flashes; only conclude "not installed" after presence stays absent several polls.
+
+
+
       if (state === 'checking') {
         indeterminateMisses += 1;
         const previous = this.extensionState();
@@ -325,7 +325,7 @@ export class SocialProfileListingComponent {
       }
       indeterminateMisses = 0;
 
-      // Confirmed states apply instantly (ready / update / signin / install / unsupported).
+
       this.extensionState.set(state);
 
       if (state === 'signin' && !this.extensionOpened) {
@@ -466,7 +466,7 @@ export class SocialProfileListingComponent {
     }
   }
 
-  formatMetadataValue(value: any): string {
+  formatMetadataValue(value: unknown): string {
     if (value === null || value === undefined) {
       return '';
     }
@@ -481,12 +481,12 @@ export class SocialProfileListingComponent {
     return String(value);
   }
 
-  copyToClipboard(text: any): void {
+  copyToClipboard(text: unknown): void {
     const str = this.formatMetadataValue(text);
     void navigator.clipboard?.writeText(str);
   }
 
-  getStealerLogs(platformData: social_profile): any[] {
+  getStealerLogs(platformData: social_profile): unknown[] {
     return platformData.stealer_logs || [];
   }
 
@@ -555,13 +555,13 @@ export class SocialProfileListingComponent {
         this.setFetchedPlatformData(platformResult, stateKey, response);
       },
       error: () => {
-        this.liveSync.setSectionStatus(platformResult, section, 'failed'); this.finishFetch(requestKey); 
+        this.liveSync.setSectionStatus(platformResult, section, 'failed'); this.finishFetch(requestKey);
       },
       complete: () => {
         if (!this.liveSync.stoppedPlatformIds.has(this.getPlatformCardId(platformResult))) {
           this.liveSync.setSectionStatus(platformResult, section, failed ? 'failed' : 'completed');
         }
-        this.finishFetch(requestKey); 
+        this.finishFetch(requestKey);
       },
     });
   }
@@ -753,7 +753,7 @@ export class SocialProfileListingComponent {
     return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(rawValue);
   }
 
-  getProfileDetailEntries(platformData: social_profile): { key: string; value: any; }[] {
+  getProfileDetailEntries(platformData: social_profile): { key: string; value: unknown; }[] {
     return getProfileDetailEntries(platformData);
   }
 

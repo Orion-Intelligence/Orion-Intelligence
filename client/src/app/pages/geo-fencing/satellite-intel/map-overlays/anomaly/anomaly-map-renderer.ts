@@ -2,13 +2,14 @@ import { ComponentRef } from '@angular/core';
 import { SatelliteAnomalyResponse } from '../../model/satellite-intel-api.models';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import { AnomalyMapPopupComponent } from './anomaly-map-popup.component';
+import type * as Leaflet from 'leaflet';
 
 export class AnomalyMapRenderer {
-  private layer: any = null;
+  private layer: Leaflet.LayerGroup | null = null;
   private popupRef: ComponentRef<AnomalyMapPopupComponent> | null = null;
   private renderKey = '';
 
-  constructor(private L: any, private map: any, private componentRenderer: LeafletComponentRenderer) {}
+  constructor(private L: typeof Leaflet, private map: Leaflet.Map, private componentRenderer: LeafletComponentRenderer) {}
 
   init(): void {
     if (!this.L || !this.map || this.layer) {
@@ -73,7 +74,7 @@ export class AnomalyMapRenderer {
     return [[mnLa, mnLo], [mxLa, mxLo]];
   }
 
-  private getRectangleOptions(alertLevel: string | undefined): Record<string, unknown> {
+  private getRectangleOptions(alertLevel: string | undefined): Leaflet.PathOptions {
     const colors: Record<string, string> = {
       critical: '#ef4444',
       warning: '#f59e0b',

@@ -7,16 +7,11 @@ import { toUsername } from './username.util';
 import { buildSocialProfileUrl } from './profile-url.util';
 import { postUrlsOf } from './social-profile.util';
 import { bootstrapIconRegistry } from '../../../shared/icons/bootstrap-icon-registry';
+import type { person_view } from './model/social-user-graph.model';
+export type { person_view } from './model/social-user-graph.model';
 
-interface person_view {
-  handle: string;
-  name: string;
-  avatar: string;
-  url: string;
-  bio: string;
-  followers: string;
-  location: string;
-}
+
+
 
 export function normalizeHandle(raw: unknown): string {
   const text = String(raw ?? '').trim();

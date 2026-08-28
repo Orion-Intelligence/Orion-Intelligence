@@ -1,10 +1,9 @@
 import type jsPDF from 'jspdf';
+import type { PdfExportFontData } from './model/pdf-export-fonts.model';
+export type { PdfExportFontData } from './model/pdf-export-fonts.model';
 
-export interface PdfExportFontData {
-  interBold: string;
-  interRegular: string;
-  monoRegular: string;
-}
+
+
 
 let fontDataPromise: Promise<PdfExportFontData | null> | null = null;
 
@@ -39,7 +38,7 @@ export function registerPdfExportFonts(doc: jsPDF, fontData: PdfExportFontData |
     doc.addFont('DejaVuSansMono.ttf', 'courier', 'normal');
   }
   catch {
-    // jsPDF keeps its built-in Helvetica and Courier faces as a safe fallback.
+
   }
 }
 

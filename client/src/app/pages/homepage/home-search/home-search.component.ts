@@ -185,7 +185,7 @@ export class HomeSearchComponent implements OnInit {
       currentTargetElement.setPointerCapture(event.pointerId);
     }
     catch {
-      // Ignore pointer-capture failures on unsupported targets.
+
     }
 
     this.insightDragging = true;
@@ -205,13 +205,13 @@ export class HomeSearchComponent implements OnInit {
     this.detachWindowPointerListeners();
 
     const move = (e: PointerEvent) => {
-      this.onInsightPointerMove(e); 
+      this.onInsightPointerMove(e);
     };
     const up = (e: PointerEvent) => {
-      this.onInsightPointerUp(e); 
+      this.onInsightPointerUp(e);
     };
     const cancel = (e: PointerEvent) => {
-      this.onInsightPointerCancel(e); 
+      this.onInsightPointerCancel(e);
     };
 
     window.addEventListener('pointermove', move, { passive: false });
@@ -219,9 +219,9 @@ export class HomeSearchComponent implements OnInit {
     window.addEventListener('pointercancel', cancel, { passive: false });
 
     this.removeWindowListeners = () => {
-      window.removeEventListener('pointermove', move as any);
-      window.removeEventListener('pointerup', up as any);
-      window.removeEventListener('pointercancel', cancel as any);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', cancel);
       this.removeWindowListeners = null;
     };
   }

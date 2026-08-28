@@ -1,31 +1,43 @@
-import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CategoryAlerts } from '../../../../shared/partials/alert-notification/model/alert.notification.model';
-import { AlertAllIoc, AlertModel } from '../../../../shared/model/company-profile/node.model';
 import { map, Observable } from 'rxjs';
 import { AppService } from '../../../../services/core/app/app.service';
-import { search_filter_labels } from '../../../../shared/constants/shared-enums';
-import { AddCustomAlertComponent } from "../add-custom-alert/add-custom-alert.component";
-import { SidebarService } from '../../../../shared/services/sidebar.service';
-import { FilterModel } from '../../../../shared/model/filter/filter.model';
-import { alert_filters } from '../../../../shared/constants/filters';
-import { FiltersComponent } from "../../../../shared/partials/filters/filters.component";
-import { ApiService } from '../../../../shared/services/api.service';
-import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
+import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { ConfirmationPopupComponent } from "../../../../shared/partials/confirmation-popup/confirmation-popup.component";
-import { HelperService } from '../../../../shared/services/helper.service';
+import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
+import { alert_filters } from '../../../../shared/constants/filters';
+import { search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
+import { AlertAllIoc, AlertModel } from '../../../../shared/model/company-profile/node.model';
+import { FilterModel } from '../../../../shared/model/filter/filter.model';
+import { buildStandardExportOptions } from '../../../../shared/model/report/export-choice.model';
+import { CategoryAlerts } from '../../../../shared/partials/alert-notification/model/alert.notification.model';
+import { AlertExportService } from '../../../../shared/partials/alert-notification/services/alert-export.service';
+import { ConfirmationPopupComponent } from "../../../../shared/partials/confirmation-popup/confirmation-popup.component";
 import { EmptyResultComponent } from '../../../../shared/partials/empty-result/empty-result.component';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { buildStandardExportOptions } from '../../../../shared/model/report/export-choice.model';
-import { AlertExportService } from '../../../../shared/partials/alert-notification/services/alert-export.service';
-import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
+import { FiltersComponent } from "../../../../shared/partials/filters/filters.component";
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ApiService } from '../../../../shared/services/api.service';
+import { HelperService } from '../../../../shared/services/helper.service';
+import { SidebarService } from '../../../../shared/services/sidebar.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { isUnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { AddCustomAlertComponent } from "../add-custom-alert/add-custom-alert.component";
 import { CategoryAlertDetailDrawerComponent } from './alert-detail-drawer/category-alert-detail-drawer.component';
+import type { AlertPageResponse, StixBundle, StixReportObject } from './model/category-alert-report.model';
+export type { AlertPageResponse,StixBundle,StixExternalReference,StixReportObject } from './model/category-alert-report.model';
+
+
+
+
+
+
+
+
+
 
 @Component({
   selector: 'app-category-alert-report',
@@ -156,7 +168,7 @@ export class CategoryAlertReportComponent implements OnInit {
       return;
     }
 
-    this.apiService.get<any>(endpoint).subscribe({
+    this.apiService.get<AlertPageResponse>(endpoint).subscribe({
       next: response => {
         const rawItems: AlertModel[] = response?.items || [];
         for (const item of rawItems) {
@@ -286,7 +298,7 @@ export class CategoryAlertReportComponent implements OnInit {
     }
 
 
-    this.apiService.get<any>(apiUrl).subscribe({
+    this.apiService.get<unknown>(apiUrl).subscribe({
       next: (response) => {
         if (response) {
           this.helperService.downloadstixJson(response);
@@ -416,7 +428,7 @@ export class CategoryAlertReportComponent implements OnInit {
       this.closeExportChoice();
       return;
     }
-    this.apiService.get<any>(endpoint).subscribe({
+    this.apiService.get<AlertModel[] | AlertPageResponse>(endpoint).subscribe({
       next: response => {
         const alerts: AlertModel[] = Array.isArray(response)
           ? response
@@ -508,7 +520,7 @@ export class CategoryAlertReportComponent implements OnInit {
               break;
             case "stealerlogs":
               route = "/dashboard/stealerlogs";
-              const queryParams: any = {
+              const queryParams: Record<string, string | number | boolean> = {
                 q: "",
                 page: 1,
                 category: "credential",
@@ -517,10 +529,10 @@ export class CategoryAlertReportComponent implements OnInit {
                 must: false
               };
               if (this.isDomain(value)) {
-                queryParams.domain = value;
+                queryParams['domain'] = value;
               }
               else {
-                queryParams.user = value;
+                queryParams['user'] = value;
               }
               this.router.navigate([route], { queryParams });
               break;
@@ -733,7 +745,7 @@ export class CategoryAlertReportComponent implements OnInit {
       .map(alert => alert.detectedOn instanceof Date
         ? alert.detectedOn
         : new Date(alert.detectedOn))
-      .filter(date => !isNaN(date.getTime())); // ensures valid date
+      .filter(date => !isNaN(date.getTime()));
 
     if (validDates.length === 0) {
       return '-';
@@ -918,8 +930,9 @@ export class CategoryAlertReportComponent implements OnInit {
     return domainRegex.test(value);
   }
 
-  onFileUpload(event: any) {
-    const file = event.target.files[0];
+  onFileUpload(event: Event) {
+    const input = event.target as HTMLInputElement | null;
+    const file = input?.files?.[0];
     if (!file) {
       return;
     }
@@ -950,24 +963,26 @@ export class CategoryAlertReportComponent implements OnInit {
         });
 
       }
-      catch (error: any) {
-        this.messageNotificationService.show(error.message || this.translationService.translate('Invalid JSON file'));
+      catch (error: unknown) {
+        this.messageNotificationService.show(error instanceof Error ? error.message : this.translationService.translate('Invalid JSON file'));
       }
     };
 
     reader.readAsText(file);
   }
 
-  validateAlert(data: any): AlertModel {
-    if (!data || typeof data !== 'object') {
+  validateAlert(data: unknown): AlertModel {
+    if (!isUnknownRecord(data)) {
       throw new Error('Invalid JSON structure');
     }
 
-    if (data.type !== 'bundle' || !Array.isArray(data.objects)) {
+    const bundle = data as StixBundle;
+
+    if (bundle.type !== 'bundle' || !Array.isArray(bundle.objects)) {
       throw new Error('Uploaded file must be a STIX 2.1 bundle');
     }
 
-    const report = data.objects.find((o: any) => o.type === 'report');
+    const report = bundle.objects.find((o: StixReportObject) => o.type === 'report');
 
     if (!report) {
       throw new Error('STIX bundle must contain a report object');
@@ -980,8 +995,13 @@ export class CategoryAlertReportComponent implements OnInit {
       }
     }
 
-    const firstSeen = new Date(report.created);
-    const lastSeen = new Date(report.modified);
+    const created = report.created;
+    const modified = report.modified;
+    if (!created || !modified) {
+      throw new Error('Report timestamps are required');
+    }
+    const firstSeen = new Date(created);
+    const lastSeen = new Date(modified);
 
     if (isNaN(firstSeen.getTime()) || isNaN(lastSeen.getTime())) {
       throw new Error('Invalid report timestamps');
@@ -1003,12 +1023,12 @@ export class CategoryAlertReportComponent implements OnInit {
       description: report.description ?? '',
 
       url:
-        report.external_references?.find((r: any) => r.url)?.url ?? '',
+        report.external_references?.find((r) => r.url)?.url ?? '',
 
       source:
         report.external_references?.[0]?.source_name ?? 'import',
 
-      all_ioc: data.objects,
+      all_ioc: bundle.objects as unknown as AlertAllIoc[],
       content_types: report.labels ?? [],
     };
   }

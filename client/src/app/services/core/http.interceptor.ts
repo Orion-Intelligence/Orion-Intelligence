@@ -7,7 +7,7 @@ import { LoadingService } from '../../shared/services/loading.service';
 import { MessageNotificationService } from '../message_notification/message-notification.service';
 import { AuthService } from '../authetication/auth.service';
 let activeRequests = 0;
-let hideTimeout: any = null;
+let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 let maintenancePageLoading = false;
 const inFlightCancels = new Map<string, Subject<void>>();
 const GLOBAL_TIMEOUT = 150000;
@@ -26,7 +26,7 @@ const STATUS_MEANINGS: Record<number, string> = {
   502: 'Bad Gateway',
   503: 'Service Unavailable',
 };
-export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn): Observable<HttpEvent<any>> => {
+export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, next: HttpHandlerFn): Observable<HttpEvent<unknown>> => {
   const router = inject(Router);
   const loadingService = inject(LoadingService);
   const msg = inject(MessageNotificationService);
@@ -50,7 +50,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
   if (hideTimeout) {
     clearTimeout(hideTimeout);
   }
-  return next(authReq).pipe(cancel$ ? takeUntil(cancel$) : (s) => s, timeout<HttpEvent<any>>(GLOBAL_TIMEOUT), finalize(() => {
+  return next(authReq).pipe(cancel$ ? takeUntil(cancel$) : (s) => s, timeout<HttpEvent<unknown>>(GLOBAL_TIMEOUT), finalize(() => {
     if (key) {
       const current = inFlightCancels.get(key);
       if (current === cancel$) {
@@ -64,7 +64,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         hideTimeout = null;
       }, 1000);
     }
-  }), catchError((error: unknown) => {
+  }), catchError((error) => {
     if (isDevMode() && error instanceof HttpErrorResponse && error.status === 503) {
       if (!maintenancePageLoading) {
         maintenancePageLoading = true;
@@ -80,7 +80,8 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
     }
     if (authService?.isAuthenticated()) {
       if (error instanceof HttpErrorResponse && authReq.url.includes('api/search')) {
-        const detail = typeof error.error === 'object' ? String((error.error as any)?.detail || '') : '';
+        const errorBody = error.error && typeof error.error === 'object' ? error.error as Record<string, unknown> : null;
+        const detail = String(errorBody?.['detail'] || '');
         if (error.status === 404 && /document not found/i.test(detail)) {
           msg.show('Report Expired');
           return throwError(() => error);
@@ -90,11 +91,11 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         msg.show('Cannot connect to server');
         return throwError(() => error);
       }
-      let message = STATUS_MEANINGS[(error as any).status] || 'Error';
+      let message = error instanceof HttpErrorResponse ? STATUS_MEANINGS[error.status] || 'Error' : 'Error';
       if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
         const keys = Object.keys(error.error);
         if (keys.length === 1) {
-          message = `${(error.error as any)[keys[0]]}`;
+          message = `${(error.error as Record<string, unknown>)[keys[0]]}`;
         }
       }
       const silentLogoutMessages = new Set([
@@ -125,7 +126,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: 
         error: 'Request timed out',
         status: 408,
         statusText: 'Request Timeout',
-        url: (error as any).url,
+        url: authReq.url,
       }));
     }
     return throwError(() => error);

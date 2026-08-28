@@ -5,14 +5,14 @@ import { ApiService } from '../../../shared/services/api.service';
 
 @Injectable({ providedIn: 'root' })
 export class InsightCacheService {
-  private insight$?: Observable<any>;
+  private insight$?: Observable<unknown>;
   private warmed = false;
 
   constructor(private apiService: ApiService) {}
 
-  getInsight(): Observable<any> {
+  getInsight(): Observable<unknown> {
     if (!this.insight$) {
-      this.insight$ = this.apiService.get<any>('insight').pipe(shareReplay(1));
+      this.insight$ = this.apiService.get<unknown>('insight').pipe(shareReplay(1));
     }
     return this.insight$;
   }

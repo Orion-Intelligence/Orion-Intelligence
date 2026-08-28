@@ -1,15 +1,12 @@
 import entitiesData from '../../../assets/data/entities_data/entities.json';
 import { IocCategory } from '../model/tenant/tenant.model';
+import type { EntityDefinition, ParsedIocCsv } from './model/ioc-csv.model';
+export type { EntityDefinition, ParsedIocCsv } from './model/ioc-csv.model';
 
-interface EntityDefinition {
-  title: string;
-  key: string;
-}
 
-export interface ParsedIocCsv {
-  valuesByKey: Record<string, string[]>;
-  valueCount: number;
-}
+
+
+
 
 const CSV_HEADERS = ['key', 'value'];
 const TEMPLATE_INSTRUCTION_KEY = 'Instruction';

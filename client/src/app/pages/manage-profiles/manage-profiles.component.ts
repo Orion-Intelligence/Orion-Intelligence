@@ -9,11 +9,11 @@ import { PlatformEntry, SessionEntry } from './model/manage-profiles.model';
 import { SocialExtensionManagerComponent } from '../../shared/partials/extension-manager/extension-manager.component';
 import { SocialIconComponent } from '../../shared/partials/social-icon/social-icon.component';
 import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-popup/confirmation-popup.component';
+import type { PendingSessionDelete } from './model/manage-profiles.interfaces.model';
+export type { PendingSessionDelete } from './model/manage-profiles.interfaces.model';
 
-interface PendingSessionDelete {
-  platform: string;
-  sessionId: string;
-}
+
+
 
 @Component({
   selector: 'app-manage-profiles',

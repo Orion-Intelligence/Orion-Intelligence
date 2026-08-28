@@ -1,6 +1,9 @@
 import type jsPDF from 'jspdf';
 import { PDF_EXPORT_THEME, PdfRgb } from './pdf-export-theme';
 import { normalizePdfText } from './pdf-text.util';
+import type { InstitutionalCoverOptions, InstitutionalFooterOptions, InstitutionalHeaderOptions } from './model/pdf-export-layout.model';
+export type { InstitutionalCoverOptions, InstitutionalFooterOptions, InstitutionalHeaderOptions } from './model/pdf-export-layout.model';
+
 
 export const PDF_EXPORT_LAYOUT = {
   margin: 48,
@@ -10,30 +13,11 @@ export const PDF_EXPORT_LAYOUT = {
   footerTextOffset: 18.7
 } as const;
 
-export interface InstitutionalCoverOptions {
-  classification?: string;
-  context: string;
-  generatedAt: string;
-  lead?: string;
-  preparedFor: string;
-  reportFamily: string;
-  sections: string[];
-  subtitle: string;
-  title: string;
-}
 
-export interface InstitutionalHeaderOptions {
-  reportFamily: string;
-  section: string;
-  tenantName: string;
-}
 
-export interface InstitutionalFooterOptions {
-  pageNo: number;
-  section: string;
-  tenantName: string;
-  totalPages: number;
-}
+
+
+
 
 function fitSingleLine(doc: jsPDF, value: string, maxWidth: number, charSpace: number = 0): string {
   const input = normalizePdfText(value || '-');

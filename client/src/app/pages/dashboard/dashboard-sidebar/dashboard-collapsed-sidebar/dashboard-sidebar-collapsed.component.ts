@@ -7,6 +7,8 @@ import { sidebarItemTooltips } from '../../../../shared/constants/shared-enums';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { Category } from '../../../../shared/constants/pages';
+import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
 
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
@@ -21,11 +23,11 @@ export class SidebarSectionComponent {
   readonly title = input('');
   readonly icon = input('');
   readonly items = input<string[]>([]);
-  readonly category = input<any>();
+  readonly category = input.required<Category>();
   readonly routePrefix = input('');
-  readonly selectionStore = input<any>();
+  readonly selectionStore = input.required<SelectionStoreService>();
   readonly tooltip = input('');
-  readonly sectionSelected = output<any>();
+  readonly sectionSelected = output<Category>();
   readonly optionSelected = output<string>();
 
   constructor(protected licenseService: LicenseService, private sidebarHomepageService: SidebarHomepageService) {}

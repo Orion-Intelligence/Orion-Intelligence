@@ -9,10 +9,11 @@ import { OrionFacilitiesMapRenderer } from './facilities/orion-facilities-map-re
 import { LeafletComponentRenderer } from '../map-utils/leaflet-component-renderer';
 import { ShipMapRenderer } from './ships/ship-map-renderer';
 import { SatelliteShipTrackingService } from './ships/ship-tracking.service';
+import type * as Leaflet from 'leaflet';
 
 type EntityRendererConfig = {
-  L: any;
-  map: any;
+  L: typeof Leaflet;
+  map: Leaflet.Map;
   appRef: ApplicationRef;
   environmentInjector: EnvironmentInjector;
   aircraftService: SatelliteAircraftTrackingService;

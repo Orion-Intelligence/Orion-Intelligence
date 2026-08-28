@@ -14,13 +14,12 @@ import entitiesData from '../../../../assets/data/entities_data/entities.json';
 import licenseRulesData from '../../../../assets/data/licenses/license_rules.json';
 import { firstValueFrom } from 'rxjs';
 import { DemoTourConfig } from '../../../shared/model/demo-tour/demo.tour.model';
+import { LicenseRule } from '../../../shared/model/licenses/license.rules';
+import type { EntityOption } from './model/app.model';
+export type { EntityOption } from './model/app.model';
 
-export interface EntityOption {
-  title: string;
-  key: string;
-  fields?: string[];
-  alert?: boolean;
-}
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +32,7 @@ export class AppService {
   public configData = signal<ConfigSettings>(new ConfigSettings());
   public page = signal<number>(1);
   public entities = signal<EntityOption[]>([]);
-  public worldJson = signal<any>(null);
+  public worldJson = signal<unknown>(null);
   public demoTourConfig = signal<DemoTourConfig>({});
   public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
   public tenantData = signal<TenantModel>({
@@ -143,7 +142,7 @@ export class AppService {
       return this.configLoad$;
     }
 
-    this.configLoad$ = this.apiService.get<any>('public').pipe(tap((response) => {
+    this.configLoad$ = this.apiService.get<{ settings?: Partial<AppSettingsModel> }>('public').pipe(tap((response) => {
       if (response?.settings) {
         const current = this.configData();
         this.configData.set(new ConfigSettings(response.settings, current.localSettings));
@@ -221,7 +220,7 @@ export class AppService {
   }
 
   private initializeLicenseRules(): void {
-    const bundledRules = licenseRulesData as Record<string, any>;
+    const bundledRules = licenseRulesData as Record<string, LicenseRule>;
     for (const key in bundledRules) {
       license_rules[key] = bundledRules[key];
     }
@@ -234,7 +233,7 @@ export class AppService {
 
   loadWorldJson(): void {
     this.http
-      .get<any>('assets/data/map/world.json')
+      .get<unknown>('assets/data/map/world.json')
       .pipe(tap(data => {
         this.worldJson.set(data);
       }))

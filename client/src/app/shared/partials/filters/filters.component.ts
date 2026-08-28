@@ -137,7 +137,7 @@ export class FiltersComponent implements OnInit {
   }
 
   closeFilter() {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.filterClose.emit(undefined);
   }
 
@@ -146,7 +146,7 @@ export class FiltersComponent implements OnInit {
     this.selectedFilters = {};
     this.dashboard.selectedFilters.set({});
     this.filterChanged.emit({});
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.filterReset.emit(undefined);
     this.closeFilter();
   }

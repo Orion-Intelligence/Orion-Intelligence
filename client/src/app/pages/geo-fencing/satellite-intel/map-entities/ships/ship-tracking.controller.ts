@@ -88,7 +88,7 @@ export class SatelliteShipTrackingController {
         if (!this.enabled) {
           return;
         }
-        const payload = (res?.result ?? res) as any;
+        const payload = (res?.result ?? res) as unknown;
         const ships = this.service.extractItems(payload);
         if (ships !== null) {
           this.applyResult(ships, payload, 'Global ship tracking');
@@ -135,7 +135,7 @@ export class SatelliteShipTrackingController {
         if (!this.enabled) {
           return;
         }
-        const payload = (res?.result ?? res) as any;
+        const payload = (res?.result ?? res) as unknown;
         const ships = this.service.extractItems(payload);
         if (ships !== null) {
           this.applyResult(this.filterShipsToViewport(ships, viewport), payload, 'Ship tracking', !viewportChanged);
@@ -162,7 +162,7 @@ export class SatelliteShipTrackingController {
     });
   }
 
-  private applyResult(ships: SatelliteLiveShip[], payload: any, label: string, keepLastAllowed = true): void {
+  private applyResult(ships: SatelliteLiveShip[], payload: unknown, label: string, keepLastAllowed = true): void {
     const feedIssue = this.service.getFeedIssue(payload);
     if (ships.length > 0) {
       if (feedIssue && keepLastAllowed && this.shouldKeepLastShips() && ships.length < this.data.length) {

@@ -114,7 +114,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       next: async (res) => {
         if (res?.twofa_required) {
           this.twofaRequired = true;
-          this.pendingUsername = res.username;
+          this.pendingUsername = res.username ?? this.user.mail;
           this.tempToken = res.temp_token || null;
           this.otpUri = res.provisioning_uri || null;
           this.otpSecret = res.twofa_secret || null;

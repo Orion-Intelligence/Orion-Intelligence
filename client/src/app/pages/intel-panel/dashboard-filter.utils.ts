@@ -1,26 +1,17 @@
 import { Category } from '../../shared/constants/pages';
 import { FilterModel, FilterOption } from '../../shared/model/filter/filter.model';
+import type { DashboardFilterModels, MalpediaFilterOptionsResponse, MalwareBazaarFilterOptionsResponse } from './model/dashboard-filter.utils.model';
+export type { DashboardFilterModels, MalpediaFilterOptionsResponse, MalwareBazaarFilterOptionsResponse } from './model/dashboard-filter.utils.model';
+
 
 export const MALPEDIA_FILTER_OPTIONS_ENDPOINT = 'search/apt/families';
 export const MALWARE_BAZAAR_FILTER_OPTIONS_ENDPOINT = 'search/malware/filter-options';
 
-export interface MalpediaFilterOptionsResponse {
-  families?: string[];
-  countries?: string[];
-}
 
-export interface MalwareBazaarFilterOptionsResponse {
-  countries?: string[];
-  content_types?: string[];
-  reporters?: string[];
-}
 
-interface DashboardFilterModels {
-  general: FilterModel;
-  threatIntel: FilterModel;
-  malpedia: FilterModel;
-  malwareBazaar: FilterModel;
-}
+
+
+
 
 export function getDashboardFilterModel(type: Category, route: string, filters: DashboardFilterModels): FilterModel {
   if (isMalpediaRoute(type, route)) {

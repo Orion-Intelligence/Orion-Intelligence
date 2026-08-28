@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 if (Cypress.expose("coverage")) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+
     require("@cypress/code-coverage/support");
 }
 
@@ -77,7 +77,7 @@ Cypress.on("window:before:load", (win) => {
                     animation.cancel();
                 }
                 catch {
-                    // Ignore animations that cannot be finished or canceled.
+
                 }
             }
         });

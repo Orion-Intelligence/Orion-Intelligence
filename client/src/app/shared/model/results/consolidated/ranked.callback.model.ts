@@ -1,5 +1,9 @@
+import { CredentialResultItem } from '../credentials/credential.callback.model';
+
+export interface RankedResultItem extends CredentialResultItem {}
+
 export class RankedCallbackModel {
-  result: any[] = [];
+  result: RankedResultItem[] = [];
   pageCount: number = 0;
   totalHits: number = 0;
 

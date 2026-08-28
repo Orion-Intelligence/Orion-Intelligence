@@ -1,47 +1,14 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { SocialConnectionsPopupComponent } from '../connections-popup/social-connections-popup.component';
 import { applyImageFallback } from '../../utils/image-fallback.util';
-import { asRecord, formatKeyLabel, initialOf, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, resource_entry, resource_time, toggleKey } from '../../utils/resource-view.util';
+import { asRecord, formatKeyLabel, initialOf, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, toggleKey } from '../../utils/resource-view.util';
+import { SocialConnectionsPopupComponent } from '../connections-popup/social-connections-popup.component';
+import type { feed_item_view } from './model/resource-feed-section.model';
+export type { feed_item_view } from './model/resource-feed-section.model';
 
-export interface feed_item_view {
-  key: string;
-  author: string;
-  handle: string;
-  avatar: string;
-  initial: string;
-  verified: boolean;
-  time: resource_time;
-  edited: boolean;
-  kind: string;
-  flags: string[];
-  replyTo: string;
-  title: string;
-  body: string;
-  images: string[];
-  video: string;
-  poster: string;
-  duration: string;
-  url: string;
-  repo: string;
-  repoUrl: string;
-  branch: string;
-  commits: string;
-  tags: string[];
-  mentions: string[];
-  language: string;
-  location: string;
-  likes: string;
-  comments: string;
-  shares: string;
-  quotes: string;
-  bookmarks: string;
-  views: string;
-  warning: string;
-  hateSpeech: string;
-  extra: resource_entry[];
-}
+
+
 
 const MEDIA_TYPES = new Set(['image', 'images', 'photo', 'picture', 'video', 'reel', 'reels', 'short', 'shorts', 'clip', 'album', 'carousel', 'gif', 'pin', 'media', 'story']);
 const VIDEO_TYPES = new Set(['video', 'reel', 'reels', 'short', 'shorts', 'clip']);

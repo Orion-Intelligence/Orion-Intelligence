@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
-import { social_phone_lookup, social_profile } from '../models/social.models';
+import { social_phone_lookup, social_phone_lookup_result, social_profile } from '../models/social.models';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-social-phone-lookup-section',
@@ -26,7 +27,9 @@ export class PhoneLookupSectionComponent implements OnDestroy {
   username = input.required<string>();
   platforms = input<social_profile[]>([]);
   query = signal('');
-  result = signal<any>(null);
+  result = signal<social_phone_lookup_result | null>(null);
+  displayedResult = computed<social_phone_lookup_result>(() => this.result() ?? {});
+  displayedWebFootprints = computed(() => this.result()?.web_footprints ?? []);
   isLoading = signal(false);
   isClearing = signal(false);
   errorMessage = signal('');
@@ -153,7 +156,7 @@ export class PhoneLookupSectionComponent implements OnDestroy {
 
   private findAssociatedPhone(platforms: social_profile[]): string {
     for (const platform of platforms) {
-      const sources = [platform.profile_details, platform.meta, platform] as Array<Record<string, any> | null | undefined>;
+      const sources = [platform.profile_details, platform.meta, platform] as Array<Record<string, unknown> | null | undefined>;
       for (const source of sources) {
         for (const [key, value] of Object.entries(source ?? {})) {
           if (!PhoneLookupSectionComponent.phoneKeys.has(key.toLowerCase().replace(/[^a-z]/g, ''))) {
@@ -169,7 +172,7 @@ export class PhoneLookupSectionComponent implements OnDestroy {
     return '';
   }
 
-  private normalizePhoneValue(value: any): string {
+  private normalizePhoneValue(value: unknown): string {
     if (Array.isArray(value)) {
       for (const item of value) {
         const phone = this.normalizePhoneValue(item);
@@ -180,7 +183,8 @@ export class PhoneLookupSectionComponent implements OnDestroy {
       return '';
     }
     if (value && typeof value === 'object') {
-      return this.normalizePhoneValue(value.number ?? value.value ?? value.phone ?? '');
+      const record = asUnknownRecord(value);
+      return this.normalizePhoneValue(record['number'] ?? record['value'] ?? record['phone'] ?? '');
     }
     const phone = String(value ?? '').trim();
     const digitCount = phone.replace(/\D/g, '').length;

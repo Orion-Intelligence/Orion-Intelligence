@@ -96,7 +96,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     }
     this.scanStatusSub?.unsubscribe();
     this.scanStatusSub = stream.subscribe(res => {
-      this.alertService.isAlertScanLoading.set(res.scan_running);
+      this.alertService.isAlertScanLoading.set(!!res.scan_running);
     });
   }
 
@@ -248,7 +248,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   exportAlerts(type: string): void {
-    this.apiService.get<any>('profile/alerts').subscribe({
+    this.apiService.get<AlertModel[] | { items?: AlertModel[] }>('profile/alerts').subscribe({
       next: (alerts) => {
         const normalizedAlerts: AlertModel[] = Array.isArray(alerts)
           ? alerts

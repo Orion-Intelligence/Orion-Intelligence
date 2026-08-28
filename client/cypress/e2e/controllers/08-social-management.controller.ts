@@ -13,6 +13,10 @@ export const SOCIAL_PLATFORM = /twitter/i;
 export const SOCIAL_DOMAIN = 'twitter.com';
 const CRAWL_TYPES = ['details', 'posts', 'videos', 'images', 'followers', 'repositories'];
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value as Record<string, unknown>;
+}
+
 export function findStealerRow(rows: JQuery<HTMLElement>, limit?: number) {
   const candidates = limit ? [...rows].slice(0, limit) : [...rows];
   return candidates.find((row) => {
@@ -30,12 +34,12 @@ function isStealerDomain(value: string) {
   }
 }
 
-function loadMock<T = any>(root: string, filename: string) {
+function loadMock<T = unknown>(root: string, filename: string) {
   return cy.readFile(`${root}/${filename}`, { log: false }) as Cypress.Chainable<T>;
 }
 
-function crawlItemsFor(type: string, mocks: Record<string, any>): unknown[] | null {
-  const items = (name: string, key: string) => (mocks[name]?.result?.[key] ?? []) as unknown[];
+function crawlItemsFor(type: string, mocks: Record<string, unknown>): unknown[] | null {
+  const items = (name: string, key: string) => (asRecord(asRecord(mocks[name])['result'])[key] ?? []) as unknown[];
   switch (type) {
     case 'posts':
       return items('posts', 'posts');
@@ -48,16 +52,17 @@ function crawlItemsFor(type: string, mocks: Record<string, any>): unknown[] | nu
     case 'repositories':
       return [{ resource_id: 'repo-1', name: 'orion-recon', url: 'https://github.com/superman0011/orion-recon', description: 'Recon helpers for Orion.', language: 'TypeScript', stars: 128, forks: 12 }];
     case 'connections':
-      return items('followers', 'followers').map((entry: any) => ({ ...entry, type: 'connections', parent_url: 'https://twitter.com/superman0011/status/1' }));
+      return items('followers', 'followers').map((entry) => ({ ...asRecord(entry), type: 'connections', parent_url: 'https://twitter.com/superman0011/status/1' }));
     default:
       return null;
   }
 }
 
-function reconProfilesFrom(mock: any) {
-  return ((mock?.result ?? []) as any[]).map((entry, index) => {
-    const meta = (entry?.meta ?? entry?.metadata ?? {}) as Record<string, any>;
-    const ids = (entry?.data?.ids ?? {}) as Record<string, any>;
+function reconProfilesFrom(mock: unknown) {
+  return ((asRecord(mock)['result'] ?? []) as unknown[]).map((entry, index) => {
+    const entryRecord = asRecord(entry);
+    const meta = asRecord(entryRecord['meta'] ?? entryRecord['metadata']);
+    const ids = asRecord(asRecord(entryRecord['data'])['ids']);
     const platform = String(meta['platform'] ?? 'platform');
     const username = String(meta['username'] ?? index);
     return {
@@ -91,7 +96,7 @@ function graphDocumentFor(username: string) {
 }
 
 export function setupSocialStubs() {
-  const mocks: Record<string, any> = {};
+  const mocks: Record<string, unknown> = {};
   const remember = (key: string, filename: string) => loadMock(ELASTIC_MOCKS, filename).then((mock) => {
     mocks[key] = mock;
   });
@@ -122,8 +127,8 @@ export function setupSocialStubs() {
       return;
     }
     if (type === 'details') {
-      const details = JSON.parse(JSON.stringify(mocks['profile']?.result ?? {}));
-      details.profile = { ...(details.profile ?? {}), crawl_type: CRAWL_TYPES };
+      const details = JSON.parse(JSON.stringify(asRecord(mocks['profile'])['result'] ?? {})) as Record<string, unknown>;
+      details['profile'] = { ...asRecord(details['profile']), crawl_type: CRAWL_TYPES };
       request.reply({ statusCode: 200, body: { status: 'done', result: details } });
       return;
     }
@@ -133,7 +138,7 @@ export function setupSocialStubs() {
 
   cy.intercept('POST', '**/api/social/connections', (request) => {
     const query = String(request.body?.query ?? '').toLowerCase();
-    const items = (crawlItemsFor('connections', mocks) ?? []) as any[];
+    const items = (crawlItemsFor('connections', mocks) ?? []) as unknown[];
     const filtered = query ? items.filter((item) => JSON.stringify(item).toLowerCase().includes(query)) : items;
     request.reply({ statusCode: 200, body: { result: { items: filtered, total: filtered.length } } });
   }).as('socialConnections');

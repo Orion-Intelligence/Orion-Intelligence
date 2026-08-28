@@ -1,16 +1,13 @@
 import { formatFollowers } from '../../../shared/utils/formatters';
+import type { resource_entry, resource_time } from './model/resource-view.model';
+export type { resource_entry, resource_time } from './model/resource-view.model';
+
 
 export type resource_record = Record<string, unknown>;
 
-export interface resource_entry {
-  key: string;
-  value: string;
-}
 
-export interface resource_time {
-  date: Date | null;
-  raw: string;
-}
+
+
 
 export function asRecord(item: unknown): resource_record {
   return (item && typeof item === 'object' ? item : {}) as resource_record;

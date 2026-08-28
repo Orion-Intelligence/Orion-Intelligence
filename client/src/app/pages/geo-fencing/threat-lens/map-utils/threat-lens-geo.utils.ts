@@ -1,5 +1,6 @@
 import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
 import { ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensIpRecord } from '../models/threat-lens-map.types';
+import { asUnknownRecord, UnknownRecord } from '../../../../shared/utils/type-guards.util';
 
 export class ThreatLensGeoUtils {
   static getThreatLensDistanceKm(a: ThreatLensCoordinates, b: ThreatLensCoordinates): number {
@@ -53,12 +54,9 @@ export class ThreatLensGeoUtils {
     return boundary.rings.some((ring) => ThreatLensGeoUtils.isThreatLensPointInRing(point.lat, lon, ring));
   }
 
-  static extractThreatLensIpScanRecords(payload: any): ThreatLensIpRecord[] {
+  static extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] {
     const records = new Map<string, ThreatLensIpRecord>();
-    const readCoordinate = (source: any, keys: string[]): number | undefined => {
-      if (!source || typeof source !== 'object') {
-        return undefined;
-      }
+    const readCoordinate = (source: UnknownRecord, keys: string[]): number | undefined => {
       for (const key of keys) {
         const value = source[key];
         if (value === null || value === undefined || value === '') {
@@ -71,8 +69,12 @@ export class ThreatLensGeoUtils {
       }
       return undefined;
     };
-    const readCoordinates = (value: any): Pick<ThreatLensIpRecord, 'lat' | 'lon'> => {
-      const sources = [value, value?.ip_info, value?.geo, value?.location, value?.data];
+    const sourcesFor = (value: unknown): UnknownRecord[] => {
+      const source = asUnknownRecord(value);
+      return [source, asUnknownRecord(source['ip_info']), asUnknownRecord(source['geo']), asUnknownRecord(source['location']), asUnknownRecord(source['data'])];
+    };
+    const readCoordinates = (value: unknown): Pick<ThreatLensIpRecord, 'lat' | 'lon'> => {
+      const sources = sourcesFor(value);
       for (const source of sources) {
         const lat = readCoordinate(source, ['lat', 'latitude', 'geo_lat']);
         const lon = readCoordinate(source, ['lon', 'lng', 'longitude', 'geo_lon', 'geo_lng']);
@@ -82,12 +84,9 @@ export class ThreatLensGeoUtils {
       }
       return {};
     };
-    const readString = (value: any, keys: string[]): string => {
-      const sources = [value, value?.ip_info, value?.geo, value?.location, value?.data];
+    const readString = (value: unknown, keys: string[]): string => {
+      const sources = sourcesFor(value);
       for (const source of sources) {
-        if (!source || typeof source !== 'object') {
-          continue;
-        }
         for (const key of keys) {
           const text = String(source[key] ?? '').trim();
           if (text) {
@@ -97,8 +96,8 @@ export class ThreatLensGeoUtils {
       }
       return '';
     };
-    const readNumber = (value: any, keys: string[]): number | undefined => {
-      const sources = [value, value?.ip_info, value?.geo, value?.location, value?.data];
+    const readNumber = (value: unknown, keys: string[]): number | undefined => {
+      const sources = sourcesFor(value);
       for (const source of sources) {
         const numericValue = readCoordinate(source, keys);
         if (numericValue !== undefined) {
@@ -107,7 +106,7 @@ export class ThreatLensGeoUtils {
       }
       return undefined;
     };
-    const readMetadata = (value: any): Partial<ThreatLensIpRecord> => {
+    const readMetadata = (value: unknown): Partial<ThreatLensIpRecord> => {
       const network = readString(value, ['network', 'cidr', 'ip_range']);
       const accuracyRadius = readNumber(value, ['accuracyRadius', 'accuracy_radius', 'accuracy_km']);
       const distanceKm = readNumber(value, ['distanceKm', 'distance_km']);
@@ -117,7 +116,7 @@ export class ThreatLensGeoUtils {
         ...(distanceKm !== undefined ? { distanceKm } : {}),
       };
     };
-    const addRecord = (value: any) => {
+    const addRecord = (value: unknown) => {
       if (typeof value === 'string') {
         const ip = value.trim();
         if (ip && !records.has(ip)) {
@@ -130,7 +129,8 @@ export class ThreatLensGeoUtils {
         return;
       }
 
-      const ip = String(value.ip || value.ip_address || value.host || '').trim();
+      const source = asUnknownRecord(value);
+      const ip = String(source['ip'] || source['ip_address'] || source['host'] || '').trim();
       if (!ip) {
         return;
       }
@@ -142,20 +142,23 @@ export class ThreatLensGeoUtils {
       });
     };
 
+    const root = asUnknownRecord(payload);
+    const data = asUnknownRecord(root['data']);
+    const result = asUnknownRecord(root['result']);
     [
-      payload?.ip_locations,
-      payload?.candidate_ip_locations,
-      payload?.ips,
-      payload?.ip_addresses,
-      payload?.data?.ip_locations,
-      payload?.data?.candidate_ip_locations,
-      payload?.data?.ips,
-      payload?.result?.ip_locations,
-      payload?.result?.candidate_ip_locations,
-      payload?.result?.ips,
-      payload?.cameras,
-      payload?.result?.cameras,
-      payload?.data?.cameras,
+      root['ip_locations'],
+      root['candidate_ip_locations'],
+      root['ips'],
+      root['ip_addresses'],
+      data['ip_locations'],
+      data['candidate_ip_locations'],
+      data['ips'],
+      result['ip_locations'],
+      result['candidate_ip_locations'],
+      result['ips'],
+      root['cameras'],
+      result['cameras'],
+      data['cameras'],
     ].forEach((candidate) => {
       if (Array.isArray(candidate)) {
         candidate.forEach(addRecord);

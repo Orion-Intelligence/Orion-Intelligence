@@ -16,9 +16,15 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
 import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
 import { UserImagePickerComponent } from '../sidebar-user-settings/user-image-picker/user-image-picker.component';
+import type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
+export type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
+
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
 type SystemSettingsTab = 'branding' | 'platform';
+type SystemImageKey = 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark';
+type SystemImageResponse = Partial<Pick<AppSettingsModel, SystemImageKey>>;
+
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
@@ -128,27 +134,28 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     return this.webhookState() !== this.webhookSnapshot;
   }
 
-  updateUserResource(file: File,key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
+  updateUserResource(file: File,key: SystemImageKey = 'logo_url') {
     const formData = new FormData();
     formData.append('file', file);
     return this.apiService
-      .put<any>(`system/image?key=${key}`, formData)
+      .put<SystemImageResponse>(`system/image?key=${key}`, formData)
       .subscribe({
         next: (res) => {
+          const appSettings = this.appService.getConfig().appSettings;
           if (res?.logo_url) {
-            (this.appService.getConfig().appSettings as any).logo_url = res.logo_url;
+            appSettings.logo_url = res.logo_url;
           }
           if (res?.logo_wide_light) {
-            (this.appService.getConfig().appSettings as any).logo_wide_light = res.logo_wide_light;
+            appSettings.logo_wide_light = res.logo_wide_light;
           }
           if (res?.logo_wide_dark) {
-            (this.appService.getConfig().appSettings as any).logo_wide_dark = res.logo_wide_dark;
+            appSettings.logo_wide_dark = res.logo_wide_dark;
           }
           if(res?.auth_dashboard_icon){
-            (this.appService.getConfig().appSettings as any).auth_dashboard_icon = res.auth_dashboard_icon;
+            appSettings.auth_dashboard_icon = res.auth_dashboard_icon;
           }
-          if ((this.appService.getConfig().appSettings as any).logo_url) {
-            this.appService.updateFavicon((this.appService.getConfig().appSettings as any).logo_url);
+          if (appSettings.logo_url) {
+            this.appService.updateFavicon(appSettings.logo_url);
           }
         },
         error: (err) => {
@@ -158,16 +165,16 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       });
   }
 
-  deleteUserResource(key: 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark' = 'logo_url') {
-    return this.apiService.delete<any>(`system/image?key=${key}`).subscribe(() => {
+  deleteUserResource(key: SystemImageKey = 'logo_url') {
+    return this.apiService.delete<unknown>(`system/image?key=${key}`).subscribe(() => {
       const fallbackMap: Record<string, string> = {
         logo_url: '/api/s/static/system/logo_url_default.png',
         logo_wide_light: '/api/s/static/system/logo_wide_light_default.png',
         logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png',
-        login_page_image: '/api/s/static/system/auth_dashboard_icon_default.png'
+        auth_dashboard_icon: '/api/s/static/system/auth_dashboard_icon_default.png'
       };
       const fallback = fallbackMap[key];
-      (this.appService.getConfig().appSettings as any)[key] = fallback;
+      this.appService.getConfig().appSettings[key] = fallback;
       if (key === 'logo_url') {
         this.appService.updateFavicon(fallback);
       }
@@ -260,7 +267,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       : {
         meta_info: JSON.stringify(this.buildMetaInfo(section))
       };
-    this.apiService.post<any>('public/update', { settings }).subscribe({
+    this.apiService.post<SystemSettingsResponse>('public/update', { settings }).subscribe({
       next: (response) => {
         if (response?.settings) {
           this.applySettings(response.settings);

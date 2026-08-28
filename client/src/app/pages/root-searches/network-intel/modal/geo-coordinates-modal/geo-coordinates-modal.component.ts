@@ -5,6 +5,13 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import type { FeatureCollection, Geometry } from 'geojson';
+import type { GeometryCollection, Topology } from 'topojson-specification';
+import type { ZoomAnchor } from './model/geo-coordinates-modal.model';
+export type { ZoomAnchor } from './model/geo-coordinates-modal.model';
+
+
+type WorldTopology = Topology<{ countries: GeometryCollection }>;
 
 @Component({
   selector: 'app-geo-coordinates-modal',
@@ -80,12 +87,12 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   }
 
   onClose(): void {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.close.emit(undefined);
   }
 
   onSearch(): void {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.search.emit(undefined);
   }
 
@@ -226,7 +233,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   @HostListener('document:keydown.escape')
   onEscape(): void {
     if (this.isOpen()) {
-      // TODO: The 'emit' function requires a mandatory void argument
+
       this.close.emit(undefined);
     }
   }
@@ -310,7 +317,8 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
 
     d3.select(container).selectAll('*').remove();
 
-    const countries = topojson.feature(worldData, worldData.objects.countries) as any;
+    const topology = worldData as WorldTopology;
+    const countries = topojson.feature(topology, topology.objects.countries) as FeatureCollection<Geometry>;
 
     const svg = d3.select(container)
       .append('svg')
@@ -330,7 +338,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
       .data(countries.features)
       .enter()
       .append('path')
-      .attr('d', path as any)
+      .attr('d', path)
       .attr('fill', 'rgba(87,165,235,0.16)')
       .attr('stroke', 'rgba(87,165,235,0.24)')
       .attr('stroke-width', 0.8);
@@ -349,11 +357,4 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
       viewport.scrollTop = nextTop;
     }
   }
-}
-
-interface ZoomAnchor {
-  ratioX: number;
-  ratioY: number;
-  viewportX: number;
-  viewportY: number;
 }

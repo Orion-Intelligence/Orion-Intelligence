@@ -6,6 +6,13 @@ import { AircraftMarkerIconComponent } from './components/aircraft-marker-icon/a
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
+import type * as Leaflet from 'leaflet';
+import { asUnknownRecord, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+
+type AircraftMarker = Leaflet.Marker & {
+  __orionAircraftIconRef: ComponentRef<AircraftMarkerIconComponent> | null;
+  __orionAircraftIconState: string;
+};
 
 type AircraftDistributionCell = {
   key: string;
@@ -15,14 +22,14 @@ type AircraftDistributionCell = {
 };
 
 export class AircraftMapRenderer {
-  private cluster: any = null;
+  private cluster: Leaflet.LayerGroup | null = null;
   private renderKey = '';
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
   private renderVersion = 0;
-  private markers = new Map<string, any>();
+  private markers = new Map<string, AircraftMarker>();
   private markerTargets = new Map<string, string>();
-  private trackLine: any = null;
-  private animationFrames = new Map<string, { marker: any; startLat: number; startLon: number; targetLat: number; targetLon: number; startedAt: number }>();
+  private trackLine: Leaflet.Polyline | null = null;
+  private animationFrames = new Map<string, { marker: AircraftMarker; startLat: number; startLon: number; targetLat: number; targetLon: number; startedAt: number }>();
   private animationFrame: number | null = null;
   private detailSub?: Subscription;
   private markerZoomBucket = 0;
@@ -32,14 +39,14 @@ export class AircraftMapRenderer {
   private readonly crowdedAircraftAreaThreshold = 100;
   private readonly minimumSampledAircraftPerArea = 12;
   private readonly maxAnimatedAircraft = 60;
-  private readonly L: any;
-  private readonly map: any;
+  private readonly L: typeof Leaflet;
+  private readonly map: Leaflet.Map;
   private readonly service: SatelliteAircraftTrackingService;
   private readonly sidebar: TrackingSidebarBridge;
   private readonly componentRenderer: LeafletComponentRenderer;
   private readonly getData: () => SatelliteLiveAircraft[];
 
-  constructor(config: { L: any; map: any; service: SatelliteAircraftTrackingService; sidebar: TrackingSidebarBridge; componentRenderer: LeafletComponentRenderer; getData: () => SatelliteLiveAircraft[] }) {
+  constructor(config: { L: typeof Leaflet; map: Leaflet.Map; service: SatelliteAircraftTrackingService; sidebar: TrackingSidebarBridge; componentRenderer: LeafletComponentRenderer; getData: () => SatelliteLiveAircraft[] }) {
     this.L = config.L;
     this.map = config.map;
     this.service = config.service;
@@ -205,7 +212,7 @@ export class AircraftMapRenderer {
     return this.renderedAircraftCount <= this.maxAnimatedAircraft || isSelected || isLoading;
   }
 
-  private updateMarkerMotion(markerId: string, marker: any, aircraft: SatelliteLiveAircraft): void {
+  private updateMarkerMotion(markerId: string, marker: AircraftMarker, aircraft: SatelliteLiveAircraft): void {
     const lat = aircraft.latitude as number;
     const lon = aircraft.longitude as number;
     const motionKey = [
@@ -275,7 +282,7 @@ export class AircraftMapRenderer {
     return this.renderedAircraftCount <= this.maxAnimatedAircraft || this.isSelected(icaoId);
   }
 
-  private animateMarker(markerId: string, marker: any, targetLat: number, targetLon: number): void {
+  private animateMarker(markerId: string, marker: AircraftMarker, targetLat: number, targetLon: number): void {
     if (typeof window === 'undefined') {
       marker.setLatLng([targetLat, targetLon]);
       return;
@@ -347,14 +354,14 @@ export class AircraftMapRenderer {
     }
   }
 
-  private createMarker(aircraft: SatelliteLiveAircraft): any {
+  private createMarker(aircraft: SatelliteLiveAircraft): AircraftMarker {
     const icaoId = normalizeEntityId(aircraft.icao24);
     const isSelected = this.isSelected(icaoId);
     const isLoading = this.isLoading(icaoId);
     const renderedIcon = this.createIcon(aircraft, isSelected, isLoading);
-    const marker = this.L.marker([aircraft.latitude, aircraft.longitude], {
+    const marker = this.L.marker([aircraft.latitude!, aircraft.longitude!], {
       icon: renderedIcon.icon,
-    });
+    }) as AircraftMarker;
     marker.__orionAircraftIconRef = renderedIcon.componentRef;
     if (icaoId) {
       marker.bindTooltip(`${escapeTooltipText(icaoId)}`, {
@@ -404,7 +411,7 @@ export class AircraftMapRenderer {
     });
   }
 
-  private getMovementRotation(marker: any, aircraft: SatelliteLiveAircraft): number {
+  private getMovementRotation(marker: AircraftMarker, aircraft: SatelliteLiveAircraft): number {
     if (Number.isFinite(aircraft.true_track)) {
       return this.toCssRotation(aircraft.true_track);
     }
@@ -432,7 +439,7 @@ export class AircraftMapRenderer {
     return Number.isFinite(track) ? track as number : 0;
   }
 
-  private createIcon(aircraft: SatelliteLiveAircraft, isSelected: boolean, isLoading: boolean, rotationDegrees = this.toCssRotation(aircraft.true_track)): { icon: any; componentRef: ComponentRef<AircraftMarkerIconComponent> } {
+  private createIcon(aircraft: SatelliteLiveAircraft, isSelected: boolean, isLoading: boolean, rotationDegrees = this.toCssRotation(aircraft.true_track)): { icon: Leaflet.DivIcon; componentRef: ComponentRef<AircraftMarkerIconComponent> } {
     const size = getMarkerBaseSize(this.map, 'aircraft');
     const half = Math.round(size / 2);
     const altitudeFeet = ((aircraft.baro_altitude ?? aircraft.geo_altitude ?? 0) as number) * 3.28084;
@@ -473,12 +480,12 @@ export class AircraftMapRenderer {
     };
   }
 
-  private destroyMarkerIcon(marker: any): void {
+  private destroyMarkerIcon(marker: AircraftMarker): void {
     this.componentRenderer.destroy(marker.__orionAircraftIconRef);
     marker.__orionAircraftIconRef = null;
   }
 
-  private updateMarkerRotation(marker: any, rotationDegrees: number): void {
+  private updateMarkerRotation(marker: AircraftMarker, rotationDegrees: number): void {
     const componentRef = marker.__orionAircraftIconRef as ComponentRef<AircraftMarkerIconComponent> | null | undefined;
     if (componentRef) {
       componentRef.instance.rotationDegrees = rotationDegrees;
@@ -510,13 +517,15 @@ export class AircraftMapRenderer {
     const bounds = this.map?.getBounds?.();
     const zoom = this.map?.getZoom?.() ?? 3;
     const visible = this.getData().filter(aircraft => {
-      if (!Number.isFinite(aircraft.latitude) || !Number.isFinite(aircraft.longitude)) {
+      const latitude = aircraft.latitude;
+      const longitude = aircraft.longitude;
+      if (typeof latitude !== 'number' || typeof longitude !== 'number' || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
         return false;
       }
       if (!bounds) {
         return true;
       }
-      return bounds.contains([aircraft.latitude, aircraft.longitude]);
+      return bounds.contains([latitude, longitude]);
     });
     if (visible.length <= 1200) {
       return visible;
@@ -748,11 +757,13 @@ export class AircraftMapRenderer {
   }
 
   private getScreenCell(aircraft: SatelliteLiveAircraft, gridSize: number): { row: number; col: number } | null {
-    if (!this.map?.latLngToContainerPoint || !Number.isFinite(aircraft.latitude) || !Number.isFinite(aircraft.longitude)) {
+    const latitude = aircraft.latitude;
+    const longitude = aircraft.longitude;
+    if (!this.map?.latLngToContainerPoint || typeof latitude !== 'number' || typeof longitude !== 'number' || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return null;
     }
 
-    const point = this.map.latLngToContainerPoint([aircraft.latitude, aircraft.longitude]);
+    const point = this.map.latLngToContainerPoint([latitude, longitude]);
     if (!Number.isFinite(point?.x) || !Number.isFinite(point?.y)) {
       return null;
     }
@@ -864,39 +875,41 @@ export class AircraftMapRenderer {
     return normalizeEntityId(aircraft.icao24) ?? `${aircraft.latitude}:${aircraft.longitude}`;
   }
 
-  private extractDetails(res: any): SatelliteLiveAircraft | null {
-    const payload = res?.result ?? res;
-    if (Array.isArray(payload?.aircraft) && payload.aircraft.length > 0) {
-      return payload.aircraft[0] as SatelliteLiveAircraft;
+  private extractDetails(res: unknown): SatelliteLiveAircraft | null {
+    const response = asUnknownRecord(res);
+    const payload = asUnknownRecord(response['result'] ?? res);
+    if (Array.isArray(payload['aircraft']) && payload['aircraft'].length > 0) {
+      return payload['aircraft'][0] as SatelliteLiveAircraft;
     }
-    if (payload?.aircrafts && Array.isArray(payload.aircrafts) && payload.aircrafts.length > 0) {
-      return payload.aircrafts[0] as SatelliteLiveAircraft;
+    if (Array.isArray(payload['aircrafts']) && payload['aircrafts'].length > 0) {
+      return payload['aircrafts'][0] as SatelliteLiveAircraft;
     }
-    if (payload?.aircraft && typeof payload.aircraft === 'object' && !Array.isArray(payload.aircraft)) {
+    if (isUnknownRecord(payload['aircraft'])) {
       return {
-        ...payload.aircraft,
-        ...(payload.track ? { track: payload.track } : {}),
-        ...(payload.path ? { path: payload.path } : {}),
+        ...payload['aircraft'],
+        ...(payload['track'] ? { track: payload['track'] } : {}),
+        ...(payload['path'] ? { path: payload['path'] } : {}),
       } as SatelliteLiveAircraft;
     }
-    if (payload && typeof payload === 'object' && payload.icao24 != null) {
-      return payload as SatelliteLiveAircraft;
+    if (payload['icao24'] != null) {
+      return payload as unknown as SatelliteLiveAircraft;
     }
-    if (res && typeof res === 'object' && res.icao24 != null) {
-      return res as SatelliteLiveAircraft;
+    if (response['icao24'] != null) {
+      return response as unknown as SatelliteLiveAircraft;
     }
     return null;
   }
 
-  private renderTrack(aircraft: any): void {
-    const path = aircraft?.track?.path || aircraft?.path;
+  private renderTrack(aircraft: SatelliteLiveAircraft): void {
+    const path = aircraft.track?.path || aircraft.path;
     this.clearTrack();
     if (!this.map || !this.L || !Array.isArray(path) || path.length < 2) {
       return;
     }
-    const points = path
-      .map((point: any) => Array.isArray(point) && Number.isFinite(point[1]) && Number.isFinite(point[2]) ? [point[1], point[2]] : null)
-      .filter(Boolean);
+    const points: Leaflet.LatLngTuple[] = path.flatMap((point): Leaflet.LatLngTuple[] =>
+      Array.isArray(point) && typeof point[1] === 'number' && typeof point[2] === 'number' && Number.isFinite(point[1]) && Number.isFinite(point[2])
+        ? [[point[1], point[2]]]
+        : []);
     if (points.length < 2) {
       return;
     }
@@ -912,13 +925,15 @@ export class AircraftMapRenderer {
   }
 
   private extendSelectedTrack(aircraft: SatelliteLiveAircraft, icaoId: string | null): void {
-    if (!this.isSelected(icaoId) || !this.trackLine || !Number.isFinite(aircraft.latitude) || !Number.isFinite(aircraft.longitude)) {
+    const latitude = aircraft.latitude;
+    const longitude = aircraft.longitude;
+    if (!this.isSelected(icaoId) || !this.trackLine || typeof latitude !== 'number' || typeof longitude !== 'number' || !Number.isFinite(latitude) || !Number.isFinite(longitude)) {
       return;
     }
     const points = this.trackLine.getLatLngs?.() || [];
     const last = points[points.length - 1];
-    if (!last || Math.abs(last.lat - (aircraft.latitude as number)) > 0.00001 || Math.abs(last.lng - (aircraft.longitude as number)) > 0.00001) {
-      this.trackLine.addLatLng([aircraft.latitude, aircraft.longitude]);
+    if (!last || Array.isArray(last) || Math.abs(last.lat - latitude) > 0.00001 || Math.abs(last.lng - longitude) > 0.00001) {
+      this.trackLine.addLatLng([latitude, longitude]);
       this.trackLine.bringToFront?.();
     }
   }

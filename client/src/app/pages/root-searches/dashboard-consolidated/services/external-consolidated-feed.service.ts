@@ -6,13 +6,11 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { HelperService } from '../../../../shared/services/helper.service';
 import { ConsolidatedParamModel } from '../../../../shared/model/results/consolidated/consolidated.param.model';
 import { AptIntelResultItem } from '../../../../shared/model/results/apt-intel/apt-intel.callback.model';
+import type { AptIntelFeedResponse } from './model/external-consolidated-feed.model';
+export type { AptIntelFeedResponse } from './model/external-consolidated-feed.model';
 
-interface AptIntelFeedResponse {
-  Result?: AptIntelResultItem[];
-  Total_Hits?: number;
-  Total_Groups?: number;
-  Page_Count?: number;
-}
+
+
 
 @Injectable({ providedIn: 'root' })
 export class ExternalConsolidatedFeedService {
@@ -35,10 +33,10 @@ export class ExternalConsolidatedFeedService {
     this.updateActorMalwareResults();
   }
 
-  syncActorMalware(groupedResults: Record<string, AptIntelResultItem[]>, pageCounts: Record<string, number>): void {
+  syncActorMalware(groupedResults: Record<string, unknown[]>, pageCounts: Record<string, number>): void {
     this.localActorMalwareResults = [
-      ...(groupedResults['apt_model'] || []),
-      ...(groupedResults['malware_model'] || []),
+      ...((groupedResults['apt_model'] || []) as AptIntelResultItem[]),
+      ...((groupedResults['malware_model'] || []) as AptIntelResultItem[]),
     ];
     this.localActorMalwareResultCount = (pageCounts['apt_model'] || 0) + (pageCounts['malware_model'] || 0);
     this.updateActorMalwareResults();

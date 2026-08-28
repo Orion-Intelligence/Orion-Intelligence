@@ -22,7 +22,7 @@ export class CaseRelatedEntitiesSectionComponent {
 
   editingRelatedEntityId: string | null = null;
   readonly store = inject(CaseDetailsStore);
-  $index: any;
+  $index: unknown;
 
   get caseData(): Case {
     return this.store.caseData as Case;

@@ -31,7 +31,7 @@ export class DirectoryListComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  isRecent(timestamp: any): boolean {
+  isRecent(timestamp: string | number | Date | null | undefined): boolean {
     if (!timestamp) {
       return false;
     }

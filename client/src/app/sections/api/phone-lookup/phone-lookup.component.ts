@@ -1,13 +1,20 @@
+import { NgClass } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { NgClass } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { ApiService } from '../../../shared/services/api.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ApiService } from '../../../shared/services/api.service';
+import type { PhoneLookupResponse, PhoneLookupResult } from './model/phone-lookup.model';
+export type { PhoneLookupResponse,PhoneLookupResult } from './model/phone-lookup.model';
+
+
+
+
+
 
 @Component({
   selector: 'app-phone-lookup',
@@ -21,7 +28,7 @@ export class PhoneLookupComponent implements OnInit {
   loading = false;
   queryTriggered = false;
   errorMessage = '';
-  result: any = null;
+  result: PhoneLookupResult | null = null;
   progress = 0;
   currentStep = '';
 
@@ -89,7 +96,7 @@ export class PhoneLookupComponent implements OnInit {
     this.currentStep = 'Initializing scan...';
 
     const payload = { text: { query: value } };
-    const scanReq = () => this.api.post<any>('phone/universal_search', payload);
+    const scanReq = () => this.api.post<PhoneLookupResponse>('phone/universal_search', payload);
 
     scanReq().pipe(expand(res => (res?.status === 'pending' || res?.status === 'processing' ? timer(3000).pipe(switchMap(() => scanReq())) : EMPTY)), takeWhile(res => res?.status === 'pending' || res?.status === 'processing', true), finalize(() => {
       this.loading = false;
@@ -103,19 +110,19 @@ export class PhoneLookupComponent implements OnInit {
     });
   }
 
-  private handleScanResponse(res: any): void {
-    if (res?.status === 'pending' || res?.status === 'processing') {
-      this.progress = res?.progress || 10;
-      this.currentStep = res?.step?.replace(/_/g, ' ') || 'Extracting Intelligence...';
+  private handleScanResponse(res: PhoneLookupResponse): void {
+    if (res.status === 'pending' || res.status === 'processing') {
+      this.progress = res.progress || 10;
+      this.currentStep = res.step?.replace(/_/g, ' ') || 'Extracting Intelligence...';
       return;
     }
 
-    if (res?.status === 'error') {
+    if (res.status === 'error') {
       this.errorMessage = res.message || res.error_message || 'Scan failed to retrieve data.';
       return;
     }
 
     this.progress = 100;
-    this.result = res?.result || res;
+    this.result = res.result || res;
   }
 }

@@ -109,10 +109,10 @@ export class DashboardHeaderComponent implements OnInit {
   }
 
   supportOpenPopup() {
-    this.supportPopup = true; // open popup
+    this.supportPopup = true;
   }
 
   supportClosePopup() {
-    this.supportPopup = false; // close popup
+    this.supportPopup = false;
   }
 }

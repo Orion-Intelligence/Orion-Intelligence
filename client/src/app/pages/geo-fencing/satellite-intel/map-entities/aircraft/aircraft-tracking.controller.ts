@@ -80,7 +80,7 @@ export class SatelliteAircraftTrackingController {
         if (!this.enabled) {
           return;
         }
-        const payload = (res?.result ?? res) as any;
+        const payload = (res?.result ?? res) as unknown;
         const aircraft = this.service.extractItems(payload);
         if (aircraft !== null) {
           this.applyResult(aircraft, payload, 'Aircraft tracking');
@@ -119,7 +119,7 @@ export class SatelliteAircraftTrackingController {
         if (!this.enabled) {
           return;
         }
-        const payload = (res?.result ?? res) as any;
+        const payload = (res?.result ?? res) as unknown;
         const aircraft = this.service.extractItems(payload);
         if (aircraft !== null) {
           this.applyResult(aircraft, payload, 'Global aircraft tracking');
@@ -146,7 +146,7 @@ export class SatelliteAircraftTrackingController {
     });
   }
 
-  private applyResult(aircraft: SatelliteLiveAircraft[], payload: any, label: string): void {
+  private applyResult(aircraft: SatelliteLiveAircraft[], payload: unknown, label: string): void {
     this.data = aircraft;
     const feedIssue = this.service.getFeedIssue(payload);
     this.error = feedIssue ? `${label}: ${feedIssue}` : null;

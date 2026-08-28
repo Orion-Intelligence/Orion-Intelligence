@@ -19,6 +19,14 @@ import { ScanNotificationService } from '../../../shared/services/scan-notificat
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { DASHBOARD_API_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { isUnknownRecord, UnknownRecord } from '../../../shared/utils/type-guards.util';
+import type { DashboardApiResponse } from './model/dashboard-api.model';
+export type { DashboardApiResponse } from './model/dashboard-api.model';
+
+
+
+
+type DashboardApiWireResponse = DashboardApiResponse | DashboardApiResponse[];
 
 @Component({
   selector: 'app-dashboard-api',
@@ -33,19 +41,19 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   displayQ1 = '';
   displayQ2 = '';
   loading = false;
-  breachData: any = null;
+  breachData: UnknownRecord | null = null;
   query_triggered = false;
   apiType: string | null = null;
   progress = 0;
   currentStep = '';
-  responseData: any = null;
+  responseData: DashboardApiWireResponse | null = null;
   txDrilldown = false;
-  prevResponseData: any = null;
+  prevResponseData: DashboardApiWireResponse | null = null;
   prevQ1 = '';
   prevQ2 = '';
   prevDisplayQ1 = '';
   prevDisplayQ2 = '';
-  prevBreachData: any = null;
+  prevBreachData: UnknownRecord | null = null;
   expandedResultIndex: number | null = null;
   cryptoSummaryExpanded = false;
   isExportChoiceOpen = false;
@@ -64,7 +72,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     return this.aiToolRoutingService.getMessageForApiType(this.apiType || '');
   }
 
-  get cardsData(): any[] {
+  get cardsData(): DashboardApiResponse[] {
     const r = this.responseData;
     if (!r) {
       return [];
@@ -72,30 +80,30 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     if (Array.isArray(r)) {
       return r;
     }
-    if (Array.isArray(r?.cards_data)) {
+    if (Array.isArray(r.cards_data)) {
       return r.cards_data;
     }
-    if (Array.isArray(r?.result)) {
+    if (Array.isArray(r.result)) {
       return r.result;
     }
-    if (Array.isArray(r?.data?.cards_data)) {
+    if (Array.isArray(r.data?.cards_data)) {
       return r.data.cards_data;
     }
-    if (Array.isArray(r?.result?.cards_data)) {
+    if (!Array.isArray(r.result) && Array.isArray(r.result?.cards_data)) {
       return r.result.cards_data;
     }
     return [];
   }
 
-  get cryptoResult(): any {
+  get cryptoResult(): DashboardApiResponse | null {
     const r = this.responseData;
     if (!r) {
       return null;
     }
-    if (r?.result && typeof r.result === 'object') {
+    if (!Array.isArray(r) && r.result && !Array.isArray(r.result)) {
       return r.result;
     }
-    if (typeof r === 'object') {
+    if (!Array.isArray(r)) {
       return r;
     }
     return null;
@@ -116,7 +124,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     return Math.max(0, Math.min(100, Math.round(p)));
   }
 
-  get genericItems(): any[] {
+  get genericItems(): DashboardApiResponse[] {
     if (this.apiType === 'crypto') {
       return [];
     }
@@ -124,10 +132,12 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       this.responseData &&
       typeof this.responseData === 'object' &&
       (
-        Array.isArray(this.responseData.cards_data) ||
-        Array.isArray(this.responseData.result) ||
-        Array.isArray(this.responseData.data?.cards_data) ||
-        Array.isArray(this.responseData.result?.cards_data)
+        (!Array.isArray(this.responseData) && (
+          Array.isArray(this.responseData.cards_data) ||
+          Array.isArray(this.responseData.result) ||
+          Array.isArray(this.responseData.data?.cards_data) ||
+          (!Array.isArray(this.responseData.result) && Array.isArray(this.responseData.result?.cards_data))
+        ))
       )
     ) {
       return this.cardsData;
@@ -135,17 +145,17 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     if (this.cardsData.length > 0) {
       return this.cardsData;
     }
-    if (this.responseData && typeof this.responseData === 'object') {
+    if (this.responseData && !Array.isArray(this.responseData)) {
       return [this.responseData];
     }
     return [];
   }
 
-  isArrayValue(value: any): boolean {
+  isArrayValue(value: unknown): value is unknown[] {
     return Array.isArray(value);
   }
 
-  deduplicateWithCount(arr: any[]): { value: any; count: number }[] {
+  deduplicateWithCount(arr: unknown[]): { value: unknown; count: number }[] {
     if (!Array.isArray(arr)) {
       return [];
     }
@@ -158,10 +168,10 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   getGenericTotalFieldCount(): number {
-    return this.genericItems.reduce((total, item) => total + this.getVisibleObjectEntries(item).length, 0);
+    return this.genericItems.reduce<number>((total, item) => total + this.getVisibleObjectEntries(item).length, 0);
   }
 
-  getVisibleObjectEntries(item: any): { key: string; value: any }[] {
+  getVisibleObjectEntries(item: unknown): { key: string; value: unknown }[] {
     return this.getFlattenedObjectEntries(item).filter(entry => !this.isEmptyDisplayValue(entry.value));
   }
 
@@ -317,14 +327,16 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       }))
       .subscribe({
         next: res => {
+          const response = this.asResponse(res);
+          const nestedResponse = this.getNestedResponse(response?.result);
           const pending = this.isPendingResponse(res);
           const failedPending = this.isFailedPendingResponse(res);
           if (pending) {
-            const p = res?.result?.progress ?? res?.progress;
+            const p = nestedResponse?.progress ?? response?.progress;
             if (typeof p === 'number' && !Number.isNaN(p)) {
               this.progress = p;
             }
-            const st = res?.result?.step ?? res?.step;
+            const st = nestedResponse?.step ?? response?.step;
             if (typeof st === 'string' && st) {
               this.currentStep = st;
             }
@@ -346,10 +358,10 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
             this.expandedResultIndex = null;
           }
           else {
-            const normalized = (res && typeof res === 'object')
-              ? (res.data ?? res.result ?? res)
-              : res;
-            this.responseData = normalized;
+            const normalized = response?.data ?? response?.result ?? res;
+            this.responseData = Array.isArray(normalized)
+              ? normalized as DashboardApiResponse[]
+              : this.asResponse(normalized);
             this.breachData = (this.cardsData && this.cardsData.length > 0) ? this.cardsData[0] : null;
             this.expandedResultIndex = this.genericItems.length === 1 ? 0 : null;
           }
@@ -384,7 +396,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     return txHashPattern.test(t) || btcLegacy.test(t) || btcSegwit.test(t) || eth.test(t);
   }
 
-  private fetchSearchResults(apiEndpoint: string, paramModel: any): Observable<any> {
+  private fetchSearchResults(apiEndpoint: string, paramModel: Record<string, unknown>): Observable<DashboardApiWireResponse | null> {
     const apiReference = apiEndpoint.replace(/^\/api\//, '');
     const trackedReferences = new Set([
       'dynamic/user',
@@ -395,7 +407,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       'crypto/scan',
     ]);
     if (trackedReferences.has(apiReference)) {
-      return this.scanNotifications.runScanAsResponse<any>({
+      return this.scanNotifications.runScanAsResponse<DashboardApiResponse>({
         apiReference,
         payload: paramModel,
         metadata: {
@@ -406,12 +418,12 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
         pollDelayMs: 2000,
       }).pipe(catchError(_ => of(null)));
     }
-    return this.http.post<any>(apiEndpoint, paramModel).pipe(expand(res => this.shouldContinuePolling(res)
-      ? timer(2000).pipe(switchMap(() => this.http.post<any>(apiEndpoint, paramModel)))
+    return this.http.post<DashboardApiWireResponse>(apiEndpoint, paramModel).pipe(expand(res => this.shouldContinuePolling(res)
+      ? timer(2000).pipe(switchMap(() => this.http.post<DashboardApiWireResponse>(apiEndpoint, paramModel)))
       : EMPTY), takeWhile(res => this.shouldContinuePolling(res), true), catchError(_ => of(null)));
   }
 
-  private buildApiPayload(): any {
+  private buildApiPayload(): Record<string, unknown> {
     if (this.apiType === 'user') {
       return { text: { username: this.q1, email: this.q2 } };
     }
@@ -438,27 +450,41 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     return { text: { q1: this.q1, q2: this.q2 } };
   }
 
-  private isPendingResponse(res: any): boolean {
-    const topStatus = (res?.status || '').toLowerCase();
-    const nestedStatus = (res?.result?.status || '').toLowerCase();
+  private isPendingResponse(res: DashboardApiWireResponse | null): boolean {
+    const response = this.asResponse(res);
+    const nested = this.getNestedResponse(response?.result);
+    const topStatus = (response?.status || '').toLowerCase();
+    const nestedStatus = (nested?.status || '').toLowerCase();
     return ['pending', 'processing', 'running', 'busy'].includes(topStatus) ||
       ['pending', 'processing', 'running', 'busy'].includes(nestedStatus);
   }
 
-  private isFailedPendingResponse(res: any): boolean {
-    return (res?.status === 'pending' || res?.result?.status === 'pending') &&
-      ((res?.result?.progress ?? res?.progress) === 0) &&
-      ((res?.result?.step ?? res?.step) === 'failed');
+  private isFailedPendingResponse(res: DashboardApiWireResponse | null): boolean {
+    const response = this.asResponse(res);
+    const nested = this.getNestedResponse(response?.result);
+    return (response?.status === 'pending' || nested?.status === 'pending') &&
+      ((nested?.progress ?? response?.progress) === 0) &&
+      ((nested?.step ?? response?.step) === 'failed');
   }
 
-  private isFailedDoneResponse(res: any): boolean {
-    const status = (res?.result?.status ?? res?.status ?? '').toLowerCase();
-    const step = (res?.result?.step ?? res?.step ?? '').toLowerCase();
+  private isFailedDoneResponse(res: DashboardApiWireResponse | null): boolean {
+    const response = this.asResponse(res);
+    const nested = this.getNestedResponse(response?.result);
+    const status = (nested?.status ?? response?.status ?? '').toLowerCase();
+    const step = (nested?.step ?? response?.step ?? '').toLowerCase();
     return status === 'done' && step === 'failed';
   }
 
-  private shouldContinuePolling(res: any): boolean {
+  private shouldContinuePolling(res: DashboardApiWireResponse | null): boolean {
     return this.isPendingResponse(res) && !this.isFailedPendingResponse(res);
+  }
+
+  private asResponse(value: DashboardApiWireResponse | null | undefined): DashboardApiResponse | null {
+    return !Array.isArray(value) && isUnknownRecord(value) ? value as DashboardApiResponse : null;
+  }
+
+  private getNestedResponse(value: DashboardApiResponse | DashboardApiResponse[] | undefined): DashboardApiResponse | null {
+    return value && !Array.isArray(value) ? value : null;
   }
 
   toggleResultItem(index: number): void {
@@ -492,7 +518,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     const query = (this.displayQ1 || this.q1 || 'query').trim();
     const now = new Date().toISOString();
     const apiLabel = (this.apiType || 'api').replace(/-/g, ' ');
-    const toCompact = (v: any): string => {
+    const toCompact = (v: unknown): string => {
       const raw = this.isObjectValue(v) || this.isArrayValue(v) ? this.stringifyJson(v) : this.stringifyPrimitive(v);
       return raw.length > 500 ? `${raw.slice(0, 497)}...` : raw;
     };
@@ -553,7 +579,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       generatedAtIso: now,
       nodes: items.slice(0, 200).map((item, idx) => ({
         id: `result-${idx + 1}`,
-        label: this.stringifyPrimitive(item?.m_title || item?.m_app_name || item?.title || `Result ${idx + 1}`),
+        label: this.stringifyPrimitive(item['m_title'] || item['m_app_name'] || item['title'] || `Result ${idx + 1}`),
         type: 'record'
       })),
       edges: items.slice(0, 200).map((_, idx) => ({

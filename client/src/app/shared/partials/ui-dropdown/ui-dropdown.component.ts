@@ -4,10 +4,13 @@ import { Component, ElementRef, EmbeddedViewRef, HostListener, NgZone, OnDestroy
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
+import type { UiDropdownMenuOption, UiDropdownOption } from './model/ui-dropdown.model';
+export type { UiDropdownMenuOption, UiDropdownOption } from './model/ui-dropdown.model';
 
-// Dropdown palette. The CLOSED trigger follows the app theme (navy in dark, ice in light). The OPEN state
-// is always a white light surface: the trigger turns white and joins the white menu, so an open dropdown
-// reads as a distinct layer over the blue UI instead of merging into it. Only colours live here.
+
+
+
+
 const UI_DROPDOWN_THEME = {
   ring: 'focus-visible:ring-[rgba(87,165,235,0.4)] [body.light-theme_&]:focus-visible:ring-[rgba(17,118,212,0.3)]',
   trigger: 'border-[#2c3d58] !bg-[#131e30] text-[#e6edf6] hover:border-[#3d5175] hover:!bg-[#131e30] focus:border-[#3d5175] focus:!bg-[#131e30] [body.light-theme_&]:border-[#c5d4e6] [body.light-theme_&]:!bg-[#e9f0f8] [body.light-theme_&]:text-[#243b53] [body.light-theme_&]:hover:border-[#9fb6cf] [body.light-theme_&]:hover:!bg-[#e3ecf6] [body.light-theme_&]:focus:border-[#9fb6cf] [body.light-theme_&]:focus:!bg-[#e9f0f8]',
@@ -39,17 +42,9 @@ const UI_DROPDOWN_THEME = {
   chipRemove: 'text-[#9fb3c8] hover:bg-[rgba(255,255,255,0.1)] hover:text-white focus-visible:ring-[rgba(87,165,235,0.4)] [body.light-theme_&]:text-[#7c93ab] [body.light-theme_&]:hover:bg-[#dde8f4] [body.light-theme_&]:hover:text-[#172235] [body.light-theme_&]:focus-visible:ring-[rgba(17,118,212,0.3)]',
 };
 
-export interface UiDropdownOption {
-  key: string;
-  label: string;
-}
 
-interface UiDropdownMenuOption {
-  key: string | null;
-  label: string;
-  trackKey: string;
-  testKey: string | null;
-}
+
+
 
 @Component({
   selector: 'app-ui-dropdown',
@@ -361,8 +356,8 @@ export class UiDropdownComponent implements OnDestroy {
     const sizeClass = this.size() === 'large'
       ? `h-11 ${radiusClass} px-3 text-sm`
       : `h-10 ${radiusClass} px-[13px] text-xs`;
-    // Open and closed palettes are mutually exclusive so hover/focus rules of one state can never
-    // out-rank the other (they share specificity and would otherwise depend on stylesheet order).
+
+
     return `${sizeClass} ${this.theme.ring} ${this.isOpen ? this.theme.triggerOpen : this.theme.trigger}`;
   }
 
@@ -453,11 +448,11 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   private findMenuHost(): HTMLElement {
-    // 'static' menus live inside the nearest positioned ancestor that really scrolls vertically
-    // (page body, modal shell, ...): they then scroll natively with the trigger and cannot be
-    // clipped by intermediate overflow wrappers such as horizontally scrolling table containers.
-    // A position:fixed ancestor (modal backdrop, drawer) is its own layer: the menu must stay inside it
-    // or it would paint behind the layer's z-index.
+
+
+
+
+
     for (let element = this.hostElement.nativeElement.parentElement; element && element !== document.body; element = element.parentElement) {
       const { position, overflowY } = getComputedStyle(element);
       if (position === 'fixed') {
@@ -476,7 +471,7 @@ export class UiDropdownComponent implements OnDestroy {
       return;
     }
     document.removeEventListener('scroll', this.onDocumentScroll, true);
-    // detach() only — dispose() would also remove the outlet element, i.e. the page scroller.
+
     this.portalOutlet.detach();
     this.portalOutlet = null;
     this.portalViewRef = null;
@@ -490,8 +485,8 @@ export class UiDropdownComponent implements OnDestroy {
     }
     const triggerRect = this.visibleTriggerRect(trigger, scroller);
     const scrollerRect = scroller.getBoundingClientRect();
-    // data-top has 2px resolution (snapped downwards so there is never a seam below the trigger);
-    // data-left / data-width have 1px resolution so the menu edges line up with the trigger.
+
+
     const rawTop = triggerRect.bottom - scrollerRect.top + scroller.scrollTop - scroller.clientTop;
     const top = rawTop > 4000
       ? Math.min(20000, Math.floor(rawTop / 4) * 4)

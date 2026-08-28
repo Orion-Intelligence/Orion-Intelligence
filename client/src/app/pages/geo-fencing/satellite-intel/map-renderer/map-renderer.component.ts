@@ -1,5 +1,5 @@
 import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy, ViewEncapsulation } from '@angular/core';
-import { SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
+import { SatelliteAnomalyResponse, SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, TrackingEntityState, TrackingEntityType, TrackingSidebarBridge } from '../../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from '../map-entities/aircraft/aircraft-tracking.service';
 import { EntityRenderer } from '../map-entities/entity-renderer';
@@ -10,6 +10,13 @@ import { SearchLocationMapRenderer } from '../map-overlays/search-location-map-r
 import { Observable, Subscription } from 'rxjs';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import type * as Leaflet from 'leaflet';
+import { asUnknownRecord, UnknownRecord } from '../../../../shared/utils/type-guards.util';
+
+type LoadableLeafletLayer = Leaflet.Layer & Partial<{
+  getMaplibreMap: () => { loaded: () => boolean; once: (event: string, handler: () => void) => void; off: (event: string, handler: () => void) => void };
+  isLoading: () => boolean;
+}>;
 
 @Component({
   selector:    'app-satellite-map-renderer',
@@ -21,16 +28,16 @@ import { TranslationService } from '../../../../shared/services/translation.serv
   encapsulation: ViewEncapsulation.None,
 })
 export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy {
-  private static readonly WORLD_BOUNDS = [[-85.05112878, -180], [85.05112878, 180]] as const;
+  private static readonly WORLD_BOUNDS: Leaflet.LatLngBoundsLiteral = [[-85.05112878, -180], [85.05112878, 180]];
   private static readonly OPEN_FREE_MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('zoomLabelElement') private zoomLabelElement?: ElementRef<HTMLDivElement>;
-  private leafletMap: any   = null;
-  private esriLayer: any    = null;
-  private esriReferenceLayer: any = null;
-  private osmLayer: any     = null;
-  private L: any            = null;
-  private moveTimer: any    = null;
+  private leafletMap: Leaflet.Map | null = null;
+  private esriLayer: Leaflet.TileLayer | null = null;
+  private esriReferenceLayer: Leaflet.TileLayer | null = null;
+  private osmLayer: Leaflet.MaplibreGL | null = null;
+  private L: typeof Leaflet | null = null;
+  private moveTimer: ReturnType<typeof setTimeout> | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private entityRenderer?: EntityRenderer;
   private countryBoundaryRenderer?: CountryBoundaryMapRenderer;
@@ -39,7 +46,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   private mapReadyEmitted = false;
   private mapReadySubscription?: Subscription;
 
-  selectedEntity: { type: TrackingEntityType; data: any | null } | null = null;
+  selectedEntity: { type: TrackingEntityType; data: UnknownRecord | null } | null = null;
   sidebarVisible = false;
   sidebarLoading = false;
   sidebarError: string | null = null;
@@ -52,7 +59,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input() selectedLayer:    'esri' | 'osm' = 'osm';
   @Input() facilitiesVisible = true;
   @Input() facilityFeatures:  OrionSatelliteFeature[] = [];
-  @Input() anomalyData:      any | null = null;
+  @Input() anomalyData:      SatelliteAnomalyResponse['result'] | null = null;
   @Input() aircraftData:     SatelliteLiveAircraft[] = [];
   @Input() shipsData:        SatelliteLiveShip[]     = [];
   @Input() orionData:        OrionSatelliteFeature[] = [];
@@ -60,16 +67,16 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   @Input() topControlsInset = false;
 
   @Output() mapMoved  = new EventEmitter<{ lat: number; lon: number; zoom: number; trackingDelta: number }>();
-  @Output() featureSelected = new EventEmitter<any>();
+  @Output() featureSelected = new EventEmitter<OrionSatelliteFeature>();
   @Output() mapReady = new EventEmitter<void>();
   @Output() mapError = new EventEmitter<void>();
 
   constructor(private appRef: ApplicationRef, private environmentInjector: EnvironmentInjector, private aircraftTrackingService: SatelliteAircraftTrackingService, private shipTrackingService: SatelliteShipTrackingService, private cd: ChangeDetectorRef, private ngZone: NgZone, private translationService: TranslationService) {}
 
-  openSidebarLoading(type: TrackingEntityType, id: string, seedData: any): number {
+  openSidebarLoading(type: TrackingEntityType, id: string, seedData: unknown): number {
     const token = ++this.sidebarRequestToken;
     this.ngZone.run(() => {
-      this.selectedEntity  = { type, data: seedData ?? null };
+      this.selectedEntity  = { type, data: seedData == null ? null : asUnknownRecord(seedData) };
       this.sidebarVisible  = true;
       this.sidebarLoading  = true;
       this.sidebarError    = null;
@@ -81,9 +88,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     return token;
   }
 
-  openSidebar(type: TrackingEntityType, data: any): void {
+  openSidebar(type: TrackingEntityType, data: unknown): void {
     this.ngZone.run(() => {
-      this.selectedEntity = { type, data };
+      this.selectedEntity = { type, data: asUnknownRecord(data) };
       this.sidebarVisible = true;
       this.sidebarLoading = false;
       this.sidebarError = null;
@@ -177,7 +184,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   ngOnDestroy(): void {
-    clearTimeout(this.moveTimer);
+    if (this.moveTimer) {
+      clearTimeout(this.moveTimer);
+    }
     this.entityRenderer?.destroy();
     this.countryBoundaryRenderer?.destroy();
     this.searchLocationRenderer?.destroy();
@@ -192,10 +201,10 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     }
     try {
       const [L, maplibreLeaflet] = await Promise.all([
-        import('leaflet' as any),
+        import('leaflet'),
         import('@maplibre/maplibre-gl-leaflet'),
       ]);
-      this.L = L.default || L;
+      this.L = L;
       if (!this.mapContainer?.nativeElement) {
         return;
       }
@@ -263,8 +272,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         maxZoom: 19,
         renderWorldCopies: false,
         fadeDuration: 180,
-        className: 'opacity-[0.88]',
-      } as any);
+      });
 
       const initialLayer = this.refreshBaseLayerDetail();
       this.updateZoomLabel();
@@ -279,8 +287,8 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         getActiveEntity: () => this.activeEntity,
         getLoadingEntity: () => this.loadingEntity,
         isCurrentRequestToken: (token: number) => token === this.sidebarRequestToken,
-        openLoading: (type: TrackingEntityType, id: string, seedData: any) => this.openSidebarLoading(type, id, seedData),
-        openData: (type: TrackingEntityType, data: any) => this.openSidebar(type, data),
+        openLoading: (type: TrackingEntityType, id: string, seedData) => this.openSidebarLoading(type, id, seedData),
+        openData: (type: TrackingEntityType, data) => this.openSidebar(type, data),
         openError: (type: TrackingEntityType, id: string, message: string) => this.openSidebarError(type, id, message),
       };
       this.entityRenderer = new EntityRenderer({
@@ -304,7 +312,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       });
 
       this.leafletMap.on('zoomend', () => {
-        const z = this.leafletMap.getZoom();
+        const z = this.leafletMap?.getZoom() ?? 0;
         this.updateZoomLabel();
         this.refreshMarkerSizingForZoom(z);
         this.entityRenderer?.renderViewport();
@@ -317,9 +325,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         this.scheduleViewportEmit();
       });
 
-      this.leafletMap.on('mousemove', this.L.Util.throttle((event: any) => {
+      this.leafletMap.on('mousemove', (event: Leaflet.LeafletMouseEvent) => {
         this.updateZoomLabel(event.latlng);
-      }, 50, this));
+      });
 
       this.leafletMap.on('mouseout', () => this.updateZoomLabel());
 
@@ -361,12 +369,14 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   private updateMapView(): void {
-    if (!this.leafletMap || !Number.isFinite(this.lat) || !Number.isFinite(this.lon)) {
+    const lat = this.lat;
+    const lon = this.lon;
+    if (!this.leafletMap || typeof lat !== 'number' || typeof lon !== 'number' || !Number.isFinite(lat) || !Number.isFinite(lon)) {
       return;
     }
-    this.leafletMap.setView([this.lat, this.lon], this.deltaToZoom(this.delta));
+    this.leafletMap.setView([lat, lon], this.deltaToZoom(this.delta));
     this.leafletMap.invalidateSize();
-    this.searchLocationRenderer?.render(this.lat, this.lon);
+    this.searchLocationRenderer?.render(lat, lon);
     this.updateZoomLabel();
   }
 
@@ -392,29 +402,30 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.refreshBaseLayerDetail();
   }
 
-  private refreshBaseLayerDetail(): any {
+  private refreshBaseLayerDetail(): LoadableLeafletLayer | null {
     if (!this.leafletMap) {
       return null;
     }
+    const map = this.leafletMap;
 
     [this.esriLayer, this.esriReferenceLayer, this.osmLayer].forEach(layer => {
-      if (layer && this.leafletMap.hasLayer(layer)) {
-        this.leafletMap.removeLayer(layer);
+      if (layer && map.hasLayer(layer)) {
+        map.removeLayer(layer);
       }
     });
 
     if (this.selectedLayer === 'osm') {
-      this.osmLayer?.addTo(this.leafletMap);
+      this.osmLayer?.addTo(map);
       return this.osmLayer;
     }
     else {
-      this.esriLayer?.addTo(this.leafletMap);
-      this.esriReferenceLayer?.addTo(this.leafletMap);
+      this.esriLayer?.addTo(map);
+      this.esriReferenceLayer?.addTo(map);
       return this.esriLayer;
     }
   }
 
-  private waitForTileLayerLoad(layer: any): Observable<void> {
+  private waitForTileLayerLoad(layer: LoadableLeafletLayer | null): Observable<void> {
     return new Observable<void>((subscriber) => {
       const maplibreMap = layer?.getMaplibreMap?.();
       const eventSource = maplibreMap || layer;
@@ -461,8 +472,17 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.entityRenderer?.refreshSelectionState();
   }
 
-  private getEntityId(type: TrackingEntityType, data: any): string | null {
-    return normalizeEntityId(type === 'aircraft' ? data?.icao24 : data?.mmsi);
+  private getEntityId(type: TrackingEntityType, data: unknown): string | null {
+    if (!data || typeof data !== 'object') {
+      return null;
+    }
+    if (type === 'aircraft' && 'icao24' in data) {
+      return normalizeEntityId(data.icao24);
+    }
+    if (type === 'ship' && 'mmsi' in data) {
+      return normalizeEntityId(data.mmsi);
+    }
+    return null;
   }
 
   private refreshMarkerSizingForZoom(zoom: number): void {
@@ -482,7 +502,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   }
 
   private scheduleViewportEmit(): void {
-    clearTimeout(this.moveTimer);
+    if (this.moveTimer) {
+      clearTimeout(this.moveTimer);
+    }
     this.moveTimer = setTimeout(() => {
       if (!this.leafletMap) {
         return;

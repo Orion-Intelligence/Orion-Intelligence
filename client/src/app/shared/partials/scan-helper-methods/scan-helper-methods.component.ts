@@ -169,7 +169,7 @@ export class ScanHelperMethods implements OnDestroy {
 
   onClose(): void {
     this.resetState();
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.close.emit(undefined);
   }
 

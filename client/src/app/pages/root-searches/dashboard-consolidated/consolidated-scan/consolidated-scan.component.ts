@@ -8,13 +8,13 @@ import { RouterLink } from '@angular/router';
 import { scanAnimation } from '../../../../shared/animations/scan.animations';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { AppService } from '../../../../services/core/app/app.service';
+import type { PendingMsg } from './model/consolidated-scan.model';
+export type { PendingMsg } from './model/consolidated-scan.model';
+
 
 type ScanKey = 'basic' | 'seo' | 'repo' | 'liveapi';
-interface PendingMsg {
-    status: 'pending';
-    progress?: number;
-    step?: string;
-}
+
+type ConsolidatedScanEmission = ConsolidatedScanResults | ConsolidatedLiveApiResults[] | PendingMsg;
 @Component({
   selector: 'app-consolidated-scan',
   standalone: true,
@@ -67,7 +67,7 @@ export class ConsolidatedScanComponent {
     const input = (q || '').trim();
     const scans: {
           t: ScanKey;
-          o: Observable<any>;
+          o: Observable<ConsolidatedScanEmission>;
       }[] = [];
     const liveApiEntities: ConsolidatedLiveApis[] = [];
     const domainInputs: string[] = [];
@@ -134,14 +134,14 @@ export class ConsolidatedScanComponent {
       }
     }
     for (const repo of repoInputs) {
-      scans.push({ t: 'repo', o: this.api.scanForRepo(repo, 'repo') as any });
+      scans.push({ t: 'repo', o: this.api.scanForRepo(repo, 'repo') });
     }
     for (const domain of domainInputs) {
-      scans.push({ t: 'basic', o: this.api.scanDomain(domain, 'basic') as any });
-      scans.push({ t: 'seo', o: this.api.scanDomain(domain, 'seo') as any });
+      scans.push({ t: 'basic', o: this.api.scanDomain(domain, 'basic') });
+      scans.push({ t: 'seo', o: this.api.scanDomain(domain, 'seo') });
     }
     if (liveApiEntities.length) {
-      scans.push({ t: 'liveapi', o: this.api.runLiveApiSearch(liveApiEntities) as any });
+      scans.push({ t: 'liveapi', o: this.api.runLiveApiSearch(liveApiEntities) });
     }
     if (!scans.length) {
       return;
@@ -167,19 +167,22 @@ export class ConsolidatedScanComponent {
     this.scanSub = concat(...scans.map(({ t, o }) =>o.pipe(map(v => ({ t, v })))))
       .pipe(finalize(() => (this.isProcessing = false)))
       .subscribe({
-        next: ({ t, v }: { t: ScanKey; v: any }) => {
+        next: ({ t, v }: { t: ScanKey; v: ConsolidatedScanEmission }) => {
           if (this.isPending(v)) {
             this.progressByType[t] = this.clamp(Number(v.progress ?? 0), 0, 100);
             return;
           }
           this.progressByType[t] = 100;
           if (t === 'liveapi') {
-            this.liveApiResults = Array.isArray(v) ? v : [];
+            this.liveApiResults = Array.isArray(v) ? v as ConsolidatedLiveApiResults[] : [];
+            return;
+          }
+          if (Array.isArray(v)) {
             return;
           }
           const result = {
-            ...(v as ConsolidatedScanResults),
-            scanType: (v)?.scanType || t
+            ...v,
+            scanType: v.scanType || t
           } as ConsolidatedScanResults;
           const key = t as Exclude<ScanKey, 'liveapi'>;
           this.resultsByType[key] = [...(this.resultsByType[key] || []), result];
@@ -194,8 +197,8 @@ export class ConsolidatedScanComponent {
       });
   }
 
-  private isPending(v: any): v is PendingMsg {
-    return !!v && typeof v === 'object' && String(v.status || '').toLowerCase() === 'pending';
+  private isPending(v: unknown): v is PendingMsg {
+    return !!v && typeof v === 'object' && 'status' in v && String(v.status || '').toLowerCase() === 'pending';
   }
 
   private clamp(n: number, min: number, max: number): number {
@@ -307,8 +310,8 @@ export class ConsolidatedScanComponent {
           url: string;
       }[] = [];
     for (const r of this.liveApiResults || []) {
-      const input = (r as any)?.input || {};
-      const data = (r as any)?.resultData?.cards_data || [];
+      const input = r.input;
+      const data = r.resultData?.cards_data || [];
       for (const item of data) {
         const url = item?.m_url || item?.m_app_url || '';
         if (!url) {

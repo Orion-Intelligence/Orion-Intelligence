@@ -98,7 +98,7 @@
       </section>
     } @else if (isVulnerabilityReport) {
       <section data-testid="scan-report-results" class="mt-4 w-full" @fadeInDashboardItem>
-        <app-network-intel-vulnerability-section class="block w-full" [targets]="vulnerabilityReportTargets" [activeTarget]="vulnerabilityReportTarget" [defaultDepth]="vulnerabilityReportDepth" [readOnly]="true" [searchDomain]="vulnerabilityReportTarget || ''" [vulnerabilityResult]="result" [hasSearched]="true"></app-network-intel-vulnerability-section>
+        <app-network-intel-vulnerability-section class="block w-full" [targets]="vulnerabilityReportTargets" [activeTarget]="vulnerabilityReportTarget" [defaultDepth]="vulnerabilityReportDepth" [readOnly]="true" [searchDomain]="vulnerabilityReportTarget || ''" [vulnerabilityResult]="vulnerabilityResult" [hasSearched]="true"></app-network-intel-vulnerability-section>
       </section>
     } @else if (resultSections.length > 0) {
       <section data-testid="scan-report-results" class="mt-4 w-full space-y-4" @fadeInDashboardItem>

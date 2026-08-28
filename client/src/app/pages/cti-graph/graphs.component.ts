@@ -11,7 +11,7 @@ import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.anim
 import { Clipboard } from '@angular/cdk/clipboard';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
 import { ExportChoiceModalComponent } from '../../shared/partials/export-choice-modal/export-choice-modal.component';
-import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats, ExtendedNode, GraphResultItem, NodeVisualState } from './model/cti-graph.model';
+import { CtiGraphFilters, CtiGraphLegendItem, CtiGraphStats, ExtendedNode, GraphResultItem, GraphVertex, NodeVisualState } from './model/cti-graph.model';
 import { ReportExportService } from '../../shared/services/report-export.service';
 import { GraphReportExportType, GraphReportPayload } from '../../shared/model/report/report-export.model';
 import { GRAPH_REPORT_EXPORT_OPTIONS } from '../../shared/model/report/export-choice.model';
@@ -24,8 +24,12 @@ import { splitCountryValues } from '../../shared/utils/country-normalization.uti
 import { GraphAdvancedBuilderPopupComponent } from './advanced-builder-popup/advanced-builder-popup.component';
 import { GraphAdvancedFilterChipModel, GraphAdvancedFilterModel, GraphBuilderLogicalOperator, GraphSearchMode, GraphSearchOptionModel, GraphSearchRequestModel } from './model/graph-builder.model';
 import { TranslationService } from '../../shared/services/translation.service';
+import type { NetworkPointerParams } from './model/graphs.model';
+export type { NetworkPointerParams } from './model/graphs.model';
+
 
 type GraphNodeColor = NonNullable<ExtendedNode['color']>;
+
 @Component({
   selector: 'app-graphs',
   standalone: true,
@@ -57,7 +61,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private groupParentByGroupId: Record<string, string> = {};
   private groupExpandedState: Record<string, boolean> = {};
   private highlightedNodeId: string | null = null;
-  private physicsTimeoutId: any = null;
+  private physicsTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private readonly minZoomScale = 0.35;
   private minZoomLockPosition: { x: number; y: number; } | null = null;
   private readonly originalNodeState = new Map<string, NodeVisualState>();
@@ -134,7 +138,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   physicsEnabled = true;
   expandEnabled = false;
   isEmpty = false;
-  result: any[] = [];
+  result: GraphResultItem[] = [];
   contextMenuNode: ExtendedNode | null = null;
   copied = false;
   orignalColor: GraphNodeColor = '';
@@ -864,7 +868,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const payload = this.buildGraphPayload(data_point_type, type, value, '', maxEdge, maxDepth);
     this.resetGraph();
     this.api.post<{
-      results: any[];
+      results: GraphResultItem[];
   }>('graph', payload).subscribe({
     next: response => {
       if (!this.isCurrentGraphRequest(requestId)) {
@@ -1196,12 +1200,12 @@ export class GraphComponent implements OnInit, OnDestroy {
       size: 40,
       borderWidth: 0,
       label: ''
-    } as any);
+    });
   }
 
   private getClusterDocumentIds(nodeId: string): string[] {
     const resultDocIds = (this.result ?? [])
-      .filter((item: any) => {
+      .filter((item) => {
         const vertexId = String(item?.vertex?._id ?? '');
         const vertexType = String(item?.vertex?.type ?? '').toLowerCase();
         if (vertexType !== 'document' || !vertexId) {
@@ -1211,7 +1215,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         const to = String(item?.edge?._to ?? '');
         return from === nodeId || to === nodeId;
       })
-      .map((item: any) => String(item?.vertex?._id ?? ''))
+      .map((item) => String(item?.vertex?._id ?? ''))
       .filter(Boolean);
     if (resultDocIds.length > 0) {
       return Array.from(new Set(resultDocIds));
@@ -1678,7 +1682,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           duration: 250,
           easingFunction: 'easeInOutQuad'
         }
-      } as any);
+      });
     });
   }
 
@@ -1711,7 +1715,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return `${String(label).replace(/_/g, ' ')}${confidence}`;
   }
 
-  private getNodeTitle(vertex: any): string {
+  private getNodeTitle(vertex: GraphVertex): string {
     const lines: string[] = [];
     const type = String(vertex?.type || '').toLowerCase();
     const add = (label: string, value: unknown) => {
@@ -1818,7 +1822,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.truncateLabel(`${key}: ${value}`);
   }
 
-  private normalizeFullLabel(v: any): string {
+  private normalizeFullLabel(v: GraphVertex): string {
     if (this.selectedType === 'document' && String(v?.type || '').toLowerCase() === 'document') {
       const docLabel = v?.doc_id || v?.m_document_id || v?._key || v?._id;
       if (docLabel) {
@@ -1834,7 +1838,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return base.replace(/^m_/, '').replace(/_/g, ' ').trim();
   }
 
-  private normalizeLabel(v: any): string {
+  private normalizeLabel(v: GraphVertex): string {
     const fullLabel = this.normalizeFullLabel(v);
     if (fullLabel) {
       const propertyLabel = this.formatTooltipLabel(this.extractPropertyKey(v));
@@ -1850,7 +1854,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return this.prettifyLabel(String(v?._key ?? v?._id ?? ''));
   }
 
-  private extractPropertyKey(vertex: any): string | null {
+  private extractPropertyKey(vertex: GraphVertex): string | null {
     const key = String(vertex?._key ?? '').toLowerCase();
     const match = key.match(/m_[a-z0-9_]+/);
     return match ? match[0] : null;
@@ -2038,7 +2042,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private buildRawNodeMap(data: GraphResultItem[]): Map<string, ExtendedNode> {
     const rawNodeMap = new Map<string, ExtendedNode>();
-    const put = (vertex: any, color: string) => {
+    const put = (vertex: GraphVertex, color: string) => {
       const id = vertex?._id;
       if (!id) {
         return;
@@ -2387,7 +2391,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         improvedLayout: true
       }
     });
-    container.addEventListener('contextmenu', ( e: { preventDefault: () => any; } ) => e.preventDefault());
+    container.addEventListener('contextmenu', (event: MouseEvent) => event.preventDefault());
   }
 
   private applyPhysicsAutoDisableIfNeeded(): void {
@@ -2429,7 +2433,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.network.on('dragStart', () => {
       this.hideNodeInfoPanel();
     });
-    this.network.on('zoom', (properties: any) => {
+    this.network.on('zoom', (properties: { direction?: string }) => {
       this.hideNodeInfoPanel();
       const currentScale = this.network.getScale();
       const currentPosition = this.network.getViewPosition();
@@ -2449,7 +2453,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
   }
 
-  private handleContextMenu(params: any): void {
+  private handleContextMenu(params: NetworkPointerParams): void {
     this.hideContextMenu();
     const pointer = params.pointer.DOM;
     const rawNodeId = this.network.getNodeAt(pointer);
@@ -2579,7 +2583,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return Array.from(neighbors);
   }
 
-  private handleClick(params: any): void {
+  private handleClick(params: NetworkPointerParams): void {
     this.hideContextMenu();
     const pointer = params.pointer.DOM;
     const nodeIdRaw = this.network.getNodeAt(pointer);
@@ -2616,7 +2620,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       },
       borderWidth: 2,
       borderWidthSelected: 3
-    } as any);
+    });
   }
 
   private handleNodeBlur(nodeId: string): void {
@@ -2628,7 +2632,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         borderWidth: original.borderWidth,
         borderWidthSelected: original.borderWidthSelected,
         image: original.image
-      } as any);
+      });
     }
     if (this.hoveredNodeId === nodeId) {
       this.hoveredNodeId = null;
@@ -2694,7 +2698,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return lines.join('<br>');
   }
 
-  private handleDoubleClick(params: any): void {
+  private handleDoubleClick(params: NetworkPointerParams): void {
     this.hideContextMenu();
     const pointer = params.pointer.DOM;
     const nodeIdRaw = this.network.getNodeAt(pointer);
@@ -2801,9 +2805,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       this.originalNodeState.set(String(node.id), {
         color: node.color ?? '',
-        borderWidth: (node as any).borderWidth,
-        borderWidthSelected: (node as any).borderWidthSelected,
-        image: (node as any).image
+        borderWidth: node.borderWidth,
+        borderWidthSelected: node.borderWidthSelected,
+        image: typeof node.image === 'string' ? node.image : undefined
       });
     });
   }

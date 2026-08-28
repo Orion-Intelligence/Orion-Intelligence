@@ -1,29 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { applyImageFallback } from '../../utils/image-fallback.util';
-import { asRecord, formatKeyLabel, initialOf, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, resource_entry, resource_time, toggleKey } from '../../utils/resource-view.util';
+import { asRecord, formatKeyLabel, initialOf, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, toggleKey } from '../../utils/resource-view.util';
+import type { people_item_view } from './model/resource-people-section.model';
+export type { people_item_view } from './model/resource-people-section.model';
 
-export interface people_item_view {
-  key: string;
-  name: string;
-  handle: string;
-  url: string;
-  avatar: string;
-  initial: string;
-  bio: string;
-  kind: string;
-  verified: boolean;
-  flags: string[];
-  followers: string;
-  posts: string;
-  location: string;
-  company: string;
-  website: string;
-  joined: resource_time;
-  tags: string[];
-  extra: resource_entry[];
-}
+
+
 
 const CLAIMED_KEYS = new Set([
   'type', 'resource_id', 'url', 'parent_url', 'title', 'name', 'display_name', 'full_name', 'caption', 'description', 'bio', 'about', 'note', 'author', 'author_name', 'username', 'login', 'handle', 'screen_name', 'acct',

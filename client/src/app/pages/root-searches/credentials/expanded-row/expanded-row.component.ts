@@ -4,19 +4,14 @@ import { TooltipDirective } from '../../../../shared/directive/tooltip-directive
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { CredentialResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
+import type { CreditCardField, TelemetryGroup } from './model/expanded-row.model';
+export type { CreditCardField, TelemetryGroup } from './model/expanded-row.model';
 
-interface TelemetryGroup {
-  key: string;
-  label: string;
-  values: string[];
-}
 
-interface CreditCardField {
-  key: string;
-  label: string;
-  icon: string;
-  value: string;
-}
+
+
+
 @Component({
   selector: 'app-expanded-row',
   standalone: true,
@@ -26,7 +21,7 @@ interface CreditCardField {
   styleUrls: ['./expanded-row.component.scss'],
 })
 export class ExpandedRowComponent implements OnChanges, OnDestroy {
-  private copiedTimer: any = null;
+  private copiedTimer: ReturnType<typeof setTimeout> | null = null;
   private telemetryGroupsCache: TelemetryGroup[] = [];
   private visiblePasswordKeys = new Set<string>();
   private readonly passwordRevealConfirmKey = 'orion.passwordRevealConfirmed';
@@ -38,8 +33,8 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   copiedKey: string | null = null;
   isPasswordRevealConfirmationOpen = false;
   readonly mode = input<'stealer' | 'threat'>('stealer');
-  readonly item = input<any>(null);
-  readonly result = input<any>(null);
+  readonly item = input<CredentialResultItem | null>(null);
+  readonly result = input<CredentialResultItem | null>(null);
   readonly searchQuery = input<string>('');
 
   constructor(private rowHelper: ResultRowHelperService) {
@@ -93,11 +88,11 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return this.isAnyValueMatched(group.values);
   }
 
-  isAnyValueMatched(values: any[]): boolean {
+  isAnyValueMatched(values: unknown[]): boolean {
     return values.some(value => this.isValueMatched(value));
   }
 
-  isValueMatched(value: any): boolean {
+  isValueMatched(value: unknown): boolean {
     const candidate = this.normalizeMatchValue(value);
     if (!candidate || !this.matchedValues.length) {
       return false;
@@ -257,8 +252,8 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       return 0;
     }
 
-    const values = (value: any): string[] => this.rowHelper.normalizeToArray(value);
-    const clean = (value: any): string => String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const values = (value: unknown): string[] => this.rowHelper.normalizeToArray(value);
+    const clean = (value: unknown): string => String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
     const term = (value: string): string => {
       let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
       if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) {
@@ -504,7 +499,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return 'bi-tag-fill';
   }
 
-  copyText(text: any, key: string, e?: MouseEvent) {
+  copyText(text: unknown, key: string, e?: MouseEvent) {
     this.rowHelper.copyText(text, key, (copiedKey) => {
       this.copiedTimer = this.rowHelper.setCopiedState(copiedKey, this.copiedTimer, (value) => {
         this.copiedKey = value;
@@ -524,7 +519,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     this.activeTelemetryKey = this.telemetryGroupsCache.find(g => g.key === domainKey)?.key || this.telemetryGroupsCache[0]?.key || null;
   }
 
-  private buildStealerGroups(item: any): TelemetryGroup[] {
+  private buildStealerGroups(item: CredentialResultItem | null): TelemetryGroup[] {
     if (!item) {
       return [];
     }
@@ -593,7 +588,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return [...core, ...rest];
   }
 
-  private buildThreatGroups(result: any): TelemetryGroup[] {
+  private buildThreatGroups(result: CredentialResultItem | null): TelemetryGroup[] {
     if (!result) {
       return [];
     }
@@ -650,13 +645,13 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return Array.from(new Set(values.map(v => String(v).trim()).filter(Boolean)));
   }
 
-  private firstValue(value: any): string {
+  private firstValue(value: unknown): string {
     return this.rowHelper.normalizeToArray(value)
       .map(v => String(v ?? '').trim())
       .find(Boolean) || '-';
   }
 
-  private formatBooleanValue(value: any): string {
+  private formatBooleanValue(value: unknown): string {
     if (value === true) {
       return 'Valid';
     }
@@ -666,7 +661,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return this.firstValue(value);
   }
 
-  private formatIndexLabel(value: any): string {
+  private formatIndexLabel(value: unknown): string {
     const raw = this.rowHelper.normalizeToArray(value)[0];
     if (!raw) {
       return '-';
@@ -680,7 +675,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
   }
 
-  private extractDomain(value: any): string {
+  private extractDomain(value: unknown): string {
     let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
     if (!text || text === '-') {
       return '';
@@ -703,14 +698,14 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     }
   }
 
-  private normalizeMatchValue(value: any): string {
+  private normalizeMatchValue(value: unknown): string {
     let text = String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
     text = text.replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');
     const fieldMatch = text.match(/^[a-z_][a-z0-9_]*:(.+)$/i);
     return (fieldMatch ? fieldMatch[1] : text).trim().replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');
   }
 
-  private valuesMatch(value: any, matched: any): boolean {
+  private valuesMatch(value: unknown, matched: unknown): boolean {
     const candidate = this.normalizeMatchValue(value);
     const search = this.normalizeMatchValue(matched);
     if (!candidate || !search || candidate === '-' || search === '-') {
@@ -724,16 +719,16 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return !!candidateDomain && !!searchDomain && (candidateDomain.includes(searchDomain) || searchDomain.includes(candidateDomain));
   }
 
-  private matchableDomain(value: any): string {
+  private matchableDomain(value: unknown): string {
     const domain = this.extractDomain(value).toLowerCase();
     return domain && domain.includes('.') && !/\s/.test(domain) ? domain : '';
   }
 
-  private getRawDomainValues(item: any): string[] {
+  private getRawDomainValues(item: CredentialResultItem | null): string[] {
     return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['domain']));
   }
 
-  private getSourceDomainValues(item: any): string[] {
+  private getSourceDomainValues(item: CredentialResultItem | null): string[] {
     return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['source_domain']));
   }
 }

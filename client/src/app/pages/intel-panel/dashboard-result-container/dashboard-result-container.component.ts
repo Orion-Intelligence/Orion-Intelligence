@@ -24,6 +24,20 @@ import { DefacementGroupCallbackItem } from '../../../shared/model/results/defac
 import { FilterModel } from '../../../shared/model/filter/filter.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { applyMalpediaFilterOptions, applyMalwareBazaarFilterOptions, getDashboardFilterModel, isMalpediaRoute, isMalwareBazaarRoute, MALPEDIA_FILTER_OPTIONS_ENDPOINT, MalpediaFilterOptionsResponse, MALWARE_BAZAAR_FILTER_OPTIONS_ENDPOINT, MalwareBazaarFilterOptionsResponse } from '../dashboard-filter.utils';
+import { RankedResultItem } from '../../../shared/model/results/consolidated/ranked.callback.model';
+import type { GeneralResultItem } from '../../../shared/model/results/general/general.callback.model';
+import type { LeakResultItem } from '../../../shared/model/results/leak/leak.callback.model';
+import type { AptIntelResultItem } from '../../../shared/model/results/apt-intel/apt-intel.callback.model';
+import type { ExploitResultItem } from '../../../shared/model/results/exploit/exploit.callback.model';
+import type { SocialResultItem } from '../../../shared/model/results/social/social.callback.model';
+import type { ChatResultItem } from '../../../shared/model/results/chat/chat.callback.model';
+import type { DefacementResultItem } from '../../../shared/model/results/defacement/defacement.callback.model';
+import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import type { DashboardSearchResponse } from './model/dashboard-result-container.model';
+export type { DashboardSearchResponse } from './model/dashboard-result-container.model';
+
+
+
 
 @Component({
   selector: 'app-dashboard-result-container',
@@ -59,7 +73,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   protected readonly Category = Category;
   protected readonly alert = alert;
 
-  public currentResultModel: any = null;
+  public currentResultModel: RankedResultItem[] = [];
   public defacementGroups: DefacementGroupCallbackItem[] = [];
   public totalGroups = 0;
   public maxPages = 1;
@@ -116,6 +130,30 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       && !this.isCrossSearchExcludedRoute();
   }
 
+  asGeneralResults(results: RankedResultItem[]): Array<GeneralResultItem | LeakResultItem> {
+    return results as unknown as Array<GeneralResultItem | LeakResultItem>;
+  }
+
+  asAptResults(results: RankedResultItem[]): AptIntelResultItem[] {
+    return results as unknown as AptIntelResultItem[];
+  }
+
+  asExploitResults(results: RankedResultItem[]): ExploitResultItem[] {
+    return results as unknown as ExploitResultItem[];
+  }
+
+  asSocialResults(results: RankedResultItem[]): SocialResultItem[] {
+    return results as unknown as SocialResultItem[];
+  }
+
+  asChatResults(results: RankedResultItem[]): ChatResultItem[] {
+    return results as unknown as ChatResultItem[];
+  }
+
+  asDefacementResults(results: RankedResultItem[]): DefacementResultItem[] {
+    return results as unknown as DefacementResultItem[];
+  }
+
   ngAfterViewInit(): void {
     this.appService.updatePage(this.dashboardService.consolidatedParamModel.page);
   }
@@ -137,7 +175,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       .subscribe(([params, urlSegments]) => {
         const route = this.router.url.split('?')[0];
         if (String(route) !== this.dashboardService.m_current_route) {
-          this.currentResultModel = null;
+          this.currentResultModel = [];
           this.defacementGroups = [];
           this.totalGroups = 0;
         }
@@ -155,11 +193,14 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
         const cachedResult = sessionStorage.getItem(cacheKey);
         if (cachedResult && !this.hasResultData()) {
           try {
-            const parsedCache = JSON.parse(cachedResult);
-            this.currentResultModel = parsedCache?.result ?? parsedCache;
-            this.defacementGroups = parsedCache?.defacementGroups ?? [];
-            this.totalGroups = Number(parsedCache?.totalGroups ?? 0) || 0;
-            this.maxPages = Number(parsedCache?.maxPages ?? 1) || 1;
+            const parsed = JSON.parse(cachedResult) as unknown;
+            const parsedCache = asUnknownRecord(parsed);
+            this.currentResultModel = Array.isArray(parsed)
+              ? parsed as RankedResultItem[]
+              : Array.isArray(parsedCache['result']) ? parsedCache['result'] as RankedResultItem[] : [];
+            this.defacementGroups = Array.isArray(parsedCache['defacementGroups']) ? parsedCache['defacementGroups'] as DefacementGroupCallbackItem[] : [];
+            this.totalGroups = Number(parsedCache['totalGroups'] ?? 0) || 0;
+            this.maxPages = Number(parsedCache['maxPages'] ?? 1) || 1;
             this.restoreSavedScroll();
           }
           catch {
@@ -184,11 +225,11 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     }
 
     this.isResponseLoading.set(true);
-    this.currentResultModel = null;
+    this.currentResultModel = [];
     this.defacementGroups = [];
     this.totalGroups = 0;
 
-    this.dashboardService.fetchSearchResults<any>(this.apiEndpoint,
+    this.dashboardService.fetchSearchResults<DashboardSearchResponse>(this.apiEndpoint,
       this.dashboardService.consolidatedParamModel)
       .subscribe((response) => {
         if (response.success && response.data) {
@@ -247,9 +288,9 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       return;
     }
 
-    const results = this.currentResultModel?.Result ?? [];
+    const results = this.currentResultModel;
     if (results.length > 0) {
-      this.currentResultModel.Result = this.helperService.sortByKey<any>(results, key, order);
+      this.currentResultModel = this.helperService.sortByKey<RankedResultItem>(results, key, order);
       this.cdr.detectChanges();
     }
   }

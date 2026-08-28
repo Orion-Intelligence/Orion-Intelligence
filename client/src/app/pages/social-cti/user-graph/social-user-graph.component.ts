@@ -1,94 +1,41 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, effect, inject, input, output, signal, untracked, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs/operators';
-import { Network, type Options } from 'vis-network';
 import { DataSet } from 'vis-data';
+import { Network, type Options } from 'vis-network';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
+import { RELATION_COLORS, RELATION_LABELS } from '../constants/social-graph.constants';
+import type { SocialGraphAccount, SocialGraphView, SocialGraphVisEdge, SocialGraphVisNode, SocialGraphVisualOptions, SocialUserGraphData } from '../models/social-user-graph.models';
+import type { db_social_model } from '../models/social.models';
+import { SocialStorageService } from '../services/social-storage.service';
 import { SocialUserGraphService } from '../services/social-user-graph.service';
 import { SocialService } from '../services/social.service';
-import { SocialStorageService } from '../services/social-storage.service';
-import type { db_social_model } from '../models/social.models';
-import type { SocialGraphAccount, SocialGraphNodeKind, SocialGraphRelation, SocialGraphView, SocialGraphVisEdge, SocialGraphVisNode, SocialGraphVisualOptions, SocialUserGraphData } from '../models/social-user-graph.models';
-import { buildSocialGraphView, buildSocialUserGraph, handleLabel, isChannelHandle, linkLabel, normalizeHandle, parseHandleList, relationVerb, toVisEdge, toVisNode } from '../utils/social-user-graph.util';
-import { RELATION_COLORS, RELATION_LABELS } from '../constants/social-graph.constants';
 import { applyImageFallback } from '../utils/image-fallback.util';
+import { buildSocialGraphView, buildSocialUserGraph, handleLabel, isChannelHandle, linkLabel, normalizeHandle, parseHandleList, relationVerb, toVisEdge, toVisNode } from '../utils/social-user-graph.util';
+import type { account_view, context_menu_view, detail_view, find_match, membership_view } from './model/social-user-graph.model';
+export type { account_view,context_menu_view,detail_view,find_match,group_view,link_view,membership_view } from './model/social-user-graph.model';
+
 
 const MAX_SCANNED_USERS = 1000;
 const MIN_ZOOM = 0.35;
 const MAX_ZOOM = 3;
 const VIEW_MARGIN = 80;
 
-interface membership_view {
-  platform: string;
-  relation: string;
-  owner: string;
-  groupId: string;
-  posts: number;
-}
 
-interface account_view {
-  id: string;
-  nodeId: string;
-  owner: string;
-  platform: string;
-  handle: string;
-  url: string;
-  contacts: number;
-  discovered: boolean;
-}
 
-interface group_view {
-  id: string;
-  relation: SocialGraphRelation;
-  label: string;
-  count: number;
-  posts: number;
-  expanded: boolean;
-}
 
-interface link_view {
-  label: string;
-  title: string;
-}
 
-interface find_match {
-  nodeId: string;
-  handle: string;
-  name: string;
-}
 
-interface context_menu_view {
-  action: 'remove' | 'scan';
-  handle: string;
-  nodeId: string;
-  left: number;
-  top: number;
-}
 
-interface detail_view {
-  nodeId: string;
-  kind: SocialGraphNodeKind;
-  title: string;
-  handle: string;
-  platform: string;
-  owner: string;
-  avatar: string;
-  bio: string;
-  followers: string;
-  location: string;
-  url: string;
-  expanded: boolean;
-  connected: boolean;
-  scanned: boolean;
-  scanQuery: string;
-  addable: boolean;
-  memberships: membership_view[];
-  accounts: account_view[];
-  groups: group_view[];
-  links: link_view[];
-}
+
+
+
+
+
+
+
 
 @Component({
   selector: 'app-social-user-graph',

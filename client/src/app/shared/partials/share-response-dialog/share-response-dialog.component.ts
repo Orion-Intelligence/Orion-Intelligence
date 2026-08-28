@@ -3,15 +3,13 @@ import { AfterViewInit, Component, ElementRef, Inject, Input, OnDestroy, signal,
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ResultRowHelperService } from '../../services/result-row-helper.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import type { ShareDestination, ShareTarget } from './model/share-response-dialog.model';
+export type { ShareDestination, ShareTarget } from './model/share-response-dialog.model';
 
-type ShareTarget = 'telegram' | 'x' | 'linkedin' | 'reddit' | 'email';
 
-interface ShareDestination {
-  target: ShareTarget;
-  label: string;
-  icon: string;
-  iconClass: string;
-}
+
+
+
 
 const SHARE_DESTINATIONS: ShareDestination[] = [
   { target: 'telegram', label: 'Telegram', icon: 'bi-telegram', iconClass: 'text-sky-300 group-hover:text-sky-200 [body.light-theme_&]:text-sky-700 [body.light-theme_&]:group-hover:text-sky-800' },

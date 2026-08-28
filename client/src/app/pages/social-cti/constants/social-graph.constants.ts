@@ -1,12 +1,12 @@
 import type { SocialGraphRelation } from '../models/social-user-graph.models';
 
-/* ---------- resource fields ---------- */
+
 
 export const CONTENT_DATE_KEYS = ['datetime', 'published_at', 'creation_time', 'created_at', 'updated_at'];
 
 export const DARKWEB_SENDER_KEYS = ['m_sender_username', 'm_author', 'm_username', 'm_attacker', 'm_sender_name'];
 
-/* ---------- relations ---------- */
+
 
 export const RELATION_BY_TYPE: Record<string, SocialGraphRelation> = { followers: 'follower', following: 'following', friends: 'friend', connections: 'connection', organizations: 'organization' };
 
@@ -16,7 +16,7 @@ export const RELATION_COLORS: Record<SocialGraphRelation, string> = { follower: 
 
 export const COUNTED_RELATIONS: ReadonlySet<SocialGraphRelation> = new Set<SocialGraphRelation>(['connection', 'channel', 'mention']);
 
-/* ---------- node colors ---------- */
+
 
 export const KIND_COLORS = { root: '#7c3aed', user: '#f59e0b', person: '#64748b', multi: '#0d9488', shared: '#b45309', more: '#475569' } as const;
 
@@ -28,12 +28,12 @@ export const NODE_SCAN = '#38bdf8';
 
 export const NODE_ROOT = '#facc15';
 
-/* ---------- node geometry ---------- */
+
 
 export const RING_PX = 2.5;
 
 export const FOCUS_RING_SCALE = 2.5;
 
-/* ---------- view state ---------- */
+
 
 export const SHARED_PAGE_KEY = 'shared';

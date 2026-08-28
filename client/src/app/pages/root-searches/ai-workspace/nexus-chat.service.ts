@@ -6,12 +6,11 @@ import { AiWorkspaceTrigger } from './model/ai-workspace-message.model';
 import { NexusChatPayload, NexusChatStreamChunk, NexusSummaryPayload } from './model/nexus-chat.model';
 import { ApiService } from '../../../shared/services/api.service';
 import { NexusChatDetail, NexusChatSession, NexusWorkspaceTreeResponse, NexusWorkspaceFileReadResponse, NexusWorkspaceImportResponse } from './model/ai-chat-session.model';
+import type { NexusStreamState } from './model/nexus-chat.interfaces.model';
+export type { NexusStreamState } from './model/nexus-chat.interfaces.model';
 
-interface NexusStreamState {
-  seen: number;
-  skip: number;
-  done: boolean;
-}
+
+
 
 @Injectable({ providedIn: 'root' })
 export class NexusChatService {
@@ -223,28 +222,29 @@ export class NexusChatService {
       if (state.seen <= state.skip) {
         continue;
       }
-      let parsed: any;
+      let parsed: unknown;
       try {
         parsed = JSON.parse(line);
       }
       catch {
         continue;
       }
-      if (parsed?.done === true) {
+      const parsedRecord = this.asRecord(parsed) ?? {};
+      if (parsedRecord['done'] === true) {
         state.done = true;
       }
-      const output = this.asRecord(parsed?.output);
-      const delta = output?.['delta'] ?? parsed?.delta;
-      const response = output?.['response'] ?? parsed?.response;
-      const rawTriggers = output?.['triggers'] ?? parsed?.triggers;
+      const output = this.asRecord(parsedRecord['output']);
+      const delta = output?.['delta'] ?? parsedRecord['delta'];
+      const response = output?.['response'] ?? parsedRecord['response'];
+      const rawTriggers = output?.['triggers'] ?? parsedRecord['triggers'];
       const triggers = Array.isArray(rawTriggers)
-        ? rawTriggers.filter((item: unknown) => Boolean(this.asRecord(item)?.['url'])) as AiWorkspaceTrigger[]
+        ? rawTriggers.filter((item) => Boolean(this.asRecord(item)?.['url'])) as AiWorkspaceTrigger[]
         : undefined;
-      const status = this.asRecord(parsed?.status);
-      const statusMessage = status?.['message'] ?? parsed?.status_message;
-      const isError = Boolean(parsed?.error);
-      const error = this.asRecord(parsed?.error);
-      let detail = parsed?.detail ?? error?.['message'];
+      const status = this.asRecord(parsedRecord['status']);
+      const statusMessage = status?.['message'] ?? parsedRecord['status_message'];
+      const isError = Boolean(parsedRecord['error']);
+      const error = this.asRecord(parsedRecord['error']);
+      let detail = parsedRecord['detail'] ?? error?.['message'];
       if (typeof detail === 'string' && detail.toLowerCase().includes('stream is already active')) {
         detail = 'Nexus is still finishing the previous chat. Try again in a moment.';
       }

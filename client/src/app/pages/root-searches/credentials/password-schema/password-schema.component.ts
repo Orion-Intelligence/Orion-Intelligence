@@ -26,12 +26,12 @@ export class PasswordSchemaComponent {
   onSearch() {
     this.normalizeRange();
     this.search.emit(this.filter);
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.close.emit(undefined);
   }
 
   onClose() {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.close.emit(undefined);
   }
 
@@ -39,7 +39,7 @@ export class PasswordSchemaComponent {
   onOutsideClick(event: MouseEvent) {
     const eventTargetElement = event.target as HTMLElement;
     if (this.isOpen() && eventTargetElement.classList.contains('password-schema-overlay')) {
-      // TODO: The 'emit' function requires a mandatory void argument
+
       this.close.emit(undefined);
     }
   }

@@ -7,13 +7,10 @@ import { Router } from '@angular/router';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { AppService } from '../core/app/app.service';
 import { AuthService } from '../authetication/auth.service';
-interface CombinedRule {
-    modules: Set<string> | 'all';
-    cti_graph: boolean;
-    mapping: boolean;
-    scanning: boolean;
-    maintainer: boolean;
-}
+import type { CombinedRule } from './model/licenses.model';
+export type { CombinedRule } from './model/licenses.model';
+
+
 
 type AlertLicenseTarget = string | {
     licenses?: string[] | null;
@@ -96,10 +93,10 @@ export class LicenseService {
           combined.modules.add(m);
         }
       }
-      combined.cti_graph ||= rule.cti_graph;
-      combined.mapping ||= rule.mapping;
-      combined.scanning ||= rule.scanning;
-      combined.maintainer ||= rule.maintainer;
+      combined.cti_graph ||= !!rule.cti_graph;
+      combined.mapping ||= !!rule.mapping;
+      combined.scanning ||= !!rule.scanning;
+      combined.maintainer ||= !!rule.maintainer;
     }
     return combined;
   }

@@ -1,25 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
-import { finalize } from 'rxjs';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
-import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
-import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
-import { LoadingFormComponent } from '../../../shared/partials/loading-form/loading-form.component';
-import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
-import { event_management_filters } from '../../../shared/constants/filters';
-import { ApiService } from '../../../shared/services/api.service';
-import { SidebarService } from '../../../shared/services/sidebar.service';
-import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
+import { finalize, Observable } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
+import { event_management_filters } from '../../../shared/constants/filters';
+import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
+import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
+import { FiltersComponent } from '../../../shared/partials/filters/filters.component';
 import { IocSearchComponent } from '../../../shared/partials/ioc-search/ioc-search.component';
+import { LoadingFormComponent } from '../../../shared/partials/loading-form/loading-form.component';
+import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { TranslationService } from '../../../shared/services/translation.service';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
+import { ApiService } from '../../../shared/services/api.service';
+import { SidebarService } from '../../../shared/services/sidebar.service';
+import { TranslationService } from '../../../shared/services/translation.service';
+import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
+import type { SiemEventRecord, SiemSearchResponse } from './model/sidebar-user-event-management.model';
+export type { SiemEventRecord,SiemSearchResponse } from './model/sidebar-user-event-management.model';
+
+
+
+
+
 
 @Component({
   selector: 'app-sidebar-user-event-management',
@@ -40,7 +46,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   queryTriggered = false;
   errorMessage = '';
   expandedResultIndex: number | null = null;
-  responseData: { cards_data?: any[]; total_hits?: number; page_count?: number; batch_size?: number } | null = null;
+  responseData: SiemSearchResponse | null = null;
   readonly batchSize = 500;
   readonly emptyQueryBatchSize = 100;
   currentPage = 1;
@@ -75,7 +81,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
     });
   }
 
-  get records(): any[] {
+  get records(): SiemEventRecord[] {
     return this.responseData?.cards_data ?? [];
   }
 
@@ -140,7 +146,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
     const requestSize = this.query.trim() ? this.batchSize : this.emptyQueryBatchSize;
     const offset = (this.currentPage - 1) * requestSize;
 
-    this.apiService.post<{ cards_data?: any[]; total_hits?: number; page_count?: number; batch_size?: number }>('profile/event-management/siem/search',
+    this.apiService.post<SiemSearchResponse>('profile/event-management/siem/search',
       {
         q: this.query,
         from: offset,
@@ -167,7 +173,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
     this.expandedResultIndex = this.expandedResultIndex === index ? null : index;
   }
 
-  getResultTitle(item: any, idx: number): string {
+  getResultTitle(item: SiemEventRecord, idx: number): string {
     const raw = this.stringifyPrimitive(item?.raw);
     const compactRaw = raw.length > 90 ? `${raw.slice(0, 87)}...` : raw;
     return this.stringifyPrimitive(item?.event_type ||
@@ -177,7 +183,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
       `Event ${idx + 1}`);
   }
 
-  getRawPreview(item: any): string {
+  getRawPreview(item: SiemEventRecord): string {
     const raw = this.stringifyPrimitive(item?.raw);
     if (raw === 'not available') {
       return raw;
@@ -185,11 +191,11 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
     return raw.length > 220 ? `${raw.slice(0, 217)}...` : raw;
   }
 
-  getEventTimestamp(item: any): string {
+  getEventTimestamp(item: SiemEventRecord): string {
     return this.stringifyPrimitive(item?.timestamp || item?.ingested_at);
   }
 
-  getExtractedIocs(item: any): { name: string; values: string[] }[] {
+  getExtractedIocs(item: SiemEventRecord): { name: string; values: string[] }[] {
     const normalized: { name: string; values: string[] }[] = [];
     const seen = new Set<string>();
     const labelMap: Record<string, string> = {
@@ -203,7 +209,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
       ip: 'IP Address'
     };
 
-    const pushEntry = (name: string, values: any): void => {
+    const pushEntry = (name: string, values: unknown): void => {
       const list = (Array.isArray(values) ? values : [values])
         .map(value => this.stringifyPrimitive(value))
         .filter(value => value !== 'not available');

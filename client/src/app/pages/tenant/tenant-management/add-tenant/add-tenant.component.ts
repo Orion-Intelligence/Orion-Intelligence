@@ -96,7 +96,7 @@ export class AddTenantComponent implements OnInit {
     const endpoint = this.isAdmin ? 'tenant/create/user' : 'tenant/create/user';
     this.apiService.post(endpoint, this.model).subscribe({
       next: () => {
-        // TODO: The 'emit' function requires a mandatory void argument
+
         this.accountAdded.emit(undefined);
         this.onClose();
       },
@@ -246,7 +246,7 @@ export class AddTenantComponent implements OnInit {
     this.model.licenses = nextLicenses;
   }
 
-  toggleTenantLicense(tenant: any, license: LicenseName): void {
+  toggleTenantLicense(tenant: TenantTeamModel, license: LicenseName): void {
     if (!tenant.licenses) {
       tenant.licenses = [];
     }
@@ -259,20 +259,20 @@ export class AddTenantComponent implements OnInit {
       tenant.licenses = [LicenseName.ENTERPRISE];
       return;
     }
-    tenant.licenses = tenant.licenses.filter((l: LicenseName) => l !== LicenseName.ENTERPRISE);
+    tenant.licenses = tenant.licenses.filter((l) => l !== LicenseName.ENTERPRISE);
     if (license === LicenseName.FREE) {
       tenant.licenses = [LicenseName.FREE];
       return;
     }
     if (license === LicenseName.OSINT_BASIC) {
-      tenant.licenses = tenant.licenses.filter((l: LicenseName) =>
+      tenant.licenses = tenant.licenses.filter((l) =>
         l !== LicenseName.OSINT_ADVANCED && l !== LicenseName.FREE);
     }
     if (license === LicenseName.OSINT_ADVANCED) {
-      tenant.licenses = tenant.licenses.filter((l: LicenseName) =>
+      tenant.licenses = tenant.licenses.filter((l) =>
         l !== LicenseName.OSINT_BASIC && l !== LicenseName.FREE);
     }
-    tenant.licenses = tenant.licenses.filter((l: LicenseName) => l !== LicenseName.FREE);
+    tenant.licenses = tenant.licenses.filter((l) => l !== LicenseName.FREE);
 
     tenant.licenses.push(license);
   }

@@ -6,15 +6,11 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { SocialFetchService } from '../../services/social-fetch.service';
 import { applyImageFallback } from '../../utils/image-fallback.util';
 import { asRecord, initialOf, pickText } from '../../utils/resource-view.util';
+import type { connection_user_view } from './model/social-connections-popup.model';
+export type { connection_user_view } from './model/social-connections-popup.model';
 
-interface connection_user_view {
-  key: string;
-  name: string;
-  handle: string;
-  avatar: string;
-  initial: string;
-  url: string;
-}
+
+
 
 @Component({
   selector: 'app-social-connections',

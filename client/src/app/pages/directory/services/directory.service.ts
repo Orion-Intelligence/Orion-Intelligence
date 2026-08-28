@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { DirectoryCallbackModel } from '../model/directory.model';
 import { ApiService } from '../../../shared/services/api.service';
+import { HttpParams } from '@angular/common/http';
 @Injectable({ providedIn: 'root' })
 export class DirectoryService {
   private directoryDataSubject = new BehaviorSubject<DirectoryCallbackModel | null>(null);
@@ -13,8 +14,11 @@ export class DirectoryService {
   constructor(private apiService: ApiService) {
   }
 
-  reloadDirectoryData(params?: any): void {
-    this.apiService.get<DirectoryCallbackModel>('directory', { params }).subscribe((data) => {
+  reloadDirectoryData(params?: HttpParams | Record<string, string | number | boolean>): void {
+    const httpParams = params instanceof HttpParams
+      ? params
+      : new HttpParams({ fromObject: params ?? {} });
+    this.apiService.get<DirectoryCallbackModel>('directory', { params: httpParams }).subscribe((data) => {
       this.directoryDataSubject.next(data);
     });
   }

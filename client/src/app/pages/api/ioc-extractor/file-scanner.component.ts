@@ -1,23 +1,28 @@
-import { Component, ElementRef, inject, signal, ViewChild, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgxPrintModule } from 'ngx-print';
 import { EMPTY, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
-import { NgxPrintModule } from 'ngx-print';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
-import { ApiService } from '../../../shared/services/api.service';
-import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
-import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
-import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { FILE_SCAN_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
-import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
+import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
+import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { ApiService } from '../../../shared/services/api.service';
+import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
+import { ReportExportService } from '../../../shared/services/report-export.service';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
+import type { FileScanResponse } from './model/file-scanner.model';
+export type { FileScanResponse } from './model/file-scanner.model';
+
 
 type ScannerResultItem = { label: string; value: string };
 type ScannerResultSection = { title: string; items: ScannerResultItem[] };
+
 
 @Component({
   selector: 'app-ioc-extractor',
@@ -47,7 +52,7 @@ export class FileScannerComponent {
   hasError = false;
   errorMessage = '';
   isFileSizeError = false;
-  scanResult: Record<string, any> | null = null;
+  scanResult: Record<string, unknown> | null = null;
   resultSections: ScannerResultSection[] = [];
   progress = signal(0);
   currentStep = '';
@@ -110,7 +115,7 @@ export class FileScannerComponent {
     this.isLoading = true;
     this.currentStep = isApk ? 'Analyzing APK...' : 'Uploading file...';
 
-    const upload = () => this.api.post<any>(endpoint, formData);
+    const upload = () => this.api.post<FileScanResponse>(endpoint, formData);
     upload()
       .pipe(expand(res => (res?.status === 'pending' || res?.status === 'processing')
         ? timer(3000).pipe(switchMap(() => upload()))
@@ -125,13 +130,14 @@ export class FileScannerComponent {
       });
   }
 
-  private handleScanResponse(res: any): void {
-    if (res?.status === 'pending' || res?.status === 'processing') {
-      const p = res?.progress ?? res?.result?.progress;
+  private handleScanResponse(res: FileScanResponse): void {
+    const nested = asUnknownRecord(res.result);
+    if (res.status === 'pending' || res.status === 'processing') {
+      const p = res.progress ?? nested['progress'];
       if (typeof p === 'number' && Number.isFinite(p)) {
         this.progress.set(Math.max(0, Math.min(100, Math.round(p))));
       }
-      const step = res?.step ?? res?.result?.step;
+      const step = res.step ?? nested['step'];
       if (typeof step === 'string' && step) {
         this.currentStep = step;
       }
@@ -140,7 +146,7 @@ export class FileScannerComponent {
 
     this.isFetched = true;
     this.progress.set(100);
-    if (res?.result == null) {
+    if (res.result == null) {
       this.hasError = true;
       this.errorMessage = this.translate('No valid result received from server.');
       return;
@@ -290,15 +296,17 @@ export class FileScannerComponent {
     }
   }
 
-  private handleError(err: any): void {
-    if (err?.status === 413) {
+  private handleError(err: unknown): void {
+    const error = asUnknownRecord(err);
+    const nestedError = asUnknownRecord(error['error']);
+    if (error['status'] === 413) {
       this.errorMessage = this.fileSize
         ? `${this.translate('File size exceeds 30MB.')} ${this.translate('Your file is')} ${this.fileSize}.`
         : this.translate('File size exceeds 30MB.');
       this.isFileSizeError = true;
       return;
     }
-    this.errorMessage = err?.error?.detail || err?.message || this.translate('Upload failed.');
+    this.errorMessage = String(nestedError['detail'] || error['message'] || this.translate('Upload failed.'));
   }
 
   formatFileSize(bytes: number): string {
@@ -317,20 +325,25 @@ export class FileScannerComponent {
   }
 
   getDisplayFileName(): string {
+    const metadata = asUnknownRecord(this.scanResult?.['metadata']);
+    const nestedMetadata = asUnknownRecord(metadata['metadata']);
+    const ioc = asUnknownRecord(this.scanResult?.['ioc']);
+    const antivirus = asUnknownRecord(this.scanResult?.['antivirus']);
     return this.getFirstString([
-      this.scanResult?.['metadata']?.file_name,
-      this.scanResult?.['metadata']?.metadata?.resourceName,
-      this.scanResult?.['ioc']?.filename,
-      this.scanResult?.['antivirus']?.file_name,
+      metadata['file_name'],
+      nestedMetadata['resourceName'],
+      ioc['filename'],
+      antivirus['file_name'],
       this.scanResult?.['original_filename'],
       this.fileName
     ]) || 'file';
   }
 
   getDisplayFileType(): string {
+    const ioc = asUnknownRecord(this.scanResult?.['ioc']);
     return this.getFirstString([
       this.scanResult?.['type'],
-      this.scanResult?.['ioc']?.file_type
+      ioc['file_type']
     ]) || 'file';
   }
 
@@ -372,9 +385,9 @@ export class FileScannerComponent {
     return found == null ? '' : String(found);
   }
 
-  private toRecord(value: unknown): Record<string, any> | null {
+  private toRecord(value: unknown): Record<string, unknown> | null {
     return value && typeof value === 'object' && !Array.isArray(value)
-      ? value as Record<string, any>
+      ? value as Record<string, unknown>
       : null;
   }
 

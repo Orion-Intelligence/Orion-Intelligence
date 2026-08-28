@@ -1,5 +1,6 @@
 import { ThreatLensGeoUtils } from '../../src/app/pages/geo-fencing/threat-lens/map-utils/threat-lens-geo.utils';
 import { ThreatLensIpMarkerRenderer } from '../../src/app/pages/geo-fencing/threat-lens/map-overlays/threat-lens-ip-marker.renderer';
+import type { EsriGraphicsLayer, EsriSceneView, ThreatLensMapGraphic } from '../../src/app/pages/geo-fencing/threat-lens/models/threat-lens-map.types';
 
 describe('Threat Lens IP candidate parsing', () => {
   it('maps geolocation candidates into renderable IP records', () => {
@@ -25,20 +26,21 @@ describe('Threat Lens IP candidate parsing', () => {
   });
 
   it('renders the scan circle and a detail-enabled IP marker', () => {
-    const graphics: any[] = [];
+    const graphics: ThreatLensMapGraphic[] = [];
     const graphicsLayer = {
       removeAll: () => graphics.splice(0),
-      add: (graphic: any) => graphics.push(graphic),
-      addMany: (items: any[]) => graphics.push(...items),
-      remove: (graphic: any) => {
+      add: (graphic: ThreatLensMapGraphic) => graphics.push(graphic),
+      addMany: (items: ThreatLensMapGraphic[]) => graphics.push(...items),
+      remove: (graphic: ThreatLensMapGraphic) => {
         const index = graphics.indexOf(graphic);
         if (index >= 0) {
           graphics.splice(index, 1);
         }
       },
       graphics: { toArray: () => graphics.slice() },
-    };
-    const renderer = new ThreatLensIpMarkerRenderer({ zoom: 6, scale: 1_000_000 }, graphicsLayer);
+    } as unknown as EsriGraphicsLayer;
+    const view = { zoom: 6, scale: 1_000_000 } as EsriSceneView;
+    const renderer = new ThreatLensIpMarkerRenderer(view, graphicsLayer);
 
     expect(renderer.render([{
       ip: '203.0.113.10',

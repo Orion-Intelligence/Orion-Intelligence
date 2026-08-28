@@ -10,7 +10,7 @@ import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe'
   templateUrl: './aircraft-details-panel.component.html',
 })
 export class AircraftDetailsPanelComponent {
-  @Input() aircraft: Record<string, any> | null = null;
+  @Input() aircraft: Record<string, unknown> | null = null;
 
   get fields(): Array<{ label: string; value: string; mono?: boolean }> {
     return [

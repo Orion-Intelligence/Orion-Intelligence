@@ -35,7 +35,7 @@ export class CrossSearchCardComponent {
   toggleResultsBarCollapse(): void {
     this.isExpandable = !this.isExpandable;
 
-    // trigger search when opening
+
     if (this.isExpandable && !this.isLoading && this.engines.length === 0 && !this.hasError) {
       this.onSearch();
     }

@@ -1,7 +1,7 @@
-import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, openFirstStrategicReportFromSearch, openSidebarGroup, openSidebarSubItem, openUserEditor, setPasswordResetRequired} from './controllers/05-user-management.controller';
+import {addUser, completeSubscriptionPopupFlow, deleteUsersByUsername, loginAndClickSidebar, loginAsUser, ManagedUser, ManagedUsers, openFirstStrategicReportFromSearch, openSidebarGroup, openSidebarSubItem, openUserEditor, setPasswordResetRequired, UserManagementTestData} from './controllers/05-user-management.controller';
 
-let testUsers: any = {};
-let testData: any = {};
+let testUsers = {} as ManagedUsers;
+let testData = {} as UserManagementTestData;
 let createUsers: ManagedUser[] = [];
 let profileUserId = '';
 const forcedResetUserKey = 'testing1';
@@ -10,8 +10,8 @@ const forcedResetNewPassword = '2wsx@WSX';
 describe('Orion Intelligence - User Management Creation Flow', () => {
   before(() => {
     cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
-      testUsers = TEST_USERS || {};
-      testData = TEST_DATA || {};
+      testUsers = (TEST_USERS || {}) as ManagedUsers;
+      testData = (TEST_DATA || {}) as UserManagementTestData;
       createUsers = Object.keys(testUsers)
         .filter((key) => /^testing\d+$/.test(key))
         .map((key) => testUsers[key] as ManagedUser);
@@ -20,8 +20,8 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
 
   before(() => {
     cy.env(['TEST_USERS', 'TEST_DATA']).then(({TEST_USERS, TEST_DATA}) => {
-      testUsers = TEST_USERS || {};
-      testData = TEST_DATA || {};
+      testUsers = (TEST_USERS || {}) as ManagedUsers;
+      testData = (TEST_DATA || {}) as UserManagementTestData;
       createUsers = Object.keys(testUsers)
         .filter((key) => /^testing\d+$/.test(key))
         .map((key) => testUsers[key] as ManagedUser);

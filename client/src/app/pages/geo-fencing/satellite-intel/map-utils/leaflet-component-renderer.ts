@@ -2,7 +2,7 @@ import { ApplicationRef, ComponentRef, EnvironmentInjector, Type, createComponen
 import { RenderedLeafletComponent } from '../../models/geo-fencing.models';
 
 export class LeafletComponentRenderer {
-  private refs = new Set<ComponentRef<any>>();
+  private refs = new Set<ComponentRef<unknown>>();
 
   constructor(_appRef: ApplicationRef, private environmentInjector: EnvironmentInjector) {}
 

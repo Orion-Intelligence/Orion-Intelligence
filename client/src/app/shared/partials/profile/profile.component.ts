@@ -58,8 +58,10 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
       const data = this.appService.userSessionData();
       this.username.set(data?.user?.username ?? '');
       this.role.set(data?.user?.role ?? '');
-      this.selectedLanguage.set(this.getCurrentLanguage(data?.user?.preferences?.['language']));
-      this.selectedTheme.set(this.getCurrentTheme(data?.user?.theme ?? data?.user?.preferences?.['theme']));
+      const preferredLanguage = data?.user?.preferences?.['language'];
+      const preferredTheme = data?.user?.theme ?? data?.user?.preferences?.['theme'];
+      this.selectedLanguage.set(this.getCurrentLanguage(typeof preferredLanguage === 'string' ? preferredLanguage : ''));
+      this.selectedTheme.set(this.getCurrentTheme(typeof preferredTheme === 'string' ? preferredTheme : undefined));
     });
   }
 
@@ -242,7 +244,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   }
 
   openSupportPopup() {
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.openPopup.emit(undefined);
   }
 

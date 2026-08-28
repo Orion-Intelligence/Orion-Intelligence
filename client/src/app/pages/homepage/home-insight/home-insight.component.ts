@@ -1,13 +1,14 @@
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { NgClass, NgOptimizedImage } from '@angular/common';
-import { DefacementModel, GenericModel, InsightMetric, LeakModel } from '../model/stats_insight.model';
+import { DefacementModel, GenericModel, InsightCallbackModel, InsightMetric, LeakModel } from '../model/stats_insight.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { LatestDocument, LatestDocumentCallbackModel } from '../model/document_insight.model';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { InsightCacheService } from '../services/insight-cache.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-home-insight',
@@ -21,7 +22,7 @@ export class HomeInsightComponent implements OnInit {
 
   protected readonly String = String;
 
-  insights: any = { general: {}, leak: {}, defacement: {} };
+  insights: InsightCallbackModel = { general: {} as GenericModel, leak: {} as LeakModel, defacement: {} as DefacementModel };
   latestDocuments: LatestDocumentCallbackModel = { generic_model: [], leak_model: [], defacement_model: [], chat_model: [], exploit_model: [] };
   models: ("general" | "leak" | "defacement")[] = ["general", "leak", "defacement"];
   latestDocumentModelKeys: string[] = [];
@@ -42,10 +43,24 @@ export class HomeInsightComponent implements OnInit {
     });
   }
 
-  private applyInsightData(data: any): void {
-    this.insights = data.insights;
-    this.latestDocuments = data.latestDocument;
-    this.latestDocumentModelKeys = (Object.keys(this.latestDocuments) as (keyof LatestDocumentCallbackModel)[]).filter(key => ['leak_model', 'chat_model', 'defacement_model'].includes(key) &&
+  private applyInsightData(data: unknown): void {
+    const response = asUnknownRecord(data);
+    this.insights = {
+      general: {} as GenericModel,
+      leak: {} as LeakModel,
+      defacement: {} as DefacementModel,
+      ...asUnknownRecord(response['insights']),
+    } as unknown as InsightCallbackModel;
+    const latestDocuments = asUnknownRecord(response['latestDocument']);
+    this.latestDocuments = {
+      generic_model: [],
+      leak_model: [],
+      defacement_model: [],
+      chat_model: [],
+      exploit_model: [],
+      ...latestDocuments,
+    } as unknown as LatestDocumentCallbackModel;
+    this.latestDocumentModelKeys = Object.keys(this.latestDocuments).filter(key => ['leak_model', 'chat_model', 'defacement_model'].includes(key) &&
             this.latestDocuments[key] &&
             this.latestDocuments[key].length > 0);
     this.isLoading = false;
@@ -68,7 +83,7 @@ export class HomeInsightComponent implements OnInit {
   }
 
   getResultItems(modelKey: string): LatestDocument[] {
-    const model = (this.latestDocuments as any)[modelKey];
+    const model = this.latestDocuments[modelKey as keyof LatestDocumentCallbackModel];
     return Array.isArray(model) ? model.slice(0, 4) : [];
   }
 

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
-import { social_exposure_signals, social_profile } from '../models/social.models';
+import { social_exposure_signals, social_profile, social_stealer_log } from '../models/social.models';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
 import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
@@ -33,7 +33,7 @@ export class StealerlogSectionComponent implements OnDestroy {
 
   username = input.required<string>();
   platforms = input<social_profile[]>([]);
-  records = signal<any[]>([]);
+  records = signal<social_stealer_log[]>([]);
   isLoading = signal(false);
   errorMessage = signal('');
   isExportChoiceOpen = signal(false);
@@ -161,19 +161,19 @@ export class StealerlogSectionComponent implements OnDestroy {
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }
 
-  getRecordTrackKey(index: number, record: any): string {
+  getRecordTrackKey(index: number, record: social_stealer_log): string {
     return `${this.getRecordHost(record)}|${this.getRecordIdentity(record)}|${this.getRecordDate(record)}|${index}`;
   }
 
-  getRecordHost(record: any): string {
-    return record?.source_domain || record?.m_source_domain || record?.domain || record?.m_domain || record?.ip || record?.m_ip || record?.url || record?.m_url || record?.host || record?.m_host || record?.raw || '-';
+  getRecordHost(record: social_stealer_log): string {
+    return String(record.source_domain || record['m_source_domain'] || record.domain || record['m_domain'] || record.ip || record['m_ip'] || record.url || record['m_url'] || record.host || record['m_host'] || record.raw || '-');
   }
 
-  getRecordIdentity(record: any): string {
-    return record?.email || record?.m_email || record?.username || record?.m_username || record?.user || record?.m_user || record?.login || record?.m_login || record?.credential || record?.m_credential || record?.raw || '-';
+  getRecordIdentity(record: social_stealer_log): string {
+    return String(record.email || record['m_email'] || record.username || record['m_username'] || record.user || record['m_user'] || record.login || record['m_login'] || record.credential || record['m_credential'] || record.raw || '-');
   }
 
-  getRecordDate(record: any): string {
-    return record?.date || record?.m_date || record?.timestamp || record?.m_timestamp || record?.created_at || record?.m_created_at || record?.updated_at || record?.m_updated_at || '';
+  getRecordDate(record: social_stealer_log): string {
+    return String(record.date || record['m_date'] || record.timestamp || record['m_timestamp'] || record.created_at || record['m_created_at'] || record.updated_at || record['m_updated_at'] || '');
   }
 }

@@ -64,7 +64,7 @@ export class HelperService {
     }).filter((v): v is string => !!v);
   }
 
-  downloadAsCSV(data: any, filename: string = 'search_results.csv') {
+  downloadAsCSV(data: unknown, filename: string = 'search_results.csv') {
     const csvContent = this.convertToCSV(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -77,7 +77,7 @@ export class HelperService {
     URL.revokeObjectURL(url);
   }
 
-  downloadstixJson(data: any, filename: string = 'stix_report.json') {
+  downloadstixJson(data: unknown, filename: string = 'stix_report.json') {
     const jsonString = JSON.stringify(this.exportBranding.addTenantJsonMetadata(data), null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
@@ -88,7 +88,7 @@ export class HelperService {
     window.URL.revokeObjectURL(url);
   }
 
-  removeEmptyOrNullValues<T extends Record<string, any>>(params: T): Partial<T> {
+  removeEmptyOrNullValues<T extends Record<string, unknown>>(params: T): Partial<T> {
     const defaultParams = new ConsolidatedParamModel();
     const cleanedParams: Partial<T> = {};
     for (const key in params) {
@@ -96,7 +96,7 @@ export class HelperService {
         continue;
       }
       const value = params[key];
-      const defaultValue = (defaultParams as any)[key];
+      const defaultValue = (defaultParams as unknown as Record<string, unknown>)[key];
       const isNullOrUndefined = value === null || value === undefined;
       const isEmptyString = typeof (value as unknown) === 'string' && (value as string).trim() === '';
       const isEmptyArray = Array.isArray(value) && value.length === 0;
@@ -184,7 +184,7 @@ export class HelperService {
     return this.sanitizer.sanitize(SecurityContext.HTML, renderedHtml) || '';
   }
 
-  private convertToCSV(data: any): string {
+  private convertToCSV(data: unknown): string {
     const rows = this.toCsvRows(data);
     if (!rows.length) {
       return '';
@@ -199,7 +199,7 @@ export class HelperService {
     ].join('\n');
   }
 
-  private toCsvRows(data: any): Record<string, unknown>[] {
+  private toCsvRows(data: unknown): Record<string, unknown>[] {
     const tenantName = this.exportBranding.getTenantName();
     if (data === null || data === undefined) {
       return [];
@@ -234,10 +234,10 @@ export class HelperService {
     return `"${text.replace(/"/g, '""')}"`;
   }
 
-  sortByKey<T>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {
+  sortByKey<T extends Record<string, unknown>>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {
     return list.slice().sort((a, b) => {
-      const aVal = (a as any)[key]?.trim?.() ?? '';
-      const bVal = (b as any)[key]?.trim?.() ?? '';
+      const aVal = typeof a[key] === 'string' ? a[key].trim() : String(a[key] ?? '');
+      const bVal = typeof b[key] === 'string' ? b[key].trim() : String(b[key] ?? '');
       const isDateKey = /date|timestamp/i.test(key);
       if (isDateKey) {
         const timeA = new Date(aVal).getTime();

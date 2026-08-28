@@ -1,41 +1,21 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { SocialConnectionsPopupComponent } from '../connections-popup/social-connections-popup.component';
 import { applyImageFallback } from '../../utils/image-fallback.util';
-import { asRecord, formatKeyLabel, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, resource_entry, resource_time, toggleKey } from '../../utils/resource-view.util';
+import { asRecord, formatKeyLabel, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, toggleKey } from '../../utils/resource-view.util';
+import { SocialConnectionsPopupComponent } from '../connections-popup/social-connections-popup.component';
+import type { media_item_view } from './model/resource-media-section.model';
+export type { media_item_view } from './model/resource-media-section.model';
 
-export interface media_item_view {
-  key: string;
-  title: string;
-  caption: string;
-  author: string;
-  kind: string;
-  isVideo: boolean;
-  isVertical: boolean;
-  isLive: boolean;
-  image: string;
-  fullImage: string;
-  url: string;
-  duration: string;
-  views: string;
-  likes: string;
-  comments: string;
-  rating: string;
-  dimensions: string;
-  time: resource_time;
-  timeText: string;
-  tags: string[];
-  flags: string[];
-  extra: resource_entry[];
-}
+
+
 
 const VIDEO_TYPES = new Set(['video', 'videos', 'reel', 'reels', 'short', 'shorts', 'clip', 'stream', 'track', 'tracks', 'audio']);
 const VERTICAL_TYPES = new Set(['short', 'shorts', 'reel', 'reels', 'story', 'pin', 'pins']);
 
-// YouTube's frame0.jpg is the video's first frame (often black for shorts) — it loads (200) but shows
-// nothing, so onImageError never fires. Rewrite it to hqdefault.jpg (the real thumbnail) at display time,
-// which repairs already-stored rows without re-crawling.
+
+
+
 function reliableYtThumb(url: string): string {
   return typeof url === 'string' ? url.replace(/(i\.ytimg\.com|img\.youtube\.com)\/vi\/([^/]+)\/frame0\.jpg/, '$1/vi/$2/hqdefault.jpg') : url;
 }

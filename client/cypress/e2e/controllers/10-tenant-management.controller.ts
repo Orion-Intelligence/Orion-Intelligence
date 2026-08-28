@@ -1,3 +1,6 @@
+
+import type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
+export type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
 export const ALERT_SCANNER_CATEGORIES = [
   'general',
   'defacement',
@@ -22,13 +25,7 @@ const HOME_ALERT_CARD_SELECTOR = '[data-testid="tenant-home-alert-category-card"
 
 type AlertScannerCategory = typeof ALERT_SCANNER_CATEGORIES[number];
 
-export interface CaseAlertTenant {
-  username: string;
-  email: string;
-  password: string;
-  companyName: string;
-  slug: string;
-}
+
 
 function setConfiguredViewport() {
   cy.viewport(
@@ -105,7 +102,7 @@ export function submitLogin(username: string, password: string, tenant?: {slug: 
   cy.waitForLoginRequest();
 }
 
-export function loginTenant(tenant: any) {
+export function loginTenant(tenant: CaseAlertTenant) {
   submitLogin(tenant.username, tenant.password, tenant);
   cy.get('[data-testid="dashboard-main"]').should('be.visible');
 }
@@ -230,7 +227,7 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
   cy.visit(new URL('/login', Cypress.config('baseUrl') || 'http://localhost:4200').toString());
 }
 
-export function deleteTenant(tenant: any) {
+export function deleteTenant(tenant: CaseAlertTenant) {
   cy.intercept('DELETE', '**/api/tenants/*').as('deleteTenant');
   cy.contains('tbody tr[data-testid="tenant-row"]', tenant.email)
     .scrollIntoView()
@@ -244,7 +241,7 @@ export function deleteTenant(tenant: any) {
   cy.contains('tbody tr', tenant.email).should('not.exist');
 }
 
-export function openTenantEditor(tenant: any) {
+export function openTenantEditor(tenant: CaseAlertTenant) {
   cy.contains('tbody tr[data-testid="tenant-row"]', tenant.email)
     .scrollIntoView()
     .should('be.visible')
@@ -534,7 +531,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
       .as('tenantEditFormPanel');
     setTenantLicenseSelection('enterprise', true, 'changed');
 
-    cy.get('@changed').then((changed: any) => {
+    cy.get('@changed').then((changed) => {
       if (changed) {
         cy.get('[data-testid="tenant-edit-form-panel"]')
           .filter(':visible')
@@ -607,7 +604,7 @@ export function applyAuditLogDateRange(monthsBack: number) {
 
   cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
   cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
-  // cy.get('[data-testid="side-filter-date-day-11"]').filter(':visible').first().scrollIntoView().click();
+
   cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
 }
 
@@ -767,20 +764,20 @@ export function waitForTenantAlertScanComplete(timeoutMs = 180000) {
   let observedRunning = false;
 
   return cy.location('origin').then((origin) => {
-    const poll = (): Cypress.Chainable<any> => {
+    const poll = (): Cypress.Chainable<unknown> => {
       return cy.request('POST', `${origin}/api/profile/alert/scan/status`, {}).then((response) => {
         expect(response.status).to.eq(200);
         if (response.body?.scan_running) {
           observedRunning = true;
         }
         if (!response.body?.scan_running && (observedRunning || Date.now() - startedAt > 3000)) {
-          return cy.wrap(null);
+          return null;
         }
         if (Date.now() - startedAt > timeoutMs) {
           throw new Error('Tenant alert scan did not finish');
         }
         return cy.wait(1000, {log: false}).then(() => poll());
-      });
+      }) as unknown as Cypress.Chainable<unknown>;
     };
 
     return poll();
@@ -853,7 +850,7 @@ export function assertAlertScanCompletedMailPresent() {
 
   const waitForMail = (): Cypress.Chainable => {
     return cy.request('GET', 'http://localhost:8025/api/v1/messages').then((response) => {
-      const messages = (response.body?.messages || []) as any[];
+      const messages = (response.body?.messages || []) as AlertMailMessage[];
       const found = messages.some((message) => (
         String(message.Subject || message.subject || '').includes('Alert scan completed')
       ));

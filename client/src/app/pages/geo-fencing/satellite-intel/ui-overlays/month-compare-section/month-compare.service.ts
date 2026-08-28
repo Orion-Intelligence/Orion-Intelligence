@@ -42,7 +42,7 @@ export class MonthCompareService {
   }
 
   runAnomalyScan(lat: number, lon: number, delta = 0.05, shClientId?: string, shClientSecret?: string): Observable<SatelliteAnomalyResponse> {
-    const payload: Record<string, any> = { lat, lon, delta };
+    const payload: Record<string, unknown> = { lat, lon, delta };
     if (shClientId) {
       payload['sh_client_id'] = shClientId;
     }

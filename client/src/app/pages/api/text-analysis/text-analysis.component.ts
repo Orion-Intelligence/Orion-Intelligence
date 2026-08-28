@@ -80,7 +80,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
     return !!this.result;
   }
 
-  get resultEntries(): { key: string; value: any }[] {
+  get resultEntries(): { key: string; value: unknown }[] {
     if (!this.result) {
       return [];
     }
@@ -206,7 +206,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
     this.errorMessage = '';
     this.expanded = true;
     const payload = { text: value, job_id: Date.now().toString() };
-    this.http.post<any>('/api/nexus/analyze-text', payload)
+    this.http.post<unknown>('/api/nexus/analyze-text', payload)
       .pipe(finalize(() => this.loading = false))
       .subscribe({
         next: res => {
@@ -223,15 +223,17 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
     this.expanded = !this.expanded;
   }
 
-  private normalizeResult(res: any): TextAnalysisResult {
-    const record = (res && typeof res === 'object') ? res : { status: 'unknown' };
+  private normalizeResult(res: unknown): TextAnalysisResult {
+    const record: Partial<TextAnalysisResult> = (res && typeof res === 'object')
+      ? res as Partial<TextAnalysisResult>
+      : { status: 'unknown' };
     return {
       ...record,
       title: this.buildTitle(record)
     };
   }
 
-  private buildTitle(record: TextAnalysisResult): string {
+  private buildTitle(record: Partial<TextAnalysisResult>): string {
     const urlResults = Array.isArray(record.url_results) ? record.url_results : [];
     const hasUnsafeUrl = urlResults.some(item => item.is_safe === false);
     const spamLabel = record.spam?.label?.toLowerCase() || '';

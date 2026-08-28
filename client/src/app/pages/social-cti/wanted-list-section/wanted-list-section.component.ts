@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, computed, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
-import { social_profile } from '../models/social.models';
+import { social_profile, social_wanted } from '../models/social.models';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
@@ -25,7 +25,7 @@ export class WantedListSectionComponent implements OnDestroy {
   username = input.required<string>();
   platforms = input<social_profile[]>([]);
   query = signal('');
-  records = signal<any[]>([]);
+  records = signal<social_wanted[]>([]);
   isLoading = signal(false);
   isClearing = signal(false);
   errorMessage = signal('');
@@ -137,19 +137,19 @@ export class WantedListSectionComponent implements OnDestroy {
     });
   }
 
-  getRecordTrackKey(index: number, record: any): string {
+  getRecordTrackKey(index: number, record: social_wanted): string {
     return `${this.getRecordTitle(record)}|${this.getRecordMeta(record)}|${index}`;
   }
 
-  getRecordTitle(record: any): string {
+  getRecordTitle(record: social_wanted): string {
     return record?.name || record?.caption || record?.entity || record?.id || 'Unknown person';
   }
 
-  getRecordMeta(record: any): string {
+  getRecordMeta(record: social_wanted): string {
     return record?.schema || record?.status || record?.authority || record?.program || record?.topics || record?.datasets || '-';
   }
 
-  getRecordSummary(record: any): string {
+  getRecordSummary(record: social_wanted): string {
     return record?.description || record?.summary || record?.notes || record?.source_url || '';
   }
 }

@@ -1,10 +1,7 @@
-export interface ModerationMapping {
-  label: string;
-  displayText: string;
-  iconClass: string;
-  colorClasses: string;
-  tooltipText: string;
-}
+
+import type { ModerationMapping } from './model/moderation-mapping.model';
+export type { ModerationMapping } from './model/moderation-mapping.model';
+
 
 export const MODERATION_CONFIG: Record<string, ModerationMapping> = {
   safe: {

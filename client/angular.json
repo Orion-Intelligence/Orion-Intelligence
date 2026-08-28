@@ -44,6 +44,10 @@
               "rgbcolor",
               "html2canvas",
               "i18n-iso-countries",
+              "leaflet",
+              "leaflet.markercluster",
+              "maplibre-gl",
+              "@maplibre/maplibre-gl-leaflet",
               "jspdf",
               "vis-data",
               "vis-network",
@@ -70,7 +74,7 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "2MB",
+                  "maximumWarning": "2.25MB",
                   "maximumError": "3MB"
                 },
                 {

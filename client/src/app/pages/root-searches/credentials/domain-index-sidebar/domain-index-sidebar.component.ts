@@ -1,5 +1,5 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
-import { StealerLogCallbackModel } from '../../../../shared/model/results/credentials/credential.callback.model';
+import { StealerLogCallbackModel, StealerLogResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 
 @Component({
@@ -35,7 +35,7 @@ export class DomainIndexSidebarComponent {
     this.domainIndexExpanded = !this.domainIndexExpanded;
   }
 
-  private collectUniqueDomains(records: any[]): string[] {
+  private collectUniqueDomains(records: StealerLogResultItem[]): string[] {
     const domains = new Set<string>();
     records.forEach(item => {
       this.normalizeDomainValues(item?.['source_domain']).forEach(domain => domains.add(domain));

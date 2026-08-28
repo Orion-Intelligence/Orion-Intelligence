@@ -1,5 +1,5 @@
 import { ThreatLensGeoUtils } from '../map-utils/threat-lens-geo.utils';
-import { ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensIpDistributionCell, ThreatLensIpDistributionCellRef, ThreatLensIpGroupStats, ThreatLensIpPointGroup, ThreatLensIpRecord, ThreatLensIpScreenGroup, ThreatLensMapGraphic, ThreatLensScreenPoint } from '../models/threat-lens-map.types';
+import { EsriGeometry, EsriGraphicsLayer, EsriSceneView, EsriSymbol, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensIpDistributionCell, ThreatLensIpDistributionCellRef, ThreatLensIpGroupStats, ThreatLensIpPointGroup, ThreatLensIpRecord, ThreatLensIpScreenGroup, ThreatLensMapGraphic, ThreatLensScreenPoint } from '../models/threat-lens-map.types';
 
 export class ThreatLensIpMarkerRenderer {
   private markerGraphics: ThreatLensMapGraphic[] = [];
@@ -13,7 +13,7 @@ export class ThreatLensIpMarkerRenderer {
   private readonly centerDensityBias = 0.18;
   private readonly earthRadiusKm = 6371.0088;
 
-  constructor(private view: any, private graphicsLayer: any) {}
+  constructor(private view: EsriSceneView, private graphicsLayer: EsriGraphicsLayer) {}
 
   render(records: ThreatLensIpRecord[], _center: ThreatLensCoordinates, _radiusKm: number, boundary: ThreatLensCountryBoundary | null = null): boolean {
     if (!this.graphicsLayer) {
@@ -193,7 +193,7 @@ export class ThreatLensIpMarkerRenderer {
     };
   }
 
-  private buildPointGeometry(point: ThreatLensCoordinates): Record<string, unknown> {
+  private buildPointGeometry(point: ThreatLensCoordinates): EsriGeometry {
     return {
       type: 'point',
       longitude: point.lon,
@@ -501,7 +501,7 @@ export class ThreatLensIpMarkerRenderer {
   }
 
   private getScreenPoint(marker: ThreatLensMapGraphic): ThreatLensScreenPoint | null {
-    if (!this.view?.toScreen) {
+    if (!this.view?.toScreen || !marker.geometry) {
       return null;
     }
 
@@ -697,7 +697,7 @@ export class ThreatLensIpMarkerRenderer {
     return Math.max(0, Math.min(1, 1 - (distanceKm / 3500)));
   }
 
-  private buildMarkerSymbol(size: number): any {
+  private buildMarkerSymbol(size: number): EsriSymbol {
     return {
       type: 'simple-marker',
       style: 'circle',
@@ -710,7 +710,7 @@ export class ThreatLensIpMarkerRenderer {
     };
   }
 
-  private buildClusterSymbol(count: number): any {
+  private buildClusterSymbol(count: number): EsriSymbol {
     const size = this.getClusterSymbolSize(count);
     return {
       type: 'text',
@@ -746,7 +746,7 @@ export class ThreatLensIpMarkerRenderer {
     return count > 99 ? '99+' : String(count);
   }
 
-  private buildGraphicSymbol(graphic: ThreatLensMapGraphic, markerSize: number): any {
+  private buildGraphicSymbol(graphic: ThreatLensMapGraphic, markerSize: number): EsriSymbol {
     if (this.isClusterGraphic(graphic)) {
       return this.buildClusterSymbol(Number(graphic?.attributes?.count || 0));
     }

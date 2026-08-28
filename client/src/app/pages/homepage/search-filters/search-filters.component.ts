@@ -86,7 +86,7 @@ export class SearchFiltersComponent implements OnInit {
     this.filteredSuggestions = [];
     this.showSuggestions = false;
     if (this.checkDomain) {
-      // TODO: The 'emit' function requires a mandatory void argument
+
       this.checkDomain.emit(undefined);
     }
   }
@@ -107,7 +107,7 @@ export class SearchFiltersComponent implements OnInit {
       delete this.app_service.getConfig().localSettings.entityfilterCategories[categoryId];
     }
     this.app_service.set('entityfilterCategories', this.app_service.getConfig().localSettings.entityfilterCategories);
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.searchFiltersChange.emit(undefined);
   }
 

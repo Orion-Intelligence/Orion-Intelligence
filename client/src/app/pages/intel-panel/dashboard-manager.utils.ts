@@ -1,7 +1,7 @@
-interface QueryPageParams {
-    q: string;
-    page: number | string;
-}
+
+import type { QueryPageParams } from './model/dashboard-manager.utils.model';
+export type { QueryPageParams } from './model/dashboard-manager.utils.model';
+
 type QueryPageSource = Record<string, unknown>;
 export function applyQueryAndPageFromParams(params: QueryPageSource, target: QueryPageParams): string {
   const query = (params['q'] as string | undefined) ?? '';

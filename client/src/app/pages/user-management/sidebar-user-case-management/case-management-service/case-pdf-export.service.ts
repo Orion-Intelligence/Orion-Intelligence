@@ -9,12 +9,11 @@ import { drawInstitutionalCover, drawInstitutionalFooter, drawInstitutionalPageH
 import { loadPdfExportFontData, registerPdfExportFonts } from '../../../../shared/services/export/pdf-export-fonts';
 import { PDF_EXPORT_THEME } from '../../../../shared/services/export/pdf-export-theme';
 import { normalizePdfText, preparePdfValue } from '../../../../shared/services/export/pdf-text.util';
+import type { CasePdfExportOptions } from './model/case-pdf-export.model';
+export type { CasePdfExportOptions } from './model/case-pdf-export.model';
 
-interface CasePdfExportOptions {
-  appName?: string;
-  filenameSuffix?: string;
-  reportLabel?: string;
-}
+
+
 
 @Injectable({ providedIn: 'root' })
 export class CasePdfExportService {

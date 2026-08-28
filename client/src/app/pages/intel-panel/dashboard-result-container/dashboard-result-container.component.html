@@ -20,7 +20,7 @@
           @if (item.rank_index === 'leak_model' || item.rank_index === 'generic_model') {
             <app-dashboard-results-general-grid
               [query]="currentQuery"
-              [searchResults]="[item]"
+              [searchResults]="asGeneralResults([item])"
               [isExpandAble]="false"
               [type]="item.rank_index === 'generic_model' ? 'Strategic' : 'leak'">
             </app-dashboard-results-general-grid>
@@ -28,32 +28,32 @@
           @if ((item.rank_index === 'apt_model' || item.rank_index === 'malware_model' || (apiEndpoint === 'search/apt-intel' && item.rank_index === 'defacement_model')) && (apiEndpoint !== 'search/apt-intel' || $index === 0)) {
             <app-dashboard-result-apt
               [isExpandAble]="false"
-              [searchResults]="apiEndpoint === 'search/apt-intel' ? currentResultModel : [item]">
+              [searchResults]="asAptResults(apiEndpoint === 'search/apt-intel' ? currentResultModel : [item])">
             </app-dashboard-result-apt>
           }
           @if (item.rank_index === 'exploit_model' && (apiEndpoint !== 'search/exploit' || $index === 0)) {
             <app-dashboard-result-exploit
               [isExpandAble]="false"
-              [searchResults]="apiEndpoint === 'search/exploit' ? currentResultModel : [item]">
+              [searchResults]="asExploitResults(apiEndpoint === 'search/exploit' ? currentResultModel : [item])">
             </app-dashboard-result-exploit>
           }
           @if (item.rank_index === 'social_model') {
             <app-dashboard-result-social
               [isExpandAble]="false"
-              [searchResults]="[item]">
+              [searchResults]="asSocialResults([item])">
             </app-dashboard-result-social>
           }
           @if (item.rank_index === 'chat_model') {
             <app-dashboard-result-chat
               [isExpandAble]="false"
-              [searchResults]="[item]">
+              [searchResults]="asChatResults([item])">
             </app-dashboard-result-chat>
           }
           @if (apiEndpoint === 'search/defacement' && item.rank_index === 'defacement_model' && $index === 0) {
             <app-dashboard-result-defacement
               [groupedResults]="defacementGroups"
               [searchQuery]="currentQuery"
-              [searchResults]="currentResultModel">
+              [searchResults]="asDefacementResults(currentResultModel)">
             </app-dashboard-result-defacement>
           }
           @if ($index === 1 && shouldShowCrossSearch) {

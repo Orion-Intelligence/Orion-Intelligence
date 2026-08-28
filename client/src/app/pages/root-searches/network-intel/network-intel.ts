@@ -5,7 +5,7 @@ import { EMPTY, Subject, Subscription } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { catchError, concatMap, finalize, tap } from 'rxjs/operators';
 import { NetworkIntelScanService } from '../../../shared/services/network-intel/network-intel-scan.service';
-import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, NetworkIntelTab, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
+import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, NetworkIntelTab, UrlVulnerabilityScanResult, VulnerabilityFinding, VulnerabilityScanDepth } from '../../../shared/model/network-intel/network-intel.model';
 import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
@@ -16,10 +16,11 @@ import { ShodanSectionComponent } from './shodan-section/shodan-section.componen
 import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerability-section.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ScannerService } from './security-scan/scanner-service.service';
-import { UrlScanMeta, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
+import { UrlScanMeta, UrlScanProofItem, UrlScanResponse, UrlScanThreatItem } from '../../../shared/model/security-scan/security.scan.results.model';
 import { NetworkIntelSeoRepoScanCategory, SeoRepoScanSectionComponent } from './seo-repo-scan-section/seo-repo-scan-section.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { NETWORK_INTEL_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
+import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 
 @Component({
   selector:    'app-network-intel',
@@ -53,7 +54,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   dnsResult:       DnsResult | null = null;
   ipRows:          IpRowState[]     = [];
   shodanResult:    IpDetail | null  = null;
-  vulnerabilityResult: any   = null;
+  vulnerabilityResult: UrlVulnerabilityScanResult | null = null;
   vulnerabilityTargets: string[] = [];
   vulnerabilityActiveTarget: string | null = null;
   vulnerabilityElapsedSeconds = signal(0);
@@ -645,7 +646,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       .scanDomain(resolvedTarget, this.activeTab)
       .pipe(finalize(() => this.seoRepoScanLoading.set(false)))
       .subscribe({
-        next: (response: any) => this.parseSeoRepoScanResult(response),
+        next: (response) => this.parseSeoRepoScanResult(response),
         error: (error) => {
           this.seoRepoScanErrorMessage = (error && (error.error?.detail || error.message)) || 'Failed to fetch scan results.';
           this.seoRepoScanProgress.set(0);
@@ -653,7 +654,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       });
   }
 
-  private parseSeoRepoScanResult(response: any): void {
+  private parseSeoRepoScanResult(response: UrlScanResponse): void {
     const status = String(response?.result?.status || response?.status || '').toLowerCase();
     const progress = response?.result?.progress ?? response?.progress;
     if (typeof progress === 'number' && Number.isFinite(progress)) {
@@ -687,10 +688,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.seoRepoScanProgress.set(100);
   }
 
-  private buildSeoRepoScanCategories(threats: unknown, proofs: unknown): NetworkIntelSeoRepoScanCategory[] {
+  private buildSeoRepoScanCategories(threats: Record<string, UrlScanThreatItem[]> | undefined, proofs: Record<string, UrlScanProofItem[]> | undefined): NetworkIntelSeoRepoScanCategory[] {
     const proofMap = new Map<string, string>();
-    Object.entries((proofs || {}) as Record<string, any[]>).forEach(([category, items]) => {
-      (Array.isArray(items) ? items : []).forEach((item: any) => {
+    Object.entries(proofs || {}).forEach(([category, items]) => {
+      items.forEach((item) => {
         const key = `${category}|${String(item?.header || '').trim().toLowerCase()}`;
         if (item?.proof && !proofMap.has(key)) {
           proofMap.set(key, item.proof);
@@ -698,9 +699,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
       });
     });
 
-    return Object.entries((threats || {}) as Record<string, any[]>)
+    return Object.entries(threats || {})
       .map(([name, items]) => {
-        const list = Array.isArray(items) ? items : [];
+        const list = items;
         const seen = new Set<string>();
         const uniqueItems = list
           .filter((item) => {
@@ -716,7 +717,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
             const proof = proofMap.get(`${name}|${key}`);
             return proof ? { ...item, proof } : item;
           });
-        return { name, total: list.length, items: uniqueItems as UrlScanThreatItem[] };
+        return { name, total: list.length, items: uniqueItems };
       })
       .filter((category) => category.items.length > 0);
   }
@@ -867,7 +868,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     else if (payload?.cameras !== undefined) {
       this.geoResult       = payload as GeoResult;
       this.geoLiveStats    = null;
-      this.lastResultCount = payload.cameras_found;
+      this.lastResultCount = payload.cameras_found ?? 0;
     }
     else {
       if (payload?.ips_extracted != null || payload?.ips_scanned != null || payload?.cameras_found != null) {
@@ -1187,7 +1188,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
               return acc;
             }, {})
           },
-          ...findings.slice(0, 20).map((finding: any, index: number) => ({
+          ...findings.slice(0, 20).map((finding, index: number) => ({
             title: `Finding ${index + 1}`,
             values: {
               Title: this.normalizeReportValue(finding?.title || finding?.header),
@@ -1326,8 +1327,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
           row.detail = detail as IpDetail;
         }
       }
-      catch (error: any) {
-        row.error = error?.message || 'Failed to load details';
+      catch (error: unknown) {
+        row.error = error instanceof Error ? error.message : 'Failed to load details';
       }
 
       completed += 1;
@@ -1390,7 +1391,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
       return this.scanHelper.fetchShodanIpDetail$(row.ip, (response) => {
         row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
-        row.step = response?.['step'] || response?.result?.['step'] || response?.status || response?.result?.status || row.step;
+        const responseRecord = asUnknownRecord(response);
+        const resultRecord = asUnknownRecord(responseRecord['result']);
+        const nextStep = responseRecord['step'] || resultRecord['step'] || responseRecord['status'] || resultRecord['status'];
+        row.step = typeof nextStep === 'string' ? nextStep : row.step;
       }).pipe(tap((detail) => {
         if (detail?.ip) {
           row.detail = detail as IpDetail;
@@ -1399,7 +1403,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           row.loading = false;
         }
       }),
-      catchError((error: any) => {
+      catchError((error) => {
         row.loading = false;
         row.error = error?.message ?? 'Failed to load details';
         return EMPTY;
@@ -1446,11 +1450,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     const titlePrefix = prefix ? `${prefix} ` : '';
     const cameraPorts = this.countCameraPorts(detail);
     const iotPorts = this.countIotPorts(detail);
-    const scanPolicy = detail['scan_policy'] as Record<string, any> | undefined;
-    const portScan = scanPolicy?.['port_scan'] as Record<string, any> | undefined;
-    const outcomes = portScan?.['outcomes'] as Record<string, any> | undefined;
-    const serviceDetection = (portScan?.['service_detection'] || scanPolicy?.['service_detection'] || detail['service_detection']) as Record<string, any> | undefined;
-    const httpProbe = detail['http_probe'] as Record<string, any> | undefined;
+    const scanPolicy = detail['scan_policy'] as Record<string, unknown> | undefined;
+    const portScan = scanPolicy?.['port_scan'] as Record<string, unknown> | undefined;
+    const outcomes = portScan?.['outcomes'] as Record<string, unknown> | undefined;
+    const serviceDetection = (portScan?.['service_detection'] || scanPolicy?.['service_detection'] || detail['service_detection']) as Record<string, unknown> | undefined;
+    const httpProbe = detail['http_probe'] as Record<string, unknown> | undefined;
 
     return [
       {
@@ -1492,7 +1496,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           'Open Ports': this.joinValues(detail.open_ports),
           Technologies: this.joinValues(detail.web_technologies),
           Hostnames: this.joinValues(detail.hostnames),
-          Vulnerabilities: this.joinValues((detail.vulnerabilities as any[] | undefined)?.map(item => this.formatReportVulnerability(item))),
+          Vulnerabilities: this.joinValues((detail.vulnerabilities as unknown[] | undefined)?.map(item => this.formatReportVulnerability(item))),
           Misconfigurations: this.joinValues(detail.misconfigurations),
           Cameras: String(detail.cameras?.length ?? 0),
           'Camera Ports': cameraPorts ? String(cameraPorts) : '-',
@@ -1659,13 +1663,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
     return String(value).trim();
   }
 
-  private formatReportVulnerability(value: any): string {
+  private formatReportVulnerability(value: unknown): string {
     if (typeof value === 'string') {
       return value.trim();
     }
     if (value && typeof value === 'object') {
-      const cve = typeof value.cve === 'string' ? value.cve.trim() : '';
-      const cvss = value.cvss !== null && value.cvss !== undefined ? `CVSS ${value.cvss}` : '';
+      const vulnerability = value as VulnerabilityFinding;
+      const cve = typeof vulnerability.cve === 'string' ? vulnerability.cve.trim() : '';
+      const cvss = vulnerability.cvss !== null && vulnerability.cvss !== undefined ? `CVSS ${vulnerability.cvss}` : '';
       return [cve, cvss].filter(Boolean).join(' • ');
     }
     return '';
@@ -1689,10 +1694,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private countCameraPorts(detail: IpDetail | null | undefined): number {
-    return (detail?.ports || []).filter((port: any) => port && (port.is_camera || port.device_type === 'camera')).length;
+    return (detail?.ports || []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
   }
 
   private countIotPorts(detail: IpDetail | null | undefined): number {
-    return (detail?.ports || []).filter((port: any) => port?.is_iot).length;
+    return (detail?.ports || []).filter((port) => port?.is_iot).length;
   }
 }

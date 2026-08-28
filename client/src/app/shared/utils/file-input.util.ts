@@ -1,7 +1,7 @@
-export interface SelectedFileFromInput {
-    input: HTMLInputElement;
-    file: File;
-}
+
+import type { SelectedFileFromInput } from './model/file-input.model';
+export type { SelectedFileFromInput } from './model/file-input.model';
+
 export function getFirstFileFromInputEvent(event: Event): SelectedFileFromInput | null {
   const inputElement = event.target as HTMLInputElement | null;
   const file = inputElement?.files?.[0] ?? null;

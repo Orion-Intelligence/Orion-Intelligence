@@ -3,14 +3,11 @@ import { AfterViewInit, Component, ElementRef, EventEmitter, HostListener, Injec
 import { FormsModule } from '@angular/forms';
 import { validateCoordinatesInput } from '../../utils/geo-coordinates.utils';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import type { GeoLocationSearchResult } from './model/geocode-modal.model';
+export type { GeoLocationSearchResult } from './model/geocode-modal.model';
 
-export interface GeoLocationSearchResult {
-  name:          string;
-  display_name?: string;
-  lat:           number;
-  lon:           number;
-  delta?:        number;
-}
+
+
 
 @Component({
   selector:    'app-geocode-modal',
@@ -147,9 +144,9 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
         this.searchError = `No results for "${query}"`;
       }
     }
-    catch (err: any) {
+    catch (err: unknown) {
       if (requestId === this.searchRequestId) {
-        this.searchError = err?.message || 'Search failed';
+        this.searchError = err instanceof Error ? err.message : 'Search failed';
       }
     }
     finally {

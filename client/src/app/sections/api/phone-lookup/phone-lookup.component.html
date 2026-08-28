@@ -121,8 +121,8 @@
 
             @if(hasKnowledgeGraph) {
               <div>
-                <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Knowledge Graph ({{ result.knowledge_graph.description }})</span>
-                <p class="mt-1 text-[13px] text-[var(--color-text2)] leading-5">{{ result.knowledge_graph.detailed_desc || 'No detailed background verified.' }}</p>
+                <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">Knowledge Graph ({{ result.knowledge_graph?.description }})</span>
+                <p class="mt-1 text-[13px] text-[var(--color-text2)] leading-5">{{ result.knowledge_graph?.detailed_desc || 'No detailed background verified.' }}</p>
               </div>
             }
 

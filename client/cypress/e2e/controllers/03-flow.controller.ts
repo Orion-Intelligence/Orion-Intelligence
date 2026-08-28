@@ -66,19 +66,22 @@ export function clickSidebarSubItem(groupTitle: string, itemTitle: string) {
     .click({ force: true });
 }
 
-export function getHeatmapComponent() {
+export function getHeatmapComponent(): Cypress.Chainable<HeatmapComponentHarness> {
   return cy.get('app-world-heatmap', { timeout: 10000 }).should('exist').then(($host) => {
-    let host = $host[0] as any;
+    const host = $host[0] as AngularDebugHost;
     return cy.window().then((win) => {
-    let ngApi = (win as any).ng;
-    if (ngApi?.getComponent) {
-      return ngApi.getComponent(host) as any;
-    }
-    let ctx = host.__ngContext__ as any[] | undefined;
-    expect(ctx, 'Angular context fallback').to.exist;
-    let comp = (ctx || []).find((x: any) => x && x.constructor?.name === 'WorldHeatmapComponent');
-    expect(comp, 'WorldHeatmapComponent in ngContext').to.exist;
-    return comp as any;
+      const ngApi = (win as Window & { ng?: AngularDebugApi }).ng;
+      if (ngApi?.getComponent) {
+        return ngApi.getComponent(host) as HeatmapComponentHarness;
+      }
+      const ctx = host.__ngContext__;
+      expect(ctx, 'Angular context fallback').to.exist;
+      const comp = (ctx || []).find((value) => {
+        const candidate = value as { constructor?: { name?: string } } | null;
+        return candidate?.constructor?.name === 'WorldHeatmapComponent';
+      });
+      expect(comp, 'WorldHeatmapComponent in ngContext').to.exist;
+      return comp as HeatmapComponentHarness;
     });
   });
 }
@@ -242,3 +245,4 @@ export function assertFreeModeDashboardChrome() {
       .should('have.length.at.least', 1);
   });
 }
+import type { AngularDebugApi, AngularDebugHost, HeatmapComponentHarness } from '../model/03-flow.model';

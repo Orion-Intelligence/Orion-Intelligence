@@ -20,7 +20,7 @@ export class SelectedFilterBarComponent implements OnInit {
   categories: Record<string, string[]> = {};
   isFilterBarExpanded: boolean = false;
   maxVisibleTags = 8;
-  Object: any;
+  Object: unknown;
   readonly showSorting = input.required<boolean>();
   readonly clearAll = output<undefined>();
   readonly searchFiltersChange = output<undefined>();
@@ -51,7 +51,7 @@ export class SelectedFilterBarComponent implements OnInit {
       return updated;
     });
     this.app_service.set('matchType', "or");
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.clearAll.emit(undefined);
   }
 
@@ -67,7 +67,7 @@ export class SelectedFilterBarComponent implements OnInit {
     if (scope=='all'){
       this.app_service.set('matchType', "or");
     }
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.clearAll.emit(undefined);
   }
 
@@ -83,7 +83,7 @@ export class SelectedFilterBarComponent implements OnInit {
       }
     }
     this.app_service.set('entityfilterCategories', categories);
-    // TODO: The 'emit' function requires a mandatory void argument
+
     this.searchFiltersChange.emit(undefined);
   }
 

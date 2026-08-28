@@ -57,7 +57,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
     const formData = new FormData();
     formData.append('file', file);
     this.apiService
-      .put<any>(`system/image?key=${key}`, formData)
+      .put<Record<string, unknown>>(`system/image?key=${key}`, formData)
       .subscribe({
         next: (res) => {
           const updatedAssets: Partial<AppSettingsModel> = {};
@@ -76,7 +76,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
   }
 
   deleteUserResource(key: SystemResourceKey = 'logo_url'): void {
-    this.apiService.delete<any>(`system/image?key=${key}`).subscribe({
+    this.apiService.delete<unknown>(`system/image?key=${key}`).subscribe({
       next: () => {
         this.applySettings({ [key]: DEFAULT_SYSTEM_ASSETS[key] } as Partial<AppSettingsModel>);
       },
@@ -94,7 +94,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
       return false;
     }
     this.form.app_name = this.form.app_name.trim() || DEFAULT_APP_NAME;
-    this.apiService.post<any>('public/update', { settings: { app_name: this.form.app_name } }).subscribe({
+    this.apiService.post<{ settings?: Partial<AppSettingsModel> }>('public/update', { settings: { app_name: this.form.app_name } }).subscribe({
       next: (response) => {
         if (response?.settings) {
           this.applySettings(response.settings);

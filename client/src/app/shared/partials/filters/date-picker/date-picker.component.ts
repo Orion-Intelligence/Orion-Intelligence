@@ -205,7 +205,7 @@ export class DatePickerComponent implements OnChanges {
 
   private buildCalendar(): void {
     const first = new Date(this.viewYear, this.viewMonth, 1);
-    const startOffset = first.getDay(); // sunday-based
+    const startOffset = first.getDay();
     const start = new Date(this.viewYear, this.viewMonth, 1 - startOffset);
 
     const next: CalendarCell[] = [];

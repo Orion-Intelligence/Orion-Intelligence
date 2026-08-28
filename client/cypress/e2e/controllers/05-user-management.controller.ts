@@ -1,12 +1,7 @@
-export interface ManagedUser {
-  username: string;
-  email: string;
-  password: string;
-  role: 'Member' | 'Analyst' | 'Demo';
-  licenses: string[];
-  permissions?: string[];
-  alertAllowedTenants?: string[] | 'all';
-}
+
+import type { ManagedUser, ManagedUsers, UserManagementTestData } from '../model/05-user-management.model';
+export type { ManagedUser, ManagedUsers, UserManagementTestData } from '../model/05-user-management.model';
+
 
 const SIDEBAR_GROUP_ROUTE_PREFIX: Record<string, string> = {
   'General Intelligence': 'strategic',
@@ -304,8 +299,8 @@ export function openFirstStrategicReportFromSearch(searchTerm = 'data') {
   cy.get('#report-detail').should('be.visible');
 }
 
-export function loginAndClickSidebar(username: string, sidebarItems: string[], testUsers: any, testData: any) {
-  const selectedUser = Object.values(testUsers).find((u: any) => u?.username === username) as ManagedUser | undefined;
+export function loginAndClickSidebar(username: string, sidebarItems: string[], testUsers: ManagedUsers, testData: UserManagementTestData) {
+  const selectedUser = Object.values(testUsers).find((user) => user.username === username);
   if (!selectedUser?.password) {
     throw new Error(`Missing user/password in Cypress env for username: ${username}`);
   }
@@ -330,7 +325,7 @@ export function loginAndClickSidebar(username: string, sidebarItems: string[], t
   cy.logout();
 }
 
-export function completeSubscriptionPopupFlow(testData: any, reopenPopup: () => void) {
+export function completeSubscriptionPopupFlow(testData: UserManagementTestData, reopenPopup: () => void) {
   cy.intercept('POST', '**/api/subscription/request', (req) => {
     console.log('[cypress] subscription request', req.body);
     req.reply({

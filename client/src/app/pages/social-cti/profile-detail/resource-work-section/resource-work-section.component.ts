@@ -1,41 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { applyImageFallback } from '../../utils/image-fallback.util';
-import { asRecord, formatBytes, formatKeyLabel, initialOf, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, resource_entry, resource_time, toggleKey } from '../../utils/resource-view.util';
+import { asRecord, formatBytes, formatKeyLabel, initialOf, leftoverEntries, pickCount, pickFlag, pickList, pickText, pickTime, toggleKey } from '../../utils/resource-view.util';
+import type { work_item_view } from './model/resource-work-section.model';
+export type { work_item_view } from './model/resource-work-section.model';
 
-export interface work_item_view {
-  key: string;
-  name: string;
-  owner: string;
-  ownerAvatar: string;
-  initial: string;
-  url: string;
-  homepage: string;
-  description: string;
-  language: string;
-  stars: string;
-  forks: string;
-  watchers: string;
-  issues: string;
-  pulls: string;
-  downloads: string;
-  branch: string;
-  license: string;
-  size: string;
-  forkSource: string;
-  forkSourceUrl: string;
-  latestTag: string;
-  tagsCount: string;
-  platforms: string[];
-  topics: string[];
-  labels: string[];
-  status: string;
-  created: resource_time;
-  updated: resource_time;
-  pushed: resource_time;
-  extra: resource_entry[];
-}
+
+
 
 const LANGUAGE_COLORS: Record<string, string> = {
   javascript: '#f1e05a',

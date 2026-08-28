@@ -7,11 +7,11 @@ import { ReportRouteUtil } from '../utils/report-route.util';
 @Injectable({
   providedIn: 'root'
 })
-export class ReportConsolidatedResolver implements Resolve<any> {
+export class ReportConsolidatedResolver implements Resolve<unknown> {
   constructor(private apiService: ApiService, private router: Router) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<any> {
+  resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<unknown> {
     const index = route.queryParamMap.get('ci') || '';
     const hash = route.paramMap.get('m_hash');
     const lang = route.queryParamMap.get('lang');
@@ -23,7 +23,7 @@ export class ReportConsolidatedResolver implements Resolve<any> {
     if (lang) {
       apiUrl += `?lang=${lang}`;
     }
-    return this.apiService.get<any>(apiUrl).pipe(catchError((_) => {
+    return this.apiService.get<unknown>(apiUrl).pipe(catchError((_) => {
       this.router.navigate(['/']).then();
       return of(null);
     }));

@@ -5,6 +5,20 @@ type SlowTypeOptions = {
     settleMs?: number;
 };
 
+type CypressAutomation = typeof Cypress & {
+    automation(eventName: string, options: Record<string, unknown>): Promise<unknown>;
+};
+
+type MailSummary = {
+    ID?: string;
+};
+
+type MailDetail = {
+    Text?: string;
+    HTML?: string;
+    Snippet?: string;
+};
+
 declare global {
     namespace Cypress {
         interface Chainable {
@@ -150,7 +164,7 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
                 restoreCaptureState = undefined;
             };
         }).then(() => cy.wait(50, { log: false })).then(() => (
-            (Cypress as any).automation("remote:debugger:protocol", {
+            (Cypress as unknown as CypressAutomation).automation("remote:debugger:protocol", {
                 command: "Page.captureScreenshot",
                 params: {
                     captureBeyondViewport: false,
@@ -159,8 +173,8 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
                     fromSurface: true,
                 },
             })
-        )).then((result: any) => {
-            const data = typeof result === "string" ? result : result?.data;
+        )).then((result) => {
+            const data = typeof result === "string" ? result : (result as Record<string, unknown>)['data'];
             expect(data, `docs screenshot ${name}`).to.be.a("string").and.not.be.empty;
             return cy.task("writeDocScreenshot", {
                 data,
@@ -328,10 +342,8 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
     const intervalMs = 500;
     const startedAt = Date.now();
     const waitForUrl = (): Cypress.Chainable<string> => {
-        return cy
-            .request("GET", "http://localhost:8025/api/v1/messages")
-            .then((r) => {
-            const messages = (r.body?.messages || []) as any[];
+        return cy.request("GET", "http://localhost:8025/api/v1/messages").then((r) => {
+            const messages = (r.body?.messages || []) as MailSummary[];
             const total = messages.length;
             if (total !== 1) {
                 if (Date.now() - startedAt > timeoutMs) {
@@ -339,29 +351,31 @@ Cypress.Commands.add("openLastMailAndGetUrl", () => {
                 }
                 return cy.wait(intervalMs).then(() => waitForUrl());
             }
-            const id = messages[0]?.ID as string;
-            return cy.request("GET", `http://localhost:8025/api/v1/message/${id}`);
-        })
-            .then((r: any) => {
-            const body = r.body || {};
-            const text = (body.Text as string) ||
-                (body.HTML as string) ||
-                (body.Snippet as string) ||
-                "";
-            const match = text.match(/https?:\/\/[^\s*]+/);
-            if (!match) {
-                if (Date.now() - startedAt > timeoutMs) {
-                    throw new Error("Reset URL not found");
-                }
-                return cy.wait(intervalMs).then(() => waitForUrl());
+            const id = messages[0]?.ID;
+            if (!id) {
+                throw new Error("Email ID is missing");
             }
-            const emailUrl = new URL(match[0]);
-            const base = new URL(Cypress.config("baseUrl") as string);
-            emailUrl.protocol = base.protocol;
-            emailUrl.hostname = base.hostname;
-            emailUrl.port = base.port;
-            return cy.wrap(emailUrl.toString());
-        });
+            return cy.request<MailDetail>("GET", `http://localhost:8025/api/v1/message/${id}`).then((messageResponse) => {
+                const body = messageResponse.body || {};
+                const text = body.Text ||
+                    body.HTML ||
+                    body.Snippet ||
+                    "";
+                const match = text.match(/https?:\/\/[^\s*]+/);
+                if (!match) {
+                    if (Date.now() - startedAt > timeoutMs) {
+                        throw new Error("Reset URL not found");
+                    }
+                    return cy.wait(intervalMs).then(() => waitForUrl());
+                }
+                const emailUrl = new URL(match[0]);
+                const base = new URL(Cypress.config("baseUrl") as string);
+                emailUrl.protocol = base.protocol;
+                emailUrl.hostname = base.hostname;
+                emailUrl.port = base.port;
+                return emailUrl.toString();
+            });
+        }) as unknown as Cypress.Chainable<string>;
     };
     return waitForUrl().then((url) => cy.request("GET", "http://localhost:8025/api/v1/messages").then((r) => {
         const total = (r.body?.messages || []).length;

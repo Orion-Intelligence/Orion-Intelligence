@@ -6,18 +6,16 @@ import { NexusChatService } from '../nexus-chat.service';
 import { NexusWorkspaceFileNode, NexusWorkspaceImportResponse } from '../model/ai-chat-session.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { asUnknownRecord } from '../../../../shared/utils/type-guards.util';
+import type { WorkspaceLogEntry, WorkspaceStatusType } from './model/ai-directory.model';
+export type { WorkspaceLogEntry, WorkspaceStatusType } from './model/ai-directory.model';
+
 
 type AiDirectoryViewMode = 'chat' | 'directory' | 'split';
 type AiDirectoryTab = 'files' | 'logs';
-type WorkspaceStatusType = 'idle' | 'loading' | 'approved' | 'infected' | 'failed';
 
-interface WorkspaceLogEntry {
-  id: number;
-  message: string;
-  details: string;
-  timestamp: Date;
-  type: Exclude<WorkspaceStatusType, 'idle'>;
-}
+
+
 
 @Component({
   selector: 'app-ai-directory',
@@ -185,7 +183,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
     }
 
     this.nexusChatService.getWorkspaceTree(sessionId, path).subscribe({
-      next: (response: any) => {
+      next: (response) => {
         const result = response.result || response;
         const loadedNode = result.tree;
 
@@ -404,14 +402,17 @@ export class AiDirectory implements OnChanges, OnDestroy {
     this.selectedWorkspaceFileLoading = false;
   }
 
-  private getApiErrorMessage(error: any): string {
-    const detail = error?.error?.detail ?? error?.error;
+  private getApiErrorMessage(error: unknown): string {
+    const errorRecord = asUnknownRecord(error);
+    const nestedError = asUnknownRecord(errorRecord['error']);
+    const detail = nestedError['detail'] ?? errorRecord['error'];
 
     if (typeof detail === 'string') {
       return detail;
     }
 
-    return detail?.message || detail?.error || error?.message || this.translate('Request failed.');
+    const detailRecord = asUnknownRecord(detail);
+    return String(detailRecord['message'] || detailRecord['error'] || errorRecord['message'] || this.translate('Request failed.'));
   }
 
   private clearWorkspaceStatus(): void {

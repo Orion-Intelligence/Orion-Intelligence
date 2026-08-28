@@ -24,6 +24,7 @@ import { SocialResourceWorkSectionComponent } from '../resource-work-section/res
 import { SocialResourcePeopleSectionComponent } from '../resource-people-section/resource-people-section.component';
 import { SocialResourceFeedSectionComponent } from '../resource-feed-section/resource-feed-section.component';
 import { SocialResourceMediaSectionComponent } from '../resource-media-section/resource-media-section.component';
+import { asUnknownRecord } from '../../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
@@ -95,11 +96,11 @@ export class SocialProfileTabsSectionComponent {
     const kind = `${this.platformData()?.meta?.entity_type ?? ''} ${this.platformData()?.meta?.target_type ?? ''}`.toLowerCase();
     return ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'].some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum');
   });
-  readonly darkwebReport = signal<Record<string, any>[]>([]);
+  readonly darkwebReport = signal<Record<string, unknown>[]>([]);
   readonly darkwebLoaded = signal(false);
-  readonly detailEntries = computed<{ key: string; value: any }[]>(() =>
+  readonly detailEntries = computed<{ key: string; value: unknown }[]>(() =>
     getProfileDetailEntries(this.platformData()).filter(item => !['img_src', 'm_img_src'].includes(item.key.toLowerCase())));
-  readonly darkwebSections = computed<{ title: string; date: string; entries: { key: string; value: any }[] }[]>(() =>
+  readonly darkwebSections = computed<{ title: string; date: string; entries: { key: string; value: unknown }[] }[]>(() =>
     this.darkwebReport().map((doc, index) => {
       const entries = Object.entries(doc ?? {})
         .filter(([key, value]) => !this.darkwebEntryBlocked.has(key.toLowerCase()) && value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0))
@@ -312,15 +313,15 @@ export class SocialProfileTabsSectionComponent {
     return this.getFirstMetadataValue(platformData, ['m_coverpage', 'coverpage', 'image_bg', 'cover_image', 'coverImage', 'banner', 'banner_image']);
   }
 
-  getDisplayUrl(value: any): string {
+  getDisplayUrl(value: unknown): string {
     return this.formatMetadataValue(value);
   }
 
-  getProfileDetailEntries(platformData: social_profile): { key: string; value: any; }[] {
+  getProfileDetailEntries(platformData: social_profile): { key: string; value: unknown; }[] {
     return getProfileDetailEntries(platformData);
   }
 
-  getVisibleProfileDetailEntries(platformData: social_profile): { key: string; value: any; }[] {
+  getVisibleProfileDetailEntries(platformData: social_profile): { key: string; value: unknown; }[] {
     return this.getProfileDetailEntries(platformData).filter(item => !['img_src', 'm_img_src'].includes(item.key.toLowerCase()));
   }
 
@@ -328,7 +329,7 @@ export class SocialProfileTabsSectionComponent {
     return formatKey(key.replace(/^m_/, '').replace(/([a-z0-9])([A-Z])/g, '$1 $2'));
   }
 
-  formatProfileDetailValue(key: string, value: any): string {
+  formatProfileDetailValue(key: string, value: unknown): string {
     if (typeof value === 'string' && this.isProfileDateKey(key)) {
       const date = new Date(value);
       if (!Number.isNaN(date.getTime())) {
@@ -345,7 +346,7 @@ export class SocialProfileTabsSectionComponent {
     return this.formatMetadataValue(value);
   }
 
-  formatMetadataValue(value: any): string {
+  formatMetadataValue(value: unknown): string {
     if (value === null || value === undefined) {
       return '';
     }
@@ -353,8 +354,9 @@ export class SocialProfileTabsSectionComponent {
       return value.map(entry => this.formatMetadataValue(entry)).filter(entry => entry !== '').join(', ');
     }
     if (typeof value === 'object') {
-      if (typeof value['is_hate_speech'] === 'boolean') {
-        return value['is_hate_speech'] ? 'Yes' : 'No';
+      const record = asUnknownRecord(value);
+      if (typeof record['is_hate_speech'] === 'boolean') {
+        return record['is_hate_speech'] ? 'Yes' : 'No';
       }
       try {
         return JSON.stringify(value, null, 2);
@@ -366,11 +368,11 @@ export class SocialProfileTabsSectionComponent {
     return String(value);
   }
 
-  copyToClipboard(text: any): void {
+  copyToClipboard(text: unknown): void {
     void navigator.clipboard?.writeText(this.formatMetadataValue(text));
   }
 
-  isNumeric(value: any): boolean {
+  isNumeric(value: unknown): boolean {
     if (value === null || value === undefined || value === '') {
       return false;
     }
@@ -398,15 +400,15 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getStealerRecordHost(record: social_stealer_log): string {
-    return record?.['source_domain'] || record?.['m_source_domain'] || record?.['domain'] || record?.['m_domain'] || record?.['ip'] || record?.['m_ip'] || record?.['url'] || record?.['m_url'] || record?.['host'] || record?.['m_host'] || record?.['raw'] || '-';
+    return String(record?.['source_domain'] || record?.['m_source_domain'] || record?.['domain'] || record?.['m_domain'] || record?.['ip'] || record?.['m_ip'] || record?.['url'] || record?.['m_url'] || record?.['host'] || record?.['m_host'] || record?.['raw'] || '-');
   }
 
   getStealerRecordIdentity(record: social_stealer_log): string {
-    return record?.['email'] || record?.['m_email'] || record?.['username'] || record?.['m_username'] || record?.['user'] || record?.['m_user'] || record?.['login'] || record?.['m_login'] || record?.['credential'] || record?.['m_credential'] || record?.['raw'] || '-';
+    return String(record?.['email'] || record?.['m_email'] || record?.['username'] || record?.['m_username'] || record?.['user'] || record?.['m_user'] || record?.['login'] || record?.['m_login'] || record?.['credential'] || record?.['m_credential'] || record?.['raw'] || '-');
   }
 
   getStealerRecordDate(record: social_stealer_log): string {
-    return record?.['date'] || record?.['m_date'] || record?.['timestamp'] || record?.['m_timestamp'] || record?.['created_at'] || record?.['m_created_at'] || record?.['updated_at'] || record?.['m_updated_at'] || '-';
+    return String(record?.['date'] || record?.['m_date'] || record?.['timestamp'] || record?.['m_timestamp'] || record?.['created_at'] || record?.['m_created_at'] || record?.['updated_at'] || record?.['m_updated_at'] || '-');
   }
 
   getStealerRecordTrackKey(index: number, record: social_stealer_log): string {
@@ -492,7 +494,7 @@ export class SocialProfileTabsSectionComponent {
     return '';
   }
 
-  private getFirstValueFromSource(source: any, keys: string[]): string {
+  private getFirstValueFromSource(source: unknown, keys: string[]): string {
     if (!source) {
       return '';
     }
@@ -505,13 +507,14 @@ export class SocialProfileTabsSectionComponent {
       }
       return '';
     }
+    const sourceRecord = asUnknownRecord(source);
     for (const key of keys) {
-      const value = source[key];
+      const value = sourceRecord[key];
       if (typeof value === 'string' && value.trim()) {
         return value.trim();
       }
     }
-    return this.getFirstValueFromSource(source.result || source.profile || source.data, keys);
+    return this.getFirstValueFromSource(sourceRecord['result'] || sourceRecord['profile'] || sourceRecord['data'], keys);
   }
 
   private isProfileDateKey(key: string): boolean {

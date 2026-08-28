@@ -1,15 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, input, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
+import { UrlScanMeta } from '../../../../shared/model/security-scan/security.scan.results.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
-import { UrlScanMeta, UrlScanThreatItem } from '../../../../shared/model/security-scan/security.scan.results.model';
+import type { NetworkIntelSeoRepoScanCategory } from './model/seo-repo-scan-section.model';
+export type { NetworkIntelSeoRepoScanCategory } from './model/seo-repo-scan-section.model';
 
-export interface NetworkIntelSeoRepoScanCategory {
-  name: string;
-  total: number;
-  items: UrlScanThreatItem[];
-}
+
+
 
 @Component({
   selector: 'app-network-intel-seo-repo-scan-section',

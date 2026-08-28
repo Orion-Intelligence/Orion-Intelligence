@@ -8,6 +8,7 @@ import { getMetadataEntries } from '../utils/summary-view.util';
 import socialPlatformCapabilities from '../../../../assets/data/social-graph/platform-capabilities.json';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-social-default-list-section',
@@ -24,7 +25,7 @@ export class SocialDefaultListSectionComponent {
   profileOverview = output<social_profile>();
   connectionsOverview = output<social_profile>();
   profileTab = output<{ platformData: social_profile; tabKey: FetchTabKey }>();
-  copyValue = output<any>();
+  copyValue = output<unknown>();
   readonly formatKey = formatKey;
   readonly missingStatValue = 'Not fetched';
 
@@ -64,16 +65,17 @@ export class SocialDefaultListSectionComponent {
   }
 
   getProfileBio(platformData: social_profile): string {
-    const details = (platformData.profile_details || {}) as any;
-    return platformData.profile_details?.bio
+    const details = asUnknownRecord(platformData.profile_details);
+    const bio = platformData.profile_details?.bio
       || details['m_content']
       || platformData.meta.description
       || '';
+    return typeof bio === 'string' ? bio : String(bio);
   }
 
   getPlatformTimestamp(platformData: social_profile): string {
-    const metadata: Record<string, any> = {};
-    const details = (platformData.profile_details || {}) as any;
+    const metadata = asUnknownRecord(platformData.meta);
+    const details = asUnknownRecord(platformData.profile_details);
     const timestamp = platformData.meta.timestamp || details['m_date'] || metadata['timestamp'] || metadata['Timestamp'] || metadata['m_date'];
     return timestamp ? String(timestamp) : '';
   }
@@ -82,14 +84,17 @@ export class SocialDefaultListSectionComponent {
     return buildSocialProfileUrl(platformData.meta.platform, username, platformData.meta.url);
   }
 
-  getFilteredMetadataEntries(_platformData: social_profile): { key: string; value: any; }[] {
-    return getMetadataEntries({})
+  getFilteredMetadataEntries(platformData: social_profile): { key: string; value: unknown; }[] {
+    return getMetadataEntries({
+      ...asUnknownRecord(platformData.meta),
+      ...asUnknownRecord(platformData.profile_details),
+    })
       .filter(entry => entry.key.toLowerCase().replace(/[\s_-]+/g, '') !== 'timestamp')
       .filter(entry => entry.value !== null && entry.value !== undefined && entry.value !== '')
       .filter(entry => typeof entry.value !== 'object');
   }
 
-  formatMetadataValue(value: any): string {
+  formatMetadataValue(value: unknown): string {
     if (value === null || value === undefined) {
       return '';
     }
@@ -115,8 +120,11 @@ export class SocialDefaultListSectionComponent {
     return username;
   }
 
-  private getFallbackStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): string | number | null {
-    const metadata: Record<string, any> = {};
+  private getFallbackStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): unknown {
+    const metadata = {
+      ...asUnknownRecord(platformData.meta),
+      ...asUnknownRecord(platformData.profile_details),
+    };
     switch (key) {
       case 'total_posts':
         return this.firstStatValue(metadata['totalPosts'], metadata['posts_count'], metadata['m_post_count'], this.getPostCollectionCount(platformData));
@@ -129,7 +137,7 @@ export class SocialDefaultListSectionComponent {
     }
   }
 
-  private firstStatValue(...values: Array<string | number | null | undefined>): string | number | null {
+  private firstStatValue(...values: unknown[]): unknown {
     return values.find(value => value !== null && value !== undefined && value !== '') ?? null;
   }
 

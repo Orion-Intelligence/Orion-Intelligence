@@ -1,59 +1,21 @@
-type SearchEndpoint16 = 'strategic' | 'breach' | 'defacement' | 'social' | 'exploit';
 
-export interface ExpectedSearchResult16 {
-  title?: string;
-  linkAddress?: string | string[];
-  date?: string | null;
-  responseDate?: string | null;
-  description?: string | null;
-  baseUrl?: string | string[];
-  team?: string;
-  webUrl?: string | string[];
-  queryMatches: string[];
-}
+import type { AdvancedEntityFilterCase16, DateRangeSelection16, DirectSearchCase16, ExpectedSearchResult16, SearchEndpoint16, SearchInterception16, SidebarFilterCase16, SidebarFilterGroup16 } from '../model/15-search-api-validation.model';
+export type { AdvancedEntityFilterCase16, DateRangeSelection16, DirectSearchCase16, ExpectedSearchResult16, SearchEndpoint16, SidebarFilterCase16, SidebarFilterGroup16 } from '../model/15-search-api-validation.model';
 
-export interface DirectSearchCase16 {
-  section: string;
-  route: string;
-  endpoint: SearchEndpoint16;
-  searchQuery: string;
-  expected: ExpectedSearchResult16;
-}
+type SearchRecord16 = Record<string, unknown>;
 
-interface DateRangeSelection16 {
-  monthLabel: string;
-  startDay: number;
-  endDay: number;
-}
 
-export interface SidebarFilterCase16 extends DirectSearchCase16 {
-  selectTestId?: string;
-  option?: string;
-  requestField: string;
-  requestValue: string;
-  filterKind?: 'dropdown' | 'daterange';
-  dateRange?: DateRangeSelection16;
-  responseFields?: string[];
-  responseValue?: string;
-}
 
-export interface SidebarFilterGroup16 {
-  section: string;
-  cases: SidebarFilterCase16[];
-}
 
-export interface AdvancedEntityFilterCase16 {
-  section: string;
-  route: string;
-  endpoint: SearchEndpoint16;
-  category: string;
-  requestField: string;
-  value: string;
-  searchQuery?: string;
-  expected: ExpectedSearchResult16;
-  responseFields?: string[];
-  responseValue?: string;
-}
+
+
+
+
+
+
+
+
+
 
 const API_BASE_16 = '**/api/search';
 const SEARCH_INPUT_16 = 'input[data-testid="dashboard-general-input"][name="q"]';
@@ -621,24 +583,32 @@ function values16(value: unknown): string[] {
   return [String(value ?? '').trim()].filter(Boolean);
 }
 
-function fieldValues16(item: any, fields: string[]): string[] {
+function record16(value: unknown): SearchRecord16 {
+  return value as SearchRecord16;
+}
+
+function fieldValues16(item: unknown, fields: string[]): string[] {
+  const itemRecord = record16(item);
   return fields
-    .flatMap(field => values16(item?.[field]))
+    .flatMap(field => values16(itemRecord[field]))
     .filter(Boolean);
 }
 
-function resultItems16(body: any): any[] {
-  if (Array.isArray(body?.Result)) {
-    return body.Result;
+function resultItems16(body: unknown): unknown[] {
+  const bodyRecord = record16(body);
+  const dataRecord = record16(bodyRecord['data']);
+  const hitsRecord = record16(bodyRecord['hits']);
+  if (Array.isArray(bodyRecord['Result'])) {
+    return bodyRecord['Result'];
   }
-  if (Array.isArray(body?.result)) {
-    return body.result;
+  if (Array.isArray(bodyRecord['result'])) {
+    return bodyRecord['result'];
   }
-  if (Array.isArray(body?.data?.Result)) {
-    return body.data.Result;
+  if (Array.isArray(dataRecord['Result'])) {
+    return dataRecord['Result'];
   }
-  if (Array.isArray(body?.hits?.hits)) {
-    return body.hits.hits.map((hit: any) => hit?._source || hit);
+  if (Array.isArray(hitsRecord['hits'])) {
+    return hitsRecord['hits'].map((hit: unknown) => record16(hit)['_source'] || hit);
   }
   return [];
 }
@@ -650,17 +620,17 @@ function expectedList16(value: string | string[] | undefined): string[] {
   return Array.isArray(value) ? value : [value];
 }
 
-function hasExpectedText16(item: any, fields: string[], expected: string): boolean {
+function hasExpectedText16(item: unknown, fields: string[], expected: string): boolean {
   const normalizedExpected = normalize16(expected);
   return fieldValues16(item, fields).some(value => normalize16(value) === normalizedExpected);
 }
 
-function hasExpectedUrl16(item: any, fields: string[], expected: string): boolean {
+function hasExpectedUrl16(item: unknown, fields: string[], expected: string): boolean {
   const normalizedExpected = normalizeUrl16(expected);
   return fieldValues16(item, fields).some(value => normalizeUrl16(value) === normalizedExpected);
 }
 
-function resultMatchesExpected16(item: any, expected: ExpectedSearchResult16): boolean {
+function resultMatchesExpected16(item: unknown, expected: ExpectedSearchResult16): boolean {
   const titleMatches = expected.title
     ? hasExpectedText16(item, ['title', 'm_title', 'm_name', 'name'], expected.title)
     : true;
@@ -683,7 +653,7 @@ function resultMatchesExpected16(item: any, expected: ExpectedSearchResult16): b
   return titleMatches && linkMatches && baseUrlMatches && webUrlMatches && teamMatches && dateMatches;
 }
 
-function findExpectedResult16(body: any, expected: ExpectedSearchResult16): any {
+function findExpectedResult16(body: unknown, expected: ExpectedSearchResult16): unknown {
   const items = resultItems16(body);
   expect(items.length, 'Search API returned result count').to.be.greaterThan(0);
 
@@ -692,20 +662,20 @@ function findExpectedResult16(body: any, expected: ExpectedSearchResult16): any 
   return match;
 }
 
-function assertQueryEvidence16(item: any, expected: ExpectedSearchResult16) {
+function assertQueryEvidence16(item: unknown, expected: ExpectedSearchResult16) {
   const haystack = normalize16(JSON.stringify(item));
   expected.queryMatches.forEach(queryMatch => {
     expect(haystack, `query evidence "${queryMatch}"`).to.include(normalize16(queryMatch));
   });
 }
 
-function assertResponseResult16(interception: any, expected: ExpectedSearchResult16): any {
+function assertResponseResult16(interception: SearchInterception16, expected: ExpectedSearchResult16): unknown {
   const result = findExpectedResult16(interception.response?.body, expected);
   assertQueryEvidence16(result, expected);
   return result;
 }
 
-function assertFilterFields16(result: any, fields?: string[], value?: string) {
+function assertFilterFields16(result: unknown, fields?: string[], value?: string) {
   if (!fields || !value) {
     return;
   }
@@ -715,30 +685,31 @@ function assertFilterFields16(result: any, fields?: string[], value?: string) {
   expect(values.some(fieldValue => fieldValue === expectedValue || fieldValue.includes(expectedValue)), fields.join(',')).to.eq(true);
 }
 
-function assertFilteredResponse16(interception: any, filterCase: SidebarFilterCase16) {
+function assertFilteredResponse16(interception: SearchInterception16, filterCase: SidebarFilterCase16) {
   const result = assertResponseResult16(interception, filterCase.expected);
   assertFilterFields16(result, filterCase.responseFields, filterCase.responseValue);
 }
 
-function requestValue16(body: any, field: string): string {
-  const value = body?.[field];
+function requestValue16(body: unknown, field: string): string {
+  const value = record16(body)[field];
   if (Array.isArray(value)) {
     return normalize16(value[0]);
   }
   return normalize16(value);
 }
 
-function assertSearchRequest16(interception: any, searchCase: DirectSearchCase16) {
-  expect(normalize16(interception.request.body?.q), `${searchCase.section} request q`).to.eq(normalize16(searchCase.searchQuery));
+function assertSearchRequest16(interception: SearchInterception16, searchCase: DirectSearchCase16) {
+  expect(normalize16(interception.request.body['q']), `${searchCase.section} request q`).to.eq(normalize16(searchCase.searchQuery));
 }
 
-function assertSidebarRequest16(interception: any, filterCase: SidebarFilterCase16) {
-  expect(normalize16(interception.request.body?.q), `${filterCase.section} filter request q`).to.eq(normalize16(filterCase.searchQuery));
+function assertSidebarRequest16(interception: SearchInterception16, filterCase: SidebarFilterCase16) {
+  expect(normalize16(interception.request.body['q']), `${filterCase.section} filter request q`).to.eq(normalize16(filterCase.searchQuery));
   expect(requestValue16(interception.request.body, filterCase.requestField), `${filterCase.section} request ${filterCase.requestField}`).to.eq(filterCase.requestValue);
 }
 
-function waitForMatchingSearch16(alias: string, matches: (interception: any) => boolean, label: string, attempts = 5): Cypress.Chainable<any> {
-  return cy.wait(`@${alias}`).then((interception) => {
+function waitForMatchingSearch16(alias: string, matches: (interception: SearchInterception16) => boolean, label: string, attempts = 5): Cypress.Chainable<SearchInterception16> {
+  return cy.wait(`@${alias}`).then((captured) => {
+    const interception = captured as unknown as SearchInterception16;
     if (matches(interception)) {
       return interception;
     }
@@ -746,26 +717,26 @@ function waitForMatchingSearch16(alias: string, matches: (interception: any) => 
       throw new Error(`Expected matching ${label} request was not captured.`);
     }
     return waitForMatchingSearch16(alias, matches, label, attempts - 1);
-  });
+  }) as unknown as Cypress.Chainable<SearchInterception16>;
 }
 
 function matchesQueryRequest16(searchCase: DirectSearchCase16) {
-  return (interception: any) => normalize16(interception.request.body?.q) === normalize16(searchCase.searchQuery);
+  return (interception: SearchInterception16) => normalize16(interception.request.body['q']) === normalize16(searchCase.searchQuery);
 }
 
 function matchesSidebarRequest16(filterCase: SidebarFilterCase16) {
-  return (interception: any) => normalize16(interception.request.body?.q) === normalize16(filterCase.searchQuery)
+  return (interception: SearchInterception16) => normalize16(interception.request.body['q']) === normalize16(filterCase.searchQuery)
     && requestValue16(interception.request.body, filterCase.requestField) === filterCase.requestValue;
 }
 
-function entityFilterValues16(interception: any, field: string): string[] {
-  return values16(interception.request.body?.entity_filter?.[field]);
+function entityFilterValues16(interception: SearchInterception16, field: string): string[] {
+  return values16(record16(interception.request.body['entity_filter'])[field]);
 }
 
 function matchesEntityFilterRequest16(filterCase: AdvancedEntityFilterCase16) {
-  return (interception: any) => {
+  return (interception: SearchInterception16) => {
     const queryMatches = filterCase.searchQuery
-      ? normalize16(interception.request.body?.q) === normalize16(filterCase.searchQuery)
+      ? normalize16(interception.request.body['q']) === normalize16(filterCase.searchQuery)
       : true;
     const entityMatches = entityFilterValues16(interception, filterCase.requestField)
       .map(value => normalize16(value))

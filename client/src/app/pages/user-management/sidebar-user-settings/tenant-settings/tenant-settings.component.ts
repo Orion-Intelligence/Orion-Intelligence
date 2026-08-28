@@ -43,7 +43,8 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.userId = this.userSessionData?.user.preferences?.["userId"];
+    const userId = this.userSessionData?.user.preferences?.['userId'];
+    this.userId = typeof userId === 'string' ? userId : '';
     this.mailForm = {
       accounts_mail_password: this.userSessionData.tenant.accountsMailPassword || '',
       accounts_mail: this.userSessionData.tenant.accountsMail || '',
@@ -156,7 +157,7 @@ export class TenantSettingsComponent implements OnInit {
   updateUserResource(file: File) {
     const formData = new FormData();
     formData.append('file', file);
-    return this.apiService.put<any>('tenant/image', formData).subscribe({
+    return this.apiService.put<{ image?: string }>('tenant/image', formData).subscribe({
       next: (res) => {
         if (res?.image) {
           this.appService.userSessionData().tenant.image =
@@ -171,7 +172,7 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   deleteUserResource() {
-    return this.apiService.delete<any>('tenant/image').subscribe(() => {
+    return this.apiService.delete<unknown>('tenant/image').subscribe(() => {
       this.appService.userSessionData().tenant.image =
                 'assets/images/tenant/default.png';
     });

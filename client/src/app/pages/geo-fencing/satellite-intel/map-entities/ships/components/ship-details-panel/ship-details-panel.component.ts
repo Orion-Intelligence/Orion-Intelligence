@@ -52,7 +52,7 @@ const PRIMARY_SHIP_DETAIL_KEYS = new Set([
   templateUrl: './ship-details-panel.component.html',
 })
 export class ShipDetailsPanelComponent {
-  @Input() ship: Record<string, any> | null = null;
+  @Input() ship: Record<string, unknown> | null = null;
 
   get fields(): ShipDetailField[] {
     return [

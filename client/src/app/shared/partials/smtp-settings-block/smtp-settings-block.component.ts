@@ -42,7 +42,7 @@ export class SmtpSettingsBlockComponent implements OnChanges {
     this.isVerifyingMail = true;
     this.mailConfigurationStatus = '';
     this.verifyError = false;
-    this.apiService.post<any>('system/mail/verify', {}).subscribe({
+    this.apiService.post<unknown>('system/mail/verify', {}).subscribe({
       next: () => {
         this.mailConfigurationStatus = 'working';
         this.isVerifyingMail = false;

@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import type jsPDF from 'jspdf';
-import type { RowInput } from 'jspdf-autotable';
+import type { CellHookData, HookData, RowInput } from 'jspdf-autotable';
 import { from, Observable } from 'rxjs';
 import { map, shareReplay, tap } from 'rxjs/operators';
 import { GraphReportExportType, GraphReportMeta, GraphReportNode, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
@@ -10,49 +10,16 @@ import { drawInstitutionalContentTitle, drawInstitutionalCover, drawInstitutiona
 import { loadPdfExportFontData, PdfExportFontData, registerPdfExportFonts } from './pdf-export-fonts';
 import { PDF_EXPORT_THEME } from './pdf-export-theme';
 import { normalizePdfText, preparePdfValue } from './pdf-text.util';
+import { AutoTableDocument } from './pdf-autotable.types';
+import type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
+export type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
 
-interface PlainTableThemeOptions {
-  font?: string;
-  fontSize: number;
-  cellPadding: number;
-  overflow?: 'linebreak';
-  valign?: 'middle' | 'top';
-  textColor?: [number, number, number];
-  rowFillColor?: [number, number, number];
-  alternateRowFillColor?: [number, number, number];
-  lineColor?: [number, number, number];
-}
 
-interface PlainTableThemeConfig {
-  styles: {
-    font?: string;
-    fontSize: number;
-    cellPadding: number;
-    overflow?: 'linebreak';
-    valign?: 'middle' | 'top';
-    textColor: [number, number, number];
-    lineWidth: number | { top: number; right: number; bottom: number; left: number; };
-    lineColor: [number, number, number];
-  };
-  bodyStyles: {
-    fillColor: [number, number, number];
-    textColor?: [number, number, number];
-    lineWidth: number | { top: number; right: number; bottom: number; left: number; };
-    lineColor: [number, number, number];
-  };
-  alternateRowStyles: {
-    fillColor: [number, number, number];
-    lineWidth: number | { top: number; right: number; bottom: number; left: number; };
-    lineColor: [number, number, number];
-  };
-  theme: 'plain';
-}
 
-interface PdfExportLibraries {
-  autoTable: typeof import('jspdf-autotable').default;
-  fontData: PdfExportFontData | null;
-  jsPDF: typeof import('jspdf').default;
-}
+
+
+
+
 
 @Injectable({ providedIn: 'root' })
 export class GraphExportService {
@@ -172,7 +139,7 @@ export class GraphExportService {
     kpis.forEach((kpi, idx) => {
       this.drawKpiCard(doc, margin + idx * (kpiW + gap), kpiTop, kpiW, kpiH, kpi.label, kpi.value, idx === 0, idx === kpis.length - 1);
     });
-    const analysisDidDrawPage = (data: any) => {
+    const analysisDidDrawPage = (data: HookData) => {
       const pageNo = (data.doc as jsPDF).getCurrentPageInfo().pageNumber;
       sectionsByPage[pageNo] = 'Graph Analysis';
     };
@@ -190,8 +157,8 @@ export class GraphExportService {
       didParseCell: this.makeFirstColumnDidParse(),
       ...analysisTableBase
     });
-    this.drawRoundedTableContainer(doc, margin, contentW, 220, (doc as any).lastAutoTable?.finalY ?? 220);
-    const compositionMarkerY = this.resolveMarkerY(doc, (doc as any).lastAutoTable.finalY + 12, 126, () => {
+    this.drawRoundedTableContainer(doc, margin, contentW, 220, (doc as AutoTableDocument).lastAutoTable.finalY ?? 220);
+    const compositionMarkerY = this.resolveMarkerY(doc, (doc as AutoTableDocument).lastAutoTable.finalY + 12, 126, () => {
       const pageNo = doc.getCurrentPageInfo().pageNumber;
       sectionsByPage[pageNo] = 'Graph Analysis';
       this.drawGraphAnalysisHeader(doc, payload, meta);
@@ -202,7 +169,7 @@ export class GraphExportService {
       body: composition.map(x => [x.type, String(x.count)]) as RowInput[],
       ...analysisTableBase
     });
-    this.drawRoundedTableContainer(doc, margin, contentW, (doc as any).lastAutoTable?.startY ?? 232, (doc as any).lastAutoTable?.finalY ?? 232);
+    this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 232, (doc as AutoTableDocument).lastAutoTable.finalY ?? 232);
     const socialPlatformCounts = this.extractSocialPlatformCounts(payload);
     let platformPageNo: number | null = null;
     if (payload.graphKind === 'social' && socialPlatformCounts.length > 0) {
@@ -222,7 +189,7 @@ export class GraphExportService {
         didParseCell: this.makeHeaderRowDidParse(this.PDF_THEME.defaultHeaderRowFillRgb, false),
         didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Platform Inventory', 'Detected social platforms in current graph', platformPageNo)
       });
-      this.drawRoundedTableContainer(doc, margin, contentW, 126, (doc as any).lastAutoTable?.finalY ?? 126);
+      this.drawRoundedTableContainer(doc, margin, contentW, 126, (doc as AutoTableDocument).lastAutoTable.finalY ?? 126);
     }
     let reportsPageNo: number | null = null;
     if (payload.tables?.length) {
@@ -233,7 +200,7 @@ export class GraphExportService {
       payload.tables.forEach((t, idx) => {
         const sectionTitle = this.getReportSectionTitle(t, idx);
         const tableRows = this.buildReportSectionRows(t.values ?? {});
-        let markerY = idx === 0 ? 126 : ((doc as any).lastAutoTable?.finalY ?? 126) + 18;
+        let markerY = idx === 0 ? 126 : ((doc as AutoTableDocument).lastAutoTable.finalY ?? 126) + 18;
         markerY = this.resolveMarkerY(doc, markerY, 126, () => {
           const pageNo = doc.getCurrentPageInfo().pageNumber;
           sectionsByPage[pageNo] = 'Report Sections';
@@ -241,7 +208,7 @@ export class GraphExportService {
         });
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
         const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
-        const reportSectionDidDrawPage = (data: any) => {
+        const reportSectionDidDrawPage = (data: HookData) => {
           const drawDoc = data.doc as jsPDF;
           const pageNo = drawDoc.getCurrentPageInfo().pageNumber;
           sectionsByPage[pageNo] = 'Report Sections';
@@ -264,7 +231,7 @@ export class GraphExportService {
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
         if (screenshotDataUrl) {
-          const lastY = (doc as any).lastAutoTable?.finalY ?? (markerY + 12);
+          const lastY = (doc as AutoTableDocument).lastAutoTable.finalY ?? (markerY + 12);
           const previewHeight = this.getScreenshotPreviewHeight(doc, screenshotDataUrl, contentW, 190);
           const imageY = this.resolveMarkerY(doc, lastY + 10, 142, () => {
             const pageNo = doc.getCurrentPageInfo().pageNumber;
@@ -273,8 +240,8 @@ export class GraphExportService {
             this.drawInfoSectionMarker(doc, 126, contentW, sectionTitle);
           }, previewHeight);
           const imageBottom = this.drawScreenshotPreview(doc, screenshotDataUrl, margin, imageY, contentW, 190);
-          if ((doc as any).lastAutoTable) {
-            (doc as any).lastAutoTable.finalY = imageBottom;
+          if ((doc as AutoTableDocument).lastAutoTable) {
+            (doc as AutoTableDocument).lastAutoTable.finalY = imageBottom;
           }
         }
       });
@@ -527,8 +494,8 @@ export class GraphExportService {
     };
   }
 
-  protected makeHeaderRowDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, headerInBody: boolean = true): (data: any) => void {
-    return (data: any) => {
+  protected makeHeaderRowDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, headerInBody: boolean = true): (data: CellHookData) => void {
+    return (data: CellHookData) => {
       if (data.section === 'head' || (headerInBody && data.row.index === 0)) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = fillColor;
@@ -539,8 +506,8 @@ export class GraphExportService {
     };
   }
 
-  protected makeFirstColumnDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb): (data: any) => void {
-    return (data: any) => {
+  protected makeFirstColumnDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb): (data: CellHookData) => void {
+    return (data: CellHookData) => {
       if (data.column.index === 0) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = fillColor;
@@ -549,8 +516,8 @@ export class GraphExportService {
     };
   }
 
-  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, firstColumnFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb, headerInBody: boolean = true): (data: any) => void {
-    return (data: any) => {
+  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, firstColumnFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb, headerInBody: boolean = true): (data: CellHookData) => void {
+    return (data: CellHookData) => {
       if (data.section === 'head' || (headerInBody && data.row.index === 0)) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fillColor = headerFillColor;
@@ -851,7 +818,7 @@ export class GraphExportService {
   }
 
   protected drawRoundedTableContainer(doc: jsPDF, x: number, width: number, startY: number, endY: number): void {
-    // Intentionally no outer border for tables.
+
     void doc;
     void x;
     void width;
@@ -967,7 +934,7 @@ export class GraphExportService {
   protected findTableScreenshotDataUrl(table: GraphReportTableRow): string | null {
     const title = String(table?.title || '').toLowerCase();
     const values = table?.values ?? {};
-    // Prefer fields that are explicitly screenshot-related, then fall back to any image data URL.
+
     for (const [key, value] of Object.entries(values)) {
       if (key.toLowerCase().includes('screenshot') && this.isImageDataUrl(value)) {
         return this.normalizeDataUrl(value);
@@ -979,7 +946,7 @@ export class GraphExportService {
       }
     }
     if (title.includes('screenshot')) {
-      // Keep a direct fallback if title indicates screenshot and values have slightly malformed data URL text.
+
       for (const value of Object.values(values)) {
         const normalized = this.normalizeDataUrl(value);
         if (normalized.startsWith('data:image/')) {
@@ -1055,8 +1022,8 @@ export class GraphExportService {
     return sessionName;
   }
 
-  private makeSectionHeaderCallback(sectionsByPage: Record<number, string>, section: string, subtitle: string, firstPage: number): (data: any) => void {
-    return (data: any) => {
+  private makeSectionHeaderCallback(sectionsByPage: Record<number, string>, section: string, subtitle: string, firstPage: number): (data: HookData) => void {
+    return (data: HookData) => {
       const doc = data.doc as jsPDF;
       const pageNo = doc.getCurrentPageInfo().pageNumber;
       sectionsByPage[pageNo] = section;

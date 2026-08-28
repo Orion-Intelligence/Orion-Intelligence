@@ -7,9 +7,9 @@ export function applyImageFallback(event: Event): void {
   const image = event.target as HTMLImageElement;
   const current = image.getAttribute('src') || '';
 
-  // YouTube thumbnails: frame0.jpg (shorts) and maxresdefault.jpg (videos) 404 for many IDs.
-  // hqdefault.jpg exists for essentially every video, so retry it once before the placeholder —
-  // this repairs already-stored rows (cached URLs) as well as new crawls, at the display layer.
+
+
+
   const ytId = /(?:i\.ytimg\.com|img\.youtube\.com)\/vi\/([^/]+)\//.exec(current)?.[1];
   if (ytId && !image.dataset['ytHqTried'] && !/\/hqdefault\.jpg(?:$|\?)/.test(current)) {
     image.dataset['ytHqTried'] = '1';
