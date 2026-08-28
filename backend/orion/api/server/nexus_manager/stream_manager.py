@@ -242,6 +242,9 @@ class NexusStreamManager:
         async for line in self._subscribe(stream):
             yield line
 
+    def has_stream(self, user_id: str, request_id: str) -> bool:
+        return bool(request_id) and (user_id, request_id) in self.active_streams
+
     async def cancel_chat(self, user_id: str = "system") -> dict[str, bool]:
         task = self.active_chat_tasks.pop(user_id, None)
         cancelled = task is not None and not task.done()

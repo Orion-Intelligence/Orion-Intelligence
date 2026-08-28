@@ -213,7 +213,13 @@ class config_controller:
 
         file_name = f"{base}_custom.png"
         resource_path = ResourceManager.get_instance().system_resource_path(file_name, tenant)
-        return f"/api/s/static/system/{resource_path.name}"
+        asset_url = f"/api/s/static/system/{resource_path.name}"
+        if base != "auth_dashboard_icon":
+            return asset_url
+        try:
+            return f"{asset_url}?v={resource_path.stat().st_mtime_ns}"
+        except OSError:
+            return asset_url
 
     def _build_system_info_from_cache(self, tenant_id: str, tenant: db_tenant_model, include_email_config: bool = False) -> config_data:
         fresh_config = dict(self._configs.get(tenant_id, {}))

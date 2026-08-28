@@ -7,9 +7,17 @@ import { NexusChatPayload, NexusChatStreamChunk, NexusSummaryPayload } from './m
 import { ApiService } from '../../../shared/services/api.service';
 import { NexusChatDetail, NexusChatSession, NexusWorkspaceTreeResponse, NexusWorkspaceFileReadResponse, NexusWorkspaceImportResponse } from './model/ai-chat-session.model';
 
+interface NexusStreamState {
+  seen: number;
+  skip: number;
+  done: boolean;
+}
+
 @Injectable({ providedIn: 'root' })
 export class NexusChatService {
   private readonly streamTimeoutMs = 900000;
+  private readonly maxResumeAttempts = 8;
+  private readonly resumeDelayMs = 400;
 
   constructor(private readonly api: ApiService) { }
 
@@ -60,42 +68,56 @@ export class NexusChatService {
         this.cancelNexusChat();
         controller.abort();
       }, this.streamTimeoutMs);
-      const headers: Record<string, string> = {
-        Accept: 'application/x-ndjson',
-        'Content-Type': 'application/json',
-      };
+      const resumablePayload: NexusChatPayload = { ...payload, request_id: payload.request_id || this.newRequestId() };
+      const state: NexusStreamState = { seen: 0, skip: 0, done: false };
 
-      fetch('/api/nexus/chat', {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(payload),
-        credentials: 'include',
-        signal: controller.signal,
-      }).then(async (response) => {
+      const readAttempt = async (remaining: number): Promise<void> => {
+        const response = await fetch('/api/nexus/chat', {
+          method: 'POST',
+          headers: {
+            Accept: 'application/x-ndjson',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(resumablePayload),
+          credentials: 'include',
+          signal: controller.signal,
+        });
         if (!response.ok) {
           throw new Error(await response.text() || response.statusText);
         }
-
         if (!response.body) {
-          observer.complete();
           return;
         }
 
         const reader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
-
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) {
-            break;
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) {
+              break;
+            }
+            buffer += decoder.decode(value, { stream: true });
+            buffer = this.emitStreamLines(buffer, observer, state);
           }
-          buffer += decoder.decode(value, { stream: true });
-          buffer = this.emitStreamLines(buffer, observer);
+          buffer += decoder.decode();
+          this.emitStreamLines(`${buffer}\n`, observer, state);
+        }
+        catch (error) {
+          if (!this.canResume(cancelled, timedOut, state, remaining)) {
+            throw error;
+          }
+          return this.resume(state, () => readAttempt(remaining - 1));
         }
 
-        buffer += decoder.decode();
-        this.emitStreamLines(`${buffer}\n`, observer);
+        if (!this.canResume(cancelled, timedOut, state, remaining)) {
+          return;
+        }
+        return this.resume(state, () => readAttempt(remaining - 1));
+      };
+
+      readAttempt(this.maxResumeAttempts).then(() => {
         observer.complete();
       }).catch((error) => {
         if (timedOut) {
@@ -117,6 +139,23 @@ export class NexusChatService {
         controller.abort();
       };
     });
+  }
+
+  private canResume(cancelled: boolean, timedOut: boolean, state: NexusStreamState, remaining: number): boolean {
+    return !cancelled && !timedOut && !state.done && remaining > 0;
+  }
+
+  private async resume(state: NexusStreamState, next: () => Promise<void>): Promise<void> {
+    state.skip = state.seen;
+    state.seen = 0;
+    await new Promise<void>(resolve => window.setTimeout(resolve, this.resumeDelayMs));
+    return next();
+  }
+
+  private newRequestId(): string {
+    return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID()
+      : `req-${Date.now()}-${Math.random().toString(36).slice(2)}`;
   }
 
   clearNexusSession(payload: { session_id?: string } = {}): Observable<{ cleared?: boolean; }> {
@@ -173,11 +212,15 @@ export class NexusChatService {
       : null;
   }
 
-  private emitStreamLines(buffer: string, observer: { next: (value: NexusChatStreamChunk) => void; }): string {
+  private emitStreamLines(buffer: string, observer: { next: (value: NexusChatStreamChunk) => void; }, state: NexusStreamState): string {
     const lines = buffer.split(/\r?\n/);
     const rest = lines.pop() || '';
     for (const line of lines) {
       if (!line.trim()) {
+        continue;
+      }
+      state.seen += 1;
+      if (state.seen <= state.skip) {
         continue;
       }
       let parsed: any;
@@ -186,6 +229,9 @@ export class NexusChatService {
       }
       catch {
         continue;
+      }
+      if (parsed?.done === true) {
+        state.done = true;
       }
       const output = this.asRecord(parsed?.output);
       const delta = output?.['delta'] ?? parsed?.delta;
