@@ -127,6 +127,10 @@ export class ViewTenantComponent implements OnInit {
   }
 
   openTenant(tenant: ManagedTenant): void {
+    if (tenant.access_url) {
+      window.open(tenant.access_url, '_blank', 'noopener,noreferrer');
+      return;
+    }
     const url = new URL(window.location.origin);
     url.hostname = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
       ? `${tenant.slug}.localhost`

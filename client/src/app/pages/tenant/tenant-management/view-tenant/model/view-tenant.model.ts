@@ -3,6 +3,7 @@ import { TenantModel, TenantStatus } from '../../../../../shared/model/tenant/te
 export interface ManagedTenant extends TenantModel {
   status: TenantStatus;
   slug?: string;
+  access_url?: string;
   companyName?: string;
   company?: string;
   _saved_privileged_ioc?: boolean;

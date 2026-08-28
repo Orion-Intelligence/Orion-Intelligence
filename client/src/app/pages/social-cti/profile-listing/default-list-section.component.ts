@@ -22,6 +22,7 @@ const METADATA_PRIORITY = ['real_name', 'description', 'bio', 'location', 'count
 })
 export class SocialDefaultListSectionComponent {
   private readonly platformCapabilities = socialPlatformCapabilities as SocialPlatformCapabilityMap;
+  private readonly expandedBios = signal<ReadonlySet<string>>(new Set<string>());
   private readonly expandedMetadata = signal<ReadonlySet<string>>(new Set<string>());
 
   user = input.required<FeedUser>();
@@ -76,6 +77,23 @@ export class SocialDefaultListSectionComponent {
       || platformData.meta.description
       || '';
     return typeof bio === 'string' ? bio : String(bio);
+  }
+
+  hasLongBio(bio: string): boolean {
+    return bio.length > 280 || bio.split('\n').length > 4;
+  }
+
+  isBioExpanded(platformData: social_profile): boolean {
+    return this.expandedBios().has(this.getPlatformCardId(platformData));
+  }
+
+  toggleBio(platformData: social_profile): void {
+    const cardId = this.getPlatformCardId(platformData);
+    const expanded = new Set(this.expandedBios());
+    if (!expanded.delete(cardId)) {
+      expanded.add(cardId);
+    }
+    this.expandedBios.set(expanded);
   }
 
   getPlatformTimestamp(platformData: social_profile): string {

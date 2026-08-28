@@ -132,6 +132,16 @@ class TenantManager:
         return f"{tenant_url}/{path.lstrip('/')}"
 
     @staticmethod
+    def tenant_access_url(tenant: db_tenant_model) -> str:
+        app_url = str(env_handler.get_instance().env("APP_URL", "") or "").strip()
+        if not app_url:
+            return ""
+        try:
+            return TenantManager.build_tenant_url(app_url, tenant, "/")
+        except HTTPException:
+            return ""
+
+    @staticmethod
     def validate_signup_username(username: str):
         if not re.match(TenantManager.SIGNUP_USERNAME_PATTERN, username):
             raise HTTPException(status_code=422, detail="Username already exist")
@@ -555,6 +565,7 @@ class TenantManager:
 
         tenant_data = tenant.model_dump()
         tenant_data["id"] = str(tenant.id)
+        tenant_data["access_url"] = TenantManager.tenant_access_url(tenant)
 
         tenant_data["name"] = enc.decrypt((tenant_data.get("name") or "").encode()).decode() if tenant_data.get(
             "name") else ""
@@ -618,6 +629,7 @@ class TenantManager:
 
             tenant_data = tenant.model_dump()
             tenant_data["id"] = str(tenant.id)
+            tenant_data["access_url"] = TenantManager.tenant_access_url(tenant)
             tenant_data["accounts_mail_password"] = None
             tenant_data["accounts_mail"] = ""
             tenant_data["accounts_smtp_server"] = ""
