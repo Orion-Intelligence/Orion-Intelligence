@@ -1,6 +1,7 @@
 export class AppSettingsModel {
   version: string = '1.0.0';
   app_url: string = '';
+  orion_mail_url: string = '';
   language_allowed: string = 'en';
   logo_url: string = '';
   logo_wide_light: string = '';
@@ -27,6 +28,7 @@ export class AppSettingsModel {
       this.admin_root_allowed = data.admin_root_allowed === true || data.admin_root_allowed === '1' || data.admin_root_allowed === 'true';
       this.version = (data.version as string) || this.version;
       this.app_url = (data.app_url as string) || this.app_url;
+      this.orion_mail_url = (data.orion_mail_url as string) || this.orion_mail_url;
       this.language_allowed = (data.language_allowed as string) || this.language_allowed;
       this.logo_url = (data.logo_url as string) || this.logo_url;
       this.logo_wide_light = (data.logo_wide_light as string) || this.logo_wide_light;

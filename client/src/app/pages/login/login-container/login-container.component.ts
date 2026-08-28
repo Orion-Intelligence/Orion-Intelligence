@@ -56,6 +56,11 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
             this.router.navigate(['/reset', passwordResetToken], { replaceUrl: true }).then();
             return;
           }
+          const mailRedirect = this.validMailSsoRedirect();
+          if (mailRedirect) {
+            window.location.assign(mailRedirect);
+            return;
+          }
           this.router.navigate(['dashboard'], { replaceUrl: true }).then();
         });
       }
@@ -77,6 +82,24 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         this.demoLogin();
       }
     });
+  }
+
+  private validMailSsoRedirect(): string | null {
+    const rawRedirect = this.route.snapshot.queryParamMap.get('redirect');
+    if (!rawRedirect) {
+      return null;
+    }
+    try {
+      const redirect = new URL(rawRedirect, window.location.origin);
+      if (redirect.origin !== window.location.origin
+        || redirect.pathname !== '/api/sso/mail/authorize') {
+        return null;
+      }
+      return `${redirect.pathname}${redirect.search}`;
+    }
+    catch {
+      return null;
+    }
   }
 
   getLoginLogoSrc(): string {

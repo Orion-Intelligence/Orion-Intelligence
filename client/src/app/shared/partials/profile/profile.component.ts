@@ -194,6 +194,16 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     this.router.navigate(['/dashboard/profile/system-settings']).then();
   }
 
+  openOrionMail(): void {
+    const mailUrl = this.appService.getConfig().appSettings.orion_mail_url.trim();
+    if (!mailUrl) {
+      return;
+    }
+    window.open(mailUrl, '_blank', 'noopener,noreferrer');
+    this.dropdownOpen.set(false);
+    this.languageDropdownOpen.set(false);
+  }
+
   logout() {
     this.scanNotificationService.stopAll();
     this.dashboardService.resetParams();
