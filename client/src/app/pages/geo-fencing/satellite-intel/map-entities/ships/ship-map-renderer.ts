@@ -8,18 +8,13 @@ import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseSta
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
 import { asUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { ShipDistributionCell } from '../../model/satellite-intel.model';
 
 type ShipMarker = Leaflet.Marker & {
   __orionShipIconRef: ComponentRef<ShipMarkerIconComponent> | null;
   __orionShipIconState: string;
 };
 
-type ShipDistributionCell = {
-  key: string;
-  row: number;
-  col: number;
-  items: SatelliteLiveShip[];
-};
 
 export class ShipMapRenderer {
   private cluster: Leaflet.LayerGroup | null = null;

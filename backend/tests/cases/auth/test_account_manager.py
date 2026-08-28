@@ -213,7 +213,7 @@ def test_delete_user_rejects_maintainer_from_other_tenant(tmp_path):
         _run(manager.delete_user(SimpleNamespace(username="alice"), current_user))
 
     assert exc.value.status_code == 401
-    assert "same tenant" in exc.value.detail
+    assert "same tenant" in (exc.value.detail or "")
 
 
 def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, monkeypatch):

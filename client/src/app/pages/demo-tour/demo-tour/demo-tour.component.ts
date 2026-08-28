@@ -1519,7 +1519,6 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         return styleSheet;
       }
       catch {
-        continue;
       }
     }
 
@@ -1778,7 +1777,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       let previousUrl = this.router.url;
       let stableFrames = 0;
       let frameId = 0;
-      let navigationPending = this.router.getCurrentNavigation() !== null;
+      let navigationPending = this.router.currentNavigation() !== null;
       let settled = false;
 
       const finish = () => {
@@ -1814,7 +1813,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
-        navigationPending = navigationPending || this.router.getCurrentNavigation() !== null;
+        navigationPending = navigationPending || this.router.currentNavigation() !== null;
         const currentUrl = this.router.url;
         if (navigationPending || currentUrl !== previousUrl) {
           previousUrl = currentUrl;

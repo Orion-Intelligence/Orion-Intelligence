@@ -166,6 +166,7 @@ export class CasePdfExportService {
   private addPdfSection(doc: jsPDF, autoTable: typeof import('jspdf-autotable').default, y: number, title: string, rows: RowInput[], contentWidth: number): number {
     const startY = this.resolvePdfY(doc, y, 86);
     const margin = PDF_EXPORT_LAYOUT.margin;
+    const borderThickness = this.theme.tableBorderWidth;
     drawInstitutionalSectionHeading(doc, startY, contentWidth, normalizePdfText(title));
     autoTable(doc, {
       startY: startY + 16,
@@ -180,17 +181,17 @@ export class CasePdfExportService {
         overflow: 'linebreak',
         valign: 'top',
         textColor: this.theme.textBodyRgb,
-        lineWidth: { top: 0, right: 0, bottom: this.theme.tableBorderWidth, left: 0 },
+        lineWidth: { top: 0, right: 0, bottom: borderThickness, left: 0 },
         lineColor: this.theme.tableBorderRgb,
       },
       bodyStyles: {
         fillColor: this.theme.tableRowBgRgb,
-        lineWidth: { top: 0, right: 0, bottom: this.theme.tableBorderWidth, left: 0 },
+        lineWidth: { top: 0, right: 0, bottom: borderThickness, left: 0 },
         lineColor: this.theme.tableBorderRgb,
       },
       alternateRowStyles: {
         fillColor: this.theme.tableRowBgRgb,
-        lineWidth: { top: 0, right: 0, bottom: this.theme.tableBorderWidth, left: 0 },
+        lineWidth: { top: 0, right: 0, bottom: borderThickness, left: 0 },
         lineColor: this.theme.tableBorderRgb,
       },
       columnStyles: { 0: { cellWidth: 130, fontStyle: 'bold' }, 1: { cellWidth: contentWidth - 130 } },

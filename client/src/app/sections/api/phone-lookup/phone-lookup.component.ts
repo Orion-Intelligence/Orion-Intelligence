@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EMPTY, timer } from 'rxjs';
 import { expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ApiService } from '../../../shared/services/api.service';
@@ -20,7 +19,7 @@ export type { PhoneLookupResponse,PhoneLookupResult } from './model/phone-lookup
   selector: 'app-phone-lookup',
   standalone: true,
   imports: [FormsModule, NgClass, TranslatePipe, EmptyQueryComponent],
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./phone-lookup.component.css'],
   templateUrl: './phone-lookup.component.html'
 })
 export class PhoneLookupComponent implements OnInit {

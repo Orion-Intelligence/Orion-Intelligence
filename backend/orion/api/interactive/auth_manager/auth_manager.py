@@ -53,7 +53,7 @@ class auth_manager:
     @staticmethod
     async def login(mail: str, password: str, free=False, tenant_id=None, client: str = "web"):
         user = await auth_manager.get_instance().authenticate_user(mail, password)
-        if not user:
+        if user is None:
             raise HTTPException(status_code=401, detail="Invalid user or password")
         if user.status == UserStatus.DISABLE:
             raise HTTPException(status_code=401, detail="Account Blocked")
@@ -131,7 +131,7 @@ class auth_manager:
         onboarding_exists = await session_manager.get_instance().has_onboarding(str(user.tenant_uuid))
 
         session_data = {"role": role, "username": user.username, "status": user.status, "hasOnboarding": onboarding_exists, "subscription": user.subscription, "verificationDate": user.account_verify_at, "licenses": [
-            license.value for license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": reset_token, }
+            user_license.value for user_license in user.licenses], "password_reset_required": getattr(user, "password_reset_required", False), "password_reset_token": reset_token, }
 
 
         return {"access_token": access_token, "token_type": "bearer", "session": session_data, }  # nosec B105

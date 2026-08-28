@@ -1,10 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
+import { AiToolRouteConfig } from './model/ai-tool-routing.model';
 
-type AiToolRouteConfig = {
-  type: string;
-  message: string;
-};
 
 const DEFAULT_MESSAGE = 'Ask me what to check and I will use the active route.';
 const ROUTE_MAPPINGS: Array<{ pattern: RegExp } & AiToolRouteConfig> = [

@@ -169,14 +169,6 @@ export class AddCustomAlertComponent implements OnInit {
     this.cancle.emit(refresh);
   }
 
-  getAlertTypeLabel(selectedKey: string): string {
-    if (!selectedKey) {
-      return 'Select Type';
-    }
-    const type = this.alertTypes.find(t => t.key === selectedKey);
-    return type ? type.label : 'Select Type';
-  }
-
   getIOCTypeLabel(selectedKey: string): string {
     if (!selectedKey) {
       return 'Select IOC Type';

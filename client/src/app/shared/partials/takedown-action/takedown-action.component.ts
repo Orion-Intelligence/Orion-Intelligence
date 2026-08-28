@@ -160,7 +160,7 @@ export class TakedownActionComponent implements OnChanges {
   }
 
   submitTakedown(): void {
-    let target = '';
+    let target: string;
     if (this.manualUrlMode) {
       target = this.manualTargetUrl.trim();
       this.manualUrlError = '';

@@ -6,7 +6,6 @@ import { last } from 'rxjs';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { AppService } from '../../../../services/core/app/app.service';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { Category } from '../../../../shared/constants/pages';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-block.component';
@@ -32,7 +31,7 @@ export type { GeneralReportItem } from './model/report.model';
   templateUrl: './report.component.html',
   imports: [ResultListComponent, CommonModule, NgClass, ResultSectionComponent, TooltipDirective, JsonApiViewerComponent, ReportMappingComponent, ReportHeaderComponent, ChatWidgetComponent, CodeBlockComponent, ReportInteractionHostComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./report.component.css'],
 })
 export class ReportComponent implements OnInit, AfterViewInit {
   protected readonly last = last;

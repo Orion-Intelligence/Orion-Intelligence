@@ -3,7 +3,6 @@ import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, map, switchMap, take, timer } from 'rxjs';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { TitleCasePipe } from '@angular/common';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
 import { DashboardResultsGeneralComponent } from '../../intel-panel/dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
@@ -48,11 +47,11 @@ import type { ChatResultItem } from '../../../shared/model/results/chat/chat.cal
   imports: [ResultComponent, DashboardResultsGeneralComponent, TitleCasePipe, DashboardResultExploitComponent, DashboardResultAptComponent, DashboardResultChatComponent, SortGroupedResultsPipe, TooltipDirective, DashboardResultSocialComponent, ResultInsightsComponent, ThreatResultsComponent, ConsolidatedScanComponent, ConsolidatedIocComponent, NetworkIntel, CrossSearchCardComponent, SatelliteIntel, TranslatePipe],
   templateUrl: './dashboard-consolidated.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [scanAnimation, fadeInDashboardItem],
+  animations: [scanAnimation],
+  styleUrls: ['./dashboard-consolidated.component.css'],
 })
 export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   protected readonly Math = Math;
-  protected readonly fadeInDashboardItem = fadeInDashboardItem;
   protected readonly consolidated_filters = consolidated_filters;
 
   @ViewChild('domainScan') domainScanComponent!: ConsolidatedScanComponent;
@@ -341,13 +340,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  isIpReportExpandable(): boolean {
-    const totalWithoutDefacement = Object.entries(this.groupedResults)
-      .filter(([key]) => key !== 'defacement_model')
-      .reduce((sum, [_, list]) => sum + list.length, 0);
-    return totalWithoutDefacement == 0;
-  }
-
   onSectionSelected(section: Category) {
     this.selectionStore.setSelectedSection(section);
     let firstSubcategory: string | undefined;
@@ -495,27 +487,15 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return Object.values(categories).some((arr) => Array.isArray(arr) && arr.length > 0);
   }
 
-  shouldShowSection(): boolean {
-    const totalResults = this.getTotalResultCount();
-    const hasAnyData = totalResults > 0;
-    if (!this.checkMember()) {
-      return hasAnyData;
-    }
-    return hasAnyData && this.hasIOCs();
-  }
-
   isEmailOrUrl(query: string): boolean {
     if (!query) {
       return false;
     }
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const urlRegex = /^(https?:\/\/|www\.|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?#][^\s]*)?$/i;
+    const urlRegex = /^(https?:\/\/|www\.|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?#]\S*)?$/i;
     if (emailRegex.test(query)) {
       return true;
     }
-    if (urlRegex.test(query)) {
-      return true;
-    }
-    return false;
+    return urlRegex.test(query);
   }
 }

@@ -8,18 +8,13 @@ import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseSta
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
 import { asUnknownRecord, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { AircraftDistributionCell } from '../../model/satellite-intel.model';
 
 type AircraftMarker = Leaflet.Marker & {
   __orionAircraftIconRef: ComponentRef<AircraftMarkerIconComponent> | null;
   __orionAircraftIconState: string;
 };
 
-type AircraftDistributionCell = {
-  key: string;
-  row: number;
-  col: number;
-  items: SatelliteLiveAircraft[];
-};
 
 export class AircraftMapRenderer {
   private cluster: Leaflet.LayerGroup | null = null;

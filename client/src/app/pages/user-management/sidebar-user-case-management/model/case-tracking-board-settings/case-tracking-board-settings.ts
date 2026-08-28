@@ -64,7 +64,7 @@ export class CaseTrackingBoardSettings implements OnInit {
   }
 
   goBack(): void {
-    this.router.navigate(['/dashboard/profile/case-management/tracking-board']);
+    void this.router.navigate(['/dashboard/profile/case-management/tracking-board']);
   }
 
   isRequiredStatus(status: CaseStatusBoardItem): boolean {

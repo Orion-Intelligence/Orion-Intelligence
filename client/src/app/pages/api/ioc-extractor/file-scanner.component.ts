@@ -17,11 +17,11 @@ import { TranslationService } from '../../../shared/services/translation.service
 import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
 import type { FileScanResponse } from './model/file-scanner.model';
+import { ScannerResultItem } from './model/file-scanner.model';
+import { ScannerResultSection } from './model/file-scanner.model';
 export type { FileScanResponse } from './model/file-scanner.model';
 
 
-type ScannerResultItem = { label: string; value: string };
-type ScannerResultSection = { title: string; items: ScannerResultItem[] };
 
 
 @Component({

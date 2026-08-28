@@ -51,11 +51,10 @@
     "zone.js": "0.16.2"
   },
   "devDependencies": {
-    "@angular-builders/custom-webpack": "22.0.1",
-    "@angular-devkit/build-angular": "22.1.4",
     "@angular-eslint/eslint-plugin": "22.1.0",
     "@angular-eslint/eslint-plugin-template": "22.1.0",
     "@angular-eslint/template-parser": "22.1.0",
+    "@angular/build": "22.1.4",
     "@angular/cli": "22.1.4",
     "@angular/compiler-cli": "22.1.2",
     "@babel/core": "7.29.7",
@@ -86,12 +85,6 @@
     "typescript-eslint": "^8.67.0"
   },
   "overrides": {
-    "@angular-devkit/build-angular": {
-      "http-proxy-middleware": "3.0.7",
-      "picomatch": "4.0.4",
-      "piscina": "5.2.0",
-      "webpack-dev-server": "5.2.6"
-    },
     "@angular-devkit/core": {
       "picomatch": "4.0.4"
     },

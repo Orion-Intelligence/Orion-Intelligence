@@ -8,3 +8,7 @@ export interface SatelliteResponseRecord extends UnknownRecord {
   error?: unknown;
   statusText?: string;
 }
+
+export interface SatellitePollingOptions {
+  trackState?: boolean;
+}

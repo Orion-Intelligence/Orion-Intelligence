@@ -5,7 +5,6 @@ import { HttpHeaders } from '@angular/common/http';
 
 import { FormsModule } from '@angular/forms';
 import { AlertAllowedTenantOption, User } from '../../../../shared/model/tenant/tenant.model';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { AddTenantComponent } from "../add-tenant/add-tenant.component";
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
@@ -21,9 +20,9 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partia
 @Component({
   selector: 'app-view-profile',
   imports: [FormsModule, CommonModule, AddTenantComponent, ConfirmationPopupComponent, TooltipDirective, TranslatePipe, UiDropdownComponent],
-  animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './manage-profile.component.html',
+  styleUrls: ['./manage-profile.component.css'],
 })
 export class ManageProfileComponent implements OnInit {
   private readonly allAlertsOption = 'all';

@@ -3,7 +3,6 @@ import { FormsModule } from '@angular/forms';
 import { NgOptimizedImage } from '@angular/common';
 import { FilterModel } from '../../model/filter/filter.model';
 import { last } from 'rxjs';
-import { filterAnimation } from '../../animations/filter.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { DatePickerComponent } from './date-picker/date-picker.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
@@ -18,7 +17,6 @@ import { SuggestionService } from './services/suggestions.service';
   standalone: true,
   imports: [FormsModule, NgOptimizedImage, TooltipDirective, DatePickerComponent, TranslatePipe, UiDropdownComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [filterAnimation],
 })
 export class FiltersComponent implements OnInit {
   private suggestionRequestIds: Record<string, number> = {};
@@ -101,32 +99,6 @@ export class FiltersComponent implements OnInit {
         }
       }
     });
-  }
-
-  onNumberInputChange(key: string, rawValue: string | null) {
-    const filter = this.filterModel.filters[key];
-    const digitsOnly = String(rawValue ?? '').replace(/\D+/g, '');
-
-    if (!digitsOnly) {
-      this.onSelectionChange(key, null);
-      return;
-    }
-
-    let numericValue = Number.parseInt(digitsOnly, 10);
-    if (Number.isNaN(numericValue)) {
-      this.onSelectionChange(key, null);
-      return;
-    }
-
-    if (typeof filter.min === 'number') {
-      numericValue = Math.max(filter.min, numericValue);
-    }
-
-    if (typeof filter.max === 'number') {
-      numericValue = Math.min(filter.max, numericValue);
-    }
-
-    this.onSelectionChange(key, String(numericValue));
   }
 
   applyFilters() {

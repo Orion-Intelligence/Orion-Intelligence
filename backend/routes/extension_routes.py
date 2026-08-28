@@ -10,6 +10,7 @@ from configs.auth_cookie import clear_extension_cookie, extension_token_from_req
 from configs.limiter_dependency import auth_rate_limit
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.redis_manager.redis_controller import redis_controller
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
@@ -30,7 +31,7 @@ async def system_session_active(current_user, redis_store: redis_controller) -> 
     return redis_session_id == session_id
 
 
-async def extension_user_from_token(token: str | None):
+async def extension_user_from_token(token: str | None) -> db_user_account | None:
     try:
         return await session_manager.get_instance().get_current_user(token)
     except Exception:

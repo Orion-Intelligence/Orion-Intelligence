@@ -1,7 +1,7 @@
 import asyncio
 import ipaddress
 import socket
-from typing import Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 from fastapi import Depends, HTTPException, Request, UploadFile, status
@@ -200,13 +200,13 @@ def _enforce_demo_safe_search(param, current_user, is_free: bool = False) -> Non
         param.safe = True
 
 
-def status_required(status_required: list[UserStatus], bypass_roles: Optional[list[user_role]] = None):
+def status_required(required_statuses: list[UserStatus], bypass_roles: Optional[list[user_role]] = None):
     async def verify_status(user_status: UserStatus = Depends(get_current_status),
             role: user_role = Depends(get_current_role), ):
         if bypass_roles and role in bypass_roles:
             return user_status
 
-        if user_status not in status_required:
+        if user_status not in required_statuses:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
         return user_status
 
@@ -236,7 +236,7 @@ def license_required(feature: str, bypass_roles: Optional[list[user_role]] = Non
 
     return checker
 def get_user_permissions(user):
-    final = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False, "geo_fencing": False}
+    final: dict[str, Any] = {"modules": set(), "cti_graph": False, "mapping": False, "scanning": False, "maintainer": False, "geo_fencing": False}
 
     for lic in user.licenses:
         rules = constant.license_rules.get(lic, {})

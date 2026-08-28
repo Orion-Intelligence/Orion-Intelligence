@@ -15,7 +15,7 @@ export class NotificationComponent {
   description: string = 'Your trial period has ended. To continue enjoying full access, please upgrade your subscription.';
 
   constructor(private router: Router) {
-    const nav = this.router.getCurrentNavigation();
+    const nav = this.router.currentNavigation();
     const state = nav?.extras?.state;
     if (state) {
       this.title = state['title'] || this.title;

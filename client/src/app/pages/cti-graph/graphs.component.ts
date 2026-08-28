@@ -7,7 +7,6 @@ import { ApiService } from '../../shared/services/api.service';
 import { CtiSidebarComponent } from './cti-sidebar/cti-sidebar.component';
 import { GraphContextMenuComponent } from './context-menu/context-menu.component';
 import { isPlatformBrowser } from '@angular/common';
-import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { Clipboard } from '@angular/cdk/clipboard';
 import { ExpandToggleButtonComponent } from './expand-toggle-button/expand-toggle-button.component';
 import { ExportChoiceModalComponent } from '../../shared/partials/export-choice-modal/export-choice-modal.component';
@@ -34,7 +33,7 @@ type GraphNodeColor = NonNullable<ExtendedNode['color']>;
   selector: 'app-graphs',
   standalone: true,
   templateUrl: './graphs.component.html',
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./graphs.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [FormsModule, CtiSidebarComponent, GraphContextMenuComponent, ExpandToggleButtonComponent, ExportChoiceModalComponent, ProfileComponent, TranslatePipe, GraphAdvancedBuilderPopupComponent]
 })
@@ -1039,8 +1038,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (node && typeof node.id === 'string') {
       const nodeId = node.id;
       const containerRect = this.networkContainer?.nativeElement?.getBoundingClientRect();
-      let left = 0;
-      let top = 0;
+      let left: number;
+      let top: number;
       if (pointerDom && containerRect) {
         left = containerRect.left + pointerDom.x;
         top = containerRect.top + pointerDom.y;
@@ -1384,7 +1383,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (subNodes.length === 0) {
       return false;
     }
-    return !!this.groupExpandedState[nodeId];
+    return this.groupExpandedState[nodeId];
   }
 
   showContextOpenCti(): boolean {

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { filter_mapping } from '../../../shared/constants/filters';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
@@ -12,7 +11,7 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
   imports: [CommonModule, TranslatePipe],
   templateUrl: './selected-filter-bar.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./selected-filter-bar.component.css'],
 })
 export class SelectedFilterBarComponent implements OnInit {
   protected readonly filter_mapping = filter_mapping;

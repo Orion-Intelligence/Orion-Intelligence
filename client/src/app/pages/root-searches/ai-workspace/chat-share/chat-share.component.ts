@@ -9,12 +9,8 @@ import { MessageScrollRailComponent } from '../message-scroll-rail/message-scrol
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { AppService } from '../../../../services/core/app/app.service';
+import { SharedChatMessage } from '../model/chat-share.model';
 
-type SharedChatMessage = {
-  sender: 'user' | 'bot';
-  text: string;
-  time: Date;
-};
 
 @Component({
   selector: 'app-chat-share',

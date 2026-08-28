@@ -1,12 +1,12 @@
 from __future__ import annotations
 
+import asyncio
 import json
 from types import SimpleNamespace
 
 import pytest
 from fastapi import HTTPException
 
-from orion.services.mail_manager import mail_manager as mail_module
 from orion.services.mail_manager.mail_manager import mail_manager
 
 
@@ -38,7 +38,7 @@ def test_validate_mail_configuration_rejects_invalid_smtp_settings(monkeypatch):
 
 @pytest.mark.anyio
 async def test_send_verification_mail_uses_saved_smtp_settings(monkeypatch):
-    manager = mail_manager.get_instance()
+    manager: mail_manager = mail_manager.get_instance()
     sent = {}
 
     monkeypatch.setattr(
@@ -78,7 +78,7 @@ async def test_send_verification_mail_uses_saved_smtp_settings(monkeypatch):
         )
 
     monkeypatch.setattr(manager, "process_app_variables", process_app_variables)
-    monkeypatch.setattr(mail_module.asyncio, "to_thread", to_thread)
+    monkeypatch.setattr(asyncio, "to_thread", to_thread)
     monkeypatch.setattr(mail_manager, "_send_sync_email", staticmethod(send_sync_email))
 
     await manager.send_verification_mail("user@example.com", "Subject", "<p>Hello</p>")
@@ -95,7 +95,7 @@ async def test_send_verification_mail_uses_saved_smtp_settings(monkeypatch):
 
 @pytest.mark.anyio
 async def test_send_test_mail_verifies_configuration(monkeypatch):
-    manager = mail_manager.get_instance()
+    manager: mail_manager = mail_manager.get_instance()
     sent = {}
 
     async def process_app_variables(subject: str, body: str):
@@ -117,7 +117,7 @@ async def test_send_test_mail_verifies_configuration(monkeypatch):
         )
 
     monkeypatch.setattr(manager, "process_app_variables", process_app_variables)
-    monkeypatch.setattr(mail_module.asyncio, "to_thread", to_thread)
+    monkeypatch.setattr(asyncio, "to_thread", to_thread)
     monkeypatch.setattr(mail_manager, "_send_sync_email", staticmethod(send_sync_email))
 
     await manager.send_test_mail(
@@ -141,7 +141,7 @@ async def test_send_test_mail_verifies_configuration(monkeypatch):
 
 @pytest.mark.anyio
 async def test_send_test_mail_falls_back_to_global_smtp_when_tenant_smtp_missing(monkeypatch):
-    manager = mail_manager.get_instance()
+    manager: mail_manager = mail_manager.get_instance()
     sent = {}
 
     async def tenant_system_mail_config(tenant_id: str | None):
@@ -180,7 +180,7 @@ async def test_send_test_mail_falls_back_to_global_smtp_when_tenant_smtp_missing
         ),
     )
     monkeypatch.setattr(manager, "process_app_variables", process_app_variables)
-    monkeypatch.setattr(mail_module.asyncio, "to_thread", to_thread)
+    monkeypatch.setattr(asyncio, "to_thread", to_thread)
     monkeypatch.setattr(mail_manager, "_send_sync_email", staticmethod(send_sync_email))
 
     await manager.send_test_mail(tenant_id="tenant-without-smtp")

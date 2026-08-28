@@ -5,7 +5,6 @@ import { FormsModule } from '@angular/forms';
 
 import { AppService } from '../../../../services/core/app/app.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { search_filter_labels } from '../../../../shared/constants/shared-enums';
 import { LicenseName } from '../../../../shared/model/licenses/license.rules';
 import { IocCategory, TenantStatus, TenantStatusValues } from '../../../../shared/model/tenant/tenant.model';
@@ -27,7 +26,7 @@ export type { ManagedTenant,TenantUpdateResponse } from './model/view-tenant.mod
   selector: 'app-view-tenant',
   standalone: true,
   imports: [FormsModule, CommonModule, TranslatePipe, UiDropdownComponent, TenantIocDrawerContentComponent, ConfirmationPopupComponent],
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./view-tenant.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './view-tenant.component.html',
 })
@@ -124,7 +123,7 @@ export class ViewTenantComponent implements OnInit {
   }
 
   canEditTenantAiEndpoint(): boolean {
-    return this.isAdmin() && this.appService.configData().appSettings.ai_endpoint_enabled === true;
+    return this.isAdmin() && this.appService.configData().appSettings.ai_endpoint_enabled;
   }
 
   openTenant(tenant: ManagedTenant): void {

@@ -515,21 +515,21 @@ function resetSearchStorage16(win: Window) {
 }
 
 function waitForSearchReady16() {
-  cy.get('app-loading-form').should('not.exist');
-  cy.get('.ui-shimmer', { timeout: 60000 }).should('not.exist');
-  cy.get(SEARCH_INPUT_16).first().should('be.visible').and('be.enabled');
+  void cy.get('app-loading-form').should('not.exist');
+  void cy.get('.ui-shimmer', { timeout: 60000 }).should('not.exist');
+  void cy.get(SEARCH_INPUT_16).first().should('be.visible').and('be.enabled');
 }
 
 function visitSearchSection16(route: string) {
-  cy.visit(`${route}?page=1`, {
+  void cy.visit(`${route}?page=1`, {
     onBeforeLoad: resetSearchStorage16,
   });
-  cy.location('pathname').should('eq', route);
+  void cy.location('pathname').should('eq', route);
   waitForSearchReady16();
 }
 
 function searchAlias16(endpoint: SearchEndpoint16, alias: string) {
-  cy.intercept('POST', `${API_BASE_16}/${endpoint}`).as(alias);
+  void cy.intercept('POST', `${API_BASE_16}/${endpoint}`).as(alias);
 }
 
 function aliasKey16(value: string): string {
@@ -537,22 +537,22 @@ function aliasKey16(value: string): string {
 }
 
 function typeDashboardSearch16(value: string) {
-  cy.scrollDashboardToTop();
+  void cy.scrollDashboardToTop();
   waitForSearchReady16();
-  cy.get(SEARCH_INPUT_16).first()
+  void cy.get(SEARCH_INPUT_16).first()
     .type(`{selectall}{backspace}${value}`, { force: true });
   submitDashboardSearch16();
 }
 
 function submitDashboardSearch16() {
-  cy.scrollDashboardToTop();
+  void cy.scrollDashboardToTop();
   cy.get('body').then(($body) => {
     const submitButton = $body.find('[data-testid="dashboard-search-submit"]:visible').first();
     if (submitButton.length > 0) {
-      cy.wrap(submitButton).scrollIntoView().should('be.visible').click({ force: true });
+      void cy.wrap(submitButton).scrollIntoView().should('be.visible').click({ force: true });
       return;
     }
-    cy.get(SEARCH_INPUT_16).first().type('{enter}', { force: true });
+    void cy.get(SEARCH_INPUT_16).first().type('{enter}', { force: true });
   });
 }
 
@@ -748,32 +748,32 @@ function matchesEntityFilterRequest16(filterCase: AdvancedEntityFilterCase16) {
 function assertRenderedSearchResult16(expected: ExpectedSearchResult16) {
   if (expected.baseUrl || expected.team) {
     if (expected.team) {
-      cy.get('body').should('contain.text', expected.team);
+      void cy.get('body').should('contain.text', expected.team);
     }
     expected.queryMatches.forEach(queryMatch => {
-      cy.get('body').should('contain.text', queryMatch);
+      void cy.get('body').should('contain.text', queryMatch);
     });
     return;
   }
 
-  cy.get('[data-testid="result-card"]', { timeout: 20000 }).should('have.length.at.least', 1);
-  cy.contains('[data-testid="result-card"]', displayText16(expected.title), { matchCase: false })
+  void cy.get('[data-testid="result-card"]', { timeout: 20000 }).should('have.length.at.least', 1);
+  void cy.contains('[data-testid="result-card"]', displayText16(expected.title), { matchCase: false })
     .scrollIntoView()
     .should('be.visible')
     .within(() => {
       expectedList16(expected.linkAddress).forEach(link => {
-        cy.contains(link).should('exist');
+        void cy.contains(link).should('exist');
       });
       if (expected.date) {
-        cy.contains(expected.date).should('exist');
+        void cy.contains(expected.date).should('exist');
       }
     });
 }
 
 function openSidebar16() {
-  cy.scrollDashboardToTop();
-  cy.openSideFilter();
-  cy.get('[data-testid="side-filter-apply"]').filter(':visible')
+  void cy.scrollDashboardToTop();
+  void cy.openSideFilter();
+  void cy.get('[data-testid="side-filter-apply"]').filter(':visible')
     .first()
     .should('be.visible');
 }
@@ -787,25 +787,25 @@ function selectSidebarFilterOption16(selectTestId: string, option: string) {
 
       return cy.wrap($select).scrollIntoView().then(($select) => {
         if ($select.is('select')) {
-          cy.wrap($select).select(option, { force: true });
+          void cy.wrap($select).select(option, { force: true });
           return;
         }
 
         const menuId = $select.attr('aria-controls');
         expect(menuId, `${selectTestId} menu id`).to.exist;
-        cy.wrap($select).click({ force: true });
-        cy.wrap($select).should('have.attr', 'aria-expanded', 'true');
+        void cy.wrap($select).click({ force: true });
+        void cy.wrap($select).should('have.attr', 'aria-expanded', 'true');
         const typeOption = () => cy.get(`#${menuId}`).parent()
           .find('input')
           .then(($input) => {
             if ($input.length > 0) {
-              cy.wrap($input.first()).clear({ force: true }).type(option, { force: true });
+              void cy.wrap($input.first()).clear({ force: true }).type(option, { force: true });
             }
           });
 
-        typeOption();
+        void typeOption();
         if (selectTestId !== 'side-filter-select-m_cve') {
-          cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000, matchCase: false }).click({ force: true });
+          void cy.contains(`#${menuId} [role="option"]`, option, { timeout: 15000, matchCase: false }).click({ force: true });
           return;
         }
 
@@ -823,7 +823,7 @@ function selectSidebarFilterOption16(selectTestId: string, option: string) {
           }
           return typeOption().then(() => clickOption(attempt + 1));
         });
-        clickOption();
+        void clickOption();
       });
     });
 }
@@ -844,16 +844,16 @@ function moveDatePickerToMonth16(targetLabel: string, attempts = 0): void {
     const navSelector = currentDate.getTime() > targetDate.getTime()
       ? '[data-testid="side-filter-date-prev-month"]'
       : '[data-testid="side-filter-date-next-month"]';
-    cy.get(navSelector).filter(':visible').first().scrollIntoView().click({ force: true });
+    void cy.get(navSelector).filter(':visible').first().scrollIntoView().click({ force: true });
     moveDatePickerToMonth16(targetLabel, attempts + 1);
   });
 }
 
 function selectSidebarDateRange16(dateRange: DateRangeSelection16) {
-  cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click({ force: true });
+  void cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click({ force: true });
   moveDatePickerToMonth16(dateRange.monthLabel);
-  cy.get(`[data-testid="side-filter-date-day-${dateRange.startDay}"]`).filter(':visible').first().scrollIntoView().click({ force: true });
-  cy.get(`[data-testid="side-filter-date-day-${dateRange.endDay}"]`).filter(':visible').first().scrollIntoView().click({ force: true });
+  void cy.get(`[data-testid="side-filter-date-day-${dateRange.startDay}"]`).filter(':visible').first().scrollIntoView().click({ force: true });
+  void cy.get(`[data-testid="side-filter-date-day-${dateRange.endDay}"]`).filter(':visible').first().scrollIntoView().click({ force: true });
 }
 
 function selectSidebarFilter16(filterCase: SidebarFilterCase16) {
@@ -869,35 +869,35 @@ function selectSidebarFilter16(filterCase: SidebarFilterCase16) {
 }
 
 function ensureAdvancedFiltersOpen16() {
-  cy.get(SEARCH_INPUT_16).first().click({ force: true });
+  void cy.get(SEARCH_INPUT_16).first().click({ force: true });
   cy.get('[data-testid="dashboard-advance-toggle"]').should('exist')
     .then(($toggle) => {
       if (!($toggle[0] as HTMLInputElement).checked) {
-        cy.wrap($toggle).closest('label').click({ force: true });
+        void cy.wrap($toggle).closest('label').click({ force: true });
       }
     });
-  cy.get(SEARCH_INPUT_16).first().click({ force: true });
-  cy.get('app-search-filters').should('be.visible');
+  void cy.get(SEARCH_INPUT_16).first().click({ force: true });
+  void cy.get('app-search-filters').should('be.visible');
 }
 
 function applyEntityFilter16(category: string, value: string) {
   const categoryKey = category.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-  cy.get('app-search-filters input').first().clear({ force: true }).type(category, { force: true });
-  cy.get(`[data-testid="entity-filter-category-${categoryKey}"]`).should('be.visible')
+  void cy.get('app-search-filters input').first().clear({ force: true }).type(category, { force: true });
+  void cy.get(`[data-testid="entity-filter-category-${categoryKey}"]`).should('be.visible')
     .scrollIntoView()
     .click({ force: true });
-  cy.get('[data-testid="entity-filter-value-input"]').scrollIntoView()
+  void cy.get('[data-testid="entity-filter-value-input"]').scrollIntoView()
     .clear({ force: true })
     .type(value, { force: true });
-  cy.get('[data-testid="entity-filter-add-value"]').should('be.visible')
+  void cy.get('[data-testid="entity-filter-add-value"]').should('be.visible')
     .scrollIntoView()
     .click({ force: true });
-  cy.contains('app-search-filters', value).should('be.visible');
+  void cy.contains('app-search-filters', value).should('be.visible');
 }
 
 function clearEntityFilters16() {
   ensureAdvancedFiltersOpen16();
-  cy.get('[data-testid="entity-filter-clear-selection"]').scrollIntoView()
+  void cy.get('[data-testid="entity-filter-clear-selection"]').scrollIntoView()
     .click({ force: true });
 }
 
@@ -932,7 +932,7 @@ export function assertSidebarFilterResult16(filterCase: SidebarFilterCase16) {
   openSidebar16();
   selectSidebarFilter16(filterCase);
   searchAlias16(filterCase.endpoint, filterAlias);
-  cy.get('[data-testid="side-filter-apply"]').filter(':visible')
+  void cy.get('[data-testid="side-filter-apply"]').filter(':visible')
     .first()
     .click({ force: true });
 

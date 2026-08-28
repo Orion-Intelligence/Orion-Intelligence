@@ -35,6 +35,7 @@ class db_system_model(Model):
     value: str = Field(default="")
 
     @field_validator("value")
+    @classmethod
     def validate_value(cls, value: str, info: Any):
         key = info.data.get("key")
         validators = {AllowedKeys.SYSTEM_SETTINGS: _is_valid_meta_info, AllowedKeys.VERSION: lambda v: bool(

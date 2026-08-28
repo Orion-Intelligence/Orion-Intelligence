@@ -2,7 +2,6 @@ import { CommonModule, NgClass, NgOptimizedImage } from '@angular/common';
 import { Component, OnInit, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs/operators';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-block.component';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { SecurityScanExportComponentComponent } from './security-scan-export-component/security-scan-export-component.component';
@@ -34,8 +33,8 @@ import { SECURITY_SCAN_EXPORT_OPTIONS } from '../../../../shared/model/report/ex
     ReactiveFormsModule,
     EmptyQueryComponent, TranslatePipe, ExportChoiceModalComponent],
   templateUrl: './security-scan.component.html',
+  styleUrls: ['./security-scan.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class SecurityScanComponent implements OnInit {
   meta: UrlScanMeta | null = null;

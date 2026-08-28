@@ -202,10 +202,6 @@ export class SidebarUserCaseManagement implements OnInit {
       .replace(/\b\w/g, char => char.toUpperCase()));
   }
 
-  toggleArchivedCases(): void {
-    this.setArchivedCases(!this.showArchivedCases);
-  }
-
   openTrackingBoard(): void {
     if (!this.canManageCases()) {
       return;

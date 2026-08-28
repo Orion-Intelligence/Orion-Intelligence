@@ -61,12 +61,12 @@ class config_controller:
         asyncio.create_task(self.load_config())
 
     @classmethod
-    def _is_admin(self, current_user) -> bool:
+    def _is_admin(cls, current_user) -> bool:
         return getattr(current_user, "role", "") == "admin"
 
     @classmethod
-    def _is_tenant_branding_editor(self, current_user) -> bool:
-        if self._is_admin(current_user):
+    def _is_tenant_branding_editor(cls, current_user) -> bool:
+        if cls._is_admin(current_user):
             return True
         licenses = getattr(current_user, "licenses", None) or []
         return LicenseName.MAINTAINER in licenses
@@ -116,6 +116,8 @@ class config_controller:
     async def load_config(self, force_db: bool = False, tenant_id: str | None = None) -> str | None:
         try:
             tenant = await self._get_tenant(tenant_id)
+            if tenant is None:
+                return None
             resolved_tenant_id = str(tenant.id)
             config = None
             if not force_db:
@@ -143,9 +145,10 @@ class config_controller:
             if not tenant.is_default:
                 default_tenant = await self._get_tenant()
                 default_config = {}
-                default_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(default_tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS)) if default_tenant else None
-                if default_record and default_record.value:
-                    default_config = json.loads(default_record.value)
+                if default_tenant:
+                    default_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(default_tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+                    if default_record and default_record.value:
+                        default_config = json.loads(default_record.value)
                 for key in self.ADMIN_SETTING_KEYS:
                     config[key] = default_config.get(key, "")
                 config[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if (
@@ -181,7 +184,7 @@ class config_controller:
         if any(not value for value in required):
             return False
         try:
-            smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT")))
+            smtp_port = int(str(meta_info.get("ACCOUNTS_SMTP_PORT", "")))
         except ValueError:
             return False
         return 1 <= smtp_port <= 65535

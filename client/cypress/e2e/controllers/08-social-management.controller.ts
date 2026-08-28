@@ -17,7 +17,7 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-export function findStealerRow(rows: JQuery<HTMLElement>, limit?: number) {
+export function findStealerRow(rows: JQuery, limit?: number) {
   const candidates = limit ? [...rows].slice(0, limit) : [...rows];
   return candidates.find((row) => {
     const domain = row.querySelector('[title]')?.getAttribute('title') || '';
@@ -101,26 +101,26 @@ export function setupSocialStubs() {
     mocks[key] = mock;
   });
 
-  remember('profile', 'social_profile.json');
-  remember('posts', 'social_posts.json');
-  remember('videos', 'social_videos.json');
-  remember('images', 'social_online_images.json');
-  remember('followers', 'social_followers.json');
+  void remember('profile', 'social_profile.json');
+  void remember('posts', 'social_posts.json');
+  void remember('videos', 'social_videos.json');
+  void remember('images', 'social_online_images.json');
+  void remember('followers', 'social_followers.json');
 
   loadMock(ELASTIC_MOCKS, 'social_recon.json').then((mock) => {
-    cy.intercept('POST', '**/api/social/recon', { statusCode: 200, body: { job_id: 'cypress', result: reconProfilesFrom(mock) } }).as('socialRecon');
+    void cy.intercept('POST', '**/api/social/recon', { statusCode: 200, body: { job_id: 'cypress', result: reconProfilesFrom(mock) } }).as('socialRecon');
   });
   loadMock(ELASTIC_MOCKS, 'social_online_presence.json').then((mock) => {
-    cy.intercept('POST', '**/api/social/metadata', { statusCode: 200, body: mock }).as('socialOnlinePresence');
+    void cy.intercept('POST', '**/api/social/metadata', { statusCode: 200, body: mock }).as('socialOnlinePresence');
   });
   loadMock(ELASTIC_MOCKS, 'social_stealer_logs.json').then((mock) => {
-    cy.intercept('POST', '**/api/search/stealer/ioc', { statusCode: 200, body: mock }).as('socialStealerLogs');
+    void cy.intercept('POST', '**/api/search/stealer/ioc', { statusCode: 200, body: mock }).as('socialStealerLogs');
   });
   loadMock(API_MOCKS, 'dynamic_wanted.json').then((mock) => {
-    cy.intercept('POST', '**/api/dynamic/wanted', { statusCode: 200, body: mock }).as('socialWanted');
+    void cy.intercept('POST', '**/api/dynamic/wanted', { statusCode: 200, body: mock }).as('socialWanted');
   });
 
-  cy.intercept('POST', '**/api/social/profile', (request) => {
+  void cy.intercept('POST', '**/api/social/profile', (request) => {
     const type = String(request.body?.type ?? '');
     if (request.body?.command === 'cancel') {
       request.reply({ statusCode: 200, body: { status: 'done' } });
@@ -136,27 +136,27 @@ export function setupSocialStubs() {
     request.reply({ statusCode: 200, body: items === null ? { status: 'idle' } : { status: 'done', result: { items, has_more: false } } });
   }).as('socialCrawl');
 
-  cy.intercept('POST', '**/api/social/connections', (request) => {
+  void cy.intercept('POST', '**/api/social/connections', (request) => {
     const query = String(request.body?.query ?? '').toLowerCase();
     const items = (crawlItemsFor('connections', mocks) ?? []) as unknown[];
     const filtered = query ? items.filter((item) => JSON.stringify(item).toLowerCase().includes(query)) : items;
     request.reply({ statusCode: 200, body: { result: { items: filtered, total: filtered.length } } });
   }).as('socialConnections');
 
-  cy.intercept('POST', '**/api/social/graph/data', (request) => {
+  void cy.intercept('POST', '**/api/social/graph/data', (request) => {
     const usernames = (request.body?.usernames ?? []) as string[];
     request.reply({ statusCode: 200, body: { result: usernames.map(graphDocumentFor) } });
   }).as('socialGraphData');
 
-  cy.intercept('GET', '**/api/extension/session', { statusCode: 200, body: { extension_connected: true } });
-  cy.intercept('POST', '**/api/social/recon/status', { statusCode: 200, body: { status: 'pending', progress: 90, step: 'Scanning' } });
-  cy.intercept('POST', '**/api/search/social', { statusCode: 200, body: { Result: [], Total_Hits: 0 } });
-  cy.intercept('POST', '**/api/phone/universal_search', { statusCode: 200, body: { cards_data: [] } }).as('socialPhone');
-  cy.intercept('GET', '**/api/social/data', { statusCode: 200, body: { status: 'done', result: [] } });
-  cy.intercept('GET', '**/api/social/data/*', { statusCode: 200, body: { profiles: [], count: 0 } });
-  cy.intercept('POST', '**/api/social/data', { statusCode: 200, body: { status: 'done' } });
-  cy.intercept('GET', '**/api/graph/session/tabs*', { statusCode: 200, body: { tabs: [], extra: { usernames: [] } } });
-  cy.intercept('POST', '**/api/graph/session/upsert*', { statusCode: 200, body: { status: 'done' } }).as('socialGraphSave');
+  void cy.intercept('GET', '**/api/extension/session', { statusCode: 200, body: { extension_connected: true } });
+  void cy.intercept('POST', '**/api/social/recon/status', { statusCode: 200, body: { status: 'pending', progress: 90, step: 'Scanning' } });
+  void cy.intercept('POST', '**/api/search/social', { statusCode: 200, body: { Result: [], Total_Hits: 0 } });
+  void cy.intercept('POST', '**/api/phone/universal_search', { statusCode: 200, body: { cards_data: [] } }).as('socialPhone');
+  void cy.intercept('GET', '**/api/social/data', { statusCode: 200, body: { status: 'done', result: [] } });
+  void cy.intercept('GET', '**/api/social/data/*', { statusCode: 200, body: { profiles: [], count: 0 } });
+  void cy.intercept('POST', '**/api/social/data', { statusCode: 200, body: { status: 'done' } });
+  void cy.intercept('GET', '**/api/graph/session/tabs*', { statusCode: 200, body: { tabs: [], extra: { usernames: [] } } });
+  void cy.intercept('POST', '**/api/graph/session/upsert*', { statusCode: 200, body: { status: 'done' } }).as('socialGraphSave');
 }
 
 export function assertCrawlTabs() {
@@ -169,18 +169,18 @@ export function assertCrawlTabs() {
   ];
   tabs.forEach(([key, list, item]) => {
     clickTab(key);
-    cy.get('[data-testid="social-crawl-section-fetch"]', { timeout: FETCH_TIMEOUT }).first().click();
-    cy.wait('@socialCrawl', { timeout: FETCH_TIMEOUT });
-    cy.get(CRAWL_PANEL, { timeout: FETCH_TIMEOUT }).should('be.visible');
-    cy.get(list, { timeout: FETCH_TIMEOUT }).should('be.visible');
-    cy.get(item).should('have.length.greaterThan', 0);
+    void cy.get('[data-testid="social-crawl-section-fetch"]', { timeout: FETCH_TIMEOUT }).first().click();
+    void cy.wait('@socialCrawl', { timeout: FETCH_TIMEOUT });
+    void cy.get(CRAWL_PANEL, { timeout: FETCH_TIMEOUT }).should('be.visible');
+    void cy.get(list, { timeout: FETCH_TIMEOUT }).should('be.visible');
+    void cy.get(item).should('have.length.greaterThan', 0);
   });
-  cy.get('[data-testid="social-work-row"]').first().should('contain.text', 'orion-recon').and('contain.text', 'TypeScript');
-  cy.docsScreenshot('social-followers-popup');
+  void cy.get('[data-testid="social-work-row"]').first().should('contain.text', 'orion-recon').and('contain.text', 'TypeScript');
+  void cy.docsScreenshot('social-followers-popup');
 }
 
 export function stubPhoneIntelligence() {
-  cy.intercept('POST', '**/api/phone/universal_search', {
+  void cy.intercept('POST', '**/api/phone/universal_search', {
     statusCode: 200,
     delay: 700,
     body: {
@@ -193,5 +193,5 @@ export function stubPhoneIntelligence() {
 }
 
 export function clickTab(key: string) {
-  cy.get(`[data-testid="social-fetch-tab"][data-tab-key="${key}"]`, { timeout: FETCH_TIMEOUT }).scrollIntoView().click();
+  void cy.get(`[data-testid="social-fetch-tab"][data-tab-key="${key}"]`, { timeout: FETCH_TIMEOUT }).scrollIntoView().click();
 }

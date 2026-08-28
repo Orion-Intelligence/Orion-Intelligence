@@ -115,7 +115,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                          '"endpoints":[{"url":"https://try.orionintelligence.org/csp-report-endpoint/"}]}')
 
         if not self.DEBUG:
-            response.headers["Strict-Transport-Security"] = ("max-age=31536000; includeSubDomains; preload")
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains; preload"
 
         response.headers["Permissions-Policy"] = ("accelerometer=(), "
                                                   "camera=(), "

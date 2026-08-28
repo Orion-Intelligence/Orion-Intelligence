@@ -51,23 +51,23 @@ async def get_public_config(request: Request):
     return config
 
 
-@public_routes.get("/api/s/static/tenant/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
-async def get_tenant_resource(id: str):
-    return await ResourceManager.get_instance().get_tenant_image(id)
+@public_routes.get("/api/s/static/tenant/{resource_id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
+async def get_tenant_resource(resource_id: str):
+    return await ResourceManager.get_instance().get_tenant_image(resource_id)
 
 
-@public_routes.get("/api/s/static/user/{id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
-async def get_user_resource(id: str):
-    return await ResourceManager.get_instance().get_user_image(id)
+@public_routes.get("/api/s/static/user/{resource_id}", include_in_schema=False, dependencies=[Depends(cookie_required)])
+async def get_user_resource(resource_id: str):
+    return await ResourceManager.get_instance().get_user_image(resource_id)
 
 
 @public_routes.get("/api/s/static/favicon", include_in_schema=False)
 async def get_favicon_resource(request: Request):
     return await ResourceManager.get_instance().get_favicon(request.state.tenant)
 
-@public_routes.get("/api/s/static/system/{id}", include_in_schema=False)
-async def get_system_resource(request: Request, id: str):
-    return await ResourceManager.get_instance().get_system_image(id, request.state.tenant)
+@public_routes.get("/api/s/static/system/{resource_id}", include_in_schema=False)
+async def get_system_resource(request: Request, resource_id: str):
+    return await ResourceManager.get_instance().get_system_image(resource_id, request.state.tenant)
 
 
 @public_routes.get("/api/public/case-shares/{share_id}", include_in_schema=False)
@@ -87,7 +87,10 @@ def _request_ip(request: Request) -> str:
     forwarded_for = request.headers.get("x-forwarded-for", "")
     if forwarded_for:
         return forwarded_for.split(",", 1)[0].strip()
-    return request.client.host if request.client else "unknown"
+    client = request.client
+    if client is None:
+        return "unknown"
+    return client.host
 
 
 @public_routes.get(

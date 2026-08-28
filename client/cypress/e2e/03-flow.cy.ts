@@ -109,7 +109,7 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
           const name = (((el as HeatmapCountryPathElement).__data__?.properties?.name) || '').toString().trim().toLowerCase();
           return aliases.includes(name);
         }) || $paths[0];
-        expect(target, 'USA country path').to.exist;
+        assert.exists(target, 'USA country path');
         cy.wrap((target as unknown as SVGPathElement)).as('usaCountryPath');
       });
 

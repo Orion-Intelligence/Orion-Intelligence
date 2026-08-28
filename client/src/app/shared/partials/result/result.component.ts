@@ -1,23 +1,20 @@
-import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EmptyResultComponent } from '../empty-result/empty-result.component';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { LoadingFormComponent } from '../loading-form/loading-form.component';
-import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { SidebarService } from '../../services/sidebar.service';
 import { FiltersComponent } from '../filters/filters.component';
 import { FilterCategory, FilterModel, FilterOption } from '../../model/filter/filter.model';
 import { SortType } from '../../constants/shared-enums';
 import { EmptyQueryComponent } from '../empty-query/empty-query.component';
-import { query } from '@angular/animations';
 import { Category } from "../../constants/pages";
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ScrollTopComponent } from '../scroll-top/scroll-top.component';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { AppService } from '../../../services/core/app/app.service';
 import { SearchFiltersComponent } from "../../../pages/homepage/search-filters/search-filters.component";
-import { searchFilterAnimation } from '../../animations/search.filter.animation';
 import { SelectedFilterBarComponent } from '../../../pages/homepage/selected-filter-bar/selected-filter-bar.component';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { HelperService } from '../../services/helper.service';
@@ -26,7 +23,6 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from './services/home.search.service';
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
-import { ProxyController } from '../../services/proxy-controller';
 import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-card.component';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
@@ -36,16 +32,13 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   selector: 'app-result',
   standalone: true,
   templateUrl: './result.component.html',
-  animations: [fadeInDashboardItem, searchFilterAnimation],
+  styleUrls: ['./result.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
   imports: [CommonModule, EmptyResultComponent, FormsModule, NgOptimizedImage, LoadingFormComponent, FiltersComponent, EmptyQueryComponent, RouterLink, ScrollTopComponent, TooltipDirective, SearchFiltersComponent, SelectedFilterBarComponent, CrossSearchCardComponent, ChatWidgetComponent, TranslatePipe],
 })
 export class ResultComponent implements OnInit, OnChanges {
-  private readonly proxied_resource = inject(ProxyController);
-
   protected readonly SortType = SortType;
   protected readonly Category = Category;
-  protected readonly query = query;
 
   readonly resultCountInput = input<number | undefined>(undefined, { alias: 'result_count' });
   readonly searchQueryInput = input('', { alias: 'searchQuery' });
@@ -59,7 +52,6 @@ export class ResultComponent implements OnInit, OnChanges {
   isFilterOpen$: Observable<boolean>;
   result_triggered = true;
   selectedSortBy: SortType = SortType.DEFAULT;
-  selectedSearchBy = 'Match any term';
   local_query = '';
   showScans = false;
   sortMenuOpen = false;
@@ -312,17 +304,6 @@ export class ResultComponent implements OnInit, OnChanges {
       ? filters['m_domain'].map((domain: string) => `https://${domain}`)
       : [];
     this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
-  }
-
-  toggleScan() {
-    this.showScans = !this.showScans;
-  }
-
-  onScanSelected(domain: string) {
-    const url = this.router.serializeUrl(this.router.createUrlTree(['/dashboard/scan'], {
-      queryParams: { domain }
-    }));
-    this.proxied_resource.open(url);
   }
 
   normalizeDisplayUrl(url?: string | null): string {

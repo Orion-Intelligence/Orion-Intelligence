@@ -1,7 +1,6 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { Component, inject, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { fadeInDashboardItem } from '../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../shared/directive/tooltip-directive.directive';
 import { DnsResult, IpDetail, IpRowState, UrlVulnerabilityScanResult, VulnerabilityScanDepth } from '../../shared/model/network-intel/network-intel.model';
 import { buildStandardExportOptions } from '../../shared/model/report/export-choice.model';
@@ -17,9 +16,9 @@ import { ShodanSectionComponent } from '../root-searches/network-intel/shodan-se
 import { VulnerabilitySectionComponent } from '../root-searches/network-intel/vulnerability-section/vulnerability-section.component';
 import { TranslationService } from '../../shared/services/translation.service';
 import { asUnknownRecord, isUnknownRecord, UnknownRecord } from '../../shared/utils/type-guards.util';
+import { ScanReportField } from './model/scan-report.model';
+import { ScanReportSection } from './model/scan-report.model';
 
-type ScanReportField = { label: string; value: unknown };
-type ScanReportSection = { title: string; items: ScanReportField[] };
 const SCAN_REPORT_EXPORT_OPTIONS = buildStandardExportOptions('scan-report-export', 'report', 'Generate consistent scan report PDF export.');
 
 @Component({
@@ -27,8 +26,8 @@ const SCAN_REPORT_EXPORT_OPTIONS = buildStandardExportOptions('scan-report-expor
   standalone: true,
   imports: [CommonModule, NgClass, TooltipDirective, ExportChoiceModalComponent, TranslatePipe, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent],
   templateUrl: './scan-report.component.html',
+  styleUrls: ['./scan-report.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class ScanReportComponent extends ValuePresentationBase implements OnInit {
   private readonly translationService = inject(TranslationService);

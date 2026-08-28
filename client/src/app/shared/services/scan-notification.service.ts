@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { concat, EMPTY, Observable, of, Subject, Subscription, timer } from 'rxjs';
 import { catchError, filter, finalize, map, switchMap, takeWhile, tap } from 'rxjs/operators';
-import { DuplicateScanChoice, DuplicateScanPrompt, ScanJob, ScanJobCreateApiResponse, ScanJobDetailResponse, ScanJobDuplicateChoiceResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobNotificationResponse, ScanJobPollResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
+import { DuplicateScanChoice, DuplicateScanPrompt, ScanJob, ScanJobCreateApiResponse, ScanJobDetailResponse, ScanJobDuplicateChoiceResponse, ScanJobIncompleteResponse, ScanJobListResponse, ScanJobPollResponse, ScanJobStartRequest, ScanJobStatus } from '../model/scan-jobs/scan-job.model';
 import { isUnknownRecord } from '../utils/type-guards.util';
 import { ApiService } from './api.service';
 import type { ScanResponseRecord } from './model/scan-notification.model';
@@ -92,11 +92,11 @@ export class ScanNotificationService {
     }
     const nextPage = reset ? 1 : this.currentPage + 1;
     this.isLoading.set(true);
-    this.api.get<ScanJobListResponse<ScanJobNotificationResponse>>(`scan-jobs/notifications?page=${nextPage}&limit=${this.pageSize}`).subscribe({
+    this.api.get<ScanJobListResponse>(`scan-jobs/notifications?page=${nextPage}&limit=${this.pageSize}`).subscribe({
       next: response => {
         const items = (response?.items || []) as ScanJob[];
         this.currentPage = response?.page || nextPage;
-        this.hasMore.set(!!response?.has_more);
+        this.hasMore.set(response?.has_more);
         if (reset) {
           items.forEach(job => this.cacheJob(job, false));
           this.jobs.set(items);
@@ -174,7 +174,7 @@ export class ScanNotificationService {
   }
 
   private isDuplicateChoiceResponse(response: ScanJobCreateApiResponse): response is ScanJobDuplicateChoiceResponse {
-    return !!(response as ScanJobDuplicateChoiceResponse)?.requires_confirmation;
+    return (response as ScanJobDuplicateChoiceResponse)?.requires_confirmation;
   }
 
   private askDuplicateScanChoice(response: ScanJobDuplicateChoiceResponse): Observable<DuplicateScanChoice> {

@@ -6,7 +6,7 @@ from types import SimpleNamespace
 
 from bson import ObjectId
 
-from orion.api.interactive.scheduler_manager import scheduler_manager as scheduler_module
+import orion.api.interactive.scheduler_manager.scheduler_manager as scheduler_module
 from orion.api.interactive.scheduler_manager.scheduler_manager import DailySchedulerConfig, SchedulerManager
 from orion.management.jobs.alert.alert_job import alert_job
 from orion.services.mongo_manager.shared_model.db_scheduler_model import SchedulerMailStatus, SchedulerRunStatus
@@ -101,7 +101,7 @@ class _FakeSchedulerCollection:
             self.docs.append(doc)
         return _UpdateResult(0)
 
-    async def find_one_and_update(self, query, update, return_document=None):
+    async def find_one_and_update(self, query, update, **_kwargs):
         for doc in self.docs:
             if self._matches(doc, query):
                 doc.update(update["$set"])

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
+import { ShipDetailField } from '../../../../model/satellite-intel.model';
 
-type ShipDetailField = { label: string; value: string; mono?: boolean };
 
 const PRIMARY_SHIP_DETAIL_KEYS = new Set([
   'mmsi',

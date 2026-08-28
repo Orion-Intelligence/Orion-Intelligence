@@ -8,3 +8,7 @@ export interface FileScanResponse extends UnknownRecord {
   error?: unknown;
   message?: unknown;
 }
+
+export interface ScannerResultItem { label: string; value: string }
+
+export interface ScannerResultSection { title: string; items: ScannerResultItem[] }

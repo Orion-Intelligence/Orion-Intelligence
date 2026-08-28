@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Dict
 
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import AlertConnectorProvider
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
@@ -20,7 +20,7 @@ class FakeDoc:
     def __setattr__(self, name: str, value: Any) -> None:
         self._data[name] = value
 
-    def dict(self) -> dict[str, Any]:
+    def dict(self) -> Dict[str, Any]:
         return self._data.copy()
 
 
@@ -101,7 +101,7 @@ class FakeMongoEngine:
         self.removed.append((args, kwargs))
         return True
 
-    async def count(self, *args, **kwargs):
+    async def count(self, *_args, **_kwargs):
         return self.count_result
 
 
@@ -188,7 +188,7 @@ class FakeElastic:
     def get_connection(self):
         return self
 
-    async def update(self, index, id, body, request_timeout=220):
+    async def update(self, index, id, body, **_kwargs):
         self.docs[id] = {
             "_index": index,
             "_id": id,

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import asyncio
 import json
 
 import pytest
@@ -230,7 +229,7 @@ async def test_update_insights_runs_day_then_weekly_rollover(monkeypatch):
 
     calls = []
 
-    async def _fake_update(self, arg):
+    async def _fake_update(_self, arg):
         calls.append(arg)
         if arg == REDIS_KEYS.INSIGHT_OLD_WEEK:
             raise _StopLoop

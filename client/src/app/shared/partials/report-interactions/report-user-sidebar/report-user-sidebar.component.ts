@@ -56,7 +56,7 @@ export class ReportUserSidebarComponent {
     const userId = this.userId;
     sessionStorage.setItem('profileUserBackUrl', this.router.url);
     this.closeSidebar();
-    this.router.navigate(['/dashboard/profile/user', userId]);
+    void this.router.navigate(['/dashboard/profile/user', userId]);
   }
 
   private loadUser(): void {

@@ -4,18 +4,17 @@ import { ApiService } from '../../../shared/services/api.service';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../services/core/app/app.service';
 import { AppSettingsModel, ConfigSettings } from '../../../shared/model/app/config';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { SmtpSettingsBlockComponent } from '../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
 import { AlertWebhookSettingsBlockComponent } from '../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
-import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
+import { LANGUAGE_OPTIONS } from '../../../shared/constants/shared-enums';
+import { LanguageOption } from '../../../shared/constants/model/shared-enums.model';
 import { ActivatedRoute } from '@angular/router';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
 import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
-import { UserImagePickerComponent } from '../sidebar-user-settings/user-image-picker/user-image-picker.component';
 import type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
 export type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
 
@@ -28,8 +27,8 @@ type SystemImageResponse = Partial<Pick<AppSettingsModel, SystemImageKey>>;
 
 @Component({
   selector: 'app-sidebar-user-system-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, TenantBrandingSettingsComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
-  animations: [fadeInDashboardItem],
+  imports: [FormsModule, CommonModule, SmtpSettingsBlockComponent, TenantBrandingSettingsComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
+  styleUrls: ['./sidebar-user-system-settings.component.scss'],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './sidebar-user-system-settings.component.html'
 })
@@ -84,7 +83,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     if (!settings) {
       return;
     }
-    let metaInfo: Record<string, string | boolean> = {};
+    let metaInfo: Record<string, string | boolean>;
     try {
       metaInfo = settings.meta_info ? JSON.parse(settings.meta_info) : {};
     }
@@ -330,14 +329,14 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.webhookForm = {
       slack_client_id: response?.app?.slack_client_id || '',
       slack_client_secret: '',
-      slack_configured: response?.app?.slack_configured === true,
+      slack_configured: response?.app?.slack_configured,
       jira_client_id: response?.app?.jira_client_id || '',
       jira_client_secret: '',
-      jira_configured: response?.app?.jira_configured === true,
-      alert_slack_connected: response?.tenant?.slack_connected === true,
+      jira_configured: response?.app?.jira_configured,
+      alert_slack_connected: response?.tenant?.slack_connected,
       alert_slack_channel: response?.tenant?.slack_channel || '',
       alert_slack_team: response?.tenant?.slack_team || '',
-      alert_jira_connected: response?.tenant?.jira_connected === true,
+      alert_jira_connected: response?.tenant?.jira_connected,
       alert_jira_site_url: response?.tenant?.jira_site_url || '',
       alert_jira_site_name: response?.tenant?.jira_site_name || ''
     };

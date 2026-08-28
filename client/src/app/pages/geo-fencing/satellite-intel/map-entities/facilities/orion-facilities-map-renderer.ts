@@ -5,6 +5,7 @@ import { stableHash } from '../../map-utils/renderer-utils';
 import { OrionFacilityMarkerIconComponent } from './components/orion-facility-marker-icon/orion-facility-marker-icon.component';
 import { OrionFacilityPopupComponent } from './components/orion-facility-popup/orion-facility-popup.component';
 import type * as Leaflet from 'leaflet';
+import { OrionFacilitiesMapRendererConfig } from '../../model/satellite-intel.model';
 
 type OrionFacilityMarker = Leaflet.Marker & {
   __orionFacilityIconRef: ComponentRef<OrionFacilityMarkerIconComponent> | null;
@@ -12,14 +13,6 @@ type OrionFacilityMarker = Leaflet.Marker & {
   orionFeature: OrionSatelliteFeature;
 };
 
-type OrionFacilitiesMapRendererConfig = {
-  L: typeof Leaflet;
-  map: Leaflet.Map;
-  componentRenderer: LeafletComponentRenderer;
-  getData: () => OrionSatelliteFeature[];
-  getFocusedFeature: () => OrionSatelliteFeature | null;
-  onFeatureSelected: (feature: OrionSatelliteFeature) => void;
-};
 
 export class OrionFacilitiesMapRenderer {
   private layer: Leaflet.LayerGroup | null = null;

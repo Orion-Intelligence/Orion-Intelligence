@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { LANGUAGE_OPTIONS, LanguageOption } from '../../../shared/constants/shared-enums';
+import { LANGUAGE_OPTIONS } from '../../../shared/constants/shared-enums';
+import { LanguageOption } from '../../../shared/constants/model/shared-enums.model';
 import { PasswordToggleDirective } from '../../../shared/directive/password-toggle.directive';
 import { UserDataModel, userMetaData, userSessionData } from '../../../shared/model/company-profile/node.model';
 import { PasswordConfirmationPopupComponent } from '../../../shared/partials/password-confirmation-popup/password-confirmation-popup.component';
@@ -22,9 +22,9 @@ type SensitiveAction = 'twofa' | 'password' | 'recovery';
 @Component({
   selector: 'app-sidebar-profile-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent, PasswordToggleDirective, TranslatePipe, RecoveryKeyPopupComponent, PasswordConfirmationPopupComponent],
-  animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './account-settings.component.html'
+  templateUrl: './account-settings.component.html',
+  styleUrls: ['./account-settings.component.css']
 })
 export class AccountSettingsComponent implements OnInit {
   userSessionData: userSessionData;

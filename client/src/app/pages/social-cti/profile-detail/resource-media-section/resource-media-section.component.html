@@ -1,7 +1,7 @@
 <div data-testid="social-media-grid" class="grid gap-3" [class.grid-cols-3]="isImageGrid()" [class.grid-cols-2]="!isImageGrid()" [class.xl:grid-cols-3]="!isImageGrid()">
   @for (view of views(); track view.key) {
     <article data-testid="social-media-tile" [class.ui-connection-beam]="isConnectionsLoading(view)" class="group/tile flex min-w-0 flex-col overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[#111a2c] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] shadow-[0_6px_20px_var(--color-shadow-light)] transition-[border-color,box-shadow] hover:border-sky-400/25 [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-[#f7fafd] [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_6px_18px_rgba(15,23,42,0.07)]">
-      <a [href]="view.url || view.fullImage || view.image" target="_blank" rel="noopener noreferrer" class="relative block w-full overflow-hidden bg-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/35" [class.aspect-video]="view.isVideo && !view.isVertical" [class.aspect-[3/4]]="view.isVertical" [class.aspect-square]="!view.isVideo && !view.isVertical">
+      <a [href]="view.url || view.fullImage || view.image" target="_blank" rel="noopener noreferrer" class="relative block w-full overflow-hidden bg-black/40 outline-none focus-visible:ring-2 focus-visible:ring-sky-400/35" [class]="view.isVertical ? 'aspect-[3/4]' : (view.isVideo ? 'aspect-video' : 'aspect-square')">
         @if (view.image) {
           <img [src]="view.image" [alt]="view.title || view.author || view.kind" referrerpolicy="no-referrer" loading="lazy" (error)="onImageError($event)" class="h-full w-full object-cover transition-transform duration-300 group-hover/tile:scale-[1.03]">
         } @else {
@@ -22,7 +22,7 @@
             <span class="rounded bg-black/60 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-white">{{ view.kind | translate }}</span>
           }
           @for (flag of view.flags; track flag) {
-            <span class="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-white" [class.bg-red-600]="flag === 'Live'" [class.bg-black/60]="flag !== 'Live'">{{ flag | translate }}</span>
+            <span class="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.08em] text-white" [class]="flag === 'Live' ? 'bg-red-600' : 'bg-black/60'">{{ flag | translate }}</span>
           }
         </span>
         @if (view.duration) {

@@ -14,13 +14,6 @@ export class AuditlogService implements ListService {
 
   constructor(private apiService: ApiService) { }
 
-  reloadAuditData(params?: unknown): void {
-    this.lastParams = params ?? this.lastParams;
-    this.apiService.post<AuditLogCallbackModel>('audit/logs', params).subscribe((data) => {
-      this.auditDataSubject.next(data);
-    });
-  }
-
   setCurrentPage(page: number): void {
     if (page > 0) {
       this.currentPageSubject.next(page);

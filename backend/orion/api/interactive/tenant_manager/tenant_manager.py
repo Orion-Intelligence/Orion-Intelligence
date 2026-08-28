@@ -114,7 +114,8 @@ class TenantManager:
 
         parsed = urlsplit(base_url)
         slug = normalize_tenant_slug(tenant.slug)
-        if not slug or not parsed.hostname:
+        parsed_hostname = parsed.hostname
+        if not slug or not parsed_hostname:
             raise HTTPException(status_code=400, detail="Tenant subdomain not configured")
 
         tenant_base_domain = str(
@@ -122,10 +123,11 @@ class TenantManager:
         ).strip().lower().rstrip(".").removeprefix("*.")
         hostname = (
             f"{slug}.localhost"
-            if parsed.hostname in {"localhost", "127.0.0.1"}
-            else f"{slug}.{tenant_base_domain or parsed.hostname}"
+            if parsed_hostname in {"localhost", "127.0.0.1"}
+            else f"{slug}.{tenant_base_domain or parsed_hostname}"
         )
-        netloc = f"{hostname}:{parsed.port}" if parsed.port else hostname
+        parsed_port = parsed.port
+        netloc = f"{hostname}:{parsed_port}" if parsed_port else hostname
         tenant_url = urlunsplit((parsed.scheme, netloc, parsed.path.rstrip("/"), "", ""))
         return f"{tenant_url}/{path.lstrip('/')}"
 
@@ -178,7 +180,7 @@ class TenantManager:
             result.append({
                 "id": tenant_id,
                 "name": enc.decrypt(tenant.name.encode()).decode(),
-                "email": enc.decrypt(tenant.email.encode()).decode(),
+                "email": enc.decrypt(tenant.email.encode()).decode() if tenant.email else "",
             })
         return result
 
@@ -245,7 +247,7 @@ class TenantManager:
             tenant_data = {
                 "id": tenant_id,
                 "name": enc.decrypt(tenant.name.encode()).decode(),
-                "email": enc.decrypt(tenant.email.encode()).decode(),
+                "email": enc.decrypt(tenant.email.encode()).decode() if tenant.email else "",
                 "is_active": tenant.status == TenantStatus.ACTIVE
             }
 
@@ -495,7 +497,7 @@ class TenantManager:
             tenant_email = enc.decrypt(tenant.email.encode()).decode() if tenant.email else ""
             tenant.iocs = [IocCategory(
                 ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
-                name=enc.encrypt(ioc.name.encode()).decode(),
+                name=enc.encrypt((ioc.name or "").encode()).decode(),
                 values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in self.build_privileged_iocs(tenant_email)]
 
         if "alert_run_time" in data.model_fields_set:
@@ -509,7 +511,7 @@ class TenantManager:
                 raise HTTPException(status_code=403, detail="You don't have permission to manage IOCs outside your domain. Ask your network administrator.")
             tenant.iocs = [IocCategory(
                 ioc_id=enc.encrypt(ioc.ioc_id.encode()).decode(),
-                name=enc.encrypt(ioc.name.encode()).decode(),
+                name=enc.encrypt((ioc.name or "").encode()).decode(),
                 values=[enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (data.iocs or [])]
 
         await self._engine.save(tenant)
@@ -611,7 +613,7 @@ class TenantManager:
                 tenant.email = ""
             tenant.iocs = [IocCategory(
                 ioc_id=enc.decrypt(ioc.ioc_id.encode()).decode(),
-                name=enc.decrypt(ioc.name.encode()).decode(),
+                name=enc.decrypt(ioc.name.encode()).decode() if ioc.name else "",
                 values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (tenant.iocs or [])]
 
             tenant_data = tenant.model_dump()
@@ -798,7 +800,7 @@ class TenantManager:
 
             hashed_password = await AccountManager.get_instance().create_tenant_user(existing_user, existing_mail, password)
 
-            tenant_uuid = getattr(current_user, "tenant_uuid", None)
+            tenant_uuid = getattr(current_user, "tenant_uuid", None) or ""
             if not tenant_uuid:
                 raise HTTPException(status_code=400, detail="Invalid company association")
 

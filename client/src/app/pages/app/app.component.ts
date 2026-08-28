@@ -4,7 +4,6 @@ import { ErrorStoreService } from './services/error-store.service';
 import { filter, map, Observable } from 'rxjs';
 
 import { AppService } from '../../services/core/app/app.service';
-import { appAnimation, quotaBannerAnimation } from '../../shared/animations/app.animations';
 import { MessageNotificationComponent } from '../../shared/partials/message-notification/message-notification.component';
 import { LoaderComponent } from '../../shared/partials/loader/loader.component';
 import { TrailNotificationComponent } from '../../shared/partials/trail-notification/trail-notification.component';
@@ -16,8 +15,8 @@ import { LoadingService } from '../../shared/services/loading.service';
   standalone: true,
   imports: [RouterOutlet, MessageNotificationComponent, LoaderComponent, TrailNotificationComponent, TranslatePipe],
   templateUrl: './app.component.html',
+  styleUrls: ['./app.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [appAnimation, quotaBannerAnimation],
 })
 export class AppComponent {
   private activeRouteConfigLoads = 0;

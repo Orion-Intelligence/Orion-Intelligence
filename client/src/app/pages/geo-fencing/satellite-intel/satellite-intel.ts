@@ -106,7 +106,7 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     }
     this.initialMapEntityLoadTimer = setTimeout(() => {
       this.initialMapEntityLoadTimer = null;
-      this.loadMapEntities();
+      void this.loadMapEntities();
     }, 0);
   }
 

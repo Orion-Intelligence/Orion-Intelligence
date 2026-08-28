@@ -26,16 +26,3 @@ export const MODERATION_CONFIG: Record<string, ModerationMapping> = {
     tooltipText: 'Severe toxicity, threat, or identity-targeted hate detected',
   },
 };
-
-export function getModerationConfig(label?: string | null): ModerationMapping | null {
-  if (!label) {
-    return null;
-  }
-  return MODERATION_CONFIG[label] || {
-    label: 'unknown',
-    displayText: 'Flagged Content',
-    iconClass: 'bi bi-exclamation-circle-fill',
-    colorClasses: 'border-gray-500/30 bg-gray-500/10 text-gray-600 [body.light-theme_&]:text-gray-700',
-    tooltipText: 'Content flagged by moderation system',
-  };
-}

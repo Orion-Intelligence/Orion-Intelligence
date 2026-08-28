@@ -2,7 +2,6 @@ import { NgClass } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { FeederRuleOption, FeederScriptItem } from './model/feeder.model';
 import { FeederService } from './feeder.service';
 import { SidebarUserFeederAddComponent } from './add/sidebar-user-feeder-add.component';
@@ -18,8 +17,8 @@ import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../social-cti/constants/social
   standalone: true,
   imports: [NgClass, SidebarUserFeederAddComponent, SidebarUserFeederViewComponent, TranslatePipe, UiDropdownComponent],
   templateUrl: './sidebar-user-feeder.component.html',
+  styleUrls: ['./sidebar-user-feeder.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class SidebarUserFeederComponent implements OnInit {
   private readonly socialRuleGroupKey = '__social_media__';
@@ -181,7 +180,7 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   private syncRuleQueryParam(): void {
-    this.router.navigate([], {
+    void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { rule: this.effectiveSelectedRuleKey || null },
       queryParamsHandling: 'merge',

@@ -18,7 +18,7 @@
       <app-consolidated-scan [isLoading]="isLoading()" #domainScan></app-consolidated-scan>
     }
     @if (!isLoading()) {
-      <div @fadeInDashboardItem>
+      <div class="fade-in-dashboard-item">
         <div class="grid gap-5 xl:grid-cols-[minmax(0,13fr)_minmax(0,7fr)] max-[640px]:gap-4">
           <div class="min-w-0 space-y-4">
             @if (isGrouped) {
@@ -69,7 +69,7 @@
                         </span>
                       }
                     </div>
-                    <app-dashboard-result-apt @fadeInDashboardItem
+                    <app-dashboard-result-apt class="fade-in-dashboard-item"
                     [isExpandAble]="true" [directResults]="true" [searchResults]="externalConsolidatedFeedService.actorMalwareResults()"></app-dashboard-result-apt>
                   </div>
                 }
@@ -94,20 +94,20 @@
                     @if (index.value.length > 0) {
                       @if (index.key === 'leak_model' || index.key === 'generic_model' || index.key === 'tracking_model' || index.key === 'news_model') {
                         <app-dashboard-results-general-grid
-                          @fadeInDashboardItem [query]="query" [searchResults]="asGeneralResults(index.value)" [isExpandAble]="true"
+                          class="fade-in-dashboard-item" [query]="query" [searchResults]="asGeneralResults(index.value)" [isExpandAble]="true"
                           [type]="index.key === 'leak_model' ? 'leak' : index.key === 'tracking_model' ? 'tracking' : index.key === 'news_model' ? 'news' : 'general'">
                         </app-dashboard-results-general-grid>
                       }
                       @if (index.key === 'exploit_model') {
-                        <app-dashboard-result-exploit @fadeInDashboardItem
+                        <app-dashboard-result-exploit class="fade-in-dashboard-item"
                         [isExpandAble]="true" [searchResults]="asExploitResults(index.value)"></app-dashboard-result-exploit>
                       }
                       @if (index.key === 'social_model') {
-                        <app-dashboard-result-social @fadeInDashboardItem
+                        <app-dashboard-result-social class="fade-in-dashboard-item"
                         [isExpandAble]="true" [searchResults]="asSocialResults(index.value)"></app-dashboard-result-social>
                       }
                       @if (index.key === 'chat_model') {
-                        <app-dashboard-result-chat @fadeInDashboardItem
+                        <app-dashboard-result-chat class="fade-in-dashboard-item"
                         [isExpandAble]="true" [searchResults]="asChatResults(index.value)"></app-dashboard-result-chat>
                       }
                     } @else {

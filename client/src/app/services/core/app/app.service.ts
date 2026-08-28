@@ -4,7 +4,7 @@ import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../s
 import { AppStorageService } from './app-storage.service';
 import { ApiService } from '../../../shared/services/api.service';
 import { HttpClient } from '@angular/common/http';
-import { catchError, finalize, mapTo, shareReplay, tap } from 'rxjs/operators';
+import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 import { license_rules, search_filter_labels } from '../../../shared/constants/shared-enums';
 import { userSessionData } from '../../../shared/model/company-profile/node.model';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
@@ -102,7 +102,7 @@ export class AppService {
     this.loadEntities();
     this.loadLicenseRules();
     this.loadWorldJson();
-    this.loadDemoTourConfig();
+    void this.loadDemoTourConfig();
     this.activatedRoute.queryParams.subscribe(params => {
       const pageParam = +params['page'];
       if (!isNaN(pageParam)) {
@@ -130,7 +130,7 @@ export class AppService {
     }), catchError(() => {
       this.userSessionData.set(this.createEmptyUserSessionData());
       return of(null);
-    }), mapTo(void 0), finalize(() => {
+    }), map(() => void 0), finalize(() => {
       this.sessionLoad$ = null;
     }), shareReplay(1));
 
@@ -150,7 +150,7 @@ export class AppService {
         this.preloadImage(this.configData().appSettings.logo_wide_dark);
         this.title.setTitle(this.configData().appSettings.app_name || 'Orion Intelligence');
       }
-    }), catchError(() => of(null)), mapTo(void 0), finalize(() => {
+    }), catchError(() => of(null)), map(() => void 0), finalize(() => {
       this.configLoad$ = null;
     }), shareReplay(1));
 

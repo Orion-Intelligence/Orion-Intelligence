@@ -4,7 +4,6 @@ import { ChatResultItem } from '../../../../shared/model/results/chat/chat.callb
 import { CommonModule, NgClass, SlicePipe } from '@angular/common';
 import { ResultListComponent } from '../../../../shared/partials/result-components/result-list/result-list.component';
 import { ResultSectionComponent } from '../../../../shared/partials/result-components/result-section/result-section.component';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { JsonApiViewerComponent } from '../../../../shared/partials/json-api-viewer/json-api-viewer.component';
 import { last } from 'rxjs';
@@ -23,6 +22,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-report-chat',
   templateUrl: './report-chat.component.html',
+  styleUrls: ['./report-chat.component.css'],
   standalone: true,
   imports: [
     ResultListComponent,
@@ -36,7 +36,6 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
     ChatWidgetComponent,
     ReportInteractionHostComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem]
 })
 export class ReportChatComponent implements OnInit, AfterViewInit {
   private readonly commentTabKeys = new Set(['m_comments', 'm_post_comments', 'm_post_comments_list', 'm_post_comment_list', 'm_comment_list', 'm_comments_list', 'comments', 'comment_items', 'comment_details', 'comments_list', 'post_comments_list', 'm_replies', 'replies', 'm_thread_comments', 'thread_comments']);
@@ -306,45 +305,6 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   hasValue(value: unknown): boolean {
     return this.scanHelperMethodsService.hasRenderableValue(value);
-  }
-
-  getMetadataRows(): { label: string; value: string; long?: boolean }[] {
-    if (!this.resultItem) {
-      return [];
-    }
-
-    const item = this.resultItem;
-    const rows: { label: string; value: string; long?: boolean }[] = [];
-    const add = (label: string, value: unknown, long = false) => {
-      if (!this.hasValue(value)) {
-        return;
-      }
-      rows.push({
-        label,
-        value: Array.isArray(value) ? value.join(', ') : String(value),
-        long
-      });
-    };
-
-    add('Message Date', this.getDisplayMessageDate(item));
-    add('Views', item.m_views);
-    add('Sender Username', item.m_sender_username);
-    add('Sender', item.m_sender_name);
-    add('Message ID', this.getDisplayMessageId(item), true);
-    add('Platform', item.m_platform);
-    add('Network', item.m_network);
-    add('Post Likes', item.m_post_likes);
-    add('Post Shares', item.m_post_shares);
-    add('Post Comments', item.m_post_comments_count);
-    add('Post Tags', item.m_post_tags, true);
-    add('Post Views', item.m_post_views);
-    add('Post Expiry', item.m_post_expiry);
-    add('Comment Count', item.m_comment_count);
-    add('Likes', item.m_likes);
-    add('Retweets', item.m_retweets);
-    add('Commenters', item.m_commenters, true);
-
-    return rows;
   }
 
   get reportDocId(): string {

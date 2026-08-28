@@ -454,10 +454,6 @@ export class AlertNotificationComponent implements OnChanges {
     return this.scanNotificationService.getStep(job);
   }
 
-  getScanError(job: ScanJob): string {
-    return this.scanNotificationService.getError(job);
-  }
-
   close() {
     if (this.isScanMode()) {
       this.scanNotificationService.closePanel();

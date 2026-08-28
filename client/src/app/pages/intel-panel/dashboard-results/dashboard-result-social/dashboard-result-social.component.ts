@@ -1,10 +1,9 @@
 import { AfterViewInit, Component, ElementRef, OnInit, inject, input, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, Params, Router, RouterLink } from '@angular/router';
-import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
+import { SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { SocialResultItem } from '../../../../shared/model/results/social/social.callback.model';
-import { fadeInDashboardItem } from "../../../../shared/animations/dashboard.item.animation";
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
@@ -20,7 +19,6 @@ export type { SocialThreadComment } from './model/dashboard-result-social.model'
   selector: 'app-dashboard-result-social',
   standalone: true,
   imports: [
-    DatePipe,
     SlicePipe,
     RouterLink,
     TooltipDirective,
@@ -28,7 +26,7 @@ export type { SocialThreadComment } from './model/dashboard-result-social.model'
     RemoveEmojisPipe, TranslatePipe],
   templateUrl: './dashboard-result-social.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem]
+  styleUrls: ['./dashboard-result-social.component.css'],
 })
 export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);

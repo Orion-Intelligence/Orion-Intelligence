@@ -163,7 +163,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (!caseId) {
       this.isLoading = false;
       this.messageNotificationService.show(this.translate('No case ID provided'));
-      this.router.navigate(['/dashboard/profile/case-management']);
+      void this.router.navigate(['/dashboard/profile/case-management']);
       return;
     }
 
@@ -191,7 +191,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: () => {
         this.messageNotificationService.show(this.translate('Case not found'));
-        this.router.navigate(['/dashboard/profile/case-management']);
+        void this.router.navigate(['/dashboard/profile/case-management']);
         this.isLoading = false;
       }
     });
@@ -642,7 +642,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       expiresInHours: 168
     }).subscribe({
       next: share => {
-        let shareUrl = share.path;
+        let shareUrl: string;
         try {
           shareUrl = new URL(share.path, window.location.origin).toString();
         }

@@ -125,7 +125,7 @@ export class CaseTrackingBoard implements OnInit {
   }
 
   openBoardSettings(): void {
-    this.router.navigate(['/dashboard/profile/case-management/tracking-board/settings']);
+    void this.router.navigate(['/dashboard/profile/case-management/tracking-board/settings']);
   }
 
   canManageBoardSettings(): boolean {

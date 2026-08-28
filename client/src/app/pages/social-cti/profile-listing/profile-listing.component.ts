@@ -20,7 +20,6 @@ import type { FetchStateKey, FetchTabKey, SocialResultSource } from '../enums/so
 import type { CrawlResultView, FeedUser, FetchTab } from '../models/social-usability.models';
 import type { ExtensionState } from '../../../shared/model/extension/extension.model';
 import { toUsername } from '../utils/username.util';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { SocialDefaultListSectionComponent } from './default-list-section.component';
 import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tabs-section/profile-tabs-section.component';
 import { SocialExtensionManagerComponent } from '../../../shared/partials/extension-manager/extension-manager.component';
@@ -31,9 +30,9 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 @Component({
   selector: 'app-social-profile-listing',
   templateUrl: './profile-listing.component.html',
+  styleUrls: ['./profile-listing.component.css'],
   standalone: true,
   imports: [NgClass, SocialIconComponent, StealerlogSectionComponent, WantedListSectionComponent, PhoneLookupSectionComponent, SocialDefaultListSectionComponent, SocialProfileTabsSectionComponent, SocialExtensionManagerComponent, TranslatePipe],
-  animations: [fadeInDashboardItem],
   providers: [SocialLiveSyncService],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -52,7 +51,7 @@ export class SocialProfileListingComponent {
   private readonly liveSync = inject(SocialLiveSyncService);
   private readonly fetchCancelSubjects = new Map<string, Subject<void>>();
   private appliedProfileQuery = signal(false);
-  private readonly loadingByRequestKey = signal<Record<string, boolean>>({});
+  private readonly loadingByRequestKey = signal<Record<string, boolean | undefined>>({});
   private readonly loadingPlatformIds = computed(() => {
     const platformIds = new Set<string>();
     const addFrom = (key: string) => {
@@ -179,7 +178,7 @@ export class SocialProfileListingComponent {
 
   openProfileOverviewTab(platformId: string, tabKey: FetchTabKey, platformData?: social_profile): void {
     this.profileOverviewIds.set(new Set<string>([platformId]));
-    this.setActiveTab(platformId, platformData ? this.getAllowedTabKey(platformData, tabKey) : tabKey, platformData);
+    this.setActiveTab(platformId, platformData ? this.getAllowedTabKey(tabKey) : tabKey, platformData);
     if (platformData) {
       this.setProfileQuery(platformData);
       this.emitProfileOverviewLabel(platformData);
@@ -202,7 +201,7 @@ export class SocialProfileListingComponent {
   }
 
   getActiveTabForPlatform(platformData: social_profile): FetchTabKey {
-    return this.getAllowedTabKey(platformData, this.getActiveTab(this.getPlatformCardId(platformData)));
+    return this.getAllowedTabKey(this.getActiveTab(this.getPlatformCardId(platformData)));
   }
 
   getFetchTabs(): FetchTab[] {
@@ -656,7 +655,7 @@ export class SocialProfileListingComponent {
         return results;
       }
       updatedProfiles = currentProfiles.map(platform => isSamePlatform(platform, platformResult)
-        ? { ...platform, ...this.buildFetchedPlatformData(platform, stateKey, data, hasData), section_status: { ...platform.section_status, [this.sectionOf(stateKey)]: 'completed' } }
+        ? { ...platform, ...this.buildFetchedPlatformData(stateKey, data, hasData), section_status: { ...platform.section_status, [this.sectionOf(stateKey)]: 'completed' } }
         : platform);
       return new Map(results).set(getProfileGroupKey(this.storageService.state.scanResults(), platformResult), updatedProfiles);
     });
@@ -668,7 +667,7 @@ export class SocialProfileListingComponent {
     }
   }
 
-  private buildFetchedPlatformData(platform: social_profile, stateKey: FetchStateKey, data: unknown, hasData: boolean): Partial<social_profile> {
+  private buildFetchedPlatformData(stateKey: FetchStateKey, data: unknown, hasData: boolean): Partial<social_profile> {
     const propertyMap: Partial<Record<FetchStateKey, keyof social_profile>> = {
       profile: 'profile_details',
       onlinePresence: 'online_presence',
@@ -924,7 +923,7 @@ export class SocialProfileListingComponent {
     return platforms.some(platform => this.getResultSource(platform) === 'normal') ? 'normal' : 'darkweb';
   }
 
-  private getAllowedTabKey(platformData: social_profile, tabKey: FetchTabKey): FetchTabKey {
+  private getAllowedTabKey(tabKey: FetchTabKey): FetchTabKey {
     return this.getFetchTabs().some(tab => tab.key === tabKey) ? tabKey : 'details';
   }
 }

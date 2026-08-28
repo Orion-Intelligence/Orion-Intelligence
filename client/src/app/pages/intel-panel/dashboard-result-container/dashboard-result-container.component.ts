@@ -3,7 +3,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 
 import { DashboardResultsGeneralComponent } from '../dashboard-results/dashboard-results-general-grid/dashboard-results-general.component';
 import { PaginationComponent } from '../../../shared/partials/pagination/pagination.component';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { Category } from '../../../shared/constants/pages';
 import { combineLatest, distinctUntilChanged } from 'rxjs';
@@ -53,7 +52,7 @@ export type { DashboardSearchResponse } from './model/dashboard-result-container
     DashboardResultDefacementComponent],
   templateUrl: './dashboard-result-container.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./dashboard-result-container.component.scss'],
 })
 export class DashboardResultContainer implements OnInit, AfterViewInit, AfterViewChecked {
   private pendingScrollRestore = false;

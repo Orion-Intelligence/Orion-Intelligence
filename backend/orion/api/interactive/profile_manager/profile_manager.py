@@ -98,7 +98,7 @@ class ProfileManager:
             cipher = await self._tenant_cipher(current_user)
             session_id = uuid4().hex
             encrypted = cipher.encrypt(raw)
-            existing_record = None
+            existing_record: db_social_session_model | None = None
             if safe_session:
                 existing_record = await self._engine.find_one(
                     db_social_session_model,
@@ -180,7 +180,7 @@ class ProfileManager:
                 return await self._store_verification(record, False, username, "user_already_exists")
         return await self._store_verification(record, verified, username, str(reply.get("error") or ""))
 
-    async def _read_session_state(self, current_user, user_key: str, safe_platform: str, file_name: str):
+    async def _read_session_state(self, current_user, user_key: str, safe_platform: str, file_name: str) -> dict | None:
         path = CONSTANTS.S_SESSION_RESOURCE_DIR / user_key / safe_platform / file_name
         if not path.exists():
             return None

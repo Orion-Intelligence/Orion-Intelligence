@@ -97,7 +97,7 @@ class cronjob_manager:
                         hour=hour,
                         minute=minute,
                         timezone_name=timezone_name,
-                        handler=lambda tenant=tenant: alert_job.get_instance().run_tenant_categories(tenant),
+                        handler=lambda job_tenant=tenant: alert_job.get_instance().run_tenant_categories(job_tenant),
                         stale_after=timedelta(minutes=15),
                         heartbeat_interval=timedelta(seconds=60),
                     )

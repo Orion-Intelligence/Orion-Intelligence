@@ -2,12 +2,12 @@ import { Component, OnInit, input, output, ChangeDetectionStrategy } from '@angu
 import { KeyValuePipe, NgClass, NgTemplateOutlet } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
-import { advancedRowMotionAnimation } from '../../../shared/animations/advanced.row.motion.animation';
+import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
+import { advancedRowMotionAnimation } from '../../animations/advanced.row.motion.animation';
 import { popupAnimation } from '../../animations/popup.animations';
-import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
-import { SidebarService } from '../../../shared/services/sidebar.service';
-import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
+import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../model/stealerlogs-filter/stealerlogs-filters';
+import { SidebarService } from '../../services/sidebar.service';
+import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AppService } from '../../../services/core/app/app.service';

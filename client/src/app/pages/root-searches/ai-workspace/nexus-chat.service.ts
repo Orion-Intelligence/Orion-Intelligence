@@ -161,24 +161,10 @@ export class NexusChatService {
     return this.api.post<{ cleared?: boolean; }>('nexus/chat/clear-session', payload);
   }
 
-  pollNexusReportChat(payload: NexusChatPayload) {
-    return this.api.post<ChatApiResponse>('nlp/chat/report', payload).pipe(expand(response => this.isNexusPending(response)
-      ? timer(2000).pipe(switchMap(() => this.api.post<ChatApiResponse>('nlp/chat/report', payload)))
-      : EMPTY), takeWhile(response => this.isNexusPending(response), true));
-  }
-
   pollNexusSummary(payload: NexusSummaryPayload) {
     return this.api.post<ChatApiResponse>('nlp/summarize/ai', payload).pipe(expand(response => this.isNexusPending(response)
       ? timer(2000).pipe(switchMap(() => this.api.post<ChatApiResponse>('nlp/summarize/ai', payload)))
       : EMPTY), takeWhile(response => this.isNexusPending(response), true));
-  }
-
-  getNexusChatReply(response: ChatApiResponse): string {
-    const result = this.asRecord(response?.result);
-    const reply = result
-      ? result['response'] ?? result['result'] ?? result['text'] ?? response?.reply ?? response?.message ?? response?.text
-      : response?.result ?? response?.reply ?? response?.message ?? response?.text;
-    return (reply ?? '').toString().trim();
   }
 
   getNexusSummary(response: ChatApiResponse): string {

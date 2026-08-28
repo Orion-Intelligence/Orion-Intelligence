@@ -55,7 +55,7 @@ export class SidebarUserIocComponent implements OnInit {
     const tenantPrivileged = this.appService.tenantData().privileged_ioc;
     return tenantPrivileged === undefined
       ? this.appService.userSessionData().tenant.privilegedIoc !== true
-      : tenantPrivileged !== true;
+      : !tenantPrivileged;
   }
 
   update(): void {

@@ -47,7 +47,7 @@ export class TenantComponent implements OnInit {
     const tenantPrivileged = this.onboardingData.privileged_ioc ?? this.appService.tenantData().privileged_ioc;
     return tenantPrivileged === undefined
       ? this.appService.userSessionData().tenant.privilegedIoc !== true
-      : tenantPrivileged !== true;
+      : !tenantPrivileged;
   }
 
   goNext() {

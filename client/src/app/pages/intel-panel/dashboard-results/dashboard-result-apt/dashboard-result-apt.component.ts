@@ -6,7 +6,6 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
 import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } from '../../../../shared/model/results/apt-intel/apt-intel.callback.model';
 import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 
 const STAGGER_RENDER_BATCH_SIZE = 10;
 const STAGGER_RENDER_DELAY_MS = 16;
@@ -17,8 +16,8 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   standalone: true,
   imports: [CommonModule, DatePipe, TranslatePipe, RouterLink, RecordSidebarComponent],
   templateUrl: './dashboard-result-apt.component.html',
+  styleUrls: ['./dashboard-result-apt.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -263,10 +262,6 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
     return item.m_title || item.m_team || this.toList(item.m_attacker)[0] || item.m_family || item.m_signature || item.m_file_name || item.m_url || 'Untitled intel';
   }
 
-  getDescription(item: AptIntelResultItem): string {
-    return item.m_important_content || item.m_content || '';
-  }
-
   getPrimarySource(item: AptIntelResultItem): string {
     return item.m_reporter || item.m_source_url || item.m_url || item.m_base_url || '';
   }
@@ -339,12 +334,6 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   getGroupProfileLabel(group: AptIntelGroup): string {
     const first = group.records[0]?.item;
     return first ? (first.m_platform || first.m_origin_country || first.m_country || '-') : '-';
-  }
-
-  getBadgeClass(item: AptIntelResultItem): string {
-    return this.isMalware(item)
-      ? 'border-rose-400/30 bg-rose-400/10 text-rose-200 [body.light-theme_&]:border-rose-300 [body.light-theme_&]:bg-rose-50 [body.light-theme_&]:text-rose-700'
-      : 'border-sky-400/30 bg-sky-400/10 text-sky-200 [body.light-theme_&]:border-sky-300 [body.light-theme_&]:bg-sky-50 [body.light-theme_&]:text-sky-700';
   }
 
   isMalware(item: AptIntelResultItem): boolean {

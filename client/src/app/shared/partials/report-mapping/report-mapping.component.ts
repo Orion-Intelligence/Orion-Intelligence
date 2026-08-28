@@ -4,7 +4,6 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { fadeInDashboardItem } from '../../animations/dashboard.item.animation';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { ApiService } from '../../services/api.service';
@@ -23,9 +22,9 @@ export type { MappingEdge,MappingGraphItem,MappingVertex } from './model/report-
 @Component({
   selector: 'app-report-mapping',
   templateUrl: './report-mapping.component.html',
+  styleUrls: ['./report-mapping.component.css'],
   imports: [CommonModule, NgClass, TooltipDirective, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class ReportMappingComponent {
   private readonly proxied_resource = inject(ProxyController);

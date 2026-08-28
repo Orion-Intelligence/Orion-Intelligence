@@ -15,9 +15,7 @@ import { AlertScanLoadingComponent } from "./alert-scan-loading/alert-scan-loadi
 import { AlertService } from './services/alerts.service';
 import { AuthService } from '../../../services/authetication/auth.service';
 import { HomepageComponent } from "../../homepage/homepage.component";
-import { HomeInsightComponent } from "../../homepage/home-insight/home-insight.component";
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { overlayAnimation } from '../../../shared/animations/popup.animations';
 import { MessagePopupComponent } from "../../../shared/partials/message-popup/message-popup.component";
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 import { Subscription } from 'rxjs';
@@ -30,10 +28,9 @@ import { TranslationService } from '../../../shared/services/translation.service
 
 @Component({
   selector: 'app-sidebar-user-homepage',
-  imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, HomeInsightComponent, NgOptimizedImage, MessagePopupComponent, ExportChoiceModalComponent, TranslatePipe],
+  imports: [CommonModule, FormsModule, HomeSearchComponent, TooltipDirective, ConfirmationPopupComponent, AlertScanLoadingComponent, HomepageComponent, NgOptimizedImage, MessagePopupComponent, ExportChoiceModalComponent, TranslatePipe],
   templateUrl: './sidebar-user-homepage.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [overlayAnimation],
 })
 export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   private scanStatusSub?: Subscription;
@@ -152,7 +149,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
     const tenantPrivileged = this.appService.tenantData().privileged_ioc;
     return tenantPrivileged === undefined
       ? this.appService.userSessionData().tenant.privilegedIoc !== true
-      : tenantPrivileged !== true;
+      : !tenantPrivileged;
   }
 
   editIocs() {

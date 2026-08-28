@@ -7,6 +7,7 @@ from types import SimpleNamespace
 import httpx
 import pytest
 from cryptography.fernet import Fernet
+from fastapi import HTTPException
 
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import (
     search_consolidated_param_model,
@@ -101,7 +102,7 @@ def test_request_general_doc_fetches_document_and_translates_selected_fields(fak
         staticmethod(lambda text, target_lang: translations.append((text, target_lang)) or f"{target_lang}:{text}"),
     )
 
-    async def fake_get_value_crawl_status(record_name: str, url: str):
+    async def fake_get_value_crawl_status(_record_name: str, _url: str):
         return {"status": "active", "last_checked_at": None}
 
     monkeypatch.setattr(
@@ -363,7 +364,7 @@ def test_extract_ioc_from_file_raises_http_exception_on_failed_service(monkeypat
         async def __aenter__(self):
             return self
 
-        async def __aexit__(self, exc_type, exc, tb):
+        async def __aexit__(self, exc_type, exc_value, tb):
             return False
 
         async def post(self, url, files):
@@ -373,7 +374,7 @@ def test_extract_ioc_from_file_raises_http_exception_on_failed_service(monkeypat
 
     monkeypatch.setattr(httpx, "AsyncClient", _Client)
 
-    with pytest.raises(Exception) as exc:
+    with pytest.raises(HTTPException) as exc:
         _run(search_model().extract_ioc_from_file(b"ioc-data", "ioc.txt", "user-1"))
 
     assert "bad upstream" in str(exc.value.detail)

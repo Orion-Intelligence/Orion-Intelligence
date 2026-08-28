@@ -3,14 +3,13 @@ import { HttpParams } from '@angular/common/http';
 import { Component, OnInit, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ApiService } from '../../../shared/services/api.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { DatePickerComponent } from '../../../shared/partials/filters/date-picker/date-picker.component';
-import { SystemLogFile, SystemLogResponse } from './model/system-log.models';
+import { SystemLogResponse } from './model/system-log.models';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
 
 @Component({
@@ -18,8 +17,8 @@ import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/
   standalone: true,
   imports: [CommonModule, TranslatePipe, ConfirmationPopupComponent, DatePickerComponent, UiDropdownComponent],
   templateUrl: './sidebar-user-log-manager.component.html',
+  styleUrls: ['./sidebar-user-log-manager.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class SidebarUserLogManagerComponent implements OnInit {
   logType = '';
@@ -103,24 +102,6 @@ export class SidebarUserLogManagerComponent implements OnInit {
     }
     this.page -= 1;
     this.loadLogs();
-  }
-
-  deleteFile(file: SystemLogFile): void {
-    const confirmation = this.translationService.translate('Delete {file} from {date}?')
-      .replace('{file}', file.file)
-      .replace('{date}', file.date);
-    if (!confirm(confirmation)) {
-      return;
-    }
-    this.apiService.delete<{ success: boolean }>(`profile/system-logs/${file.date}/${file.file}`).subscribe({
-      next: () => {
-        this.page = 1;
-        this.loadLogs();
-      },
-      error: (error) => {
-        this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to delete log file');
-      }
-    });
   }
 
   flushLogs(): void {

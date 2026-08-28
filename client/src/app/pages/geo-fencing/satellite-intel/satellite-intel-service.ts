@@ -3,14 +3,12 @@ import { defer, EMPTY, Observable, throwError, timer } from 'rxjs';
 import { catchError, expand, switchMap, takeWhile, tap } from 'rxjs/operators';
 import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 import type { SatelliteResponseRecord } from './model/satellite-intel-service.model';
+import { SatellitePollingOptions } from './model/satellite-intel-service.model';
 export type { SatelliteResponseRecord } from './model/satellite-intel-service.model';
 
 
 
 
-export type SatellitePollingOptions = {
-  trackState?: boolean;
-};
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteIntelService {

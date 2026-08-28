@@ -5,7 +5,7 @@ import * as d3 from 'd3';
 import * as topojson from 'topojson-client';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
-import type { FeatureCollection, Geometry } from 'geojson';
+import type { FeatureCollection } from 'geojson';
 import type { GeometryCollection, Topology } from 'topojson-specification';
 import type { ZoomAnchor } from './model/geo-coordinates-modal.model';
 export type { ZoomAnchor } from './model/geo-coordinates-modal.model';
@@ -318,7 +318,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
     d3.select(container).selectAll('*').remove();
 
     const topology = worldData as WorldTopology;
-    const countries = topojson.feature(topology, topology.objects.countries) as FeatureCollection<Geometry>;
+    const countries = topojson.feature(topology, topology.objects.countries) as FeatureCollection;
 
     const svg = d3.select(container)
       .append('svg')

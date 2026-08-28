@@ -37,7 +37,7 @@ def test_graph_batch_expands_country_values_and_applies_builder_and():
         ("m_ip", "8.8.8.8"): [graph_item("doc-shared", "m_ip", "8.8.8.8")],
     }
 
-    async def fake_get_entity_relations(self, query):
+    async def fake_get_entity_relations(_self, query):
         calls.append(query)
         return {
             "results": responses.get((query.model_type, query.query_value), []),
@@ -89,7 +89,7 @@ def test_graph_batch_preserves_repeated_country_row_and_operator():
         ("m_country", "india"): [graph_item("doc-india", "m_country", "india")],
     }
 
-    async def fake_get_entity_relations(self, query):
+    async def fake_get_entity_relations(_self, query):
         calls.append(query)
         return {
             "results": responses.get((query.model_type, query.query_value), []),

@@ -18,7 +18,7 @@ def test_get_filters_logs_by_inclusive_date_range(tmp_path, monkeypatch):
         _write_log(tmp_path, log_date)
 
     manager = SystemLogManager.get_instance()
-    monkeypatch.setattr(manager, "_log_roots", lambda: [tmp_path])
+    monkeypatch.setattr(SystemLogManager, "_log_roots", lambda self: [tmp_path])
 
     result = manager.get(date_range="2026-07-02,2026-07-03", limit=100)
 

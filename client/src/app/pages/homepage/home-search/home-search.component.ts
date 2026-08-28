@@ -11,13 +11,12 @@ import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../shared/partials/result/services/home.search.service';
 import { WorldHeatmapComponent } from '../world-heatmap/world-heatmap.component';
-import { DemoTourComponent } from "../../demo-tour/demo-tour/demo-tour.component";
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-home-search',
   standalone: true,
-  imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, DemoTourComponent, TranslatePipe],
+  imports: [FormsModule, NgOptimizedImage, CommonModule, RouterLink, SearchFiltersComponent, HomeInsightComponent, WorldHeatmapComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './home-search.component.html',
 })

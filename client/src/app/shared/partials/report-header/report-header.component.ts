@@ -14,7 +14,8 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { ProxyController } from '../../services/proxy-controller';
 import { AiSummaryComponent } from '../../../pages/root-searches/ai-workspace/ai-summary/ai-summary.component';
 import { TranslatePipe } from '../../pipes/translate.pipe';
-import { LANGUAGE_OPTIONS, LanguageOption } from '../../constants/shared-enums';
+import { LANGUAGE_OPTIONS } from '../../constants/shared-enums';
+import { LanguageOption } from '../../constants/model/shared-enums.model';
 import { TranslationService } from '../../services/translation.service';
 import { ReportRouteUtil } from '../../utils/report-route.util';
 

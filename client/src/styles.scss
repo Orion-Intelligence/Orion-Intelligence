@@ -363,9 +363,14 @@ html:has(body.dark-theme) {
 body.demo-tour-active {
   [data-testid="dashboard-sidebar-main"] {
     height: 100vh !important;
-    height: 100dvh !important;
     min-height: 100vh !important;
-    min-height: 100dvh !important;
+  }
+
+  @supports (height: 100dvh) {
+    [data-testid="dashboard-sidebar-main"] {
+      height: 100dvh !important;
+      min-height: 100dvh !important;
+    }
   }
 
   [data-testid="dashboard-sidebar-scroll"] {

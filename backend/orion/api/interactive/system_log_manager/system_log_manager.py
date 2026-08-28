@@ -192,12 +192,12 @@ class SystemLogManager:
         return self._log_date(path), path.stat().st_mtime, int(match.group(0)) if match else 0
 
     def _log_file_item(self, path: Path) -> dict:
-        stat = path.stat()
+        file_stat = path.stat()
         return {
             "date": self._log_date(path),
             "file": self._log_file_name(path),
-            "size": stat.st_size,
-            "modified_at": datetime.fromtimestamp(stat.st_mtime).isoformat(),
+            "size": file_stat.st_size,
+            "modified_at": datetime.fromtimestamp(file_stat.st_mtime).isoformat(),
         }
 
     def _log_date(self, path: Path) -> str:

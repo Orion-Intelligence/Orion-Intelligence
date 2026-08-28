@@ -22,20 +22,20 @@ import {
 } from './controllers/08-social-extension.controller';
 
 function scanUsername(username = SOCIAL_USERNAME, platform: string | RegExp = SOCIAL_PLATFORM) {
-  cy.get('[data-testid="social-scan-input"]').clear().type(username);
-  cy.get('[data-testid="social-scan-submit"]').should('not.be.disabled').click();
-  cy.wait('@socialRecon', { timeout: FETCH_TIMEOUT });
-  cy.contains('[data-testid="social-history-job"]', username, { timeout: SCAN_TIMEOUT })
+  void cy.get('[data-testid="social-scan-input"]').clear().type(username);
+  void cy.get('[data-testid="social-scan-submit"]').should('not.be.disabled').click();
+  void cy.wait('@socialRecon', { timeout: FETCH_TIMEOUT });
+  void cy.contains('[data-testid="social-history-job"]', username, { timeout: SCAN_TIMEOUT })
     .should('contain.text', 'Results Ready')
     .click();
-  cy.contains(PLATFORM_CARD, platform, { timeout: FETCH_TIMEOUT }).scrollIntoView().should('be.visible');
+  void cy.contains(PLATFORM_CARD, platform, { timeout: FETCH_TIMEOUT }).scrollIntoView().should('be.visible');
 }
 
 function openProfile(platform: string | RegExp = SOCIAL_PLATFORM) {
-  cy.contains(PLATFORM_CARD, platform, { timeout: FETCH_TIMEOUT }).scrollIntoView().within(() => {
-    cy.get('[data-testid="social-profile-overview-button"]').click();
+  void cy.contains(PLATFORM_CARD, platform, { timeout: FETCH_TIMEOUT }).scrollIntoView().within(() => {
+    void cy.get('[data-testid="social-profile-overview-button"]').click();
   });
-  cy.get('[data-testid="social-header-back"]').should('be.visible');
+  void cy.get('[data-testid="social-header-back"]').should('be.visible');
 }
 
 describe('Orion Intelligence - Social Intel Management Flow', () => {
@@ -85,7 +85,7 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
       .should('be.visible')
       .and('contain.text', 'Exposure found');
     cy.get('[data-testid="social-dashboard-stealer-row"]').should('have.length.greaterThan', 0).then(($rows) => {
-      expect(findStealerRow($rows, 3), `a top stealer row is on ${SOCIAL_DOMAIN}`).to.exist;
+      assert.exists(findStealerRow($rows, 3), `a top stealer row is on ${SOCIAL_DOMAIN}`);
     });
 
     cy.get('[data-testid="social-dashboard-stealer-download"]').click();
@@ -292,7 +292,7 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     cy.get('[data-testid="social-tab-panel-stealer-logs"]', { timeout: FETCH_TIMEOUT }).should('be.visible');
     cy.get('[data-testid="social-stealerlog-table"]').should('be.visible');
     cy.get('[data-testid="social-stealerlog-row"]').should('have.length.greaterThan', 0).then(($rows) => {
-      expect(findStealerRow($rows), `a stealer row is on ${SOCIAL_DOMAIN}`).to.exist;
+      assert.exists(findStealerRow($rows), `a stealer row is on ${SOCIAL_DOMAIN}`);
     });
     cy.get('[data-testid="social-stealer-logs-reload"]').click();
     cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT });

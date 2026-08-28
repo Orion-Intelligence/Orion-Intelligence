@@ -2,10 +2,10 @@ import { geoContains } from 'd3-geo';
 import { feature as topojsonFeature } from 'topojson-client';
 import { OrionSatelliteFeature } from '../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
-import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
+import type { Feature, FeatureCollection, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 import type { Topology } from 'topojson-specification';
 
-type CountryFeature = Feature<Geometry, GeoJsonProperties>;
+type CountryFeature = Feature;
 type ExtendedGeoJSONOptions = Leaflet.GeoJSONOptions & { noClip?: boolean; smoothFactor?: number };
 
 export class CountryBoundaryMapRenderer {
@@ -35,9 +35,9 @@ export class CountryBoundaryMapRenderer {
       if (!countriesObject) {
         return;
       }
-      const countryCollection = topojsonFeature(topology, countriesObject) as FeatureCollection<Geometry, GeoJsonProperties>;
+      const countryCollection = topojsonFeature(topology, countriesObject) as FeatureCollection;
       this.countryFeatures = countryCollection.features;
-      const renderableCountryCollection: FeatureCollection<Geometry, GeoJsonProperties> = {
+      const renderableCountryCollection: FeatureCollection = {
         ...countryCollection,
         features: this.countryFeatures.map((feature) => this.normalizeFeature(feature)),
       };

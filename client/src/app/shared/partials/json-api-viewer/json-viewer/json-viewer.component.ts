@@ -1,11 +1,10 @@
 import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { TranslatePipe } from '../../../pipes/translate.pipe';
 
 @Component({
   selector: 'app-json-viewer',
   standalone: true,
-  imports: [CommonModule, TranslatePipe],
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './json-viewer.component.html'
 })

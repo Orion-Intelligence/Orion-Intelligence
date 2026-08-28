@@ -98,12 +98,14 @@ client_build() {
     rm -rf build-next
     if [ "$1" = "-t" ]; then
         npx ng build --configuration instrumented --output-path build-next
+        node instrument-build.js build-next/browser
     else
         npx ng build --configuration production --output-path build-next
     fi
-    test -d build-next
+    test -d build-next/browser
     mkdir -p build
-    rsync -a build-next/ build/
+    find build-next -maxdepth 1 -type f -exec mv -f {} build-next/browser/ \;
+    rsync -a build-next/browser/ build/
     rm -rf build-next
     cd ..
     rm -rf backend/workspace/build

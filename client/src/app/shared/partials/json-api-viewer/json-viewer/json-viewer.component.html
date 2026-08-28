@@ -6,7 +6,7 @@
   <span class="pointer-events-none absolute bottom-0 left-[3px] top-0 border-l-[1.5px] border-[var(--color-divider)]"></span>
   <ul class="list-none pl-0 font-mono text-[13px] leading-[1.55]">
     @for (key of keys(json); track key; let last = $last) {
-      <li class="relative py-[1px]" [class.mb-[3px]]="!last">
+      <li class="relative py-[1px]" [ngClass]="{'mb-[3px]': !last}">
         @if (isCollapsible(valueAt(key))) {
           <div (click)="toggle(pathKey(parentPath, key))" class="group relative flex cursor-pointer items-center gap-1 rounded-[6px] px-2 py-[4px] hover:bg-[var(--color-blue-790)] [&&]:!bg-[var(--color-blue-790)] [body.light-theme_&&]:!bg-[#f6faff] [body.light-theme_&&]:hover:!bg-[var(--color-blue-800)]">
             @if (level() > 0) {

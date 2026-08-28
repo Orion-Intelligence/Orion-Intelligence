@@ -3,13 +3,14 @@ import inspect
 import logging
 import os
 import stat
+import subprocess
 import sys
 from threading import Lock
 
 from termcolor import colored
 
 if sys.platform == "win32":
-    os.system('color')
+    subprocess.call('color', shell=True)
 
 
 class log:
@@ -89,7 +90,7 @@ class log:
 
             os.chmod(log_filepath, stat.S_IRUSR | stat.S_IWUSR | stat.S_IRGRP | stat.S_IROTH)
 
-        except Exception as e:
+        except Exception:
             pass
 
     def __format_log_message(self, log_type, p_log, include_caller=False):
@@ -125,7 +126,7 @@ class log:
                     except ValueError:
                         continue
 
-        except Exception as e:
+        except Exception:
             pass
 
     def i(self, p_log):

@@ -456,11 +456,12 @@ export class GraphExportService {
   }
 
   protected buildPlainTableTheme(options: PlainTableThemeOptions): PlainTableThemeConfig {
+    const borderLine = this.TABLE_BORDER_WIDTH;
     const styles: PlainTableThemeConfig['styles'] = {
       fontSize: options.fontSize,
       cellPadding: options.cellPadding,
       textColor: options.textColor ?? this.PDF_THEME.textBodyRgb,
-      lineWidth: { top: 0, right: 0, bottom: this.TABLE_BORDER_WIDTH, left: 0 },
+      lineWidth: { top: 0, right: 0, bottom: borderLine, left: 0 },
       lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.font) {
@@ -475,7 +476,7 @@ export class GraphExportService {
 
     const bodyStyles: PlainTableThemeConfig['bodyStyles'] = {
       fillColor: options.rowFillColor ?? this.TABLE_ROW_BG_RGB,
-      lineWidth: { top: 0, right: 0, bottom: this.TABLE_BORDER_WIDTH, left: 0 },
+      lineWidth: { top: 0, right: 0, bottom: borderLine, left: 0 },
       lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
     };
     if (options.textColor) {
@@ -487,7 +488,7 @@ export class GraphExportService {
       bodyStyles,
       alternateRowStyles: {
         fillColor: options.alternateRowFillColor ?? this.TABLE_ROW_ALT_BG_RGB,
-        lineWidth: { top: 0, right: 0, bottom: this.TABLE_BORDER_WIDTH, left: 0 },
+        lineWidth: { top: 0, right: 0, bottom: borderLine, left: 0 },
         lineColor: options.lineColor ?? this.TABLE_BORDER_RGB
       },
       theme: 'plain'
@@ -711,7 +712,7 @@ export class GraphExportService {
     if (sensitiveHeader.test(key.trim())) {
       return 'Present (value omitted from PDF)';
     }
-    if (!/(?:banner|headers?|response|request)/i.test(key)) {
+    if (!/banner|headers?|response|request/i.test(key)) {
       return text;
     }
     return text.replace(/^(\s*(?:set-cookie|cookie|authorization|proxy-authorization|x-api-key)\s*:).*$/gim, '$1 [value omitted from PDF]');
@@ -797,11 +798,6 @@ export class GraphExportService {
     return out + ellipsis;
   }
 
-  protected fitSingleLineStrict(doc: jsPDF, text: string, maxWidth: number, maxChars: number, safetyFactor: number = 0.86): string {
-    const limited = String(text || '').slice(0, Math.max(0, maxChars));
-    return this.fitSingleLine(doc, limited, maxWidth * safetyFactor);
-  }
-
   protected truncateWithEllipsis(value: string, maxChars: number): string {
     const input = String(value || '');
     if (input.length <= maxChars) {
@@ -828,13 +824,6 @@ export class GraphExportService {
 
   protected drawInfoSectionMarker(doc: jsPDF, y: number, width: number, label: string, fillRgb: [number, number, number] = this.INTERNAL_HEADER_RGB): void {
     drawInstitutionalSectionHeading(doc, y, width, label, fillRgb);
-  }
-
-  protected drawClippedText( doc: jsPDF, text: string, x: number, y: number, clipX: number, clipY: number, clipWidth: number, clipHeight: number, align: 'left' | 'center' | 'right' = 'left' ): void {
-    doc.saveGraphicsState();
-    doc.rect(clipX, clipY, clipWidth, clipHeight, null).clip().discardPath();
-    doc.text(text, x, y, { align });
-    doc.restoreGraphicsState();
   }
 
   protected getReportSectionTitle(table: GraphReportTableRow, index: number): string {

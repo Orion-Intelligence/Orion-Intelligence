@@ -16,8 +16,8 @@ async def tenant_branding_editor(current_user=Depends(get_current_user)):
         return current_user
 
     licenses = {
-        license
-        for license in (getattr(current_user, "licenses", None) or [])
+        license_name
+        for license_name in (getattr(current_user, "licenses", None) or [])
     }
     if LicenseName.MAINTAINER.value in licenses:
         return current_user
@@ -35,20 +35,20 @@ async def block_row_action(name: str = Query(...)):
 
 
 @admin_routes.post(
-    "/admin/api/db_user_account/edit/{id}",
+    "/admin/api/db_user_account/edit/{user_id}",
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def custom_edit_api(id: str, request: Request):
-    await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
+async def custom_edit_api(user_id: str, request: Request):
+    await auth_manager.edit_userStatus_and_sendMail_from_admin(user_id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
 
 
 @admin_routes.post(
-    "/admin/api/db_user_account/edit/{id}/",
+    "/admin/api/db_user_account/edit/{user_id}/",
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
-async def custom_edit_api_trailing(id: str, request: Request):
-    await auth_manager.edit_userStatus_and_sendMail_from_admin(id, request)
+async def custom_edit_api_trailing(user_id: str, request: Request):
+    await auth_manager.edit_userStatus_and_sendMail_from_admin(user_id, request)
     return RedirectResponse(url="/admin/db_user_account/list", status_code=303)
 
 

@@ -3,16 +3,15 @@ import { CommonModule, NgClass } from '@angular/common';
 import { Observable, Subscription } from 'rxjs';
 import { DirectoryCallbackModel } from '../model/directory.model';
 import { DirectoryService } from '../services/directory.service';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 @Component({
   selector: 'app-directory-list',
   templateUrl: './directory-list.component.html',
+  styleUrls: ['./directory-list.component.css'],
   standalone: true,
   imports: [CommonModule, NgClass, TranslatePipe],
-  changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem]
+  changeDetection: ChangeDetectionStrategy.Eager
 })
 export class DirectoryListComponent implements AfterViewInit, OnDestroy {
   private dataSub?: Subscription;

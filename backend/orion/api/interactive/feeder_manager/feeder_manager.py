@@ -43,7 +43,8 @@ class FeederManager:
 
     async def _read_limited_session_file(self, session_file: UploadFile) -> bytes:
         max_size = self._helper.MAX_FILE_SIZE
-        if getattr(session_file, "size", None) is not None and session_file.size > max_size:
+        declared_size = getattr(session_file, "size", None)
+        if declared_size is not None and declared_size > max_size:
             raise HTTPException(status_code=400, detail="Session file size must be 1 MB or less")
         content = await session_file.read(max_size + 1)
         if len(content) > max_size:
@@ -373,7 +374,7 @@ class FeederManager:
                     record = candidate_record
                     break
         if not record and lookup_url:
-            value_records = await self._engine.find(self._helper.model, self._helper.model.rule_key != None)
+            value_records = await self._engine.find(self._helper.model, self._helper.model.rule_key.ne(None))
             for candidate_record in value_records:
                 if lookup_url not in [str(value.get("url") or "") for value in (candidate_record.values or [])]:
                     continue

@@ -2,7 +2,6 @@ import { ChangeDetectorRef, Component, OnInit, ChangeDetectionStrategy } from '@
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { switchMap, timer, map, distinctUntilChanged, combineLatest } from 'rxjs';
 import { ResultComponent } from '../../../shared/partials/result/result.component';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { NgClass } from '@angular/common';
 import { CredentialListComponent } from './credential-list/credential-list.component';
@@ -46,8 +45,8 @@ type IocResultTab = 'stealers' | 'threats';
     ScrollTopComponent,
     TranslatePipe],
   templateUrl: './credential.component.html',
+  styleUrls: ['./credential.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class CredentialComponent implements OnInit {
   private pendingRequests = 0;
@@ -290,7 +289,8 @@ export class CredentialComponent implements OnInit {
     this.dashboardService
       .fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(switchMap(response => timer(500).pipe(map(() => response))), finalize(() => {
-        this.setLoading(-1), this.dashboardService.consolidatedParamModel.ioc = '';
+        this.setLoading(-1);
+        this.dashboardService.consolidatedParamModel.ioc = '';
       }))
       .subscribe(response => {
         if (requestId !== this.rankedRequestId) {

@@ -19,10 +19,6 @@ export class HomeSearchService {
     this.showFiltersOverlay = false;
   }
 
-  openOverlay() {
-    this.showFiltersOverlay = true;
-  }
-
   toggleAdvanceSettings() {
     const cfg = this.appService.configData();
     this.appService.set('advance_setting_toggle', !cfg.localSettings.advance_setting_toggle);

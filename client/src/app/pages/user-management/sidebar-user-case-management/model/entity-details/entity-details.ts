@@ -118,14 +118,6 @@ export class EntityDetailsComponent implements OnChanges {
     return null;
   }
 
-  getEntityTypeOtherError(): string | null {
-    return this.getOtherError(this.entity?.type, this.entity?.entityTypeOtherValue);
-  }
-
-  getEntitySourceOtherError(): string | null {
-    return this.getOtherError(this.entity?.source, this.entity?.entitySourceOtherValue);
-  }
-
   getLinkedEntityLabel(entity: CaseEntity): string {
     const value = entity.value || entity.entityId;
 

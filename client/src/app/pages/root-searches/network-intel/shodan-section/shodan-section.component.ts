@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
 import { IpDetailComponent } from '../ip-detail/ip-detail.component';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
@@ -12,8 +11,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
   standalone: true,
   imports: [CommonModule, IpDetailComponent, TranslatePipe],
   templateUrl: './shodan-section.component.html',
+  styleUrls: ['./shodan-section.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class ShodanSectionComponent {
   readonly errorMessageInput = input<string | null>(null, { alias: 'errorMessage' });
@@ -55,9 +54,5 @@ export class ShodanSectionComponent {
 
   get hasCameraSignals(): boolean {
     return !!this.shodanResult?.is_camera || this.cameraPortCount > 0 || (this.shodanResult?.cameras?.length ?? 0) > 0;
-  }
-
-  isProgressSegmentActive(index: number): boolean {
-    return index < Math.ceil(this.progress() / 5);
   }
 }

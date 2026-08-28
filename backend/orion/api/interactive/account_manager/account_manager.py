@@ -181,7 +181,7 @@ class AccountManager:
                 str(user.tenant_uuid), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="This user type cannot be updated")
 
-        tenant = None
+        tenant: db_tenant_model | None = None
         if request.licenses is not None or (user.status == UserStatus.DISABLE and request.status == UserStatus.ACTIVE):
             tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
 
@@ -362,7 +362,7 @@ class AccountManager:
 
         node = NodeCallbackModel.model_validate(
             {"user": {"email": user.email, "theme": theme, "twofa_enabled": user.twofa_enabled, "username": user.username, "role": user.role, "status": user.status, "subscription": user.subscription, "verificationDate": user.account_verify_at.isoformat() if user.account_verify_at else None, "password_reset_required": getattr(user, "password_reset_required", False), "license": [
-                license.value for license in
+                user_license.value for user_license in
                 user.licenses], "permissions": [
                 permission.value if hasattr(permission, "value") else permission for permission in (getattr(user, "permissions", None) or [])], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
                 tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(
@@ -417,5 +417,5 @@ class AccountManager:
             "email": user.email,
             "role": user.role,
             "tenant_name": tenant_name,
-            "licenses": [license.value if hasattr(license, "value") else str(license) for license in (user.licenses or [])],
+            "licenses": [user_license.value if hasattr(user_license, "value") else str(user_license) for user_license in (user.licenses or [])],
         }

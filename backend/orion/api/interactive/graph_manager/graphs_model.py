@@ -160,8 +160,6 @@ class graphs_model:
                 schema_version=safe_data.get("schema_version", 1),
             )
 
-            if new_doc.tabs is None:
-                new_doc.tabs = []
             if len(new_doc.tabs) > 5:
                 return JSONResponse(
                     status_code=400,

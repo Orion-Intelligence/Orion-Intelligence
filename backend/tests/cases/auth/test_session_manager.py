@@ -53,10 +53,16 @@ def _make_user(**overrides):
 
 def _make_manager(*, user=None, find_one_results=None):
     engine = FakeEngine(user, find_one_results=find_one_results)
-    manager = object.__new__(type("session_manager_under_test", (session_manager,), {"_engine": property(lambda _self: engine)}))
-    manager._redis = FakeRedis()
-    manager._session_ttl = 1800
-    return manager
+
+    class session_manager_under_test(session_manager):
+        _redis = FakeRedis()
+        _session_ttl = 1800
+
+        @property
+        def _engine(self):
+            return engine
+
+    return object.__new__(session_manager_under_test)
 
 
 def _token(payload):
@@ -398,7 +404,7 @@ def test_refresh_token_rejects_expired_member_trial():
         _run(manager.refresh_token(token))
 
     assert exc.value.status_code == 402
-    assert "Trial expired" in exc.value.detail
+    assert "Trial expired" in (exc.value.detail or "")
 
 
 def test_refresh_token_returns_new_session_payload_for_crawler(monkeypatch):

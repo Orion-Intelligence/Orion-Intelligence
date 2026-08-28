@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { DefacementGroup, DefacementGroupCallbackItem, DefacementRecord, DefacementResultItem, DefacementRisk, DefacementSummary } from '../../../../shared/model/results/defacement/defacement.callback.model';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
 import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
@@ -18,7 +17,7 @@ const RECORD_SIDEBAR_CLOSE_MS = 300;
   standalone: true, imports: [NgClass, DatePipe, TooltipDirective, TranslatePipe, RecordSidebarComponent],
   templateUrl: './dashboard-result-defacement.component.html',
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
+  styleUrls: ['./dashboard-result-defacement.component.css'],
 })
 export class DashboardResultDefacementComponent implements OnInit, AfterViewInit, OnDestroy {
   private renderTimer: ReturnType<typeof setTimeout> | null = null;

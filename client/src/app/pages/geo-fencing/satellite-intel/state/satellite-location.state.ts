@@ -1,7 +1,7 @@
 import { SatelliteTrackingViewport } from '../../models/geo-fencing.models';
 import { SatelliteIntelViewport } from '../../enums/geo-fencing.enums';
+import { ParsedCoordinates } from '../../../../shared/utils/model/geo-coordinates.model';
 
-type ParsedCoordinates = { lat: number; lon: number };
 
 export class SatelliteLocationState {
   private readonly compareNarrowDelta = 0.015;

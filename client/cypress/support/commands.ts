@@ -55,9 +55,9 @@ const loginRequestAlias = (alias = "loginRequest"): `@${string}` => (
 ) as `@${string}`;
 
 const visitLoginWithCleanAuthState = () => {
-    cy.clearCookies({ log: false });
-    cy.clearLocalStorage();
-    cy.visit("/login", {
+    void cy.clearCookies({ log: false });
+    void cy.clearLocalStorage();
+    void cy.visit("/login", {
         onBeforeLoad(win) {
             win.localStorage.clear();
             win.sessionStorage.clear();
@@ -68,9 +68,9 @@ const visitLoginWithCleanAuthState = () => {
 const waitForLoginForm = (reloaded = false, attempts = 0): Cypress.Chainable<void> => {
     return cy.document({ log: false }).then((doc) => {
         if (doc.querySelector('[data-testid="login-user"]')) {
-            cy.get('[data-testid="login-page"]', { timeout: 60000 }).should('be.visible');
-            cy.get('[data-testid="login-user"]', { timeout: 60000 }).should('be.visible');
-            cy.get('[data-testid="login-pass"]', { timeout: 60000 }).should('be.visible');
+            void cy.get('[data-testid="login-page"]', { timeout: 60000 }).should('be.visible');
+            void cy.get('[data-testid="login-user"]', { timeout: 60000 }).should('be.visible');
+            void cy.get('[data-testid="login-pass"]', { timeout: 60000 }).should('be.visible');
             return cy.wrap<void>(undefined, { log: false });
         }
 
@@ -79,7 +79,7 @@ const waitForLoginForm = (reloaded = false, attempts = 0): Cypress.Chainable<voi
         }
 
         if (!reloaded) {
-            cy.reload();
+            void cy.reload();
             return waitForLoginForm(true);
         }
 
@@ -175,7 +175,7 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
             })
         )).then((result) => {
             const data = typeof result === "string" ? result : (result as Record<string, unknown>)['data'];
-            expect(data, `docs screenshot ${name}`).to.be.a("string").and.not.be.empty;
+            expect(data, `docs screenshot ${name}`).to.be.a("string").and.not.equal("");
             return cy.task("writeDocScreenshot", {
                 data,
                 name: taskScreenshotName,
@@ -196,10 +196,10 @@ Cypress.Commands.add("typeSlow", (selector: string, value: string, options: Slow
     const submit = options.submit ?? false;
 
     const typeValue = (typeDelay = delay) => {
-        getSlowTypeInput(selector).click({ force: true });
-        getSlowTypeInput(selector).type('{selectall}{backspace}', { force: true });
-        cy.wait(settleMs);
-        getSlowTypeInput(selector).type(value, { force: true, delay: typeDelay });
+        void getSlowTypeInput(selector).click({ force: true });
+        void getSlowTypeInput(selector).type('{selectall}{backspace}', { force: true });
+        void cy.wait(settleMs);
+        void getSlowTypeInput(selector).type(value, { force: true, delay: typeDelay });
     };
 
     typeValue();
@@ -208,11 +208,11 @@ Cypress.Commands.add("typeSlow", (selector: string, value: string, options: Slow
             typeValue(0);
         }
     });
-    getSlowTypeInput(selector).should('have.value', value);
+    void getSlowTypeInput(selector).should('have.value', value);
 
     if (submit) {
-        cy.wait(settleMs);
-        getSlowTypeInput(selector).type('{enter}', { force: true });
+        void cy.wait(settleMs);
+        void getSlowTypeInput(selector).type('{enter}', { force: true });
     }
 
     return cy.wrap<void>(undefined, { log: false });
@@ -220,14 +220,14 @@ Cypress.Commands.add("typeSlow", (selector: string, value: string, options: Slow
 
 Cypress.Commands.add("loginAsAdmin", () => {
     cy.env(["ADMIN_USERNAME", "ADMIN_PASSWORD"]).then(({ ADMIN_USERNAME, ADMIN_PASSWORD }) => {
-        cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
-        cy.visitLoginWithCleanAuthState();
-        waitForLoginForm();
-        cy.get('[data-testid="login-user"]').clear().type(ADMIN_USERNAME);
-        cy.get('[data-testid="login-pass"]').clear().type(ADMIN_PASSWORD, { log: false });
-        cy.get('[data-testid="login-button"]').first().click();
-        cy.waitForLoginRequest();
-        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
+        void cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
+        void cy.visitLoginWithCleanAuthState();
+        void waitForLoginForm();
+        void cy.get('[data-testid="login-user"]').clear().type(ADMIN_USERNAME);
+        void cy.get('[data-testid="login-pass"]').clear().type(ADMIN_PASSWORD, { log: false });
+        void cy.get('[data-testid="login-button"]').first().click();
+        void cy.waitForLoginRequest();
+        void cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -240,14 +240,14 @@ Cypress.Commands.add("loginAsTest1", () => {
         if (!user?.username || !user?.password) {
             throw new Error(`Missing test user credentials for key: ${key}`);
         }
-        cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
-        cy.visitLoginWithCleanAuthState();
-        waitForLoginForm();
-        cy.get('[data-testid="login-user"]').clear().type(user.username);
-        cy.get('[data-testid="login-pass"]').clear().type(user.password, { log: false });
-        cy.get('[data-testid="login-button"]').first().click();
-        cy.waitForLoginRequest();
-        cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
+        void cy.intercept({ method: "POST", pathname: "**/api/token" }).as("loginRequest");
+        void cy.visitLoginWithCleanAuthState();
+        void waitForLoginForm();
+        void cy.get('[data-testid="login-user"]').clear().type(user.username);
+        void cy.get('[data-testid="login-pass"]').clear().type(user.password, { log: false });
+        void cy.get('[data-testid="login-button"]').first().click();
+        void cy.waitForLoginRequest();
+        void cy.get('[data-testid="profile-menu"], [data-testid="dashboard-main"], [data-testid="dashboard-container"]')
             .filter(':visible')
             .should('have.length.greaterThan', 0);
     });
@@ -264,19 +264,19 @@ Cypress.Commands.add("logout", () => {
             if (!profileMenu.length) {
                 return;
             }
-            cy.intercept("GET", "**/api/insight", {
+            void cy.intercept("GET", "**/api/insight", {
                 statusCode: 200,
                 body: {
                     insights: { general: {}, leak: {}, defacement: {} },
                     latestDocument: { generic_model: [], leak_model: [], defacement_model: [], chat_model: [], exploit_model: [] },
                 },
             });
-            cy.scrollTo("top", { ensureScrollable: false });
-            cy.wrap(profileMenu).scrollIntoView().click({ force: true });
-            cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({ force: true });
-            cy.get('[data-testid="login-user"]').should('exist');
-            cy.clearCookies({ log: false });
-            cy.clearLocalStorage();
+            void cy.scrollTo("top", { ensureScrollable: false });
+            void cy.wrap(profileMenu).scrollIntoView().click({ force: true });
+            void cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({ force: true });
+            void cy.get('[data-testid="login-user"]').should('exist');
+            void cy.clearCookies({ log: false });
+            void cy.clearLocalStorage();
             cy.window({ log: false }).then((win) => {
                 win.localStorage.clear();
                 win.sessionStorage.clear();
@@ -309,9 +309,9 @@ Cypress.Commands.add("scrollDashboardToBottom", () => {
 });
 
 Cypress.Commands.add("openSideFilter", () => {
-    cy.scrollDashboardToTop();
-    cy.get('[data-testid="side-filter-open"]').filter(':visible').first().should('be.visible').click();
-    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
+    void cy.scrollDashboardToTop();
+    void cy.get('[data-testid="side-filter-open"]').filter(':visible').first().should('be.visible').click();
+    void cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
 });
 Cypress.Commands.add("closeSideFilter", () => {
     cy.window().then((win) => {
@@ -324,18 +324,18 @@ Cypress.Commands.add("closeSideFilter", () => {
             return;
         }
 
-        cy.wrap(target).click('center', { force: true });
+        void cy.wrap(target).click('center', { force: true });
     });
 });
 Cypress.Commands.add("applySideFilter", () => {
-    cy.get('[data-testid="side-filter-apply"]')
+    void cy.get('[data-testid="side-filter-apply"]')
         .filter(':visible')
         .first()
         .should('be.visible')
         .click({ force: true, waitForAnimations: false, animationDistanceThreshold: 0 });
 });
 Cypress.Commands.add("clearAllEmails", () => {
-    cy.request("DELETE", "http://localhost:8025/api/v1/messages");
+    void cy.request("DELETE", "http://localhost:8025/api/v1/messages");
 });
 Cypress.Commands.add("openLastMailAndGetUrl", () => {
     const timeoutMs = 20000;

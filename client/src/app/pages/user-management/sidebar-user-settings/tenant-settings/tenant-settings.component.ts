@@ -8,7 +8,6 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { userSessionData } from '../../../../shared/model/company-profile/node.model';
 import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
 import { TenantModel } from '../../../../shared/model/tenant/tenant.model';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { getTenantLocationDisplay } from '../sidebar-settings.util';
 import { MessageNotificationService } from '../../../../services/message_notification/message-notification.service';
 import { AlertWebhookSettingsBlockComponent } from '../../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings-block.component';
@@ -21,9 +20,9 @@ import { TranslationService } from '../../../../shared/services/translation.serv
 @Component({
   selector: 'app-tenant-settings',
   imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
-  animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './tenant-settings.component.html'
+  templateUrl: './tenant-settings.component.html',
+  styleUrls: ['./tenant-settings.component.css']
 })
 export class TenantSettingsComponent implements OnInit {
   private contactSnapshot = '';
@@ -191,14 +190,14 @@ export class TenantSettingsComponent implements OnInit {
     this.webhookForm = {
       slack_client_id: response?.app?.slack_client_id || '',
       slack_client_secret: '',
-      slack_configured: response?.app?.slack_configured === true,
+      slack_configured: response?.app?.slack_configured,
       jira_client_id: response?.app?.jira_client_id || '',
       jira_client_secret: '',
-      jira_configured: response?.app?.jira_configured === true,
-      alert_slack_connected: response?.tenant?.slack_connected === true,
+      jira_configured: response?.app?.jira_configured,
+      alert_slack_connected: response?.tenant?.slack_connected,
       alert_slack_channel: response?.tenant?.slack_channel || '',
       alert_slack_team: response?.tenant?.slack_team || '',
-      alert_jira_connected: response?.tenant?.jira_connected === true,
+      alert_jira_connected: response?.tenant?.jira_connected,
       alert_jira_site_url: response?.tenant?.jira_site_url || '',
       alert_jira_site_name: response?.tenant?.jira_site_name || ''
     };

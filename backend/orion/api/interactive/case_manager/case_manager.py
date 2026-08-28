@@ -501,7 +501,7 @@ class CaseManager:
         if assigned_analysts_changed and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can update case analysts")
 
-        if (task_assignments_changed and not CaseHelperMethods.is_analyst(current_user) and not CaseHelperMethods.can_manage_case_assignments(record, current_user)):
+        if task_assignments_changed and not CaseHelperMethods.is_analyst(current_user) and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
             raise HTTPException(status_code=403, detail="Only admins, maintainers, or the case creator can assign tasks")
 
         if linked_cases_changed and not CaseHelperMethods.can_manage_case_assignments(record, current_user):
@@ -712,7 +712,7 @@ class CaseManager:
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
-        if not artifact:
+        if artifact is None:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
         for file in files:
@@ -779,12 +779,12 @@ class CaseManager:
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
-        if not artifact:
+        if artifact is None:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
         artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
 
-        if not artifact_file:
+        if artifact_file is None:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
         file_resource_id = artifact_file.fileResourceId
@@ -850,12 +850,12 @@ class CaseManager:
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
 
-        if not artifact:
+        if artifact is None:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
         artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
 
-        if not artifact_file:
+        if artifact_file is None:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
         self._artifact_file_helper.delete_artifact_file(artifact_file.fileResourceId)
@@ -904,7 +904,7 @@ class CaseManager:
         )
     
 
-    async def get_artifact_reports(self, source: str, current_user, q: str = "", limit: int = 10) -> list[dict]:
+    async def get_artifact_reports(self, source: str, _current_user, q: str = "", limit: int = 10) -> list[dict]:
         source = (source or "").strip().lower()
         q = (q or "").strip()
         limit = max(1, min(limit or 10, 50))
@@ -1105,11 +1105,11 @@ class CaseManager:
         )
 
         artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
-        if not artifact:
+        if artifact is None:
             raise HTTPException(status_code=404, detail="Artifact not found")
 
         artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
-        if not artifact_file:
+        if artifact_file is None:
             raise HTTPException(status_code=404, detail="Artifact file not found")
 
         is_valid = self._verify_file_integrity(artifact_file, enc)

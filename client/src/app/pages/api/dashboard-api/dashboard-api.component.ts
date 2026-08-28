@@ -7,7 +7,6 @@ import { Observable, EMPTY, of, timer } from 'rxjs';
 import { catchError, expand, finalize, switchMap, takeWhile } from 'rxjs/operators';
 import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
@@ -31,9 +30,9 @@ type DashboardApiWireResponse = DashboardApiResponse | DashboardApiResponse[];
 @Component({
   selector: 'app-dashboard-api',
   imports: [FormsModule, NgOptimizedImage, EmptyResultComponent, EmptyQueryComponent, NgClass, UpperCasePipe, ChatWidgetComponent, TooltipDirective, TranslatePipe, ExportChoiceModalComponent],
-  animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.Eager,
-  templateUrl: './dashboard-api.component.html'
+  templateUrl: './dashboard-api.component.html',
+  styleUrls: ['./dashboard-api.component.css']
 })
 export class DashboardApiComponent extends ValuePresentationBase implements OnInit {
   q1 = '';

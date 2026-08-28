@@ -1,6 +1,6 @@
 <div data-testid="social-list-view" class="mb-[100px] flex h-full w-full flex-col overflow-hidden bg-transparent">
   @if (showLoadingSkeleton()) {
-    <div data-testid="social-profile-query-loading" class="min-h-0 flex-1 overflow-y-auto bg-transparent" @fadeInDashboardItem>
+    <div data-testid="social-profile-query-loading" class="ui-fade-in-dashboard-item min-h-0 flex-1 overflow-y-auto bg-transparent">
       <div class="mx-auto flex w-full max-w-[1480px] animate-social-profile-overview-in items-stretch gap-4 px-4 py-3 will-change-[opacity,transform] motion-reduce:animate-none">
         <aside class="hidden w-[240px] flex-shrink-0 flex-col gap-3 pr-2 lg:flex">
           <div class="overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]">
@@ -47,7 +47,7 @@
       </div>
     </div>
   } @else if (!hasResults()) {
-    <div data-testid="social-list-empty" class="min-h-0 flex-1 overflow-y-auto bg-transparent" @fadeInDashboardItem>
+    <div data-testid="social-list-empty" class="ui-fade-in-dashboard-item min-h-0 flex-1 overflow-y-auto bg-transparent">
       <div class="mx-auto flex w-full max-w-[1480px] items-stretch gap-4 px-4 py-3">
         <aside class="sticky top-4 hidden max-h-[calc(100vh-5rem)] w-[240px] flex-shrink-0 self-stretch flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar lg:flex">
           <div class="flex-shrink-0 overflow-hidden rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)]">
@@ -103,7 +103,7 @@
       </div>
     </div>
   } @else {
-    <div class="min-h-0 flex-1 overflow-hidden bg-transparent" @fadeInDashboardItem>
+    <div class="ui-fade-in-dashboard-item min-h-0 flex-1 overflow-hidden bg-transparent">
       <div class="mx-auto flex h-full min-h-0 w-full max-w-[1480px] items-start gap-4 px-4 py-3">
         <aside class="hidden max-h-[850px] min-h-0 w-[240px] flex-shrink-0 flex-col gap-3 overflow-hidden pr-2 lg:flex">
           @if (activeUser(); as user) {

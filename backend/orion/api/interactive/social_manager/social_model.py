@@ -57,7 +57,7 @@ class social_model:
     @staticmethod
     def _recon_profile_details(item: dict) -> dict:
         followers = item.get("total_followers") or item.get("follower_count") or item.get("followers")
-        details = {
+        details: dict[str, Any] = {
             "real_name": item.get("full_name") or item.get("name") or item.get("real_name"),
             "bio": item.get("description") or item.get("bio"),
             "location": item.get("location"),
@@ -95,13 +95,16 @@ class social_model:
                 return item
 
         metadata = item.get("metadata") if isinstance(item.get("metadata"), dict) else {}
-        data = item.get("data") if isinstance(item.get("data"), dict) else {}
+        raw_data = item.get("data")
+        data = raw_data if isinstance(raw_data, dict) else {}
         if not item.get("platform") and not metadata and "platform" not in item:
             return item
 
-        ids = (data.get("platform_profile") or {}).get("ids") if isinstance(data.get("platform_profile"), dict) else None
+        platform_profile = data.get("platform_profile")
+        ids = platform_profile.get("ids") if isinstance(platform_profile, dict) else None
         if not isinstance(ids, dict):
-            ids = data.get("ids") if isinstance(data.get("ids"), dict) else {}
+            raw_ids = data.get("ids")
+            ids = raw_ids if isinstance(raw_ids, dict) else {}
 
         built = {"meta": social_model._recon_meta(item, metadata, ids, profile_username)}
         details = item.get("profile_details") if isinstance(item.get("profile_details"), dict) else None
@@ -527,8 +530,8 @@ class social_model:
     def _graph_person_handle(cls, item: dict) -> str:
         if not isinstance(item, dict):
             return ""
-        raw = next((str(item.get(key)).strip() for key in ("handle", "screen_name", "acct", "username", "login", "author") if str(item.get(key) or "").strip()), "")
-        url = next((str(item.get(key)).strip() for key in ("url", "media_url", "profile_url") if str(item.get(key) or "").strip()), "")
+        raw = next((str(item.get(key) or "").strip() for key in ("handle", "screen_name", "acct", "username", "login", "author") if str(item.get(key) or "").strip()), "")
+        url = next((str(item.get(key) or "").strip() for key in ("url", "media_url", "profile_url") if str(item.get(key) or "").strip()), "")
         if raw and not re.search(r"\s", raw):
             return cls._graph_handle(raw)
         return cls._graph_handle(url) or cls._graph_handle(raw)
@@ -625,7 +628,7 @@ class social_model:
 
     async def delete_social_profiles(self, user_id: str, profile_username: str):
         try:
-            normalized_username = (profile_username).strip().lstrip("@").lower()
+            normalized_username = profile_username.strip().lstrip("@").lower()
             result = await self._engine.database[SOCIAL_COLLECTION].delete_many({
                 "user_id": user_id,
                 "$or": [

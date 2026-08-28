@@ -223,6 +223,7 @@ class search_query_generator:
     def _build_query_block(p_query_model, pfilter, raw_query, quoted_value, exact_phrases, loose_terms, phrase_fields, must_clauses, must_not_clause, m_page_number, date_boost_fields):
         multi_fields = [f"{field}^{boost}" for field, boost in phrase_fields]
 
+        content_query: dict
         if raw_query == "*":
             content_query = {"match_all": {}}
         else:
@@ -291,7 +292,7 @@ class search_query_generator:
                 if not u:
                     continue
 
-                has_scheme = bool(re.match(r"^(?:https?://)", u, flags=re.I))
+                has_scheme = bool(re.match(r"^https?://", u, flags=re.I))
                 candidates = set()
 
                 if has_scheme:
@@ -484,7 +485,6 @@ class search_query_generator:
 
         m_date_range = p_query_model.daterange
         m_network = p_query_model.network
-        m_platform = p_query_model.platform
         m_page_number = getattr(p_query_model, "page", 1)
         m_content_type = str(getattr(p_query_model, "m_content_type", None) or p_query_model.content or "all").strip().lower()
         m_platform = (p_query_model.platform or "").strip().lower()
@@ -735,7 +735,7 @@ class search_query_generator:
         }
 
         date_field = "date"
-        date_range = getattr(p_query_model, "daterange", None)
+        date_range = str(getattr(p_query_model, "daterange", None) or "")
 
         if date_range:
             parts = date_range.split(',')

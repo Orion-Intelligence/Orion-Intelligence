@@ -117,6 +117,7 @@ class TestRouteHelper:
             return cls.load_api_mock("nexus_analyze_text.json")
         return {"status": "done", "step": "complete", "result": {}}
 
+    @staticmethod
     async def test_poll_scan_job(scan_id: str, current_user):
         manager = ScanJobManager.get_instance()
 
@@ -126,7 +127,7 @@ class TestRouteHelper:
 
         response = job.response or {}
         scan_status = manager._job_status_from_response(response) if response else None
-        if not scan_status or not manager.is_terminal_status(scan_status.value):
+        if scan_status is None or not manager.is_terminal_status(scan_status.value):
             now = datetime.now(timezone.utc)
             mock_response = TestRouteHelper.scan_job_mock_response(job.api_reference, job.payload or {})
             job.response = mock_response if isinstance(mock_response, dict) else {"result": mock_response}

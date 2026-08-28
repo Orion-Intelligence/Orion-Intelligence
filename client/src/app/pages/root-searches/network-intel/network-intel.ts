@@ -9,7 +9,6 @@ import { DnsResult, IpDetail, IpRowState, GeoResult, GeoLiveStats, NetworkIntelT
 import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/report/report-export.model';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-coordinates-modal.component';
 import { DnsSectionComponent } from './dns-section/dns-section.component';
 import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
@@ -25,10 +24,10 @@ import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 @Component({
   selector:    'app-network-intel',
   templateUrl: './network-intel.html',
+  styleUrls:   ['./network-intel.css'],
   standalone:  true,
   imports:     [CommonModule, FormsModule, EmptyQueryComponent, GeoCoordinatesModalComponent, DnsSectionComponent, ShodanSectionComponent, VulnerabilitySectionComponent, SeoRepoScanSectionComponent, TranslatePipe, ExportChoiceModalComponent],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations:  [fadeInDashboardItem],
 })
 export class NetworkIntel implements OnInit, OnDestroy {
   private sub?: Subscription;
@@ -240,15 +239,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.openGeoCoordinatesModalFromStatus();
   }
 
-  openGeoCoordinatesModal(): void {
-    if (this.isScanning()) {
-      return;
-    }
-    this.geoMode = 'coords';
-    this.showGeoRangesModal = false;
-    this.showGeoCoordinatesModal = true;
-  }
-
   openGeoCoordinatesModalFromStatus(): void {
     this.geoMode = 'coords';
     this.showGeoRangesModal = false;
@@ -261,19 +251,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.geoMode = 'coords';
     this.validateGeo();
     this.syncUrl();
-  }
-
-  openGeoRangesModal(): void {
-    if (this.isScanning()) {
-      return;
-    }
-    this.geoMode = 'ranges';
-    this.showGeoCoordinatesModal = false;
-    this.geoForm.ip_ranges = '';
-    this.formError = null;
-    this.parsedRanges = [];
-    this.geoRangesSubmitAttempted = false;
-    this.showGeoRangesModal = true;
   }
 
   getToolbarQuery(): string {
@@ -345,24 +322,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return 'Search repository URL...';
     }
     return 'Search coordinates...';
-  }
-
-  getGeoRangePreview(): string {
-    const ranges = this.geoForm.ip_ranges
-      .split('\n')
-      .map(line => line.trim())
-      .filter(Boolean);
-
-    return ranges[0] || 'No IP ranges selected';
-  }
-
-  getGeoRangeExtraCount(): number {
-    const ranges = this.geoForm.ip_ranges
-      .split('\n')
-      .map(line => line.trim())
-      .filter(Boolean);
-
-    return Math.max(0, ranges.length - 1);
   }
 
   canDownloadReport(): boolean {
@@ -1614,7 +1573,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return [];
     }
 
-    let json = '';
+    let json: string;
     try {
       json = JSON.stringify(source, null, 2);
     }

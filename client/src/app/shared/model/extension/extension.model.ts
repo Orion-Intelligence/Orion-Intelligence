@@ -7,7 +7,3 @@ export interface ExtensionPresence {
   connected?: boolean;
   version?: string;
 }
-
-export interface ExtensionSession {
-  extension_connected?: boolean;
-}

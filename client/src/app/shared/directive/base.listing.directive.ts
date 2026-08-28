@@ -71,7 +71,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
     this.isLoading.set(true);
     this.service.setCurrentPage(page);
     const queryParams = { ...this.selectedFilters, q: this.searchQuery || null, page };
-    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
+    void this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
     this.service.reload(queryParams);
   }
 
@@ -100,7 +100,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
   protected reload(): void {
     this.isLoading.set(true);
     const queryParams = { ...this.selectedFilters, q: this.searchQuery || null, page: 1 };
-    this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
+    void this.router.navigate([], { relativeTo: this.route, queryParams, queryParamsHandling: 'merge' });
     this.service.reload(queryParams);
   }
 }

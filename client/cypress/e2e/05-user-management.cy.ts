@@ -259,7 +259,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     cy.get('[data-testid="demo-tour-tooltip"]').should('be.visible');
     cy.get('[data-testid="demo-tour-step"]').should('be.visible').invoke('text').should(rawProgress => {
       const progress = rawProgress.match(/^\s*Step\s+(\d+)\s*\/\s*(\d+)\s*$/);
-      expect(progress, 'tour progress').to.not.be.null;
+      expect(progress, 'tour progress').to.not.equal(null);
       expect(Number(progress![1]), 'current tour step').to.eq(expectedCurrent);
       expect(Number(progress![2]), 'total tour steps').to.eq(expectedTotal);
     });
@@ -290,7 +290,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
         if (!settings) {
           return;
         }
-        let metaInfo: Record<string, unknown> = {};
+        let metaInfo: Record<string, unknown>;
         try {
           const parsedMetaInfo = typeof settings.meta_info === 'string' ? JSON.parse(settings.meta_info) : settings.meta_info;
           metaInfo = parsedMetaInfo && typeof parsedMetaInfo === 'object' && !Array.isArray(parsedMetaInfo)
@@ -311,7 +311,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
       const scroller = $scrollers[0] as HTMLElement;
       const documentation = scroller.querySelector<HTMLElement>('[data-testid="sidebar-documentation"]');
 
-      expect(documentation, 'Documentation belongs to the visible sidebar scroller').to.not.be.null;
+      expect(documentation, 'Documentation belongs to the visible sidebar scroller').to.not.equal(null);
       expect(scroller.scrollHeight, 'sidebar has scrollable content').to.be.greaterThan(scroller.clientHeight);
 
       scroller.scrollTop = 0;
@@ -330,7 +330,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
       const scroller = $scrollers[0] as HTMLElement;
       const documentation = scroller.querySelector<HTMLElement>('[data-testid="sidebar-documentation"]');
 
-      expect(documentation, 'Documentation remains in the visible sidebar scroller').to.not.be.null;
+      expect(documentation, 'Documentation remains in the visible sidebar scroller').to.not.equal(null);
       const scrollerRect = scroller.getBoundingClientRect();
       const documentationRect = documentation!.getBoundingClientRect();
       const viewportHeight = scroller.ownerDocument.defaultView?.innerHeight ?? scrollerRect.bottom;
@@ -347,7 +347,7 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
     waitForTourStep(visitedTitles.length + 1, expectedTotal);
     return cy.get('[data-testid="demo-tour-step"]').should('be.visible').invoke('text').then(rawProgress => {
       const progress = rawProgress.match(/^\s*Step\s+(\d+)\s*\/\s*(\d+)\s*$/);
-      expect(progress, 'tour progress').to.not.be.null;
+      expect(progress, 'tour progress').to.not.equal(null);
       const current = Number(progress![1]);
       const total = Number(progress![2]);
 
@@ -466,13 +466,13 @@ describe('Orion Intelligence - Enterprise Demo Tour', () => {
       const overlay = win.document.querySelector('[data-testid="demo-tour-overlay"]') as SVGElement | null;
       const profileButton = win.document.querySelector('[data-testid="sidebar-group-profile"]') as HTMLElement | null;
 
-      expect(overlay, 'demo tour overlay').to.not.be.null;
-      expect(profileButton, 'profile sidebar button').to.not.be.null;
-      expect(win.document.querySelector('[data-testid="sidebar-documentation"]'), 'Documentation is enabled for this tour').to.not.be.null;
+      expect(overlay, 'demo tour overlay').to.not.equal(null);
+      expect(profileButton, 'profile sidebar button').to.not.equal(null);
+      expect(win.document.querySelector('[data-testid="sidebar-documentation"]'), 'Documentation is enabled for this tour').to.not.equal(null);
 
       const profileRect = profileButton!.getBoundingClientRect();
       const topmostElement = win.document.elementFromPoint(profileRect.left + (profileRect.width / 2), profileRect.top + (profileRect.height / 2));
-      expect(topmostElement?.closest('[data-testid="demo-tour-overlay"]'), 'overlay blocks the sidebar control').to.not.be.null;
+      expect(topmostElement?.closest('[data-testid="demo-tour-overlay"]'), 'overlay blocks the sidebar control').to.not.equal(null);
     });
 
     assertBackWorksDuringLoading(10);

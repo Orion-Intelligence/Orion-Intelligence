@@ -15,7 +15,7 @@
     @if (router.url !== '/login' && canViewScanNotifications()) {
       <button data-testid="profile-scan-notification-bell" type="button" (click)="openScanNotifications()" class="relative inline-flex cursor-pointer items-center justify-center px-[12px] pt-[18px] pb-[20px]" [attr.aria-label]="'Scan Notifications' | translate">
         <span class="relative inline-flex h-6 w-6 items-center justify-center text-[var(--color-text2)]">
-           <img alt="" src="/assets/images/sidebar/theme/scanner.svg" height="24" priority width="20" class="h-6 w-5">
+           <img alt="" src="/assets/images/sidebar/theme/scanner.svg" height="24" width="20" class="h-6 w-5">
           <span class="absolute right-[-9px] top-[-7px] z-10 inline-flex min-h-[21px] min-w-[21px] items-center justify-center rounded-full border-2 border-[#0f1d2f] px-[6px] text-[11px] font-extrabold leading-none tabular-nums shadow-[0_2px_8px_rgba(0,0,0,0.35)] [body.light-theme_&]:border-white" [ngClass]="scanNotificationService.totalScanCount() === 0 ? 'bg-[#34D399] text-[#052E16]' : 'bg-[#FACC15] text-[#422006]'">
             {{ scanNotificationService.totalScanCount() }}
           </span>

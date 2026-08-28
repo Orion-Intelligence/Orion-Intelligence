@@ -374,7 +374,7 @@ class CaseStatusBoardConfig(BaseModel):
             raise ValueError("At least one status is required")
 
         values = [item.value.lower() for item in self.statuses]
-        labels = [(item.label or (item.value).replace("_", " ").replace("-", " ").title()).strip().lower() for item in self.statuses]
+        labels = [(item.label or item.value.replace("_", " ").replace("-", " ").title()).strip().lower() for item in self.statuses]
         if len(values) != len(set(values)):
             raise ValueError("Duplicate status keys are not allowed")
         if len(labels) != len(set(labels)):

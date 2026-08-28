@@ -1,6 +1,5 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
-import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { UrlScanMeta } from '../../../../shared/model/security-scan/security.scan.results.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
@@ -15,8 +14,8 @@ export type { NetworkIntelSeoRepoScanCategory } from './model/seo-repo-scan-sect
   standalone: true,
   imports: [CommonModule, TranslatePipe],
   templateUrl: './seo-repo-scan-section.component.html',
+  styleUrls: ['./seo-repo-scan-section.component.css'],
   changeDetection: ChangeDetectionStrategy.Eager,
-  animations: [fadeInDashboardItem],
 })
 export class SeoRepoScanSectionComponent {
   readonly isEmbedded = input(false);

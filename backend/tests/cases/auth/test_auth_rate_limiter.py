@@ -22,7 +22,8 @@ def test_auth_rate_limit_escalates_cooldown(monkeypatch, failures, delay):
         asyncio.run(auth_rate_limit(redis_store, "user@example.com", failed_login))
 
     assert error.value.status_code == 429
-    assert error.value.headers["Retry-After"] == str(delay)
+    retry_headers = error.value.headers or {}
+    assert retry_headers["Retry-After"] == str(delay)
     retry_key = invoke_trigger.await_args_list[0].args[1][0]
     assert invoke_trigger.await_args_list[-1] == call(
         REDIS_COMMANDS.S_SET_STRING,

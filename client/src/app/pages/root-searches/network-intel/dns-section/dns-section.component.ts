@@ -88,10 +88,6 @@ export class DnsSectionComponent implements OnDestroy {
     return this.hasSearched() && !this.isScanning() && !this.errorMessage && !!this.dnsResult() && this.ipRows.length === 0;
   }
 
-  isProgressSegmentActive(index: number): boolean {
-    return index < Math.ceil(this.progress() / 5);
-  }
-
   trackByIp(_: number, row: IpRowState): string {
     return row.ip;
   }

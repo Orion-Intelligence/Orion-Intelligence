@@ -5,7 +5,6 @@ import { finalize, Observable } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { event_management_filters } from '../../../shared/constants/filters';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { EmptyResultComponent } from '../../../shared/partials/empty-result/empty-result.component';
@@ -32,7 +31,6 @@ export type { SiemEventRecord,SiemSearchResponse } from './model/sidebar-user-ev
   standalone: true,
   imports: [CommonModule, PaginationComponent, FiltersComponent, EmptyQueryComponent, EmptyResultComponent, LoadingFormComponent, IocSearchComponent, TranslatePipe],
   templateUrl: './sidebar-user-event-management.component.html',
-  animations: [fadeInDashboardItem],
   changeDetection: ChangeDetectionStrategy.Eager,
   styleUrls: ['./sidebar-user-event-management.component.css'],
 })

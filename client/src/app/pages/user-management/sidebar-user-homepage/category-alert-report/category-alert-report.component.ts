@@ -79,7 +79,6 @@ export class CategoryAlertReportComponent implements OnInit {
   isAdminTenantAlertReport: boolean = false;
   adminTenantId: string | null = null;
   readonly alertExportOptions = buildStandardExportOptions('category-alert-export-option', 'report', 'Generate PDF export for selected alert.');
-  expandedAlertIds = new Set<string>();
 
   constructor( private router: Router, private route: ActivatedRoute, public appService: AppService, public sidebarService: SidebarService, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected licenseService: LicenseService, private helperService: HelperService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService, private translationService: TranslationService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
@@ -232,7 +231,7 @@ export class CategoryAlertReportComponent implements OnInit {
       this.apiService.post(`profile/alerts/delete/${this.category}`, null).subscribe({
         next: () => {
           this.getLatestAlerts();
-          this.router.navigate(["/dashboard"], {});
+          void this.router.navigate(["/dashboard"], {});
         },
         error: (err) => {
           this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to delete'))
@@ -258,18 +257,6 @@ export class CategoryAlertReportComponent implements OnInit {
       default:
         break;
     }
-  }
-
-  isAlertExpanded(id: string): boolean {
-    return this.expandedAlertIds.has(id);
-  }
-
-  toggleAlertExpanded(id: string): void {
-    if (this.expandedAlertIds.has(id)) {
-      this.expandedAlertIds.delete(id);
-      return;
-    }
-    this.expandedAlertIds.add(id);
   }
 
   exportAlert(hash: string) {
@@ -475,7 +462,7 @@ export class CategoryAlertReportComponent implements OnInit {
             case "advance scanning":
               scanType = "advance";
               route = "/dashboard/scanner/network-scan";
-              this.router.navigate([route], {
+              void this.router.navigate([route], {
                 queryParams: { page: 1, domain: encodeURIComponent(value), canType: scanType }
               });
               break;
@@ -483,7 +470,7 @@ export class CategoryAlertReportComponent implements OnInit {
             case "seo scanning":
               scanType = "seo";
               route = "/dashboard/scanner/network-scan";
-              this.router.navigate([route], {
+              void this.router.navigate([route], {
                 queryParams: { page: 1, q: value, scanType, section: 'seo-scan' }
               });
               break;
@@ -491,7 +478,7 @@ export class CategoryAlertReportComponent implements OnInit {
             case "repo scanning":
               scanType = "repo";
               route = "/dashboard/scanner/network-scan";
-              this.router.navigate([route], {
+              void this.router.navigate([route], {
                 queryParams: { page: 1, q: value, scanType, section: 'repository-scan' }
               });
               break;
@@ -500,21 +487,21 @@ export class CategoryAlertReportComponent implements OnInit {
               const _username = value.split('@')[0];
               scanType = "repo";
               route = "/dashboard/api/email-breach";
-              this.router.navigate([route], {
+              void this.router.navigate([route], {
                 queryParams: { username: _username, email: value }
               });
               break;
             case "playstore-scanning":
               scanType = "repo";
               route = "/dashboard/api/playstore-scanner";
-              this.router.navigate([route], {
+              void this.router.navigate([route], {
                 queryParams: { playstore: value }
               });
               break;
             case "social-scanner":
               scanType = "repo";
               route = "/dashboard/api/social-scanner";
-              this.router.navigate([route], {
+              void this.router.navigate([route], {
                 queryParams: { username: value }
               });
               break;
@@ -534,10 +521,10 @@ export class CategoryAlertReportComponent implements OnInit {
               else {
                 queryParams['user'] = value;
               }
-              this.router.navigate([route], { queryParams });
+              void this.router.navigate([route], { queryParams });
               break;
             default:
-              this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
+              void this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
               break;
           }
 
@@ -681,21 +668,6 @@ export class CategoryAlertReportComponent implements OnInit {
       default:
         return '';
     }
-  }
-
-  sliceString(text: string, maxLength: number): string {
-    if (typeof text !== 'string' || text === null || text === undefined) {
-      return '';
-    }
-    if (text.length <= maxLength) {
-      return text;
-    }
-    return text.slice(0, maxLength) + '...';
-  }
-
-  hasAlertUrl(url: string): boolean {
-    const normalizedUrl = (url || '').trim().toLowerCase();
-    return !!normalizedUrl && !['-', 'n/a', 'none', 'null'].includes(normalizedUrl);
   }
 
   getAlertCardDate(alert: CategoryAlerts): Date {
@@ -905,17 +877,6 @@ export class CategoryAlertReportComponent implements OnInit {
       alert.url,
       iocText
     ].join(' ').toLowerCase();
-  }
-
-  filterByDate(start: Date, end: Date) {
-    const inclusiveEnd = new Date(end);
-    inclusiveEnd.setHours(23, 59, 59, 999);
-
-    this.filteredAlerts = this.alerts.filter(alert => {
-      const lastSeenDate = new Date(alert.detectedOn);
-      return lastSeenDate >= start && lastSeenDate <= inclusiveEnd;
-    });
-    this.visibleFilteredAlerts = [...this.filteredAlerts];
   }
 
   isDomain(value: string): boolean {

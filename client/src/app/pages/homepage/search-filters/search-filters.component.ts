@@ -120,10 +120,6 @@ export class SearchFiltersComponent implements OnInit {
     this.app_service.set('entityfilterCategories', this.categories);
   }
 
-  toggleExpand() {
-    this.app_service.set('iocExpanded', !this.app_service.configData().localSettings.iocExpanded);
-  }
-
   onEntityFilterToggle(newValue: boolean): void {
     this.app_service.set('entityFilterCondition', newValue);
   }

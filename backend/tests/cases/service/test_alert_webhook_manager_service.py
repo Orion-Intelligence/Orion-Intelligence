@@ -4,7 +4,6 @@ import asyncio
 
 from fastapi.routing import APIRoute
 
-from orion.services.alert_webhook_manager import alert_webhook_manager as webhook_module
 from orion.services.alert_webhook_manager.alert_webhook_manager import AlertWebhookManager
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import AlertConnectorProvider
 from routes.alert_connector_routes import alert_connector_routes
@@ -21,7 +20,7 @@ def test_alert_webhook_sends_only_to_requested_tenant_webhook(monkeypatch):
     async def to_thread(func, *args, **kwargs):
         return func(*args, **kwargs)
 
-    monkeypatch.setattr(webhook_module.asyncio, "to_thread", to_thread)
+    monkeypatch.setattr(asyncio, "to_thread", to_thread)
 
     asyncio.run(
         manager.send_alert(
