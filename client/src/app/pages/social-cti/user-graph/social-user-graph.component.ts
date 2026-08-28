@@ -200,6 +200,7 @@ export class SocialUserGraphComponent {
   readonly hasGraph = computed(() => !!this.graph()?.hasProfiles);
   readonly busy = computed(() => this.loading() || this.reportsLoading() || this.documentsLoading());
   readonly layoutProgress = signal(100);
+  readonly layoutReady = signal(false);
   readonly copied = signal(false);
   readonly notice = signal('');
   readonly expandedUsers = signal<Set<string>>(new Set<string>());
@@ -332,7 +333,7 @@ export class SocialUserGraphComponent {
     this.panelTop.set(12);
     if (this.nodeSet?.get(id)) {
       this.network?.selectNodes([id]);
-      this.network?.focus(id, { scale: 1.1, animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+      this.network?.focus(id, { animation: false });
       return;
     }
     this.pendingFocusId = id;
@@ -626,12 +627,14 @@ export class SocialUserGraphComponent {
     if (!this.network) {
       return;
     }
+    this.layoutReady.set(false);
     if (initial) {
       this.layoutProgress.set(0);
     }
     this.network.once('stabilized', () => {
       this.layoutProgress.set(100);
       this.applyPendingFocus();
+      this.layoutReady.set(true);
     });
   }
 
@@ -642,7 +645,7 @@ export class SocialUserGraphComponent {
     }
     this.pendingFocusId = null;
     this.network.selectNodes([id]);
-    this.network.focus(id, { scale: 1.1, animation: { duration: 500, easingFunction: 'easeInOutQuad' } });
+    this.network.focus(id, { animation: false });
   }
 
   private positionPanel(pointer: { x: number; y: number } | undefined, width: number, height: number): { left: number; top: number } {
@@ -805,7 +808,7 @@ export class SocialUserGraphComponent {
         zoomView: true,
         dragView: true,
       },
-      layout: { improvedLayout: true },
+      layout: { improvedLayout: true, randomSeed: 42 },
     };
   }
 }

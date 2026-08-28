@@ -753,6 +753,22 @@ function personAccent(node: SocialGraphViewNode, dark: boolean): string {
   return dark ? '#94a3b8' : '#64748b';
 }
 
+function readablePlatformColor(color: string | undefined, dark: boolean): string | undefined {
+  if (!color || !dark) {
+    return color;
+  }
+  const match = color.trim().match(/^#([0-9a-f]{6})$/i);
+  if (!match) {
+    return color;
+  }
+  const value = Number.parseInt(match[1], 16);
+  const red = (value >> 16) & 255;
+  const green = (value >> 8) & 255;
+  const blue = value & 255;
+  const luminance = ((red * 299) + (green * 587) + (blue * 114)) / 255000;
+  return luminance < 0.18 ? '#94a3b8' : color;
+}
+
 export function toVisNode(node: SocialGraphViewNode, options: SocialGraphVisualOptions): SocialGraphVisNode {
   const highlighted = options.highlighted.has(node.id);
   const scanning = options.scanning.has(node.id);
@@ -771,7 +787,7 @@ export function toVisNode(node: SocialGraphViewNode, options: SocialGraphVisualO
     return emphasis({ ...base, image: circleIconSvg(KIND_COLORS.user, iconInner('bi-person-badge-fill'), node.expanded ? 38 : 34, ring ?? (node.expanded ? NODE_FOCUS : KIND_COLORS.user), ringScale), size: node.expanded ? 38 : 34 });
   }
   if (node.kind === 'account') {
-    const accent = options.colors.get(node.platform.toLowerCase()) ?? '#818cf8';
+    const accent = readablePlatformColor(options.colors.get(node.platform.toLowerCase()), options.dark) ?? '#818cf8';
     const icon = options.icons.get(node.platform.toLowerCase());
     return emphasis({ ...base, image: circleIconSvg(accent, icon ? imageInner(icon) : textInner(node.platform.slice(0, 2).toUpperCase()), 36, ring, ringScale), size: 36 });
   }
@@ -790,9 +806,10 @@ export function toVisNode(node: SocialGraphViewNode, options: SocialGraphVisualO
 }
 
 export function toVisEdge(edge: SocialGraphViewEdge, options: SocialGraphVisualOptions): SocialGraphVisEdge {
-  const platformColor = options.colors.get(edge.platform.toLowerCase());
+  const platformColor = readablePlatformColor(options.colors.get(edge.platform.toLowerCase()), options.dark);
   const relationColor = edge.relation ? RELATION_COLORS[edge.relation] : '#94a3b8';
-  const color = edge.kind === 'account' ? (platformColor ?? '#818cf8') : (edge.kind === 'link' ? KIND_COLORS.user : (edge.kind === 'member' ? `${relationColor}99` : 'rgba(75, 85, 99, 0.8)'));
+  const defaultColor = options.dark ? 'rgba(148, 163, 184, 0.55)' : 'rgba(71, 85, 105, 0.65)';
+  const color = edge.kind === 'account' ? (platformColor ?? '#818cf8') : (edge.kind === 'link' ? KIND_COLORS.user : (edge.kind === 'member' ? `${relationColor}99` : defaultColor));
   const width = edge.kind === 'account' ? 2 : (edge.weight > 1 ? Math.min(1.5 + (edge.weight - 1) * 0.6, 5) : 1.5);
   return {
     id: edge.id,

@@ -144,11 +144,14 @@ export class ThreatLensGeoUtils {
 
     [
       payload?.ip_locations,
+      payload?.candidate_ip_locations,
       payload?.ips,
       payload?.ip_addresses,
       payload?.data?.ip_locations,
+      payload?.data?.candidate_ip_locations,
       payload?.data?.ips,
       payload?.result?.ip_locations,
+      payload?.result?.candidate_ip_locations,
       payload?.result?.ips,
       payload?.cameras,
       payload?.result?.cameras,

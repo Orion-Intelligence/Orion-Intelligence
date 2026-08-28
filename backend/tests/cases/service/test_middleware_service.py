@@ -288,6 +288,22 @@ async def test_content_security_policy_middleware_sets_admin_headers(monkeypatch
 
 
 @pytest.mark.anyio
+async def test_content_security_policy_middleware_allows_openfreemap(monkeypatch):
+    monkeypatch.setattr(
+        "orion.middleware.middlewares.content_security_policy_middleware.env_handler.get_instance",
+        staticmethod(lambda: SimpleNamespace(env=lambda *_args: "1")),
+    )
+
+    async with _client_with_middleware(content_security_policy_middleware) as client:
+        response = await client.get("/")
+
+    policy = response.headers["Content-Security-Policy"]
+    assert "img-src 'self' data: blob: https://try.orionintelligence.org https://tiles.openfreemap.org" in policy
+    assert "connect-src 'self' https://tiles.openfreemap.org" in policy
+    assert "basemaps.cartocdn.com" not in policy
+
+
+@pytest.mark.anyio
 async def test_security_headers_middleware_uses_debug_hsts_settings(monkeypatch):
     monkeypatch.setattr(
         "orion.middleware.middlewares.security_headers_middleware.env_handler.get_instance",

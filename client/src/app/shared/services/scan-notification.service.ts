@@ -203,7 +203,7 @@ export class ScanNotificationService {
 
   private resolveApiScanResponse<T>(response: T | ScanJobDuplicateChoiceResponse, request: ScanJobStartRequest): Observable<T> {
     if (this.isDuplicateChoiceResponse(response as ScanJobCreateApiResponse)) {
-      if (request.apiReference === 'netintel/resolve_ip' || request.apiReference === 'urlscan/subdomains') {
+      if (request.reusePrevious || request.apiReference === 'netintel/resolve_ip' || request.apiReference === 'urlscan/subdomains') {
         return this.getScanDetail((response as ScanJobDuplicateChoiceResponse).previous_scan.scan_id).pipe(map(job => this.toScanResponse<T>(job)));
       }
       return this.askDuplicateScanChoice(response as ScanJobDuplicateChoiceResponse).pipe(switchMap(choice => {

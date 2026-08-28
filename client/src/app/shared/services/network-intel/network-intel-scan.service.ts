@@ -91,7 +91,12 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   scanThreatLensGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
-    return this.runPolledTask<GeoCameraResponse>(() => this.api.post<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips }), 250);
+    return this.runTrackedScan<GeoCameraResponse>('netintel/iot_detect', { coordinates, radius_km, max_ips }, {
+      title: 'Threat Lens IP Scan',
+      target: coordinates,
+      page_reference: 'threat-lens',
+      section: 'ip-scan',
+    }, 250, true);
   }
 
   scanGeoCamera(coordinates: string, radius_km = 25, max_ips = 200): Subscription {
@@ -315,16 +320,13 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     return { message: value?.result?.message || value?.message || 'Request failed' };
   }
 
-  private runPolledTask<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>(call: () => Observable<T>, pollDelayMs = this.pollDelayMs): Subscription {
-    return this.runTask<T>((cancel$) => this.poll<T>(call, (response) => this.getPendingStatus(response), (response) => this.updateProgress(response?.result?.progress ?? response?.progress), cancel$, pollDelayMs));
-  }
-
-  private runTrackedScan<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>( apiReference: string, payload: Record<string, any>, metadata: Record<string, any>, pollDelayMs = this.pollDelayMs, ): Subscription {
+  private runTrackedScan<T extends { result?: { status?: string; progress?: number } | null; status?: string; progress?: number | null }>( apiReference: string, payload: Record<string, any>, metadata: Record<string, any>, pollDelayMs = this.pollDelayMs, reusePrevious = false, ): Subscription {
     return this.runTask<T>((cancel$) => this.scanNotifications.runApiScanAsResponse<T>({
       apiReference,
       payload,
       metadata,
       pollDelayMs,
+      reusePrevious,
     }).pipe(tap((response: T) => this.updateProgress((response as any)?.result?.progress ?? (response as any)?.progress)),
       takeUntil(cancel$),));
   }

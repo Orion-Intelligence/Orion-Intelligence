@@ -1,4 +1,4 @@
-import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, ApplicationRef, ChangeDetectorRef, Component, ElementRef, EnvironmentInjector, EventEmitter, Input, NgZone, OnChanges, OnDestroy, Output, SimpleChanges, ViewChild, ChangeDetectionStrategy, ViewEncapsulation } from '@angular/core';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from '../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, TrackingEntityState, TrackingEntityType, TrackingSidebarBridge } from '../../models/geo-fencing.models';
 import { SatelliteAircraftTrackingService } from '../map-entities/aircraft/aircraft-tracking.service';
@@ -17,16 +17,18 @@ import { TranslationService } from '../../../../shared/services/translation.serv
   standalone:  true,
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './map-renderer.component.html',
+  styleUrls: ['./map-renderer.component.scss'],
+  encapsulation: ViewEncapsulation.None,
 })
 export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy {
   private static readonly WORLD_BOUNDS = [[-85.05112878, -180], [85.05112878, 180]] as const;
+  private static readonly OPEN_FREE_MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('zoomLabelElement') private zoomLabelElement?: ElementRef<HTMLDivElement>;
   private leafletMap: any   = null;
   private esriLayer: any    = null;
-  private esriLowResLayer: any = null;
+  private esriReferenceLayer: any = null;
   private osmLayer: any     = null;
-  private osmLowResLayer: any = null;
   private L: any            = null;
   private moveTimer: any    = null;
   private resizeObserver: ResizeObserver | null = null;
@@ -189,7 +191,10 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       return;
     }
     try {
-      const L = (await import('leaflet' as any)) as any;
+      const [L, maplibreLeaflet] = await Promise.all([
+        import('leaflet' as any),
+        import('@maplibre/maplibre-gl-leaflet'),
+      ]);
       this.L = L.default || L;
       if (!this.mapContainer?.nativeElement) {
         return;
@@ -200,79 +205,66 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         zoom:     2.5,
         minZoom:  2,
         zoomSnap: 0.5,
-        zoomControl: false,
+        zoomDelta: 0.5,
+        zoomControl: true,
         attributionControl: false,
         maxBounds: this.L.latLngBounds(MapRendererComponent.WORLD_BOUNDS),
         maxBoundsViscosity: 1,
         worldCopyJump: false,
-        zoomAnimation: false,
-        fadeAnimation: false,
+        zoomAnimation: true,
+        fadeAnimation: true,
         scrollWheelZoom: true,
-        markerZoomAnimation: false,
+        wheelDebounceTime: 25,
+        wheelPxPerZoomLevel: 90,
+        doubleClickZoom: true,
+        touchZoom: true,
+        boxZoom: true,
+        keyboard: true,
+        keyboardPanDelta: 60,
+        inertia: true,
+        inertiaDeceleration: 3000,
+        inertiaMaxSpeed: 1500,
+        easeLinearity: 0.2,
+        bounceAtZoomLimits: false,
+        markerZoomAnimation: true,
         preferCanvas: true,
       });
 
+      const imageryTileOptions = {
+        attribution: '',
+        maxZoom: 20,
+        maxNativeZoom: 20,
+        noWrap: true,
+        bounds: MapRendererComponent.WORLD_BOUNDS,
+        updateWhenIdle: false,
+        updateWhenZooming: true,
+        updateInterval: 150,
+        keepBuffer: 2,
+        detectRetina: false,
+      };
+
       this.esriLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
         {
-          attribution: '',
-          maxZoom: 20,
-          maxNativeZoom: 10,
-          noWrap: true,
-          bounds: MapRendererComponent.WORLD_BOUNDS,
-          updateWhenIdle: true,
-          updateWhenZooming: false,
-          updateInterval: 500,
-          keepBuffer: 0,
-          detectRetina: false,
+          ...imageryTileOptions,
+          zIndex: 1,
         },);
 
-      this.esriLowResLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      this.esriReferenceLayer = this.L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
         {
-          attribution: '',
-          maxZoom: 20,
-          maxNativeZoom: 10,
-          noWrap: true,
-          bounds: MapRendererComponent.WORLD_BOUNDS,
-          updateWhenIdle: true,
-          updateWhenZooming: false,
-          updateInterval: 500,
-          keepBuffer: 0,
-          detectRetina: false,
+          ...imageryTileOptions,
+          opacity: 0.9,
+          zIndex: 2,
         },);
 
-      this.osmLayer = this.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-        {
-          attribution: '',
-          maxZoom: 19,
-          maxNativeZoom: 10,
-          subdomains: 'abcd',
-          crossOrigin: true,
-          opacity: 0.72,
-          noWrap: true,
-          bounds: MapRendererComponent.WORLD_BOUNDS,
-          updateWhenIdle: true,
-          updateWhenZooming: false,
-          updateInterval: 500,
-          keepBuffer: 0,
-          detectRetina: false,
-        },);
-
-      this.osmLowResLayer = this.L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png',
-        {
-          attribution: '',
-          maxZoom: 19,
-          maxNativeZoom: 10,
-          subdomains: 'abcd',
-          crossOrigin: true,
-          opacity: 0.72,
-          noWrap: true,
-          bounds: MapRendererComponent.WORLD_BOUNDS,
-          updateWhenIdle: true,
-          updateWhenZooming: false,
-          updateInterval: 500,
-          keepBuffer: 0,
-          detectRetina: false,
-        },);
+      this.osmLayer = maplibreLeaflet.maplibreGL({
+        style: MapRendererComponent.OPEN_FREE_MAP_STYLE_URL,
+        interactive: false,
+        attributionControl: false,
+        maxZoom: 19,
+        renderWorldCopies: false,
+        fadeDuration: 180,
+        className: 'opacity-[0.88]',
+      } as any);
 
       const initialLayer = this.refreshBaseLayerDetail();
       this.updateZoomLabel();
@@ -324,6 +316,12 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         this.entityRenderer?.renderViewport();
         this.scheduleViewportEmit();
       });
+
+      this.leafletMap.on('mousemove', this.L.Util.throttle((event: any) => {
+        this.updateZoomLabel(event.latlng);
+      }, 50, this));
+
+      this.leafletMap.on('mouseout', () => this.updateZoomLabel());
 
       if (Number.isFinite(this.lat) && Number.isFinite(this.lon)) {
         this.updateMapView();
@@ -399,7 +397,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       return null;
     }
 
-    [this.esriLayer, this.esriLowResLayer, this.osmLayer, this.osmLowResLayer].forEach(layer => {
+    [this.esriLayer, this.esriReferenceLayer, this.osmLayer].forEach(layer => {
       if (layer && this.leafletMap.hasLayer(layer)) {
         this.leafletMap.removeLayer(layer);
       }
@@ -411,13 +409,20 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     }
     else {
       this.esriLayer?.addTo(this.leafletMap);
+      this.esriReferenceLayer?.addTo(this.leafletMap);
       return this.esriLayer;
     }
   }
 
   private waitForTileLayerLoad(layer: any): Observable<void> {
     return new Observable<void>((subscriber) => {
-      if (!layer || (typeof layer.isLoading === 'function' && !layer.isLoading())) {
+      const maplibreMap = layer?.getMaplibreMap?.();
+      const eventSource = maplibreMap || layer;
+      const isLoaded = maplibreMap
+        ? maplibreMap.loaded?.()
+        : typeof layer?.isLoading === 'function' && !layer.isLoading();
+
+      if (!layer || isLoaded) {
         subscriber.next();
         subscriber.complete();
         return;
@@ -435,11 +440,11 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         finish();
       };
       const timeout = window.setTimeout(finish, 12000);
-      layer.once?.('load', onLoad);
+      eventSource?.once?.('load', onLoad);
 
       return () => {
         window.clearTimeout(timeout);
-        layer.off?.('load', onLoad);
+        eventSource?.off?.('load', onLoad);
       };
     });
   }
@@ -465,13 +470,15 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.entityRenderer?.setMarkerZoomBucket(bucket);
   }
 
-  private updateZoomLabel(): void {
+  private updateZoomLabel(coordinates?: { lat: number; lng: number }): void {
     if (!this.leafletMap || !this.zoomLabelElement?.nativeElement) {
       return;
     }
-    const center = this.leafletMap.getCenter();
+    const location = coordinates || this.leafletMap.getCenter();
     const zoom = this.leafletMap.getZoom();
-    this.zoomLabelElement.nativeElement.textContent = `${this.translationService.translate('Zoom')} ${zoom.toFixed(1)}  ·  ${center.lat.toFixed(4)}°N  ${center.lng.toFixed(4)}°E`;
+    const latitude = `${Math.abs(location.lat).toFixed(4)}°${location.lat >= 0 ? 'N' : 'S'}`;
+    const longitude = `${Math.abs(location.lng).toFixed(4)}°${location.lng >= 0 ? 'E' : 'W'}`;
+    this.zoomLabelElement.nativeElement.textContent = `${this.translationService.translate('Zoom')} ${zoom.toFixed(1)}  ·  ${latitude}  ${longitude}`;
   }
 
   private scheduleViewportEmit(): void {
