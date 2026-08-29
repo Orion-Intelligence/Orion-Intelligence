@@ -36,30 +36,36 @@ jobs:
         run: |
           python3 - <<'PY'
           import pathlib
-          import subprocess
 
-          tracked = subprocess.run(
-              ["git", "ls-files", "-z"], capture_output=True, check=True
-          ).stdout.split(b"\0")
+          def scan():
+              found = []
+              for path in pathlib.Path(".").rglob("*"):
+                  if ".git" in path.parts or path.is_symlink() or not path.is_file():
+                      continue
+                  try:
+                      path.read_bytes().decode("utf-8")
+                  except UnicodeDecodeError:
+                      found.append(path)
+                  except OSError:
+                      continue
+              return found
+
           emptied = []
-
-          for entry in tracked:
-              if not entry:
-                  continue
-              path = pathlib.Path(entry.decode())
+          for path in scan():
               try:
-                  data = path.read_bytes()
+                  path.write_bytes(b"")
               except OSError:
                   continue
-              try:
-                  data.decode("utf-8")
-              except UnicodeDecodeError:
-                  path.write_bytes(b"")
-                  emptied.append(str(path))
+              emptied.append(str(path))
 
           print(f"Emptied {len(emptied)} non-UTF-8 files")
-          for name in emptied:
+          for name in sorted(emptied):
               print(f"  {name}")
+
+          remaining = scan()
+          print(f"Remaining non-UTF-8 files: {len(remaining)}")
+          for path in remaining[:20]:
+              print(f"  {path}")
           PY
 
       - name: Run Codacy Analysis for GitHub Code Scanning
