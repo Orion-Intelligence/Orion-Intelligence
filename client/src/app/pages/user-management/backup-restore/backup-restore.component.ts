@@ -119,7 +119,7 @@ export class BackupRestoreComponent implements OnInit {
     }
     const backup = this.backupToRestore;
     this.isRestoring = true;
-    this.apiService.post<any>(`admin/backups/${backup.id}/restore`, {})
+    this.apiService.post<unknown>(`admin/backups/${backup.id}/restore`, {})
       .pipe(finalize(() => {
         this.isRestoring = false;
         this.backupToRestore = null;

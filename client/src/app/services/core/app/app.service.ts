@@ -209,7 +209,7 @@ export class AppService {
     const visibleEntities = bundledEntities.filter(e => e.alert !== false);
     this.entities.set(visibleEntities);
     for (const e of visibleEntities) {
-      const key = `${e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`)}`;
+      const key = e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`);
       search_filter_labels[key] = e.title;
     }
   }

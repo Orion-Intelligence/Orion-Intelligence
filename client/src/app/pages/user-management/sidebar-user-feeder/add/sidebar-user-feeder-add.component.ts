@@ -350,10 +350,14 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   }
 
   private submitSessionUpload(fileInput: HTMLInputElement): void {
+    const selectedSessionFile = this.selectedSessionFile;
+    if (!selectedSessionFile) {
+      return;
+    }
     const formData = new FormData();
     formData.append('rule_key', this.selectedRuleKey);
     formData.append('mode', 'file');
-    formData.append('session_file', this.selectedSessionFile!);
+    formData.append('session_file', selectedSessionFile);
 
     this.isSubmitting = true;
     this.feederService.upload(formData)

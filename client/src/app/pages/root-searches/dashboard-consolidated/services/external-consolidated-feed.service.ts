@@ -57,7 +57,7 @@ export class ExternalConsolidatedFeedService {
     };
 
     if (entityCategories) {
-      payload['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, value]) => Array.isArray(value) ? value.length > 0 : true));
+      payload['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([, value]) => Array.isArray(value) ? value.length > 0 : true));
     }
 
     payload = this.helperService.removeEmptyOrNullValues(payload);

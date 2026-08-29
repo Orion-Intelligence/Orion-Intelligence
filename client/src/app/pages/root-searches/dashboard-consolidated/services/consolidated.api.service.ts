@@ -124,7 +124,7 @@ export class ConsolidatedApiService {
           errorMessage: null,
         } as ConsolidatedLiveApiResults;
       }),
-      catchError(_ =>
+      catchError(() =>
         of({
           input,
           status: 'error',

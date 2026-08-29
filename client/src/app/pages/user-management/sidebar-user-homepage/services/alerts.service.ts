@@ -43,7 +43,7 @@ export class AlertService implements OnDestroy {
               this.getLatestAlerts();
             }
           },
-          error: (_) => {
+          error: () => {
             this.isAlertScanLoading.set(false);
             this.setPendingScanFlag(false);
           }
@@ -62,7 +62,7 @@ export class AlertService implements OnDestroy {
     this.scanStatusSub?.unsubscribe();
     this.isCheckingStatus = false;
     this.apiService.post<unknown>('profile/alert/scan/cancel', null).subscribe({
-      next: (_) => {
+      next: () => {
         this.isAlertScanLoading.set(false);
         this.setPendingScanFlag(false);
       },

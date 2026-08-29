@@ -63,6 +63,7 @@ export class SocialDefaultListSectionComponent {
   }
 
   getFollowers(_platformData: social_profile): string[] {
+    void _platformData;
     return [];
   }
 
@@ -205,6 +206,7 @@ export class SocialDefaultListSectionComponent {
   }
 
   private getPostCollectionCount(_platformData: social_profile): number | null {
+    void _platformData;
     return null;
   }
 

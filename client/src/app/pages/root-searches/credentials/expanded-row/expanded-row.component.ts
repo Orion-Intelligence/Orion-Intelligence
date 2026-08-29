@@ -6,6 +6,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { CredentialResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import type { CreditCardField, TelemetryGroup } from './model/expanded-row.model';
+import { isIpv4Address } from '../../../../shared/utils/network-validation.util';
 export type { CreditCardField, TelemetryGroup } from './model/expanded-row.model';
 
 
@@ -274,7 +275,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       text = text.split(/[/?#]/)[0] ?? '';
       text = text.split(':')[0] ?? '';
       text = text.replace(/^\.+|\.+$/g, '').replace(/^www\./, '');
-      return text && text.includes('.') && !/\s/.test(text) && !/^\d{1,3}(\.\d{1,3}){3}$/.test(text) ? text : '';
+      return text && text.includes('.') && !/\s/.test(text) && !isIpv4Address(text) ? text : '';
     };
 
     const searchTerms = Array.from(new Set((this.searchQuery() || '')

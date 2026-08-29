@@ -251,8 +251,9 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
         const meta = [
           comment['sender_name'] || comment['m_sender_name'] || comment['author'] || comment['m_author'] || comment['comment_author'] || comment['username'] || comment['user'] || comment['name'] || comment['from'],
           comment['m_date'] || comment['date'] || comment['datetime'] || comment['created_at'] || comment['timestamp'] || comment['time'] || comment['m_time']
-        ].filter(Boolean).join(' - ');
-        return [meta ? `${meta}: ${text}` : String(text)];
+        ].map(item => this.toDisplayValue(item)).filter(Boolean).join(' - ');
+        const displayText = this.toDisplayValue(text);
+        return [meta ? `${meta}: ${displayText}` : displayText];
       }
       return Array.from(this.commentTabKeys).flatMap(key => this.normalizeCommentValues(comment[key]));
     }

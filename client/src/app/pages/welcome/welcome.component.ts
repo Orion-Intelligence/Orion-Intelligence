@@ -34,7 +34,7 @@ export class WelcomeComponent implements OnInit {
     this.applyTheme(theme);
 
     const token = this.route.snapshot.paramMap.get('token');
-    if (token !== null) {
+    if (typeof token === 'string') {
       this.hasToken = true;
       this.apiService.post<{ message?: string; access_url?: string | null }>(`verify/${token}`, null).subscribe({
         next: (res) => {

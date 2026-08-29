@@ -80,10 +80,10 @@ export class SocialProfileTabsSectionComponent {
   syncAll = output<FetchTabKey>();
   stopSync = output<FetchTabKey>();
   loadConnections = output<string>();
-  syncAllConnections = output<void>();
+  syncAllConnections = output();
   connectionSearch = output<string>();
   onlinePresenceSearchTermChanged = output<string>();
-  onlinePresenceSearch = output<void>();
+  onlinePresenceSearch = output();
   readonly isUrl = isUrl;
   readonly onImageError = applyImageFallback;
   readonly isImageUrl = isImageUrl;

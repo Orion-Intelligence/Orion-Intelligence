@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, inject, ChangeDetectionStrategy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -37,7 +37,7 @@ export class TakedownActionComponent implements OnChanges {
 
   @Output() requestCreated = new EventEmitter<TakedownActionResponse>();
 
-  ngOnChanges(_: SimpleChanges): void {
+  ngOnChanges(): void {
     this.applyTakedownStatus(this.status, this.statusLabel);
   }
 
@@ -211,7 +211,7 @@ export class TakedownActionComponent implements OnChanges {
 
   private handleSuccess(record: TakedownActionResponse): void {
     this.isTakingDown = false;
-    const evidence = (record.evidence?.result || record.evidence || {}) as Record<string, unknown>;
+    const evidence = (record.evidence?.result || record.evidence || {});
 
     const abuseEmail = record.abuse_email || String(evidence['abuse_email_found'] || '');
     const takedownType = evidence['takedown_type'] as string;

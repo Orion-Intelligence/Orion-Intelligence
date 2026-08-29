@@ -98,7 +98,7 @@ export class ViewTenantComponent implements OnInit {
         }));
         this.isLoading = false;
       },
-      error: (_) => {
+      error: () => {
         this.isLoading = false;
       },
     });
@@ -175,7 +175,7 @@ export class ViewTenantComponent implements OnInit {
       return;
     }
     this.isLoading = true;
-    this.apiService.delete<void>(`tenants/${tenant.id}`).subscribe({
+    this.apiService.delete<unknown>(`tenants/${tenant.id}`).subscribe({
       next: () => {
         this.tenants = this.tenants.filter(item => item.id !== tenant.id);
         this.isLoading = false;

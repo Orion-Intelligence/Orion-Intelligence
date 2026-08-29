@@ -1,4 +1,4 @@
-const PDF_ASCII_REPLACEMENTS: ReadonlyArray<[RegExp, string]> = [
+const PDF_ASCII_REPLACEMENTS: readonly [RegExp, string][] = [
   [/\u00a0/g, ' '],
   [/[\u200b-\u200d\u2060\ufeff]/g, ''],
   [/[\u2018\u2019\u201a\u201b]/g, '\''],

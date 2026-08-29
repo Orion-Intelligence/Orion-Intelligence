@@ -38,7 +38,7 @@ export class SuggestionService {
       return of([]);
     }
     const suggestionSource = this.suggestionSources[source];
-    if (!suggestionSource || !suggestionSource.fields.has(field)) {
+    if (!suggestionSource?.fields.has(field)) {
       return of([]);
     }
     const params = new HttpParams()

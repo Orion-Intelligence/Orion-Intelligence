@@ -7,6 +7,7 @@ import { ScanHelperMethodsService } from '../../partials/scan-helper-methods/sca
 import { ScanNotificationService } from '../scan-notification.service';
 import { SubdomainResponse } from '../../model/scanners/scanner.models';
 import { asUnknownRecord } from '../../utils/type-guards.util';
+import { isDecimalString, isDomainName, isIpv4Address } from '../../utils/network-validation.util';
 
 @Injectable({ providedIn: 'root' })
 export class NetworkIntelScanService extends ScanHelperMethodsService {
@@ -260,14 +261,8 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
       return { error: null, parsedRanges: [] };
     }
 
-    const cidr = /^(\d{1,3}\.){3}\d{1,3}\/(\d|[12]\d|3[012])$/;
-    const range = /^(\d{1,3}\.){3}\d{1,3}-(\d{1,3}\.){3}\d{1,3}$/;
-    const single = /^(\d{1,3}\.){3}\d{1,3}$/;
-    const isValidOctet = (ip: string) => ip.split('.').every(octet => parseInt(octet, 10) <= 255);
     const parsedRanges = lines.map(line => {
-      const base = line.split('/')[0].split('-')[0];
-      const valid = (cidr.test(line) || range.test(line) || single.test(line)) && isValidOctet(base);
-      return { value: line, valid };
+      return { value: line, valid: this.isValidIpRangeEntry(line) };
     });
     const invalid = parsedRanges.find(rangeItem => !rangeItem.valid);
     return {
@@ -362,20 +357,30 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   private isValidDomain(value: string): boolean {
-    const ipPattern = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (ipPattern.test(value)) {
-      return false;
-    }
-    const domainPattern = /^(?:[a-zA-Z0-9](?:[a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}$/;
-    return domainPattern.test(value);
+    return !isIpv4Address(value) && isDomainName(value);
   }
 
   private isValidIp(value: string): boolean {
-    const ipv4 = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipv4.test(value)) {
-      return false;
+    return isIpv4Address(value);
+  }
+
+  private isValidIpRangeEntry(value: string): boolean {
+    const cidrParts = value.split('/');
+    if (cidrParts.length === 2) {
+      const [address, prefix] = cidrParts;
+      const prefixLength = Number(prefix);
+      return isIpv4Address(address)
+        && isDecimalString(prefix)
+        && String(prefixLength) === prefix
+        && prefixLength >= 0
+        && prefixLength <= 32;
     }
-    return value.split('.').every(octet => parseInt(octet, 10) <= 255);
+
+    const rangeParts = value.split('-');
+    if (rangeParts.length === 2) {
+      return rangeParts.every(isIpv4Address);
+    }
+    return isIpv4Address(value);
   }
 
   private isValidCoordinates(value: string): boolean {

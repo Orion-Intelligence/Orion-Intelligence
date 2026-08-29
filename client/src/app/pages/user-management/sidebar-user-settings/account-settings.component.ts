@@ -186,7 +186,7 @@ export class AccountSettingsComponent implements OnInit {
     };
     this.apiService.post(route, userMeta).subscribe({
       next: () => void 0,
-      error: (_err) => void 0,
+      error: () => void 0,
     });
   }
 

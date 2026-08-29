@@ -1,4 +1,4 @@
-import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, SimpleChanges, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, computed, effect, ElementRef, HostListener, OnChanges, OnInit, ViewChild, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EmptyResultComponent } from '../empty-result/empty-result.component';
 import { FormsModule } from '@angular/forms';
@@ -161,7 +161,7 @@ export class ResultComponent implements OnInit, OnChanges {
     });
   }
 
-  ngOnChanges(_: SimpleChanges): void {
+  ngOnChanges(): void {
     this.searchQuery = this.searchQuery
       ?.replace(/"/g, ' ')
       .replace(/\s+/g, ' ')
@@ -247,7 +247,7 @@ export class ResultComponent implements OnInit, OnChanges {
 
   entityFiltersCount(): number {
     const categories = this.app_service.configData().localSettings.entityfilterCategories;
-    return Object.values(categories).reduce((count, val) => {
+    return Object.values(categories).reduce<number>((count, val) => {
       if (Array.isArray(val)) {
         return count + val.length;
       }

@@ -242,13 +242,14 @@ export class CategoryAlertReportComponent implements OnInit {
 
   showAlertPopup(action: string, id: string) {
     switch (action) {
-      case 'edit':
+      case 'edit': {
         const alert = this.alertLookupById.get(id);
         if (alert) {
           this.selectedAlert = alert;
           this.showEditAlertPopup = true;
         }
         break;
+      }
 
       case 'add':
         this.showCustomAlertPopup = true;
@@ -483,7 +484,7 @@ export class CategoryAlertReportComponent implements OnInit {
               });
               break;
 
-            case "email-breach":
+            case "email-breach": {
               const _username = value.split('@')[0];
               scanType = "repo";
               route = "/dashboard/api/email-breach";
@@ -491,6 +492,7 @@ export class CategoryAlertReportComponent implements OnInit {
                 queryParams: { username: _username, email: value }
               });
               break;
+            }
             case "playstore-scanning":
               scanType = "repo";
               route = "/dashboard/api/playstore-scanner";
@@ -558,13 +560,14 @@ export class CategoryAlertReportComponent implements OnInit {
     const entity = alert.ioc_value || 'N/A';
     const resultDate = this.extractAlertResultDate(alert.all_ioc || []);
     const password = this.extractAlertPassword(alert);
+    const category = alert.type || 'unknown';
 
     return {
       id: alert.alert_id || '',
       seen: alert.report_seen || false,
       custom: alert.custom_alert || false,
-      risk: this.getRiskLevel(alert.type!, alert.risk),
-      category: alert.type || 'unknown',
+      risk: this.getRiskLevel(category, alert.risk),
+      category,
       title: alert.title || 'No Title',
       description: alert.description || 'No description provided.',
       hash: alert.data_hash || 'NO_HASH',

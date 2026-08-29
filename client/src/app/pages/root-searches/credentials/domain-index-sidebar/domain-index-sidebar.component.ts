@@ -1,6 +1,7 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { StealerLogCallbackModel, StealerLogResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { isIpv4Address } from '../../../../shared/utils/network-validation.util';
 
 @Component({
   selector: 'app-domain-index-sidebar',
@@ -62,7 +63,7 @@ export class DomainIndexSidebarComponent {
     domain = domain.split(/[/?#]/)[0] ?? '';
     domain = domain.split(':')[0] ?? '';
     domain = domain.replace(/^\.+|\.+$/g, '').replace(/^www\./, '');
-    if (!domain || !domain.includes('.') || /\s/.test(domain) || /^\d{1,3}(\.\d{1,3}){3}$/.test(domain)) {
+    if (!domain || !domain.includes('.') || /\s/.test(domain) || isIpv4Address(domain)) {
       return '';
     }
     return domain;

@@ -686,8 +686,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     try {
       sessionStorage.setItem(this.pendingStreamStorageKey, JSON.stringify(pending));
     }
-    catch {
-
+    catch (error) {
+      void error;
     }
   }
 
@@ -834,7 +834,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private mapSession(session: NexusChatSession): AiChatSession {
     return {
-      sessionId: session.session_id || session.id!,
+      sessionId: session.session_id || session.id || '',
       title: session.title,
       updatedAt: session.updated_at,
       messageCount: session.message_count ?? (Array.isArray(session.messages) ? session.messages.length : 0),

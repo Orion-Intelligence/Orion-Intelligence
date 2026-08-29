@@ -25,7 +25,7 @@ export class SocialFetchService {
       map(response => ({
         pending: response?.status === 'pending',
         idle: response?.status === 'idle',
-        items: (response?.result?.items ?? (response?.result?.profile ? [response.result.profile] : [])) as unknown[],
+        items: (response?.result?.items ?? (response?.result?.profile ? [response.result.profile] : [])),
         next_cursor: response?.result?.next_cursor,
         has_more: response?.result?.has_more,
         error: response?.error,
@@ -95,7 +95,7 @@ export class SocialFetchService {
 
   fetchDarkwebReport(username: string, limit?: number): Observable<Record<string, unknown>[]> {
     return this.api.post<SocialSearchResponse<Record<string, unknown>>>('search/social', { q: username, category: 'all', network: 'all', page: 1, ...(limit ? { platform_result_count: Math.max(1, Math.min(limit, 100)) } : {}) })
-      .pipe(map(response => (response?.Result ?? response?.data?.Result ?? response?.result?.Result ?? []) as Record<string, unknown>[]),
+      .pipe(map(response => (response?.Result ?? response?.data?.Result ?? response?.result?.Result ?? [])),
         catchError(() => of<Record<string, unknown>[]>([])));
   }
 

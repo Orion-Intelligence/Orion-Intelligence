@@ -16,6 +16,7 @@ import { NetworkIntelScanService } from '../../../../shared/services/network-int
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { SECURITY_SCAN_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
+import { isIpv4Address } from '../../../../shared/utils/network-validation.util';
 
 @Component({
   selector: 'app-security-scan',
@@ -73,7 +74,7 @@ export class SecurityScanComponent implements OnInit {
     try {
       const u = new URL(resolved);
       const host = u.hostname;
-      const isIPv4 = /^\d{1,3}(\.\d{1,3}){3}$/.test(host);
+      const isIPv4 = isIpv4Address(host);
       const validHost = host === 'localhost' || isIPv4 || host.includes('.');
       if (!validHost) {
         return;

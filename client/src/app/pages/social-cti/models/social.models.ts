@@ -134,7 +134,7 @@ export interface social_phone_lookup_result extends Record<string, unknown> {
     rating?: string | number;
     user_ratings_total?: string | number;
     website?: string;
-    phone_numbers?: Array<string | number>;
+    phone_numbers?: (string | number)[];
     emails?: string[];
     web_footprints?: social_phone_web_footprint[];
 }

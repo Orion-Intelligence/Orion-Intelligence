@@ -18,7 +18,7 @@ export class ResultRowHelperService {
   }
 
   prettyLabel(key: string): string {
-    const cleaned = String(key).replace(/^m_/, '').replace(/[_\-]+/g, ' ').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
+    const cleaned = String(key).replace(/^m_/, '').replace(/[_-]+/g, ' ').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
     if (!cleaned) {
       return String(key);
     }

@@ -13,7 +13,7 @@ import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe'
 export class OrionFacilityPopupComponent {
   private currentFeature: OrionSatelliteFeature | null = null;
 
-  rows: Array<{ label: string; value: string; stacked: boolean }> = [];
+  rows: { label: string; value: string; stacked: boolean }[] = [];
 
   set feature(value: OrionSatelliteFeature | null) {
     this.currentFeature = value;
@@ -29,7 +29,7 @@ export class OrionFacilityPopupComponent {
     return name || 'Feature';
   }
 
-  private buildRows(feature: OrionSatelliteFeature | null): Array<{ label: string; value: string; stacked: boolean }> {
+  private buildRows(feature: OrionSatelliteFeature | null): { label: string; value: string; stacked: boolean }[] {
     if (!feature) {
       return [];
     }

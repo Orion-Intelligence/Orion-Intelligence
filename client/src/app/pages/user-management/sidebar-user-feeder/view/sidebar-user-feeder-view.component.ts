@@ -804,16 +804,18 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   }
 
   private sortScripts(scripts: FeederScriptItem[]): FeederScriptItem[] {
-    if (!this.sortColumn || !this.sortDirection) {
+    const sortColumn = this.sortColumn;
+    const sortDirection = this.sortDirection;
+    if (!sortColumn || !sortDirection) {
       return [...scripts];
     }
     return [...scripts].sort((left, right) => {
-      const leftValue = this.getScriptSortValue(left, this.sortColumn as SortColumn);
-      const rightValue = this.getScriptSortValue(right, this.sortColumn as SortColumn);
+      const leftValue = this.getScriptSortValue(left, sortColumn);
+      const rightValue = this.getScriptSortValue(right, sortColumn);
       const result = typeof leftValue === 'number' && typeof rightValue === 'number'
         ? leftValue - rightValue
         : String(leftValue).localeCompare(String(rightValue));
-      return this.sortDirection === 'asc' ? result : -result;
+      return sortDirection === 'asc' ? result : -result;
     });
   }
 

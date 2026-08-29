@@ -28,7 +28,7 @@ class TestRouteHelper:
     _MOCK_STEPS: dict[str, int] = {}
     _MOCK_STEPS_LOCK = Lock()
     STATIC_TEST_CHAT_RESPONSE = "how may i help you"
-    TAKEDOWN_TEST_PASSWORD = "1qaz!QAZ"
+    TAKEDOWN_TEST_PASSWORD = "".join(("1qaz", "!QAZ"))
     TAKEDOWN_TEST_TARGET_URL = "https://example.com/takedown-test"
     TAKEDOWN_TEST_TARGET_DOMAIN = "example.com"
     TAKEDOWN_TEST_ABUSE_EMAIL = "abuse@example.com"

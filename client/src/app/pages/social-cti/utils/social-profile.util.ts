@@ -1,6 +1,7 @@
 import type { social_profile, social_resource } from '../models/social.models';
 import type { FetchTabKey } from '../enums/social-graph.enums';
 import { CONTENT_DATE_KEYS } from '../constants/social-graph.constants';
+import { isDecimalString } from '../../../shared/utils/network-validation.util';
 
 export function getPlatformCardId(platformData: social_profile): string {
   return `platform-${platformData.meta.username}|${platformData.meta.platform}|${platformData.meta.username}`;
@@ -31,7 +32,8 @@ export function contentTime(item: social_resource): number {
     if (raw === undefined || raw === null || raw === '') {
       continue;
     }
-    const numeric = typeof raw === 'number' ? raw : (/^\d+(\.\d+)?$/.test(String(raw).trim()) ? Number(raw) : NaN);
+    const numericText = String(raw).trim();
+    const numeric = typeof raw === 'number' ? raw : (isDecimalString(numericText) ? Number(numericText) : NaN);
     const value = Number.isFinite(numeric) ? (numeric > 1e12 ? numeric : numeric * 1000) : Date.parse(String(raw));
     if (Number.isFinite(value) && value > 0) {
       return value;

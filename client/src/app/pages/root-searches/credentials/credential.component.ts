@@ -265,11 +265,13 @@ export class CredentialComponent implements OnInit {
   }
 
   reloadFilters(_: Record<string, string | null>) {
+    void _;
     this.fetchSearchResults();
     this.fetchRanked();
   }
 
   resetFilters(_: undefined) {
+    void _;
     this.fetchSearchResults(true);
     this.fetchRanked();
   }

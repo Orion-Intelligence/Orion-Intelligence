@@ -7,7 +7,7 @@ import { drawInstitutionalContentTitle, drawInstitutionalCover, drawInstitutiona
 import { PdfExportFontData, registerPdfExportFonts } from './pdf-export-fonts';
 import { PdfExportTheme } from './pdf-export-theme';
 import { preparePdfValue } from './pdf-text.util';
-import { AutoTableDocument } from './pdf-autotable.types';
+import { assertAutoTableDocument, AutoTableDocument } from './pdf-autotable.types';
 
 @Injectable({ providedIn: 'root' })
 export class DocumentExportService extends GraphExportService {
@@ -47,18 +47,20 @@ export class DocumentExportService extends GraphExportService {
       didParseCell: this.makeFirstColumnDidParse(theme?.firstColumnFillRgb),
       didDrawPage: hooks.didDrawPage
     });
-    this.drawRoundedTableContainer(doc, margin, contentW, firstSectionY, (doc as AutoTableDocument).lastAutoTable.finalY ?? firstSectionY);
-    if (this.isJpegDataUrl(payload.graphImageDataUrl)) {
-      const snapshotHeight = this.getScreenshotPreviewHeight(doc, payload.graphImageDataUrl!, contentW, 260);
-      const snapshotMarkerY = this.resolveMarkerY(doc, (doc as AutoTableDocument).lastAutoTable.finalY + 14, PDF_EXPORT_LAYOUT.contentStartY, undefined, snapshotHeight + 18);
+    assertAutoTableDocument(doc);
+    this.drawRoundedTableContainer(doc, margin, contentW, firstSectionY, doc.lastAutoTable.finalY ?? firstSectionY);
+    const graphImageDataUrl = payload.graphImageDataUrl;
+    if (this.isJpegDataUrl(graphImageDataUrl)) {
+      const snapshotHeight = this.getScreenshotPreviewHeight(doc, graphImageDataUrl, contentW, 260);
+      const snapshotMarkerY = this.resolveMarkerY(doc, doc.lastAutoTable.finalY + 14, PDF_EXPORT_LAYOUT.contentStartY, undefined, snapshotHeight + 18);
       this.drawInfoSectionMarker(doc, snapshotMarkerY, contentW, 'Network Snapshot', theme?.sectionHeaderRgb);
-      const snapshotBottom = this.drawScreenshotPreview(doc, payload.graphImageDataUrl!, margin, snapshotMarkerY + 18, contentW, 260);
-      if ((doc as AutoTableDocument).lastAutoTable) {
-        (doc as AutoTableDocument).lastAutoTable.finalY = snapshotBottom;
+      const snapshotBottom = this.drawScreenshotPreview(doc, graphImageDataUrl, margin, snapshotMarkerY + 18, contentW, 260);
+      if (doc.lastAutoTable) {
+        doc.lastAutoTable.finalY = snapshotBottom;
       }
     }
     if (payload.nodes.length) {
-      const requestedNodeY = Math.max((doc as AutoTableDocument).lastAutoTable.finalY ?? 160, 160) + 18;
+      const requestedNodeY = Math.max(doc.lastAutoTable.finalY ?? 160, 160) + 18;
       const nodeMarkerY = this.resolveMarkerY(doc, requestedNodeY, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
       this.drawInfoSectionMarker(doc, nodeMarkerY, contentW, 'Nodes', theme?.sectionHeaderRgb);
       autoTable(doc, {
@@ -77,7 +79,7 @@ export class DocumentExportService extends GraphExportService {
         didParseCell: this.makeHeaderRowDidParse(theme?.headerRowFillRgb, false),
         didDrawPage: hooks.didDrawPage
       });
-      this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 0, (doc as AutoTableDocument).lastAutoTable.finalY ?? 0);
+      this.drawRoundedTableContainer(doc, margin, contentW, doc.lastAutoTable.startY ?? 0, doc.lastAutoTable.finalY ?? 0);
     }
     if (payload.tables?.length) {
       const hasMultipleRecordGroups = payload.tables.filter(table => Boolean(table.recordBlocks?.length)).length > 1;
@@ -90,13 +92,13 @@ export class DocumentExportService extends GraphExportService {
         const structuredRows = this.buildStructuredSectionRows(t);
         const hasStructuredRows = structuredRows.length > 1;
         const tableRows = hasStructuredRows ? structuredRows : this.buildReportSectionRows(t.values ?? {});
-        let markerY = ((doc as AutoTableDocument).lastAutoTable.finalY ?? 160) + 18;
+        let markerY = (doc.lastAutoTable.finalY ?? 160) + 18;
         markerY = this.resolveMarkerY(doc, markerY, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle, theme?.sectionHeaderRgb);
         const sectionStartPage = doc.getCurrentPageInfo().pageNumber;
         const reportSectionDidDrawPage = (data: HookData) => {
           hooks.didDrawPage(data);
-          const pageNo = (data?.doc as jsPDF | undefined)?.getCurrentPageInfo?.().pageNumber ?? data?.pageNumber ?? sectionStartPage;
+          const pageNo = data?.doc?.getCurrentPageInfo?.().pageNumber ?? data?.pageNumber ?? sectionStartPage;
           if (pageNo !== sectionStartPage) {
             this.drawInfoSectionMarker(data.doc as jsPDF, continuationMarkerY, contentW, sectionTitle || 'Info', theme?.sectionHeaderRgb);
           }
@@ -123,21 +125,21 @@ export class DocumentExportService extends GraphExportService {
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
         if (screenshotDataUrl) {
-          const lastY = (doc as AutoTableDocument).lastAutoTable.finalY ?? (markerY + 12);
+          const lastY = doc.lastAutoTable.finalY ?? (markerY + 12);
           const previewHeight = this.getScreenshotPreviewHeight(doc, screenshotDataUrl, contentW, 180);
           const imageY = this.resolveMarkerY(doc, lastY + 10, 98, () => {
             this.drawInfoSectionMarker(doc, 82, contentW, sectionTitle, theme?.sectionHeaderRgb);
           }, previewHeight);
           const imageBottom = this.drawScreenshotPreview(doc, screenshotDataUrl, margin, imageY, contentW, 180);
-          if ((doc as AutoTableDocument).lastAutoTable) {
-            (doc as AutoTableDocument).lastAutoTable.finalY = imageBottom;
+          if (doc.lastAutoTable) {
+            doc.lastAutoTable.finalY = imageBottom;
           }
         }
-        this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 0, (doc as AutoTableDocument).lastAutoTable.finalY ?? 0);
+        this.drawRoundedTableContainer(doc, margin, contentW, doc.lastAutoTable.startY ?? 0, doc.lastAutoTable.finalY ?? 0);
       });
     }
     if ((payload.edges || []).length > 0) {
-      const edgeMarkerY = this.resolveMarkerY(doc, (doc as AutoTableDocument).lastAutoTable.finalY + 18, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
+      const edgeMarkerY = this.resolveMarkerY(doc, doc.lastAutoTable.finalY + 18, PDF_EXPORT_LAYOUT.contentStartY, undefined, 70);
       this.drawInfoSectionMarker(doc, edgeMarkerY, contentW, 'Connection Matrix', theme?.sectionHeaderRgb);
       autoTable(doc, {
         startY: edgeMarkerY + 12,
@@ -156,7 +158,7 @@ export class DocumentExportService extends GraphExportService {
         didParseCell: this.makeHeaderRowDidParse(theme?.headerRowFillRgb, false),
         didDrawPage: hooks.didDrawPage
       });
-      this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 0, (doc as AutoTableDocument).lastAutoTable.finalY ?? 0);
+      this.drawRoundedTableContainer(doc, margin, contentW, doc.lastAutoTable.startY ?? 0, doc.lastAutoTable.finalY ?? 0);
     }
     this.finalizeDocumentPages(doc, payload, meta, theme);
     return this.docToBytes(doc);
@@ -251,9 +253,7 @@ export class DocumentExportService extends GraphExportService {
       }
       const raw = data?.cell?.raw;
       const title = String(raw && typeof raw === 'object' && 'content' in raw ? raw.content : '').trim();
-      const titleMatch = title.match(/^\s*(record\s*#?\s*\d+)\s*(?:[|/\-:]\s*)?(.*)$/i);
-      const recordLabel = titleMatch?.[1]?.trim() || 'Record';
-      const identity = titleMatch?.[2]?.trim() || '';
+      const { recordLabel, identity } = this.splitRecordTitle(title);
       const x = data.cell.x;
       const recordLabelY = data.cell.y + 13.1;
       const identityY = data.cell.y + 14.4;
@@ -276,6 +276,41 @@ export class DocumentExportService extends GraphExportService {
         drawDoc.text(this.fitSingleLine(drawDoc, identity, data.cell.width - identityOffset), x + identityOffset, identityY);
       }
     };
+  }
+
+  private splitRecordTitle(title: string): { recordLabel: string; identity: string } {
+    if (!title.toLowerCase().startsWith('record')) {
+      return { recordLabel: 'Record', identity: '' };
+    }
+
+    let cursor = 'record'.length;
+    while (cursor < title.length && /\s/.test(title.charAt(cursor))) {
+      cursor += 1;
+    }
+    if (title.charAt(cursor) === '#') {
+      cursor += 1;
+    }
+    while (cursor < title.length && /\s/.test(title.charAt(cursor))) {
+      cursor += 1;
+    }
+    const numberStart = cursor;
+    while (cursor < title.length) {
+      const character = title.charAt(cursor);
+      if (character < '0' || character > '9') {
+        break;
+      }
+      cursor += 1;
+    }
+    if (cursor === numberStart) {
+      return { recordLabel: 'Record', identity: '' };
+    }
+
+    const recordLabel = title.slice(0, cursor).trim();
+    let identity = title.slice(cursor).trim();
+    if ('|/-:'.includes(identity.charAt(0))) {
+      identity = identity.slice(1).trim();
+    }
+    return { recordLabel, identity };
   }
 
   private isMonospaceEvidenceField(label: string): boolean {

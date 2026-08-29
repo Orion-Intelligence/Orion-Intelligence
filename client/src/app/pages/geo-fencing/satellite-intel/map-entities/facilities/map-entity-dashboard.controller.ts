@@ -7,7 +7,7 @@ export class SatelliteMapEntityDashboardController {
   private isMapEntityFlushing = false;
   private streamFinished = false;
   private dashboardTypeFilterCache: OrionSatelliteDashboardFilter[] = ORION_POWER_FILTERS.map((option) => ({
-    key: option.key as OrionSatelliteFeatureType,
+    key: option.key,
     label: option.label,
     color: option.color,
     count: 0,
@@ -206,7 +206,7 @@ export class SatelliteMapEntityDashboardController {
       key: option.key as OrionSatelliteFeatureType,
       label: option.label,
       color: option.color,
-      count: counts.get(option.key as OrionSatelliteFeatureType) || 0,
+      count: counts.get(option.key) || 0,
     }));
 
     this.visiblePowerCountCache = this.filteredData.filter((feature) => feature.source === 'WRI').length;

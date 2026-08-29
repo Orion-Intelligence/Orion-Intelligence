@@ -12,7 +12,7 @@ export class IocResolver implements Resolve<TenantModel | null> {
   resolve(): Observable<TenantModel | null> {
     return this.apiService.post<TenantModel>('get/tenant', {}).pipe(tap(_tenantData => {
       this.appService.tenantData.set(_tenantData);
-    }), catchError(_ => {
+    }), catchError(() => {
       return of(null);
     }));
   }

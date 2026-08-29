@@ -268,6 +268,7 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
       }
     }
     catch {
+      return '';
     }
 
     return '';

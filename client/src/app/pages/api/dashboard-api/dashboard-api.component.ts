@@ -19,6 +19,7 @@ import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.s
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { DASHBOARD_API_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { isUnknownRecord, UnknownRecord } from '../../../shared/utils/type-guards.util';
+import { isDottedIdentifier } from '../../../shared/utils/network-validation.util';
 import type { DashboardApiResponse } from './model/dashboard-api.model';
 export type { DashboardApiResponse } from './model/dashboard-api.model';
 
@@ -359,7 +360,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
           else {
             const normalized = response?.data ?? response?.result ?? res;
             this.responseData = Array.isArray(normalized)
-              ? normalized as DashboardApiResponse[]
+              ? normalized
               : this.asResponse(normalized);
             this.breachData = (this.cardsData && this.cardsData.length > 0) ? this.cardsData[0] : null;
             this.expandedResultIndex = this.genericItems.length === 1 ? 0 : null;
@@ -376,10 +377,10 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   get crackedValid(): boolean {
     try {
       const u = new URL(this.q1);
-      return ((u.protocol === 'https:' || u.protocol === 'http:') && u.hostname === 'play.google.com') || /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(this.q1);
+      return ((u.protocol === 'https:' || u.protocol === 'http:') && u.hostname === 'play.google.com') || isDottedIdentifier(this.q1);
     }
     catch {
-      return /^[a-zA-Z][a-zA-Z0-9_]*(\.[a-zA-Z][a-zA-Z0-9_]*)+$/.test(this.q1);
+      return isDottedIdentifier(this.q1);
     }
   }
 
@@ -415,11 +416,11 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
           section: this.apiType || apiReference,
         },
         pollDelayMs: 2000,
-      }).pipe(catchError(_ => of(null)));
+      }).pipe(catchError(() => of(null)));
     }
     return this.http.post<DashboardApiWireResponse>(apiEndpoint, paramModel).pipe(expand(res => this.shouldContinuePolling(res)
       ? timer(2000).pipe(switchMap(() => this.http.post<DashboardApiWireResponse>(apiEndpoint, paramModel)))
-      : EMPTY), takeWhile(res => this.shouldContinuePolling(res), true), catchError(_ => of(null)));
+      : EMPTY), takeWhile(res => this.shouldContinuePolling(res), true), catchError(() => of(null)));
   }
 
   private buildApiPayload(): Record<string, unknown> {
@@ -479,7 +480,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   private asResponse(value: DashboardApiWireResponse | null | undefined): DashboardApiResponse | null {
-    return !Array.isArray(value) && isUnknownRecord(value) ? value as DashboardApiResponse : null;
+    return !Array.isArray(value) && isUnknownRecord(value) ? value : null;
   }
 
   private getNestedResponse(value: DashboardApiResponse | DashboardApiResponse[] | undefined): DashboardApiResponse | null {

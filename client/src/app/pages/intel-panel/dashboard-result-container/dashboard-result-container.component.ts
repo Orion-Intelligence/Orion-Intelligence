@@ -129,8 +129,8 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       && !this.isCrossSearchExcludedRoute();
   }
 
-  asGeneralResults(results: RankedResultItem[]): Array<GeneralResultItem | LeakResultItem> {
-    return results as unknown as Array<GeneralResultItem | LeakResultItem>;
+  asGeneralResults(results: RankedResultItem[]): (GeneralResultItem | LeakResultItem)[] {
+    return results as unknown as (GeneralResultItem | LeakResultItem)[];
   }
 
   asAptResults(results: RankedResultItem[]): AptIntelResultItem[] {
@@ -258,6 +258,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   }
 
   reloadFilters(_: Record<string, string | null>): void {
+    void _;
     this.fetchSearchResults();
   }
 

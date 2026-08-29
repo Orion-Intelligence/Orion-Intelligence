@@ -38,7 +38,7 @@ export function registerPdfExportFonts(doc: jsPDF, fontData: PdfExportFontData |
     doc.addFont('DejaVuSansMono.ttf', 'courier', 'normal');
   }
   catch {
-
+    return;
   }
 }
 

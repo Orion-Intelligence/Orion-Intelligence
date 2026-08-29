@@ -27,7 +27,7 @@ export class SatelliteFacilitiesService {
   }
 
   getTypeEntries(data: SatelliteFacilitiesResponse['result'] | null): [string, number][] {
-    return Object.entries(data?.type_counts || {}).sort((a, b) => b[1] - a[1]) as [string, number][];
+    return Object.entries(data?.type_counts || {}).sort((a, b) => b[1] - a[1]);
   }
 
   async streamMapEntities(size: number, onChunk: (items: OrionSatelliteFeature[]) => void, onComplete?: () => void, onError?: (error: unknown) => void): Promise<void> {
@@ -50,7 +50,7 @@ export class SatelliteFacilitiesService {
       const decoder = new TextDecoder();
       let buffer = '';
 
-      while (true) {
+      for (;;) {
         const { done, value } = await reader.read();
         if (done) {
           break;
@@ -282,7 +282,7 @@ export class SatelliteFacilitiesService {
     const parsedLocation = this.extractLatLon(item);
     const lat = parsedLocation?.lat;
     const lon = parsedLocation?.lon;
-    const hasValidCoords = Number.isFinite(lat) && Number.isFinite(lon);
+    const hasValidCoords = typeof lat === 'number' && typeof lon === 'number' && Number.isFinite(lat) && Number.isFinite(lon);
     const type = this.detectTypeFromRecord(item);
     const rawType = String(item?.type || item?.primary_fuel || '').trim();
 
@@ -296,7 +296,7 @@ export class SatelliteFacilitiesService {
       type,
       rawType: rawType || type,
       source: 'WRI',
-      coordinates: hasValidCoords ? [lon as number, lat as number] : [0, 0],
+      coordinates: hasValidCoords ? [lon, lat] : [0, 0],
       color: this.getStreamedMapEntityColor(type),
       capacityMw: typeof item?.capacity_mw === 'number' ? item.capacity_mw : null,
       properties: {
@@ -346,7 +346,7 @@ export class SatelliteFacilitiesService {
   private toScalarLatLon(latValue: unknown, lonValue: unknown): { lat: number; lon: number } | null {
     const lat = this.toFiniteNumber(latValue);
     const lon = this.toFiniteNumber(lonValue);
-    return this.isValidLatLon(lat, lon) ? { lat: lat as number, lon: lon as number } : null;
+    return lat !== null && lon !== null && this.isValidLatLon(lat, lon) ? { lat, lon } : null;
   }
 
   private toLatLonSequence(latValue: unknown, lonValue: unknown): { lat: number; lon: number } | null {
@@ -355,19 +355,19 @@ export class SatelliteFacilitiesService {
     }
 
     const count = Math.min(latValue.length, lonValue.length);
-    const points: Array<{ lat: number; lon: number }> = [];
+    const points: { lat: number; lon: number }[] = [];
     for (let index = 0; index < count; index += 1) {
       const lat = this.toFiniteNumber(latValue[index]);
       const lon = this.toFiniteNumber(lonValue[index]);
-      if (this.isValidLatLon(lat, lon)) {
-        points.push({ lat: lat as number, lon: lon as number });
+      if (lat !== null && lon !== null && this.isValidLatLon(lat, lon)) {
+        points.push({ lat, lon });
       }
     }
 
     return this.averageLatLon(points);
   }
 
-  private extractCoordinatePairs(value: unknown): Array<{ lat: number; lon: number }> {
+  private extractCoordinatePairs(value: unknown): { lat: number; lon: number }[] {
     if (!Array.isArray(value)) {
       return [];
     }
@@ -375,15 +375,15 @@ export class SatelliteFacilitiesService {
     if (value.length >= 2) {
       const lon = this.toFiniteNumber(value[0]);
       const lat = this.toFiniteNumber(value[1]);
-      if (this.isValidLatLon(lat, lon)) {
-        return [{ lat: lat as number, lon: lon as number }];
+      if (lat !== null && lon !== null && this.isValidLatLon(lat, lon)) {
+        return [{ lat, lon }];
       }
     }
 
     return value.flatMap((entry) => this.extractCoordinatePairs(entry));
   }
 
-  private averageLatLon(points: Array<{ lat: number; lon: number }>): { lat: number; lon: number } | null {
+  private averageLatLon(points: { lat: number; lon: number }[]): { lat: number; lon: number } | null {
     if (!points.length) {
       return null;
     }
@@ -407,7 +407,7 @@ export class SatelliteFacilitiesService {
   }
 
   private isValidLatLon(lat: number | null, lon: number | null): boolean {
-    return Number.isFinite(lat) && Number.isFinite(lon) && (lat as number) >= -90 && (lat as number) <= 90 && (lon as number) >= -180 && (lon as number) <= 180;
+    return lat !== null && lon !== null && Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180;
   }
 
   private detectTypeFromRecord(value: unknown): OrionSatelliteFeatureType {

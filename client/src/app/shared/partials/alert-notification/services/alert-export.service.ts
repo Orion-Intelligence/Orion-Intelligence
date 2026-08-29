@@ -266,7 +266,8 @@ export class AlertExportService {
     }
     const text = String(value)
       .normalize('NFKC')
-      .replace(/[\u00AD\u034F\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFE0E\uFE0F\uFEFF]/g, '')
+      .replace(/[\u00AD\u061C\u180E\u200B-\u200F\u202A-\u202E\u2060-\u206F\uFEFF]/g, '')
+      .replace(/\u034F|\uFE0E|\uFE0F/g, '')
       .replace(/[\uD800-\uDFFF]/g, '')
       .replace(/\s+/g, ' ')
       .trim();

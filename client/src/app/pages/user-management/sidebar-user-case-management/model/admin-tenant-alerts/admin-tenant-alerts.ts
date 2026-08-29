@@ -74,11 +74,10 @@ export class AdminTenantAlerts implements OnInit {
     return [
       { key: ALL_TENANTS_OPTION, label: this.translationService.translate('All') },
       ...this.tenantAlertGroups
-        .filter(group => !!group.tenant.id)
-        .map(group => ({
-          key: group.tenant.id as string,
-          label: group.tenant.name || group.tenant.email || group.tenant.id as string
-        }))
+        .flatMap(group => {
+          const id = group.tenant.id;
+          return id ? [{ key: id, label: group.tenant.name || group.tenant.email || id }] : [];
+        })
     ];
   }
 

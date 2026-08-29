@@ -441,6 +441,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private scrollToBottom(_: boolean): void {
+    void _;
     const el = this.messagesContainer?.nativeElement;
     if (!el) {
       return;

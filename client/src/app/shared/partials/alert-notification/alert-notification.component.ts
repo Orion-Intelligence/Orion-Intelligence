@@ -187,7 +187,7 @@ export class AlertNotificationComponent implements OnChanges {
     if (!date) {
       return '';
     }
-    const d = new Date(date + 'Z');
+    const d = new Date(date instanceof Date ? date : `${date}Z`);
     const now = new Date();
     const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
     const formatter = new Intl.RelativeTimeFormat(document.documentElement.lang || 'en', { numeric: 'always' });

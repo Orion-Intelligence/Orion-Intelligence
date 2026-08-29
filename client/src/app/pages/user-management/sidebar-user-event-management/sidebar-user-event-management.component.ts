@@ -18,6 +18,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
+import { DOMAIN_NAME_PATTERN, EMAIL_ADDRESS_PATTERN, IPV4_ADDRESS_PATTERN } from '../../../shared/utils/network-validation.util';
 import type { SiemEventRecord, SiemSearchResponse } from './model/sidebar-user-event-management.model';
 export type { SiemEventRecord,SiemSearchResponse } from './model/sidebar-user-event-management.model';
 
@@ -36,8 +37,8 @@ export type { SiemEventRecord,SiemSearchResponse } from './model/sidebar-user-ev
 })
 export class SidebarUserEventManagementComponent extends ValuePresentationBase implements OnInit, AfterViewInit {
   readonly searchBuilderTags = ['all', 'domain', 'email', 'ip'];
-  readonly searchBuilderValueValidators: RegExp[] = [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/];
-  readonly searchBuilderTagValidators: Record<string, RegExp> = { email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, domain: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, ip: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/ };
+  readonly searchBuilderValueValidators: RegExp[] = [EMAIL_ADDRESS_PATTERN, DOMAIN_NAME_PATTERN, IPV4_ADDRESS_PATTERN];
+  readonly searchBuilderTagValidators: Record<string, RegExp> = { email: EMAIL_ADDRESS_PATTERN, domain: DOMAIN_NAME_PATTERN, ip: IPV4_ADDRESS_PATTERN };
   query = '';
   displayQuery = '';
   loading = false;
@@ -119,6 +120,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   }
 
   reloadFilters(_: Record<string, string | null>): void {
+    void _;
     if (!this.queryTriggered && !this.query.trim()) {
       return;
     }

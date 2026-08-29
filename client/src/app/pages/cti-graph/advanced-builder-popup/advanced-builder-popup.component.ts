@@ -20,9 +20,9 @@ export class GraphAdvancedBuilderPopupComponent {
   readonly joinOperatorOptions = input<UiDropdownOption[]>([]);
   readonly clusterValueOptions = input<UiDropdownOption[]>([]);
   readonly maxFilters = input(8);
-  readonly closed = output<void>();
-  readonly execute = output<void>();
-  readonly addFilter = output<void>();
+  readonly closed = output();
+  readonly execute = output();
+  readonly addFilter = output();
   readonly removeFilter = output<string>();
   readonly operatorChange = output<{ filter: GraphAdvancedFilterModel; operator: string | null; index: number; }>();
   readonly optionChange = output<{ filter: GraphAdvancedFilterModel; optionKey: string | null; }>();

@@ -64,7 +64,7 @@ export class SocialExtensionService {
 
       void this.refreshLatest().finally(() => resolveWhenProbesSettle());
       window.addEventListener('message', onMessage);
-      window.postMessage({ source: 'orion-app', type: 'ping' }, '*');
+      window.postMessage({ source: 'orion-app', type: 'ping' }, window.location.origin);
       const presenceTimer = setTimeout(() => {
         deadlineReached = true;
         resolveWhenProbesSettle();
@@ -80,7 +80,7 @@ export class SocialExtensionService {
   }
 
   openExtension(): void {
-    window.postMessage({ source: 'orion-app', type: 'open' }, '*');
+    window.postMessage({ source: 'orion-app', type: 'open' }, window.location.origin);
   }
 
   crawlProfile(platform: string, url: string): Observable<Record<string, unknown> | null> {
@@ -104,7 +104,7 @@ export class SocialExtensionService {
       };
 
       window.addEventListener('message', onMessage);
-      window.postMessage({ source: 'orion-app', type: 'crawl', platform, url }, '*');
+      window.postMessage({ source: 'orion-app', type: 'crawl', platform, url }, window.location.origin);
       const timer = setTimeout(() => finish(null), 30000);
 
       return () => {
@@ -141,7 +141,7 @@ export class SocialExtensionService {
   }
 
   browserKind(): 'chrome' | 'firefox' {
-    return typeof navigator !== 'undefined' && /Firefox\//.test(navigator.userAgent) ? 'firefox' : 'chrome';
+    return typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox/') ? 'firefox' : 'chrome';
   }
 
   downloadUrl(browser: 'chrome' | 'firefox' = this.browserKind()): string {
@@ -168,10 +168,10 @@ export class SocialExtensionService {
     if (typeof navigator === 'undefined') {
       return false;
     }
-    if (/Firefox\//.test(navigator.userAgent)) {
+    if (navigator.userAgent.includes('Firefox/')) {
       return true;
     }
-    const brands = (navigator as Navigator & { userAgentData?: { brands?: Array<{ brand: string }> } }).userAgentData?.brands;
+    const brands = (navigator as Navigator & { userAgentData?: { brands?: { brand: string }[] } }).userAgentData?.brands;
     if (!brands?.length) {
       return false;
     }

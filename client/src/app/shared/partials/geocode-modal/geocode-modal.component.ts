@@ -116,7 +116,9 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
       return;
     }
     this.isSearching = true;
-    this.searchTimer = setTimeout(() => this.runSearch(), this.DEBOUNCE_MS);
+    this.searchTimer = setTimeout(() => {
+      void this.runSearch();
+    }, this.DEBOUNCE_MS);
   }
 
   async runSearch(): Promise<void> {

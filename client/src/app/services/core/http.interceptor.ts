@@ -95,7 +95,18 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       if (error instanceof HttpErrorResponse && error.error && typeof error.error === 'object') {
         const keys = Object.keys(error.error);
         if (keys.length === 1) {
-          message = `${(error.error as Record<string, unknown>)[keys[0]]}`;
+          const errorValue = (error.error as Record<string, unknown>)[keys[0]];
+          if (typeof errorValue === 'string') {
+            message = errorValue;
+          }
+          else {
+            try {
+              message = JSON.stringify(errorValue) ?? '';
+            }
+            catch {
+              message = 'Request failed';
+            }
+          }
         }
       }
       const silentLogoutMessages = new Set([

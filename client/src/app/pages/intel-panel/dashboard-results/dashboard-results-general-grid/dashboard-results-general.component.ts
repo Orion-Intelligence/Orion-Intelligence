@@ -45,8 +45,9 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
 
   highlightWords(text: unknown): string {
     const key = JSON.stringify(text);
-    if (this.highlightCache.has(key)) {
-      return this.highlightCache.get(key)!;
+    const cached = this.highlightCache.get(key);
+    if (cached !== undefined) {
+      return cached;
     }
     const result = this.helperService.highlightWords(typeof text === 'string' ? text : String(text ?? ''));
     this.highlightCache.set(key, result);

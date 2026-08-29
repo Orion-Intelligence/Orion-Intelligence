@@ -91,7 +91,7 @@ export class MarkdownPipe implements PipeTransform {
         continue;
       }
 
-      if (/^([-*_])(?:\s*\1){2,}$/.test(trimmed)) {
+      if (this.isHorizontalRule(trimmed)) {
         flushParagraph();
         flushList();
         html.push('<hr>');
@@ -144,7 +144,7 @@ export class MarkdownPipe implements PipeTransform {
   private tryRenderTable(lines: string[], startIndex: number): { html: string; endIndex: number } | null {
     const header = lines[startIndex]?.trim() ?? '';
     const separator = lines[startIndex + 1]?.trim() ?? '';
-    if (!header.includes('|') || !/^\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?$/.test(separator)) {
+    if (!header.includes('|') || !this.isTableSeparator(separator)) {
       return null;
     }
 
@@ -178,10 +178,48 @@ export class MarkdownPipe implements PipeTransform {
 
   private formatHeaderCell(value: string): string {
     const trimmed = value.trim();
-    if (!/^[a-z0-9]+([_-][a-z0-9]+)*$/.test(trimmed)) {
+    if (!this.isHeaderIdentifier(trimmed)) {
       return value;
     }
     return trimmed.split(/[_-]/).map(word => `${word.charAt(0).toUpperCase()}${word.slice(1)}`).join(' ');
+  }
+
+  private isHorizontalRule(value: string): boolean {
+    const compact = value.replace(/\s/g, '');
+    const marker = compact.charAt(0);
+    return compact.length >= 3
+      && '-*_'.includes(marker)
+      && Array.from(compact).every(character => character === marker);
+  }
+
+  private isTableSeparator(value: string): boolean {
+    let content = value.trim();
+    if (content.startsWith('|')) {
+      content = content.slice(1);
+    }
+    if (content.endsWith('|')) {
+      content = content.slice(0, -1);
+    }
+    const cells = content.split('|');
+    return cells.length >= 2 && cells.every(cell => {
+      let rule = cell.trim();
+      if (rule.startsWith(':')) {
+        rule = rule.slice(1);
+      }
+      if (rule.endsWith(':')) {
+        rule = rule.slice(0, -1);
+      }
+      rule = rule.trim();
+      return rule.length >= 3 && Array.from(rule).every(character => character === '-');
+    });
+  }
+
+  private isHeaderIdentifier(value: string): boolean {
+    return value.length > 0 && value.split(/[_-]/).every(part => part.length > 0 && Array.from(part).every(character => {
+      const isLowercaseLetter = character >= 'a' && character <= 'z';
+      const isDigit = character >= '0' && character <= '9';
+      return isLowercaseLetter || isDigit;
+    }));
   }
 
   private formatValueCell(value: string): string {
@@ -255,7 +293,7 @@ export class MarkdownPipe implements PipeTransform {
     };
 
     let text = value
-      .replace(/\\([\\`*_\[\]<>|])/g, (_match, literal: string) => token(this.escapeHtml(literal)))
+      .replace(/\\([\\`*_[\]<>|])/g, (_match, literal: string) => token(this.escapeHtml(literal)))
       .replace(/`([^`]+)`/g, (_match, code: string) => token(`<code>${this.escapeHtml(code)}</code>`))
       .replace(/\[([^\]]+)]\(([^)\s]+)\)/g, (_match, label: string, href: string) => {
         const url = this.escapeAttribute(this.sanitizeHref(href));

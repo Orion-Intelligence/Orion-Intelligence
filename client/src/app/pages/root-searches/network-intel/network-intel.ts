@@ -20,6 +20,7 @@ import { NetworkIntelSeoRepoScanCategory, SeoRepoScanSectionComponent } from './
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { NETWORK_INTEL_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
 import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { isIpv4Address } from '../../../shared/utils/network-validation.util';
 
 @Component({
   selector:    'app-network-intel',
@@ -587,7 +588,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
     const resolvedTarget = this.resolveSeoRepoScanTarget(this.seoRepoScanForm.target);
     const host = this.extractSeoRepoScanHost(resolvedTarget);
-    if (!host || (host !== 'localhost' && !host.includes('.') && !/^\d{1,3}(\.\d{1,3}){3}$/.test(host))) {
+    if (!host || (host !== 'localhost' && !host.includes('.') && !isIpv4Address(host))) {
       this.formError = 'Enter a valid URL or host';
       return;
     }
@@ -864,19 +865,20 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private buildReportPayload(): GraphReportPayload | null {
-    if (this.activeTab === 'dns' && this.dnsResult) {
+    const dnsResult = this.dnsResult;
+    if (this.activeTab === 'dns' && dnsResult) {
       const now = new Date().toISOString();
       const completedDetails = this.ipRows.flatMap(row => row.detail ? [row.detail] : []);
       const scanStatuses = Array.from(new Set(completedDetails
         .map(detail => this.normalizeReportValue(detail['scan_status'] || detail.status))
         .filter(Boolean)));
       const nodes = [
-        { id: `domain-${this.dnsResult.domain}`, label: this.dnsResult.domain, type: 'domain' },
-        ...this.dnsResult.ips.map(ip => ({ id: `ip-${ip}`, label: ip, type: 'ip' as const }))
+        { id: `domain-${dnsResult.domain}`, label: dnsResult.domain, type: 'domain' },
+        ...dnsResult.ips.map(ip => ({ id: `ip-${ip}`, label: ip, type: 'ip' as const }))
       ];
-      const edges = this.dnsResult.ips.map(ip => ({
-        id: `${this.dnsResult!.domain}-${ip}`,
-        from: `domain-${this.dnsResult!.domain}`,
+      const edges = dnsResult.ips.map(ip => ({
+        id: `${dnsResult.domain}-${ip}`,
+        from: `domain-${dnsResult.domain}`,
         to: `ip-${ip}`,
         label: 'resolves_to'
       }));
@@ -884,13 +886,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return {
         graphKind: 'cti',
         title: 'Host Recon Report',
-        sessionName: this.dnsResult.domain,
+        sessionName: dnsResult.domain,
         generatedAtIso: now,
         nodes,
         edges,
         summary: {
-          domain: this.dnsResult.domain,
-          resolved_ips: this.dnsResult.ips.length,
+          domain: dnsResult.domain,
+          resolved_ips: dnsResult.ips.length,
           enriched_ips: completedDetails.length,
           open_ports: completedDetails.reduce((total, detail) => total + (detail.open_ports?.length ?? 0), 0),
           scan_status: scanStatuses.length ? scanStatuses.join(', ') : 'Not reported',
@@ -899,18 +901,20 @@ export class NetworkIntel implements OnInit, OnDestroy {
         tables: [
           {
             title: 'Resolved IPs',
-            values: this.dnsResult.ips.reduce<Record<string, string>>((acc, ip, index) => {
+            values: dnsResult.ips.reduce<Record<string, string>>((acc, ip, index) => {
               acc[`IP ${index + 1}`] = ip;
               return acc;
             }, {})
           },
-          ...this.buildRawJsonTables(this.dnsResult, 'DNS Raw Result'),
+          ...this.buildRawJsonTables(dnsResult, 'DNS Raw Result'),
           ...this.ipRows
-            .filter(row => Boolean(row.detail))
-            .flatMap((row, index) => [
-              ...this.buildIpDetailTables(row.detail!, `IP ${index + 1}`),
-              ...this.buildRawJsonTables(row.detail!, `IP ${index + 1} Raw Result`)
-            ])
+            .flatMap((row, index) => {
+              const detail = row.detail;
+              return detail ? [
+                ...this.buildIpDetailTables(detail, `IP ${index + 1}`),
+                ...this.buildRawJsonTables(detail, `IP ${index + 1} Raw Result`)
+              ] : [];
+            })
         ]
       };
     }

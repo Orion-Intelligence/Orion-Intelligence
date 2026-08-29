@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, Router, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, Resolve, Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ApiService } from '../services/api.service';
@@ -11,7 +11,7 @@ export class ReportResolver implements Resolve<unknown> {
   constructor(private apiService: ApiService, private router: Router) {
   }
 
-  resolve(route: ActivatedRouteSnapshot, _state: RouterStateSnapshot): Observable<unknown> {
+  resolve(route: ActivatedRouteSnapshot): Observable<unknown> {
     const category_1 = route.parent?.url[0]?.path || '';
     const category_2 = route.url[0]?.path || '';
     const hash = route.paramMap.get('m_hash');
@@ -24,7 +24,7 @@ export class ReportResolver implements Resolve<unknown> {
     if (lang) {
       apiUrl += `?lang=${lang}`;
     }
-    return this.apiService.get<unknown>(apiUrl).pipe(catchError((_) => {
+    return this.apiService.get<unknown>(apiUrl).pipe(catchError(() => {
       this.router.navigate(['/']).then();
       return of(null);
     }));

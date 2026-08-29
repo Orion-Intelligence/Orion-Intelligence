@@ -10,7 +10,7 @@ import { drawInstitutionalContentTitle, drawInstitutionalCover, drawInstitutiona
 import { loadPdfExportFontData, PdfExportFontData, registerPdfExportFonts } from './pdf-export-fonts';
 import { PDF_EXPORT_THEME } from './pdf-export-theme';
 import { normalizePdfText, preparePdfValue } from './pdf-text.util';
-import { AutoTableDocument } from './pdf-autotable.types';
+import { assertAutoTableDocument } from './pdf-autotable.types';
 import type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
 export type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
 
@@ -55,7 +55,7 @@ export class GraphExportService {
         import('jspdf'),
         import('jspdf-autotable'),
         loadPdfExportFontData()
-      ])).pipe(tap(([_, autoTableModule, fontData]) => {
+      ])).pipe(tap(([, autoTableModule, fontData]) => {
         this.loadedAutoTable = autoTableModule.default;
         if (!fontData) {
           this.pdfLibs$ = null;
@@ -157,8 +157,9 @@ export class GraphExportService {
       didParseCell: this.makeFirstColumnDidParse(),
       ...analysisTableBase
     });
-    this.drawRoundedTableContainer(doc, margin, contentW, 220, (doc as AutoTableDocument).lastAutoTable.finalY ?? 220);
-    const compositionMarkerY = this.resolveMarkerY(doc, (doc as AutoTableDocument).lastAutoTable.finalY + 12, 126, () => {
+    assertAutoTableDocument(doc);
+    this.drawRoundedTableContainer(doc, margin, contentW, 220, doc.lastAutoTable.finalY ?? 220);
+    const compositionMarkerY = this.resolveMarkerY(doc, doc.lastAutoTable.finalY + 12, 126, () => {
       const pageNo = doc.getCurrentPageInfo().pageNumber;
       sectionsByPage[pageNo] = 'Graph Analysis';
       this.drawGraphAnalysisHeader(doc, payload, meta);
@@ -169,7 +170,7 @@ export class GraphExportService {
       body: composition.map(x => [x.type, String(x.count)]) as RowInput[],
       ...analysisTableBase
     });
-    this.drawRoundedTableContainer(doc, margin, contentW, (doc as AutoTableDocument).lastAutoTable.startY ?? 232, (doc as AutoTableDocument).lastAutoTable.finalY ?? 232);
+    this.drawRoundedTableContainer(doc, margin, contentW, doc.lastAutoTable.startY ?? 232, doc.lastAutoTable.finalY ?? 232);
     const socialPlatformCounts = this.extractSocialPlatformCounts(payload);
     let platformPageNo: number | null = null;
     if (payload.graphKind === 'social' && socialPlatformCounts.length > 0) {
@@ -189,7 +190,7 @@ export class GraphExportService {
         didParseCell: this.makeHeaderRowDidParse(this.PDF_THEME.defaultHeaderRowFillRgb, false),
         didDrawPage: this.makeSectionHeaderCallback(sectionsByPage, 'Platform Inventory', 'Detected social platforms in current graph', platformPageNo)
       });
-      this.drawRoundedTableContainer(doc, margin, contentW, 126, (doc as AutoTableDocument).lastAutoTable.finalY ?? 126);
+      this.drawRoundedTableContainer(doc, margin, contentW, 126, doc.lastAutoTable.finalY ?? 126);
     }
     let reportsPageNo: number | null = null;
     if (payload.tables?.length) {
@@ -200,7 +201,7 @@ export class GraphExportService {
       payload.tables.forEach((t, idx) => {
         const sectionTitle = this.getReportSectionTitle(t, idx);
         const tableRows = this.buildReportSectionRows(t.values ?? {});
-        let markerY = idx === 0 ? 126 : ((doc as AutoTableDocument).lastAutoTable.finalY ?? 126) + 18;
+        let markerY = idx === 0 ? 126 : (doc.lastAutoTable.finalY ?? 126) + 18;
         markerY = this.resolveMarkerY(doc, markerY, 126, () => {
           const pageNo = doc.getCurrentPageInfo().pageNumber;
           sectionsByPage[pageNo] = 'Report Sections';
@@ -231,7 +232,7 @@ export class GraphExportService {
         });
         const screenshotDataUrl = this.findTableScreenshotDataUrl(t);
         if (screenshotDataUrl) {
-          const lastY = (doc as AutoTableDocument).lastAutoTable.finalY ?? (markerY + 12);
+          const lastY = doc.lastAutoTable.finalY ?? (markerY + 12);
           const previewHeight = this.getScreenshotPreviewHeight(doc, screenshotDataUrl, contentW, 190);
           const imageY = this.resolveMarkerY(doc, lastY + 10, 142, () => {
             const pageNo = doc.getCurrentPageInfo().pageNumber;
@@ -240,8 +241,8 @@ export class GraphExportService {
             this.drawInfoSectionMarker(doc, 126, contentW, sectionTitle);
           }, previewHeight);
           const imageBottom = this.drawScreenshotPreview(doc, screenshotDataUrl, margin, imageY, contentW, 190);
-          if ((doc as AutoTableDocument).lastAutoTable) {
-            (doc as AutoTableDocument).lastAutoTable.finalY = imageBottom;
+          if (doc.lastAutoTable) {
+            doc.lastAutoTable.finalY = imageBottom;
           }
         }
       });
@@ -407,11 +408,15 @@ export class GraphExportService {
   }
 
   private drawGraphSnapshot(doc: jsPDF, payload: GraphReportPayload): void {
+    const graphImageDataUrl = payload.graphImageDataUrl;
+    if (!this.isJpegDataUrl(graphImageDataUrl)) {
+      return;
+    }
     this.drawReportBackgroundPattern(doc);
     drawInstitutionalContentTitle(doc, 'Expanded Graph View', 'Rendered graph snapshot at export time');
     const margin = PDF_EXPORT_LAYOUT.margin;
     const fit = this.fitRectToPage(doc, margin, 136, margin, 80);
-    const img = doc.getImageProperties(payload.graphImageDataUrl!);
+    const img = doc.getImageProperties(graphImageDataUrl);
     let imgW = fit.w;
     let imgH = (imgW * img.height) / img.width;
     if (imgH > fit.h) {
@@ -427,7 +432,7 @@ export class GraphExportService {
     doc.setDrawColor(...this.PDF_THEME.mediumBorderRgb);
     doc.setLineWidth(1);
     doc.rect(fit.x, fit.y, fit.w, fit.h);
-    doc.addImage(payload.graphImageDataUrl!, 'JPEG', drawX, drawY, imgW, imgH, undefined, 'FAST');
+    doc.addImage(graphImageDataUrl, 'JPEG', drawX, drawY, imgW, imgH, undefined, 'FAST');
     doc.setFontSize(8);
     doc.setTextColor(...this.PDF_THEME.textMutedRgb);
     doc.text(`Nodes: ${payload.nodes.length}   Edges: ${payload.edges.length}`, margin, this.getPageH(doc) - 56);
@@ -749,7 +754,7 @@ export class GraphExportService {
     doc.viewerPreferences({ DisplayDocTitle: true, FitWindow: true });
   }
 
-  protected isJpegDataUrl(dataUrl?: string): boolean {
+  protected isJpegDataUrl(dataUrl?: string): dataUrl is string {
     return typeof dataUrl === 'string' && dataUrl.startsWith('data:image/jpeg;base64,');
   }
 

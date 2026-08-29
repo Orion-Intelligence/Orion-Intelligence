@@ -143,15 +143,16 @@ export class OrionFacilitiesMapRenderer {
     const popup = this.componentRenderer.create(OrionFacilityPopupComponent, {
       feature,
     });
-    const marker = this.L.marker([lat, lon], {
+    const marker = Object.assign(this.L.marker([lat, lon], {
       icon: markerIcon.icon,
-    }) as OrionFacilityMarker;
-    marker.__orionFacilityIconRef = markerIcon.componentRef;
-    marker.__orionFacilityPopupRef = popup.componentRef;
+    }), {
+      __orionFacilityIconRef: markerIcon.componentRef,
+      __orionFacilityPopupRef: popup.componentRef,
+      orionFeature: feature,
+    });
     marker.bindPopup(popup.element, {
       className: 'orion-popup [&_.leaflet-popup-content-wrapper]:!border-0 [&_.leaflet-popup-content-wrapper]:!bg-transparent [&_.leaflet-popup-content-wrapper]:!p-0 [&_.leaflet-popup-content-wrapper]:!shadow-none [&_.leaflet-popup-content]:!m-0 [&_.leaflet-popup-tip]:!bg-transparent [&_.leaflet-popup-tip]:!shadow-none',
     });
-    marker.orionFeature = feature;
     marker.on('click', () => {
       this.onFeatureSelected(feature);
     });
@@ -228,7 +229,7 @@ export class OrionFacilitiesMapRenderer {
       : null;
     const remainingLimit = Math.max(0, limit - (focusedFeature ? 1 : 0));
     const grid = this.getGridSize(zoom);
-    const buckets = new Map<string, Array<{ feature: OrionSatelliteFeature; score: number }>>();
+    const buckets = new Map<string, { feature: OrionSatelliteFeature; score: number }[]>();
 
     features.forEach((feature) => {
       if (focusedFeature && String(feature?.id || '') === focusedId) {

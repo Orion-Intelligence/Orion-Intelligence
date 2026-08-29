@@ -112,7 +112,7 @@ export class SocialUserGraphComponent {
     untracked(() => {
       if (finished.length) {
         this.pendingScans.set(new Map(Array.from(pending.entries()).filter(([id]) => !finished.includes(id))));
-        this.showNotice(`Scan finished for ${finished.map(id => `@${id}`).join(', ')}`);
+        this.showNotice(`Scan finished for ${finished.map(id => `@${String(id)}`).join(', ')}`);
       }
       if (ended.length && this.hasRoots()) {
         this.fetchDocuments(this.roots());

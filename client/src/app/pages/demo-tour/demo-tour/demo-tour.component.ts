@@ -1519,6 +1519,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         return styleSheet;
       }
       catch {
+        continue;
       }
     }
 

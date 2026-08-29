@@ -18,7 +18,7 @@ export class RecordSidebarComponent {
   readonly subtitle = input<string | null>(null);
   readonly records = input<RecordSidebarItem[]>([]);
   readonly testId = input('record-sidebar');
-  readonly close = output<void>();
+  readonly close = output();
   readonly searchTerm = signal('');
   readonly filteredRecords = computed(() => {
     const term = this.searchTerm().trim().toLowerCase();

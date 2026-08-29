@@ -13,7 +13,7 @@ export class NodeResolver implements Resolve<userSessionData | null> {
   resolve(): Observable<userSessionData | null> {
     return this.apiService
       .post<userSessionData>('get/tenant/node', {})
-      .pipe(catchError(_ => {
+      .pipe(catchError(() => {
         return of(null);
       }), tap(sessionData => {
         if (sessionData) {

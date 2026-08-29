@@ -821,7 +821,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   resetGraph(): void {
     if (this.network) {
       this.network.destroy();
-      this.network = null!;
+      Reflect.deleteProperty(this, 'network');
     }
     if (this.nodeSet) {
       this.nodeSet.clear();
@@ -916,7 +916,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         this.renderGraph(this.result);
         this.loading = true;
       },
-      error: _ => {
+      error: () => {
         if (!this.isCurrentGraphRequest(requestId)) {
           return;
         }

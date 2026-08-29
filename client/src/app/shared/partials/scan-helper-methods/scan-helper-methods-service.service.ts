@@ -104,11 +104,11 @@ export class ScanHelperMethodsService {
   }
 
   protected beforeTaskStart(): void {
-
+    return;
   }
 
   protected afterTaskStop(): void {
-
+    return;
   }
 
   protected handleTaskValue<T extends object>(value: T): void {

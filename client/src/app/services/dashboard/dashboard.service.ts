@@ -84,7 +84,7 @@ export class DashboardService {
       this.syncQueryParamsToUrl(baseParams);
     }
     if (entityCategories) {
-      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => Array.isArray(v) ? v.length > 0 : true));
+      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([, v]) => Array.isArray(v) ? v.length > 0 : true));
     }
     const passwordScheme = this.passwordSchemeFilter;
     if (passwordScheme && Object.values(passwordScheme).some(v => v !== null && v !== false)) {
@@ -101,7 +101,7 @@ export class DashboardService {
       success: true,
       isEmpty: response.Result?.length === 0 || response.cards_data?.length === 0,
       data: response
-    })), catchError((_) => {
+    })), catchError(() => {
       return of({ success: false, isEmpty: false, data: null });
     }));
   }
@@ -306,7 +306,7 @@ export class DashboardService {
 
   private applyEntityFilter(params: UnknownRecord, entityCategories: UnknownRecord): UnknownRecord {
     if (Object.keys(entityCategories).length > 0) {
-      params['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([_, v]) => (Array.isArray(v) ? v.length > 0 : true)));
+      params['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([, v]) => (Array.isArray(v) ? v.length > 0 : true)));
     }
     return params;
   }

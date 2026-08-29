@@ -79,7 +79,7 @@ export class ManageProfileComponent implements OnInit {
         this.users = data;
         this.isLoading = false;
       },
-      error: (_) => {
+      error: () => {
         this.isLoading = false;
       },
     });
@@ -96,7 +96,7 @@ export class ManageProfileComponent implements OnInit {
     const payload = this.buildUserUpdatePayload(user);
     this.isLoading = true;
     this.apiService.post('update/user', payload).pipe(switchMap(() => this.nodeResolver.resolve()), finalize(() => (this.isLoading = false))).subscribe({
-      next: (_) => void 0,
+      next: () => void 0,
       error: () => void 0
     });
   }

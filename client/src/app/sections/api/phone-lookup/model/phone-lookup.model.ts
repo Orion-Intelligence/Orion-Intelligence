@@ -17,7 +17,7 @@ export interface PhoneLookupResult extends UnknownRecord {
   rating?: string | number;
   user_ratings_total?: string | number;
   website?: string;
-  phone_numbers?: Array<string | number>;
+  phone_numbers?: (string | number)[];
   knowledge_graph?: PhoneLookupKnowledgeGraph;
   emails?: string[];
   web_footprints?: PhoneLookupWebFootprint[];

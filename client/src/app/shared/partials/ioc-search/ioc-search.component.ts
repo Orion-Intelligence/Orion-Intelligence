@@ -13,6 +13,7 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
+import { DOMAIN_NAME_PATTERN, EMAIL_ADDRESS_PATTERN, IPV4_ADDRESS_PATTERN } from '../../utils/network-validation.util';
 import type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './model/ioc-search.model';
 export type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './model/ioc-search.model';
 
@@ -28,8 +29,8 @@ export type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './mod
   animations: [fadeInDashboardItem, advancedRowMotionAnimation, popupAnimation],
 })
 export class IocSearchComponent implements OnInit {
-  private readonly DEFAULT_VALUE_VALIDATORS: RegExp[] = [ /^[^\s@]+@[^\s@]+\.[^\s@]+$/, /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, /^(?:\d{6}|\d{13,19})$/ ];
-  private readonly DEFAULT_TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, [StealerlogsSearchFilters.DOMAIN]: /^(?!:\/\/)([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/, [StealerlogsSearchFilters.IP]: /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
+  private readonly DEFAULT_VALUE_VALIDATORS: RegExp[] = [EMAIL_ADDRESS_PATTERN, DOMAIN_NAME_PATTERN, IPV4_ADDRESS_PATTERN, /^(?:\d{6}|\d{13,19})$/];
+  private readonly DEFAULT_TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: EMAIL_ADDRESS_PATTERN, [StealerlogsSearchFilters.DOMAIN]: DOMAIN_NAME_PATTERN, [StealerlogsSearchFilters.IP]: IPV4_ADDRESS_PATTERN, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
 
   readonly basicTags = input<string[]>([StealerlogsSearchFilters.ALL, StealerlogsSearchFilters.DOMAIN, StealerlogsSearchFilters.EMAIL, StealerlogsSearchFilters.CREDITCARD, StealerlogsSearchFilters.IP]);
   readonly filterLabels = input<Record<string, string>>(StealerlogsSearchFilterLabels);

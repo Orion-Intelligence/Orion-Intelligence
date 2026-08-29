@@ -52,7 +52,7 @@ export class HelperService {
     if (!input) {
       return [];
     }
-    const matches = input.match(/\b(?:https?:\/\/)?[a-z0-9.-]+\.[a-z]{2,}(?:\/\S*)?/gi) || [];
+    const matches = input.match(/\b(?:https:\/\/|http:\/\/)?[a-z0-9.-]{1,253}\.[a-z]{2,63}[^\s]*/gi) || [];
     return matches.map(v => {
       const url = /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '');
       try {

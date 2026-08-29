@@ -70,7 +70,7 @@ export class SidebarUserIocComponent implements OnInit {
     this.appService.tenantData.set({ ...this.appService.tenantData(), ...filteredOnboardingData });
     this.apiService.post('update/tenants', filteredOnboardingData).subscribe({
       next: () => void 0,
-      error: (_err) => void 0,
+      error: () => void 0,
     });
   }
 

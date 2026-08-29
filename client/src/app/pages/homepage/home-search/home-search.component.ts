@@ -183,8 +183,8 @@ export class HomeSearchComponent implements OnInit {
     try {
       currentTargetElement.setPointerCapture(event.pointerId);
     }
-    catch {
-
+    catch (error) {
+      void error;
     }
 
     this.insightDragging = true;

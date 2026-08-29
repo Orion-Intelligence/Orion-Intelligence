@@ -85,7 +85,7 @@ export class SocialLiveSyncService {
     this.stoppedPlatformIds.delete(cardId);
     const stopped = () => this.liveStop.has(stopKey) || this.stoppedPlatformIds.has(cardId);
     const existing = (this.findPlatform(platformData)?.resources ?? platformData.resources ?? []).find(entry => entry.id === 'connections');
-    const seen = new Set((existing?.resources ?? []).map(item => resourceKey(item as social_resource)));
+    const seen = new Set((existing?.resources ?? []).map(item => resourceKey(item)));
     const postUrls = this.collectPostUrls(platformData);
     this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: '' } }));
     try {
@@ -260,7 +260,7 @@ export class SocialLiveSyncService {
       }
       let changed = false;
       const nextProfiles = currentProfiles.map(platform => {
-        if (!isSamePlatform(platform, platformData) || (platform.section_status ?? {})[section] === status) {
+        if (!isSamePlatform(platform, platformData) || platform.section_status?.[section] === status) {
           return platform;
         }
         changed = true;
@@ -293,7 +293,7 @@ export class SocialLiveSyncService {
         const status = { ...(platform.section_status ?? {}) };
         for (const section of Object.keys(status)) {
           if (status[section] === 'fetching') {
-            delete status[section];
+            Reflect.deleteProperty(status, section);
             changed = true;
           }
         }

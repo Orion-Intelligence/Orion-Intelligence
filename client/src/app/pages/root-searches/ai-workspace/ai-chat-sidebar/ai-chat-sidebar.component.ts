@@ -35,8 +35,8 @@ export class AiChatSidebarComponent {
   readonly busySessionId = input<string | null>(null);
   readonly creatingChat = input(false);
   readonly clearingChats = input(false);
-  readonly newChat = output<void>();
-  readonly clearChats = output<void>();
+  readonly newChat = output();
+  readonly clearChats = output();
   readonly chatSelected = output<AiChatSession>();
   readonly sessionUpdated = output<AiChatSession>();
   readonly sessionDeleted = output<string>();

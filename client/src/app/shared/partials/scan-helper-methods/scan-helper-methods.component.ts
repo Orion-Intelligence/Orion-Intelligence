@@ -6,6 +6,7 @@ import { DnsRecord, WaybackSnapshot } from '../../model/scanners/scanner.models'
 import { ScanHelperMethodsService } from './scan-helper-methods-service.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { isDomainName, isIpv4Address, isIpv6Address } from '../../utils/network-validation.util';
 
 @Component({
   selector: 'app-scan-helper',
@@ -208,15 +209,11 @@ export class ScanHelperMethods implements OnDestroy {
       return;
     }
     if (this.activeTab === 'dns') {
-      const ip = trimmed;
-      const ipv4 = /^(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)$/;
-      const ipv6 = /^((?:[0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|::1|::|(?:[0-9a-fA-F]{1,4}:){1,7}:)$/;
-      this.isValidDomain = ipv4.test(ip) || ipv6.test(ip);
+      this.isValidDomain = isIpv4Address(trimmed) || isIpv6Address(trimmed);
     }
     else {
-      const domainOnly = trimmed.replace(/^https?:\/\//i, '').replace(/\/.*/, '');
-      const domainRegex = /^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$/i;
-      this.isValidDomain = domainRegex.test(domainOnly);
+      const domainOnly = trimmed.replace(/^https:\/\//i, '').replace(/^http:\/\//i, '').split('/')[0];
+      this.isValidDomain = isDomainName(domainOnly);
     }
   }
 

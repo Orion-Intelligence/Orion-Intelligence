@@ -92,7 +92,7 @@ export class NexusChatService {
         const decoder = new TextDecoder();
         let buffer = '';
         try {
-          while (true) {
+          for (;;) {
             const { value, done } = await reader.read();
             if (done) {
               break;
@@ -172,7 +172,7 @@ export class NexusChatService {
     const summary = result
       ? result['response'] ?? result['summary'] ?? result['result'] ?? result['text'] ?? response?.['summary'] ?? response?.message ?? response?.text
       : response?.result ?? response?.['summary'] ?? response?.message ?? response?.text;
-    return Array.isArray(summary) ? summary.join('\n').trim() : (summary ?? '').toString().trim();
+    return Array.isArray(summary) ? summary.join('\n').trim() : this.streamValueToText(summary ?? '').trim();
   }
 
   isNexusPending(response: ChatApiResponse): boolean {
@@ -183,7 +183,7 @@ export class NexusChatService {
   getNexusStep(response: ChatApiResponse): string {
     const result = this.asRecord(response?.result);
     const step = result?.['step'] ?? response?.['step'] ?? result?.['progress'] ?? response?.['progress'] ?? result?.['status'] ?? response?.['status'];
-    return (step ?? '').toString().trim();
+    return this.streamValueToText(step ?? '').trim();
   }
 
   private getNexusStatus(response: ChatApiResponse): string {

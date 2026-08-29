@@ -22,6 +22,7 @@ import { ThreatResultsComponent } from "./defacement-results/threat-results.comp
 import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
 import { HttpClient } from '@angular/common/http';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
+import { isDomainName, isEmailAddress } from '../../../shared/utils/network-validation.util';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AuthService } from '../../../services/authetication/auth.service';
@@ -114,8 +115,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return (this.defacementResultCount + this.stealerlogResultCount) > 0;
   }
 
-  asGeneralResults(results: unknown[]): Array<GeneralResultItem | LeakResultItem> {
-    return results as Array<GeneralResultItem | LeakResultItem>;
+  asGeneralResults(results: unknown[]): (GeneralResultItem | LeakResultItem)[] {
+    return results as (GeneralResultItem | LeakResultItem)[];
   }
 
   asAptResults(results: unknown[]): AptIntelResultItem[] {
@@ -171,6 +172,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(_ = false): void {
+    void _;
     if (this.domainScanComponent) {
       this.domainScanComponent.clearResults();
     }
@@ -267,10 +269,12 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   resetFilters(_: undefined) {
+    void _;
     this.fetchSearchResults(true);
   }
 
   reloadFilters(_: Record<string, string | null>) {
+    void _;
     this.dashboardService.consolidatedParamModel.page = 1;
     this.fetchSearchResults();
   }
@@ -491,11 +495,16 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     if (!query) {
       return false;
     }
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    const urlRegex = /^(https?:\/\/|www\.|[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})(?:[/?#]\S*)?$/i;
-    if (emailRegex.test(query)) {
+    if (isEmailAddress(query)) {
       return true;
     }
-    return urlRegex.test(query);
+    try {
+      const candidate = query.startsWith('http://') || query.startsWith('https://') ? query : `https://${query}`;
+      const url = new URL(candidate);
+      return (url.protocol === 'http:' || url.protocol === 'https:') && isDomainName(url.hostname);
+    }
+    catch {
+      return false;
+    }
   }
 }

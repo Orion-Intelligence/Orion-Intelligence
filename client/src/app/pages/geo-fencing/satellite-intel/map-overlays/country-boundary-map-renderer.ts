@@ -130,7 +130,9 @@ export class CountryBoundaryMapRenderer {
       this.hoverLayer?.addData(feature);
       this.hoverLayer?.bringToFront();
     }
-    catch { }
+    catch {
+      return;
+    }
   }
 
   private clearCountryHover(): void {

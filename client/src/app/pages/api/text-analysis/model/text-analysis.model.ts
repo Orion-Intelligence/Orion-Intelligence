@@ -9,12 +9,12 @@ export interface TextAnalysisResult {
     confidence?: number;
     is_spam?: boolean;
   };
-  url_results?: Array<{
+  url_results?: {
     url?: string;
     label?: string;
     confidence?: number;
     is_safe?: boolean;
-  }>;
+  }[];
   verdict?: {
     safe?: boolean;
     threats?: string[];

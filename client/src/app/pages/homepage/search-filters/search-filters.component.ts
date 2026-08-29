@@ -104,7 +104,7 @@ export class SearchFiltersComponent implements OnInit {
       this.app_service.getConfig().localSettings.entityfilterCategories[categoryId] = value.filter(t => t !== tag);
     }
     else if (value === tag) {
-      delete this.app_service.getConfig().localSettings.entityfilterCategories[categoryId];
+      Reflect.deleteProperty(this.app_service.getConfig().localSettings.entityfilterCategories, categoryId);
     }
     this.app_service.set('entityfilterCategories', this.app_service.getConfig().localSettings.entityfilterCategories);
 

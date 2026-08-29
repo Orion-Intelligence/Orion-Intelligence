@@ -55,7 +55,10 @@ export class SocialProfileListingComponent {
   private readonly loadingPlatformIds = computed(() => {
     const platformIds = new Set<string>();
     const addFrom = (key: string) => {
-      const platformId = key.match(/^(?:[^:]*:)?(platform-[^:]+)/)?.[1];
+      const parts = key.split(':');
+      const platformId = parts[0].startsWith('platform-')
+        ? parts[0]
+        : parts[1]?.startsWith('platform-') ? parts[1] : undefined;
       if (platformId) {
         platformIds.add(platformId);
       }
@@ -102,7 +105,7 @@ export class SocialProfileListingComponent {
   sidebarPlatformClicked = output<string>();
   profileOverviewLabelChanged = output<string | null>();
   manageProfilesRequested = output<FeedUser>();
-  scanInProgress = output<void>();
+  scanInProgress = output();
   highlightedNodeId = input<string | null>(null);
   activeTabs = signal<Record<string, FetchTabKey | null>>({});
   profileOverviewIds = signal<Set<string>>(new Set<string>());
@@ -250,7 +253,7 @@ export class SocialProfileListingComponent {
       const next = { ...current };
       for (const key of Object.keys(next)) {
         if (key.includes(cardId)) {
-          delete next[key];
+          Reflect.deleteProperty(next, key);
         }
       }
       return next;
@@ -449,7 +452,7 @@ export class SocialProfileListingComponent {
     if (this.liveSync.crawlResults()[crawlKey(platformData, tabKey)]?.loading) {
       return true;
     }
-    return (platformData.section_status ?? {})[tabKey] === 'fetching';
+    return platformData.section_status?.[tabKey] === 'fetching';
   }
 
   private hasTabData(platformData: social_profile, tabKey: FetchTabKey): boolean {
@@ -636,7 +639,7 @@ export class SocialProfileListingComponent {
     if (!platformData || platformData.profile_details?.is_parsed === true || this.liveSync.stoppedPlatformIds.has(this.getPlatformCardId(platformData))) {
       return;
     }
-    const detailsStatus = (platformData.section_status ?? {})['details'];
+    const detailsStatus = platformData.section_status?.['details'];
     if (this.isTabLoading(platformData, 'details') || detailsStatus === 'failed' || detailsStatus === 'completed') {
       return;
     }
@@ -697,7 +700,7 @@ export class SocialProfileListingComponent {
         next[requestKey] = true;
       }
       else {
-        delete next[requestKey];
+        Reflect.deleteProperty(next, requestKey);
       }
       return next;
     });
@@ -773,7 +776,7 @@ export class SocialProfileListingComponent {
     }
   }
 
-  private firstStatValue(...values: Array<string | number | null | undefined>): string | number | null {
+  private firstStatValue(...values: (string | number | null | undefined)[]): string | number | null {
     return values.find(value => value !== null && value !== undefined && value !== '') ?? null;
   }
 

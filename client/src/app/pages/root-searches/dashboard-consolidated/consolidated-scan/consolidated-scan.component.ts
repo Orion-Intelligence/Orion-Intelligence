@@ -9,6 +9,7 @@ import { scanAnimation } from '../../../../shared/animations/scan.animations';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { AppService } from '../../../../services/core/app/app.service';
 import type { PendingMsg } from './model/consolidated-scan.model';
+import { isDomainName } from '../../../../shared/utils/network-validation.util';
 export type { PendingMsg } from './model/consolidated-scan.model';
 
 
@@ -75,7 +76,8 @@ export class ConsolidatedScanComponent {
     this.today = new Date();
     this.targetLabel = input;
     if (input) {
-      const isDomain = /^(https?:\/\/)?([a-z0-9-]+\.)+[a-z]{2,}$/i.test(input);
+      const domainHost = input.replace(/^https:\/\//i, '').replace(/^http:\/\//i, '').split('/')[0];
+      const isDomain = isDomainName(domainHost);
       const isRepo = input.includes('github');
       if (isRepo) {
         repoInputs.push(input);
@@ -174,7 +176,7 @@ export class ConsolidatedScanComponent {
           }
           this.progressByType[t] = 100;
           if (t === 'liveapi') {
-            this.liveApiResults = Array.isArray(v) ? v as ConsolidatedLiveApiResults[] : [];
+            this.liveApiResults = Array.isArray(v) ? v : [];
             return;
           }
           if (Array.isArray(v)) {
@@ -184,7 +186,7 @@ export class ConsolidatedScanComponent {
             ...v,
             scanType: v.scanType || t
           } as ConsolidatedScanResults;
-          const key = t as Exclude<ScanKey, 'liveapi'>;
+          const key = t;
           this.resultsByType[key] = [...(this.resultsByType[key] || []), result];
         },
         error: () => {

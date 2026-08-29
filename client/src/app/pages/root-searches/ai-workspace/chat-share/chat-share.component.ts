@@ -43,7 +43,7 @@ export class ChatShareComponent implements OnInit, OnDestroy {
       this.isLoading = false;
       return;
     }
-    this.api.get<{ messages: Array<Omit<SharedChatMessage, 'time'> & { time: string; }>; expiresAt: string; }>(`public/chat-shares/${shareId}`, {
+    this.api.get<{ messages: (Omit<SharedChatMessage, 'time'> & { time: string; })[]; expiresAt: string; }>(`public/chat-shares/${shareId}`, {
       params: new HttpParams().set('token', token)
     }).subscribe({
       next: response => {

@@ -58,7 +58,7 @@ export class ResetPasswordComponent implements OnInit {
 
   ngOnInit() {
     const token = this.route.snapshot.paramMap.get('token');
-    if (token !== null) {
+    if (typeof token === 'string') {
       this.token = token;
       this.hasToken = true;
     }
@@ -74,7 +74,7 @@ export class ResetPasswordComponent implements OnInit {
           return;
         }
         this.auth_service.updatePassword(this.token, this.password).subscribe({
-          next: (_) => {
+          next: () => {
             this.responseError = false;
             if (this.forcedPasswordReset) {
               this.appService.loadSession(true).subscribe(() => {

@@ -156,7 +156,7 @@ export class PhoneLookupSectionComponent implements OnDestroy {
 
   private findAssociatedPhone(platforms: social_profile[]): string {
     for (const platform of platforms) {
-      const sources = [platform.profile_details, platform.meta, platform] as Array<Record<string, unknown> | null | undefined>;
+      const sources = [platform.profile_details, platform.meta, platform] as (Record<string, unknown> | null | undefined)[];
       for (const source of sources) {
         for (const [key, value] of Object.entries(source ?? {})) {
           if (!PhoneLookupSectionComponent.phoneKeys.has(key.toLowerCase().replace(/[^a-z]/g, ''))) {

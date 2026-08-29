@@ -241,7 +241,10 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
     group.posts = Math.max(group.posts, groupPosts.size);
   };
   for (const [owner, document] of documentsByOwner) {
-    const user = users.get(owner)!;
+    const user = users.get(owner);
+    if (!user) {
+      continue;
+    }
     for (const profile of (document.profiles ?? []).filter(entry => platformOf(entry))) {
       const platform = platformOf(profile);
       const handle = String(profile.meta?.username || owner).replace(/^@+/, '');
@@ -282,7 +285,10 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
   }
 
   for (const root of roots) {
-    const user = users.get(root)!;
+    const user = users.get(root);
+    if (!user) {
+      continue;
+    }
     for (const doc of reports.get(root) ?? []) {
       const record = asRecord(doc);
       const platform = darkwebPlatform(record);
@@ -331,8 +337,11 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
       for (const group of account.groups) {
         group.posts = Math.max(group.posts, group.members.length ? 1 : 0);
         group.members.sort((left, right) => {
-          const a = persons.get(left)!;
-          const b = persons.get(right)!;
+          const a = persons.get(left);
+          const b = persons.get(right);
+          if (!a || !b) {
+            return left.localeCompare(right);
+          }
           const postsA = a.memberships.find(entry => entry.groupId === group.id)?.posts ?? 0;
           const postsB = b.memberships.find(entry => entry.groupId === group.id)?.posts ?? 0;
           return Number(!!b.owner) - Number(!!a.owner) || postsB - postsA || b.memberships.length - a.memberships.length || a.name.localeCompare(b.name);
@@ -378,7 +387,10 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
     }
   }
 
-  const rootUsers = roots.map(root => users.get(root)!);
+  const rootUsers = roots.flatMap(root => {
+    const user = users.get(root);
+    return user ? [user] : [];
+  });
   return {
     roots,
     hasProfiles: rootUsers.some(user => user.accounts.length > 0),
@@ -493,8 +505,12 @@ export function buildSocialGraphView(data: SocialUserGraphData | null, state: So
   const accountKey = (owner: string, platform: string): string => `${owner}|${platform.toLowerCase()}`;
   const find = (key: string): string => {
     let current = key;
-    while (parent.has(current) && parent.get(current) !== current) {
-      current = parent.get(current)!;
+    while (parent.has(current)) {
+      const next = parent.get(current);
+      if (next === undefined || next === current) {
+        break;
+      }
+      current = next;
     }
     return current;
   };

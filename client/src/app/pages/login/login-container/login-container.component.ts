@@ -134,14 +134,21 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       return;
     }
     this.authService.login(this.user.mail, this.user.password).subscribe({
-      next: async (res) => {
+      next: (res) => {
         if (res?.twofa_required) {
           this.twofaRequired = true;
           this.pendingUsername = res.username ?? this.user.mail;
           this.tempToken = res.temp_token || null;
           this.otpUri = res.provisioning_uri || null;
           this.otpSecret = res.twofa_secret || null;
-          this.otpDataUrl = this.otpUri ? await QRCode.toDataURL(this.otpUri) : null;
+          this.otpDataUrl = null;
+          if (this.otpUri) {
+            void QRCode.toDataURL(this.otpUri).then(dataUrl => {
+              this.otpDataUrl = dataUrl;
+            }).catch(() => {
+              this.otpDataUrl = null;
+            });
+          }
         }
       },
       error: err => {

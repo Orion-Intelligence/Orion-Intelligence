@@ -78,7 +78,7 @@ export class SelectedFilterBarComponent implements OnInit {
         categories[key] = value.filter(tag => tag !== tagToRemoveId);
       }
       else if (value === tagToRemoveId) {
-        delete categories[key];
+        Reflect.deleteProperty(categories, key);
       }
     }
     this.app_service.set('entityfilterCategories', categories);

@@ -7,7 +7,7 @@ import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-mark
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
-import { asUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, isFiniteNumber } from '../../../../../shared/utils/type-guards.util';
 import { ShipDistributionCell } from '../../model/satellite-intel.model';
 
 type ShipMarker = Leaflet.Marker & {
@@ -156,6 +156,9 @@ export class ShipMapRenderer {
     const existing = this.markers.get(markerId);
     if (!existing) {
       const marker = this.createMarker(ship);
+      if (!marker) {
+        return;
+      }
       const mmsiId = normalizeEntityId(ship.mmsi);
       const isSelected = this.isSelected(mmsiId);
       const isLoading = this.isLoading(mmsiId);
@@ -186,8 +189,11 @@ export class ShipMapRenderer {
   }
 
   private updateMarkerMotion(markerId: string, marker: ShipMarker, ship: SatelliteLiveShip): void {
-    const lat = ship.latitude as number;
-    const lon = ship.longitude as number;
+    const lat = ship.latitude;
+    const lon = ship.longitude;
+    if (!isFiniteNumber(lat) || !isFiniteNumber(lon)) {
+      return;
+    }
     const motionKey = [
       lat,
       lon,
@@ -227,24 +233,24 @@ export class ShipMapRenderer {
     const speed = ship.speed;
     const bearing = ship.course ?? ship.true_heading;
     if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(lon) ||
-      !Number.isFinite(speed) ||
-      !Number.isFinite(bearing) ||
-      (speed ?? 0) <= 0
+      !isFiniteNumber(lat) ||
+      !isFiniteNumber(lon) ||
+      !isFiniteNumber(speed) ||
+      !isFiniteNumber(bearing) ||
+      speed <= 0
     ) {
       return null;
     }
 
-    const distanceMeters = (speed as number) * 0.514444 * seconds;
-    const bearingRadians = ((bearing as number) * Math.PI) / 180;
-    const latRadians = ((lat as number) * Math.PI) / 180;
+    const distanceMeters = speed * 0.514444 * seconds;
+    const bearingRadians = (bearing * Math.PI) / 180;
+    const latRadians = (lat * Math.PI) / 180;
     const metersPerDegreeLat = 111320;
     const metersPerDegreeLon = Math.max(1, metersPerDegreeLat * Math.cos(latRadians));
 
     return {
-      lat: (lat as number) + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
-      lon: (lon as number) + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
+      lat: lat + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
+      lon: lon + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
     };
   }
 
@@ -325,17 +331,22 @@ export class ShipMapRenderer {
     }
   }
 
-  private createMarker(ship: SatelliteLiveShip): ShipMarker {
+  private createMarker(ship: SatelliteLiveShip): ShipMarker | null {
+    const latitude = ship.latitude;
+    const longitude = ship.longitude;
+    if (!isFiniteNumber(latitude) || !isFiniteNumber(longitude)) {
+      return null;
+    }
     const mmsiId = normalizeEntityId(ship.mmsi);
     const isSelected = this.isSelected(mmsiId);
     const isLoading = this.isLoading(mmsiId);
     const renderedIcon = this.createIcon(ship, isSelected, isLoading);
-    const marker = this.L.marker([ship.latitude!, ship.longitude!], {
+    const marker = this.L.marker([latitude, longitude], {
       icon: renderedIcon.icon,
     }) as ShipMarker;
     marker.__orionShipIconRef = renderedIcon.componentRef;
     if (mmsiId) {
-      marker.bindTooltip(`${escapeTooltipText(mmsiId)}`, {
+      marker.bindTooltip(escapeTooltipText(mmsiId), {
         direction: 'top',
         offset:    [0, -10],
         opacity:   0.95,
@@ -382,11 +393,11 @@ export class ShipMapRenderer {
   }
 
   private getMovementRotation(marker: ShipMarker, ship: SatelliteLiveShip): number {
-    if (Number.isFinite(ship.course)) {
-      return ship.course as number;
+    if (isFiniteNumber(ship.course)) {
+      return ship.course;
     }
-    if (Number.isFinite(ship.true_heading)) {
-      return ship.true_heading as number;
+    if (isFiniteNumber(ship.true_heading)) {
+      return ship.true_heading;
     }
 
     const current = marker.getLatLng?.();
@@ -396,10 +407,10 @@ export class ShipMapRenderer {
       current &&
       Number.isFinite(current.lat) &&
       Number.isFinite(current.lng) &&
-      Number.isFinite(targetLat) &&
-      Number.isFinite(targetLon)
+      isFiniteNumber(targetLat) &&
+      isFiniteNumber(targetLon)
     ) {
-      const bearing = getBearingDegrees(current.lat, current.lng, targetLat as number, targetLon as number);
+      const bearing = getBearingDegrees(current.lat, current.lng, targetLat, targetLon);
       if (bearing !== null) {
         return bearing;
       }
@@ -408,7 +419,7 @@ export class ShipMapRenderer {
     return 0;
   }
 
-  private createIcon(ship: SatelliteLiveShip, isSelected: boolean, isLoading: boolean, rotationDegrees = Number.isFinite(ship.course) ? ship.course as number : Number.isFinite(ship.true_heading) ? ship.true_heading as number : 0): { icon: Leaflet.DivIcon; componentRef: ComponentRef<ShipMarkerIconComponent> } {
+  private createIcon(ship: SatelliteLiveShip, isSelected: boolean, isLoading: boolean, rotationDegrees = isFiniteNumber(ship.course) ? ship.course : isFiniteNumber(ship.true_heading) ? ship.true_heading : 0): { icon: Leaflet.DivIcon; componentRef: ComponentRef<ShipMarkerIconComponent> } {
     const size = getMarkerBaseSize(this.map, 'ship');
     const half = Math.round(size / 2);
     const rendered = this.componentRenderer.create(ShipMarkerIconComponent, {
@@ -435,7 +446,7 @@ export class ShipMapRenderer {
   }
 
   private updateMarkerRotation(marker: ShipMarker, rotationDegrees: number): void {
-    const componentRef = marker.__orionShipIconRef as ComponentRef<ShipMarkerIconComponent> | null | undefined;
+    const componentRef = marker.__orionShipIconRef;
     if (componentRef) {
       componentRef.instance.rotationDegrees = rotationDegrees;
       componentRef.changeDetectorRef.detectChanges();
@@ -713,10 +724,12 @@ export class ShipMapRenderer {
       return screenCell;
     }
 
-    if (Number.isFinite(ship.latitude) && Number.isFinite(ship.longitude)) {
+    const latitude = ship.latitude;
+    const longitude = ship.longitude;
+    if (isFiniteNumber(latitude) && isFiniteNumber(longitude)) {
       const gridSize = this.getDistributionGridSize(zoom);
-      const row = Math.floor(((ship.latitude as number) + 90) / gridSize);
-      const col = Math.floor(((ship.longitude as number) + 180) / gridSize);
+      const row = Math.floor((latitude + 90) / gridSize);
+      const col = Math.floor((longitude + 180) / gridSize);
       return { key: `cell:${gridSize}:${row}:${col}`, row, col };
     }
 
@@ -803,10 +816,12 @@ export class ShipMapRenderer {
       return screenBucketKey;
     }
 
-    if (Number.isFinite(ship.latitude) && Number.isFinite(ship.longitude)) {
+    const latitude = ship.latitude;
+    const longitude = ship.longitude;
+    if (isFiniteNumber(latitude) && isFiniteNumber(longitude)) {
       const gridSize = this.getSampleGridSize(zoom);
-      const latBucket = Math.floor(((ship.latitude as number) + 90) / gridSize);
-      const lonBucket = Math.floor(((ship.longitude as number) + 180) / gridSize);
+      const latBucket = Math.floor((latitude + 90) / gridSize);
+      const lonBucket = Math.floor((longitude + 180) / gridSize);
       return `grid:${gridSize}:${latBucket}:${lonBucket}`;
     }
 

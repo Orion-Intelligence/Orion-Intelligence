@@ -23,6 +23,8 @@ const DEFAULT_APP_NAME = 'Orion Intelligence';
 type SystemSettingsTab = 'branding' | 'platform';
 type SystemImageKey = 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark';
 type SystemImageResponse = Partial<Pick<AppSettingsModel, SystemImageKey>>;
+type AppSettingsWire = Partial<Record<keyof AppSettingsModel, string | boolean>>;
+type UpdateSettingsResponse = { settings?: AppSettingsWire; appSettings?: AppSettingsWire };
 
 
 @Component({
@@ -45,10 +47,10 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   form = { language: '', version: '', app_name: '0', ai_endpoint_enabled: true, admin_root_allowed: false, s_onion: '', data_sources_url: '', adversaries_url: '', pricing_url: '', documentation_allowed: false, whistle_blowing_allowed: false, accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   webhookForm: AlertWebhookSettingsForm = this.createWebhookForm();
   languageOptions: LanguageOption[] = LANGUAGE_OPTIONS;
-  onionPattern = /^(https?:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
+  onionPattern = /^(?:https:\/\/|http:\/\/)?[a-z2-7]{56}\.onion\/?$/i;
   urlPattern = /^https?:\/\/.+/i;
   emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  smtpServerPattern = /^(?=.{1,253}$)(localhost|[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?|([a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}|(\d{1,3}\.){3}\d{1,3})$/;
+  smtpServerPattern = /^(?:localhost|[a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]|(?=.{1,253}$)(?!.*\.\.)(?!.*(?:^|\.)-)(?!.*-(?:\.|$))[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})$/;
 
   constructor(private apiService: ApiService, private route: ActivatedRoute, protected appService: AppService, private licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
   }
@@ -348,14 +350,14 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   updateScheduledBackup(): void {
     const value = this.scheduledBackup;
-    this.apiService.post<any>('public/update', {
+    this.apiService.post<UpdateSettingsResponse>('public/update', {
       settings: {
         backup_schedule: value ? '1' : '0'
       }
     }).subscribe({
       next: (response) => {
         const current = this.appService.configData();
-        const appSettings = { ...current.appSettings, ...(response?.settings || response?.appSettings || {}), backup_schedule: value ? '1' : '0' };
+        const appSettings = new AppSettingsModel({ ...current.appSettings, ...(response?.settings || response?.appSettings || {}), backup_schedule: value ? '1' : '0' });
         this.appService.configData.set(new ConfigSettings(appSettings, current.localSettings));
         this.messageNotificationService.show(this.translationService.translate('Settings updated successfully'),'success');
       },

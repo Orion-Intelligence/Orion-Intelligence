@@ -12,7 +12,7 @@ import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe'
 export class AircraftDetailsPanelComponent {
   @Input() aircraft: Record<string, unknown> | null = null;
 
-  get fields(): Array<{ label: string; value: string; mono?: boolean }> {
+  get fields(): { label: string; value: string; mono?: boolean }[] {
     return [
       { label: 'ICAO24', value: this.display(this.pick('icao24')), mono: true },
       { label: 'Callsign', value: this.display(this.pick('callsign')) },

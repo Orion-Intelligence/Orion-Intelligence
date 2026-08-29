@@ -50,7 +50,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     if (this.currentUrl.includes('consolidated')) {
       this.currentUrl = this.currentUrl.replace("/all", "/defacement");
     }
-    this.route.queryParams.subscribe(_ => {
+    this.route.queryParams.subscribe(() => {
       this.queryParams = { ci: 'defacement' };
     });
   }
@@ -78,7 +78,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     if (this.groupedResults.length) {
       return this.groupedResults.map(group => {
         const records = (group.records || []).map(item => this.toDefacementRecord(item));
-        const latestSeen = group.latest_seen || records.reduce((latest, record) => this.getLatestDate(latest, record.leakDate), null as string | null);
+        const latestSeen = group.latest_seen || records.reduce<string | null>((latest, record) => this.getLatestDate(latest, record.leakDate), null);
         const affectedSites = group.affected_sites ?? this.countUnique(records.map(record => this.getSiteLabel(record.item)));
         const ipCount = group.ip_count ?? this.countUnique(records.flatMap(record => record.item.m_ip || []));
         const servers = group.servers?.length ? group.servers : this.uniqueValues(records.flatMap(record => record.item.m_web_server || [])).slice(0, 6);
@@ -243,7 +243,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       campaigns: groups.length,
       records: records.length,
       affectedSites: this.countUnique(records.map(item => this.getSiteLabel(item))),
-      latestSeen: records.reduce((latest, item) => this.getLatestDate(latest, item.m_date || null), null as string | null)
+      latestSeen: records.reduce<string | null>((latest, item) => this.getLatestDate(latest, item.m_date || null), null)
     };
   }
 

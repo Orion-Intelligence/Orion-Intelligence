@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../model/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
-import { asUnknownRecord, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, isFiniteNumber, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteShipTrackingService {
@@ -253,11 +253,11 @@ export class SatelliteShipTrackingService {
   }
 
   private isValidLatitude(value: number | null): value is number {
-    return Number.isFinite(value) && (value as number) >= -90 && (value as number) <= 90;
+    return isFiniteNumber(value) && value >= -90 && value <= 90;
   }
 
   private isValidLongitude(value: number | null): value is number {
-    return Number.isFinite(value) && (value as number) >= -180 && (value as number) <= 180;
+    return isFiniteNumber(value) && value >= -180 && value <= 180;
   }
 
   private getPayloadCount(payload: unknown): number | null {

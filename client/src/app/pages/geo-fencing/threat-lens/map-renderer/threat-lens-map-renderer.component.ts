@@ -861,7 +861,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           return this.normalizeCoordinates(convertedLat, convertedLon);
         }
       }
-      catch {
+      catch (error) {
+        void error;
       }
     }
 
