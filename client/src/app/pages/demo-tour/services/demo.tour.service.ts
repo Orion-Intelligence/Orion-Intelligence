@@ -97,7 +97,7 @@ export class DemoTourService {
   }
 
   getCapturedValue(stepId: string): string {
-    return this.capturedValues.get(stepId) || '';
+    return this.capturedValues.get(stepId) ?? '';
   }
 
   getCapturedValues(): Record<string, string> {

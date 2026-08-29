@@ -116,7 +116,7 @@ export class SatelliteAircraftTrackingController {
         }
       },
       error: (err) => {
-        this.error = err?.error?.detail || err?.message || `${options.label} failed`;
+        this.error = err?.error?.detail ?? err?.message ?? `${options.label} failed`;
       },
     });
     this.trackSub.add(() => {

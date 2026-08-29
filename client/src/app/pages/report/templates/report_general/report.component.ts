@@ -118,7 +118,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   processResultItem() {
     if (this.resultItem) {
       const resultItem = this.resultItem;
-      this.content = resultItem.m_content || '';
+      this.content = resultItem.m_content ?? '';
       this.arrayKeys = [];
       if ('m_section' in resultItem && Array.isArray(resultItem.m_section) && resultItem.m_section.length > 0) {
         this.arrayKeys.push('m_section');
@@ -243,22 +243,22 @@ export class ReportComponent implements OnInit, AfterViewInit {
   }
 
   getReportUrl(): string {
-    return this.resultItem?.m_url || this.resultItem?.m_source_url || this.resultItem?.m_base_url || '';
+    return this.resultItem?.m_url ?? this.resultItem?.m_source_url ?? this.resultItem?.m_base_url ?? '';
   }
 
   getReportDescription(): string {
-    return this.resultItem?.m_important_content || this.resultItem?.m_content || '';
+    return this.resultItem?.m_important_content ?? this.resultItem?.m_content ?? '';
   }
 
   getReportDate(): string {
-    return this.resultItem?.m_date || this.resultItem?.m_published_date || this.resultItem?.m_first_seen || '';
+    return this.resultItem?.m_date ?? this.resultItem?.m_published_date ?? this.resultItem?.m_first_seen ?? '';
   }
 
   getStatusDate(): string {
-    return this.resultItem?.m_creation_date || this.resultItem?.m_update_date || this.getReportDate();
+    return this.resultItem?.m_creation_date ?? this.resultItem?.m_update_date ?? this.getReportDate();
   }
 
   get reportDocId(): string {
-    return this.resultItem?.m_hash || this.resultItem?._id || '';
+    return this.resultItem?.m_hash ?? this.resultItem?._id ?? '';
   }
 }

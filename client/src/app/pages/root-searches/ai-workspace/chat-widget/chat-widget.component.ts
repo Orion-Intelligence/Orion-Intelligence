@@ -132,7 +132,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       this.scrollToNewMessage();
       return;
     }
-    const report = (this.report() || this.reportText() || '').trim();
+    const report = (this.report() ?? this.reportText() ?? '').trim();
     const payload = {
       session_id: this.temporarySessionId(),
       session_type: 'temporary' as const,
@@ -183,7 +183,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
           this.cdr.detectChanges();
         }
         if (chunk.error) {
-          reply = chunk.response || chunk.delta || this.translationService.translate('Something went wrong. Try again.');
+          reply = chunk.response ?? chunk.delta ?? this.translationService.translate('Something went wrong. Try again.');
           this.chatMessages = botMessage ? this.chatMessages.filter(message => message.id !== botMessage?.id) : this.chatMessages;
           this.showErrorMessage(userMessage, reply);
           this.scrollToNewMessage();

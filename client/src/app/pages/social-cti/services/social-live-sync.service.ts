@@ -178,7 +178,7 @@ export class SocialLiveSyncService {
     if (trackStatus) {
       this.setSectionStatus(platformData, type, 'fetching');
     }
-    const url = urlOverride || buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
+    const url = urlOverride ?? buildSocialProfileUrl(platformData.meta.platform, platformData.meta.username, platformData.meta.url);
     const stopped = () => this.liveStop.has(stopKey) || this.stoppedPlatformIds.has(cardId);
     let pendingLoginUrl: string | undefined;
     const runPage = async (cursor: string): Promise<{ items: social_resource[]; next?: string; more: boolean } | 'error' | null> => {

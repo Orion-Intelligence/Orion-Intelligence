@@ -194,7 +194,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
 
   getSidebarItems(): RecordSidebarItem[] {
     return this.getSidebarRecords().map((record, index) => ({
-      id: record.item.m_hash || record.item._id || record.item.m_sha256_hash || `${this.normalizeGroupKey(record.title)}-${index}`,
+      id: record.item.m_hash ?? record.item._id ?? record.item.m_sha256_hash ?? `${this.normalizeGroupKey(record.title)}-${index}`,
       title: record.title,
       subtitle: this.getPrimaryIdentity(record.item),
       kindLabel: this.getKindLabel(record.item),
@@ -204,7 +204,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
       routerLink: this.getReportLink(record.item),
       queryParams: this.getQueryParams(record.item),
       searchText: this.getRecordSearchText(record.item),
-      savePositionId: record.item.m_hash || record.item._id || record.item.m_sha256_hash || '',
+      savePositionId: record.item.m_hash ?? record.item._id ?? record.item.m_sha256_hash ?? '',
     }));
   }
 
@@ -240,11 +240,11 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getItemKey(item: AptIntelResultItem, index = 0): string {
-    return this.getReportId(item) || item.m_url || item.m_base_url || `${index}`;
+    return this.getReportId(item) ?? item.m_url ?? item.m_base_url ?? `${index}`;
   }
 
   getReportId(item: AptIntelResultItem): string {
-    return item.m_hash || item._id || item.m_sha256_hash || item.m_sha1_hash || item.m_md5_hash || '';
+    return item.m_hash ?? item._id ?? item.m_sha256_hash ?? item.m_sha1_hash ?? item.m_md5_hash ?? '';
   }
 
   saveCurrentPosition(item: AptIntelResultItem): void {
@@ -259,25 +259,25 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getTitle(item: AptIntelResultItem): string {
-    return item.m_title || item.m_team || this.toList(item.m_attacker)[0] || item.m_family || item.m_signature || item.m_file_name || item.m_url || 'Untitled intel';
+    return item.m_title ?? item.m_team ?? this.toList(item.m_attacker)[0] ?? item.m_family ?? item.m_signature ?? item.m_file_name ?? item.m_url ?? 'Untitled intel';
   }
 
   getPrimarySource(item: AptIntelResultItem): string {
-    return item.m_reporter || item.m_source_url || item.m_url || item.m_base_url || '';
+    return item.m_reporter ?? item.m_source_url ?? item.m_url ?? item.m_base_url ?? '';
   }
 
   getDateValue(item: AptIntelResultItem): string | null {
-    return item.m_date || item.m_first_seen || item.m_last_seen || item.m_update_date || item.m_creation_date || null;
+    return item.m_date ?? item.m_first_seen ?? item.m_last_seen ?? item.m_update_date ?? item.m_creation_date ?? null;
   }
 
   getPrimaryIdentity(item: AptIntelResultItem): string {
     if (this.isDefacement(item)) {
-      return item.m_team || this.toList(item.m_attacker)[0] || item.m_url || item.m_base_url || '-';
+      return item.m_team ?? this.toList(item.m_attacker)[0] ?? item.m_url ?? item.m_base_url ?? '-';
     }
     if (this.isMalware(item)) {
-      return item.m_sha256_hash || item.m_sha1_hash || item.m_md5_hash || item.m_signature || item.m_file_name || '-';
+      return item.m_sha256_hash ?? item.m_sha1_hash ?? item.m_md5_hash ?? item.m_signature ?? item.m_file_name ?? '-';
     }
-    return item.m_family || this.toList(item.m_aliases)[0] || item.m_country || '-';
+    return item.m_family ?? this.toList(item.m_aliases)[0] ?? item.m_country ?? '-';
   }
 
   getTags(item: AptIntelResultItem): string[] {
@@ -294,7 +294,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getReferenceCount(item: AptIntelResultItem): number {
-    return (item.m_references || []).length + (item.m_sha256_hash ? 1 : 0);
+    return (item.m_references ?? []).length + (item.m_sha256_hash ? 1 : 0);
   }
 
   getArtifactCount(item: AptIntelResultItem): number {
@@ -328,12 +328,12 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   getGroupPrimarySource(group: AptIntelGroup): string {
-    return group.records.map(record => record.sourceLabel).find(Boolean) || '-';
+    return group.records.map(record => record.sourceLabel).find(Boolean) ?? '-';
   }
 
   getGroupProfileLabel(group: AptIntelGroup): string {
     const first = group.records[0]?.item;
-    return first ? (first.m_platform || first.m_origin_country || first.m_country || '-') : '-';
+    return first ? (first.m_platform ?? first.m_origin_country ?? first.m_country ?? '-') : '-';
   }
 
   isMalware(item: AptIntelResultItem): boolean {
@@ -346,12 +346,12 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
 
   private getActorGroupTitle(item: AptIntelResultItem): string {
     if (this.isDefacement(item)) {
-      return item.m_team || this.toList(item.m_attacker)[0] || item.m_url || item.m_base_url || 'Unknown actor';
+      return item.m_team ?? this.toList(item.m_attacker)[0] ?? item.m_url ?? item.m_base_url ?? 'Unknown actor';
     }
     if (this.isMalware(item)) {
-      return item.m_signature || item.m_family || item.m_file_name || item.m_title || 'Unknown malware';
+      return item.m_signature ?? item.m_family ?? item.m_file_name ?? item.m_title ?? 'Unknown malware';
     }
-    return item.m_family || item.m_title || this.toList(item.m_aliases)[0] || 'Unknown actor';
+    return item.m_family ?? item.m_title ?? this.toList(item.m_aliases)[0] ?? 'Unknown actor';
   }
 
   private getGroupSubtitle(item: AptIntelResultItem): string {
@@ -410,7 +410,7 @@ export class DashboardResultAptComponent implements OnInit, AfterViewInit, OnDes
   }
 
   private buildRenderKey(groups: AptIntelGroup[]): string {
-    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen || ''}`).join('|');
+    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen ?? ''}`).join('|');
   }
 
   private buildDirectRenderKey(results: AptIntelResultItem[]): string {

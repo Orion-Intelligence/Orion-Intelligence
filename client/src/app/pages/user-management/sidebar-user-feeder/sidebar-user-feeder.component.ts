@@ -35,7 +35,7 @@ export class SidebarUserFeederComponent implements OnInit {
   constructor(private feederService: FeederService, private route: ActivatedRoute, private router: Router, private translationService: TranslationService) {}
 
   ngOnInit(): void {
-    this.selectedRuleKey = this.route.snapshot.queryParamMap.get('rule') || '';
+    this.selectedRuleKey = this.route.snapshot.queryParamMap.get('rule') ?? '';
     this.loadCatalog();
   }
 
@@ -44,7 +44,7 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   get selectedRuleType(): string {
-    return this.selectedRule?.rule_type || '';
+    return this.selectedRule?.rule_type ?? '';
   }
 
   get isSocialRuleSelected(): boolean {
@@ -145,10 +145,10 @@ export class SidebarUserFeederComponent implements OnInit {
           this.rules = response?.rules ?? [];
           this.syncSocialRuleSelectionFromSelectedRule();
           if (!this.selectedRuleKey && this.rules.length > 0) {
-            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || this.socialRuleGroupKey;
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? this.socialRuleGroupKey;
           }
           if (this.selectedRuleKey && this.selectedRuleKey !== this.socialRuleGroupKey && !this.rules.some((rule) => rule.key === this.selectedRuleKey)) {
-            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || '';
+            this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? '';
           }
           this.ensureSocialRuleSelection();
           this.ensureValidActiveTab();
@@ -156,7 +156,7 @@ export class SidebarUserFeederComponent implements OnInit {
           this.formError = '';
         },
         error: (error) => {
-          this.formError = error?.error?.detail || this.translationService.translate('Failed to load feeder categories');
+          this.formError = error?.error?.detail ?? this.translationService.translate('Failed to load feeder categories');
         }
       });
   }
@@ -189,7 +189,7 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   private isSocialRule(rule: FeederRuleOption): boolean {
-    return (rule.path || '').toLowerCase() === 'social/platform';
+    return (rule.path ?? '').toLowerCase() === 'social/platform';
   }
 
   private isSupportedSocialRule(rule: FeederRuleOption): boolean {
@@ -210,7 +210,7 @@ export class SidebarUserFeederComponent implements OnInit {
       return;
     }
     if (!this.socialRules.length) {
-      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key || '';
+      this.selectedRuleKey = this.rules.find(rule => !this.isSocialRule(rule))?.key ?? '';
       this.selectedSocialRuleKey = '';
       return;
     }

@@ -79,7 +79,7 @@ export function evaluatePasswordInput(password: string): PasswordEvaluation {
     { key: 'specialChar', message: 'At least one special character' }
   ] as const;
 
-  const currentUnmetCheck = checkOrder.find(check => !passwordChecks[check.key])?.message || null;
+  const currentUnmetCheck = checkOrder.find(check => !passwordChecks[check.key])?.message ?? null;
   const allPasswordRequirementsMet = areAllPasswordRequirementsMet(passwordChecks);
 
   let strengthLevel: PasswordStrength = 'weak';

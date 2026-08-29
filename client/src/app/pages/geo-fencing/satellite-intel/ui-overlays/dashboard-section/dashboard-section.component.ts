@@ -51,6 +51,6 @@ export class DashboardSectionComponent {
   }
 
   dotColor(feature: OrionSatelliteFeature | null): string {
-    return feature?.color || '#6b7280';
+    return feature?.color ?? '#6b7280';
   }
 }

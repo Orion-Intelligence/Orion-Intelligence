@@ -39,8 +39,8 @@ export class WelcomeComponent implements OnInit {
       this.apiService.post<{ message?: string; access_url?: string | null }>(`verify/${token}`, null).subscribe({
         next: (res) => {
           this.heading = "Verification Successful!";
-          this.message = res.message || "Your email has been verified successfully. You may continue onboarding.";
-          this.accessUrl = res.access_url || null;
+          this.message = res.message ?? "Your email has been verified successfully. You may continue onboarding.";
+          this.accessUrl = res.access_url ?? null;
         },
         error: (err) => {
           this.heading = "Verification Failed!";

@@ -35,7 +35,7 @@ export class GeoFencingGeocodeService {
   }
 
   private getResponseStatus(value: SatelliteGeocodeResponse): string | undefined {
-    return value.result?.status || value.status;
+    return value.result?.status ?? value.status;
   }
 
   private getResponseResult(value: SatelliteGeocodeResponse): SatelliteGeocodeResponse['result'] | SatelliteGeocodeResponse {
@@ -48,7 +48,7 @@ export class GeoFencingGeocodeService {
     }
 
     return {
-      message: value.result?.error_message || value.result?.message || value.message || 'Request failed',
+      message: value.result?.error_message ?? value.result?.message ?? value.message ?? 'Request failed',
     };
   }
 }

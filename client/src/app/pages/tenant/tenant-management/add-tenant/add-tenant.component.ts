@@ -101,7 +101,7 @@ export class AddTenantComponent implements OnInit {
         this.onClose();
       },
       error: err => {
-        this.errorText = err?.error?.detail || this.translationService.translate('Failed to create user');
+        this.errorText = err?.error?.detail ?? this.translationService.translate('Failed to create user');
       }
     });
   }
@@ -170,7 +170,7 @@ export class AddTenantComponent implements OnInit {
   }
 
   get showAlertsAllowed(): boolean {
-    return this.isAdmin && (this.model.permissions || []).includes('case_management');
+    return this.isAdmin && (this.model.permissions ?? []).includes('case_management');
   }
 
   get alertAllowedOptions(): UiDropdownOption[] {
@@ -188,7 +188,7 @@ export class AddTenantComponent implements OnInit {
     if (this.model.alerts_allowed_all) {
       return [this.allAlertsOption];
     }
-    return this.model.alerts_allowed_tenant_ids || [];
+    return this.model.alerts_allowed_tenant_ids ?? [];
   }
 
   onPermissionChange(permissions: string[]): void {
@@ -235,11 +235,11 @@ export class AddTenantComponent implements OnInit {
       return;
     }
     const allowedTenantIds = new Set(this.alertTenantOptions.map(tenant => tenant.id));
-    this.model.alerts_allowed_tenant_ids = (this.model.alerts_allowed_tenant_ids || []).filter(id => allowedTenantIds.has(id));
+    this.model.alerts_allowed_tenant_ids = (this.model.alerts_allowed_tenant_ids ?? []).filter(id => allowedTenantIds.has(id));
   }
 
   onLicenseDropdownChange(nextLicenses: string[]): void {
-    const currentLicenses = this.model.licenses || [];
+    const currentLicenses = this.model.licenses ?? [];
     const addedLicense = nextLicenses.find(license => !currentLicenses.includes(license));
     if (addedLicense) {
       this.toggleTenantLicense(this.model, addedLicense as LicenseName);
@@ -249,9 +249,7 @@ export class AddTenantComponent implements OnInit {
   }
 
   toggleTenantLicense(tenant: TenantTeamModel, license: LicenseName): void {
-    if (!tenant.licenses) {
-      tenant.licenses = [];
-    }
+    tenant.licenses ??= [];
     const index = tenant.licenses.indexOf(license);
     if (index > -1) {
       tenant.licenses.splice(index, 1);

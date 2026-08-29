@@ -187,7 +187,7 @@ export class ConsolidatedScanComponent {
             scanType: v.scanType || t
           } as ConsolidatedScanResults;
           const key = t;
-          this.resultsByType[key] = [...(this.resultsByType[key] || []), result];
+          this.resultsByType[key] = [...(this.resultsByType[key] ?? []), result];
         },
         error: () => {
           this.isProcessing = false;
@@ -200,7 +200,7 @@ export class ConsolidatedScanComponent {
   }
 
   private isPending(v: unknown): v is PendingMsg {
-    return !!v && typeof v === 'object' && 'status' in v && String(v.status || '').toLowerCase() === 'pending';
+    return !!v && typeof v === 'object' && 'status' in v && String(v.status ?? '').toLowerCase() === 'pending';
   }
 
   private clamp(n: number, min: number, max: number): number {
@@ -313,9 +313,9 @@ export class ConsolidatedScanComponent {
       }[] = [];
     for (const r of this.liveApiResults || []) {
       const input = r.input;
-      const data = r.resultData?.cards_data || [];
+      const data = r.resultData?.cards_data ?? [];
       for (const item of data) {
-        const url = item?.m_url || item?.m_app_url || '';
+        const url = item?.m_url ?? item?.m_app_url ?? '';
         if (!url) {
           continue;
         }
@@ -330,7 +330,7 @@ export class ConsolidatedScanComponent {
   }
 
   gradeBadgeClass(grade?: string): string {
-    const g = (grade || '').toUpperCase();
+    const g = (grade ?? '').toUpperCase();
     const baseClass = 'inline-flex items-center justify-center rounded-[999px] border px-[8px] py-[4px] font-[Inter] text-[12px] font-normal leading-[12px] whitespace-nowrap';
     if (g === 'D') {
       return `${baseClass} border-[rgba(248,113,113,0.45)] bg-[rgba(127,29,29,0.42)] text-red-100 [body.light-theme_&]:border-red-300 [body.light-theme_&]:bg-red-50 [body.light-theme_&]:text-red-700`;
@@ -342,7 +342,7 @@ export class ConsolidatedScanComponent {
   }
 
   gradeText(grade?: string): string {
-    const g = (grade || '—').toUpperCase();
+    const g = (grade ?? '—').toUpperCase();
     return `${g} Grade`;
   }
 

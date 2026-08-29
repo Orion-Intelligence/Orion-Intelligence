@@ -59,7 +59,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   }
 
   get selectedRuleType(): string {
-    return this.selectedRule?.rule_type || '';
+    return this.selectedRule?.rule_type ?? '';
   }
 
   hasSharedScriptUploaded(): boolean {
@@ -67,7 +67,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   }
 
   get currentSessionFileName(): string {
-    return this.selectedSessionFile?.name || this.uploadedSessionFileName || this.sharedRuleScripts.find(script => script.session_file_name)?.session_file_name || '';
+    return this.selectedSessionFile?.name ?? this.uploadedSessionFileName ?? this.sharedRuleScripts.find(script => script.session_file_name)?.session_file_name ?? '';
   }
 
   isSharedValueBlocked(): boolean {
@@ -100,7 +100,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     if (!(input instanceof HTMLInputElement)) {
       return;
     }
-    this.selectedFiles = Array.from(input.files || []);
+    this.selectedFiles = Array.from(input.files ?? []);
   }
 
   onSessionFileSelected(event: Event): void {
@@ -108,7 +108,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     if (!(input instanceof HTMLInputElement)) {
       return;
     }
-    const file = input.files?.[0] || null;
+    const file = input.files?.[0] ?? null;
     if (file && !file.name.toLowerCase().endsWith('.zip')) {
       this.formError = this.translationService.translate('Only ZIP session files are allowed');
       input.value = '';
@@ -220,7 +220,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
           this.submitUpload(fileInput);
         },
         error: (error) => {
-          this.formError = error?.error?.detail || this.translationService.translate('Failed to check existing feeder scripts');
+          this.formError = error?.error?.detail ?? this.translationService.translate('Failed to check existing feeder scripts');
         }
       });
   }
@@ -341,16 +341,16 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       }))
       .subscribe({
         next: (response) => {
-          this.messageNotificationService.show(response?.message || this.translationService.translate('Upload completed successfully'), 'success');
+          this.messageNotificationService.show(response?.message ?? this.translationService.translate('Upload completed successfully'), 'success');
           fileInput.value = '';
         },
         error: (error) => {
           if (error?.status === 409) {
             this.formError = '';
-            this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Script owner already exists'));
+            this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Script owner already exists'));
             return;
           }
-          this.formError = error?.error?.detail || this.translationService.translate('Failed to upload feeder script');
+          this.formError = error?.error?.detail ?? this.translationService.translate('Failed to upload feeder script');
         }
       });
   }
@@ -372,8 +372,8 @@ export class SidebarUserFeederAddComponent implements OnChanges {
       }))
       .subscribe({
         next: (response) => {
-          this.messageNotificationService.show(response?.message || this.translationService.translate('Session file uploaded successfully'), 'success');
-          this.uploadedSessionFileName = response?.script?.session_file_name || this.selectedSessionFile?.name || '';
+          this.messageNotificationService.show(response?.message ?? this.translationService.translate('Session file uploaded successfully'), 'success');
+          this.uploadedSessionFileName = response?.script?.session_file_name ?? this.selectedSessionFile?.name ?? '';
           if (this.selectedRuleType === 'shared' && response?.script) {
             this.sharedRuleScripts = [response.script];
           }
@@ -381,7 +381,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
           fileInput.value = '';
         },
         error: (error) => {
-          this.formError = error?.error?.detail || this.translationService.translate('Failed to upload session file');
+          this.formError = error?.error?.detail ?? this.translationService.translate('Failed to upload session file');
         }
       });
   }
@@ -418,17 +418,17 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     this.feederService.upload(formData)
       .subscribe({
         next: (response) => {
-          this.submitFileUploads(fileInput, index + 1, response?.script || lastUploadedScript);
+          this.submitFileUploads(fileInput, index + 1, response?.script ?? lastUploadedScript);
         },
         error: (error) => {
           this.isSubmitting = false;
           this.resetUploadProgress();
           if (error?.status === 409) {
             this.formError = '';
-            this.messageNotificationService.show(error?.error?.detail || this.translationService.translate('Script owner already exists'));
+            this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Script owner already exists'));
             return;
           }
-          this.formError = error?.error?.detail || this.translationService.translate('Failed to upload feeder script');
+          this.formError = error?.error?.detail ?? this.translationService.translate('Failed to upload feeder script');
         }
       });
   }
@@ -440,7 +440,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
 
     const normalizedNames = new Set(this.selectedFiles.map((file) => this.sanitizeFileName(file.name)));
     return existingScripts.filter((script) =>
-      (script.path || '') === (this.selectedRule?.path || '')
+      (script.path ?? '') === (this.selectedRule?.path ?? '')
       && normalizedNames.has(script.file_name));
   }
 
@@ -450,7 +450,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
     }
 
     return existingScripts.filter((script) =>
-      (script.path || '') === (this.selectedRule?.path || '')
+      (script.path ?? '') === (this.selectedRule?.path ?? '')
       && !!script.session_file_name);
   }
 

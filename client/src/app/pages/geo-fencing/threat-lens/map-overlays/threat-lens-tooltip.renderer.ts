@@ -62,8 +62,8 @@ export class ThreatLensTooltipRenderer {
       return;
     }
 
-    const count = Number(attributes['count'] || 0);
-    const networkCount = Number(attributes['networkCount'] || 0);
+    const count = Number(attributes['count'] ?? 0);
+    const networkCount = Number(attributes['networkCount'] ?? 0);
     const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
     const accuracyMin = this.toFiniteNumber(attributes['accuracyMin']);
     const accuracyMax = this.toFiniteNumber(attributes['accuracyMax']);
@@ -76,7 +76,7 @@ export class ThreatLensTooltipRenderer {
     title.textContent = this.translate('Stacked approximate IPs');
 
     tooltipContent.append(title);
-    tooltipContent.append(this.buildTooltipRow(this.translate('Why stacked'), String(attributes['stackReason'] || this.translate('Same MaxMind coordinate'))));
+    tooltipContent.append(this.buildTooltipRow(this.translate('Why stacked'), String(attributes['stackReason'] ?? this.translate('Same MaxMind coordinate'))));
     tooltipContent.append(this.buildTooltipRow(this.translate('IP records'), String(count || records.length)));
     if (networkCount > 0) {
       tooltipContent.append(this.buildTooltipRow(this.translate('Prefixes'), String(networkCount)));
@@ -88,7 +88,7 @@ export class ThreatLensTooltipRenderer {
       tooltipContent.append(this.buildTooltipRow(this.translate('Approx. radius'), this.formatKm(accuracyRadius)));
     }
     const sampleIps = records
-      .map((record) => String(record?.ip || '').trim())
+      .map((record) => String(record?.ip ?? '').trim())
       .filter(Boolean)
       .slice(0, 3)
       .join(', ');

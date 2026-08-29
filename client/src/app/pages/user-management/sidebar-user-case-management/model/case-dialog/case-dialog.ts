@@ -47,7 +47,7 @@ export class CaseDialog implements OnChanges {
   }
 
   setAnalyst(value: string | null): void {
-    this.selectedAnalystId = value || '';
+    this.selectedAnalystId = value ?? '';
   }
 
   confirmAssignAnalyst(): void {

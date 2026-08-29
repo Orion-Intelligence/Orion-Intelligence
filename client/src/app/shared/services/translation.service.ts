@@ -39,7 +39,7 @@ export class TranslationService {
   }
 
   translate(key: string | null | undefined): string {
-    const normalizedKey = (key || '').replace(/\s+/g, ' ').trim();
+    const normalizedKey = (key ?? '').replace(/\s+/g, ' ').trim();
     if (!normalizedKey) {
       return '';
     }

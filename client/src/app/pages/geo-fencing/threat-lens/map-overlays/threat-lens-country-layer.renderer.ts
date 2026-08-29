@@ -57,7 +57,7 @@ export class ThreatLensCountryLayerRenderer {
   }
 
   getFeature(countryKey: string): ThreatLensMapGraphic | null {
-    return this.featureIndex.get(countryKey) || null;
+    return this.featureIndex.get(countryKey) ?? null;
   }
 
   getCountryName(countryKey: string): string {

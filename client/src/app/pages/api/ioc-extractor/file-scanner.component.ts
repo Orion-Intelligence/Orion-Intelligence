@@ -161,7 +161,7 @@ export class FileScannerComponent {
 
   private applyServerResult(result: unknown): void {
     const record = this.toRecord(result);
-    this.scanResult = record || { value: result };
+    this.scanResult = record ?? { value: result };
     this.resultSections = this.buildResultSections(result);
   }
 
@@ -311,7 +311,7 @@ export class FileScannerComponent {
       this.isFileSizeError = true;
       return;
     }
-    this.errorMessage = String(nestedError['detail'] || error['message'] || this.translate('Upload failed.'));
+    this.errorMessage = String(nestedError['detail'] ?? error['message'] ?? this.translate('Upload failed.'));
   }
 
   formatFileSize(bytes: number): string {

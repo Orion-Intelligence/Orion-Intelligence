@@ -322,7 +322,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   onUpdateQuery(query: string) {
     this.dashboardService.consolidatedParamModel.q = query;
-    this.dashboardService.consolidatedParamModel.category = this.route.snapshot.routeConfig?.path || 'all';
+    this.dashboardService.consolidatedParamModel.category = this.route.snapshot.routeConfig?.path ?? 'all';
     this.dashboardService.consolidatedParamModel.url = '';
     this.dashboardService.consolidatedParamModel.user = '';
     this.dashboardService.consolidatedParamModel.ioc = '';

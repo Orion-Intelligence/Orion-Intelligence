@@ -45,7 +45,7 @@ export class ExternalConsolidatedFeedService {
   fetchActorMalware(paramModel: ConsolidatedParamModel, selectedFilters: Record<string, string | null>): void {
     const localSettings = this.appService.configData().localSettings;
     const entityCategories = localSettings.entityfilterCategories;
-    const resultCount = Number(selectedFilters['platform_result_count'] || 0);
+    const resultCount = Number(selectedFilters['platform_result_count'] ?? 0);
     let payload: Record<string, unknown> = {
       ...paramModel,
       ...selectedFilters,
@@ -90,7 +90,7 @@ export class ExternalConsolidatedFeedService {
   private uniqueActorMalwareResults(results: AptIntelResultItem[]): AptIntelResultItem[] {
     const seen = new Set<string>();
     return results.filter((item, index) => {
-      const key = item.m_hash || item._id || item.m_sha256_hash || item.m_sha1_hash || item.m_md5_hash || item.m_url || item.m_base_url || `${index}`;
+      const key = item.m_hash ?? item._id ?? item.m_sha256_hash ?? item.m_sha1_hash ?? item.m_md5_hash ?? item.m_url ?? item.m_base_url ?? `${index}`;
       if (seen.has(key)) {
         return false;
       }

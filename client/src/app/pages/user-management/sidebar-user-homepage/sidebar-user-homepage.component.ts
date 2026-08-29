@@ -78,7 +78,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   initializeData() {
     const summary = this.appService.userSessionData().alert_summary;
-    const categories = this.convertCountsToCategories(summary?.counts_by_type || {});
+    const categories = this.convertCountsToCategories(summary?.counts_by_type ?? {});
     queueMicrotask(() => {
       this.alertCategories = categories;
       this.countRiskFromSummary(summary?.counts_by_risk);
@@ -125,10 +125,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   countRiskFromSummary(riskCounts?: { critical?: number; high?: number; medium?: number; low?: number }) {
-    this.criticalRisks = Number(riskCounts?.critical || 0);
-    this.highRisks = Number(riskCounts?.high || 0);
-    this.mediumRisks = Number(riskCounts?.medium || 0);
-    this.lowRisks = Number(riskCounts?.low || 0);
+    this.criticalRisks = Number(riskCounts?.critical ?? 0);
+    this.highRisks = Number(riskCounts?.high ?? 0);
+    this.mediumRisks = Number(riskCounts?.medium ?? 0);
+    this.lowRisks = Number(riskCounts?.low ?? 0);
   }
 
   hasReports(): boolean {
@@ -213,7 +213,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.alertService.isAlertScanLoading.set(false);
-          this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to delete'));
+          this.messageNotificationService.show(err?.error?.detail ?? this.translationService.translate('Failed to delete'));
         },
       });
     }

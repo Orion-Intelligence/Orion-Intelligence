@@ -148,11 +148,11 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   getProgressValue(progress: number | null | undefined): number {
-    return Math.max(6, Math.min(100, Math.round(progress || 0)));
+    return Math.max(6, Math.min(100, Math.round(progress ?? 0)));
   }
 
   getLoadingStepLabel(step: string | null | undefined): string {
-    const raw = (step || '').trim();
+    const raw = (step ?? '').trim();
     if (!raw) {
       return 'Scanning in progress...';
     }
@@ -164,7 +164,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   shouldShowLoadingSkeleton(hasSearched: boolean, result: unknown, errorMessage: string | null | undefined, isScanning: boolean, progress: number | null | undefined): boolean {
-    return hasSearched && !result && !errorMessage && (isScanning || (progress || 0) > 0);
+    return hasSearched && !result && !errorMessage && (isScanning || (progress ?? 0) > 0);
   }
 
   validateDnsInput(value: string): string | null {
@@ -294,7 +294,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   }
 
   renderablePorts(ports: IpPortData[] | undefined | null): IpPortData[] {
-    return (ports || []).filter(port => this.hasPortDetail(port));
+    return (ports ?? []).filter(port => this.hasPortDetail(port));
   }
 
   securityItems(sec: string[] | Record<string, boolean> | undefined | null): string[] {
@@ -310,11 +310,11 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
   private getResponseError(value: unknown): { message: string } | null {
     const response = asUnknownRecord(value);
     const result = asUnknownRecord(response['result']);
-    const status = String(result['status'] || response['status'] || '');
+    const status = String(result['status'] ?? response['status'] ?? '');
     if (status !== 'error') {
       return null;
     }
-    return { message: String(result['message'] || response['message'] || 'Request failed') };
+    return { message: String(result['message'] ?? response['message'] ?? 'Request failed') };
   }
 
   private runTrackedScan<T extends object>( apiReference: string, payload: Record<string, unknown>, metadata: Record<string, unknown>, pollDelayMs = this.pollDelayMs, reusePrevious = false, ): Subscription {

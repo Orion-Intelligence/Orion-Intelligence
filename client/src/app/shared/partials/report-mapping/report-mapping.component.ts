@@ -109,10 +109,10 @@ export class ReportMappingComponent {
   private toRelatedReportItem(item: MappingGraphItem, vertex: MappingVertex | null, id: string, rawMappingKey: string): RelatedReportItem {
     const mappingKey = this.formatLabel(rawMappingKey);
     const mappingValue = this.extractMappingValue(item);
-    const title = this.cleanText(vertex?.title || vertex?.display_value || vertex?.label) || `Related report ${this.compactId(id)}`;
+    const title = this.cleanText(vertex?.title ?? vertex?.display_value ?? vertex?.label) || `Related report ${this.compactId(id)}`;
     const summary = this.truncate(this.cleanText(vertex?.summary), 220);
-    const cluster = this.formatLabel(vertex?.cluster_id || vertex?.module || '');
-    const source = this.formatLabel(vertex?.source || vertex?.module || vertex?.cluster_id || '');
+    const cluster = this.formatLabel(vertex?.cluster_id ?? vertex?.module ?? '');
+    const source = this.formatLabel(vertex?.source ?? vertex?.module ?? vertex?.cluster_id ?? '');
     return {
       id,
       title,
@@ -130,12 +130,12 @@ export class ReportMappingComponent {
   private getRelatedDocumentVertex(item: MappingGraphItem, currentId: string): MappingVertex | null {
     const candidates = [item.vertex, ...(item.path?.vertices ?? [])].filter((vertex): vertex is MappingVertex => !!vertex);
     return candidates.find(vertex => {
-      if (String(vertex?.type || '').toLowerCase() !== 'document') {
+      if (String(vertex?.type ?? '').toLowerCase() !== 'document') {
         return false;
       }
       const id = this.getDocumentId(vertex);
       return id && id !== currentId;
-    }) || null;
+    }) ?? null;
   }
 
   private getDocumentId(vertex: MappingVertex | null | undefined): string {
@@ -153,7 +153,7 @@ export class ReportMappingComponent {
         return id;
       }
     }
-    const edgeId = this.extractId(edge?._id || '');
+    const edgeId = this.extractId(edge?._id ?? '');
     if (edgeId && edgeId !== currentId) {
       return edgeId;
     }
@@ -161,7 +161,7 @@ export class ReportMappingComponent {
   }
 
   private extractDocumentId(value: unknown): string {
-    const text = String(value || '').trim();
+    const text = String(value ?? '').trim();
     if (!text) {
       return '';
     }
@@ -178,14 +178,14 @@ export class ReportMappingComponent {
   }
 
   private extractMappingKeyRaw(item: MappingGraphItem): string {
-    const edge = item.edge || {};
-    const key = this.extractProperty(edge._id || '', 'key', true)
-      || this.extractProperty(edge._to || '', 'key', true)
-      || edge.label
-      || edge.relationship_type
-      || edge.edge_type
-      || edge.type;
-    return String(key || '').replace(/^has_/, '').replace(/^derived_/, '');
+    const edge = item.edge ?? {};
+    const key = this.extractProperty(edge._id ?? '', 'key', true)
+      ?? this.extractProperty(edge._to ?? '', 'key', true)
+      ?? edge.label
+      ?? edge.relationship_type
+      ?? edge.edge_type
+      ?? edge.type;
+    return String(key ?? '').replace(/^has_/, '').replace(/^derived_/, '');
   }
 
   private isStrongMappingKey(key: string): boolean {
@@ -193,16 +193,16 @@ export class ReportMappingComponent {
   }
 
   private extractMappingValue(item: MappingGraphItem): string {
-    const edge = item.edge || {};
-    const edgeValue = this.extractProperty(edge._id || '', 'value') || this.extractProperty(edge._to || '', 'value');
+    const edge = item.edge ?? {};
+    const edgeValue = this.extractProperty(edge._id ?? '', 'value') || this.extractProperty(edge._to ?? '', 'value');
     if (edgeValue) {
       return this.normalizeDisplayValue(edgeValue);
     }
     const propertyVertex = [item.vertex, ...(item.path?.vertices ?? [])].filter((vertex): vertex is MappingVertex => !!vertex).find(vertex => {
-      const type = String(vertex?.type || '').toLowerCase();
+      const type = String(vertex?.type ?? '').toLowerCase();
       return type && type !== 'document' && type !== 'cluster';
     });
-    return this.normalizeDisplayValue(propertyVertex?.display_value || propertyVertex?.value || propertyVertex?.label || '');
+    return this.normalizeDisplayValue(propertyVertex?.display_value ?? propertyVertex?.value ?? propertyVertex?.label ?? '');
   }
 
   private getCurrentReportId(): string {
@@ -218,7 +218,7 @@ export class ReportMappingComponent {
   }
 
   private cleanText(value: unknown): string {
-    return String(value || '').replace(/\s+/g, ' ').trim();
+    return String(value ?? '').replace(/\s+/g, ' ').trim();
   }
 
   private truncate(value: string, limit: number): string {
@@ -309,7 +309,7 @@ export class ReportMappingComponent {
   private extractKnownPropertyKey(value: string): string {
     return Array.from(STRONG_RELATED_MAPPING_KEYS)
       .sort((a, b) => b.length - a.length)
-      .find(key => value === key || value.startsWith(`${key}_`)) || '';
+      .find(key => value === key || value.startsWith(`${key}_`)) ?? '';
   }
 
   private extractId(path: string): string {

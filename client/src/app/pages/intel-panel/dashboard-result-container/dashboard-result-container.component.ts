@@ -179,8 +179,8 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
           this.totalGroups = 0;
         }
 
-        this.dashboardService.consolidatedParamModel.q = params['q'] || '';
-        this.dashboardService.consolidatedParamModel.page = params['page'] || '1';
+        this.dashboardService.consolidatedParamModel.q = params['q'] ?? '';
+        this.dashboardService.consolidatedParamModel.page = params['page'] ?? '1';
         const routeCategory = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         this.apiEndpoint = this.getApiEndpoint(route);
         this.dashboardService.consolidatedParamModel.category = this.getApiCategory(routeCategory);

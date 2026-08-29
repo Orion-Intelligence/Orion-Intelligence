@@ -18,8 +18,8 @@ export class NotificationComponent {
     const nav = this.router.currentNavigation();
     const state = nav?.extras?.state;
     if (state) {
-      this.title = state['title'] || this.title;
-      this.description = state['description'] || this.description;
+      this.title = state['title'] ?? this.title;
+      this.description = state['description'] ?? this.description;
     }
     else {
       this.router.navigate(['/']).then();

@@ -55,7 +55,7 @@ export class CaseTasksSectionComponent {
       return null;
     }
 
-    return this.editedCase?.tasks?.[this.editingTaskIndex] || null;
+    return this.editedCase?.tasks?.[this.editingTaskIndex] ?? null;
   }
 
   openEditTask(index: number): void {
@@ -75,7 +75,7 @@ export class CaseTasksSectionComponent {
   }
 
   hasTasksChanged(): boolean {
-    return (this.editedCase?.tasks?.length || 0) !== (this.caseData?.tasks?.length || 0);
+    return (this.editedCase?.tasks?.length ?? 0) !== (this.caseData?.tasks?.length || 0);
   }
 
   getCaseAnalysts(caseItem: Case | null = this.caseData): CaseAnalyst[] {

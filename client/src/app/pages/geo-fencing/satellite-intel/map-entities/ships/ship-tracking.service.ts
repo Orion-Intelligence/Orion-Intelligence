@@ -53,7 +53,7 @@ export class SatelliteShipTrackingService {
         .filter((ship): ship is SatelliteLiveShip => ship !== null);
     }
 
-    const status = String(asUnknownRecord(payload)['status'] || '').toLowerCase();
+    const status = String(asUnknownRecord(payload)['status'] ?? '').toLowerCase();
     if (status === 'pending' || status === 'busy') {
       return null;
     }
@@ -63,7 +63,7 @@ export class SatelliteShipTrackingService {
 
   getFeedIssue(payload: unknown): string | null {
     const record = asUnknownRecord(payload);
-    const payloadError = record['error'] || record['error_message'] || record['last_error'] || null;
+    const payloadError = record['error'] ?? record['error_message'] ?? record['last_error'] ?? null;
     if (payloadError) {
       return String(payloadError);
     }
@@ -156,7 +156,7 @@ export class SatelliteShipTrackingService {
       return null;
     }
 
-    const mmsi = this.readString(item, ['mmsi', 'MMSI', 'Mmsi', 'id', 'ship_id', 'vessel_id'], [['MetaData', 'MMSI'], ['MetaData', 'mmsi'], ['Message', 'PositionReport', 'UserID']]) || `${latitude}:${longitude}`;
+    const mmsi = this.readString(item, ['mmsi', 'MMSI', 'Mmsi', 'id', 'ship_id', 'vessel_id'], [['MetaData', 'MMSI'], ['MetaData', 'mmsi'], ['Message', 'PositionReport', 'UserID']]) ?? `${latitude}:${longitude}`;
     return {
       ...item,
       mmsi,

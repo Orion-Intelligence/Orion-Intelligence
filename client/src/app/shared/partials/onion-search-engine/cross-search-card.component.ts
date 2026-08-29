@@ -124,7 +124,7 @@ export class CrossSearchCardComponent {
 
   openEngineCard(entry: CrossSearchEntry, event?: Event): void {
     event?.stopPropagation();
-    const targetUrl = entry.first_result?.url || entry.search_url;
+    const targetUrl = entry.first_result?.url ?? entry.search_url;
     if (!targetUrl) {
       return;
     }
@@ -147,8 +147,8 @@ export class CrossSearchCardComponent {
   }
 
   private isPendingResponse(res: CrossSearchResponse): boolean {
-    const topStatus = (res?.status || '').toLowerCase();
-    const nestedStatus = (res?.result?.status || '').toLowerCase();
+    const topStatus = (res?.status ?? '').toLowerCase();
+    const nestedStatus = (res?.result?.status ?? '').toLowerCase();
     return (
       ['pending', 'processing', 'running', 'busy'].includes(topStatus) ||
       ['pending', 'processing', 'running', 'busy'].includes(nestedStatus)

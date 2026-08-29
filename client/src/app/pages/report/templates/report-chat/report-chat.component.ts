@@ -85,7 +85,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   processResultItem() {
     const resultItem = this.resultItem;
     if (resultItem) {
-      this.content = resultItem.m_content || '';
+      this.content = resultItem.m_content ?? '';
       this.summary = (resultItem.m_summary?.[0]) || '';
       this.arrayKeys = [];
       const addedKeys = new Set<string>();
@@ -176,7 +176,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     return item?.m_content
       ? item.m_content
         .split('\n')
-        .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
+        .filter((line: string) => line.trim() && (line.match(/ /g) ?? []).length > 5)
       : [];
   }
 
@@ -245,11 +245,11 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     }
     if (typeof value === 'object') {
       const comment = value as Record<string, unknown>;
-      const text = comment['text'] || comment['comment'] || comment['comment_text'] || comment['m_comment_text'] || comment['m_comment'] || comment['m_text'] || comment['content'] || comment['comment_content'] || comment['m_content'] || comment['message'] || comment['body'] || comment['m_body'] || comment['comment_body'] || comment['reply'] || comment['reply_content'] || comment['description'];
+      const text = comment['text'] ?? comment['comment'] ?? comment['comment_text'] ?? comment['m_comment_text'] ?? comment['m_comment'] ?? comment['m_text'] ?? comment['content'] ?? comment['comment_content'] ?? comment['m_content'] ?? comment['message'] ?? comment['body'] ?? comment['m_body'] ?? comment['comment_body'] ?? comment['reply'] ?? comment['reply_content'] ?? comment['description'];
       if (text) {
         const meta = [
-          comment['sender_name'] || comment['m_sender_name'] || comment['author'] || comment['m_author'] || comment['comment_author'] || comment['username'] || comment['user'] || comment['name'] || comment['from'],
-          comment['m_date'] || comment['date'] || comment['datetime'] || comment['created_at'] || comment['timestamp'] || comment['time'] || comment['m_time']
+          comment['sender_name'] ?? comment['m_sender_name'] ?? comment['author'] ?? comment['m_author'] ?? comment['comment_author'] ?? comment['username'] ?? comment['user'] ?? comment['name'] ?? comment['from'],
+          comment['m_date'] ?? comment['date'] ?? comment['datetime'] ?? comment['created_at'] ?? comment['timestamp'] ?? comment['time'] ?? comment['m_time']
         ].map(item => this.toDisplayValue(item)).filter(Boolean).join(' - ');
         const displayText = this.toDisplayValue(text);
         return [meta ? `${meta}: ${displayText}` : displayText];
@@ -296,8 +296,8 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   getDisplayMessageId(item: ChatResultItem | SocialResultItem | null): string {
     const rawItem = item as Record<string, unknown> | null;
-    const messageId = String(rawItem?.['m_message_id'] || '').trim();
-    if (!messageId || this.isSlugLikeMessageId(messageId, String(rawItem?.['m_platform'] || ''))) {
+    const messageId = String(rawItem?.['m_message_id'] ?? '').trim();
+    if (!messageId || this.isSlugLikeMessageId(messageId, String(rawItem?.['m_platform'] ?? ''))) {
       return '';
     }
     return messageId;
@@ -308,7 +308,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   }
 
   get reportDocId(): string {
-    return String(this.resultItem?.m_hash || this.resultItem?.['_id'] || '');
+    return String(this.resultItem?.m_hash ?? this.resultItem?.['_id'] ?? '');
   }
 
   private getFirstRenderableValue(...values: unknown[]): unknown {
@@ -332,7 +332,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   }
 
   private isSlugLikeMessageId(value: string, platform?: string): boolean {
-    const normalizedPlatform = String(platform || '').toLowerCase();
+    const normalizedPlatform = String(platform ?? '').toLowerCase();
     const hasPercentEncoding = /%[0-9a-f]{2}/i.test(value);
     const decodedValue = this.decodeURIComponentSafe(value);
     const hasSlugSeparator = /[-_/]/.test(decodedValue);

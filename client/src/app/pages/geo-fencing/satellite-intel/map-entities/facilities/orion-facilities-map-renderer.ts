@@ -240,7 +240,7 @@ export class OrionFacilitiesMapRenderer {
       }
 
       const bucketKey = this.getGridKey(feature, bounds, grid.cols, grid.rows);
-      const bucket = buckets.get(bucketKey) || [];
+      const bucket = buckets.get(bucketKey) ?? [];
       bucket.push({
         feature,
         score: Math.abs(stableHash(String(feature?.id || `${feature?.coordinates?.[1]}:${feature?.coordinates?.[0]}`))),
@@ -338,7 +338,7 @@ export class OrionFacilitiesMapRenderer {
     const zoom = this.map?.getZoom?.() ?? 3;
     const bounds = this.map?.getBounds?.();
     const data = this.getData();
-    const focusedId = this.getFocusedFeature()?.id || '';
+    const focusedId = this.getFocusedFeature()?.id ?? '';
     if (!bounds) {
       return `z:${Math.round(zoom * 2)}|count:${data.length}|v:${this.renderVersion}|focus:${focusedId}`;
     }

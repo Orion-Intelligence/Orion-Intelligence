@@ -160,7 +160,7 @@ export class LicenseService {
   }
 
   canUseAlertType(type?: string | null): boolean {
-    const rawType = (type || '').trim().toLowerCase();
+    const rawType = (type ?? '').trim().toLowerCase();
     if (!rawType) {
       return false;
     }
@@ -176,7 +176,7 @@ export class LicenseService {
   }
 
   getAlertLicenses(type?: string | null): string[] {
-    const rawType = (type || '').trim().toLowerCase();
+    const rawType = (type ?? '').trim().toLowerCase();
     const alertType = this.normalizeAlertType(rawType);
     const isScanningAlert = SCANNING_ALERT_TYPES.has(rawType);
     return Object.entries(license_rules)
@@ -198,10 +198,10 @@ export class LicenseService {
     }
     const type = typeof target === 'string'
       ? target
-      : (target?.type || target?.categoryName || '');
+      : (target?.type ?? target?.categoryName ?? '');
     const alertLicenses = typeof target === 'string'
       ? []
-      : (target?.licenses || []);
+      : (target?.licenses ?? []);
     if (alertLicenses.length > 0 && this.getAlertAccessLicenses().some(license => alertLicenses.includes(license))) {
       return true;
     }
@@ -237,13 +237,13 @@ export class LicenseService {
   }
 
   canViewTenantAlerts(): boolean {
-    const permissions = this.appService.userSessionData().user.permissions || [];
+    const permissions = this.appService.userSessionData().user.permissions ?? [];
     return this.isAdmin() || (this.isAnalyst() && permissions.includes('case_management') && this.appService.userSessionData().tenant.isDefault);
   }
 
   canUseOrionMail(): boolean {
     const session = this.appService.userSessionData();
-    return session.tenant.isDefault && (this.isAdmin() || (session.user.permissions || []).includes('orion_mail'));
+    return session.tenant.isDefault && (this.isAdmin() || (session.user.permissions ?? []).includes('orion_mail'));
   }
 
   canReviewTakedowns(): boolean {

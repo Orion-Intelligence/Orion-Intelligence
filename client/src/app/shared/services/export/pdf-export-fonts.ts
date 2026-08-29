@@ -8,20 +8,18 @@ export type { PdfExportFontData } from './model/pdf-export-fonts.model';
 let fontDataPromise: Promise<PdfExportFontData | null> | null = null;
 
 export function loadPdfExportFontData(): Promise<PdfExportFontData | null> {
-  if (!fontDataPromise) {
-    fontDataPromise = Promise.all([
-      fetchFont('assets/fonts/Pdf/Inter-Regular.ttf'),
-      fetchFont('assets/fonts/Pdf/Inter-Bold.ttf'),
-      fetchFont('assets/fonts/Pdf/DejaVuSansMono.ttf')
-    ]).then(([interRegular, interBold, monoRegular]) => ({
-      interRegular,
-      interBold,
-      monoRegular
-    })).catch(() => {
-      fontDataPromise = null;
-      return null;
-    });
-  }
+  fontDataPromise ??= Promise.all([
+    fetchFont('assets/fonts/Pdf/Inter-Regular.ttf'),
+    fetchFont('assets/fonts/Pdf/Inter-Bold.ttf'),
+    fetchFont('assets/fonts/Pdf/DejaVuSansMono.ttf')
+  ]).then(([interRegular, interBold, monoRegular]) => ({
+    interRegular,
+    interBold,
+    monoRegular
+  })).catch(() => {
+    fontDataPromise = null;
+    return null;
+  });
   return fontDataPromise;
 }
 

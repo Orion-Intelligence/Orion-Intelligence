@@ -60,7 +60,7 @@ export class SidebarComponent implements OnInit, OnChanges {
   }
 
   get queryModeLabel(): string {
-    const type = this.filters()?.selectedType || 'cluster';
+    const type = this.filters()?.selectedType ?? 'cluster';
     if (type === 'property') {
       return 'Entity';
     }

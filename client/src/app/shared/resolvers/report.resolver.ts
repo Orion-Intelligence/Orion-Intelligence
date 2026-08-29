@@ -12,7 +12,7 @@ export class ReportResolver implements Resolve<unknown> {
   }
 
   resolve(route: ActivatedRouteSnapshot): Observable<unknown> {
-    const category_1 = route.parent?.url[0]?.path || '';
+    const category_1 = route.parent?.url[0]?.path ?? '';
     const category_2 = route.url[0]?.path || '';
     const hash = route.paramMap.get('m_hash');
     const lang = route.queryParamMap.get('lang');

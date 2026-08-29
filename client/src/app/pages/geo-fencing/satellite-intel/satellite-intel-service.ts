@@ -64,7 +64,7 @@ export class SatelliteIntelService {
 
   private getResponseStatus(value: unknown): string | undefined {
     const response = this.asResponse(value);
-    return response.result?.status || response.status;
+    return response.result?.status ?? response.status;
   }
 
   private getResponseError(value: unknown): { message: string } | null {
@@ -74,7 +74,7 @@ export class SatelliteIntelService {
 
     const response = this.asResponse(value);
     return {
-      message: response.result?.error_message || response.result?.message || response.message || 'Request failed',
+      message: response.result?.error_message ?? response.result?.message ?? response.message ?? 'Request failed',
     };
   }
 
@@ -82,7 +82,7 @@ export class SatelliteIntelService {
     const response = this.asResponse(error);
     const nestedError = asUnknownRecord(response.error);
     return {
-      message: String(nestedError['detail'] || nestedError['message'] || response.message || response.statusText || 'Request failed'),
+      message: String(nestedError['detail'] ?? nestedError['message'] ?? response.message ?? response.statusText ?? 'Request failed'),
     };
   }
 

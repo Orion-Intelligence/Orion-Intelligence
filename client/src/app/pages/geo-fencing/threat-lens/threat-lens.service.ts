@@ -84,7 +84,7 @@ export class ThreatLensService {
     const normalizedResponse = new ConsolidatedCallbackModel(response);
     const counts = THREAT_LENS_CATEGORY_CONFIG.map((category) => {
       const categoryResponse = normalizedResponse[category.key];
-      return Number(categoryResponse?.Page_Count || 0);
+      return Number(categoryResponse?.Page_Count ?? 0);
     });
     const maxCount = Math.max(...counts, 1);
     return Number.isFinite(maxCount) && maxCount > 0 ? Math.ceil(maxCount) : 1;
@@ -101,14 +101,14 @@ export class ThreatLensService {
     for (const normalizedResponse of normalizedResponses) {
       for (const category of THREAT_LENS_CATEGORY_CONFIG) {
         const documents = this.extractResultItems(normalizedResponse[category.key]);
-        const existingDocuments = categoryDocuments.get(category.key) || [];
+        const existingDocuments = categoryDocuments.get(category.key) ?? [];
         existingDocuments.push(...documents);
         categoryDocuments.set(category.key, existingDocuments);
       }
     }
 
     for (const category of THREAT_LENS_CATEGORY_CONFIG) {
-      const documents = this.dedupeDocuments(categoryDocuments.get(category.key) || []);
+      const documents = this.dedupeDocuments(categoryDocuments.get(category.key) ?? []);
       totalResults += documents.length;
 
       const categoryCountryCounts = new Map<string, number>();
@@ -129,8 +129,8 @@ export class ThreatLensService {
 
           seenKeys.add(key);
           countriesForDoc.push(normalized);
-          categoryCountryCounts.set(key, (categoryCountryCounts.get(key) || 0) + 1);
-          overallCountryCounts.set(key, (overallCountryCounts.get(key) || 0) + 1);
+          categoryCountryCounts.set(key, (categoryCountryCounts.get(key) ?? 0) + 1);
+          overallCountryCounts.set(key, (overallCountryCounts.get(key) ?? 0) + 1);
 
           if (!categoryCountryNames.has(key)) {
             categoryCountryNames.set(key, normalized);
@@ -185,7 +185,7 @@ export class ThreatLensService {
   private rankCountryCounts(countryCounts: Map<string, number>, countryNames: Map<string, string>): ThreatCountryCount[] {
     return Array.from(countryCounts.entries())
       .map(([key, count]) => ({
-        country: countryNames.get(key) || key,
+        country: countryNames.get(key) ?? key,
         count,
       }))
       .sort((a, b) => b.count - a.count);
@@ -219,7 +219,7 @@ export class ThreatLensService {
     ];
 
     const identity = parts
-      .map((part) => String(part || '').trim())
+      .map((part) => String(part ?? '').trim())
       .filter(Boolean)
       .join('|');
 
@@ -283,7 +283,7 @@ export class ThreatLensService {
     ];
 
     for (const candidate of candidates) {
-      const value = String(candidate || '').trim();
+      const value = String(candidate ?? '').trim();
       if (!value) {
         continue;
       }
@@ -351,7 +351,7 @@ export class ThreatLensService {
     ];
 
     for (const candidate of candidates) {
-      const value = this.toSafeHttpUrl(String(candidate || '').trim());
+      const value = this.toSafeHttpUrl(String(candidate ?? '').trim());
       if (value) {
         return value;
       }

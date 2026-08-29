@@ -29,11 +29,11 @@ export class ScanHelperMethodsService {
   }
 
   protected isPendingOrBusy(status: string | undefined): boolean {
-    return ['pending', 'busy', 'queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].includes(String(status || '').toLowerCase());
+    return ['pending', 'busy', 'queued', 'running', 'started', 'processing', 'scanning', 'in_progress'].includes(String(status ?? '').toLowerCase());
   }
 
   protected getPendingStatus<T extends { status?: string; progress?: number; step?: string; result?: { status?: string; progress?: number; step?: string } | null }>(res: T): string | undefined {
-    return res?.result?.status || res?.status;
+    return res?.result?.status ?? res?.status;
   }
 
   protected updateProgress(progress: number | null | undefined): void {

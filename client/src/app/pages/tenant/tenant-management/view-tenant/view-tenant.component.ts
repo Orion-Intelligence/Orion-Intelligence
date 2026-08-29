@@ -73,7 +73,7 @@ export class ViewTenantComponent implements OnInit {
       tenant.subscription ? 'paid' : 'free',
       tenant.verified ? 'verified' : 'not verified',
       this.getTenantLicensesLabel(tenant)
-    ].some(value => String(value || '').toLowerCase().includes(search)));
+    ].some(value => String(value ?? '').toLowerCase().includes(search)));
   }
 
   ngOnInit(): void {
@@ -195,9 +195,7 @@ export class ViewTenantComponent implements OnInit {
   }
 
   toggleTenantLicense(tenant: ManagedTenant, license: LicenseName): void {
-    if (!tenant.licenses) {
-      tenant.licenses = [];
-    }
+    tenant.licenses ??= [];
     const index = tenant.licenses.indexOf(license);
     if (index > -1) {
       tenant.licenses.splice(index, 1);
@@ -278,8 +276,8 @@ export class ViewTenantComponent implements OnInit {
       const existing = existingById.get(key);
       return {
         ioc_id: key,
-        name: search_filter_labels[key] || existing?.name || key,
-        values: [...new Set((existing?.values || []).map(value => String(value).trim()).filter(Boolean))]
+        name: search_filter_labels[key] ?? existing?.name ?? key,
+        values: [...new Set((existing?.values ?? []).map(value => String(value).trim()).filter(Boolean))]
       };
     });
   }

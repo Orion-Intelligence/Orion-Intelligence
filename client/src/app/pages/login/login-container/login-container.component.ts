@@ -51,7 +51,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       if (authState.isAuthenticated) {
         this.appService.loadSession(true).subscribe(() => {
           const user = this.appService.userSessionData().user;
-          const passwordResetToken = user.password_reset_token || this.authService.passwordResetToken;
+          const passwordResetToken = user.password_reset_token ?? this.authService.passwordResetToken;
           if (user.password_reset_required && passwordResetToken) {
             this.router.navigate(['/reset', passwordResetToken], { replaceUrl: true }).then();
             return;
@@ -138,9 +138,9 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         if (res?.twofa_required) {
           this.twofaRequired = true;
           this.pendingUsername = res.username ?? this.user.mail;
-          this.tempToken = res.temp_token || null;
-          this.otpUri = res.provisioning_uri || null;
-          this.otpSecret = res.twofa_secret || null;
+          this.tempToken = res.temp_token ?? null;
+          this.otpUri = res.provisioning_uri ?? null;
+          this.otpSecret = res.twofa_secret ?? null;
           this.otpDataUrl = null;
           if (this.otpUri) {
             void QRCode.toDataURL(this.otpUri).then(dataUrl => {
@@ -152,7 +152,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         }
       },
       error: err => {
-        this.errorMessage = err?.error?.detail || err?.message || 'Login failed';
+        this.errorMessage = err?.error?.detail ?? err?.message ?? 'Login failed';
       }
     });
   }
@@ -172,8 +172,8 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.errorMessage =
-                    err?.error?.detail ||
-                        err?.message ||
+                    err?.error?.detail ??
+                        err?.message ??
                         'Login failed';
         }
       });
@@ -205,7 +205,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         const vErr = err?.error?.validation_errors?.[0];
-        this.errorMessage = vErr?.message || err?.error?.detail || 'Signup failed';
+        this.errorMessage = vErr?.message ?? err?.error?.detail ?? 'Signup failed';
       }
     });
   }

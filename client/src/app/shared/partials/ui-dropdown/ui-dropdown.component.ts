@@ -122,7 +122,7 @@ export class UiDropdownComponent implements OnDestroy {
 
   get selectedLabel(): string {
     if (this.multiSelect()) {
-      const selectedValues = this.selectedValues() || [];
+      const selectedValues = this.selectedValues() ?? [];
       if (!selectedValues.length) {
         return this.resolveUiLabel(this.placeholder());
       }
@@ -166,11 +166,11 @@ export class UiDropdownComponent implements OnDestroy {
       return options;
     }
 
-    return options.filter(option => option.label.toLowerCase().includes(query) || String(option.key || '').toLowerCase().includes(query));
+    return options.filter(option => option.label.toLowerCase().includes(query) || String(option.key ?? '').toLowerCase().includes(query));
   }
 
   get resolvedMenuId(): string {
-    return this.menuId() || `${this.fallbackId}-menu`;
+    return this.menuId() ?? `${this.fallbackId}-menu`;
   }
 
   shouldShowEmptyOption(): boolean {
@@ -196,7 +196,7 @@ export class UiDropdownComponent implements OnDestroy {
         this.valuesChange.emit([]);
         return;
       }
-      const selectedValues = this.selectedValues() || [];
+      const selectedValues = this.selectedValues() ?? [];
       const nextValues = selectedValues.includes(value)
         ? selectedValues.filter(item => item !== value)
         : [...selectedValues, value];
@@ -209,7 +209,7 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   hasSelectedValues(): boolean {
-    return this.multiSelect() && !!(this.selectedValues() || []).length;
+    return this.multiSelect() && !!(this.selectedValues() ?? []).length;
   }
 
   clearAllSelectedValues(event: Event): void {
@@ -220,7 +220,7 @@ export class UiDropdownComponent implements OnDestroy {
 
   removeSelectedValue(value: string, event: Event): void {
     event.stopPropagation();
-    const selectedValues = this.selectedValues() || [];
+    const selectedValues = this.selectedValues() ?? [];
     this.valuesChange.emit(selectedValues.filter(item => item !== value));
   }
 
@@ -330,7 +330,7 @@ export class UiDropdownComponent implements OnDestroy {
 
   isSelected(value: string | null): boolean {
     if (this.multiSelect()) {
-      return value === null ? !(this.selectedValues() || []).length : (this.selectedValues() || []).includes(value);
+      return value === null ? !(this.selectedValues() ?? []).length : (this.selectedValues() ?? []).includes(value);
     }
     return value === null ? !this.selected() : this.selected() === value;
   }
@@ -365,7 +365,7 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   selectedLabelClass(): string {
-    const hasSelection = this.multiSelect() ? !!(this.selectedValues() || []).length : !!this.selected();
+    const hasSelection = this.multiSelect() ? !!(this.selectedValues() ?? []).length : !!this.selected();
     const labelSizeClass = this.size() === 'large' ? 'text-sm' : 'text-[13px]';
     if (this.isOpen) {
       return hasSelection ? `${this.theme.selectedTextOpen} ${labelSizeClass}` : `${this.theme.placeholderOpen} ${labelSizeClass}`;
@@ -593,7 +593,7 @@ export class UiDropdownComponent implements OnDestroy {
     }
     window.setTimeout(() => {
       this.searchInput?.nativeElement.focus();
-      const valueLength = this.searchInput?.nativeElement.value.length || 0;
+      const valueLength = this.searchInput?.nativeElement.value.length ?? 0;
       this.searchInput?.nativeElement.setSelectionRange(valueLength, valueLength);
     });
   }

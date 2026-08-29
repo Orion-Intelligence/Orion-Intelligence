@@ -97,27 +97,27 @@ export class AddNewCase {
       entityId,
       type: this.primaryEntity.type,
       value,
-      entityDescription: this.primaryEntity.entityDescription?.trim() || value,
+      entityDescription: this.primaryEntity.entityDescription?.trim() ?? value,
       confidence: this.primaryEntity.confidence,
       source: this.primaryEntity.source,
-      entityTypeOtherValue: this.primaryEntity.entityTypeOtherValue?.trim() || '',
-      entitySourceOtherValue: this.primaryEntity.entitySourceOtherValue?.trim() || '',
+      entityTypeOtherValue: this.primaryEntity.entityTypeOtherValue?.trim() ?? '',
+      entitySourceOtherValue: this.primaryEntity.entitySourceOtherValue?.trim() ?? '',
       identifiers: this.primaryEntity.identifiers
         .filter(identifier => identifier.type && identifier.value.trim())
         .map(identifier => ({
           ...identifier,
           value: identifier.value.trim(),
-          issuer: identifier.issuer?.trim() || '',
-          identifierTypeOtherValue: identifier.identifierTypeOtherValue?.trim() || ''
+          issuer: identifier.issuer?.trim() ?? '',
+          identifierTypeOtherValue: identifier.identifierTypeOtherValue?.trim() ?? ''
         })),
       socialProfiles: this.primaryEntity.socialProfiles
         .filter(profile => profile.platform && profile.username.trim())
         .map(profile => ({
           ...profile,
           username: profile.username.trim(),
-          displayName: profile.displayName?.trim() || '',
-          profileUrl: profile.profileUrl?.trim() || '',
-          platformOtherValue: profile.platformOtherValue?.trim() || ''
+          displayName: profile.displayName?.trim() ?? '',
+          profileUrl: profile.profileUrl?.trim() ?? '',
+          platformOtherValue: profile.platformOtherValue?.trim() ?? ''
         })),
       tags: this.primaryEntity.tags || []
     };
@@ -179,8 +179,8 @@ export class AddNewCase {
       severity: this.caseForm.severity,
       priority: this.caseForm.priority,
       intakeSource: this.caseForm.intakeSource,
-      caseTypeOtherValue: this.caseForm.caseTypeOtherValue?.trim() || '',
-      intakeSourceOtherValue: this.caseForm.intakeSourceOtherValue?.trim() || '',
+      caseTypeOtherValue: this.caseForm.caseTypeOtherValue?.trim() ?? '',
+      intakeSourceOtherValue: this.caseForm.intakeSourceOtherValue?.trim() ?? '',
       tags: this.caseForm.tags,
       primaryEntityId: primaryEntity.entityId,
       assignedAnalystIds: [],
@@ -199,7 +199,7 @@ export class AddNewCase {
       },
       error: (err) => {
         console.error('Failed to save case:', err);
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translationService.translate('Failed to save case'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translationService.translate('Failed to save case'));
       }
     });
   }

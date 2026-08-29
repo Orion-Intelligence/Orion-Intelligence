@@ -80,7 +80,7 @@ export class SocialResourceWorkSectionComponent {
   private toView(item: unknown, index: number): work_item_view {
     const record = asRecord(item);
     const fullName = pickText(record, 'full_name', 'resource_id');
-    const name = pickText(record, 'title', 'name') || fullName.split('/').pop() || 'Untitled';
+    const name = pickText(record, 'title', 'name') ?? fullName.split('/').pop() ?? 'Untitled';
     const owner = fullName.includes('/') ? fullName.split('/')[0] : pickText(record, 'owner_login', 'hub_user', 'namespace', 'author');
     const visibility = pickText(record, 'visibility') || (pickFlag(record, 'is_private') ? 'Private' : '');
     const labels = [

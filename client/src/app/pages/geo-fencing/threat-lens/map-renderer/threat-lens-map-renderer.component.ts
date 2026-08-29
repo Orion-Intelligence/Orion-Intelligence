@@ -406,7 +406,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const endpointGraphic = hit.results.find((result) => this.arcRenderer?.isEndpointGraphic(result.graphic))?.graphic;
       if (endpointGraphic) {
-        const selection = this.buildArcSelection(endpointGraphic.attributes || {});
+        const selection = this.buildArcSelection(endpointGraphic.attributes ?? {});
         if (selection) {
           this.tooltipRenderer.hide();
           this.clearHoverHighlight();
@@ -431,7 +431,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const arcGraphic = hit.results.find((result) => this.arcRenderer?.isTooltipGraphic(result.graphic))?.graphic;
       if (arcGraphic) {
-        const selection = this.buildArcSelection(arcGraphic.attributes || {});
+        const selection = this.buildArcSelection(arcGraphic.attributes ?? {});
         if (selection) {
           this.tooltipRenderer.hide();
           this.clearHoverHighlight();
@@ -487,7 +487,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         this.clearHoverHighlight();
         this.setMapCursor('');
         this.ipMarkerRenderer?.showAccuracyRadius(clusterGraphic);
-        this.tooltipRenderer.showIpCluster(event, clusterGraphic.attributes || {});
+        this.tooltipRenderer.showIpCluster(event, clusterGraphic.attributes ?? {});
         return;
       }
 
@@ -496,7 +496,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         this.clearHoverHighlight();
         this.setMapCursor('pointer');
         this.ipMarkerRenderer?.showAccuracyRadius(ipGraphic);
-        this.tooltipRenderer.showIpScan(event, ipGraphic.attributes || {});
+        this.tooltipRenderer.showIpScan(event, ipGraphic.attributes ?? {});
         return;
       }
 
@@ -591,9 +591,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private buildArcSelection(attributes: Record<string, unknown>): ThreatLensArcSelection | null {
-    const categoryKey = String(attributes['category'] || '').trim();
-    const countryAKey = String(attributes['country_a'] || '').trim();
-    const countryBKey = String(attributes['country_b'] || '').trim();
+    const categoryKey = String(attributes['category'] ?? '').trim();
+    const countryAKey = String(attributes['country_a'] ?? '').trim();
+    const countryBKey = String(attributes['country_b'] ?? '').trim();
 
     if (!categoryKey || !countryAKey || !countryBKey) {
       return null;
@@ -601,12 +601,12 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     return {
       categoryKey: categoryKey as ThreatLensCategoryModelKey,
-      categoryLabel: String(attributes['category_label'] || 'Threat').trim(),
+      categoryLabel: String(attributes['category_label'] ?? 'Threat').trim(),
       countryAKey,
       countryBKey,
-      countryAName: String(attributes['start_country'] || countryAKey).trim(),
-      countryBName: String(attributes['end_country'] || countryBKey).trim(),
-      weight: Number(attributes['weight'] || 0),
+      countryAName: String(attributes['start_country'] ?? countryAKey).trim(),
+      countryBName: String(attributes['end_country'] ?? countryBKey).trim(),
+      weight: Number(attributes['weight'] ?? 0),
     };
   }
 
@@ -829,8 +829,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private getViewportCenterCoordinates(): ThreatLensCoordinates | null {
-    const width = Number(this.view?.width || 0);
-    const height = Number(this.view?.height || 0);
+    const width = Number(this.view?.width ?? 0);
+    const height = Number(this.view?.height ?? 0);
     if (width > 0 && height > 0) {
       const center = this.getMapCoordinatesAtScreen(width / 2, height / 2);
       if (center) {
@@ -842,8 +842,8 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private getViewportRadiusKm(center: ThreatLensCoordinates): number {
-    const width = Number(this.view?.width || 0);
-    const height = Number(this.view?.height || 0);
+    const width = Number(this.view?.width ?? 0);
+    const height = Number(this.view?.height ?? 0);
     const edgePoints = width > 0 && height > 0
       ? [
         this.getMapCoordinatesAtScreen(width * 0.18, height / 2),

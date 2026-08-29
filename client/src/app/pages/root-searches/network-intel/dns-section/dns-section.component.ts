@@ -59,7 +59,7 @@ export class DnsSectionComponent implements OnDestroy {
   }
 
   getRowLoadingStepLabel(row: IpRowState): string {
-    return this.ui.getLoadingStepLabel(row.step || `Loading details for ${row.ip}...`);
+    return this.ui.getLoadingStepLabel(row.step ?? `Loading details for ${row.ip}...`);
   }
 
   getRowProgressValue(row: IpRowState): number {

@@ -66,7 +66,7 @@ export class SidebarSectionComponent {
       'text-analysis': 'phishing',
       'crypto-scanner': 'cryptocurrency',
       feeder: 'account',
-    }[normalized] || normalized;
+    }[normalized] ?? normalized;
     return `/assets/images/sidebar/sub_${mapped}.svg`;
   }
 }

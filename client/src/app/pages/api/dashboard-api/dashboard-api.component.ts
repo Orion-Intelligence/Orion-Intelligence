@@ -65,11 +65,11 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   get aiToolApiName(): string {
-    return this.aiToolRoutingService.getTypeForApiType(this.apiType || '');
+    return this.aiToolRoutingService.getTypeForApiType(this.apiType ?? '');
   }
 
   get aiWelcomeMessage(): string {
-    return this.aiToolRoutingService.getMessageForApiType(this.apiType || '');
+    return this.aiToolRoutingService.getMessageForApiType(this.apiType ?? '');
   }
 
   get cardsData(): DashboardApiResponse[] {
@@ -162,7 +162,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     const map = new Map<string, number>();
     arr.forEach(item => {
       const key = String(item);
-      map.set(key, (map.get(key) || 0) + 1);
+      map.set(key, (map.get(key) ?? 0) + 1);
     });
     return Array.from(map.entries()).map(([value, count]) => ({ value, count }));
   }
@@ -242,7 +242,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   openTx(txid: string | null | undefined) {
-    const t = (txid || '').trim();
+    const t = (txid ?? '').trim();
     if (!t) {
       return;
     }
@@ -264,7 +264,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   openAddr(addr: string | null | undefined) {
-    const a = (addr || '').trim();
+    const a = (addr ?? '').trim();
     if (!a) {
       return;
     }
@@ -411,9 +411,9 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
         apiReference,
         payload: paramModel,
         metadata: {
-          title: `${(this.apiType || apiReference).replace('-', ' ')} Scan`,
+          title: `${(this.apiType ?? apiReference).replace('-', ' ')} Scan`,
           target: this.q1 || this.q2 || apiReference,
-          section: this.apiType || apiReference,
+          section: this.apiType ?? apiReference,
         },
         pollDelayMs: 2000,
       }).pipe(catchError(() => of(null)));
@@ -453,8 +453,8 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   private isPendingResponse(res: DashboardApiWireResponse | null): boolean {
     const response = this.asResponse(res);
     const nested = this.getNestedResponse(response?.result);
-    const topStatus = (response?.status || '').toLowerCase();
-    const nestedStatus = (nested?.status || '').toLowerCase();
+    const topStatus = (response?.status ?? '').toLowerCase();
+    const nestedStatus = (nested?.status ?? '').toLowerCase();
     return ['pending', 'processing', 'running', 'busy'].includes(topStatus) ||
       ['pending', 'processing', 'running', 'busy'].includes(nestedStatus);
   }
@@ -517,7 +517,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
 
     const query = (this.displayQ1 || this.q1 || 'query').trim();
     const now = new Date().toISOString();
-    const apiLabel = (this.apiType || 'api').replace(/-/g, ' ');
+    const apiLabel = (this.apiType ?? 'api').replace(/-/g, ' ');
     const toCompact = (v: unknown): string => {
       const raw = this.isObjectValue(v) || this.isArrayValue(v) ? this.stringifyJson(v) : this.stringifyPrimitive(v);
       return raw.length > 500 ? `${raw.slice(0, 497)}...` : raw;
@@ -541,7 +541,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
           api_type: this.displayFieldLabel(apiLabel),
           query,
           status: this.stringifyPrimitive(r?.status),
-          network: this.stringifyPrimitive(r?.network || r?.detected_network),
+          network: this.stringifyPrimitive(r?.network ?? r?.detected_network),
           query_type: this.stringifyPrimitive(r?.query_type),
           total_fields: Object.keys(values).length,
           exported_at: now
@@ -575,11 +575,11 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     const payload: GraphReportPayload = {
       graphKind: (this.apiType === 'social' || this.apiType === 'wanted' || this.apiType === 'national-identity') ? 'social' : 'cti',
       title: `Entity Lookup Report - ${this.displayFieldLabel(apiLabel)}`,
-      sessionName: `${this.apiType || 'api'}-${query || 'query'}`.slice(0, 80),
+      sessionName: `${this.apiType ?? 'api'}-${query || 'query'}`.slice(0, 80),
       generatedAtIso: now,
       nodes: items.slice(0, 200).map((item, idx) => ({
         id: `result-${idx + 1}`,
-        label: this.stringifyPrimitive(item['m_title'] || item['m_app_name'] || item['title'] || `Result ${idx + 1}`),
+        label: this.stringifyPrimitive(item['m_title'] ?? item['m_app_name'] ?? item['title'] ?? `Result ${idx + 1}`),
         type: 'record'
       })),
       edges: items.slice(0, 200).map((_, idx) => ({

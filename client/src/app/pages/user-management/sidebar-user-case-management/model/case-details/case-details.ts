@@ -173,9 +173,9 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         caseData.tasks = caseData.tasks || [];
         caseData.comments = caseData.comments || [];
         caseData.linkedCases = caseData.linkedCases || [];
-        caseData.closure = caseData.closure || null;
+        caseData.closure = caseData.closure ?? null;
         caseData.assignedAnalystIds = caseData.assignedAnalystIds || [];
-        caseData.assignedAnalysts = caseData.assignedAnalysts || [];
+        caseData.assignedAnalysts = caseData.assignedAnalysts ?? [];
 
         if (!this.canManageCases()) {
           this.analysts = caseData.assignedAnalysts;
@@ -225,7 +225,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     editedCase.assignedAnalystIds = editedCase.assignedAnalystIds || [];
     editedCase.comments = editedCase.comments || [];
     editedCase.linkedCases = editedCase.linkedCases || [];
-    editedCase.closure = editedCase.closure || null;
+    editedCase.closure = editedCase.closure ?? null;
     editedCase.entities = (editedCase.entities || []).map(entity => ensureEntityDefaults(entity));
     editedCase.artifacts = (editedCase.artifacts || []).map(artifact => ensureArtifactDefaults(artifact));
     editedCase.tasks = (editedCase.tasks || []).map(task => ensureTaskDefaults(task));
@@ -275,7 +275,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
-    const files = Array.from(fileInput.files || []);
+    const files = Array.from(fileInput.files ?? []);
 
     if (!this.validateArtifactFiles(artifact, files, artifact.files?.length || 0)) {
       fileInput.value = '';
@@ -296,7 +296,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         fileInput.value = '';
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to upload files'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to upload files'));
       }
     });
   }
@@ -318,7 +318,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       error: err => {
         this.artifactReports = [];
         this.isArtifactReportsLoading = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to load reports'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to load reports'));
       }
     });
   }
@@ -430,7 +430,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = artifactFile?.fileName || 'artifact-file';
+        link.download = artifactFile?.fileName ?? 'artifact-file';
         link.click();
         window.URL.revokeObjectURL(url);
       },
@@ -439,7 +439,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
           artifactFile.integrityStatus = 'failed';
         }
 
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('File integrity check failed'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('File integrity check failed'));
       }
     });
   }
@@ -462,7 +462,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.messageNotificationService.show(this.translate('File deleted successfully'), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to delete file'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to delete file'));
       }
     });
   }
@@ -472,7 +472,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
-    const files = Array.from(fileInput.files || []);
+    const files = Array.from(fileInput.files ?? []);
 
     if (!files.length) {
       this.pendingNewArtifactFiles = [];
@@ -509,7 +509,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isPdfExporting = false;
-        this.messageNotificationService.show(err?.message || this.translate('Failed to export PDF'));
+        this.messageNotificationService.show(err?.message ?? this.translate('Failed to export PDF'));
       }
     });
   }
@@ -602,7 +602,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isArchivingCase = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to archive case'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to archive case'));
       }
     });
   }
@@ -628,7 +628,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isArchivingCase = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to unarchive case'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to unarchive case'));
       }
     });
   }
@@ -654,7 +654,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isShareCreating = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to create share link'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to create share link'));
       }
     });
   }
@@ -671,7 +671,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isShareRevoking = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to revoke share links'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to revoke share links'));
       }
     });
   }
@@ -704,13 +704,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return null;
     }
     return caseItem.entities.find(entity => entity.entityId === caseItem.primaryEntityId)
-      || caseItem.entities.find(entity => entity.role === 'primary')
-      || caseItem.entities[0];
+      ?? caseItem.entities.find(entity => entity.role === 'primary')
+      ?? caseItem.entities[0];
   }
 
   getRelatedEntities(caseItem: Case | null = this.caseData): CaseEntity[] {
     const primaryEntity = this.getPrimaryEntity(caseItem);
-    return caseItem?.entities?.filter(entity => entity.entityId !== primaryEntity?.entityId) || [];
+    return caseItem?.entities?.filter(entity => entity.entityId !== primaryEntity?.entityId) ?? [];
   }
 
   removeRelatedEntity(index: number): void {
@@ -779,10 +779,10 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     return this.getCaseSaveSignature(this.editedCase) !== this.getCaseSaveSignature(this.caseData);
   }
 
-  getLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): Case[] {
+  getLinkableCases(caseItem: Case | null = this.editedCase ?? this.caseData, currentSelectedCaseId = ''): Case[] {
     const currentCaseId = caseItem?.caseId;
 
-    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases || [])
+    const alreadyLinkedCaseIds = new Set((caseItem?.linkedCases ?? [])
       .map(linkedCase => linkedCase.targetCaseId)
       .filter(caseId => caseId && caseId !== currentSelectedCaseId));
 
@@ -791,7 +791,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       !alreadyLinkedCaseIds.has(item.caseId));
   }
 
-  hasLinkableCases(caseItem: Case | null = this.editedCase || this.caseData, currentSelectedCaseId = ''): boolean {
+  hasLinkableCases(caseItem: Case | null = this.editedCase ?? this.caseData, currentSelectedCaseId = ''): boolean {
     return this.getLinkableCases(caseItem, currentSelectedCaseId).length > 0;
   }
 
@@ -922,7 +922,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     updated.comments = updated.comments || [];
     updated.linkedCases = updated.linkedCases || [];
     updated.assignedAnalystIds = updated.assignedAnalystIds || [];
-    updated.closure = updated.closure || null;
+    updated.closure = updated.closure ?? null;
   }
 
   private saveCasePayload(payload: CaseUpdateRequest, successMessage: string): void {
@@ -943,7 +943,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.messageNotificationService.show(this.translate(successMessage), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to save changes'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to save changes'));
       }
     });
   }
@@ -1134,7 +1134,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
             error: err => {
               this.pendingNewArtifactFiles = [];
               this.pendingNewArtifactFileInput = null;
-              this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Artifact saved, but file upload failed'));
+              this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Artifact saved, but file upload failed'));
             }
           });
 
@@ -1148,7 +1148,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
         this.messageNotificationService.show(this.translate('Artifact added successfully'), 'success');
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('Failed to add artifact'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('Failed to add artifact'));
       }
     });
   }
@@ -1166,7 +1166,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     }
 
     if (!this.canManageCases()) {
-      const originalTasks = new Map((this.caseData?.tasks || []).map(task => [task.taskId, task]));
+      const originalTasks = new Map((this.caseData?.tasks ?? []).map(task => [task.taskId, task]));
 
       const invalidTask = (this.editedCase.tasks || []).find(task => {
         const originalTask = originalTasks.get(task.taskId);
@@ -1309,7 +1309,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.isCommentSaving = false;
-        this.commentErrorMessage = err?.error?.detail || err?.message || this.translate('Unable to save comment.');
+        this.commentErrorMessage = err?.error?.detail ?? err?.message ?? this.translate('Unable to save comment.');
       }
     });
   }
@@ -1321,14 +1321,14 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     const analyst = [
       ...(this.analysts || []),
-      ...(this.caseData?.assignedAnalysts || [])
+      ...(this.caseData?.assignedAnalysts ?? [])
     ].find(item => item.id === userId);
 
     if (!analyst) {
       return userId;
     }
 
-    return analyst.username || analyst.email || analyst.id;
+    return analyst.username ?? analyst.email ?? analyst.id;
   }
 
   getCaseAnalysts(caseItem: Case | null = this.caseData): CaseAnalyst[] {
@@ -1336,7 +1336,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return caseItem.assignedAnalysts;
     }
 
-    const assignedIds = new Set(caseItem?.assignedAnalystIds || []);
+    const assignedIds = new Set(caseItem?.assignedAnalystIds ?? []);
     return this.analysts.filter(analyst => assignedIds.has(analyst.id));
   }
 
@@ -1374,7 +1374,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   formatConfidence(value?: string | null): string {
-    return this.formatLabel(value || 'high');
+    return this.formatLabel(value ?? 'high');
   }
 
   private getCaseSaveSignature(caseItem: Case): string {
@@ -1405,7 +1405,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       },
       error: err => {
         this.setArtifactFileStatus(artifact, fileId, 'failed');
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translate('File integrity check failed'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translate('File integrity check failed'));
       }
     });
   }

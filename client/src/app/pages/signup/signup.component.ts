@@ -103,7 +103,7 @@ export class SignupComponent implements OnInit {
         this.router.navigate(['/welcome']).then();
       },
       error: (err) => {
-        this.errorMessage = err?.error?.detail || 'Signup failed';
+        this.errorMessage = err?.error?.detail ?? 'Signup failed';
       }
     });
   }

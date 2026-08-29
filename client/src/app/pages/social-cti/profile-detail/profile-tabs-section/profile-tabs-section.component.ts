@@ -385,15 +385,15 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getOnlinePresence(platformData: social_profile): social_online_presence_hit[] | null {
-    return platformData.online_presence || null;
+    return platformData.online_presence ?? null;
   }
 
   getOnlinePresenceResults(platformData: social_profile): social_online_presence_hit[] {
-    return platformData.online_presence || [];
+    return platformData.online_presence ?? [];
   }
 
   getStealerLogs(platformData: social_profile): social_stealer_log[] {
-    return platformData.stealer_logs || [];
+    return platformData.stealer_logs ?? [];
   }
 
   getPlatformStealerDomain(platformData: social_profile): string {
@@ -401,15 +401,15 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getStealerRecordHost(record: social_stealer_log): string {
-    return String(record?.['source_domain'] || record?.['m_source_domain'] || record?.['domain'] || record?.['m_domain'] || record?.['ip'] || record?.['m_ip'] || record?.['url'] || record?.['m_url'] || record?.['host'] || record?.['m_host'] || record?.['raw'] || '-');
+    return String(record?.['source_domain'] ?? record?.['m_source_domain'] ?? record?.['domain'] ?? record?.['m_domain'] ?? record?.['ip'] ?? record?.['m_ip'] ?? record?.['url'] ?? record?.['m_url'] ?? record?.['host'] ?? record?.['m_host'] ?? record?.['raw'] ?? '-');
   }
 
   getStealerRecordIdentity(record: social_stealer_log): string {
-    return String(record?.['email'] || record?.['m_email'] || record?.['username'] || record?.['m_username'] || record?.['user'] || record?.['m_user'] || record?.['login'] || record?.['m_login'] || record?.['credential'] || record?.['m_credential'] || record?.['raw'] || '-');
+    return String(record?.['email'] ?? record?.['m_email'] ?? record?.['username'] ?? record?.['m_username'] ?? record?.['user'] ?? record?.['m_user'] ?? record?.['login'] ?? record?.['m_login'] ?? record?.['credential'] ?? record?.['m_credential'] ?? record?.['raw'] ?? '-');
   }
 
   getStealerRecordDate(record: social_stealer_log): string {
-    return String(record?.['date'] || record?.['m_date'] || record?.['timestamp'] || record?.['m_timestamp'] || record?.['created_at'] || record?.['m_created_at'] || record?.['updated_at'] || record?.['m_updated_at'] || '-');
+    return String(record?.['date'] ?? record?.['m_date'] ?? record?.['timestamp'] ?? record?.['m_timestamp'] ?? record?.['created_at'] ?? record?.['m_created_at'] ?? record?.['updated_at'] ?? record?.['m_updated_at'] ?? '-');
   }
 
   getStealerRecordTrackKey(index: number, record: social_stealer_log): string {
@@ -439,15 +439,15 @@ export class SocialProfileTabsSectionComponent {
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim(),
-      email: String(item?.['email'] || item?.['m_email'] || '-'),
-      username: String(item?.['username'] || item?.['m_username'] || '-'),
-      domain: String(item?.['domain'] || item?.['m_domain'] || '-'),
-      source: String(this.exportBranding.replaceSystemBrand(String(item?.['channel'] || item?.['filename'] || item?.['file'] || item?.['m_source'] || item?.['m_scrap_file'] || '-'))),
-      hash: String(item?.['m_hash'] || '-'),
+      email: String(item?.['email'] ?? item?.['m_email'] ?? '-'),
+      username: String(item?.['username'] ?? item?.['m_username'] ?? '-'),
+      domain: String(item?.['domain'] ?? item?.['m_domain'] ?? '-'),
+      source: String(this.exportBranding.replaceSystemBrand(String(item?.['channel'] ?? item?.['filename'] ?? item?.['file'] ?? item?.['m_source'] ?? item?.['m_scrap_file'] ?? '-'))),
+      hash: String(item?.['m_hash'] ?? '-'),
       title: '-',
-      url: String(item?.['url'] || item?.['m_url'] || '-'),
+      url: String(item?.['url'] ?? item?.['m_url'] ?? '-'),
       rank: '-',
-      date: String(item?.['date'] || item?.['m_date'] || '-'),
+      date: String(item?.['date'] ?? item?.['m_date'] ?? '-'),
       team: '-',
       summary: '-'
     }));
@@ -515,7 +515,7 @@ export class SocialProfileTabsSectionComponent {
         return value.trim();
       }
     }
-    return this.getFirstValueFromSource(sourceRecord['result'] || sourceRecord['profile'] || sourceRecord['data'], keys);
+    return this.getFirstValueFromSource(sourceRecord['result'] ?? sourceRecord['profile'] ?? sourceRecord['data'], keys);
   }
 
   private isProfileDateKey(key: string): boolean {

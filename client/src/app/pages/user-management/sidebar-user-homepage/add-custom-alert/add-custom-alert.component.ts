@@ -63,9 +63,7 @@ export class AddCustomAlertComponent implements OnInit {
           this.alert.type = lastSegment;
         });
     }
-    if (!this.alert.all_ioc) {
-      this.alert.all_ioc = [];
-    }
+    this.alert.all_ioc ??= [];
     this.syncAllIoc();
   }
 
@@ -83,8 +81,8 @@ export class AddCustomAlertComponent implements OnInit {
   }
 
   private syncAllIoc() {
-    const name = this.alert.ioc_type || '';
-    const value = (this.alert.ioc_value || '').trim();
+    const name = this.alert.ioc_type ?? '';
+    const value = (this.alert.ioc_value ?? '').trim();
     if (!name || !value) {
       this.alert.all_ioc = [];
       return;
@@ -104,10 +102,10 @@ export class AddCustomAlertComponent implements OnInit {
   }
 
   private validateForm(): string {
-    const title = (this.alert.title || '').trim();
-    const desc = (this.alert.description || '').trim();
-    const source = (this.alert.source || '').trim();
-    const url = (this.alert.url || '').trim();
+    const title = (this.alert.title ?? '').trim();
+    const desc = (this.alert.description ?? '').trim();
+    const source = (this.alert.source ?? '').trim();
+    const url = (this.alert.url ?? '').trim();
     if (!this.alert.type) {
       return 'Please select an alert type.';
     }
@@ -150,7 +148,7 @@ export class AddCustomAlertComponent implements OnInit {
         this.cancleAlert(true);
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Alert operation failed'));
+        this.messageNotificationService.show(err?.error?.detail ?? this.translationService.translate('Alert operation failed'));
       }
     });
   }

@@ -78,7 +78,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
     if (this.groupedResults.length) {
       return this.groupedResults.map(group => {
         const records = (group.records || []).map(item => this.toDefacementRecord(item));
-        const latestSeen = group.latest_seen || records.reduce<string | null>((latest, record) => this.getLatestDate(latest, record.leakDate), null);
+        const latestSeen = group.latest_seen ?? records.reduce<string | null>((latest, record) => this.getLatestDate(latest, record.leakDate), null);
         const affectedSites = group.affected_sites ?? this.countUnique(records.map(record => this.getSiteLabel(record.item)));
         const ipCount = group.ip_count ?? this.countUnique(records.flatMap(record => record.item.m_ip || []));
         const servers = group.servers?.length ? group.servers : this.uniqueValues(records.flatMap(record => record.item.m_web_server || [])).slice(0, 6);
@@ -86,7 +86,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
         return {
           key: group.key || this.normalizeGroupKey(group.title),
           title: group.title || 'Unknown actor',
-          subtitle: group.subtitle || 'Actor / campaign',
+          subtitle: group.subtitle ?? 'Actor / campaign',
           risk: this.getDefacementRisk(records.length, ipCount),
           records,
           affectedSites,
@@ -243,7 +243,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       campaigns: groups.length,
       records: records.length,
       affectedSites: this.countUnique(records.map(item => this.getSiteLabel(item))),
-      latestSeen: records.reduce<string | null>((latest, item) => this.getLatestDate(latest, item.m_date || null), null)
+      latestSeen: records.reduce<string | null>((latest, item) => this.getLatestDate(latest, item.m_date ?? null), null)
     };
   }
 
@@ -258,7 +258,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
       ipSummary: item.m_ip?.length ? item.m_ip.join(', ') : '-',
       webServerSummary: item.m_web_server?.length ? item.m_web_server.join(', ') : '-',
       sourceUrl: this.getFirstSourceUrl(item),
-      leakDate: item.m_date || null
+      leakDate: item.m_date ?? null
     };
   }
 
@@ -267,7 +267,7 @@ export class DashboardResultDefacementComponent implements OnInit, AfterViewInit
   }
 
   private buildRenderKey(groups: DefacementGroup[]): string {
-    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen || ''}`).join('|');
+    return groups.map(group => `${group.key}:${group.records.length}:${group.latestSeen ?? ''}`).join('|');
   }
 
   private startStaggeredRender(targetCount: number, key: string): void {

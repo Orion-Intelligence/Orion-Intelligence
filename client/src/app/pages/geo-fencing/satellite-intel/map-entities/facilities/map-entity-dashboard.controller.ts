@@ -199,14 +199,14 @@ export class SatelliteMapEntityDashboardController {
   private refreshStats(data: OrionSatelliteFeature[]): void {
     const counts = new Map<OrionSatelliteFeatureType, number>();
     for (const feature of data) {
-      counts.set(feature.type, (counts.get(feature.type) || 0) + 1);
+      counts.set(feature.type, (counts.get(feature.type) ?? 0) + 1);
     }
 
     this.dashboardTypeFilterCache = ORION_POWER_FILTERS.map((option) => ({
       key: option.key,
       label: option.label,
       color: option.color,
-      count: counts.get(option.key) || 0,
+      count: counts.get(option.key) ?? 0,
     }));
 
     this.visiblePowerCountCache = this.filteredData.filter((feature) => feature.source === 'WRI').length;

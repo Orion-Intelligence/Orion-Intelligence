@@ -217,16 +217,16 @@ export class ResultInsightsComponent implements OnInit {
     if (!isGrouped && Array.isArray(rankedData)) {
       return rankedData.length;
     }
-    return ((consolidated.leak_model?.Result?.length || 0) +
-          (consolidated.chat_model?.Result?.length || 0) +
-          (consolidated.exploit_model?.Result?.length || 0) +
-          (consolidated.apt_model?.Result?.length || 0) +
-          (consolidated.malware_model?.Result?.length || 0) +
-          (consolidated.generic_model?.Result?.length || 0) +
-          (consolidated.defacement_model?.Result?.length || 0) +
-          (consolidated.social_model?.Result?.length || 0) +
-          (consolidated.tracking_model?.Result?.length || 0) +
-          (consolidated.news_model?.Result?.length || 0));
+    return ((consolidated.leak_model?.Result?.length ?? 0) +
+          (consolidated.chat_model?.Result?.length ?? 0) +
+          (consolidated.exploit_model?.Result?.length ?? 0) +
+          (consolidated.apt_model?.Result?.length ?? 0) +
+          (consolidated.malware_model?.Result?.length ?? 0) +
+          (consolidated.generic_model?.Result?.length ?? 0) +
+          (consolidated.defacement_model?.Result?.length ?? 0) +
+          (consolidated.social_model?.Result?.length ?? 0) +
+          (consolidated.tracking_model?.Result?.length ?? 0) +
+          (consolidated.news_model?.Result?.length ?? 0));
   }
 
   getActiveModelCount(consolidated: ConsolidatedCallbackModel, rankedData: InsightResultItem[], isGrouped: boolean): number {
@@ -253,12 +253,12 @@ export class ResultInsightsComponent implements OnInit {
     const addToMap = (url: string | undefined, title: string | undefined, date?: string) => {
       if (url && !linkMap.has(url)) {
         const status = this.getStatus(date);
-        linkMap.set(url, { url, title: title || 'Untitled', status });
+        linkMap.set(url, { url, title: title ?? 'Untitled', status });
       }
     };
     const items = isGrouped ? this.getGroupedItems(consolidated) : rankedData;
     items.forEach(item => {
-      addToMap(item.m_url, item.m_title, item.m_creation_date || item.m_update_date || item.m_date);
+      addToMap(item.m_url, item.m_title, item.m_creation_date ?? item.m_update_date ?? item.m_date);
       ['m_clearnet_links', 'm_weblink', 'm_dumplink', 'm_source_url'].forEach(field => {
         const links = item[field];
         if (Array.isArray(links)) {
@@ -308,7 +308,7 @@ export class ResultInsightsComponent implements OnInit {
         return;
       }
       toValues(value).forEach(item => {
-        (item.match(emailRegex) || []).forEach(email => emails.add(email));
+        (item.match(emailRegex) ?? []).forEach(email => emails.add(email));
       });
     };
     const items = isGrouped ? this.getGroupedItems(consolidated) : rankedData;
@@ -344,7 +344,7 @@ export class ResultInsightsComponent implements OnInit {
     const allResults = isGrouped ? this.getGroupedItems(consolidated) : rankedData;
     total = allResults.length;
     allResults.forEach(item => {
-      const rawDate = item.m_update_date || item.m_date || item.m_creation_date;
+      const rawDate = item.m_update_date ?? item.m_date ?? item.m_creation_date;
       const status = this.getStatusCategory(rawDate);
       if (status === 'Active') {
         active++;

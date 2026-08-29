@@ -494,7 +494,7 @@ export class SocialProfileListingComponent {
   }
 
   getStealerLogs(platformData: social_profile): unknown[] {
-    return platformData.stealer_logs || [];
+    return platformData.stealer_logs ?? [];
   }
 
   getOnlinePresenceSearchTerm(platformData: social_profile): string {
@@ -524,7 +524,7 @@ export class SocialProfileListingComponent {
     this.fetchData(platformData, 'profile', this.fetchService.crawlProfile(platformData.meta.platform, platformData.meta.username, profileUrl, 'details').pipe(map(result => {
       const profile = (result.items ?? [])[0] as Record<string, unknown> | undefined;
       const hasProfile = !result.idle && !result.error && !!profile && Object.keys(profile).length > 0;
-      this.liveSync.crawlResults.update(current => ({ ...current, [detailsKey]: { loading: false, error: hasProfile ? undefined : (result.error || 'crawl_failed'), login_url: hasProfile ? undefined : result.login_url } }));
+      this.liveSync.crawlResults.update(current => ({ ...current, [detailsKey]: { loading: false, error: hasProfile ? undefined : (result.error ?? 'crawl_failed'), login_url: hasProfile ? undefined : result.login_url } }));
       return hasProfile ? { profile } : { failed: true };
     })));
   }
@@ -848,7 +848,7 @@ export class SocialProfileListingComponent {
       this.appliedProfileQuery.set(true);
       return;
     }
-    const normalize = (value: string | null | undefined): string => (value || '').trim().replace(/^@+/, '').toLowerCase();
+    const normalize = (value: string | null | undefined): string => (value ?? '').trim().replace(/^@+/, '').toLowerCase();
     const wantedProfile = normalize(profile);
     const wantedPlatform = platform.toLowerCase();
     for (const user of this.activeUsers()) {

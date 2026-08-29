@@ -8,7 +8,7 @@ export function applyImageFallback(event: Event): void {
   if (!(image instanceof HTMLImageElement)) {
     return;
   }
-  const current = image.getAttribute('src') || '';
+  const current = image.getAttribute('src') ?? '';
 
 
 

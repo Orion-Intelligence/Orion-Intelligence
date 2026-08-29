@@ -517,7 +517,7 @@ export class ThreatLensComponent implements OnDestroy {
     }
 
     const payload = (done.result ?? done) as GeoCameraResponse & Record<string, unknown>;
-    const rawStatus = String(payload?.status || done?.status || '').toLowerCase();
+    const rawStatus = String(payload?.status ?? done?.status ?? '').toLowerCase();
     const progress = Number(payload?.progress ?? done?.progress);
     const step = String(payload?.step ?? done?.step ?? '').toLowerCase();
     const status = (rawStatus === 'pending' || rawStatus === 'busy') && progress >= 100 && step.includes('done')

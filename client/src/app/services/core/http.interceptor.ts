@@ -81,7 +81,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
     if (authService?.isAuthenticated()) {
       if (error instanceof HttpErrorResponse && authReq.url.includes('api/search')) {
         const errorBody = error.error && typeof error.error === 'object' ? error.error as Record<string, unknown> : null;
-        const detail = String(errorBody?.['detail'] || '');
+        const detail = String(errorBody?.['detail'] ?? '');
         if (error.status === 404 && /document not found/i.test(detail)) {
           msg.show('Report Expired');
           return throwError(() => error);

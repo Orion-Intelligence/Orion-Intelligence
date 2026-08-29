@@ -115,7 +115,7 @@ export class ResetPasswordComponent implements OnInit {
           error: (err) => {
             this.responseError = true;
             if (this.recoveryMode) {
-              this.errorMessage = err?.error?.detail || "Invalid recovery key";
+              this.errorMessage = err?.error?.detail ?? "Invalid recovery key";
             }
             else {
               this.errorMessage = "Something went wrong. Please try again later.";

@@ -82,7 +82,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   onDropdownOpen() {
     const rawLicenses = this.appService.userSessionData().user.license;
     this.licences = rawLicenses.map(l => this.licenseService.getLicenseLabel(l)).join(', ');
-    this.profile_image = this.appService.userSessionData().user.image || "";
+    this.profile_image = this.appService.userSessionData().user.image ?? "";
   }
 
   isAdmin(): boolean {
@@ -118,7 +118,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     const selectedLanguage = this.translationService.getSupportedLanguage(language);
     const currentSession = this.appService.userSessionData();
     const preferences = {
-      ...(currentSession.user.preferences || {}),
+      ...(currentSession.user.preferences ?? {}),
       language: selectedLanguage
     };
     this.selectedLanguage.set(selectedLanguage);
@@ -156,7 +156,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
     }
     const selectedTheme: ThemeMode = this.selectedTheme() === 'dark-theme' ? 'light-theme' : 'dark-theme';
     const preferences = {
-      ...(currentSession.user.preferences || {}),
+      ...(currentSession.user.preferences ?? {}),
       theme: selectedTheme
     };
     this.selectedTheme.set(selectedTheme);

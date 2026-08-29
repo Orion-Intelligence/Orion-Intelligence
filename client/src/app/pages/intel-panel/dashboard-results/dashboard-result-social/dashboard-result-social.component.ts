@@ -49,7 +49,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     return item?.m_content
       ? item.m_content
         .split('\n')
-        .filter((line: string) => line.trim() && (line.match(/ /g) || []).length > 5)
+        .filter((line: string) => line.trim() && (line.match(/ /g) ?? []).length > 5)
       : [];
   }
 
@@ -109,7 +109,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
 
   getCommentCount(item: SocialResultItem): string {
     const rawItem: Record<string, unknown> = item;
-    return String(item.m_comment_count || item.m_post_comments_count || item.m_comments_count || rawItem['comment_count'] || rawItem['comments_count'] || '');
+    return String(item.m_comment_count ?? item.m_post_comments_count ?? item.m_comments_count ?? rawItem['comment_count'] ?? rawItem['comments_count'] ?? '');
   }
 
   getResultDisplayLimit(): number {
@@ -157,7 +157,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     }
     if (typeof value === 'object') {
       const comment = value as Record<string, unknown>;
-      const text = comment['text'] || comment['comment'] || comment['comment_text'] || comment['m_comment_text'] || comment['m_comment'] || comment['m_text'] || comment['content'] || comment['comment_content'] || comment['m_content'] || comment['message'] || comment['body'] || comment['m_body'] || comment['comment_body'] || comment['reply'] || comment['reply_content'] || comment['description'];
+      const text = comment['text'] ?? comment['comment'] ?? comment['comment_text'] ?? comment['m_comment_text'] ?? comment['m_comment'] ?? comment['m_text'] ?? comment['content'] ?? comment['comment_content'] ?? comment['m_content'] ?? comment['message'] ?? comment['body'] ?? comment['m_body'] ?? comment['comment_body'] ?? comment['reply'] ?? comment['reply_content'] ?? comment['description'];
       if (!text) {
         const nestedKeys = ['m_comments', 'm_post_comments', 'm_post_comments_list', 'm_post_comment_list', 'm_comments_list', 'comments', 'comment_items', 'comment_details', 'comments_list', 'post_comments_list', 'm_replies', 'replies', 'm_thread_comments', 'thread_comments'];
         const nestedComments = nestedKeys.flatMap(key => this.normalizeComments(comment[key]));
@@ -171,9 +171,9 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
         return [];
       }
       return [{
-        sender: String(comment['sender_name'] || comment['m_sender_name'] || comment['author'] || comment['m_author'] || comment['comment_author'] || comment['username'] || comment['user'] || comment['name'] || comment['from'] || ''),
-        date: String(comment['m_date'] || comment['date'] || comment['datetime'] || comment['created_at'] || comment['timestamp'] || comment['time'] || comment['m_time'] || ''),
-        likes: String(comment['likes'] || comment['m_likes'] || comment['like_count'] || ''),
+        sender: String(comment['sender_name'] ?? comment['m_sender_name'] ?? comment['author'] ?? comment['m_author'] ?? comment['comment_author'] ?? comment['username'] ?? comment['user'] ?? comment['name'] ?? comment['from'] ?? ''),
+        date: String(comment['m_date'] ?? comment['date'] ?? comment['datetime'] ?? comment['created_at'] ?? comment['timestamp'] ?? comment['time'] ?? comment['m_time'] ?? ''),
+        likes: String(comment['likes'] ?? comment['m_likes'] ?? comment['like_count'] ?? ''),
         text: String(text)
       }];
     }

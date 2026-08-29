@@ -44,10 +44,10 @@ export class TenantSettingsComponent implements OnInit {
     const userId = this.userSessionData?.user.preferences?.['userId'];
     this.userId = typeof userId === 'string' ? userId : '';
     this.mailForm = {
-      accounts_mail_password: this.userSessionData.tenant.accountsMailPassword || '',
-      accounts_mail: this.userSessionData.tenant.accountsMail || '',
-      accounts_smtp_server: this.userSessionData.tenant.accountsSmtpServer || '',
-      accounts_smtp_port: this.userSessionData.tenant.accountsSmtpPort || '',
+      accounts_mail_password: this.userSessionData.tenant.accountsMailPassword ?? '',
+      accounts_mail: this.userSessionData.tenant.accountsMail ?? '',
+      accounts_smtp_server: this.userSessionData.tenant.accountsSmtpServer ?? '',
+      accounts_smtp_port: this.userSessionData.tenant.accountsSmtpPort ?? '',
     };
     this.captureEditableSettings();
     this.loadAlertConnectorSettings();
@@ -98,12 +98,12 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   normalizedAlertRunTime(): string | null {
-    const value = (this.userSessionData.tenant.alertRunTime || '').trim();
+    const value = (this.userSessionData.tenant.alertRunTime ?? '').trim();
     return value || null;
   }
 
   getAlertRunTimeDisplay(): string {
-    return this.normalizedAlertRunTime() || 'Use default schedule';
+    return this.normalizedAlertRunTime() ?? 'Use default schedule';
   }
 
   openAlertRunTimePicker(input: HTMLInputElement): void {
@@ -163,7 +163,7 @@ export class TenantSettingsComponent implements OnInit {
         }
       },
       error: (err) => {
-        const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
+        const message = err?.error?.detail ?? this.translationService.translate('Failed to upload image');
         this.messageNotificationService.show(message);
       }
     });

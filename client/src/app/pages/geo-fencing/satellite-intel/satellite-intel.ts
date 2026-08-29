@@ -96,8 +96,8 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.satelliteService.resetState();
     this.initialMapLoadingId = this.loadingState.begin('Loading Satellite Map', 'Rendering satellite map...');
     const section = this.route.snapshot.queryParamMap.get('section');
-    const q = this.route.snapshot.queryParamMap.get('q')?.trim() || '';
-    const requestedView = this.route.snapshot.queryParamMap.get('view') || this.route.snapshot.data['view'];
+    const q = this.route.snapshot.queryParamMap.get('q')?.trim() ?? '';
+    const requestedView = this.route.snapshot.queryParamMap.get('view') ?? this.route.snapshot.data['view'];
     this.setPanel(this.isPanelId(section) ? section : SatelliteIntelPanelEnum.Dashboard);
     this.isPanelPopupOpen = true;
     if (requestedView === 'threat') {

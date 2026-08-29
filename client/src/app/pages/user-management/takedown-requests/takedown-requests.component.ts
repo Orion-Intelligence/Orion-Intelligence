@@ -124,7 +124,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
         this.actionId = '';
       },
       error: err => {
-        this.error = err?.error?.detail || 'Unable to accept takedown request.';
+        this.error = err?.error?.detail ?? 'Unable to accept takedown request.';
         this.actionId = '';
       }
     });
@@ -157,7 +157,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
         this.rejectionTarget = null;
       },
       error: err => {
-        this.error = err?.error?.detail || 'Unable to reject takedown request.';
+        this.error = err?.error?.detail ?? 'Unable to reject takedown request.';
         this.actionId = '';
       }
     });

@@ -75,7 +75,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   private normalizeThreatType(type: unknown): string {
-    return String(type || 'Unknown').trim().toLowerCase() || 'Unknown';
+    return String(type ?? 'Unknown').trim().toLowerCase() || 'Unknown';
   }
 
   explore(route: string, q: string) {

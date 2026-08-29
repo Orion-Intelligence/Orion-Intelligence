@@ -112,8 +112,8 @@ export class CategoryAlertReportComponent implements OnInit {
       }
       return '';
     })).subscribe(lastSegment => {
-      this.adminTenantId = this.route.snapshot.paramMap.get('tenantId') || this.route.snapshot.queryParamMap.get('tenantId');
-      this.category = this.route.snapshot.paramMap.get('type') || lastSegment;
+      this.adminTenantId = this.route.snapshot.paramMap.get('tenantId') ?? this.route.snapshot.queryParamMap.get('tenantId');
+      this.category = this.route.snapshot.paramMap.get('type') ?? lastSegment;
       this.getLatestAlerts();
     });
   }
@@ -169,7 +169,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
     this.apiService.get<AlertPageResponse>(endpoint).subscribe({
       next: response => {
-        const rawItems: AlertModel[] = response?.items || [];
+        const rawItems: AlertModel[] = response?.items ?? [];
         for (const item of rawItems) {
           if (item?.alert_id) {
             this.alertLookupById.set(item.alert_id, item);
@@ -177,7 +177,7 @@ export class CategoryAlertReportComponent implements OnInit {
         }
         const convertedItems = this.convertAlertsList(rawItems, this.category);
 
-        this.currentPage = response?.page || nextPage;
+        this.currentPage = response?.page ?? nextPage;
         this.hasMoreAlerts = !!response?.has_more;
         this.alerts = reset ? convertedItems : [...this.alerts, ...convertedItems];
         this.refreshAlertFilterOptions();
@@ -234,7 +234,7 @@ export class CategoryAlertReportComponent implements OnInit {
           void this.router.navigate(["/dashboard"], {});
         },
         error: (err) => {
-          this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to delete'))
+          this.messageNotificationService.show(err?.error?.detail ?? this.translationService.translate('Failed to delete'))
         },
       });
     }
@@ -341,7 +341,7 @@ export class CategoryAlertReportComponent implements OnInit {
         this.getLatestAlerts();
       },
       error: (err) => {
-        const mess = err?.error?.detail || this.translationService.translate('Failed to delete alert');
+        const mess = err?.error?.detail ?? this.translationService.translate('Failed to delete alert');
         this.messageNotificationService.show(mess)
       },
     });
@@ -360,7 +360,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   seeDetailReprot(alertId: string) {
-    this.alertToShowReport = this.alertLookupById.get(alertId) || null;
+    this.alertToShowReport = this.alertLookupById.get(alertId) ?? null;
 
     if (!this.alertToShowReport) {
       return;
@@ -455,7 +455,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
         const _alert = this.alertLookupById.get(id);
         if (_alert?.type) {
-          const value = _alert.ioc_value || '-';
+          const value = _alert.ioc_value ?? '-';
           let scanType: string;
           let route: string;
 
@@ -555,40 +555,40 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   convertToCategoryAlert(alert: AlertModel): CategoryAlerts {
-    const entity = alert.ioc_value || 'N/A';
-    const resultDate = this.extractAlertResultDate(alert.all_ioc || []);
+    const entity = alert.ioc_value ?? 'N/A';
+    const resultDate = this.extractAlertResultDate(alert.all_ioc ?? []);
     const password = this.extractAlertPassword(alert);
-    const category = alert.type || 'unknown';
+    const category = alert.type ?? 'unknown';
 
     return {
-      id: alert.alert_id || '',
-      seen: alert.report_seen || false,
-      custom: alert.custom_alert || false,
+      id: alert.alert_id ?? '',
+      seen: alert.report_seen ?? false,
+      custom: alert.custom_alert ?? false,
       risk: this.getRiskLevel(category, alert.risk),
       category,
-      title: alert.title || 'No Title',
-      description: alert.description || 'No description provided.',
-      hash: alert.data_hash || 'NO_HASH',
-      source: alert.source || 'N/A',
-      url: alert.url || 'N/A',
+      title: alert.title ?? 'No Title',
+      description: alert.description ?? 'No description provided.',
+      hash: alert.data_hash ?? 'NO_HASH',
+      source: alert.source ?? 'N/A',
+      url: alert.url ?? 'N/A',
       entity: entity,
-      contentTypes: alert.content_types || [],
-      rawFindings: alert.raw_findings || {},
+      contentTypes: alert.content_types ?? [],
+      rawFindings: alert.raw_findings ?? {},
 
-      allIOC: alert.all_ioc || [],
-      detectedOn: alert.first_seen || new Date(),
+      allIOC: alert.all_ioc ?? [],
+      detectedOn: alert.first_seen ?? new Date(),
       resultDate,
       password,
     };
   }
 
   private extractAlertPassword(alert: AlertModel): string {
-    const fromIoc = this.getFirstAlertIocValue(alert.all_ioc || [], ['password', 'm_password']);
+    const fromIoc = this.getFirstAlertIocValue(alert.all_ioc ?? [], ['password', 'm_password']);
     if (fromIoc) {
       return fromIoc;
     }
-    if ((alert.type || '').toLowerCase() === 'stealerlogs') {
-      return this.cleanAlertValue(alert.description || '');
+    if ((alert.type ?? '').toLowerCase() === 'stealerlogs') {
+      return this.cleanAlertValue(alert.description ?? '');
     }
     return '';
   }
@@ -614,7 +614,7 @@ export class CategoryAlertReportComponent implements OnInit {
     const wanted = new Set(keys.map(key => key.toLowerCase()));
     const match = (allIOC || []).find(ioc => wanted.has(String(ioc?.name || '').toLowerCase()));
     const value = match?.values?.find(item => this.cleanAlertValue(item));
-    return this.cleanAlertValue(value || '');
+    return this.cleanAlertValue(value ?? '');
   }
 
   private cleanAlertValue(value: unknown): string {
@@ -672,7 +672,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   getAlertCardDate(alert: CategoryAlerts): Date {
-    return alert.resultDate || alert.detectedOn;
+    return alert.resultDate ?? alert.detectedOn;
   }
 
   getFilteredIocs(allIOC: AlertAllIoc[]): { label: string, count: number }[] {
@@ -778,7 +778,7 @@ export class CategoryAlertReportComponent implements OnInit {
   applyFilter(filters: Record<string, string | null>) {
     this.activeAlertFilters = { ...filters };
     const range = filters['daterange'];
-    this.activeDateRange = range || null;
+    this.activeDateRange = range ?? null;
     this.applyCurrentFilters();
   }
 
@@ -919,7 +919,7 @@ export class CategoryAlertReportComponent implements OnInit {
             this.messageNotificationService.show(this.translationService.translate('Alert imported successfully!'), 'success');
           },
           error: (err) => {
-            const mess = err?.error?.detail || this.translationService.translate('Failed to add alert');
+            const mess = err?.error?.detail ?? this.translationService.translate('Failed to add alert');
             this.messageNotificationService.show(mess);
           },
         });

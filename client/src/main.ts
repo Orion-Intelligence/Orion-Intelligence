@@ -43,7 +43,7 @@ const preloadDashboardLogo = new Image();
 preloadDashboardLogo.src = DEFAULT_DASHBOARD_LOGO_SRC;
 const bootstrapIconClassPattern = /(?:^|\s)(bi-[A-Za-z0-9-]+)(?=\s|$)/;
 const getBootstrapIconName = (element: Element): BootstrapIconName | null => {
-    const className = element.getAttribute('class') || '';
+    const className = element.getAttribute('class') ?? '';
     const match = className.match(bootstrapIconClassPattern);
     if (!match) {
         return null;
@@ -96,8 +96,8 @@ const mark = (img: HTMLImageElement) => {
     if (img.dataset['ph'] === '1') {
         return;
     }
-    const src = img.getAttribute('src') || '';
-    const alt = (img.getAttribute('alt') || '').toLowerCase();
+    const src = img.getAttribute('src') ?? '';
+    const alt = (img.getAttribute('alt') ?? '').toLowerCase();
     if (!/images\/(statistics|sidebar)\//.test(src)) {
         return;
     }

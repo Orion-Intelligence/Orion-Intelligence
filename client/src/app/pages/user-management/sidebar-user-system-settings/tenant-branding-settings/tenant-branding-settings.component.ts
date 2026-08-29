@@ -69,7 +69,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
           this.applySettings(updatedAssets);
         },
         error: (err) => {
-          const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
+          const message = err?.error?.detail ?? this.translationService.translate('Failed to upload image');
           this.messageNotificationService.show(message);
         }
       });
@@ -81,7 +81,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
         this.applySettings({ [key]: DEFAULT_SYSTEM_ASSETS[key] } as Partial<AppSettingsModel>);
       },
       error: (err) => {
-        const message = err?.error?.detail || this.translationService.translate('Failed to remove image');
+        const message = err?.error?.detail ?? this.translationService.translate('Failed to remove image');
         this.messageNotificationService.show(message);
       }
     });

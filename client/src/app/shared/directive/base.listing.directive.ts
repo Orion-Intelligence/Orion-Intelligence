@@ -64,7 +64,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
       }
     });
     this.selectedFilters = initialSelected;
-    this.searchQuery = params['q'] || '';
+    this.searchQuery = params['q'] ?? '';
   }
 
   onPageChange(page: number): void {

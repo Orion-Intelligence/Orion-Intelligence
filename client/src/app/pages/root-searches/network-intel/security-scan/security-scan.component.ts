@@ -65,7 +65,7 @@ export class SecurityScanComponent implements OnInit {
     if (!this.scanType) {
       this.scanType = 'basic';
     }
-    const rawParam = this.route.snapshot.queryParamMap.get('domain') || '';
+    const rawParam = this.route.snapshot.queryParamMap.get('domain') ?? '';
     this.searchQuery = rawParam;
     if (!rawParam) {
       return;
@@ -138,10 +138,10 @@ export class SecurityScanComponent implements OnInit {
             Host: (m?.Host?.trim()) || this.extractHost(m?.URL) || this.requestedDomain,
             URL: m?.URL || this.requestedUrl,
           };
-          this.grade = result.grade || '';
-          this.gradeCounts = result.grade_counts || { high: 0, medium: 0, low: 0, informational: 0 };
+          this.grade = result.grade ?? '';
+          this.gradeCounts = result.grade_counts ?? { high: 0, medium: 0, low: 0, informational: 0 };
           const proofMap = new Map<string, string>();
-          const proofs = result.proofs || {};
+          const proofs = result.proofs ?? {};
           Object.entries(proofs).forEach(([cat, items]) => {
             items.forEach((p) => {
               const k = cat + '|' + (p.header || '').trim().toLowerCase();
@@ -150,7 +150,7 @@ export class SecurityScanComponent implements OnInit {
               }
             });
           });
-          const entries = Object.entries(result.threats || {});
+          const entries = Object.entries(result.threats ?? {});
           this.categories = entries
             .map(([name, items]) => {
               const list: UrlScanThreatItem[] = Array.isArray(items) ? items : [];
@@ -298,7 +298,7 @@ export class SecurityScanComponent implements OnInit {
   }
 
   get displayHost(): string {
-    return this.meta?.Host || this.extractHost(this.meta?.URL) || this.requestedDomain;
+    return this.meta?.Host ?? this.extractHost(this.meta?.URL) ?? this.requestedDomain;
   }
 
   get displayPort(): string {

@@ -117,7 +117,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get yearValue(): string {
-    const d = this.item()?.date || this.result()?.m_update_date;
+    const d = this.item()?.date ?? this.result()?.m_update_date;
     if (!d) {
       return '-';
     }
@@ -160,7 +160,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     const title = candidates
       .map(value => String(value || '').replace(/\s+/g, ' ').trim())
       .find(Boolean);
-    return title || this.threatBaseDomainValue;
+    return title ?? this.threatBaseDomainValue;
   }
 
   get threatBaseDomainValue(): string {
@@ -174,7 +174,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       ...this.rowHelper.normalizeToArray(result?.m_root_domain),
       ...this.rowHelper.normalizeToArray(result?.m_websites),
     ];
-    return candidates.map(value => this.extractDomain(value)).find(Boolean) || '-';
+    return candidates.map(value => this.extractDomain(value)).find(Boolean) ?? '-';
   }
 
   get threatDescriptionValue(): string {
@@ -192,7 +192,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       .map(value => String(value || '').replace(/\s+/g, ' ').trim())
       .map(value => value.replace(/^(description|m_description|content|m_content|title|m_title)\s*[:=-]\s*/i, '').trim())
       .find(Boolean);
-    return description || 'Description not found';
+    return description ?? 'Description not found';
   }
 
   get passwordValue(): string {
@@ -201,7 +201,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get isCreditCardRecord(): boolean {
-    return String(this.item()?.['type'] || '').toLowerCase() === 'bin';
+    return String(this.item()?.['type'] ?? '').toLowerCase() === 'bin';
   }
 
   get recordSubtitle(): string {
@@ -254,7 +254,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     }
 
     const values = (value: unknown): string[] => this.rowHelper.normalizeToArray(value);
-    const clean = (value: unknown): string => String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    const clean = (value: unknown): string => String(value ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
     const term = (value: string): string => {
       let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
       if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) {
@@ -428,7 +428,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     if (!this.activeTelemetryKey) {
       return null;
     }
-    return this.telemetryGroups.find(g => g.key === this.activeTelemetryKey) || null;
+    return this.telemetryGroups.find(g => g.key === this.activeTelemetryKey) ?? null;
   }
 
   selectTelemetry(key: string, e?: MouseEvent) {
@@ -517,7 +517,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       ? this.buildStealerGroups(this.item())
       : this.buildThreatGroups(this.result());
     const domainKey = this.mode() === 'stealer' ? 'domain' : 'm_domain';
-    this.activeTelemetryKey = this.telemetryGroupsCache.find(g => g.key === domainKey)?.key || this.telemetryGroupsCache[0]?.key || null;
+    this.activeTelemetryKey = this.telemetryGroupsCache.find(g => g.key === domainKey)?.key ?? this.telemetryGroupsCache[0]?.key ?? null;
   }
 
   private buildStealerGroups(item: CredentialResultItem | null): TelemetryGroup[] {
@@ -638,7 +638,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
 
   private isHashOrIndexKey(key: string, label?: string): boolean {
     const k = (key || '').toLowerCase();
-    const l = (label || '').toLowerCase();
+    const l = (label ?? '').toLowerCase();
     return k.includes('hash') || k.includes('index') || l.includes('hash') || l.includes('index');
   }
 
@@ -649,7 +649,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private firstValue(value: unknown): string {
     return this.rowHelper.normalizeToArray(value)
       .map(v => String(v ?? '').trim())
-      .find(Boolean) || '-';
+      .find(Boolean) ?? '-';
   }
 
   private formatBooleanValue(value: unknown): string {
@@ -677,12 +677,12 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   private extractDomain(value: unknown): string {
-    let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
+    let text = String(value ?? '').trim().replace(/^['"]|['"]$/g, '');
     if (!text || text === '-') {
       return '';
     }
     if (text.includes('@') && !text.includes('/')) {
-      text = text.split('@').pop() || text;
+      text = text.split('@').pop() ?? text;
     }
     const parseValue = /^[a-z][a-z0-9+.-]*:\/\//i.test(text) ? text : `https://${text}`;
     try {
@@ -700,7 +700,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   private normalizeMatchValue(value: unknown): string {
-    let text = String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+    let text = String(value ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
     text = text.replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');
     const fieldMatch = text.match(/^[a-z_][a-z0-9_]*:(.+)$/i);
     return (fieldMatch ? fieldMatch[1] : text).trim().replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');

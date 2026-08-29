@@ -67,7 +67,7 @@ export class IpDetailPopupComponent implements OnChanges, OnDestroy {
         return;
       }
       const progress = response.result?.['progress'] ?? response['progress'];
-      const step = response.result?.['step'] || response['step'] || response.result?.status || response.status;
+      const step = response.result?.['step'] ?? response['step'] ?? response.result?.status ?? response.status;
       this.progress = this.networkIntelService.getProgressValue(typeof progress === 'number' ? progress : undefined);
       this.currentStep = this.networkIntelService.getLoadingStepLabel(typeof step === 'string' ? step : undefined);
     }).subscribe({
@@ -86,7 +86,7 @@ export class IpDetailPopupComponent implements OnChanges, OnDestroy {
         }
 
         const finalPayload = this.removeIntermediateFields(payload);
-        this.detail = { ...finalPayload, ip: String(finalPayload['ip'] || ip) };
+        this.detail = { ...finalPayload, ip: String(finalPayload['ip'] ?? ip) };
         this.isLoading = false;
         this.currentStep = '';
       },
@@ -94,7 +94,7 @@ export class IpDetailPopupComponent implements OnChanges, OnDestroy {
         if (requestId !== this.requestId) {
           return;
         }
-        this.errorMessage = error?.message || 'Failed to load IP details.';
+        this.errorMessage = error?.message ?? 'Failed to load IP details.';
         this.isLoading = false;
       },
     });
@@ -126,7 +126,7 @@ export class IpDetailPopupComponent implements OnChanges, OnDestroy {
   private updateLoadingState(payload: Record<string, unknown>): void {
     const result = asUnknownRecord(payload['result']);
     const progress = payload['progress'] ?? result['progress'];
-    const step = payload['step'] || result['step'] || payload['status'] || result['status'];
+    const step = payload['step'] ?? result['step'] ?? payload['status'] ?? result['status'];
     this.progress = this.networkIntelService.getProgressValue(typeof progress === 'number' ? progress : this.progress);
     this.currentStep = this.networkIntelService.getLoadingStepLabel(typeof step === 'string' ? step : undefined);
   }
@@ -148,7 +148,7 @@ export class IpDetailPopupComponent implements OnChanges, OnDestroy {
 
   private isIntermediateResponse(payload: Record<string, unknown>): boolean {
     const result = asUnknownRecord(payload['result']);
-    const status = String(payload['status'] || result['status'] || '').toLowerCase();
+    const status = String(payload['status'] ?? result['status'] ?? '').toLowerCase();
     const hasJobId = payload['job_id'] !== undefined || payload['jobId'] !== undefined || payload['task_id'] !== undefined || payload['taskId'] !== undefined;
     const hasProgress = payload['progress'] !== undefined || result['progress'] !== undefined;
     const isRunningStatus = ['pending', 'busy', 'queued', 'queue', 'processing', 'running', 'in_progress', 'started', 'scanning'].includes(status);

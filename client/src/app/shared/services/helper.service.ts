@@ -25,7 +25,7 @@ export class HelperService {
   }
 
   riskClass(risk: string | null | undefined): RiskClass {
-    const r = String(risk || '').toLowerCase();
+    const r = String(risk ?? '').toLowerCase();
     if (r === 'high' || r === 'critical') {
       return 'risk-high';
     }
@@ -52,7 +52,7 @@ export class HelperService {
     if (!input) {
       return [];
     }
-    const matches = input.match(/\b(?:https:\/\/|http:\/\/)?[a-z0-9.-]{1,253}\.[a-z]{2,63}[^\s]*/gi) || [];
+    const matches = input.match(/\b(?:https:\/\/|http:\/\/)?[a-z0-9.-]{1,253}\.[a-z]{2,63}[^\s]*/gi) ?? [];
     return matches.map(v => {
       const url = /^https?:\/\//i.test(v) ? v : 'https://' + v.replace(/^\/+/, '');
       try {
@@ -157,7 +157,7 @@ export class HelperService {
           const prevEnd = end;
           const nextStart = matches[j].index;
           const betweenText = text.slice(prevEnd, nextStart);
-          const cleanBetween = new DOMParser().parseFromString(betweenText, 'text/html').body.textContent || '';
+          const cleanBetween = new DOMParser().parseFromString(betweenText, 'text/html').body.textContent ?? '';
           const wordGap = cleanBetween
             .trim()
             .split(/\s+/)
@@ -182,7 +182,7 @@ export class HelperService {
       renderedMarkup = escapeMarkup(text.length > 500 ? text.substring(0, 500) : text);
     }
     const contextName = 'HTML';
-    return this.sanitizer.sanitize(SecurityContext[contextName], renderedMarkup) || '';
+    return this.sanitizer.sanitize(SecurityContext[contextName], renderedMarkup) ?? '';
   }
 
   private convertToCSV(data: unknown): string {

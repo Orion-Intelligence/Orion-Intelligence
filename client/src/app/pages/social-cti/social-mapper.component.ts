@@ -288,7 +288,7 @@ export class SocialMapperComponent {
   openDeleteConfirmation(username: string): void {
     const job = this.jobs().find(currentJob => currentJob.id === username);
     this.deleteUsername.set(username);
-    this.deleteConfirmationMessage.set(`Are you sure you want to delete the profile for ${job?.id || username}? This will remove all associated data and cannot be undone.`);
+    this.deleteConfirmationMessage.set(`Are you sure you want to delete the profile for ${job?.id ?? username}? This will remove all associated data and cannot be undone.`);
   }
 
   closeDeleteConfirmation(): void {

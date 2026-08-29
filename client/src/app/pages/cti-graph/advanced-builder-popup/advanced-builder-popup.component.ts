@@ -37,7 +37,7 @@ export class GraphAdvancedBuilderPopupComponent {
   }
 
   getOption(optionKey: string): GraphSearchOptionModel {
-    return this.searchOptions().find(option => option.key === optionKey) || this.searchOptions()[0];
+    return this.searchOptions().find(option => option.key === optionKey) ?? this.searchOptions()[0];
   }
 
   isClusterOption(optionKey: string): boolean {
@@ -45,7 +45,7 @@ export class GraphAdvancedBuilderPopupComponent {
   }
 
   getClusterValue(filter: GraphAdvancedFilterModel): string {
-    return filter.value || this.getOption(filter.optionKey)?.clusterValue || this.clusterValueOptions()[0]?.key || '';
+    return filter.value ?? this.getOption(filter.optionKey)?.clusterValue ?? this.clusterValueOptions()[0]?.key ?? '';
   }
 
   onBackdrop(event: MouseEvent): void {

@@ -57,7 +57,7 @@ export function drawInstitutionalCover(doc: jsPDF, options: InstitutionalCoverOp
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(7.2);
   doc.setTextColor(...theme.headerAccentRgb);
-  const classification = String(options.classification || 'CONFIDENTIAL').toUpperCase();
+  const classification = String(options.classification ?? 'CONFIDENTIAL').toUpperCase();
   drawTrackedText(doc, fitSingleLine(doc, classification, contentWidth, 1.35), pageWidth - margin, 42, { align: 'right', charSpace: 1.35 });
 
   const eyebrowY = isLandscape ? 82 : 104;
@@ -90,7 +90,7 @@ export function drawInstitutionalCover(doc: jsPDF, options: InstitutionalCoverOp
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10.5);
   doc.setTextColor(...theme.textBodyRgb);
-  const lead = options.lead || `${options.reportFamily} prepared for authorized review and operational decision-making.`;
+  const lead = options.lead ?? `${options.reportFamily} prepared for authorized review and operational decision-making.`;
   const leadLines = (doc.splitTextToSize(normalizePdfText(lead), Math.min(contentWidth, 470)) as string[]).slice(0, 3);
   doc.text(leadLines, margin, leadY, { lineHeightFactor: 1.35 });
 
@@ -148,7 +148,7 @@ export function drawInstitutionalCover(doc: jsPDF, options: InstitutionalCoverOp
   doc.setFontSize(7.6);
   doc.setTextColor(...theme.footerTextRgb);
   doc.text('AUTHORIZED RECIPIENTS ONLY', margin, pageHeight - 29);
-  doc.text(String(options.classification || 'Confidential'), pageWidth - margin, pageHeight - 29, { align: 'right' });
+  doc.text(String(options.classification ?? 'Confidential'), pageWidth - margin, pageHeight - 29, { align: 'right' });
 }
 
 export function drawInstitutionalPageHeader(doc: jsPDF, options: InstitutionalHeaderOptions, height: number = PDF_EXPORT_LAYOUT.pageHeaderHeight): void {

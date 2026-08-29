@@ -129,7 +129,7 @@ export class CategoryAlertDetailDrawerComponent {
   }
 
   getAlertCardDate(alert: CategoryAlerts): Date {
-    return alert.resultDate || alert.detectedOn;
+    return alert.resultDate ?? alert.detectedOn;
   }
 
   hasRawFindings(alert: CategoryAlerts | null): boolean {
@@ -156,7 +156,7 @@ export class CategoryAlertDetailDrawerComponent {
   }
 
   shouldShowDescriptionToggle(description: string | null | undefined): boolean {
-    const text = (description || '').trim();
+    const text = (description ?? '').trim();
     return text.split(/\r?\n/).length > 4 || text.length > 280;
   }
 

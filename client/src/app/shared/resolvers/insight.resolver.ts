@@ -11,9 +11,7 @@ export class InsightResolver implements Resolve<InsightCallbackModel> {
   constructor(private apiService: ApiService) { }
 
   resolve(): Observable<InsightCallbackModel> {
-    if (!this.cache$) {
-      this.cache$ = this.apiService.get<InsightCallbackModel>('insight').pipe(shareReplay(1));
-    }
+    this.cache$ ??= this.apiService.get<InsightCallbackModel>('insight').pipe(shareReplay(1));
     return this.cache$;
   }
 }

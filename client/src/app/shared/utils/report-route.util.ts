@@ -60,7 +60,7 @@ function getReportSearchTypeFromUrl(currentUrl: URL, segments = currentUrl.pathn
 }
 
 function getReportRouteSection(segments: string[]): string {
-  return segments.find(segment => REPORT_ROUTE_SECTIONS.has(segment)) || '';
+  return segments.find(segment => REPORT_ROUTE_SECTIONS.has(segment)) ?? '';
 }
 
 function getReportSearchTypeForRoute(section: string, category: string): string {
@@ -92,7 +92,7 @@ function getReportSearchTypeForRoute(section: string, category: string): string 
 }
 
 function normalizeConsolidatedReportSearchType(value: string | null | undefined): string {
-  const type = (value || '').replace('_model', '').toLowerCase();
+  const type = (value ?? '').replace('_model', '').toLowerCase();
   switch (type) {
     case 'leak':
     case 'tracking':

@@ -278,7 +278,7 @@ export class IocSearchComponent implements OnInit {
       .replace(/\s*&&\s*/g, ' && ')
       .trim();
     const parts = normalized.split(/\s+(?:\|\||&&)\s+/g);
-    const operators = normalized.match(/(\|\||&&)/g) || [];
+    const operators = normalized.match(/(\|\||&&)/g) ?? [];
     const result: string[] = [];
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i].trim();

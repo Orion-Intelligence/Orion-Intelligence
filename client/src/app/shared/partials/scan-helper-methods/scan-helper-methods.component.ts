@@ -58,7 +58,7 @@ export class ScanHelperMethods implements OnDestroy {
         this.cancelRequested = false;
         return;
       }
-      const status = res?.status || res?.result?.status || 'unknown';
+      const status = res?.status ?? res?.result?.status ?? 'unknown';
       const progressVal = res?.progress ?? null;
       if (progressVal != null && typeof progressVal === 'number') {
         this.progress = Math.min(99, progressVal);
@@ -75,11 +75,11 @@ export class ScanHelperMethods implements OnDestroy {
       if (this.activeTab === 'subdomains') {
         if (this.isCompletedStatus(status)) {
           if (this.checkLive) {
-            this.subdomains = res?.result?.live_subdomains || res?.live_subdomains || [];
+            this.subdomains = res?.result?.live_subdomains ?? res?.live_subdomains ?? [];
             this.subdomainCount = this.subdomains.length;
           }
           else {
-            this.subdomains = res?.result?.subdomains || res?.subdomains || [];
+            this.subdomains = res?.result?.subdomains ?? res?.subdomains ?? [];
             this.subdomainCount = this.subdomains.length;
           }
           this.search.emit(this.subdomains);
@@ -94,14 +94,14 @@ export class ScanHelperMethods implements OnDestroy {
       else if (this.activeTab === 'dns') {
         const dnsRecord = res?.result?.result ?? res?.result;
         if (res?.status === 'error' || dnsRecord?.status === 'error') {
-          this.errorMessage = dnsRecord?.message || res?.error || 'Resolution failed';
+          this.errorMessage = dnsRecord?.message ?? res?.error ?? 'Resolution failed';
           this.statusMessage = 'Failed';
         }
         else if (dnsRecord?.ip || dnsRecord?.hostname || dnsRecord?.domains?.length) {
           const domains = Array.isArray(dnsRecord.domains) ? dnsRecord.domains : [];
           this.dnsRecords = [{
-            ip: dnsRecord.ip || this.domain.trim(),
-            hostname: dnsRecord.hostname || '',
+            ip: dnsRecord.ip ?? this.domain.trim(),
+            hostname: dnsRecord.hostname ?? '',
             domains,
             error: dnsRecord.error,
           }];
@@ -115,7 +115,7 @@ export class ScanHelperMethods implements OnDestroy {
       }
       else if (this.activeTab === 'wayback') {
         if (this.isCompletedStatus(status)) {
-          this.waybackSnapshots = res?.result?.snapshots || res?.snapshots || [];
+          this.waybackSnapshots = res?.result?.snapshots ?? res?.snapshots ?? [];
           this.statusMessage = this.waybackSnapshots.length > 0
             ? `Found ${this.waybackSnapshots.length} snapshot${this.waybackSnapshots.length !== 1 ? 's' : ''}`
             : 'No records found';

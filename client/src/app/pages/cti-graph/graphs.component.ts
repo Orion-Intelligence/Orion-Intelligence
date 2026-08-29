@@ -452,7 +452,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private getGraphFilterChipValue(filter: GraphAdvancedFilterModel, option: GraphSearchOptionModel): string {
     if (option.mode === GraphSearchMode.Cluster) {
       const clusterValue = this.getGraphFilterClusterValue(filter);
-      return this.graphBuilderClusterValueOptions.find(item => item.key === clusterValue)?.label || clusterValue;
+      return this.graphBuilderClusterValueOptions.find(item => item.key === clusterValue)?.label ?? clusterValue;
     }
     return filter.value.trim();
   }
@@ -480,7 +480,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (option.mode === GraphSearchMode.Cluster) {
       if (queryValue) {
         nextFilters.selectedType = 'property';
-        nextFilters.singleInput = option.clusterValue || 'all';
+        nextFilters.singleInput = option.clusterValue ?? 'all';
         nextFilters.propertyType = 'all';
         nextFilters.propertyValue = queryValue;
         this.applyFilterValues(nextFilters);
@@ -489,7 +489,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         return;
       }
       nextFilters.selectedType = 'cluster';
-      nextFilters.singleInput = option.clusterValue || 'all';
+      nextFilters.singleInput = option.clusterValue ?? 'all';
       nextFilters.propertyType = 'all';
       nextFilters.propertyValue = '';
     }
@@ -499,7 +499,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       nextFilters.selectedType = 'property';
       nextFilters.singleInput = '';
-      nextFilters.propertyType = option.propertyType || 'all';
+      nextFilters.propertyType = option.propertyType ?? 'all';
       nextFilters.propertyValue = queryValue;
     }
     else if (queryValue) {
@@ -553,13 +553,13 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (filters.selectedType === 'property') {
       const propertyOption = this.graphSearchOptions.find(option => option.mode === GraphSearchMode.Property && option.propertyType === filters.propertyType);
       const scopedClusterOption = this.graphSearchOptions.find(option => option.mode === GraphSearchMode.Cluster && option.clusterValue === filters.singleInput);
-      this.activeGraphSearchKey = propertyOption?.key || scopedClusterOption?.key || 'all';
+      this.activeGraphSearchKey = propertyOption?.key ?? scopedClusterOption?.key ?? 'all';
       this.graphSearchText = filters.propertyValue || '';
       return;
     }
 
     const clusterOption = this.graphSearchOptions.find(option => option.mode === GraphSearchMode.Cluster && option.clusterValue === filters.singleInput);
-    this.activeGraphSearchKey = clusterOption?.key || 'all';
+    this.activeGraphSearchKey = clusterOption?.key ?? 'all';
     this.graphSearchText = '';
   }
 
@@ -596,11 +596,11 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private buildGraphSearchRequest(option: GraphSearchOptionModel, queryValue: string, operator?: GraphSearchRequestModel['operator']): GraphSearchRequestModel | null {
     if (option.mode === GraphSearchMode.Cluster) {
-      return new GraphSearchRequestModel({ dataPointType: 'cluster', modelType: 'cluster', queryValues: [queryValue || option.clusterValue || this.defaultGraphBuilderClusterValue], operator });
+      return new GraphSearchRequestModel({ dataPointType: 'cluster', modelType: 'cluster', queryValues: [queryValue ?? option.clusterValue ?? this.defaultGraphBuilderClusterValue], operator });
     }
     if (option.mode === GraphSearchMode.Property) {
       const queryValues = this.parseGraphBuilderValues(option, queryValue);
-      return queryValues.length ? new GraphSearchRequestModel({ dataPointType: 'property', modelType: option.propertyType || 'all', queryValues, operator }) : null;
+      return queryValues.length ? new GraphSearchRequestModel({ dataPointType: 'property', modelType: option.propertyType ?? 'all', queryValues, operator }) : null;
     }
     return null;
   }
@@ -879,7 +879,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       this.result = results;
       this.renderGraph(this.result);
       if (data_point_type === 'document') {
-        this.focusGraphNode(this.pendingFocusNodeId || `cti_vertices/${value}`);
+        this.focusGraphNode(this.pendingFocusNodeId ?? `cti_vertices/${value}`);
         this.pendingFocusNodeId = null;
       }
       this.loading = true;
@@ -1250,7 +1250,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number): void {
-    const isExpanded = this.groupExpandedState.get(nodeId) || false;
+    const isExpanded = this.groupExpandedState.get(nodeId) ?? false;
     if (isExpanded) {
       return;
     }
@@ -1318,7 +1318,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false): void {
-    const isExpanded = this.groupExpandedState.get(nodeId) || false;
+    const isExpanded = this.groupExpandedState.get(nodeId) ?? false;
     if (!isExpanded && !force) {
       return;
     }
@@ -1413,8 +1413,8 @@ export class GraphComponent implements OnInit, OnDestroy {
       return false;
     }
     const nodeId = String(node.id);
-    const nodeType = String(node.nodeType || this.nodeTypeById[nodeId] || '').toLowerCase();
-    const nodeClass = String(node.nodeClass || '').toLowerCase();
+    const nodeType = String(node.nodeType ?? this.nodeTypeById[nodeId] ?? '').toLowerCase();
+    const nodeClass = String(node.nodeClass ?? '').toLowerCase();
     return nodeType === 'document' || nodeType === 'report' || nodeClass === 'report';
   }
 
@@ -1481,7 +1481,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private getReportCategory(nodeId: string): string {
-    const nodeClusterId = this.normalizeReportCategory(String(this.contextMenuNode?.clusterId || ''));
+    const nodeClusterId = this.normalizeReportCategory(String(this.contextMenuNode?.clusterId ?? ''));
     if (nodeClusterId && this.clusterPalette[nodeClusterId]) {
       return nodeClusterId;
     }
@@ -1536,7 +1536,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   viewReport() {
     const nodeId = this.contextMenuNodeId;
     const parts = nodeId.split('/');
-    const singleInput = this.contextMenuNode?.docId || parts[parts.length - 1];
+    const singleInput = this.contextMenuNode?.docId ?? parts[parts.length - 1];
     const category = this.getReportCategory(nodeId);
     const reportPath = this.getReportPathForCategory(category);
     if (!singleInput || !reportPath) {
@@ -1696,7 +1696,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       const edgeTitle = this.getEdgeTitle(e);
       this.rawEdges.push({
-        id: e._id || `${e._from}->${e._to}`,
+        id: e._id ?? `${e._from}->${e._to}`,
         from: e._from,
         to: e._to,
         arrows: 'to',
@@ -1711,38 +1711,38 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private getEdgeTitle(edge: GraphResultItem['edge']): string {
-    const label = edge?.label || edge?.edge_type || edge?.relationship_type || edge?.type || 'Connection';
+    const label = edge?.label ?? edge?.edge_type ?? edge?.relationship_type ?? edge?.type ?? 'Connection';
     const confidence = typeof edge?.confidence === 'number' ? ` (${Math.round(edge.confidence * 100)}%)` : '';
     return `${String(label).replace(/_/g, ' ')}${confidence}`;
   }
 
   private getNodeTitleAsHtml(vertex: GraphVertex): string {
     const lines: string[] = [];
-    const type = String(vertex?.type || '').toLowerCase();
+    const type = String(vertex?.type ?? '').toLowerCase();
     const add = (label: string, value: unknown) => {
       const text = this.formatTooltipValue(value);
       if (text) {
         lines.push(`<strong>${this.escapeHtml(label)}:</strong> ${this.escapeHtml(text)}`);
       }
     };
-    const title = this.formatTooltipValue(vertex?.display_value || vertex?.label || vertex?.title || vertex?.value);
+    const title = this.formatTooltipValue(vertex?.display_value ?? vertex?.label ?? vertex?.title ?? vertex?.value);
     if (title) {
       lines.push(`<strong>${this.escapeHtml(this.truncateTooltipText(title, 90))}</strong>`);
     }
 
     if (type === 'document') {
       add('Type', 'Report');
-      add('Cluster', this.formatTooltipLabel(vertex?.cluster_id || vertex?.module));
+      add('Cluster', this.formatTooltipLabel(vertex?.cluster_id ?? vertex?.module));
       add('Published', vertex?.published);
       add('Summary', this.truncateTooltipText(vertex?.summary, 180));
       add('Reliability', this.formatTooltipPercent(vertex?.source_reliability));
-      add('ID', this.shortenTooltipId(vertex?.doc_id || vertex?.m_document_id || vertex?._key));
+      add('ID', this.shortenTooltipId(vertex?.doc_id ?? vertex?.m_document_id ?? vertex?._key));
     }
     else if (type === 'cluster') {
       add('Type', 'Cluster');
     }
     else {
-      add('Type', this.formatTooltipLabel(vertex?.type || vertex?.node_class));
+      add('Type', this.formatTooltipLabel(vertex?.type ?? vertex?.node_class));
       add('Role', this.formatTooltipLabel(vertex?.entity_role));
       add('Confidence', this.formatTooltipPercent(vertex?.confidence));
       add('Evidence', vertex?.evidence_count);
@@ -1824,8 +1824,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private normalizeFullLabel(v: GraphVertex): string {
-    if (this.selectedType === 'document' && String(v?.type || '').toLowerCase() === 'document') {
-      const docLabel = v?.doc_id || v?.m_document_id || v?._key || v?._id;
+    if (this.selectedType === 'document' && String(v?.type ?? '').toLowerCase() === 'document') {
+      const docLabel = v?.doc_id ?? v?.m_document_id ?? v?._key ?? v?._id;
       if (docLabel) {
         return String(docLabel).trim();
       }
@@ -1874,7 +1874,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private getVisualNodeCategory(node: ExtendedNode): string {
-    const type = String(node.nodeType || '').toLowerCase();
+    const type = String(node.nodeType ?? '').toLowerCase();
     if (type === 'cluster' || this.isClusterRootNode(String(node.id ?? ''))) {
       return 'cluster';
     }
@@ -1950,7 +1950,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       return this.nodeDocumentBorder;
     }
-    const classKey = String(node.nodeClass || '').toLowerCase();
+    const classKey = String(node.nodeClass ?? '').toLowerCase();
     return this.propertyClassPalette[classKey] ?? this.nodePropertyBorder;
   }
 
@@ -2016,7 +2016,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         .slice(0, 3)
         .toUpperCase();
     }
-    const source = String(node.propertyKey || node.nodeClass || node.rawLabel || node.label || '');
+    const source = String(node.propertyKey ?? node.nodeClass ?? node.rawLabel ?? node.label ?? '');
     const cleaned = source.replace(/^m_/, '').replace(/[_:./-]+/g, ' ').trim();
     if (!cleaned) {
       return '?';
@@ -2051,12 +2051,12 @@ export class GraphComponent implements OnInit, OnDestroy {
       const rawLabel = this.normalizeFullLabel(vertex);
       const existingNode = rawNodeMap.get(id);
       if (existingNode) {
-        existingNode.nodeClass = existingNode.nodeClass || vertex?.node_class;
-        existingNode.clusterId = existingNode.clusterId || vertex?.cluster_id;
-        existingNode.docId = existingNode.docId || vertex?.doc_id || vertex?.m_document_id || vertex?._key;
-        existingNode.rawLabel = existingNode.rawLabel || rawLabel;
-        existingNode.hiddenByDefault = existingNode.hiddenByDefault || !!vertex?.hidden_by_default;
-        existingNode.nodeInfoHtml = existingNode.nodeInfoHtml || this.getNodeTitleAsHtml(vertex);
+        existingNode.nodeClass = existingNode.nodeClass ?? vertex?.node_class;
+        existingNode.clusterId = existingNode.clusterId ?? vertex?.cluster_id;
+        existingNode.docId = existingNode.docId ?? vertex?.doc_id ?? vertex?.m_document_id ?? vertex?._key;
+        existingNode.rawLabel = existingNode.rawLabel ?? rawLabel;
+        existingNode.hiddenByDefault = [existingNode.hiddenByDefault, vertex?.hidden_by_default].some(Boolean);
+        existingNode.nodeInfoHtml = existingNode.nodeInfoHtml ?? this.getNodeTitleAsHtml(vertex);
         return;
       }
       rawNodeMap.set(id, {
@@ -2066,7 +2066,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         rawLabel,
         nodeClass: vertex?.node_class,
         clusterId: vertex?.cluster_id,
-        docId: vertex?.doc_id || vertex?.m_document_id || vertex?._key,
+        docId: vertex?.doc_id ?? vertex?.m_document_id ?? vertex?._key,
         propertyKey: this.extractPropertyKey(vertex),
         hiddenByDefault: !!vertex?.hidden_by_default,
         color: {
@@ -2093,7 +2093,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const nodeTypeMap: Record<string, string> = {};
     data.forEach(item => {
       if (item?.vertex?._id) {
-        nodeTypeMap[item.vertex._id] = item.vertex.type || '';
+        nodeTypeMap[item.vertex._id] = item.vertex.type ?? '';
       }
       (item.path?.vertices ?? []).forEach(pv => {
         if (pv?._id && pv?.type) {
@@ -2114,9 +2114,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       const clusterKey = this.getClusterKeyFromNodeId(nodeId);
       const clusterDocumentIds = isClusterRootNode ? this.getClusterDocumentIds(nodeId) : [];
       node.nodeType = nodeType;
-      if (!node.propertyKey) {
-        node.propertyKey = this.extractPropertyKeyFromLabel(node.label?.toString());
-      }
+      node.propertyKey ??= this.extractPropertyKeyFromLabel(node.label?.toString());
       let degree = edgeMap[nodeId] || 0;
       if (this.expandEnabled) {
         degree = 0;
@@ -2239,7 +2237,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   visibleEdges: Edge[];
   } {
     const groupedSubNodeIds = new Set([...this.groupInfo.values()].flat());
-    const visibleNodes = this.rawNodes.filter(node => node.isGroup || !groupedSubNodeIds.has(node.id as string));
+    const visibleNodes = this.rawNodes.filter(node => [node.isGroup, !groupedSubNodeIds.has(node.id as string)].some(Boolean));
     const visibleNodeIds = new Set(visibleNodes.map(node => String(node.id)));
     const hiddenToParent = new Map<string, string>();
     this.groupedSubNodesByParent.forEach((subSet, parentId) => {
@@ -2643,7 +2641,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private showNodeInfoPanel(node: ExtendedNode, pointerDom?: { x: number; y: number; }): void {
-    const html = node.nodeInfoHtml || this.getFallbackNodeInfoHtml(node);
+    const html = node.nodeInfoHtml ?? this.getFallbackNodeInfoHtml(node);
     if (!html) {
       this.hideNodeInfoPanel();
       return;
@@ -2666,8 +2664,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     const height = 260;
     const padding = 12;
     const offset = 14;
-    const containerWidth = container?.clientWidth || window.innerWidth;
-    const containerHeight = container?.clientHeight || window.innerHeight;
+    const containerWidth = container?.clientWidth ?? window.innerWidth;
+    const containerHeight = container?.clientHeight ?? window.innerHeight;
     const maxLeft = Math.max(padding, containerWidth - width - padding);
     const maxTop = Math.max(padding, containerHeight - height - padding);
     const x = pointerDom?.x ?? padding;
@@ -2691,8 +2689,8 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private getFallbackNodeInfoHtml(node: ExtendedNode): string {
-    const label = this.formatTooltipValue(node.rawLabel || node.label || node.id);
-    const type = this.formatTooltipLabel(node.nodeType || node.nodeClass || 'Node');
+    const label = this.formatTooltipValue(node.rawLabel ?? node.label ?? node.id);
+    const type = this.formatTooltipLabel(node.nodeType ?? node.nodeClass ?? 'Node');
     const lines = [
       label ? `<strong>${this.escapeHtml(this.truncateTooltipText(label, 90))}</strong>` : '',
       type ? `<strong>${this.escapeHtml(this.translationService.translate('Type'))}:</strong> ${this.escapeHtml(type)}` : '',
@@ -2717,7 +2715,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (subNodes.length === 0) {
       return;
     }
-    const isExpanded = this.groupExpandedState.get(nodeId) || false;
+    const isExpanded = this.groupExpandedState.get(nodeId) ?? false;
     if (isExpanded) {
       this.collapseGroupFromNodeId(nodeId, subNodes);
     }
@@ -2762,7 +2760,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     const matchedNodeIds: string[] = [];
     this.nodeSet.get().forEach(node => {
-      const label = (node.label || '').toString().toLowerCase();
+      const label = (node.label ?? '').toString().toLowerCase();
       if (!label.includes(needle)) {
         return;
       }

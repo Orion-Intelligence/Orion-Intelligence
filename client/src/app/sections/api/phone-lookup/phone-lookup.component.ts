@@ -37,13 +37,13 @@ export class PhoneLookupComponent implements OnInit {
   }
 
   get hasEntityIdentification(): boolean {
-    return !!(
-      this.result?.name ||
-      this.result?.formatted_address ||
-      this.result?.rating ||
-      this.result?.website ||
+    return [
+      this.result?.name,
+      this.result?.formatted_address,
+      this.result?.rating,
+      this.result?.website,
       this.result?.phone_numbers?.length
-    );
+    ].some(Boolean);
   }
 
   get hasKnowledgeGraph(): boolean {
@@ -54,11 +54,11 @@ export class PhoneLookupComponent implements OnInit {
   }
 
   get hasOpenSourceFootprints(): boolean {
-    return !!(
-      this.hasKnowledgeGraph ||
-      this.result?.emails?.length ||
+    return [
+      this.hasKnowledgeGraph,
+      this.result?.emails?.length,
       this.result?.web_footprints?.length
-    );
+    ].some(Boolean);
   }
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router) {}
@@ -104,24 +104,24 @@ export class PhoneLookupComponent implements OnInit {
         this.handleScanResponse(res);
       },
       error: err => {
-        this.errorMessage = err?.error?.detail || err?.message || 'OSINT Analysis failed.';
+        this.errorMessage = err?.error?.detail ?? err?.message ?? 'OSINT Analysis failed.';
       }
     });
   }
 
   private handleScanResponse(res: PhoneLookupResponse): void {
     if (res.status === 'pending' || res.status === 'processing') {
-      this.progress = res.progress || 10;
-      this.currentStep = res.step?.replace(/_/g, ' ') || 'Extracting Intelligence...';
+      this.progress = res.progress ?? 10;
+      this.currentStep = res.step?.replace(/_/g, ' ') ?? 'Extracting Intelligence...';
       return;
     }
 
     if (res.status === 'error') {
-      this.errorMessage = res.message || res.error_message || 'Scan failed to retrieve data.';
+      this.errorMessage = res.message ?? res.error_message ?? 'Scan failed to retrieve data.';
       return;
     }
 
     this.progress = 100;
-    this.result = res.result || res;
+    this.result = res.result ?? res;
   }
 }

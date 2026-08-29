@@ -23,6 +23,14 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
+    "@typescript-eslint/prefer-nullish-coalescing": [
+      "error",
+      {
+        "ignoreBooleanCoercion": true,
+        "ignoreConditionalTests": true,
+        "ignoreMixedLogicalExpressions": true
+      }
+    ],
     "no-dupe-class-members": "off",
     "@typescript-eslint/no-dupe-class-members": "error"
   },

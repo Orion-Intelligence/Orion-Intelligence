@@ -59,7 +59,7 @@ export class SecurityScanExportComponentComponent implements OnChanges {
           description: it.description || '',
           risk: it.risk || '',
           confidence: it.confidence || '',
-          proof: it.proof || undefined
+          proof: it.proof ?? undefined
         });
       }
     }

@@ -69,7 +69,7 @@ export class NexusChatService {
         this.cancelNexusChat();
         controller.abort();
       }, this.streamTimeoutMs);
-      const resumablePayload: NexusChatPayload = { ...payload, request_id: payload.request_id || this.newRequestId() };
+      const resumablePayload: NexusChatPayload = { ...payload, request_id: payload.request_id ?? this.newRequestId() };
       const state: NexusStreamState = { seen: 0, skip: 0, done: false };
 
       const readAttempt = async (remaining: number): Promise<void> => {
@@ -201,7 +201,7 @@ export class NexusChatService {
 
   private emitStreamLines(buffer: string, observer: { next: (value: NexusChatStreamChunk) => void; }, state: NexusStreamState): string {
     const lines = buffer.split(/\r?\n/);
-    const rest = lines.pop() || '';
+    const rest = lines.pop() ?? '';
     for (const line of lines) {
       if (!line.trim()) {
         continue;
@@ -261,8 +261,8 @@ export class NexusChatService {
   }
 
   private downloadName(url: string, disposition: string | null): string {
-    const match = /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i.exec(disposition || '');
-    const name = match?.[1] || match?.[2] || url.split('/').pop() || 'download';
+    const match = /filename\*=UTF-8''([^;]+)|filename="?([^";]+)"?/i.exec(disposition ?? '');
+    const name = match?.[1] ?? match?.[2] ?? url.split('/').pop() ?? 'download';
     return decodeURIComponent(name);
   }
 

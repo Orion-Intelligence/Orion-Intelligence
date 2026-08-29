@@ -50,22 +50,20 @@ export class GraphExportService {
   }
 
   protected getPdfLibs(): Observable<PdfExportLibraries> {
-    if (!this.pdfLibs$) {
-      this.pdfLibs$ = from(Promise.all([
-        import('jspdf'),
-        import('jspdf-autotable'),
-        loadPdfExportFontData()
-      ])).pipe(tap(([, autoTableModule, fontData]) => {
-        this.loadedAutoTable = autoTableModule.default;
-        if (!fontData) {
-          this.pdfLibs$ = null;
-        }
-      }), map(([jspdfModule, autoTableModule, fontData]) => ({
-        jsPDF: jspdfModule.default,
-        autoTable: autoTableModule.default,
-        fontData
-      })), shareReplay(1));
-    }
+    this.pdfLibs$ ??= from(Promise.all([
+      import('jspdf'),
+      import('jspdf-autotable'),
+      loadPdfExportFontData()
+    ])).pipe(tap(([, autoTableModule, fontData]) => {
+      this.loadedAutoTable = autoTableModule.default;
+      if (!fontData) {
+        this.pdfLibs$ = null;
+      }
+    }), map(([jspdfModule, autoTableModule, fontData]) => ({
+      jsPDF: jspdfModule.default,
+      autoTable: autoTableModule.default,
+      fontData
+    })), shareReplay(1));
     return this.pdfLibs$;
   }
 
@@ -92,7 +90,7 @@ export class GraphExportService {
     const rows = [
       ['type', 'id', 'label', 'from', 'to'],
       ...(payload.nodes || []).map(node => ['node', node.id, node.label, '', '']),
-      ...(payload.edges || []).map(edge => ['edge', edge.id, edge.label || '', edge.from, edge.to])
+      ...(payload.edges || []).map(edge => ['edge', edge.id, edge.label ?? '', edge.from, edge.to])
     ];
     const csv = rows.map(row => row.map(value => this.escapeCsvValue(value)).join(',')).join('\n');
     this.downloadText(csv, 'text/csv;charset=utf-8;', `${this.buildSafeFilename(payload)}-graph.csv`);
@@ -678,7 +676,7 @@ export class GraphExportService {
           values: normalizeRecordValues(block.values ?? {})
         }))
       }))
-      .filter(table => Boolean(Object.keys(table.values).length || table.rows?.length || table.recordBlocks?.length));
+      .filter(table => [Object.keys(table.values).length, table.rows?.length, table.recordBlocks?.length].some(Boolean));
     return {
       ...payload,
       title: normalizePdfText(payload.title),

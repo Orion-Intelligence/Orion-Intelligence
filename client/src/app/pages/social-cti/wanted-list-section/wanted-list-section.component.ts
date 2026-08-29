@@ -143,14 +143,14 @@ export class WantedListSectionComponent implements OnDestroy {
   }
 
   getRecordTitle(record: social_wanted): string {
-    return record?.name || record?.caption || record?.entity || record?.id || 'Unknown person';
+    return record?.name ?? record?.caption ?? record?.entity ?? record?.id ?? 'Unknown person';
   }
 
   getRecordMeta(record: social_wanted): string {
-    return record?.schema || record?.status || record?.authority || record?.program || record?.topics || record?.datasets || '-';
+    return record?.schema ?? record?.status ?? record?.authority ?? record?.program ?? record?.topics ?? record?.datasets ?? '-';
   }
 
   getRecordSummary(record: social_wanted): string {
-    return record?.description || record?.summary || record?.notes || record?.source_url || '';
+    return record?.description ?? record?.summary ?? record?.notes ?? record?.source_url ?? '';
   }
 }

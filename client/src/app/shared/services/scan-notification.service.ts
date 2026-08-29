@@ -77,7 +77,7 @@ export class ScanNotificationService {
   refreshCounts(): void {
     this.api.get<unknown>('scan-jobs/count').subscribe({
       next: response => {
-        this.totalScanCount.set(Number(this.asScanResponse(response)['total'] || 0));
+        this.totalScanCount.set(Number(this.asScanResponse(response)['total'] ?? 0));
       },
       error: () => void 0,
     });
@@ -161,7 +161,7 @@ export class ScanNotificationService {
     return this.api.post<ScanJobCreateApiResponse>('scan-jobs/create', {
       api_reference: request.apiReference,
       payload: request.payload,
-      metadata: request.metadata || {},
+      metadata: request.metadata ?? {},
       force_new: !!request.forceNew,
     });
   }
@@ -232,13 +232,13 @@ export class ScanNotificationService {
     }
 
     if (this.shouldRetryIncompleteUrlScanResponse(response, request)) {
-      return timer(request.pollDelayMs || this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
+      return timer(request.pollDelayMs ?? this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
     }
 
     const job = this.trackApiScanResponse(response, request);
     if (!job) {
       if (this.isPendingResponse(response)) {
-        const retry$ = timer(request.pollDelayMs || this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
+        const retry$ = timer(request.pollDelayMs ?? this.defaultPollDelayMs).pipe(switchMap(() => this.createApiScanRequest<T>(request)), switchMap(nextResponse => this.resolveApiScanResponse<T>(nextResponse, request)));
         return concat(of(response as T), retry$);
       }
       return of(response as T);
@@ -264,12 +264,12 @@ export class ScanNotificationService {
     }
     const job: ScanJob = {
       scan_id: String(scanId),
-      title: responseRecord.scan_title || request.metadata?.title || 'Scan',
-      target: responseRecord.scan_target || request.metadata?.target || '',
+      title: responseRecord.scan_title ?? request.metadata?.title ?? 'Scan',
+      target: responseRecord.scan_target ?? request.metadata?.target ?? '',
       api_reference: request.apiReference,
       payload: request.payload,
       response,
-      status: this.normalizeScanStatus(responseRecord.scan_status) || this.statusFromResponse(response),
+      status: this.normalizeScanStatus(responseRecord.scan_status) ?? this.statusFromResponse(response),
       seen: responseRecord.scan_seen ?? false,
       created_at: responseRecord.scan_created_at,
       updated_at: responseRecord.scan_updated_at,
@@ -335,7 +335,7 @@ export class ScanNotificationService {
 
   private watchJob(scanId: string): Observable<ScanJob> {
     return new Observable<ScanJob>(observer => {
-      const current = this.jobCache.get(scanId) || this.jobs().find(job => job.scan_id === scanId);
+      const current = this.jobCache.get(scanId) ?? this.jobs().find(job => job.scan_id === scanId);
       if (current) {
         observer.next(current);
       }
@@ -368,13 +368,13 @@ export class ScanNotificationService {
       this.resumeNextIncompleteJob();
       return;
     }
-    const job = this.jobCache.get(nextId) || this.jobs().find(item => item.scan_id === nextId);
+    const job = this.jobCache.get(nextId) ?? this.jobs().find(item => item.scan_id === nextId);
     this.queuedPollIds.delete(nextId);
     if (!job || !this.isIncomplete(job)) {
       this.runNextQueuedJob();
       return;
     }
-    this.startPolling(job, this.pollDelayByJob.get(job.scan_id) || this.defaultPollDelayMs);
+    this.startPolling(job, this.pollDelayByJob.get(job.scan_id) ?? this.defaultPollDelayMs);
   }
 
   private startPolling(job: ScanJob, pollDelayMs: number): void {
@@ -387,7 +387,7 @@ export class ScanNotificationService {
       catchError(error => of(this.mergePollResponse(job, {
         response: {
           status: 'error',
-          detail: error?.error?.detail || error?.message || 'Scan polling failed',
+          detail: error?.error?.detail ?? error?.message ?? 'Scan polling failed',
           step: 'failed',
         },
         updated_at: new Date().toISOString(),
@@ -410,7 +410,7 @@ export class ScanNotificationService {
   }
 
   private mergePollResponse(job: ScanJob, poll: ScanJobPollResponse): ScanJob {
-    const current = this.jobCache.get(job.scan_id) || this.jobs().find(item => item.scan_id === job.scan_id) || job;
+    const current = this.jobCache.get(job.scan_id) ?? this.jobs().find(item => item.scan_id === job.scan_id) ?? job;
     const response = poll?.response ?? current.response ?? {};
 
     return {
@@ -444,16 +444,16 @@ export class ScanNotificationService {
   getError(job: ScanJob): string {
     const response = this.asScanResponse(job.response);
     return this.getStatus(job) === 'error'
-      ? String(response?.message || response?.detail || 'Scan failed')
+      ? String(response?.message ?? response?.detail ?? 'Scan failed')
       : '';
   }
 
   private statusFromResponse(response: unknown): ScanJobStatus {
     const responseRecord = this.asScanResponse(response);
     const nested = this.asScanResponse(responseRecord.result);
-    const raw = String(nested.status || responseRecord.status || responseRecord.scan_status || '').toLowerCase();
+    const raw = String(nested.status ?? responseRecord.status ?? responseRecord.scan_status ?? '').toLowerCase();
     const progress = Number(nested.progress ?? responseRecord.progress);
-    const step = String(nested.step || responseRecord.step || '').toLowerCase();
+    const step = String(nested.step ?? responseRecord.step ?? '').toLowerCase();
     if (raw === 'error' || raw === 'failed' || raw === 'failure') {
       return 'error';
     }
@@ -493,7 +493,7 @@ export class ScanNotificationService {
 
   private stepFromResponse(response: unknown, status: ScanJobStatus): string {
     const responseRecord = this.asScanResponse(response);
-    return String(this.asScanResponse(responseRecord.result).step || responseRecord.step || status);
+    return String(this.asScanResponse(responseRecord.result).step ?? responseRecord.step ?? status);
   }
 
   private cacheJob(job: ScanJob, emit = true): void {
@@ -551,7 +551,7 @@ export class ScanNotificationService {
       if (priorityA !== priorityB) {
         return priorityA - priorityB;
       }
-      return new Date(b.created_at || b.updated_at || 0).getTime() - new Date(a.created_at || a.updated_at || 0).getTime();
+      return new Date(b.created_at ?? b.updated_at ?? 0).getTime() - new Date(a.created_at ?? a.updated_at ?? 0).getTime();
     });
   }
 
@@ -572,9 +572,9 @@ export class ScanNotificationService {
   private isPendingResponse(response: unknown): boolean {
     const responseRecord = this.asScanResponse(response);
     const nested = this.asScanResponse(responseRecord.result);
-    const status = String(nested.status || responseRecord.status || responseRecord.scan_status || '').toLowerCase();
+    const status = String(nested.status ?? responseRecord.status ?? responseRecord.scan_status ?? '').toLowerCase();
     const progress = Number(nested.progress ?? responseRecord.progress);
-    const step = String(nested.step || responseRecord.step || '').toLowerCase();
+    const step = String(nested.step ?? responseRecord.step ?? '').toLowerCase();
     if (progress >= 100 && (step.includes('done') || step.includes('complete') || step.includes('success'))) {
       return false;
     }
@@ -584,10 +584,10 @@ export class ScanNotificationService {
 
   private shouldRetryIncompleteUrlScanResponse(response: unknown, request: ScanJobStartRequest): boolean {
     const apiReference = String(request.apiReference || '').replace(/^\/?api\//, '');
-    const scanType = String(request.payload?.['scanType'] || '').toLowerCase();
+    const scanType = String(request.payload?.['scanType'] ?? '').toLowerCase();
     const responseRecord = this.asScanResponse(response);
     const nested = this.asScanResponse(responseRecord.result);
-    const status = String(nested.status || responseRecord.status || responseRecord.scan_status || '').toLowerCase();
+    const status = String(nested.status ?? responseRecord.status ?? responseRecord.scan_status ?? '').toLowerCase();
     if (apiReference !== 'urlscan/domain' || !['seo', 'repo'].includes(scanType)) {
       return false;
     }

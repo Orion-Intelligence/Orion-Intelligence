@@ -24,7 +24,7 @@ export class AnomalyMapRenderer {
       return;
     }
 
-    const renderKey = JSON.stringify(anomalyResult || null);
+    const renderKey = JSON.stringify(anomalyResult ?? null);
     if (renderKey === this.renderKey) {
       return;
     }
@@ -82,7 +82,7 @@ export class AnomalyMapRenderer {
       nominal: '#22c55e',
       unknown: '#3b82f6',
     };
-    const color = colors[alertLevel || 'unknown'] || colors['unknown'];
+    const color = colors[alertLevel ?? 'unknown'] || colors['unknown'];
     return {
       color,
       weight: 2,

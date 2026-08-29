@@ -64,11 +64,11 @@ export class DashboardService {
     const requestParams: UnknownRecord = { ...asUnknownRecord(paramModel), page: this.consolidatedParamModel.page };
     let baseParams: UnknownRecord = { ...requestParams, ...this.selectedFilters() };
     if (apiEndpoint === 'search/defacement') {
-      baseParams['category'] = requestParams['category'] || 'all';
-      baseParams['content'] = baseParams['content'] || requestParams['content'] || 'all';
+      baseParams['category'] = requestParams['category'] ?? 'all';
+      baseParams['content'] = baseParams['content'] ?? requestParams['content'] ?? 'all';
     }
     if (apiEndpoint === 'search/exploit' || apiEndpoint === 'search/apt-intel') {
-      const resultCount = Number(baseParams['platform_result_count'] || 0);
+      const resultCount = Number(baseParams['platform_result_count'] ?? 0);
       baseParams['platform_result_count'] = Math.max(Number.isFinite(resultCount) ? resultCount : 0, 100);
     }
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
@@ -145,13 +145,15 @@ export class DashboardService {
     payload['must'] = this.app_service.configData().localSettings.entityFilterCondition;
     this.syncQueryParamsToUrl(payload);
     return this.apiService.post<ConsolidatedCallbackModel>(apiEndpoint, payload).pipe(takeUntil(this.cancelRequest$), map((response: ConsolidatedCallbackModel) => {
-      const hasAnyResults = !!(response?.leak_model?.Result?.length ||
-                response?.exploit_model?.Result?.length ||
-                response?.apt_model?.Result?.length ||
-                response?.malware_model?.Result?.length ||
-                response?.chat_model?.Result?.length ||
-                response?.generic_model?.Result?.length ||
-                response?.defacement_model?.Result?.length);
+      const hasAnyResults = [
+        response?.leak_model?.Result?.length,
+        response?.exploit_model?.Result?.length,
+        response?.apt_model?.Result?.length,
+        response?.malware_model?.Result?.length,
+        response?.chat_model?.Result?.length,
+        response?.generic_model?.Result?.length,
+        response?.defacement_model?.Result?.length,
+      ].some(Boolean);
       return {
         success: true,
         isEmpty: !hasAnyResults,
@@ -210,7 +212,7 @@ export class DashboardService {
         handlers?.setSaving?.(false);
       },
       error: (error) => {
-        handlers?.setError?.(error?.error?.detail || error?.error?.message || 'Unable to save comment.');
+        handlers?.setError?.(error?.error?.detail ?? error?.error?.message ?? 'Unable to save comment.');
         handlers?.setSaving?.(false);
       },
     });
@@ -228,7 +230,7 @@ export class DashboardService {
         handlers?.setSaving?.(false);
       },
       error: (error) => {
-        handlers?.setError?.(error?.error?.detail || error?.error?.message || 'Unable to delete comment.');
+        handlers?.setError?.(error?.error?.detail ?? error?.error?.message ?? 'Unable to delete comment.');
         handlers?.setSaving?.(false);
       },
     });

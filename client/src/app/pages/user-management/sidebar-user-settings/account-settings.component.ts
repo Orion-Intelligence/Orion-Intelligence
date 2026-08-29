@@ -61,7 +61,7 @@ export class AccountSettingsComponent implements OnInit {
   setItemsFromPreferences() {
     const userTheme = this.userSessionData?.user?.theme;
     const preferenceTheme = this.userSessionData?.user?.preferences?.["theme"];
-    const theme = userTheme || preferenceTheme || 'dark-theme';
+    const theme = userTheme ?? preferenceTheme ?? 'dark-theme';
     this.isDarkMode = theme === 'dark-theme';
     this.isProfileVisible = this.userSessionData?.user?.preferences?.["profile_visible"] !== false;
     const languagePreference = this.userSessionData?.user?.preferences?.["language"];
@@ -101,7 +101,7 @@ export class AccountSettingsComponent implements OnInit {
           ...state.user,
           theme,
           preferences: {
-            ...(state.user.preferences || {}),
+            ...(state.user.preferences ?? {}),
             theme
           }
         }
@@ -121,7 +121,7 @@ export class AccountSettingsComponent implements OnInit {
       return;
     }
     const preferences = {
-      ...(this.userSessionData.user.preferences || {}),
+      ...(this.userSessionData.user.preferences ?? {}),
       profile_visible: this.isProfileVisible
     };
     this.userSessionData.user.preferences = preferences;
@@ -132,7 +132,7 @@ export class AccountSettingsComponent implements OnInit {
     this.selectedLanguage = this.translationService.getSupportedLanguage(this.selectedLanguage, this.translationService.getSystemLanguage());
     this.hasLanguagePreference = true;
     const preferences = {
-      ...(this.userSessionData.user.preferences || {}),
+      ...(this.userSessionData.user.preferences ?? {}),
       language: this.selectedLanguage
     };
     this.userSessionData.user.preferences = preferences;
@@ -145,7 +145,7 @@ export class AccountSettingsComponent implements OnInit {
         user: {
           ...state.user,
           preferences: {
-            ...(state.user.preferences || {}),
+            ...(state.user.preferences ?? {}),
             language: this.selectedLanguage
           }
         }
@@ -166,7 +166,7 @@ export class AccountSettingsComponent implements OnInit {
       theme: 'dark-theme' | 'light-theme';
       profile_visible: boolean;
     } = {
-      ...(this.userSessionData.user.preferences || {}),
+      ...(this.userSessionData.user.preferences ?? {}),
       theme,
       profile_visible: this.isProfileVisible
     };
@@ -216,7 +216,7 @@ export class AccountSettingsComponent implements OnInit {
           this.sensitiveAction = null;
           this.recoveryKey = response.recovery_key;
         },
-        error: (err) => this.confirmationError = err?.error?.detail || 'Invalid password'
+        error: (err) => this.confirmationError = err?.error?.detail ?? 'Invalid password'
       });
       return;
     }
@@ -240,7 +240,7 @@ export class AccountSettingsComponent implements OnInit {
           this.isPasswordSectionOpen = false;
         }
       },
-      error: (err) => this.confirmationError = err?.error?.detail || 'Invalid password'
+      error: (err) => this.confirmationError = err?.error?.detail ?? 'Invalid password'
     });
   }
 
@@ -268,7 +268,7 @@ export class AccountSettingsComponent implements OnInit {
         }
       },
       error: (err) => {
-        const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
+        const message = err?.error?.detail ?? this.translationService.translate('Failed to upload image');
         this.messageNotificationService.show(message);
       }
     });

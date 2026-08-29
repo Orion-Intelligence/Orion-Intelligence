@@ -25,7 +25,7 @@ export class SuggestionService {
         .set('field', field)
         .set('q', query.trim())
         .set('limit', query.trim() ? '25' : '50');
-      Object.entries(extraParams || {}).forEach(([key, value]) => {
+      Object.entries(extraParams ?? {}).forEach(([key, value]) => {
         if (value) {
           params = params.set(key, value);
         }

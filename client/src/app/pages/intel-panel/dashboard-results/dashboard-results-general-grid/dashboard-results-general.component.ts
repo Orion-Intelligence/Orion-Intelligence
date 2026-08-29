@@ -112,7 +112,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   }
 
   getDisplayUrl(item: GeneralResultItem | LeakResultItem): string {
-    return item.m_url || item.m_source_url || item.m_base_url || '';
+    return item.m_url ?? item.m_source_url ?? item.m_base_url ?? '';
   }
 
   getReportLink(item: GeneralResultItem | LeakResultItem): string[] {

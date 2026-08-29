@@ -199,7 +199,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
     const canAccessFeeder = this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
-    const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || (this.isAnalyst() && (this.appService.userSessionData().user.permissions || []).includes('case_management'));
+    const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || (this.isAnalyst() && (this.appService.userSessionData().user.permissions ?? []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
 
     if (this.isAdmin()) {

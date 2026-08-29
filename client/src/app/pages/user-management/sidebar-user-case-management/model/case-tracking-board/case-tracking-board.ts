@@ -67,7 +67,7 @@ export class CaseTrackingBoard implements OnInit {
       },
       error: err => {
         this.isLoading = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translationService.translate('Failed to load cases'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translationService.translate('Failed to load cases'));
       }
     });
   }
@@ -230,7 +230,7 @@ export class CaseTrackingBoard implements OnInit {
       },
       error: err => {
         this.isSavingMove = false;
-        this.messageNotificationService.show(err?.error?.detail || err?.message || this.translationService.translate('Failed to update case status'));
+        this.messageNotificationService.show(err?.error?.detail ?? err?.message ?? this.translationService.translate('Failed to update case status'));
       }
     });
   }
@@ -262,7 +262,7 @@ export class CaseTrackingBoard implements OnInit {
     if (!value) {
       return '-';
     }
-    return this.workflow.find(item => item.value === value)?.label || this.formatLabel(value);
+    return this.workflow.find(item => item.value === value)?.label ?? this.formatLabel(value);
   }
 
   getCaseTypeLabel(caseItem: Case): string {

@@ -94,7 +94,7 @@ export class DashboardComponent implements AfterViewInit, OnInit {
       return null;
     }
 
-    return outlet?.activatedRouteData?.['animation'] || null;
+    return outlet?.activatedRouteData?.['animation'] ?? null;
   }
 
   isCtiGraph(): boolean {

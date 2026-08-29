@@ -11,9 +11,7 @@ export class InsightCacheService {
   constructor(private apiService: ApiService) {}
 
   getInsight(): Observable<unknown> {
-    if (!this.insight$) {
-      this.insight$ = this.apiService.get<unknown>('insight').pipe(shareReplay(1));
-    }
+    this.insight$ ??= this.apiService.get<unknown>('insight').pipe(shareReplay(1));
     return this.insight$;
   }
 

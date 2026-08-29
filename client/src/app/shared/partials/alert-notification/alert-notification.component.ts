@@ -112,7 +112,7 @@ export class AlertNotificationComponent implements OnChanges {
     this.isLoadingMore = true;
     this.apiService.get<AlertNotificationPage>(`profile/alerts?paginate=true&compact=true&unseen_only=true&include_counts=true&page=${nextPage}&limit=${this.batchSize}`).subscribe({
       next: response => {
-        const items = (response.items || []).map((n: AlertNotification) => ({
+        const items = (response.items ?? []).map((n: AlertNotification) => ({
           ...n,
           lastSeen: n?.lastSeen ? new Date(n.lastSeen) : n?.lastSeen
         }));
@@ -124,10 +124,10 @@ export class AlertNotificationComponent implements OnChanges {
           }, 800);
           return;
         }
-        this.totalCount = response?.total || 0;
-        this.currentPage = response?.page || nextPage;
+        this.totalCount = response?.total ?? 0;
+        this.currentPage = response?.page ?? nextPage;
         this.hasMore = !!response?.has_more;
-        this.countsByType = response?.counts_by_type || {};
+        this.countsByType = response?.counts_by_type ?? {};
         this.isLoadingMore = false;
         this.isLoadMoreTriggered = false;
         this.appendNotificationsIncrementally(items, reset);
@@ -215,7 +215,7 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   seeDetails(_category: string, hash: string) {
-    const notification = this.alertNotifications.find(n => n.hash === hash) || { categoryName: _category };
+    const notification = this.alertNotifications.find(n => n.hash === hash) ?? { categoryName: _category };
     if (!this.licenseService.canViewAlert(notification)) {
       this.messageNotificationService.show(this.alertLicenseWarning);
       return;
@@ -227,7 +227,7 @@ export class AlertNotificationComponent implements OnChanges {
           ? response
           : (Array.isArray(response?.items) ? response.items : []);
         this.appService.userSessionData().alerts = alerts;
-        const selectedAlert = alerts.find(a => a.data_hash === hash) || null;
+        const selectedAlert = alerts.find(a => a.data_hash === hash) ?? null;
         if (!selectedAlert) {
           this.isFetchingDetail = false;
           this.messageNotificationService.show(this.alertLicenseWarning);
@@ -307,7 +307,7 @@ export class AlertNotificationComponent implements OnChanges {
     event?.stopPropagation();
     this.scanNotificationService.deleteScan(job).subscribe({
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to stop scan');
+        this.messageNotificationService.show(err?.error?.detail ?? 'Failed to stop scan');
       },
     });
   }
@@ -353,7 +353,7 @@ export class AlertNotificationComponent implements OnChanges {
           this.closeScanDeleteConfirmation();
         },
         error: err => {
-          this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scan');
+          this.messageNotificationService.show(err?.error?.detail ?? 'Failed to delete scan');
           this.closeScanDeleteConfirmation();
         },
       });
@@ -368,7 +368,7 @@ export class AlertNotificationComponent implements OnChanges {
           this.closeScanDeleteConfirmation();
         },
         error: err => {
-          this.messageNotificationService.show(err?.error?.detail || 'Failed to clear scans');
+          this.messageNotificationService.show(err?.error?.detail ?? 'Failed to clear scans');
           this.closeScanDeleteConfirmation();
         },
       });
@@ -377,7 +377,7 @@ export class AlertNotificationComponent implements OnChanges {
 
     this.scanNotificationService.deleteAllScans().subscribe({
       next: response => {
-        const deleted = Number(asUnknownRecord(response)['deleted'] || 0);
+        const deleted = Number(asUnknownRecord(response)['deleted'] ?? 0);
         if (deleted > 0) {
           this.messageNotificationService.show('Scans deleted successfully!', 'success');
         }
@@ -387,7 +387,7 @@ export class AlertNotificationComponent implements OnChanges {
         this.closeScanDeleteConfirmation();
       },
       error: err => {
-        this.messageNotificationService.show(err?.error?.detail || 'Failed to delete scans');
+        this.messageNotificationService.show(err?.error?.detail ?? 'Failed to delete scans');
         this.closeScanDeleteConfirmation();
       },
     });
@@ -444,7 +444,7 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   isNetworkScan(job: ScanJob): boolean {
-    const reference = String(job.api_reference || '').replace(/^\/?api\//, '');
+    const reference = String(job.api_reference ?? '').replace(/^\/?api\//, '');
     return reference.startsWith('netintel/') || reference.startsWith('urlscan/');
   }
 
@@ -491,7 +491,7 @@ export class AlertNotificationComponent implements OnChanges {
             this.close();
           },
           error: (err) => {
-            const mess = err?.error?.detail || 'Clear all alerts failed';
+            const mess = err?.error?.detail ?? 'Clear all alerts failed';
             this.messageNotificationService.show(mess);
           },
         });

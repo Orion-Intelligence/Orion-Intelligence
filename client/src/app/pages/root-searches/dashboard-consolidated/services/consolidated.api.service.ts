@@ -172,7 +172,7 @@ export class ConsolidatedApiService {
           meta: null,
           grade: '—',
           hasError: true,
-          errorMessage: err?.error?.detail || `Failed to scan ${scanType}.`,
+          errorMessage: err?.error?.detail ?? `Failed to scan ${scanType}.`,
         } as ConsolidatedScanResults);
       }));
   }

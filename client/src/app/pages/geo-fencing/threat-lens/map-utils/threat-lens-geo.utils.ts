@@ -35,7 +35,7 @@ function buildThreatLensLegend( categoryData: ThreatLensCategoryMapData[], arcCo
     label: category.categoryLabel,
     colorHex: toThreatLensHexColor(category.color),
     countryCount: category.countryCounts.length,
-    arcCount: arcCountByCategory.get(category.categoryKey) || 0,
+    arcCount: arcCountByCategory.get(category.categoryKey) ?? 0,
     totalResults: category.totalResults,
   }));
 }
@@ -129,7 +129,7 @@ function extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] 
     }
 
     const source = asUnknownRecord(value);
-    const ip = String(source['ip'] || source['ip_address'] || source['host'] || '').trim();
+    const ip = String(source['ip'] ?? source['ip_address'] ?? source['host'] ?? '').trim();
     if (!ip) {
       return;
     }

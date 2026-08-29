@@ -101,7 +101,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   }
 
   private prepareMetadata(): void {
-    this.content = this.defacementData?.m_content || '';
+    this.content = this.defacementData?.m_content ?? '';
     this.arrayKeys = [];
     if (Array.isArray(this.defacementData?.m_section) && this.defacementData.m_section.length > 0) {
       this.arrayKeys.push('m_section');
@@ -128,16 +128,16 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
   }
 
   normalizeDisplayUrl(url?: string | string[] | null): string {
-    const rawUrl = Array.isArray(url) ? (url[0] || '') : (url || '');
+    const rawUrl = Array.isArray(url) ? (url[0] || '') : (url ?? '');
     return normalizeDisplayUrlUtil(rawUrl, '-');
   }
 
   get reportDocId(): string {
     return this.defacementData?.m_hash
-      || this.defacementData?._id
-      || this.defacementData?.doc_id
-      || this.defacementData?.m_document_id
-      || this.route.snapshot.paramMap.get('m_hash')
-      || '';
+      ?? this.defacementData?._id
+      ?? this.defacementData?.doc_id
+      ?? this.defacementData?.m_document_id
+      ?? this.route.snapshot.paramMap.get('m_hash')
+      ?? '';
   }
 }

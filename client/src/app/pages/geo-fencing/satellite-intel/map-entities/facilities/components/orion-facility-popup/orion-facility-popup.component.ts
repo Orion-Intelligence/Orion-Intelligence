@@ -26,7 +26,7 @@ export class OrionFacilityPopupComponent {
 
   get title(): string {
     const name = this.feature?.name?.trim();
-    return name || 'Feature';
+    return name ?? 'Feature';
   }
 
   private buildRows(feature: OrionSatelliteFeature | null): { label: string; value: string; stacked: boolean }[] {

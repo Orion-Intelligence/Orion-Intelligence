@@ -104,7 +104,7 @@ export class ThreatLensIpMarkerRenderer {
 
   showAccuracyRadius(markerGraphic: ThreatLensMapGraphic): void {
     const center = this.resolveMarkerPoint({
-      ip: String(markerGraphic?.attributes?.ip || ''),
+      ip: String(markerGraphic?.attributes?.ip ?? ''),
       lat: markerGraphic?.geometry?.latitude,
       lon: markerGraphic?.geometry?.longitude,
     });
@@ -185,7 +185,7 @@ export class ThreatLensIpMarkerRenderer {
       attributes: {
         role: 'ip-scan-marker',
         ip: record.ip,
-        network: record.network || '',
+        network: record.network ?? '',
         accuracyRadius: record.accuracyRadius,
         distanceKm: record.distanceKm,
       },
@@ -203,7 +203,7 @@ export class ThreatLensIpMarkerRenderer {
   }
 
   private getGroupStats(records: ThreatLensIpRecord[]): ThreatLensIpGroupStats {
-    const networks = new Set(records.map((record) => String(record.network || record.ip || '').trim()).filter(Boolean));
+    const networks = new Set(records.map((record) => String(record.network ?? record.ip ?? '').trim()).filter(Boolean));
     const radii = records
       .map((record) => Number(record.accuracyRadius))
       .filter((value) => Number.isFinite(value) && value > 0);
@@ -354,7 +354,7 @@ export class ThreatLensIpMarkerRenderer {
       return records.filter((record) => Boolean(record?.ip));
     }
 
-    const ip = String(graphic?.attributes?.ip || '').trim();
+    const ip = String(graphic?.attributes?.ip ?? '').trim();
     if (!ip) {
       return [];
     }
@@ -363,7 +363,7 @@ export class ThreatLensIpMarkerRenderer {
       ip,
       lat: Number(graphic?.geometry?.latitude),
       lon: Number(graphic?.geometry?.longitude),
-      network: String(graphic?.attributes?.network || ''),
+      network: String(graphic?.attributes?.network ?? ''),
       accuracyRadius: Number(graphic?.attributes?.accuracyRadius),
       distanceKm: Number(graphic?.attributes?.distanceKm),
     }];
@@ -371,8 +371,8 @@ export class ThreatLensIpMarkerRenderer {
 
   private getGraphicPoint(graphic: ThreatLensMapGraphic): ThreatLensCoordinates {
     return {
-      lat: Number(graphic?.geometry?.latitude || 0),
-      lon: ThreatLensGeoUtils.normalizeThreatLensLongitude(Number(graphic?.geometry?.longitude || 0)),
+      lat: Number(graphic?.geometry?.latitude ?? 0),
+      lon: ThreatLensGeoUtils.normalizeThreatLensLongitude(Number(graphic?.geometry?.longitude ?? 0)),
     };
   }
 
@@ -397,10 +397,10 @@ export class ThreatLensIpMarkerRenderer {
 
   private getGraphicRenderKey(graphic: ThreatLensMapGraphic): string {
     return [
-      graphic?.attributes?.role || '',
-      graphic?.attributes?.ip || graphic?.attributes?.count || '',
-      Number(graphic?.geometry?.latitude || 0).toFixed(5),
-      Number(graphic?.geometry?.longitude || 0).toFixed(5),
+      graphic?.attributes?.role ?? '',
+      graphic?.attributes?.ip ?? graphic?.attributes?.count ?? '',
+      Number(graphic?.geometry?.latitude ?? 0).toFixed(5),
+      Number(graphic?.geometry?.longitude ?? 0).toFixed(5),
     ].join(':');
   }
 
@@ -444,7 +444,7 @@ export class ThreatLensIpMarkerRenderer {
 
     const orderedCells = this.orderDistributionCells(Array.from(cells.values()).map((cell) => ({
       ...cell,
-      items: cell.items.slice().sort((left, right) => ThreatLensGeoUtils.hashThreatLensString(String(left.attributes?.ip || '')) - ThreatLensGeoUtils.hashThreatLensString(String(right.attributes?.ip || ''))),
+      items: cell.items.slice().sort((left, right) => ThreatLensGeoUtils.hashThreatLensString(String(left.attributes?.ip ?? '')) - ThreatLensGeoUtils.hashThreatLensString(String(right.attributes?.ip ?? ''))),
     })), limit);
     const selected: ThreatLensMapGraphic[] = [];
     let round = 0;
@@ -748,7 +748,7 @@ export class ThreatLensIpMarkerRenderer {
 
   private buildGraphicSymbol(graphic: ThreatLensMapGraphic, markerSize: number): EsriSymbol {
     if (this.isClusterGraphic(graphic)) {
-      return this.buildClusterSymbol(Number(graphic?.attributes?.count || 0));
+      return this.buildClusterSymbol(Number(graphic?.attributes?.count ?? 0));
     }
     return this.buildMarkerSymbol(markerSize);
   }

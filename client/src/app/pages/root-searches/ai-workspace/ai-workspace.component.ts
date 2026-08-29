@@ -192,7 +192,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     this.cancelMessageEdit();
     this.detachActiveNexusRequest();
-    const requestId = this.resumedRequestId || crypto.randomUUID();
+    const requestId = this.resumedRequestId ?? crypto.randomUUID();
     this.resumedRequestId = null;
 
     const sendToSession = (sessionId: string, sessionMessages: AiWorkspaceMessage[], shouldNameNewChat = false) => {
@@ -270,7 +270,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
             this.cdr.detectChanges();
           }
           if (chunk.error) {
-            fail(chunk.response || this.translationService.translate('Something went wrong. Try again.'));
+            fail(chunk.response ?? this.translationService.translate('Something went wrong. Try again.'));
             return;
           }
           if (chunk.delta) {
@@ -845,7 +845,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
   private mapSession(session: NexusChatSession): AiChatSession {
     return {
-      sessionId: session.session_id || session.id || '',
+      sessionId: session.session_id ?? session.id ?? '',
       title: session.title,
       updatedAt: session.updated_at,
       messageCount: session.message_count ?? (Array.isArray(session.messages) ? session.messages.length : 0),

@@ -85,19 +85,19 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   }
 
   get totalHits(): number {
-    return Number(this.responseData?.total_hits || 0);
+    return Number(this.responseData?.total_hits ?? 0);
   }
 
   get pageCount(): number {
-    return Number(this.responseData?.page_count || 0);
+    return Number(this.responseData?.page_count ?? 0);
   }
 
   get currentBatchSize(): number {
-    return Number(this.responseData?.batch_size || (this.query.trim() ? this.batchSize : this.emptyQueryBatchSize));
+    return Number(this.responseData?.batch_size ?? (this.query.trim() ? this.batchSize : this.emptyQueryBatchSize));
   }
 
   get activeDateRange(): string {
-    return this.dashboardService.selectedFilters()['daterange'] || '';
+    return this.dashboardService.selectedFilters()['daterange'] ?? '';
   }
 
   canAccessEventManagement(): boolean {
@@ -163,7 +163,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
           this.expandedResultIndex = this.records.length === 1 ? 0 : null;
         },
         error: (error) => {
-          this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to search SIEM events');
+          this.errorMessage = error?.error?.detail ?? this.translationService.translate('Failed to search SIEM events');
           this.displayQuery = this.query;
         }
       });
@@ -176,10 +176,10 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   getResultTitle(item: SiemEventRecord, idx: number): string {
     const raw = this.stringifyPrimitive(item?.raw);
     const compactRaw = raw.length > 90 ? `${raw.slice(0, 87)}...` : raw;
-    return this.stringifyPrimitive(item?.event_type ||
-      item?.source ||
-      item?.host ||
-      compactRaw ||
+    return this.stringifyPrimitive(item?.event_type ??
+      item?.source ??
+      item?.host ??
+      compactRaw ??
       `Event ${idx + 1}`);
   }
 
@@ -192,7 +192,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   }
 
   getEventTimestamp(item: SiemEventRecord): string {
-    return this.stringifyPrimitive(item?.timestamp || item?.ingested_at);
+    return this.stringifyPrimitive(item?.timestamp ?? item?.ingested_at);
   }
 
   getExtractedIocs(item: SiemEventRecord): { name: string; values: string[] }[] {

@@ -11,8 +11,8 @@ function buildCountryFeatureIndex(features: ThreatLensMapGraphic[], countryNameF
   };
 
   for (const feature of features) {
-    const attributes = feature?.attributes || {};
-    const area = Number(attributes['Shape__Area'] || 0);
+    const attributes = feature?.attributes ?? {};
+    const area = Number(attributes['Shape__Area'] ?? 0);
     const candidateFields = [
       ...countryCodeFields,
       ...countryNameFields,
@@ -61,7 +61,7 @@ function collectArcPairs(documentCountryGroups: string[][], toCountryKey: (value
     for (let i = 0; i < uniqueKeys.length - 1; i += 1) {
       for (let j = i + 1; j < uniqueKeys.length; j += 1) {
         const pairKey = [uniqueKeys[i], uniqueKeys[j]].sort().join('||');
-        pairCount.set(pairKey, (pairCount.get(pairKey) || 0) + 1);
+        pairCount.set(pairKey, (pairCount.get(pairKey) ?? 0) + 1);
       }
     }
   }

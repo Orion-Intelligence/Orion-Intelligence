@@ -74,9 +74,9 @@ export class SocialDefaultListSectionComponent {
   getProfileBio(platformData: social_profile): string {
     const details = asUnknownRecord(platformData.profile_details);
     const bio = platformData.profile_details?.bio
-      || details['m_content']
-      || platformData.meta.description
-      || '';
+      ?? details['m_content']
+      ?? platformData.meta.description
+      ?? '';
     return typeof bio === 'string' ? bio : String(bio);
   }
 
@@ -100,7 +100,7 @@ export class SocialDefaultListSectionComponent {
   getPlatformTimestamp(platformData: social_profile): string {
     const metadata = asUnknownRecord(platformData.meta);
     const details = asUnknownRecord(platformData.profile_details);
-    const timestamp = platformData.meta.timestamp || details['m_date'] || metadata['timestamp'] || metadata['Timestamp'] || metadata['m_date'];
+    const timestamp = platformData.meta.timestamp ?? details['m_date'] ?? metadata['timestamp'] ?? metadata['Timestamp'] ?? metadata['m_date'];
     return timestamp ? String(timestamp) : '';
   }
 

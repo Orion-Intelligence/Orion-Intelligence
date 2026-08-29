@@ -26,7 +26,7 @@ export class DirectoryListComponent implements AfterViewInit, OnDestroy {
   constructor(public directoryService: DirectoryService) {
     this.directoryData$ = this.directoryService.directoryData$;
     this.dataSub = this.directoryData$.subscribe(data => {
-      this.totalItems = data?.mDirectoryCallbackLinks?.length || 0;
+      this.totalItems = data?.mDirectoryCallbackLinks?.length ?? 0;
     });
   }
 

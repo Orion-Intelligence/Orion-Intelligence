@@ -47,7 +47,7 @@ export class SatelliteAircraftTrackingService {
       return record['aircraft'] as SatelliteLiveAircraft[];
     }
 
-    const status = String(record['status'] || '').toLowerCase();
+    const status = String(record['status'] ?? '').toLowerCase();
     if (status === 'pending' || status === 'busy') {
       return null;
     }
@@ -57,7 +57,7 @@ export class SatelliteAircraftTrackingService {
 
   getFeedIssue(payload: unknown): string | null {
     const record = asUnknownRecord(payload);
-    const issue = record['error'] || record['error_message'] || record['last_error'];
+    const issue = record['error'] ?? record['error_message'] ?? record['last_error'];
     return issue ? String(issue) : null;
   }
 

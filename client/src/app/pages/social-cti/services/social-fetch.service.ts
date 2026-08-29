@@ -86,7 +86,7 @@ export class SocialFetchService {
       take(1),
       map(response => {
         if (response?.status === 'error') {
-          throw new Error(response?.message || response?.error_message || 'Phone lookup failed');
+          throw new Error(response?.message ?? response?.error_message ?? 'Phone lookup failed');
         }
         return response?.result ?? response;
       }),

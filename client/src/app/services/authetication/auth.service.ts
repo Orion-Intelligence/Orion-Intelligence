@@ -223,7 +223,7 @@ export class AuthService {
       this.denyAccess(deniedMessage);
       return false;
     }
-    this.passwordResetToken = sessionData.password_reset_required ? sessionData.password_reset_token || null : null;
+    this.passwordResetToken = sessionData.password_reset_required ? sessionData.password_reset_token ?? null : null;
     this.setAuthenticated();
     this.startTokenRefresh();
     return true;

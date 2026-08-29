@@ -36,8 +36,8 @@ export class ChatShareComponent implements OnInit, OnDestroy {
     });
     this.previousTitle = this.title.getTitle();
     this.title.setTitle(this.translationService.translate('Shared Chat'));
-    const shareId = this.route.snapshot.paramMap.get('shareId') || '';
-    const token = this.route.snapshot.queryParamMap.get('token') || '';
+    const shareId = this.route.snapshot.paramMap.get('shareId') ?? '';
+    const token = this.route.snapshot.queryParamMap.get('token') ?? '';
     if (!shareId || !token) {
       this.errorMessage = this.translationService.translate('Invalid share link.');
       this.isLoading = false;
@@ -54,7 +54,7 @@ export class ChatShareComponent implements OnInit, OnDestroy {
         this.isLoading = false;
       },
       error: err => {
-        this.errorMessage = err?.error?.detail || this.translationService.translate('This share link is unavailable.');
+        this.errorMessage = err?.error?.detail ?? this.translationService.translate('This share link is unavailable.');
         this.isLoading = false;
       }
     });

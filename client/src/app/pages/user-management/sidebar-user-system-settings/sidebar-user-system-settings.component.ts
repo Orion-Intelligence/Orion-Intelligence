@@ -164,7 +164,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           }
         },
         error: (err) => {
-          const message = err?.error?.detail || this.translationService.translate('Failed to upload image');
+          const message = err?.error?.detail ?? this.translationService.translate('Failed to upload image');
           this.messageNotificationService.show(message);
         }
       });
@@ -359,7 +359,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     }).subscribe({
       next: (response) => {
         const current = this.appService.configData();
-        const appSettings = new AppSettingsModel({ ...current.appSettings, ...(response?.settings || response?.appSettings || {}), backup_schedule: value ? '1' : '0' });
+        const appSettings = new AppSettingsModel({ ...current.appSettings, ...(response?.settings ?? response?.appSettings ?? {}), backup_schedule: value ? '1' : '0' });
         this.appService.configData.set(new ConfigSettings(appSettings, current.localSettings));
         this.messageNotificationService.show(this.translationService.translate('Settings updated successfully'),'success');
       },

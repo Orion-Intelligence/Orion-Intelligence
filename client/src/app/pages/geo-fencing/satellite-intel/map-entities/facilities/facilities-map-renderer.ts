@@ -72,8 +72,8 @@ export class FacilitiesMapRenderer {
 
   private bindPopup(layer: Leaflet.Layer, properties: { name?: string; kind?: string }, refs: Set<ComponentRef<FacilityPopupComponent>>): void {
     const popup = this.componentRenderer.create(FacilityPopupComponent, {
-      name: String(properties.name || ''),
-      kind: String(properties.kind || ''),
+      name: String(properties.name ?? ''),
+      kind: String(properties.kind ?? ''),
     });
     refs.add(popup.componentRef);
     layer.bindPopup(popup.element);

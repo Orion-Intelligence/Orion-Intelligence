@@ -80,7 +80,7 @@ export class ReportHeaderComponent {
   private getStixExportEndpoint(): string | null {
     const tree = this.route.parseUrl(this.route.url);
     const id = tree.root.children['primary']?.segments.slice(-1)[0]?.path || '';
-    let ci = String(tree.queryParams['ci'] || '').trim().toLowerCase();
+    let ci = String(tree.queryParams['ci'] ?? '').trim().toLowerCase();
     if (!id || !ci) {
       return null;
     }
@@ -132,7 +132,7 @@ export class ReportHeaderComponent {
   }
 
   shareResult() {
-    this.helperService.shareResult(this.url() || '');
+    this.helperService.shareResult(this.url() ?? '');
   }
 
   redirectToUrl() {
@@ -166,7 +166,7 @@ export class ReportHeaderComponent {
     if (!this.route.url.toLowerCase().includes('/strategic/')) {
       return true;
     }
-    const cleanUrl = (this.url() || '').trim().split(/[?#]/)[0].replace(/\/+$/, '');
+    const cleanUrl = (this.url() ?? '').trim().split(/[?#]/)[0].replace(/\/+$/, '');
     return cleanUrl.endsWith('.onion');
   }
 

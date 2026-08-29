@@ -32,14 +32,14 @@ export function isMalwareBazaarRoute(type: Category, route: string): boolean {
 }
 
 export function applyMalpediaFilterOptions(filterModel: FilterModel, response: MalpediaFilterOptionsResponse): void {
-  setDropdownOptions(filterModel.filters['family'], response.families || [], formatMalpediaFamilyLabel);
-  setDropdownOptions(filterModel.filters['m_country'], response.countries || []);
+  setDropdownOptions(filterModel.filters['family'], response.families ?? [], formatMalpediaFamilyLabel);
+  setDropdownOptions(filterModel.filters['m_country'], response.countries ?? []);
 }
 
 export function applyMalwareBazaarFilterOptions(filterModel: FilterModel, response: MalwareBazaarFilterOptionsResponse): void {
-  setDropdownOptions(filterModel.filters['m_country'], response.countries || []);
-  setDropdownOptions(filterModel.filters['content_type'], response.content_types || []);
-  setDropdownOptions(filterModel.filters['m_reporter'], response.reporters || []);
+  setDropdownOptions(filterModel.filters['m_country'], response.countries ?? []);
+  setDropdownOptions(filterModel.filters['content_type'], response.content_types ?? []);
+  setDropdownOptions(filterModel.filters['m_reporter'], response.reporters ?? []);
 }
 
 function setDropdownOptions(filter: FilterOption | undefined, values: string[], labelFormatter: (value: string) => string = (value) => value): void {

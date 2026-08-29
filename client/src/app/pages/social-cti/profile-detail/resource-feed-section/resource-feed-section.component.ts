@@ -186,7 +186,7 @@ export class SocialResourceFeedSectionComponent {
       bookmarks: pickCount(record, 'bookmark_count', 'bookmarks'),
       views: pickCount(record, 'views', 'views_count', 'view_count'),
       warning,
-      hateSpeech: hate?.is_hate_speech ? (hate.label || 'Flagged') : '',
+      hateSpeech: hate?.is_hate_speech ? (hate.label ?? 'Flagged') : '',
       extra: leftoverEntries(record, CLAIMED_KEYS),
     };
   }

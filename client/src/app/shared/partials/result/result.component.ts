@@ -115,7 +115,7 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   showResultCardShimmer(): boolean {
-    const currentType = String(this.type() || '').toLowerCase();
+    const currentType = String(this.type() ?? '').toLowerCase();
     const currentEndpoint = String(this.apiEndpoint() || '').toLowerCase();
     return currentEndpoint === 'search/defacement'
       || currentEndpoint === 'search/apt-intel'
@@ -127,11 +127,11 @@ export class ResultComponent implements OnInit, OnChanges {
 
   showDefacementResultShimmer(): boolean {
     return String(this.apiEndpoint() || '').toLowerCase() === 'search/defacement'
-      || String(this.type() || '').toLowerCase() === Category.DEFACEMENT.toLowerCase();
+      || String(this.type() ?? '').toLowerCase() === Category.DEFACEMENT.toLowerCase();
   }
 
   private isCrossSearchExcludedRoute(): boolean {
-    const currentType = String(this.type() || '').toLowerCase();
+    const currentType = String(this.type() ?? '').toLowerCase();
     const currentEndpoint = String(this.apiEndpoint() || '').toLowerCase();
     const currentRoute = this.router.url.toLowerCase();
     return currentEndpoint === 'search/defacement'
@@ -182,7 +182,7 @@ export class ResultComponent implements OnInit, OnChanges {
     if (!tabElement) {
       return;
     }
-    const tab = tabElement.getAttribute('data-tab') || '';
+    const tab = tabElement.getAttribute('data-tab') ?? '';
     if (!tab) {
       return;
     }

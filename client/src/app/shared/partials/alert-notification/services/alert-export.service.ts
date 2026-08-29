@@ -35,7 +35,7 @@ export class AlertExportService {
       baseSummary['ioc_value'] = this.getText(first.ioc_value);
       baseSummary['source'] = this.getText(this.exportBranding.replaceSystemBrand(first.source));
       baseSummary['url'] = this.getText(first.url);
-      baseSummary['result_date'] = this.getDateText(this.extractAlertResultDate(first.all_ioc || []));
+      baseSummary['result_date'] = this.getDateText(this.extractAlertResultDate(first.all_ioc ?? []));
       baseSummary['first_seen'] = this.getDateText(first.first_seen);
       baseSummary['last_seen'] = this.getDateText(first.last_seen);
     }
@@ -58,7 +58,7 @@ export class AlertExportService {
     alerts.forEach(alert => {
       const key = this.getText(alert.type).toLowerCase();
       const type = key && key !== '-' ? key : 'unknown';
-      grouped.set(type, [...(grouped.get(type) || []), alert]);
+      grouped.set(type, [...(grouped.get(type) ?? []), alert]);
     });
 
     return Array.from(grouped.entries())
@@ -77,7 +77,7 @@ export class AlertExportService {
   private buildAlertRecordBlock(alert: AlertModel, index: number): GraphReportRecordBlock {
     const title = this.firstText(alert.title, alert.ioc_value, alert.type, `Alert ${index + 1}`);
     const values: Record<string, string> = {};
-    this.addField(values, 'Risk', this.getRiskLevel(alert.type || '', alert.risk));
+    this.addField(values, 'Risk', this.getRiskLevel(alert.type ?? '', alert.risk));
     this.addField(values, 'Category', alert.type);
     this.addField(values, 'Title', alert.title, 260);
     this.addField(values, 'Description', alert.description, 700);
@@ -85,12 +85,12 @@ export class AlertExportService {
     this.addField(values, 'IOC Type', alert.ioc_type, 160);
     this.addField(values, 'Source', this.exportBranding.replaceSystemBrand(alert.source), 220);
     this.addField(values, 'URL', alert.url, 320);
-    this.addField(values, 'Result Date', this.getDateText(this.extractAlertResultDate(alert.all_ioc || [])));
+    this.addField(values, 'Result Date', this.getDateText(this.extractAlertResultDate(alert.all_ioc ?? [])));
     this.addField(values, 'Alert First Seen', this.getDateText(alert.first_seen));
     this.addField(values, 'Alert Last Seen', this.getDateText(alert.last_seen));
     this.addField(values, 'Password', this.extractAlertPassword(alert), 220);
     this.addField(values, 'Hash', alert.data_hash, 220);
-    this.appendIocFields(values, alert.all_ioc || []);
+    this.appendIocFields(values, alert.all_ioc ?? []);
 
     return {
       title: `Record ${index + 1} | ${title}`,
@@ -202,14 +202,14 @@ export class AlertExportService {
   }
 
   private extractAlertPassword(alert: AlertModel): string {
-    const fromIoc = this.getFirstAlertIocValue(alert.all_ioc || [], ['password', 'm_password']);
+    const fromIoc = this.getFirstAlertIocValue(alert.all_ioc ?? [], ['password', 'm_password']);
     if (fromIoc) {
       return fromIoc;
     }
-    if ((alert.type || '').toLowerCase() !== 'stealerlogs') {
+    if ((alert.type ?? '').toLowerCase() !== 'stealerlogs') {
       return '';
     }
-    const description = String(alert.description || '');
+    const description = String(alert.description ?? '');
     const labelledPassword = description.match(/\bpassword\s*:\s*([\s\S]*?)(?=\s+(?:links?|filelist|files?|https?:\/\/)\b|$)/i)?.[1];
     if (labelledPassword?.trim()) {
       return this.getText(labelledPassword, 360);
@@ -239,7 +239,7 @@ export class AlertExportService {
     const wanted = new Set(keys.map(key => key.toLowerCase()));
     const match = (allIoc || []).find(ioc => wanted.has(String(ioc?.name || '').toLowerCase()));
     const value = match?.values?.find(item => this.cleanValue(item));
-    return this.cleanValue(value || '');
+    return this.cleanValue(value ?? '');
   }
 
   private addField(fields: Record<string, string>, label: string, value: unknown, maxLength = 240): void {
@@ -337,7 +337,7 @@ export class AlertExportService {
   }
 
   private formatRisk(value?: string): string {
-    const normalized = (value || '').trim().toLowerCase();
+    const normalized = (value ?? '').trim().toLowerCase();
     if (!normalized) {
       return '';
     }

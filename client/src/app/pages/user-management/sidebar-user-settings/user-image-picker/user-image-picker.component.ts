@@ -62,7 +62,7 @@ export class UserImagePickerComponent {
   }
 
   hasCustomImage(): boolean {
-    const image = this.selectedImage || this.imageUrl || '';
+    const image = this.selectedImage ?? this.imageUrl ?? '';
     if (!image) {
       return false;
     }

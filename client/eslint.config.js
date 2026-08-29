@@ -1037,6 +1037,14 @@ module.exports = [
           caughtErrorsIgnorePattern: '^_'
         }
       ],
+      '@typescript-eslint/prefer-nullish-coalescing': [
+        'error',
+        {
+          ignoreBooleanCoercion: true,
+          ignoreConditionalTests: true,
+          ignoreMixedLogicalExpressions: true
+        }
+      ],
       'no-unused-private-class-members': 'error',
       'local/no-unused-imports': 'error',
       'local/decorator-single-line': 'error',

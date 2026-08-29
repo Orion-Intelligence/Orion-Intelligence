@@ -170,7 +170,7 @@ export class TakedownActionComponent implements OnChanges {
       }
     }
     else {
-      target = String(this.targetUrl || '');
+      target = String(this.targetUrl ?? '');
     }
 
     this.isReviewing = false;
@@ -211,19 +211,19 @@ export class TakedownActionComponent implements OnChanges {
 
   private handleSuccess(record: TakedownActionResponse): void {
     this.isTakingDown = false;
-    const evidence = (record.evidence?.result || record.evidence || {});
+    const evidence = (record.evidence?.result ?? record.evidence ?? {});
 
-    const abuseEmail = record.abuse_email || String(evidence['abuse_email_found'] || '');
+    const abuseEmail = record.abuse_email ?? String(evidence['abuse_email_found'] ?? '');
     const takedownType = evidence['takedown_type'] as string;
     const actionUrl = evidence['action_url'] as string;
 
     if (!this.manualUrlMode) {
-      this.applyTakedownStatus(record.public_status || null, record.status_label || '');
+      this.applyTakedownStatus(record.public_status ?? null, record.status_label ?? '');
     }
 
     this.actionResult = {
       abuse_email: abuseEmail,
-      status_label: record.status_label || this.takedownLabel || 'Takedown request created',
+      status_label: record.status_label ?? this.takedownLabel ?? 'Takedown request created',
       takedown_type: takedownType,
       action_url: actionUrl
     };

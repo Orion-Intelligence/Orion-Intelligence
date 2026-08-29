@@ -393,7 +393,7 @@ export class ShipMapRenderer {
         if (!this.sidebar.isCurrentRequestToken(token)) {
           return;
         }
-        this.sidebar.openError('ship', markerId, err?.error?.detail || err?.message || 'Ship details request failed');
+        this.sidebar.openError('ship', markerId, err?.error?.detail ?? err?.message ?? 'Ship details request failed');
       },
     });
   }
@@ -466,15 +466,15 @@ export class ShipMapRenderer {
     const activeEntity = this.sidebar.getActiveEntity();
     const loadingEntity = this.sidebar.getLoadingEntity();
     if (!bounds) {
-      return `z:${Math.round(zoom * 2)}|sel:${activeEntity?.id || ''}|load:${loadingEntity?.id || ''}|count:${data.length}`;
+      return `z:${Math.round(zoom * 2)}|sel:${activeEntity?.id ?? ''}|load:${loadingEntity?.id ?? ''}|count:${data.length}`;
     }
     const center = bounds.getCenter();
     return [
       `z:${Math.round(zoom * 2)}`,
       `c:${center.lat.toFixed(1)},${center.lng.toFixed(1)}`,
       `d:${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)},${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)}`,
-      `sel:${activeEntity?.id || ''}`,
-      `load:${loadingEntity?.id || ''}`,
+      `sel:${activeEntity?.id ?? ''}`,
+      `load:${loadingEntity?.id ?? ''}`,
       `count:${data.length}`,
     ].join('|');
   }

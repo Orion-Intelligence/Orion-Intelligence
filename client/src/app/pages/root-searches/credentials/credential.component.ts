@@ -165,8 +165,8 @@ export class CredentialComponent implements OnInit {
       .subscribe(([params]) => {
         this.url = params['url'];
         this.user = params['user'];
-        this.dashboardService.consolidatedParamModel.url = params['url'] || '';
-        this.dashboardService.consolidatedParamModel.user = params['user'] || '';
+        this.dashboardService.consolidatedParamModel.url = params['url'] ?? '';
+        this.dashboardService.consolidatedParamModel.user = params['user'] ?? '';
         if (this.firstTrigger) {
           this.firstTrigger = false;
           if(params['q']){
@@ -480,7 +480,7 @@ export class CredentialComponent implements OnInit {
       email: this.toExportValue(item?.['email']),
       username: this.toExportValue(item?.['username']),
       domain: this.toExportValue(item?.['domain']),
-      source: this.toExportValue(item?.['channel'] || item?.['filename'] || item?.['file']),
+      source: this.toExportValue(item?.['channel'] ?? item?.['filename'] ?? item?.['file']),
       hash: this.toExportValue(item?.['m_hash']),
       title: '-',
       url: '-',
@@ -504,9 +504,9 @@ export class CredentialComponent implements OnInit {
       title: this.toExportValue(item?.['m_title'], 160),
       url: this.toExportValue(item?.['m_url'], 160),
       rank: this.toExportValue(item?.['rank_index']),
-      date: this.toExportValue(item?.['m_date'] || item?.['m_update_date']),
+      date: this.toExportValue(item?.['m_date'] ?? item?.['m_update_date']),
       team: this.toExportValue(item?.['m_team']),
-      summary: this.toExportValue(item?.['m_important_content'] || item?.['m_content'], 240)
+      summary: this.toExportValue(item?.['m_important_content'] ?? item?.['m_content'], 240)
     }));
   }
 
@@ -760,7 +760,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private getResultIdentity(item: CredentialResultItem, fallback: string): string {
-    return String(item?.raw || item?._id || item?.id || item?.m_hash || item?.hash || item?.m_message_id || item?.m_url || fallback);
+    return String(item?.raw ?? item?._id ?? item?.id ?? item?.m_hash ?? item?.hash ?? item?.m_message_id ?? item?.m_url ?? fallback);
   }
 
   openScheme() {

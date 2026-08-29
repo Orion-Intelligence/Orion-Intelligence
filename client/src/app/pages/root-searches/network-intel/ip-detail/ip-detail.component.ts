@@ -29,11 +29,11 @@ export class IpDetailComponent {
   }
 
   get cameraPortCount(): number {
-    return (this.detail?.ports || []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
+    return (this.detail?.ports ?? []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
   }
 
   get iotPortCount(): number {
-    return (this.detail?.ports || []).filter((port) => port?.is_iot).length;
+    return (this.detail?.ports ?? []).filter((port) => port?.is_iot).length;
   }
 
   get hasCameraSignals(): boolean {

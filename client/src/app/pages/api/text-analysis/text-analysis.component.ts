@@ -126,7 +126,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
   }
 
   get spamLabel(): string {
-    return this.result?.spam?.label || 'not available';
+    return this.result?.spam?.label ?? 'not available';
   }
 
   get spamConfidenceLabel(): string {
@@ -159,7 +159,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
     if (!this.result) {
       return false;
     }
-    const spamLabel = this.result.spam?.label?.toLowerCase() || '';
+    const spamLabel = this.result.spam?.label?.toLowerCase() ?? '';
     const threats = Array.isArray(this.result.verdict?.threats) ? this.result.verdict.threats : [];
     return this.unsafeUrlCount > 0 || spamLabel.includes('phish') || threats.some(threat => threat.toLowerCase().includes('phish'));
   }
@@ -192,7 +192,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
           this.result = this.normalizeResult(res);
         },
         error: err => {
-          this.errorMessage = err?.error?.detail || err?.message || this.translationService.translate('Text analysis failed.');
+          this.errorMessage = err?.error?.detail ?? err?.message ?? this.translationService.translate('Text analysis failed.');
         }
       });
   }
@@ -214,7 +214,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
   private buildTitle(record: Partial<TextAnalysisResult>): string {
     const urlResults = Array.isArray(record.url_results) ? record.url_results : [];
     const hasUnsafeUrl = urlResults.some(item => item.is_safe === false);
-    const spamLabel = record.spam?.label?.toLowerCase() || '';
+    const spamLabel = record.spam?.label?.toLowerCase() ?? '';
     const threats = Array.isArray(record.verdict?.threats) ? record.verdict.threats : [];
     const hasPhishingSignal = hasUnsafeUrl || spamLabel.includes('phish') || threats.some(threat => threat.toLowerCase().includes('phish'));
     if (record.spam?.is_spam === true && hasPhishingSignal) {

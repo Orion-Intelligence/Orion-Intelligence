@@ -76,7 +76,7 @@ export class AdminTenantAlerts implements OnInit {
       ...this.tenantAlertGroups
         .flatMap(group => {
           const id = group.tenant.id;
-          return id ? [{ key: id, label: group.tenant.name || group.tenant.email || id }] : [];
+          return id ? [{ key: id, label: group.tenant.name ?? group.tenant.email ?? id }] : [];
         })
     ];
   }
@@ -153,21 +153,21 @@ export class AdminTenantAlerts implements OnInit {
   }
 
   private convertSummaryToCategories(summary?: AlertSummary): AlertCategorySummary[] {
-    const countsByType = summary?.counts_by_type || {};
+    const countsByType = summary?.counts_by_type ?? {};
     return ALERT_CATEGORY_NAMES.map(category => createAlertCategorySummary(category, countsByType[category] || 0, this.getRiskLevel.bind(this)));
   }
 
   private countRiskFromSummary(summary?: AlertSummary): { critical: number; high: number; medium: number; low: number } {
     return {
-      critical: Number(summary?.counts_by_risk?.critical || 0),
-      high: Number(summary?.counts_by_risk?.high || 0),
-      medium: Number(summary?.counts_by_risk?.medium || 0),
-      low: Number(summary?.counts_by_risk?.low || 0)
+      critical: Number(summary?.counts_by_risk?.critical ?? 0),
+      high: Number(summary?.counts_by_risk?.high ?? 0),
+      medium: Number(summary?.counts_by_risk?.medium ?? 0),
+      low: Number(summary?.counts_by_risk?.low ?? 0)
     };
   }
 
   private countTotalAlerts(summary?: AlertSummary): number {
-    return Object.values(summary?.counts_by_type || {}).reduce((total, count) => total + Number(count || 0), 0);
+    return Object.values(summary?.counts_by_type ?? {}).reduce((total, count) => total + Number(count || 0), 0);
   }
 
   private normalizeSelectedTenantIds(values: string[], previousValues: string[] = this.selectedTenantIds): string[] {
@@ -198,7 +198,7 @@ export class AdminTenantAlerts implements OnInit {
       },
       error: (err) => {
         this.isExportingTenantAlerts = false;
-        this.messageNotificationService.show(err?.error?.detail || this.translationService.translate('Failed to download tenant alerts'));
+        this.messageNotificationService.show(err?.error?.detail ?? this.translationService.translate('Failed to download tenant alerts'));
       }
     });
   }

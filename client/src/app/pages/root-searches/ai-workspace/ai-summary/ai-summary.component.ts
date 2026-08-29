@@ -36,7 +36,7 @@ export class AiSummaryComponent {
       return;
     }
 
-    const text = (this.content() || '').trim();
+    const text = (this.content() ?? '').trim();
     if (!text || this.isLoading()) {
       return;
     }

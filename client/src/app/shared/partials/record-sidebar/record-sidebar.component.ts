@@ -26,12 +26,12 @@ export class RecordSidebarComponent {
     if (!term) {
       return records;
     }
-    return records.filter(record => String(record.searchText || `${record.title} ${record.subtitle || ''} ${record.sourceLabel || ''} ${(record.tags || []).join(' ')}`).toLowerCase().includes(term));
+    return records.filter(record => String(record.searchText ?? `${record.title} ${record.subtitle ?? ''} ${record.sourceLabel ?? ''} ${(record.tags ?? []).join(' ')}`).toLowerCase().includes(term));
   });
   readonly latestDate = computed(() => {
     return this.records().reduce((latest, record) => {
       if (!latest) {
-        return record.date || null;
+        return record.date ?? null;
       }
       if (!record.date) {
         return latest;
@@ -49,7 +49,7 @@ export class RecordSidebarComponent {
   }
 
   onRecordClick(record: RecordSidebarItem): void {
-    this.scrollService.saveCurrentPosition(record.savePositionId || record.id || '');
+    this.scrollService.saveCurrentPosition(record.savePositionId ?? record.id ?? '');
   }
 
   private dateTime(value: string | null): number {

@@ -679,7 +679,7 @@ export class ThreatLensArcRenderer {
     const baseColor = Array.isArray(graphic.attributes?.endpoint_color) ? graphic.attributes.endpoint_color : [255, 255, 255];
     const baseOpacity = Number(graphic.attributes?.endpoint_opacity);
     const opacity = Number.isFinite(baseOpacity) ? baseOpacity : 1;
-    const endpointId = String(graphic.attributes?.endpoint_id || '');
+    const endpointId = String(graphic.attributes?.endpoint_id ?? '');
 
     delete symbol.color;
     symbol.opacity = hovered ? 1 : opacity;
@@ -701,7 +701,7 @@ export class ThreatLensArcRenderer {
       return graphic;
     }
 
-    const endpointId = String(graphic?.attributes?.endpoint_id || '');
+    const endpointId = String(graphic?.attributes?.endpoint_id ?? '');
     if (!endpointId) {
       return null;
     }
@@ -710,7 +710,7 @@ export class ThreatLensArcRenderer {
       ...this.startMarkerGraphics,
       ...this.endMarkerGraphics,
     ];
-    return endpointGraphics.find((endpointGraphic) => endpointGraphic?.attributes?.endpoint_id === endpointId) || null;
+    return endpointGraphics.find((endpointGraphic) => endpointGraphic?.attributes?.endpoint_id === endpointId) ?? null;
   }
 
   private getEndpointId(arc: AnimatedArcDescriptor, role: string): string {

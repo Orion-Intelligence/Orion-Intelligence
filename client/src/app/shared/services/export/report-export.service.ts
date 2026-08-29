@@ -26,7 +26,7 @@ export class ReportExportService extends ExportSharedService {
     const routeUrl = input.currentRouteUrl || '/';
     const urlObj = new URL(routeUrl, window.location.origin);
     const pathSegs = urlObj.pathname.split('/').filter(Boolean);
-    const queryType = (urlObj.searchParams.get('ci') || '').toLowerCase();
+    const queryType = (urlObj.searchParams.get('ci') ?? '').toLowerCase();
     const reportId = pathSegs[pathSegs.length - 1] || 'report';
     const nowIso = new Date().toISOString();
 
@@ -34,10 +34,10 @@ export class ReportExportService extends ExportSharedService {
     const title = `${this.toTitle(normalizedType)} Report`;
     const sessionName = `ID-${reportId}`;
 
-    const normalizedUrl = this.normalizeUrl(input.url || '');
+    const normalizedUrl = this.normalizeUrl(input.url ?? '');
     const source = this.toRecord(input.csvObject);
     const sourceEntries = Object.entries(source);
-    const contentText = this.cleanText(input.content || '');
+    const contentText = this.cleanText(input.content ?? '');
     const screenshotRef = this.cleanText(source['m_screenshot'] || '');
     const reportIdShort = this.compactMiddle(reportId, 14, 12);
     const sourceUrlShort = this.compactMiddle(normalizedUrl, 48, 18);
@@ -92,11 +92,11 @@ export class ReportExportService extends ExportSharedService {
     const rows = [
       ['section', 'field', 'value'],
       ...Object.entries(payload.summary || {}).map(([key, value]) => ['Summary', key, value]),
-      ...(payload.tables || []).flatMap(table => {
+      ...(payload.tables ?? []).flatMap(table => {
         const valueRows = Object.entries(table.values || {}).map(([key, value]) => [table.title, key, value]);
-        const tableRows = (table.rows || []).flatMap((row, index) =>
+        const tableRows = (table.rows ?? []).flatMap((row, index) =>
           Object.entries(row).map(([key, value]) => [`${table.title} #${index + 1}`, key, value]));
-        const blockRows = (table.recordBlocks || []).flatMap(block =>
+        const blockRows = (table.recordBlocks ?? []).flatMap(block =>
           Object.entries(block.values || {}).map(([key, value]) => [`${table.title} - ${block.title}`, key, value]));
         return [...valueRows, ...tableRows, ...blockRows];
       })

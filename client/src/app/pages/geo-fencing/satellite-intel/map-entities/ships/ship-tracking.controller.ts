@@ -100,7 +100,7 @@ export class SatelliteShipTrackingController {
         }
       },
       error: (err) => {
-        this.error = err?.error?.detail || err?.message || 'Global ship tracking failed';
+        this.error = err?.error?.detail ?? err?.message ?? 'Global ship tracking failed';
       },
     });
     this.trackSub.add(() => {
@@ -147,7 +147,7 @@ export class SatelliteShipTrackingController {
         }
       },
       error: (err) => {
-        this.error = err?.error?.detail || err?.message || 'Ship tracking failed';
+        this.error = err?.error?.detail ?? err?.message ?? 'Ship tracking failed';
       },
     });
     this.trackSub.add(() => {

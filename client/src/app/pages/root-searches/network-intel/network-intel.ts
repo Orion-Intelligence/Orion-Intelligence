@@ -120,7 +120,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         this.parseShodanResult();
       }
       else if (this.activeTab === 'vuln' && this.vulnerabilityActiveTarget) {
-        this.startVulnerabilityElapsedTimer(done.scan_created_at || done.result?.scan_created_at);
+        this.startVulnerabilityElapsedTimer(done.scan_created_at ?? done.result?.scan_created_at);
         this.parseVulnerabilityResult();
       }
       else if (this.activeTab === 'vuln') {
@@ -137,7 +137,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.bindDnsIpDetailQueue();
 
     const section = this.route.snapshot.queryParamMap.get('section');
-    const q = (this.route.snapshot.queryParamMap.get('q') || this.route.snapshot.queryParamMap.get('domain') || '').trim();
+    const q = (this.route.snapshot.queryParamMap.get('q') ?? this.route.snapshot.queryParamMap.get('domain') ?? '').trim();
 
     if (section && this.sectionToTab[section]) {
       this.activeTab = this.sectionToTab[section];
@@ -341,7 +341,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.activeTab === 'seo' || this.activeTab === 'repo') {
       return Boolean(this.seoRepoScanMeta && !this.seoRepoScanErrorMessage);
     }
-    return Boolean(this.geoIpListResult?.ips?.length || this.geoResult?.cameras?.length || this.geoResult || this.geoLiveStats);
+    return [this.geoIpListResult?.ips?.length, this.geoResult?.cameras?.length, this.geoResult, this.geoLiveStats].some(Boolean);
   }
 
   openExportChoice(): void {
@@ -478,7 +478,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
-    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
+    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
     const payload = done.result ?? done;
     if (payload?.domain != null && Array.isArray(payload.ips)) {
       const existingRows = new Map(this.ipRows.map((row) => [row.ip, row]));
@@ -538,13 +538,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
   private normalizeDomainInput(value: string): string {
     const trimmed = value.trim();
     const match = trimmed.match(/^(?:https:\/\/)?(?:www\.)?([^/?#]+)\/?$/i);
-    return match?.[1] || trimmed;
+    return match?.[1] ?? trimmed;
   }
 
   private normalizeIpInput(value: string): string {
     const trimmed = value.trim();
     const match = trimmed.match(/^(?:https:\/\/)?([^/?#]+)\/?$/i);
-    return match?.[1] || trimmed;
+    return match?.[1] ?? trimmed;
   }
 
   startVulnerabilityScanForTarget(target: string, depth: VulnerabilityScanDepth): void {
@@ -619,7 +619,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private parseSeoRepoScanResult(response: UrlScanResponse): void {
-    const status = String(response?.result?.status || response?.status || '').toLowerCase();
+    const status = String(response?.result?.status ?? response?.status ?? '').toLowerCase();
     const progress = response?.result?.progress ?? response?.progress;
     if (typeof progress === 'number' && Number.isFinite(progress)) {
       this.seoRepoScanProgress.set(Math.max(8, Math.min(99, Math.round(progress))));
@@ -644,8 +644,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
       Host: meta?.Host?.trim() || this.extractSeoRepoScanHost(meta?.URL) || this.seoRepoScanRequestedDomain,
       URL: meta?.URL || this.seoRepoScanRequestedUrl,
     };
-    this.seoRepoScanGrade = result.grade || '';
-    this.seoRepoScanGradeCounts = result.grade_counts || { high: 0, medium: 0, low: 0, informational: 0 };
+    this.seoRepoScanGrade = result.grade ?? '';
+    this.seoRepoScanGradeCounts = result.grade_counts ?? { high: 0, medium: 0, low: 0, informational: 0 };
     this.seoRepoScanCategories = this.buildSeoRepoScanCategories(result.threats, result.proofs);
     this.lastResultCount = this.seoRepoScanCategories.reduce((total, category) => total + category.items.length, 0);
     this.currentStep = 'Done';
@@ -654,7 +654,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private buildSeoRepoScanCategories(threats: Record<string, UrlScanThreatItem[]> | undefined, proofs: Record<string, UrlScanProofItem[]> | undefined): NetworkIntelSeoRepoScanCategory[] {
     const proofMap = new Map<string, string>();
-    Object.entries(proofs || {}).forEach(([category, items]) => {
+    Object.entries(proofs ?? {}).forEach(([category, items]) => {
       items.forEach((item) => {
         const key = `${category}|${String(item?.header || '').trim().toLowerCase()}`;
         if (item?.proof && !proofMap.has(key)) {
@@ -663,7 +663,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       });
     });
 
-    return Object.entries(threats || {})
+    return Object.entries(threats ?? {})
       .map(([name, items]) => {
         const list = items;
         const seen = new Set<string>();
@@ -713,7 +713,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
-    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
+    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
     const payload = done.result ?? done;
     if (payload?.ip) {
       this.shodanResult    = payload as IpDetail;
@@ -726,9 +726,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
-    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
+    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
     const payload = done.result ?? done;
-    const status = String(payload?.status || done?.status || '').toLowerCase();
+    const status = String(payload?.status ?? done?.status ?? '').toLowerCase();
     const hasRenderablePayload =
       !!payload &&
       (
@@ -754,9 +754,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
-    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
+    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
     const payload = done.result ?? done;
-    const status = String(payload?.status || done?.status || '').toLowerCase();
+    const status = String(payload?.status ?? done?.status ?? '').toLowerCase();
     if (status === 'pending' || status === 'busy') {
       return;
     }
@@ -814,12 +814,12 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (!done) {
       return;
     }
-    this.currentStep = done.step || done.result?.step || done.status || done.result?.status || '';
+    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
     const payload = done.result ?? done;
 
     if (Array.isArray(payload?.ips)) {
       this.geoIpListResult = {
-        domain: payload.domain || this.geoForm.coordinates.trim() || 'geo-results',
+        domain: payload.domain ?? this.geoForm.coordinates.trim() ?? 'geo-results',
         ips: payload.ips,
       };
       this.geoIpRows = payload.ips.map((ip: string) => ({
@@ -874,7 +874,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       const now = new Date().toISOString();
       const completedDetails = this.ipRows.flatMap(row => row.detail ? [row.detail] : []);
       const scanStatuses = Array.from(new Set(completedDetails
-        .map(detail => this.normalizeReportValue(detail['scan_status'] || detail.status))
+        .map(detail => this.normalizeReportValue(detail['scan_status'] ?? detail.status))
         .filter(Boolean)));
       const nodes = [
         { id: `domain-${dnsResult.domain}`, label: dnsResult.domain, type: 'domain' },
@@ -937,9 +937,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
         edges.push({ id: `${nodes[0].id}-${id}`, from: nodes[0].id, to: id, label: edgeLabel });
       };
 
-      addNode(`org-${detail.organization}`, detail.organization || '', 'organization', 'owned_by');
-      addNode(`country-${detail.country}`, detail.country || '', 'country', 'located_in');
-      addNode(`city-${detail.city}`, detail.city || '', 'city', 'city');
+      addNode(`org-${detail.organization}`, detail.organization ?? '', 'organization', 'owned_by');
+      addNode(`country-${detail.country}`, detail.country ?? '', 'country', 'located_in');
+      addNode(`city-${detail.city}`, detail.city ?? '', 'city', 'city');
 
       return {
         graphKind: 'cti',
@@ -950,9 +950,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
         edges,
         summary: {
           ip: detail.ip,
-          country: detail.country || '-',
-          city: detail.city || '-',
-          organization: detail.organization || '-',
+          country: detail.country ?? '-',
+          city: detail.city ?? '-',
+          organization: detail.organization ?? '-',
           open_ports: detail.open_ports?.length ?? 0,
           vulnerabilities: detail.vulnerabilities?.length ?? 0,
           cameras: detail.cameras?.length ?? 0,
@@ -1004,7 +1004,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       const sessionName = this.geoMode === 'coords'
         ? (this.geoForm.coordinates.trim() || 'geo-coordinates')
         : (ranges[0] || 'geo-ranges');
-      const cameras = result?.cameras || [];
+      const cameras = result?.cameras ?? [];
 
       return {
         graphKind: 'cti',
@@ -1012,7 +1012,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         sessionName,
         generatedAtIso: now,
         nodes: cameras.slice(0, 100).map((camera, index) => ({
-          id: `camera-${camera.ip || index}-${camera.port || 0}`,
+          id: `camera-${camera.ip || index}-${camera.port ?? 0}`,
           label: camera.ip || `Camera ${index + 1}`,
           type: 'camera'
         })),
@@ -1048,7 +1048,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
               acc[`Camera ${index + 1}`] = [
                 camera.ip || 'Unknown IP',
                 camera.port ? `:${camera.port}` : '',
-                camera.brand || camera.model || ''
+                camera.brand ?? camera.model ?? ''
               ].join(' ').trim();
               return acc;
             }, {})
@@ -1062,7 +1062,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     if (this.activeTab === 'vuln' && this.vulnerabilityResult) {
       const now = new Date().toISOString();
       const result = this.vulnerabilityResult;
-      const host = result.host || result.url || 'url-vulnerability-scan';
+      const host = result.host ?? result.url ?? 'url-vulnerability-scan';
       const scannedUrls = Array.isArray(result.scanned_urls) ? result.scanned_urls : [];
       const findings = Array.isArray(result.findings)
         ? result.findings
@@ -1093,10 +1093,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
         nodes,
         edges,
         summary: {
-          host: result.host || '-',
-          url: result.url || '-',
-          final_url: result.final_url || '-',
-          request_mode: result.request_mode || '-',
+          host: result.host ?? '-',
+          url: result.url ?? '-',
+          final_url: result.final_url ?? '-',
+          request_mode: result.request_mode ?? '-',
           elapsed_seconds: typeof result.elapsed_seconds === 'number' ? result.elapsed_seconds.toFixed(1) : '-',
           total_findings: result.summary?.total ?? findings.length,
           critical: result.summary?.critical ?? 0,
@@ -1110,10 +1110,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
           {
             title: 'Request Information',
             values: {
-              Host: result.host || '-',
-              URL: result.url || '-',
-              'Final URL': result.final_url || '-',
-              'Request Mode': result.request_mode || '-',
+              Host: result.host ?? '-',
+              URL: result.url ?? '-',
+              'Final URL': result.final_url ?? '-',
+              'Request Mode': result.request_mode ?? '-',
               Elapsed: typeof result.elapsed_seconds === 'number' ? `${result.elapsed_seconds.toFixed(1)}s` : '-',
               'Max Minutes': this.normalizeReportValue(result.max_minutes)
             }
@@ -1158,7 +1158,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           ...findings.slice(0, 20).map((finding, index: number) => ({
             title: `Finding ${index + 1}`,
             values: {
-              Title: this.normalizeReportValue(finding?.title || finding?.header),
+              Title: this.normalizeReportValue(finding?.title ?? finding?.header),
               Category: this.normalizeReportValue(finding?.category),
               Risk: this.normalizeReportValue(finding?.risk),
               Confidence: this.normalizeReportValue(finding?.confidence),
@@ -1360,7 +1360,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
         const responseRecord = asUnknownRecord(response);
         const resultRecord = asUnknownRecord(responseRecord['result']);
-        const nextStep = responseRecord['step'] || resultRecord['step'] || responseRecord['status'] || resultRecord['status'];
+        const nextStep = responseRecord['step'] ?? resultRecord['step'] ?? responseRecord['status'] ?? resultRecord['status'];
         row.step = typeof nextStep === 'string' ? nextStep : row.step;
       }).pipe(tap((detail) => {
         if (detail?.ip) {
@@ -1385,7 +1385,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private joinValues(values: unknown[] | undefined | null): string {
-    const normalized = (values || [])
+    const normalized = (values ?? [])
       .map(value => String(value ?? '').trim())
       .filter(Boolean);
 
@@ -1393,7 +1393,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private toStringRecord(source: Record<string, unknown> | undefined | null): Record<string, string> {
-    const entries = Object.entries(source || {})
+    const entries = Object.entries(source ?? {})
       .map(([key, value]) => {
         if (key.toLowerCase() === 'unknown' && value && typeof value === 'object' && !Array.isArray(value)) {
           const nested = value as Record<string, unknown>;
@@ -1420,7 +1420,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     const scanPolicy = detail['scan_policy'] as Record<string, unknown> | undefined;
     const portScan = scanPolicy?.['port_scan'] as Record<string, unknown> | undefined;
     const outcomes = portScan?.['outcomes'] as Record<string, unknown> | undefined;
-    const serviceDetection = (portScan?.['service_detection'] || scanPolicy?.['service_detection'] || detail['service_detection']) as Record<string, unknown> | undefined;
+    const serviceDetection = (portScan?.['service_detection'] ?? scanPolicy?.['service_detection'] ?? detail['service_detection']) as Record<string, unknown> | undefined;
     const httpProbe = detail['http_probe'] as Record<string, unknown> | undefined;
 
     return [
@@ -1428,17 +1428,17 @@ export class NetworkIntel implements OnInit, OnDestroy {
         title: `${titlePrefix}General Information`.trim(),
         values: {
           IP: detail.ip || '-',
-          Country: detail.country || '-',
-          City: detail.city || '-',
-          Organization: detail.organization || '-',
-          ISP: detail.isp || '-',
-          ASN: detail.asn || '-',
-          Hosting: detail.hosting_type || '-',
-          'Cloud Provider': detail.cloud_provider || '-',
-          'Cloud Region': detail.cloud_region || '-',
-          'Cloud Service': detail.cloud_service || '-',
-          'Web Server': detail.web_server || '-',
-          Title: detail.title || '-',
+          Country: detail.country ?? '-',
+          City: detail.city ?? '-',
+          Organization: detail.organization ?? '-',
+          ISP: detail.isp ?? '-',
+          ASN: detail.asn ?? '-',
+          Hosting: detail.hosting_type ?? '-',
+          'Cloud Provider': detail.cloud_provider ?? '-',
+          'Cloud Region': detail.cloud_region ?? '-',
+          'Cloud Service': detail.cloud_service ?? '-',
+          'Web Server': detail.web_server ?? '-',
+          Title: detail.title ?? '-',
           'Camera Detected': cameraPorts > 0 || !!detail.is_camera || (detail.cameras?.length ?? 0) > 0 ? 'Yes' : 'No',
           'Camera Ports': cameraPorts ? String(cameraPorts) : '-',
           'IoT Ports': iotPorts ? String(iotPorts) : '-',
@@ -1447,7 +1447,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       {
         title: `${titlePrefix}Scan Quality`.trim(),
         values: {
-          Status: this.normalizeReportValue(detail['scan_status'] || detail.status),
+          Status: this.normalizeReportValue(detail['scan_status'] ?? detail.status),
           'Coverage Complete': this.formatReportBoolean(portScan?.['coverage_complete'] ?? scanPolicy?.['coverage_complete']),
           Conclusive: this.formatReportBoolean(portScan?.['conclusive'] ?? scanPolicy?.['conclusive']),
           'Ports Attempted': this.normalizeReportValue(portScan?.['attempted'] ?? scanPolicy?.['ports_attempted']),
@@ -1497,11 +1497,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
       },
       {
         title: `${titlePrefix}Detected Cameras`.trim(),
-        values: (detail.cameras || []).slice(0, 20).reduce<Record<string, string>>((acc, camera, index) => {
+        values: (detail.cameras ?? []).slice(0, 20).reduce<Record<string, string>>((acc, camera, index) => {
           acc[`Camera ${index + 1}`] = [
             detail.ip || 'Unknown IP',
             camera.port ? `:${camera.port}` : '',
-            camera.brand || camera.model_hint || camera.model || 'Unknown',
+            camera.brand ?? camera.model_hint ?? camera.model ?? 'Unknown',
             camera.service ? `(${camera.service})` : ''
           ].join(' ').trim();
           return acc;
@@ -1514,13 +1514,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
   private buildPortDetailTables(detail: IpDetail, prefix = ''): { title: string; values: Record<string, string> }[] {
     const titlePrefix = prefix ? `${prefix} ` : '';
 
-    return (detail.ports || []).slice(0, 12).map((port, index) => ({
+    return (detail.ports ?? []).slice(0, 12).map((port, index) => ({
       title: `${titlePrefix}Port ${port.port || index + 1} Details`.trim(),
       values: {
         Port: port.port ? String(port.port) : '-',
-        Protocol: port.protocol || port.proto || '-',
-        Service: port.service || '-',
-        State: port.state || '-',
+        Protocol: port.protocol ?? port.proto ?? '-',
+        Service: port.service ?? '-',
+        State: port.state ?? '-',
         'Is Camera': port['is_camera'] || port['device_type'] === 'camera' ? 'Yes' : 'No',
         'Is IoT': port['is_iot'] ? 'Yes' : 'No',
         'Device Type': this.normalizeReportValue(port['device_type']),
@@ -1569,7 +1569,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         'Weak Protocols': this.joinValues(port.tls?.weak_protocols),
         'Self Signed': port.tls?.is_self_signed === undefined ? '-' : (port.tls?.is_self_signed ? 'Yes' : 'No'),
         'Certificate CA': port.tls?.['is_ca'] === undefined ? '-' : (port.tls?.['is_ca'] ? 'Yes' : 'No'),
-        'Certificate Expiry': this.normalizeReportValue(port.tls?.not_after || port.tls?.cert_expires),
+        'Certificate Expiry': this.normalizeReportValue(port.tls?.not_after ?? port.tls?.cert_expires),
         'Certificate Not Before': this.normalizeReportValue(port.tls?.not_before),
         'Discovered Paths': this.joinValues(port['discovered_paths']),
       }
@@ -1661,10 +1661,10 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private countCameraPorts(detail: IpDetail | null | undefined): number {
-    return (detail?.ports || []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
+    return (detail?.ports ?? []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
   }
 
   private countIotPorts(detail: IpDetail | null | undefined): number {
-    return (detail?.ports || []).filter((port) => port?.is_iot).length;
+    return (detail?.ports ?? []).filter((port) => port?.is_iot).length;
   }
 }

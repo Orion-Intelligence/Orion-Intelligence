@@ -12,7 +12,7 @@ export class ReportConsolidatedResolver implements Resolve<unknown> {
   }
 
   resolve(route: ActivatedRouteSnapshot): Observable<unknown> {
-    const index = route.queryParamMap.get('ci') || '';
+    const index = route.queryParamMap.get('ci') ?? '';
     const hash = route.paramMap.get('m_hash');
     const lang = route.queryParamMap.get('lang');
     let apiUrl = ReportRouteUtil.getConsolidatedReportDetailEndpoint(index, hash);

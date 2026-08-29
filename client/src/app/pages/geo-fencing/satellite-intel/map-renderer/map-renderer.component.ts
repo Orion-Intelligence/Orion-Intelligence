@@ -443,7 +443,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   private waitForTileLayerLoad(layer: Nullable<LoadableLeafletLayer>): Observable<void> {
     return new Observable<void>((subscriber) => {
       const maplibreMap = layer?.getMaplibreMap?.();
-      const eventSource = maplibreMap || layer;
+      const eventSource = maplibreMap ?? layer;
       const isLoaded = maplibreMap
         ? maplibreMap.loaded?.()
         : typeof layer?.isLoading === 'function' && !layer.isLoading();
@@ -511,7 +511,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     if (!this.leafletMap || !this.zoomLabelElement?.nativeElement) {
       return;
     }
-    const location = coordinates || this.leafletMap.getCenter();
+    const location = coordinates ?? this.leafletMap.getCenter();
     const zoom = this.leafletMap.getZoom();
     const latitude = `${Math.abs(location.lat).toFixed(4)}°${location.lat >= 0 ? 'N' : 'S'}`;
     const longitude = `${Math.abs(location.lng).toFixed(4)}°${location.lng >= 0 ? 'E' : 'W'}`;

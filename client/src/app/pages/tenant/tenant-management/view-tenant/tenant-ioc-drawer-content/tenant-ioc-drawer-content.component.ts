@@ -22,7 +22,7 @@ export class TenantIocDrawerContentComponent extends TenantIocSelectorComponent 
   }
 
   get selectedCategoryName(): string {
-    return this.iocs.find(ioc => ioc.ioc_id === this.selectedCategoryId)?.name || '';
+    return this.iocs.find(ioc => ioc.ioc_id === this.selectedCategoryId)?.name ?? '';
   }
 
   get iocsWithValues(): IocCategory[] {

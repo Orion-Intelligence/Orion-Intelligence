@@ -171,7 +171,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   onUserLicenseDropdownChange(user: User, nextLicenses: string[]): void {
-    const currentLicenses = user.licenses || [];
+    const currentLicenses = user.licenses ?? [];
     const addedLicense = nextLicenses.find(license => !currentLicenses.includes(license));
     if (addedLicense) {
       this.toggleUserLicense(user, addedLicense as LicenseName);
@@ -181,14 +181,14 @@ export class ManageProfileComponent implements OnInit {
   }
 
   showAlertsAllowed(user: User): boolean {
-    return this.appService.userSessionData().user.role === 'admin' && (user.permissions || []).includes('case_management');
+    return this.appService.userSessionData().user.role === 'admin' && (user.permissions ?? []).includes('case_management');
   }
 
   selectedAlertAllowedValues(user: User): string[] {
     if (user.alerts_allowed_all) {
       return [this.allAlertsOption];
     }
-    return user.alerts_allowed_tenant_ids || [];
+    return user.alerts_allowed_tenant_ids ?? [];
   }
 
   onUserPermissionChange(user: User, permissions: string[]): void {
@@ -235,7 +235,7 @@ export class ManageProfileComponent implements OnInit {
       return;
     }
     const allowedTenantIds = new Set(this.alertTenantOptions.map(tenant => tenant.id));
-    user.alerts_allowed_tenant_ids = (user.alerts_allowed_tenant_ids || []).filter(id => allowedTenantIds.has(id));
+    user.alerts_allowed_tenant_ids = (user.alerts_allowed_tenant_ids ?? []).filter(id => allowedTenantIds.has(id));
   }
 
   private buildUserUpdatePayload(user: User): User {
@@ -250,9 +250,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   toggleUserLicense(user: User, license: LicenseName) {
-    if (!user.licenses) {
-      user.licenses = [];
-    }
+    user.licenses ??= [];
     if (user.licenses.includes(license)) {
       user.licenses = user.licenses.filter((l) => l !== license);
       return;
@@ -304,7 +302,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   getPermissionLabel(permission: string): string {
-    return this.permissionOptions.find(option => option.key === permission)?.label || permission;
+    return this.permissionOptions.find(option => option.key === permission)?.label ?? permission;
   }
 
   canEditUser(user: User): boolean {

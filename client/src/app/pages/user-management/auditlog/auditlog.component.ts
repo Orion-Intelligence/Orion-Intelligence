@@ -77,11 +77,11 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
 
   exportAuditLogs(type = 'csv') {
     this.auditService.auditData$.pipe(take(1)).subscribe(data => {
-      const items = data?.items || [];
+      const items = data?.items ?? [];
       if (!items.length) {
         return;
       }
-      const page = data?.page || 1;
+      const page = data?.page ?? 1;
       const rows = items.map((item, index) => ({
         id: index + 1 + (page - 1) * 100,
         timestamp: item.ts,

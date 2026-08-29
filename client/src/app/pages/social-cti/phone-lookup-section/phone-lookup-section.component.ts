@@ -44,11 +44,11 @@ export class PhoneLookupSectionComponent implements OnDestroy {
   });
   hasEntityIdentification = computed(() => {
     const result = this.result();
-    return !!(result?.name || result?.formatted_address || result?.rating || result?.website || result?.phone_numbers?.length);
+    return [result?.name, result?.formatted_address, result?.rating, result?.website, result?.phone_numbers?.length].some(Boolean);
   });
   hasOpenSourceFootprints = computed(() => {
     const result = this.result();
-    return !!(this.hasKnowledgeGraph() || result?.emails?.length || result?.web_footprints?.length);
+    return [this.hasKnowledgeGraph(), result?.emails?.length, result?.web_footprints?.length].some(Boolean);
   });
 
   constructor() {

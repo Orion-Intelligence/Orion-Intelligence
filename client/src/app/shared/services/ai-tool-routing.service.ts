@@ -81,7 +81,7 @@ export class AiToolRoutingService {
     if (cleanRoute.startsWith('/api/')) {
       return this.getEndpointConfig(cleanRoute);
     }
-    return this.routeMappings.find(({ pattern }) => pattern.test(cleanRoute)) || { type: 'default', message: this.defaultMessage };
+    return this.routeMappings.find(({ pattern }) => pattern.test(cleanRoute)) ?? { type: 'default', message: this.defaultMessage };
   }
 
   private getApiTypeConfig(apiType = ''): AiToolRouteConfig {
@@ -94,8 +94,8 @@ export class AiToolRoutingService {
       return this.getRouteConfig();
     }
     return this.routeMappings.find(route => route.type === cleanEndpoint)
-      || Object.values(this.apiTypeMappings).find(config => config.type === cleanEndpoint)
-      || { type: cleanEndpoint, message: this.defaultMessage };
+      ?? Object.values(this.apiTypeMappings).find(config => config.type === cleanEndpoint)
+      ?? { type: cleanEndpoint, message: this.defaultMessage };
   }
 
   private normalizeApiEndpoint(endpoint: string): string {

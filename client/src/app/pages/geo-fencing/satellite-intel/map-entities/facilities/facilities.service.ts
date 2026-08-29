@@ -27,7 +27,7 @@ export class SatelliteFacilitiesService {
   }
 
   getTypeEntries(data: SatelliteFacilitiesResponse['result'] | null): [string, number][] {
-    return Object.entries(data?.type_counts || {}).sort((a, b) => b[1] - a[1]);
+    return Object.entries(data?.type_counts ?? {}).sort((a, b) => b[1] - a[1]);
   }
 
   async streamMapEntities(size: number, onChunk: (items: OrionSatelliteFeature[]) => void, onComplete?: () => void, onError?: (error: unknown) => void): Promise<void> {
@@ -58,7 +58,7 @@ export class SatelliteFacilitiesService {
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+        buffer = lines.pop() ?? '';
 
         for (const line of lines) {
           if (!line.trim()) {
@@ -86,7 +86,7 @@ export class SatelliteFacilitiesService {
   }
 
   private getPollStatus(res: SatelliteFacilitiesResponse): string | undefined {
-    return res?.result?.status || res?.status;
+    return res?.result?.status ?? res?.status;
   }
 
   private toFeature(feature: SatelliteFacilityFeature, index: number): OrionSatelliteFeature | null {
@@ -265,15 +265,15 @@ export class SatelliteFacilitiesService {
   }
 
   private getRawKind(properties: Record<string, unknown>): string {
-    const rawKind = properties?.['kind'] ||
-      properties?.['type'] ||
-      properties?.['amenity'] ||
-      properties?.['man_made'] ||
-      properties?.['building'] ||
-      properties?.['landuse'] ||
-      properties?.['waterway'] ||
-      properties?.['seamark:type'] ||
-      properties?.['seamark_type'] ||
+    const rawKind = properties?.['kind'] ??
+      properties?.['type'] ??
+      properties?.['amenity'] ??
+      properties?.['man_made'] ??
+      properties?.['building'] ??
+      properties?.['landuse'] ??
+      properties?.['waterway'] ??
+      properties?.['seamark:type'] ??
+      properties?.['seamark_type'] ??
       '';
     return String(rawKind).trim().toLowerCase();
   }
@@ -284,15 +284,15 @@ export class SatelliteFacilitiesService {
     const lon = parsedLocation?.lon;
     const hasValidCoords = typeof lat === 'number' && typeof lon === 'number' && Number.isFinite(lat) && Number.isFinite(lon);
     const type = this.detectTypeFromRecord(item);
-    const rawType = String(item?.type || item?.primary_fuel || '').trim();
+    const rawType = String(item?.type ?? item?.primary_fuel ?? '').trim();
 
     if (!item.id && !item._id && !item.name) {
       return null;
     }
 
     return {
-      id: item.id || item._id || `wri-${index}`,
-      name: item.name?.trim() || `Facility ${index + 1}`,
+      id: item.id ?? item._id ?? `wri-${index}`,
+      name: item.name?.trim() ?? `Facility ${index + 1}`,
       type,
       rawType: rawType || type,
       source: 'WRI',
@@ -412,13 +412,13 @@ export class SatelliteFacilitiesService {
 
   private detectTypeFromRecord(value: unknown): OrionSatelliteFeatureType {
     const record = asUnknownRecord(value);
-    const kind = this.normalizeKindKey(String(record['kind'] || record['type'] || record['primary_fuel'] || ''));
-    const landuse = this.normalizeKindKey(String(record['landuse'] || ''));
-    const building = this.normalizeKindKey(String(record['building'] || ''));
-    const manMade = this.normalizeKindKey(String(record['man_made'] || ''));
-    const amenity = this.normalizeKindKey(String(record['amenity'] || ''));
-    const waterway = this.normalizeKindKey(String(record['waterway'] || ''));
-    const seamarkType = this.normalizeKindKey(String(record['seamark:type'] || record['seamark_type'] || ''));
+    const kind = this.normalizeKindKey(String(record['kind'] ?? record['type'] ?? record['primary_fuel'] ?? ''));
+    const landuse = this.normalizeKindKey(String(record['landuse'] ?? ''));
+    const building = this.normalizeKindKey(String(record['building'] ?? ''));
+    const manMade = this.normalizeKindKey(String(record['man_made'] ?? ''));
+    const amenity = this.normalizeKindKey(String(record['amenity'] ?? ''));
+    const waterway = this.normalizeKindKey(String(record['waterway'] ?? ''));
+    const seamarkType = this.normalizeKindKey(String(record['seamark:type'] ?? record['seamark_type'] ?? ''));
 
     if (kind) {
       const detected = this.normalizeType(kind);

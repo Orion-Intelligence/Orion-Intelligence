@@ -67,7 +67,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
           this.response = response ?? this.emptyResponse();
         },
         error: (error) => {
-          this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to load logs');
+          this.errorMessage = error?.error?.detail ?? this.translationService.translate('Failed to load logs');
         }
       });
   }
@@ -122,7 +122,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
         this.response = this.emptyResponse();
       },
       error: (error) => {
-        this.errorMessage = error?.error?.detail || this.translationService.translate('Failed to flush logs');
+        this.errorMessage = error?.error?.detail ?? this.translationService.translate('Failed to flush logs');
       }
     });
   }

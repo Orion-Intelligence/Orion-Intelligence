@@ -65,7 +65,7 @@ export class ThreatLensCategoryLayersComponent {
     const match = this.arcRangeOptions.find((option) => Number.isFinite(numericQuery)
       && numericQuery >= option.start
       && numericQuery <= option.end)
-      || this.filteredArcRangeOptions[0];
+      ?? this.filteredArcRangeOptions[0];
 
     if (match) {
       this.selectRange(match);
@@ -104,7 +104,7 @@ export class ThreatLensCategoryLayersComponent {
 
   private syncRangeSearchTerm(): void {
     const option = this.arcRangeOptionsValue.find((range) => range.index === this.selectedArcRangeIndexValue)
-      || this.arcRangeOptionsValue[0];
+      ?? this.arcRangeOptionsValue[0];
     this.rangeSearchTerm = option?.label || '';
   }
 

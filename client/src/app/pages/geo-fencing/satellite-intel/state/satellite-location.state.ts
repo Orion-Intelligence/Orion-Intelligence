@@ -234,7 +234,7 @@ export class SatelliteLocationState {
     }
     const pendingCompare = {
       imageType: this.pendingCompareImageType,
-      month: this.pendingCompareMonth || '',
+      month: this.pendingCompareMonth ?? '',
     };
     this.clearPendingCompare();
     return pendingCompare;

@@ -611,8 +611,8 @@ export class SocialUserGraphComponent {
     const container = this.graphContainer()?.nativeElement;
     const padding = 12;
     const offset = 14;
-    const containerWidth = container?.clientWidth || window.innerWidth;
-    const containerHeight = container?.clientHeight || window.innerHeight;
+    const containerWidth = container?.clientWidth ?? window.innerWidth;
+    const containerHeight = container?.clientHeight ?? window.innerHeight;
     const maxLeft = Math.max(padding, containerWidth - width - padding);
     const maxTop = Math.max(padding, containerHeight - height - padding);
     const x = pointer?.x ?? padding;

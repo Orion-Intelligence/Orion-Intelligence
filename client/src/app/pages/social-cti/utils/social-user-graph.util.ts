@@ -134,7 +134,7 @@ function darkwebHandles(record: ReturnType<typeof asRecord>): { handle: string; 
 }
 
 function firstText(profiles: social_profile[], pick: (profile: social_profile) => string | undefined | null): string {
-  return profiles.map(profile => pick(profile) || '').find(Boolean) ?? '';
+  return profiles.map(profile => pick(profile) ?? '').find(Boolean) ?? '';
 }
 
 function shorten(label: string, max = 24): string {
@@ -150,7 +150,7 @@ function buildUser(owner: string, document: db_social_model): SocialGraphUser {
   return {
     owner,
     name: firstText(profiles, profile => profile.profile_details?.real_name),
-    avatar: firstText(profiles, profile => profile.profile_details?.avatar || profile.meta?.avatar),
+    avatar: firstText(profiles, profile => profile.profile_details?.avatar ?? profile.meta?.avatar),
     bio: firstText(profiles, profile => profile.profile_details?.bio),
     location: firstText(profiles, profile => profile.profile_details?.location),
     accounts: [],
@@ -193,7 +193,7 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
     if (!person) {
       const owner = aliasToOwner.get(handle) ?? null;
       const user = owner ? users.get(owner) : undefined;
-      person = { handle, name: view?.name || user?.name || handle, avatar: view?.avatar || user?.avatar || '', url: view?.url || '', bio: view?.bio || user?.bio || '', followers: view?.followers || '', location: view?.location || user?.location || '', owner, memberships: [] };
+      person = { handle, name: view?.name ?? user?.name ?? handle, avatar: view?.avatar ?? user?.avatar ?? '', url: view?.url ?? '', bio: view?.bio ?? user?.bio ?? '', followers: view?.followers ?? '', location: view?.location ?? user?.location ?? '', owner, memberships: [] };
       persons.set(handle, person);
     }
     else if (view) {
@@ -258,12 +258,12 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
           owner,
           platform,
           handle,
-          name: profile.profile_details?.real_name || handle,
-          avatar: profile.profile_details?.avatar || profile.meta?.avatar || '',
+          name: profile.profile_details?.real_name ?? handle,
+          avatar: profile.profile_details?.avatar ?? profile.meta?.avatar ?? '',
           url: buildSocialProfileUrl(platform, handle, profile.meta?.url ?? ''),
-          bio: profile.profile_details?.bio || '',
-          followers: profile.profile_details?.total_followers || '',
-          location: profile.profile_details?.location || '',
+          bio: profile.profile_details?.bio ?? '',
+          followers: profile.profile_details?.total_followers ?? '',
+          location: profile.profile_details?.location ?? '',
           darkweb: false,
           discovered: false,
           groups: [],

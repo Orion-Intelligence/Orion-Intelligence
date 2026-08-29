@@ -51,7 +51,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   ngOnInit(): void {
-    const scanId = this.route.snapshot.paramMap.get('scanId') || '';
+    const scanId = this.route.snapshot.paramMap.get('scanId') ?? '';
     if (!scanId) {
       this.loading = false;
       this.errorMessage = this.translationService.translate('Scan report not found.');
@@ -70,7 +70,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
       },
       error: err => {
         this.loading = false;
-        this.errorMessage = err?.error?.detail || this.translationService.translate('Unable to load scan report.');
+        this.errorMessage = err?.error?.detail ?? this.translationService.translate('Unable to load scan report.');
       },
     });
   }
@@ -88,7 +88,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   get apiType(): string {
-    const raw = String(this.job?.api_reference || this.job?.title || 'scan')
+    const raw = String(this.job?.api_reference ?? this.job?.title ?? 'scan')
       .replace(/^\/?api\//, '')
       .replace(/^dynamic\//, '')
       .replace(/^netintel\//, '')
@@ -112,7 +112,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
 
   get targetText(): string {
     const result = this.resultRecord;
-    return this.job?.target || String(result['domain'] || result['host'] || result['url'] || result['ip'] || result['query'] || this.translationService.translate('Scan target'));
+    return this.job?.target ?? String(result['domain'] ?? result['host'] ?? result['url'] ?? result['ip'] ?? result['query'] ?? this.translationService.translate('Scan target'));
   }
 
   get isHostReconReport(): boolean {
@@ -184,14 +184,12 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
   }
 
   get resultSections(): ScanReportSection[] {
-    if (this.cachedResultSections === undefined) {
-      this.cachedResultSections = this.buildResultSections(this.result);
-    }
+    this.cachedResultSections ??= this.buildResultSections(this.result);
     return this.cachedResultSections;
   }
 
   get completedAtLabel(): string {
-    return this.formatDate(this.job?.completed_at || this.job?.updated_at || this.job?.created_at);
+    return this.formatDate(this.job?.completed_at ?? this.job?.updated_at ?? this.job?.created_at);
   }
 
   isLastSectionRow(section: ScanReportSection, index: number): boolean {
@@ -225,7 +223,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     const result = this.resultRecord;
 
     if (this.isHostReconReport) {
-      const domain = String(result['domain'] || this.job?.payload?.['domain'] || this.job?.target || '');
+      const domain = String(result['domain'] ?? this.job?.payload?.['domain'] ?? this.job?.target ?? '');
       const ips: string[] = Array.isArray(result['ips']) ? result['ips'].map((ip: unknown) => String(ip)).filter(Boolean) : [];
       this.dnsReportResult = { domain, ips };
       this.dnsReportRows = ips.map(ip => ({ ip, expanded: false, loading: false, detail: null, error: null }));
@@ -239,16 +237,16 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
 
     if (this.isVulnerabilityReport) {
       const extracted = asUnknownRecord(result['extracted']);
-      const target = this.normalizeVulnerabilityTarget(result['host'] || extracted['host'] || this.job?.payload?.['domain'] || this.job?.target || result['url']);
+      const target = this.normalizeVulnerabilityTarget(result['host'] ?? extracted['host'] ?? this.job?.payload?.['domain'] ?? this.job?.target ?? result['url']);
       this.vulnerabilityReportTarget = target || null;
       this.vulnerabilityReportTargets = target ? [target] : [];
-      const depth = String(this.job?.payload?.['depth'] || '').toLowerCase();
+      const depth = String(this.job?.payload?.['depth'] ?? '').toLowerCase();
       this.vulnerabilityReportDepth = ['low', 'medium', 'high', 'full'].includes(depth) ? depth as VulnerabilityScanDepth : 'low';
     }
   }
 
   private normalizeVulnerabilityTarget(value: unknown): string {
-    const raw = String(value || '').trim();
+    const raw = String(value ?? '').trim();
     if (!raw) {
       return '';
     }
