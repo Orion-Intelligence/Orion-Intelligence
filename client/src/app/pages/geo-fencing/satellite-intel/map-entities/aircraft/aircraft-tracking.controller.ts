@@ -75,7 +75,7 @@ export class SatelliteAircraftTrackingController {
       loadingMessage: 'Loading aircraft tracking data...',
       label: 'Aircraft tracking',
       reschedule: () => {
-        this.refresh(viewport, false, true); 
+        this.refresh(viewport, false, true);
       },
     });
   }
@@ -88,7 +88,7 @@ export class SatelliteAircraftTrackingController {
       loadingMessage: 'Loading global aircraft tracking data...',
       label: 'Global aircraft tracking',
       reschedule: () => {
-        this.refreshGlobal(false, true); 
+        this.refreshGlobal(false, true);
       },
     });
   }

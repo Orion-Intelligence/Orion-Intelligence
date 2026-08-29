@@ -58,7 +58,7 @@ export class ConsolidatedApiService {
       return this.shouldContinueLivePolling(res);
     }, true), catchError(error => {
       return new Observable<ConsolidatedApiResponse>(observer => {
-        observer.error(error); 
+        observer.error(error);
       });
     }));
   }

@@ -124,7 +124,7 @@ export class AddTenantComponent implements OnInit {
     this.isOpen = false;
     this.cdr.detectChanges();
     setTimeout(() => {
-      this.closs.emit(undefined); 
+      this.closs.emit(undefined);
     }, 300);
   }
 

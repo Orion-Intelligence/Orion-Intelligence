@@ -77,7 +77,7 @@ export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
       if (ok) {
         this.copied.set(true);
         window.setTimeout(() => {
-          this.copied.set(false); 
+          this.copied.set(false);
         }, 1400);
       }
     });

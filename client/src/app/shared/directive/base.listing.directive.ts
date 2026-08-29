@@ -93,7 +93,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
     Object.keys(this.filterModel.filters).forEach(key => delete this.filterModel.filters[key].selected);
     const currentUrl = this.router.url.split('?')[0];
     this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => {
-      this.reload(); 
+      this.reload();
     });
   }
 

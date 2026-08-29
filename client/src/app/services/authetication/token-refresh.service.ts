@@ -10,7 +10,7 @@ export class TokenRefreshService {
 
   constructor() {
     this.destroyRef.onDestroy(() => {
-      this.stopTokenRefresh(); 
+      this.stopTokenRefresh();
     });
   }
 

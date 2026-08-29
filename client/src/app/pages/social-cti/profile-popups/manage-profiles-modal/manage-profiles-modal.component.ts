@@ -58,7 +58,7 @@ export class ManageProfilesModalComponent {
 
   constructor() {
     afterNextRender(() => requestAnimationFrame(() => {
-      this.isOpen.set(true); 
+      this.isOpen.set(true);
     }));
     effect(() => {
       const modalData = this.data();
@@ -98,7 +98,7 @@ export class ManageProfilesModalComponent {
   requestClose(): void {
     this.isOpen.set(false);
     setTimeout(() => {
-      this.close.emit(undefined); 
+      this.close.emit(undefined);
     }, 300);
   }
 

@@ -19,7 +19,7 @@ export class TooltipDirective implements AfterViewInit, OnDestroy {
     if (container) {
       this.zone.runOutsideAngular(() => {
         this.removeContainerScroll = this.renderer.listen(container, 'scroll', () => {
-          this.scheduleHide(); 
+          this.scheduleHide();
         });
       });
     }

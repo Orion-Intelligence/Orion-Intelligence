@@ -605,7 +605,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.seoRepoScanSub = this.scanner
       .scanDomain(resolvedTarget, this.activeTab)
       .pipe(finalize(() => {
-        this.seoRepoScanLoading.set(false); 
+        this.seoRepoScanLoading.set(false);
       }))
       .subscribe({
         next: (response) => {

@@ -365,7 +365,7 @@ export class SocialMapperComponent {
       style: 'bg-orange-500/90 text-white border border-orange-400',
     });
     this.notificationTimeout = setTimeout(() => {
-      this.notification.set(null); 
+      this.notification.set(null);
     }, 3000);
   }
 

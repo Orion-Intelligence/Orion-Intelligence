@@ -669,7 +669,7 @@ export class CredentialComponent implements OnInit {
       .filter(key => this.isSimpleExportValue(record[key]))
       .sort((a, b) => this.toExportLabel(a).localeCompare(this.toExportLabel(b)))
       .forEach(key => {
-        this.addExportField(fields, this.toExportLabel(key), record[key], 320); 
+        this.addExportField(fields, this.toExportLabel(key), record[key], 320);
       });
   }
 

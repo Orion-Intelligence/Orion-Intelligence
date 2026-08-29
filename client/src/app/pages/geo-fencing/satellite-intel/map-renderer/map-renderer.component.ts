@@ -310,8 +310,8 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         getFocusedFeature: () => this.focusedFeature,
         onFeatureSelected: (feature: OrionSatelliteFeature) => {
           this.ngZone.run(() => {
-            this.featureSelected.emit(feature); 
-          }); 
+            this.featureSelected.emit(feature);
+          });
         },
       });
       this.entityRenderer.init(this.facilitiesVisible);
@@ -378,7 +378,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     }
     catch {
       this.ngZone.run(() => {
-        this.mapError.emit(); 
+        this.mapError.emit();
       });
     }
   }
@@ -481,7 +481,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     }
     this.mapReadyEmitted = true;
     this.ngZone.run(() => {
-      this.mapReady.emit(); 
+      this.mapReady.emit();
     });
   }
 
@@ -534,7 +534,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         trackingDelta: this.getVisibleBoundsDelta(),
       };
       this.ngZone.run(() => {
-        this.mapMoved.emit(viewport); 
+        this.mapMoved.emit(viewport);
       });
     }, 500);
   }

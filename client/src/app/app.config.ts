@@ -23,7 +23,7 @@ export const appConfig: ApplicationConfig = {
     }),
     provideAppInitializer(() => inject(AppService).loadSession()),
     provideAppInitializer(() => {
-      inject(ProxyController).initialize(); 
+      inject(ProxyController).initialize();
     }),
     provideRouter(routes, withRouterConfig({ onSameUrlNavigation: 'reload' })),
     provideAnimationsAsync()

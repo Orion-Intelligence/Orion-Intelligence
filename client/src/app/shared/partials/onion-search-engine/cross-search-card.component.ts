@@ -99,7 +99,7 @@ export class CrossSearchCardComponent {
               first_result: r.first_result,
             }));
           setTimeout(() => {
-            this.updateScrollState(); 
+            this.updateScrollState();
           });
         },
         error: () => (this.hasError = true),

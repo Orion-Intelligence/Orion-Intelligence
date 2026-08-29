@@ -314,10 +314,10 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         webMercatorUtils,
         (value) => this.toCountryKey(value),
         (count) => {
-          this.arcCountChange.emit(count); 
+          this.arcCountChange.emit(count);
         },
         (status) => {
-          this.arcBatchStatusChange.emit(status); 
+          this.arcBatchStatusChange.emit(status);
         },);
       this.ipMarkerRenderer = new ThreatLensIpMarkerRenderer(this.view, this.ipScanGraphicsLayer);
 
@@ -335,13 +335,13 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.registerClickHandler();
       this.registerHoverHandler();
       this.ngZone.run(() => {
-        this.mapReady.emit(); 
+        this.mapReady.emit();
       });
     }
     catch (error) {
       console.error('Failed to initialize threat lens map', error);
       this.ngZone.run(() => {
-        this.mapError.emit('Failed to initialize threat lens map.'); 
+        this.mapError.emit('Failed to initialize threat lens map.');
       });
     }
   }
@@ -361,7 +361,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       container.replaceChildren(fallback);
     }
     this.ngZone.run(() => {
-      this.mapReady.emit(); 
+      this.mapReady.emit();
     });
   }
 
@@ -398,7 +398,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.tooltipRenderer.hide();
           this.clearHoverHighlight();
           this.ngZone.run(() => {
-            this.ipSelected.emit(ip); 
+            this.ipSelected.emit(ip);
           });
         }
         return;
@@ -411,7 +411,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.tooltipRenderer.hide();
           this.clearHoverHighlight();
           this.ngZone.run(() => {
-            this.arcSelected.emit(selection); 
+            this.arcSelected.emit(selection);
           });
         }
         return;
@@ -422,7 +422,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       if (countryGraphic) {
         const selection = this.buildCountrySelection(countryGraphic);
         this.ngZone.run(() => {
-          this.countrySelected.emit(selection); 
+          this.countrySelected.emit(selection);
         });
         await this.focusCountryByKey(selection.key);
         this.emitViewportIpScanRequest(true);
@@ -436,7 +436,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
           this.tooltipRenderer.hide();
           this.clearHoverHighlight();
           this.ngZone.run(() => {
-            this.arcSelected.emit(selection); 
+            this.arcSelected.emit(selection);
           });
         }
         return;
@@ -445,7 +445,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.countryRenderer.clearHighlight();
       this.countryRenderer.setSelectedCountryKey('');
       this.ngZone.run(() => {
-        this.emptySelection.emit(); 
+        this.emptySelection.emit();
       });
     });
   }
@@ -564,7 +564,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     document.addEventListener('pointermove', handleDocumentPointerMove, true);
 
     this.mapPointerLeaveHandle = { remove: () => {
-      mapElement.removeEventListener('pointerleave', hide); 
+      mapElement.removeEventListener('pointerleave', hide);
     } };
     this.documentPointerMoveHandle = { remove: () => {
       document.removeEventListener('pointermove', handleDocumentPointerMove, true);
@@ -713,7 +713,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     this.lastViewportIpScanKey = key;
     this.ngZone.run(() => {
-      this.viewportIpScanRequested.emit(viewport); 
+      this.viewportIpScanRequested.emit(viewport);
     });
     return true;
   }

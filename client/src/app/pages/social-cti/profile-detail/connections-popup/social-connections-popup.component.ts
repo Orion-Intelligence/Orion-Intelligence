@@ -72,7 +72,7 @@ export class SocialConnectionsPopupComponent {
       return timer(query ? 250 : 0).pipe(switchMap(() => this.fetchService.searchConnections(this.platform(), this.profileUsername(), query, url)));
     }),
     takeUntilDestroyed(this.destroyRef)).subscribe(items => {
-      this.searchResults.set(items); 
+      this.searchResults.set(items);
     });
   }
 

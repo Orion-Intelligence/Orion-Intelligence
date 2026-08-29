@@ -101,7 +101,7 @@ export class SocialUserGraphComponent {
       this.platformColors.set(this.graphService.platformColors(platforms));
       if (fresh.length) {
         void this.graphService.resolvePlatformIcons(fresh).then(icons => {
-          this.platformIcons.update(current => new Map([...current, ...icons])); 
+          this.platformIcons.update(current => new Map([...current, ...icons]));
         });
       }
     });
@@ -399,7 +399,7 @@ export class SocialUserGraphComponent {
       this.copied.set(true);
       clearTimeout(this.copiedTimeout);
       this.copiedTimeout = setTimeout(() => {
-        this.copied.set(false); 
+        this.copied.set(false);
       }, 1500);
     });
   }
@@ -451,7 +451,7 @@ export class SocialUserGraphComponent {
     this.notice.set(message);
     clearTimeout(this.noticeTimeout);
     this.noticeTimeout = setTimeout(() => {
-      this.notice.set(''); 
+      this.notice.set('');
     }, 3500);
   }
 
@@ -714,7 +714,7 @@ export class SocialUserGraphComponent {
       this.layoutProgress.set(progress.total ? Math.min(99, Math.round(progress.iterations / progress.total * 100)) : 0);
     });
     network.on('stabilizationIterationsDone', () => {
-      this.layoutProgress.set(100); 
+      this.layoutProgress.set(100);
     });
   }
 

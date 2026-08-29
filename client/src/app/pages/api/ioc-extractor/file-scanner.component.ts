@@ -418,7 +418,7 @@ export class FileScannerComponent {
     void navigator.clipboard.writeText(value).then(() => {
       this.copiedValue.set(value);
       setTimeout(() => {
-        this.copiedValue.set(null); 
+        this.copiedValue.set(null);
       }, 1500);
     });
   }
