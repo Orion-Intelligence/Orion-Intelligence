@@ -169,7 +169,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     });
   }
 
-  fetchSearchResults(_ = false): void {
+  fetchSearchResults(): void {
     if (this.domainScanComponent) {
       this.domainScanComponent.clearResults();
     }
@@ -266,10 +266,10 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   resetFilters(): void {
-    this.fetchSearchResults(true);
+    this.fetchSearchResults();
   }
 
-  reloadFilters(_: Record<string, string | null>) {
+  reloadFilters(): void {
     this.dashboardService.consolidatedParamModel.page = 1;
     this.fetchSearchResults();
   }

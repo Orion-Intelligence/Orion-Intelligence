@@ -264,7 +264,7 @@ export class CredentialComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  reloadFilters(_: Record<string, string | null>) {
+  reloadFilters(): void {
     this.fetchSearchResults();
     this.fetchRanked();
   }

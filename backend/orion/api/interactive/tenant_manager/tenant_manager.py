@@ -578,18 +578,7 @@ class TenantManager:
         tenant_data["postal_code"] = enc.decrypt(
             (tenant_data.get("postal_code") or "").encode()).decode() if tenant_data.get("postal_code") else ""
         tenant_data["licenses"] = [enc.decrypt(x.encode()).decode() for x in (tenant_data.get("licenses") or [])]
-        tenant_data["accounts_mail_password"] = None
-        tenant_data["accounts_mail"] = ""
-        tenant_data["accounts_smtp_server"] = ""
-        tenant_data["accounts_smtp_port"] = ""
-        settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
-        if settings_record and settings_record.value:
-            system_settings = json.loads(settings_record.value)
-            meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
-            tenant_data["accounts_mail"] = meta_info.get("ACCOUNTS_MAIL") or ""
-            tenant_data["accounts_smtp_server"] = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
-            tenant_data["accounts_smtp_port"] = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
-            tenant_data["ai_endpoint_enabled"] = system_settings.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
+        await self._apply_tenant_system_settings(tenant_data, str(tenant.id))
         tenant_data["iocs"] = [{**ioc, "ioc_id": enc.decrypt((ioc.get("ioc_id") or "").encode()).decode() if ioc.get(
             "ioc_id") else "", "name": enc.decrypt((ioc.get("name") or "").encode()).decode() if ioc.get(
             "name") else "", "values": [enc.decrypt(v.encode()).decode() for v in (ioc.get("values") or [])], } for ioc
@@ -630,18 +619,7 @@ class TenantManager:
             tenant_data = tenant.model_dump()
             tenant_data["id"] = str(tenant.id)
             tenant_data["access_url"] = TenantManager.tenant_access_url(tenant)
-            tenant_data["accounts_mail_password"] = None
-            tenant_data["accounts_mail"] = ""
-            tenant_data["accounts_smtp_server"] = ""
-            tenant_data["accounts_smtp_port"] = ""
-            settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
-            if settings_record and settings_record.value:
-                system_settings = json.loads(settings_record.value)
-                meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
-                tenant_data["accounts_mail"] = meta_info.get("ACCOUNTS_MAIL") or ""
-                tenant_data["accounts_smtp_server"] = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
-                tenant_data["accounts_smtp_port"] = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
-                tenant_data["ai_endpoint_enabled"] = system_settings.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
+            await self._apply_tenant_system_settings(tenant_data, str(tenant.id))
             maintainer = maintainer_by_tenant_id.get(str(tenant.id))
             tenant_data["password_reset_required"] = getattr(maintainer, "password_reset_required", False)
             result.append(tenant_data)
@@ -679,6 +657,57 @@ class TenantManager:
         tenants = await self.get_admin_visible_alert_tenants(tenant_ids)
         return await self.build_tenant_alert_summary(tenants)
 
+    async def _apply_tenant_system_settings(self, tenant_data: dict, tenant_id: str) -> None:
+        tenant_data["accounts_mail_password"] = None
+        tenant_data["accounts_mail"] = ""
+        tenant_data["accounts_smtp_server"] = ""
+        tenant_data["accounts_smtp_port"] = ""
+        settings_record = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        if settings_record and settings_record.value:
+            system_settings = json.loads(settings_record.value)
+            meta_info = json.loads(system_settings.get(AllowedKeys.META_INFO.value) or "{}")
+            tenant_data["accounts_mail"] = meta_info.get("ACCOUNTS_MAIL") or ""
+            tenant_data["accounts_smtp_server"] = meta_info.get("ACCOUNTS_SMTP_SERVER") or ""
+            tenant_data["accounts_smtp_port"] = meta_info.get("ACCOUNTS_SMTP_PORT") or ""
+            tenant_data["ai_endpoint_enabled"] = system_settings.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
+
+    async def _collect_tenant_alerts(self, tenant_id: str, page: int, limit: int, alert_type: str | None, paginate: bool):
+        alerts_data = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
+        if not alerts_data:
+            if paginate:
+                return {
+                    "items": [],
+                    "total": 0,
+                    "page": page,
+                    "limit": limit,
+                    "has_more": False
+                }
+            return []
+
+        alerts = visible_alerts(alerts_data.alerts)
+        if alert_type:
+            normalized_type = alert_type.strip().lower()
+            alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
+
+        if not paginate:
+            return alerts
+
+        sorted_alerts = sorted(
+            alerts,
+            key=lambda alert: alert.last_seen or alert.first_seen or datetime.min.replace(tzinfo=timezone.utc),
+            reverse=True)
+        total = len(sorted_alerts)
+        start = (page - 1) * limit
+        end = start + limit
+
+        return {
+            "items": sorted_alerts[start:end],
+            "total": total,
+            "page": page,
+            "limit": limit,
+            "has_more": end < total,
+        }
+
     async def get_visible_tenant_alerts(self, tenant_id: str, current_user, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False):
         visible_tenant_ids = set(await self.resolve_visible_alert_tenant_ids_for_user(current_user))
         if tenant_id not in visible_tenant_ids:
@@ -693,82 +722,14 @@ class TenantManager:
         if not tenant or getattr(tenant, "is_default", False) or getattr(tenant, "alerts_visible_to_admin", True) is False:
             raise HTTPException(status_code=404, detail="Tenant alerts not available")
 
-        alerts_data = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
-        if not alerts_data:
-            if paginate:
-                return {
-                    "items": [],
-                    "total": 0,
-                    "page": page,
-                    "limit": limit,
-                    "has_more": False
-                }
-            return []
-
-        alerts = visible_alerts(alerts_data.alerts)
-        if alert_type:
-            normalized_type = alert_type.strip().lower()
-            alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
-
-        if not paginate:
-            return alerts
-
-        sorted_alerts = sorted(
-            alerts,
-            key=lambda alert: alert.last_seen or alert.first_seen or datetime.min.replace(tzinfo=timezone.utc),
-            reverse=True)
-        total = len(sorted_alerts)
-        start = (page - 1) * limit
-        end = start + limit
-
-        return {
-            "items": sorted_alerts[start:end],
-            "total": total,
-            "page": page,
-            "limit": limit,
-            "has_more": end < total,
-        }
+        return await self._collect_tenant_alerts(tenant_id, page, limit, alert_type, paginate)
 
     async def get_admin_tenant_alerts(self, tenant_id: str, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False):
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         if not tenant or getattr(tenant, "is_default", False) or getattr(tenant, "alerts_visible_to_admin", True) is False:
             raise HTTPException(status_code=404, detail="Tenant alerts not available")
 
-        alerts_data = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
-        if not alerts_data:
-            if paginate:
-                return {
-                    "items": [],
-                    "total": 0,
-                    "page": page,
-                    "limit": limit,
-                    "has_more": False
-                }
-            return []
-
-        alerts = visible_alerts(alerts_data.alerts)
-        if alert_type:
-            normalized_type = alert_type.strip().lower()
-            alerts = [alert for alert in alerts if (alert.type or "").strip().lower() == normalized_type]
-
-        if not paginate:
-            return alerts
-
-        sorted_alerts = sorted(
-            alerts,
-            key=lambda alert: alert.last_seen or alert.first_seen or datetime.min.replace(tzinfo=timezone.utc),
-            reverse=True)
-        total = len(sorted_alerts)
-        start = (page - 1) * limit
-        end = start + limit
-
-        return {
-            "items": sorted_alerts[start:end],
-            "total": total,
-            "page": page,
-            "limit": limit,
-            "has_more": end < total,
-        }
+        return await self._collect_tenant_alerts(tenant_id, page, limit, alert_type, paginate)
 
     async def get_visible_tenant_alert_filter_options(self, tenant_id: str, current_user, field: str, query: str = "", limit: int = 25, alert_type: str | None = None) -> dict[str, list[str]]:
         from orion.api.interactive.alert_manager.alert_manager import AlertManager

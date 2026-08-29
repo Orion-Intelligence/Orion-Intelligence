@@ -18,7 +18,7 @@ export class EntityRenderer {
   private readonly anomalyRenderer: AnomalyMapRenderer;
 
   constructor(config: EntityRendererConfig) {
-    this.componentRenderer = new LeafletComponentRenderer(config.appRef, config.environmentInjector);
+    this.componentRenderer = new LeafletComponentRenderer(config.environmentInjector);
     this.facilitiesRenderer = new FacilitiesMapRenderer(config.L, config.map, this.componentRenderer);
     this.orionFacilitiesRenderer = new OrionFacilitiesMapRenderer({
       L: config.L,

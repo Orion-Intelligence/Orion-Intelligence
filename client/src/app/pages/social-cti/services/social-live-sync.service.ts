@@ -1,7 +1,7 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom, Subject, takeUntil, timeout } from 'rxjs';
-import type { social_profile, social_resource } from '../models/social.models';
+import type { social_profile, social_resource, social_resource_collection } from '../models/social.models';
 import type { CrawlResultState, CrawlResultView } from '../models/social-usability.models';
 import type { FetchTabKey } from '../enums/social-graph.enums';
 import { SocialFetchService } from './social-fetch.service';
@@ -310,7 +310,7 @@ export class SocialLiveSyncService {
     }
   }
 
-  private storeLive(platformData: social_profile, type: FetchTabKey, resources: social_resource[]): void {
+  private updateProfileResources(platformData: social_profile, type: FetchTabKey, build: (previous: social_resource_collection | undefined) => social_resource_collection): void {
     let updatedProfiles: social_profile[] | null = null;
     const groupKey = getProfileGroupKey(this.storageService.state.scanResults(), platformData);
     this.storageService.state.scanResults.update(results => {
@@ -324,14 +324,17 @@ export class SocialLiveSyncService {
         }
         const others = (platform.resources ?? []).filter(entry => entry.id !== type);
         const previous = (platform.resources ?? []).find(entry => entry.id === type);
-        const merged = mergeResourcesById(previous?.resources ?? [], resources);
-        return { ...platform, resources: [...others, { ...previous, id: type, is_parsed: true, resources: merged }] };
+        return { ...platform, resources: [...others, build(previous)] };
       });
       return new Map(results).set(groupKey, updatedProfiles);
     });
     if (updatedProfiles) {
       this.storageService.saveProfiles(groupKey, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
+  }
+
+  private storeLive(platformData: social_profile, type: FetchTabKey, resources: social_resource[]): void {
+    this.updateProfileResources(platformData, type, previous => ({ ...previous, id: type, is_parsed: true, resources: mergeResourcesById(previous?.resources ?? [], resources) }));
   }
 
   private storePostConnections(postUrl: string, resources: social_resource[]): void {
@@ -346,27 +349,8 @@ export class SocialLiveSyncService {
   }
 
   private markSynced(platformData: social_profile, type: FetchTabKey): void {
-    let updatedProfiles: social_profile[] | null = null;
-    const groupKey = getProfileGroupKey(this.storageService.state.scanResults(), platformData);
     const stamp = new Date().toISOString();
-    this.storageService.state.scanResults.update(results => {
-      const currentProfiles = results.get(groupKey);
-      if (!currentProfiles) {
-        return results;
-      }
-      updatedProfiles = currentProfiles.map(platform => {
-        if (!isSamePlatform(platform, platformData)) {
-          return platform;
-        }
-        const others = (platform.resources ?? []).filter(entry => entry.id !== type);
-        const previous = (platform.resources ?? []).find(entry => entry.id === type);
-        return { ...platform, resources: [...others, { ...previous, id: type, is_parsed: true, resources: previous?.resources ?? [], last_synced: stamp }] };
-      });
-      return new Map(results).set(groupKey, updatedProfiles);
-    });
-    if (updatedProfiles) {
-      this.storageService.saveProfiles(groupKey, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-    }
+    this.updateProfileResources(platformData, type, previous => ({ ...previous, id: type, is_parsed: true, resources: previous?.resources ?? [], last_synced: stamp }));
   }
 
   private resourceLabel(item: social_resource): string {

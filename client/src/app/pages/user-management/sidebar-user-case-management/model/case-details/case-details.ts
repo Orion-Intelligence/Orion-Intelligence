@@ -916,6 +916,15 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     this.cancelAllSectionModes();
   }
 
+  private normalizeCaseCollections(updated: Case): void {
+    updated.artifacts = updated.artifacts || [];
+    updated.tasks = updated.tasks || [];
+    updated.comments = updated.comments || [];
+    updated.linkedCases = updated.linkedCases || [];
+    updated.assignedAnalystIds = updated.assignedAnalystIds || [];
+    updated.closure = updated.closure || null;
+  }
+
   private saveCasePayload(payload: CaseUpdateRequest, successMessage: string): void {
     if (!this.caseData) {
       return;
@@ -923,12 +932,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     this.caseService.updateCase(this.caseData.caseId, payload).subscribe({
       next: updated => {
-        updated.artifacts = updated.artifacts || [];
-        updated.tasks = updated.tasks || [];
-        updated.comments = updated.comments || [];
-        updated.linkedCases = updated.linkedCases || [];
-        updated.assignedAnalystIds = updated.assignedAnalystIds || [];
-        updated.closure = updated.closure || null;
+        this.normalizeCaseCollections(updated);
 
         this.caseData = updated;
         this.isEditing = false;
@@ -1106,12 +1110,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     this.caseService.updateCase(this.caseData.caseId, payload).subscribe({
       next: updated => {
-        updated.artifacts = updated.artifacts || [];
-        updated.tasks = updated.tasks || [];
-        updated.comments = updated.comments || [];
-        updated.linkedCases = updated.linkedCases || [];
-        updated.assignedAnalystIds = updated.assignedAnalystIds || [];
-        updated.closure = updated.closure || null;
+        this.normalizeCaseCollections(updated);
 
         this.caseData = updated;
 

@@ -3,7 +3,7 @@ import { SatelliteAircraftTrackingService } from '../map-entities/aircraft/aircr
 import { SatelliteFacilitiesService } from '../map-entities/facilities/facilities.service';
 import { SatelliteShipTrackingService } from '../map-entities/ships/ship-tracking.service';
 import { SatelliteLiveAircraft, SatelliteLiveShip } from './satellite-intel-api.models';
-import { ApplicationRef, EnvironmentInjector } from '@angular/core';
+import { EnvironmentInjector } from '@angular/core';
 import { LeafletComponentRenderer } from '../map-utils/leaflet-component-renderer';
 import type * as Leaflet from 'leaflet';
 
@@ -47,7 +47,6 @@ export interface ShipDistributionCell {
 export interface EntityRendererConfig {
   L: typeof Leaflet;
   map: Leaflet.Map;
-  appRef: ApplicationRef;
   environmentInjector: EnvironmentInjector;
   aircraftService: SatelliteAircraftTrackingService;
   shipService: SatelliteShipTrackingService;

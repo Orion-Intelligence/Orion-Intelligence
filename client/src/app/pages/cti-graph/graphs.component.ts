@@ -974,7 +974,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         this.renderGraph(this.result);
         this.loading = true;
       },
-      error: _ => {
+      error: () => {
         if (!this.isCurrentGraphRequest(requestId)) {
           return;
         }

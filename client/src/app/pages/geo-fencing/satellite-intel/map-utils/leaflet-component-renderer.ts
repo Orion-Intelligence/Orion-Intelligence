@@ -1,11 +1,11 @@
-import { ApplicationRef, ComponentRef, EnvironmentInjector, Type, createComponent } from '@angular/core';
+import { ComponentRef, EnvironmentInjector, Type, createComponent } from '@angular/core';
 import { RenderedLeafletComponent } from '../../models/geo-fencing.models';
 import type { Nullish } from '../../../../shared/utils/type-guards.util';
 
 export class LeafletComponentRenderer {
   private refs = new Set<ComponentRef<unknown>>();
 
-  constructor(_appRef: ApplicationRef, private environmentInjector: EnvironmentInjector) {}
+  constructor(private environmentInjector: EnvironmentInjector) {}
 
   create<T>(component: Type<T>, inputs: Partial<T>): RenderedLeafletComponent<T> {
     const componentRef = createComponent(component, {

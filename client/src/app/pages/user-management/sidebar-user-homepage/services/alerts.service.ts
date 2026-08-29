@@ -66,7 +66,7 @@ export class AlertService implements OnDestroy {
         this.isAlertScanLoading.set(false);
         this.setPendingScanFlag(false);
       },
-      error: (_) => {
+      error: () => {
         this.isAlertScanLoading.set(false);
         this.setPendingScanFlag(false);
       },

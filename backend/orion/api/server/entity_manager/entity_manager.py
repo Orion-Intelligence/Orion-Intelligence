@@ -1300,10 +1300,12 @@ class entity_manager:
             "queried_ids": conjunctive_groups["queried_ids"],
             "scope_cluster_id": scope_cluster,
         }
+        return await self._execute_conjunctive_graph_query(query_str, bind_vars, conjunctive_groups["queried_ids"])
+
+    async def _execute_conjunctive_graph_query(self, query_str: str, bind_vars: dict, queried_ids: list):
         result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
         result_obj = result_obj[0] if result_obj else {}
         results = self._dedupe_graph_results(result_obj.get("depth1", []) or [])
-        queried_ids = conjunctive_groups["queried_ids"]
         return {
             "results": results,
             "limit_reached": bool(result_obj.get("limit_hit_depth1")),
@@ -1471,17 +1473,7 @@ class entity_manager:
             "scope_cluster_id": scope_cluster,
             "seed_probe_limit": min(document_limit * 20, 1000),
         }
-        result_obj = await run_in_threadpool(lambda: list(self.__db.aql.execute(query_str, bind_vars=bind_vars)))
-        result_obj = result_obj[0] if result_obj else {}
-        results = self._dedupe_graph_results(result_obj.get("depth1", []) or [])
-        queried_ids = conjunctive_groups["queried_ids"]
-        return {
-            "results": results,
-            "limit_reached": bool(result_obj.get("limit_hit_depth1")),
-            "queried_id": queried_ids[0] if queried_ids else None,
-            "queried_ids": queried_ids,
-            "matched_vertex_ids": result_obj.get("matched_ids", []) or [],
-        }
+        return await self._execute_conjunctive_graph_query(query_str, bind_vars, conjunctive_groups["queried_ids"])
 
     async def get_entity_relations_batch(self, query: EntityGraphBatchQueryModel):
         try:
