@@ -145,7 +145,7 @@ function toValidLngLat(point: EsriGeometry | null | undefined, webMercatorUtils:
   }
 
   if (webMercatorUtils?.xyToLngLat) {
-    let projectedPoint: LngLat | null = null;
+    let projectedPoint: LngLat | null;
     try {
       const [lng, lat] = webMercatorUtils.xyToLngLat(rawLon, rawLat);
       projectedPoint = [normalizeLongitude(lng), lat];

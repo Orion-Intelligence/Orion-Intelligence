@@ -55,10 +55,10 @@ export class GraphComponent implements OnInit, OnDestroy {
   private readonly clusterPalette: Record<string, { color: string; label: string; swatchClass: string; }> = { general: { color: '#38bdf8', label: 'General', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-sky-400' }, leak: { color: '#f97316', label: 'Leak', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-orange-500' }, tracking: { color: '#22c55e', label: 'Tracking', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-green-500' }, news: { color: '#eab308', label: 'News', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-yellow-500' }, defacement: { color: '#ef4444', label: 'Defacement', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-red-500' }, chat: { color: '#06b6d4', label: 'Chat', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-cyan-500' }, exploit: { color: '#fb7185', label: 'Exploit', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-400' }, social: { color: '#a78bfa', label: 'Social', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-purple-400' }, apt: { color: '#f43f5e', label: 'APT', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-rose-500' }, malware: { color: '#14b8a6', label: 'Malware', swatchClass: 'h-2.5 w-2.5 shrink-0 rounded-full bg-teal-500' } };
   private readonly propertyClassPalette: Record<string, string> = { geo: '#22c55e', identity: '#38bdf8', infrastructure: '#60a5fa', indicator: '#f59e0b', vulnerability: '#fb7185', host_indicator: '#eab308', financial: '#34d399', crypto: '#f97316', organization: '#a78bfa', source: '#94a3b8' };
   private readonly iconMap: Record<string, string> = { cluster: 'diagram-3-fill', campaign: 'diagram-3-fill', document: 'file-earmark-text-fill', property: 'tags-fill', actor: 'tags-fill', encoded: 'code-slash', document_id: 'file-earmark-lock-fill', ip: 'hdd-network-fill', phone: 'telephone-fill', email: 'envelope-fill', domain: 'globe2', url: 'link-45deg', country: 'flag-fill', file: 'folder-fill', card: 'credit-card-2-front-fill', crypto: 'currency-bitcoin', bank: 'bank2', platform: 'cpu-fill', company: 'building-fill', person: 'person-fill', location: 'geo-alt-fill', language: 'translate', hashtag: 'hash', mention: 'at', xmpp: 'chat-dots-fill', tactic: 'bullseye', technique: 'tools', script: 'braces' };
-  private groupInfo: Record<string, string[]> = {};
-  private groupedSubNodesByParent: Record<string, Set<string>> = {};
-  private groupParentByGroupId: Record<string, string> = {};
-  private groupExpandedState: Record<string, boolean> = {};
+  private groupInfo = new Map<string, string[]>();
+  private groupedSubNodesByParent = new Map<string, Set<string>>();
+  private groupParentByGroupId = new Map<string, string>();
+  private groupExpandedState = new Map<string, boolean>();
   private highlightedNodeId: string | null = null;
   private physicsTimeoutId: ReturnType<typeof setTimeout> | null = null;
   private readonly minZoomScale = 0.35;
@@ -727,7 +727,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       if (!ext.isGroup || !nodeId || (ext.subNodes?.length ?? 0) === 0) {
         return;
       }
-      if (!this.groupExpandedState[nodeId]) {
+      if (!this.groupExpandedState.get(nodeId)) {
         groupsToExpand.push({ id: nodeId, subNodes: ext.subNodes ?? [] });
       }
     });
@@ -835,10 +835,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.edgeSet = new DataSet<Edge>();
     this.rawNodes = [];
     this.rawEdges = [];
-    this.groupInfo = {};
-    this.groupedSubNodesByParent = {};
-    this.groupParentByGroupId = {};
-    this.groupExpandedState = {};
+    this.groupInfo.clear();
+    this.groupedSubNodesByParent.clear();
+    this.groupParentByGroupId.clear();
+    this.groupExpandedState.clear();
     this.highlightedNodeId = null;
     this.contextMenuNode = null;
     this.contextMenuNodeId = '';
@@ -1123,7 +1123,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private getEdgeIdsToRemove(fromId: string, toIds: string[]): string[] {
-    const sourceId = this.groupParentByGroupId[fromId] ?? fromId;
+    const sourceId = this.groupParentByGroupId.get(fromId) ?? fromId;
     return this.rawEdges
       .filter(e => (e.from === sourceId && toIds.includes(e.to as string)) ||
   (e.to === sourceId && toIds.includes(e.from as string)) ||
@@ -1250,12 +1250,12 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private expandGroupFromNodeId(nodeId: string, subNodes: string[], radius: number): void {
-    const isExpanded = this.groupExpandedState[nodeId] || false;
+    const isExpanded = this.groupExpandedState.get(nodeId) || false;
     if (isExpanded) {
       return;
     }
     const uniqueSubNodes = Array.from(new Set(subNodes));
-    const sourceId = this.groupParentByGroupId[nodeId] ?? nodeId;
+    const sourceId = this.groupParentByGroupId.get(nodeId) ?? nodeId;
     const centerPos = this.network.getPositions([nodeId])[nodeId] ?? { x: 0, y: 0 };
     const existingEdgeIds = new Set(this.edgeSet.getIds().map(id => String(id)));
     const uniqueEdgesById = new Map<string, Edge>();
@@ -1290,7 +1290,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (newNodes.length > 0) {
       this.nodeSet.add(newNodes);
     }
-    this.groupExpandedState[nodeId] = true;
+    this.groupExpandedState.set(nodeId, true);
     this.updateGroupNodeVisual(nodeId, uniqueSubNodes.length, true);
   }
 
@@ -1310,7 +1310,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       const hasVisibleSubNode = subNodes.some(subNodeId => !!this.nodeSet.get(subNodeId));
       if (!hasVisibleSubNode) {
-        this.groupExpandedState[nodeId] = false;
+        this.groupExpandedState.set(nodeId, false);
       }
       this.expandGroupFromNodeId(nodeId, subNodes, 200);
       this.captureOriginalNodeColors([nodeId, ...subNodes]);
@@ -1318,12 +1318,12 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private collapseGroupFromNodeId(nodeId: string, subNodes: string[], force = false): void {
-    const isExpanded = this.groupExpandedState[nodeId] || false;
+    const isExpanded = this.groupExpandedState.get(nodeId) || false;
     if (!isExpanded && !force) {
       return;
     }
     this.removeSubNodesAndEdges(nodeId, subNodes);
-    this.groupExpandedState[nodeId] = false;
+    this.groupExpandedState.set(nodeId, false);
     this.updateGroupNodeVisual(nodeId, subNodes.length, false);
   }
 
@@ -1369,7 +1369,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (subNodes.length === 0) {
       return false;
     }
-    return !this.groupExpandedState[nodeId];
+    return !this.groupExpandedState.get(nodeId);
   }
 
   canContextCollapse(): boolean {
@@ -1385,7 +1385,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (subNodes.length === 0) {
       return false;
     }
-    return this.groupExpandedState[nodeId];
+    return this.groupExpandedState.get(nodeId) ?? false;
   }
 
   showContextOpenCti(): boolean {
@@ -1628,10 +1628,10 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.isEmpty = data.length === 0;
     this.rawNodes = [];
     this.rawEdges = [];
-    this.groupInfo = {};
-    this.groupedSubNodesByParent = {};
-    this.groupParentByGroupId = {};
-    this.groupExpandedState = {};
+    this.groupInfo.clear();
+    this.groupedSubNodesByParent.clear();
+    this.groupParentByGroupId.clear();
+    this.groupExpandedState.clear();
     const edgeMap = this.buildEdgesAndEdgeMap(data);
     const rawNodeMap = this.buildRawNodeMap(data);
     const nodeTypeMap = this.buildNodeTypeMap(data);
@@ -2125,8 +2125,8 @@ export class GraphComponent implements OnInit, OnDestroy {
       if (isGroupable) {
         const subNodes = this.getClusterCollapseTargets(nodeId);
         const clusterLabel = `${this.clusterPalette[clusterKey]?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
-        this.groupInfo[nodeId] = subNodes;
-        this.groupParentByGroupId[nodeId] = nodeId;
+        this.groupInfo.set(nodeId, subNodes);
+        this.groupParentByGroupId.set(nodeId, nodeId);
         nodes.push({
           id: node.id,
           label: '',
@@ -2144,7 +2144,7 @@ export class GraphComponent implements OnInit, OnDestroy {
           image: this.createGroupNodeSvg(clusterDocumentIds.length, false, clusterLabel, clusterKey),
           borderWidth: 0
         });
-        this.groupedSubNodesByParent[nodeId] = new Set(subNodes);
+        this.groupedSubNodesByParent.set(nodeId, new Set(subNodes));
         return;
       }
       this.applyNonGroupNodeColor(node, isClusterNode, edgeMap);
@@ -2238,11 +2238,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   visibleNodes: ExtendedNode[];
   visibleEdges: Edge[];
   } {
-    const groupedSubNodeIds = new Set(Object.values(this.groupInfo).flat());
+    const groupedSubNodeIds = new Set([...this.groupInfo.values()].flat());
     const visibleNodes = this.rawNodes.filter(node => node.isGroup || !groupedSubNodeIds.has(node.id as string));
     const visibleNodeIds = new Set(visibleNodes.map(node => String(node.id)));
     const hiddenToParent = new Map<string, string>();
-    Object.entries(this.groupedSubNodesByParent).forEach(([parentId, subSet]) => {
+    this.groupedSubNodesByParent.forEach((subSet, parentId) => {
       if (!visibleNodeIds.has(parentId)) {
         return;
       }
@@ -2392,7 +2392,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         improvedLayout: true
       }
     });
-    container.addEventListener('contextmenu', (event: MouseEvent) => event.preventDefault());
+    container.addEventListener('contextmenu', (event: MouseEvent) => { event.preventDefault(); });
   }
 
   private applyPhysicsAutoDisableIfNeeded(): void {
@@ -2481,8 +2481,8 @@ export class GraphComponent implements OnInit, OnDestroy {
     if ((node.subNodes?.length ?? 0) > 0) {
       return node.subNodes ?? [];
     }
-    if ((this.groupInfo[nodeId]?.length ?? 0) > 0) {
-      return this.groupInfo[nodeId] ?? [];
+    if ((this.groupInfo.get(nodeId)?.length ?? 0) > 0) {
+      return this.groupInfo.get(nodeId) ?? [];
     }
     if (this.isClusterRootNode(nodeId)) {
       const visibleResolved = this.getVisibleClusterAttachedNodeIds(nodeId);
@@ -2545,7 +2545,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       .map(edge => edge.id as string)
       .filter(Boolean);
     this.edgeSet.remove(residualEdgesToRemove);
-    this.groupExpandedState[clusterNodeId] = false;
+    this.groupExpandedState.set(clusterNodeId, false);
     this.updateGroupNodeVisual(clusterNodeId, this.getClusterDocumentIds(clusterNodeId).length, false);
   }
 
@@ -2715,7 +2715,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (subNodes.length === 0) {
       return;
     }
-    const isExpanded = this.groupExpandedState[nodeId] || false;
+    const isExpanded = this.groupExpandedState.get(nodeId) || false;
     if (isExpanded) {
       this.collapseGroupFromNodeId(nodeId, subNodes);
     }

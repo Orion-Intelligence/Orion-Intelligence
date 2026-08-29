@@ -308,7 +308,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         getShipsData: () => this.shipsData,
         getOrionData: () => this.orionData,
         getFocusedFeature: () => this.focusedFeature,
-        onFeatureSelected: (feature: OrionSatelliteFeature) => this.ngZone.run(() => this.featureSelected.emit(feature)),
+        onFeatureSelected: (feature: OrionSatelliteFeature) => { this.ngZone.run(() => { this.featureSelected.emit(feature); }); },
       });
       this.entityRenderer.init(this.facilitiesVisible);
 
@@ -373,7 +373,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       });
     }
     catch {
-      this.ngZone.run(() => this.mapError.emit());
+      this.ngZone.run(() => { this.mapError.emit(); });
     }
   }
 
@@ -474,7 +474,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
       return;
     }
     this.mapReadyEmitted = true;
-    this.ngZone.run(() => this.mapReady.emit());
+    this.ngZone.run(() => { this.mapReady.emit(); });
   }
 
   private refreshSelectionState(): void {
@@ -525,7 +525,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         zoom: this.leafletMap.getZoom(),
         trackingDelta: this.getVisibleBoundsDelta(),
       };
-      this.ngZone.run(() => this.mapMoved.emit(viewport));
+      this.ngZone.run(() => { this.mapMoved.emit(viewport); });
     }, 500);
   }
 

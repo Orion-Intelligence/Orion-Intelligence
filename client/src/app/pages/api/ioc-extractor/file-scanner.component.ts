@@ -417,7 +417,7 @@ export class FileScannerComponent {
   copyValue(value: string): void {
     void navigator.clipboard.writeText(value).then(() => {
       this.copiedValue.set(value);
-      setTimeout(() => this.copiedValue.set(null), 1500);
+      setTimeout(() => { this.copiedValue.set(null); }, 1500);
     });
   }
 

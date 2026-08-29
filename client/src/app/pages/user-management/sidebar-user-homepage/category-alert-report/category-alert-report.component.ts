@@ -457,7 +457,7 @@ export class CategoryAlertReportComponent implements OnInit {
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';
           let scanType: string;
-          let route = '/dashboard/scanner/network-scan';
+          let route: string;
 
           switch (_alert.type.toLowerCase()) {
             case "advance scanning":
@@ -486,7 +486,6 @@ export class CategoryAlertReportComponent implements OnInit {
 
             case "email-breach": {
               const _username = value.split('@')[0];
-              scanType = "repo";
               route = "/dashboard/api/email-breach";
               void this.router.navigate([route], {
                 queryParams: { username: _username, email: value }
@@ -494,20 +493,18 @@ export class CategoryAlertReportComponent implements OnInit {
               break;
             }
             case "playstore-scanning":
-              scanType = "repo";
               route = "/dashboard/api/playstore-scanner";
               void this.router.navigate([route], {
                 queryParams: { playstore: value }
               });
               break;
             case "social-scanner":
-              scanType = "repo";
               route = "/dashboard/api/social-scanner";
               void this.router.navigate([route], {
                 queryParams: { username: value }
               });
               break;
-            case "stealerlogs":
+            case "stealerlogs": {
               route = "/dashboard/stealerlogs";
               const queryParams: Record<string, string | number | boolean> = {
                 q: "",
@@ -525,6 +522,7 @@ export class CategoryAlertReportComponent implements OnInit {
               }
               void this.router.navigate([route], { queryParams });
               break;
+            }
             default:
               void this.router.navigate([`/dashboard/${this.category}/all/${hash}`]);
               break;
@@ -889,9 +887,9 @@ export class CategoryAlertReportComponent implements OnInit {
 
     value = value.replace(/https?:\/\//, "").replace(/^www\./, "");
 
-    const domainRegex = /^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}(?:\.[a-zA-Z]{2,})*$/;
+    const labels = value.split('.');
 
-    return domainRegex.test(value);
+    return labels.length > 1 && /^[a-zA-Z0-9-]+$/.test(labels[0]) && labels.slice(1).every(label => /^[a-zA-Z]{2,}$/.test(label));
   }
 
   onFileUpload(event: Event) {

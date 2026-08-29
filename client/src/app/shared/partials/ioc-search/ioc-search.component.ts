@@ -155,7 +155,7 @@ export class IocSearchComponent implements OnInit {
 
   triggerSearch(): boolean {
     this.basicSubmitted = true;
-    let finalQuery = '';
+    let finalQuery: string;
     if (this.isAdvanced) {
       this.advancedFilters = this.advancedFilters.map(f => ({ ...f, value: this.stripUrlPrefixes(f.value) }));
       const invalidFilter = this.advancedFilters.find(f => f.value && !this.validateValue(f.tag, f.value));

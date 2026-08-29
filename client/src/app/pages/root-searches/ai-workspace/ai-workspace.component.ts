@@ -557,7 +557,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
     this.resultRowHelper.copyToClipboard(text).subscribe((ok) => {
       this.copiedMessageId.set(ok ? message.id : null);
-      setTimeout(() => this.copiedMessageId.set(null), 1200);
+      setTimeout(() => { this.copiedMessageId.set(null); }, 1200);
     });
   }
 

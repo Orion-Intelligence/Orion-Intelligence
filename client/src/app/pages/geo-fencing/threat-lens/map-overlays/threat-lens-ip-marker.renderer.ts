@@ -505,7 +505,7 @@ export class ThreatLensIpMarkerRenderer {
       return null;
     }
 
-    let point: Partial<ThreatLensScreenPoint> | null = null;
+    let point: Partial<ThreatLensScreenPoint> | null;
     try {
       point = this.view.toScreen(marker.geometry);
     }

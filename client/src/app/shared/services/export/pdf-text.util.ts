@@ -19,7 +19,7 @@ export function normalizePdfText(value: unknown): string {
   text = text
     .normalize('NFKD')
     .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^\x09\x0a\x20-\x7e]/g, '?')
+    .replace(/[^\t\n\x20-\x7e]/g, '?')
     .replace(/\t/g, '  ')
     .replace(/[ \f\v]+$/gm, '')
     .replace(/\n{3,}/g, '\n\n');
