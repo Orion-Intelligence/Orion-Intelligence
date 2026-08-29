@@ -75,6 +75,15 @@ class AccountManager:
                 raise HTTPException(status_code=400, detail="Invalid password")
         return hashed_password
 
+    async def _assert_orion_mail_allowed(self, permissions, tenant_uuid, current_user):
+        if UserPermission.ORION_MAIL not in (permissions or []):
+            return
+        if current_user.role != user_role.ADMIN:
+            raise HTTPException(status_code=403, detail="Only a root tenant admin can assign the Orion Mail permission")
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_uuid)))
+        if tenant is None or not tenant.is_default:
+            raise HTTPException(status_code=403, detail="Orion Mail permission is limited to root tenant users")
+
     async def create_user(self, data: user_model, current_user):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
         try:
@@ -105,6 +114,8 @@ class AccountManager:
             existing_user = await engine.find_one(db_user_account, db_user_account.username == username)
             existing_mail = await engine.find_one(db_user_account, db_user_account.email == email)
             hashed_password = self.create_tenant_user(existing_user, existing_mail, password)
+
+            await self._assert_orion_mail_allowed(data.permissions, current_user.tenant_uuid, current_user)
 
             user = db_user_account(
                 username=username,
@@ -212,6 +223,7 @@ class AccountManager:
                     raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
             user.licenses = request.licenses
         if request.permissions is not None:
+            await self._assert_orion_mail_allowed(request.permissions, user.tenant_uuid, current_user)
             user.permissions = request.permissions
             if UserPermission.CASE_MANAGEMENT not in (user.permissions or []):
                 user.alerts_allowed_all = False

@@ -241,6 +241,11 @@ export class LicenseService {
     return this.isAdmin() || (this.isAnalyst() && permissions.includes('case_management') && this.appService.userSessionData().tenant.isDefault);
   }
 
+  canUseOrionMail(): boolean {
+    const session = this.appService.userSessionData();
+    return session.tenant.isDefault && (this.isAdmin() || (session.user.permissions || []).includes('orion_mail'));
+  }
+
   canReviewTakedowns(): boolean {
     const tenant = this.appService.userSessionData().tenant;
     const isRootTenant = tenant.isDefault;

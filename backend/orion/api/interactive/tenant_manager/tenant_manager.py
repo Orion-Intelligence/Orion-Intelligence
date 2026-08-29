@@ -840,6 +840,9 @@ class TenantManager:
             if requested and not requested.issubset(tenant_allowed) and not current_user.role in ["admin"]:
                 raise HTTPException(status_code=400, detail="User assigned license not allowed for this tenant")
 
+            if UserPermission.ORION_MAIL in (data.permissions or []):
+                raise HTTPException(status_code=403, detail="Orion Mail permission is limited to root tenant users")
+
             alerts_allowed_all, alerts_allowed_tenant_ids = await self.validate_alert_access_assignment(data, current_user)
 
             users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)
