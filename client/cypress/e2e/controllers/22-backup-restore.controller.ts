@@ -1,15 +1,24 @@
 export function openBackupRestore() {
-  cy.get('[data-testid="sidebar-subitem-profile-backup-restore"]').filter(':visible').first().scrollIntoView().click();
+  cy.visit('/dashboard/profile/backup-restore');
   cy.url().should('include', 'backup-restore');
+  cy.get('[data-testid="instant-backup-button"]').should('be.visible');
+  cy.get('[data-testid="backup-row"], [data-testid="backup-empty-state"]').should('exist');
+}
+
+export function openScheduledBackupSettings() {
+  cy.visit('/dashboard/profile/system-settings');
+  cy.url().should('include', 'system-settings');
 }
 
 export function setScheduledBackupToggle(checked: boolean) {
   cy.get('[data-testid="scheduled-backup-toggle"]')
     .scrollIntoView()
     .then(($checkbox) => {
-      if ($checkbox.is(':checked') !== checked) {
+      if ($checkbox.is(':checked') === checked) {
         cy.wrap($checkbox).click({force: true});
+        cy.wait('@updateScheduledBackup', {timeout: 60000});
       }
+      cy.wrap($checkbox).click({force: true});
     });
 }
 

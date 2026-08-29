@@ -4,11 +4,12 @@ import {
   getBackupFilenames,
   getBackupRows,
   openBackupRestore,
+  openScheduledBackupSettings,
   restoreBackupViaTestApi,
   setScheduledBackupToggle,
 } from './controllers/22-backup-restore.controller';
 
-const MAX_BACKUPS = 5;
+const MAX_BACKUPS = 2;
 
 describe('Backup & Restore - Admin Management Flow', () => {
   after(() => {
@@ -21,11 +22,13 @@ describe('Backup & Restore - Admin Management Flow', () => {
     clearAllBackups();
 
     cy.intercept('POST', '**/api/public/update').as('updateScheduledBackup');
+    openScheduledBackupSettings();
     setScheduledBackupToggle(true);
     cy.wait('@updateScheduledBackup', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
     cy.get('[data-testid="scheduled-backup-toggle"]').should('be.checked');
     cy.docsScreenshot('backup-restore-scheduled-toggle-on');
 
+    openBackupRestore();
     createInstantBackup();
     getBackupRows().should('have.length', 1);
 
@@ -43,9 +46,6 @@ describe('Backup & Restore - Admin Management Flow', () => {
       getBackupFilenames().should('include', latestFilename);
     });
 
-    createInstantBackup();
-    createInstantBackup();
-    createInstantBackup();
     getBackupRows().should('have.length', MAX_BACKUPS);
 
     cy.intercept('POST', '**/api/admin/backups/instant').as('createBackupAtLimit');
@@ -55,7 +55,7 @@ describe('Backup & Restore - Admin Management Flow', () => {
     cy.docsScreenshot('backup-restore-limit-warning-popup');
     cy.get('[data-testid="confirmation-yes-button"]').click();
     cy.wait('@createBackupAtLimit', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
-    getBackupRows().should('have.length', MAX_BACKUPS + 1);
+    getBackupRows().should('have.length', MAX_BACKUPS);
 
     cy.logout();
   });

@@ -52,8 +52,7 @@ class BackupManager:
 
     async def create_backup(self, backup_type: BackupType):
         existing_backups = await self._engine.find(db_backup_model, sort=db_backup_model.created_at.asc())
-        if len(existing_backups) >= CONSTANTS.MAX_BACKUPS:
-            oldest = existing_backups[0]
+        for oldest in existing_backups[:max(0, len(existing_backups) - CONSTANTS.MAX_BACKUPS + 1)]:
             shutil.rmtree(self.backup_root / oldest.filename, ignore_errors=True)
             await self._engine.delete(oldest)
             log.g().i(f"BACKUP: limit of {CONSTANTS.MAX_BACKUPS} reached, removed oldest backup {oldest.filename}")

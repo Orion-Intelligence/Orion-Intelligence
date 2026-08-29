@@ -2654,7 +2654,7 @@ The Backup card controls whether Orion Intelligence creates backups on its own s
 
 When Scheduled Backup is enabled, the platform creates a backup automatically every 3 days. The toggle saves immediately; there is no separate save action for it.
 
-Only the 5 most recent backups are retained. When a new backup would exceed that limit, the oldest existing backup is deleted first. This retention limit is shared across scheduled and manually created backups, so enabling the schedule will eventually displace older manual backups.
+Only the 2 most recent backups are retained. When a new backup would exceed that limit, the oldest existing backup is deleted first. This retention limit is shared across scheduled and manually created backups, so enabling the schedule will eventually displace older manual backups.
 
 ```{figure} ../screenshots/alert-integrations-system-slack-config-20260326.png
 :alt: System Slack alert integration configuration

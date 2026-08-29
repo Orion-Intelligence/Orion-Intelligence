@@ -35,7 +35,7 @@ export class BackupRestoreComponent implements OnInit {
   isRestoreConfirmationOpen = signal<boolean>(false);
   isRestoring = false;
   isCreating = false;
-  readonly MAX_BACKUPS = 5;
+  readonly MAX_BACKUPS = 2;
   instantConfirmationMessage = 'Start instant backup now?';
 
   constructor(private apiService: ApiService, protected appService: AppService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {

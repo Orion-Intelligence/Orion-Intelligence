@@ -52,7 +52,7 @@ class CONSTANTS:
         "text/plain",
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     }
-    MAX_BACKUPS=5
+    MAX_BACKUPS=2
 
 allowed_key_titles: dict[str, str] = {}
 mail_template = None

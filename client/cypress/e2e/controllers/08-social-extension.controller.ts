@@ -75,8 +75,8 @@ export function assertInstallPrompt() {
     .and('have.attr', 'href', '/ext/firefox/orion-social-firefox.xpi');
   void cy.get('[data-testid="social-extension-download-chrome"]')
     .should('contain.text', 'Download for Chromium')
-    .and('not.have.attr', 'href')
-    .click();
+    .and('not.have.attr', 'href');
+  void cy.get('[data-testid="social-extension-download-chrome"]').click();
   void cy.contains('Chromium install is coming soon').should('be.visible');
   void cy.get('[data-testid="tenant-message-dismiss"]').click();
   void cy.get(MANAGER).find('a[data-testid^="social-extension-download-"]').first()
