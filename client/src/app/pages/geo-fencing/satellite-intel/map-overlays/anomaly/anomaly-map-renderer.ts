@@ -3,10 +3,11 @@ import { SatelliteAnomalyResponse } from '../../model/satellite-intel-api.models
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import { AnomalyMapPopupComponent } from './anomaly-map-popup.component';
 import type * as Leaflet from 'leaflet';
+import type { Nullable } from '../../../../../shared/utils/type-guards.util';
 
 export class AnomalyMapRenderer {
-  private layer: Leaflet.LayerGroup | null = null;
-  private popupRef: ComponentRef<AnomalyMapPopupComponent> | null = null;
+  private layer: Nullable<Leaflet.LayerGroup> = null;
+  private popupRef: Nullable<ComponentRef<AnomalyMapPopupComponent>> = null;
   private renderKey = '';
 
   constructor(private L: typeof Leaflet, private map: Leaflet.Map, private componentRenderer: LeafletComponentRenderer) {}

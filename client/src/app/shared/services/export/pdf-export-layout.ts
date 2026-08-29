@@ -19,7 +19,7 @@ export const PDF_EXPORT_LAYOUT = {
 
 
 
-function fitSingleLine(doc: jsPDF, value: string, maxWidth: number, charSpace: number = 0): string {
+function fitSingleLine(doc: jsPDF, value: string, maxWidth: number, charSpace = 0): string {
   const input = normalizePdfText(value || '-');
   const trackedWidth = (text: string) => doc.getTextWidth(text) + (Math.max(0, text.length - 1) * charSpace);
   if (trackedWidth(input) <= maxWidth) {

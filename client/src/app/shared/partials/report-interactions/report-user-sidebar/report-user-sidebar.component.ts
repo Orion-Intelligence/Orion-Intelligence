@@ -35,7 +35,9 @@ export class ReportUserSidebarComponent {
     this.userId = userId;
     this.isMounted = true;
     this.isVisible = false;
-    window.requestAnimationFrame(() => this.loadUser());
+    window.requestAnimationFrame(() => {
+      this.loadUser();
+    });
     window.requestAnimationFrame(() => {
       this.isVisible = true;
     });

@@ -55,28 +55,28 @@ export class CategoryAlertReportComponent implements OnInit {
   visibleFilteredAlerts: CategoryAlerts[] = [];
   readonly serverPageSize: number = 20;
   readonly incrementalDelayMs: number = 90;
-  currentPage: number = 0;
-  hasMoreAlerts: boolean = false;
-  isLoadingMoreAlerts: boolean = false;
-  isInitialLoading: boolean = false;
+  currentPage = 0;
+  hasMoreAlerts = false;
+  isLoadingMoreAlerts = false;
+  isInitialLoading = false;
   activeDateRange: string | null = null;
   activeAlertFilters: Record<string, string | null> = {};
-  searchText: string = '';
-  category: string = '';
+  searchText = '';
+  category = '';
   iocTypes: Record<string, string> = { ...search_filter_labels };
-  showCustomAlertPopup: boolean = false;
-  showEditAlertPopup: boolean = false;
+  showCustomAlertPopup = false;
+  showEditAlertPopup = false;
   isFilterOpen$: Observable<boolean>;
   selectedAlert!: AlertModel;
   isFlushAllConfirmationOpen = signal(false);
   isDeleteAlertConfirmationOpen = signal(false);
-  selectedDeleteAlertId: string = '';
+  selectedDeleteAlertId = '';
   importedAlert: AlertModel | null = null;
   alertToShowReport: AlertModel | null = null;
   activeDetailAlert: CategoryAlerts | null = null;
   alertExportScope: 'selected' | 'category' = 'selected';
-  isExportChoiceOpen: boolean = false;
-  isAdminTenantAlertReport: boolean = false;
+  isExportChoiceOpen = false;
+  isAdminTenantAlertReport = false;
   adminTenantId: string | null = null;
   readonly alertExportOptions = buildStandardExportOptions('category-alert-export-option', 'report', 'Generate PDF export for selected alert.');
 
@@ -84,7 +84,7 @@ export class CategoryAlertReportComponent implements OnInit {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
-  private decrementUnseenSummary(by: number = 1): void {
+  private decrementUnseenSummary(by = 1): void {
     const summary = this.appService.userSessionData().alert_summary;
     if (!summary) {
       return;
@@ -457,7 +457,7 @@ export class CategoryAlertReportComponent implements OnInit {
         if (_alert?.type) {
           const value = _alert.ioc_value || '-';
           let scanType: string;
-          let route: string = '/dashboard/scanner/network-scan';
+          let route = '/dashboard/scanner/network-scan';
 
           switch (_alert.type.toLowerCase()) {
             case "advance scanning":

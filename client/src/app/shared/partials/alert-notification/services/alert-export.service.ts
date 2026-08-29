@@ -9,11 +9,11 @@ export class AlertExportService {
   constructor(private exportBranding: ExportBrandingService, private reportExport: ReportExportService) {
   }
 
-  exportPdf(alerts: AlertModel[] | null | undefined, title: string = 'Brand Alerts'): void {
+  exportPdf(alerts: AlertModel[] | null | undefined, title = 'Brand Alerts'): void {
     this.exportByType(alerts, 'report', title);
   }
 
-  exportByType(alerts: AlertModel[] | null | undefined, type: string, title: string = 'Brand Alerts'): void {
+  exportByType(alerts: AlertModel[] | null | undefined, type: string, title = 'Brand Alerts'): void {
     const payload = this.buildPayload(alerts, title);
     this.reportExport.exportByType(payload, type === 'json' || type === 'csv' ? type : 'doc_pdf');
   }

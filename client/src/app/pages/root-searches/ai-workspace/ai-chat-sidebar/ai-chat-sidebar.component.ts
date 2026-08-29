@@ -136,7 +136,9 @@ export class AiChatSidebarComponent {
             window.open(new URL(share.path, window.location.origin).toString(), '_blank', 'noopener');
             this.finishSharing();
           },
-          error: () => this.finishSharing(),
+          error: () => {
+            this.finishSharing();
+          },
         });
       },
       error: () => this.finishSharing(),
@@ -173,8 +175,8 @@ export class AiChatSidebarComponent {
   }
 
   onRenameBackdrop(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    if (target?.dataset?.['role'] === 'backdrop') {
+    const target = event.target;
+    if (target instanceof HTMLElement && target.dataset['role'] === 'backdrop') {
       this.closeRenameChatPopup();
     }
   }

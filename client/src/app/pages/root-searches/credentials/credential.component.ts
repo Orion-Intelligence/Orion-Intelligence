@@ -58,12 +58,12 @@ export class CredentialComponent implements OnInit {
   protected readonly filters = stealer_filters;
 
   readonly reportExportOptions = CREDENTIAL_REPORT_EXPORT_OPTIONS;
-  searchQuery: string = '';
-  isLoading: boolean = false;
-  firstTrigger: boolean = true;
-  user: string = '';
-  url: string = '';
-  ioc: string = '';
+  searchQuery = '';
+  isLoading = false;
+  firstTrigger = true;
+  user = '';
+  url = '';
+  ioc = '';
   type: string;
   stealerlogCallbackModel: StealerLogCallbackModel = new StealerLogCallbackModel();
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
@@ -265,13 +265,11 @@ export class CredentialComponent implements OnInit {
   }
 
   reloadFilters(_: Record<string, string | null>) {
-    void _;
     this.fetchSearchResults();
     this.fetchRanked();
   }
 
-  resetFilters(_: undefined) {
-    void _;
+  resetFilters(): void {
     this.fetchSearchResults(true);
     this.fetchRanked();
   }

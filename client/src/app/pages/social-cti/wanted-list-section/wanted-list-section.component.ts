@@ -5,6 +5,7 @@ import { social_profile, social_wanted } from '../models/social.models';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getInputValue } from '../../../shared/utils/event-input.util';
 
 @Component({
   selector: 'app-social-wanted-list-section',
@@ -63,7 +64,7 @@ export class WantedListSectionComponent implements OnDestroy {
   }
 
   onQueryInput(event: Event): void {
-    this.query.set((event.target as HTMLInputElement | null)?.value ?? '');
+    this.query.set(getInputValue(event));
   }
 
   search(event?: Event): void {

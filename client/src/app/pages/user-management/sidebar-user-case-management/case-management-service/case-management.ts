@@ -80,7 +80,7 @@ export class CaseManagement {
     return this.api.delete<{ success: boolean }>(`profile/cases/${caseId}/artifacts/${artifactId}/files/${fileId}`);
   }
 
-  getArtifactReports(source: string, q: string = '', limit: number = 10): Observable<ArtifactReportOption[]> {
+  getArtifactReports(source: string, q = '', limit = 10): Observable<ArtifactReportOption[]> {
     const params = new URLSearchParams();
 
     params.set('source', source);

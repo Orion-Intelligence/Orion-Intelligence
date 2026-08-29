@@ -118,7 +118,9 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
 
   loadAlertConnectorSettings() {
     this.apiService.get<AlertConnectorSettingsResponse>('alert-connectors/settings').subscribe({
-      next: (response) => this.applyAlertConnectorSettings(response),
+      next: (response) => {
+        this.applyAlertConnectorSettings(response);
+      },
       error: () => {
         this.webhookErrorState = true;
       }

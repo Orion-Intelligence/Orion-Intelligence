@@ -315,7 +315,10 @@ export class AiDirectory implements OnChanges, OnDestroy {
   }
 
   onWorkspaceFileScroll(event: Event): void {
-    const element = event.target as HTMLElement;
+    const element = event.target;
+    if (!(element instanceof HTMLElement)) {
+      return;
+    }
 
     const nearBottom =
       element.scrollTop + element.clientHeight >= element.scrollHeight - 200;

@@ -19,6 +19,7 @@ import { ManageProfilesModalComponent } from './profile-popups/manage-profiles-m
 import type { SocialResultSource } from './enums/social-graph.enums';
 import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { getInputValue } from '../../shared/utils/event-input.util';
 
 @Component({
   selector: 'app-social-graph',
@@ -89,7 +90,9 @@ export class SocialMapperComponent {
   profileListing = viewChild(SocialProfileListingComponent);
 
   constructor(private destroyRef: DestroyRef) {
-    this.destroyRef.onDestroy(() => clearTimeout(this.notificationTimeout));
+    this.destroyRef.onDestroy(() => {
+      clearTimeout(this.notificationTimeout);
+    });
     this.storageService.loadProfiles().pipe(takeUntilDestroyed(this.destroyRef), finalize(() => {
       this.isInitialLoading.set(false);
       this.resumeIncompleteScans();
@@ -106,7 +109,7 @@ export class SocialMapperComponent {
   }
 
   onDashboardScanInput(event: Event): void {
-    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    const nextValue = getInputValue(event);
     this.onHomeMenuSearchChanged(nextValue);
   }
 

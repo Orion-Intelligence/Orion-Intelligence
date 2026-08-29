@@ -69,7 +69,10 @@ export class FileScannerComponent {
   }
 
   onFileSelected(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
+    const inputElement = event.target;
+    if (!(inputElement instanceof HTMLInputElement)) {
+      return;
+    }
     if (inputElement.files?.[0]) {
       this.handleFileSelect(inputElement.files[0]);
     }
@@ -121,7 +124,9 @@ export class FileScannerComponent {
         ? timer(3000).pipe(switchMap(() => upload()))
         : EMPTY), takeWhile(res => res?.status === 'pending' || res?.status === 'processing', true), finalize(() => this.isLoading = false))
       .subscribe({
-        next: res => this.handleScanResponse(res),
+        next: res => {
+          this.handleScanResponse(res);
+        },
         error: err => {
           this.isFetched = true;
           this.hasError = true;

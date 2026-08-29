@@ -1,7 +1,8 @@
 import type * as Leaflet from 'leaflet';
+import type { Nullable } from '../../../../shared/utils/type-guards.util';
 
 export class SearchLocationMapRenderer {
-  private marker: Leaflet.CircleMarker | null = null;
+  private marker: Nullable<Leaflet.CircleMarker> = null;
 
   constructor(private L: typeof Leaflet, private map: Leaflet.Map) {}
 

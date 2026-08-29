@@ -17,7 +17,7 @@ export class SelectedFilterBarComponent implements OnInit {
   protected readonly filter_mapping = filter_mapping;
 
   categories: Record<string, string[]> = {};
-  isFilterBarExpanded: boolean = false;
+  isFilterBarExpanded = false;
   maxVisibleTags = 8;
   Object: unknown;
   readonly showSorting = input.required<boolean>();
@@ -94,7 +94,7 @@ export class SelectedFilterBarComponent implements OnInit {
     return Object.keys(this.dashboardService.selectedFilters());
   }
 
-  sidebarFilterCount(all: boolean = false): number {
+  sidebarFilterCount(all = false): number {
     if (all) {
       return Object.entries(this.dashboardService.selectedFilters())
         .filter(([key, value]) => key !== 'matchtype' || value !== 'or')

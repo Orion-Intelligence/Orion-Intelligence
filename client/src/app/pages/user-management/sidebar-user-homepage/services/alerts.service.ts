@@ -49,7 +49,7 @@ export class AlertService implements OnDestroy {
           }
         });
       },
-      error: (_) => {
+      error: () => {
         this.isAlertScanLoading.set(false);
         this.setPendingScanFlag(false);
       },

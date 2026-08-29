@@ -7,23 +7,23 @@ import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-rend
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
-import { asUnknownRecord, isFiniteNumber, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, Augmented, isFiniteNumber, isUnknownRecord, Nullable } from '../../../../../shared/utils/type-guards.util';
 import { AircraftDistributionCell } from '../../model/satellite-intel.model';
 
-type AircraftMarker = Leaflet.Marker & {
-  __orionAircraftIconRef: ComponentRef<AircraftMarkerIconComponent> | null;
-  __orionAircraftIconState: string;
-};
+type AircraftMarker = Augmented<Leaflet.Marker, {
+  __orionAircraftIconRef?: Nullable<ComponentRef<AircraftMarkerIconComponent>>;
+  __orionAircraftIconState?: string;
+}>;
 
 
 export class AircraftMapRenderer {
-  private cluster: Leaflet.LayerGroup | null = null;
+  private cluster: Nullable<Leaflet.LayerGroup> = null;
   private renderKey = '';
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
   private renderVersion = 0;
   private markers = new Map<string, AircraftMarker>();
   private markerTargets = new Map<string, string>();
-  private trackLine: Leaflet.Polyline | null = null;
+  private trackLine: Nullable<Leaflet.Polyline> = null;
   private animationFrames = new Map<string, { marker: AircraftMarker; startLat: number; startLon: number; targetLat: number; targetLon: number; startedAt: number }>();
   private animationFrame: number | null = null;
   private detailSub?: Subscription;
@@ -124,7 +124,9 @@ export class AircraftMapRenderer {
       this.map?.removeLayer(this.cluster);
       this.cluster = null;
     }
-    Array.from(this.markers.values()).forEach((marker) => this.destroyMarkerIcon(marker));
+    Array.from(this.markers.values()).forEach((marker) => {
+      this.destroyMarkerIcon(marker);
+    });
     this.markers.clear();
     this.markerTargets.clear();
   }
@@ -149,7 +151,9 @@ export class AircraftMapRenderer {
     }
 
     if (endIndex < aircraft.length) {
-      this.renderTimer = setTimeout(() => this.renderMarkersInChunks(aircraft, renderVersion, endIndex), 0);
+      this.renderTimer = setTimeout(() => {
+        this.renderMarkersInChunks(aircraft, renderVersion, endIndex);
+      }, 0);
     }
     else {
       this.renderTimer = null;
@@ -355,7 +359,7 @@ export class AircraftMapRenderer {
     }
   }
 
-  private createMarker(aircraft: SatelliteLiveAircraft): AircraftMarker | null {
+  private createMarker(aircraft: SatelliteLiveAircraft): Nullable<AircraftMarker> {
     const latitude = aircraft.latitude;
     const longitude = aircraft.longitude;
     if (!isFiniteNumber(latitude) || !isFiniteNumber(longitude)) {
@@ -365,9 +369,9 @@ export class AircraftMapRenderer {
     const isSelected = this.isSelected(icaoId);
     const isLoading = this.isLoading(icaoId);
     const renderedIcon = this.createIcon(aircraft, isSelected, isLoading);
-    const marker = this.L.marker([latitude, longitude], {
+    const marker: AircraftMarker = this.L.marker([latitude, longitude], {
       icon: renderedIcon.icon,
-    }) as AircraftMarker;
+    });
     marker.__orionAircraftIconRef = renderedIcon.componentRef;
     if (icaoId) {
       marker.bindTooltip(escapeTooltipText(icaoId), {
@@ -378,7 +382,9 @@ export class AircraftMapRenderer {
       });
     }
     if (aircraft.icao24) {
-      marker.on('click', () => this.loadDetails(aircraft));
+      marker.on('click', () => {
+        this.loadDetails(aircraft);
+      });
     }
     return marker;
   }
@@ -477,7 +483,7 @@ export class AircraftMapRenderer {
 
     return {
       icon: this.L.divIcon({
-        html: rendered.element,
+        html: this.componentRenderer.elementAsHtml(rendered.element),
         className: 'bg-transparent border-0',
         iconSize: [size, size],
         iconAnchor: [half, half],

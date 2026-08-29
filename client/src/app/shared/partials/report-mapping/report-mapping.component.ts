@@ -1,7 +1,6 @@
 import { CommonModule, NgClass } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { AuthService } from '../../../services/authetication/auth.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
@@ -36,7 +35,7 @@ export class ReportMappingComponent {
   filteredItems: RelatedReportItem[] = [];
   isExpanded = false;
 
-  constructor(private api: ApiService, protected dashboardservice: DashboardService, protected authService: AuthService, protected licenseService: LicenseService) {
+  constructor(private api: ApiService, protected dashboardservice: DashboardService, protected licenseService: LicenseService) {
   }
 
   toggleContent(): void {

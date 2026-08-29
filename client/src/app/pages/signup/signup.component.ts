@@ -28,7 +28,7 @@ export class SignupComponent implements OnInit {
   currentUnmetCheck: string | null = null;
   isMobile = false;
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
-  usernameSuggestion: string = '';
+  usernameSuggestion = '';
   brandingResolved = false;
 
   constructor(private router: Router, public auth_service: AuthService, private route: ActivatedRoute, protected appService: AppService) { }

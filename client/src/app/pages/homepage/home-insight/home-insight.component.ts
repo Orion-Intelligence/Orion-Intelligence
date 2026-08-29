@@ -4,7 +4,6 @@ import { NgClass, NgOptimizedImage } from '@angular/common';
 import { DefacementModel, GenericModel, InsightCallbackModel, InsightMetric, LeakModel } from '../model/stats_insight.model';
 import { TooltipDirective } from '../../../shared/directive/tooltip-directive.directive';
 import { LatestDocument, LatestDocumentCallbackModel } from '../model/document_insight.model';
-import { AppService } from '../../../services/core/app/app.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { InsightCacheService } from '../services/insight-cache.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
@@ -29,7 +28,7 @@ export class HomeInsightComponent implements OnInit {
   isLoading = true;
   readonly loadingCards = [1, 2, 3, 4];
 
-  constructor(private router: Router, private route: ActivatedRoute, public appService: AppService, protected licenseService: LicenseService, private insightCacheService: InsightCacheService) {
+  constructor(private router: Router, private route: ActivatedRoute, protected licenseService: LicenseService, private insightCacheService: InsightCacheService) {
   }
 
   ngOnInit() {
@@ -39,7 +38,7 @@ export class HomeInsightComponent implements OnInit {
       return;
     }
     this.insightCacheService.getInsight().subscribe(data => {
-      this.applyInsightData(data); 
+      this.applyInsightData(data);
     });
   }
 

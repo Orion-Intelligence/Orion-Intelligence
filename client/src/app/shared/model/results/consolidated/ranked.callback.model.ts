@@ -4,8 +4,8 @@ export interface RankedResultItem extends CredentialResultItem {}
 
 export class RankedCallbackModel {
   result: RankedResultItem[] = [];
-  pageCount: number = 0;
-  totalHits: number = 0;
+  pageCount = 0;
+  totalHits = 0;
 
   constructor(init?: Partial<RankedCallbackModel>) {
     if (init) {

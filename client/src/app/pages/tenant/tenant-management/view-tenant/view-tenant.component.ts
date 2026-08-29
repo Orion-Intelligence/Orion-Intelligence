@@ -157,7 +157,7 @@ export class ViewTenantComponent implements OnInit {
         }
         this.isLoading = false;
       },
-      error: (_) => {
+      error: () => {
         this.isLoading = false;
       },
     });
@@ -188,8 +188,8 @@ export class ViewTenantComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent): void {
-    const eventTargetElement = event.target as HTMLElement;
-    if (!eventTargetElement.closest('.action-menu')) {
+    const eventTargetElement = event.target;
+    if (!(eventTargetElement instanceof Element) || !eventTargetElement.closest('.action-menu')) {
       this.selectedTenantId = null;
     }
   }

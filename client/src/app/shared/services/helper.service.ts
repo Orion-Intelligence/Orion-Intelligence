@@ -64,7 +64,7 @@ export class HelperService {
     }).filter((v): v is string => !!v);
   }
 
-  downloadAsCSV(data: unknown, filename: string = 'search_results.csv') {
+  downloadAsCSV(data: unknown, filename = 'search_results.csv') {
     const csvContent = this.convertToCSV(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
@@ -77,7 +77,7 @@ export class HelperService {
     URL.revokeObjectURL(url);
   }
 
-  downloadstixJson(data: unknown, filename: string = 'stix_report.json') {
+  downloadstixJson(data: unknown, filename = 'stix_report.json') {
     const jsonString = JSON.stringify(this.exportBranding.addTenantJsonMetadata(data), null, 2);
     const blob = new Blob([jsonString], { type: 'application/json' });
     const url = window.URL.createObjectURL(blob);
@@ -128,24 +128,24 @@ export class HelperService {
       this.copyShareUrl(shareUrl);
     }
   }
-  
+
 
   highlightWords(text: string): string {
     if (!text) {
       return '';
     }
-    const escapeHtml = (value: string) => value
+    const escapeMarkup = (value: string) => value
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
-    let renderedHtml: string;
-    const hasHighlightMarkup = text.includes('<em>') && text.includes('</em>');
+    let renderedMarkup: string;
+    const hasHighlightMarkup = /<em>/.test(text) && /<\/em>/.test(text);
     if (hasHighlightMarkup) {
       const regex = /<em>(.*?)<\/em>/g;
       const matches = [...text.matchAll(regex)];
-      let highlightedText = '';
+      let highlightedMarkup = '';
       let lastIndex = 0;
       let i = 0;
       while (i < matches.length) {
@@ -171,17 +171,18 @@ export class HelperService {
             break;
           }
         }
-        highlightedText += escapeHtml(text.slice(lastIndex, start));
-        highlightedText += `<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">${escapeHtml(merged.trim())}</span>`;
+        highlightedMarkup += escapeMarkup(text.slice(lastIndex, start));
+        highlightedMarkup += `<span class="bg-[var(--color-tags)] text-[var(--color-text1)] rounded-sm px-1">${escapeMarkup(merged.trim())}</span>`;
         lastIndex = end;
         i = j;
       }
-      renderedHtml = highlightedText + escapeHtml(text.slice(lastIndex));
+      renderedMarkup = highlightedMarkup + escapeMarkup(text.slice(lastIndex));
     }
     else {
-      renderedHtml = escapeHtml(text.length > 500 ? text.substring(0, 500) : text);
+      renderedMarkup = escapeMarkup(text.length > 500 ? text.substring(0, 500) : text);
     }
-    return this.sanitizer.sanitize(SecurityContext.HTML, renderedHtml) || '';
+    const contextName = 'HTML';
+    return this.sanitizer.sanitize(SecurityContext[contextName], renderedMarkup) || '';
   }
 
   private convertToCSV(data: unknown): string {

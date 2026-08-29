@@ -85,7 +85,7 @@ export class CredentialListComponent {
     return values.length ? values.join(', ') : 'Not available';
   }
 
-  sliceText(text: string | null | undefined, maxLength: number = 30): string {
+  sliceText(text: string | null | undefined, maxLength = 30): string {
     if (!text) {
       return '';
     }
@@ -101,7 +101,7 @@ export class CredentialListComponent {
     return candidates[0] || '-';
   }
 
-  getThreatPrimaryUrlShort(result: RankedResultItem, maxLength: number = 25): string {
+  getThreatPrimaryUrlShort(result: RankedResultItem, maxLength = 25): string {
     return this.sliceText(this.getThreatPrimaryUrl(result), maxLength) || '-';
   }
 

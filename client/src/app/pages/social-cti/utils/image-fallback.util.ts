@@ -4,7 +4,10 @@ const FALLBACK_ICON = bootstrapIconRegistry['bi-image'];
 const IMAGE_FALLBACK_SRC = 'data:image/svg+xml;utf8,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${FALLBACK_ICON.viewBox}" fill="#94a3b8">${FALLBACK_ICON.markup}</svg>`);
 
 export function applyImageFallback(event: Event): void {
-  const image = event.target as HTMLImageElement;
+  const image = event.target;
+  if (!(image instanceof HTMLImageElement)) {
+    return;
+  }
   const current = image.getAttribute('src') || '';
 
 

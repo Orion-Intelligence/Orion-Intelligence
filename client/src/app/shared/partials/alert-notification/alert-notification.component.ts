@@ -39,17 +39,17 @@ export class AlertNotificationComponent implements OnChanges {
   readonly batchSize: number = 20;
   readonly incrementalDelayMs: number = 120;
   readonly incrementalChunkSize: number = 1;
-  currentPage: number = 0;
-  totalCount: number = 0;
-  hasMore: boolean = false;
+  currentPage = 0;
+  totalCount = 0;
+  hasMore = false;
   countsByType: Record<string, number> = {};
-  isLoadingMore: boolean = false;
-  isLoadMoreTriggered: boolean = false;
-  isFetchingDetail: boolean = false;
+  isLoadingMore = false;
+  isLoadMoreTriggered = false;
+  isFetchingDetail = false;
   alertToShowReport: AlertModel | null = null;
-  isExportChoiceOpen: boolean = false;
-  isScanDeleteConfirmationOpen: boolean = false;
-  isScanDeleting: boolean = false;
+  isExportChoiceOpen = false;
+  isScanDeleteConfirmationOpen = false;
+  isScanDeleting = false;
   scanDeleteTarget: ScanJob | null = null;
   scanDeleteMode: ScanActionMode | null = null;
   readonly alertExportOptions = ALERT_REPORT_EXPORT_OPTIONS;
@@ -61,7 +61,7 @@ export class AlertNotificationComponent implements OnChanges {
   constructor(public appService: AppService, public apiService: ApiService, private messageNotificationService: MessageNotificationService, private alertExportService: AlertExportService, public scanNotificationService: ScanNotificationService, private router: Router, private licenseService: LicenseService) {
   }
 
-  private decrementUnseenSummary(by: number = 1): void {
+  private decrementUnseenSummary(by = 1): void {
     const summary = this.appService.userSessionData().alert_summary;
     if (!summary) {
       return;
@@ -102,7 +102,7 @@ export class AlertNotificationComponent implements OnChanges {
     return this.hasMore || this.alertNotifications.length < this.totalCount;
   }
 
-  private fetchNotifications(reset: boolean, attempt: number = 1): void {
+  private fetchNotifications(reset: boolean, attempt = 1): void {
     if (this.isLoadingMore) {
       return;
     }
@@ -306,7 +306,9 @@ export class AlertNotificationComponent implements OnChanges {
   stopScan(job: ScanJob, event?: Event): void {
     event?.stopPropagation();
     this.scanNotificationService.deleteScan(job).subscribe({
-      error: err => this.messageNotificationService.show(err?.error?.detail || 'Failed to stop scan'),
+      error: err => {
+        this.messageNotificationService.show(err?.error?.detail || 'Failed to stop scan');
+      },
     });
   }
 

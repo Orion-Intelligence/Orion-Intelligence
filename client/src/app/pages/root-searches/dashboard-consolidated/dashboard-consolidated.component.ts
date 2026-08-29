@@ -20,12 +20,10 @@ import { consolidated_filters } from '../../../shared/constants/filters';
 import { ALLOWED_CONSOLIDATED_RANKED_SINGLETON } from '../../../shared/constants/shared-enums';
 import { ThreatResultsComponent } from "./defacement-results/threat-results.component";
 import { RankedCallbackModel } from '../../../shared/model/results/consolidated/ranked.callback.model';
-import { HttpClient } from '@angular/common/http';
 import { ConsolidatedScanComponent } from './consolidated-scan/consolidated-scan.component';
 import { isDomainName, isEmailAddress } from '../../../shared/utils/network-validation.util';
 import { StealerLogCallbackModel } from '../../../shared/model/results/credentials/credential.callback.model';
 import { LicenseService } from '../../../services/licenses/licenses.service';
-import { AuthService } from '../../../services/authetication/auth.service';
 import { ConsolidatedIocComponent } from "./consolidated-ioc/consolidated-ioc.component";
 import { scanAnimation } from '../../../shared/animations/scan.animations';
 import { DefacementCallbackModel } from '../../../shared/model/results/defacement/defacement.callback.model';
@@ -65,7 +63,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   isIOC = true;
   isNetworkIntel = false;
   isGeoFencing = false;
-  query: string = '';
+  query = '';
   isLoading = signal(false);
   isStealerLogLoading = signal(false);
   firstTrigger = true;
@@ -99,7 +97,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     return false;
   });
 
-  constructor(public http: HttpClient, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected authService: AuthService, protected externalConsolidatedFeedService: ExternalConsolidatedFeedService) {
+  constructor(public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected selectionStore: SelectionStoreService, protected licenseService: LicenseService, protected externalConsolidatedFeedService: ExternalConsolidatedFeedService) {
     this.pageCounts = {};
   }
 
@@ -172,7 +170,6 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   fetchSearchResults(_ = false): void {
-    void _;
     if (this.domainScanComponent) {
       this.domainScanComponent.clearResults();
     }
@@ -268,13 +265,11 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     }
   }
 
-  resetFilters(_: undefined) {
-    void _;
+  resetFilters(): void {
     this.fetchSearchResults(true);
   }
 
   reloadFilters(_: Record<string, string | null>) {
-    void _;
     this.dashboardService.consolidatedParamModel.page = 1;
     this.fetchSearchResults();
   }

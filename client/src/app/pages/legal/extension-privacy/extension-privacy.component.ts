@@ -93,9 +93,9 @@ export class ExtensionPrivacyComponent implements OnInit, AfterViewInit, OnDestr
   }
 
   onLogoError(event: Event) {
-    const img = event.target as HTMLImageElement;
-    if (!img.src.endsWith(this.fallbackLogo)) {
-      img.src = this.fallbackLogo;
+    const image = event.target;
+    if (image instanceof HTMLImageElement && !image.src.endsWith(this.fallbackLogo)) {
+      image.src = this.fallbackLogo;
     }
   }
 }

@@ -173,7 +173,7 @@ export class SocialLiveSyncService {
     this.liveStop.delete(stopKey);
     this.stoppedPlatformIds.delete(cardId);
     const existing = (this.findPlatform(platformData)?.resources ?? platformData.resources ?? []).find(entry => entry.id === type);
-    const seen = new Set((existing?.resources ?? []).map(item => resourceKey(item as social_resource)));
+    const seen = new Set((existing?.resources ?? []).map(item => resourceKey(item)));
     this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: '' } }));
     if (trackStatus) {
       this.setSectionStatus(platformData, type, 'fetching');

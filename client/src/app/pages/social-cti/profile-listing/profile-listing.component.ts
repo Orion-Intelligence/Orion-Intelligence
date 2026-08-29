@@ -25,6 +25,7 @@ import { SocialProfileTabsSectionComponent } from '../profile-detail/profile-tab
 import { SocialExtensionManagerComponent } from '../../../shared/partials/extension-manager/extension-manager.component';
 import { SocialExtensionService } from '../../../shared/services/social-extension.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getInputValue } from '../../../shared/utils/event-input.util';
 
 
 @Component({
@@ -162,12 +163,16 @@ export class SocialProfileListingComponent {
     effect(() => {
       this.storageService.state.scanResults();
       this.extensionState();
-      queueMicrotask(() => this.resumeInFlightSections());
+      queueMicrotask(() => {
+        this.resumeInFlightSections();
+      });
     });
     effect(() => {
       this.activeUsers();
       this.isInitialLoading();
-      queueMicrotask(() => this.openProfileOverviewFromQuery());
+      queueMicrotask(() => {
+        this.openProfileOverviewFromQuery();
+      });
     });
   }
 
@@ -728,7 +733,7 @@ export class SocialProfileListingComponent {
   }
 
   onPlatformSearchInput(event: Event): void {
-    this.platformSearchTerm.set((event.target as HTMLInputElement | null)?.value ?? '');
+    this.platformSearchTerm.set(getInputValue(event));
   }
 
   getSidebarPlatforms(user: FeedUser): social_profile[] {

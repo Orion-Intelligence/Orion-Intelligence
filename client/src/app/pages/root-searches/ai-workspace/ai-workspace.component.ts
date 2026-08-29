@@ -144,7 +144,10 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     if (event.pointerId !== this.activeSplitPointerId) {
       return;
     }
-    const divider = event.currentTarget as HTMLElement;
+    const divider = event.currentTarget;
+    if (!(divider instanceof HTMLElement)) {
+      return;
+    }
     if (divider.hasPointerCapture(event.pointerId)) {
       divider.releasePointerCapture(event.pointerId);
     }
@@ -281,7 +284,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
           }
         },
         complete,
-        error: () => fail(),
+        error: () => {
+          fail();
+        },
       });
     };
 
@@ -569,9 +574,11 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.editingMessageId = message.id;
     this.editDraft = message.text;
     requestAnimationFrame(() => {
-      const textarea = document.getElementById(`ai-message-edit-${message.id}`) as HTMLTextAreaElement | null;
-      textarea?.focus();
-      textarea?.setSelectionRange(textarea.value.length, textarea.value.length);
+      const textarea = document.getElementById(`ai-message-edit-${message.id}`);
+      if (textarea instanceof HTMLTextAreaElement) {
+        textarea.focus();
+        textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      }
     });
   }
 
@@ -715,7 +722,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       sessionStorage.removeItem(this.pendingStreamStorageKey);
     }
     catch {
-
+      return;
     }
   }
 
@@ -773,8 +780,8 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
       if (!container) {
         return;
       }
-      const lastMessage = container.lastElementChild as HTMLElement | null;
-      if (!lastMessage) {
+      const lastMessage = container.lastElementChild;
+      if (!(lastMessage instanceof HTMLElement)) {
         return;
       }
 
@@ -790,7 +797,9 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   queueComposerResize(): void {
-    requestAnimationFrame(() => this.resizeComposer());
+    requestAnimationFrame(() => {
+      this.resizeComposer();
+    });
   }
 
   private getComposerLineCount(textarea: HTMLTextAreaElement): number {

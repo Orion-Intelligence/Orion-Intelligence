@@ -1,4 +1,5 @@
 import type { Edge, Node } from 'vis-network';
+import type { Augmented } from '../../../shared/utils/type-guards.util';
 
 export type SocialGraphNodeKind = 'root' | 'user' | 'account' | 'group' | 'person' | 'more';
 
@@ -136,6 +137,6 @@ export interface SocialGraphVisualOptions {
   scanning: ReadonlySet<string>;
 }
 
-export type SocialGraphVisNode = Node & { id: string };
+export type SocialGraphVisNode = Augmented<Node, { id: string }>;
 
-export type SocialGraphVisEdge = Edge & { id: string };
+export type SocialGraphVisEdge = Augmented<Edge, { id: string }>;

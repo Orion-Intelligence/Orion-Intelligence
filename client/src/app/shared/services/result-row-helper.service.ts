@@ -35,7 +35,7 @@ export class ResultRowHelperService {
     return String(value);
   }
 
-  arrayOrDash(value: unknown, joinBy: string = ', '): string {
+  arrayOrDash(value: unknown, joinBy = ', '): string {
     const values = this.normalizeToArray(value);
     if (values.length === 0) {
       return '-';
@@ -43,7 +43,7 @@ export class ResultRowHelperService {
     return values.join(joinBy);
   }
 
-  truncate(value: unknown, max: number = 30): string {
+  truncate(value: unknown, max = 30): string {
     const text = value == null ? '' : String(value);
     if (!text) {
       return '-';
@@ -90,7 +90,9 @@ export class ResultRowHelperService {
     if (copiedTimer) {
       clearTimeout(copiedTimer);
     }
-    return setTimeout(() => setCopiedKey(null), 1200);
+    return setTimeout(() => {
+      setCopiedKey(null);
+    }, 1200);
   }
 
   private copyWithExecCommand(value: string): boolean {

@@ -35,9 +35,9 @@ import { TakedownActionComponent } from '../../../../shared/partials/takedown-ac
 })
 export class ReportDefacementComponent implements OnInit, AfterViewInit {
   defacementData: DefacementResultItem | null = null;
-  isExpandedMetadata: boolean = true;
-  activeTab: string = '';
-  content: string = '';
+  isExpandedMetadata = true;
+  activeTab = '';
+  content = '';
   listItems: string[] = [];
   arrayKeys: string[] = [];
 

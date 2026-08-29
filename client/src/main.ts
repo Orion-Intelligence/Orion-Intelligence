@@ -69,24 +69,21 @@ const buildBootstrapSvgElement = (iconName: BootstrapIconName): SVGSVGElement =>
     return svg;
 };
 const renderBootstrapIcon = (element: Element) => {
-    if (!(element instanceof HTMLElement)) {
-        return;
-    }
     const iconName = getBootstrapIconName(element);
     if (!iconName) {
-        if (element.dataset['bootstrapIconRendered'] === '1') {
+        if (element.getAttribute('data-bootstrap-icon-rendered') === '1') {
             element.textContent = '';
-            delete element.dataset['bootstrapIconRendered'];
-            delete element.dataset['bootstrapIconName'];
+            element.removeAttribute('data-bootstrap-icon-rendered');
+            element.removeAttribute('data-bootstrap-icon-name');
         }
         return;
     }
-    if (element.dataset['bootstrapIconName'] === iconName) {
+    if (element.getAttribute('data-bootstrap-icon-name') === iconName) {
         return;
     }
     element.replaceChildren(buildBootstrapSvgElement(iconName));
-    element.dataset['bootstrapIconRendered'] = '1';
-    element.dataset['bootstrapIconName'] = iconName;
+    element.setAttribute('data-bootstrap-icon-rendered', '1');
+    element.setAttribute('data-bootstrap-icon-name', iconName);
 };
 const hydrateBootstrapIcons = (root: ParentNode | Element = document) => {
     if (root instanceof Element) {

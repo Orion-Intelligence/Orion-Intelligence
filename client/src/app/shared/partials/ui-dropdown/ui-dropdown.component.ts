@@ -4,6 +4,7 @@ import { Component, ElementRef, EmbeddedViewRef, HostListener, NgZone, OnDestroy
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { TranslationService } from '../../services/translation.service';
+import type { Nullable } from '../../utils/type-guards.util';
 import type { UiDropdownMenuOption, UiDropdownOption } from './model/ui-dropdown.model';
 export type { UiDropdownMenuOption, UiDropdownOption } from './model/ui-dropdown.model';
 
@@ -64,8 +65,8 @@ export class UiDropdownComponent implements OnDestroy {
   @ViewChild('searchInput') private searchInput?: ElementRef<HTMLInputElement>;
   @ViewChild('listbox') private listbox?: ElementRef<HTMLElement>;
   @ViewChild('portalMenu', { static: true }) private portalMenu?: TemplateRef<unknown>;
-  private portalOutlet: DomPortalOutlet | null = null;
-  private portalViewRef: EmbeddedViewRef<unknown> | null = null;
+  private portalOutlet: Nullable<DomPortalOutlet> = null;
+  private portalViewRef: Nullable<EmbeddedViewRef<unknown>> = null;
   private readonly onDocumentPointerDown = (event: Event): void => {
     const target = event.target;
     if (!(target instanceof Node) || this.hostElement.nativeElement.contains(target)) {
@@ -74,7 +75,9 @@ export class UiDropdownComponent implements OnDestroy {
     if (this.portalViewRef?.rootNodes.some(node => node instanceof Node && node.contains(target))) {
       return;
     }
-    this.ngZone.run(() => this.close());
+    this.ngZone.run(() => {
+      this.close();
+    });
   };
   private readonly onDocumentScroll = (event: Event): void => {
     if (event.target instanceof Node && this.portalOutlet?.outletElement === event.target) {
@@ -430,7 +433,9 @@ export class UiDropdownComponent implements OnDestroy {
     this.searchTerm = searchTerm;
     this.searchChange.emit(searchTerm);
     this.attachPortalMenu();
-    this.ngZone.runOutsideAngular(() => document.addEventListener('pointerdown', this.onDocumentPointerDown, true));
+    this.ngZone.runOutsideAngular(() => {
+      document.addEventListener('pointerdown', this.onDocumentPointerDown, true);
+    });
     const selectedIndex = this.visibleOptions.findIndex(option => this.isSelected(option.key));
     this.activeIndex = selectedIndex >= 0 ? selectedIndex : (this.visibleOptions.length ? 0 : -1);
     this.focusSearch();
@@ -444,7 +449,9 @@ export class UiDropdownComponent implements OnDestroy {
     this.portalOutlet = new DomPortalOutlet(this.findMenuHost());
     this.updatePortalPosition();
     this.portalViewRef = this.portalOutlet.attach(new TemplatePortal(this.portalMenu, this.viewContainerRef));
-    this.ngZone.runOutsideAngular(() => document.addEventListener('scroll', this.onDocumentScroll, true));
+    this.ngZone.runOutsideAngular(() => {
+      document.addEventListener('scroll', this.onDocumentScroll, true);
+    });
   }
 
   private findMenuHost(): HTMLElement {
@@ -478,9 +485,9 @@ export class UiDropdownComponent implements OnDestroy {
   }
 
   private updatePortalPosition(): boolean {
-    const scroller = this.portalOutlet?.outletElement as HTMLElement | undefined;
+    const scroller = this.portalOutlet?.outletElement;
     const trigger = this.triggerButton?.nativeElement;
-    if (!scroller || !trigger) {
+    if (!(scroller instanceof HTMLElement) || !trigger) {
       return false;
     }
     const triggerRect = this.visibleTriggerRect(trigger, scroller);

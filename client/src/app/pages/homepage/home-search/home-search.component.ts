@@ -7,7 +7,6 @@ import { ConsolidatedCallbackModel } from '../../../shared/model/results/consoli
 import { SearchFiltersComponent } from '../search-filters/search-filters.component';
 import { AppService } from '../../../services/core/app/app.service';
 import { HomeInsightComponent } from '../home-insight/home-insight.component';
-import { AuthService } from '../../../services/authetication/auth.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from '../../../shared/partials/result/services/home.search.service';
 import { WorldHeatmapComponent } from '../world-heatmap/world-heatmap.component';
@@ -32,7 +31,7 @@ export class HomeSearchComponent implements OnInit {
   protected readonly tabs = ['IOCs', 'Deep Search', 'Network Intelligence', 'Geo Fencing'];
 
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('matchTypeDropdown', { static: false }) matchTypeDropdownRef?: ElementRef<HTMLDetailsElement>;
   searchQuery = '';
   selectedSearchBy = 'Match any term';
@@ -46,7 +45,7 @@ export class HomeSearchComponent implements OnInit {
   readonly hideHeatmapAndAnalytics = input<boolean>(false);
   readonly compactLayout = input<boolean>(false);
 
-  constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
+  constructor( public dashboardService: DashboardService, private route: ActivatedRoute, private router: Router, public app_service: AppService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService ) {}
 
   ngOnInit(): void {
     const cfg = this.app_service.configData();
@@ -142,7 +141,7 @@ export class HomeSearchComponent implements OnInit {
 
   clearSearchInput(): void {
     this.searchQuery = '';
-    const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    const inputElement = this.searchInputRef?.nativeElement;
     if (inputElement) {
       inputElement.value = '';
       inputElement.focus();
@@ -179,7 +178,10 @@ export class HomeSearchComponent implements OnInit {
     this.computeInsightMax();
     const max = this.insightMax;
 
-    const currentTargetElement = event.currentTarget as HTMLElement;
+    const currentTargetElement = event.currentTarget;
+    if (!(currentTargetElement instanceof HTMLElement)) {
+      return;
+    }
     try {
       currentTargetElement.setPointerCapture(event.pointerId);
     }

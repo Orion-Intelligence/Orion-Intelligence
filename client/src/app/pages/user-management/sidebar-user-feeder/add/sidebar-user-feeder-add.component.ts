@@ -95,13 +95,19 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   }
 
   onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
     this.isSelectingFiles = false;
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
     this.selectedFiles = Array.from(input.files || []);
   }
 
   onSessionFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
+    const input = event.target;
+    if (!(input instanceof HTMLInputElement)) {
+      return;
+    }
     const file = input.files?.[0] || null;
     if (file && !file.name.toLowerCase().endsWith('.zip')) {
       this.formError = this.translationService.translate('Only ZIP session files are allowed');

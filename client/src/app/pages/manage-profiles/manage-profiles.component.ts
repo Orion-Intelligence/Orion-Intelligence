@@ -172,7 +172,9 @@ export class ManageProfilesComponent {
   }
 
   deleteSession(platform: string, sessionId: string): void {
-    this.service.deleteSession(platform, sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.loadCapturedSessions());
+    this.service.deleteSession(platform, sessionId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => {
+      this.loadCapturedSessions();
+    });
   }
 
   private loadCapturedSessions(): void {

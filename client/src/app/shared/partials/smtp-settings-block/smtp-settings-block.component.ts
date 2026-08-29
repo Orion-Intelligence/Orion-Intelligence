@@ -16,7 +16,7 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 })
 export class SmtpSettingsBlockComponent implements OnChanges {
   private apiService = inject(ApiService);
-  private hostElement = inject(ElementRef<HTMLElement>);
+  private hostElement = inject<ElementRef<Element>>(ElementRef);
 
   isVerifyingMail = false;
   mailConfigurationStatus = '';

@@ -23,7 +23,9 @@ export class FacilityLegendComponent implements AfterViewInit, OnChanges, OnDest
 
   ngAfterViewInit(): void {
     if (typeof ResizeObserver !== 'undefined' && this.scrollArea?.nativeElement) {
-      this.resizeObserver = new ResizeObserver(() => this.updateOverflow());
+      this.resizeObserver = new ResizeObserver(() => {
+        this.updateOverflow();
+      });
       this.resizeObserver.observe(this.scrollArea.nativeElement);
     }
     this.scheduleOverflowUpdate();

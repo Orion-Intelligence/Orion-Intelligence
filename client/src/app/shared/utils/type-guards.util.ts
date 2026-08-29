@@ -1,4 +1,8 @@
 export type UnknownRecord = Record<string, unknown>;
+export type Augmented<TBase, TExtension> = TBase & TExtension;
+export type Either<TLeft, TRight> = TLeft | TRight;
+export type Nullable<T> = T | null;
+export type Nullish<T> = T | null | undefined;
 
 export function isUnknownRecord(value: unknown): value is UnknownRecord {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

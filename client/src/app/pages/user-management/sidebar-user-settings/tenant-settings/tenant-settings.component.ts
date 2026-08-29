@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../../shared/services/api.service';
 import { AppService } from '../../../../services/core/app/app.service';
-import { AuthService } from '../../../../services/authetication/auth.service';
 import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { userSessionData } from '../../../../shared/model/company-profile/node.model';
 import { UserImagePickerComponent } from '../user-image-picker/user-image-picker.component';
@@ -33,11 +32,11 @@ export class TenantSettingsComponent implements OnInit {
   mailErrorState = false;
   webhookErrorState = false;
   userSessionData: userSessionData;
-  userId: string = '';
+  userId = '';
   mailForm: SmtpSettingsForm = { accounts_mail_password: '', accounts_mail: '', accounts_smtp_server: '', accounts_smtp_port: '' };
   webhookForm: AlertWebhookSettingsForm = this.createWebhookForm();
 
-  constructor(protected apiService: ApiService, protected appService: AppService, protected authService: AuthService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
+  constructor(protected apiService: ApiService, protected appService: AppService, protected licenseService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
     this.userSessionData = this.appService.userSessionData();
   }
 
@@ -179,7 +178,9 @@ export class TenantSettingsComponent implements OnInit {
 
   private loadAlertConnectorSettings() {
     this.apiService.get<AlertConnectorSettingsResponse>('alert-connectors/settings').subscribe({
-      next: (response) => this.applyAlertConnectorSettings(response),
+      next: (response) => {
+        this.applyAlertConnectorSettings(response);
+      },
       error: () => {
         this.webhookErrorState = true;
       }

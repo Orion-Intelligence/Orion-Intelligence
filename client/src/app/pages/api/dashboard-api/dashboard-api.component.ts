@@ -510,7 +510,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.closeExportChoice();
   }
 
-  private exportPdfReport(type: string = 'report'): void {
+  private exportPdfReport(type = 'report'): void {
     if (!this.hasResults) {
       return;
     }

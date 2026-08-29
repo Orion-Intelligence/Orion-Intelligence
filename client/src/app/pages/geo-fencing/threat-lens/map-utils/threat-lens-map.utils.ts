@@ -100,6 +100,7 @@ function getFeatureAnchor(feature: ThreatLensMapGraphic | null, geometryEngine: 
       anchor = toValidLngLat(geometryEngine.centroid(geometry), webMercatorUtils);
     }
     catch {
+      anchor = null;
     }
   }
 
@@ -144,14 +145,16 @@ function toValidLngLat(point: EsriGeometry | null | undefined, webMercatorUtils:
   }
 
   if (webMercatorUtils?.xyToLngLat) {
+    let projectedPoint: LngLat | null = null;
     try {
       const [lng, lat] = webMercatorUtils.xyToLngLat(rawLon, rawLat);
-      const lngLat: LngLat = [normalizeLongitude(lng), lat];
-      if (isValidLngLat(lngLat)) {
-        return lngLat;
-      }
+      projectedPoint = [normalizeLongitude(lng), lat];
     }
     catch {
+      projectedPoint = null;
+    }
+    if (isValidLngLat(projectedPoint)) {
+      return projectedPoint;
     }
   }
 

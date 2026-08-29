@@ -50,7 +50,7 @@ export class SecurityScanComponent implements OnInit {
   skeletonCards = Array.from({ length: 3 });
   progress = signal(0);
   currentStep = '';
-  scanType: string = '';
+  scanType = '';
   grade = '';
   gradeCounts: { high: number; medium: number; low: number; informational: number; } = { high: 0, medium: 0, low: 0, informational: 0, };
   trackByCategory = ( _: number, c: { name: string; } ) => c.name;
@@ -197,7 +197,7 @@ export class SecurityScanComponent implements OnInit {
     this.closeExportChoice();
   }
 
-  private exportReport(type: string = 'report'): void {
+  private exportReport(type = 'report'): void {
     if (!this.meta) {
       return;
     }
@@ -205,7 +205,7 @@ export class SecurityScanComponent implements OnInit {
     const now = new Date().toISOString();
     const host = this.displayHost || 'report';
     const totalFindings = this.categories.reduce((acc, c) => acc + (c.items?.length || 0), 0);
-    const summarize = (text: string, limit: number = 180): string => {
+    const summarize = (text: string, limit = 180): string => {
       const v = (text || '').replace(/\s+/g, ' ').trim();
       return v.length > limit ? `${v.slice(0, limit - 3)}...` : (v || 'not available');
     };

@@ -25,11 +25,11 @@ export class AddTenantComponent implements OnInit {
   licenseList = Object.values(LicenseName);
   licenses = ['free', 'osint_basic', 'osint_advanced', 'social_mapper', 'pentester', 'maintainer', 'enterprise'];
   alertTenantOptions: AlertAllowedTenantOption[] = [];
-  isAdmin: boolean = false;
+  isAdmin = false;
   model: TenantTeamModel = { username: '', email: '', password: '', role: 'analyst', status: 'active', subscription: false, licenses: [], permissions: [], alerts_allowed_all: false, alerts_allowed_tenant_ids: [] };
-  errorText: string = "";
+  errorText = "";
   usernamePattern = /^[A-Za-z][A-Za-z0-9_-]{7,19}$/;
-  usernameSuggestion: string = "";
+  usernameSuggestion = "";
   showPasswordMeter = false;
   passwordStrength: PasswordStrength = null;
   passwordChecks: PasswordChecks = createEmptyPasswordChecks();

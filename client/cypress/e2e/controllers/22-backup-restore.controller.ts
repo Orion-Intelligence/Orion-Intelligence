@@ -59,15 +59,38 @@ export function clearAllBackups() {
   deleteFirstBackupIfPresent();
 }
 
-export function restoreBackupViaTestApi() {
-  cy.intercept('POST', '**/api/admin/backups/*/restore', (req) => {
-    req.continue();
-  }).as('restoreBackup');
+function backupsApiStatus(): Cypress.Chainable<number> {
+  return cy.request({url: '/api/admin/backups', failOnStatusCode: false, log: false}).its('status', {log: false});
+}
 
+function waitForMaintenanceStart(attempts = 0): Cypress.Chainable<void> {
+  return backupsApiStatus().then((status) => {
+    if (status === 503 || attempts >= 20) {
+      return cy.wrap<void>(undefined, {log: false});
+    }
+    return cy.wait(500, {log: false}).then(() => waitForMaintenanceStart(attempts + 1));
+  });
+}
+
+function waitForMaintenanceEnd(attempts = 0): Cypress.Chainable<void> {
+  return backupsApiStatus().then((status) => {
+    if (status === 200) {
+      return cy.wrap<void>(undefined, {log: false});
+    }
+    if (attempts >= 300) {
+      throw new Error('Restore did not finish: maintenance mode is still enabled');
+    }
+    return cy.wait(1000, {log: false}).then(() => waitForMaintenanceEnd(attempts + 1));
+  });
+}
+
+export function restoreBackupViaTestApi() {
   getBackupRows().eq(0).within(() => {
     cy.contains('button', 'Restore').click();
   });
   cy.contains('[data-testid="confirmation-popup"]', 'maintenance mode').should('be.visible');
   cy.get('[data-testid="confirmation-yes-button"]').click();
-  cy.wait('@restoreBackup', {timeout: 60000}).its('response.statusCode').should('be.oneOf', [200, 201]);
+  waitForMaintenanceStart();
+  waitForMaintenanceEnd();
+  openBackupRestore();
 }

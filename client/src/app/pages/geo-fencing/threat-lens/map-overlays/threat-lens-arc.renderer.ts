@@ -336,7 +336,9 @@ export class ThreatLensArcRenderer {
 
     if (!items.length) {
       this.countryRenderer.setConnectedCountryKeys([]);
-      this.ngZone.run(() => this.onVisibleArcCountChange(0));
+      this.ngZone.run(() => {
+        this.onVisibleArcCountChange(0);
+      });
       this.emitBatchStatus(null);
       return;
     }
@@ -353,7 +355,9 @@ export class ThreatLensArcRenderer {
         }
         return states;
       }, []);
-    this.ngZone.run(() => this.onVisibleArcCountChange(items.length));
+    this.ngZone.run(() => {
+      this.onVisibleArcCountChange(items.length);
+    });
     this.emitBatchStatus(batch);
     this.movingDotGraphics = [];
     this.receiverPulseGraphics = [];
@@ -464,7 +468,9 @@ export class ThreatLensArcRenderer {
       }
       : null;
 
-    this.ngZone.run(() => this.onBatchStatusChange(status));
+    this.ngZone.run(() => {
+      this.onBatchStatusChange(status);
+    });
   }
 
   private logCountryCoordinateValidation(countryKey: string, coordinates: LngLat): void {

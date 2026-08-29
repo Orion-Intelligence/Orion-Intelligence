@@ -1,5 +1,6 @@
 import { ApplicationRef, ComponentRef, EnvironmentInjector, Type, createComponent } from '@angular/core';
 import { RenderedLeafletComponent } from '../../models/geo-fencing.models';
+import type { Nullish } from '../../../../shared/utils/type-guards.util';
 
 export class LeafletComponentRenderer {
   private refs = new Set<ComponentRef<unknown>>();
@@ -16,13 +17,21 @@ export class LeafletComponentRenderer {
     componentRef.changeDetectorRef.detach();
     this.refs.add(componentRef);
 
+    const element = componentRef.location.nativeElement;
+    if (!(element instanceof HTMLElement)) {
+      throw new TypeError('Expected a rendered component element.');
+    }
     return {
-      element: componentRef.location.nativeElement as HTMLElement,
+      element,
       componentRef,
     };
   }
 
-  destroy<T>(componentRef: ComponentRef<T> | null | undefined): void {
+  elementAsHtml(element: HTMLElement): HTMLElement {
+    return element;
+  }
+
+  destroy<T>(componentRef: Nullish<ComponentRef<T>>): void {
     if (!componentRef) {
       return;
     }
@@ -31,6 +40,8 @@ export class LeafletComponentRenderer {
   }
 
   destroyAll(): void {
-    Array.from(this.refs).forEach((componentRef) => this.destroy(componentRef));
+    Array.from(this.refs).forEach((componentRef) => {
+      this.destroy(componentRef);
+    });
   }
 }

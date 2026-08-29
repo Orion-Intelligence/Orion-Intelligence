@@ -23,7 +23,7 @@ export class AddCustomAlertComponent implements OnInit {
 
   iocDropdownOpen = false;
   alert: AlertModel = { type: '', status: 'active', title: '', description: '', url: '', source: '', all_ioc: [], content_types: [], first_seen: new Date(), last_seen: new Date(), ioc_type: '', ioc_value: '' };
-  formError: string = '';
+  formError = '';
   alertTypes = [ { key: 'general', label: 'General' }, { key: 'breach', label: 'Breach' }, { key: 'exploit', label: 'Exploit' }, { key: 'social', label: 'Social' }, { key: 'defacement', label: 'Defacement' } ];
   readonly heading = input<string>('');
   readonly description = input<string>('');

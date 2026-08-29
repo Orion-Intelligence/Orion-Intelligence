@@ -8,6 +8,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import type { FeatureCollection } from 'geojson';
 import type { GeometryCollection, Topology } from 'topojson-specification';
 import type { ZoomAnchor } from './model/geo-coordinates-modal.model';
+import type { Nullable } from '../../../../../shared/utils/type-guards.util';
 export type { ZoomAnchor } from './model/geo-coordinates-modal.model';
 
 
@@ -23,7 +24,7 @@ type WorldTopology = Topology<{ countries: GeometryCollection }>;
 export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('mapViewport') private mapViewport?: ElementRef<HTMLDivElement>;
-  private projection: ReturnType<typeof d3.geoNaturalEarth1> | null = null;
+  private projection: Nullable<ReturnType<typeof d3.geoNaturalEarth1>> = null;
   private dragStartX = 0;
   private dragStartY = 0;
   private dragStartScrollLeft = 0;

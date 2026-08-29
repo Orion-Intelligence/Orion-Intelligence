@@ -177,7 +177,7 @@ export class AppService {
     });
   }
 
-  public updateFavicon(url: string = '/api/s/static/system/logo.png'): void {
+  public updateFavicon(url = '/api/s/static/system/logo.png'): void {
     (document.querySelector<HTMLLinkElement>('link[rel="icon"]') ??
             document.head.appendChild(Object.assign(document.createElement('link'), { rel: 'icon' }))).href = url;
   }

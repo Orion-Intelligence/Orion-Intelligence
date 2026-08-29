@@ -5,7 +5,6 @@ import { DatePipe, SlicePipe, CommonModule } from '@angular/common';
 import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode.pipe';
-import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -33,7 +32,7 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
   readonly searchResults = input<ChatResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
-  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngAfterViewInit() {

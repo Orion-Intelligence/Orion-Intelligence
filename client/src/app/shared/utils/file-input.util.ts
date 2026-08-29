@@ -3,9 +3,12 @@ import type { SelectedFileFromInput } from './model/file-input.model';
 export type { SelectedFileFromInput } from './model/file-input.model';
 
 export function getFirstFileFromInputEvent(event: Event): SelectedFileFromInput | null {
-  const inputElement = event.target as HTMLInputElement | null;
-  const file = inputElement?.files?.[0] ?? null;
-  if (!inputElement || !file) {
+  const inputElement = event.target;
+  if (!(inputElement instanceof HTMLInputElement)) {
+    return null;
+  }
+  const file = inputElement.files?.[0] ?? null;
+  if (!file) {
     return null;
   }
   return { input: inputElement, file };

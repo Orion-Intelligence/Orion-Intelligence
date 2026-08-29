@@ -194,7 +194,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     return this.rowHelper.valueOrDash(asUnknownRecord(item)['url']);
   }
 
-  truncate(v: unknown, n: number = 30): string {
+  truncate(v: unknown, n = 30): string {
     return this.rowHelper.truncate(v, n);
   }
 }

@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subject, of, timer } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { getInputValue } from '../../../../shared/utils/event-input.util';
 import { SocialFetchService } from '../../services/social-fetch.service';
 import { applyImageFallback } from '../../utils/image-fallback.util';
 import { asRecord, initialOf, pickText } from '../../utils/resource-view.util';
@@ -85,7 +86,7 @@ export class SocialConnectionsPopupComponent {
   }
 
   onSearch(event: Event): void {
-    const term = (event.target as HTMLInputElement | null)?.value ?? '';
+    const term = getInputValue(event);
     this.searchTerm.set(term);
     this.limit.set(30);
     this.search$.next(term);

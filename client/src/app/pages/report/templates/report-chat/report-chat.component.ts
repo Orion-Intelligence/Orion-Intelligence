@@ -7,7 +7,6 @@ import { ResultSectionComponent } from '../../../../shared/partials/result-compo
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { JsonApiViewerComponent } from '../../../../shared/partials/json-api-viewer/json-api-viewer.component';
 import { last } from 'rxjs';
-import { AuthService } from '../../../../services/authetication/auth.service';
 import { SocialResultItem } from '../../../../shared/model/results/social/social.callback.model';
 import { ReportHeaderComponent } from '../../../../shared/partials/report-header/report-header.component';
 import { DashboardService } from '../../../../services/dashboard/dashboard.service';
@@ -50,7 +49,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   summary = '';
   isExpandedMetadata = true;
 
-  constructor(protected appService: AppService, private route: ActivatedRoute, protected authService: AuthService, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>, private scanHelperMethodsService: NetworkIntelScanService) {
+  constructor(protected appService: AppService, private route: ActivatedRoute, public dashboardService: DashboardService, private router: Router, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>, private scanHelperMethodsService: NetworkIntelScanService) {
   }
 
   ngOnInit(): void {

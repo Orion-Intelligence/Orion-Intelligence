@@ -16,24 +16,24 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 export class TakedownActionComponent implements OnChanges {
   private http = inject(HttpClient);
 
-  isTakingDown: boolean = false;
-  showTakedownModal: boolean = false;
-  isReviewing: boolean = false;
+  isTakingDown = false;
+  showTakedownModal = false;
+  isReviewing = false;
   actionResult: TakedownActionResult | null = null;
-  takedownLabel: string = '';
-  takedownDisabled: boolean = false;
+  takedownLabel = '';
+  takedownDisabled = false;
   manualTargetUrl = '';
   manualUrlError = '';
   customMessage = '';
 
-  @Input() reportId: string = '';
+  @Input() reportId = '';
   @Input() targetUrl: string | null | undefined = '';
   @Input() status: string | null = null;
-  @Input() statusLabel: string = '';
-  @Input() manualUrlMode: boolean = false;
-  @Input() actionLabel: string = 'Initiate Takedown';
-  @Input() buttonClass: string = '';
-  @Input() buttonIcon: string = '';
+  @Input() statusLabel = '';
+  @Input() manualUrlMode = false;
+  @Input() actionLabel = 'Initiate Takedown';
+  @Input() buttonClass = '';
+  @Input() buttonIcon = '';
 
   @Output() requestCreated = new EventEmitter<TakedownActionResponse>();
 
@@ -204,7 +204,7 @@ export class TakedownActionComponent implements OnChanges {
     this.isReviewing = false;
   }
 
-  private applyTakedownStatus(status: string | null, label: string = ''): void {
+  private applyTakedownStatus(status: string | null, label = ''): void {
     this.takedownLabel = label;
     this.takedownDisabled = !!status || !!label;
   }

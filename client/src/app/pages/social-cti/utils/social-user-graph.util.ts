@@ -123,7 +123,9 @@ function darkwebHandles(record: ReturnType<typeof asRecord>): { handle: string; 
     push(record[senderKey], record['m_sender_name']);
   }
   push(record['m_forwarded_from']);
-  pickList(record, 'm_users').forEach(user => push(user));
+  pickList(record, 'm_users').forEach(user => {
+    push(user);
+  });
   for (const comment of Array.isArray(record['m_comments']) ? record['m_comments'] : []) {
     const entry = asRecord(comment);
     push(entry['m_username'] ?? entry['m_author'] ?? entry['m_sender_username'] ?? entry['m_sender_name']);

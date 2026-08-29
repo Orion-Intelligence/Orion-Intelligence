@@ -36,7 +36,7 @@ export class ManageProfileComponent implements OnInit {
   isLoading = true;
   selectedUserId: string | null = null;
   expandedUserIndex: number | null = null;
-  showAddTenantPopup: boolean = false;
+  showAddTenantPopup = false;
   userToDelete: User | null = null;
   isDeleteConfirmationOpen = signal<boolean>(false);
 
@@ -103,8 +103,8 @@ export class ManageProfileComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   handleClickOutside(event: MouseEvent) {
-    const eventTargetElement = event.target as HTMLElement;
-    if (!eventTargetElement.closest('.action-menu')) {
+    const eventTargetElement = event.target;
+    if (!(eventTargetElement instanceof Element) || !eventTargetElement.closest('.action-menu')) {
       this.selectedUserId = null;
     }
   }

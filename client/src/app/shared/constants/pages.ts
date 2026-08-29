@@ -9,7 +9,6 @@ export enum Category {
     EXPLOIT = 'Exploit',
     APT_INTEL = 'APT Intel',
     FEED = 'Feed',
-    CONSOLIDATED = 'Consolidated',
     STEALERLOGS = 'Stealerlogs',
     TENANT = 'Tenant',
     PROFILE = 'Profile',

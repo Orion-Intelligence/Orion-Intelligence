@@ -4,16 +4,17 @@ import { OrionSatelliteFeature } from '../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
 import type { Feature, FeatureCollection, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 import type { Topology } from 'topojson-specification';
+import type { Augmented, Nullable } from '../../../../shared/utils/type-guards.util';
 
 type CountryFeature = Feature;
-type ExtendedGeoJSONOptions = Leaflet.GeoJSONOptions & { noClip?: boolean; smoothFactor?: number };
+type ExtendedGeoJSONOptions = Augmented<Leaflet.GeoJSONOptions, { noClip?: boolean; smoothFactor?: number }>;
 
 export class CountryBoundaryMapRenderer {
-  private boundaryLayer: Leaflet.GeoJSON | null = null;
-  private highlightLayer: Leaflet.GeoJSON | null = null;
-  private hoverLayer: Leaflet.GeoJSON | null = null;
+  private boundaryLayer: Nullable<Leaflet.GeoJSON> = null;
+  private highlightLayer: Nullable<Leaflet.GeoJSON> = null;
+  private hoverLayer: Nullable<Leaflet.GeoJSON> = null;
   private countryFeatures: CountryFeature[] = [];
-  private highlightedFeature: CountryFeature | null = null;
+  private highlightedFeature: Nullable<CountryFeature> = null;
 
   constructor(private L: typeof Leaflet, private map: Leaflet.Map) {}
 
@@ -61,7 +62,9 @@ export class CountryBoundaryMapRenderer {
         noClip: true,
         smoothFactor: 0,
         style: () => this.getBoundaryStyle(),
-        onEachFeature: (feature, layer) => this.bindCountryFeature(feature, layer),
+        onEachFeature: (feature, layer) => {
+          this.bindCountryFeature(feature, layer);
+        },
       };
       this.boundaryLayer = this.L.geoJSON(renderableCountryCollection, boundaryOptions).addTo(this.map);
 
@@ -109,9 +112,15 @@ export class CountryBoundaryMapRenderer {
       opacity: 0.95,
       className: 'country-hover-tooltip rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-770)] px-[10px] py-[6px] text-[12px] font-semibold text-[var(--color-text1)] shadow-[0_12px_30px_rgb(2_6_23_/_45%)] [backdrop-filter:blur(8px)]',
     });
-    layer.on('click', () => this.toggleCountryHighlight(feature));
-    layer.on('mouseover', () => this.showCountryHover(feature));
-    layer.on('mouseout', () => this.clearCountryHover());
+    layer.on('click', () => {
+      this.toggleCountryHighlight(feature);
+    });
+    layer.on('mouseover', () => {
+      this.showCountryHover(feature);
+    });
+    layer.on('mouseout', () => {
+      this.clearCountryHover();
+    });
   }
 
   private toggleCountryHighlight(feature: CountryFeature): void {
@@ -140,7 +149,9 @@ export class CountryBoundaryMapRenderer {
       this.hoverLayer?.clearLayers();
       this.updateHighlight();
     }
-    catch { }
+    catch {
+      return;
+    }
   }
 
   private updateHighlight(): void {
@@ -269,7 +280,7 @@ export class CountryBoundaryMapRenderer {
     return [lon, lat];
   }
 
-  private isSameFeature(left: CountryFeature | null, right: CountryFeature | null): boolean {
+  private isSameFeature(left: Nullable<CountryFeature>, right: Nullable<CountryFeature>): boolean {
     if (!left || !right) {
       return false;
     }

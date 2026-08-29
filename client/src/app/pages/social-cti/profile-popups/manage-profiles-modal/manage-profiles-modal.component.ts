@@ -3,6 +3,7 @@ import type { social_profile } from '../../models/social.models';
 import type { ManageProfilesModalData, ManagedPlatform } from '../../models/social-usability.models';
 import { SocialIconComponent } from '../../../../shared/partials/social-icon/social-icon.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { getInputValue } from '../../../../shared/utils/event-input.util';
 
 type ManagedPlatformRow = ManagedPlatform & {
   draftUsername: string;
@@ -98,7 +99,7 @@ export class ManageProfilesModalComponent {
   }
 
   onSearchChanged(event: Event): void {
-    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    const nextValue = getInputValue(event);
     this.searchTerm.set(nextValue);
   }
 
@@ -172,7 +173,7 @@ export class ManageProfilesModalComponent {
     if (!this.isImageExtractedFlow()) {
       return;
     }
-    const nextValue = (event.target as HTMLInputElement | null)?.value ?? '';
+    const nextValue = getInputValue(event);
     this.platforms.update(current => current.map(p => p.stableKey === platformToUpdate.stableKey ? { ...p, draftUsername: nextValue } : p));
   }
 

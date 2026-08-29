@@ -40,7 +40,9 @@ export class CrossSearchCardComponent {
       this.onSearch();
     }
     else if (this.isExpandable) {
-      setTimeout(() => this.updateScrollState());
+      setTimeout(() => {
+        this.updateScrollState();
+      });
     }
   }
 
@@ -109,7 +111,9 @@ export class CrossSearchCardComponent {
       return;
     }
     el.scrollBy({ left: direction === 'left' ? -332 : 332, behavior: 'smooth' });
-    setTimeout(() => this.updateScrollState(), 250);
+    setTimeout(() => {
+      this.updateScrollState();
+    }, 250);
   }
 
   onScrollRow(): void {

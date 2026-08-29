@@ -25,6 +25,7 @@ import { SocialResourcePeopleSectionComponent } from '../resource-people-section
 import { SocialResourceFeedSectionComponent } from '../resource-feed-section/resource-feed-section.component';
 import { SocialResourceMediaSectionComponent } from '../resource-media-section/resource-media-section.component';
 import { asUnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { getInputValue } from '../../../../shared/utils/event-input.util';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
@@ -44,7 +45,7 @@ export class SocialProfileTabsSectionComponent {
   private readonly contentTabKeys: FetchTabKey[] = ['details', 'onlinePresence', 'stealerLogs'];
   private readonly displayLimit = signal(50);
   private readonly resetDisplayLimit = effect(() => {
-    this.activeTab(); this.displayLimit.set(50); 
+    this.activeTab(); this.displayLimit.set(50);
   });
   private readonly forceStale = false;
   private readonly fetchService = inject(SocialFetchService);
@@ -147,7 +148,7 @@ export class SocialProfileTabsSectionComponent {
   }
 
   onConnectionSearch(event: Event): void {
-    this.connectionSearch.emit((event.target as HTMLInputElement | null)?.value ?? '');
+    this.connectionSearch.emit(getInputValue(event));
   }
 
   syncAllNow(): void {
@@ -272,7 +273,7 @@ export class SocialProfileTabsSectionComponent {
   }
 
   onOnlinePresenceInput(event: Event): void {
-    this.onlinePresenceSearchTermChanged.emit((event.target as HTMLInputElement | null)?.value ?? '');
+    this.onlinePresenceSearchTermChanged.emit(getInputValue(event));
   }
 
   getProfileImageUrl(platformData: social_profile): string {

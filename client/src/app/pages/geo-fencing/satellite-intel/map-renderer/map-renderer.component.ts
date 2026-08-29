@@ -11,12 +11,12 @@ import { Observable, Subscription } from 'rxjs';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import type * as Leaflet from 'leaflet';
-import { asUnknownRecord, UnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, Augmented, Nullable, UnknownRecord } from '../../../../shared/utils/type-guards.util';
 
-type LoadableLeafletLayer = Leaflet.Layer & Partial<{
+type LoadableLeafletLayer = Augmented<Leaflet.Layer, Partial<{
   getMaplibreMap: () => { loaded: () => boolean; once: (event: string, handler: () => void) => void; off: (event: string, handler: () => void) => void };
   isLoading: () => boolean;
-}>;
+}>>;
 
 @Component({
   selector:    'app-satellite-map-renderer',
@@ -32,11 +32,11 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
   private static readonly OPEN_FREE_MAP_STYLE_URL = 'https://tiles.openfreemap.org/styles/positron';
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLDivElement>;
   @ViewChild('zoomLabelElement') private zoomLabelElement?: ElementRef<HTMLDivElement>;
-  private leafletMap: Leaflet.Map | null = null;
-  private esriLayer: Leaflet.TileLayer | null = null;
-  private esriReferenceLayer: Leaflet.TileLayer | null = null;
-  private osmLayer: Leaflet.MaplibreGL | null = null;
-  private L: typeof Leaflet | null = null;
+  private leafletMap: Nullable<Leaflet.Map> = null;
+  private esriLayer: Nullable<Leaflet.TileLayer> = null;
+  private esriReferenceLayer: Nullable<Leaflet.TileLayer> = null;
+  private osmLayer: Nullable<Leaflet.MaplibreGL> = null;
+  private L: Nullable<typeof Leaflet> = null;
   private moveTimer: ReturnType<typeof setTimeout> | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private entityRenderer?: EntityRenderer;
@@ -131,7 +131,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.lat = lat;
     this.lon = lon;
     this.delta = delta;
-    this.ngZone.runOutsideAngular(() => this.updateMapView());
+    this.ngZone.runOutsideAngular(() => {
+      this.updateMapView();
+    });
   }
 
   clearLocation(): void {
@@ -288,8 +290,12 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         getLoadingEntity: () => this.loadingEntity,
         isCurrentRequestToken: (token: number) => token === this.sidebarRequestToken,
         openLoading: (type: TrackingEntityType, id: string, seedData) => this.openSidebarLoading(type, id, seedData),
-        openData: (type: TrackingEntityType, data) => this.openSidebar(type, data),
-        openError: (type: TrackingEntityType, id: string, message: string) => this.openSidebarError(type, id, message),
+        openData: (type: TrackingEntityType, data) => {
+          this.openSidebar(type, data);
+        },
+        openError: (type: TrackingEntityType, id: string, message: string) => {
+          this.openSidebarError(type, id, message);
+        },
       };
       this.entityRenderer = new EntityRenderer({
         L: this.L,
@@ -329,7 +335,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         this.updateZoomLabel(event.latlng);
       });
 
-      this.leafletMap.on('mouseout', () => this.updateZoomLabel());
+      this.leafletMap.on('mouseout', () => {
+        this.updateZoomLabel();
+      });
 
       if (Number.isFinite(this.lat) && Number.isFinite(this.lon)) {
         this.updateMapView();
@@ -361,7 +369,9 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
         this.scheduleViewportEmit();
       }, 0);
       this.mapReadySubscription?.unsubscribe();
-      this.mapReadySubscription = this.waitForTileLayerLoad(initialLayer).subscribe(() => this.emitMapReady());
+      this.mapReadySubscription = this.waitForTileLayerLoad(initialLayer).subscribe(() => {
+        this.emitMapReady();
+      });
     }
     catch {
       this.ngZone.run(() => this.mapError.emit());
@@ -402,7 +412,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     this.refreshBaseLayerDetail();
   }
 
-  private refreshBaseLayerDetail(): LoadableLeafletLayer | null {
+  private refreshBaseLayerDetail(): Nullable<LoadableLeafletLayer> {
     if (!this.leafletMap) {
       return null;
     }
@@ -425,7 +435,7 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
     }
   }
 
-  private waitForTileLayerLoad(layer: LoadableLeafletLayer | null): Observable<void> {
+  private waitForTileLayerLoad(layer: Nullable<LoadableLeafletLayer>): Observable<void> {
     return new Observable<void>((subscriber) => {
       const maplibreMap = layer?.getMaplibreMap?.();
       const eventSource = maplibreMap || layer;

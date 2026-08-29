@@ -65,7 +65,9 @@ export class SocialStorageService {
 
   loadProfiles(): Observable<void> {
     return this.api.get<ApiEnvelope<db_social_model[]>>('social/data').pipe(map(response => Array.isArray(response?.result) ? response.result : []),
-      tap(documents => this.setStoredSocialProfiles(documents)),
+      tap(documents => {
+        this.setStoredSocialProfiles(documents);
+      }),
       map(() => undefined),);
   }
 

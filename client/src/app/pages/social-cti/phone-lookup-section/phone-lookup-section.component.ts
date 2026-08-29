@@ -5,6 +5,7 @@ import { social_phone_lookup, social_phone_lookup_result, social_profile } from 
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getInputValue } from '../../../shared/utils/event-input.util';
 import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
 
 @Component({
@@ -81,7 +82,7 @@ export class PhoneLookupSectionComponent implements OnDestroy {
   }
 
   onQueryInput(event: Event): void {
-    this.query.set((event.target as HTMLInputElement | null)?.value ?? '');
+    this.query.set(getInputValue(event));
   }
 
   search(event?: Event): void {

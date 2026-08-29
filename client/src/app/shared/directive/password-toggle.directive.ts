@@ -37,7 +37,10 @@ export class PasswordToggleDirective implements AfterViewInit, DoCheck, OnDestro
 
     this.renderer.setAttribute(inputElement, 'type', 'password');
 
-    const buttonElement = this.renderer.createElement('button') as HTMLButtonElement;
+    const buttonElement = this.renderer.createElement('button');
+    if (!(buttonElement instanceof HTMLButtonElement)) {
+      return;
+    }
     const buttonClass = [
       'absolute right-2.5 top-1/2 inline-flex h-7 w-7 -translate-y-1/2 items-center justify-center border-0 bg-transparent p-0 transition-colors disabled:cursor-not-allowed disabled:opacity-50',
       this.appPasswordToggle === 'dark'
@@ -65,14 +68,26 @@ export class PasswordToggleDirective implements AfterViewInit, DoCheck, OnDestro
       }
       this.toggleVisibility();
     });
-    this.removeInputListener = this.renderer.listen(inputElement, 'input', () => this.syncButtonState());
-    this.removeChangeListener = this.renderer.listen(inputElement, 'change', () => this.syncButtonState());
-    this.removeFocusListener = this.renderer.listen(inputElement, 'focus', () => this.syncButtonState());
-    this.removeCopyListener = this.renderer.listen(inputElement, 'copy', (event: ClipboardEvent) => event.preventDefault());
-    this.removeCutListener = this.renderer.listen(inputElement, 'cut', (event: ClipboardEvent) => event.preventDefault());
+    this.removeInputListener = this.renderer.listen(inputElement, 'input', () => {
+      this.syncButtonState();
+    });
+    this.removeChangeListener = this.renderer.listen(inputElement, 'change', () => {
+      this.syncButtonState();
+    });
+    this.removeFocusListener = this.renderer.listen(inputElement, 'focus', () => {
+      this.syncButtonState();
+    });
+    this.removeCopyListener = this.renderer.listen(inputElement, 'copy', (event: ClipboardEvent) => {
+      event.preventDefault();
+    });
+    this.removeCutListener = this.renderer.listen(inputElement, 'cut', (event: ClipboardEvent) => {
+      event.preventDefault();
+    });
 
     this.syncButtonState();
-    this.mutationObserver = new MutationObserver(() => this.syncButtonState());
+    this.mutationObserver = new MutationObserver(() => {
+      this.syncButtonState();
+    });
     this.mutationObserver.observe(inputElement, { attributes: true, attributeFilter: ['disabled'] });
   }
 

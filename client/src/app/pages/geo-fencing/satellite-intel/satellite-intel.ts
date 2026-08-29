@@ -78,7 +78,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
     const loadingBridge = {
       begin: (title: string, message: string) => this.loadingState.begin(title, message),
-      end: (id: number) => this.loadingState.end(id),
+      end: (id: number) => {
+        this.loadingState.end(id);
+      },
     };
     this.entityLoader = new EntityLoader({
       aircraftService: aircraftTrackingService,
@@ -399,16 +401,18 @@ export class SatelliteIntel implements OnInit, OnDestroy {
     this.selectedFeature = null;
     this.mapEntityDashboard.setViewport(null);
     this.mapEntityDashboard.clearMapEntities();
-    this.entityLoader.clearFacilities(() => this.refreshMergedData());
+    this.entityLoader.clearFacilities(() => {
+      this.refreshMergedData();
+    });
     this.entityLoader.clearTracking();
     this.mapRenderer?.clearLocation();
   }
 
   @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {
-    const target = event.target as HTMLElement;
+    const target = event.target;
 
-    if (!target.closest('.map-overlay-menu')) {
+    if (target instanceof HTMLElement && !target.closest('.map-overlay-menu')) {
       this.isPanelMenuOpen = false;
     }
   }
@@ -515,7 +519,9 @@ export class SatelliteIntel implements OnInit, OnDestroy {
   private loadFacilities(showLoading = true): void {
     this.locationState.syncAppliedViewport();
     this.scanState.markSearched();
-    this.entityLoader.loadFacilities(this.locationState.getTrackingViewport(), () => this.refreshMergedData(), showLoading);
+    this.entityLoader.loadFacilities(this.locationState.getTrackingViewport(), () => {
+      this.refreshMergedData();
+    }, showLoading);
   }
 
   private refreshMergedData(): void {

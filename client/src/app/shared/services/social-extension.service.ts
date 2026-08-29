@@ -33,7 +33,7 @@ export class SocialExtensionService {
       const resolveState = () => {
         if (!installed) {
           const stamped = typeof document !== 'undefined'
-            && document.documentElement?.getAttribute('data-orion-extension') === 'installed';
+              && document.documentElement?.getAttribute('data-orion-extension') === 'installed';
           finish(stamped ? 'checking' : 'install');
           return;
         }
@@ -62,7 +62,9 @@ export class SocialExtensionService {
         resolveState();
       };
 
-      void this.refreshLatest().finally(() => resolveWhenProbesSettle());
+      void this.refreshLatest().finally(() => {
+        resolveWhenProbesSettle();
+      });
       window.addEventListener('message', onMessage);
       window.postMessage({ source: 'orion-app', type: 'ping' }, window.location.origin);
       const presenceTimer = setTimeout(() => {
@@ -105,7 +107,9 @@ export class SocialExtensionService {
 
       window.addEventListener('message', onMessage);
       window.postMessage({ source: 'orion-app', type: 'crawl', platform, url }, window.location.origin);
-      const timer = setTimeout(() => finish(null), 30000);
+      const timer = setTimeout(() => {
+        finish(null);
+      }, 30000);
 
       return () => {
         window.removeEventListener('message', onMessage);

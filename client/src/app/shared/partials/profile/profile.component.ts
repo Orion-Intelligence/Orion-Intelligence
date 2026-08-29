@@ -37,8 +37,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
   role = signal<string>('');
   isNotificationOpen = signal<boolean>(false);
   isScanNotificationOpen = signal<boolean>(false);
-  profile_image: string = "";
-  licences: string = '';
+  profile_image = "";
+  licences = '';
   dropdownOpen = signal(false);
   languageDropdownOpen = signal(false);
   selectedLanguage = signal('');
@@ -216,8 +216,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('document:click', ['$event'])
   closeDropdown(event: Event) {
-    const eventTargetElement = event.target as HTMLElement;
-    if (!eventTargetElement.closest('.profile')) {
+    const eventTargetElement = event.target;
+    if (!(eventTargetElement instanceof Element) || !eventTargetElement.closest('.profile')) {
       this.dropdownOpen.set(false);
       this.languageDropdownOpen.set(false);
     }

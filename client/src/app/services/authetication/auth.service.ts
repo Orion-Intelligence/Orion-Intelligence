@@ -31,7 +31,7 @@ export class AuthService {
     return this.authState.asObservable();
   }
 
-  login(mail: string, password: string, isDemo: boolean = false): Observable<LoginResponse> {
+  login(mail: string, password: string, isDemo = false): Observable<LoginResponse> {
     if (this.appService.isMobileMode()) {
       localStorage.setItem('mobileDemo', 'true');
     }
@@ -213,7 +213,7 @@ export class AuthService {
       }), map(() => void 0));
   }
 
-  private applyLoginResponse(response: LoginResponse, deniedMessage: string = 'Access denied!'): boolean {
+  private applyLoginResponse(response: LoginResponse, deniedMessage = 'Access denied!'): boolean {
     if (!response?.session) {
       this.denyAccess(deniedMessage);
       return false;

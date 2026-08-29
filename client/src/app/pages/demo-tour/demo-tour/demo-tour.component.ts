@@ -1020,7 +1020,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private async setProfileMenuState(state: NonNullable<TourStep['profileMenuState']>): Promise<void> {
-    const menuOpen = document.getElementById('profile-dropdown-menu') instanceof HTMLElement;
+    const menuOpen = document.getElementById('profile-dropdown-menu') !== null;
     const shouldBeOpen = state === 'open';
     if (menuOpen !== shouldBeOpen) {
       const trigger = await this.waitForRenderedSelector('[data-testid="profile-menu"]');
@@ -1084,17 +1084,17 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         const collapseButton = document.querySelector('[data-testid="sidebar-collapse-button"]');
         const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
 
-        if (!(shell instanceof HTMLElement)) {
+        if (!shell) {
           return false;
         }
 
-        const shellVisible = shell.offsetParent !== null;
+        const shellVisible = 'offsetParent' in shell && shell.offsetParent !== null;
 
         if (expanded) {
-          return collapseButton instanceof HTMLElement && !shellVisible;
+          return collapseButton !== null && !shellVisible;
         }
 
-        return expandButton instanceof HTMLElement && shellVisible;
+        return expandButton !== null && shellVisible;
       };
 
       if (isReady()) {
@@ -1275,7 +1275,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private lockPageScroll(): void {
-    const html = document.documentElement;
+    const rootElement = document.documentElement;
     const body = document.body;
 
     if (body.classList.contains('demo-tour-scroll-locked')) {
@@ -1283,8 +1283,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     this.scrollLockY = window.scrollY;
-    html.classList.add('no-scroll');
-    html.classList.add('demo-tour-scroll-locked');
+    rootElement.classList.add('no-scroll');
+    rootElement.classList.add('demo-tour-scroll-locked');
     body.classList.add('no-scroll');
     body.classList.add('demo-tour-scroll-locked');
     body.classList.add('demo-tour-active');
@@ -1292,19 +1292,19 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private unlockPageScroll(): void {
-    const html = document.documentElement;
+    const rootElement = document.documentElement;
     const body = document.body;
 
     if (!body.classList.contains('demo-tour-scroll-locked')) {
-      html.classList.remove('no-scroll');
-      html.classList.remove('demo-tour-scroll-locked');
+      rootElement.classList.remove('no-scroll');
+      rootElement.classList.remove('demo-tour-scroll-locked');
       body.classList.remove('no-scroll');
       body.classList.remove('demo-tour-active');
       return;
     }
 
-    html.classList.remove('no-scroll');
-    html.classList.remove('demo-tour-scroll-locked');
+    rootElement.classList.remove('no-scroll');
+    rootElement.classList.remove('demo-tour-scroll-locked');
     body.classList.remove('no-scroll');
     body.classList.remove('demo-tour-scroll-locked');
     body.classList.remove('demo-tour-active');
@@ -1713,7 +1713,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
           finish(element);
         }
       });
-      const timeoutId = window.setTimeout(() => finish(this.getRenderedSelectorElement(selector)), timeoutMs);
+      const timeoutId = window.setTimeout(() => {
+        finish(this.getRenderedSelectorElement(selector));
+      }, timeoutMs);
 
       observer.observe(document.body, {
         childList: true,
@@ -1766,7 +1768,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
           return;
         }
 
-        requestAnimationFrame(() => stepFrame(remaining - 1));
+        requestAnimationFrame(() => {
+          stepFrame(remaining - 1);
+        });
       };
 
       stepFrame(count);
@@ -1926,7 +1930,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
           finish(true);
         }
       });
-      const timeoutId = window.setTimeout(() => finish(predicate()), timeoutMs);
+      const timeoutId = window.setTimeout(() => {
+        finish(predicate());
+      }, timeoutMs);
 
       observer.observe(document.body, {
         childList: true,
@@ -1983,7 +1989,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         }
         resolve();
       };
-      const cancel = () => finish(false);
+      const cancel = () => {
+        finish(false);
+      };
 
       const tick = () => {
         if (token !== this.stepPreparationToken || this.step !== step || !this.visible) {
@@ -2013,7 +2021,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       let settleTimer: number | null = null;
       const stableAfterMs = 180;
 
-      const observedElements = new Set<HTMLElement>([element]);
+      const observedElements = new Set([element]);
       if (step.waitForSelector) {
         const nested = this.getRenderedSelectorElement(step.waitForSelector);
         if (nested) {
@@ -2041,7 +2049,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         if (settleTimer !== null) {
           window.clearTimeout(settleTimer);
         }
-        settleTimer = window.setTimeout(() => finish(), stableAfterMs);
+        settleTimer = window.setTimeout(() => {
+          finish();
+        }, stableAfterMs);
       };
 
       const resizeObserver = new ResizeObserver(() => {
@@ -2110,7 +2120,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         frameId = requestAnimationFrame(tick);
       };
 
-      timeoutId = window.setTimeout(() => finish(), 700);
+      timeoutId = window.setTimeout(() => {
+        finish();
+      }, 700);
       frameId = requestAnimationFrame(tick);
     });
   }

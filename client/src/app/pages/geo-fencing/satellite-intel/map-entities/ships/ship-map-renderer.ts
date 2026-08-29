@@ -7,17 +7,17 @@ import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-mark
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
-import { asUnknownRecord, isFiniteNumber } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, Augmented, isFiniteNumber, Nullable } from '../../../../../shared/utils/type-guards.util';
 import { ShipDistributionCell } from '../../model/satellite-intel.model';
 
-type ShipMarker = Leaflet.Marker & {
-  __orionShipIconRef: ComponentRef<ShipMarkerIconComponent> | null;
-  __orionShipIconState: string;
-};
+type ShipMarker = Augmented<Leaflet.Marker, {
+  __orionShipIconRef?: Nullable<ComponentRef<ShipMarkerIconComponent>>;
+  __orionShipIconState?: string;
+}>;
 
 
 export class ShipMapRenderer {
-  private cluster: Leaflet.LayerGroup | null = null;
+  private cluster: Nullable<Leaflet.LayerGroup> = null;
   private renderKey = '';
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
   private renderVersion = 0;
@@ -112,7 +112,9 @@ export class ShipMapRenderer {
       this.map?.removeLayer(this.cluster);
       this.cluster = null;
     }
-    Array.from(this.markers.values()).forEach((marker) => this.destroyMarkerIcon(marker));
+    Array.from(this.markers.values()).forEach((marker) => {
+      this.destroyMarkerIcon(marker);
+    });
     this.markers.clear();
     this.markerTargets.clear();
   }
@@ -137,7 +139,9 @@ export class ShipMapRenderer {
     }
 
     if (endIndex < ships.length) {
-      this.renderTimer = setTimeout(() => this.renderMarkersInChunks(ships, renderVersion, endIndex), 0);
+      this.renderTimer = setTimeout(() => {
+        this.renderMarkersInChunks(ships, renderVersion, endIndex);
+      }, 0);
     }
     else {
       this.renderTimer = null;
@@ -331,7 +335,7 @@ export class ShipMapRenderer {
     }
   }
 
-  private createMarker(ship: SatelliteLiveShip): ShipMarker | null {
+  private createMarker(ship: SatelliteLiveShip): Nullable<ShipMarker> {
     const latitude = ship.latitude;
     const longitude = ship.longitude;
     if (!isFiniteNumber(latitude) || !isFiniteNumber(longitude)) {
@@ -341,9 +345,9 @@ export class ShipMapRenderer {
     const isSelected = this.isSelected(mmsiId);
     const isLoading = this.isLoading(mmsiId);
     const renderedIcon = this.createIcon(ship, isSelected, isLoading);
-    const marker = this.L.marker([latitude, longitude], {
+    const marker: ShipMarker = this.L.marker([latitude, longitude], {
       icon: renderedIcon.icon,
-    }) as ShipMarker;
+    });
     marker.__orionShipIconRef = renderedIcon.componentRef;
     if (mmsiId) {
       marker.bindTooltip(escapeTooltipText(mmsiId), {
@@ -354,7 +358,9 @@ export class ShipMapRenderer {
       });
     }
     if (ship.mmsi) {
-      marker.on('click', () => this.loadDetails(ship));
+      marker.on('click', () => {
+        this.loadDetails(ship);
+      });
     }
     return marker;
   }
@@ -431,7 +437,7 @@ export class ShipMapRenderer {
 
     return {
       icon: this.L.divIcon({
-        html: rendered.element,
+        html: this.componentRenderer.elementAsHtml(rendered.element),
         className: 'bg-transparent border-0',
         iconSize: [size, size],
         iconAnchor: [half, half],

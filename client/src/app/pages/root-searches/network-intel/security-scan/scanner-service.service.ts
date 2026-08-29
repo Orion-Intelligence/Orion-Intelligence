@@ -7,7 +7,7 @@ import { UrlScanResponse } from '../../../../shared/model/security-scan/security
 export class ScannerService {
   private cancel$ = new Subject<void>();
 
-  public first_load: boolean = true;
+  public first_load = true;
 
   constructor(private scanNotifications: ScanNotificationService) { }
 

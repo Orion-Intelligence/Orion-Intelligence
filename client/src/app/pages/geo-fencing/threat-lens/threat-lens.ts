@@ -254,7 +254,9 @@ export class ThreatLensComponent implements OnDestroy {
       return;
     }
 
-    void reset.then(() => this.refreshIpScan());
+    void reset.then(() => {
+      this.refreshIpScan();
+    });
   }
 
   resetSelectedCountry(): void {

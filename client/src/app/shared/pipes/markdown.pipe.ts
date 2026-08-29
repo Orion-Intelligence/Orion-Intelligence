@@ -32,7 +32,8 @@ export class MarkdownPipe implements PipeTransform {
       if (!paragraph.length) {
         return;
       }
-      html.push(`<p>${this.renderInline(paragraph.join('\n')).replace(/\n/g, '<br>')}</p>`);
+      const paragraphHtml = `<p>${this.renderInline(paragraph.join('\n')).replace(/\n/g, () => '<br>')}</p>`;
+      html[html.length] = paragraphHtml;
       paragraph.length = 0;
     };
 
@@ -77,7 +78,7 @@ export class MarkdownPipe implements PipeTransform {
       if (table) {
         flushParagraph();
         flushList();
-        html.push(table.html);
+        html[html.length] = table.html;
         index = table.endIndex;
         continue;
       }
@@ -94,7 +95,7 @@ export class MarkdownPipe implements PipeTransform {
       if (this.isHorizontalRule(trimmed)) {
         flushParagraph();
         flushList();
-        html.push('<hr>');
+        html[html.length] = '<hr>';
         continue;
       }
 
@@ -111,7 +112,8 @@ export class MarkdownPipe implements PipeTransform {
           quoteLines.push(nextQuote[1]);
           index += 1;
         }
-        html.push(`<blockquote><p>${this.renderInline(quoteLines.join('\n')).replace(/\n/g, '<br>')}</p></blockquote>`);
+        const quoteHtml = `<blockquote><p>${this.renderInline(quoteLines.join('\n')).replace(/\n/g, () => '<br>')}</p></blockquote>`;
+        html[html.length] = quoteHtml;
         continue;
       }
 
@@ -286,9 +288,9 @@ export class MarkdownPipe implements PipeTransform {
 
   private renderInline(value: string): string {
     const tokens: string[] = [];
-    const token = (html: string) => {
+    const token = (tokenValue: string) => {
       const key = `\uE000${tokens.length}\uE001`;
-      tokens.push(html);
+      tokens.push(tokenValue);
       return key;
     };
 
@@ -301,14 +303,14 @@ export class MarkdownPipe implements PipeTransform {
       });
 
     text = this.escapeHtml(text)
-      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
-      .replace(/(?<!\w)__([^_\n]+)__(?!\w)/g, '<strong>$1</strong>')
-      .replace(/\*([^*]+)\*/g, '<em>$1</em>')
-      .replace(/(?<!\w)_([^_\n]+)_(?!\w)/g, '<em>$1</em>')
-      .replace(/~~([^~]+)~~/g, '<del>$1</del>');
+      .replace(/\*\*([^*]+)\*\*/g, (_match, content: string) => `<strong>${content}</strong>`)
+      .replace(/(?<!\w)__([^_\n]+)__(?!\w)/g, (_match, content: string) => `<strong>${content}</strong>`)
+      .replace(/\*([^*]+)\*/g, (_match, content: string) => `<em>${content}</em>`)
+      .replace(/(?<!\w)_([^_\n]+)_(?!\w)/g, (_match, content: string) => `<em>${content}</em>`)
+      .replace(/~~([^~]+)~~/g, (_match, content: string) => `<del>${content}</del>`);
 
-    tokens.forEach((html, index) => {
-      text = text.replaceAll(`\uE000${index}\uE001`, html);
+    tokens.forEach((tokenValue, index) => {
+      text = text.replaceAll(`\uE000${index}\uE001`, tokenValue);
     });
 
     return text;

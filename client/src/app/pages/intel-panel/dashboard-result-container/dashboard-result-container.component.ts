@@ -78,7 +78,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   public maxPages = 1;
   public isResponseLoading = signal(false);
   type: Category = Category.STRATEGIC;
-  apiEndpoint: string = '';
+  apiEndpoint = '';
 
   constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService, private apiService: ApiService) {
     this.type = this.route.snapshot.data['type'] as Category;
@@ -164,7 +164,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
     this.pendingScrollRestore = false;
     this.scrollService.scrollToSavedPosition();
     requestAnimationFrame(() => {
-      this.scrollService.scrollToSavedPosition(); 
+      this.scrollService.scrollToSavedPosition();
     });
   }
 

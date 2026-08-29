@@ -263,8 +263,12 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isBotTyping = false;
     this.botStep = '';
     this.nexusChatService.clearNexusSession({ session_id: this.temporarySessionId() }).subscribe({
-      next: () => this.resetChatView(),
-      error: () => this.resetChatView(),
+      next: () => {
+        this.resetChatView();
+      },
+      error: () => {
+        this.resetChatView();
+      },
     });
   }
 
@@ -352,7 +356,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   queueComposerResize(): void {
-    requestAnimationFrame(() => this.resizeComposer());
+    requestAnimationFrame(() => {
+      this.resizeComposer();
+    });
   }
 
   private isAtBottom(threshold = 4): boolean {
@@ -458,7 +464,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     if (!this.io) {
       this.io = new IntersectionObserver(entries => {
-        this.userNearBottom = entries.some(e => e.isIntersecting); 
+        this.userNearBottom = entries.some(e => e.isIntersecting);
       }, { root: rootEl, threshold: 1 });
       this.io.observe(sentinelEl);
     }

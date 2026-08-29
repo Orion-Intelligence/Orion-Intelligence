@@ -76,9 +76,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (!this.network) {
       return;
     }
-    const eventTargetElement = event.target as HTMLElement | null;
-    const tag = eventTargetElement?.tagName?.toLowerCase() || '';
-    const isEditable = !!eventTargetElement?.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select';
+    const eventTargetElement = event.target;
+    const tag = eventTargetElement instanceof Element ? eventTargetElement.tagName.toLowerCase() : '';
+    const isEditable = (eventTargetElement instanceof Element && eventTargetElement.closest('[contenteditable="true"]') !== null) || tag === 'input' || tag === 'textarea' || tag === 'select';
     if (isEditable) {
       return;
     }
@@ -115,7 +115,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private graphRequestSequence = 0;
   private themeObserver: MutationObserver | null = null;
 
-  networkContainer?: ElementRef;
+  networkContainer?: ElementRef<HTMLElement>;
   public rawNodes: ExtendedNode[] = [];
   public rawEdges: Edge[] = [];
   public nodeSet!: DataSet<ExtendedNode>;
@@ -212,7 +212,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   @ViewChild('networkContainer')
-  set networkContainerRef(ref: ElementRef) {
+  set networkContainerRef(ref: ElementRef<HTMLElement>) {
     if (ref) {
       this.networkContainer = ref;
       this.tryApplyPendingFilters();
@@ -225,7 +225,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (isPlatformBrowser(this.platformId)) {
       ensureStylesheet('/assets/libs/vis-network.css', 'vis-network-styles');
       document.addEventListener('keydown', this.globalKeyDownListener, true);
-      this.themeObserver = new MutationObserver(() => this.refreshGraphTheme());
+      this.themeObserver = new MutationObserver(() => {
+        this.refreshGraphTheme();
+      });
       this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
     }
     this.route.queryParams.subscribe(params => {
@@ -742,7 +744,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       animation: false
     });
     this.network.redraw();
-    const canvasElements = this.networkContainer.nativeElement.querySelectorAll('canvas') as NodeListOf<HTMLCanvasElement>;
+    const canvasElements = this.networkContainer.nativeElement.querySelectorAll('canvas');
     let snapshot: string | undefined;
     if (canvasElements.length > 0) {
       const width = canvasElements[0].width;
@@ -882,7 +884,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       }
       this.loading = true;
     },
-    error: _ => {
+    error: () => {
       if (!this.isCurrentGraphRequest(requestId)) {
         return;
       }
@@ -1714,7 +1716,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     return `${String(label).replace(/_/g, ' ')}${confidence}`;
   }
 
-  private getNodeTitle(vertex: GraphVertex): string {
+  private getNodeTitleAsHtml(vertex: GraphVertex): string {
     const lines: string[] = [];
     const type = String(vertex?.type || '').toLowerCase();
     const add = (label: string, value: unknown) => {
@@ -2054,13 +2056,13 @@ export class GraphComponent implements OnInit, OnDestroy {
         existingNode.docId = existingNode.docId || vertex?.doc_id || vertex?.m_document_id || vertex?._key;
         existingNode.rawLabel = existingNode.rawLabel || rawLabel;
         existingNode.hiddenByDefault = existingNode.hiddenByDefault || !!vertex?.hidden_by_default;
-        existingNode.nodeInfoHtml = existingNode.nodeInfoHtml || this.getNodeTitle(vertex);
+        existingNode.nodeInfoHtml = existingNode.nodeInfoHtml || this.getNodeTitleAsHtml(vertex);
         return;
       }
       rawNodeMap.set(id, {
         id,
         label: this.normalizeLabel(vertex),
-        nodeInfoHtml: this.getNodeTitle(vertex),
+        nodeInfoHtml: this.getNodeTitleAsHtml(vertex),
         rawLabel,
         nodeClass: vertex?.node_class,
         clusterId: vertex?.cluster_id,
@@ -2657,7 +2659,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private positionNodeInfoPanel(pointerDom?: { x: number; y: number; }): void {
-    const container = this.networkContainer?.nativeElement as HTMLElement | undefined;
+    const container = this.networkContainer?.nativeElement;
     const width = 292;
     const height = 260;
     const padding = 12;

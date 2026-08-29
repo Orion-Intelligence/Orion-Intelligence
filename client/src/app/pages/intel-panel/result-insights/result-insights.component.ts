@@ -27,7 +27,7 @@ export class ResultInsightsComponent implements OnInit {
   copiedUniqueUrlKey = '';
   searchQuery = '';
   filterOptions = ['All', 'Email', 'Username', 'Actor', 'Team', 'Attacker'];
-  selectedFilter: string = 'All';
+  selectedFilter = 'All';
   emails: string[] = [];
   usernames: string[] = [];
   actors: string[] = [];

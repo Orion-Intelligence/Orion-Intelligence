@@ -20,7 +20,6 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { HelperService } from '../../services/helper.service';
 import { ScrollService } from '../../services/scroll.service';
 import { AuthService } from '../../../services/authetication/auth.service';
-import { LicenseService } from '../../../services/licenses/licenses.service';
 import { HomeSearchService } from './services/home.search.service';
 import { normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../utils/intel-report.util';
 import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-card.component';
@@ -46,7 +45,7 @@ export class ResultComponent implements OnInit, OnChanges {
   readonly filterModelInput = input<FilterModel | undefined>(undefined, { alias: 'filterModel' });
   readonly activeTabInput = input('IOCs', { alias: 'activeTab' });
   @ViewChild('filtersWrapper', { static: false }) filtersWrapperRef!: ElementRef;
-  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef;
+  @ViewChild('searchInput', { static: false }) searchInputRef!: ElementRef<HTMLInputElement>;
   @ViewChild('sortMenuRef', { static: false }) sortMenuRef?: ElementRef;
   @ViewChild('searchMenuRef', { static: false }) searchMenuRef?: ElementRef;
   isFilterOpen$: Observable<boolean>;
@@ -91,7 +90,7 @@ export class ResultComponent implements OnInit, OnChanges {
   filterModel!: FilterModel;
   readonly showSorting = input<boolean>(true);
   readonly showSelectedFilters = input<boolean>(true);
-  activeTab: string = 'IOCs';
+  activeTab = 'IOCs';
   readonly reloadSearchFilters = output<FilterCategory[]>();
   readonly resetFilter = output<undefined>();
   readonly onToggleSwitch = output<string>();
@@ -144,7 +143,7 @@ export class ResultComponent implements OnInit, OnChanges {
       || currentRoute.includes('/defacement');
   }
 
-  constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected licenseService: LicenseService, protected homeSearchService: HomeSearchService, protected aiToolRoutingService: AiToolRoutingService ) {
+  constructor( protected scrollService: ScrollService, private router: Router, public helperService: HelperService, public app_service: AppService, protected dashboardService: DashboardService, public sidebarService: SidebarService, private route: ActivatedRoute, public authService: AuthService, protected homeSearchService: HomeSearchService, protected aiToolRoutingService: AiToolRoutingService ) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
     effect(() => {
       const resultCount = this.resultCountInput();
@@ -175,8 +174,11 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onTabClick(event: Event): void {
-    const eventTargetElement = event.target as HTMLElement | null;
-    const tabElement = eventTargetElement?.closest('[data-tab]') as HTMLElement | null;
+    const eventTargetElement = event.target;
+    if (!(eventTargetElement instanceof Element)) {
+      return;
+    }
+    const tabElement = eventTargetElement.closest('[data-tab]');
     if (!tabElement) {
       return;
     }
@@ -320,13 +322,14 @@ export class ResultComponent implements OnInit, OnChanges {
   }
 
   onSearchInput(event: Event): void {
-    const inputElement = event.target as HTMLInputElement | null;
-    if (inputElement) {
-      this.local_query = inputElement.value;
-      if (!inputElement.value.trim()) {
-        this.updateQuery.emit('');
-        this.clearQueryParam();
-      }
+    const inputElement = event.target;
+    if (!(inputElement instanceof HTMLInputElement)) {
+      return;
+    }
+    this.local_query = inputElement.value;
+    if (!inputElement.value.trim()) {
+      this.updateQuery.emit('');
+      this.clearQueryParam();
     }
     this.homeSearchService.handleSearchInput(event);
   }
@@ -345,7 +348,7 @@ export class ResultComponent implements OnInit, OnChanges {
   clearSearchInput(focusInput = true): void {
     this.searchQuery = '';
     this.local_query = '';
-    const inputElement = this.searchInputRef?.nativeElement as HTMLInputElement | undefined;
+    const inputElement = this.searchInputRef?.nativeElement;
     if (inputElement) {
       inputElement.value = '';
       if (focusInput) {

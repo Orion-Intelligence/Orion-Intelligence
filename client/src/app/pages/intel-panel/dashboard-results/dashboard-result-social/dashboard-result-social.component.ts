@@ -5,7 +5,6 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { SocialResultItem } from '../../../../shared/model/results/social/social.callback.model';
 import { RemoveEmojisPipe } from '../../../../shared/pipes/remove-emojis-pipe.pipe';
-import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
@@ -39,7 +38,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   readonly searchResults = input<SocialResultItem[]>([]);
   readonly isExpandAble = input<boolean>(false);
 
-  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService, protected licenseService: LicenseService) {
+  constructor(protected authService: AuthService, private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
   }
 
   ngAfterViewInit() {

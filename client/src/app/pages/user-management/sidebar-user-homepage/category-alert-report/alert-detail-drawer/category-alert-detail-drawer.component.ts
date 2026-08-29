@@ -22,7 +22,7 @@ export class CategoryAlertDetailDrawerComponent {
 
   expandedDescriptionIds = new Set<string>();
   selectedDetailAlert: CategoryAlerts | null = null;
-  isAlertDetailDrawerOpen: boolean = false;
+  isAlertDetailDrawerOpen = false;
 
   @Output() detailAlertChange = new EventEmitter<CategoryAlerts | null>();
 
@@ -215,12 +215,12 @@ export class CategoryAlertDetailDrawerComponent {
     return this.hiddenRawFindingKeys.has(key.toLowerCase());
   }
 
-  private formatRawFindingBlocks(value: unknown, depth: number = 1): string[] {
+  private formatRawFindingBlocks(value: unknown, depth = 1): string[] {
     const formattedValue = this.formatRawFindingBlock(value, depth);
     return formattedValue ? [formattedValue] : [];
   }
 
-  private formatRawFindingBlock(value: unknown, depth: number = 1): string {
+  private formatRawFindingBlock(value: unknown, depth = 1): string {
     if (value === null || value === undefined || value === '') {
       return '';
     }

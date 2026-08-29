@@ -1,24 +1,24 @@
 export class AppSettingsModel {
-  version: string = '1.0.0';
-  app_url: string = '';
-  orion_mail_url: string = '';
-  language_allowed: string = 'en';
-  logo_url: string = '';
-  logo_wide_light: string = '';
-  logo_wide_dark: string = '';
-  auth_dashboard_icon:string='';
-  app_name: string = '';
-  meta_info: string = '';
-  home_header_data_sources: string = '';
-  home_header_adversaries: string = '';
-  home_header_pricing: string = '';
-  home_header_pricing_allowed: boolean = true;
-  home_header_whistle_blowing_allowed: boolean = false;
-  ai_endpoint_enabled: boolean = true;
-  backup_schedule: boolean = false;
-  admin_root_allowed: boolean = false;
-  smtp_configured: boolean = false;
-  s_onion: string = '';
+  version = '1.0.0';
+  app_url = '';
+  orion_mail_url = '';
+  language_allowed = 'en';
+  logo_url = '';
+  logo_wide_light = '';
+  logo_wide_dark = '';
+  auth_dashboard_icon='';
+  app_name = '';
+  meta_info = '';
+  home_header_data_sources = '';
+  home_header_adversaries = '';
+  home_header_pricing = '';
+  home_header_pricing_allowed = true;
+  home_header_whistle_blowing_allowed = false;
+  ai_endpoint_enabled = true;
+  backup_schedule = false;
+  admin_root_allowed = false;
+  smtp_configured = false;
+  s_onion = '';
 
   constructor(data?: Partial<Record<keyof AppSettingsModel, string | boolean>>) {
     if (data) {
@@ -61,14 +61,14 @@ export class AppSettingsModel {
   }
 }
 export class LocalSettingsModel {
-  enable_advanced_tools: boolean = false;
-  advance_setting_toggle: boolean = true;
-  iocExpanded: boolean = true;
+  enable_advanced_tools = false;
+  advance_setting_toggle = true;
+  iocExpanded = true;
   entityfilterCategories: Record<string, string[]> = {};
-  entityFilterCondition: boolean = true;
-  isSidebarOpen: boolean = true;
-  matchType: string = "";
-  sortType: string = "";
+  entityFilterCondition = true;
+  isSidebarOpen = true;
+  matchType = "";
+  sortType = "";
 }
 export class ConfigSettings {
   appSettings: AppSettingsModel;

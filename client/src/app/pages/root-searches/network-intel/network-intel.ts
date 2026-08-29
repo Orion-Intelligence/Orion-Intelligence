@@ -359,7 +359,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.closeExportChoice();
   }
 
-  private async downloadReport(type: string = 'report'): Promise<void> {
+  private async downloadReport(type = 'report'): Promise<void> {
     try {
       this.isExportingReport = true;
       this.exportProgress = 6;
@@ -606,7 +606,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
       .scanDomain(resolvedTarget, this.activeTab)
       .pipe(finalize(() => this.seoRepoScanLoading.set(false)))
       .subscribe({
-        next: (response) => this.parseSeoRepoScanResult(response),
+        next: (response) => {
+          this.parseSeoRepoScanResult(response);
+        },
         error: (error) => {
           this.seoRepoScanErrorMessage = (error && (error.error?.detail || error.message)) || 'Failed to fetch scan results.';
           this.seoRepoScanProgress.set(0);

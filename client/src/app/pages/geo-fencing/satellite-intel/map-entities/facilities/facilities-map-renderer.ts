@@ -3,9 +3,10 @@ import { OrionSatelliteFeature } from '../../../models/geo-fencing.models';
 import { FacilityPopupComponent } from './components/facility-popup/facility-popup.component';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import type * as Leaflet from 'leaflet';
+import type { Nullable } from '../../../../../shared/utils/type-guards.util';
 
 export class FacilitiesMapRenderer {
-  private featureLayer: Leaflet.LayerGroup | null = null;
+  private featureLayer: Nullable<Leaflet.LayerGroup> = null;
   private featurePopupRefs = new Set<ComponentRef<FacilityPopupComponent>>();
 
   constructor(private L: typeof Leaflet, private map: Leaflet.Map, private componentRenderer: LeafletComponentRenderer) {}
@@ -102,7 +103,9 @@ export class FacilitiesMapRenderer {
   }
 
   private destroyPopupRefs(refs: Set<ComponentRef<FacilityPopupComponent>>): void {
-    Array.from(refs).forEach((componentRef) => this.componentRenderer.destroy(componentRef));
+    Array.from(refs).forEach((componentRef) => {
+      this.componentRenderer.destroy(componentRef);
+    });
     refs.clear();
   }
 }

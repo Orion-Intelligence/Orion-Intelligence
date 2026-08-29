@@ -75,7 +75,7 @@ export class AuditlogComponent extends BaseListingComponent<AuditLogCallbackMode
     this.reload();
   }
 
-  exportAuditLogs(type: string = 'csv') {
+  exportAuditLogs(type = 'csv') {
     this.auditService.auditData$.pipe(take(1)).subscribe(data => {
       const items = data?.items || [];
       if (!items.length) {

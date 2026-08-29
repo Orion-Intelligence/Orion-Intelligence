@@ -301,7 +301,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     });
   }
 
-  loadArtifactReports(source: string, q: string = ''): void {
+  loadArtifactReports(source: string, q = ''): void {
     this.artifactReports = [];
 
     if (!source) {

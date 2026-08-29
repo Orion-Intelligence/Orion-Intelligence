@@ -43,7 +43,10 @@ export class HomeSearchService {
   }
 
   handleDocumentClick(event: MouseEvent, filtersWrapper?: ElementRef, searchInput?: ElementRef) {
-    const eventTargetElement = event.target as HTMLElement;
+    const eventTargetElement = event.target;
+    if (!(eventTargetElement instanceof Node)) {
+      return;
+    }
     const clickedInsideFilter = filtersWrapper?.nativeElement.contains(eventTargetElement);
     const clickedInput = searchInput?.nativeElement.contains(eventTargetElement);
     if (!clickedInsideFilter && !clickedInput) {

@@ -91,7 +91,9 @@ export class ShareResponseDialogComponent implements AfterViewInit, OnDestroy {
     if (!text || !nav.share) {
       return;
     }
-    void nav.share({ text }).then(() => this.close()).catch(() => undefined);
+    void nav.share({ text }).then(() => {
+      this.close();
+    }).catch(() => undefined);
   }
 
   shareUrl(target: ShareTarget): string {

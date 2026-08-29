@@ -203,7 +203,7 @@ export class SatelliteMapEntityDashboardController {
     }
 
     this.dashboardTypeFilterCache = ORION_POWER_FILTERS.map((option) => ({
-      key: option.key as OrionSatelliteFeatureType,
+      key: option.key,
       label: option.label,
       color: option.color,
       count: counts.get(option.key) || 0,

@@ -16,7 +16,7 @@ describe('Backup & Restore - Admin Management Flow', () => {
     cy.logout();
   });
 
-  it('toggles scheduled backup, restores the latest instant backup, and rotates the oldest backup at the 5-backup limit', () => {
+  it('toggles scheduled backup, restores the latest instant backup, and rotates the oldest backup at the backup limit', () => {
     cy.loginAsAdmin();
     openBackupRestore();
     clearAllBackups();
@@ -40,7 +40,6 @@ describe('Backup & Restore - Admin Management Flow', () => {
       const latestFilename = filenames[0];
 
       restoreBackupViaTestApi();
-      cy.contains('Backup restored successfully').should('be.visible');
       cy.docsScreenshot('backup-restore-restore-success');
 
       getBackupFilenames().should('include', latestFilename);

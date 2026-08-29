@@ -181,8 +181,8 @@ export class ReportHeaderComponent {
 
   @HostListener('document:click', ['$event'])
   closeLanguageDropdown(event: Event) {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.report-language-picker')) {
+    const target = event.target;
+    if (!(target instanceof Element) || !target.closest('.report-language-picker')) {
       this.isLanguageDropdownOpen.set(false);
     }
   }

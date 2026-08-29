@@ -217,20 +217,20 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
         geometryEngine,
         webMercatorUtils,
       ] = await loadEsriModules<[
-        EsriConstructor<EsriMapLike>,
-        EsriConstructor<EsriSceneView>,
-        EsriConstructor<EsriFeatureLayer>,
-        EsriConstructor<EsriGraphicsLayer>,
-        EsriGeometryEngine,
-        EsriWebMercatorUtils,
-      ]>([
-        'esri/Map',
-        'esri/views/SceneView',
-        'esri/layers/FeatureLayer',
-        'esri/layers/GraphicsLayer',
-        'esri/geometry/geometryEngine',
-        'esri/geometry/support/webMercatorUtils',
-      ]);
+          EsriConstructor<EsriMapLike>,
+          EsriConstructor<EsriSceneView>,
+          EsriConstructor<EsriFeatureLayer>,
+          EsriConstructor<EsriGraphicsLayer>,
+          EsriGeometryEngine,
+          EsriWebMercatorUtils,
+        ]>([
+          'esri/Map',
+          'esri/views/SceneView',
+          'esri/layers/FeatureLayer',
+          'esri/layers/GraphicsLayer',
+          'esri/geometry/geometryEngine',
+          'esri/geometry/support/webMercatorUtils',
+        ]);
 
       if (this.destroyed) {
         return;
@@ -321,7 +321,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       this.observeMapResize();
       this.observeThemeChanges();
       this.scheduleMapResize();
-      [0, 150, 500, 1000, 2000].forEach((delay) => window.setTimeout(() => this.scheduleMapResize(), delay));
+      [0, 150, 500, 1000, 2000].forEach((delay) => window.setTimeout(() => {
+        this.scheduleMapResize();
+      }, delay));
       this.registerViewScaleWatcher();
       this.registerBasemapWatcher();
       this.registerViewInteractingWatcher();
@@ -524,7 +526,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     this.mapPointerLeaveHandle?.remove();
     this.documentPointerMoveHandle?.remove();
 
-    const hide = () => this.hideHoverTooltip();
+    const hide = () => {
+      this.hideHoverTooltip();
+    };
     const handleDocumentPointerMove = (event: PointerEvent) => {
       const target = event.target instanceof Element ? event.target : null;
       if (!target) {
@@ -540,7 +544,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     document.addEventListener('pointermove', handleDocumentPointerMove, true);
 
     this.mapPointerLeaveHandle = { remove: () => mapElement.removeEventListener('pointerleave', hide) };
-    this.documentPointerMoveHandle = { remove: () => document.removeEventListener('pointermove', handleDocumentPointerMove, true) };
+    this.documentPointerMoveHandle = { remove: () => {
+      document.removeEventListener('pointermove', handleDocumentPointerMove, true);
+    } };
   }
 
   private isMapUiElement(target: Element): boolean {
@@ -633,8 +639,12 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     this.viewportDragHandle?.remove();
     this.viewportWheelHandle?.remove();
-    this.viewportDragHandle = this.view.on('drag', () => this.markViewportNavigation());
-    this.viewportWheelHandle = this.view.on('mouse-wheel', () => this.markViewportNavigation());
+    this.viewportDragHandle = this.view.on('drag', () => {
+      this.markViewportNavigation();
+    });
+    this.viewportWheelHandle = this.view.on('mouse-wheel', () => {
+      this.markViewportNavigation();
+    });
   }
 
   private markViewportNavigation(): void {
@@ -916,7 +926,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     this.themeObserver?.disconnect();
-    this.themeObserver = new MutationObserver(() => this.applyThemeMode());
+    this.themeObserver = new MutationObserver(() => {
+      this.applyThemeMode();
+    });
     this.themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
   }
 
@@ -965,7 +977,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
     }
 
     this.mapResizeObserver?.disconnect();
-    this.mapResizeObserver = new ResizeObserver(() => this.scheduleMapResize());
+    this.mapResizeObserver = new ResizeObserver(() => {
+      this.scheduleMapResize();
+    });
     this.mapResizeObserver.observe(element);
   }
 

@@ -11,8 +11,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
   templateUrl: './notification.component.html'
 })
 export class NotificationComponent {
-  title: string = 'Your Trial Has Ended';
-  description: string = 'Your trial period has ended. To continue enjoying full access, please upgrade your subscription.';
+  title = 'Your Trial Has Ended';
+  description = 'Your trial period has ended. To continue enjoying full access, please upgrade your subscription.';
 
   constructor(private router: Router) {
     const nav = this.router.currentNavigation();

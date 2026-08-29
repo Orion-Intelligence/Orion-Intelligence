@@ -230,7 +230,7 @@ export class ScanHelperMethods implements OnDestroy {
     return this.waybackSnapshots.map(s => s.url).join('\n');
   }
 
-  copy(text: string, message: string = 'Copied'): void {
+  copy(text: string, message = 'Copied'): void {
     navigator.clipboard.writeText(text).then(() => {
       this.toast = message;
       setTimeout(() => {

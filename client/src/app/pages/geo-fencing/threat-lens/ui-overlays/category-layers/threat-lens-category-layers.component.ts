@@ -117,7 +117,9 @@ export class ThreatLensCategoryLayersComponent {
       return;
     }
 
-    const activeElement = document.activeElement as HTMLElement | null;
-    activeElement?.blur?.();
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement) {
+      activeElement.blur();
+    }
   }
 }

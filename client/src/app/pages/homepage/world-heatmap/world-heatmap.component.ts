@@ -14,7 +14,7 @@ import { InsightCacheService } from '../services/insight-cache.service';
 import { CountryData, CountryInsightPageResponse, CountryInsightReport } from '../model/country-insight.model';
 import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-badges/map-loading-badges.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { asUnknownRecord, Nullable } from '../../../shared/utils/type-guards.util';
 
 type CountryFeature = Feature<Geometry, { name?: string }>;
 type WorldTopology = Topology<{ countries: GeometryCollection }>;
@@ -27,7 +27,7 @@ type WorldTopology = Topology<{ countries: GeometryCollection }>;
   templateUrl: './world-heatmap.component.html',
 })
 export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
-  @ViewChild('mapContainer') private chartContainer!: ElementRef;
+  @ViewChild('mapContainer') private chartContainer!: ElementRef<HTMLElement>;
   private allCategoryReports: Record<string, CountryInsightReport[]> = {};
   private rotationTimer: number | null = null;
   private worldJsonPollTimer: number | null = null;
@@ -38,7 +38,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   private projection!: d3.GeoProjection;
   private path!: d3.GeoPath<unknown, CountryFeature>;
   private tooltip!: d3.Selection<HTMLDivElement, unknown, null, undefined>;
-  private worldData: WorldTopology | null = null;
+  private worldData: Nullable<WorldTopology> = null;
   private categoryOrder = [ 'leak', 'generic', 'exploit', 'chat', 'social', 'defacement' ];
   private valueByName = new Map<string, number>();
   private selectedName: string | null = null;
@@ -97,7 +97,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
       return;
     }
     this.insightCacheService.getInsight().subscribe(data => {
-      this.applyInsightData(data); 
+      this.applyInsightData(data);
     });
   }
 
@@ -237,7 +237,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!this.svg || !this.chartContainer) {
       return;
     }
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     this.ensureLegendDefs();
@@ -335,7 +335,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!this.svg || !this.chartContainer) {
       return;
     }
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const width = chartContainerElement.offsetWidth || 800;
     const isMobile = width <= 768;
     const labelX = isMobile ? 35 : 33;
@@ -363,7 +363,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!this.worldData) {
       return;
     }
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const width = chartContainerElement.offsetWidth || 800;
     const height = chartContainerElement.offsetHeight || Math.min(Math.max(Math.round(width * 0.52), 400), Math.round(window.innerHeight * 0.8));
     d3.select(chartContainerElement).selectAll('*').remove();
@@ -394,10 +394,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
       .classed('cursor-default', !this.canOpenReports())
       .classed('has-data', (d) => this.getValueForFeature(d) != null)
       .on('mousemove', (event: MouseEvent, d) => {
-        this.onHoverMove(event, d); 
+        this.onHoverMove(event, d);
       })
       .on('mouseleave', (event: MouseEvent) => {
-        this.onHoverOut(event); 
+        this.onHoverOut(event);
       })
       .on('click', (_: MouseEvent, d) => {
         if (this.getValueForFeature(d) == null) {
@@ -472,9 +472,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     this.tooltip.selectAll('*').remove();
     this.tooltip.append('div').text(name);
     this.tooltip.append('div').text(`Leaks: ${v ?? 'N/A'}`);
-    const chartContainerElement = this.chartContainer.nativeElement as HTMLElement;
+    const chartContainerElement = this.chartContainer.nativeElement;
     const rect = chartContainerElement.getBoundingClientRect();
-    const tooltipElement = this.tooltip.node() as HTMLDivElement | null;
+    const tooltipElement = this.tooltip.node();
     const tipW = tooltipElement?.offsetWidth ?? 160;
     const tipH = tooltipElement?.offsetHeight ?? 44;
     let x = event.clientX - rect.left + 12;

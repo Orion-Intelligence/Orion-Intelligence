@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 
-import { AppService } from '../../../services/core/app/app.service';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
@@ -38,7 +37,7 @@ export class BackupRestoreComponent implements OnInit {
   readonly MAX_BACKUPS = 2;
   instantConfirmationMessage = 'Start instant backup now?';
 
-  constructor(private apiService: ApiService, protected appService: AppService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
+  constructor(private apiService: ApiService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
   }
 
   ngOnInit(): void {
@@ -51,7 +50,9 @@ export class BackupRestoreComponent implements OnInit {
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (backups) => this.backups = backups || [],
-        error: () => this.messageNotificationService.show(this.translationService.translate('Failed to load backups'))
+        error: () => {
+          this.messageNotificationService.show(this.translationService.translate('Failed to load backups'));
+        }
       });
   }
 
@@ -75,7 +76,9 @@ export class BackupRestoreComponent implements OnInit {
           this.messageNotificationService.show(this.translationService.translate('Backup created successfully'),'success');
           this.loadBackups();
         },
-        error: () => this.messageNotificationService.show(this.translationService.translate('Failed to create backup'))
+        error: () => {
+          this.messageNotificationService.show(this.translationService.translate('Failed to create backup'));
+        }
       });
   }
 
@@ -102,7 +105,9 @@ export class BackupRestoreComponent implements OnInit {
           this.backups = this.backups.filter(item => item.id !== backup.id);
           this.messageNotificationService.show(this.translationService.translate('Backup deleted successfully'));
         },
-        error: () => this.messageNotificationService.show(this.translationService.translate('Failed to delete backup'))
+        error: () => {
+          this.messageNotificationService.show(this.translationService.translate('Failed to delete backup'));
+        }
       });
   }
 
@@ -125,8 +130,12 @@ export class BackupRestoreComponent implements OnInit {
         this.backupToRestore = null;
       }))
       .subscribe({
-        next: () => this.messageNotificationService.show(this.translationService.translate('Backup restored successfully'), 'success'),
-        error: () => this.messageNotificationService.show(this.translationService.translate('Failed to restore backup'))
+        next: () => {
+          this.messageNotificationService.show(this.translationService.translate('Backup restored successfully'), 'success');
+        },
+        error: () => {
+          this.messageNotificationService.show(this.translationService.translate('Failed to restore backup'));
+        }
       });
   }
 

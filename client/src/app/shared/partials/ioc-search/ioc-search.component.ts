@@ -9,7 +9,6 @@ import { StealerlogsSearchFilters, StealerlogsSearchFilterLabels } from '../../m
 import { SidebarService } from '../../services/sidebar.service';
 import { TooltipDirective } from '../../directive/tooltip-directive.directive';
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
-import { LicenseService } from '../../../services/licenses/licenses.service';
 import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
@@ -55,7 +54,7 @@ export class IocSearchComponent implements OnInit {
   advancedFilters: SharedSearchAdvancedFilter[] = [{ id: this.generateId(), tag: this.defaultAdvancedTag(), value: '', operator: '&&' }];
   readonly searchTriggered = output<string>();
 
-  constructor(protected sidebarService: SidebarService, private route: ActivatedRoute, protected licenseService: LicenseService, protected appService: AppService, protected aiToolRoutingService: AiToolRoutingService) { }
+  constructor(protected sidebarService: SidebarService, private route: ActivatedRoute, protected appService: AppService, protected aiToolRoutingService: AiToolRoutingService) { }
 
   get resolvedAiType(): string {
     return this.aiType() || this.aiToolRoutingService.getTypeForApiType('stealer-ioc');
@@ -94,8 +93,8 @@ export class IocSearchComponent implements OnInit {
   }
 
   onAdvancedBuilderBackdrop(event: MouseEvent): void {
-    const eventTargetElement = event.target as HTMLElement | null;
-    if (eventTargetElement?.dataset?.['role'] === 'backdrop') {
+    const eventTargetElement = event.target;
+    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset['role'] === 'backdrop') {
       this.closeAdvancedBuilder();
     }
   }
@@ -340,7 +339,10 @@ export class IocSearchComponent implements OnInit {
   }
 
   filterBasicInput(event: Event): void {
-    const inputElement = event.target as HTMLInputElement;
+    const inputElement = event.target;
+    if (!(inputElement instanceof HTMLInputElement)) {
+      return;
+    }
     const value = this.stripUrlPrefixes(inputElement.value);
     if (this.selectedTag === this.allTag()) {
       this.updateBasicInput(inputElement, value);

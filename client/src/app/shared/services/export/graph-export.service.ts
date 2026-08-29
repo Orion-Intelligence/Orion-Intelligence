@@ -500,7 +500,7 @@ export class GraphExportService {
     };
   }
 
-  protected makeHeaderRowDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, headerInBody: boolean = true): (data: CellHookData) => void {
+  protected makeHeaderRowDidParse(fillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, headerInBody = true): (data: CellHookData) => void {
     return (data: CellHookData) => {
       if (data.section === 'head' || (headerInBody && data.row.index === 0)) {
         data.cell.styles.fontStyle = 'bold';
@@ -522,7 +522,7 @@ export class GraphExportService {
     };
   }
 
-  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, firstColumnFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb, headerInBody: boolean = true): (data: CellHookData) => void {
+  protected makeHeaderAndFirstColumnDidParse(headerFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultHeaderRowFillRgb, firstColumnFillColor: [number, number, number] = PDF_EXPORT_THEME.defaultFirstColumnFillRgb, headerInBody = true): (data: CellHookData) => void {
     return (data: CellHookData) => {
       if (data.section === 'head' || (headerInBody && data.row.index === 0)) {
         data.cell.styles.fontStyle = 'bold';
@@ -915,7 +915,7 @@ export class GraphExportService {
     return raw.replace(/\s*,\s*/g, ', ').replace(/\s+/g, ' ').trim();
   }
 
-  protected resolveMarkerY(doc: jsPDF, requestedY: number, resetY: number, onNewPage?: () => void, minBlockHeight: number = 26): number {
+  protected resolveMarkerY(doc: jsPDF, requestedY: number, resetY: number, onNewPage?: () => void, minBlockHeight = 26): number {
     const pageBottom = this.getPageH(doc) - 58;
     if (requestedY + minBlockHeight <= pageBottom) {
       return requestedY;

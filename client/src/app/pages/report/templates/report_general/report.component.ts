@@ -3,9 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, OnInit, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { last } from 'rxjs';
-import { AuthService } from '../../../../services/authetication/auth.service';
 import { AppService } from '../../../../services/core/app/app.service';
-import { DashboardService } from '../../../../services/dashboard/dashboard.service';
 import { Category } from '../../../../shared/constants/pages';
 import { TooltipDirective } from '../../../../shared/directive/tooltip-directive.directive';
 import { CodeBlockComponent } from '../../../../shared/partials/code-block/code-block.component';
@@ -53,7 +51,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   username = signal<string>('');
   role = signal<string>('');
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, protected authService: AuthService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef, private route: ActivatedRoute, private helperService: HelperService, protected appService: AppService, private scrollService: ScrollService, private elementRef: ElementRef<HTMLElement>) {
     this.lang = appService.getConfig().appSettings.language_allowed;
     this.lang_detected = appService.getConfig().appSettings.language_allowed;
     this.username.set(this.appService.userSessionData().user.username);

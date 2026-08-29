@@ -59,8 +59,12 @@ function loadArcgisApi(): Promise<EsriRequire> {
 
 export function loadEsriModules<TModules extends unknown[]>(modulePaths: string[]): Promise<TModules> {
   return loadArcgisApi().then(esriRequire => new Promise<TModules>((resolve, reject) => {
-    const onLoad = (...loadedModules: unknown[]) => resolve(loadedModules as TModules);
-    const onError = (error: unknown) => reject(error instanceof Error ? error : new Error(String(error)));
+    const onLoad = (...loadedModules: unknown[]) => {
+      resolve(loadedModules as TModules);
+    };
+    const onError = (error: unknown) => {
+      reject(error instanceof Error ? error : new Error(String(error)));
+    };
     esriRequire(modulePaths, onLoad, onError);
   }));
 }

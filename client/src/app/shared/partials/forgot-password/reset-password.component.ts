@@ -23,9 +23,9 @@ export class ResetPasswordComponent implements OnInit {
   password = '';
   errorMessage: string | null = null;
   responseError = false;
-  hasToken: boolean = false;
-  token: string = '';
-  confirmPassword: string = 'asdsadasd';
+  hasToken = false;
+  token = '';
+  confirmPassword = 'asdsadasd';
   forcedPasswordReset = false;
   passwordStrength: PasswordStrength = null;
   showPasswordMeter = false;
@@ -103,7 +103,7 @@ export class ResetPasswordComponent implements OnInit {
           ? this.auth_service.recoverAccount(this.recoveryKey)
           : this.auth_service.forgotPassword(this.email);
         request.subscribe({
-          next: (_) => {
+          next: () => {
             this.responseError = false;
             this.router.navigate(['notification'], {
               state: {

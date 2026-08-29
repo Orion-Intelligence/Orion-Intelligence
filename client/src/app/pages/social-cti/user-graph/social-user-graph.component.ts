@@ -6,6 +6,8 @@ import { Network, type Options } from 'vis-network';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { ensureStylesheet } from '../../../shared/utils/ensure-stylesheet.util';
+import { getInputValue } from '../../../shared/utils/event-input.util';
+import type { Nullable } from '../../../shared/utils/type-guards.util';
 import { RELATION_COLORS, RELATION_LABELS } from '../constants/social-graph.constants';
 import type { SocialGraphAccount, SocialGraphView, SocialGraphVisEdge, SocialGraphVisNode, SocialGraphVisualOptions, SocialUserGraphData } from '../models/social-user-graph.models';
 import type { db_social_model } from '../models/social.models';
@@ -63,10 +65,10 @@ export class SocialUserGraphComponent {
   private readonly selectedId = signal<string | null>(null);
   private readonly highlightedId = signal<string | null>(null);
   private readonly pendingScans = signal<Map<string, string>>(new Map<string, string>());
-  private readonly themeObserver = new MutationObserver(() => this.onThemeChanged());
-  private network: Network | null = null;
-  private nodeSet: DataSet<SocialGraphVisNode> | null = null;
-  private edgeSet: DataSet<SocialGraphVisEdge> | null = null;
+  private readonly themeObserver = new MutationObserver(this.onThemeChanged.bind(this));
+  private network: Nullable<Network> = null;
+  private nodeSet: Nullable<DataSet<SocialGraphVisNode>> = null;
+  private edgeSet: Nullable<DataSet<SocialGraphVisEdge>> = null;
   private pendingFocusId: string | null = null;
   private reportRequest = 0;
   private copiedTimeout: ReturnType<typeof setTimeout> | undefined;
@@ -127,7 +129,9 @@ export class SocialUserGraphComponent {
     if (!container) {
       return;
     }
-    untracked(() => this.renderNetwork(container, view, options));
+    untracked(() => {
+      this.renderNetwork(container, view, options);
+    });
   });
 
   usernames = input<string[]>([]);
@@ -211,7 +215,7 @@ export class SocialUserGraphComponent {
   }
 
   onFindInput(event: Event): void {
-    this.findTerm.set((event.target as HTMLInputElement | null)?.value ?? '');
+    this.findTerm.set(getInputValue(event));
   }
 
   clearFind(): void {
@@ -535,7 +539,9 @@ export class SocialUserGraphComponent {
       this.nodeSet = new DataSet<SocialGraphVisNode>(visNodes);
       this.edgeSet = new DataSet<SocialGraphVisEdge>(visEdges);
       this.network = new Network(container, { nodes: this.nodeSet, edges: this.edgeSet }, this.buildOptions());
-      container.addEventListener('contextmenu', event => event.preventDefault());
+      container.addEventListener('contextmenu', event => {
+        event.preventDefault();
+      });
       this.attachHandlers(this.network);
       this.awaitSettle(true);
       return;

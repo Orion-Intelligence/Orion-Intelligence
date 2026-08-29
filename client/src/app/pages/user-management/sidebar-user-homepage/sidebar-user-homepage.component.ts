@@ -2,7 +2,6 @@ import { Component, effect, OnDestroy, OnInit, signal, ChangeDetectionStrategy }
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppService } from '../../../services/core/app/app.service';
-import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { Router } from '@angular/router';
 import { HomeSearchComponent } from "../../homepage/home-search/home-search.component";
 import { ALERT_CATEGORY_NAMES, AlertCategorySummary, createAlertCategorySummary } from '../../../shared/partials/alert-notification/model/alert.notification.model';
@@ -37,10 +36,10 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
 
   hoveredHomeTool: 'print' | 'flush' | 'settings' | 'scan' | null = null;
   alertCategories: AlertCategorySummary[] = [];
-  criticalRisks: number = 0;
-  highRisks: number = 0;
-  mediumRisks: number = 0;
-  lowRisks: number = 0;
+  criticalRisks = 0;
+  highRisks = 0;
+  mediumRisks = 0;
+  lowRisks = 0;
   isConfirmationOpen = signal(false);
   noIocPopup = signal(false);
   showAlertScanLoading = signal(false);
@@ -49,7 +48,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   readonly alertLicenseWarning = "You don't have license to view this";
   readonly alertExportOptions = buildStandardExportOptions('home-alert-export-option', 'report', 'Generate PDF export for alerts.');
 
-  constructor(public appService: AppService, protected alertService: AlertService, protected dashboardService: DashboardService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService, private translationService: TranslationService) {
+  constructor(public appService: AppService, protected alertService: AlertService, public router: Router, private apiService: ApiService, private messageNotificationService: MessageNotificationService, protected authService: AuthService, protected licenseService: LicenseService, private alertExportService: AlertExportService, private sidebarHomepageService: SidebarHomepageService, private translationService: TranslationService) {
     effect(() => {
       if (!this.alertService.isAlertScanLoading()) {
         this.initializeData();

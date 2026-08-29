@@ -6,16 +6,17 @@ import { OrionFacilityMarkerIconComponent } from './components/orion-facility-ma
 import { OrionFacilityPopupComponent } from './components/orion-facility-popup/orion-facility-popup.component';
 import type * as Leaflet from 'leaflet';
 import { OrionFacilitiesMapRendererConfig } from '../../model/satellite-intel.model';
+import type { Augmented, Nullable, Nullish } from '../../../../../shared/utils/type-guards.util';
 
-type OrionFacilityMarker = Leaflet.Marker & {
-  __orionFacilityIconRef: ComponentRef<OrionFacilityMarkerIconComponent> | null;
-  __orionFacilityPopupRef: ComponentRef<OrionFacilityPopupComponent> | null;
+type OrionFacilityMarker = Augmented<Leaflet.Marker, {
+  __orionFacilityIconRef: Nullable<ComponentRef<OrionFacilityMarkerIconComponent>>;
+  __orionFacilityPopupRef: Nullable<ComponentRef<OrionFacilityPopupComponent>>;
   orionFeature: OrionSatelliteFeature;
-};
+}>;
 
 
 export class OrionFacilitiesMapRenderer {
-  private layer: Leaflet.LayerGroup | null = null;
+  private layer: Nullable<Leaflet.LayerGroup> = null;
   private renderKey = '';
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
   private renderVersion = 0;
@@ -128,7 +129,9 @@ export class OrionFacilitiesMapRenderer {
       clearTimeout(this.renderTimer);
       this.renderTimer = null;
     }
-    Array.from(this.markers.values()).forEach((marker) => this.destroyMarkerComponents(marker));
+    Array.from(this.markers.values()).forEach((marker) => {
+      this.destroyMarkerComponents(marker);
+    });
     this.markers.clear();
     this.markerSignatures.clear();
     if (this.layer) {
@@ -168,7 +171,7 @@ export class OrionFacilitiesMapRenderer {
 
     return {
       icon: this.L.divIcon({
-        html: rendered.element,
+        html: this.componentRenderer.elementAsHtml(rendered.element),
         className: 'bg-transparent border-0',
         iconSize: [size, size],
         iconAnchor: [Math.round(size / 2), size],
@@ -217,7 +220,7 @@ export class OrionFacilitiesMapRenderer {
       lat !== 0;
   }
 
-  private limitFeaturesForZoom(features: OrionSatelliteFeature[], zoom: number, bounds: Leaflet.LatLngBounds | null | undefined): OrionSatelliteFeature[] {
+  private limitFeaturesForZoom(features: OrionSatelliteFeature[], zoom: number, bounds: Nullish<Leaflet.LatLngBounds>): OrionSatelliteFeature[] {
     const limit = this.getVisibleLimit(zoom);
     if (!Number.isFinite(limit) || features.length <= limit) {
       return features;
@@ -317,7 +320,7 @@ export class OrionFacilitiesMapRenderer {
     return { cols: 16, rows: 10 };
   }
 
-  private getGridKey(feature: OrionSatelliteFeature, bounds: Leaflet.LatLngBounds | null | undefined, cols: number, rows: number): string {
+  private getGridKey(feature: OrionSatelliteFeature, bounds: Nullish<Leaflet.LatLngBounds>, cols: number, rows: number): string {
     const [lon, lat] = feature.coordinates;
     const west = bounds?.getWest?.() ?? -180;
     const east = bounds?.getEast?.() ?? 180;

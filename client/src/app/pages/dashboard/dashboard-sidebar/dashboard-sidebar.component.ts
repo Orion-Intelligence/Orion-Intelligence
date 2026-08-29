@@ -26,7 +26,9 @@ import { SidebarShellComponent } from '../../../shared/partials/sidebar-shell/si
   templateUrl: './dashboard-sidebar.component.html',
 })
 export class DashboardSidebarComponent implements OnInit, OnDestroy {
-  private readonly resizeHandler = () => this.checkScreenWidth();
+  private readonly resizeHandler = () => {
+    this.checkScreenWidth();
+  };
   private readonly closeForSubscriptionHandler = () => {
     if (this.sidebar_default) {
       this.onToggleSidebar(this.mobile_menu_status);
@@ -169,7 +171,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     this.scrollService.scrollReportToTop();
   }
 
-  onToggleSidebar(mobile_menu_status: boolean = false) {
+  onToggleSidebar(mobile_menu_status = false) {
     this.menuToggle.emit(undefined);
     this.sidebar_default = !this.sidebar_default;
     this.mobile_menu_status = mobile_menu_status;
