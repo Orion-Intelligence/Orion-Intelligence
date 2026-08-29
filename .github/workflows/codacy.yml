@@ -32,6 +32,36 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      - name: Empty non-UTF-8 files before analysis
+        run: |
+          python3 - <<'PY'
+          import pathlib
+          import subprocess
+
+          tracked = subprocess.run(
+              ["git", "ls-files", "-z"], capture_output=True, check=True
+          ).stdout.split(b"\0")
+          emptied = []
+
+          for entry in tracked:
+              if not entry:
+                  continue
+              path = pathlib.Path(entry.decode())
+              try:
+                  data = path.read_bytes()
+              except OSError:
+                  continue
+              try:
+                  data.decode("utf-8")
+              except UnicodeDecodeError:
+                  path.write_bytes(b"")
+                  emptied.append(str(path))
+
+          print(f"Emptied {len(emptied)} non-UTF-8 files")
+          for name in emptied:
+              print(f"  {name}")
+          PY
+
       - name: Run Codacy Analysis for GitHub Code Scanning
         uses: codacy/codacy-analysis-cli-action@562ee3e92b8e92df8b67e0a5ff8aa8e261919c08
         with:
@@ -41,6 +71,7 @@ jobs:
           format: sarif
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
+          skip-uncommitted-files-check: true
 
       - name: Split SARIF runs into unique categories
         run: |

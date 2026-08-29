@@ -1,0 +1,59 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended"
+  ],
+  "rules": {
+    "no-undef": "off",
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "destructuredArrayIgnorePattern": "^_",
+        "caughtErrorsIgnorePattern": "^_"
+      }
+    ],
+    "no-dupe-class-members": "off",
+    "@typescript-eslint/no-dupe-class-members": "error"
+  },
+  "overrides": [
+    {
+      "files": [
+        "src/app/**/*guard*.ts"
+      ],
+      "rules": {
+        "@typescript-eslint/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^(?:_|route|state)$",
+            "varsIgnorePattern": "^_",
+            "destructuredArrayIgnorePattern": "^_",
+            "caughtErrorsIgnorePattern": "^_"
+          }
+        ]
+      }
+    }
+  ],
+  "ignorePatterns": [
+    "build/**",
+    "coverage/**",
+    ".angular/**",
+    "node_modules/**",
+    ".nyc_output/**",
+    "src/assets/**",
+    "cypress/**",
+    "*.config.ts",
+    "*.config.js",
+    "eslint.config.js"
+  ]
+}
