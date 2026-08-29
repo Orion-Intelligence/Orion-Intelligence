@@ -104,7 +104,15 @@ async def list_backups():
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
 async def create_instant_backup():
-    return await BackupManager.get_instance().create_backup(BackupType.INSTANT)
+    return await BackupManager.get_instance().start_backup(BackupType.INSTANT)
+
+
+@admin_routes.get(
+    "/api/admin/backups/status",
+    dependencies=[Depends(role_required([user_role.ADMIN]))],
+)
+async def backup_job_status():
+    return BackupManager.get_instance().job_status()
 
 
 @admin_routes.delete(
@@ -120,4 +128,4 @@ async def delete_backup(backup_id: str):
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
 async def restore_backup(backup_id: str):
-    return await BackupManager.get_instance().restore_backup_by_id(backup_id)
+    return await BackupManager.get_instance().start_restore(backup_id)

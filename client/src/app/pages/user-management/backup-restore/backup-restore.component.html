@@ -13,6 +13,16 @@
         </button>
       </div>
 
+      @if (job && job.status === 'running') {
+        <div data-testid="backup-progress" class="mb-4">
+          <div class="mb-1 flex items-center justify-between text-[11px] font-medium text-[var(--color-text6)]">
+            <span data-testid="backup-progress-message">{{ (job.operation === 'restore' ? 'Restoring backup' : 'Creating backup') | translate }} - {{ job.message | translate }}</span>
+            <span data-testid="backup-progress-value">{{ job.progress }}%</span>
+          </div>
+          <progress data-testid="backup-progress-bar" class="h-1.5 w-full overflow-hidden rounded-full border-0 bg-[var(--color-blue-820-light)] [&::-webkit-progress-bar]:bg-[var(--color-blue-820-light)] [&::-webkit-progress-value]:bg-[#2c7ac5] [&::-moz-progress-bar]:bg-[#2c7ac5]" max="100" [value]="job.progress"></progress>
+        </div>
+      }
+
       <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
 
       <div class="m-0 overflow-hidden rounded-none border-0 [box-shadow:rgba(0,0,0,0.06)_0_4px_6px_-1px,rgba(0,0,0,0.035)_0_2px_4px_-1px] md:rounded-[8px] md:border md:!border-[var(--tenant-line)]">

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
 import { finalize } from 'rxjs';
 
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
@@ -8,13 +8,7 @@ import { ConfirmationPopupComponent } from '../../../shared/partials/confirmatio
 import { ApiService } from '../../../shared/services/api.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
-
-interface BackupRecord {
-  id: string;
-  filename: string;
-  backup_type: 'auto' | 'instant';
-  created_at: string;
-}
+import type { BackupJob, BackupRecord } from './model/backup-restore.model';
 
 @Component({
   selector: 'app-backup-restore',
@@ -24,7 +18,10 @@ interface BackupRecord {
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './backup-restore.component.html',
 })
-export class BackupRestoreComponent implements OnInit {
+export class BackupRestoreComponent implements OnInit, OnDestroy {
+  private jobTimer: ReturnType<typeof setTimeout> | null = null;
+  private jobWasRunning = false;
+
   backups: BackupRecord[] = [];
   isLoading = true;
   backupToDelete: BackupRecord | null = null;
@@ -34,6 +31,7 @@ export class BackupRestoreComponent implements OnInit {
   isRestoreConfirmationOpen = signal<boolean>(false);
   isRestoring = false;
   isCreating = false;
+  job: BackupJob | null = null;
   readonly MAX_BACKUPS = 2;
   instantConfirmationMessage = 'Start instant backup now?';
 
@@ -42,6 +40,41 @@ export class BackupRestoreComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBackups();
+    this.pollJob();
+  }
+
+  ngOnDestroy(): void {
+    if (this.jobTimer !== null) {
+      clearTimeout(this.jobTimer);
+    }
+  }
+
+  private pollJob(): void {
+    this.apiService.get<BackupJob>('admin/backups/status').subscribe({
+      next: (job) => {
+        this.job = job;
+        this.isCreating = job.status === 'running' && job.operation === 'backup';
+        this.isRestoring = job.status === 'running' && job.operation === 'restore';
+        if (job.status === 'running') {
+          this.jobWasRunning = true;
+          this.jobTimer = setTimeout(() => {
+            this.pollJob();
+          }, 2000);
+          return;
+        }
+        if (this.jobWasRunning) {
+          this.jobWasRunning = false;
+          this.backupToRestore = null;
+          this.messageNotificationService.show(this.translationService.translate(job.message), job.status === 'done' ? 'success' : 'fail');
+          this.loadBackups();
+        }
+      },
+      error: () => {
+        this.jobTimer = setTimeout(() => {
+          this.pollJob();
+        }, 5000);
+      }
+    });
   }
 
   loadBackups(): void {
@@ -69,17 +102,15 @@ export class BackupRestoreComponent implements OnInit {
       return;
     }
     this.isCreating = true;
-    this.apiService.post<BackupRecord>('admin/backups/instant', {})
-      .pipe(finalize(() => (this.isCreating = false)))
-      .subscribe({
-        next: () => {
-          this.messageNotificationService.show(this.translationService.translate('Backup created successfully'),'success');
-          this.loadBackups();
-        },
-        error: () => {
-          this.messageNotificationService.show(this.translationService.translate('Failed to create backup'));
-        }
-      });
+    this.apiService.post<BackupJob>('admin/backups/instant', {}).subscribe({
+      next: () => {
+        this.pollJob();
+      },
+      error: () => {
+        this.isCreating = false;
+        this.messageNotificationService.show(this.translationService.translate('Failed to create backup'));
+      }
+    });
   }
 
   openDeleteConfirmation(backup: BackupRecord): void {
@@ -124,19 +155,16 @@ export class BackupRestoreComponent implements OnInit {
     }
     const backup = this.backupToRestore;
     this.isRestoring = true;
-    this.apiService.post<unknown>(`admin/backups/${backup.id}/restore`, {})
-      .pipe(finalize(() => {
+    this.apiService.post<BackupJob>(`admin/backups/${backup.id}/restore`, {}).subscribe({
+      next: () => {
+        this.pollJob();
+      },
+      error: () => {
         this.isRestoring = false;
         this.backupToRestore = null;
-      }))
-      .subscribe({
-        next: () => {
-          this.messageNotificationService.show(this.translationService.translate('Backup restored successfully'), 'success');
-        },
-        error: () => {
-          this.messageNotificationService.show(this.translationService.translate('Failed to restore backup'));
-        }
-      });
+        this.messageNotificationService.show(this.translationService.translate('Failed to restore backup'));
+      }
+    });
   }
 
   formatDate(value: string): string {

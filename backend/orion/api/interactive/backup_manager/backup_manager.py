@@ -37,6 +37,58 @@ class BackupManager:
         self._engine = mongo_controller.get_instance().get_engine()
         self.backup_root = BASE_DIR / "backups"
         self.maintenance_flag = BASE_DIR / "static" / ".maintenance"
+        self._job = {"operation": "", "status": "idle", "progress": 0, "message": "", "filename": ""}
+
+    def job_status(self) -> dict:
+        return dict(self._job)
+
+    def _begin_job(self, operation: str, message: str) -> bool:
+        if self._job.get("status") == "running":
+            return False
+        self._job = {"operation": operation, "status": "running", "progress": 0, "message": message, "filename": ""}
+        return True
+
+    def _set_progress(self, progress: int, message: str) -> None:
+        if self._job.get("status") == "running":
+            self._job["progress"] = progress
+            self._job["message"] = message
+
+    def _end_job(self, status: str, message: str, filename: str = "") -> None:
+        self._job = {
+            "operation": self._job.get("operation", ""),
+            "status": status,
+            "progress": 100 if status == "done" else self._job.get("progress", 0),
+            "message": message,
+            "filename": filename,
+        }
+
+    async def start_backup(self, backup_type: BackupType) -> dict:
+        if not self._begin_job("backup", "Starting backup"):
+            return self.job_status()
+        asyncio.create_task(self._run_backup(backup_type))
+        return self.job_status()
+
+    async def _run_backup(self, backup_type: BackupType) -> None:
+        try:
+            result = await self.create_backup(backup_type)
+            self._end_job("done", "Backup completed successfully", result.get("filename", ""))
+        except Exception as exc:
+            log.g().e(f"BACKUP FAILED: {exc}")
+            self._end_job("failed", str(getattr(exc, "detail", exc)))
+
+    async def start_restore(self, backup_id: str) -> dict:
+        if not self._begin_job("restore", "Starting restore"):
+            return self.job_status()
+        asyncio.create_task(self._run_restore(backup_id))
+        return self.job_status()
+
+    async def _run_restore(self, backup_id: str) -> None:
+        try:
+            result = await self.restore_backup_by_id(backup_id)
+            self._end_job("done", "Backup restored successfully", result.get("filename", ""))
+        except Exception as exc:
+            log.g().e(f"RESTORE FAILED: {exc}")
+            self._end_job("failed", str(getattr(exc, "detail", exc)))
 
     async def list_backups(self):
         backups = await self._engine.find(db_backup_model, sort=db_backup_model.created_at.desc())
@@ -76,13 +128,22 @@ class BackupManager:
             "created_at": backup.created_at,
         }
 
-    async def _perform_backup(self, backup_dir: Path):
+    async def _perform_backup(self, backup_dir: Path, progress_base: int = 0, progress_span: int = 90):
+        def step(done: int, message: str) -> None:
+            self._set_progress(progress_base + (progress_span * done // 5), message)
+
         backup_dir.mkdir(parents=True, exist_ok=True)
+        step(0, "Exporting MongoDB")
         await self._backup_mongo(backup_dir / "mongo")
+        step(1, "Exporting ArangoDB")
         await asyncio.to_thread(self._backup_arango, backup_dir / "arango")
+        step(2, "Exporting Elasticsearch")
         await self._backup_elastic(backup_dir / "elastic")
+        step(3, "Copying logs")
         await asyncio.to_thread(self._copy_folder, BASE_DIR / "orion" / "logs", backup_dir / "logs")
+        step(4, "Copying resources")
         await asyncio.to_thread(self._copy_folder, BASE_DIR / "static" / "resource", backup_dir / "resource")
+        step(5, "Finalizing")
         if not (BASE_DIR / "static" / "resource").exists():
             await asyncio.to_thread(self._copy_folder, BASE_DIR / "static" / "resource", backup_dir / "resource")
 
@@ -124,7 +185,7 @@ class BackupManager:
         rollback_name = f"rollback_{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}"
         rollback_dir = self.backup_root / rollback_name
         try:
-            await self._perform_backup(rollback_dir)
+            await self._perform_backup(rollback_dir, progress_base=5, progress_span=35)
             log.g().i(f"RESTORE: rollback point created: {rollback_name}")
         except Exception as exc:
             shutil.rmtree(rollback_dir, ignore_errors=True)
@@ -133,8 +194,10 @@ class BackupManager:
             raise HTTPException(status_code=500, detail=f"Restore aborted, could not create rollback point: {exc}") from exc
 
         try:
+            self._set_progress(45, "Restoring data")
             await self._run_restore_engine(backup_dir)
             log.g().i(f"RESTORE: restore steps completed for {filename}")
+            self._set_progress(90, "Validating restore")
             valid, details = await self._validate_restore()
             if not valid:
                 raise RuntimeError(f"validation failed: {details}")
