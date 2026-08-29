@@ -55,7 +55,6 @@
     roughly 60-70 kB;
   - reduce the arbitrary-value Tailwind usage, which is where the remaining ~1.1 MB comes from.
 
-
 ## Webpack -> esbuild build system migration (2026-08-28)
 
 Migrated every builder off Angular's deprecated webpack support. This removes `@angular-devkit/build-angular`,

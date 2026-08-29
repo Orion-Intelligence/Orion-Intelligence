@@ -37,10 +37,10 @@ class sso_manager:
 
     @staticmethod
     def _require_client(request: Request) -> None:
-        provided = request.headers.get(SSO_CONSTANTS.S_CLIENT_SECRET_HEADER, "")
-        if len(SSO_CONSTANTS.S_CLIENT_SECRET) < 32:
+        provided = request.headers.get(SSO_CONSTANTS.S_CLIENT_AUTH_HEADER, "")
+        if len(SSO_CONSTANTS.S_CLIENT_CREDENTIAL) < 32:
             raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Orion Mail SSO is not configured")
-        if not provided or not secrets.compare_digest(SSO_CONSTANTS.S_CLIENT_SECRET, provided):
+        if not provided or not secrets.compare_digest(SSO_CONSTANTS.S_CLIENT_CREDENTIAL, provided):
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Orion Mail client")
 
     @staticmethod

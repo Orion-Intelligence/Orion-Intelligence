@@ -22,7 +22,9 @@ COOKIE_CIPHER = auth_cookie_config.COOKIE_CIPHER
 
 
 def uses_cookie_auth(request: Request, cookie_only: bool) -> bool:
-    return cookie_only or bool(request.cookies.get(ACCESS_COOKIE))
+    if cookie_only:
+        return True
+    return (request.cookies.get(ACCESS_COOKIE) or "") != ""
 
 
 def cookie_only_result(result: dict, cookie_auth: bool) -> dict:

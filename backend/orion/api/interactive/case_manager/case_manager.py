@@ -786,7 +786,7 @@ class CaseManager:
             lambda value: CaseHelperMethods.decrypt_value(enc, value)
         )
 
-        artifact, artifact_file = self._resolve_artifact_file(record, artifact_id, file_id)
+        _, artifact_file = self._resolve_artifact_file(record, artifact_id, file_id)
 
         file_resource_id = artifact_file.fileResourceId
         file_name = artifact_file.fileName or "artifact-file"

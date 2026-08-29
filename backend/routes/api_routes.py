@@ -1,5 +1,6 @@
 import asyncio
 import requests
+from urllib.parse import quote
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, UploadFile, File
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
@@ -21,6 +22,7 @@ from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.feedback_manager.feedback_manager import FeedbackManager
 from orion.api.interactive.feedback_manager.models.feedback_param_model import feedback_comment_param_model
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
+from orion.helper_manager.env_handler import env_handler
 from orion.api.interactive.takedown_manager.takedown_manager import TakedownManager
 from orion.api.interactive.directory_manager.directory_model import directory_model
 from orion.api.interactive.directory_manager.directory_shared_model.directory_param_model import directory_param_model
@@ -1126,7 +1128,8 @@ async def delete_scan_job(scan_id: str, current_user=Depends(get_current_user)):
 )
 async def phone_universal_search_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
     def forward_to_micros():
-        url = f"http://api:8010/api/phone/universal_search/{current_user.id}"
+        base_url = env_handler.get_instance().env("MICROS_API_BASE", "http://api:8010").rstrip("/")
+        url = f"{base_url}/api/phone/universal_search/{quote(str(current_user.id), safe='')}"
         response = requests.post(url, json=payload, timeout=30)
 
         if response.status_code != 200:
