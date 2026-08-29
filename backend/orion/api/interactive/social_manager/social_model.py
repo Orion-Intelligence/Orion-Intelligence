@@ -355,7 +355,7 @@ class social_model:
 
         platform_scope = re.sub(r"[^a-z0-9]", "", str(payload.get("platform") or "").lower())
         identity = (str(payload.get("username") or "").strip() or str(payload.get("url") or "").strip()).lower()
-        profile_scope = hashlib.sha1(identity.encode("utf-8")).hexdigest()[:12] if identity else ""
+        profile_scope = hashlib.sha256(identity.encode("utf-8")).hexdigest()[:12] if identity else ""
         result_scope = f"{platform_scope}:{profile_scope}:{crawl_type}:{cursor}" if cursor else f"{platform_scope}:{profile_scope}:{crawl_type}"
 
         manager = extension_socket_manager.get_instance()

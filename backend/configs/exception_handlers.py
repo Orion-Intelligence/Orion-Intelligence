@@ -1,6 +1,4 @@
 import logging
-import re
-import traceback
 
 from fastapi import Request, HTTPException
 from fastapi.exceptions import RequestValidationError
@@ -18,12 +16,6 @@ def is_api_request(request: Request) -> bool:
     return path == "/api" or path.startswith("/api/")
 
 
-def clean_traceback(exc: Exception):
-    error_trace = traceback.format_exception(type(exc), exc, exc.__traceback__)
-    cleaned_trace = [re.sub(r"\s*\^+\s*", "", line.strip()) for line in error_trace if line.strip()]
-    return cleaned_trace[::-1]
-
-
 async def global_exception_handler(request: Request, exc: Exception):
     status_code = exc.status_code if isinstance(exc, HTTPException) else HTTP_500_INTERNAL_SERVER_ERROR
 
@@ -38,8 +30,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     if is_api_request(request):
         detail = exc.detail if isinstance(exc, HTTPException) else "An unexpected error occurred"
         content = {"detail": detail}
-        if config.DEBUG and not isinstance(exc, HTTPException):
-            content["traceback"] = clean_traceback(exc)
         return JSONResponse(
             status_code=status_code,
             content=content,
@@ -74,8 +64,6 @@ async def validation_exception_handler(request: Request, exc: Exception):
             "detail": "Request validation failed",
             "validation_errors": [error.model_dump() for error in errors],
         }
-        if config.DEBUG:
-            content["traceback"] = clean_traceback(exc)
         return JSONResponse(
             status_code=HTTP_422_UNPROCESSABLE_CONTENT,
             content=content,
@@ -83,7 +71,7 @@ async def validation_exception_handler(request: Request, exc: Exception):
 
     if config.DEBUG:
         error_response = ValidationErrorResponseModel(
-            validation_errors=errors, traceback=clean_traceback(exc))
+            validation_errors=errors, traceback=[])
         return JSONResponse(status_code=HTTP_422_UNPROCESSABLE_CONTENT, content=error_response.model_dump())
 
     return RedirectResponse(url=f"/{HTTP_422_UNPROCESSABLE_CONTENT}")
