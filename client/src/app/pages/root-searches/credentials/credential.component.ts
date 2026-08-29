@@ -668,7 +668,9 @@ export class CredentialComponent implements OnInit {
       .filter(key => !this.shouldSkipExportField(key, record[key]))
       .filter(key => this.isSimpleExportValue(record[key]))
       .sort((a, b) => this.toExportLabel(a).localeCompare(this.toExportLabel(b)))
-      .forEach(key => { this.addExportField(fields, this.toExportLabel(key), record[key], 320); });
+      .forEach(key => {
+        this.addExportField(fields, this.toExportLabel(key), record[key], 320); 
+      });
   }
 
   private getExportSearchQuery(): string {
@@ -791,5 +793,4 @@ export class CredentialComponent implements OnInit {
     }
     this.fetchSearchResults(true);
   }
-
 }

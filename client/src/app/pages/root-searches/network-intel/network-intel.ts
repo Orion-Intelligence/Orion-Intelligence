@@ -604,7 +604,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.syncUrl();
     this.seoRepoScanSub = this.scanner
       .scanDomain(resolvedTarget, this.activeTab)
-      .pipe(finalize(() => { this.seoRepoScanLoading.set(false); }))
+      .pipe(finalize(() => {
+        this.seoRepoScanLoading.set(false); 
+      }))
       .subscribe({
         next: (response) => {
           this.parseSeoRepoScanResult(response);

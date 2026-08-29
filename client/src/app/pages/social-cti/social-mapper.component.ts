@@ -364,7 +364,9 @@ export class SocialMapperComponent {
       icon: 'bi bi-hourglass-split',
       style: 'bg-orange-500/90 text-white border border-orange-400',
     });
-    this.notificationTimeout = setTimeout(() => { this.notification.set(null); }, 3000);
+    this.notificationTimeout = setTimeout(() => {
+      this.notification.set(null); 
+    }, 3000);
   }
 
   private getResultSource(platformData: social_profile): SocialResultSource {

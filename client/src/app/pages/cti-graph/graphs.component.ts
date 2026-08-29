@@ -2392,7 +2392,9 @@ export class GraphComponent implements OnInit, OnDestroy {
         improvedLayout: true
       }
     });
-    container.addEventListener('contextmenu', (event: MouseEvent) => { event.preventDefault(); });
+    container.addEventListener('contextmenu', (event: MouseEvent) => {
+      event.preventDefault(); 
+    });
   }
 
   private applyPhysicsAutoDisableIfNeeded(): void {

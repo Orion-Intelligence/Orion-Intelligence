@@ -100,7 +100,9 @@ export class SocialUserGraphComponent {
       const fresh = platforms.filter(platform => !known.has(platform.toLowerCase()));
       this.platformColors.set(this.graphService.platformColors(platforms));
       if (fresh.length) {
-        void this.graphService.resolvePlatformIcons(fresh).then(icons => { this.platformIcons.update(current => new Map([...current, ...icons])); });
+        void this.graphService.resolvePlatformIcons(fresh).then(icons => {
+          this.platformIcons.update(current => new Map([...current, ...icons])); 
+        });
       }
     });
   });
@@ -396,7 +398,9 @@ export class SocialUserGraphComponent {
     void navigator.clipboard?.writeText(value).then(() => {
       this.copied.set(true);
       clearTimeout(this.copiedTimeout);
-      this.copiedTimeout = setTimeout(() => { this.copied.set(false); }, 1500);
+      this.copiedTimeout = setTimeout(() => {
+        this.copied.set(false); 
+      }, 1500);
     });
   }
 
@@ -446,7 +450,9 @@ export class SocialUserGraphComponent {
   private showNotice(message: string): void {
     this.notice.set(message);
     clearTimeout(this.noticeTimeout);
-    this.noticeTimeout = setTimeout(() => { this.notice.set(''); }, 3500);
+    this.noticeTimeout = setTimeout(() => {
+      this.notice.set(''); 
+    }, 3500);
   }
 
   private readLabelColor(): string {
@@ -707,7 +713,9 @@ export class SocialUserGraphComponent {
       const progress = params as { iterations: number; total: number };
       this.layoutProgress.set(progress.total ? Math.min(99, Math.round(progress.iterations / progress.total * 100)) : 0);
     });
-    network.on('stabilizationIterationsDone', () => { this.layoutProgress.set(100); });
+    network.on('stabilizationIterationsDone', () => {
+      this.layoutProgress.set(100); 
+    });
   }
 
   private keepNodesInView(network: Network): void {

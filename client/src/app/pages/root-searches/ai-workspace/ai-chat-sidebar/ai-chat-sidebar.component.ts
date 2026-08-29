@@ -141,7 +141,9 @@ export class AiChatSidebarComponent {
           },
         });
       },
-      error: () => { this.finishSharing(); },
+      error: () => {
+        this.finishSharing(); 
+      },
     });
   }
 
@@ -197,7 +199,9 @@ export class AiChatSidebarComponent {
       return;
     }
     this.nexusChatService.deleteChatSession(chat.sessionId).subscribe({
-      next: () => { this.sessionDeleted.emit(chat.sessionId); },
+      next: () => {
+        this.sessionDeleted.emit(chat.sessionId); 
+      },
     });
   }
 

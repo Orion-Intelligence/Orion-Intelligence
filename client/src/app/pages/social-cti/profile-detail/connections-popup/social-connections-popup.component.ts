@@ -71,7 +71,9 @@ export class SocialConnectionsPopupComponent {
       const query = term.trim();
       return timer(query ? 250 : 0).pipe(switchMap(() => this.fetchService.searchConnections(this.platform(), this.profileUsername(), query, url)));
     }),
-    takeUntilDestroyed(this.destroyRef)).subscribe(items => { this.searchResults.set(items); });
+    takeUntilDestroyed(this.destroyRef)).subscribe(items => {
+      this.searchResults.set(items); 
+    });
   }
 
   open(event: Event, dialog: HTMLDialogElement): void {

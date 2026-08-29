@@ -57,7 +57,9 @@ export class ManageProfilesModalComponent {
   areAllVisibleDeselected = computed(() => this.filteredPlatforms().every(p => !p.isSelected));
 
   constructor() {
-    afterNextRender(() => requestAnimationFrame(() => { this.isOpen.set(true); }));
+    afterNextRender(() => requestAnimationFrame(() => {
+      this.isOpen.set(true); 
+    }));
     effect(() => {
       const modalData = this.data();
       if (!modalData) {
@@ -95,7 +97,9 @@ export class ManageProfilesModalComponent {
 
   requestClose(): void {
     this.isOpen.set(false);
-    setTimeout(() => { this.close.emit(undefined); }, 300);
+    setTimeout(() => {
+      this.close.emit(undefined); 
+    }, 300);
   }
 
   onSearchChanged(event: Event): void {

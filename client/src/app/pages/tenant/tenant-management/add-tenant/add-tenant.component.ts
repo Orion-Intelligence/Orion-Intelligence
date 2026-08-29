@@ -123,7 +123,9 @@ export class AddTenantComponent implements OnInit {
     this.isClosing = true;
     this.isOpen = false;
     this.cdr.detectChanges();
-    setTimeout(() => { this.closs.emit(undefined); }, 300);
+    setTimeout(() => {
+      this.closs.emit(undefined); 
+    }, 300);
   }
 
   get hasFullLicenseAccess(): boolean {

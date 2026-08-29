@@ -98,7 +98,9 @@ export class CrossSearchCardComponent {
               search_url: r.search_url,
               first_result: r.first_result,
             }));
-          setTimeout(() => { this.updateScrollState(); });
+          setTimeout(() => {
+            this.updateScrollState(); 
+          });
         },
         error: () => (this.hasError = true),
       });
