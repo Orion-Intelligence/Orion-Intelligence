@@ -164,7 +164,7 @@ jobs:
           export NODE_OPTIONS=--no-deprecation
           mkdir -p coverage cypress/downloads cypress/error cypress/screenshots cypress/videos
           npx cypress verify
-          ORION_COVERAGE=true CI=false GITHUB_ACTIONS=false npx cypress run --browser chrome --config baseUrl=https://127.0.0.1:8443
+          ORION_COVERAGE=true CI=false GITHUB_ACTIONS=false npx cypress run --browser electron --config baseUrl=https://127.0.0.1:8443
           test -s coverage/lcov.info
 
       - name: Make client coverage paths repository relative

@@ -1,6 +1,6 @@
 import asyncio
+import re
 import requests
-from urllib.parse import quote
 from typing import Optional
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, Request, UploadFile, File
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
@@ -1127,9 +1127,16 @@ async def delete_scan_job(scan_id: str, current_user=Depends(get_current_user)):
     dependencies=SCANNING_DEPS,
 )
 async def phone_universal_search_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
+    base_url = str(env_handler.get_instance().env("TRUSTED_MICROS_API_BASE", "") or "").strip().rstrip("/")
+    if not base_url:
+        raise HTTPException(status_code=500, detail="Phone lookup service is not configured")
+
+    user_id = str(current_user.id)
+    if not re.fullmatch(r"[A-Fa-f0-9]{24}", user_id):
+        raise HTTPException(status_code=400, detail="Invalid user")
+
     def forward_to_micros():
-        base_url = env_handler.get_instance().env("MICROS_API_BASE", "http://api:8010").rstrip("/")
-        url = f"{base_url}/api/phone/universal_search/{quote(str(current_user.id), safe='')}"
+        url = f"{base_url}/api/phone/universal_search/{user_id}"
         response = requests.post(url, json=payload, timeout=30)
 
         if response.status_code != 200:

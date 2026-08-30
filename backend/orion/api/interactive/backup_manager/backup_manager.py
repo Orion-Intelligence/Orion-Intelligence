@@ -270,7 +270,15 @@ class BackupManager:
         collections = await database.list_collection_names()
         for collection_name in collections:
             documents = await database[collection_name].find({}).to_list(length=None)
-            (output_dir / f"{collection_name}.json").write_text(json_util.dumps(documents, indent=2), encoding="utf-8")
+            await asyncio.to_thread(self._write_json_dump, output_dir / f"{collection_name}.json", documents)
+
+    @staticmethod
+    def _write_json_dump(path: Path, documents) -> None:
+        path.write_text(json_util.dumps(documents, indent=2), encoding="utf-8")
+
+    @staticmethod
+    def _read_json_dump(path: Path):
+        return json_util.loads(path.read_text(encoding="utf-8"))
 
     def _backup_arango(self, output_dir: Path):
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -300,13 +308,17 @@ class BackupManager:
                 scroll_id = response.get("_scroll_id")
                 hits = response.get("hits", {}).get("hits", [])
                 while hits:
-                    for hit in hits:
-                        file.write(json.dumps(hit, default=str) + "\n")
+                    await asyncio.to_thread(self._write_hits, file, hits)
                     response = await conn.scroll(scroll_id=scroll_id, scroll="2m")
                     scroll_id = response.get("_scroll_id")
                     hits = response.get("hits", {}).get("hits", [])
                 if scroll_id:
                     await conn.clear_scroll(scroll_id=scroll_id)
+
+    @staticmethod
+    def _write_hits(file, hits) -> None:
+        for hit in hits:
+            file.write(json.dumps(hit, default=str) + "\n")
 
     def _copy_folder(self, source: Path, destination: Path):
         destination.mkdir(parents=True, exist_ok=True)
@@ -322,7 +334,7 @@ class BackupManager:
             collection_name = file.stem
             if collection_name == catalog_collection:
                 continue
-            documents = json_util.loads(file.read_text(encoding="utf-8"))
+            documents = await asyncio.to_thread(self._read_json_dump, file)
             await database[collection_name].delete_many({})
             if documents:
                 await database[collection_name].insert_many(documents)
@@ -355,21 +367,26 @@ class BackupManager:
                 await conn.indices.delete(index=index_name)
             await conn.indices.create(index=index_name)
 
-            actions = []
-            with file.open("r", encoding="utf-8") as fh:
-                for line in fh:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    hit = json.loads(line)
-                    actions.append({
-                        "_op_type": "index",
-                        "_index": index_name,
-                        "_id": hit.get("_id"),
-                        "_source": hit.get("_source", {}),
-                    })
+            actions = await asyncio.to_thread(self._read_hits, file, index_name)
             if actions:
                 await es_helpers.async_bulk(conn, actions)
+
+    @staticmethod
+    def _read_hits(path: Path, index_name: str) -> list:
+        actions = []
+        with path.open("r", encoding="utf-8") as handle:
+            for line in handle:
+                line = line.strip()
+                if not line:
+                    continue
+                hit = json.loads(line)
+                actions.append({
+                    "_op_type": "index",
+                    "_index": index_name,
+                    "_id": hit.get("_id"),
+                    "_source": hit.get("_source", {}),
+                })
+        return actions
 
     def _restore_folder(self, source: Path, destination: Path):
         if not source.exists():
