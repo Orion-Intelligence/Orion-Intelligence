@@ -38,6 +38,7 @@ class BackupManager:
         self.backup_root = BASE_DIR / "backups"
         self.maintenance_flag = BASE_DIR / "static" / ".maintenance"
         self._job = {"operation": "", "status": "idle", "progress": 0, "message": "", "filename": ""}
+        self._progress_window = (0, 90)
 
     def job_status(self) -> dict:
         return dict(self._job)
@@ -46,12 +47,14 @@ class BackupManager:
         if self._job.get("status") == "running":
             return False
         self._job = {"operation": operation, "status": "running", "progress": 0, "message": message, "filename": ""}
+        self._progress_window = (0, 90)
         return True
 
     def _set_progress(self, progress: int, message: str) -> None:
-        if self._job.get("status") == "running":
-            self._job["progress"] = progress
-            self._job["message"] = message
+        job = getattr(self, "_job", None)
+        if job and job.get("status") == "running":
+            job["progress"] = progress
+            job["message"] = message
 
     def _end_job(self, status: str, message: str, filename: str = "") -> None:
         self._job = {
@@ -128,7 +131,9 @@ class BackupManager:
             "created_at": backup.created_at,
         }
 
-    async def _perform_backup(self, backup_dir: Path, progress_base: int = 0, progress_span: int = 90):
+    async def _perform_backup(self, backup_dir: Path):
+        progress_base, progress_span = getattr(self, "_progress_window", (0, 90))
+
         def step(done: int, message: str) -> None:
             self._set_progress(progress_base + (progress_span * done // 5), message)
 
@@ -185,7 +190,8 @@ class BackupManager:
         rollback_name = f"rollback_{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}"
         rollback_dir = self.backup_root / rollback_name
         try:
-            await self._perform_backup(rollback_dir, progress_base=5, progress_span=35)
+            self._progress_window = (5, 35)
+            await self._perform_backup(rollback_dir)
             log.g().i(f"RESTORE: rollback point created: {rollback_name}")
         except Exception as exc:
             shutil.rmtree(rollback_dir, ignore_errors=True)

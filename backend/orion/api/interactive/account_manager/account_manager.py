@@ -4,9 +4,11 @@ import json
 import re
 import secrets
 from typing import List
+from urllib.parse import quote
 from pathlib import Path
 from types import SimpleNamespace
 
+import httpx
 from bson import ObjectId
 from cryptography.fernet import Fernet
 from fastapi import HTTPException
@@ -20,6 +22,8 @@ from orion.api.interactive.alert_manager.alert_manager import AlertManager
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
 from orion.helper_manager.helper_controller import helper_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, UserStatus, LicenseName, user_role
+from orion.api.server.sso_manager.constants.sso_constants import SSO_CONSTANTS
+from orion.helper_manager.env_handler import env_handler
 from orion.services.permission_manager.permission_models import UserPermission
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.constants.constant import CONSTANTS
@@ -83,6 +87,26 @@ class AccountManager:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_uuid)))
         if tenant is None or not tenant.is_default:
             raise HTTPException(status_code=403, detail="Orion Mail permission is limited to root tenant users")
+
+    async def _delete_orion_mail_account(self, user):
+        if UserPermission.ORION_MAIL not in (getattr(user, "permissions", None) or []):
+            return
+
+        base_url = str(env_handler.get_instance().env("ORION_MAIL_PUBLIC_URL", "") or "").strip().rstrip("/")
+        if not base_url:
+            raise HTTPException(status_code=500, detail="Orion Mail is not configured")
+
+        try:
+            async with httpx.AsyncClient(timeout=15) as client:
+                response = await client.delete(
+                    f"{base_url}/api/accounts/{quote(str(user.email or ''), safe='')}",
+                    headers={SSO_CONSTANTS.S_CLIENT_AUTH_HEADER: SSO_CONSTANTS.S_CLIENT_CREDENTIAL},
+                )
+        except Exception as exc:
+            raise HTTPException(status_code=500, detail="Orion Mail is not reachable") from exc
+
+        if response.status_code not in (200, 202, 204, 404):
+            raise HTTPException(status_code=500, detail="Orion Mail account could not be removed")
 
     async def create_user(self, data: user_model, current_user):
         from orion.services.mongo_manager.mongo_controller import mongo_controller
@@ -153,6 +177,8 @@ class AccountManager:
                     status_code=401, detail="Maintainer can only delete non-maintainer users from the same tenant")
         else:
             raise HTTPException(status_code=401, detail="You are not allowed to delete users")
+
+        await self._delete_orion_mail_account(user)
 
         await self._engine.remove(db_keys, db_keys.auth_id == str(user.id))
 
