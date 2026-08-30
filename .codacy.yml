@@ -12,6 +12,7 @@ exclude_paths:
   - "run.sh"
   - "**/*.html"
   - "**/*.md"
+  - "*.md"
   - "**/*.sh"
   - "**/*.yml"
   - "**/*.yaml"
