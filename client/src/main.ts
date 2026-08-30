@@ -2,6 +2,7 @@ import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { AppComponent } from './app/pages/app/app.component';
 import { bootstrapIconRegistry, BootstrapIconName } from './app/shared/icons/bootstrap-icon-registry';
+import { getOwnProperty } from './app/shared/utils/type-guards.util';
 
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const AUTH_FRAME_SRC = '/assets/images/shared/auth_dashboard_frame_base.svg';
@@ -52,7 +53,7 @@ const getBootstrapIconName = (element: Element): BootstrapIconName | null => {
     return iconName in bootstrapIconRegistry ? iconName : null;
 };
 const buildBootstrapSvgElement = (iconName: BootstrapIconName): SVGSVGElement => {
-    const icon = bootstrapIconRegistry[iconName];
+    const icon = getOwnProperty(bootstrapIconRegistry, iconName);
     const parser = new DOMParser();
     const parsed = parser.parseFromString(
         `<svg xmlns="http://www.w3.org/2000/svg">${icon.markup}</svg>`,

@@ -562,7 +562,10 @@ export class ShipMapRenderer {
 
     ships.forEach(ship => {
       const shipId = normalizeEntityId(ship.mmsi);
-      if ((activeShip && shipId === activeShipId) || (loadingShip && shipId === loadingShipId)) {
+      if (activeShip && shipId === activeShipId) {
+        return;
+      }
+      if (loadingShip && shipId === loadingShipId) {
         return;
       }
 

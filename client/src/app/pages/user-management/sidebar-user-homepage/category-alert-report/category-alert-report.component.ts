@@ -893,8 +893,10 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   onFileUpload(event: Event) {
-    const fileInput = event.target as HTMLInputElement | null;
-    const file = fileInput?.files?.[0];
+    if (!(event.target instanceof HTMLInputElement)) {
+      return;
+    }
+    const file = event.target.files?.[0];
     if (!file) {
       return;
     }

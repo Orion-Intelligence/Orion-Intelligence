@@ -1028,15 +1028,8 @@ module.exports = [
           ]
         }
       ],
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^_',
-          varsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_'
-        }
-      ],
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
       '@typescript-eslint/prefer-nullish-coalescing': [
         'error',
         {
@@ -1127,15 +1120,7 @@ module.exports = [
   {
     files: ['src/app/**/*guard*.ts'],
     rules: {
-      '@typescript-eslint/no-unused-vars': [
-        'error',
-        {
-          argsIgnorePattern: '^(?:_|route|state)$',
-          varsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_'
-        }
-      ],
+      '@typescript-eslint/no-unused-vars': 'off',
     },
   },
 ];

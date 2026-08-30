@@ -11,8 +11,8 @@ export function normalizeEntityId(value: unknown): string | null {
 }
 
 export function escapeTooltipText(value: string): string {
-  const htmlEntities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' };
-  return value.replace(/[&<>"']/g, character => getOwnProperty(htmlEntities, character) ?? character);
+  const encodedEntities: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', '\'': '&#39;' };
+  return value.replace(/[&<>"']/g, character => getOwnProperty(encodedEntities, character) ?? character);
 }
 
 export function getMarkerBaseSize(map: Pick<LeafletMap, 'getZoom'> | null | undefined, type: TrackingEntityType): number {

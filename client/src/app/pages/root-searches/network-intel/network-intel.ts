@@ -965,7 +965,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       };
     }
 
-    if (this.activeTab === 'geo' && (this.geoIpListResult || this.geoResult || this.geoLiveStats)) {
+    if (this.activeTab === 'geo' && [this.geoIpListResult, this.geoResult, this.geoLiveStats].some(Boolean)) {
       const now = new Date().toISOString();
       if (this.geoIpListResult) {
         return {
