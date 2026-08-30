@@ -26,6 +26,8 @@ import { CrossSearchCardComponent } from '../onion-search-engine/cross-search-ca
 import { ChatWidgetComponent } from '../../../pages/root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
 import { TranslatePipe } from '../../pipes/translate.pipe';
+import { getOwnProperty, setOwnProperty } from '../../utils/type-guards.util';
+
 
 @Component({
   selector: 'app-result',
@@ -200,16 +202,16 @@ export class ResultComponent implements OnInit, OnChanges {
       const newFilters: Record<string, FilterOption> = {};
       if (this.filterModel) {
         Object.keys(this.filterModel.filters).forEach(key => {
-          const base = this.filterModel.filters[key];
-          let value = params[key];
+          const base = getOwnProperty(this.filterModel.filters, key);
+          let value = getOwnProperty(params, key);
           if (key === 'mSearchParamSafeSearch') {
             value = value === 'true' ? 'yes' : value === 'false' ? 'no' : value;
           }
           if (value && base.options.includes(value)) {
-            newFilters[key] = { ...base, selected: value };
+            setOwnProperty(newFilters, key, { ...base, selected: value });
           }
           else {
-            newFilters[key] = { ...base };
+            setOwnProperty(newFilters, key, { ...base });
           }
         });
         this.filterModel = { ...this.filterModel, filters: newFilters };

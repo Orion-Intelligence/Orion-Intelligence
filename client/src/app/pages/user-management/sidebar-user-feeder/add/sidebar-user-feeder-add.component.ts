@@ -8,6 +8,8 @@ import { FeederService } from '../feeder.service';
 import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from '../feeder-rule.utils';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-sidebar-user-feeder-add',
@@ -387,7 +389,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   }
 
   private submitFileUploads(fileInput: HTMLInputElement, index: number, lastUploadedScript: FeederScriptItem | null): void {
-    const file = this.selectedFiles[index];
+    const file = getOwnProperty(this.selectedFiles, index);
     if (!file) {
       this.isSubmitting = false;
       this.resetUploadProgress();

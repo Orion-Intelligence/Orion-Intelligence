@@ -116,7 +116,7 @@ export class AiChatSidebarComponent {
 
   shareChat(chat: AiChatSession, event: Event): void {
     event.stopPropagation();
-    if (this.sharingSessionId || this.isChatBusy(chat)) {
+    if (Boolean(this.sharingSessionId) || this.isChatBusy(chat)) {
       return;
     }
     this.sharingSessionId = chat.sessionId;

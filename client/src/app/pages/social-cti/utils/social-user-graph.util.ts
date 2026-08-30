@@ -8,6 +8,8 @@ import { buildSocialProfileUrl } from './profile-url.util';
 import { postUrlsOf } from './social-profile.util';
 import { bootstrapIconRegistry } from '../../../shared/icons/bootstrap-icon-registry';
 import type { person_view } from './model/social-user-graph.model';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 export type { person_view } from './model/social-user-graph.model';
 
 
@@ -56,7 +58,7 @@ export function handleLabel(handle: string): string {
 
 export function relationVerb(relation: SocialGraphRelation): string {
   const verbs: Record<SocialGraphRelation, string> = { follower: 'follows', following: 'is followed by', friend: 'is a friend of', connection: 'commented on', organization: 'is a member of', contact: 'is a contact of', same_handle: 'shares a handle with', channel: 'is a channel used by', mention: 'appears alongside' };
-  return verbs[relation];
+  return getOwnProperty(verbs, relation);
 }
 
 export function linkLabel(link: SocialGraphLink): string {
@@ -65,8 +67,8 @@ export function linkLabel(link: SocialGraphLink): string {
 
 function relationFor(type: unknown): SocialGraphRelation | null {
   const key = String(type ?? '').toLowerCase();
-  if (RELATION_BY_TYPE[key]) {
-    return RELATION_BY_TYPE[key];
+  if (getOwnProperty(RELATION_BY_TYPE, key)) {
+    return getOwnProperty(RELATION_BY_TYPE, key);
   }
   return categoryFor('', key) === 'people' ? 'contact' : null;
 }
@@ -118,9 +120,9 @@ function darkwebHandles(record: ReturnType<typeof asRecord>): { handle: string; 
       found.push({ handle, name: (textOf(label) || text).replace(/^@+/, '') });
     }
   };
-  const senderKey = DARKWEB_SENDER_KEYS.find(key => textOf(record[key]));
+  const senderKey = DARKWEB_SENDER_KEYS.find(key => textOf(getOwnProperty(record, key)));
   if (senderKey) {
-    push(record[senderKey], record['m_sender_name']);
+    push(getOwnProperty(record, senderKey), record['m_sender_name']);
   }
   push(record['m_forwarded_from']);
   pickList(record, 'm_users').forEach(user => {

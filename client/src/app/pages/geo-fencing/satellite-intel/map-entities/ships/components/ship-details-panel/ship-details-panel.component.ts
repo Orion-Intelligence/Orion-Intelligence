@@ -2,6 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 import { ShipDetailField } from '../../../../model/satellite-intel.model';
+import { getOwnProperty } from '../../../../../../../shared/utils/type-guards.util';
+
 
 
 const PRIMARY_SHIP_DETAIL_KEYS = new Set([
@@ -92,7 +94,7 @@ export class ShipDetailsPanelComponent {
 
   private pick(...keys: string[]): unknown {
     for (const key of keys) {
-      const value = this.ship?.[key];
+      const value = getOwnProperty(this.ship, key);
       if (value !== null && value !== undefined && value !== '') {
         return value;
       }

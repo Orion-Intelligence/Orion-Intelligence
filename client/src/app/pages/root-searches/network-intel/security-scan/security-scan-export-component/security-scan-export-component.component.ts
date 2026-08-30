@@ -4,6 +4,8 @@ import { UrlScanMeta, UrlScanThreatItem } from '../../../../../shared/model/secu
 import { FindingRow } from '../model/finding-row.model';
 import { HelperService } from '../../../../../shared/services/helper.service';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-security-scan-export-component',
@@ -51,7 +53,7 @@ export class SecurityScanExportComponentComponent implements OnChanges {
     for (const cat of cats) {
       const items = cat.items || [];
       for (let i = 0; i < items.length; i++) {
-        const it = items[i];
+        const it = getOwnProperty(items, i);
         rows.push({
           n: i + 1,
           category: cat.name,

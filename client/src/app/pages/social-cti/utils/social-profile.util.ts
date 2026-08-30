@@ -2,6 +2,8 @@ import type { social_profile, social_resource } from '../models/social.models';
 import type { FetchTabKey } from '../enums/social-graph.enums';
 import { CONTENT_DATE_KEYS } from '../constants/social-graph.constants';
 import { isDecimalString } from '../../../shared/utils/network-validation.util';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 export function getPlatformCardId(platformData: social_profile): string {
   return `platform-${platformData.meta.username}|${platformData.meta.platform}|${platformData.meta.username}`;
@@ -28,7 +30,7 @@ export function postUrlsOf(item: social_resource): string[] {
 export function contentTime(item: social_resource): number {
   const record = item as unknown as Record<string, unknown>;
   for (const key of CONTENT_DATE_KEYS) {
-    const raw = record[key];
+    const raw = getOwnProperty(record, key);
     if (raw === undefined || raw === null || raw === '') {
       continue;
     }
@@ -57,10 +59,10 @@ export function mergeResourcesById(previous: social_resource[], incoming: social
       merged.push(item);
       continue;
     }
-    const known = postUrlsOf(merged[index]);
+    const known = postUrlsOf(getOwnProperty(merged, index));
     const added = postUrlsOf(item).filter(url => !known.includes(url));
     if (added.length) {
-      merged[index] = { ...merged[index], parent_urls: [...known, ...added] };
+      setOwnProperty(merged, index, { ...getOwnProperty(merged, index), parent_urls: [...known, ...added] });
     }
   }
   return merged;

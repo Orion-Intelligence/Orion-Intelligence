@@ -145,7 +145,7 @@ export class SatelliteMapEntityDashboardController {
     }
     this.mapEntityFlushTimer = setTimeout(() => {
       this.mapEntityFlushTimer = null;
-      void this.flushQueue();
+      this.flushQueue();
     }, this.mapEntityFlushIntervalMs);
   }
 

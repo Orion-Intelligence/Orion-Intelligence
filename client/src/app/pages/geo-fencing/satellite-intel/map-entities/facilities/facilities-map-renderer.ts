@@ -4,6 +4,8 @@ import { FacilityPopupComponent } from './components/facility-popup/facility-pop
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
 import type * as Leaflet from 'leaflet';
 import type { Nullable } from '../../../../../shared/utils/type-guards.util';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 export class FacilitiesMapRenderer {
   private featureLayer: Nullable<Leaflet.LayerGroup> = null;
@@ -101,7 +103,7 @@ export class FacilitiesMapRenderer {
       military: '#ef4444',
       other: '#64748b',
     };
-    return colors[kind] || '#6b7280';
+    return getOwnProperty(colors, kind) || '#6b7280';
   }
 
   private destroyPopupRefs(refs: Set<ComponentRef<FacilityPopupComponent>>): void {

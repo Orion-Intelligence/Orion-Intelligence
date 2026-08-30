@@ -11,6 +11,8 @@ import { SidebarService } from '../../shared/services/sidebar.service';
 import { DirectoryService } from './services/directory.service';
 import { DirectoryCallbackModel } from './model/directory.model';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
+import { getOwnProperty, setOwnProperty } from '../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-directory',
@@ -48,18 +50,18 @@ export class DirectoryComponent implements OnInit {
       const newFilters: Record<string, FilterOption> = {};
       const initialSelectedFilters: Record<string, string> = {};
       for (const key of Object.keys(baseFilters)) {
-        const base = baseFilters[key];
-        const paramValue = params[key];
+        const base = getOwnProperty(baseFilters, key);
+        const paramValue = getOwnProperty(params, key);
         const match = base.options?.find((opt) => opt.key.toLowerCase() === paramValue?.toLowerCase());
         if (paramValue && match) {
-          newFilters[key] = {
+          setOwnProperty(newFilters, key, {
             ...base,
             selected: match.key
-          };
-          initialSelectedFilters[key] = match.key;
+          });
+          setOwnProperty(initialSelectedFilters, key, match.key);
         }
         else {
-          newFilters[key] = { ...base };
+          setOwnProperty(newFilters, key, { ...base });
         }
       }
       this.filterModel = {
@@ -93,7 +95,7 @@ export class DirectoryComponent implements OnInit {
   resetFilters() {
     this.selectedFilters = {};
     Object.keys(this.filterModel.filters).forEach(key => {
-      const filter = this.filterModel.filters[key];
+      const filter = getOwnProperty(this.filterModel.filters, key);
       if (filter) {
         delete filter.selected;
       }

@@ -169,12 +169,13 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
       void cy.get('[data-testid="dashboard-main"]').should('be.visible');
     }
 
-    void cy.visit('/dashboard/profile/tenant-settings');
-    cy.location('pathname').then((pathname) => {
-      if (!pathname.includes('tenant-settings')) {
-        void cy.visit('/dashboard/profile/tenant-settings');
+    cy.get('body').then(($body) => {
+      if (!$body.find('[data-testid="sidebar-subitem-profile-tenant-settings"]:visible').length) {
+        void cy.get('[data-testid="sidebar-group-profile"]').filter(':visible').first().click();
       }
     });
+    void cy.get('[data-testid="sidebar-subitem-profile-tenant-settings"]', {timeout: 60000}).filter(':visible').first().click();
+    void cy.location('pathname').should('include', '/dashboard/profile/tenant-settings');
     void cy.contains('h1', 'Tenant Data').should('be.visible');
     cy.contains('label', 'Allow Admin Alert Visibility')
       .scrollIntoView()

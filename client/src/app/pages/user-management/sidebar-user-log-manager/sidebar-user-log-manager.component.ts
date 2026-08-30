@@ -11,6 +11,8 @@ import { ConfirmationPopupComponent } from '../../../shared/partials/confirmatio
 import { DatePickerComponent } from '../../../shared/partials/filters/date-picker/date-picker.component';
 import { SystemLogResponse } from './model/system-log.models';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-sidebar-user-log-manager',
@@ -148,7 +150,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
       size /= 1024;
       unit += 1;
     }
-    return `${size.toFixed(unit ? 1 : 0)} ${units[unit]}`;
+    return `${size.toFixed(unit ? 1 : 0)} ${getOwnProperty(units, unit)}`;
   }
 
   private emptyResponse(): SystemLogResponse {

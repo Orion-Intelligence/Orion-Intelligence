@@ -9,6 +9,8 @@ import { MessageNotificationService } from '../../../../../services/message_noti
 import { CaseEditDrawerComponent } from '../case-details/case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../../shared/services/translation.service';
+import { setOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-add-new-case',
@@ -84,7 +86,7 @@ export class AddNewCase {
 
   private validateOther(value: string | undefined | null, otherValue: string | undefined | null, key: string, message: string): void {
     if (value === 'other' && !otherValue?.trim()) {
-      this.validationErrors[key] = message;
+      setOwnProperty(this.validationErrors, key, message);
     }
   }
 

@@ -11,6 +11,8 @@ import { LicenseService } from '../../../../../services/licenses/licenses.servic
 import { TooltipDirective } from '../../../../../shared/directive/tooltip-directive.directive';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../../shared/services/translation.service';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-case-tracking-board',
@@ -105,7 +107,7 @@ export class CaseTrackingBoard implements OnInit {
 
     for (let nextIndex = index + 2; nextIndex < this.workflow.length; nextIndex += 1) {
       const skippedStatuses = this.workflow.slice(index + 1, nextIndex);
-      const target = this.workflow[nextIndex]?.value || null;
+      const target = getOwnProperty(this.workflow, nextIndex)?.value || null;
       if (!target || target === 'closed' || !skippedStatuses.length || !skippedStatuses.every(item => item.skippable)) {
         break;
       }
@@ -114,7 +116,7 @@ export class CaseTrackingBoard implements OnInit {
 
     for (let previousIndex = index - 2; previousIndex >= 0; previousIndex -= 1) {
       const skippedStatuses = this.workflow.slice(previousIndex + 1, index);
-      const target = this.workflow[previousIndex]?.value || null;
+      const target = getOwnProperty(this.workflow, previousIndex)?.value || null;
       if (!target || target === 'new' || !skippedStatuses.length || !skippedStatuses.every(item => item.skippable)) {
         break;
       }

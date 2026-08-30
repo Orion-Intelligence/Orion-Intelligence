@@ -4,6 +4,8 @@ import { CASE_STATUS_OPTIONS, CASE_TYPE_OPTIONS, INTAKE_SOURCE_OPTIONS, PRIORITY
 import { Case, CaseChartItem, CaseStatus, CaseType, IntakeSource, Priority, Severity } from '../case.model';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../../shared/services/translation.service';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-case-analytics-panel',
@@ -188,7 +190,7 @@ export class CaseAnalyticsPanel {
     return {
       key: value,
       label,
-      count: this.filteredCases.filter(caseItem => caseItem[field] === value).length
+      count: this.filteredCases.filter(caseItem => getOwnProperty(caseItem, field) === value).length
     };
   }
 

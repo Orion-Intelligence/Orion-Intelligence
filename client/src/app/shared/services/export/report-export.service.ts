@@ -3,6 +3,8 @@ import { ExportSharedService } from './export-shared.service';
 import { GraphExportService } from './graph-export.service';
 import { DocumentExportService } from './document-export.service';
 import { GraphReportExportType, GraphReportPayload, UnifiedReportPayloadInput } from '../../model/report/report-export.model';
+import { getOwnProperty } from '../../utils/type-guards.util';
+
 
 @Injectable({ providedIn: 'root' })
 export class ReportExportService extends ExportSharedService {
@@ -131,7 +133,7 @@ export class ReportExportService extends ExportSharedService {
   private buildMetadataValues(source: Record<string, string>): Record<string, string> {
     const pick = (...keys: string[]): string => {
       for (const key of keys) {
-        const value = this.cleanText(source[key] || '');
+        const value = this.cleanText(getOwnProperty(source, key) || '');
         if (value) {
           return value;
         }
@@ -163,7 +165,7 @@ export class ReportExportService extends ExportSharedService {
     const relatedKeys = Object.keys(source).filter(k => /related|mapping|edge|graph/i.test(k));
     const joined = relatedKeys
       .slice(0, 12)
-      .map(k => `${this.toTitle(k)}: ${this.cleanText(source[k]).slice(0, 180)}`)
+      .map(k => `${this.toTitle(k)}: ${this.cleanText(getOwnProperty(source, k)).slice(0, 180)}`)
       .join(' | ');
     return {
       Description: 'Reports linked directly or indirectly through mapped entities.',

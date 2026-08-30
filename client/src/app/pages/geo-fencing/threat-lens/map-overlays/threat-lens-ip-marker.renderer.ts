@@ -1,5 +1,7 @@
 import { ThreatLensGeoUtils } from '../map-utils/threat-lens-geo.utils';
 import { EsriGeometry, EsriGraphicsLayer, EsriSceneView, EsriSymbol, ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensIpDistributionCell, ThreatLensIpDistributionCellRef, ThreatLensIpGroupStats, ThreatLensIpPointGroup, ThreatLensIpRecord, ThreatLensIpScreenGroup, ThreatLensMapGraphic, ThreatLensScreenPoint } from '../models/threat-lens-map.types';
+import { getOwnProperty, setOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 export class ThreatLensIpMarkerRenderer {
   private markerGraphics: ThreatLensMapGraphic[] = [];
@@ -452,7 +454,7 @@ export class ThreatLensIpMarkerRenderer {
     while (selected.length < limit) {
       let addedThisRound = false;
       for (const cell of orderedCells) {
-        const marker = cell.items[round];
+        const marker = getOwnProperty(cell.items, round);
         if (!marker) {
           continue;
         }
@@ -619,7 +621,7 @@ export class ThreatLensIpMarkerRenderer {
       .sort((left, right) => this.compareCenterBiasedCells(left, right));
 
     for (let index = 0; index < swapCount; index += 1) {
-      const candidate = candidates[index];
+      const candidate = getOwnProperty(candidates, index);
       if (!candidate) {
         break;
       }
@@ -637,7 +639,7 @@ export class ThreatLensIpMarkerRenderer {
         continue;
       }
 
-      selected[weakestIndex] = candidate;
+      setOwnProperty(selected, weakestIndex, candidate);
     }
 
     return selected.sort((left, right) => this.compareCenterBiasedCells(left, right));

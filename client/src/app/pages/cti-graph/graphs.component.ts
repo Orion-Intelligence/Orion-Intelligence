@@ -24,6 +24,8 @@ import { GraphAdvancedBuilderPopupComponent } from './advanced-builder-popup/adv
 import { GraphAdvancedFilterChipModel, GraphAdvancedFilterModel, GraphBuilderLogicalOperator, GraphSearchMode, GraphSearchOptionModel, GraphSearchRequestModel } from './model/graph-builder.model';
 import { TranslationService } from '../../shared/services/translation.service';
 import type { NetworkPointerParams } from './model/graphs.model';
+import { getOwnProperty, setOwnProperty } from '../../shared/utils/type-guards.util';
+
 export type { NetworkPointerParams } from './model/graphs.model';
 
 
@@ -1162,7 +1164,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private createGroupNodeSvg(count: number, isExpanded = false, clusterLabel = 'CTI Cluster', clusterKey = ''): string {
-    const paletteColor = this.clusterPalette[clusterKey]?.color ?? '#7dd3fc';
+    const paletteColor = getOwnProperty(this.clusterPalette, clusterKey)?.color ?? '#7dd3fc';
     const borderColor = isExpanded ? '#facc15' : paletteColor;
     const subtitle = clusterLabel.replace(/&/g, '&amp;').slice(0, 20);
     const initials = subtitle
@@ -1193,7 +1195,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const clusterKey = this.getClusterKeyFromNodeId(nodeId);
     const clusterLabel = groupNode?.title
       ? String(groupNode.title).split('(')[0].trim()
-      : `${this.clusterPalette[clusterKey]?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
+      : `${getOwnProperty(this.clusterPalette, clusterKey)?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
     this.nodeSet.update({
       id: nodeId,
       shape: 'circularImage',
@@ -1256,7 +1258,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     }
     const uniqueSubNodes = Array.from(new Set(subNodes));
     const sourceId = this.groupParentByGroupId.get(nodeId) ?? nodeId;
-    const centerPos = this.network.getPositions([nodeId])[nodeId] ?? { x: 0, y: 0 };
+    const centerPos = getOwnProperty(this.network.getPositions([nodeId]), nodeId) ?? { x: 0, y: 0 };
     const existingEdgeIds = new Set(this.edgeSet.getIds().map(id => String(id)));
     const uniqueEdgesById = new Map<string, Edge>();
     this.rawEdges.forEach(e => {
@@ -1419,7 +1421,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       return false;
     }
     const nodeId = String(node.id);
-    const nodeType = String(node.nodeType ?? this.nodeTypeById[nodeId] ?? '').toLowerCase();
+    const nodeType = String(node.nodeType ?? getOwnProperty(this.nodeTypeById, nodeId) ?? '').toLowerCase();
     const nodeClass = String(node.nodeClass ?? '').toLowerCase();
     return nodeType === 'document' || nodeType === 'report' || nodeClass === 'report';
   }
@@ -1483,12 +1485,12 @@ export class GraphComponent implements OnInit, OnDestroy {
       telegram: 'chat',
       chats: 'chat'
     };
-    return aliases[normalized] || normalized;
+    return getOwnProperty(aliases, normalized) || normalized;
   }
 
   private getReportCategory(nodeId: string): string {
     const nodeClusterId = this.normalizeReportCategory(String(this.contextMenuNode?.clusterId ?? ''));
-    if (nodeClusterId && this.clusterPalette[nodeClusterId]) {
+    if (nodeClusterId && getOwnProperty(this.clusterPalette, nodeClusterId)) {
       return nodeClusterId;
     }
 
@@ -1948,7 +1950,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private getNodeAccentColor(node: ExtendedNode, type: string): string {
     if (type === 'cluster') {
       const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
-      return this.clusterPalette[clusterKey]?.color ?? this.nodeClusterBorder;
+      return getOwnProperty(this.clusterPalette, clusterKey)?.color ?? this.nodeClusterBorder;
     }
     if (type === 'document') {
       if (this.isFocusedDocumentNode(node)) {
@@ -1957,7 +1959,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       return this.nodeDocumentBorder;
     }
     const classKey = String(node.nodeClass ?? '').toLowerCase();
-    return this.propertyClassPalette[classKey] ?? this.nodePropertyBorder;
+    return getOwnProperty(this.propertyClassPalette, classKey) ?? this.nodePropertyBorder;
   }
 
   private getNodeSize(type: string, degree: number): number {
@@ -2014,7 +2016,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   private getNodeAcronym(node: ExtendedNode): string {
     const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
     if (clusterKey) {
-      const label = this.clusterPalette[clusterKey]?.label ?? clusterKey;
+      const label = getOwnProperty(this.clusterPalette, clusterKey)?.label ?? clusterKey;
       return label
         .split(/\s+/)
         .map(part => part.charAt(0))
@@ -2035,7 +2037,7 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private buildIconSvg(iconName: string, borderColor: string, node?: ExtendedNode): string | null {
-    const def = BOOTSTRAP_ICON_PATHS[iconName];
+    const def = getOwnProperty(BOOTSTRAP_ICON_PATHS, iconName);
     const iconContent = def
       ? `<g transform="translate(4 4) scale(0.5)">${def.paths.map(d => `<path d="${d}" fill="#f8fafc"/>`).join('')}</g>`
       : `<text x="8" y="9" dominant-baseline="middle" font-family="'Inter', sans-serif" text-anchor="middle" font-size="5.3" font-weight="800" fill="#f8fafc">${this.escapeHtml(node ? this.getNodeAcronym(node) : '?')}</text>`;
@@ -2114,21 +2116,21 @@ export class GraphComponent implements OnInit, OnDestroy {
     const nodes: ExtendedNode[] = [];
     rawNodeMap.forEach(node => {
       const nodeId = node.id as string;
-      const nodeType = nodeTypeMap[nodeId] || '';
+      const nodeType = getOwnProperty(nodeTypeMap, nodeId) || '';
       const isClusterNode = nodeType === 'cluster';
       const isClusterRootNode = this.isClusterRootNode(nodeId);
       const clusterKey = this.getClusterKeyFromNodeId(nodeId);
       const clusterDocumentIds = isClusterRootNode ? this.getClusterDocumentIds(nodeId) : [];
       node.nodeType = nodeType;
       node.propertyKey ??= this.extractPropertyKeyFromLabel(node.label?.toString());
-      let degree = edgeMap[nodeId] || 0;
+      let degree = getOwnProperty(edgeMap, nodeId) || 0;
       if (this.expandEnabled) {
         degree = 0;
       }
       const isGroupable = degree > 2 && isClusterRootNode && clusterDocumentIds.length > 5;
       if (isGroupable) {
         const subNodes = this.getClusterCollapseTargets(nodeId);
-        const clusterLabel = `${this.clusterPalette[clusterKey]?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
+        const clusterLabel = `${getOwnProperty(this.clusterPalette, clusterKey)?.label ?? this.toTitleCase(String(nodeId).split('/').pop() ?? 'CTI')} Cluster`;
         this.groupInfo.set(nodeId, subNodes);
         this.groupParentByGroupId.set(nodeId, nodeId);
         nodes.push({
@@ -2292,16 +2294,16 @@ export class GraphComponent implements OnInit, OnDestroy {
 
     visibleNodes.forEach(node => {
       const category = this.getVisualNodeCategory(node);
-      counts[category] = (counts[category] ?? 0) + 1;
+      setOwnProperty(counts, category, (getOwnProperty(counts, category) ?? 0) + 1);
       if (category === 'cluster') {
         const clusterKey = this.getClusterKeyFromNodeId(String(node.id ?? ''));
         if (clusterKey) {
-          clusterCounts[clusterKey] = (clusterCounts[clusterKey] ?? 0) + 1;
+          setOwnProperty(clusterCounts, clusterKey, (getOwnProperty(clusterCounts, clusterKey) ?? 0) + 1);
         }
         return;
       }
       this.getConnectedClusterKeys(String(node.id ?? '')).forEach(clusterKey => {
-        clusterCounts[clusterKey] = (clusterCounts[clusterKey] ?? 0) + 1;
+        setOwnProperty(clusterCounts, clusterKey, (getOwnProperty(clusterCounts, clusterKey) ?? 0) + 1);
       });
     });
 
@@ -2317,7 +2319,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         label: value.label,
         color: value.color,
         swatchClass: value.swatchClass,
-        count: clusterCounts[key] ?? 0
+        count: getOwnProperty(clusterCounts, key) ?? 0
       }))
       .filter(item => item.count > 0);
 

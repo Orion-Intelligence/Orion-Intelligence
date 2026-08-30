@@ -19,6 +19,8 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitleUtil, getStatusText as getStatusTextUtil, isHiddenReportMetadataKey, isWithinDays as isWithinDaysUtil, normalizeDisplayUrl as normalizeDisplayUrlUtil } from '../../../../shared/utils/intel-report.util';
 import { ChatWidgetComponent } from '../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import type { GeneralReportItem } from './model/report.model';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 export type { GeneralReportItem } from './model/report.model';
 
 
@@ -63,7 +65,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
       if (key === 'm_code_snippet' && this.resultItem && 'm_code_snippet' in this.resultItem) {
         return false;
       }
-      const val = (this.resultItem)?.[key];
+      const val = getOwnProperty((this.resultItem), key);
       return val != null && (!Array.isArray(val) || val.length > 0);
     });
   }
@@ -127,7 +129,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
         this.arrayKeys.push('m_content');
       }
       Object.keys(resultItem).forEach((key) => {
-        const value = resultItem[key];
+        const value = getOwnProperty(resultItem, key);
         if (key !== 'm_section' && this.shouldShowMetadataKey(key, value)) {
           this.arrayKeys.push(key);
         }
@@ -149,7 +151,7 @@ export class ReportComponent implements OnInit, AfterViewInit {
   }
 
   private getMetadataListItems(key: string): string[] {
-    const value = this.resultItem?.[key];
+    const value = getOwnProperty(this.resultItem, key);
     if (Array.isArray(value)) {
       return value.map(item => String(item));
     }

@@ -6,6 +6,8 @@ import { ApiService } from '../../../shared/services/api.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { normalizeCountryLabel, splitCountryValues, toCountryKey } from '../../../shared/utils/country-normalization.util';
 import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDocument, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
 
@@ -50,8 +52,8 @@ export class ThreatLensService {
     const cleanedParams: Record<string, unknown> = {};
 
     for (const key of Object.keys(params)) {
-      const value = params[key];
-      const defaultValue = defaultParams[key];
+      const value = getOwnProperty(params, key);
+      const defaultValue = getOwnProperty(defaultParams, key);
       const isNullOrUndefined = value === null || value === undefined;
       const isEmptyString = typeof value === 'string' && value.trim() === '';
       const isEmptyArray = Array.isArray(value) && value.length === 0;
@@ -59,7 +61,7 @@ export class ThreatLensService {
       const isAllOption = value === 'all';
 
       if ((!isNullOrUndefined && !isEmptyString && !isEmptyArray && !isSameAsDefault && !isAllOption) || key === 'q' || key === 'page') {
-        cleanedParams[key] = value;
+        setOwnProperty(cleanedParams, key, value);
       }
     }
 
@@ -230,7 +232,7 @@ export class ThreatLensService {
     const countries: string[] = [];
 
     for (const fieldName of COUNTRY_FIELDS) {
-      const value = document?.[fieldName];
+      const value = getOwnProperty(document, fieldName);
       if (Array.isArray(value)) {
         for (const item of value) {
           countries.push(...this.splitCountryString(item));

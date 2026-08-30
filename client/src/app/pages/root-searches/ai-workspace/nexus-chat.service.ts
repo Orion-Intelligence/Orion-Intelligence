@@ -120,12 +120,12 @@ export class NexusChatService {
 
       readAttempt(this.maxResumeAttempts).then(() => {
         observer.complete();
-      }).catch((error) => {
+      }).catch((error: unknown) => {
         if (timedOut) {
           observer.error(new Error('Nexus chat timed out.'));
           return;
         }
-        if (cancelled || error?.name === 'AbortError') {
+        if (cancelled || (error instanceof Error && error.name === 'AbortError')) {
           observer.complete();
           return;
         }

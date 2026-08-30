@@ -1,4 +1,6 @@
 import { Case, CaseAnalyst, CaseEntity } from '../case.model';
+import { setOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 export type CaseDateField = 'dueAt' | 'capturedAt';
 
@@ -75,7 +77,7 @@ export function getCaseDateInputValue(date?: Date | string | null): string {
 }
 
 export function setCaseDateInputValue(target: CaseDateTarget, field: CaseDateField, value: string): void {
-  target[field] = value || null;
+  setOwnProperty(target, field, value || null);
 }
 
 export function getCaseAnalystLabel(analysts: CaseAnalyst[], userId?: string): string {

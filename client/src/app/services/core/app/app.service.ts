@@ -16,6 +16,8 @@ import { firstValueFrom } from 'rxjs';
 import { DemoTourConfig } from '../../../shared/model/demo-tour/demo.tour.model';
 import { LicenseRule } from '../../../shared/model/licenses/license.rules';
 import type { EntityOption } from './model/app.model';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 export type { EntityOption } from './model/app.model';
 
 
@@ -210,7 +212,7 @@ export class AppService {
     this.entities.set(visibleEntities);
     for (const e of visibleEntities) {
       const key = e.key.replace(/[A-Z]/g, (c: string) => `_${c.toLowerCase()}`);
-      search_filter_labels[key] = e.title;
+      setOwnProperty(search_filter_labels, key, e.title);
     }
   }
 
@@ -222,7 +224,7 @@ export class AppService {
   private initializeLicenseRules(): void {
     const bundledRules = licenseRulesData as Record<string, LicenseRule>;
     for (const key in bundledRules) {
-      license_rules[key] = bundledRules[key];
+      setOwnProperty(license_rules, key, getOwnProperty(bundledRules, key));
     }
   }
 

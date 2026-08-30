@@ -16,7 +16,7 @@ import { PasswordSchemaFilter } from '../../shared/model/stealerlogs-filter/stea
 import { ReportFeedbackModel } from '../../shared/partials/report-interactions/models/report-feedback.model';
 import { ApiService } from '../../shared/services/api.service';
 import { HelperService } from '../../shared/services/helper.service';
-import { asUnknownRecord, UnknownRecord } from '../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty, setOwnProperty, UnknownRecord } from '../../shared/utils/type-guards.util';
 import { AppService } from '../core/app/app.service';
 import type { RankedApiResponse } from './model/dashboard.model';
 export type { RankedApiResponse } from './model/dashboard.model';
@@ -187,7 +187,7 @@ export class DashboardService {
       untrust: 'untrust_count',
     } as const;
     const previousState = new ReportFeedbackModel(feedbackModel);
-    setLoadingKey?.(loadingMap[action]);
+    setLoadingKey?.(getOwnProperty(loadingMap, action));
     this.apiService.post<ReportFeedbackModel>(`feedback/${action}/${docId}`, {}).subscribe({
       next: (response) => {
         this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
@@ -265,7 +265,7 @@ export class DashboardService {
     const selected: Record<string, string | null> = {};
     params.forEach((value, key) => {
       if (allowedKeys.includes(key)) {
-        selected[key] = value === 'all' || value === '' ? null : value;
+        setOwnProperty(selected, key, value === 'all' || value === '' ? null : value);
       }
     });
     this.selectedFilters.set(selected);

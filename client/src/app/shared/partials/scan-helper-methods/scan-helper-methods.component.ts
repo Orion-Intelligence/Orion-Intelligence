@@ -97,7 +97,7 @@ export class ScanHelperMethods implements OnDestroy {
           this.errorMessage = dnsRecord?.message ?? res?.error ?? 'Resolution failed';
           this.statusMessage = 'Failed';
         }
-        else if (dnsRecord?.ip || dnsRecord?.hostname || dnsRecord?.domains?.length) {
+        else if (dnsRecord != null && (Boolean(dnsRecord.ip) || Boolean(dnsRecord.hostname) || Boolean(dnsRecord.domains?.length))) {
           const domains = Array.isArray(dnsRecord.domains) ? dnsRecord.domains : [];
           this.dnsRecords = [{
             ip: dnsRecord.ip ?? this.domain.trim(),

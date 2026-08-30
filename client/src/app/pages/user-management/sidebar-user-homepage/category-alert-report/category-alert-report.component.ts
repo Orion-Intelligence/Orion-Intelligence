@@ -24,7 +24,7 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { HelperService } from '../../../../shared/services/helper.service';
 import { SidebarService } from '../../../../shared/services/sidebar.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
-import { isUnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { getOwnProperty, isUnknownRecord } from '../../../../shared/utils/type-guards.util';
 import { AddCustomAlertComponent } from "../add-custom-alert/add-custom-alert.component";
 import { CategoryAlertDetailDrawerComponent } from './alert-detail-drawer/category-alert-detail-drawer.component';
 import type { AlertPageResponse, StixBundle, StixReportObject } from './model/category-alert-report.model';
@@ -142,7 +142,7 @@ export class CategoryAlertReportComponent implements OnInit {
         return;
       }
 
-      this.visibleFilteredAlerts = [...this.visibleFilteredAlerts, items[index]];
+      this.visibleFilteredAlerts = [...this.visibleFilteredAlerts, getOwnProperty(items, index)];
       index += 1;
       this.appendTimer = setTimeout(appendNext, this.incrementalDelayMs);
     };
@@ -183,7 +183,7 @@ export class CategoryAlertReportComponent implements OnInit {
         this.refreshAlertFilterOptions();
         this.isInitialLoading = false;
 
-        if (this.activeDateRange || this.searchText.trim()) {
+        if (Boolean(this.activeDateRange) || Boolean(this.searchText.trim())) {
           this.applyCurrentFilters();
           this.isLoadingMoreAlerts = false;
           return;
@@ -893,8 +893,8 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   onFileUpload(event: Event) {
-    const input = event.target as HTMLInputElement | null;
-    const file = input?.files?.[0];
+    const fileInput = event.target as HTMLInputElement | null;
+    const file = fileInput?.files?.[0];
     if (!file) {
       return;
     }
@@ -952,7 +952,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
     const requiredReportFields = ['id', 'name', 'created', 'modified'];
     for (const field of requiredReportFields) {
-      if (!report[field]) {
+      if (!getOwnProperty(report, field)) {
         throw new Error(`Report missing required field: ${field}`);
       }
     }

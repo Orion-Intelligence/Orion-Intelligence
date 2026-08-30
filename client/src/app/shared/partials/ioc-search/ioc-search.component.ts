@@ -14,6 +14,8 @@ import { TranslatePipe } from '../../pipes/translate.pipe';
 import { AiToolRoutingService } from '../../services/ai-tool-routing.service';
 import { DOMAIN_NAME_PATTERN, EMAIL_ADDRESS_PATTERN, IPV4_ADDRESS_PATTERN } from '../../utils/network-validation.util';
 import type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './model/ioc-search.model';
+import { getOwnProperty } from '../../utils/type-guards.util';
+
 export type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './model/ioc-search.model';
 
 
@@ -255,7 +257,7 @@ export class IocSearchComponent implements OnInit {
     if (/\s+/.test(value) && !/&&|\|\|/.test(value)) {
       return false;
     }
-    const validator = this.tagValidators()[tag];
+    const validator = getOwnProperty(this.tagValidators(), tag);
     if (!validator) {
       return true;
     }
@@ -281,13 +283,13 @@ export class IocSearchComponent implements OnInit {
     const operators = normalized.match(/(\|\||&&)/g) ?? [];
     const result: string[] = [];
     for (let i = 0; i < parts.length; i++) {
-      const part = parts[i].trim();
+      const part = getOwnProperty(parts, i).trim();
       if (!part || part === '&&' || part === '||') {
         continue;
       }
       result.push(`${tag}:${part}`);
-      if (operators[i]) {
-        result.push(operators[i]);
+      if (getOwnProperty(operators, i)) {
+        result.push(getOwnProperty(operators, i));
       }
     }
     return result.join(' ');

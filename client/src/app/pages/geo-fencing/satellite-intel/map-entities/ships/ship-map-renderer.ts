@@ -7,7 +7,7 @@ import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-mark
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
-import { asUnknownRecord, Augmented, isFiniteNumber, Nullable } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, Augmented, getOwnProperty, isFiniteNumber, Nullable } from '../../../../../shared/utils/type-guards.util';
 import { ShipDistributionCell } from '../../model/satellite-intel.model';
 
 type ShipMarker = Augmented<Leaflet.Marker, {
@@ -135,7 +135,7 @@ export class ShipMapRenderer {
     const chunkSize = 160;
     const endIndex = Math.min(startIndex + chunkSize, ships.length);
     for (let index = startIndex; index < endIndex; index += 1) {
-      this.upsertMarker(ships[index]);
+      this.upsertMarker(getOwnProperty(ships, index));
     }
 
     if (endIndex < ships.length) {
@@ -618,7 +618,7 @@ export class ShipMapRenderer {
     while (selected.length < limit) {
       let addedThisRound = false;
       for (const cell of orderedCells) {
-        const ship = cell.items[round];
+        const ship = getOwnProperty(cell.items, round);
         if (!ship) {
           continue;
         }

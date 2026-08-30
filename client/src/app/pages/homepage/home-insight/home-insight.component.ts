@@ -7,7 +7,7 @@ import { LatestDocument, LatestDocumentCallbackModel } from '../model/document_i
 import { LicenseService } from '../../../services/licenses/licenses.service';
 import { InsightCacheService } from '../services/insight-cache.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty } from '../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-home-insight',
@@ -60,8 +60,8 @@ export class HomeInsightComponent implements OnInit {
       ...latestDocuments,
     };
     this.latestDocumentModelKeys = Object.keys(this.latestDocuments).filter(key => ['leak_model', 'chat_model', 'defacement_model'].includes(key) &&
-            this.latestDocuments[key] &&
-            this.latestDocuments[key].length > 0);
+            getOwnProperty(this.latestDocuments, key) &&
+            getOwnProperty(this.latestDocuments, key).length > 0);
     this.isLoading = false;
   }
 
@@ -71,7 +71,7 @@ export class HomeInsightComponent implements OnInit {
 
   getStatIcon(key: string, metric?: InsightMetric): string {
     const labelKey = (metric?.key ?? '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
-    return this.statIconAliases[labelKey] ?? key;
+    return getOwnProperty(this.statIconAliases, labelKey) ?? key;
   }
 
   formatModelKey(key: string): string {

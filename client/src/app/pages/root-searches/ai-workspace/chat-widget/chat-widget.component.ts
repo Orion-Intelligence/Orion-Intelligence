@@ -370,7 +370,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private cancelActiveNexusRequest(): void {
-    if (this.activeChatRequest || this.isBotTyping) {
+    if (Boolean(this.activeChatRequest) || this.isBotTyping) {
       this.nexusChatService.cancelNexusChat();
     }
     this.activeChatRequest?.unsubscribe();

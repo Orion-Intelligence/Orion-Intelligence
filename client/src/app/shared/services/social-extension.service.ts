@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { EXTENSION_DOWNLOAD_URLS, EXTENSION_LATEST_TTL_MS } from '../constants/extension';
 import { ExtensionPresence, ExtensionState } from '../model/extension/extension.model';
+import { getOwnProperty } from '../utils/type-guards.util';
+
 
 @Injectable({ providedIn: 'root' })
 export class SocialExtensionService {
@@ -149,7 +151,7 @@ export class SocialExtensionService {
   }
 
   downloadUrl(browser: 'chrome' | 'firefox' = this.browserKind()): string {
-    return EXTENSION_DOWNLOAD_URLS[browser];
+    return getOwnProperty(EXTENSION_DOWNLOAD_URLS, browser);
   }
 
   private outdated(installed: string): boolean {
@@ -160,7 +162,7 @@ export class SocialExtensionService {
     const current = installed.split('.').map(part => Number.parseInt(part, 10) || 0);
     const target = this.latest.split('.').map(part => Number.parseInt(part, 10) || 0);
     for (let i = 0; i < Math.max(current.length, target.length); i += 1) {
-      const diff = (current[i] ?? 0) - (target[i] ?? 0);
+      const diff = (getOwnProperty(current, i) ?? 0) - (getOwnProperty(target, i) ?? 0);
       if (diff !== 0) {
         return diff < 0;
       }

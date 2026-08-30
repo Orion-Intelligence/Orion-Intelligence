@@ -14,7 +14,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { ExportBrandingService } from '../../../shared/services/export/export-branding.service';
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { TranslationService } from '../../../shared/services/translation.service';
-import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty } from '../../../shared/utils/type-guards.util';
 import { APK_SCAN_ENDPOINT, IOC_EXTRACT_ENDPOINT, MAX_FILE_SIZE_APK } from './file-scanner.constants';
 import type { FileScanResponse } from './model/file-scanner.model';
 import { ScannerResultItem } from './model/file-scanner.model';
@@ -321,7 +321,7 @@ export class FileScannerComponent {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const index = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
-    return `${Math.round((bytes / Math.pow(k, index)) * 100) / 100} ${sizes[index]}`;
+    return `${Math.round((bytes / Math.pow(k, index)) * 100) / 100} ${getOwnProperty(sizes, index)}`;
   }
 
   isLastSectionRow(section: ScannerResultSection, index: number): boolean {

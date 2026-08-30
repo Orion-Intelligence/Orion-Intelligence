@@ -1,6 +1,8 @@
 import entitiesData from '../../../assets/data/entities_data/entities.json';
 import { IocCategory } from '../model/tenant/tenant.model';
 import type { EntityDefinition, ParsedIocCsv } from './model/ioc-csv.model';
+import { getOwnProperty, setOwnProperty } from './type-guards.util';
+
 export type { EntityDefinition, ParsedIocCsv } from './model/ioc-csv.model';
 
 
@@ -63,9 +65,9 @@ export function parseIocCsv(content: string): ParsedIocCsv {
       throw new Error(`Row ${rowNumber} uses an invalid IOC key: ${key}.`);
     }
 
-    valuesByKey[key] ??= [];
-    if (!valuesByKey[key].includes(value)) {
-      valuesByKey[key].push(value);
+    setOwnProperty(valuesByKey, key, getOwnProperty(valuesByKey, key) ?? []);
+    if (!getOwnProperty(valuesByKey, key).includes(value)) {
+      getOwnProperty(valuesByKey, key).push(value);
       valueCount++;
     }
   });
@@ -135,7 +137,7 @@ function parseCsvRows(content: string): string[][] {
   let inQuotes = false;
 
   for (let index = 0; index < normalizedContent.length; index++) {
-    const char = normalizedContent[index];
+    const char = getOwnProperty(normalizedContent, index);
     const nextChar = normalizedContent[index + 1];
 
     if (inQuotes) {

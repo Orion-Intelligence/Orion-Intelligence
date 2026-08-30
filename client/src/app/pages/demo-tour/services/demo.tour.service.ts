@@ -5,6 +5,8 @@ import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
 import { userMetaData } from '../../../shared/model/company-profile/node.model';
 import { AppService } from '../../../services/core/app/app.service';
 import { ApiService } from '../../../shared/services/api.service';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 @Injectable({ providedIn: 'root' })
 export class DemoTourService {
@@ -85,7 +87,7 @@ export class DemoTourService {
   }
 
   getStep(index: number): TourStep | null {
-    return this.steps[index] || null;
+    return getOwnProperty(this.steps, index) || null;
   }
 
   getTotalSteps(): number {
@@ -107,12 +109,12 @@ export class DemoTourService {
   private getTourStepsForCurrentLicense(): TourStep[] {
     const config = this.appService.demoTourConfig();
     const licenses = (this.appService.userSessionData().user.license ?? []).map(license => license.toLowerCase());
-    const selectedLicense = this.tourLicensePriority.find(license => licenses.includes(license) && config[license]?.length) ??
-      licenses.find(license => config[license]?.length);
-    const licenseSteps = selectedLicense ? config[selectedLicense] : config['default'] ?? [];
+    const selectedLicense = this.tourLicensePriority.find(license => licenses.includes(license) && getOwnProperty(config, license)?.length) ??
+      licenses.find(license => getOwnProperty(config, license)?.length);
+    const licenseSteps = selectedLicense ? getOwnProperty(config, selectedLicense) : config['default'] ?? [];
     const auxiliarySteps = ['feeder', 'maintainer']
       .filter(license => license !== selectedLicense && licenses.includes(license))
-      .flatMap(license => config[license] ?? []);
+      .flatMap(license => getOwnProperty(config, license) ?? []);
 
     const sharedSteps = config['shared'] ?? [];
     const documentationSteps = this.appService.getConfig().appSettings.home_header_pricing_allowed

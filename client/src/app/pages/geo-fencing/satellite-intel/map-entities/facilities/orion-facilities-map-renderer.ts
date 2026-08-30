@@ -7,6 +7,8 @@ import { OrionFacilityPopupComponent } from './components/orion-facility-popup/o
 import type * as Leaflet from 'leaflet';
 import { OrionFacilitiesMapRendererConfig } from '../../model/satellite-intel.model';
 import type { Augmented, Nullable, Nullish } from '../../../../../shared/utils/type-guards.util';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 type OrionFacilityMarker = Augmented<Leaflet.Marker, {
   __orionFacilityIconRef: Nullable<ComponentRef<OrionFacilityMarkerIconComponent>>;
@@ -257,7 +259,7 @@ export class OrionFacilitiesMapRenderer {
     while (limitedFeatures.length < remainingLimit) {
       let addedThisRound = false;
       for (const bucket of sortedBuckets) {
-        const entry = bucket[round];
+        const entry = getOwnProperty(bucket, round);
         if (!entry) {
           continue;
         }

@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { siAboutdotme, siArtstation, siBehance, siBitbucket, siCrowdin, siDeviantart, siDiscord, siDocker, siDribbble, siEnvato, siFacebook, siFlickr, siFoursquare, siGithub, siGitlab, siGravatar, siInstagram, siLastdotfm, siMedium, siNodedotjs, siPatreon, siPinterest, siReddit, siReplit, siSnapchat, siSoundcloud, siSpotify, siSteam, siTelegram, siTiktok, siTumblr, siTwitch, siVimeo, siVk, siWordpress, siX, siYoutube, siDevdotto } from 'simple-icons';
 import type { IconOptions } from './model/icon.model';
+import { getOwnProperty } from '../../../utils/type-guards.util';
+
 export type { IconOptions } from './model/icon.model';
 
 const iconMap: Record<string, string> = {
@@ -154,7 +156,7 @@ export class IconService {
     if (!normalizedSlug) {
       return null;
     }
-    return simpleIconPathMap[normalizedSlug] ?? null;
+    return getOwnProperty(simpleIconPathMap, normalizedSlug) ?? null;
   }
 
   private buildIconSvg(pathData: string, options: IconOptions): string {
@@ -179,7 +181,7 @@ export class IconService {
       return Promise.resolve(cachedIcon);
     }
     const lowerCasePlatform = safePlatform.toLowerCase();
-    const slug = iconMap[lowerCasePlatform] || lowerCasePlatform.replace(/[\s.]+/g, '');
+    const slug = getOwnProperty(iconMap, lowerCasePlatform) || lowerCasePlatform.replace(/[\s.]+/g, '');
     const pathData = this.getSimpleIconPath(slug);
     const svgText = pathData
       ? this.buildIconSvg(pathData, options)
@@ -191,9 +193,9 @@ export class IconService {
 
   getPlatformBrandColor(platformName: string): string {
     const lowerCasePlatform = platformName.toLowerCase();
-    const slug = iconMap[lowerCasePlatform] || lowerCasePlatform.replace(/[\s.]+/g, '');
+    const slug = getOwnProperty(iconMap, lowerCasePlatform) || lowerCasePlatform.replace(/[\s.]+/g, '');
     const normalizedSlug = slug.replace(/[^a-z0-9]/g, '').toLowerCase();
-    const predefinedColor = simpleIconColorMap[normalizedSlug] ?? fallbackPlatformColorMap[normalizedSlug];
+    const predefinedColor = getOwnProperty(simpleIconColorMap, normalizedSlug) ?? getOwnProperty(fallbackPlatformColorMap, normalizedSlug);
     if (predefinedColor) {
       return predefinedColor;
     }

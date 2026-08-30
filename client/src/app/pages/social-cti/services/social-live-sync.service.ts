@@ -9,6 +9,8 @@ import { SocialStorageService } from './social-storage.service';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { crawlKey, getPlatformCardId, getProfileGroupKey, isSamePlatform, mergeResourcesById, resourceKey, sortByContentDate } from '../utils/social-profile.util';
 import { categoryFor } from '../constants/resource-category.constants';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 @Injectable()
 export class SocialLiveSyncService {
@@ -76,7 +78,7 @@ export class SocialLiveSyncService {
     const platform = this.platformKey(platformData);
     const cardId = getPlatformCardId(platformData);
     const key = crawlKey(platformData, 'connections');
-    if (this.activePlatforms.has(platform) || this.crawlResults()[key]?.loading) {
+    if (this.activePlatforms.has(platform) || getOwnProperty(this.crawlResults(), key)?.loading) {
       return;
     }
     this.activePlatforms.add(platform);
@@ -103,7 +105,7 @@ export class SocialLiveSyncService {
         if (stopped()) {
           break;
         }
-        if (!result || result.idle || result.error) {
+        if (!result || Boolean(result.idle) || Boolean(result.error)) {
           continue;
         }
         const items = ((result.items ?? []) as social_resource[]).slice(0, 50);
@@ -112,7 +114,7 @@ export class SocialLiveSyncService {
           this.storeLive(platformData, 'connections', items);
         }
         const last = items[items.length - 1];
-        this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : current[key]?.log } }));
+        this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : getOwnProperty(current, key)?.log } }));
       }
     }
     finally {
@@ -155,7 +157,7 @@ export class SocialLiveSyncService {
     const key = crawlKey(platformData, type);
     this.liveStop.add(key);
     this.fireStop(key);
-    this.crawlResults.update(current => ({ ...current, [key]: { ...current[key], loading: false } }));
+    this.crawlResults.update(current => ({ ...current, [key]: { ...getOwnProperty(current, key), loading: false } }));
     this.setSectionStatus(platformData, type, 'completed');
     this.fetchService.cancelProfileCrawl(platformData.meta.platform, platformData.meta.username, type).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
@@ -164,7 +166,7 @@ export class SocialLiveSyncService {
     const cardId = getPlatformCardId(platformData);
     const key = crawlKey(platformData, type);
     const platform = this.platformKey(platformData);
-    if (this.activePlatforms.has(platform) || this.crawlResults()[key]?.loading) {
+    if (this.activePlatforms.has(platform) || getOwnProperty(this.crawlResults(), key)?.loading) {
       return;
     }
     this.activePlatforms.add(platform);
@@ -230,7 +232,7 @@ export class SocialLiveSyncService {
           }
         }
         const last = page.items[page.items.length - 1];
-        this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : current[key]?.log } }));
+        this.crawlResults.update(current => ({ ...current, [key]: { loading: true, count: seen.size, log: last ? this.resourceLabel(last) : getOwnProperty(current, key)?.log } }));
         if (seen.size >= this.maxSyncItems) {
           break;
         }
@@ -260,7 +262,7 @@ export class SocialLiveSyncService {
       }
       let changed = false;
       const nextProfiles = currentProfiles.map(platform => {
-        if (!isSamePlatform(platform, platformData) || platform.section_status?.[section] === status) {
+        if (!isSamePlatform(platform, platformData) || getOwnProperty(platform.section_status, section) === status) {
           return platform;
         }
         changed = true;
@@ -292,7 +294,7 @@ export class SocialLiveSyncService {
         }
         const status = { ...(platform.section_status ?? {}) };
         for (const section of Object.keys(status)) {
-          if (status[section] === 'fetching') {
+          if (getOwnProperty(status, section) === 'fetching') {
             Reflect.deleteProperty(status, section);
             changed = true;
           }
@@ -357,7 +359,7 @@ export class SocialLiveSyncService {
     const record = item as unknown as Record<string, unknown>;
     const pick = (...keys: string[]): string => {
       for (const key of keys) {
-        const value = record[key];
+        const value = getOwnProperty(record, key);
         if (typeof value === 'string' && value.trim()) {
           return value.trim();
         }

@@ -9,6 +9,8 @@ import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import type { SocialThreadComment } from './model/dashboard-result-social.model';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 export type { SocialThreadComment } from './model/dashboard-result-social.model';
 
 
@@ -160,7 +162,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
       const text = comment['text'] ?? comment['comment'] ?? comment['comment_text'] ?? comment['m_comment_text'] ?? comment['m_comment'] ?? comment['m_text'] ?? comment['content'] ?? comment['comment_content'] ?? comment['m_content'] ?? comment['message'] ?? comment['body'] ?? comment['m_body'] ?? comment['comment_body'] ?? comment['reply'] ?? comment['reply_content'] ?? comment['description'];
       if (!text) {
         const nestedKeys = ['m_comments', 'm_post_comments', 'm_post_comments_list', 'm_post_comment_list', 'm_comments_list', 'comments', 'comment_items', 'comment_details', 'comments_list', 'post_comments_list', 'm_replies', 'replies', 'm_thread_comments', 'thread_comments'];
-        const nestedComments = nestedKeys.flatMap(key => this.normalizeComments(comment[key]));
+        const nestedComments = nestedKeys.flatMap(key => this.normalizeComments(getOwnProperty(comment, key)));
         if (nestedComments.length) {
           return nestedComments;
         }

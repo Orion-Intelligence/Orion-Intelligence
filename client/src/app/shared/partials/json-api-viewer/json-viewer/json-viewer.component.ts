@@ -1,5 +1,7 @@
 import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { getOwnProperty } from '../../../utils/type-guards.util';
+
 
 @Component({
   selector: 'app-json-viewer',
@@ -75,7 +77,7 @@ export class JsonViewerComponent {
 
   valueAt(key: string): unknown {
     return this.isObject(this.json)
-      ? (this.json as Record<string, unknown>)[key]
+      ? getOwnProperty((this.json as Record<string, unknown>), key)
       : undefined;
   }
 

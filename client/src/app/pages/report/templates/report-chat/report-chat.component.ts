@@ -17,6 +17,8 @@ import { formatKeyLabel as formatKeyLabelUtil, getDisplayTitle as getDisplayTitl
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { ReportInteractionHostComponent } from '../../../../shared/partials/report-interactions/report-interaction-host/report-interaction-host.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-report-chat',
@@ -98,7 +100,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
         addedKeys.add('m_summary');
       }
       Object.keys(resultItem).forEach((key) => {
-        const value = resultItem[key];
+        const value = getOwnProperty(resultItem, key);
         if (Array.isArray(value) &&
                     value.length > 0 &&
                     !isHiddenReportMetadataKey(key) &&
@@ -164,7 +166,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     if (tab === 'm_content' || tab === 'm_summary') {
       this.listItems = [];
     }
-    else if (this.resultItem && Array.isArray(this.resultItem[tab])) {
+    else if (this.resultItem && Array.isArray(getOwnProperty(this.resultItem, tab))) {
       this.listItems = this.getMetadataListItems(tab);
     }
     else {
@@ -206,7 +208,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     if (key === 'm_summary') {
       return this.summary ? 1 : 0;
     }
-    const value = this.resultItem?.[key];
+    const value = getOwnProperty(this.resultItem, key);
     return Array.isArray(value) ? value.length : value ? 1 : 0;
   }
 
@@ -214,7 +216,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     if (!this.resultItem) {
       return [];
     }
-    const value = this.resultItem[tab];
+    const value = getOwnProperty(this.resultItem, tab);
     if (this.commentTabKeys.has(tab)) {
       return this.normalizeCommentValues(value).slice(0, 100);
     }
@@ -254,7 +256,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
         const displayText = this.toDisplayValue(text);
         return [meta ? `${meta}: ${displayText}` : displayText];
       }
-      return Array.from(this.commentTabKeys).flatMap(key => this.normalizeCommentValues(comment[key]));
+      return Array.from(this.commentTabKeys).flatMap(key => this.normalizeCommentValues(getOwnProperty(comment, key)));
     }
     return [String(value)];
   }

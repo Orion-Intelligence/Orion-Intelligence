@@ -1,6 +1,6 @@
 import { ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensLegendItem } from '../../models/geo-fencing.models';
 import { ThreatLensCoordinates, ThreatLensCountryBoundary, ThreatLensIpRecord } from '../models/threat-lens-map.types';
-import { asUnknownRecord, UnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty, UnknownRecord } from '../../../../shared/utils/type-guards.util';
 
 function getThreatLensDistanceKm(a: ThreatLensCoordinates, b: ThreatLensCoordinates): number {
   const toRadians = (value: number) => value * Math.PI / 180;
@@ -57,7 +57,7 @@ function extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] 
   const records = new Map<string, ThreatLensIpRecord>();
   const readCoordinate = (source: UnknownRecord, keys: string[]): number | undefined => {
     for (const key of keys) {
-      const value = source[key];
+      const value = getOwnProperty(source, key);
       if (value === null || value === undefined || value === '') {
         continue;
       }
@@ -87,7 +87,7 @@ function extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] 
     const sources = sourcesFor(value);
     for (const source of sources) {
       for (const key of keys) {
-        const text = String(source[key] ?? '').trim();
+        const text = String(getOwnProperty(source, key) ?? '').trim();
         if (text) {
           return text;
         }
@@ -170,8 +170,8 @@ function extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] 
 function isThreatLensPointInRing(lat: number, lon: number, ring: ThreatLensCoordinates[]): boolean {
   let inside = false;
   for (let index = 0, previousIndex = ring.length - 1; index < ring.length; previousIndex = index, index += 1) {
-    const current = ring[index];
-    const previous = ring[previousIndex];
+    const current = getOwnProperty(ring, index);
+    const previous = getOwnProperty(ring, previousIndex);
     const currentLon = normalizeThreatLensLongitude(current.lon);
     const previousLon = normalizeThreatLensLongitude(previous.lon);
     const intersects = ((current.lat > lat) !== (previous.lat > lat))

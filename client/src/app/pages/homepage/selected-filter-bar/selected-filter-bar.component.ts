@@ -5,6 +5,8 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { filter_mapping } from '../../../shared/constants/filters';
 import { countFilterValues } from '../../../shared/utils/filter-values.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-selected-filter-bar',
@@ -73,9 +75,9 @@ export class SelectedFilterBarComponent implements OnInit {
   removeEntityTypeFilterTag(tagToRemoveId: string) {
     const categories = { ...this.app_service.configData().localSettings.entityfilterCategories };
     for (const key in categories) {
-      const value = categories[key];
+      const value = getOwnProperty(categories, key);
       if (Array.isArray(value)) {
-        categories[key] = value.filter(tag => tag !== tagToRemoveId);
+        setOwnProperty(categories, key, value.filter(tag => tag !== tagToRemoveId));
       }
       else if (value === tagToRemoveId) {
         Reflect.deleteProperty(categories, key);

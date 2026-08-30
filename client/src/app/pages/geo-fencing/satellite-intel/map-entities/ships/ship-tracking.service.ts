@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../model/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
-import { asUnknownRecord, isFiniteNumber, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty, isFiniteNumber, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteShipTrackingService {
@@ -229,8 +229,8 @@ export class SatelliteShipTrackingService {
   private readValue(item: unknown, keys: string[], paths: string[][] = []): unknown {
     const record = asUnknownRecord(item);
     for (const key of keys) {
-      if (record[key] !== null && record[key] !== undefined && record[key] !== '') {
-        return record[key];
+      if (getOwnProperty(record, key) !== null && getOwnProperty(record, key) !== undefined && getOwnProperty(record, key) !== '') {
+        return getOwnProperty(record, key);
       }
     }
 
@@ -241,7 +241,7 @@ export class SatelliteShipTrackingService {
           value = value[Number(segment)];
         }
         else {
-          value = asUnknownRecord(value)[segment];
+          value = getOwnProperty(asUnknownRecord(value), segment);
         }
       }
       if (value !== null && value !== undefined && value !== '') {

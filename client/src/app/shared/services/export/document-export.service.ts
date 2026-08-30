@@ -8,6 +8,8 @@ import { PdfExportFontData, registerPdfExportFonts } from './pdf-export-fonts';
 import { PdfExportTheme } from './pdf-export-theme';
 import { preparePdfValue } from './pdf-text.util';
 import { assertAutoTableDocument, AutoTableDocument } from './pdf-autotable.types';
+import { getOwnProperty } from '../../utils/type-guards.util';
+
 
 @Injectable({ providedIn: 'root' })
 export class DocumentExportService extends GraphExportService {
@@ -424,7 +426,7 @@ export class DocumentExportService extends GraphExportService {
     }
     return [
       columns,
-      ...rows.map(row => columns.map(column => String(row[column] ?? '-')))
+      ...rows.map(row => columns.map(column => String(getOwnProperty(row, column) ?? '-')))
     ];
   }
 

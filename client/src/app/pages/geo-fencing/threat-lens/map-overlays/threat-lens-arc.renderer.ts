@@ -3,6 +3,8 @@ import { AnimatedArcDescriptor, ArcDrawState, ThreatLensCategoryMapData, ThreatL
 import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
 import { ArcCategoryBatch, EsriGeometry, EsriGeometryEngine, EsriGraphicsLayer, EsriWebMercatorUtils, LngLat, ThreatLensArcBatchStatus, ThreatLensArcRenderResult, ThreatLensMapGraphic } from '../models/threat-lens-map.types';
 import { ThreatLensCountryLayerRenderer } from './threat-lens-country-layer.renderer';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 export class ThreatLensArcRenderer {
   private animatedArcs: AnimatedArcDescriptor[] = [];
@@ -281,8 +283,8 @@ export class ThreatLensArcRenderer {
         for (const arc of batch.batch?.items ?? []) {
           const progress = ((timestamp + (arc.animationOffset * arc.animationDuration)) % arc.animationDuration) / arc.animationDuration;
           const point = ThreatLensMapUtils.getSurfacePointAtProgress(arc.arcPoints, progress);
-          const graphic = this.movingDotGraphics[index];
-          const receiverGraphic = this.receiverPulseGraphics[index];
+          const graphic = getOwnProperty(this.movingDotGraphics, index);
+          const receiverGraphic = getOwnProperty(this.receiverPulseGraphics, index);
 
           if (point && graphic) {
             const [lon, lat] = point;
@@ -313,7 +315,7 @@ export class ThreatLensArcRenderer {
     const index = this.getClampedBatchIndex(batches);
     return {
       index,
-      batch: batches[index],
+      batch: getOwnProperty(batches, index),
     };
   }
 
@@ -328,7 +330,7 @@ export class ThreatLensArcRenderer {
     this.visibleBatchDrawStartTime = renderedAt;
     this.hoveredEndpointGraphic = null;
     const batches = this.getVisibleBatchSequence();
-    const batch = batchOverride ?? (index >= 0 ? batches[index] ?? null : null);
+    const batch = batchOverride ?? (index >= 0 ? getOwnProperty(batches, index) ?? null : null);
     const items = batch?.items ?? [];
     this.visibleBatchIndex = index;
     this.arcGraphicsLayer.removeAll();
@@ -349,7 +351,7 @@ export class ThreatLensArcRenderer {
     this.arcDrawStates = arcLayerGraphics
       .filter((graphic) => graphic?.attributes?.role === 'arc')
       .reduce((states: ArcDrawState<ThreatLensMapGraphic>[], graphic, drawIndex: number) => {
-        const arc = items[drawIndex];
+        const arc = getOwnProperty(items, drawIndex);
         if (arc) {
           states.push({ arc, graphic, completed: false });
         }
@@ -499,7 +501,7 @@ export class ThreatLensArcRenderer {
     }
 
     for (let index = 0; index < this.arcDrawStates.length; index += 1) {
-      const state = this.arcDrawStates[index];
+      const state = getOwnProperty(this.arcDrawStates, index);
       if (state.completed) {
         continue;
       }

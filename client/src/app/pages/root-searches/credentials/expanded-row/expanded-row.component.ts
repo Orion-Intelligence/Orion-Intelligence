@@ -7,6 +7,8 @@ import { ConfirmationPopupComponent } from '../../../../shared/partials/confirma
 import { CredentialResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import type { CreditCardField, TelemetryGroup } from './model/expanded-row.model';
 import { isIpv4Address } from '../../../../shared/utils/network-validation.util';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 export type { CreditCardField, TelemetryGroup } from './model/expanded-row.model';
 
 
@@ -290,13 +292,13 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     const keys = this.mode() === 'stealer'
       ? ['email', 'username', 'user', 'domain', 'source_domain', 'raw', 'url', 'ip', 'bin', 'card_type', 'channel', 'file', 'timestamp', 'date']
       : ['m_email', 'm_username', 'm_user', 'm_domain', 'm_root_domain', 'm_url', 'm_base_url', 'm_weblink', 'm_title', 'm_content', 'm_important_content', 'm_channel', 'm_date', 'm_update_date', 'rank_index', 'm_rank_index'];
-    const searchable = Array.from(new Set([...domains, ...keys.flatMap(key => values(record?.[key]))])).map(clean).filter(value => value.length >= 3);
+    const searchable = Array.from(new Set([...domains, ...keys.flatMap(key => values(getOwnProperty(record, key)))])).map(clean).filter(value => value.length >= 3);
     const baseKeys = ['confidence', 'confidence_score', 'score', 'rank_score', 'relevance_score', 'm_score'];
     let score = baseKeys.reduce((found, key) => {
       if (found > 0) {
         return found;
       }
-      const raw = Number(values(record?.[key])[0]);
+      const raw = Number(values(getOwnProperty(record, key))[0]);
       return Number.isFinite(raw) && raw > 0 ? (raw <= 1 ? raw * 100 : raw) : 0;
     }, 0) || 50;
 
@@ -304,7 +306,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       score += 18;
     }
     const dateValue = ['date', 'm_date', 'm_update_date', 'timestamp', 'created_at', 'updated_at', 'time', 'year']
-      .map(key => values(record?.[key])[0])
+      .map(key => values(getOwnProperty(record, key))[0])
       .find(Boolean);
     const parsedDate = dateValue ? new Date(dateValue) : null;
     if (parsedDate && !Number.isNaN(parsedDate.getTime())) {
@@ -561,7 +563,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
         .map(field => ({ key: field.key, label: field.label, values: [field.value] }));
       const rest = Object.keys(item)
         .filter(k => !exclude.has(k))
-        .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(item?.[k]) }))
+        .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(getOwnProperty(item, k)) }))
         .filter(g => g.values.length > 0)
         .filter(g => !this.isHashOrIndexKey(g.key, g.label))
         .sort((a, b) => a.label.localeCompare(b.label));
@@ -582,7 +584,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     }
     const rest: TelemetryGroup[] = Object.keys(item)
       .filter(k => !exclude.has(k))
-      .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(item?.[k]) }))
+      .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(getOwnProperty(item, k)) }))
       .filter(g => g.values.length > 0)
       .filter(g => !this.isHashOrIndexKey(g.key, g.label))
       .sort((a, b) => a.label.localeCompare(b.label));
@@ -604,19 +606,19 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       'm_hash',
       'm_index'
     ]);
-    const groups: TelemetryGroup[] = Object.keys(result)
-      .filter(k => k.startsWith('m_') && Array.isArray(result[k]) && result[k].length > 0 && !exclude.has(k))
-      .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(result?.[k]) }))
+    const groups: TelemetryGroup[] = Object.entries(result)
+      .filter(([key, value]) => key.startsWith('m_') && Array.isArray(value) && value.length > 0 && !exclude.has(key))
+      .map(([key, value]) => ({ key, label: this.rowHelper.prettyLabel(key), values: this.rowHelper.normalizeToArray(value) }))
       .filter(g => g.values.length > 0)
       .filter(g => !this.isHashOrIndexKey(g.key, g.label));
     const emailK = 'm_email';
     const domainK = 'm_domain';
     const ipK = 'm_ip';
     const passK = 'm_password';
-    const emailV = this.rowHelper.normalizeToArray(result?.[emailK]);
-    const domainV = this.rowHelper.normalizeToArray(result?.[domainK]);
-    const ipV = this.rowHelper.normalizeToArray(result?.[ipK]);
-    const passV = this.rowHelper.normalizeToArray(result?.[passK]);
+    const emailV = this.rowHelper.normalizeToArray(getOwnProperty(result, emailK));
+    const domainV = this.rowHelper.normalizeToArray(getOwnProperty(result, domainK));
+    const ipV = this.rowHelper.normalizeToArray(getOwnProperty(result, ipK));
+    const passV = this.rowHelper.normalizeToArray(getOwnProperty(result, passK));
     const core: TelemetryGroup[] = [];
     if (emailV.length > 0) {
       core.push({ key: emailK, label: 'Email', values: emailV });

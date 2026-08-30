@@ -8,7 +8,7 @@ import { DashboardService } from '../../../../services/dashboard/dashboard.servi
 import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { asUnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty, setOwnProperty } from '../../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-defacement-results',
@@ -70,7 +70,7 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
     this.threatTypeCounts = {};
     results.forEach(item => {
       const type = this.normalizeThreatType(item.m_ioc_type?.[0]);
-      this.threatTypeCounts[type] = (this.threatTypeCounts[type] || 0) + 1;
+      setOwnProperty(this.threatTypeCounts, type, (getOwnProperty(this.threatTypeCounts, type) || 0) + 1);
     });
   }
 

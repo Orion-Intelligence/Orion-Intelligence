@@ -8,6 +8,8 @@ import { MessageNotificationService } from '../../../../services/message_notific
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { UserImagePickerComponent } from '../../sidebar-user-settings/user-image-picker/user-image-picker.component';
+import { getOwnProperty, setOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 const DEFAULT_APP_NAME = 'Orion Intelligence';
 type SystemResourceKey = 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark';
@@ -62,8 +64,9 @@ export class TenantBrandingSettingsComponent implements OnInit {
         next: (res) => {
           const updatedAssets: Partial<AppSettingsModel> = {};
           for (const assetKey of Object.keys(DEFAULT_SYSTEM_ASSETS) as SystemResourceKey[]) {
-            if (typeof res?.[assetKey] === 'string' && res[assetKey]) {
-              updatedAssets[assetKey] = res[assetKey];
+            const assetValue = getOwnProperty(res, assetKey);
+            if (typeof assetValue === 'string' && assetValue) {
+              setOwnProperty(updatedAssets, assetKey, assetValue);
             }
           }
           this.applySettings(updatedAssets);
@@ -78,7 +81,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
   deleteUserResource(key: SystemResourceKey = 'logo_url'): void {
     this.apiService.delete<unknown>(`system/image?key=${key}`).subscribe({
       next: () => {
-        this.applySettings({ [key]: DEFAULT_SYSTEM_ASSETS[key] });
+        this.applySettings({ [key]: getOwnProperty(DEFAULT_SYSTEM_ASSETS, key) });
       },
       error: (err) => {
         const message = err?.error?.detail ?? this.translationService.translate('Failed to remove image');

@@ -10,6 +10,8 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { AppService } from '../../../../services/core/app/app.service';
 import type { PendingMsg } from './model/consolidated-scan.model';
 import { isDomainName } from '../../../../shared/utils/network-validation.util';
+import { getOwnProperty, setOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 export type { PendingMsg } from './model/consolidated-scan.model';
 
 
@@ -163,7 +165,7 @@ export class ConsolidatedScanComponent {
     this.liveApiResults = [];
     this.isCollapsed = false;
     for (const t of this.expectedTypes) {
-      this.progressByType[t] = 0;
+      setOwnProperty(this.progressByType, t, 0);
     }
     this.isProcessing = true;
     this.scanSub = concat(...scans.map(({ t, o }) =>o.pipe(map(v => ({ t, v })))))
@@ -171,10 +173,10 @@ export class ConsolidatedScanComponent {
       .subscribe({
         next: ({ t, v }: { t: ScanKey; v: ConsolidatedScanEmission }) => {
           if (this.isPending(v)) {
-            this.progressByType[t] = this.clamp(Number(v.progress ?? 0), 0, 100);
+            setOwnProperty(this.progressByType, t, this.clamp(Number(v.progress ?? 0), 0, 100));
             return;
           }
-          this.progressByType[t] = 100;
+          setOwnProperty(this.progressByType, t, 100);
           if (t === 'liveapi') {
             this.liveApiResults = Array.isArray(v) ? v : [];
             return;
@@ -187,7 +189,7 @@ export class ConsolidatedScanComponent {
             scanType: v.scanType || t
           };
           const key = t;
-          this.resultsByType[key] = [...(this.resultsByType[key] ?? []), result];
+          setOwnProperty(this.resultsByType, key, [...(getOwnProperty(this.resultsByType, key) ?? []), result]);
         },
         error: () => {
           this.isProcessing = false;
@@ -261,7 +263,7 @@ export class ConsolidatedScanComponent {
       if (t === 'liveapi') {
         return (this.progressByType.liveapi ?? 0) < 100;
       }
-      return !this.resultsByType[t];
+      return !getOwnProperty(this.resultsByType, t);
     });
   }
 
@@ -279,7 +281,7 @@ export class ConsolidatedScanComponent {
     }
     let sum = 0;
     for (const t of this.expectedTypes) {
-      sum += Number(this.progressByType[t] ?? 0);
+      sum += Number(getOwnProperty(this.progressByType, t) ?? 0);
     }
     return Math.round(sum / this.totalCount);
   }

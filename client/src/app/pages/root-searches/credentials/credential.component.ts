@@ -25,6 +25,8 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index-sidebar.component';
 import { ScrollTopComponent } from '../../../shared/partials/scroll-top/scroll-top.component';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 type IocResultTab = 'stealers' | 'threats';
 
@@ -201,7 +203,7 @@ export class CredentialComponent implements OnInit {
     this.resetIocPaginationState();
     const cleanedParams: Params = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
-      cleanedParams[key] = value;
+      setOwnProperty(cleanedParams, key, value);
     });
     this.router.navigate([], {
       queryParams: cleanedParams,
@@ -655,21 +657,21 @@ export class CredentialComponent implements OnInit {
     }
     let key = label;
     let suffix = 2;
-    while (fields[key]) {
+    while (getOwnProperty(fields, key)) {
       key = `${label} ${suffix}`;
       suffix += 1;
     }
-    fields[key] = text;
+    setOwnProperty(fields, key, text);
   }
 
   private appendAdditionalExportFields(fields: Record<string, string>, record: Record<string, unknown>, excludedKeys: Set<string>): void {
     Object.keys(record ?? {})
       .filter(key => !excludedKeys.has(key))
-      .filter(key => !this.shouldSkipExportField(key, record[key]))
-      .filter(key => this.isSimpleExportValue(record[key]))
+      .filter(key => !this.shouldSkipExportField(key, getOwnProperty(record, key)))
+      .filter(key => this.isSimpleExportValue(getOwnProperty(record, key)))
       .sort((a, b) => this.toExportLabel(a).localeCompare(this.toExportLabel(b)))
       .forEach(key => {
-        this.addExportField(fields, this.toExportLabel(key), record[key], 320);
+        this.addExportField(fields, this.toExportLabel(key), getOwnProperty(record, key), 320);
       });
   }
 

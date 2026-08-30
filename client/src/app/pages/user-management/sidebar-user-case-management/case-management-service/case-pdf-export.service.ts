@@ -86,7 +86,7 @@ export class CasePdfExportService {
       ], contentWidth);
     }
 
-    if (report.closure || report.closedAt) {
+    if (Boolean(report.closure) || Boolean(report.closedAt)) {
       y = this.addPdfSection(doc, autoTable, y, 'Closure', [
         ['Reason', this.formatLabel(report.closure?.reason, report.closure?.closureReasonOtherValue)],
         ['Summary', report.closure?.summary ?? 'No closure summary provided.'],

@@ -17,6 +17,8 @@ import { SocialService } from '../services/social.service';
 import { applyImageFallback } from '../utils/image-fallback.util';
 import { buildSocialGraphView, buildSocialUserGraph, handleLabel, isChannelHandle, linkLabel, normalizeHandle, parseHandleList, relationVerb, toVisEdge, toVisNode } from '../utils/social-user-graph.util';
 import type { account_view, context_menu_view, detail_view, find_match, membership_view } from './model/social-user-graph.model';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 export type { account_view,context_menu_view,detail_view,find_match,group_view,link_view,membership_view } from './model/social-user-graph.model';
 
 
@@ -406,7 +408,7 @@ export class SocialUserGraphComponent {
 
   kindLabel(kind: string): string {
     const labels: Record<string, string> = { root: 'Searched user', account: 'Platform account', group: 'Contact group', user: 'Scanned user', person: 'Contact', more: 'More' };
-    return labels[kind] ?? kind;
+    return getOwnProperty(labels, kind) ?? kind;
   }
 
   private fetchDocuments(roots: string[]): void {
@@ -569,7 +571,7 @@ export class SocialUserGraphComponent {
     for (const node of added) {
       const parentEdge = visEdges.find(edge => (edge.to === node.id && existing.has(String(edge.from))) || (edge.from === node.id && existing.has(String(edge.to))));
       const parentId = parentEdge ? String(parentEdge.to === node.id ? parentEdge.from : parentEdge.to) : '';
-      const anchor = parentId ? positions[parentId] : undefined;
+      const anchor = parentId ? getOwnProperty(positions, parentId) : undefined;
       if (anchor) {
         this.network.moveNode(node.id, anchor.x + (Math.random() - 0.5) * 140, anchor.y + (Math.random() - 0.5) * 140);
       }

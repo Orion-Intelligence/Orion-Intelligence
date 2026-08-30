@@ -1,4 +1,6 @@
 import { ArcPair, ArcPoint2D, EsriGeometry, EsriGeometryEngine, EsriWebMercatorUtils, LngLat, ThreatLensMapGraphic } from '../models/threat-lens-map.types';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 function buildCountryFeatureIndex(features: ThreatLensMapGraphic[], countryNameFields: string[], normalizeCountryLabel: (value: string) => string, toCountryKey: (value: string) => string, countryCodeFields: string[] = []): Map<string, ThreatLensMapGraphic> {
   const selected = new Map<string, { feature: ThreatLensMapGraphic; priority: number; area: number }>();
@@ -19,7 +21,7 @@ function buildCountryFeatureIndex(features: ThreatLensMapGraphic[], countryNameF
     ];
 
     for (const fieldName of candidateFields) {
-      const rawValue = attributes[fieldName];
+      const rawValue = getOwnProperty(attributes, fieldName);
       if (typeof rawValue !== 'string' || !rawValue.trim()) {
         continue;
       }
@@ -31,7 +33,7 @@ function buildCountryFeatureIndex(features: ThreatLensMapGraphic[], countryNameF
       }
 
       const current = selected.get(key);
-      const priority = priorityByField[fieldName] ?? 10;
+      const priority = getOwnProperty(priorityByField, fieldName) ?? 10;
       if (!current || priority < current.priority || (priority === current.priority && area > current.area)) {
         selected.set(key, { feature, priority, area });
       }
@@ -60,7 +62,7 @@ function collectArcPairs(documentCountryGroups: string[][], toCountryKey: (value
 
     for (let i = 0; i < uniqueKeys.length - 1; i += 1) {
       for (let j = i + 1; j < uniqueKeys.length; j += 1) {
-        const pairKey = [uniqueKeys[i], uniqueKeys[j]].sort().join('||');
+        const pairKey = [getOwnProperty(uniqueKeys, i), getOwnProperty(uniqueKeys, j)].sort().join('||');
         pairCount.set(pairKey, (pairCount.get(pairKey) ?? 0) + 1);
       }
     }
@@ -198,10 +200,10 @@ function getSurfacePointAtProgress(points: ArcPoint2D[], progress: number): ArcP
   const endIndex = Math.min(points.length - 1, Math.ceil(position));
 
   if (startIndex === endIndex) {
-    return points[startIndex];
+    return getOwnProperty(points, startIndex);
   }
 
-  return interpolatePoint2D(points[startIndex], points[endIndex], position - startIndex);
+  return interpolatePoint2D(getOwnProperty(points, startIndex), getOwnProperty(points, endIndex), position - startIndex);
 }
 
 function buildSurfacePathPoints(start: LngLat, end: LngLat): ArcPoint2D[] {
@@ -253,7 +255,7 @@ function splitPath2D(points: ArcPoint2D[]): ArcPoint2D[][] {
 
   for (let i = 1; i < points.length; i += 1) {
     const previous = points[i - 1];
-    const next = points[i];
+    const next = getOwnProperty(points, i);
     const lonDelta = next[0] - previous[0];
 
     if (Math.abs(lonDelta) > 180) {
@@ -283,10 +285,10 @@ function slicePath2D(points: ArcPoint2D[], startProgress: number, endProgress: n
   const endPosition = endProgress * maxIndex;
   const startIndex = Math.floor(startPosition);
   const endIndex = Math.ceil(endPosition);
-  const segment: ArcPoint2D[] = [interpolatePoint2D(points[startIndex], points[Math.min(maxIndex, startIndex + 1)], startPosition - startIndex)];
+  const segment: ArcPoint2D[] = [interpolatePoint2D(getOwnProperty(points, startIndex), points[Math.min(maxIndex, startIndex + 1)], startPosition - startIndex)];
 
   for (let index = startIndex + 1; index <= endIndex - 1 && index < points.length; index += 1) {
-    segment.push(points[index]);
+    segment.push(getOwnProperty(points, index));
   }
 
   segment.push(interpolatePoint2D(points[Math.max(0, endIndex - 1)], points[Math.min(maxIndex, endIndex)], endPosition - Math.max(0, endIndex - 1)));
@@ -412,7 +414,7 @@ function getRingArea(ring: LngLat[]): number {
   const unwrapped = unwrapRingLongitudes(ring);
   let area = 0;
   for (let index = 0; index < unwrapped.length; index += 1) {
-    const current = unwrapped[index];
+    const current = getOwnProperty(unwrapped, index);
     const next = unwrapped[(index + 1) % unwrapped.length];
     area += (current[0] * next[1]) - (next[0] * current[1]);
   }
@@ -426,7 +428,7 @@ function getRingCentroid(ring: LngLat[]): LngLat | null {
   let cy = 0;
 
   for (let index = 0; index < unwrapped.length; index += 1) {
-    const current = unwrapped[index];
+    const current = getOwnProperty(unwrapped, index);
     const next = unwrapped[(index + 1) % unwrapped.length];
     const cross = (current[0] * next[1]) - (next[0] * current[1]);
     twiceArea += cross;
@@ -480,10 +482,10 @@ function isPointInRing(point: LngLat, ring: LngLat[]): boolean {
   let inside = false;
 
   for (let index = 0, previousIndex = unwrapped.length - 1; index < unwrapped.length; previousIndex = index, index += 1) {
-    const xi = unwrapped[index][0];
-    const yi = unwrapped[index][1];
-    const xj = unwrapped[previousIndex][0];
-    const yj = unwrapped[previousIndex][1];
+    const xi = getOwnProperty(unwrapped, index)[0];
+    const yi = getOwnProperty(unwrapped, index)[1];
+    const xj = getOwnProperty(unwrapped, previousIndex)[0];
+    const yj = getOwnProperty(unwrapped, previousIndex)[1];
     const intersects = ((yi > y) !== (yj > y))
       && (x < (((xj - xi) * (y - yi)) / ((yj - yi) || Number.EPSILON)) + xi);
     if (intersects) {

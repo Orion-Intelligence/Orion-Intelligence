@@ -39,6 +39,8 @@ import type { AptIntelResultItem } from '../../../shared/model/results/apt-intel
 import type { ExploitResultItem } from '../../../shared/model/results/exploit/exploit.callback.model';
 import type { SocialResultItem } from '../../../shared/model/results/social/social.callback.model';
 import type { ChatResultItem } from '../../../shared/model/results/chat/chat.callback.model';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-dashboard-consolidated',
@@ -197,7 +199,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
     const cleanedParams: Record<string, unknown> = {};
     Object.entries(this.dashboardService.consolidatedParamModel).forEach(([key, value]) => {
       if (value != null && value !== '') {
-        cleanedParams[key] = value;
+        setOwnProperty(cleanedParams, key, value);
       }
     });
     cleanedParams['tab'] = this.getActiveConsolidatedTab();
@@ -314,8 +316,8 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
       'news_model',
     ];
     models.forEach(model => {
-      this.groupedResults[model] = this.consolidatedCallbackModel[model]?.Result ?? [];
-      this.pageCounts[model] = this.consolidatedCallbackModel[model]?.Page_Count ?? 0;
+      setOwnProperty(this.groupedResults, model, getOwnProperty(this.consolidatedCallbackModel, model)?.Result ?? []);
+      setOwnProperty(this.pageCounts, model, getOwnProperty(this.consolidatedCallbackModel, model)?.Page_Count ?? 0);
     });
     this.externalConsolidatedFeedService.syncActorMalware(this.groupedResults, this.pageCounts);
   }

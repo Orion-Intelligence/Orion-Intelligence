@@ -20,6 +20,8 @@ import type { SocialResultSource } from './enums/social-graph.enums';
 import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.component';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { getInputValue } from '../../shared/utils/event-input.util';
+import { getOwnProperty } from '../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-social-graph',
@@ -80,7 +82,7 @@ export class SocialMapperComponent {
   activeResultSource = computed(() => {
     const username = this.activeUsername();
     const platforms = this.activeSourcePlatforms();
-    const preferred = username ? this.activeResultSources()[username] ?? 'normal' : 'normal';
+    const preferred = username ? getOwnProperty(this.activeResultSources(), username) ?? 'normal' : 'normal';
     if (platforms.some(platform => this.getResultSource(platform) === preferred)) {
       return preferred;
     }

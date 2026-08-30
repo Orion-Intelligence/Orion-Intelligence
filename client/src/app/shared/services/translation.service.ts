@@ -1,6 +1,8 @@
 import { effect, Injectable, inject, signal } from '@angular/core';
 import { AppService } from '../../services/core/app/app.service';
 import { LANGUAGE_OPTIONS } from '../constants/shared-enums';
+import { getOwnProperty } from '../utils/type-guards.util';
+
 
 @Injectable({ providedIn: 'root' })
 export class TranslationService {
@@ -44,10 +46,10 @@ export class TranslationService {
       return '';
     }
     const spaceKey = normalizedKey.replace(/-/g, ' ');
-    return this.translations[normalizedKey]
-      ?? this.translations[spaceKey]
-      ?? this.fallbackTranslations[normalizedKey]
-      ?? this.fallbackTranslations[spaceKey]
+    return getOwnProperty(this.translations, normalizedKey)
+      ?? getOwnProperty(this.translations, spaceKey)
+      ?? getOwnProperty(this.fallbackTranslations, normalizedKey)
+      ?? getOwnProperty(this.fallbackTranslations, spaceKey)
       ?? normalizedKey;
   }
 

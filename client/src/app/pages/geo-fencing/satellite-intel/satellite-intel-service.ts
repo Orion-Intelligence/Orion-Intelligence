@@ -36,7 +36,7 @@ export class SatelliteIntelService {
         const responseError = this.getResponseError(value);
         if (trackState && responseError) {
           this.onError.set(responseError);
-          throw responseError;
+          throw new Error(responseError.message);
         }
       }),
       catchError((error) => {

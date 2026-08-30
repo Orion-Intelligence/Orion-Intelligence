@@ -191,7 +191,7 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   onSubmit(): void {
     this.onManualCoordsChange();
     this.onManualCoverageChange();
-    if (this.coordsError || this.coverageError || !this.manualCoords.trim()) {
+    if (Boolean(this.coordsError) || Boolean(this.coverageError) || !this.manualCoords.trim()) {
       return;
     }
 

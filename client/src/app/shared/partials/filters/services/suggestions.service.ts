@@ -3,6 +3,8 @@ import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { ApiService } from '../../../services/api.service';
+import { getOwnProperty } from '../../../utils/type-guards.util';
+
 @Injectable({ providedIn: 'root' })
 export class SuggestionService {
   private readonly suggestionSources: Record<string, { endpoint: string; fields: Set<string>; }> = { exploit: { endpoint: 'search/exploit/suggestions', fields: new Set(['m_cve', 'm_cwe', 'm_product', 'm_tags']) } };
@@ -37,7 +39,7 @@ export class SuggestionService {
     if (!source) {
       return of([]);
     }
-    const suggestionSource = this.suggestionSources[source];
+    const suggestionSource = getOwnProperty(this.suggestionSources, source);
     if (!suggestionSource?.fields.has(field)) {
       return of([]);
     }

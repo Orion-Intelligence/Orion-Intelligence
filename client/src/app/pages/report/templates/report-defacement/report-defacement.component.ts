@@ -13,6 +13,8 @@ import { ScrollService } from '../../../../shared/services/scroll.service';
 import { ReportInteractionHostComponent } from '../../../../shared/partials/report-interactions/report-interaction-host/report-interaction-host.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TakedownActionComponent } from '../../../../shared/partials/takedown-action/takedown-action.component';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-report-defacement',
@@ -64,7 +66,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
 
   get filteredArrayKeys(): string[] {
     return this.arrayKeys.filter(key => {
-      const val = this.defacementData?.[key];
+      const val = getOwnProperty(this.defacementData, key);
       return !isHiddenReportMetadataKey(key) && val != null && (!Array.isArray(val) || val.length > 0);
     });
   }
@@ -80,8 +82,8 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
       return;
     }
     this.activeTab = tab;
-    if (this.defacementData && Array.isArray(this.defacementData[tab])) {
-      this.listItems = this.defacementData[tab] as string[];
+    if (this.defacementData && Array.isArray(getOwnProperty(this.defacementData, tab))) {
+      this.listItems = getOwnProperty(this.defacementData, tab) as string[];
     }
     else {
       this.listItems = [];
@@ -96,7 +98,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     if (key === 'm_content') {
       return this.content ? 1 : 0;
     }
-    const value = this.defacementData?.[key];
+    const value = getOwnProperty(this.defacementData, key);
     return Array.isArray(value) ? value.length : value ? 1 : 0;
   }
 
@@ -111,7 +113,7 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
     }
     if (this.defacementData) {
       Object.keys(this.defacementData).forEach(key => {
-        const value = this.defacementData?.[key];
+        const value = getOwnProperty(this.defacementData, key);
         if (Array.isArray(value) && value.length > 0 && key !== 'm_section' && !isHiddenReportMetadataKey(key)) {
           this.arrayKeys.push(key);
         }

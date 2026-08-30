@@ -15,7 +15,7 @@ import { DnsSectionComponent } from '../root-searches/network-intel/dns-section/
 import { ShodanSectionComponent } from '../root-searches/network-intel/shodan-section/shodan-section.component';
 import { VulnerabilitySectionComponent } from '../root-searches/network-intel/vulnerability-section/vulnerability-section.component';
 import { TranslationService } from '../../shared/services/translation.service';
-import { asUnknownRecord, isUnknownRecord, UnknownRecord } from '../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty, isUnknownRecord, setOwnProperty, UnknownRecord } from '../../shared/utils/type-guards.util';
 import { ScanReportField } from './model/scan-report.model';
 import { ScanReportSection } from './model/scan-report.model';
 
@@ -395,8 +395,8 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     const values: Record<string, string> = {};
     section.items.slice(0, 80).forEach((item, index) => {
       const label = item.label || `Field ${index + 1}`;
-      const key = values[label] === undefined ? label : `${label} ${index + 1}`;
-      values[key] = this.toReportCellValue(item.value);
+      const key = getOwnProperty(values, label) === undefined ? label : `${label} ${index + 1}`;
+      setOwnProperty(values, key, this.toReportCellValue(item.value));
     });
     return Object.keys(values).length ? values : { Details: '-' };
   }

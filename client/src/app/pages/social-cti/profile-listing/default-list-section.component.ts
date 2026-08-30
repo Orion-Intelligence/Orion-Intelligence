@@ -8,7 +8,7 @@ import { getMetadataEntries } from '../utils/summary-view.util';
 import socialPlatformCapabilities from '../../../../assets/data/social-graph/platform-capabilities.json';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty } from '../../../shared/utils/type-guards.util';
 
 const DEDUPE_MIN_LENGTH = 12;
 const METADATA_PRIORITY = ['real_name', 'description', 'bio', 'location', 'country', 'joined_date', 'total_followers', 'total_posts', 'total_views', 'status', 'url', 'profile_url'];
@@ -44,13 +44,13 @@ export class SocialDefaultListSectionComponent {
   }
 
   isPriorityPlatform(platformName?: string): boolean {
-    return !!platformName && !!this.platformCapabilities[platformName];
+    return !!platformName && !!getOwnProperty(this.platformCapabilities, platformName);
   }
 
   isFetchTabAllowed(platformData: social_profile, tabKey: FetchTabKey): boolean {
     const globalCapability = this.platformCapabilities['__all__'];
     const capability = this.platformCapabilities[platformData.meta.platform];
-    if (globalCapability?.disallow?.includes(tabKey) || capability?.disallow?.includes(tabKey)) {
+    if (Boolean(globalCapability?.disallow?.includes(tabKey)) || Boolean(capability?.disallow?.includes(tabKey))) {
       return false;
     }
     if (tabKey === 'followers') {
@@ -166,7 +166,7 @@ export class SocialDefaultListSectionComponent {
   }
 
   getStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): string {
-    const profileValue = platformData.profile_details?.[key];
+    const profileValue = getOwnProperty(platformData.profile_details, key);
     const metadataValue = undefined;
     const rawValue = profileValue ?? metadataValue ?? this.getFallbackStatValue(platformData, key);
     if (rawValue === null || rawValue === undefined || rawValue === '') {

@@ -5,7 +5,7 @@ import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { ConsolidatedCallbackModel } from '../../../shared/model/results/consolidated/consolidated.callback.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { getStatusFlag } from '../../../shared/utils/intel-report.util';
-import { isUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { getOwnProperty, isUnknownRecord, setOwnProperty } from '../../../shared/utils/type-guards.util';
 import { UniqueLinkItem } from '../model/consolidation_insights';
 import type { InsightResultItem } from './model/result-insights.model';
 export type { InsightResultItem } from './model/result-insights.model';
@@ -72,7 +72,7 @@ export class ResultInsightsComponent implements OnInit {
       ]);
       const collected: string[] = [];
       for (const k of variants) {
-        const v = extractedData[k];
+        const v = getOwnProperty(extractedData, k);
         if (Array.isArray(v)) {
           collected.push(...v);
         }
@@ -84,7 +84,7 @@ export class ResultInsightsComponent implements OnInit {
       };
     });
     for (const key of Object.keys(search_filter_labels)) {
-      this.sectionStates[key] = false;
+      setOwnProperty(this.sectionStates, key, false);
     }
     this.sectionStates['isKeywordExpanded'] = true;
     this.sectionStates['isCoverageExpanded'] = true;
@@ -98,12 +98,12 @@ export class ResultInsightsComponent implements OnInit {
 
   toggleSection(section: string): void {
     if (section in this.sectionStates) {
-      this.sectionStates[section] = !this.sectionStates[section];
+      setOwnProperty(this.sectionStates, section, !getOwnProperty(this.sectionStates, section));
     }
   }
 
   isSectionExpanded(section: string): boolean {
-    return this.sectionStates[section];
+    return getOwnProperty(this.sectionStates, section);
   }
 
   getFilteredSectionData(section: { key: string; data: string[] }): string[] {
@@ -260,7 +260,7 @@ export class ResultInsightsComponent implements OnInit {
     items.forEach(item => {
       addToMap(item.m_url, item.m_title, item.m_creation_date ?? item.m_update_date ?? item.m_date);
       ['m_clearnet_links', 'm_weblink', 'm_dumplink', 'm_source_url'].forEach(field => {
-        const links = item[field];
+        const links = getOwnProperty(item, field);
         if (Array.isArray(links)) {
           links.forEach((link: unknown) => {
             if (typeof link === 'string') {
@@ -419,7 +419,7 @@ export class ResultInsightsComponent implements OnInit {
         tracking_model: consolidated.tracking_model,
         news_model: consolidated.news_model,
       };
-      const model = models[modelKey];
+      const model = getOwnProperty(models, modelKey);
       const results = isUnknownRecord(model) ? this.toInsightItems(model['Result']) : [];
       results.forEach((item: InsightResultItem) => {
         const url = this.getFirstHttpUrlFromFields(item, fields);
@@ -433,7 +433,7 @@ export class ResultInsightsComponent implements OnInit {
 
   private getFirstHttpUrlFromFields(item: InsightResultItem, fields: string[]): string | null {
     for (const field of fields) {
-      const value = item[field];
+      const value = getOwnProperty(item, field);
       const url = Array.isArray(value)
         ? value.find(v => typeof v === 'string' && v.startsWith('http'))
         : (typeof value === 'string' && value.startsWith('http') ? value : null);
@@ -451,24 +451,24 @@ export class ResultInsightsComponent implements OnInit {
       : this.toInsightItems(rankData);
     for (const item of dataArray) {
       for (const [key, value] of Object.entries(item)) {
-        if (!resultMap[key]) {
-          resultMap[key] = new Set();
+        if (!getOwnProperty(resultMap, key)) {
+          setOwnProperty(resultMap, key, new Set());
         }
         if (Array.isArray(value)) {
           for (const v of value) {
             if (typeof v === 'string' && v.trim()) {
-              resultMap[key].add(v);
+              getOwnProperty(resultMap, key).add(v);
             }
           }
         }
         else if (typeof value === 'string' && value.trim()) {
-          resultMap[key].add(value);
+          getOwnProperty(resultMap, key).add(value);
         }
       }
     }
     const finalResult: Record<string, string[]> = {};
     for (const key in resultMap) {
-      finalResult[key] = Array.from(resultMap[key]);
+      setOwnProperty(finalResult, key, Array.from(getOwnProperty(resultMap, key)));
     }
     return finalResult;
   }

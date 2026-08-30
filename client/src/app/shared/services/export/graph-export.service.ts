@@ -12,6 +12,8 @@ import { PDF_EXPORT_THEME } from './pdf-export-theme';
 import { normalizePdfText, preparePdfValue } from './pdf-text.util';
 import { assertAutoTableDocument } from './pdf-autotable.types';
 import type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
+import { getOwnProperty, setOwnProperty } from '../../utils/type-guards.util';
+
 export type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
 
 
@@ -113,12 +115,12 @@ export class GraphExportService {
     if (this.isJpegDataUrl(payload.graphImageDataUrl)) {
       doc.addPage();
       graphPageNo = doc.getCurrentPageInfo().pageNumber;
-      sectionsByPage[graphPageNo] = 'Graph Snapshot';
+      setOwnProperty(sectionsByPage, graphPageNo, 'Graph Snapshot');
       this.drawGraphSnapshot(doc, payload);
     }
     doc.addPage();
     const analysisPageNo = doc.getCurrentPageInfo().pageNumber;
-    sectionsByPage[analysisPageNo] = 'Graph Analysis';
+    setOwnProperty(sectionsByPage, analysisPageNo, 'Graph Analysis');
     this.drawGraphAnalysisHeader(doc, payload, meta);
     const pageW = doc.internal.pageSize.getWidth();
     const margin = PDF_EXPORT_LAYOUT.margin;
@@ -139,7 +141,7 @@ export class GraphExportService {
     });
     const analysisDidDrawPage = (data: HookData) => {
       const pageNo = (data.doc as jsPDF).getCurrentPageInfo().pageNumber;
-      sectionsByPage[pageNo] = 'Graph Analysis';
+      setOwnProperty(sectionsByPage, pageNo, 'Graph Analysis');
     };
     const analysisTableBase = {
       margin: { left: margin, right: margin, bottom: 58 },
@@ -159,7 +161,7 @@ export class GraphExportService {
     this.drawRoundedTableContainer(doc, margin, contentW, 220, doc.lastAutoTable.finalY ?? 220);
     const compositionMarkerY = this.resolveMarkerY(doc, doc.lastAutoTable.finalY + 12, 126, () => {
       const pageNo = doc.getCurrentPageInfo().pageNumber;
-      sectionsByPage[pageNo] = 'Graph Analysis';
+      setOwnProperty(sectionsByPage, pageNo, 'Graph Analysis');
       this.drawGraphAnalysisHeader(doc, payload, meta);
     }, 70);
     this.drawInfoSectionMarker(doc, compositionMarkerY, contentW, 'Node Type Distribution');
@@ -174,7 +176,7 @@ export class GraphExportService {
     if (payload.graphKind === 'social' && socialPlatformCounts.length > 0) {
       doc.addPage();
       platformPageNo = doc.getCurrentPageInfo().pageNumber;
-      sectionsByPage[platformPageNo] = 'Platform Inventory';
+      setOwnProperty(sectionsByPage, platformPageNo, 'Platform Inventory');
       this.drawConnectionMatrixHeader(doc, 'Platform Inventory', 'Detected social platforms in current graph');
       this.drawInfoSectionMarker(doc, 126, contentW, 'Platform Inventory');
       this.requireAutoTable()(doc, {
@@ -194,7 +196,7 @@ export class GraphExportService {
     if (payload.tables?.length) {
       doc.addPage();
       reportsPageNo = doc.getCurrentPageInfo().pageNumber;
-      sectionsByPage[reportsPageNo] = 'Report Sections';
+      setOwnProperty(sectionsByPage, reportsPageNo, 'Report Sections');
       this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
       payload.tables.forEach((t, idx) => {
         const sectionTitle = this.getReportSectionTitle(t, idx);
@@ -202,7 +204,7 @@ export class GraphExportService {
         let markerY = idx === 0 ? 126 : (doc.lastAutoTable.finalY ?? 126) + 18;
         markerY = this.resolveMarkerY(doc, markerY, 126, () => {
           const pageNo = doc.getCurrentPageInfo().pageNumber;
-          sectionsByPage[pageNo] = 'Report Sections';
+          setOwnProperty(sectionsByPage, pageNo, 'Report Sections');
           this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
         });
         this.drawInfoSectionMarker(doc, markerY, contentW, sectionTitle);
@@ -210,7 +212,7 @@ export class GraphExportService {
         const reportSectionDidDrawPage = (data: HookData) => {
           const drawDoc = data.doc as jsPDF;
           const pageNo = drawDoc.getCurrentPageInfo().pageNumber;
-          sectionsByPage[pageNo] = 'Report Sections';
+          setOwnProperty(sectionsByPage, pageNo, 'Report Sections');
           if (pageNo !== sectionStartPage) {
             this.drawConnectionMatrixHeader(drawDoc, 'Report Sections', 'Metadata, screenshot, and related reports');
             this.drawInfoSectionMarker(drawDoc, 126, contentW, sectionTitle || 'Info');
@@ -234,7 +236,7 @@ export class GraphExportService {
           const previewHeight = this.getScreenshotPreviewHeight(doc, screenshotDataUrl, contentW, 190);
           const imageY = this.resolveMarkerY(doc, lastY + 10, 142, () => {
             const pageNo = doc.getCurrentPageInfo().pageNumber;
-            sectionsByPage[pageNo] = 'Report Sections';
+            setOwnProperty(sectionsByPage, pageNo, 'Report Sections');
             this.drawConnectionMatrixHeader(doc, 'Report Sections', 'Metadata, screenshot, and related reports');
             this.drawInfoSectionMarker(doc, 126, contentW, sectionTitle);
           }, previewHeight);
@@ -247,7 +249,7 @@ export class GraphExportService {
     }
     doc.addPage();
     const edgesPageNo = doc.getCurrentPageInfo().pageNumber;
-    sectionsByPage[edgesPageNo] = 'Connection Matrix';
+    setOwnProperty(sectionsByPage, edgesPageNo, 'Connection Matrix');
     this.drawConnectionMatrixHeader(doc, 'Connection Matrix', 'Relationship listing from current graph state');
     this.drawInfoSectionMarker(doc, 126, contentW, 'Connection Matrix');
     this.requireAutoTable()(doc, {
@@ -277,8 +279,8 @@ export class GraphExportService {
     for (let page = 1; page <= totalPages; page++) {
       doc.setPage(page);
       if (page !== 1) {
-        this.drawGraphChrome(doc, payload, meta, sectionsByPage[page] ?? 'Details');
-        this.drawGraphFooter(doc, payload, meta, page - 1, totalPages - 1, sectionsByPage[page] ?? 'Details');
+        this.drawGraphChrome(doc, payload, meta, getOwnProperty(sectionsByPage, page) ?? 'Details');
+        this.drawGraphFooter(doc, payload, meta, page - 1, totalPages - 1, getOwnProperty(sectionsByPage, page) ?? 'Details');
       }
     }
     return this.docToBytes(doc);
@@ -596,7 +598,7 @@ export class GraphExportService {
     const counts: Record<string, number> = {};
     nodes.forEach(n => {
       const key = this.normalizeNodeType(n.type || 'unknown');
-      counts[key] = (counts[key] ?? 0) + 1;
+      setOwnProperty(counts, key, (getOwnProperty(counts, key) ?? 0) + 1);
     });
     return Object.entries(counts).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
   }
@@ -1018,7 +1020,7 @@ export class GraphExportService {
     return (data: HookData) => {
       const doc = data.doc as jsPDF;
       const pageNo = doc.getCurrentPageInfo().pageNumber;
-      sectionsByPage[pageNo] = section;
+      setOwnProperty(sectionsByPage, pageNo, section);
       if (pageNo !== firstPage) {
         this.drawConnectionMatrixHeader(doc, section, subtitle);
       }

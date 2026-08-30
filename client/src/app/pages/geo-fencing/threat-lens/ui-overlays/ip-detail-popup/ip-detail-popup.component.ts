@@ -5,7 +5,7 @@ import { IpDetail } from '../../../../../shared/model/network-intel/network-inte
 import { NetworkIntelScanService } from '../../../../../shared/services/network-intel/network-intel-scan.service';
 import { IpDetailComponent } from '../../../../root-searches/network-intel/ip-detail/ip-detail.component';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
-import { asUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty } from '../../../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-threat-lens-ip-detail-popup',
@@ -143,7 +143,7 @@ export class IpDetailPopupComponent implements OnChanges, OnDestroy {
   }
 
   private hasDetailFields(payload: Record<string, unknown>): boolean {
-    return this.finalDetailKeys.some((key) => this.networkIntelService.hasRenderableValue(payload[key]));
+    return this.finalDetailKeys.some((key) => this.networkIntelService.hasRenderableValue(getOwnProperty(payload, key)));
   }
 
   private isIntermediateResponse(payload: Record<string, unknown>): boolean {

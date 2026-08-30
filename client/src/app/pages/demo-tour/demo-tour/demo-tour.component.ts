@@ -5,6 +5,8 @@ import { DemoTourService } from '../services/demo.tour.service';
 import { RenderedGeometry } from '../model/rendered-geometry.interface';
 import { TourStep } from '../../../shared/model/demo-tour/demo.tour.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-demo-tour',
@@ -337,7 +339,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private areCutoutRectsStable(nextCutoutRects: { top: number; left: number; width: number; height: number; rx: number; ry: number; }[]): boolean {
     return this.lastTargetCutoutRects.length === nextCutoutRects.length &&
       nextCutoutRects.every((rect, index) => {
-        const previousRect = this.lastTargetCutoutRects[index];
+        const previousRect = getOwnProperty(this.lastTargetCutoutRects, index);
         return this.isWithinTolerance(previousRect.top, rect.top) &&
           this.isWithinTolerance(previousRect.left, rect.left) &&
           this.isWithinTolerance(previousRect.width, rect.width) &&
@@ -1447,7 +1449,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       const easedProgress = 1 - Math.pow(1 - progress, 2);
 
       this.cutoutRects = nextCutoutRects.map((targetRect, index) => {
-        const startRect = startRects[index];
+        const startRect = getOwnProperty(startRects, index);
         return {
           top: this.interpolateNumber(startRect.top, targetRect.top, easedProgress),
           left: this.interpolateNumber(startRect.left, targetRect.left, easedProgress),
@@ -1533,7 +1535,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private removeRuntimeRule(styleSheet: CSSStyleSheet, selector: string): void {
     for (let index = styleSheet.cssRules.length - 1; index >= 0; index -= 1) {
-      const rule = styleSheet.cssRules[index];
+      const rule = getOwnProperty(styleSheet.cssRules, index);
       if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
         styleSheet.deleteRule(index);
       }

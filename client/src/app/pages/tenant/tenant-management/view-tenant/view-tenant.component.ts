@@ -15,6 +15,8 @@ import { ApiService } from '../../../../shared/services/api.service';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import type { ManagedTenant, TenantUpdateResponse } from './model/view-tenant.model';
 import { TenantIocDrawerContentComponent } from './tenant-ioc-drawer-content/tenant-ioc-drawer-content.component';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 export type { ManagedTenant,TenantUpdateResponse } from './model/view-tenant.model';
 
 
@@ -276,7 +278,7 @@ export class ViewTenantComponent implements OnInit {
       const existing = existingById.get(key);
       return {
         ioc_id: key,
-        name: search_filter_labels[key] ?? existing?.name ?? key,
+        name: getOwnProperty(search_filter_labels, key) ?? existing?.name ?? key,
         values: [...new Set((existing?.values ?? []).map(value => String(value).trim()).filter(Boolean))]
       };
     });

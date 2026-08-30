@@ -7,6 +7,8 @@ import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 import { PublicUserActivityItem } from '../partials/report-interactions/models/public-user-data.model';
 import { ExportBrandingService } from './export/export-branding.service';
+import { getOwnProperty, setOwnProperty } from '../utils/type-guards.util';
+
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
 @Injectable({
   providedIn: 'root'
@@ -20,7 +22,7 @@ export class HelperService {
     if (iso639_3 === 'und') {
       return "en";
     }
-    const match = LANGUAGE_MAP[iso639_3];
+    const match = getOwnProperty(LANGUAGE_MAP, iso639_3);
     return match ? match.iso1 : "fr";
   }
 
@@ -95,14 +97,14 @@ export class HelperService {
       if (!Object.prototype.hasOwnProperty.call(params, key)) {
         continue;
       }
-      const value = params[key];
-      const defaultValue = (defaultParams as unknown as Record<string, unknown>)[key];
+      const value = getOwnProperty(params, key);
+      const defaultValue = getOwnProperty((defaultParams as unknown as Record<string, unknown>), key);
       const isNullOrUndefined = value === null || value === undefined;
       const isEmptyString = typeof (value as unknown) === 'string' && (value as string).trim() === '';
       const isEmptyArray = Array.isArray(value) && value.length === 0;
       const isSameAsDefault = JSON.stringify(value) === JSON.stringify(defaultValue);
       if (!isNullOrUndefined && !isEmptyString && !isEmptyArray && !isSameAsDefault || key == "q" || key == "page") {
-        cleanedParams[key] = value;
+        setOwnProperty(cleanedParams, key, value);
       }
     }
     return cleanedParams;
@@ -141,7 +143,7 @@ export class HelperService {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
     let renderedMarkup: string;
-    const hasHighlightMarkup = text.includes('<em>') && text.includes('</em>');
+    const hasHighlightMarkup = /<em>/.test(text) && /<\/em>/.test(text);
     if (hasHighlightMarkup) {
       const regex = /<em>(.*?)<\/em>/g;
       const matches = [...text.matchAll(regex)];
@@ -149,13 +151,13 @@ export class HelperService {
       let lastIndex = 0;
       let i = 0;
       while (i < matches.length) {
-        let merged = matches[i][1];
-        const start = matches[i].index;
-        let end = start + matches[i][0].length;
+        let merged = getOwnProperty(matches, i)[1];
+        const start = getOwnProperty(matches, i).index;
+        let end = start + getOwnProperty(matches, i)[0].length;
         let j = i + 1;
         while (j < matches.length) {
           const prevEnd = end;
-          const nextStart = matches[j].index;
+          const nextStart = getOwnProperty(matches, j).index;
           const betweenText = text.slice(prevEnd, nextStart);
           const cleanBetween = new DOMParser().parseFromString(betweenText, 'text/html').body.textContent ?? '';
           const wordGap = cleanBetween
@@ -163,8 +165,8 @@ export class HelperService {
             .split(/\s+/)
             .filter(Boolean).length;
           if (wordGap <= 2) {
-            merged += ` ${cleanBetween.trim()} ${matches[j][1]}`;
-            end = matches[j].index + matches[j][0].length;
+            merged += ` ${cleanBetween.trim()} ${getOwnProperty(matches, j)[1]}`;
+            end = getOwnProperty(matches, j).index + getOwnProperty(matches, j)[0].length;
             j++;
           }
           else {
@@ -182,7 +184,7 @@ export class HelperService {
       renderedMarkup = escapeMarkup(text.length > 500 ? text.substring(0, 500) : text);
     }
     const contextName = 'HTML';
-    return this.sanitizer.sanitize(SecurityContext[contextName], renderedMarkup) ?? '';
+    return this.sanitizer.sanitize(getOwnProperty(SecurityContext, contextName), renderedMarkup) ?? '';
   }
 
   private convertToCSV(data: unknown): string {
@@ -196,7 +198,7 @@ export class HelperService {
     }, new Set<string>()));
     return [
       keys.map(key => this.escapeCsvValue(key)).join(','),
-      ...rows.map(row => keys.map(key => this.escapeCsvValue(row[key])).join(','))
+      ...rows.map(row => keys.map(key => this.escapeCsvValue(getOwnProperty(row, key))).join(','))
     ].join('\n');
   }
 
@@ -237,8 +239,10 @@ export class HelperService {
 
   sortByKey<T extends Record<string, unknown>>(list: T[], key: string, order: 'asc' | 'desc' = 'asc'): T[] {
     return list.slice().sort((a, b) => {
-      const aVal = typeof a[key] === 'string' ? a[key].trim() : String(a[key] ?? '');
-      const bVal = typeof b[key] === 'string' ? b[key].trim() : String(b[key] ?? '');
+      const rawA = getOwnProperty(a, key);
+      const rawB = getOwnProperty(b, key);
+      const aVal = typeof rawA === 'string' ? rawA.trim() : String(rawA ?? '');
+      const bVal = typeof rawB === 'string' ? rawB.trim() : String(rawB ?? '');
       const isDateKey = /date|timestamp/i.test(key);
       if (isDateKey) {
         const timeA = new Date(aVal).getTime();

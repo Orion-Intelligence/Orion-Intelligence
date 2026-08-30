@@ -24,7 +24,7 @@ import { SocialResourceWorkSectionComponent } from '../resource-work-section/res
 import { SocialResourcePeopleSectionComponent } from '../resource-people-section/resource-people-section.component';
 import { SocialResourceFeedSectionComponent } from '../resource-feed-section/resource-feed-section.component';
 import { SocialResourceMediaSectionComponent } from '../resource-media-section/resource-media-section.component';
-import { asUnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty } from '../../../../shared/utils/type-guards.util';
 import { getInputValue } from '../../../../shared/utils/event-input.util';
 
 @Component({
@@ -175,7 +175,7 @@ export class SocialProfileTabsSectionComponent {
   }
 
   isTabLoading(tabKey: FetchTabKey): boolean {
-    return !!this.loadingStates()[tabKey];
+    return !!getOwnProperty(this.loadingStates(), tabKey);
   }
 
   isSectionLoading(tabKey: FetchTabKey): boolean {
@@ -212,9 +212,9 @@ export class SocialProfileTabsSectionComponent {
   crawlItemHighlights(item: unknown): { key: string; value: unknown }[] {
     const record = this.crawlItemRecord(item);
     return primaryKeysFor(this.resourceCategory())
-      .filter(key => this.hasCrawlItemValue(record[key]))
+      .filter(key => this.hasCrawlItemValue(getOwnProperty(record, key)))
       .slice(0, 6)
-      .map(key => ({ key, value: record[key] }));
+      .map(key => ({ key, value: getOwnProperty(record, key) }));
   }
 
   crawlItemEntries(item: unknown): { key: string; value: unknown }[] {
@@ -510,7 +510,7 @@ export class SocialProfileTabsSectionComponent {
     }
     const sourceRecord = asUnknownRecord(source);
     for (const key of keys) {
-      const value = sourceRecord[key];
+      const value = getOwnProperty(sourceRecord, key);
       if (typeof value === 'string' && value.trim()) {
         return value.trim();
       }

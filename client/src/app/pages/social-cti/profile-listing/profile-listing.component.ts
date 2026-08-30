@@ -26,6 +26,8 @@ import { SocialExtensionManagerComponent } from '../../../shared/partials/extens
 import { SocialExtensionService } from '../../../shared/services/social-extension.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { getInputValue } from '../../../shared/utils/event-input.util';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 
 
 @Component({
@@ -205,7 +207,7 @@ export class SocialProfileListingComponent {
   }
 
   getActiveTab(platformId: string): FetchTabKey {
-    return this.activeTabs()[platformId] ?? 'details';
+    return getOwnProperty(this.activeTabs(), platformId) ?? 'details';
   }
 
   getActiveTabForPlatform(platformData: social_profile): FetchTabKey {
@@ -248,8 +250,8 @@ export class SocialProfileListingComponent {
     this.liveSync.crawlResults.update(current => {
       const next = { ...current };
       for (const key of Object.keys(next)) {
-        if (key.startsWith(`${cardId}:`) && next[key]?.loading) {
-          next[key] = { ...next[key], loading: false };
+        if (key.startsWith(`${cardId}:`) && getOwnProperty(next, key)?.loading) {
+          setOwnProperty(next, key, { ...getOwnProperty(next, key), loading: false });
         }
       }
       return next;
@@ -457,7 +459,7 @@ export class SocialProfileListingComponent {
     if (this.liveSync.crawlResults()[crawlKey(platformData, tabKey)]?.loading) {
       return true;
     }
-    return platformData.section_status?.[tabKey] === 'fetching';
+    return getOwnProperty(platformData.section_status, tabKey) === 'fetching';
   }
 
   private hasTabData(platformData: social_profile, tabKey: FetchTabKey): boolean {
@@ -499,7 +501,7 @@ export class SocialProfileListingComponent {
 
   getOnlinePresenceSearchTerm(platformData: social_profile): string {
     const key = this.getPlatformCardId(platformData);
-    return this.onlinePresenceSearchTerms()[key] ?? '';
+    return getOwnProperty(this.onlinePresenceSearchTerms(), key) ?? '';
   }
 
   searchOnlinePresence(platformData: social_profile): void {
@@ -657,7 +659,7 @@ export class SocialProfileListingComponent {
     }
     const responseRecord = response as Record<string, unknown>;
     const dataKey = Object.keys(responseRecord)[0];
-    const data = dataKey ? responseRecord[dataKey] : null;
+    const data = dataKey ? getOwnProperty(responseRecord, dataKey) : null;
     const hasData = !!data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0);
     let updatedProfiles: social_profile[] | null = null;
 
@@ -685,7 +687,7 @@ export class SocialProfileListingComponent {
       onlinePresence: 'online_presence',
       stealerLogs: 'stealer_logs',
     };
-    const propertyName = propertyMap[stateKey];
+    const propertyName = getOwnProperty(propertyMap, stateKey);
     if (!propertyName) {
       return {};
     }
@@ -702,7 +704,7 @@ export class SocialProfileListingComponent {
     this.loadingByRequestKey.update(current => {
       const next = { ...current };
       if (isLoading) {
-        next[requestKey] = true;
+        setOwnProperty(next, requestKey, true);
       }
       else {
         Reflect.deleteProperty(next, requestKey);
@@ -755,7 +757,7 @@ export class SocialProfileListingComponent {
   }
 
   getStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): string {
-    const profileValue = platformData.profile_details?.[key];
+    const profileValue = getOwnProperty(platformData.profile_details, key);
     const rawValue = profileValue ?? this.getFallbackStatValue(platformData, key);
     if (rawValue === null || rawValue === undefined || rawValue === '') {
       return this.missingStatValue;
@@ -928,7 +930,7 @@ export class SocialProfileListingComponent {
   }
 
   private getActiveResultSource(username: string, platforms: social_profile[]): SocialResultSource {
-    const preferred = this.activeResultSources()[username] ?? 'normal';
+    const preferred = getOwnProperty(this.activeResultSources(), username) ?? 'normal';
     if (platforms.some(platform => this.getResultSource(platform) === preferred)) {
       return preferred;
     }

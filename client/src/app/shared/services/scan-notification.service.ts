@@ -54,7 +54,7 @@ export class ScanNotificationService {
   }
 
   resumeNextIncompleteJob(): void {
-    if (this.activePollerId || this.queuedPollIds.size > 0 || this.loadingNextActive) {
+    if (Boolean(this.activePollerId) || this.queuedPollIds.size > 0 || this.loadingNextActive) {
       return;
     }
     this.loadingNextActive = true;
@@ -217,7 +217,7 @@ export class ScanNotificationService {
 
   private resolveApiScanResponse<T>(response: T | ScanJobDuplicateChoiceResponse, request: ScanJobStartRequest): Observable<T> {
     if (this.isDuplicateChoiceResponse(response as ScanJobCreateApiResponse)) {
-      if (request.reusePrevious || request.apiReference === 'netintel/resolve_ip' || request.apiReference === 'urlscan/subdomains') {
+      if (Boolean(request.reusePrevious) || request.apiReference === 'netintel/resolve_ip' || request.apiReference === 'urlscan/subdomains') {
         return this.getScanDetail((response as ScanJobDuplicateChoiceResponse).previous_scan.scan_id).pipe(map(job => this.toScanResponse<T>(job)));
       }
       return this.askDuplicateScanChoice(response as ScanJobDuplicateChoiceResponse).pipe(switchMap(choice => {
@@ -378,7 +378,7 @@ export class ScanNotificationService {
   }
 
   private startPolling(job: ScanJob, pollDelayMs: number): void {
-    if (this.activePollerId || this.pollers.has(job.scan_id)) {
+    if (Boolean(this.activePollerId) || this.pollers.has(job.scan_id)) {
       this.ensurePolling(job, pollDelayMs);
       return;
     }
@@ -472,7 +472,7 @@ export class ScanNotificationService {
       }
       return 'running';
     }
-    if (responseRecord.error || responseRecord.detail) {
+    if (Boolean(responseRecord.error) || Boolean(responseRecord.detail)) {
       return 'error';
     }
     return Object.keys(responseRecord).length > 0 ? 'done' : 'queued';
@@ -583,7 +583,7 @@ export class ScanNotificationService {
   }
 
   private shouldRetryIncompleteUrlScanResponse(response: unknown, request: ScanJobStartRequest): boolean {
-    const apiReference = String(request.apiReference || '').replace(/^\/?api\//, '');
+    const apiReference = String(request.apiReference ?? '').replace(/^\/?api\//, '');
     const scanType = String(request.payload?.['scanType'] ?? '').toLowerCase();
     const responseRecord = this.asScanResponse(response);
     const nested = this.asScanResponse(responseRecord.result);
@@ -591,7 +591,7 @@ export class ScanNotificationService {
     if (apiReference !== 'urlscan/domain' || !['seo', 'repo'].includes(scanType)) {
       return false;
     }
-    if (['error', 'failed', 'failure'].includes(status) || responseRecord.error || responseRecord.detail) {
+    if (['error', 'failed', 'failure'].includes(status) || Boolean(responseRecord.error) || Boolean(responseRecord.detail)) {
       return false;
     }
     return !nested.meta;

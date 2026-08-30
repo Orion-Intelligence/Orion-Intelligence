@@ -15,6 +15,8 @@ import { AlertExportService } from '../../../../../shared/partials/alert-notific
 import { MessageNotificationService } from '../../../../../services/message_notification/message-notification.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { AdminTenantAlertGroup, AdminTenantAlertsPage, AdminTenantAlertsResponse } from './admin-tenant-alerts.model';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 const ALL_TENANTS_OPTION = 'all';
 
@@ -154,7 +156,7 @@ export class AdminTenantAlerts implements OnInit {
 
   private convertSummaryToCategories(summary?: AlertSummary): AlertCategorySummary[] {
     const countsByType = summary?.counts_by_type ?? {};
-    return ALERT_CATEGORY_NAMES.map(category => createAlertCategorySummary(category, countsByType[category] || 0, this.getRiskLevel.bind(this)));
+    return ALERT_CATEGORY_NAMES.map(category => createAlertCategorySummary(category, getOwnProperty(countsByType, category) || 0, this.getRiskLevel.bind(this)));
   }
 
   private countRiskFromSummary(summary?: AlertSummary): { critical: number; high: number; medium: number; low: number } {

@@ -7,7 +7,7 @@ import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-rend
 import { escapeTooltipText, getBearingDegrees, getMarkerBaseSize, getResponseStatus, isPendingStatus, normalizeEntityId, stableHash } from '../../map-utils/renderer-utils';
 import { TrackingSidebarBridge } from '../../../models/geo-fencing.models';
 import type * as Leaflet from 'leaflet';
-import { asUnknownRecord, Augmented, isFiniteNumber, isUnknownRecord, Nullable } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, Augmented, getOwnProperty, isFiniteNumber, isUnknownRecord, Nullable } from '../../../../../shared/utils/type-guards.util';
 import { AircraftDistributionCell } from '../../model/satellite-intel.model';
 
 type AircraftMarker = Augmented<Leaflet.Marker, {
@@ -147,7 +147,7 @@ export class AircraftMapRenderer {
     const chunkSize = 80;
     const endIndex = Math.min(startIndex + chunkSize, aircraft.length);
     for (let index = startIndex; index < endIndex; index += 1) {
-      this.upsertMarker(aircraft[index]);
+      this.upsertMarker(getOwnProperty(aircraft, index));
     }
 
     if (endIndex < aircraft.length) {
@@ -260,7 +260,7 @@ export class AircraftMapRenderer {
     const velocity = aircraft.velocity;
     const bearing = aircraft.true_track;
     if (
-      aircraft.on_ground ||
+      Boolean(aircraft.on_ground) ||
       !isFiniteNumber(lat) ||
       !isFiniteNumber(lon) ||
       !isFiniteNumber(velocity) ||
@@ -658,7 +658,7 @@ export class AircraftMapRenderer {
     while (selected.length < limit) {
       let addedThisRound = false;
       for (const cell of orderedCells) {
-        const item = cell.items[round];
+        const item = getOwnProperty(cell.items, round);
         if (!item) {
           continue;
         }

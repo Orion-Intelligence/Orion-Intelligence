@@ -29,6 +29,8 @@ import { TranslationService } from '../../../../../shared/services/translation.s
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
+import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-case-details',
@@ -396,7 +398,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       exploit: { base: 'exploit', category: 'all' }
     };
 
-    const config = sourcePathMap[source];
+    const config = getOwnProperty(sourcePathMap, source);
 
     if (!config) {
       return '';
@@ -518,7 +520,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
     if (!this.canManageCases()) {
       return;
     }
-    if (!this.caseData?.closure || this.caseData.isArchived || this.isArchivingCase) {
+    if (!this.caseData?.closure || Boolean(this.caseData.isArchived) || this.isArchivingCase) {
       return;
     }
 
@@ -721,7 +723,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       return;
     }
 
-    const relatedEntity = this.getRelatedEntities(this.editedCase)[index];
+    const relatedEntity = getOwnProperty(this.getRelatedEntities(this.editedCase), index);
 
     if (!relatedEntity) {
       return;

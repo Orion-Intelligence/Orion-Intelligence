@@ -5,6 +5,8 @@ import type * as Leaflet from 'leaflet';
 import type { Feature, FeatureCollection, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 import type { Topology } from 'topojson-specification';
 import type { Augmented, Nullable } from '../../../../shared/utils/type-guards.util';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 type CountryFeature = Feature;
 type ExtendedGeoJSONOptions = Augmented<Leaflet.GeoJSONOptions, { noClip?: boolean; smoothFactor?: number }>;
@@ -241,7 +243,7 @@ export class CountryBoundaryMapRenderer {
     let previousLongitude = firstPoint[0];
 
     for (let index = 1; index < ring.length; index += 1) {
-      const point = ring[index];
+      const point = getOwnProperty(ring, index);
       if (!Array.isArray(point) || point.length < 2) {
         continue;
       }

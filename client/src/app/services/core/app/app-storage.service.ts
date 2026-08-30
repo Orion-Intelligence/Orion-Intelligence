@@ -1,5 +1,7 @@
 import { effect, Injectable, WritableSignal } from '@angular/core';
 import { AppSettingsModel, ConfigSettings, LocalSettingsModel } from '../../../shared/model/app/config';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -53,7 +55,7 @@ export class AppStorageService {
     effect(() => {
       const settings = configData().localSettings;
       this.watchList.forEach(key => {
-        const value = settings[key];
+        const value = getOwnProperty(settings, key);
         if (value !== undefined) {
           const storeValue = typeof value === 'boolean' ? String(value)
             : typeof value === 'object' ? JSON.stringify(value)

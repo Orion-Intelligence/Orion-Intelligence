@@ -651,7 +651,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   private cancelActiveNexusRequest(): void {
-    if (this.activeChatRequest || this.isSending()) {
+    if (Boolean(this.activeChatRequest) || this.isSending()) {
       this.nexusChatService.cancelNexusChat();
     }
     this.activeChatRequest?.unsubscribe();

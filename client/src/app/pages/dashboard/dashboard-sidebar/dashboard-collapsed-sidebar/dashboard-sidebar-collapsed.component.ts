@@ -9,6 +9,8 @@ import { SidebarHomepageService } from '../../../../services/dashboard/sidebar.s
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { Category } from '../../../../shared/constants/pages';
 import { SelectionStoreService } from '../../../../services/dashboard/selection.service';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-dashboard-sidebar-collapsed',
@@ -49,7 +51,7 @@ export class SidebarSectionComponent {
   }
 
   getItemTooltip(item: string): string {
-    const mapped = this.itemTooltips[item];
+    const mapped = getOwnProperty(this.itemTooltips, item);
     if (mapped) {
       return mapped;
     }
@@ -58,7 +60,7 @@ export class SidebarSectionComponent {
 
   getItemIcon(item: string): string {
     const normalized = item.toLowerCase().replace(/\s+/g, '-');
-    const mapped = {
+    const iconAliases: Record<string, string> = {
       apt: 'mitre',
       malware: 'phishing',
       iocs: 'ioc',
@@ -66,7 +68,8 @@ export class SidebarSectionComponent {
       'text-analysis': 'phishing',
       'crypto-scanner': 'cryptocurrency',
       feeder: 'account',
-    }[normalized] ?? normalized;
+    };
+    const mapped = getOwnProperty(iconAliases, normalized) ?? normalized;
     return `/assets/images/sidebar/sub_${mapped}.svg`;
   }
 }

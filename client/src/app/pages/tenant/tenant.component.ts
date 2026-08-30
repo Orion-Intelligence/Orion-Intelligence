@@ -10,6 +10,8 @@ import { TenantIocSelectorComponent } from '../../shared/partials/tenant-ioc-sel
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { ApiService } from '../../shared/services/api.service';
 import type { TenantOnboardingUpdateResponse } from './model/tenant.model';
+import { getOwnProperty } from '../../shared/utils/type-guards.util';
+
 export type { TenantOnboardingUpdateResponse } from './model/tenant.model';
 
 
@@ -38,7 +40,7 @@ export class TenantComponent implements OnInit {
     const search_filter_keys = Object.keys(search_filter_labels);
     this.onboardingData.iocs = Array.from(search_filter_keys).map(key => ({
       ioc_id: key,
-      name: search_filter_labels[key] || key,
+      name: getOwnProperty(search_filter_labels, key) || key,
       values: []
     }));
   }

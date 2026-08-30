@@ -1,5 +1,7 @@
 import { Pipe, PipeTransform, inject } from '@angular/core';
 import { TranslationService } from '../services/translation.service';
+import { getOwnProperty } from '../utils/type-guards.util';
+
 
 @Pipe({ name: 'markdown', standalone: true, pure: false })
 export class MarkdownPipe implements PipeTransform {
@@ -47,7 +49,7 @@ export class MarkdownPipe implements PipeTransform {
     };
 
     for (let index = 0; index < lines.length; index += 1) {
-      const line = lines[index] ?? '';
+      const line = getOwnProperty(lines, index) ?? '';
       const trimmed = line.trim();
 
       if (codeLines) {
@@ -119,7 +121,7 @@ export class MarkdownPipe implements PipeTransform {
 
       const unordered = /^[-*+]\s+(.+)$/.exec(trimmed);
       const ordered = /^\d+\.\s+(.+)$/.exec(trimmed);
-      if (unordered || ordered) {
+      if (unordered !== null || ordered !== null) {
         flushParagraph();
         const nextType = ordered ? 'ol' : 'ul';
         if (listType && listType !== nextType) {
@@ -144,7 +146,7 @@ export class MarkdownPipe implements PipeTransform {
   }
 
   private tryRenderTable(lines: string[], startIndex: number): { html: string; endIndex: number } | null {
-    const header = lines[startIndex]?.trim() ?? '';
+    const header = getOwnProperty(lines, startIndex)?.trim() ?? '';
     const separator = lines[startIndex + 1]?.trim() ?? '';
     if (!header.includes('|') || !this.isTableSeparator(separator)) {
       return null;
@@ -166,7 +168,7 @@ export class MarkdownPipe implements PipeTransform {
     const labels = headers.map(cell => this.formatHeaderCell(cell));
     const thead = `<thead><tr>${labels.map(cell => `<th>${this.renderInline(cell)}</th>`).join('')}</tr></thead>`;
     const tbody = rows.length
-      ? `<tbody>${rows.map(row => `<tr>${labels.map((label, cellIndex) => this.renderTableCell(label, row[cellIndex] ?? '')).join('')}</tr>`).join('')}</tbody>`
+      ? `<tbody>${rows.map(row => `<tr>${labels.map((label, cellIndex) => this.renderTableCell(label, getOwnProperty(row, cellIndex) ?? '')).join('')}</tr>`).join('')}</tbody>`
       : '';
 
     const tableShellClasses = 'w-full max-w-full mt-3 mb-1 overflow-x-auto rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--color-blue-830)] shadow-[inset_0_1px_0_rgb(255_255_255/3%)] [scrollbar-color:color-mix(in_srgb,var(--color-blue-640)_55%,transparent)_transparent] [scrollbar-width:thin] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--color-blue-640)]';

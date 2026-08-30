@@ -6,6 +6,8 @@ import { DashboardService } from '../../services/dashboard/dashboard.service';
 import { ScrollService } from '../services/scroll.service';
 import { FilterModel } from '../model/filter/filter.model';
 import type { BaseListResponse, ListService } from './model/base.listing.model';
+import { getOwnProperty, setOwnProperty } from '../utils/type-guards.util';
+
 export type { BaseListResponse, ListService } from './model/base.listing.model';
 
 
@@ -57,10 +59,10 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
     const baseFilters = this.filterModel.filters;
     const initialSelected: Record<string, string> = {};
     Object.keys(baseFilters).forEach(key => {
-      const value = params[key];
-      if (value && baseFilters[key].options.includes(value)) {
-        baseFilters[key].selected = value;
-        initialSelected[key] = value;
+      const value = getOwnProperty(params, key);
+      if (value && getOwnProperty(baseFilters, key).options.includes(value)) {
+        getOwnProperty(baseFilters, key).selected = value;
+        setOwnProperty(initialSelected, key, value);
       }
     });
     this.selectedFilters = initialSelected;
@@ -90,7 +92,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
 
   resetFilters(): void {
     this.selectedFilters = {};
-    Object.keys(this.filterModel.filters).forEach(key => delete this.filterModel.filters[key].selected);
+    Object.keys(this.filterModel.filters).forEach(key => delete getOwnProperty(this.filterModel.filters, key).selected);
     const currentUrl = this.router.url.split('?')[0];
     this.router.navigateByUrl(currentUrl, { replaceUrl: true }).then(() => {
       this.reload();

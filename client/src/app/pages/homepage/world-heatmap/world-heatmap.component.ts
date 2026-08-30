@@ -14,7 +14,7 @@ import { InsightCacheService } from '../services/insight-cache.service';
 import { CountryData, CountryInsightPageResponse, CountryInsightReport } from '../model/country-insight.model';
 import { MapLoadingBadgesComponent } from '../../../shared/partials/map-loading-badges/map-loading-badges.component';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { asUnknownRecord, Nullable } from '../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty, Nullable, setOwnProperty } from '../../../shared/utils/type-guards.util';
 
 type CountryFeature = Feature<Geometry, { name?: string }>;
 type WorldTopology = Topology<{ countries: GeometryCollection }>;
@@ -152,8 +152,8 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private getAvailableCategories(): string[] {
-    return this.categoryOrder.filter(cat => this.allCategoryReports?.[cat] &&
-          this.allCategoryReports[cat].length > 0);
+    return this.categoryOrder.filter(cat => getOwnProperty(this.allCategoryReports, cat) &&
+          getOwnProperty(this.allCategoryReports, cat).length > 0);
   }
 
   private applyInsightData(data: unknown): void {
@@ -189,9 +189,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     this.stopCategoryRotation();
     let index = 0;
     const switchCategory = () => {
-      const category = available[index];
+      const category = getOwnProperty(available, index);
       this.activeCategoryKey = category;
-      this.activeCountryReports = this.allCategoryReports[category] ?? [];
+      this.activeCountryReports = getOwnProperty(this.allCategoryReports, category) ?? [];
       this.mapData = this.gettingUniqueCountrys();
       this.buildIndex();
       this.refreshMapPresentation(true);
@@ -442,7 +442,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     const ramp = ['#4a2530', '#5a2533', '#6d2637', '#82273b', '#9a2840', '#b62a46', '#d92d4d'];
     return (v: number) => {
       const index = q(v);
-      return ramp[index];
+      return getOwnProperty(ramp, index);
     };
   }
 
@@ -537,7 +537,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     this.activeCountryReports.forEach((doc) => {
       doc.m_country?.forEach((c: string) => {
         c.split(',').map(x => x.trim()).forEach(cc => {
-          counts[cc] = (counts[cc] || 0) + 1;
+          setOwnProperty(counts, cc, (getOwnProperty(counts, cc) || 0) + 1);
         });
       });
     });

@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
+import { getOwnProperty } from '../../../../../../../shared/utils/type-guards.util';
+
 
 @Component({
   selector: 'app-aircraft-details-panel',
@@ -59,7 +61,7 @@ export class AircraftDetailsPanelComponent {
 
   private pick(...keys: string[]): unknown {
     for (const key of keys) {
-      const value = this.aircraft?.[key];
+      const value = getOwnProperty(this.aircraft, key);
       if (value !== null && value !== undefined && value !== '') {
         return value;
       }

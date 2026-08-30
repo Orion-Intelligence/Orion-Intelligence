@@ -3,6 +3,8 @@ import { AlertAllIoc, AlertModel } from '../../../model/company-profile/node.mod
 import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from '../../../model/report/report-export.model';
 import { ExportBrandingService } from '../../../services/export/export-branding.service';
 import { ReportExportService } from '../../../services/export/report-export.service';
+import { setOwnProperty } from '../../../utils/type-guards.util';
+
 
 @Injectable({ providedIn: 'root' })
 export class AlertExportService {
@@ -247,7 +249,7 @@ export class AlertExportService {
     if (text === '-') {
       return;
     }
-    fields[label] = text;
+    setOwnProperty(fields, label, text);
   }
 
   private firstText(...values: unknown[]): string {

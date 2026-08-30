@@ -16,6 +16,8 @@ import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TenantBrandingSettingsComponent } from './tenant-branding-settings/tenant-branding-settings.component';
 import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../../shared/partials/alert-webhook-settings-block/model/alert-webhook-settings.model';
 import type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
+import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+
 export type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
 
 
@@ -178,8 +180,8 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
         logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png',
         auth_dashboard_icon: '/api/s/static/system/auth_dashboard_icon_default.png'
       };
-      const fallback = fallbackMap[key];
-      this.appService.getConfig().appSettings[key] = fallback;
+      const fallback = getOwnProperty(fallbackMap, key);
+      setOwnProperty(this.appService.getConfig().appSettings, key, fallback);
       if (key === 'logo_url') {
         this.appService.updateFavicon(fallback);
       }

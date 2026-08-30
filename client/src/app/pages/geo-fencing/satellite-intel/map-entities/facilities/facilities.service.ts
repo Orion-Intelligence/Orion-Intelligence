@@ -4,7 +4,7 @@ import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteFacilitiesResponse, SatelliteFacilityFeature } from '../../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, OrionSatelliteFeatureType } from '../../../models/geo-fencing.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
-import { asUnknownRecord, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
 import type { StreamedMapEntity } from './model/facilities.model';
 export type { StreamedMapEntity } from './model/facilities.model';
 
@@ -357,8 +357,8 @@ export class SatelliteFacilitiesService {
     const count = Math.min(latValue.length, lonValue.length);
     const points: { lat: number; lon: number }[] = [];
     for (let index = 0; index < count; index += 1) {
-      const lat = this.toFiniteNumber(latValue[index]);
-      const lon = this.toFiniteNumber(lonValue[index]);
+      const lat = this.toFiniteNumber(getOwnProperty(latValue, index));
+      const lon = this.toFiniteNumber(getOwnProperty(lonValue, index));
       if (lat !== null && lon !== null && this.isValidLatLon(lat, lon)) {
         points.push({ lat, lon });
       }
@@ -434,7 +434,7 @@ export class SatelliteFacilitiesService {
       }
     }
 
-    if (record['port'] || record['harbour'] || record['harbor']) {
+    if (Boolean(record['port']) || Boolean(record['harbour']) || Boolean(record['harbor'])) {
       return 'port';
     }
     if (['port', 'harbour', 'harbor', 'dock', 'marina', 'shipyard'].includes(landuse)) {
@@ -542,7 +542,7 @@ export class SatelliteFacilitiesService {
       wave_and_tidal: '#06b6d4',
       other: '#64748b',
     };
-    return colors[type] || colors.other;
+    return getOwnProperty(colors, type) || colors.other;
   }
 
   private getStreamedMapEntityColor(type: OrionSatelliteFeatureType): string {
@@ -568,6 +568,6 @@ export class SatelliteFacilitiesService {
       military: '#d71c1c',
       other: '#a3a3a3',
     };
-    return colors[type] || colors.other;
+    return getOwnProperty(colors, type) || colors.other;
   }
 }

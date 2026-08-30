@@ -1,3 +1,4 @@
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
 export type ResourceCategory = 'feed' | 'media' | 'people' | 'work' | 'document' | 'record';
 
 const TYPE_CATEGORY: Record<string, ResourceCategory> = {
@@ -42,11 +43,11 @@ const CATEGORY_PRIMARY_KEYS: Record<ResourceCategory, string[]> = {
 export function categoryFor(platform: string, type: string): ResourceCategory {
   const platformKey = String(platform ?? '').toLowerCase();
   const typeKey = String(type ?? '').toLowerCase();
-  return PLATFORM_TYPE_CATEGORY[`${platformKey}:${typeKey}`] ?? TYPE_CATEGORY[typeKey] ?? 'record';
+  return PLATFORM_TYPE_CATEGORY[`${platformKey}:${typeKey}`] ?? getOwnProperty(TYPE_CATEGORY, typeKey) ?? 'record';
 }
 
 const FALLBACK_PRIMARY_KEYS = ['author', 'datetime', 'likes', 'views', 'shares'];
 
 export function primaryKeysFor(category: ResourceCategory): string[] {
-  return [...new Set([...(CATEGORY_PRIMARY_KEYS[category] ?? []), ...FALLBACK_PRIMARY_KEYS])];
+  return [...new Set([...(getOwnProperty(CATEGORY_PRIMARY_KEYS, category) ?? []), ...FALLBACK_PRIMARY_KEYS])];
 }

@@ -19,7 +19,7 @@ import { UrlScanMeta, UrlScanProofItem, UrlScanResponse, UrlScanThreatItem } fro
 import { NetworkIntelSeoRepoScanCategory, SeoRepoScanSectionComponent } from './seo-repo-scan-section/seo-repo-scan-section.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { NETWORK_INTEL_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
-import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty } from '../../../shared/utils/type-guards.util';
 import { isIpv4Address } from '../../../shared/utils/network-validation.util';
 
 @Component({
@@ -139,8 +139,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
     const section = this.route.snapshot.queryParamMap.get('section');
     const q = (this.route.snapshot.queryParamMap.get('q') ?? this.route.snapshot.queryParamMap.get('domain') ?? '').trim();
 
-    if (section && this.sectionToTab[section]) {
-      this.activeTab = this.sectionToTab[section];
+    if (section && getOwnProperty(this.sectionToTab, section)) {
+      this.activeTab = getOwnProperty(this.sectionToTab, section);
       if (this.activeTab === 'dns' || this.activeTab === 'shodan' || this.activeTab === 'vuln') {
         this.lastPrimaryTab = this.activeTab;
       }
@@ -462,7 +462,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   startDnsScan(): void {
     this.dnsForm.domain = this.normalizeDomainInput(this.dnsForm.domain);
     this.validateDns();
-    if (this.formError || !this.dnsForm.domain.trim() || this.isScanning()) {
+    if (Boolean(this.formError) || !this.dnsForm.domain.trim() || this.isScanning()) {
       return;
     }
     this.resetActiveWork();
@@ -495,7 +495,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       row.expanded = false; return;
     }
     row.expanded = true;
-    if (row.detail || row.loading) {
+    if (Boolean(row.detail) || row.loading) {
       return;
     }
 
@@ -510,7 +510,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   startShodanScan(): void {
     this.shodanForm.ip = this.normalizeIpInput(this.shodanForm.ip);
     this.validateShodan();
-    if (this.formError || !this.shodanForm.ip.trim() || this.isScanning()) {
+    if (Boolean(this.formError) || !this.shodanForm.ip.trim() || this.isScanning()) {
       return;
     }
     this.resetActiveWork();
@@ -524,7 +524,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   startVulnerabilityScan(): void {
     this.vulnForm.ip = this.normalizeDomainInput(this.vulnForm.ip);
     this.validateVulnerability();
-    if (this.formError || !this.vulnForm.ip.trim() || this.isScanning()) {
+    if (Boolean(this.formError) || !this.vulnForm.ip.trim() || this.isScanning()) {
       return;
     }
     this.resetActiveWork();
@@ -582,7 +582,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.seoRepoScanForm.target = this.normalizeDomainInput(this.seoRepoScanForm.target);
       this.validateSeoScan();
     }
-    if (this.formError || !this.seoRepoScanForm.target.trim() || this.isScanning()) {
+    if (Boolean(this.formError) || !this.seoRepoScanForm.target.trim() || this.isScanning()) {
       return;
     }
 
@@ -780,7 +780,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.resetActiveWork();
     if (this.geoMode === 'coords') {
       this.validateGeo();
-      if (this.formError || !this.geoForm.coordinates.trim() || this.isScanning()) {
+      if (Boolean(this.formError) || !this.geoForm.coordinates.trim() || this.isScanning()) {
         return;
       }
       this.hasSearched = true;
@@ -793,7 +793,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     else {
       this.geoRangesSubmitAttempted = true;
       this.validateIpRanges();
-      if (this.formError || !this.geoForm.ip_ranges.trim() || this.isScanning()) {
+      if (Boolean(this.formError) || !this.geoForm.ip_ranges.trim() || this.isScanning()) {
         return;
       }
       const ranges = this.geoForm.ip_ranges
@@ -1284,7 +1284,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       this.exportCurrentStep = `Loading details for ${row.ip}...`;
       this.exportProgress = Math.max(6, Math.min(95, Math.round((completed / total) * 100)));
 
-      if (row.detail || row.error) {
+      if (Boolean(row.detail) || Boolean(row.error)) {
         continue;
       }
 
@@ -1350,7 +1350,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   private bindDnsIpDetailQueue(): void {
     this.dnsIpDetailQueueSub?.unsubscribe();
     this.dnsIpDetailQueueSub = this.dnsIpDetailQueue$.pipe(concatMap((row) => {
-      if (!row || row.detail || row.error) {
+      if (!row || Boolean(row.detail) || Boolean(row.error)) {
         return EMPTY;
       }
 
@@ -1508,7 +1508,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         }, {})
       },
       ...this.buildPortDetailTables(detail, prefix)
-    ].filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
+    ].filter(table => Object.values(table.values).some(value => Boolean((value ?? '').trim()) && value.trim() !== '-'));
   }
 
   private buildPortDetailTables(detail: IpDetail, prefix = ''): { title: string; values: Record<string, string> }[] {
@@ -1521,7 +1521,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         Protocol: port.protocol ?? port.proto ?? '-',
         Service: port.service ?? '-',
         State: port.state ?? '-',
-        'Is Camera': port.is_camera || port.device_type === 'camera' ? 'Yes' : 'No',
+        'Is Camera': Boolean(port.is_camera) || port.device_type === 'camera' ? 'Yes' : 'No',
         'Is IoT': port.is_iot ? 'Yes' : 'No',
         'Device Type': this.normalizeReportValue(port.device_type),
         'Device Category': this.normalizeReportValue(port.device_category),

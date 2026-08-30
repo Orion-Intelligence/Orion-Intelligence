@@ -1,5 +1,7 @@
 import { formatFollowers } from '../../../shared/utils/formatters';
 import type { resource_entry, resource_time } from './model/resource-view.model';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 export type { resource_entry, resource_time } from './model/resource-view.model';
 
 
@@ -28,7 +30,7 @@ export function hasValue(value: unknown): boolean {
 
 export function pickText(record: resource_record, ...keys: string[]): string {
   for (const key of keys) {
-    const value = record[key];
+    const value = getOwnProperty(record, key);
     if (hasValue(value) && typeof value !== 'object') {
       return String(value).trim();
     }
@@ -38,7 +40,7 @@ export function pickText(record: resource_record, ...keys: string[]): string {
 
 export function pickFlag(record: resource_record, ...keys: string[]): boolean {
   for (const key of keys) {
-    const value = record[key];
+    const value = getOwnProperty(record, key);
     if (value === true || value === 'true' || value === 1 || value === '1') {
       return true;
     }
@@ -48,7 +50,7 @@ export function pickFlag(record: resource_record, ...keys: string[]): boolean {
 
 export function pickList(record: resource_record, ...keys: string[]): string[] {
   for (const key of keys) {
-    const value = record[key];
+    const value = getOwnProperty(record, key);
     if (Array.isArray(value) && value.length) {
       return value.map(entry => typeof entry === 'object' && entry !== null ? pickText(asRecord(entry), 'url', 'name', 'text', 'tag') : String(entry)).filter(Boolean);
     }
@@ -93,7 +95,7 @@ export function formatBytes(value: string | number, unit: 'b' | 'kb' = 'b'): str
     size /= 1024;
     index += 1;
   }
-  return `${size >= 10 || index === 0 ? Math.round(size) : size.toFixed(1)} ${units[index]}`;
+  return `${size >= 10 || index === 0 ? Math.round(size) : size.toFixed(1)} ${getOwnProperty(units, index)}`;
 }
 
 export function formatKeyLabel(key: string): string {

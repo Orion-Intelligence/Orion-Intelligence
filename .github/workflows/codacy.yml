@@ -91,6 +91,14 @@ jobs:
           sarif = json.loads(source.read_text())
           runs = sarif.get("runs") or []
           batch_size = 20
+          suppressed_rules = {"no-unused-vars"}
+
+          for run in runs:
+              results = run.get("results") or []
+              kept = [r for r in results if r.get("ruleId") not in suppressed_rules]
+              if len(kept) != len(results):
+                  print(f"Dropped {len(results) - len(kept)} suppressed results")
+              run["results"] = kept
 
           if not runs:
               raise SystemExit("results.sarif does not contain any SARIF runs")

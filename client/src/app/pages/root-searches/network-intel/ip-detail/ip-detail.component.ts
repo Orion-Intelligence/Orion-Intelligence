@@ -4,7 +4,7 @@ import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { IpDetail } from '../../../../shared/model/network-intel/network-intel.model';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { asUnknownRecord } from '../../../../shared/utils/type-guards.util';
+import { asUnknownRecord, getOwnProperty } from '../../../../shared/utils/type-guards.util';
 
 @Component({
   selector: 'app-ip-detail',
@@ -133,6 +133,6 @@ export class IpDetailComponent {
       as: this.detail?.asn,
     };
 
-    return key in duplicateFields && this.formatDisplayValue(duplicateFields[key]) === this.formatDisplayValue(value);
+    return key in duplicateFields && this.formatDisplayValue(getOwnProperty(duplicateFields, key)) === this.formatDisplayValue(value);
   }
 }

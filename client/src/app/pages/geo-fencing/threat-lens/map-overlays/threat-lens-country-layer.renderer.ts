@@ -1,5 +1,7 @@
 import { ThreatLensMapUtils } from '../map-utils/threat-lens-map.utils';
 import { EsriConstructor, EsriFeatureLayer, EsriGraphicsLayer, EsriLayerView, EsriSceneView, ThreatLensMapGraphic } from '../models/threat-lens-map.types';
+import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+
 
 export class ThreatLensCountryLayerRenderer {
   private static readonly COUNTRY_LAYER_URL = 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0';
@@ -107,7 +109,7 @@ export class ThreatLensCountryLayerRenderer {
     }
 
     for (const fieldName of this.countryNameFields) {
-      const value = attributes[fieldName];
+      const value = getOwnProperty(attributes, fieldName);
       if (typeof value === 'string' && value.trim()) {
         return value;
       }
@@ -122,7 +124,7 @@ export class ThreatLensCountryLayerRenderer {
     }
 
     for (const fieldName of this.countryCodeFields) {
-      const value = attributes[fieldName];
+      const value = getOwnProperty(attributes, fieldName);
       if (typeof value === 'string') {
         const normalized = value.trim().toUpperCase();
         if (normalized && normalized !== '-99' && normalized !== '99' && normalized !== 'NULL') {

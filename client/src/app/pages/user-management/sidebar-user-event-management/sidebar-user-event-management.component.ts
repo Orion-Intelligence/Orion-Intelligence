@@ -20,6 +20,8 @@ import { TranslationService } from '../../../shared/services/translation.service
 import { ValuePresentationBase } from '../../../shared/utils/value-presentation.base';
 import { DOMAIN_NAME_PATTERN, EMAIL_ADDRESS_PATTERN, IPV4_ADDRESS_PATTERN } from '../../../shared/utils/network-validation.util';
 import type { SiemEventRecord, SiemSearchResponse } from './model/sidebar-user-event-management.model';
+import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+
 export type { SiemEventRecord,SiemSearchResponse } from './model/sidebar-user-event-management.model';
 
 
@@ -219,7 +221,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
       }
 
       const rawKey = name.toLowerCase();
-      const friendlyName = labelMap[rawKey] || name.replace(/^m_/, '').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+      const friendlyName = getOwnProperty(labelMap, rawKey) || name.replace(/^m_/, '').replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
       const key = friendlyName.toLowerCase();
       if (seen.has(key)) {
         return;
