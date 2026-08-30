@@ -210,7 +210,7 @@ export class AlertExportService {
       return '';
     }
     const description = String(alert.description ?? '');
-    const labelledPassword = description.match(/\bpassword\s*:\s*([\s\S]*?)(?=\s+(?:links?|filelist|files?|https?:\/\/)\b|$)/i)?.[1];
+    const labelledPassword = (/\bpassword\s*:\s*([\s\S]*?)(?=\s+(?:links?|filelist|files?|https?:\/\/)\b|$)/i.exec(description))?.[1];
     if (labelledPassword?.trim()) {
       return this.getText(labelledPassword, 360);
     }

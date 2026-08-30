@@ -24,7 +24,7 @@ type SystemSettingsTab = 'branding' | 'platform';
 type SystemImageKey = 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark';
 type SystemImageResponse = Partial<Pick<AppSettingsModel, SystemImageKey>>;
 type AppSettingsWire = Partial<Record<keyof AppSettingsModel, string | boolean>>;
-type UpdateSettingsResponse = { settings?: AppSettingsWire; appSettings?: AppSettingsWire };
+interface UpdateSettingsResponse { settings?: AppSettingsWire; appSettings?: AppSettingsWire }
 
 
 @Component({

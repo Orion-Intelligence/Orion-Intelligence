@@ -17,7 +17,7 @@ export class ManageProfilesService {
 
   fetchPlatforms(): Observable<{ items: PlatformEntry[]; error?: string }> {
     return timer(0, 3000).pipe(switchMap(() => this.http.post<{ result?: { items?: PlatformEntry[] }; error?: string; status?: string }>('/api/manage-profiles/platforms', {}, { withCredentials: true })),
-      map(response => ({ pending: response?.status === 'pending', items: (response?.result?.items ?? []) as PlatformEntry[], error: response?.error })),
+      map(response => ({ pending: response?.status === 'pending', items: (response?.result?.items ?? []), error: response?.error })),
       filter(result => !result.pending),
       take(1),
       map(result => ({ items: result.items, error: result.error })),

@@ -57,7 +57,7 @@ export class AddTenantComponent implements OnInit {
 
   ngOnInit(): void {
     this.isAdmin = this.appService.userSessionData().user.role === 'admin';
-    this.isAdmin ? (this.model.role = 'analyst') : (this.model.role = 'member');
+    this.model.role = this.isAdmin ? 'analyst' : 'member';
     if (this.isAdmin) {
       this.loadAlertTenantOptions();
     }

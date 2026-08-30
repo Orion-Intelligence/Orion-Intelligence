@@ -212,6 +212,6 @@ export class SocialDefaultListSectionComponent {
 
   private extractSocialCount(value: unknown): string | null {
     const text = typeof value === 'string' ? value : '';
-    return text.match(/([\d,.]+[kmb]?)(?=\s*(subscribers|followers))/i)?.[1] ?? null;
+    return (/([\d,.]+[kmb]?)(?=\s*(subscribers|followers))/i.exec(text))?.[1] ?? null;
   }
 }

@@ -75,7 +75,7 @@ export class ConfigSettings {
   localSettings: LocalSettingsModel;
 
   constructor(appSettings?: Partial<AppSettingsModel>, localSettings?: Partial<LocalSettingsModel>) {
-    this.appSettings = new AppSettingsModel(appSettings as Partial<Record<keyof AppSettingsModel, string | boolean>> | undefined);
+    this.appSettings = new AppSettingsModel(appSettings);
     this.localSettings = Object.assign(new LocalSettingsModel(), localSettings);
   }
 }

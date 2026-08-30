@@ -59,7 +59,9 @@ export class FacilitiesMapRenderer {
       this.featureLayer?.addTo(this.map);
       return;
     }
-    this.featureLayer && this.map.removeLayer(this.featureLayer);
+    if (this.featureLayer) {
+      this.map.removeLayer(this.featureLayer);
+    }
   }
 
   destroy(): void {

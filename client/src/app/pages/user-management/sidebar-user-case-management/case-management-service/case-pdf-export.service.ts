@@ -302,7 +302,7 @@ export class CasePdfExportService {
           return { ...cell, content: preparePdfValue(cell.content) };
         }
         return cell;
-      }) as RowInput;
+      });
     });
   }
 

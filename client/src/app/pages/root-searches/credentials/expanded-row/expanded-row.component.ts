@@ -75,7 +75,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     for (let part of parts) {
       part = part.trim();
       let value = part;
-      const tagMatch = part.match(/^(\w+):(.+)$/);
+      const tagMatch = /^(\w+):(.+)$/.exec(part);
       if (tagMatch) {
         value = tagMatch[2].trim();
       }
@@ -104,14 +104,14 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   get channelValue(): string {
     const item = this.item();
     const result = this.result();
-    const v = item?.['channel'] ??
-          item?.['m_channel'] ??
-          item?.['source_channel'] ??
-          item?.['m_source_channel'] ??
-          result?.['channel'] ??
-          result?.['m_channel'] ??
-          result?.['source_channel'] ??
-          result?.['m_source_channel'];
+    const v = item?.channel ??
+          item?.m_channel ??
+          item?.source_channel ??
+          item?.m_source_channel ??
+          result?.channel ??
+          result?.m_channel ??
+          result?.source_channel ??
+          result?.m_source_channel;
     const arr = this.rowHelper.normalizeToArray(v);
     return arr[0] || '-';
   }
@@ -128,12 +128,12 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   get fileTypeValue(): string {
     const item = this.item();
     const result = this.result();
-    const v = item?.['type'] ??
-          item?.['file_type'] ??
-          item?.['fileType'] ??
-          result?.['type'] ??
-          result?.['file_type'] ??
-          result?.['fileType'];
+    const v = item?.type ??
+          item?.file_type ??
+          item?.fileType ??
+          result?.type ??
+          result?.file_type ??
+          result?.fileType;
     const arr = this.rowHelper.normalizeToArray(v);
     return arr[0] || '-';
   }
@@ -196,12 +196,12 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get passwordValue(): string {
-    const arr = this.rowHelper.normalizeToArray(this.item()?.['password']);
+    const arr = this.rowHelper.normalizeToArray(this.item()?.password);
     return arr[0] || '-';
   }
 
   get isCreditCardRecord(): boolean {
-    return String(this.item()?.['type'] ?? '').toLowerCase() === 'bin';
+    return String(this.item()?.type ?? '').toLowerCase() === 'bin';
   }
 
   get recordSubtitle(): string {
@@ -221,7 +221,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return [
       { key: 'bin', label: 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.firstValue(item?.['bin']) },
       { key: 'Scheme', label: 'Scheme', icon: 'bi-wallet2', value: this.firstValue(item?.['Scheme'] ?? item?.['scheme']) },
-      { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.['Type'] ?? item?.['card_type'] ?? item?.['type']) },
+      { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.['Type'] ?? item?.['card_type'] ?? item?.type) },
       { key: 'Tier', label: 'Tier', icon: 'bi-tag-fill', value: this.firstValue(item?.['Tier'] ?? item?.['tier']) },
       { key: 'Issuer', label: 'Issuer', icon: 'bi-building', value: this.firstValue(item?.['Issuer'] ?? item?.['issuer']) },
       { key: 'Country', label: 'Country', icon: 'bi-flag-fill', value: this.firstValue(item?.['Country'] ?? item?.['country']) },
@@ -258,7 +258,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     const term = (value: string): string => {
       let text = String(value || '').trim().replace(/^['"]|['"]$/g, '');
       if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) {
-        const fieldMatch = text.match(/^[a-z_][a-z0-9_]*:(.+)$/i);
+        const fieldMatch = /^[a-z_][a-z0-9_]*:(.+)$/i.exec(text);
         if (fieldMatch) {
           text = fieldMatch[1].trim();
         }
@@ -283,7 +283,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       .map(term)
       .filter(value => value.length >= 3)));
     const domains = Array.from(new Set((this.mode() === 'stealer'
-      ? [...values(record?.['domain']), ...values(record?.['source_domain'])]
+      ? [...values(record?.domain), ...values(record?.source_domain)]
       : [...values(record?.m_domain), ...values(record?.m_root_domain), ...values(record?.m_url), ...values(record?.m_base_url), ...values(record?.m_weblink)])
       .map(domain)
       .filter(Boolean)));
@@ -524,14 +524,14 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     if (!item) {
       return [];
     }
-    const emails = this.rowHelper.normalizeToArray(item?.['email']);
+    const emails = this.rowHelper.normalizeToArray(item?.email);
     const sourceDomains = this.getSourceDomainValues(item);
     const domains = this.uniqueValues([
       ...this.getRawDomainValues(item),
       ...sourceDomains
     ]);
-    const ips = this.rowHelper.normalizeToArray(item?.['ip']);
-    const passwords = this.rowHelper.normalizeToArray(item?.['password']);
+    const ips = this.rowHelper.normalizeToArray(item?.ip);
+    const passwords = this.rowHelper.normalizeToArray(item?.password);
     const exclude = new Set<string>([
       '_id',
       'raw',
@@ -702,7 +702,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private normalizeMatchValue(value: unknown): string {
     let text = String(value ?? '').toLowerCase().replace(/\s+/g, ' ').trim();
     text = text.replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');
-    const fieldMatch = text.match(/^[a-z_][a-z0-9_]*:(.+)$/i);
+    const fieldMatch = /^[a-z_][a-z0-9_]*:(.+)$/i.exec(text);
     return (fieldMatch ? fieldMatch[1] : text).trim().replace(/^['"]|['"]$/g, '').replace(/^\*+|\*+$/g, '');
   }
 
@@ -726,10 +726,10 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   private getRawDomainValues(item: CredentialResultItem | null): string[] {
-    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['domain']));
+    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.domain));
   }
 
   private getSourceDomainValues(item: CredentialResultItem | null): string[] {
-    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.['source_domain']));
+    return this.uniqueValues(this.rowHelper.normalizeToArray(item?.source_domain));
   }
 }

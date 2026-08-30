@@ -49,7 +49,7 @@ export class HomeInsightComponent implements OnInit {
       leak: {} as LeakModel,
       defacement: {} as DefacementModel,
       ...asUnknownRecord(response['insights']),
-    } as unknown as InsightCallbackModel;
+    };
     const latestDocuments = asUnknownRecord(response['latestDocument']);
     this.latestDocuments = {
       generic_model: [],
@@ -58,7 +58,7 @@ export class HomeInsightComponent implements OnInit {
       chat_model: [],
       exploit_model: [],
       ...latestDocuments,
-    } as unknown as LatestDocumentCallbackModel;
+    };
     this.latestDocumentModelKeys = Object.keys(this.latestDocuments).filter(key => ['leak_model', 'chat_model', 'defacement_model'].includes(key) &&
             this.latestDocuments[key] &&
             this.latestDocuments[key].length > 0);

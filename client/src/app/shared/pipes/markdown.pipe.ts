@@ -83,7 +83,7 @@ export class MarkdownPipe implements PipeTransform {
         continue;
       }
 
-      const heading = trimmed.match(/^(#{1,6})\s+(.+)$/);
+      const heading = /^(#{1,6})\s+(.+)$/.exec(trimmed);
       if (heading) {
         flushParagraph();
         flushList();
@@ -99,13 +99,13 @@ export class MarkdownPipe implements PipeTransform {
         continue;
       }
 
-      const quote = trimmed.match(/^>\s?(.*)$/);
+      const quote = /^>\s?(.*)$/.exec(trimmed);
       if (quote) {
         flushParagraph();
         flushList();
         const quoteLines = [quote[1]];
         while (index + 1 < lines.length) {
-          const nextQuote = (lines[index + 1] ?? '').trim().match(/^>\s?(.*)$/);
+          const nextQuote = /^>\s?(.*)$/.exec((lines[index + 1] ?? '').trim());
           if (!nextQuote) {
             break;
           }
@@ -117,8 +117,8 @@ export class MarkdownPipe implements PipeTransform {
         continue;
       }
 
-      const unordered = trimmed.match(/^[-*+]\s+(.+)$/);
-      const ordered = trimmed.match(/^\d+\.\s+(.+)$/);
+      const unordered = /^[-*+]\s+(.+)$/.exec(trimmed);
+      const ordered = /^\d+\.\s+(.+)$/.exec(trimmed);
       if (unordered || ordered) {
         flushParagraph();
         const nextType = ordered ? 'ol' : 'ul';

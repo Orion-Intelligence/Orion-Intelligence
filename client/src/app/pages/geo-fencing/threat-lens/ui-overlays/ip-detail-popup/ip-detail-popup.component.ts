@@ -66,7 +66,7 @@ export class IpDetailPopupComponent implements OnChanges, OnDestroy {
       if (requestId !== this.requestId) {
         return;
       }
-      const progress = response.result?.['progress'] ?? response['progress'];
+      const progress = response.result?.['progress'] ?? response.progress;
       const step = response.result?.['step'] ?? response['step'] ?? response.result?.status ?? response.status;
       this.progress = this.networkIntelService.getProgressValue(typeof progress === 'number' ? progress : undefined);
       this.currentStep = this.networkIntelService.getLoadingStepLabel(typeof step === 'string' ? step : undefined);

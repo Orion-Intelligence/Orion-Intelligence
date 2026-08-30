@@ -51,7 +51,7 @@ export class SocialExtensionService {
 
       const onMessage = (event: MessageEvent) => {
         const data = event.data as ExtensionPresence;
-        if (event.source !== window || !data || data.source !== 'orion-extension' || data.type !== 'presence') {
+        if (event.source !== window || data?.source !== 'orion-extension' || data.type !== 'presence') {
           return;
         }
         installed = true;
@@ -99,7 +99,7 @@ export class SocialExtensionService {
 
       const onMessage = (event: MessageEvent) => {
         const data = event.data as { source?: string; type?: string; items?: Record<string, unknown>[] };
-        if (event.source !== window || !data || data.source !== 'orion-extension' || data.type !== 'crawl-result') {
+        if (event.source !== window || data?.source !== 'orion-extension' || data.type !== 'crawl-result') {
           return;
         }
         finish(data.items?.[0] ?? null);

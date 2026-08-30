@@ -149,7 +149,7 @@ export class SatelliteMapEntityDashboardController {
     }, this.mapEntityFlushIntervalMs);
   }
 
-  private async flushQueue(): Promise<void> {
+  private flushQueue(): void {
     if (this.isMapEntityFlushing) {
       return;
     }

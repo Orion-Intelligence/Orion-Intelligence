@@ -143,7 +143,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.consolidatedCallbackModel = {
       ...this.dashboardService.consolidatedCallbackModel
-    } as ConsolidatedCallbackModel;
+    };
     this.populateGroupedResults();
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(take(1))

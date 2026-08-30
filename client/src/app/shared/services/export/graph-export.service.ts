@@ -150,7 +150,7 @@ export class GraphExportService {
     this.drawInfoSectionMarker(doc, 220, contentW, 'Graph Summary');
     this.requireAutoTable()(doc, {
       startY: 232,
-      body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]) as RowInput[],
+      body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]),
       columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
       didParseCell: this.makeFirstColumnDidParse(),
       ...analysisTableBase
@@ -165,7 +165,7 @@ export class GraphExportService {
     this.drawInfoSectionMarker(doc, compositionMarkerY, contentW, 'Node Type Distribution');
     this.requireAutoTable()(doc, {
       startY: compositionMarkerY + 12,
-      body: composition.map(x => [x.type, String(x.count)]) as RowInput[],
+      body: composition.map(x => [x.type, String(x.count)]),
       ...analysisTableBase
     });
     this.drawRoundedTableContainer(doc, margin, contentW, doc.lastAutoTable.startY ?? 232, doc.lastAutoTable.finalY ?? 232);
@@ -182,7 +182,7 @@ export class GraphExportService {
         margin: { top: 126, left: margin, right: margin, bottom: 58 },
         tableWidth: contentW,
         head: [['#', 'Platform', 'Node Count']] as RowInput[],
-        body: socialPlatformCounts.map((item, i) => [String(i + 1), item.name, String(item.count)]) as RowInput[],
+        body: socialPlatformCounts.map((item, i) => [String(i + 1), item.name, String(item.count)]),
         showHead: 'everyPage',
         ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6, valign: 'top' }),
         didParseCell: this.makeHeaderRowDidParse(this.PDF_THEME.defaultHeaderRowFillRgb, false),
@@ -221,7 +221,7 @@ export class GraphExportService {
           margin: { top: 139, left: margin, right: margin, bottom: 58 },
           tableWidth: contentW,
           head: [tableRows[0]] as RowInput[],
-          body: tableRows.slice(1) as RowInput[],
+          body: tableRows.slice(1),
           showHead: 'everyPage',
           ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6 }),
           columnStyles: { 0: { cellWidth: 170 }, 1: { cellWidth: contentW - 170 } },
@@ -260,7 +260,7 @@ export class GraphExportService {
         preparePdfValue(e.from),
         preparePdfValue(e.to),
         preparePdfValue(e.label ?? '')
-      ]) as RowInput[],
+      ]),
       showHead: 'everyPage',
       ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5 }),
       didParseCell: this.makeHeaderRowDidParse(this.PDF_THEME.defaultHeaderRowFillRgb, false),
@@ -625,7 +625,7 @@ export class GraphExportService {
     const counts = new Map<string, number>();
     payload.nodes.forEach(node => {
       const id = String(node.id ?? '');
-      const match = id.match(/^platform-[^|]+\|([^|]+)\|/i);
+      const match = /^platform-[^|]+\|([^|]+)\|/i.exec(id);
       if (match?.[1]) {
         const name = match[1].toLowerCase();
         counts.set(name, (counts.get(name) ?? 0) + 1);
@@ -890,7 +890,7 @@ export class GraphExportService {
         .split('\n')
         .map(line => {
           const trimmed = line.trim().replace(/\s+/g, ' ');
-          const numberedUrl = trimmed.match(/^(\d+\.\s*)(https?:\/\/.*)$/i);
+          const numberedUrl = /^(\d+\.\s*)(https?:\/\/.*)$/i.exec(trimmed);
           if (numberedUrl) {
             return `${numberedUrl[1]}${numberedUrl[2].replace(/\s+/g, '')}`;
           }

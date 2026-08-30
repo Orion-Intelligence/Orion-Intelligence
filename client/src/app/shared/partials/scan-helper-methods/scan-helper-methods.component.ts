@@ -223,7 +223,7 @@ export class ScanHelperMethods implements OnDestroy {
   }
 
   getSubdomainUrl(subdomain: string): string {
-    return subdomain.match(/^https?:\/\//i) ? subdomain : `https://${subdomain}`;
+    return (/^https?:\/\//i.exec(subdomain)) ? subdomain : `https://${subdomain}`;
   }
 
   getAllWaybackUrls(): string {
@@ -283,7 +283,7 @@ export class ScanHelperMethods implements OnDestroy {
       return '';
     }
     try {
-      const u = new URL(v.match(/^https?:\/\//i) ? v : `https://${v.replace(/^\/+/, '')}`);
+      const u = new URL((/^https?:\/\//i.exec(v)) ? v : `https://${v.replace(/^\/+/, '')}`);
       return u.toString();
     }
     catch {

@@ -49,7 +49,7 @@ export class ShodanSectionComponent {
   }
 
   get cameraPortCount(): number {
-    return (this.shodanResult?.ports ?? []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
+    return (this.shodanResult?.ports ?? []).filter((port) => port && ((port.is_camera ?? false) || port.device_type === 'camera')).length;
   }
 
   get hasCameraSignals(): boolean {

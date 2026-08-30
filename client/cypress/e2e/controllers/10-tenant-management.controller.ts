@@ -170,6 +170,11 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
     }
 
     void cy.visit('/dashboard/profile/tenant-settings');
+    cy.location('pathname').then((pathname) => {
+      if (!pathname.includes('tenant-settings')) {
+        void cy.visit('/dashboard/profile/tenant-settings');
+      }
+    });
     void cy.contains('h1', 'Tenant Data').should('be.visible');
     cy.contains('label', 'Allow Admin Alert Visibility')
       .scrollIntoView()
@@ -748,6 +753,14 @@ export function waitForTenantAlertScanComplete(timeoutMs = 180000) {
   });
 }
 
+export function ensureTenantAlertReportsPresent() {
+  cy.get('body').then(($body) => {
+    if (!$body.find('[data-testid="tenant-home-print-alerts"]').length) {
+      runTenantAlertScan();
+    }
+  });
+}
+
 export function runTenantAlertScan() {
   void cy.intercept('POST', '**/api/profile/alert/scan').as('tenantAlertScanStart');
   void cy.get('[data-testid="tenant-home-scan-all"]')
@@ -764,6 +777,7 @@ export function runTenantAlertScan() {
 export function waitForTenantAlertFindings(category: AlertScannerCategory, timeoutMs = 360000) {
   return cy.location('origin').then((origin) => {
     const startedAt = Date.now();
+    let rescanned = false;
     const poll = (): Cypress.Chainable => {
       return cy.request('GET', `${origin}/api/get/tenant/alert/summary`).then((response) => {
         expect(response.status).to.eq(200);
@@ -773,6 +787,10 @@ export function waitForTenantAlertFindings(category: AlertScannerCategory, timeo
         }
         if (Date.now() - startedAt > timeoutMs) {
           throw new Error(`Tenant alert scan produced no ${category} findings`);
+        }
+        if (!rescanned && Date.now() - startedAt > timeoutMs / 2) {
+          rescanned = true;
+          runTenantAlertScan();
         }
         return cy.wait(1000, {log: false}).then(() => poll());
       });

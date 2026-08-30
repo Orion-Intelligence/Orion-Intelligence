@@ -41,7 +41,7 @@ export class DocumentExportService extends GraphExportService {
       startY: firstSectionY + 12,
       margin: { top: 72, left: margin, right: margin, bottom: 58 },
       tableWidth: contentW,
-      body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]) as RowInput[],
+      body: Object.entries(payload.summary ?? {}).map(([k, v]) => [this.toTitle(k), String(v)]),
       ...this.buildPlainTableTheme({ fontSize: 9, cellPadding: 6, ...tableTheme }),
       columnStyles: { 0: { cellWidth: 150 }, 1: { cellWidth: contentW - 150 } },
       didParseCell: this.makeFirstColumnDidParse(theme?.firstColumnFillRgb),
@@ -72,7 +72,7 @@ export class DocumentExportService extends GraphExportService {
           preparePdfValue(n.label || n.id, 34),
           preparePdfValue(n.type, 24),
           preparePdfValue(String(n.id || ''), 34)
-        ]) as RowInput[],
+        ]),
         showHead: 'everyPage',
         ...this.buildPlainTableTheme({ fontSize: 8, cellPadding: 5, ...tableTheme }),
         columnStyles: { 0: { cellWidth: contentW * 0.46 }, 1: { cellWidth: contentW * 0.18 }, 2: { cellWidth: contentW * 0.36 } },
@@ -108,7 +108,7 @@ export class DocumentExportService extends GraphExportService {
           margin: { top: continuationTableY, left: margin, right: margin, bottom: 58 },
           tableWidth: contentW,
           head: [tableRows[0]] as RowInput[],
-          body: tableRows.slice(1) as RowInput[],
+          body: tableRows.slice(1),
           showHead: 'everyPage',
           ...this.buildPlainTableTheme({
             fontSize: hasStructuredRows ? 7.4 : 9,
@@ -151,7 +151,7 @@ export class DocumentExportService extends GraphExportService {
           preparePdfValue(e.from, 30),
           preparePdfValue(e.to, 30),
           preparePdfValue(e.label ?? '', 30)
-        ]) as RowInput[],
+        ]),
         showHead: 'everyPage',
         ...this.buildPlainTableTheme({ fontSize: 7.4, cellPadding: 4, ...tableTheme }),
         columnStyles: { 0: { cellWidth: 38 }, 1: { cellWidth: (contentW - 38) / 3 }, 2: { cellWidth: (contentW - 38) / 3 }, 3: { cellWidth: (contentW - 38) / 3 } },

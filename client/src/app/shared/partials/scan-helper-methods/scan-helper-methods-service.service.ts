@@ -112,7 +112,7 @@ export class ScanHelperMethodsService {
   }
 
   protected handleTaskValue<T extends object>(value: T): void {
-    this.onDone.set(value as unknown as ScanTaskResponse);
+    this.onDone.set(value);
   }
 
   scanSubdomains(resolved: string, checkLive: boolean): Subscription {

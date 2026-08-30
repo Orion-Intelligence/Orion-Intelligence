@@ -315,9 +315,9 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
   }
 
   for (const root of roots) {
-    const user = users.get(root)!;
+    const user = users.get(root);
     const person = persons.get(root);
-    if (user.accounts.some(account => !account.darkweb) || !person) {
+    if (!user || user.accounts.some(account => !account.darkweb) || !person) {
       continue;
     }
     user.name = user.name || (person.name !== person.handle ? person.name : '');
@@ -770,7 +770,7 @@ function readablePlatformColor(color: string | undefined, dark: boolean): string
   if (!color || !dark) {
     return color;
   }
-  const match = color.trim().match(/^#([0-9a-f]{6})$/i);
+  const match = /^#([0-9a-f]{6})$/i.exec(color.trim());
   if (!match) {
     return color;
   }

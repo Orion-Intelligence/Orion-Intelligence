@@ -68,16 +68,16 @@ export class CredentialListComponent {
   }
 
   getStealerDomainValues(item: StealerLogResultItem): string[] {
-    if (!item || item['type'] === 'bin') {
+    if (!item || item.type === 'bin') {
       return [];
     }
-    const domains = this.normalizeValues(item['domain']);
-    const sourceDomains = this.normalizeValues(item['source_domain']);
+    const domains = this.normalizeValues(item.domain);
+    const sourceDomains = this.normalizeValues(item.source_domain);
     const mergedDomains = this.mergeUniqueValues(domains, sourceDomains);
     if (mergedDomains.length) {
       return mergedDomains;
     }
-    return this.normalizeValues(item['ip']);
+    return this.normalizeValues(item.ip);
   }
 
   getStealerDomainTitle(item: StealerLogResultItem): string {

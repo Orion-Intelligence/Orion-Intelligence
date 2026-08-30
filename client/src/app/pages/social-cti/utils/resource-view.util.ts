@@ -118,5 +118,5 @@ export function toggleKey(current: Set<string>, key: string): Set<string> {
 }
 
 export function initialOf(label: string): string {
-  return (label.match(/\p{L}|\p{N}/u)?.[0] ?? '?').toLocaleUpperCase();
+  return ((/\p{L}|\p{N}/u.exec(label))?.[0] ?? '?').toLocaleUpperCase();
 }

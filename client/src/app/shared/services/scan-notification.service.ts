@@ -363,7 +363,7 @@ export class ScanNotificationService {
     if (this.activePollerId) {
       return;
     }
-    const nextId = this.queuedPollIds.values().next().value as string | undefined;
+    const nextId = this.queuedPollIds.values().next().value;
     if (!nextId) {
       this.resumeNextIncompleteJob();
       return;
@@ -598,7 +598,7 @@ export class ScanNotificationService {
   }
 
   private asScanResponse(value: unknown): ScanResponseRecord {
-    return isUnknownRecord(value) ? value as ScanResponseRecord : {};
+    return isUnknownRecord(value) ? value : {};
   }
 
   private normalizeScanStatus(value: string | undefined): ScanJobStatus | null {

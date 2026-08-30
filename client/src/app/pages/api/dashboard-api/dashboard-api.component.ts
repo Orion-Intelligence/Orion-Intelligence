@@ -579,7 +579,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       generatedAtIso: now,
       nodes: items.slice(0, 200).map((item, idx) => ({
         id: `result-${idx + 1}`,
-        label: this.stringifyPrimitive(item['m_title'] ?? item['m_app_name'] ?? item['title'] ?? `Result ${idx + 1}`),
+        label: this.stringifyPrimitive(item.m_title ?? item.m_app_name ?? item.title ?? `Result ${idx + 1}`),
         type: 'record'
       })),
       edges: items.slice(0, 200).map((_, idx) => ({

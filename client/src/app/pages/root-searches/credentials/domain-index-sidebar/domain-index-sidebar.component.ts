@@ -39,8 +39,8 @@ export class DomainIndexSidebarComponent {
   private collectUniqueDomains(records: StealerLogResultItem[]): string[] {
     const domains = new Set<string>();
     records.forEach(item => {
-      this.normalizeDomainValues(item?.['source_domain']).forEach(domain => domains.add(domain));
-      this.normalizeDomainValues(item?.['domain']).forEach(domain => domains.add(domain));
+      this.normalizeDomainValues(item?.source_domain).forEach(domain => domains.add(domain));
+      this.normalizeDomainValues(item?.domain).forEach(domain => domains.add(domain));
     });
     return Array.from(domains).sort((a, b) => a.localeCompare(b));
   }

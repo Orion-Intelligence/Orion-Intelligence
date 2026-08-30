@@ -232,14 +232,14 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
       this.dashboardService.consolidatedParamModel)
       .subscribe((response) => {
         if (response.success && response.data) {
-          this.currentResultModel = response.data["Result"] ?? [];
+          this.currentResultModel = response.data.Result ?? [];
           this.defacementGroups = this.apiEndpoint === 'search/defacement'
-            ? (response.data["Defacement_Groups"] ?? [])
+            ? (response.data.Defacement_Groups ?? [])
             : [];
           this.totalGroups = this.apiEndpoint === 'search/apt-intel'
-            ? Number(response.data["Total_Groups"] ?? 0) || 0
+            ? Number(response.data.Total_Groups ?? 0) || 0
             : 0;
-          this.maxPages = Number(response.data["Page_Count"] ?? 1) || 1;
+          this.maxPages = Number(response.data.Page_Count ?? 1) || 1;
           this.cacheResult({
             result: this.currentResultModel,
             defacementGroups: this.defacementGroups,

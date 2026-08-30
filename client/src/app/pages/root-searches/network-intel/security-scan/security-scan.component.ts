@@ -177,7 +177,7 @@ export class SecurityScanComponent implements OnInit {
           this.isFetched = true;
           this.hasError = true;
           this.errorMessage =
-                    (err && (err.error?.detail || err.message)) || 'Failed to fetch security scan results.';
+                    String(err?.error?.detail ?? '') || String(err?.message ?? '') || 'Failed to fetch security scan results.';
         },
       });
   }
@@ -280,7 +280,7 @@ export class SecurityScanComponent implements OnInit {
       return '';
     }
     try {
-      const u = new URL(v.match(/^https?:\/\//i) ? v : `https://${v.replace(/^\/+/, '')}`);
+      const u = new URL((/^https?:\/\//i.exec(v)) ? v : `https://${v.replace(/^\/+/, '')}`);
       return u.toString();
     }
     catch {

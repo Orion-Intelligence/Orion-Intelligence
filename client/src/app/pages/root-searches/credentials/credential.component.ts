@@ -477,10 +477,10 @@ export class CredentialComponent implements OnInit {
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery,
-      email: this.toExportValue(item?.['email']),
-      username: this.toExportValue(item?.['username']),
-      domain: this.toExportValue(item?.['domain']),
-      source: this.toExportValue(item?.['channel'] ?? item?.['filename'] ?? item?.['file']),
+      email: this.toExportValue(item?.email),
+      username: this.toExportValue(item?.username),
+      domain: this.toExportValue(item?.domain),
+      source: this.toExportValue(item?.channel ?? item?.['filename'] ?? item?.file),
       hash: this.toExportValue(item?.['m_hash']),
       title: '-',
       url: '-',
@@ -500,33 +500,33 @@ export class CredentialComponent implements OnInit {
       username: '-',
       domain: '-',
       source: '-',
-      hash: this.toExportValue(item?.['m_hash']),
-      title: this.toExportValue(item?.['m_title'], 160),
-      url: this.toExportValue(item?.['m_url'], 160),
-      rank: this.toExportValue(item?.['rank_index']),
-      date: this.toExportValue(item?.['m_date'] ?? item?.['m_update_date']),
-      team: this.toExportValue(item?.['m_team']),
-      summary: this.toExportValue(item?.['m_important_content'] ?? item?.['m_content'], 240)
+      hash: this.toExportValue(item?.m_hash),
+      title: this.toExportValue(item?.m_title, 160),
+      url: this.toExportValue(item?.m_url, 160),
+      rank: this.toExportValue(item?.rank_index),
+      date: this.toExportValue(item?.m_date ?? item?.m_update_date),
+      team: this.toExportValue(item?.m_team),
+      summary: this.toExportValue(item?.m_important_content ?? item?.m_content, 240)
     }));
   }
 
   private buildStealerPdfBlocks(records: StealerLogResultItem[]): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
-      const identity = this.firstAvailableExportValue(item?.['email'], item?.['username'], item?.['user']);
-      const domain = this.firstAvailableExportValue(item?.['domain'], item?.['source_domain'], item?.['ip']);
+      const identity = this.firstAvailableExportValue(item?.email, item?.username, item?.['user']);
+      const domain = this.firstAvailableExportValue(item?.domain, item?.source_domain, item?.ip);
       const values: Record<string, string> = {};
-      this.addExportField(values, 'Email', item?.['email'], 180);
-      this.addExportField(values, 'Username', item?.['username'], 180);
+      this.addExportField(values, 'Email', item?.email, 180);
+      this.addExportField(values, 'Username', item?.username, 180);
       this.addExportField(values, 'Password', item?.['password'], 220);
-      this.addExportField(values, 'Domain', item?.['domain'], 240);
-      this.addExportField(values, 'Source Domain', item?.['source_domain'], 240);
-      this.addExportField(values, 'IP Address', item?.['ip'], 180);
-      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['channel'], item?.['m_channel'], item?.['source_channel'], item?.['m_source_channel']), 240);
-      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['date'], item?.['timestamp'], item?.['m_date'], item?.['m_update_date']), 160);
-      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.['type'])), 140);
+      this.addExportField(values, 'Domain', item?.domain, 240);
+      this.addExportField(values, 'Source Domain', item?.source_domain, 240);
+      this.addExportField(values, 'IP Address', item?.ip, 180);
+      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.channel, item?.['m_channel'], item?.['source_channel'], item?.['m_source_channel']), 240);
+      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.date, item?.timestamp, item?.['m_date'], item?.['m_update_date']), 160);
+      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.type)), 140);
       this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
-      this.addExportField(values, 'Raw Trace', item?.['raw'], 900);
-      this.addExportField(values, 'File Name', this.firstAvailableExportValue(item?.['filename'], item?.['file'], item?.['m_file']), 220);
+      this.addExportField(values, 'Raw Trace', item?.raw, 900);
+      this.addExportField(values, 'File Name', this.firstAvailableExportValue(item?.['filename'], item?.file, item?.['m_file']), 220);
       this.appendAdditionalExportFields(values, item, new Set([
         '_id',
         'email',
@@ -571,25 +571,25 @@ export class CredentialComponent implements OnInit {
 
   private buildRankedPdfBlocks(records: RankedResultItem[], recordOffset = 0): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
-      const title = this.firstAvailableExportValue(item?.['m_title'], item?.['m_important_content'], item?.['m_url']);
-      const primaryUrl = this.firstAvailableExportValue(item?.['m_url'], item?.['m_base_url'], item?.['m_domain'], item?.['m_weblink']);
+      const title = this.firstAvailableExportValue(item?.m_title, item?.m_important_content, item?.m_url);
+      const primaryUrl = this.firstAvailableExportValue(item?.m_url, item?.m_base_url, item?.m_domain, item?.m_weblink);
       const values: Record<string, string> = {};
-      this.addExportField(values, 'Title', item?.['m_title'], 260);
+      this.addExportField(values, 'Title', item?.m_title, 260);
       this.addExportField(values, 'URL', primaryUrl, 320);
-      this.addExportField(values, 'Domain', this.firstAvailableExportValue(item?.['m_domain'], item?.['m_root_domain']), 240);
-      this.addExportField(values, 'Email', item?.['m_email'], 180);
-      this.addExportField(values, 'Username', this.firstAvailableExportValue(item?.['m_username'], item?.['m_user']), 180);
-      this.addExportField(values, 'Password', item?.['m_password'], 220);
-      this.addExportField(values, 'IP Address', item?.['m_ip'], 180);
-      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.['m_channel'], item?.['m_source_channel']), 240);
-      this.addExportField(values, 'Rank', this.firstAvailableExportValue(item?.['rank_index'], item?.['m_rank_index']), 160);
-      this.addExportField(values, 'Team', item?.['m_team'], 180);
-      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.['m_date'], item?.['m_update_date'], item?.['m_year']), 160);
-      this.addExportField(values, 'Content Type', item?.['m_content_type'], 200);
-      this.addExportField(values, 'Source', this.firstAvailableExportValue(item?.['m_source'], item?.['m_file']), 220);
-      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
-      this.addExportField(values, 'Important Content', item?.['m_important_content'], 900);
-      this.addExportField(values, 'Content', item?.['m_content'], 900);
+      this.addExportField(values, 'Domain', this.firstAvailableExportValue(item?.m_domain, item?.m_root_domain), 240);
+      this.addExportField(values, 'Email', item?.m_email, 180);
+      this.addExportField(values, 'Username', this.firstAvailableExportValue(item?.m_username, item?.m_user), 180);
+      this.addExportField(values, 'Password', item?.m_password, 220);
+      this.addExportField(values, 'IP Address', item?.m_ip, 180);
+      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.m_channel, item?.m_source_channel), 240);
+      this.addExportField(values, 'Rank', this.firstAvailableExportValue(item?.rank_index, item?.m_rank_index), 160);
+      this.addExportField(values, 'Team', item?.m_team, 180);
+      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.m_date, item?.m_update_date, item?.m_year), 160);
+      this.addExportField(values, 'Content Type', item?.m_content_type, 200);
+      this.addExportField(values, 'Source', this.firstAvailableExportValue(item?.m_source, item?.m_file), 220);
+      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.m_hash, item?.hash), 220);
+      this.addExportField(values, 'Important Content', item?.m_important_content, 900);
+      this.addExportField(values, 'Content', item?.m_content, 900);
       this.appendAdditionalExportFields(values, item, new Set([
         '_id',
         'm_title',

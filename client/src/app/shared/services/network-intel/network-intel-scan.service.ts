@@ -220,7 +220,7 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
       return null;
     }
     try {
-      const url = new URL(trimmed.match(/^https?:\/\//i) ? trimmed : `https://${trimmed.replace(/^\/+/, '')}`);
+      const url = new URL((/^https?:\/\//i.exec(trimmed)) ? trimmed : `https://${trimmed.replace(/^\/+/, '')}`);
       const host = url.hostname.toLowerCase();
       const pathParts = url.pathname.split('/').filter(Boolean);
       if ((host === 'github.com' || host === 'www.github.com') && pathParts.length >= 2) {
@@ -415,14 +415,8 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
     if (!port) {
       return false;
     }
-    return Boolean(port.port ||
-      port.protocol ||
-      port.proto ||
-      port.service ||
-      port.state ||
-      port.banner ||
-      port.http ||
-      port.tls ||
-      (Array.isArray(port.risk_flags) && port.risk_flags.length));
+    const values = [port.port, port.protocol, port.proto, port.service, port.state, port.banner, port.http, port.tls];
+
+    return values.some(Boolean) || (Array.isArray(port.risk_flags) && port.risk_flags.length > 0);
   }
 }

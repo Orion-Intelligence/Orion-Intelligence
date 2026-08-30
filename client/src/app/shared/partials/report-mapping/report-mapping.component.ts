@@ -165,11 +165,11 @@ export class ReportMappingComponent {
     if (!text) {
       return '';
     }
-    const vertexMatch = text.match(/cti_vertices\/([^/]+)/);
+    const vertexMatch = /cti_vertices\/([^/]+)/.exec(text);
     if (vertexMatch?.[1]) {
       return vertexMatch[1];
     }
-    const hashMatch = text.match(/[a-f0-9]{64}/i);
+    const hashMatch = /[a-f0-9]{64}/i.exec(text);
     return hashMatch ? hashMatch[0] : text;
   }
 
@@ -276,7 +276,7 @@ export class ReportMappingComponent {
     if (!id) {
       return '';
     }
-    const vertexMatch = id.match(/cti_vertices\/([^:]+):(.+)/);
+    const vertexMatch = /cti_vertices\/([^:]+):(.+)/.exec(id);
     if (vertexMatch?.[1]) {
       return mode === 'key'
         ? (keepRawKey ? vertexMatch[1] : vertexMatch[1].replace(/^m_/, '').replaceAll('_', ''))
@@ -313,7 +313,7 @@ export class ReportMappingComponent {
   }
 
   private extractId(path: string): string {
-    const match = path.match(/[a-f0-9]{64}/);
+    const match = /[a-f0-9]{64}/.exec(path);
     return match ? match[0] : '';
   }
 }

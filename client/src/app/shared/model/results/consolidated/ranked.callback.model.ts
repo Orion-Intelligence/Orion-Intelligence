@@ -1,6 +1,6 @@
 import { CredentialResultItem } from '../credentials/credential.callback.model';
 
-export interface RankedResultItem extends CredentialResultItem {}
+export type RankedResultItem = CredentialResultItem;
 
 export class RankedCallbackModel {
   result: RankedResultItem[] = [];

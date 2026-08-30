@@ -1329,7 +1329,10 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   expandGroupNode(): void {
     this.hideContextMenu();
-    const node = this.contextMenuNode!;
+    const node = this.contextMenuNode;
+    if (!node) {
+      return;
+    }
     const nodeId = node.id as string;
     const subNodes = this.getContextSubNodes(nodeId, node);
     if (!nodeId || subNodes.length === 0) {
@@ -1341,7 +1344,10 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   collapseGroupNode(): void {
     this.hideContextMenu();
-    const node = this.contextMenuNode!;
+    const node = this.contextMenuNode;
+    if (!node) {
+      return;
+    }
     const nodeId = node.id as string;
     const subNodes = this.getContextSubNodes(nodeId, node);
     if (this.isClusterRootNode(nodeId)) {
@@ -1857,7 +1863,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private extractPropertyKey(vertex: GraphVertex): string | null {
     const key = String(vertex?._key ?? '').toLowerCase();
-    const match = key.match(/m_[a-z0-9_]+/);
+    const match = /m_[a-z0-9_]+/.exec(key);
     return match ? match[0] : null;
   }
 
@@ -1866,7 +1872,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       return null;
     }
     const normalized = label.toLowerCase().replace(/\s+/g, '_');
-    const match = normalized.match(/m_[a-z0-9_]+/);
+    const match = /m_[a-z0-9_]+/.exec(normalized);
     if (match) {
       return match[0];
     }
@@ -2728,9 +2734,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     const isSameNodeClicked = this.highlightedNodeId === nodeId;
     const allEdges = this.edgeSet.get();
     const resetEdges = allEdges
-      .filter(e => e.id)
+      .filter((e): e is Edge & { id: NonNullable<Edge['id']> } => e.id !== undefined)
       .map(e => ({
-        id: e.id!,
+        id: e.id,
         color: { color: this.edgeBaseColor },
         width: 1.5
       }));
@@ -2743,9 +2749,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       filter: edge => edge.from === nodeId || edge.to === nodeId
     });
     const highlightEdges = connectedEdges
-      .filter(e => e.id)
+      .filter((e): e is Edge & { id: NonNullable<Edge['id']> } => e.id !== undefined)
       .map(e => ({
-        id: e.id!,
+        id: e.id,
         color: { color: this.edgeHighlightColor },
         width: 2.5
       }));
@@ -2778,13 +2784,15 @@ export class GraphComponent implements OnInit, OnDestroy {
     const matchedEdges = this.edgeSet.get({
       filter: edge => matchedNodeIds.includes(edge.from as string) || matchedNodeIds.includes(edge.to as string)
     });
-    this.edgeSet.update(matchedEdges.map(edge => ({
-      id: edge.id!,
-      color: { color: this.edgeHighlightColor },
-      dashes: true,
-      width: 2.5,
-      arrows: { to: { enabled: false } }
-    })));
+    this.edgeSet.update(matchedEdges
+      .filter((edge): edge is Edge & { id: NonNullable<Edge['id']> } => edge.id !== undefined)
+      .map(edge => ({
+        id: edge.id,
+        color: { color: this.edgeHighlightColor },
+        dashes: true,
+        width: 2.5,
+        arrows: { to: { enabled: false } }
+      })));
   }
 
   private captureOriginalNodeColors(nodeIds?: string[]): void {

@@ -341,7 +341,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   }
 
   scheduleArtifactReportSearch(artifact: CaseArtifact): void {
-    if (!artifact || artifact.type !== 'report' || !artifact.linkedReportSource) {
+    if (artifact?.type !== 'report' || !artifact.linkedReportSource) {
       return;
     }
 

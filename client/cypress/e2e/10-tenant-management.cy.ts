@@ -28,6 +28,7 @@ import {
   setTenantLicenses,
   submitLogin,
   waitForTenantAlertScanComplete,
+  ensureTenantAlertReportsPresent,
   waitForTenantAlertFindings,
   waitForBlockingOverlayToClose
 } from './controllers/10-tenant-management.controller';
@@ -511,6 +512,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
 
     cy.get('app-alert-scan-loading', { timeout: 80000 }).should('not.exist');
     assertAlertScanCompletedMailPresent();
+    ensureTenantAlertReportsPresent();
     cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
 

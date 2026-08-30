@@ -153,7 +153,7 @@ export class SocialProfileListingComponent {
       if (!query) {
         return of({ key, items: null as unknown[] | null });
       }
-      return this.fetchService.searchConnections(platformData.meta.platform, platformData.meta.username, query).pipe(map(items => ({ key, items: items as unknown[] | null })));
+      return this.fetchService.searchConnections(platformData.meta.platform, platformData.meta.username, query).pipe(map(items => ({ key, items: items })));
     }), takeUntilDestroyed(this.destroyRef)).subscribe(({ key, items }) => {
       this.connectionSearchResults.update(current => ({ ...current, [key]: items }));
     });
@@ -629,7 +629,7 @@ export class SocialProfileListingComponent {
             continue;
           }
           if (section === 'details' || section === 'onlinePresence' || section === 'stealerLogs') {
-            this.refetchTabData(platform, section as FetchTabKey);
+            this.refetchTabData(platform, section);
           }
           else {
             void this.liveSync.startLiveFetch(platform, section as FetchTabKey);
@@ -658,7 +658,7 @@ export class SocialProfileListingComponent {
     const responseRecord = response as Record<string, unknown>;
     const dataKey = Object.keys(responseRecord)[0];
     const data = dataKey ? responseRecord[dataKey] : null;
-    const hasData = !!data && (Array.isArray(data) ? data.length > 0 : Object.keys(data as object).length > 0);
+    const hasData = !!data && (Array.isArray(data) ? data.length > 0 : Object.keys(data).length > 0);
     let updatedProfiles: social_profile[] | null = null;
 
     this.storageService.state.scanResults.update(results => {
@@ -691,7 +691,7 @@ export class SocialProfileListingComponent {
     }
 
     const value = stateKey === 'profile' && hasData && data && typeof data === 'object' ? { ...(data as Record<string, unknown>), is_parsed: true } : data;
-    return { [propertyName]: hasData ? value : null } as Partial<social_profile>;
+    return { [propertyName]: hasData ? value : null };
   }
 
   private getRequestKey(stateKey: FetchStateKey, platformData: social_profile): string {
@@ -725,7 +725,7 @@ export class SocialProfileListingComponent {
   }
 
   getUsernameInitial(username: string): string {
-    return username.match(/\p{L}/u)?.[0].toLocaleUpperCase() ?? '?';
+    return (/\p{L}/u.exec(username))?.[0].toLocaleUpperCase() ?? '?';
   }
 
   getDisplayUsername(username: string): string {

@@ -87,6 +87,6 @@ export class SatelliteIntelService {
   }
 
   private asResponse(value: unknown): SatelliteResponseRecord {
-    return asUnknownRecord(value) as SatelliteResponseRecord;
+    return asUnknownRecord(value);
   }
 }

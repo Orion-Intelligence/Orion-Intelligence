@@ -359,7 +359,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private createChart(): void {
-    this.worldData = this.appService.worldJson() as unknown as WorldTopology;
+    this.worldData = this.appService.worldJson() as WorldTopology;
     if (!this.worldData) {
       return;
     }

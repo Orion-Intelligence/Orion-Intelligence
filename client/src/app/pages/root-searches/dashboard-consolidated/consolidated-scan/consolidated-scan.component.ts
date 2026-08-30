@@ -104,7 +104,7 @@ export class ConsolidatedScanComponent {
       for (const email of emails) {
         const value = (email || '').trim();
         if (value) {
-          liveApiEntities.push({ type: 'social', q1: value } as ConsolidatedLiveApis);
+          liveApiEntities.push({ type: 'social', q1: value });
         }
       }
       for (const url of urls) {
@@ -113,25 +113,25 @@ export class ConsolidatedScanComponent {
           repoInputs.push(value);
         }
         else if (value.includes('play.google.com/store/apps')) {
-          liveApiEntities.push({ type: 'cracked', q1: value } as ConsolidatedLiveApis);
+          liveApiEntities.push({ type: 'cracked', q1: value });
         }
       }
       for (const name of software) {
         const value = (name || '').trim();
         if (value) {
-          liveApiEntities.push({ type: 'software', q1: value } as ConsolidatedLiveApis);
+          liveApiEntities.push({ type: 'software', q1: value });
         }
       }
       for (const company of companyNames) {
         const value = (company || '').trim();
         if (value) {
-          liveApiEntities.push({ type: 'social', q1: value } as ConsolidatedLiveApis);
+          liveApiEntities.push({ type: 'social', q1: value });
         }
       }
       for (const org of orgs) {
         const value = (org || '').trim();
         if (value) {
-          liveApiEntities.push({ type: 'social', q1: value } as ConsolidatedLiveApis);
+          liveApiEntities.push({ type: 'social', q1: value });
         }
       }
     }
@@ -185,7 +185,7 @@ export class ConsolidatedScanComponent {
           const result = {
             ...v,
             scanType: v.scanType || t
-          } as ConsolidatedScanResults;
+          };
           const key = t;
           this.resultsByType[key] = [...(this.resultsByType[key] ?? []), result];
         },
@@ -225,19 +225,19 @@ export class ConsolidatedScanComponent {
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed);
     if (isEmail) {
       const username = trimmed.split('@')[0];
-      entities.push({ type: 'user', q1: username, q2: trimmed } as ConsolidatedLiveApis);
-      entities.push({ type: 'social', q1: username } as ConsolidatedLiveApis);
+      entities.push({ type: 'user', q1: username, q2: trimmed });
+      entities.push({ type: 'social', q1: username });
       return entities;
     }
     if (trimmed.includes('play.google.com/store/apps')) {
-      entities.push({ type: 'cracked', q1: trimmed } as ConsolidatedLiveApis);
+      entities.push({ type: 'cracked', q1: trimmed });
     }
     try {
       const url = new URL(trimmed);
       const hostname = url.hostname.replace('www.', '');
       const name = hostname.split('.')[0];
       if (name) {
-        entities.push({ type: 'social', q1: name } as ConsolidatedLiveApis);
+        entities.push({ type: 'social', q1: name });
       }
     }
     catch {
@@ -246,7 +246,7 @@ export class ConsolidatedScanComponent {
         name = name.split('.')[0];
       }
       if (name) {
-        entities.push({ type: 'social', q1: name } as ConsolidatedLiveApis);
+        entities.push({ type: 'social', q1: name });
       }
     }
     return entities;

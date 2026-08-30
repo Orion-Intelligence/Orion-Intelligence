@@ -537,13 +537,13 @@ export class NetworkIntel implements OnInit, OnDestroy {
 
   private normalizeDomainInput(value: string): string {
     const trimmed = value.trim();
-    const match = trimmed.match(/^(?:https:\/\/)?(?:www\.)?([^/?#]+)\/?$/i);
+    const match = /^(?:https:\/\/)?(?:www\.)?([^/?#]+)\/?$/i.exec(trimmed);
     return match?.[1] ?? trimmed;
   }
 
   private normalizeIpInput(value: string): string {
     const trimmed = value.trim();
-    const match = trimmed.match(/^(?:https:\/\/)?([^/?#]+)\/?$/i);
+    const match = /^(?:https:\/\/)?([^/?#]+)\/?$/i.exec(trimmed);
     return match?.[1] ?? trimmed;
   }
 
@@ -612,7 +612,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           this.parseSeoRepoScanResult(response);
         },
         error: (error) => {
-          this.seoRepoScanErrorMessage = (error && (error.error?.detail || error.message)) || 'Failed to fetch scan results.';
+          this.seoRepoScanErrorMessage = String(error?.error?.detail ?? '') || String(error?.message ?? '') || 'Failed to fetch scan results.';
           this.seoRepoScanProgress.set(0);
         },
       });
@@ -692,7 +692,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return '';
     }
     try {
-      return new URL(value.match(/^https?:\/\//i) ? value : `https://${value.replace(/^\/+/, '')}`).toString();
+      return new URL((/^https?:\/\//i.exec(value)) ? value : `https://${value.replace(/^\/+/, '')}`).toString();
     }
     catch {
       return `https://${value.replace(/^https?:\/\//i, '').replace(/^\/+/, '')}`;
@@ -1291,7 +1291,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       try {
         const detail = await this.scanHelper.fetchShodanIpDetail(row.ip);
         if (detail?.ip) {
-          row.detail = detail as IpDetail;
+          row.detail = detail;
         }
       }
       catch (error: unknown) {
@@ -1330,7 +1330,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
     }
 
     const updateElapsed = () => {
-      this.vulnerabilityElapsedSeconds.set(Math.max(0, Math.floor((Date.now() - this.vulnerabilityCreatedAtMs!) / 1000)));
+      this.vulnerabilityElapsedSeconds.set(Math.max(0, Math.floor((Date.now() - (this.vulnerabilityCreatedAtMs ?? Date.now())) / 1000)));
     };
     updateElapsed();
     this.vulnerabilityElapsedInterval ??= setInterval(() => {
@@ -1364,7 +1364,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
         row.step = typeof nextStep === 'string' ? nextStep : row.step;
       }).pipe(tap((detail) => {
         if (detail?.ip) {
-          row.detail = detail as IpDetail;
+          row.detail = detail;
           row.progress = 100;
           row.step = 'Done';
           row.loading = false;
@@ -1521,23 +1521,23 @@ export class NetworkIntel implements OnInit, OnDestroy {
         Protocol: port.protocol ?? port.proto ?? '-',
         Service: port.service ?? '-',
         State: port.state ?? '-',
-        'Is Camera': port['is_camera'] || port['device_type'] === 'camera' ? 'Yes' : 'No',
-        'Is IoT': port['is_iot'] ? 'Yes' : 'No',
-        'Device Type': this.normalizeReportValue(port['device_type']),
-        'Device Category': this.normalizeReportValue(port['device_category']),
-        'Device Vendor': this.normalizeReportValue(port['device_vendor']),
-        'Device Family': this.normalizeReportValue(port['device_family']),
-        'Device Model': this.normalizeReportValue(port['device_model']),
-        'Device Version': this.normalizeReportValue(port['device_version']),
-        'Device Tags': this.joinValues(port['device_tags']),
-        'Device Confidence': this.normalizeReportValue(port['device_confidence']),
-        'Fingerprint Source': this.normalizeReportValue(port['fingerprint_source']),
-        'Fingerprint Match': this.normalizeReportValue(port['fingerprint_match']),
-        'Protocol Verified': port['protocol_verified'] === undefined ? '-' : (port['protocol_verified'] ? 'Yes' : 'No'),
-        CPE: this.normalizeReportValue(port['cpe']),
-        Product: this.normalizeReportValue(port['product']),
-        Version: this.normalizeReportValue(port['version']),
-        Vendor: this.normalizeReportValue(port['vendor']),
+        'Is Camera': port.is_camera || port.device_type === 'camera' ? 'Yes' : 'No',
+        'Is IoT': port.is_iot ? 'Yes' : 'No',
+        'Device Type': this.normalizeReportValue(port.device_type),
+        'Device Category': this.normalizeReportValue(port.device_category),
+        'Device Vendor': this.normalizeReportValue(port.device_vendor),
+        'Device Family': this.normalizeReportValue(port.device_family),
+        'Device Model': this.normalizeReportValue(port.device_model),
+        'Device Version': this.normalizeReportValue(port.device_version),
+        'Device Tags': this.joinValues(port.device_tags),
+        'Device Confidence': this.normalizeReportValue(port.device_confidence),
+        'Fingerprint Source': this.normalizeReportValue(port.fingerprint_source),
+        'Fingerprint Match': this.normalizeReportValue(port.fingerprint_match),
+        'Protocol Verified': port.protocol_verified === undefined ? '-' : (port.protocol_verified ? 'Yes' : 'No'),
+        CPE: this.normalizeReportValue(port.cpe),
+        Product: this.normalizeReportValue(port.product),
+        Version: this.normalizeReportValue(port.version),
+        Vendor: this.normalizeReportValue(port.vendor),
         'Risk Flags': this.joinValues(port.risk_flags),
         Misconfigurations: this.joinValues(port.misconfigurations),
         Banner: this.truncateReportText(port.banner),
@@ -1546,32 +1546,32 @@ export class NetworkIntel implements OnInit, OnDestroy {
         'TLS Version': this.normalizeReportValue(port.tls?.version),
         'TLS Cipher': this.normalizeReportValue(port.tls?.cipher),
         'TLS Supported Versions': this.joinValues(port.tls?.supported_versions),
-        'TLS Ciphers By Version': this.normalizeReportValue(port.tls?.['ciphers_by_version']),
+        'TLS Ciphers By Version': this.normalizeReportValue(port.tls?.ciphers_by_version),
         'Certificate CN': this.normalizeReportValue(port.tls?.cert_cn),
         'Certificate SAN': this.normalizeReportValue(port.tls?.san),
         'Certificate Issuer': this.normalizeReportValue(port.tls?.issuer),
         'Certificate Subject': this.normalizeReportValue(port.tls?.subject),
         'Certificate Serial': this.normalizeReportValue(port.tls?.serial_number),
-        'Certificate Policies': this.joinValues(port.tls?.['certificate_policies']),
-        'CA Issuers': this.joinValues(port.tls?.['ca_issuers']),
-        'CRL Distribution Points': this.joinValues(port.tls?.['crl_distribution_points']),
-        'SCTs': this.normalizeReportValue(port.tls?.['scts']),
+        'Certificate Policies': this.joinValues(port.tls?.certificate_policies),
+        'CA Issuers': this.joinValues(port.tls?.ca_issuers),
+        'CRL Distribution Points': this.joinValues(port.tls?.crl_distribution_points),
+        'SCTs': this.normalizeReportValue(port.tls?.scts),
         'Public Key': this.normalizeReportValue(port.tls?.public_key_algorithm
           ? `${port.tls.public_key_algorithm}${port.tls?.public_key_size ? ` (${port.tls.public_key_size} bit)` : ''}`
           : ''),
         'Signature Algorithm': this.normalizeReportValue(port.tls?.signature_algorithm),
         'Key Usage': this.joinValues(port.tls?.key_usage),
         'Extended Key Usage': this.joinValues(port.tls?.extended_key_usage),
-        'Subject Key ID': this.normalizeReportValue(port.tls?.['subject_key_identifier']),
-        'Authority Key ID': this.normalizeReportValue(port.tls?.['authority_key_identifier']),
+        'Subject Key ID': this.normalizeReportValue(port.tls?.subject_key_identifier),
+        'Authority Key ID': this.normalizeReportValue(port.tls?.authority_key_identifier),
         'SHA-256 Fingerprint': this.normalizeReportValue(port.tls?.fingerprint_sha256),
         'TLS Risk Flags': this.joinValues(port.tls?.risk_flags),
         'Weak Protocols': this.joinValues(port.tls?.weak_protocols),
         'Self Signed': port.tls?.is_self_signed === undefined ? '-' : (port.tls?.is_self_signed ? 'Yes' : 'No'),
-        'Certificate CA': port.tls?.['is_ca'] === undefined ? '-' : (port.tls?.['is_ca'] ? 'Yes' : 'No'),
+        'Certificate CA': port.tls?.is_ca === undefined ? '-' : (port.tls?.is_ca ? 'Yes' : 'No'),
         'Certificate Expiry': this.normalizeReportValue(port.tls?.not_after ?? port.tls?.cert_expires),
         'Certificate Not Before': this.normalizeReportValue(port.tls?.not_before),
-        'Discovered Paths': this.joinValues(port['discovered_paths']),
+        'Discovered Paths': this.joinValues(port.discovered_paths),
       }
     })).filter(table => Object.values(table.values).some(value => Boolean((value || '').trim()) && value.trim() !== '-'));
   }
@@ -1661,7 +1661,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private countCameraPorts(detail: IpDetail | null | undefined): number {
-    return (detail?.ports ?? []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
+    return (detail?.ports ?? []).filter((port) => port && ((port.is_camera ?? false) || port.device_type === 'camera')).length;
   }
 
   private countIotPorts(detail: IpDetail | null | undefined): number {

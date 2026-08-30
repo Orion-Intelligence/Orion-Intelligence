@@ -29,7 +29,7 @@ export class IpDetailComponent {
   }
 
   get cameraPortCount(): number {
-    return (this.detail?.ports ?? []).filter((port) => port && (port.is_camera || port.device_type === 'camera')).length;
+    return (this.detail?.ports ?? []).filter((port) => port && ((port.is_camera ?? false) || port.device_type === 'camera')).length;
   }
 
   get iotPortCount(): number {

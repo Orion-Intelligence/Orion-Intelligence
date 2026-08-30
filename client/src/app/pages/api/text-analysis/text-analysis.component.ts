@@ -203,7 +203,7 @@ export class TextAnalysisComponent extends ValuePresentationBase implements OnIn
 
   private normalizeResult(res: unknown): TextAnalysisResult {
     const record: Partial<TextAnalysisResult> = (res && typeof res === 'object')
-      ? res as Partial<TextAnalysisResult>
+      ? res
       : { status: 'unknown' };
     return {
       ...record,

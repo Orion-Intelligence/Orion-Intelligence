@@ -78,7 +78,7 @@ export class TenantBrandingSettingsComponent implements OnInit {
   deleteUserResource(key: SystemResourceKey = 'logo_url'): void {
     this.apiService.delete<unknown>(`system/image?key=${key}`).subscribe({
       next: () => {
-        this.applySettings({ [key]: DEFAULT_SYSTEM_ASSETS[key] } as Partial<AppSettingsModel>);
+        this.applySettings({ [key]: DEFAULT_SYSTEM_ASSETS[key] });
       },
       error: (err) => {
         const message = err?.error?.detail ?? this.translationService.translate('Failed to remove image');
