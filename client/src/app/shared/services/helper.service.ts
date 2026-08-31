@@ -143,10 +143,9 @@ export class HelperService {
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
     let renderedMarkup: string;
-    const hasHighlightMarkup = text.includes('<em>') && text.includes('</em>');
-    if (hasHighlightMarkup) {
-      const regex = /<em>(.*?)<\/em>/g;
-      const matches = [...text.matchAll(regex)];
+    const highlightPattern = /<em>(.*?)<\/em>/g;
+    const matches = [...text.matchAll(highlightPattern)];
+    if (matches.length > 0) {
       let highlightedMarkup = '';
       let lastIndex = 0;
       let i = 0;

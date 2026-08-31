@@ -1852,9 +1852,12 @@ export class GraphComponent implements OnInit, OnDestroy {
     if (fullLabel) {
       const propertyLabel = this.formatTooltipLabel(this.extractPropertyKey(v));
       if (propertyLabel) {
-        const existingKeyPattern = new RegExp(`^${propertyLabel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*:`, 'i');
-        const displayLabel = existingKeyPattern.test(fullLabel)
-          ? fullLabel.replace(existingKeyPattern, `${propertyLabel}:`)
+        const labelRemainder = fullLabel.slice(propertyLabel.length);
+        const existingSeparator = /^\s*:/.exec(labelRemainder);
+        const hasExistingKey = existingSeparator !== null
+          && fullLabel.slice(0, propertyLabel.length).toLowerCase() === propertyLabel.toLowerCase();
+        const displayLabel = hasExistingKey
+          ? `${propertyLabel}:${labelRemainder.slice(existingSeparator[0].length)}`
           : `${propertyLabel}: ${fullLabel}`;
         return this.truncateLabel(displayLabel);
       }
