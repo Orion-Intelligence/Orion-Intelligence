@@ -172,8 +172,8 @@ export class NexusChatService {
   getNexusSummary(response: ChatApiResponse): string {
     const result = this.asRecord(response?.result);
     const summary = result
-      ? result['response'] ?? result['summary'] ?? result['result'] ?? result['text'] ?? response?.['summary'] ?? response?.message ?? response?.text
-      : response?.result ?? response?.['summary'] ?? response?.message ?? response?.text;
+      ? result.response ?? result.summary ?? result.result ?? result.text ?? response?.summary ?? response?.message ?? response?.text
+      : response?.result ?? response?.summary ?? response?.message ?? response?.text;
     return Array.isArray(summary) ? summary.join('\n').trim() : this.streamValueToText(summary ?? '').trim();
   }
 
@@ -184,13 +184,13 @@ export class NexusChatService {
 
   getNexusStep(response: ChatApiResponse): string {
     const result = this.asRecord(response?.result);
-    const step = result?.['step'] ?? response?.['step'] ?? result?.['progress'] ?? response?.['progress'] ?? result?.['status'] ?? response?.['status'];
+    const step = result?.step ?? response?.step ?? result?.progress ?? response?.progress ?? result?.status ?? response?.status;
     return this.streamValueToText(step ?? '').trim();
   }
 
   private getNexusStatus(response: ChatApiResponse): string {
     const result = this.asRecord(response?.result);
-    return ((result?.['status'] ?? response?.['status'] ?? '') as string).toString().trim().toLowerCase();
+    return ((result?.status ?? response?.status ?? '') as string).toString().trim().toLowerCase();
   }
 
   private asRecord(value: unknown): Record<string, unknown> | null {
@@ -218,21 +218,21 @@ export class NexusChatService {
         continue;
       }
       const parsedRecord = this.asRecord(parsed) ?? {};
-      if (parsedRecord['done'] === true) {
+      if (parsedRecord.done === true) {
         state.done = true;
       }
-      const output = this.asRecord(parsedRecord['output']);
-      const delta = output?.['delta'] ?? parsedRecord['delta'];
-      const response = output?.['response'] ?? parsedRecord['response'];
-      const rawTriggers = output?.['triggers'] ?? parsedRecord['triggers'];
+      const output = this.asRecord(parsedRecord.output);
+      const delta = output?.delta ?? parsedRecord.delta;
+      const response = output?.response ?? parsedRecord.response;
+      const rawTriggers = output?.triggers ?? parsedRecord.triggers;
       const triggers = Array.isArray(rawTriggers)
-        ? rawTriggers.filter((item) => Boolean(this.asRecord(item)?.['url'])) as AiWorkspaceTrigger[]
+        ? rawTriggers.filter((item) => Boolean(this.asRecord(item)?.url)) as AiWorkspaceTrigger[]
         : undefined;
-      const status = this.asRecord(parsedRecord['status']);
-      const statusMessage = status?.['message'] ?? parsedRecord['status_message'];
-      const isError = Boolean(parsedRecord['error']);
-      const error = this.asRecord(parsedRecord['error']);
-      let detail = parsedRecord['detail'] ?? error?.['message'];
+      const status = this.asRecord(parsedRecord.status);
+      const statusMessage = status?.message ?? parsedRecord.status_message;
+      const isError = Boolean(parsedRecord.error);
+      const error = this.asRecord(parsedRecord.error);
+      let detail = parsedRecord.detail ?? error?.message;
       if (typeof detail === 'string' && detail.toLowerCase().includes('stream is already active')) {
         detail = 'Nexus is still finishing the previous chat. Try again in a moment.';
       }
@@ -255,7 +255,7 @@ export class NexusChatService {
   private streamValueToText(value: unknown): string {
     const record = this.asRecord(value);
     if (record) {
-      return this.streamValueToText(record['response'] ?? record['result'] ?? record['text'] ?? JSON.stringify(record));
+      return this.streamValueToText(record.response ?? record.result ?? record.text ?? JSON.stringify(record));
     }
     return String(value);
   }

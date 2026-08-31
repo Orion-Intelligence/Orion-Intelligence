@@ -68,7 +68,7 @@ export class GeoCoordinatesModalComponent implements AfterViewInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isOpen']?.currentValue) {
+    if (changes.isOpen?.currentValue) {
       this.queueRenderMap();
     }
   }

@@ -155,7 +155,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       const target: Record<string, unknown> = { center: [center.lon, center.lat] };
       const currentZoom = Number(this.view.zoom);
       if (Number.isFinite(currentZoom)) {
-        target['zoom'] = currentZoom;
+        target.zoom = currentZoom;
       }
 
       this.clearViewportNavigationRequest();
@@ -591,9 +591,9 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
   }
 
   private buildArcSelection(attributes: Record<string, unknown>): ThreatLensArcSelection | null {
-    const categoryKey = String(attributes['category'] ?? '').trim();
-    const countryAKey = String(attributes['country_a'] ?? '').trim();
-    const countryBKey = String(attributes['country_b'] ?? '').trim();
+    const categoryKey = String(attributes.category ?? '').trim();
+    const countryAKey = String(attributes.country_a ?? '').trim();
+    const countryBKey = String(attributes.country_b ?? '').trim();
 
     if (!categoryKey || !countryAKey || !countryBKey) {
       return null;
@@ -601,12 +601,12 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
     return {
       categoryKey: categoryKey as ThreatLensCategoryModelKey,
-      categoryLabel: String(attributes['category_label'] ?? 'Threat').trim(),
+      categoryLabel: String(attributes.category_label ?? 'Threat').trim(),
       countryAKey,
       countryBKey,
-      countryAName: String(attributes['start_country'] ?? countryAKey).trim(),
-      countryBName: String(attributes['end_country'] ?? countryBKey).trim(),
-      weight: Number(attributes['weight'] ?? 0),
+      countryAName: String(attributes.start_country ?? countryAKey).trim(),
+      countryBName: String(attributes.end_country ?? countryBKey).trim(),
+      weight: Number(attributes.weight ?? 0),
     };
   }
 

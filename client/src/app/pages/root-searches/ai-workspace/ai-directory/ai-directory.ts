@@ -69,7 +69,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['importRequest'] && this.importRequest) {
+    if (changes.importRequest && this.importRequest) {
       if (this.importRequest.requestId === this.lastImportRequestId) {
         return;
       }
@@ -85,7 +85,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
       return;
     }
 
-    if (changes['sessionId']) {
+    if (changes.sessionId) {
       this.workspaceStatusRequest?.unsubscribe();
       this.resetWorkspace(false);
       this.repositoryImportMode = false;
@@ -101,7 +101,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
       return;
     }
 
-    if (changes['viewMode'] && this.viewMode !== 'chat' && this.sessionId) {
+    if (changes.viewMode && this.viewMode !== 'chat' && this.sessionId) {
       this.workspaceStatusRequest?.unsubscribe();
       this.activeWorkspaceSessionId = this.sessionId;
       this.loadExistingWorkspaceStatus();
@@ -407,15 +407,15 @@ export class AiDirectory implements OnChanges, OnDestroy {
 
   private getApiErrorMessage(error: unknown): string {
     const errorRecord = asUnknownRecord(error);
-    const nestedError = asUnknownRecord(errorRecord['error']);
-    const detail = nestedError['detail'] ?? errorRecord['error'];
+    const nestedError = asUnknownRecord(errorRecord.error);
+    const detail = nestedError.detail ?? errorRecord.error;
 
     if (typeof detail === 'string') {
       return detail;
     }
 
     const detailRecord = asUnknownRecord(detail);
-    return String(detailRecord['message'] ?? detailRecord['error'] ?? errorRecord['message'] ?? this.translate('Request failed.'));
+    return String(detailRecord.message ?? detailRecord.error ?? errorRecord.message ?? this.translate('Request failed.'));
   }
 
   private clearWorkspaceStatus(): void {

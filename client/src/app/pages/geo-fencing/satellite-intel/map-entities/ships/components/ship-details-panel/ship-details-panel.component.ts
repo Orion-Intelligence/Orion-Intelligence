@@ -84,8 +84,8 @@ export class ShipDetailsPanelComponent {
   }
 
   get coordinates(): string {
-    const latitude = this.ship?.['latitude'];
-    const longitude = this.ship?.['longitude'];
+    const latitude = this.ship?.latitude;
+    const longitude = this.ship?.longitude;
     if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
       return `${Number(latitude).toFixed(3)}, ${Number(longitude).toFixed(3)}`;
     }

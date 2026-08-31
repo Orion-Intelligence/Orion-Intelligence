@@ -44,10 +44,10 @@ export class MonthCompareService {
   runAnomalyScan(lat: number, lon: number, delta = 0.05, shClientId?: string, shClientSecret?: string): Observable<SatelliteAnomalyResponse> {
     const payload: Record<string, unknown> = { lat, lon, delta };
     if (shClientId) {
-      payload['sh_client_id'] = shClientId;
+      payload.sh_client_id = shClientId;
     }
     if (shClientSecret) {
-      payload['sh_client_secret'] = shClientSecret;
+      payload.sh_client_secret = shClientSecret;
     }
     return this.satelliteIntelService.createPolledRequest(() => this.api.post<SatelliteAnomalyResponse>('satellite/anomaly', payload),
       (res) => this.getPollStatus(res),
@@ -132,7 +132,7 @@ export class MonthCompareService {
   }
 
   private toDataUrl(imageResult: SatelliteImageResponse['result']): string {
-    const imageBase64 = imageResult?.image_base64 ?? imageResult?.['image_b64'];
+    const imageBase64 = imageResult?.image_base64 ?? imageResult?.image_b64;
     if (typeof imageBase64 !== 'string' || !imageBase64.trim()) {
       return '';
     }

@@ -77,7 +77,7 @@ export class ScanNotificationService {
   refreshCounts(): void {
     this.api.get<unknown>('scan-jobs/count').subscribe({
       next: response => {
-        this.totalScanCount.set(Number(this.asScanResponse(response)['total'] ?? 0));
+        this.totalScanCount.set(Number(this.asScanResponse(response).total ?? 0));
       },
       error: () => void 0,
     });
@@ -584,7 +584,7 @@ export class ScanNotificationService {
 
   private shouldRetryIncompleteUrlScanResponse(response: unknown, request: ScanJobStartRequest): boolean {
     const apiReference = String(request.apiReference ?? '').replace(/^\/?api\//, '');
-    const scanType = String(request.payload?.['scanType'] ?? '').toLowerCase();
+    const scanType = String(request.payload?.scanType ?? '').toLowerCase();
     const responseRecord = this.asScanResponse(response);
     const nested = this.asScanResponse(responseRecord.result);
     const status = String(nested.status ?? responseRecord.status ?? responseRecord.scan_status ?? '').toLowerCase();

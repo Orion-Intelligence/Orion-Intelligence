@@ -47,8 +47,8 @@ export class ReportDefacementComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.route.data.subscribe(data => {
-      if (data['reportdata']) {
-        this.defacementData = data['reportdata'] as DefacementResultItem;
+      if (data.reportdata) {
+        this.defacementData = data.reportdata as DefacementResultItem;
         this.prepareMetadata();
         this.scrollToTop();
       }

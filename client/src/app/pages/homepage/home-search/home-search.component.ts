@@ -53,7 +53,7 @@ export class HomeSearchComponent implements OnInit {
     this.onSetMatchType(matchtype);
     this.computeInsightMax();
     this.route.queryParams.subscribe(params => {
-      const tab = params['tab'];
+      const tab = params.tab;
       if (typeof tab === 'string' && this.tabs.includes(tab)) {
         this.selectedTab = tab;
       }
@@ -108,7 +108,7 @@ export class HomeSearchComponent implements OnInit {
   }
 
   getMatchType() {
-    const matchtype = this.dashboardService.selectedFilters()['matchtype'];
+    const matchtype = this.dashboardService.selectedFilters().matchtype;
     if (matchtype === 'full') {
       return 'Match full query';
     }

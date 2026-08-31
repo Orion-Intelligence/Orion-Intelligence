@@ -30,7 +30,7 @@ export class SmtpSettingsBlockComponent implements OnChanges {
   @Output() settingsChange = new EventEmitter<void>();
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['errorState']?.currentValue) {
+    if (changes.errorState?.currentValue) {
       this.scrollToError();
     }
   }

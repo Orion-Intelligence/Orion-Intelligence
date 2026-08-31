@@ -102,15 +102,15 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
     this.form.ai_endpoint_enabled = settings.ai_endpoint_enabled;
     this.form.admin_root_allowed = settings.admin_root_allowed;
     this.form.s_onion = settings.s_onion;
-    this.form.data_sources_url = typeof metaInfo['S_HOME_HEADER_DATA_SOURCES'] === 'string' ? metaInfo['S_HOME_HEADER_DATA_SOURCES'] : '';
-    this.form.adversaries_url = typeof metaInfo['S_HOME_HEADER_ADVERSARIES'] === 'string' ? metaInfo['S_HOME_HEADER_ADVERSARIES'] : '';
-    this.form.pricing_url = typeof metaInfo['S_HOME_HEADER_PRICING'] === 'string' ? metaInfo['S_HOME_HEADER_PRICING'] : '';
-    this.form.documentation_allowed = metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] === true;
-    this.form.whistle_blowing_allowed = metaInfo['S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED'] === true;
-    this.form.accounts_mail_password = typeof metaInfo['ACCOUNTS_MAIL_PASSWORD'] === 'string' ? metaInfo['ACCOUNTS_MAIL_PASSWORD'] : '';
-    this.form.accounts_mail = typeof metaInfo['ACCOUNTS_MAIL'] === 'string' ? metaInfo['ACCOUNTS_MAIL'] : '';
-    this.form.accounts_smtp_server = typeof metaInfo['ACCOUNTS_SMTP_SERVER'] === 'string' ? metaInfo['ACCOUNTS_SMTP_SERVER'] : '';
-    this.form.accounts_smtp_port = typeof metaInfo['ACCOUNTS_SMTP_PORT'] === 'string' ? metaInfo['ACCOUNTS_SMTP_PORT'] : '';
+    this.form.data_sources_url = typeof metaInfo.S_HOME_HEADER_DATA_SOURCES === 'string' ? metaInfo.S_HOME_HEADER_DATA_SOURCES : '';
+    this.form.adversaries_url = typeof metaInfo.S_HOME_HEADER_ADVERSARIES === 'string' ? metaInfo.S_HOME_HEADER_ADVERSARIES : '';
+    this.form.pricing_url = typeof metaInfo.S_HOME_HEADER_PRICING === 'string' ? metaInfo.S_HOME_HEADER_PRICING : '';
+    this.form.documentation_allowed = metaInfo.S_HOME_HEADER_PRICING_ALLOWED === true;
+    this.form.whistle_blowing_allowed = metaInfo.S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED === true;
+    this.form.accounts_mail_password = typeof metaInfo.ACCOUNTS_MAIL_PASSWORD === 'string' ? metaInfo.ACCOUNTS_MAIL_PASSWORD : '';
+    this.form.accounts_mail = typeof metaInfo.ACCOUNTS_MAIL === 'string' ? metaInfo.ACCOUNTS_MAIL : '';
+    this.form.accounts_smtp_server = typeof metaInfo.ACCOUNTS_SMTP_SERVER === 'string' ? metaInfo.ACCOUNTS_SMTP_SERVER : '';
+    this.form.accounts_smtp_port = typeof metaInfo.ACCOUNTS_SMTP_PORT === 'string' ? metaInfo.ACCOUNTS_SMTP_PORT : '';
     this.configurationError = '';
     this.mailErrorState = false;
     this.webhookErrorState = false;
@@ -301,17 +301,17 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   private buildMetaInfo(section: 'configuration' | 'mail'): Record<string, string | boolean> {
     const metaInfo: Record<string, string | boolean> = {};
     if (section === 'configuration') {
-      metaInfo['S_HOME_HEADER_DATA_SOURCES'] = this.form.data_sources_url;
-      metaInfo['S_HOME_HEADER_ADVERSARIES'] = this.form.adversaries_url;
-      metaInfo['S_HOME_HEADER_PRICING'] = this.form.pricing_url;
-      metaInfo['S_HOME_HEADER_PRICING_ALLOWED'] = this.form.documentation_allowed;
-      metaInfo['S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED'] = this.form.whistle_blowing_allowed;
+      metaInfo.S_HOME_HEADER_DATA_SOURCES = this.form.data_sources_url;
+      metaInfo.S_HOME_HEADER_ADVERSARIES = this.form.adversaries_url;
+      metaInfo.S_HOME_HEADER_PRICING = this.form.pricing_url;
+      metaInfo.S_HOME_HEADER_PRICING_ALLOWED = this.form.documentation_allowed;
+      metaInfo.S_HOME_HEADER_WHISTLE_BLOWING_ALLOWED = this.form.whistle_blowing_allowed;
     }
     if (section === 'mail') {
-      metaInfo['ACCOUNTS_MAIL_PASSWORD'] = this.form.accounts_mail_password;
-      metaInfo['ACCOUNTS_MAIL'] = this.form.accounts_mail;
-      metaInfo['ACCOUNTS_SMTP_SERVER'] = this.form.accounts_smtp_server;
-      metaInfo['ACCOUNTS_SMTP_PORT'] = this.form.accounts_smtp_port;
+      metaInfo.ACCOUNTS_MAIL_PASSWORD = this.form.accounts_mail_password;
+      metaInfo.ACCOUNTS_MAIL = this.form.accounts_mail;
+      metaInfo.ACCOUNTS_SMTP_SERVER = this.form.accounts_smtp_server;
+      metaInfo.ACCOUNTS_SMTP_PORT = this.form.accounts_smtp_port;
     }
     return metaInfo;
   }

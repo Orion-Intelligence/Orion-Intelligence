@@ -185,7 +185,7 @@ export class PhoneLookupSectionComponent implements OnDestroy {
     }
     if (value && typeof value === 'object') {
       const record = asUnknownRecord(value);
-      return this.normalizePhoneValue(record['number'] ?? record['value'] ?? record['phone'] ?? '');
+      return this.normalizePhoneValue(record.number ?? record.value ?? record.phone ?? '');
     }
     const phone = String(value ?? '').trim();
     const digitCount = phone.replace(/\D/g, '').length;

@@ -81,7 +81,7 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
   apiEndpoint = '';
 
   constructor(protected helperService: HelperService, public appService: AppService, public dashboardService: DashboardService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, private scrollService: ScrollService, private apiService: ApiService) {
-    this.type = this.route.snapshot.data['type'] as Category;
+    this.type = this.route.snapshot.data.type as Category;
     this.apiEndpoint = this.getApiEndpoint(this.router.url.split('?')[0]);
   }
 
@@ -179,8 +179,8 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
           this.totalGroups = 0;
         }
 
-        this.dashboardService.consolidatedParamModel.q = params['q'] ?? '';
-        this.dashboardService.consolidatedParamModel.page = params['page'] ?? '1';
+        this.dashboardService.consolidatedParamModel.q = params.q ?? '';
+        this.dashboardService.consolidatedParamModel.page = params.page ?? '1';
         const routeCategory = urlSegments.length ? urlSegments[urlSegments.length - 1].path : 'all';
         this.apiEndpoint = this.getApiEndpoint(route);
         this.dashboardService.consolidatedParamModel.category = this.getApiCategory(routeCategory);
@@ -196,10 +196,10 @@ export class DashboardResultContainer implements OnInit, AfterViewInit, AfterVie
             const parsedCache = asUnknownRecord(parsed);
             this.currentResultModel = Array.isArray(parsed)
               ? parsed as RankedResultItem[]
-              : Array.isArray(parsedCache['result']) ? parsedCache['result'] as RankedResultItem[] : [];
-            this.defacementGroups = Array.isArray(parsedCache['defacementGroups']) ? parsedCache['defacementGroups'] as DefacementGroupCallbackItem[] : [];
-            this.totalGroups = Number(parsedCache['totalGroups'] ?? 0) || 0;
-            this.maxPages = Number(parsedCache['maxPages'] ?? 1) || 1;
+              : Array.isArray(parsedCache.result) ? parsedCache.result as RankedResultItem[] : [];
+            this.defacementGroups = Array.isArray(parsedCache.defacementGroups) ? parsedCache.defacementGroups as DefacementGroupCallbackItem[] : [];
+            this.totalGroups = Number(parsedCache.totalGroups ?? 0) || 0;
+            this.maxPages = Number(parsedCache.maxPages ?? 1) || 1;
             this.restoreSavedScroll();
           }
           catch {

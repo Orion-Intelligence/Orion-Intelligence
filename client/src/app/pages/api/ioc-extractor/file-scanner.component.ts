@@ -62,9 +62,9 @@ export class FileScannerComponent {
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private exportBranding: ExportBrandingService, private reportExportService: ReportExportService) {
     this.route.data.subscribe(data => {
-      this.type = data['type'] ?? this.type;
-      this.title = data['title'] ?? this.title;
-      this.description = data['description'] ?? this.description;
+      this.type = data.type ?? this.type;
+      this.title = data.title ?? this.title;
+      this.description = data.description ?? this.description;
     });
   }
 
@@ -138,11 +138,11 @@ export class FileScannerComponent {
   private handleScanResponse(res: FileScanResponse): void {
     const nested = asUnknownRecord(res.result);
     if (res.status === 'pending' || res.status === 'processing') {
-      const p = res.progress ?? nested['progress'];
+      const p = res.progress ?? nested.progress;
       if (typeof p === 'number' && Number.isFinite(p)) {
         this.progress.set(Math.max(0, Math.min(100, Math.round(p))));
       }
-      const step = res.step ?? nested['step'];
+      const step = res.step ?? nested.step;
       if (typeof step === 'string' && step) {
         this.currentStep = step;
       }
@@ -303,15 +303,15 @@ export class FileScannerComponent {
 
   private handleError(err: unknown): void {
     const error = asUnknownRecord(err);
-    const nestedError = asUnknownRecord(error['error']);
-    if (error['status'] === 413) {
+    const nestedError = asUnknownRecord(error.error);
+    if (error.status === 413) {
       this.errorMessage = this.fileSize
         ? `${this.translate('File size exceeds 30MB.')} ${this.translate('Your file is')} ${this.fileSize}.`
         : this.translate('File size exceeds 30MB.');
       this.isFileSizeError = true;
       return;
     }
-    this.errorMessage = String(nestedError['detail'] ?? error['message'] ?? this.translate('Upload failed.'));
+    this.errorMessage = String(nestedError.detail ?? error.message ?? this.translate('Upload failed.'));
   }
 
   formatFileSize(bytes: number): string {
@@ -330,25 +330,25 @@ export class FileScannerComponent {
   }
 
   getDisplayFileName(): string {
-    const metadata = asUnknownRecord(this.scanResult?.['metadata']);
-    const nestedMetadata = asUnknownRecord(metadata['metadata']);
-    const ioc = asUnknownRecord(this.scanResult?.['ioc']);
-    const antivirus = asUnknownRecord(this.scanResult?.['antivirus']);
+    const metadata = asUnknownRecord(this.scanResult?.metadata);
+    const nestedMetadata = asUnknownRecord(metadata.metadata);
+    const ioc = asUnknownRecord(this.scanResult?.ioc);
+    const antivirus = asUnknownRecord(this.scanResult?.antivirus);
     return this.getFirstString([
-      metadata['file_name'],
-      nestedMetadata['resourceName'],
-      ioc['filename'],
-      antivirus['file_name'],
-      this.scanResult?.['original_filename'],
+      metadata.file_name,
+      nestedMetadata.resourceName,
+      ioc.filename,
+      antivirus.file_name,
+      this.scanResult?.original_filename,
       this.fileName
     ]) || 'file';
   }
 
   getDisplayFileType(): string {
-    const ioc = asUnknownRecord(this.scanResult?.['ioc']);
+    const ioc = asUnknownRecord(this.scanResult?.ioc);
     return this.getFirstString([
-      this.scanResult?.['type'],
-      ioc['file_type']
+      this.scanResult?.type,
+      ioc.file_type
     ]) || 'file';
   }
 

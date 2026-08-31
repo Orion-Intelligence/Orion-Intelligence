@@ -247,11 +247,11 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
     }
     if (typeof value === 'object') {
       const comment = value as Record<string, unknown>;
-      const text = comment['text'] ?? comment['comment'] ?? comment['comment_text'] ?? comment['m_comment_text'] ?? comment['m_comment'] ?? comment['m_text'] ?? comment['content'] ?? comment['comment_content'] ?? comment['m_content'] ?? comment['message'] ?? comment['body'] ?? comment['m_body'] ?? comment['comment_body'] ?? comment['reply'] ?? comment['reply_content'] ?? comment['description'];
+      const text = comment.text ?? comment.comment ?? comment.comment_text ?? comment.m_comment_text ?? comment.m_comment ?? comment.m_text ?? comment.content ?? comment.comment_content ?? comment.m_content ?? comment.message ?? comment.body ?? comment.m_body ?? comment.comment_body ?? comment.reply ?? comment.reply_content ?? comment.description;
       if (text) {
         const meta = [
-          comment['sender_name'] ?? comment['m_sender_name'] ?? comment['author'] ?? comment['m_author'] ?? comment['comment_author'] ?? comment['username'] ?? comment['user'] ?? comment['name'] ?? comment['from'],
-          comment['m_date'] ?? comment['date'] ?? comment['datetime'] ?? comment['created_at'] ?? comment['timestamp'] ?? comment['time'] ?? comment['m_time']
+          comment.sender_name ?? comment.m_sender_name ?? comment.author ?? comment.m_author ?? comment.comment_author ?? comment.username ?? comment.user ?? comment.name ?? comment.from,
+          comment.m_date ?? comment.date ?? comment.datetime ?? comment.created_at ?? comment.timestamp ?? comment.time ?? comment.m_time
         ].map(item => this.toDisplayValue(item)).filter(Boolean).join(' - ');
         const displayText = this.toDisplayValue(text);
         return [meta ? `${meta}: ${displayText}` : displayText];
@@ -284,22 +284,22 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
 
   getDisplayMessageDate(item: ChatResultItem | SocialResultItem | null): string {
     const rawItem = item as Record<string, unknown> | null;
-    const value = this.getFirstRenderableValue(rawItem?.['m_date'],
-      rawItem?.['m_message_date'],
-      rawItem?.['message_date'],
-      rawItem?.['date'],
-      rawItem?.['created_at'],
-      rawItem?.['m_created_at'],
-      rawItem?.['m_creation_date'],
-      rawItem?.['m_update_date'],
-      rawItem?.['m_time']);
+    const value = this.getFirstRenderableValue(rawItem?.m_date,
+      rawItem?.m_message_date,
+      rawItem?.message_date,
+      rawItem?.date,
+      rawItem?.created_at,
+      rawItem?.m_created_at,
+      rawItem?.m_creation_date,
+      rawItem?.m_update_date,
+      rawItem?.m_time);
     return this.formatDateValue(value);
   }
 
   getDisplayMessageId(item: ChatResultItem | SocialResultItem | null): string {
     const rawItem = item as Record<string, unknown> | null;
-    const messageId = String(rawItem?.['m_message_id'] ?? '').trim();
-    if (!messageId || this.isSlugLikeMessageId(messageId, String(rawItem?.['m_platform'] ?? ''))) {
+    const messageId = String(rawItem?.m_message_id ?? '').trim();
+    if (!messageId || this.isSlugLikeMessageId(messageId, String(rawItem?.m_platform ?? ''))) {
       return '';
     }
     return messageId;
@@ -310,7 +310,7 @@ export class ReportChatComponent implements OnInit, AfterViewInit {
   }
 
   get reportDocId(): string {
-    return String(this.resultItem?.m_hash ?? this.resultItem?.['_id'] ?? '');
+    return String(this.resultItem?.m_hash ?? this.resultItem?._id ?? '');
   }
 
   private getFirstRenderableValue(...values: unknown[]): unknown {

@@ -309,12 +309,12 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
 
   private getResponseError(value: unknown): { message: string } | null {
     const response = asUnknownRecord(value);
-    const result = asUnknownRecord(response['result']);
-    const status = String(result['status'] ?? response['status'] ?? '');
+    const result = asUnknownRecord(response.result);
+    const status = String(result.status ?? response.status ?? '');
     if (status !== 'error') {
       return null;
     }
-    return { message: String(result['message'] ?? response['message'] ?? 'Request failed') };
+    return { message: String(result.message ?? response.message ?? 'Request failed') };
   }
 
   private runTrackedScan<T extends object>( apiReference: string, payload: Record<string, unknown>, metadata: Record<string, unknown>, pollDelayMs = this.pollDelayMs, reusePrevious = false, ): Subscription {
@@ -326,8 +326,8 @@ export class NetworkIntelScanService extends ScanHelperMethodsService {
       reusePrevious,
     }).pipe(tap((response: T) => {
       const record = asUnknownRecord(response);
-      const result = asUnknownRecord(record['result']);
-      const progress = result['progress'] ?? record['progress'];
+      const result = asUnknownRecord(record.result);
+      const progress = result.progress ?? record.progress;
       this.updateProgress(typeof progress === 'number' ? progress : null);
     }),
     takeUntil(cancel$),));

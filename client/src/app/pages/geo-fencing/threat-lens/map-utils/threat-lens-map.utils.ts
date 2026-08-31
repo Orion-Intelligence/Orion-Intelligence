@@ -14,7 +14,7 @@ function buildCountryFeatureIndex(features: ThreatLensMapGraphic[], countryNameF
 
   for (const feature of features) {
     const attributes = feature?.attributes ?? {};
-    const area = Number(attributes['Shape__Area'] ?? 0);
+    const area = Number(attributes.Shape__Area ?? 0);
     const candidateFields = [
       ...countryCodeFields,
       ...countryNameFields,

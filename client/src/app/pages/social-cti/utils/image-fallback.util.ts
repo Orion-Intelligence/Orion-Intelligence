@@ -14,16 +14,16 @@ export function applyImageFallback(event: Event): void {
 
 
   const ytId = /(?:i\.ytimg\.com|img\.youtube\.com)\/vi\/([^/]+)\//.exec(current)?.[1];
-  if (ytId && !image.dataset['ytHqTried'] && !/\/hqdefault\.jpg(?:$|\?)/.test(current)) {
-    image.dataset['ytHqTried'] = '1';
+  if (ytId && !image.dataset.ytHqTried && !/\/hqdefault\.jpg(?:$|\?)/.test(current)) {
+    image.dataset.ytHqTried = '1';
     image.src = `https://i.ytimg.com/vi/${ytId}/hqdefault.jpg`;
     return;
   }
 
-  if (image.dataset['fallbackApplied']) {
+  if (image.dataset.fallbackApplied) {
     return;
   }
-  image.dataset['fallbackApplied'] = '1';
+  image.dataset.fallbackApplied = '1';
   image.src = IMAGE_FALLBACK_SRC;
   image.classList.remove('object-cover', 'max-h-[420px]');
   image.classList.add('object-contain', 'max-h-[72px]', 'p-[12px]', 'opacity-50');

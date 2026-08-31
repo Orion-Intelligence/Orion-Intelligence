@@ -70,7 +70,7 @@ function extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] 
   };
   const sourcesFor = (value: unknown): UnknownRecord[] => {
     const source = asUnknownRecord(value);
-    return [source, asUnknownRecord(source['ip_info']), asUnknownRecord(source['geo']), asUnknownRecord(source['location']), asUnknownRecord(source['data'])];
+    return [source, asUnknownRecord(source.ip_info), asUnknownRecord(source.geo), asUnknownRecord(source.location), asUnknownRecord(source.data)];
   };
   const readCoordinates = (value: unknown): Pick<ThreatLensIpRecord, 'lat' | 'lon'> => {
     const sources = sourcesFor(value);
@@ -129,7 +129,7 @@ function extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] 
     }
 
     const source = asUnknownRecord(value);
-    const ip = String(source['ip'] ?? source['ip_address'] ?? source['host'] ?? '').trim();
+    const ip = String(source.ip ?? source.ip_address ?? source.host ?? '').trim();
     if (!ip) {
       return;
     }
@@ -142,22 +142,22 @@ function extractThreatLensIpScanRecords(payload: unknown): ThreatLensIpRecord[] 
   };
 
   const root = asUnknownRecord(payload);
-  const data = asUnknownRecord(root['data']);
-  const result = asUnknownRecord(root['result']);
+  const data = asUnknownRecord(root.data);
+  const result = asUnknownRecord(root.result);
   [
-    root['ip_locations'],
-    root['candidate_ip_locations'],
-    root['ips'],
-    root['ip_addresses'],
-    data['ip_locations'],
-    data['candidate_ip_locations'],
-    data['ips'],
-    result['ip_locations'],
-    result['candidate_ip_locations'],
-    result['ips'],
-    root['cameras'],
-    result['cameras'],
-    data['cameras'],
+    root.ip_locations,
+    root.candidate_ip_locations,
+    root.ips,
+    root.ip_addresses,
+    data.ip_locations,
+    data.candidate_ip_locations,
+    data.ips,
+    result.ip_locations,
+    result.candidate_ip_locations,
+    result.ips,
+    root.cameras,
+    result.cameras,
+    data.cameras,
   ].forEach((candidate) => {
     if (Array.isArray(candidate)) {
       candidate.forEach(addRecord);

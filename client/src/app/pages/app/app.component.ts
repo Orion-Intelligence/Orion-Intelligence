@@ -35,7 +35,7 @@ export class AppComponent {
     });
     this.error$ = this.errorStore.error$;
     this.router.events.pipe(filter(event => event instanceof NavigationEnd), map(() => {
-      const path = this.router.parseUrl(this.router.url).root.children['primary']?.segments.map(s => s.path).join('/') || '';
+      const path = this.router.parseUrl(this.router.url).root.children.primary?.segments.map(s => s.path).join('/') || '';
       return `/${path}`;
     })).subscribe((path) => {
       this.currentRoute.set(path);

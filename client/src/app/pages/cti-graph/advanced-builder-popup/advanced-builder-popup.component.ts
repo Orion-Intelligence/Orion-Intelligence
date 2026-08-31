@@ -50,7 +50,7 @@ export class GraphAdvancedBuilderPopupComponent {
 
   onBackdrop(event: MouseEvent): void {
     const eventTargetElement = event.target;
-    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset['role'] === 'backdrop') {
+    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset.role === 'backdrop') {
       this.closed.emit();
     }
   }

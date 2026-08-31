@@ -274,10 +274,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       nextCutoutRects = [
         { top, left, width, height, rx: this.spotlightCornerRadius, ry: this.spotlightCornerRadius },
         ...additionalSpotlightStyles.map(spotlight => ({
-          top: Number.parseFloat(spotlight['top']),
-          left: Number.parseFloat(spotlight['left']),
-          width: Number.parseFloat(spotlight['width']),
-          height: Number.parseFloat(spotlight['height']),
+          top: Number.parseFloat(spotlight.top),
+          left: Number.parseFloat(spotlight.left),
+          width: Number.parseFloat(spotlight.width),
+          height: Number.parseFloat(spotlight.height),
           rx: this.spotlightCornerRadius,
           ry: this.spotlightCornerRadius
         }))
@@ -303,8 +303,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       spotlightLeft: left,
       spotlightWidth: width,
       spotlightHeight: height,
-      tooltipTop: Number.parseFloat(this.positionStyle['top'] || '0') || 0,
-      tooltipLeft: Number.parseFloat(this.positionStyle['left'] || '0') || 0
+      tooltipTop: Number.parseFloat(this.positionStyle.top || '0') || 0,
+      tooltipLeft: Number.parseFloat(this.positionStyle.left || '0') || 0
     };
 
     if (this.shouldSkipGeometryUpdate(nextGeometry, nextCutoutRects)) {
@@ -315,9 +315,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.lastRenderedGeometry = nextGeometry;
     this.lastTargetCutoutRects = nextCutoutRects.map(rect => ({ ...rect }));
     this.animateCutoutRects(nextCutoutRects);
-    this.tooltipTop = this.positionStyle['top'] || '0px';
-    this.tooltipLeft = this.positionStyle['left'] || '0px';
-    this.tooltipBottom = this.positionStyle['bottom'] || 'auto';
+    this.tooltipTop = this.positionStyle.top || '0px';
+    this.tooltipLeft = this.positionStyle.left || '0px';
+    this.tooltipBottom = this.positionStyle.bottom || 'auto';
     this.progressWidth = `${this.totalSteps > 0 ? ((this.currentIndex + 1) / this.totalSteps) * 100 : 0}%`;
     this.syncRuntimeStyles();
   }
@@ -824,8 +824,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private fitsInViewport( tooltip: Record<string, string>, tooltipWidth: number, tooltipHeight: number, margin: number ): boolean {
-    const top = Number.parseFloat(tooltip['top']);
-    const left = Number.parseFloat(tooltip['left']);
+    const top = Number.parseFloat(tooltip.top);
+    const left = Number.parseFloat(tooltip.left);
 
     return top >= margin &&
       left >= margin &&
@@ -834,8 +834,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private clampTooltipToViewport( tooltip: Record<string, string>, tooltipWidth: number, tooltipHeight: number, margin: number ): Record<string, string> {
-    const top = Number.parseFloat(tooltip['top']);
-    const left = Number.parseFloat(tooltip['left']);
+    const top = Number.parseFloat(tooltip.top);
+    const left = Number.parseFloat(tooltip.left);
 
     return {
       top: `${Math.min(Math.max(top, margin), Math.max(window.innerHeight - tooltipHeight - margin, margin))}px`,

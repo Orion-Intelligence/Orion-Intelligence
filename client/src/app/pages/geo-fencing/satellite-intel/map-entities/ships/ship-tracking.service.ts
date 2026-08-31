@@ -38,10 +38,10 @@ export class SatelliteShipTrackingService {
   getBoundsRequestKey(lat: number, lon: number, delta = 0.05): string {
     const payload = this.buildBoundsPayload(lat, lon, delta);
     return [
-      payload['lat_min'],
-      payload['lat_max'],
-      payload['lon_min'],
-      payload['lon_max'],
+      payload.lat_min,
+      payload.lat_max,
+      payload.lon_min,
+      payload.lon_max,
     ].map(value => Number(value).toFixed(2)).join(':');
   }
 
@@ -53,7 +53,7 @@ export class SatelliteShipTrackingService {
         .filter((ship): ship is SatelliteLiveShip => ship !== null);
     }
 
-    const status = String(asUnknownRecord(payload)['status'] ?? '').toLowerCase();
+    const status = String(asUnknownRecord(payload).status ?? '').toLowerCase();
     if (status === 'pending' || status === 'busy') {
       return null;
     }
@@ -63,12 +63,12 @@ export class SatelliteShipTrackingService {
 
   getFeedIssue(payload: unknown): string | null {
     const record = asUnknownRecord(payload);
-    const payloadError = record['error'] ?? record['error_message'] ?? record['last_error'] ?? null;
+    const payloadError = record.error ?? record.error_message ?? record.last_error ?? null;
     if (payloadError) {
       return String(payloadError);
     }
 
-    if (record['connected'] === false || asUnknownRecord(record['aisstream'])['connected'] === false) {
+    if (record.connected === false || asUnknownRecord(record.aisstream).connected === false) {
       return 'ship feed disconnected';
     }
 
@@ -85,7 +85,7 @@ export class SatelliteShipTrackingService {
     };
 
     if (aisstreamApiKey?.trim()) {
-      payload['aisstream_api_key'] = aisstreamApiKey.trim();
+      payload.aisstream_api_key = aisstreamApiKey.trim();
     }
 
     return payload;
@@ -100,7 +100,7 @@ export class SatelliteShipTrackingService {
     };
 
     if (aisstreamApiKey?.trim()) {
-      payload['aisstream_api_key'] = aisstreamApiKey.trim();
+      payload.aisstream_api_key = aisstreamApiKey.trim();
     }
 
     return payload;
@@ -108,22 +108,22 @@ export class SatelliteShipTrackingService {
 
   private extractShipArray(payload: unknown): unknown[] | null {
     const record = asUnknownRecord(payload);
-    const result = asUnknownRecord(record['result']);
-    const data = asUnknownRecord(record['data']);
+    const result = asUnknownRecord(record.result);
+    const data = asUnknownRecord(record.data);
     const candidates = [
-      record['ships'],
-      result['ships'],
-      data['ships'],
-      record['ship'],
-      result['ship'],
-      data['ship'],
-      record['vessels'],
-      result['vessels'],
-      data['vessels'],
-      record['items'],
-      result['items'],
-      data['items'],
-      record['Result'],
+      record.ships,
+      result.ships,
+      data.ships,
+      record.ship,
+      result.ship,
+      data.ship,
+      record.vessels,
+      result.vessels,
+      data.vessels,
+      record.items,
+      result.items,
+      data.items,
+      record.Result,
     ];
 
     for (const candidate of candidates) {
@@ -160,15 +160,15 @@ export class SatelliteShipTrackingService {
     return {
       ...item,
       mmsi,
-      name: this.readString(item, ['name', 'ship_name', 'vessel_name', 'VesselName'], [['MetaData', 'ShipName'], ['MetaData', 'ship_name']]) ?? (typeof item['name'] === 'string' ? item['name'] : null),
+      name: this.readString(item, ['name', 'ship_name', 'vessel_name', 'VesselName'], [['MetaData', 'ShipName'], ['MetaData', 'ship_name']]) ?? (typeof item.name === 'string' ? item.name : null),
       latitude,
       longitude,
       speed: this.readNumber(item, ['speed', 'sog', 'SOG', 'Speed'], [['Message', 'PositionReport', 'Sog'], ['Message', 'PositionReport', 'SpeedOverGround']]),
       course: this.readNumber(item, ['course', 'cog', 'COG', 'Course'], [['Message', 'PositionReport', 'Cog'], ['Message', 'PositionReport', 'CourseOverGround']]),
       true_heading: this.readNumber(item, ['true_heading', 'heading', 'HDG', 'Heading'], [['Message', 'PositionReport', 'TrueHeading']]),
       nav_status: this.readNumber(item, ['nav_status', 'navigational_status', 'status_code']),
-      call_sign: this.readString(item, ['call_sign', 'callsign', 'CallSign'], [['MetaData', 'CallSign']]) ?? (typeof item['call_sign'] === 'string' ? item['call_sign'] : null),
-      destination: this.readString(item, ['destination', 'Destination'], [['MetaData', 'Destination']]) ?? (typeof item['destination'] === 'string' ? item['destination'] : null),
+      call_sign: this.readString(item, ['call_sign', 'callsign', 'CallSign'], [['MetaData', 'CallSign']]) ?? (typeof item.call_sign === 'string' ? item.call_sign : null),
+      destination: this.readString(item, ['destination', 'Destination'], [['MetaData', 'Destination']]) ?? (typeof item.destination === 'string' ? item.destination : null),
       ship_type: this.readNumber(item, ['ship_type', 'ShipType', 'type']),
     };
   }
@@ -205,15 +205,15 @@ export class SatelliteShipTrackingService {
   private hasShipFields(candidate: unknown): boolean {
     const record = asUnknownRecord(candidate);
     return [
-      record['mmsi'],
-      record['MMSI'],
-      record['latitude'],
-      record['lat'],
-      record['longitude'],
-      record['lon'],
-      record['lng'],
-      record['position'],
-      record['location'],
+      record.mmsi,
+      record.MMSI,
+      record.latitude,
+      record.lat,
+      record.longitude,
+      record.lon,
+      record.lng,
+      record.position,
+      record.location,
     ].some((value) => value !== null && value !== undefined && value !== '');
   }
 
@@ -262,7 +262,7 @@ export class SatelliteShipTrackingService {
 
   private getPayloadCount(payload: unknown): number | null {
     const record = asUnknownRecord(payload);
-    const count = record['count'] ?? record['total'] ?? asUnknownRecord(record['result'])['count'] ?? asUnknownRecord(record['data'])['count'];
+    const count = record.count ?? record.total ?? asUnknownRecord(record.result).count ?? asUnknownRecord(record.data).count;
     if (typeof count === 'number') {
       return Number.isFinite(count) ? count : null;
     }
@@ -283,7 +283,7 @@ export class SatelliteShipTrackingService {
 
   private getPollStatus(res: unknown): string | undefined {
     const response = asUnknownRecord(res);
-    const status = asUnknownRecord(response['result'])['status'] ?? response['status'];
+    const status = asUnknownRecord(response.result).status ?? response.status;
     return typeof status === 'string' ? status : undefined;
   }
 }

@@ -51,7 +51,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['mode'] || changes['item'] || changes['result']) {
+    if (changes.mode || changes.item || changes.result) {
       this.activeTelemetryKey = null;
       this.copiedKey = null;
       if (this.copiedTimer) {
@@ -60,7 +60,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       this.visiblePasswordKeys.clear();
       this.rebuildTelemetryGroups();
     }
-    if (changes['mode'] || changes['item'] || changes['result'] || changes['searchQuery']) {
+    if (changes.mode || changes.item || changes.result || changes.searchQuery) {
       this.parseSearchQuery();
     }
   }
@@ -221,14 +221,14 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   get creditCardFields(): CreditCardField[] {
     const item = this.item();
     return [
-      { key: 'bin', label: 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.firstValue(item?.['bin']) },
-      { key: 'Scheme', label: 'Scheme', icon: 'bi-wallet2', value: this.firstValue(item?.['Scheme'] ?? item?.['scheme']) },
-      { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.['Type'] ?? item?.['card_type'] ?? item?.type) },
-      { key: 'Tier', label: 'Tier', icon: 'bi-tag-fill', value: this.firstValue(item?.['Tier'] ?? item?.['tier']) },
-      { key: 'Issuer', label: 'Issuer', icon: 'bi-building', value: this.firstValue(item?.['Issuer'] ?? item?.['issuer']) },
-      { key: 'Country', label: 'Country', icon: 'bi-flag-fill', value: this.firstValue(item?.['Country'] ?? item?.['country']) },
-      { key: 'Luhn', label: 'Luhn', icon: 'bi-check2-circle', value: this.formatBooleanValue(item?.['Luhn'] ?? item?.['luhn']) },
-      { key: 'Website', label: 'Website', icon: 'bi-link-45deg', value: this.firstValue(item?.['Website'] ?? item?.['website']) },
+      { key: 'bin', label: 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.firstValue(item?.bin) },
+      { key: 'Scheme', label: 'Scheme', icon: 'bi-wallet2', value: this.firstValue(item?.Scheme ?? item?.scheme) },
+      { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.Type ?? item?.card_type ?? item?.type) },
+      { key: 'Tier', label: 'Tier', icon: 'bi-tag-fill', value: this.firstValue(item?.Tier ?? item?.tier) },
+      { key: 'Issuer', label: 'Issuer', icon: 'bi-building', value: this.firstValue(item?.Issuer ?? item?.issuer) },
+      { key: 'Country', label: 'Country', icon: 'bi-flag-fill', value: this.firstValue(item?.Country ?? item?.country) },
+      { key: 'Luhn', label: 'Luhn', icon: 'bi-check2-circle', value: this.formatBooleanValue(item?.Luhn ?? item?.luhn) },
+      { key: 'Website', label: 'Website', icon: 'bi-link-45deg', value: this.firstValue(item?.Website ?? item?.website) },
     ];
   }
 

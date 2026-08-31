@@ -48,7 +48,7 @@ export class SelectedFilterBarComponent implements OnInit {
   clearMatchType(): void {
     this.dashboardService.selectedFilters.update((filters) => {
       const updated = { ...filters };
-      delete updated["matchtype"];
+      delete updated.matchtype;
       return updated;
     });
     this.app_service.set('matchType', "or");

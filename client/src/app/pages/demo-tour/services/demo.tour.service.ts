@@ -111,14 +111,14 @@ export class DemoTourService {
     const licenses = (this.appService.userSessionData().user.license ?? []).map(license => license.toLowerCase());
     const selectedLicense = this.tourLicensePriority.find(license => licenses.includes(license) && getOwnProperty(config, license)?.length) ??
       licenses.find(license => getOwnProperty(config, license)?.length);
-    const licenseSteps = selectedLicense ? getOwnProperty(config, selectedLicense) : config['default'] ?? [];
+    const licenseSteps = selectedLicense ? getOwnProperty(config, selectedLicense) : config.default ?? [];
     const auxiliarySteps = ['feeder', 'maintainer']
       .filter(license => license !== selectedLicense && licenses.includes(license))
       .flatMap(license => getOwnProperty(config, license) ?? []);
 
-    const sharedSteps = config['shared'] ?? [];
+    const sharedSteps = config.shared ?? [];
     const documentationSteps = this.appService.getConfig().appSettings.home_header_pricing_allowed
-      ? config['shared_documentation'] ?? []
+      ? config.shared_documentation ?? []
       : [];
 
     return [...licenseSteps, ...auxiliarySteps, ...sharedSteps, ...documentationSteps]

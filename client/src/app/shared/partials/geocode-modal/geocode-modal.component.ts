@@ -73,7 +73,7 @@ export class GeocodeModalComponent implements AfterViewInit, OnChanges, OnDestro
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    const isOpenChange = changes['isOpen'];
+    const isOpenChange = changes.isOpen;
     if (isOpenChange) {
       this.searchRequestId++;
       clearTimeout(this.searchTimer);

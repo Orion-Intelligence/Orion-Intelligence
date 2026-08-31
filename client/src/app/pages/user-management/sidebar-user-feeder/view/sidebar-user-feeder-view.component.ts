@@ -63,15 +63,15 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService, private appService: AppService, private translationService: TranslationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['active'] && !changes['active'].currentValue) {
+    if (changes.active && !changes.active.currentValue) {
       this.closeScriptPreview();
     }
 
-    if (changes['active']?.currentValue && !this.hasLoadedScripts) {
+    if (changes.active?.currentValue && !this.hasLoadedScripts) {
       this.loadScripts();
     }
 
-    if (changes['selectedRuleKey'] || changes['entryType']) {
+    if (changes.selectedRuleKey || changes.entryType) {
       this.currentPage = 1;
       this.consumedHighlightedScriptId = null;
       this.clearScriptSelection();
@@ -82,8 +82,8 @@ export class SidebarUserFeederViewComponent implements OnChanges {
       this.selectedValueUrl = null;
     }
 
-    if (changes['highlightedScript']) {
-      const script = changes['highlightedScript'].currentValue as FeederScriptItem | null;
+    if (changes.highlightedScript) {
+      const script = changes.highlightedScript.currentValue as FeederScriptItem | null;
       if (!script) {
         this.consumedHighlightedScriptId = null;
         return;

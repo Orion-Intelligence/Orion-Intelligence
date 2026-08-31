@@ -91,7 +91,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const data = this.route.snapshot.data['insights'];
+    const data = this.route.snapshot.data.insights;
     if (data) {
       this.applyInsightData(data);
       return;
@@ -157,7 +157,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   private applyInsightData(data: unknown): void {
-    const countryInsight = asUnknownRecord(asUnknownRecord(data)['country_insight']);
+    const countryInsight = asUnknownRecord(asUnknownRecord(data).country_insight);
     this.allCategoryReports = Object.fromEntries(Object.entries(countryInsight).map(([category, reports]) => [
       category,
       Array.isArray(reports)

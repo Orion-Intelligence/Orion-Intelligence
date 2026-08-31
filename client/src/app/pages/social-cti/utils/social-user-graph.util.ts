@@ -103,12 +103,12 @@ function textOf(value: unknown): string {
 }
 
 function darkwebPlatform(record: ReturnType<typeof asRecord>): string {
-  const raw = textOf(record['m_network']) || textOf(record['m_platform']) || 'darkweb';
+  const raw = textOf(record.m_network) || textOf(record.m_platform) || 'darkweb';
   return raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
 }
 
 function darkwebDocKey(record: ReturnType<typeof asRecord>): string {
-  return textOf(record['m_message_id']) || textOf(record['_id']) || textOf(record['m_message_sharable_link']) || textOf(record['m_url']) || textOf(record['m_weblink']) || `${textOf(record['m_channel_name'])}|${textOf(record['m_date'])}|${textOf(record['m_title'])}`;
+  return textOf(record.m_message_id) || textOf(record._id) || textOf(record.m_message_sharable_link) || textOf(record.m_url) || textOf(record.m_weblink) || `${textOf(record.m_channel_name)}|${textOf(record.m_date)}|${textOf(record.m_title)}`;
 }
 
 function darkwebHandles(record: ReturnType<typeof asRecord>): { handle: string; name: string }[] {
@@ -122,15 +122,15 @@ function darkwebHandles(record: ReturnType<typeof asRecord>): { handle: string; 
   };
   const senderKey = DARKWEB_SENDER_KEYS.find(key => textOf(getOwnProperty(record, key)));
   if (senderKey) {
-    push(getOwnProperty(record, senderKey), record['m_sender_name']);
+    push(getOwnProperty(record, senderKey), record.m_sender_name);
   }
-  push(record['m_forwarded_from']);
+  push(record.m_forwarded_from);
   pickList(record, 'm_users').forEach(user => {
     push(user);
   });
-  for (const comment of Array.isArray(record['m_comments']) ? record['m_comments'] : []) {
+  for (const comment of Array.isArray(record.m_comments) ? record.m_comments : []) {
     const entry = asRecord(comment);
-    push(entry['m_username'] ?? entry['m_author'] ?? entry['m_sender_username'] ?? entry['m_sender_name']);
+    push(entry.m_username ?? entry.m_author ?? entry.m_sender_username ?? entry.m_sender_name);
   }
   return found;
 }
@@ -303,9 +303,9 @@ export function buildSocialUserGraph(usernames: string[], targets: ReadonlyMap<s
         user.accounts.push(account);
       }
       account.darkweb = true;
-      const channel = textOf(record['m_channel_name']);
+      const channel = textOf(record.m_channel_name);
       if (channel) {
-        attachMember(account, 'channel', `#${channel.replace(/\s+/g, ' ').toLowerCase()}`, { handle: '', name: channel, avatar: '', url: textOf(record['m_channel_url']) || textOf(record['m_source_channel_url']), bio: '', followers: '', location: '' }, [docKey]);
+        attachMember(account, 'channel', `#${channel.replace(/\s+/g, ' ').toLowerCase()}`, { handle: '', name: channel, avatar: '', url: textOf(record.m_channel_url) || textOf(record.m_source_channel_url), bio: '', followers: '', location: '' }, [docKey]);
       }
       for (const entry of darkwebHandles(record)) {
         if (aliasToOwner.get(entry.handle) === root) {

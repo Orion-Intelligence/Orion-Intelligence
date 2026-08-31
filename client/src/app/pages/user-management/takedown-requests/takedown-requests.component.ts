@@ -71,7 +71,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
       .set('q', this.query.trim())
       .set('page', this.page)
       .set('limit', this.limit);
-    const daterange = this.selectedFilters['daterange'];
+    const daterange = this.selectedFilters.daterange;
     if (daterange) {
       params = params.set('daterange', daterange);
     }
@@ -90,7 +90,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
 
   applyFilters(filters: Record<string, string | null>): void {
     this.selectedFilters = { ...filters };
-    this.status = (filters['status'] as TakedownFilter) || 'all';
+    this.status = (filters.status as TakedownFilter) || 'all';
     this.page = 1;
     this.load();
   }

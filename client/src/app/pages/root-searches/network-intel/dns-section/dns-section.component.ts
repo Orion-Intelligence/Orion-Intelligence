@@ -105,10 +105,10 @@ export class DnsSectionComponent implements OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['ipRows']) {
+    if (changes.ipRows) {
       const totalPages = this.totalPages;
       this.currentPage = Math.min(this.currentPage, totalPages);
-      if (!changes['ipRows'].previousValue || changes['ipRows'].previousValue !== changes['ipRows'].currentValue) {
+      if (!changes.ipRows.previousValue || changes.ipRows.previousValue !== changes.ipRows.currentValue) {
         this.currentPage = 1;
       }
     }

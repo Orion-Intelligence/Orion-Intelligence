@@ -73,8 +73,8 @@ export class AlertNotificationComponent implements OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isNotificationOpen']) {
-      const value = changes['isNotificationOpen'].currentValue;
+    if (changes.isNotificationOpen) {
+      const value = changes.isNotificationOpen.currentValue;
       if (value === true && this.isAlertMode() && this.alertNotifications.length === 0) {
         this.fetchNotifications(true);
       }
@@ -377,7 +377,7 @@ export class AlertNotificationComponent implements OnChanges {
 
     this.scanNotificationService.deleteAllScans().subscribe({
       next: response => {
-        const deleted = Number(asUnknownRecord(response)['deleted'] ?? 0);
+        const deleted = Number(asUnknownRecord(response).deleted ?? 0);
         if (deleted > 0) {
           this.messageNotificationService.show('Scans deleted successfully!', 'success');
         }

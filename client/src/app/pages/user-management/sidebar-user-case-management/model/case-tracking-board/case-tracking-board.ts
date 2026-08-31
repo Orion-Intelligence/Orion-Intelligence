@@ -169,7 +169,7 @@ export class CaseTrackingBoard implements OnInit {
           && event.pointerPosition.y >= rect.top
           && event.pointerPosition.y <= rect.bottom;
       });
-    const status = columnElement?.dataset['testid']?.replace('tracking-column-shell-', '') as CaseStatus | undefined;
+    const status = columnElement?.dataset.testid?.replace('tracking-column-shell-', '') as CaseStatus | undefined;
 
     this.hoveredDropStatus = status && this.getAllowedStatuses(this.draggedCase.status).includes(status)
       ? status

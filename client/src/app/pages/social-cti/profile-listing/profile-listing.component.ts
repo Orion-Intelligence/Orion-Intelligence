@@ -646,7 +646,7 @@ export class SocialProfileListingComponent {
     if (!platformData || platformData.profile_details?.is_parsed === true || this.liveSync.stoppedPlatformIds.has(this.getPlatformCardId(platformData))) {
       return;
     }
-    const detailsStatus = platformData.section_status?.['details'];
+    const detailsStatus = platformData.section_status?.details;
     if (this.isTabLoading(platformData, 'details') || detailsStatus === 'failed' || detailsStatus === 'completed') {
       return;
     }

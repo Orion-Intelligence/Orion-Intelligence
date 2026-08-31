@@ -48,8 +48,8 @@ export function stableHash(key: string): number {
 
 export function getResponseStatus(res: unknown): string | undefined {
   const response = asUnknownRecord(res);
-  const result = asUnknownRecord(response['result']);
-  const status = result['status'] ?? response['status'];
+  const result = asUnknownRecord(response.result);
+  const status = result.status ?? response.status;
   return typeof status === 'string' ? status : undefined;
 }
 

@@ -48,7 +48,7 @@ export class SocialDefaultListSectionComponent {
   }
 
   isFetchTabAllowed(platformData: social_profile, tabKey: FetchTabKey): boolean {
-    const globalCapability = this.platformCapabilities['__all__'];
+    const globalCapability = this.platformCapabilities.__all__;
     const capability = this.platformCapabilities[platformData.meta.platform];
     if (Boolean(globalCapability?.disallow?.includes(tabKey)) || Boolean(capability?.disallow?.includes(tabKey))) {
       return false;
@@ -74,7 +74,7 @@ export class SocialDefaultListSectionComponent {
   getProfileBio(platformData: social_profile): string {
     const details = asUnknownRecord(platformData.profile_details);
     const bio = platformData.profile_details?.bio
-      ?? details['m_content']
+      ?? details.m_content
       ?? platformData.meta.description
       ?? '';
     return typeof bio === 'string' ? bio : String(bio);
@@ -100,7 +100,7 @@ export class SocialDefaultListSectionComponent {
   getPlatformTimestamp(platformData: social_profile): string {
     const metadata = asUnknownRecord(platformData.meta);
     const details = asUnknownRecord(platformData.profile_details);
-    const timestamp = platformData.meta.timestamp ?? details['m_date'] ?? metadata['timestamp'] ?? metadata['Timestamp'] ?? metadata['m_date'];
+    const timestamp = platformData.meta.timestamp ?? details.m_date ?? metadata.timestamp ?? metadata.Timestamp ?? metadata.m_date;
     return timestamp ? String(timestamp) : '';
   }
 
@@ -191,11 +191,11 @@ export class SocialDefaultListSectionComponent {
     };
     switch (key) {
       case 'total_posts':
-        return this.firstStatValue(metadata['totalPosts'], metadata['posts_count'], metadata['m_post_count'], this.getPostCollectionCount(platformData));
+        return this.firstStatValue(metadata.totalPosts, metadata.posts_count, metadata.m_post_count, this.getPostCollectionCount(platformData));
       case 'total_followers':
-        return this.firstStatValue(Number(platformData.profile_details?.total_followers ?? 0), metadata['followers'], metadata['followers_count'], metadata['m_followers'], this.extractSocialCount(metadata['m_group_info']));
+        return this.firstStatValue(Number(platformData.profile_details?.total_followers ?? 0), metadata.followers, metadata.followers_count, metadata.m_followers, this.extractSocialCount(metadata.m_group_info));
       case 'total_likes':
-        return this.firstStatValue(metadata['totalLikes'], metadata['likes'], metadata['m_likes'], metadata['m_post_likes']);
+        return this.firstStatValue(metadata.totalLikes, metadata.likes, metadata.m_likes, metadata.m_post_likes);
       default:
         return null;
     }

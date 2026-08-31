@@ -106,8 +106,8 @@ export class SocialProfileTabsSectionComponent {
       const entries = Object.entries(doc ?? {})
         .filter(([key, value]) => !this.darkwebEntryBlocked.has(key.toLowerCase()) && value !== null && value !== undefined && value !== '' && !(Array.isArray(value) && value.length === 0))
         .map(([key, value]) => ({ key, value }));
-      const label = String(doc?.['m_channel_name'] ?? doc?.['m_title'] ?? doc?.['m_platform'] ?? `Record ${index + 1}`);
-      const stamp = doc?.['m_date'] ?? doc?.['m_creation_date'] ?? '';
+      const label = String(doc?.m_channel_name ?? doc?.m_title ?? doc?.m_platform ?? `Record ${index + 1}`);
+      const stamp = doc?.m_date ?? doc?.m_creation_date ?? '';
       return { title: label, date: stamp ? String(stamp).slice(0, 19).replace('T', ' ') : '', entries };
     }).filter(section => section.entries.length));
   resourceCategory = computed(() => categoryFor(this.platformData().meta.platform, this.activeTab()));
@@ -190,22 +190,22 @@ export class SocialProfileTabsSectionComponent {
 
   crawlItemTitle(item: unknown): string {
     const record = item as Record<string, unknown>;
-    return String(record?.['title'] ?? record?.['caption'] ?? record?.['url'] ?? '');
+    return String(record?.title ?? record?.caption ?? record?.url ?? '');
   }
 
   crawlItemUrl(item: unknown): string {
     const record = item as Record<string, unknown>;
-    return String(record?.['url'] ?? '');
+    return String(record?.url ?? '');
   }
 
   crawlItemCaption(item: unknown): string {
     const record = this.crawlItemRecord(item);
-    return String(record['caption'] ?? record['description'] ?? '');
+    return String(record.caption ?? record.description ?? '');
   }
 
   crawlItemImageUrl(item: unknown): string {
     const record = this.crawlItemRecord(item);
-    const value = record['thumbnail_url'] ?? record['avatar'] ?? record['avatar_url'] ?? record['image_url'];
+    const value = record.thumbnail_url ?? record.avatar ?? record.avatar_url ?? record.image_url;
     return this.isUrl(value) ? String(value) : '';
   }
 
@@ -246,7 +246,7 @@ export class SocialProfileTabsSectionComponent {
 
   crawlItemTrackKey(index: number, item: unknown): string {
     const record = this.crawlItemRecord(item);
-    return String(record['resource_id'] ?? record['id'] ?? record['node_id'] ?? record['url'] ?? record['title'] ?? index);
+    return String(record.resource_id ?? record.id ?? record.node_id ?? record.url ?? record.title ?? index);
   }
 
   shouldShowCrawlDescriptionToggle(item: unknown): boolean {
@@ -356,8 +356,8 @@ export class SocialProfileTabsSectionComponent {
     }
     if (typeof value === 'object') {
       const record = asUnknownRecord(value);
-      if (typeof record['is_hate_speech'] === 'boolean') {
-        return record['is_hate_speech'] ? 'Yes' : 'No';
+      if (typeof record.is_hate_speech === 'boolean') {
+        return record.is_hate_speech ? 'Yes' : 'No';
       }
       try {
         return JSON.stringify(value, null, 2);
@@ -401,15 +401,15 @@ export class SocialProfileTabsSectionComponent {
   }
 
   getStealerRecordHost(record: social_stealer_log): string {
-    return String(record?.source_domain ?? record?.['m_source_domain'] ?? record?.domain ?? record?.['m_domain'] ?? record?.ip ?? record?.['m_ip'] ?? record?.url ?? record?.['m_url'] ?? record?.host ?? record?.['m_host'] ?? record?.raw ?? '-');
+    return String(record?.source_domain ?? record?.m_source_domain ?? record?.domain ?? record?.m_domain ?? record?.ip ?? record?.m_ip ?? record?.url ?? record?.m_url ?? record?.host ?? record?.m_host ?? record?.raw ?? '-');
   }
 
   getStealerRecordIdentity(record: social_stealer_log): string {
-    return String(record?.email ?? record?.['m_email'] ?? record?.username ?? record?.['m_username'] ?? record?.user ?? record?.['m_user'] ?? record?.login ?? record?.['m_login'] ?? record?.credential ?? record?.['m_credential'] ?? record?.raw ?? '-');
+    return String(record?.email ?? record?.m_email ?? record?.username ?? record?.m_username ?? record?.user ?? record?.m_user ?? record?.login ?? record?.m_login ?? record?.credential ?? record?.m_credential ?? record?.raw ?? '-');
   }
 
   getStealerRecordDate(record: social_stealer_log): string {
-    return String(record?.date ?? record?.['m_date'] ?? record?.timestamp ?? record?.['m_timestamp'] ?? record?.created_at ?? record?.['m_created_at'] ?? record?.updated_at ?? record?.['m_updated_at'] ?? '-');
+    return String(record?.date ?? record?.m_date ?? record?.timestamp ?? record?.m_timestamp ?? record?.created_at ?? record?.m_created_at ?? record?.updated_at ?? record?.m_updated_at ?? '-');
   }
 
   getStealerRecordTrackKey(index: number, record: social_stealer_log): string {
@@ -439,15 +439,15 @@ export class SocialProfileTabsSectionComponent {
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim(),
-      email: String(item?.email ?? item?.['m_email'] ?? '-'),
-      username: String(item?.username ?? item?.['m_username'] ?? '-'),
-      domain: String(item?.domain ?? item?.['m_domain'] ?? '-'),
-      source: String(this.exportBranding.replaceSystemBrand(String(item?.['channel'] ?? item?.['filename'] ?? item?.['file'] ?? item?.['m_source'] ?? item?.['m_scrap_file'] ?? '-'))),
-      hash: String(item?.['m_hash'] ?? '-'),
+      email: String(item?.email ?? item?.m_email ?? '-'),
+      username: String(item?.username ?? item?.m_username ?? '-'),
+      domain: String(item?.domain ?? item?.m_domain ?? '-'),
+      source: String(this.exportBranding.replaceSystemBrand(String(item?.channel ?? item?.filename ?? item?.file ?? item?.m_source ?? item?.m_scrap_file ?? '-'))),
+      hash: String(item?.m_hash ?? '-'),
       title: '-',
-      url: String(item?.url ?? item?.['m_url'] ?? '-'),
+      url: String(item?.url ?? item?.m_url ?? '-'),
       rank: '-',
-      date: String(item?.date ?? item?.['m_date'] ?? '-'),
+      date: String(item?.date ?? item?.m_date ?? '-'),
       team: '-',
       summary: '-'
     }));
@@ -515,7 +515,7 @@ export class SocialProfileTabsSectionComponent {
         return value.trim();
       }
     }
-    return this.getFirstValueFromSource(sourceRecord['result'] ?? sourceRecord['profile'] ?? sourceRecord['data'], keys);
+    return this.getFirstValueFromSource(sourceRecord.result ?? sourceRecord.profile ?? sourceRecord.data, keys);
   }
 
   private isProfileDateKey(key: string): boolean {

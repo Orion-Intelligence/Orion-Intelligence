@@ -23,7 +23,7 @@ export class ConfirmationPopupComponent {
 
   onBackdrop(event: MouseEvent) {
     const eventTargetElement = event.target;
-    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset['role'] === 'backdrop') {
+    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset.role === 'backdrop') {
       this.confirmed.emit(false);
     }
   }

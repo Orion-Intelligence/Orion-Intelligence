@@ -265,15 +265,15 @@ export class SatelliteFacilitiesService {
   }
 
   private getRawKind(properties: Record<string, unknown>): string {
-    const rawKind = properties?.['kind'] ??
-      properties?.['type'] ??
-      properties?.['amenity'] ??
-      properties?.['man_made'] ??
-      properties?.['building'] ??
-      properties?.['landuse'] ??
-      properties?.['waterway'] ??
+    const rawKind = properties?.kind ??
+      properties?.type ??
+      properties?.amenity ??
+      properties?.man_made ??
+      properties?.building ??
+      properties?.landuse ??
+      properties?.waterway ??
       properties?.['seamark:type'] ??
-      properties?.['seamark_type'] ??
+      properties?.seamark_type ??
       '';
     return String(rawKind).trim().toLowerCase();
   }
@@ -311,12 +311,12 @@ export class SatelliteFacilitiesService {
 
   private extractLatLon(item: unknown): { lat: number; lon: number } | null {
     const record = asUnknownRecord(item);
-    const location = asUnknownRecord(record['location']);
-    const locationPoint = asUnknownRecord(record['location_point']);
+    const location = asUnknownRecord(record.location);
+    const locationPoint = asUnknownRecord(record.location_point);
     const candidates = [
-      { lat: location['lat'], lon: location['lon'] },
-      { lat: locationPoint['lat'], lon: locationPoint['lon'] },
-      { lat: record['lat'], lon: record['lon'] },
+      { lat: location.lat, lon: location.lon },
+      { lat: locationPoint.lat, lon: locationPoint.lon },
+      { lat: record.lat, lon: record.lon },
     ];
 
     for (const candidate of candidates) {
@@ -412,13 +412,13 @@ export class SatelliteFacilitiesService {
 
   private detectTypeFromRecord(value: unknown): OrionSatelliteFeatureType {
     const record = asUnknownRecord(value);
-    const kind = this.normalizeKindKey(String(record['kind'] ?? record['type'] ?? record['primary_fuel'] ?? ''));
-    const landuse = this.normalizeKindKey(String(record['landuse'] ?? ''));
-    const building = this.normalizeKindKey(String(record['building'] ?? ''));
-    const manMade = this.normalizeKindKey(String(record['man_made'] ?? ''));
-    const amenity = this.normalizeKindKey(String(record['amenity'] ?? ''));
-    const waterway = this.normalizeKindKey(String(record['waterway'] ?? ''));
-    const seamarkType = this.normalizeKindKey(String(record['seamark:type'] ?? record['seamark_type'] ?? ''));
+    const kind = this.normalizeKindKey(String(record.kind ?? record.type ?? record.primary_fuel ?? ''));
+    const landuse = this.normalizeKindKey(String(record.landuse ?? ''));
+    const building = this.normalizeKindKey(String(record.building ?? ''));
+    const manMade = this.normalizeKindKey(String(record.man_made ?? ''));
+    const amenity = this.normalizeKindKey(String(record.amenity ?? ''));
+    const waterway = this.normalizeKindKey(String(record.waterway ?? ''));
+    const seamarkType = this.normalizeKindKey(String(record['seamark:type'] ?? record.seamark_type ?? ''));
 
     if (kind) {
       const detected = this.normalizeType(kind);
@@ -427,14 +427,14 @@ export class SatelliteFacilitiesService {
       }
     }
 
-    if (record['aeroway']) {
-      const aeroway = this.normalizeKindKey(String(record['aeroway']));
+    if (record.aeroway) {
+      const aeroway = this.normalizeKindKey(String(record.aeroway));
       if (['aerodrome', 'airfield', 'airstrip', 'hangar', 'helipad', 'heliport', 'terminal'].includes(aeroway)) {
         return 'airport';
       }
     }
 
-    if (Boolean(record['port']) || Boolean(record['harbour']) || Boolean(record['harbor'])) {
+    if (Boolean(record.port) || Boolean(record.harbour) || Boolean(record.harbor)) {
       return 'port';
     }
     if (['port', 'harbour', 'harbor', 'dock', 'marina', 'shipyard'].includes(landuse)) {
@@ -456,14 +456,14 @@ export class SatelliteFacilitiesService {
       return 'port';
     }
 
-    if (record['military']) {
-      const military = this.normalizeKindKey(String(record['military']));
+    if (record.military) {
+      const military = this.normalizeKindKey(String(record.military));
       if (military && military !== 'no') {
         return 'military';
       }
     }
 
-    if (record['landuse']) {
+    if (record.landuse) {
       if (landuse === 'industrial' || landuse === 'power' || landuse === 'brownfield' || landuse === 'quarry') {
         return 'industrial';
       }
@@ -481,7 +481,7 @@ export class SatelliteFacilitiesService {
       }
     }
 
-    if (record['building']) {
+    if (record.building) {
       if (['warehouse', 'storage', 'depot'].includes(building)) {
         return 'warehouse';
       }
@@ -496,7 +496,7 @@ export class SatelliteFacilitiesService {
       }
     }
 
-    if (record['man_made']) {
+    if (record.man_made) {
       if (['wind_farm', 'power_station', 'biogas_plant', 'heat_plant', 'solar_panels'].includes(manMade)) {
         return 'industrial';
       }
@@ -505,8 +505,8 @@ export class SatelliteFacilitiesService {
       }
     }
 
-    if (record['power']) {
-      const power = this.normalizeKindKey(String(record['power']));
+    if (record.power) {
+      const power = this.normalizeKindKey(String(record.power));
       if (power === 'plant') {
         return 'industrial';
       }

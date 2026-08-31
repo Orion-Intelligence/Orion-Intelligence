@@ -59,7 +59,7 @@ export class ResultComponent implements OnInit, OnChanges {
   searchMenuOpen = false;
   scandomains: string[] = [];
   matchTypeLabel = computed(() => {
-    const matchtype = this.dashboardService.selectedFilters()["matchtype"];
+    const matchtype = this.dashboardService.selectedFilters().matchtype;
     if (matchtype === "full") {
       return "Match full query";
     }
@@ -304,8 +304,8 @@ export class ResultComponent implements OnInit, OnChanges {
   init_domains() {
     const filters = this.app_service.configData().localSettings.entityfilterCategories;
     const queryDomains = this.helperService.extractLinks(this.searchQuery) || [];
-    const filterDomains = Array.isArray(filters['m_domain'])
-      ? filters['m_domain'].map((domain: string) => `https://${domain}`)
+    const filterDomains = Array.isArray(filters.m_domain)
+      ? filters.m_domain.map((domain: string) => `https://${domain}`)
       : [];
     this.scandomains = Array.from(new Set([...queryDomains, ...filterDomains]));
   }

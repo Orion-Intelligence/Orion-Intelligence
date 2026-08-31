@@ -42,11 +42,11 @@ export class AddNewCase {
     this.caseService.getNextCaseId().subscribe({
       next: (res) => {
         this.caseForm.caseId = res.nextCaseId;
-        delete this.validationErrors['caseId'];
+        delete this.validationErrors.caseId;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.validationErrors['caseId'] = 'Unable to generate Case ID. Please retry.';
+        this.validationErrors.caseId = 'Unable to generate Case ID. Please retry.';
         this.cdr.detectChanges();
       }
     });
@@ -129,15 +129,15 @@ export class AddNewCase {
     this.validationErrors = {};
 
     if (!this.caseForm.title.trim()) {
-      this.validationErrors['title'] = 'Case title is required';
+      this.validationErrors.title = 'Case title is required';
     }
 
     if (!this.caseForm.caseId.trim()) {
-      this.validationErrors['caseId'] = 'Case ID is required';
+      this.validationErrors.caseId = 'Case ID is required';
     }
 
     if (!this.primaryEntity.value.trim()) {
-      this.validationErrors['entityValue'] = 'Primary entity value is required';
+      this.validationErrors.entityValue = 'Primary entity value is required';
     }
 
     this.validateOther(this.caseForm.caseType, this.caseForm.caseTypeOtherValue, 'caseTypeOther', 'Other case type is required');
@@ -152,7 +152,7 @@ export class AddNewCase {
     });
 
     if (invalidIdentifier) {
-      this.validationErrors['identifier'] = 'Identifiers require type, value, and other value when type is Other';
+      this.validationErrors.identifier = 'Identifiers require type, value, and other value when type is Other';
     }
 
     const invalidSocialProfile = this.primaryEntity.socialProfiles.find(profile => {
@@ -162,7 +162,7 @@ export class AddNewCase {
     });
 
     if (invalidSocialProfile) {
-      this.validationErrors['socialProfile'] = 'Social profiles require platform, username, and other value when platform is Other';
+      this.validationErrors.socialProfile = 'Social profiles require platform, username, and other value when platform is Other';
     }
 
     if (Object.keys(this.validationErrors).length > 0) {

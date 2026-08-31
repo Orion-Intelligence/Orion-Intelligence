@@ -164,7 +164,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         this.firstTrigger = false;
       });
     this.route.queryParams.subscribe(params => {
-      const tab = params['tab'];
+      const tab = params.tab;
       if (tab) {
         this.onToggleMenu(tab);
       }
@@ -202,7 +202,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
         setOwnProperty(cleanedParams, key, value);
       }
     });
-    cleanedParams['tab'] = this.getActiveConsolidatedTab();
+    cleanedParams.tab = this.getActiveConsolidatedTab();
     this.router.navigate([], {
       queryParams: cleanedParams, queryParamsHandling: 'merge', replaceUrl: true, relativeTo: this.route
     }).then(() => {
@@ -468,7 +468,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
 
   private restoreDeepSearchQuery(): void {
     const snapshotParams = this.route.snapshot.queryParams;
-    const querySource = this.dashboardService.consolidatedParamModel.q || this.query || snapshotParams['q'];
+    const querySource = this.dashboardService.consolidatedParamModel.q || this.query || snapshotParams.q;
     if (!querySource) {
       return;
     }

@@ -129,15 +129,15 @@ export class StealerlogSectionComponent implements OnDestroy {
       recordType: 'stealer',
       recordIndex: String(index + 1),
       searchQuery: this.searchIdentity() || '-',
-      email: String(item?.email ?? item?.['m_email'] ?? '-'),
-      username: String(item?.username ?? item?.['m_username'] ?? '-'),
-      domain: String(item?.domain ?? item?.['m_domain'] ?? '-'),
-      source: String(this.exportBranding.replaceSystemBrand(String(item?.['channel'] ?? item?.['filename'] ?? item?.['file'] ?? item?.['m_source'] ?? item?.['m_scrap_file'] ?? '-'))),
-      hash: String(item?.['m_hash'] ?? '-'),
+      email: String(item?.email ?? item?.m_email ?? '-'),
+      username: String(item?.username ?? item?.m_username ?? '-'),
+      domain: String(item?.domain ?? item?.m_domain ?? '-'),
+      source: String(this.exportBranding.replaceSystemBrand(String(item?.channel ?? item?.filename ?? item?.file ?? item?.m_source ?? item?.m_scrap_file ?? '-'))),
+      hash: String(item?.m_hash ?? '-'),
       title: '-',
-      url: String(item?.url ?? item?.['m_url'] ?? '-'),
+      url: String(item?.url ?? item?.m_url ?? '-'),
       rank: '-',
-      date: String(item?.date ?? item?.['m_date'] ?? '-'),
+      date: String(item?.date ?? item?.m_date ?? '-'),
       team: '-',
       summary: '-'
     }));
@@ -166,14 +166,14 @@ export class StealerlogSectionComponent implements OnDestroy {
   }
 
   getRecordHost(record: social_stealer_log): string {
-    return String(record.source_domain ?? record['m_source_domain'] ?? record.domain ?? record['m_domain'] ?? record.ip ?? record['m_ip'] ?? record.url ?? record['m_url'] ?? record.host ?? record['m_host'] ?? record.raw ?? '-');
+    return String(record.source_domain ?? record.m_source_domain ?? record.domain ?? record.m_domain ?? record.ip ?? record.m_ip ?? record.url ?? record.m_url ?? record.host ?? record.m_host ?? record.raw ?? '-');
   }
 
   getRecordIdentity(record: social_stealer_log): string {
-    return String(record.email ?? record['m_email'] ?? record.username ?? record['m_username'] ?? record.user ?? record['m_user'] ?? record.login ?? record['m_login'] ?? record.credential ?? record['m_credential'] ?? record.raw ?? '-');
+    return String(record.email ?? record.m_email ?? record.username ?? record.m_username ?? record.user ?? record.m_user ?? record.login ?? record.m_login ?? record.credential ?? record.m_credential ?? record.raw ?? '-');
   }
 
   getRecordDate(record: social_stealer_log): string {
-    return String(record.date ?? record['m_date'] ?? record.timestamp ?? record['m_timestamp'] ?? record.created_at ?? record['m_created_at'] ?? record.updated_at ?? record['m_updated_at'] ?? '');
+    return String(record.date ?? record.m_date ?? record.timestamp ?? record.m_timestamp ?? record.created_at ?? record.m_created_at ?? record.updated_at ?? record.m_updated_at ?? '');
   }
 }

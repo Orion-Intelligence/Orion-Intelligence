@@ -43,21 +43,21 @@ export class SatelliteAircraftTrackingService {
 
   extractItems(payload: unknown): SatelliteLiveAircraft[] | null {
     const record = asUnknownRecord(payload);
-    if (Array.isArray(record['aircraft'])) {
-      return record['aircraft'] as SatelliteLiveAircraft[];
+    if (Array.isArray(record.aircraft)) {
+      return record.aircraft as SatelliteLiveAircraft[];
     }
 
-    const status = String(record['status'] ?? '').toLowerCase();
+    const status = String(record.status ?? '').toLowerCase();
     if (status === 'pending' || status === 'busy') {
       return null;
     }
 
-    return record['count'] === 0 ? [] : null;
+    return record.count === 0 ? [] : null;
   }
 
   getFeedIssue(payload: unknown): string | null {
     const record = asUnknownRecord(payload);
-    const issue = record['error'] ?? record['error_message'] ?? record['last_error'];
+    const issue = record.error ?? record.error_message ?? record.last_error;
     return issue ? String(issue) : null;
   }
 
@@ -70,10 +70,10 @@ export class SatelliteAircraftTrackingService {
     };
 
     if (openskyClientId?.trim()) {
-      payload['opensky_client_id'] = openskyClientId.trim();
+      payload.opensky_client_id = openskyClientId.trim();
     }
     if (openskyClientSecret?.trim()) {
-      payload['opensky_client_secret'] = openskyClientSecret.trim();
+      payload.opensky_client_secret = openskyClientSecret.trim();
     }
 
     return payload;
@@ -88,10 +88,10 @@ export class SatelliteAircraftTrackingService {
     };
 
     if (openskyClientId?.trim()) {
-      payload['opensky_client_id'] = openskyClientId.trim();
+      payload.opensky_client_id = openskyClientId.trim();
     }
     if (openskyClientSecret?.trim()) {
-      payload['opensky_client_secret'] = openskyClientSecret.trim();
+      payload.opensky_client_secret = openskyClientSecret.trim();
     }
 
     return payload;
@@ -99,8 +99,8 @@ export class SatelliteAircraftTrackingService {
 
   private getPollStatus(res: unknown): string | undefined {
     const response = asUnknownRecord(res);
-    const result = asUnknownRecord(response['result']);
-    const status = result['status'] ?? response['status'];
+    const result = asUnknownRecord(response.result);
+    const status = result.status ?? response.status;
     return typeof status === 'string' ? status : undefined;
   }
 }

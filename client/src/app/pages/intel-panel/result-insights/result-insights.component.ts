@@ -86,10 +86,10 @@ export class ResultInsightsComponent implements OnInit {
     for (const key of Object.keys(search_filter_labels)) {
       setOwnProperty(this.sectionStates, key, false);
     }
-    this.sectionStates['isKeywordExpanded'] = true;
-    this.sectionStates['isCoverageExpanded'] = true;
-    this.sectionStates['isThreatExpanded'] = true;
-    this.sectionStates['isUrlsExpanded'] = true;
+    this.sectionStates.isKeywordExpanded = true;
+    this.sectionStates.isCoverageExpanded = true;
+    this.sectionStates.isThreatExpanded = true;
+    this.sectionStates.isUrlsExpanded = true;
   }
 
   toggleFilter(option: string) {
@@ -420,7 +420,7 @@ export class ResultInsightsComponent implements OnInit {
         news_model: consolidated.news_model,
       };
       const model = getOwnProperty(models, modelKey);
-      const results = isUnknownRecord(model) ? this.toInsightItems(model['Result']) : [];
+      const results = isUnknownRecord(model) ? this.toInsightItems(model.Result) : [];
       results.forEach((item: InsightResultItem) => {
         const url = this.getFirstHttpUrlFromFields(item, fields);
         if (url) {
@@ -447,7 +447,7 @@ export class ResultInsightsComponent implements OnInit {
   extractMultipleFieldsFromResults(groupData: unknown, rankData: unknown, isGrouped: boolean): Record<string, string[]> {
     const resultMap: Record<string, Set<string>> = {};
     const dataArray = isGrouped && isUnknownRecord(groupData)
-      ? Object.values(groupData).flatMap(model => isUnknownRecord(model) ? this.toInsightItems(model['Result']) : [])
+      ? Object.values(groupData).flatMap(model => isUnknownRecord(model) ? this.toInsightItems(model.Result) : [])
       : this.toInsightItems(rankData);
     for (const item of dataArray) {
       for (const [key, value] of Object.entries(item)) {

@@ -154,32 +154,32 @@ export class MapRendererComponent implements AfterViewInit, OnChanges, OnDestroy
 
   ngOnChanges(changes: SimpleChanges): void {
     this.ngZone.runOutsideAngular(() => {
-      if (changes['lat'] || changes['lon'] || changes['delta']) {
+      if (changes.lat || changes.lon || changes.delta) {
         this.updateMapView();
       }
-      if (changes['facilityFeatures']) {
+      if (changes.facilityFeatures) {
         this.entityRenderer?.renderFacilities(this.facilityFeatures);
       }
-      if (changes['anomalyData'])     {
+      if (changes.anomalyData)     {
         this.entityRenderer?.renderAnomaly(this.anomalyData);
       }
-      if (changes['aircraftData']) {
+      if (changes.aircraftData) {
         this.entityRenderer?.renderAircraft(true);
       }
-      if (changes['shipsData']) {
+      if (changes.shipsData) {
         this.entityRenderer?.renderShips(true);
       }
-      if (changes['orionData']) {
+      if (changes.orionData) {
         this.entityRenderer?.renderOrionFacilities(true);
       }
-      if (changes['focusedFeature']) {
+      if (changes.focusedFeature) {
         this.focusOnFeature();
         this.entityRenderer?.renderOrionFacilities(true);
       }
-      if (changes['selectedLayer'])   {
+      if (changes.selectedLayer)   {
         this.switchLayer();
       }
-      if (changes['facilitiesVisible']) {
+      if (changes.facilitiesVisible) {
         this.entityRenderer?.setFacilitiesVisible(this.facilitiesVisible);
       }
     });

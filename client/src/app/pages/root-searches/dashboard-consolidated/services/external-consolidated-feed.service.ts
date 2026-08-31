@@ -35,17 +35,17 @@ export class ExternalConsolidatedFeedService {
 
   syncActorMalware(groupedResults: Record<string, unknown[]>, pageCounts: Record<string, number>): void {
     this.localActorMalwareResults = [
-      ...((groupedResults['apt_model'] || []) as AptIntelResultItem[]),
-      ...((groupedResults['malware_model'] || []) as AptIntelResultItem[]),
+      ...((groupedResults.apt_model || []) as AptIntelResultItem[]),
+      ...((groupedResults.malware_model || []) as AptIntelResultItem[]),
     ];
-    this.localActorMalwareResultCount = (pageCounts['apt_model'] || 0) + (pageCounts['malware_model'] || 0);
+    this.localActorMalwareResultCount = (pageCounts.apt_model || 0) + (pageCounts.malware_model || 0);
     this.updateActorMalwareResults();
   }
 
   fetchActorMalware(paramModel: ConsolidatedParamModel, selectedFilters: Record<string, string | null>): void {
     const localSettings = this.appService.configData().localSettings;
     const entityCategories = localSettings.entityfilterCategories;
-    const resultCount = Number(selectedFilters['platform_result_count'] ?? 0);
+    const resultCount = Number(selectedFilters.platform_result_count ?? 0);
     let payload: Record<string, unknown> = {
       ...paramModel,
       ...selectedFilters,
@@ -57,7 +57,7 @@ export class ExternalConsolidatedFeedService {
     };
 
     if (entityCategories) {
-      payload['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([, value]) => Array.isArray(value) ? value.length > 0 : true));
+      payload.entity_filter = Object.fromEntries(Object.entries(entityCategories).filter(([, value]) => Array.isArray(value) ? value.length > 0 : true));
     }
 
     payload = this.helperService.removeEmptyOrNullValues(payload);

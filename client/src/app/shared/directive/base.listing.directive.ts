@@ -46,7 +46,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
     });
     this.route.queryParams.pipe(take(1)).subscribe(params => {
       this.initializeFilters(params);
-      const page = parseInt(params['page'], 10) || 1;
+      const page = parseInt(params.page, 10) || 1;
       this.service.setCurrentPage(page);
       const mergedFilters = { ...this.dashboard.selectedFilters(), ...this.selectedFilters };
       this.selectedFilters = mergedFilters;
@@ -66,7 +66,7 @@ export abstract class BaseListingComponent<T extends BaseListResponse> implement
       }
     });
     this.selectedFilters = initialSelected;
-    this.searchQuery = params['q'] ?? '';
+    this.searchQuery = params.q ?? '';
   }
 
   onPageChange(page: number): void {

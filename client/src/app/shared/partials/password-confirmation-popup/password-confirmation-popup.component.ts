@@ -17,7 +17,7 @@ export class PasswordConfirmationPopupComponent {
   password = '';
 
   onBackdrop(event: MouseEvent): void {
-    if ((event.target as HTMLElement).dataset['role'] === 'backdrop') {
+    if ((event.target as HTMLElement).dataset.role === 'backdrop') {
       this.close();
     }
   }

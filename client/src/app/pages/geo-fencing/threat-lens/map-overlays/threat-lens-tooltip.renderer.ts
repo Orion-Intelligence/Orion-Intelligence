@@ -37,9 +37,9 @@ export class ThreatLensTooltipRenderer {
       return;
     }
 
-    const ip = typeof attributes['ip'] === 'string' ? attributes['ip'] : this.translate('Unknown IP');
-    const network = typeof attributes['network'] === 'string' ? attributes['network'] : '';
-    const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
+    const ip = typeof attributes.ip === 'string' ? attributes.ip : this.translate('Unknown IP');
+    const network = typeof attributes.network === 'string' ? attributes.network : '';
+    const accuracyRadius = this.toFiniteNumber(attributes.accuracyRadius);
     const tooltipContent = document.createElement('div');
     tooltipContent.className = `${ThreatLensTooltipRenderer.CONTENT_CLASS} threat-lens-tooltip__content--ip min-w-[190px]`;
 
@@ -62,12 +62,12 @@ export class ThreatLensTooltipRenderer {
       return;
     }
 
-    const count = Number(attributes['count'] ?? 0);
-    const networkCount = Number(attributes['networkCount'] ?? 0);
-    const accuracyRadius = this.toFiniteNumber(attributes['accuracyRadius']);
-    const accuracyMin = this.toFiniteNumber(attributes['accuracyMin']);
-    const accuracyMax = this.toFiniteNumber(attributes['accuracyMax']);
-    const records = Array.isArray(attributes['records']) ? attributes['records'] : [];
+    const count = Number(attributes.count ?? 0);
+    const networkCount = Number(attributes.networkCount ?? 0);
+    const accuracyRadius = this.toFiniteNumber(attributes.accuracyRadius);
+    const accuracyMin = this.toFiniteNumber(attributes.accuracyMin);
+    const accuracyMax = this.toFiniteNumber(attributes.accuracyMax);
+    const records = Array.isArray(attributes.records) ? attributes.records : [];
     const tooltipContent = document.createElement('div');
     tooltipContent.className = `${ThreatLensTooltipRenderer.CONTENT_CLASS} threat-lens-tooltip__content--ip min-w-[190px]`;
 
@@ -76,7 +76,7 @@ export class ThreatLensTooltipRenderer {
     title.textContent = this.translate('Stacked approximate IPs');
 
     tooltipContent.append(title);
-    tooltipContent.append(this.buildTooltipRow(this.translate('Why stacked'), String(attributes['stackReason'] ?? this.translate('Same MaxMind coordinate'))));
+    tooltipContent.append(this.buildTooltipRow(this.translate('Why stacked'), String(attributes.stackReason ?? this.translate('Same MaxMind coordinate'))));
     tooltipContent.append(this.buildTooltipRow(this.translate('IP records'), String(count || records.length)));
     if (networkCount > 0) {
       tooltipContent.append(this.buildTooltipRow(this.translate('Prefixes'), String(networkCount)));

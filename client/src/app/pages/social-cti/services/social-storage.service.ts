@@ -40,7 +40,7 @@ export class SocialStorageService {
       ?? Array.from(this.state.scanResults().entries()).find(([username]) => username.toLowerCase() === ownerUsername.toLowerCase())?.[1]
       ?? [];
     const previous = { ...this.getProfileConfig(ownerUsername) };
-    delete previous['allowed'];
+    delete previous.allowed;
     const config: social_profile_config = {
       ...previous,
       disallowed: allProfiles.filter(platform => !selectedIds.has(platform.id)).map(platform => platform.id),

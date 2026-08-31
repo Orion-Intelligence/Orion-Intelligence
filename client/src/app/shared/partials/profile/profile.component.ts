@@ -59,8 +59,8 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
       const data = this.appService.userSessionData();
       this.username.set(data?.user?.username ?? '');
       this.role.set(data?.user?.role ?? '');
-      const preferredLanguage = data?.user?.preferences?.['language'];
-      const preferredTheme = data?.user?.theme ?? data?.user?.preferences?.['theme'];
+      const preferredLanguage = data?.user?.preferences?.language;
+      const preferredTheme = data?.user?.theme ?? data?.user?.preferences?.theme;
       this.selectedLanguage.set(this.getCurrentLanguage(typeof preferredLanguage === 'string' ? preferredLanguage : ''));
       this.selectedTheme.set(this.getCurrentTheme(typeof preferredTheme === 'string' ? preferredTheme : undefined));
     });

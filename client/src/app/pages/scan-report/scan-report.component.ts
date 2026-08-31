@@ -112,7 +112,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
 
   get targetText(): string {
     const result = this.resultRecord;
-    return this.job?.target ?? String(result['domain'] ?? result['host'] ?? result['url'] ?? result['ip'] ?? result['query'] ?? this.translationService.translate('Scan target'));
+    return this.job?.target ?? String(result.domain ?? result.host ?? result.url ?? result.ip ?? result.query ?? this.translationService.translate('Scan target'));
   }
 
   get isHostReconReport(): boolean {
@@ -155,7 +155,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
       return this.shodanReportResult ? 1 : 0;
     }
     if (this.isVulnerabilityReport) {
-      const total = Number(asUnknownRecord(this.resultRecord['summary'])['total']);
+      const total = Number(asUnknownRecord(this.resultRecord.summary).total);
       return this.findingItems.length || (Number.isFinite(total) ? total : 0);
     }
     if (this.findingItems.length) {
@@ -178,7 +178,7 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
       return this.shodanReportResult ? Object.keys(this.shodanReportResult).length : 0;
     }
     if (this.isVulnerabilityReport) {
-      return this.findingItems.length + Object.keys(asUnknownRecord(this.resultRecord['summary'])).length;
+      return this.findingItems.length + Object.keys(asUnknownRecord(this.resultRecord.summary)).length;
     }
     return this.resultSections.reduce((total, section) => total + section.items.length, 0);
   }
@@ -223,24 +223,24 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     const result = this.resultRecord;
 
     if (this.isHostReconReport) {
-      const domain = String(result['domain'] ?? this.job?.payload?.['domain'] ?? this.job?.target ?? '');
-      const ips: string[] = Array.isArray(result['ips']) ? result['ips'].map((ip: unknown) => String(ip)).filter(Boolean) : [];
+      const domain = String(result.domain ?? this.job?.payload?.domain ?? this.job?.target ?? '');
+      const ips: string[] = Array.isArray(result.ips) ? result.ips.map((ip: unknown) => String(ip)).filter(Boolean) : [];
       this.dnsReportResult = { domain, ips };
       this.dnsReportRows = ips.map(ip => ({ ip, expanded: false, loading: false, detail: null, error: null }));
       return;
     }
 
-    if (this.isIpScanReport && result['ip']) {
+    if (this.isIpScanReport && result.ip) {
       this.shodanReportResult = result as unknown as IpDetail;
       return;
     }
 
     if (this.isVulnerabilityReport) {
-      const extracted = asUnknownRecord(result['extracted']);
-      const target = this.normalizeVulnerabilityTarget(result['host'] ?? extracted['host'] ?? this.job?.payload?.['domain'] ?? this.job?.target ?? result['url']);
+      const extracted = asUnknownRecord(result.extracted);
+      const target = this.normalizeVulnerabilityTarget(result.host ?? extracted.host ?? this.job?.payload?.domain ?? this.job?.target ?? result.url);
       this.vulnerabilityReportTarget = target || null;
       this.vulnerabilityReportTargets = target ? [target] : [];
-      const depth = String(this.job?.payload?.['depth'] ?? '').toLowerCase();
+      const depth = String(this.job?.payload?.depth ?? '').toLowerCase();
       this.vulnerabilityReportDepth = ['low', 'medium', 'high', 'full'].includes(depth) ? depth as VulnerabilityScanDepth : 'low';
     }
   }
@@ -318,25 +318,25 @@ export class ScanReportComponent extends ValuePresentationBase implements OnInit
     if (!isUnknownRecord(response)) {
       return response;
     }
-    const nestedResult = asUnknownRecord(response['result']);
-    if (isUnknownRecord(nestedResult['result']) || Array.isArray(nestedResult['result'])) {
-      return nestedResult['result'];
+    const nestedResult = asUnknownRecord(response.result);
+    if (isUnknownRecord(nestedResult.result) || Array.isArray(nestedResult.result)) {
+      return nestedResult.result;
     }
-    if (isUnknownRecord(response['data']) || Array.isArray(response['data'])) {
-      return response['data'];
+    if (isUnknownRecord(response.data) || Array.isArray(response.data)) {
+      return response.data;
     }
-    if (isUnknownRecord(response['result']) || Array.isArray(response['result'])) {
-      return response['result'];
+    if (isUnknownRecord(response.result) || Array.isArray(response.result)) {
+      return response.result;
     }
     return response;
   }
 
   private get findingItems(): unknown[] {
     const result = this.resultRecord;
-    return Array.isArray(result['findings'])
-      ? result['findings']
-      : Array.isArray(result['top_findings'])
-        ? result['top_findings']
+    return Array.isArray(result.findings)
+      ? result.findings
+      : Array.isArray(result.top_findings)
+        ? result.top_findings
         : [];
   }
 

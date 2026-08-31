@@ -34,7 +34,7 @@ export class CountryBoundaryMapRenderer {
       }
 
       const topology = await response.json() as Topology;
-      const countriesObject = topology.objects['countries'];
+      const countriesObject = topology.objects.countries;
       if (!countriesObject) {
         return;
       }
@@ -107,7 +107,7 @@ export class CountryBoundaryMapRenderer {
   }
 
   private bindCountryFeature(feature: CountryFeature, layer: Leaflet.Layer): void {
-    const countryName = String(feature.properties?.['name'] ?? 'Country');
+    const countryName = String(feature.properties?.name ?? 'Country');
     layer.bindTooltip(countryName, {
       direction: 'center',
       sticky: true,
@@ -287,8 +287,8 @@ export class CountryBoundaryMapRenderer {
       return false;
     }
 
-    const leftId = left.id ?? left.properties?.['name'] ?? left.properties?.['iso_a3'] ?? left.properties?.['admin'];
-    const rightId = right.id ?? right.properties?.['name'] ?? right.properties?.['iso_a3'] ?? right.properties?.['admin'];
+    const leftId = left.id ?? left.properties?.name ?? left.properties?.iso_a3 ?? left.properties?.admin;
+    const rightId = right.id ?? right.properties?.name ?? right.properties?.iso_a3 ?? right.properties?.admin;
     return String(leftId ?? '').trim() !== '' && String(leftId) === String(rightId);
   }
 }

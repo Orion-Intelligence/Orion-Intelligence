@@ -176,63 +176,63 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
   }
 
   ngOnInit(): void {
-    this.apiType = this.route.snapshot.data?.['type'] ? String(this.route.snapshot.data['type']) : null;
+    this.apiType = this.route.snapshot.data?.type ? String(this.route.snapshot.data.type) : null;
     this.route.data.subscribe(d => {
-      this.apiType = d?.['type'] ? String(d['type']) : this.apiType;
+      this.apiType = d?.type ? String(d.type) : this.apiType;
     });
     this.route.queryParams.subscribe(params => {
       if (this.apiType === 'user') {
-        if (params['username']) {
-          this.q1 = params['username'];
+        if (params.username) {
+          this.q1 = params.username;
         }
-        if (params['email']) {
-          this.q2 = params['email'];
+        if (params.email) {
+          this.q2 = params.email;
         }
       }
       else if (this.apiType === 'social') {
-        if (params['username']) {
-          this.q1 = params['username'];
+        if (params.username) {
+          this.q1 = params.username;
         }
-        if (params['email']) {
-          this.q2 = params['email'];
+        if (params.email) {
+          this.q2 = params.email;
         }
       }
       else if (this.apiType === 'wanted') {
-        if (params['query']) {
-          this.q1 = params['query'];
+        if (params.query) {
+          this.q1 = params.query;
         }
         this.q2 = '';
       }
       else if (this.apiType === 'national-identity') {
-        if (params['cnic']) {
-          this.q1 = params['cnic'];
+        if (params.cnic) {
+          this.q1 = params.cnic;
         }
         this.q2 = '';
       }
       else if (this.apiType === 'cracked') {
-        if (params['playstore']) {
-          this.q1 = params['playstore'];
+        if (params.playstore) {
+          this.q1 = params.playstore;
         }
         this.q2 = '';
       }
       else if (this.apiType === 'software') {
-        if (params['name']) {
-          this.q1 = params['name'];
+        if (params.name) {
+          this.q1 = params.name;
         }
         this.q2 = '';
       }
       else if (this.apiType === 'crypto') {
-        if (params['text']) {
-          this.q1 = params['text'];
+        if (params.text) {
+          this.q1 = params.text;
         }
         this.q2 = '';
       }
       else {
-        if (params['q1']) {
-          this.q1 = params['q1'];
+        if (params.q1) {
+          this.q1 = params.q1;
         }
-        if (params['q2']) {
-          this.q2 = params['q2'];
+        if (params.q2) {
+          this.q2 = params.q2;
         }
       }
       if (this.q1 || this.q2) {

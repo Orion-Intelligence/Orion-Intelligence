@@ -94,7 +94,7 @@ const hydrateBootstrapIcons = (root: ParentNode | Element = document) => {
 };
 hydrateBootstrapIcons();
 const mark = (img: HTMLImageElement) => {
-    if (img.dataset['ph'] === '1') {
+    if (img.dataset.ph === '1') {
         return;
     }
     const src = img.getAttribute('src') ?? '';
@@ -111,7 +111,7 @@ const mark = (img: HTMLImageElement) => {
         img.classList.contains('auth-wrapper__image')) {
         return;
     }
-    img.dataset['ph'] = '1';
+    img.dataset.ph = '1';
     img.setAttribute('data-ph', '');
     const onload = () => { img.removeAttribute('data-ph'); };
     img.addEventListener('load', onload, { once: true });

@@ -71,10 +71,10 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     this.route.queryParams.subscribe(params => {
       const isScreenMobile = window.innerWidth <= 480;
       this.isMobile = isScreenMobile;
-      let mode = params['mode'];
-      if (!mode && params['redirect']) {
-        const tree = this.router.parseUrl(params['redirect']);
-        mode = tree.queryParams['mode'];
+      let mode = params.mode;
+      if (!mode && params.redirect) {
+        const tree = this.router.parseUrl(params.redirect);
+        mode = tree.queryParams.mode;
       }
       if (mode === 'free') {
         localStorage.setItem('mobileDemo', 'true');

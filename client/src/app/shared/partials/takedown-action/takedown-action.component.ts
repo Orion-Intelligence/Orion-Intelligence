@@ -213,9 +213,9 @@ export class TakedownActionComponent implements OnChanges {
     this.isTakingDown = false;
     const evidence = (record.evidence?.result ?? record.evidence ?? {});
 
-    const abuseEmail = record.abuse_email ?? String(evidence['abuse_email_found'] ?? '');
-    const takedownType = evidence['takedown_type'] as string;
-    const actionUrl = evidence['action_url'] as string;
+    const abuseEmail = record.abuse_email ?? String(evidence.abuse_email_found ?? '');
+    const takedownType = evidence.takedown_type as string;
+    const actionUrl = evidence.action_url as string;
 
     if (!this.manualUrlMode) {
       this.applyTakedownStatus(record.public_status ?? null, record.status_label ?? '');

@@ -89,29 +89,29 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   getThreadComments(item: SocialResultItem): SocialThreadComment[] {
     const rawItem: Record<string, unknown> = item;
     const sources = [
-      rawItem['m_comments'],
-      rawItem['m_post_comments'],
-      rawItem['m_post_comments_list'],
-      rawItem['m_post_comment_list'],
-      rawItem['m_comment'],
-      rawItem['m_comment_list'],
-      rawItem['m_comments_list'],
-      rawItem['comments'],
-      rawItem['comment_items'],
-      rawItem['comment_details'],
-      rawItem['comments_list'],
-      rawItem['post_comments_list'],
-      rawItem['m_replies'],
-      rawItem['replies'],
-      rawItem['m_thread_comments'],
-      rawItem['thread_comments']
+      rawItem.m_comments,
+      rawItem.m_post_comments,
+      rawItem.m_post_comments_list,
+      rawItem.m_post_comment_list,
+      rawItem.m_comment,
+      rawItem.m_comment_list,
+      rawItem.m_comments_list,
+      rawItem.comments,
+      rawItem.comment_items,
+      rawItem.comment_details,
+      rawItem.comments_list,
+      rawItem.post_comments_list,
+      rawItem.m_replies,
+      rawItem.replies,
+      rawItem.m_thread_comments,
+      rawItem.thread_comments
     ];
     return sources.flatMap(source => this.normalizeComments(source)).slice(0, 3);
   }
 
   getCommentCount(item: SocialResultItem): string {
     const rawItem: Record<string, unknown> = item;
-    return String(item.m_comment_count ?? item.m_post_comments_count ?? item.m_comments_count ?? rawItem['comment_count'] ?? rawItem['comments_count'] ?? '');
+    return String(item.m_comment_count ?? item.m_post_comments_count ?? item.m_comments_count ?? rawItem.comment_count ?? rawItem.comments_count ?? '');
   }
 
   getResultDisplayLimit(): number {
@@ -159,7 +159,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     }
     if (typeof value === 'object') {
       const comment = value as Record<string, unknown>;
-      const text = comment['text'] ?? comment['comment'] ?? comment['comment_text'] ?? comment['m_comment_text'] ?? comment['m_comment'] ?? comment['m_text'] ?? comment['content'] ?? comment['comment_content'] ?? comment['m_content'] ?? comment['message'] ?? comment['body'] ?? comment['m_body'] ?? comment['comment_body'] ?? comment['reply'] ?? comment['reply_content'] ?? comment['description'];
+      const text = comment.text ?? comment.comment ?? comment.comment_text ?? comment.m_comment_text ?? comment.m_comment ?? comment.m_text ?? comment.content ?? comment.comment_content ?? comment.m_content ?? comment.message ?? comment.body ?? comment.m_body ?? comment.comment_body ?? comment.reply ?? comment.reply_content ?? comment.description;
       if (!text) {
         const nestedKeys = ['m_comments', 'm_post_comments', 'm_post_comments_list', 'm_post_comment_list', 'm_comments_list', 'comments', 'comment_items', 'comment_details', 'comments_list', 'post_comments_list', 'm_replies', 'replies', 'm_thread_comments', 'thread_comments'];
         const nestedComments = nestedKeys.flatMap(key => this.normalizeComments(getOwnProperty(comment, key)));
@@ -173,9 +173,9 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
         return [];
       }
       return [{
-        sender: String(comment['sender_name'] ?? comment['m_sender_name'] ?? comment['author'] ?? comment['m_author'] ?? comment['comment_author'] ?? comment['username'] ?? comment['user'] ?? comment['name'] ?? comment['from'] ?? ''),
-        date: String(comment['m_date'] ?? comment['date'] ?? comment['datetime'] ?? comment['created_at'] ?? comment['timestamp'] ?? comment['time'] ?? comment['m_time'] ?? ''),
-        likes: String(comment['likes'] ?? comment['m_likes'] ?? comment['like_count'] ?? ''),
+        sender: String(comment.sender_name ?? comment.m_sender_name ?? comment.author ?? comment.m_author ?? comment.comment_author ?? comment.username ?? comment.user ?? comment.name ?? comment.from ?? ''),
+        date: String(comment.m_date ?? comment.date ?? comment.datetime ?? comment.created_at ?? comment.timestamp ?? comment.time ?? comment.m_time ?? ''),
+        likes: String(comment.likes ?? comment.m_likes ?? comment.like_count ?? ''),
         text: String(text)
       }];
     }

@@ -40,7 +40,7 @@ export class ReportExportService extends ExportSharedService {
     const source = this.toRecord(input.csvObject);
     const sourceEntries = Object.entries(source);
     const contentText = this.cleanText(input.content ?? '');
-    const screenshotRef = this.cleanText(source['m_screenshot'] || '');
+    const screenshotRef = this.cleanText(source.m_screenshot || '');
     const reportIdShort = this.compactMiddle(reportId, 14, 12);
     const sourceUrlShort = this.compactMiddle(normalizedUrl, 48, 18);
 
@@ -61,7 +61,7 @@ export class ReportExportService extends ExportSharedService {
       detailValues[this.toTitle(k)] = this.cleanText(v).slice(0, 500) || '-';
     });
     if (!sourceEntries.length) {
-      detailValues['Details'] = '-';
+      detailValues.Details = '-';
     }
 
     const tables = [{ title: 'Metadata', values: this.buildMetadataValues(source) }];
@@ -153,7 +153,7 @@ export class ReportExportService extends ExportSharedService {
   }
 
   private buildScreenshotValues(source: Record<string, string>): Record<string, string> {
-    const screenshot = this.cleanText(source['m_screenshot'] || '');
+    const screenshot = this.cleanText(source.m_screenshot || '');
     return {
       Description: 'Screenshot Preview',
       Available: screenshot ? 'Yes' : 'No',

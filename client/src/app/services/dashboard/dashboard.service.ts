@@ -64,31 +64,31 @@ export class DashboardService {
     const requestParams: UnknownRecord = { ...asUnknownRecord(paramModel), page: this.consolidatedParamModel.page };
     let baseParams: UnknownRecord = { ...requestParams, ...this.selectedFilters() };
     if (apiEndpoint === 'search/defacement') {
-      baseParams['category'] = requestParams['category'] ?? 'all';
-      baseParams['content'] = baseParams['content'] ?? requestParams['content'] ?? 'all';
+      baseParams.category = requestParams.category ?? 'all';
+      baseParams.content = baseParams.content ?? requestParams.content ?? 'all';
     }
     if (apiEndpoint === 'search/exploit' || apiEndpoint === 'search/apt-intel') {
-      const resultCount = Number(baseParams['platform_result_count'] ?? 0);
-      baseParams['platform_result_count'] = Math.max(Number.isFinite(resultCount) ? resultCount : 0, 100);
+      const resultCount = Number(baseParams.platform_result_count ?? 0);
+      baseParams.platform_result_count = Math.max(Number.isFinite(resultCount) ? resultCount : 0, 100);
     }
     const entityCategories = this.app_service.configData().localSettings.entityfilterCategories;
     if (semantic) {
-      baseParams['matchtype'] = semantic;
+      baseParams.matchtype = semantic;
     }
     else {
-      baseParams['matchtype'] = this.app_service.configData().localSettings.matchType;
+      baseParams.matchtype = this.app_service.configData().localSettings.matchType;
     }
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
-    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    baseParams.must = this.app_service.configData().localSettings.entityFilterCondition;
     if (syncUrl) {
       this.syncQueryParamsToUrl(baseParams);
     }
     if (entityCategories) {
-      baseParams['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([, v]) => Array.isArray(v) ? v.length > 0 : true));
+      baseParams.entity_filter = Object.fromEntries(Object.entries(entityCategories).filter(([, v]) => Array.isArray(v) ? v.length > 0 : true));
     }
     const passwordScheme = this.passwordSchemeFilter;
     if (passwordScheme && Object.values(passwordScheme).some(v => v !== null && v !== false)) {
-      baseParams['password_schema'] = passwordScheme;
+      baseParams.password_schema = passwordScheme;
     }
     this.passwordSchemeFilter = {
       minLength: null,
@@ -115,9 +115,9 @@ export class DashboardService {
     let baseParams: UnknownRecord = mergedParams;
     baseParams = this.applyEntityFilter(baseParams, entityCategories);
     baseParams = this.helperService.removeEmptyOrNullValues(baseParams);
-    baseParams['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    baseParams.must = this.app_service.configData().localSettings.entityFilterCondition;
     let match_type = this.app_service.configData().localSettings.matchType;
-    baseParams['matchtype'] = match_type ? match_type : this.app_service.configData().localSettings.matchType;
+    baseParams.matchtype = match_type ? match_type : this.app_service.configData().localSettings.matchType;
     this.syncQueryParamsToUrl(baseParams);
     return this.apiService.post<RankedApiResponse>(apiEndpoint, baseParams).pipe(takeUntil(this.cancelRequest$), map((response) => {
       const hasAnyResults = Array.isArray(response.Result) && response.Result.length > 0;
@@ -142,7 +142,7 @@ export class DashboardService {
     let payload: UnknownRecord = mergedParams;
     payload = this.applyEntityFilter(payload, entityCategories);
     payload = this.helperService.removeEmptyOrNullValues(payload);
-    payload['must'] = this.app_service.configData().localSettings.entityFilterCondition;
+    payload.must = this.app_service.configData().localSettings.entityFilterCondition;
     this.syncQueryParamsToUrl(payload);
     return this.apiService.post<ConsolidatedCallbackModel>(apiEndpoint, payload).pipe(takeUntil(this.cancelRequest$), map((response: ConsolidatedCallbackModel) => {
       const hasAnyResults = [
@@ -308,7 +308,7 @@ export class DashboardService {
 
   private applyEntityFilter(params: UnknownRecord, entityCategories: UnknownRecord): UnknownRecord {
     if (Object.keys(entityCategories).length > 0) {
-      params['entity_filter'] = Object.fromEntries(Object.entries(entityCategories).filter(([, v]) => (Array.isArray(v) ? v.length > 0 : true)));
+      params.entity_filter = Object.fromEntries(Object.entries(entityCategories).filter(([, v]) => (Array.isArray(v) ? v.length > 0 : true)));
     }
     return params;
   }
@@ -328,7 +328,7 @@ export class DashboardService {
 
   private syncQueryParamsToUrl(params: UnknownRecord): void {
     const queryParamsForNav = { ...params };
-    delete queryParamsForNav['entity_filter'];
+    delete queryParamsForNav.entity_filter;
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: queryParamsForNav,

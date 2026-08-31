@@ -60,11 +60,11 @@ export class AccountSettingsComponent implements OnInit {
 
   setItemsFromPreferences() {
     const userTheme = this.userSessionData?.user?.theme;
-    const preferenceTheme = this.userSessionData?.user?.preferences?.["theme"];
+    const preferenceTheme = this.userSessionData?.user?.preferences?.theme;
     const theme = userTheme ?? preferenceTheme ?? 'dark-theme';
     this.isDarkMode = theme === 'dark-theme';
-    this.isProfileVisible = this.userSessionData?.user?.preferences?.["profile_visible"] !== false;
-    const languagePreference = this.userSessionData?.user?.preferences?.["language"];
+    this.isProfileVisible = this.userSessionData?.user?.preferences?.profile_visible !== false;
+    const languagePreference = this.userSessionData?.user?.preferences?.language;
     const userLanguage = typeof languagePreference === 'string' ? languagePreference : '';
     this.hasLanguagePreference = this.translationService.isSupportedLanguage(userLanguage);
     const systemLanguage = this.translationService.getSystemLanguage();
@@ -171,10 +171,10 @@ export class AccountSettingsComponent implements OnInit {
       profile_visible: this.isProfileVisible
     };
     if (this.hasLanguagePreference) {
-      preferences['language'] = this.selectedLanguage;
+      preferences.language = this.selectedLanguage;
     }
     else {
-      delete preferences['language'];
+      delete preferences.language;
     }
     this.userSessionData.user.theme = theme;
     this.userSessionData.user.preferences = preferences;

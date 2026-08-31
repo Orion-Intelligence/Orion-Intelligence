@@ -275,18 +275,18 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private buildRouteFilterOverride(params: Params): CtiGraphFilters | null {
-    const selectedType = String(params['selectedType'] ?? '').trim();
-    const singleInput = String(params['singleInput'] ?? '').trim();
-    const propertyType = String(params['propertyType'] ?? '').trim();
-    const propertyValue = String(params['propertyValue'] ?? '').trim();
+    const selectedType = String(params.selectedType ?? '').trim();
+    const singleInput = String(params.singleInput ?? '').trim();
+    const propertyType = String(params.propertyType ?? '').trim();
+    const propertyValue = String(params.propertyValue ?? '').trim();
     const hasExplicitRouteFilters = selectedType.length > 0 || singleInput.length > 0 || propertyValue.length > 0;
 
     if (!hasExplicitRouteFilters) {
       return null;
     }
 
-    const parsedMaxEdge = Number(params['maxEdge']);
-    const parsedMaxDepth = Number(params['maxDepth']);
+    const parsedMaxEdge = Number(params.maxEdge);
+    const parsedMaxDepth = Number(params.maxDepth);
 
     return {
       selectedType: selectedType || 'cluster',
@@ -544,7 +544,7 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private syncBasicSearchControlsFromRoute(params: Params, filters: CtiGraphFilters): void {
     this.graphSearchAdvancedMode = false;
-    const requestedKey = String(params['graphSearchKey'] ?? '').trim();
+    const requestedKey = String(params.graphSearchKey ?? '').trim();
     const requestedOption = requestedKey ? this.graphSearchOptions.find(option => option.key === requestedKey) : null;
     if (requestedOption) {
       this.activeGraphSearchKey = requestedOption.key;
@@ -706,9 +706,9 @@ export class GraphComponent implements OnInit, OnDestroy {
       summary: {
         totalNodes: nodes.length,
         totalEdges: edges.length,
-        clusters: byType['cluster'] ?? 0,
-        documents: byType['document'] ?? 0,
-        properties: byType['property'] ?? 0
+        clusters: byType.cluster ?? 0,
+        documents: byType.document ?? 0,
+        properties: byType.property ?? 0
       }
     };
   }
@@ -939,7 +939,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       depth: String(depthOverride ?? this.maxDepth)
     };
     if (scopeCluster && scopeCluster !== 'all') {
-      payload['scope_cluster'] = scopeCluster;
+      payload.scope_cluster = scopeCluster;
     }
     return payload;
   }
@@ -1985,13 +1985,13 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private getIconNameForNode(node: ExtendedNode, type: string): string {
     if (node.isGroup) {
-      return this.iconMap['cluster'];
+      return this.iconMap.cluster;
     }
     if (type === 'cluster') {
-      return this.iconMap['cluster'];
+      return this.iconMap.cluster;
     }
     if (type === 'document') {
-      return this.iconMap['document'];
+      return this.iconMap.document;
     }
     const rawKey = (node.propertyKey ?? '').toLowerCase();
     const labelKey = this.extractPropertyKeyFromLabel(node.label?.toString()) ?? '';
@@ -2010,7 +2010,7 @@ export class GraphComponent implements OnInit, OnDestroy {
         }
       }
     }
-    return this.iconMap['property'];
+    return this.iconMap.property;
   }
 
   private getNodeAcronym(node: ExtendedNode): string {
@@ -2308,9 +2308,9 @@ export class GraphComponent implements OnInit, OnDestroy {
     });
 
     this.legendItems = [
-      { key: 'cluster', label: 'Clusters', color: this.nodeClusterBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-amber-500 bg-[var(--color-blue-720)]', count: counts['cluster'] ?? 0 },
-      { key: 'document', label: 'Documents', color: this.nodeDocumentBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-orange-500 bg-[var(--color-blue-720)]', count: counts['document'] ?? 0 },
-      { key: 'property', label: 'Entities', color: this.nodePropertyBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-sky-400 bg-[var(--color-blue-720)]', count: counts['property'] ?? 0 }
+      { key: 'cluster', label: 'Clusters', color: this.nodeClusterBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-amber-500 bg-[var(--color-blue-720)]', count: counts.cluster ?? 0 },
+      { key: 'document', label: 'Documents', color: this.nodeDocumentBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-orange-500 bg-[var(--color-blue-720)]', count: counts.document ?? 0 },
+      { key: 'property', label: 'Entities', color: this.nodePropertyBorder, swatchClass: 'h-3.5 w-3.5 shrink-0 rounded-full border-2 border-sky-400 bg-[var(--color-blue-720)]', count: counts.property ?? 0 }
     ];
 
     this.clusterLegendItems = Object.entries(this.clusterPalette)

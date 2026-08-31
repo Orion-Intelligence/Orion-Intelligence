@@ -859,24 +859,24 @@ export class ShipMapRenderer {
 
   private extractDetails(res: unknown): SatelliteLiveShip | null {
     const response = asUnknownRecord(res);
-    const payload = asUnknownRecord(response['result'] ?? res);
+    const payload = asUnknownRecord(response.result ?? res);
     const ships = this.service.extractItems(payload);
     if (ships?.length) {
       return ships[0];
     }
-    if (Array.isArray(payload['ships']) && payload['ships'].length > 0) {
-      return payload['ships'][0] as SatelliteLiveShip;
+    if (Array.isArray(payload.ships) && payload.ships.length > 0) {
+      return payload.ships[0] as SatelliteLiveShip;
     }
-    if (payload['ship'] && typeof payload['ship'] === 'object' && !Array.isArray(payload['ship'])) {
-      return payload['ship'] as SatelliteLiveShip;
+    if (payload.ship && typeof payload.ship === 'object' && !Array.isArray(payload.ship)) {
+      return payload.ship as SatelliteLiveShip;
     }
-    if (payload['ships'] && typeof payload['ships'] === 'object' && !Array.isArray(payload['ships'])) {
-      return payload['ships'] as SatelliteLiveShip;
+    if (payload.ships && typeof payload.ships === 'object' && !Array.isArray(payload.ships)) {
+      return payload.ships as SatelliteLiveShip;
     }
-    if (payload['mmsi'] != null) {
+    if (payload.mmsi != null) {
       return payload as unknown as SatelliteLiveShip;
     }
-    if (response['mmsi'] != null) {
+    if (response.mmsi != null) {
       return response as unknown as SatelliteLiveShip;
     }
     return null;

@@ -71,7 +71,7 @@ export class TranslationService {
   }
 
   private getPreferredLocale(): string {
-    const userLanguage = this.appService.userSessionData()?.user?.preferences?.['language'];
+    const userLanguage = this.appService.userSessionData()?.user?.preferences?.language;
     const systemLanguage = this.appService.configData().appSettings.language_allowed;
     const language = typeof userLanguage === 'string' && userLanguage.trim() ? userLanguage : systemLanguage;
     const code = (language || this.defaultLocale).trim().toLowerCase();

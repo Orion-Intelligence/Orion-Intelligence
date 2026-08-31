@@ -178,7 +178,7 @@ export class AiChatSidebarComponent {
 
   onRenameBackdrop(event: MouseEvent): void {
     const target = event.target;
-    if (target instanceof HTMLElement && target.dataset['role'] === 'backdrop') {
+    if (target instanceof HTMLElement && target.dataset.role === 'backdrop') {
       this.closeRenameChatPopup();
     }
   }

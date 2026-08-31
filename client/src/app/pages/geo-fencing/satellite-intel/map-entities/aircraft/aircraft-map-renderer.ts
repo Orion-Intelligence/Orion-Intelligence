@@ -893,24 +893,24 @@ export class AircraftMapRenderer {
 
   private extractDetails(res: unknown): SatelliteLiveAircraft | null {
     const response = asUnknownRecord(res);
-    const payload = asUnknownRecord(response['result'] ?? res);
-    if (Array.isArray(payload['aircraft']) && payload['aircraft'].length > 0) {
-      return payload['aircraft'][0] as SatelliteLiveAircraft;
+    const payload = asUnknownRecord(response.result ?? res);
+    if (Array.isArray(payload.aircraft) && payload.aircraft.length > 0) {
+      return payload.aircraft[0] as SatelliteLiveAircraft;
     }
-    if (Array.isArray(payload['aircrafts']) && payload['aircrafts'].length > 0) {
-      return payload['aircrafts'][0] as SatelliteLiveAircraft;
+    if (Array.isArray(payload.aircrafts) && payload.aircrafts.length > 0) {
+      return payload.aircrafts[0] as SatelliteLiveAircraft;
     }
-    if (isUnknownRecord(payload['aircraft'])) {
+    if (isUnknownRecord(payload.aircraft)) {
       return {
-        ...payload['aircraft'],
-        ...(payload['track'] ? { track: payload['track'] } : {}),
-        ...(payload['path'] ? { path: payload['path'] } : {}),
+        ...payload.aircraft,
+        ...(payload.track ? { track: payload.track } : {}),
+        ...(payload.path ? { path: payload.path } : {}),
       } as SatelliteLiveAircraft;
     }
-    if (payload['icao24'] != null) {
+    if (payload.icao24 != null) {
       return payload as unknown as SatelliteLiveAircraft;
     }
-    if (response['icao24'] != null) {
+    if (response.icao24 != null) {
       return response as unknown as SatelliteLiveAircraft;
     }
     return null;

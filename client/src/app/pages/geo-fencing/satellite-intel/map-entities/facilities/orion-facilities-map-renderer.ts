@@ -215,7 +215,7 @@ export class OrionFacilitiesMapRenderer {
     }
 
     const [lon, lat] = feature.coordinates;
-    return feature.properties?.['hasValidCoordinates'] !== false &&
+    return feature.properties?.hasValidCoordinates !== false &&
       Number.isFinite(lon) &&
       Number.isFinite(lat) &&
       lon !== 0 &&

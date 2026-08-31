@@ -90,12 +90,12 @@ export class ConsolidatedScanComponent {
       liveApiEntities.push(...this.extractLiveApiEntities(input));
     }
     if (entityCategories) {
-      const domains = Array.isArray(entityCategories['m_domain']) ? entityCategories['m_domain'] : [];
-      const emails = Array.isArray(entityCategories['m_email']) ? entityCategories['m_email'] : [];
-      const urls = Array.isArray(entityCategories['m_url']) ? entityCategories['m_url'] : [];
-      const software = Array.isArray(entityCategories['m_software']) ? entityCategories['m_software'] : [];
-      const companyNames = Array.isArray(entityCategories['m_company_name']) ? entityCategories['m_company_name'] : [];
-      const orgs = Array.isArray(entityCategories['m_org']) ? entityCategories['m_org'] : [];
+      const domains = Array.isArray(entityCategories.m_domain) ? entityCategories.m_domain : [];
+      const emails = Array.isArray(entityCategories.m_email) ? entityCategories.m_email : [];
+      const urls = Array.isArray(entityCategories.m_url) ? entityCategories.m_url : [];
+      const software = Array.isArray(entityCategories.m_software) ? entityCategories.m_software : [];
+      const companyNames = Array.isArray(entityCategories.m_company_name) ? entityCategories.m_company_name : [];
+      const orgs = Array.isArray(entityCategories.m_org) ? entityCategories.m_org : [];
       for (const domain of domains) {
         const value = (domain || '').trim();
         if (value) {

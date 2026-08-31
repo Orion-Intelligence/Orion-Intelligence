@@ -67,8 +67,8 @@ export class IpDetailComponent {
 
     if (value && typeof value === 'object') {
       const record = asUnknownRecord(value);
-      const cve = typeof record['cve'] === 'string' ? record['cve'].trim() : '';
-      const rawCvss = record['cvss'];
+      const cve = typeof record.cve === 'string' ? record.cve.trim() : '';
+      const rawCvss = record.cvss;
       const cvssValue = typeof rawCvss === 'string' || typeof rawCvss === 'number' ? String(rawCvss).trim() : '';
       const cvss = cvssValue ? `CVSS ${cvssValue}` : '';
 

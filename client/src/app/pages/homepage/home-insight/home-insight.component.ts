@@ -32,7 +32,7 @@ export class HomeInsightComponent implements OnInit {
   }
 
   ngOnInit() {
-    const data = this.route.snapshot.data['insights'];
+    const data = this.route.snapshot.data.insights;
     if (data) {
       this.applyInsightData(data);
       return;
@@ -48,9 +48,9 @@ export class HomeInsightComponent implements OnInit {
       general: {} as GenericModel,
       leak: {} as LeakModel,
       defacement: {} as DefacementModel,
-      ...asUnknownRecord(response['insights']),
+      ...asUnknownRecord(response.insights),
     };
-    const latestDocuments = asUnknownRecord(response['latestDocument']);
+    const latestDocuments = asUnknownRecord(response.latestDocument);
     this.latestDocuments = {
       generic_model: [],
       leak_model: [],

@@ -90,7 +90,7 @@ export class CredentialComponent implements OnInit {
   }
 
   constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService, private aiToolRoutingService: AiToolRoutingService) {
-    this.type = this.route.snapshot.data['type'];
+    this.type = this.route.snapshot.data.type;
   }
 
   get aiToolType(): string {
@@ -165,20 +165,20 @@ export class CredentialComponent implements OnInit {
     combineLatest([this.route.queryParams, this.route.url])
       .pipe(distinctUntilChanged())
       .subscribe(([params]) => {
-        this.url = params['url'];
-        this.user = params['user'];
-        this.dashboardService.consolidatedParamModel.url = params['url'] ?? '';
-        this.dashboardService.consolidatedParamModel.user = params['user'] ?? '';
+        this.url = params.url;
+        this.user = params.user;
+        this.dashboardService.consolidatedParamModel.url = params.url ?? '';
+        this.dashboardService.consolidatedParamModel.user = params.user ?? '';
         if (this.firstTrigger) {
           this.firstTrigger = false;
-          if(params['q']){
-            this.searchQuery="m_search_all:"+params['q'];
+          if(params.q){
+            this.searchQuery="m_search_all:"+params.q;
           }
-          else if(params['url']){
-            this.searchQuery="m_search_all:"+params['url'];
+          else if(params.url){
+            this.searchQuery="m_search_all:"+params.url;
           }
-          else if(params['user']){
-            this.searchQuery="m_search_all:"+params['user'];
+          else if(params.user){
+            this.searchQuery="m_search_all:"+params.user;
           }
           this.fetchSearchResults(false);
           this.fetchRanked();
@@ -402,7 +402,7 @@ export class CredentialComponent implements OnInit {
   }
 
   getAggregatedDataWells(): number {
-    const stealer = new Set((this.stealerlogCallbackModel?.Result ?? []).map(item => item['m_index'])).size;
+    const stealer = new Set((this.stealerlogCallbackModel?.Result ?? []).map(item => item.m_index)).size;
     const ranked = new Set((this.rankedResult?.result ?? []).map(item => item.rank_index)).size;
     return stealer + ranked;
   }
@@ -482,8 +482,8 @@ export class CredentialComponent implements OnInit {
       email: this.toExportValue(item?.email),
       username: this.toExportValue(item?.username),
       domain: this.toExportValue(item?.domain),
-      source: this.toExportValue(item?.channel ?? item?.['filename'] ?? item?.file),
-      hash: this.toExportValue(item?.['m_hash']),
+      source: this.toExportValue(item?.channel ?? item?.filename ?? item?.file),
+      hash: this.toExportValue(item?.m_hash),
       title: '-',
       url: '-',
       rank: '-',
@@ -514,21 +514,21 @@ export class CredentialComponent implements OnInit {
 
   private buildStealerPdfBlocks(records: StealerLogResultItem[]): GraphReportTableRow {
     const recordBlocks = records.map((item, index): GraphReportRecordBlock => {
-      const identity = this.firstAvailableExportValue(item?.email, item?.username, item?.['user']);
+      const identity = this.firstAvailableExportValue(item?.email, item?.username, item?.user);
       const domain = this.firstAvailableExportValue(item?.domain, item?.source_domain, item?.ip);
       const values: Record<string, string> = {};
       this.addExportField(values, 'Email', item?.email, 180);
       this.addExportField(values, 'Username', item?.username, 180);
-      this.addExportField(values, 'Password', item?.['password'], 220);
+      this.addExportField(values, 'Password', item?.password, 220);
       this.addExportField(values, 'Domain', item?.domain, 240);
       this.addExportField(values, 'Source Domain', item?.source_domain, 240);
       this.addExportField(values, 'IP Address', item?.ip, 180);
-      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.channel, item?.['m_channel'], item?.['source_channel'], item?.['m_source_channel']), 240);
-      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.date, item?.timestamp, item?.['m_date'], item?.['m_update_date']), 160);
-      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.['file_type'], item?.['fileType'], item?.type)), 140);
-      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.['m_hash'], item?.['hash']), 220);
+      this.addExportField(values, 'Channel', this.firstAvailableExportValue(item?.channel, item?.m_channel, item?.source_channel, item?.m_source_channel), 240);
+      this.addExportField(values, 'Date / Year', this.firstAvailableExportValue(item?.date, item?.timestamp, item?.m_date, item?.m_update_date), 160);
+      this.addExportField(values, 'File Type', this.normalizeFileType(this.firstAvailableExportValue(item?.file_type, item?.fileType, item?.type)), 140);
+      this.addExportField(values, 'Hash', this.firstAvailableExportValue(item?.m_hash, item?.hash), 220);
       this.addExportField(values, 'Raw Trace', item?.raw, 900);
-      this.addExportField(values, 'File Name', this.firstAvailableExportValue(item?.['filename'], item?.file, item?.['m_file']), 220);
+      this.addExportField(values, 'File Name', this.firstAvailableExportValue(item?.filename, item?.file, item?.m_file), 220);
       this.appendAdditionalExportFields(values, item, new Set([
         '_id',
         'email',

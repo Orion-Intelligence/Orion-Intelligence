@@ -27,7 +27,7 @@ export class ExportBrandingService {
     }
     if (brandedData && typeof brandedData === 'object') {
       const record = brandedData as Record<string, unknown>;
-      const metadataKey = record['type'] === 'bundle' ? 'x_tenant_name' : 'tenant_name';
+      const metadataKey = record.type === 'bundle' ? 'x_tenant_name' : 'tenant_name';
       return { ...record, [metadataKey]: tenantName };
     }
     return { tenant_name: tenantName, value: brandedData };

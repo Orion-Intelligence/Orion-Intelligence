@@ -82,7 +82,7 @@ export class SatelliteIntelService {
     const response = this.asResponse(error);
     const nestedError = asUnknownRecord(response.error);
     return {
-      message: String(nestedError['detail'] ?? nestedError['message'] ?? response.message ?? response.statusText ?? 'Request failed'),
+      message: String(nestedError.detail ?? nestedError.message ?? response.message ?? response.statusText ?? 'Request failed'),
     };
   }
 

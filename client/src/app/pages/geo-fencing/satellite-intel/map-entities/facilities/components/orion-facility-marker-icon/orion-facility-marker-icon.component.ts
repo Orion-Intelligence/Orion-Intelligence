@@ -35,6 +35,6 @@ export class OrionFacilityMarkerIconComponent {
       military: 'bg-[#d71c1c]',
       other: 'bg-[#a3a3a3]',
     };
-    return colors[this.type] || colors['other'];
+    return colors[this.type] || colors.other;
   }
 }

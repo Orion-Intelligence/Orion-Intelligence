@@ -39,7 +39,7 @@ export class EntityDetailsComponent implements OnChanges {
   @Output() save = new EventEmitter<void>();
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['entity'] && this.entity) {
+    if (changes.entity && this.entity) {
       this.entity.identifiers = this.entity.identifiers || [];
       this.entity.socialProfiles = this.entity.socialProfiles || [];
       this.entity.tags = this.entity.tags || [];

@@ -30,7 +30,7 @@ export class SidebarUserFeederOwnerDialogComponent implements OnChanges {
   constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['script'] && this.script) {
+    if (changes.script && this.script) {
       this.selectedOwnerUserId = '';
       this.loadOwnerUsers();
     }

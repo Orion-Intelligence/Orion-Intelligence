@@ -106,7 +106,7 @@ export class AppService {
     this.loadWorldJson();
     void this.loadDemoTourConfig();
     this.activatedRoute.queryParams.subscribe(params => {
-      const pageParam = +params['page'];
+      const pageParam = +params.page;
       if (!isNaN(pageParam)) {
         this.updatePage(pageParam);
       }

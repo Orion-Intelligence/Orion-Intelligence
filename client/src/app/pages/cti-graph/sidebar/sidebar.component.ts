@@ -32,10 +32,10 @@ export class SidebarComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['collapsed']) {
-      this.isCollapsed = !!changes['collapsed'].currentValue;
+    if (changes.collapsed) {
+      this.isCollapsed = !!changes.collapsed.currentValue;
     }
-    if (changes['filters']) {
+    if (changes.filters) {
       this.localMaxEdge = this.clampNumber(this.filters()?.maxEdge, 20, 800, 25);
       this.localMaxDepth = this.clampNumber(this.filters()?.maxDepth, 1, 5, 1);
     }

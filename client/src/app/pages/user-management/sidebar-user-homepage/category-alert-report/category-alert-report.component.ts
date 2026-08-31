@@ -105,7 +105,7 @@ export class CategoryAlertReportComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.isAdminTenantAlertReport = this.route.snapshot.data['adminTenantAlerts'] === true;
+    this.isAdminTenantAlertReport = this.route.snapshot.data.adminTenantAlerts === true;
     this.route.url.pipe(map(segments => {
       if (segments && segments.length > 0) {
         return segments[segments.length - 1].path;
@@ -515,10 +515,10 @@ export class CategoryAlertReportComponent implements OnInit {
                 must: false
               };
               if (this.isDomain(value)) {
-                queryParams['domain'] = value;
+                queryParams.domain = value;
               }
               else {
-                queryParams['user'] = value;
+                queryParams.user = value;
               }
               void this.router.navigate([route], { queryParams });
               break;
@@ -777,7 +777,7 @@ export class CategoryAlertReportComponent implements OnInit {
 
   applyFilter(filters: Record<string, string | null>) {
     this.activeAlertFilters = { ...filters };
-    const range = filters['daterange'];
+    const range = filters.daterange;
     this.activeDateRange = range ?? null;
     this.applyCurrentFilters();
   }
@@ -800,13 +800,13 @@ export class CategoryAlertReportComponent implements OnInit {
       });
     }
 
-    const contentTypeFilter = this.normalizeFilterValue(this.activeAlertFilters['content_type']);
+    const contentTypeFilter = this.normalizeFilterValue(this.activeAlertFilters.content_type);
     if (contentTypeFilter && contentTypeFilter !== 'all') {
       result = result.filter(alert => (alert.contentTypes || []).some(value =>
         this.normalizeFilterValue(value).includes(contentTypeFilter)));
     }
 
-    const riskFilter = this.normalizeFilterValue(this.activeAlertFilters['risk']);
+    const riskFilter = this.normalizeFilterValue(this.activeAlertFilters.risk);
     if (riskFilter && riskFilter !== 'all') {
       result = result.filter(alert => this.normalizeFilterValue(alert.risk) === riskFilter);
     }
@@ -834,7 +834,7 @@ export class CategoryAlertReportComponent implements OnInit {
       filters: {
         ...this.filterModel.filters,
         content_type: {
-          ...this.filterModel.filters['content_type'],
+          ...this.filterModel.filters.content_type,
           options: this.toDropdownOptions(this.collectContentTypes()),
           suggestionEndpoint,
           suggestionParams

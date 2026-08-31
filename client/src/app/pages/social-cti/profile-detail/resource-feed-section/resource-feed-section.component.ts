@@ -141,7 +141,7 @@ export class SocialResourceFeedSectionComponent {
     const author = pickText(record, 'author_name', 'display_name', 'author') || handle || 'Unknown';
     const title = pickText(record, 'title', 'title_text');
     const body = pickText(record, 'caption', 'description', 'text', 'body', 'content_text', 'content');
-    const hate = record['hate_speech'] as { is_hate_speech?: boolean; label?: string } | null | undefined;
+    const hate = record.hate_speech as { is_hate_speech?: boolean; label?: string } | null | undefined;
     const images = [...new Set([...pickList(record, 'image_urls', 'media_urls'), pickText(record, 'image_url'), isMediaPost && !isVideo ? (pickText(record, 'media_url') || thumbnail) : (isPerson ? '' : thumbnail)].filter(Boolean))].slice(0, 4);
     const repo = pickText(record, 'repo');
     const flags = [

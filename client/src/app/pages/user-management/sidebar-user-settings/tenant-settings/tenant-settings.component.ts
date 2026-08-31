@@ -41,7 +41,7 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const userId = this.userSessionData?.user.preferences?.['userId'];
+    const userId = this.userSessionData?.user.preferences?.userId;
     this.userId = typeof userId === 'string' ? userId : '';
     this.mailForm = {
       accounts_mail_password: this.userSessionData.tenant.accountsMailPassword ?? '',

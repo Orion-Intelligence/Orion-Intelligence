@@ -79,8 +79,8 @@ export class ReportHeaderComponent {
 
   private getStixExportEndpoint(): string | null {
     const tree = this.route.parseUrl(this.route.url);
-    const id = tree.root.children['primary']?.segments.slice(-1)[0]?.path || '';
-    let ci = String(tree.queryParams['ci'] ?? '').trim().toLowerCase();
+    const id = tree.root.children.primary?.segments.slice(-1)[0]?.path || '';
+    let ci = String(tree.queryParams.ci ?? '').trim().toLowerCase();
     if (!id || !ci) {
       return null;
     }
@@ -100,16 +100,16 @@ export class ReportHeaderComponent {
       Object.assign(row, source);
     }
     else if (source !== null && source !== undefined) {
-      row['value'] = source;
+      row.value = source;
     }
     if (this.url()) {
-      row['url'] = this.url();
+      row.url = this.url();
     }
     if (this.lang() || this.lang_detected()) {
-      row['language'] = this.lang() || this.lang_detected();
+      row.language = this.lang() || this.lang_detected();
     }
     if (this.content()) {
-      row['content'] = this.content();
+      row.content = this.content();
     }
     return row;
   }

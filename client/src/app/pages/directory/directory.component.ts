@@ -69,7 +69,7 @@ export class DirectoryComponent implements OnInit {
         filters: newFilters
       };
       this.selectedFilters = initialSelectedFilters;
-      const currentPage = parseInt(params['page'], 10) || 1;
+      const currentPage = parseInt(params.page, 10) || 1;
       this.directoryService.setCurrentPage(currentPage);
       if (!this.isLoaded) {
         this.reloadDirectory();

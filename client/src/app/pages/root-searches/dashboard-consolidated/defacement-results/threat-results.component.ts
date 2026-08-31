@@ -51,14 +51,14 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     const results_defacement = this.results_defacement();
-    if (changes['results_defacement'] && results_defacement?.Result?.length) {
+    if (changes.results_defacement && results_defacement?.Result?.length) {
       this.updateThreatTypeCounts(results_defacement.Result);
       this.showLimitDefacement = 10;
     }
-    if (changes['results_stealerlog'] && this.results_stealerlog()?.Result?.length) {
+    if (changes.results_stealerlog && this.results_stealerlog()?.Result?.length) {
       this.showLimitStealer = 10;
     }
-    if (changes['results_defacement'] || changes['results_stealerlog'] || changes['isExpandable']) {
+    if (changes.results_defacement || changes.results_stealerlog || changes.isExpandable) {
       this.copiedKey = null;
       if (this.copiedTimer) {
         clearTimeout(this.copiedTimer);
@@ -151,47 +151,47 @@ export class ThreatResultsComponent implements OnInit, OnChanges {
   }
 
   webServerValue(item: unknown): string {
-    return this.rowHelper.arrayOrDash(asUnknownRecord(item)['m_web_server']);
+    return this.rowHelper.arrayOrDash(asUnknownRecord(item).m_web_server);
   }
 
   attackerValue(item: unknown): string {
-    return this.rowHelper.arrayOrDash(asUnknownRecord(item)['m_attacker']);
+    return this.rowHelper.arrayOrDash(asUnknownRecord(item).m_attacker);
   }
 
   teamValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['m_team']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).m_team);
   }
 
   ipValue(item: unknown): string {
-    return this.rowHelper.arrayOrDash(asUnknownRecord(item)['m_ip']);
+    return this.rowHelper.arrayOrDash(asUnknownRecord(item).m_ip);
   }
 
   urlValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['m_url']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).m_url);
   }
 
   dateValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['m_date']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).m_date);
   }
 
   usernameValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['username']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).username);
   }
 
   passwordValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['password']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).password);
   }
 
   domainValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['domain']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).domain);
   }
 
   hashValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['m_hash']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).m_hash);
   }
 
   stealerUrlValue(item: unknown): string {
-    return this.rowHelper.valueOrDash(asUnknownRecord(item)['url']);
+    return this.rowHelper.valueOrDash(asUnknownRecord(item).url);
   }
 
   truncate(v: unknown, n = 30): string {

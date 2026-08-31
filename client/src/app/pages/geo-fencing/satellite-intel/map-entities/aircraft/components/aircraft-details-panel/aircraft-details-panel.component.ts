@@ -51,8 +51,8 @@ export class AircraftDetailsPanelComponent {
   }
 
   get coordinates(): string {
-    const latitude = this.aircraft?.['latitude'];
-    const longitude = this.aircraft?.['longitude'];
+    const latitude = this.aircraft?.latitude;
+    const longitude = this.aircraft?.longitude;
     if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
       return `${Number(latitude).toFixed(3)}, ${Number(longitude).toFixed(3)}`;
     }

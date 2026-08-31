@@ -31,15 +31,15 @@ export class AlertExportService {
 
     if (safeAlerts.length === 1) {
       const first = safeAlerts[0];
-      baseSummary['type'] = this.getText(first.type);
-      baseSummary['title'] = this.getText(first.title);
-      baseSummary['ioc_type'] = this.getText(first.ioc_type);
-      baseSummary['ioc_value'] = this.getText(first.ioc_value);
-      baseSummary['source'] = this.getText(this.exportBranding.replaceSystemBrand(first.source));
-      baseSummary['url'] = this.getText(first.url);
-      baseSummary['result_date'] = this.getDateText(this.extractAlertResultDate(first.all_ioc ?? []));
-      baseSummary['first_seen'] = this.getDateText(first.first_seen);
-      baseSummary['last_seen'] = this.getDateText(first.last_seen);
+      baseSummary.type = this.getText(first.type);
+      baseSummary.title = this.getText(first.title);
+      baseSummary.ioc_type = this.getText(first.ioc_type);
+      baseSummary.ioc_value = this.getText(first.ioc_value);
+      baseSummary.source = this.getText(this.exportBranding.replaceSystemBrand(first.source));
+      baseSummary.url = this.getText(first.url);
+      baseSummary.result_date = this.getDateText(this.extractAlertResultDate(first.all_ioc ?? []));
+      baseSummary.first_seen = this.getDateText(first.first_seen);
+      baseSummary.last_seen = this.getDateText(first.last_seen);
     }
 
     return {

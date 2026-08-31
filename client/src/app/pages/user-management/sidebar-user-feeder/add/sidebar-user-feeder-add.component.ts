@@ -47,7 +47,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
   constructor(private feederService: FeederService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['selectedRuleKey'] || changes['rules']) {
+    if (changes.selectedRuleKey || changes.rules) {
       this.syncUploadMode();
       this.loadSharedRuleScripts();
       this.loadCurrentRuleValues();

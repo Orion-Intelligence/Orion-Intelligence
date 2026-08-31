@@ -99,7 +99,7 @@ export class SidebarUserEventManagementComponent extends ValuePresentationBase i
   }
 
   get activeDateRange(): string {
-    return this.dashboardService.selectedFilters()['daterange'] ?? '';
+    return this.dashboardService.selectedFilters().daterange ?? '';
   }
 
   canAccessEventManagement(): boolean {

@@ -874,7 +874,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       const now = new Date().toISOString();
       const completedDetails = this.ipRows.flatMap(row => row.detail ? [row.detail] : []);
       const scanStatuses = Array.from(new Set(completedDetails
-        .map(detail => this.normalizeReportValue(detail['scan_status'] ?? detail.status))
+        .map(detail => this.normalizeReportValue(detail.scan_status ?? detail.status))
         .filter(Boolean)));
       const nodes = [
         { id: `domain-${dnsResult.domain}`, label: dnsResult.domain, type: 'domain' },
@@ -1359,8 +1359,8 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return this.scanHelper.fetchShodanIpDetail$(row.ip, (response) => {
         row.progress = typeof response?.progress === 'number' ? Math.max(5, Math.min(99, Math.round(response.progress))) : row.progress;
         const responseRecord = asUnknownRecord(response);
-        const resultRecord = asUnknownRecord(responseRecord['result']);
-        const nextStep = responseRecord['step'] ?? resultRecord['step'] ?? responseRecord['status'] ?? resultRecord['status'];
+        const resultRecord = asUnknownRecord(responseRecord.result);
+        const nextStep = responseRecord.step ?? resultRecord.step ?? responseRecord.status ?? resultRecord.status;
         row.step = typeof nextStep === 'string' ? nextStep : row.step;
       }).pipe(tap((detail) => {
         if (detail?.ip) {
@@ -1397,9 +1397,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
       .map(([key, value]) => {
         if (key.toLowerCase() === 'unknown' && value && typeof value === 'object' && !Array.isArray(value)) {
           const nested = value as Record<string, unknown>;
-          const nestedKey = this.normalizeReportValue(nested['key']).replace(/_/g, '-');
+          const nestedKey = this.normalizeReportValue(nested.key).replace(/_/g, '-');
           if (nestedKey) {
-            return [nestedKey, this.normalizeReportValue(nested['value'])] as [string, string];
+            return [nestedKey, this.normalizeReportValue(nested.value)] as [string, string];
           }
         }
         return [key, this.normalizeReportValue(value)] as [string, string];
@@ -1417,11 +1417,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
     const titlePrefix = prefix ? `${prefix} ` : '';
     const cameraPorts = this.countCameraPorts(detail);
     const iotPorts = this.countIotPorts(detail);
-    const scanPolicy = detail['scan_policy'] as Record<string, unknown> | undefined;
-    const portScan = scanPolicy?.['port_scan'] as Record<string, unknown> | undefined;
-    const outcomes = portScan?.['outcomes'] as Record<string, unknown> | undefined;
-    const serviceDetection = (portScan?.['service_detection'] ?? scanPolicy?.['service_detection'] ?? detail['service_detection']) as Record<string, unknown> | undefined;
-    const httpProbe = detail['http_probe'] as Record<string, unknown> | undefined;
+    const scanPolicy = detail.scan_policy as Record<string, unknown> | undefined;
+    const portScan = scanPolicy?.port_scan as Record<string, unknown> | undefined;
+    const outcomes = portScan?.outcomes as Record<string, unknown> | undefined;
+    const serviceDetection = (portScan?.service_detection ?? scanPolicy?.service_detection ?? detail.service_detection) as Record<string, unknown> | undefined;
+    const httpProbe = detail.http_probe as Record<string, unknown> | undefined;
 
     return [
       {
@@ -1447,14 +1447,14 @@ export class NetworkIntel implements OnInit, OnDestroy {
       {
         title: `${titlePrefix}Scan Quality`.trim(),
         values: {
-          Status: this.normalizeReportValue(detail['scan_status'] ?? detail.status),
-          'Coverage Complete': this.formatReportBoolean(portScan?.['coverage_complete'] ?? scanPolicy?.['coverage_complete']),
-          Conclusive: this.formatReportBoolean(portScan?.['conclusive'] ?? scanPolicy?.['conclusive']),
-          'Ports Attempted': this.normalizeReportValue(portScan?.['attempted'] ?? scanPolicy?.['ports_attempted']),
-          'Ports Completed': this.normalizeReportValue(portScan?.['completed'] ?? scanPolicy?.['ports_completed']),
-          'Unknown Outcomes': this.normalizeReportValue(outcomes?.['unknown']),
-          'Service Detection': this.normalizeReportValue(serviceDetection?.['completed'] === undefined ? serviceDetection?.['status'] : (serviceDetection?.['completed'] ? 'Complete' : 'Partial')),
-          'HTTP Probe': this.normalizeReportValue(httpProbe?.['status'])
+          Status: this.normalizeReportValue(detail.scan_status ?? detail.status),
+          'Coverage Complete': this.formatReportBoolean(portScan?.coverage_complete ?? scanPolicy?.coverage_complete),
+          Conclusive: this.formatReportBoolean(portScan?.conclusive ?? scanPolicy?.conclusive),
+          'Ports Attempted': this.normalizeReportValue(portScan?.attempted ?? scanPolicy?.ports_attempted),
+          'Ports Completed': this.normalizeReportValue(portScan?.completed ?? scanPolicy?.ports_completed),
+          'Unknown Outcomes': this.normalizeReportValue(outcomes?.unknown),
+          'Service Detection': this.normalizeReportValue(serviceDetection?.completed === undefined ? serviceDetection?.status : (serviceDetection?.completed ? 'Complete' : 'Partial')),
+          'HTTP Probe': this.normalizeReportValue(httpProbe?.status)
         }
       },
       {

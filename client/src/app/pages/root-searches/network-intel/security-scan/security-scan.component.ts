@@ -61,7 +61,7 @@ export class SecurityScanComponent implements OnInit {
   constructor(private router: Router, private route: ActivatedRoute, private scanner: ScannerService, private graphReportExport: ReportExportService, private scanHelperMethodsService: NetworkIntelScanService) { }
 
   ngOnInit(): void {
-    this.scanType = this.route.snapshot.data['type'];
+    this.scanType = this.route.snapshot.data.type;
     if (!this.scanType) {
       this.scanType = 'basic';
     }

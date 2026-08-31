@@ -1030,6 +1030,7 @@ module.exports = [
       ],
       'no-unused-vars': 'off',
       '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/dot-notation': 'error',
       '@typescript-eslint/prefer-nullish-coalescing': [
         'error',
         {
@@ -1099,6 +1100,22 @@ module.exports = [
           message: 'Do not inject HTML directly from TS.'
         }
       ],
+    },
+  },
+  {
+    files: ['src/main.ts'],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: ['./tsconfig.json', './tsconfig.app.json'],
+        sourceType: 'module',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tsPlugin,
+    },
+    rules: {
+      '@typescript-eslint/dot-notation': 'error',
     },
   },
   {

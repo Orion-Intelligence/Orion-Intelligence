@@ -36,10 +36,10 @@ export class OrionFacilityPopupComponent {
 
     const properties = feature.properties && typeof feature.properties === 'object' ? feature.properties : {};
     const rows = [
-      this.createRow('Country', properties['country']),
-      this.createRow('Fuel', properties['fuel'] ?? properties['primary_fuel']),
-      this.createRow('Capacity', this.formatCapacityValue(properties['capacity_mw'] ?? feature.capacityMw)),
-      this.createRow('Source', properties['source'] ?? feature.source),
+      this.createRow('Country', properties.country),
+      this.createRow('Fuel', properties.fuel ?? properties.primary_fuel),
+      this.createRow('Capacity', this.formatCapacityValue(properties.capacity_mw ?? feature.capacityMw)),
+      this.createRow('Source', properties.source ?? feature.source),
     ].filter((row): row is { label: string; value: string; stacked: boolean } => row !== null);
 
     Object.entries(properties).forEach(([key, rawValue]) => {

@@ -71,7 +71,7 @@ export class IocSearchComponent implements OnInit {
     this.advancedFilters = [{ id: this.generateId(), tag: this.defaultAdvancedTag(), value: '', operator: '&&' }];
     if (this.useRouteQuery()) {
       this.route.queryParams.subscribe(params => {
-        const q = params['q'];
+        const q = params.q;
         if (q) {
           this.basicQuery = this.stripUrlPrefixes(q);
         }
@@ -96,7 +96,7 @@ export class IocSearchComponent implements OnInit {
 
   onAdvancedBuilderBackdrop(event: MouseEvent): void {
     const eventTargetElement = event.target;
-    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset['role'] === 'backdrop') {
+    if (eventTargetElement instanceof HTMLElement && eventTargetElement.dataset.role === 'backdrop') {
       this.closeAdvancedBuilder();
     }
   }
