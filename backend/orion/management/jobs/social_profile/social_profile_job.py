@@ -185,7 +185,7 @@ class social_profile_job:
             log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
 
     async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
-        
+
         log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
         
         try:
