@@ -103,7 +103,8 @@ class social_profile_job:
         import uuid
         for purpose in profile.purposes:
             task_id = str(uuid.uuid4())
-            cb_url = f"http://trusted-web-main:8070/api/social/automation/callback?task_id={task_id}"
+            base_url = os.getenv("ORION_WEB_INTERNAL_URL")
+            cb_url = f"{base_url}/api/social/automation/callback?task_id={task_id}"
             
             if purpose == SocialProfilePurpose.POSTING:
                 await self.run_posting(profile, persona, session_state, cb_url)
