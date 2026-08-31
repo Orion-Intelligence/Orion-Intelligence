@@ -6,6 +6,7 @@ import shutil
 import stat
 import subprocess
 import sys
+import traceback
 from threading import Lock
 
 from termcolor import colored
@@ -171,3 +172,33 @@ class log:
             print(colored(console_log, 'red'))
         except Exception:
             pass
+
+
+class log_bridge(logging.Handler):
+    LEVEL = logging.WARNING
+
+    def emit(self, record):
+        try:
+            message = f"{record.name}: {record.getMessage()}"
+            if record.exc_info:
+                message += "\n" + "".join(traceback.format_exception(*record.exc_info)).strip()
+            if record.levelno >= logging.CRITICAL:
+                log.g().c(message)
+            elif record.levelno >= logging.ERROR:
+                log.g().e(message)
+            else:
+                log.g().w(message)
+        except Exception:
+            pass
+
+    @staticmethod
+    def install():
+        log.g()
+        root = logging.getLogger()
+        if any(isinstance(handler, log_bridge) for handler in root.handlers):
+            return
+        handler = log_bridge()
+        handler.setLevel(log_bridge.LEVEL)
+        root.addHandler(handler)
+        if root.level == logging.NOTSET or root.level > log_bridge.LEVEL:
+            root.setLevel(log_bridge.LEVEL)

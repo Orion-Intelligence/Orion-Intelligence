@@ -315,6 +315,28 @@ inside `logs/` but cannot create it — so a fresh clone, a wiped volume or a ne
 in the same wedged state. The chmod is deliberately not `-R`: recursing would rewrite the 0644 perms
 `__write_to_file` sets on every log file and walk the whole history on each deploy.
 
+### Root logger bridge for stdlib logging
+
+`docker logs trusted-web-main` carried 101 lines against 7 in `workspace/logs` for the same window,
+including a real `[ERROR] Control server error: [Errno 13] Permission denied` that the page never showed.
+Everything reaching stdlib `logging` — third-party libraries and any `logging.getLogger(__name__)` — was
+invisible. `log_bridge` is a `logging.Handler` on the root logger at level WARNING that forwards
+WARNING/ERROR/CRITICAL to `log.g().w()`/`.e()`/`.c()`, formatting `record.exc_info` onto the message so
+the reader's multi-line merge keeps the traceback. INFO and DEBUG are dropped at the handler, which
+matters because pymongo and elastic_transport are extremely chatty below WARNING.
+
+`install()` calls `log.g()` first. That looks redundant but is the loop guard: `__configure_logs` is what
+sets `propagate = False` on `genesis_logs`, and until the singleton exists that logger propagates to root,
+so a record written by the bridge could come straight back into it. Forcing construction before the
+handler is attached makes the ordering deterministic rather than dependent on who logs first.
+
+Two things it does not reach. `uvicorn` sets `propagate: False`, so `uvicorn.error` records stop there and
+never touch root — that path stays covered by the explicit `log.g()` calls in `configs/exception_handlers.py`.
+And the gunicorn master is a separate process that never imports the app without `--preload`, so its own
+errors are out of reach of anything in-process; the same goes for nginx, mongo, elastic and arango, which
+need a log shipper, not a handler. `caller` on bridged rows reads `log_bridge` since `get_caller_info`
+walks to the handler frame; the originating logger name is the message prefix instead.
+
 ### Left alone deliberately
 
 `total` is still `page * limit + 1` (an honest count means scanning every file on every request), deep
