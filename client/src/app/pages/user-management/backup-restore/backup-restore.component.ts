@@ -49,17 +49,31 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     }
   }
 
+  private schedulePoll(delay: number): void {
+    if (this.jobTimer !== null) {
+      clearTimeout(this.jobTimer);
+    }
+    this.jobTimer = setTimeout(() => {
+      this.jobTimer = null;
+      this.pollJob();
+    }, delay);
+  }
+
+  private applyJob(job: BackupJob): void {
+    this.job = job;
+    this.isCreating = job.status === 'running' && job.operation === 'backup';
+    this.isRestoring = job.status === 'running' && job.operation === 'restore';
+    if (job.status === 'running') {
+      this.jobWasRunning = true;
+    }
+  }
+
   private pollJob(): void {
     this.apiService.get<BackupJob>('admin/backups/status').subscribe({
       next: (job) => {
-        this.job = job;
-        this.isCreating = job.status === 'running' && job.operation === 'backup';
-        this.isRestoring = job.status === 'running' && job.operation === 'restore';
+        this.applyJob(job);
         if (job.status === 'running') {
-          this.jobWasRunning = true;
-          this.jobTimer = setTimeout(() => {
-            this.pollJob();
-          }, 2000);
+          this.schedulePoll(2000);
           return;
         }
         if (this.jobWasRunning) {
@@ -70,9 +84,7 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
         }
       },
       error: () => {
-        this.jobTimer = setTimeout(() => {
-          this.pollJob();
-        }, 5000);
+        this.schedulePoll(5000);
       }
     });
   }
@@ -103,8 +115,9 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     }
     this.isCreating = true;
     this.apiService.post<BackupJob>('admin/backups/instant', {}).subscribe({
-      next: () => {
-        this.pollJob();
+      next: (job) => {
+        this.applyJob(job);
+        this.schedulePoll(1000);
       },
       error: () => {
         this.isCreating = false;
@@ -156,8 +169,9 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     const backup = this.backupToRestore;
     this.isRestoring = true;
     this.apiService.post<BackupJob>(`admin/backups/${backup.id}/restore`, {}).subscribe({
-      next: () => {
-        this.pollJob();
+      next: (job) => {
+        this.applyJob(job);
+        this.schedulePoll(1000);
       },
       error: () => {
         this.isRestoring = false;

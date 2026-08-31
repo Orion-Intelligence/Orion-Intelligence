@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import asyncio
+from types import SimpleNamespace
 from typing import Any, Dict
+
+from pymongo.errors import DuplicateKeyError
 
 from orion.services.mongo_manager.shared_model.db_alert_connector_model import AlertConnectorProvider
 from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
@@ -261,3 +265,72 @@ class FakeBloom:
 
     def add(self, item):
         self.values.add(item)
+
+
+class FakeBackupJobStore:
+    def __init__(self, can_begin: bool = True):
+        self.can_begin = can_begin
+        self.begun = []
+        self.progressed = []
+        self.finished = []
+        self.heartbeats = 0
+
+    async def read(self):
+        return {"operation": "", "status": "idle", "progress": 0, "message": "", "filename": ""}
+
+    async def begin(self, operation: str, message: str) -> bool:
+        self.begun.append((operation, message))
+        return self.can_begin
+
+    async def progress(self, progress: int, message: str) -> None:
+        self.progressed.append((progress, message))
+
+    async def heartbeat(self) -> None:
+        self.heartbeats += 1
+
+    async def finish(self, status, message: str, filename: str = "") -> None:
+        self.finished.append((status, message, filename))
+
+    async def keep_alive(self) -> None:
+        while True:
+            await asyncio.sleep(3600)
+
+
+class FakeBackupJobCollection:
+    def __init__(self, document=None):
+        self.document = dict(document) if document else None
+
+    def _matches(self, query) -> bool:
+        if self.document is None:
+            return False
+        for key, condition in query.items():
+            value = self.document.get(key)
+            if isinstance(condition, dict):
+                if "$ne" in condition and value == condition["$ne"]:
+                    return False
+                if "$lte" in condition and (value is None or value > condition["$lte"]):
+                    return False
+            elif value != condition:
+                return False
+        return True
+
+    async def find_one(self, query):
+        return dict(self.document) if self._matches(query) else None
+
+    async def update_one(self, query, update):
+        if not self._matches(query):
+            return SimpleNamespace(modified_count=0)
+        self.document.update(update.get("$set", {}))
+        return SimpleNamespace(modified_count=1)
+
+    async def find_one_and_update(self, query, update, upsert=False, return_document=None):
+        if self._matches(query):
+            self.document.update(update.get("$set", {}))
+            return dict(self.document)
+        if not upsert:
+            return None
+        if self.document is not None:
+            raise DuplicateKeyError("duplicate job_key")
+        self.document = dict(update.get("$setOnInsert", {}))
+        self.document.update(update.get("$set", {}))
+        return dict(self.document)

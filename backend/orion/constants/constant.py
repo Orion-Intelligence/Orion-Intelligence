@@ -53,6 +53,7 @@ class CONSTANTS:
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
     }
     MAX_BACKUPS=2
+    BACKUP_BATCH_SIZE=1000
 
 allowed_key_titles: dict[str, str] = {}
 mail_template = None

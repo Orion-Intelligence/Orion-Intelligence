@@ -342,3 +342,83 @@ walks to the handler frame; the originating logger name is the message prefix in
 `total` is still `page * limit + 1` (an honest count means scanning every file on every request), deep
 paging is still an O(page) rescan, and nginx / Mongo / Elastic / the Angular client / the sibling Orion
 services still do not feed this page at all. Those need a real log pipeline, not a patch.
+
+## Backup job state, progress and memory (2026-08-31)
+
+Reported symptom: in production the instant-backup progress bar never appears, sometimes appears after a
+reload, and the backup does not finish; the server itself was seen choking. Three independent causes.
+
+### The progress bar: per-process job state behind four workers
+
+`docker-compose-production.yml` runs `gunicorn -w 4 --threads 4`, and `cronjobs.py` runs as a fifth,
+separate process. `BackupManager._job` was a plain dict on a per-process singleton. `POST /api/admin/backups/instant`
+starts the task in whichever worker handled it; `GET /api/admin/backups/status` round-robins, so three polls
+in four answer from a worker whose singleton has never seen the job and returns `status: "idle"`.
+
+The client made that worse rather than merely noisy: `pollJob()` only re-armed its timer while
+`status === 'running'`, so the first poll that landed on the wrong worker ended polling silently — no bar,
+no toast, nothing. A reload had a one-in-four chance of hitting the right worker, which is exactly the
+"sometimes shows on reload" report.
+
+Job state now lives in Mongo in `backup_jobs`, one document keyed `job_key: "backup_job"` with a unique
+index, wrapped by `BackupJobStore`. `begin()` is a `find_one_and_update` filtered on `status != running`
+with `upsert=True`; when a job is already running the filter misses, the upsert collides with the unique
+index and the `DuplicateKeyError` *is* the answer — the lock is held. That makes the guard atomic across
+all five processes, where the old `if self._job["status"] == "running"` guarded only its own.
+
+Gunicorn was left at `-w 4` on purpose. Dropping to `-w 1` would also have made the singleton correct, by
+serializing every API request in the product behind one event loop.
+
+### Jobs that die without saying so
+
+Two ways a run vanished. `asyncio.create_task(...)` was called with its return value discarded, and the
+loop keeps only a weak reference, so the task could be collected mid-run; tasks are now held in
+`BackupManager._tasks` until they complete. And if the worker itself is killed (OOM, `--timeout 900`), the
+in-memory dict died with it, so the UI saw `idle` and no error was ever written. The job document now
+carries a 30s heartbeat, and any reader that finds a `running` job whose `updated_at` is older than 120s
+marks it failed with `BackupJobStore.STALE_MESSAGE`. A killed worker now surfaces as a failed backup within
+two minutes instead of a bar that never moves or a job that is "running" forever.
+
+### The choke: whole collections in RAM, twice
+
+`_backup_mongo` did `find({}).to_list(length=None)` per collection and then `json_util.dumps(documents, indent=2)`,
+holding the decoded documents *and* the entire serialized string in memory at once; `_backup_arango` did the
+same via a list comprehension over the cursor plus `json.dumps`. The `web` service has no `mem_limit`, so on a
+real dataset this is bounded only by host RAM. Both now stream: batches of `CONSTANTS.BACKUP_BATCH_SIZE`
+documents, serialized and written inside `asyncio.to_thread`, with the Arango AQL cursor opened
+`stream=True`. Restore is streamed and batched the same way, and Elasticsearch restore no longer builds
+every bulk action for an index before sending the first one.
+
+Streaming means the dumps are newline-delimited `.ndjson` rather than one JSON array, so restore accepts
+both: `_collect_sources` maps stem to file and lets `.ndjson` win over a legacy `.json` of the same name,
+and `_read_documents` / `_iter_documents` branch on the suffix. Backups taken before this change still
+restore, including through `restore_backup.py`.
+
+Streaming is also what keeps `--timeout 900` viable. The dump now yields to the event loop on every batch,
+so the uvicorn worker keeps answering gunicorn's heartbeat while a large backup runs.
+
+### Progress that reflects work
+
+`step()` fired six times for the whole backup, and the Mongo export — by far the long pole — sat at the same
+value from start to finish. `_backup_mongo` now takes a `report` callback and advances a fraction per
+collection inside its slice of the window. The message stays one of the fixed strings because the UI runs
+it through `| translate`; only the number moves.
+
+### Log folder path
+
+`_perform_backup` copied `BASE_DIR / "orion" / "logs"`, which has not been the log location since logs moved
+to `workspace/logs` — and `/app/orion` is mounted read-only in production anyway. Every backup has been
+storing an empty `logs/` folder. Fixed to `BASE_DIR / "workspace" / "logs"`.
+
+On restore that folder is now merged with `_copy_folder` instead of being wiped and replaced by
+`_restore_folder`. Previously the wipe was harmless only because the source never existed; with a real
+source it would `rmtree` the live log root out from under the running logger, which is the failure mode
+"Stop log flush from deleting the log root" already dealt with once.
+
+### Scheduled backups
+
+`cronjob_manager.backup_loop` called `create_backup()` directly, bypassing the job guard entirely: it
+published no status the UI could see, and nothing stopped it from running concurrently with a UI-triggered
+backup — two full dumps at once, with `MAX_BACKUPS` pruning `shutil.rmtree`-ing a folder the other was still
+writing. It now calls `run_backup_now()`, which takes the same cross-process lock and reports through the
+same document.

@@ -117,7 +117,7 @@ class cronjob_manager:
             try:
                 enabled = await config_controller.getInstance()._is_backup_schedule()
                 if enabled == "1":
-                    await BackupManager.get_instance().create_backup(BackupType.AUTO)
+                    await BackupManager.get_instance().run_backup_now(BackupType.AUTO)
             except Exception as e:
                 log.g().e(f"Backup loop failed: {e}")
 

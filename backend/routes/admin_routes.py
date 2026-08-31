@@ -112,7 +112,7 @@ async def create_instant_backup():
     dependencies=[Depends(role_required([user_role.ADMIN]))],
 )
 async def backup_job_status():
-    return BackupManager.get_instance().job_status()
+    return await BackupManager.get_instance().job_status()
 
 
 @admin_routes.delete(
