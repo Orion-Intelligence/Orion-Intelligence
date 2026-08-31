@@ -18,6 +18,7 @@ from orion.middleware.middlewares.content_security_policy_middleware import cont
 from orion.middleware.middlewares.security_headers_middleware import security_headers_middleware
 from orion.middleware.middlewares.service_ready_middleware import service_ready_middleware
 from orion.middleware.middlewares.tenant_resolution_middleware import tenant_resolution_middleware
+from orion.middleware.middlewares.maintenance_middleware import maintenance_middleware
 from routes.auth_routes import COOKIE_CIPHER
 
 
@@ -85,6 +86,7 @@ def test_setup_middlewares_registers_expected_stack(monkeypatch):
         content_block_middleware,
         cache_admin,
         tenant_resolution_middleware,
+        maintenance_middleware,
     ]
     assert app.calls[4][2]["allow_origins"] == "example.com"
     assert app.calls[5][2]["allowed_hosts"] == ["example.com", "*.example.com"]

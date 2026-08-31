@@ -422,3 +422,162 @@ published no status the UI could see, and nothing stopped it from running concur
 backup — two full dumps at once, with `MAX_BACKUPS` pruning `shutil.rmtree`-ing a folder the other was still
 writing. It now calls `run_backup_now()`, which takes the same cross-process lock and reports through the
 same document.
+
+## Backup/restore hardening and real maintenance mode (2026-08-31)
+
+Follow-up to the entry above. A seven-lens audit with adversarial verification of every finding
+produced 22 confirmed defects (6 were refuted and dropped). What follows is what was wrong and
+what changed.
+
+### Maintenance mode was advisory, not enforced
+
+The `.maintenance` flag was read by exactly one thing: nginx, via `if (-f /app/static/.maintenance)`.
+No Python anywhere looked at it. That left four ways to keep writing to the databases during a
+restore, all confirmed:
+
+- `location = /api/extension/socket` carried no guard in any of the five server blocks across the
+  three configs. Because `location =` outranks the guarded prefixes, an extension could complete a
+  fresh WebSocket handshake mid-restore.
+- The `.onion` vhost's `location /` (nginx-prod.conf) had no guard at all, so Tor users kept full
+  read/write access while the databases were being wiped and repopulated.
+- `cronjobs.py` is a separate process. `purge_loop`, `iocs_alert_loop` and `backup_loop` never
+  traverse nginx, so a proxy-level flag is invisible to them. The confirmed contamination path is
+  the alert one: `upsert_alerts_bulk` and `set_scan_running` write with no owner or generation
+  filter, so an alert scan finishing after `_restore_mongo` has repopulated the alert collections
+  writes post-backup alerts into the just-restored dataset.
+- nginx evaluates the guard only on *new* requests, so any asyncio task already in flight —
+  and any long-lived socket — keeps running for the whole restore.
+
+Enforcement is now in three layers. `maintenance_state` is a singleton class holding the single
+predicate — `get_instance().is_active()`, a 1s-cached stat so it is cheap enough to call per
+request, plus `enable()`/`disable()`/`invalidate()` so one object owns the flag's lifecycle. Every
+tunable it and the backup manager use (`MAINTENANCE_FLAG`, `MAINTENANCE_CACHE_TTL_SECONDS`,
+`BACKUP_MANIFEST_NAME`, `RESTORE_ROLLBACK_PREFIX`, `BACKUP_EXCLUDED_ELASTIC_INDICES`, the job-store
+heartbeat and staleness windows, …) lives in `CONSTANTS` rather than as module-level globals, and
+`backup_manager` now sources `BASE_DIR` from `CONSTANTS` too instead of mixing it with the
+`interface` import. `maintenance_middleware` is
+an ASGI middleware registered last in `setup_middlewares`, which makes it outermost, so it runs
+before tenant resolution and every route. It handles `websocket` scopes explicitly — receiving the
+`websocket.connect` and answering `websocket.close` 1013 — because the existing
+`service_ready_middleware` returns early on any non-`http` scope, which is precisely the hole the
+extension socket walked through. The nginx guard was added to all five socket blocks and to the
+onion `location /`. The three cron loops check the predicate at the top of every iteration.
+
+Exempt paths are deliberately narrow: `/api/admin/backups/status` (so progress stays visible),
+`/robots.txt`, and the maintenance page's own assets. Everything else 503s, including `/api/public`
+— which matters, see below.
+
+`restore_backup` also quiesces before it starts: it closes local extension sockets and cancels
+local social scans, then drains. That only reaches the restoring worker's own tasks; the middleware
+in the other three workers is what stops new work arriving there.
+
+### The maintenance page was never shown in production
+
+`http.interceptor.ts:68` read `if (isDevMode() && ... status === 503)`. `isDevMode()` is false in
+a production build, so Angular's optimizer removed the whole branch: the redirect to
+`/static/maintenance.html` has never run in production. Users got a silently broken app instead of
+a maintenance page. The gate is gone, and the status-poll URL is excluded from the redirect so the
+admin driving the restore keeps their progress bar instead of being bounced with everyone else.
+
+`maintenance.html` now polls `/api/admin/backups/status` and renders the live operation, phase
+message and percentage. Its old reconnect probe hit `/dashboard/home`; the new one hits
+`/api/public`, which works *because* the new middleware 503s it — nginx leaves `/api/public`
+unguarded, so before the middleware existed there was no origin-independent way to ask "is the app
+actually back?" without flapping the user in and out of the app every 5 seconds.
+
+One more client fix: `token-refresh.service.ts` put `catchError` downstream of `switchMap`, so the
+first 503 completed the outer observable and tore the refresh timer down permanently. Every user
+who sat through a restore was silently logged out ~15 minutes later. The catch moved inside the
+inner observable, so a failed tick is skipped and the timer survives.
+
+### Backups that destroyed the thing they were protecting
+
+`create_backup` pruned to `MAX_BACKUPS - 1` *before* writing the new backup. With `MAX_BACKUPS=2`,
+a backup that then failed left one good backup where there had been two — and a second failure left
+none. Pruning now happens after the new backup is written and its catalog row saved.
+
+Every `shutil.rmtree` ran on the event loop. A large tree blocks long enough to starve the 30s job
+heartbeat, and past 120s the staleness sweep marks a *live* job failed and releases the lock —
+letting a second backup start on top of the running one, writing into the same directory. All
+removals moved to `asyncio.to_thread`.
+
+`_progress_window` was per-run state on a process-lifetime singleton: `restore_backup` set it to
+`(5, 35)` and nothing ever reset it, so every later backup in that worker capped at 35%. It is now
+a parameter threaded through `_perform_backup`.
+
+### Restores that silently changed the data
+
+Three fidelity gaps, all confirmed:
+
+- **Elasticsearch lost every mapping and setting.** The dump stored only `_source` hits from a
+  scroll; restore called `indices.create(index=name)` with no body, producing default dynamic
+  mappings. Custom analyzers, normalizers, the 384-dim `dense_vector` embedding field,
+  `max_result_window`, shard counts — all gone, and nothing at startup repairs an existing index.
+  `_backup_elastic` now writes a `<index>.meta.json` sidecar with mappings and settings, and
+  `_restore_elastic` passes them to `indices.create`. Settings that Elasticsearch refuses on create
+  (`uuid`, `creation_date`, `provided_name`, `version`, `resize`, `routing`) are stripped.
+- **ArangoDB edge collections came back as document collections.** `db.create_collection(name)`
+  with no `edge=True` makes a document collection, so restoring `cti_edges` into an Arango that had
+  lost it would break the CTI graph. The collection type is now recorded in a `.meta.json` sidecar
+  and honoured on restore, including the case where an existing collection's type disagrees with
+  the backup — that gets dropped and recreated rather than truncated.
+- **A restore was not a restore.** Both `_restore_mongo` and `_restore_arango` drove their loop off
+  the dump's files only, so any collection created after the backup was left fully populated: a
+  point-in-time restore produced a mixed-epoch database. All three stores now enumerate what is
+  live and drop whatever the backup does not contain.
+
+`_validate_restore` only pinged connectivity — `list_collection_names`, `db.collections()`,
+`conn.info()` — which passes cleanly against a database that was just wiped, making the rollback
+trigger effectively unreachable. `_perform_backup` now writes a `manifest.json` with per-collection
+document counts and a `completed` marker; restore refuses a manifest that says `completed: false`,
+and validation compares post-restore counts against it. Backups predating the manifest still
+restore, with a logged warning instead of count verification.
+
+### Interrupted restores
+
+If the process died inside `_run_restore_engine` the databases were left half-restored, no rollback
+was attempted, and nothing recorded that it had happened — the next boot served traffic on an
+inconsistent database. A `.restore_in_progress` marker is now written before the first datastore is
+touched, naming the source backup and the rollback directory, and cleared only on the success or
+rolled-back paths. `service_manager.init_services` calls `resolve_interrupted_restore()`, which
+re-enables maintenance mode, logs CRITICAL with the exact `restore_backup.py <rollback>` recovery
+command, and fails the job so the status endpoint surfaces it. Holding the site down is deliberate:
+a partially restored database must not serve traffic. `start_backup` and `start_restore` refuse with
+409 while the marker exists.
+
+Two related leaks: `rollback_*` directories were outside all pruning and listing accounting and
+accumulated forever, and nothing checked free space before writing a second full dump onto the same
+volume. There is now an age-based rollback sweep and a `shutil.disk_usage` precondition that aborts
+with 507 rather than filling the disk mid-restore.
+
+Finally, restore never invalidated the Redis config cache, which has no TTL — so after a restore the
+platform kept serving pre-restore system settings indefinitely. `_refresh_caches` reloads config
+with `force_db=True` on both the success and rollback paths.
+
+### Stealer logs are never backed up
+
+`stealer_model` is excluded from the backup outright. It is the 150-shard bulk dump index and lives
+on a different Elasticsearch host in production; scrolling it into an ndjson file is a large part of
+why the server choked. `_is_excluded_index` gates both directions — and the restore side matters
+just as much as the backup side, because the new "drop anything absent from the backup" logic would
+otherwise have deleted the entire stealer index on the first restore.
+
+### run.sh could leave production down permanently
+
+`run.sh` has `set -e`. The dev and test paths pair `enable_maintenance_mode` with
+`trap disable_maintenance_mode EXIT`; both production paths (`production` and `build -p`) set the
+flag with no trap, so any failure between enabling and disabling left production hard-503 with no
+automatic recovery. `wait_for_application_services` made it worse: an unbounded `until` loop that
+hangs forever if the container never turns healthy, with the site down the whole time. Both
+production paths now register the trap and clear it at their success points, and the health wait
+takes a deadline (`APPLICATION_READY_TIMEOUT`, default 600s) and fails loudly.
+
+### Not addressed
+
+The quiesce only reaches the restoring worker's own tasks — the other three workers' in-flight
+coroutines are stopped from *starting* new work by the middleware, but a coroutine already past its
+last await keeps going. Making that airtight needs the write helpers themselves to re-check the
+predicate (`upsert_alerts_bulk` and `set_scan_running` are the two confirmed unguarded ones), or a
+generation token on every write. Mongo indexes are still not recreated after a restore beyond what
+`ensure_indexes` rebuilds at boot, and Redis, the bloom-filter volume and GridFS remain outside the
+backup entirely.

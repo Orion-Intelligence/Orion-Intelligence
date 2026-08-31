@@ -66,7 +66,8 @@ class FakeSlackConnectorProvider:
 
 
 class FakeMongoEngine:
-    def __init__(self, records=None, find_one_results=None):
+    def __init__(self, records=None, find_one_results=None, append_on_save=False):
+        self.append_on_save = append_on_save
         if records is None:
             self.records = []
         elif isinstance(records, (list, tuple)):
@@ -89,10 +90,10 @@ class FakeMongoEngine:
 
     async def save(self, model):
         self.saved.append(model)
-        if self.records:
-            self.records[0] = model
-        else:
+        if self.append_on_save or not self.records:
             self.records.append(model)
+        else:
+            self.records[0] = model
         return model
 
     async def delete(self, model):

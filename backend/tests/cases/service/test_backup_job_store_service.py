@@ -4,6 +4,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 
 from orion.api.interactive.backup_manager.backup_job_store import BackupJobStore
+from orion.constants.constant import CONSTANTS
 from orion.services.mongo_manager.shared_model.db_backup_job_model import BackupJobStatus
 from tests.cases.fake_model.fakes import FakeBackupJobCollection
 
@@ -21,7 +22,7 @@ def _make_store(collection: FakeBackupJobCollection) -> BackupJobStore:
 def _running_document(age_seconds: int = 0) -> dict:
     updated_at = datetime.now(timezone.utc) - timedelta(seconds=age_seconds)
     return {
-        "job_key": BackupJobStore.JOB_KEY,
+        "job_key": CONSTANTS.BACKUP_JOB_KEY,
         "operation": "backup",
         "status": BackupJobStatus.RUNNING.value,
         "progress": 20,
@@ -71,7 +72,7 @@ def test_read_marks_a_stale_running_job_as_failed():
     job = _run(store.read())
 
     assert job["status"] == BackupJobStatus.FAILED.value
-    assert job["message"] == BackupJobStore.STALE_MESSAGE
+    assert job["message"] == CONSTANTS.BACKUP_JOB_STALE_MESSAGE
 
 
 def test_read_keeps_a_running_job_with_a_fresh_heartbeat():

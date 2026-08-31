@@ -3,6 +3,7 @@ from datetime import timedelta
 from interface import BASE_DIR
 from orion.constants.constant import allowed_key_titles
 from orion.api.interactive.backup_manager.backup_manager import BackupManager
+from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
 from orion.helper_manager.helper_controller import helper_controller
 from orion.management.jobs.insight_job import insight_job
 from orion.management.jobs.alert.alert_job import alert_job
@@ -43,6 +44,10 @@ class cronjob_manager:
     @staticmethod
     async def purge_loop():
         while True:
+            if maintenance_state.get_instance().is_active():
+                log.g().i("Purge loop paused: maintenance mode is active")
+                await asyncio.sleep(30)
+                continue
             await elastic_controller.get_instance().purge_old_records()
             await asyncio.sleep(86400)
 
@@ -72,6 +77,11 @@ class cronjob_manager:
         )
 
         while True:
+            if maintenance_state.get_instance().is_active():
+                log.g().i("IOC alert loop paused: maintenance mode is active")
+                await asyncio.sleep(30)
+                continue
+
             if not allowed_key_titles:
                 await asyncio.sleep(60)
                 continue
@@ -115,6 +125,11 @@ class cronjob_manager:
     async def backup_loop():
         while True:
             try:
+                if maintenance_state.get_instance().is_active():
+                    log.g().i("Backup loop skipped: maintenance mode is active")
+                    await asyncio.sleep(30)
+                    continue
+
                 enabled = await config_controller.getInstance()._is_backup_schedule()
                 if enabled == "1":
                     await BackupManager.get_instance().run_backup_now(BackupType.AUTO)

@@ -1,5 +1,5 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
-import { inject, Injector, isDevMode } from '@angular/core';
+import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, throwError, TimeoutError, Subject } from 'rxjs';
 import { catchError, finalize, timeout, takeUntil } from 'rxjs/operators';
@@ -65,7 +65,7 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
       }, 1000);
     }
   }), catchError((error) => {
-    if (isDevMode() && error instanceof HttpErrorResponse && error.status === 503) {
+    if (error instanceof HttpErrorResponse && error.status === 503 && !authReq.url.includes('admin/backups/status')) {
       if (!maintenancePageLoading) {
         maintenancePageLoading = true;
         window.location.replace('/static/maintenance.html');

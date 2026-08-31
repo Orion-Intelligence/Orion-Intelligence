@@ -159,10 +159,16 @@ use_compose_file() {
 
 wait_for_application_services() {
     local health
+    local timeout_seconds="${APPLICATION_READY_TIMEOUT:-600}"
+    local deadline=$(( $(date +%s) + timeout_seconds ))
 
     echo "Waiting for application services to become ready..."
     until health="$(docker inspect -f '{{.State.Health.Status}}' trusted-web-main 2>/dev/null)" \
         && [ "$health" = "healthy" ]; do
+        if [ "$(date +%s)" -ge "$deadline" ]; then
+            echo "ERROR: trusted-web-main did not become healthy within ${timeout_seconds}s (last status: ${health:-unknown})" >&2
+            return 1
+        fi
         sleep 2
     done
 }
@@ -316,6 +322,7 @@ EXTRA_FLAG=$3
 
 if [ "$COMMAND" = "production" ]; then
     enable_maintenance_mode
+    trap disable_maintenance_mode EXIT
     if is_nginx_running; then
         stop_production_services_preserving_nginx
     else
@@ -331,6 +338,7 @@ set_testing_enabled "$FLAG"
 if [ "$COMMAND" = "build" ]; then
     if [ "$FLAG" = "-p" ]; then
         enable_maintenance_mode
+        trap disable_maintenance_mode EXIT
     elif [ "$FLAG" = "-d" ] || [ "$FLAG" = "-t" ] || [ "$FLAG" = "-tb" ]; then
         if [ "$FLAG" = "-d" ]; then
             cp nginx/nginx-dev.conf nginx/nginx.conf
@@ -436,6 +444,7 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     wait_for_application_services
     sudo systemctl restart tor@default
     disable_maintenance_mode
+    trap - EXIT
 fi
 
 case "$COMMAND:$FLAG" in
@@ -457,6 +466,7 @@ case "$COMMAND:$FLAG" in
     production:*)
         wait_for_application_services
         disable_maintenance_mode
+        trap - EXIT
         ;;
     *)
         wait_for_application_services

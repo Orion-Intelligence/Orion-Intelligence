@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import asyncio
+import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 from types import SimpleNamespace
@@ -11,7 +13,7 @@ from fastapi import HTTPException
 from bson import ObjectId
 
 from orion.api.interactive.backup_manager.backup_manager import BackupManager
-from orion.services.mongo_manager.shared_model.db_backup_job_model import BackupJobStatus
+from orion.services.mongo_manager.shared_model.db_backup_job_model import BackupJobStatus, db_backup_job_model
 from orion.services.mongo_manager.shared_model.db_backup_model import BackupType, db_backup_model
 from tests.cases.fake_model.fakes import FakeBackupJobStore, FakeMongoEngine
 from orion.constants.constant import CONSTANTS
@@ -23,6 +25,7 @@ def _run(coro):
 
 def _make_manager(tmp_path: Path, engine: FakeMongoEngine, job_store: FakeBackupJobStore | None = None) -> BackupManager:
     manager = object.__new__(BackupManager)
+    engine.append_on_save = True
     manager._engine = engine
     manager._job_store = job_store or FakeBackupJobStore()
     manager.backup_root = tmp_path / "backups"
@@ -36,11 +39,12 @@ def _make_backup_record(filename: str, backup_type: BackupType = BackupType.INST
 
 
 def _stub_perform_backup(manager: BackupManager, calls: list[Path] | None = None):
-    async def _perform(backup_dir: Path):
+    async def _perform(backup_dir: Path, window=(0, 90)):
         backup_dir.mkdir(parents=True, exist_ok=True)
         mongo_dir = backup_dir / "mongo"
         mongo_dir.mkdir(parents=True, exist_ok=True)
         (mongo_dir / "placeholder.json").write_text("[]", encoding="utf-8")
+        (backup_dir / "manifest.json").write_text('{"version": 1, "completed": true}', encoding="utf-8")
         if calls is not None:
             calls.append(backup_dir)
 
@@ -109,7 +113,7 @@ def test_create_backup_cleans_up_directory_and_raises_on_failure(tmp_path):
     engine = FakeMongoEngine()
     manager = _make_manager(tmp_path, engine)
 
-    async def _fail(backup_dir: Path):
+    async def _fail(backup_dir: Path, window=(0, 90)):
         backup_dir.mkdir(parents=True, exist_ok=True)
         raise RuntimeError("mongo dump failed")
 
@@ -185,7 +189,7 @@ def test_restore_backup_success_runs_engine_and_clears_maintenance(tmp_path):
     async def fake_run_restore_engine(source_dir: Path):
         engine_calls.append(source_dir)
 
-    async def fake_validate_restore():
+    async def fake_validate_restore(manifest=None):
         return True, "ok"
 
     manager._run_restore_engine = fake_run_restore_engine
@@ -211,7 +215,7 @@ def test_restore_backup_failure_triggers_successful_rollback(tmp_path):
         if call_count["n"] == 1:
             raise RuntimeError("mongo restore exploded")
 
-    async def fake_validate_restore():
+    async def fake_validate_restore(manifest=None):
         return True, "ok"
 
     manager._run_restore_engine = fake_run_restore_engine
@@ -252,7 +256,7 @@ def test_restore_backup_rollback_creation_failure_disables_maintenance(tmp_path)
     manager = _make_manager(tmp_path, FakeMongoEngine())
     _seed_backup_dir(manager, "2026_01_04_00_00_00")
 
-    async def fail_perform_backup(backup_dir: Path):
+    async def fail_perform_backup(backup_dir: Path, window=(0, 90)):
         raise RuntimeError("disk full")
 
     manager._perform_backup = fail_perform_backup
@@ -305,12 +309,16 @@ def test_restore_backup_by_id_delegates_to_restore_backup(tmp_path):
 class _FakeCollection:
     def __init__(self):
         self.deleted = 0
+        self.dropped = 0
         self.inserted: list = []
 
     async def delete_many(self, _query):
         self.deleted += 1
 
-    async def insert_many(self, documents):
+    async def drop(self):
+        self.dropped += 1
+
+    async def insert_many(self, documents, ordered=True):
         self.inserted.extend(documents)
 
 
@@ -320,6 +328,9 @@ class _FakeDatabase:
 
     def __getitem__(self, name):
         return self.collections.setdefault(name, _FakeCollection())
+
+    async def list_collection_names(self):
+        return list(self.collections.keys())
 
 
 class _FakeEngineWithDatabase:
@@ -362,6 +373,7 @@ class _FakeStreamingCollection:
     def __init__(self, documents=None):
         self.documents = list(documents or [])
         self.deleted = 0
+        self.dropped = 0
         self.inserted_batches: list[list] = []
 
     def find(self, _query, batch_size=None):
@@ -370,7 +382,10 @@ class _FakeStreamingCollection:
     async def delete_many(self, _query):
         self.deleted += 1
 
-    async def insert_many(self, documents):
+    async def drop(self):
+        self.dropped += 1
+
+    async def insert_many(self, documents, ordered=True):
         self.inserted_batches.append(list(documents))
 
 
@@ -386,11 +401,13 @@ class _FakeStreamingDatabase:
 
 
 class _FakeStreamingEngine:
+    COLLECTION_NAMES = {db_backup_model: "db_backup_model", db_backup_job_model: "backup_jobs"}
+
     def __init__(self, collections):
         self.database = _FakeStreamingDatabase(collections)
 
-    def get_collection(self, _model):
-        return SimpleNamespace(name="db_backup_model")
+    def get_collection(self, model):
+        return SimpleNamespace(name=self.COLLECTION_NAMES[model])
 
 
 def test_backup_mongo_writes_one_ndjson_line_per_document(tmp_path):
@@ -546,7 +563,7 @@ def test_run_backup_now_marks_the_shared_job_failed(tmp_path):
     job_store = FakeBackupJobStore()
     manager = _make_manager(tmp_path, FakeMongoEngine(), job_store)
 
-    async def _fail(backup_dir: Path):
+    async def _fail(backup_dir: Path, window=(0, 90)):
         raise RuntimeError("disk full")
 
     manager._perform_backup = _fail
@@ -583,3 +600,364 @@ def test_perform_backup_publishes_progress_across_the_window(tmp_path):
     assert values[-1] == 90
     assert values == sorted(values)
     assert [message for _, message in job_store.progressed][-1] == "Finalizing"
+
+
+def test_restore_mongo_never_wipes_the_live_backup_job_document(tmp_path):
+    source_dir = tmp_path / "source" / "mongo"
+    source_dir.mkdir(parents=True)
+    (source_dir / "backup_jobs.ndjson").write_text('{"job_key": "backup_job", "status": "done"}\n', encoding="utf-8")
+    (source_dir / "db_backup_model.ndjson").write_text('{"filename": "2026_01_01_00_00_00"}\n', encoding="utf-8")
+    (source_dir / "db_user_account.ndjson").write_text('{"index": 0}\n', encoding="utf-8")
+
+    collections: dict[str, _FakeStreamingCollection] = {}
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    manager._engine = _FakeStreamingEngine(collections)
+
+    _run(manager._restore_mongo(source_dir))
+
+    assert "backup_jobs" not in collections
+    assert "db_backup_model" not in collections
+    assert collections["db_user_account"].deleted == 1
+
+
+class _FakeIndices:
+    def __init__(self, definitions):
+        self.definitions = dict(definitions)
+        self.created: dict[str, dict] = {}
+        self.deleted: list[str] = []
+
+    async def get(self, index=None, expand_wildcards=None, ignore_unavailable=None):
+        return dict(self.definitions)
+
+    async def exists(self, index):
+        return index in self.definitions
+
+    async def delete(self, index, ignore_unavailable=None):
+        self.deleted.append(index)
+        self.definitions.pop(index, None)
+
+    async def create(self, index, **body):
+        self.created[index] = body
+        self.definitions[index] = body
+
+
+class _FakeElasticConnection:
+    def __init__(self, definitions=None, hits=None):
+        self.indices = _FakeIndices(definitions or {})
+        self._hits = dict(hits or {})
+        self.bulked: list = []
+
+    async def info(self):
+        return {"version": {"number": "8.19.2"}}
+
+    async def search(self, index=None, body=None, scroll=None, size=None):
+        return {"_scroll_id": f"scroll-{index}", "hits": {"hits": self._hits.get(index, [])}}
+
+    async def scroll(self, scroll_id=None, scroll=None):
+        return {"_scroll_id": scroll_id, "hits": {"hits": []}}
+
+    async def clear_scroll(self, scroll_id=None):
+        return None
+
+
+class _FakeArangoCollection:
+    def __init__(self, name, edge=False, documents=None):
+        self.name = name
+        self.edge = edge
+        self.documents = list(documents or [])
+        self.truncated = 0
+        self.imported: list[list] = []
+
+    def properties(self):
+        return {"edge": self.edge, "type": 3 if self.edge else 2}
+
+    def truncate(self):
+        self.truncated += 1
+
+    def import_bulk(self, documents, on_duplicate=None):
+        self.imported.append(list(documents))
+
+
+class _FakeAql:
+    def __init__(self, db):
+        self.db = db
+
+    def execute(self, query, batch_size=None, stream=None):
+        name = query.split("`")[1]
+        return iter(self.db.store[name].documents)
+
+
+class _FakeArangoDatabase:
+    def __init__(self, collections=None):
+        self.store = {collection.name: collection for collection in (collections or [])}
+        self.created: list[tuple] = []
+        self.deleted: list[str] = []
+        self.aql = _FakeAql(self)
+
+    def collections(self):
+        return [{"name": name, "type": "edge" if collection.edge else "document"} for name, collection in self.store.items()]
+
+    def has_collection(self, name):
+        return name in self.store
+
+    def create_collection(self, name, edge=False):
+        self.created.append((name, edge))
+        self.store[name] = _FakeArangoCollection(name, edge=edge)
+        return self.store[name]
+
+    def delete_collection(self, name):
+        self.deleted.append(name)
+        self.store.pop(name, None)
+
+    def collection(self, name):
+        return self.store[name]
+
+
+def _use_elastic(monkeypatch, connection):
+    monkeypatch.setattr(
+        "orion.api.interactive.backup_manager.backup_manager.elastic_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_connection=lambda: connection)),
+    )
+
+    async def fake_async_bulk(client, actions, **_kwargs):
+        collected = list(actions)
+        connection.bulked.extend(collected)
+        return len(collected), []
+
+    monkeypatch.setattr("orion.api.interactive.backup_manager.backup_manager.es_helpers.async_bulk", fake_async_bulk)
+
+
+def _use_arango(monkeypatch, database):
+    monkeypatch.setattr(
+        "orion.api.interactive.backup_manager.backup_manager.arango_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_db=lambda: database)),
+    )
+
+
+def test_backup_elastic_never_dumps_the_stealer_logs_index(tmp_path, monkeypatch):
+    connection = _FakeElasticConnection(
+        definitions={"stealer_model": {"mappings": {}, "settings": {}}, "leak_model": {"mappings": {}, "settings": {}}},
+        hits={"leak_model": [{"_id": "1", "_source": {"a": 1}}]},
+    )
+    _use_elastic(monkeypatch, connection)
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    output_dir = tmp_path / "dump" / "elastic"
+
+    counts = _run(manager._backup_elastic(output_dir))
+
+    assert "stealer_model" not in counts
+    assert not (output_dir / "stealer_model.ndjson").exists()
+    assert not (output_dir / "stealer_model.meta.json").exists()
+    assert counts["leak_model"] == 1
+
+
+def test_restore_elastic_never_deletes_the_stealer_logs_index(tmp_path, monkeypatch):
+    connection = _FakeElasticConnection(definitions={"stealer_model": {}, "orphan_model": {}})
+    _use_elastic(monkeypatch, connection)
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    source_dir = tmp_path / "source" / "elastic"
+    source_dir.mkdir(parents=True)
+    (source_dir / "leak_model.ndjson").write_text('{"_id": "1", "_source": {"a": 1}}\n', encoding="utf-8")
+
+    _run(manager._restore_elastic(source_dir))
+
+    assert "stealer_model" not in connection.indices.deleted
+    assert "orphan_model" in connection.indices.deleted
+
+
+def test_restore_elastic_recreates_indices_with_the_saved_mappings_and_settings(tmp_path, monkeypatch):
+    connection = _FakeElasticConnection()
+    _use_elastic(monkeypatch, connection)
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    source_dir = tmp_path / "source" / "elastic"
+    source_dir.mkdir(parents=True)
+    (source_dir / "leak_model.ndjson").write_text('{"_id": "1", "_source": {"a": 1}}\n', encoding="utf-8")
+    (source_dir / "leak_model.meta.json").write_text(
+        json.dumps({"mappings": {"properties": {"m_ip": {"type": "keyword"}}}, "settings": {"index": {"number_of_shards": "1"}}}),
+        encoding="utf-8",
+    )
+
+    _run(manager._restore_elastic(source_dir))
+
+    created = connection.indices.created["leak_model"]
+    assert created["mappings"] == {"properties": {"m_ip": {"type": "keyword"}}}
+    assert created["settings"] == {"index": {"number_of_shards": "1"}}
+
+
+def test_sanitize_index_settings_strips_settings_elasticsearch_refuses():
+    settings = {"index": {"number_of_shards": "1", "uuid": "abc", "creation_date": "1", "provided_name": "leak_model"}}
+
+    assert BackupManager._sanitize_index_settings(settings) == {"index": {"number_of_shards": "1"}}
+
+
+def test_backup_arango_records_which_collections_are_edges(tmp_path, monkeypatch):
+    database = _FakeArangoDatabase([
+        _FakeArangoCollection("cti_vertices", edge=False, documents=[{"_key": "a"}]),
+        _FakeArangoCollection("cti_edges", edge=True, documents=[{"_key": "e", "_from": "cti_vertices/a", "_to": "cti_vertices/a"}]),
+    ])
+    _use_arango(monkeypatch, database)
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    output_dir = tmp_path / "dump" / "arango"
+
+    counts = manager._backup_arango(output_dir)
+
+    assert counts["cti_edges"]["edge"] is True
+    assert counts["cti_vertices"]["edge"] is False
+    assert json.loads((output_dir / "cti_edges.meta.json").read_text(encoding="utf-8"))["edge"] is True
+
+
+def test_restore_arango_recreates_a_missing_edge_collection_as_an_edge_collection(tmp_path, monkeypatch):
+    database = _FakeArangoDatabase()
+    _use_arango(monkeypatch, database)
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    source_dir = tmp_path / "source" / "arango"
+    source_dir.mkdir(parents=True)
+    (source_dir / "cti_edges.ndjson").write_text('{"_key": "e"}\n', encoding="utf-8")
+    (source_dir / "cti_edges.meta.json").write_text('{"edge": true, "count": 1}', encoding="utf-8")
+
+    manager._restore_arango(source_dir)
+
+    assert ("cti_edges", True) in database.created
+
+
+def test_restore_arango_replaces_a_collection_whose_type_no_longer_matches(tmp_path, monkeypatch):
+    database = _FakeArangoDatabase([_FakeArangoCollection("cti_edges", edge=False)])
+    _use_arango(monkeypatch, database)
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    source_dir = tmp_path / "source" / "arango"
+    source_dir.mkdir(parents=True)
+    (source_dir / "cti_edges.ndjson").write_text('{"_key": "e"}\n', encoding="utf-8")
+    (source_dir / "cti_edges.meta.json").write_text('{"edge": true, "count": 1}', encoding="utf-8")
+
+    manager._restore_arango(source_dir)
+
+    assert "cti_edges" in database.deleted
+    assert ("cti_edges", True) in database.created
+
+
+def test_restore_arango_drops_collections_absent_from_the_backup(tmp_path, monkeypatch):
+    database = _FakeArangoDatabase([_FakeArangoCollection("stale_collection")])
+    _use_arango(monkeypatch, database)
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    source_dir = tmp_path / "source" / "arango"
+    source_dir.mkdir(parents=True)
+    (source_dir / "cti_vertices.ndjson").write_text('{"_key": "a"}\n', encoding="utf-8")
+
+    manager._restore_arango(source_dir)
+
+    assert database.deleted == ["stale_collection"]
+
+
+def test_restore_mongo_drops_collections_absent_from_the_backup(tmp_path):
+    source_dir = tmp_path / "source" / "mongo"
+    source_dir.mkdir(parents=True)
+    (source_dir / "db_user_account.ndjson").write_text('{"index": 0}\n', encoding="utf-8")
+
+    collections = {"db_user_account": _FakeStreamingCollection(), "post_backup_leftover": _FakeStreamingCollection()}
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    manager._engine = _FakeStreamingEngine(collections)
+
+    _run(manager._restore_mongo(source_dir))
+
+    assert collections["post_backup_leftover"].dropped == 1
+    assert collections["db_user_account"].dropped == 0
+
+
+def test_create_backup_keeps_the_existing_backup_when_the_new_one_fails(tmp_path):
+    records = [_make_backup_record(f"2026_01_0{index + 1}_00_00_00") for index in range(CONSTANTS.MAX_BACKUPS)]
+    for record in records:
+        (tmp_path / "backups" / record.filename / "mongo").mkdir(parents=True, exist_ok=True)
+    engine = FakeMongoEngine(records=list(records))
+    manager = _make_manager(tmp_path, engine)
+
+    async def _fail(backup_dir: Path, window=(0, 90)):
+        raise RuntimeError("mongo dump failed")
+
+    manager._perform_backup = _fail
+
+    with pytest.raises(HTTPException):
+        _run(manager.create_backup(BackupType.INSTANT))
+
+    assert engine.deleted == []
+    for record in records:
+        assert (manager.backup_root / record.filename).is_dir()
+
+
+def test_restore_refuses_a_backup_whose_manifest_says_it_never_finished(tmp_path):
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    backup_dir = _seed_backup_dir(manager, "2026_01_06_00_00_00")
+    (backup_dir / "manifest.json").write_text('{"version": 1, "completed": false}', encoding="utf-8")
+
+    with pytest.raises(HTTPException) as exc_info:
+        _run(manager.restore_backup("2026_01_06_00_00_00"))
+
+    assert exc_info.value.status_code == 422
+    assert not manager.maintenance_flag.exists()
+
+
+def test_restore_clears_the_interrupted_restore_marker_on_success(tmp_path):
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    _seed_backup_dir(manager, "2026_01_07_00_00_00")
+    _stub_perform_backup(manager)
+
+    async def fake_run_restore_engine(source_dir: Path):
+        assert manager.restore_marker.exists()
+
+    async def fake_validate_restore(manifest=None):
+        return True, "ok"
+
+    manager._run_restore_engine = fake_run_restore_engine
+    manager._validate_restore = fake_validate_restore
+
+    _run(manager.restore_backup("2026_01_07_00_00_00"))
+
+    assert not manager.restore_marker.exists()
+
+
+def test_start_backup_is_refused_while_an_interrupted_restore_is_unresolved(tmp_path):
+    job_store = FakeBackupJobStore()
+    manager = _make_manager(tmp_path, FakeMongoEngine(), job_store)
+    manager._write_json_file(manager.restore_marker, {"backup": "2026_01_08_00_00_00", "rollback": "rollback_x"})
+
+    with pytest.raises(HTTPException) as exc_info:
+        _run(manager.start_backup(BackupType.INSTANT))
+
+    assert exc_info.value.status_code == 409
+    assert job_store.begun == []
+
+
+def test_resolve_interrupted_restore_holds_the_site_in_maintenance_and_fails_the_job(tmp_path):
+    job_store = FakeBackupJobStore()
+    manager = _make_manager(tmp_path, FakeMongoEngine(), job_store)
+    manager._write_json_file(manager.restore_marker, {"backup": "2026_01_09_00_00_00", "rollback": "rollback_y"})
+
+    assert _run(manager.resolve_interrupted_restore()) is True
+    assert manager.maintenance_flag.exists()
+    status, message, filename = job_store.finished[0]
+    assert status == BackupJobStatus.FAILED
+    assert "Manual recovery required" in message
+
+
+def test_resolve_interrupted_restore_is_a_no_op_on_a_clean_boot(tmp_path):
+    job_store = FakeBackupJobStore()
+    manager = _make_manager(tmp_path, FakeMongoEngine(), job_store)
+
+    assert _run(manager.resolve_interrupted_restore()) is False
+    assert not manager.maintenance_flag.exists()
+    assert job_store.finished == []
+
+
+def test_sweep_removes_abandoned_rollback_directories(tmp_path):
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    stale = manager.backup_root / "rollback_2026_01_01_00_00_00"
+    fresh = manager.backup_root / "rollback_2026_08_31_00_00_00"
+    keep = manager.backup_root / "2026_01_01_00_00_00"
+    for path in (stale, fresh, keep):
+        path.mkdir(parents=True, exist_ok=True)
+    os.utime(stale, (0, 0))
+
+    _run(manager._sweep_stale_rollbacks())
+
+    assert not stale.exists()
+    assert fresh.exists()
+    assert keep.exists()

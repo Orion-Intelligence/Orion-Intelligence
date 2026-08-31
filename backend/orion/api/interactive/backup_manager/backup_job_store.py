@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 from pymongo import ReturnDocument
 from pymongo.errors import DuplicateKeyError
 
+from orion.constants.constant import CONSTANTS
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_backup_job_model import BackupJobStatus, db_backup_job_model
@@ -14,10 +15,8 @@ from orion.services.mongo_manager.shared_model.db_backup_job_model import Backup
 class BackupJobStore:
     __instance = None
 
-    JOB_KEY = "backup_job"
-    STALE_AFTER = timedelta(seconds=120)
-    HEARTBEAT_INTERVAL = timedelta(seconds=30)
-    STALE_MESSAGE = "Backup worker stopped responding"
+    STALE_AFTER = timedelta(seconds=CONSTANTS.BACKUP_JOB_STALE_SECONDS)
+    HEARTBEAT_INTERVAL = timedelta(seconds=CONSTANTS.BACKUP_JOB_HEARTBEAT_SECONDS)
 
     @staticmethod
     def get_instance():
@@ -60,20 +59,20 @@ class BackupJobStore:
         if collection is None:
             return self.idle_job()
         await self._expire_stale(collection)
-        return self._as_job(await collection.find_one({"job_key": self.JOB_KEY}))
+        return self._as_job(await collection.find_one({"job_key": CONSTANTS.BACKUP_JOB_KEY}))
 
     async def _expire_stale(self, collection) -> None:
         now = datetime.now(timezone.utc)
         result = await collection.update_one(
             {
-                "job_key": self.JOB_KEY,
+                "job_key": CONSTANTS.BACKUP_JOB_KEY,
                 "status": BackupJobStatus.RUNNING.value,
                 "updated_at": {"$lte": now - self.STALE_AFTER},
             },
             {
                 "$set": {
                     "status": BackupJobStatus.FAILED.value,
-                    "message": self.STALE_MESSAGE,
+                    "message": CONSTANTS.BACKUP_JOB_STALE_MESSAGE,
                     "updated_at": now,
                 }
             },
@@ -90,7 +89,7 @@ class BackupJobStore:
         now = datetime.now(timezone.utc)
         try:
             document = await collection.find_one_and_update(
-                {"job_key": self.JOB_KEY, "status": {"$ne": BackupJobStatus.RUNNING.value}},
+                {"job_key": CONSTANTS.BACKUP_JOB_KEY, "status": {"$ne": BackupJobStatus.RUNNING.value}},
                 {
                     "$set": {
                         "operation": operation,
@@ -101,7 +100,7 @@ class BackupJobStore:
                         "started_at": now,
                         "updated_at": now,
                     },
-                    "$setOnInsert": {"job_key": self.JOB_KEY},
+                    "$setOnInsert": {"job_key": CONSTANTS.BACKUP_JOB_KEY},
                 },
                 upsert=True,
                 return_document=ReturnDocument.AFTER,
@@ -115,7 +114,7 @@ class BackupJobStore:
         if collection is None:
             return
         await collection.update_one(
-            {"job_key": self.JOB_KEY, "status": BackupJobStatus.RUNNING.value},
+            {"job_key": CONSTANTS.BACKUP_JOB_KEY, "status": BackupJobStatus.RUNNING.value},
             {"$set": {"progress": int(progress), "message": message, "updated_at": datetime.now(timezone.utc)}},
         )
 
@@ -124,7 +123,7 @@ class BackupJobStore:
         if collection is None:
             return
         await collection.update_one(
-            {"job_key": self.JOB_KEY, "status": BackupJobStatus.RUNNING.value},
+            {"job_key": CONSTANTS.BACKUP_JOB_KEY, "status": BackupJobStatus.RUNNING.value},
             {"$set": {"updated_at": datetime.now(timezone.utc)}},
         )
 
@@ -136,7 +135,7 @@ class BackupJobStore:
         update = {"status": status.value, "message": message, "filename": filename, "updated_at": now}
         if status == BackupJobStatus.DONE:
             update["progress"] = 100
-        await collection.update_one({"job_key": self.JOB_KEY}, {"$set": update})
+        await collection.update_one({"job_key": CONSTANTS.BACKUP_JOB_KEY}, {"$set": update})
 
     async def keep_alive(self) -> None:
         seconds = max(5, int(self.HEARTBEAT_INTERVAL.total_seconds()))
