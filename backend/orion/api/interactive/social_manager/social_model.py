@@ -262,25 +262,6 @@ class social_model:
                 continue
         return 0, last_error
 
-    async def social_request_get(self, params: dict, key: str, headers: dict[str, str]) -> tuple[int, Any]:
-        last_error = ""
-        for base_url in self._social_api_base_urls():
-            try:
-                async with httpx.AsyncClient() as client:
-                    response = await client.get(
-                        f"{base_url.rstrip('/')}/{f'social/{key}'.lstrip('/')}",
-                        params=params,
-                        headers=headers,
-                        timeout=120,
-                    )
-                if response.status_code != 200:
-                    return response.status_code, None
-                return 200, response.json()
-            except httpx.RequestError as exc:
-                last_error = str(exc)
-                continue
-        return 0, last_error
-
     async def social_search(self, model, key: str, current_user=None, request=None) -> Any:
         headers = self._social_headers(current_user, request)
         payload = model.model_dump() if hasattr(model, "model_dump") else model

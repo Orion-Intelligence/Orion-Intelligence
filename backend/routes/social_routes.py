@@ -200,9 +200,7 @@ async def get_social_profiles(profile_username: str, current_user=Depends(get_cu
 async def delete_social_profiles(profile_username: str, current_user=Depends(get_current_user)):
     return await social_model.getInstance().delete_social_profiles(str(current_user.id), profile_username)
 
-social_callback_router = APIRouter()
-
-@social_callback_router.post(
+@social_routes.post(
     "/api/social/automation/callback",
     include_in_schema=False,
 )
