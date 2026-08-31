@@ -112,7 +112,7 @@ class social_profile_job:
                 
             await self._wait_for_task(task_id, timeout_seconds=300)
 
-    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
+    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str ):
         log.g().i(f"Running posting for profile {profile.profile_id} on {profile.platform}")
         
         from datetime import timezone
@@ -184,7 +184,7 @@ class social_profile_job:
         except Exception as e:
             log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
 
-    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
+    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str ):
 
         log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
         
