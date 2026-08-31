@@ -1,6 +1,13 @@
+import asyncio
+import json
+import os
+import tempfile
+from orion.helper_manager.env_handler import env_handler
+import urllib.request
+from datetime import datetime
 from typing import Any
-
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
+from orion.api.interactive.social_manager.social_model import social_model
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_social_profile_management_model import (
     ManagedSocialProfile,
@@ -24,6 +31,8 @@ class social_profile_job:
         else:
             social_profile_job.__instance = self
             self._profile_manager = ProfileManager.get_instance()
+            self._posts_cache = {}
+
 
     async def run_daily_social_profiles(self):
         records = await self._profile_manager.get_all_social_profile_records()
@@ -60,7 +69,7 @@ class social_profile_job:
                         skipped_profile_count += 1
                         continue
 
-                    await self._run_profile_purposes(profile, persona, session_state)
+                    asyncio.create_task(self._run_profile_purposes(profile, persona, session_state))
                     processed_profile_count += 1
                 except Exception as exc:
                     error_count += 1
@@ -76,23 +85,149 @@ class social_profile_job:
             "error_count": error_count,
         }
 
+    async def _wait_for_task(self, task_id: str, timeout_seconds: int = 300):
+        if not hasattr(self, 'task_events'):
+            self.task_events = {}
+        event = asyncio.Event()
+        self.task_events[task_id] = event
+        
+        try:
+            await asyncio.wait_for(event.wait(), timeout=timeout_seconds)
+            log.g().i(f"Task {task_id} completed successfully.")
+        except asyncio.TimeoutError:
+            log.g().w(f"Task {task_id} timed out after {timeout_seconds}s. Starting next purpose.")
+        finally:
+            self.task_events.pop(task_id, None)
+
     async def _run_profile_purposes(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any]):
+        import uuid
         for purpose in profile.purposes:
+            task_id = str(uuid.uuid4())
+            cb_url = f"http://trusted-web-main:8070/api/social/automation/callback?task_id={task_id}"
+            
             if purpose == SocialProfilePurpose.POSTING:
-                await self.run_posting(profile, persona, session_state)
+                await self.run_posting(profile, persona, session_state, cb_url)
             elif purpose == SocialProfilePurpose.AD_MONITORING:
-                await self.run_ad_monitoring(profile, persona, session_state)
+                await self.run_ad_monitoring(profile, persona, session_state, cb_url)
             elif purpose == SocialProfilePurpose.HATE_SPEECH_MONITORING:
-                await self.run_hate_speech_monitoring(profile, session_state)
+                await self.run_hate_speech_monitoring(profile, persona, session_state, cb_url)
+                
+            await self._wait_for_task(task_id, timeout_seconds=300)
 
-    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any]):
-        print("run_posting "*100)
-        print(f"Running posting for profile {profile.profile_id}")
+    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
+        log.g().i(f"Running posting for profile {profile.profile_id} on {profile.platform}")
+        
+        from datetime import timezone
+        now = datetime.now(timezone.utc)
+        created = persona.created_at.replace(tzinfo=timezone.utc) if persona.created_at.tzinfo is None else persona.created_at
+        days_active = (now - created).days + 1
+        day_index = ((days_active - 1) % 365) + 1
+        
+        gender_val = persona.gender.value if persona.gender else ""
+        age_group_val = persona.age_group.value if persona.age_group else ""
+        interests_list = persona.interests or []
+        
+        cache_key = (gender_val, age_group_val, tuple(sorted(interests_list)))
+        
+        if cache_key not in self._posts_cache:
+            try:
+                from orion.services.mongo_manager.mongo_controller import mongo_controller
+                collection = mongo_controller.get_instance().get_engine().database["persona_posts"]
+                query = {
+                    "gender": gender_val,
+                    "age_group": age_group_val,
+                }
+                if interests_list:
+                    query["interests"] = {"$all": interests_list, "$size": len(interests_list)}
+                else:
+                    query["interests"] = {"$size": 0}
+                    
+                doc = await collection.find_one(query)
+                if doc and "posts" in doc:
+                    self._posts_cache[cache_key] = doc["posts"]
+                else:
+                    self._posts_cache[cache_key] = []
+            except Exception as e:
+                log.g().e(f"Failed to fetch persona posts from mongo: {e}")
+                self._posts_cache[cache_key] = []
 
-    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any]):
-        print("run_ad_monitoring "*100)
-        print(f"Running ad monitoring for profile {profile.profile_id}")
+        posts_list = self._posts_cache.get(cache_key, [])
+        if not posts_list:
+            log.g().e(f"No post data found for persona combination {cache_key}")
+            return
+            
+        post_data = next((p for p in posts_list if p.get("day") == day_index), None)
+        if not post_data:
+            idx = (day_index - 1) % len(posts_list)
+            post_data = posts_list[idx]
+        
+        image_url = post_data.get("image_url")
+        caption = post_data.get("caption")
+        
+        try:
+            headers = social_model._social_headers(None, None)
+            payload = {
+                "session_state": session_state,
+                "platform": profile.platform,
+                "text": caption,
+                "image_url": image_url,
+                "callback_url": callback_url,
+                "gender": gender_val,
+                "age_group": age_group_val,
+                "interests": interests_list
+            }
+            status_code, resp_body = await social_model.getInstance().social_request(
+                payload,
+                "automation/post",
+                headers
+            )
+            log.g().i(f"run_posting API response: {status_code} {resp_body}")
+                
+        except Exception as e:
+            log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
 
-    async def run_hate_speech_monitoring(self, profile: ManagedSocialProfile, session_state: dict[str, Any]):
-        print("run_hate_speech_monitoring "*100)
-        print(f"Running hate speech monitoring for profile {profile.profile_id}")
+    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
+        log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
+        
+        try:
+            headers = social_model._social_headers(None, None)
+            payload = {
+                "session_state": session_state, 
+                "platform": profile.platform,
+                "callback_url": callback_url,
+                "gender": persona.gender.value if persona.gender else "",
+                "age_group": persona.age_group.value if persona.age_group else "",
+                "interests": persona.interests or []
+            }
+            status_code, resp_body = await social_model.getInstance().social_request(
+                payload,
+                "automation/ad-monitor",
+                headers
+            )
+            log.g().i(f"run_ad_monitoring API response: {status_code} {resp_body}")
+                
+        except Exception as e:
+            log.g().e(f"Failed to run ad monitoring for profile {profile.profile_id}: {e}")
+
+    async def run_hate_speech_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
+        log.g().i(f"Running hate speech monitoring for profile {profile.profile_id} on {profile.platform}")
+        
+        try:
+            headers = social_model._social_headers(None, None)
+            payload = {
+                "session_state": session_state, 
+                "platform": profile.platform,
+                "callback_url": callback_url,
+                "gender": persona.gender.value if persona.gender else "",
+                "age_group": persona.age_group.value if persona.age_group else "",
+                "interests": persona.interests or []
+            }
+            status_code, resp_body = await social_model.getInstance().social_request(
+                payload,
+                "automation/hate-speech-monitor",
+                headers
+            )
+            log.g().i(f"run_hate_speech_monitoring API response: {status_code} {resp_body}")
+                
+        except Exception as e:
+            log.g().e(f"Failed to run hate speech monitoring for profile {profile.profile_id}: {e}")

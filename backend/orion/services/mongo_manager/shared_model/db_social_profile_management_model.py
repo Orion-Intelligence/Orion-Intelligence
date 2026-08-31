@@ -45,6 +45,21 @@ class SocialProfilePurpose(str, Enum):
     HATE_SPEECH_MONITORING = "hate_speech_monitoring"
 
 
+class db_persona_post_item(EmbeddedModel):
+    day: int
+    interest: str
+    image_url: str
+    caption: str
+
+class db_persona_posts(Model):
+    gender: str
+    age_group: str
+    interests: List[str] = Field(default_factory=list)
+    posts: List[db_persona_post_item] = Field(default_factory=list)
+
+    model_config = {"collection": "persona_posts"}
+
+
 class SocialPersona(EmbeddedModel):
     persona_id: str = Field(index=True)
     name: str
@@ -53,6 +68,7 @@ class SocialPersona(EmbeddedModel):
     country: str | None = None
     city: str | None = None
     interests: List[str] = Field(default_factory=list)
+    interest_weights: List[float] | None = None
     adult_status: bool = True
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
@@ -64,7 +80,7 @@ class ManagedSocialProfile(EmbeddedModel):
     profile_name: str | None = None
     profile_username: str | None = None
     session_id: str | None = None
-    purposes: List[SocialProfilePurpose] = Field(default_factory=list)
+    purposes: List[SocialProfilePurpose] | None = None
     assigned_persona_id: str | None = None
     connection_status: SocialProfileConnectionStatus = SocialProfileConnectionStatus.PENDING
     assignment_status: SocialProfileAssignmentStatus = SocialProfileAssignmentStatus.UNASSIGNED

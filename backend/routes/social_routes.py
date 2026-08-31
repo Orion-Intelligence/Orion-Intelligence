@@ -199,3 +199,24 @@ async def get_social_profiles(profile_username: str, current_user=Depends(get_cu
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("scanning", bypass_licenses=["osint_advanced"]))])
 async def delete_social_profiles(profile_username: str, current_user=Depends(get_current_user)):
     return await social_model.getInstance().delete_social_profiles(str(current_user.id), profile_username)
+
+social_callback_router = APIRouter()
+
+@social_callback_router.post(
+    "/api/social/automation/callback",
+    include_in_schema=False,
+)
+async def automation_callback(task_id: str = None, payload: dict = Body(...)):
+    from orion.services.log_manager.log_controller import log
+    log.g().i(f"Automation Callback Received: {payload.get('status')} for task {task_id}")
+    log.g().i(f"Automation Output: {payload.get('output')}")
+    if payload.get("error"):
+        log.g().e(f"Automation Error: {payload.get('error')}")
+        
+    if task_id:
+        from orion.management.jobs.social_profile.social_profile_job import social_profile_job
+        job = social_profile_job.get_instance()
+        if hasattr(job, 'task_events') and task_id in job.task_events:
+            job.task_events[task_id].set()
+            
+    return {"status": "success"}
