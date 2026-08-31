@@ -38,7 +38,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
 
   get typeOptions(): UiDropdownOption[] {
     this.translationService.version();
-    return [{ key: '', label: this.translationService.translate('All') }, { key: 'INFO', label: 'INFO' }, { key: 'WARNING', label: 'WARNING' }, { key: 'ERROR', label: 'ERROR' }];
+    return [{ key: '', label: this.translationService.translate('All') }, { key: 'INFO', label: 'INFO' }, { key: 'SUCCESS', label: 'SUCCESS' }, { key: 'WARNING', label: 'WARNING' }, { key: 'ERROR', label: 'ERROR' }, { key: 'CRITICAL', label: 'CRITICAL' }];
   }
 
   ngOnInit(): void {
@@ -130,8 +130,11 @@ export class SidebarUserLogManagerComponent implements OnInit {
   }
 
   getTypeClass(type: string): string {
-    if (type === 'ERROR') {
+    if (type === 'ERROR' || type === 'CRITICAL') {
       return 'border-red-400/30 bg-red-500/10 text-red-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800';
+    }
+    if (type === 'SUCCESS') {
+      return 'border-emerald-400/30 bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:border-emerald-600/30 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800';
     }
     if (type === 'WARNING') {
       return 'border-amber-400/30 bg-amber-500/10 text-amber-300 [body.light-theme_&]:border-amber-600/30 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800';

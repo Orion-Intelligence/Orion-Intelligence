@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from fastapi import Request, HTTPException
 from fastapi.exceptions import RequestValidationError
@@ -6,6 +7,7 @@ from fastapi.responses import RedirectResponse, JSONResponse
 from starlette.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_422_UNPROCESSABLE_CONTENT
 
 from configs import config
+from orion.services.log_manager.log_controller import log
 from orion.shared_models.expection_handlers.expection_handlers_models import ErrorResponseModel, ValidationErrorDetail, ValidationErrorResponseModel
 
 logger = logging.getLogger("uvicorn.error")
@@ -26,6 +28,7 @@ async def global_exception_handler(request: Request, exc: Exception):
             request.url.path,
             exc_info=(type(exc), exc, exc.__traceback__),
         )
+        log.g().e(f"Unhandled request exception: {request.method} {request.url.path}\n" + "".join(traceback.format_exception(type(exc), exc, exc.__traceback__)).strip())
 
     if is_api_request(request):
         detail = exc.detail if isinstance(exc, HTTPException) else "An unexpected error occurred"
@@ -58,6 +61,7 @@ async def validation_exception_handler(request: Request, exc: Exception):
         request.headers.get("content-type", ""),
         [error.model_dump() for error in errors],
     )
+    log.g().w(f"Request validation failed: {request.method} {request.url.path} content_type={request.headers.get('content-type', '')} errors={[error.model_dump() for error in errors]}")
 
     if is_api_request(request):
         content = {

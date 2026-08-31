@@ -75,7 +75,7 @@
                     <td [attr.data-label]="'Time' | translate" class="text-[12.5px] font-medium text-[var(--color-text3)]">{{ entry.timestamp }}</td>
                     <td [attr.data-label]="'File' | translate" class="max-w-[180px] truncate text-[12.5px] font-medium text-[var(--color-text3)]" [title]="entry.date + '/' + entry.file + ':' + entry.line">{{ entry.date }}/{{ entry.file }}:{{ entry.line }}</td>
                     <td [attr.data-label]="'Source' | translate" class="max-w-[280px] truncate text-[12px] font-medium text-[var(--color-text3)]" [title]="entry.caller">{{ entry.caller || '-' }}</td>
-                    <td [attr.data-label]="'Message' | translate" class="min-w-[320px] !whitespace-normal break-words text-[13px] font-medium leading-[1.45] text-[var(--color-text2)]">{{ entry.message }}</td>
+                    <td [attr.data-label]="'Message' | translate" class="min-w-[320px] !whitespace-pre-wrap break-words text-[13px] font-medium leading-[1.45] text-[var(--color-text2)]">{{ entry.message }}</td>
                   </tr>
                 }
               }

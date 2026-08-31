@@ -2,6 +2,7 @@ import datetime
 import inspect
 import logging
 import os
+import shutil
 import stat
 import subprocess
 import sys
@@ -104,30 +105,29 @@ class log:
 
     @staticmethod
     def __cleanup_old_logs(retention_days=30):
+        now = datetime.datetime.now().date()
+        if log.__last_cleanup_date == now:
+            return
+
+        log.__last_cleanup_date = now
+        cutoff_date = now - datetime.timedelta(days=retention_days)
+        log_root = os.path.join(os.getcwd(), 'workspace/logs')
+
         try:
-            now = datetime.datetime.now().date()
-            if log.__last_cleanup_date == now:
-                return
+            log_dirs = os.listdir(log_root)
+        except OSError:
+            return
 
-            log.__last_cleanup_date = now
-            cutoff_date = now - datetime.timedelta(days=retention_days)
-
-            log_root = os.path.join(os.getcwd(), 'workspace/logs')
-
-            for log_dir in os.listdir(log_root):
-                log_path = os.path.join(log_root, log_dir)
-                if os.path.isdir(log_path):
-                    try:
-                        log_date = datetime.datetime.strptime(log_dir, "%Y-%m-%d").date()
-                        if log_date < cutoff_date:
-                            for file in os.listdir(log_path):
-                                os.remove(os.path.join(log_path, file))
-                            os.rmdir(log_path)
-                    except ValueError:
-                        continue
-
-        except Exception:
-            pass
+        for log_dir in log_dirs:
+            log_path = os.path.join(log_root, log_dir)
+            if not os.path.isdir(log_path):
+                continue
+            try:
+                log_date = datetime.datetime.strptime(log_dir, "%Y-%m-%d").date()
+            except ValueError:
+                continue
+            if log_date < cutoff_date:
+                shutil.rmtree(log_path, ignore_errors=True)
 
     def i(self, p_log):
         try:

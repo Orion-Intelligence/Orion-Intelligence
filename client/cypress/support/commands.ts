@@ -5,10 +5,6 @@ type SlowTypeOptions = {
     settleMs?: number;
 };
 
-type CypressAutomation = typeof Cypress & {
-    automation(eventName: string, options: Record<string, unknown>): Promise<unknown>;
-};
-
 type MailSummary = {
     ID?: string;
 };
@@ -107,9 +103,6 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
 
         const safeName = String(name || "screenshot").replace(/\\/g, "/").replace(/^\/+/, "") || "screenshot";
         const taskScreenshotName = safeName.startsWith("user-manual/") ? safeName.slice("user-manual/".length) : safeName;
-        void options;
-        let restoreCaptureState: (() => void) | undefined;
-        let screenshotClip: { x: number; y: number; width: number; height: number; scale: number } | undefined;
         const hiddenScrollbarCss = `
             html, body { scrollbar-width: none !important; }
             html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar {
@@ -118,71 +111,20 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
                 display: none !important;
             }
         `;
+        let appStyle: HTMLStyleElement | undefined;
 
-        return cy.window({ log: false }).then((win) => {
-            const restoreFns: Array<() => void> = [];
-            const appStyle = win.document.createElement("style");
+        return cy.document({ log: false }).then((doc) => {
+            appStyle = doc.createElement("style");
             appStyle.textContent = hiddenScrollbarCss;
-            (win.document.head || win.document.documentElement).appendChild(appStyle);
-            restoreFns.push(() => appStyle.remove());
-
-            try {
-                const topWindow = win.top || win;
-                const topDocument = topWindow.document;
-                const iframe = Array.from(topDocument.querySelectorAll("iframe"))
-                    .find(frame => frame.contentWindow === win)
-                    || topDocument.querySelector<HTMLIFrameElement>("iframe.aut-iframe, iframe[data-cy='aut-iframe'], iframe");
-
-                const topStyle = topDocument.createElement("style");
-                topStyle.textContent = hiddenScrollbarCss;
-                (topDocument.head || topDocument.documentElement).appendChild(topStyle);
-                restoreFns.push(() => topStyle.remove());
-
-                if (iframe) {
-                    const rect = iframe.getBoundingClientRect();
-                    const viewportWidth = Number(Cypress.config("viewportWidth")) || Math.round(win.innerWidth);
-                    const viewportHeight = Number(Cypress.config("viewportHeight")) || Math.round(win.innerHeight);
-                    const scale = Math.max(
-                        viewportWidth / Math.max(1, rect.width),
-                        viewportHeight / Math.max(1, rect.height),
-                    );
-                    screenshotClip = {
-                        x: Math.max(0, rect.left),
-                        y: Math.max(0, rect.top),
-                        width: Math.max(1, rect.width),
-                        height: Math.max(1, rect.height),
-                        scale,
-                    };
-                }
-            }
-            catch {
-                screenshotClip = undefined;
-            }
-
-            restoreCaptureState = () => {
-                restoreFns.reverse().forEach(restore => restore());
-                restoreCaptureState = undefined;
-            };
-        }).then(() => cy.wait(50, { log: false })).then(() => (
-            (Cypress as unknown as CypressAutomation).automation("remote:debugger:protocol", {
-                command: "Page.captureScreenshot",
-                params: {
-                    captureBeyondViewport: false,
-                    ...(screenshotClip ? { clip: screenshotClip } : {}),
-                    format: "png",
-                    fromSurface: true,
-                },
-            })
-        )).then((result) => {
-            const data = typeof result === "string" ? result : (result as Record<string, unknown>)['data'];
-            expect(data, `docs screenshot ${name}`).to.be.a("string").and.not.equal("");
-            return cy.task("writeDocScreenshot", {
-                data,
-                name: taskScreenshotName,
-                specName: Cypress.spec.name,
-            }, { log: false });
+            (doc.head || doc.documentElement).appendChild(appStyle);
+        }).then(() => cy.wait(50, { log: false })).then(() => {
+            return cy.screenshot(`user-manual/${taskScreenshotName}`, {
+                capture: "viewport",
+                overwrite: true,
+                ...options,
+            });
         }).then(() => {
-            restoreCaptureState?.();
+            appStyle?.remove();
             return cy.wrap<void>(undefined, { log: false });
         });
     });
