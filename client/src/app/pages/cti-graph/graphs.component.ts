@@ -2739,7 +2739,7 @@ export class GraphComponent implements OnInit, OnDestroy {
     const isSameNodeClicked = this.highlightedNodeId === nodeId;
     const allEdges = this.edgeSet.get();
     const resetEdges = allEdges
-      .filter((e): e is Edge & { id: NonNullable<Edge['id']> } => e.id !== undefined)
+      .filter((e): e is { id: string | number } => e.id !== undefined)
       .map(e => ({
         id: e.id,
         color: { color: this.edgeBaseColor },
@@ -2754,7 +2754,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       filter: edge => edge.from === nodeId || edge.to === nodeId
     });
     const highlightEdges = connectedEdges
-      .filter((e): e is Edge & { id: NonNullable<Edge['id']> } => e.id !== undefined)
+      .filter((e): e is { id: string | number } => e.id !== undefined)
       .map(e => ({
         id: e.id,
         color: { color: this.edgeHighlightColor },
@@ -2790,7 +2790,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       filter: edge => matchedNodeIds.includes(edge.from as string) || matchedNodeIds.includes(edge.to as string)
     });
     this.edgeSet.update(matchedEdges
-      .filter((edge): edge is Edge & { id: NonNullable<Edge['id']> } => edge.id !== undefined)
+      .filter((edge): edge is { id: string | number } => edge.id !== undefined)
       .map(edge => ({
         id: edge.id,
         color: { color: this.edgeHighlightColor },
