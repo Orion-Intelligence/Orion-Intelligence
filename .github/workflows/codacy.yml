@@ -87,7 +87,8 @@ jobs:
       - name: Reanalyze with the updated Codacy categories
         env:
           CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        run: python3 .github/scripts/codacy_disable_categories.py --apply --reanalyze-commit "$GITHUB_SHA"
+          CODACY_COMMIT_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python3 .github/scripts/codacy_disable_categories.py --apply --reanalyze-commit "$CODACY_COMMIT_SHA"
 
       - name: Split SARIF runs into unique categories
         run: |

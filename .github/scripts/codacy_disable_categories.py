@@ -6,12 +6,14 @@ import os
 import re
 import sys
 import urllib.error
-import urllib.parse
 import urllib.request
 
 BASE_URL = "https://api.codacy.com/api/v3"
-DEFAULT_CATEGORIES = ("ErrorProne", "UnusedCode")
-PAGE_LIMIT = 100
+DEFAULT_TOOLS = ("ESLint",)
+DEFAULT_PATTERNS = (
+    "ESLint8_@typescript-eslint_no-unnecessary-condition",
+    "ESLint8_no-unused-vars",
+)
 
 
 def normalize(value: str) -> str:
@@ -43,34 +45,14 @@ def list_tools(args, auth: tuple[str, str]) -> list[dict]:
     return request(f"{repository_path(args)}/tools", auth).get("data") or []
 
 
-def list_patterns(args, auth: tuple[str, str], tool_uuid: str) -> list[dict]:
-    patterns: list[dict] = []
-    cursor = None
-    while True:
-        query = {"limit": PAGE_LIMIT}
-        if cursor:
-            query["cursor"] = cursor
-        path = f"{repository_path(args)}/tools/{tool_uuid}/patterns?{urllib.parse.urlencode(query)}"
-        response = request(path, auth)
-        patterns.extend(response.get("data") or [])
-        cursor = (response.get("pagination") or {}).get("cursor")
-        if not cursor:
-            return patterns
-
-
-def pattern_category(pattern: dict) -> str:
-    definition = pattern.get("patternDefinition") or pattern
-    return definition.get("category") or ""
-
-
-def pattern_id(pattern: dict) -> str:
-    definition = pattern.get("patternDefinition") or pattern
-    return definition.get("id") or ""
-
-
 def is_tool_enabled(tool: dict) -> bool:
     settings = tool.get("settings") or {}
     return bool(settings.get("isEnabled", tool.get("isEnabled", tool.get("enabled", False))))
+
+
+def uses_configuration_file(tool: dict) -> bool:
+    settings = tool.get("settings") or {}
+    return bool(settings.get("usesConfigurationFile", False))
 
 
 def credentials() -> tuple[str, str] | None:
@@ -84,11 +66,12 @@ def credentials() -> tuple[str, str] | None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Disable every Codacy code pattern in the given issue categories.")
+    parser = argparse.ArgumentParser(description="Disable selected Codacy ESLint code patterns.")
     parser.add_argument("--provider", default=os.getenv("CODACY_PROVIDER", "gh"))
     parser.add_argument("--organization", default=os.getenv("CODACY_ORGANIZATION", "Orion-Intelligence"))
     parser.add_argument("--repository", default=os.getenv("CODACY_REPOSITORY", "Orion-Intelligence"))
-    parser.add_argument("--category", action="append", dest="categories", default=None)
+    parser.add_argument("--pattern", action="append", dest="patterns", default=None)
+    parser.add_argument("--tool", action="append", dest="tools", default=None)
     parser.add_argument("--apply", action="store_true", help="Write the changes. Without it the script only reports.")
     parser.add_argument("--reanalyze-commit", help="Request reanalysis of this commit after applying changes.")
     args = parser.parse_args()
@@ -98,51 +81,50 @@ def main() -> int:
         print("CODACY_API_TOKEN or CODACY_PROJECT_TOKEN is not set.", file=sys.stderr)
         return 1
 
-    wanted = {normalize(name) for name in (args.categories or DEFAULT_CATEGORIES)}
+    patterns = args.patterns or list(DEFAULT_PATTERNS)
+    wanted_tools = {normalize(name) for name in (args.tools or DEFAULT_TOOLS)}
     tools = list_tools(args, auth)
     if not tools:
         print("No tools returned for this repository. Check the provider, organization and repository names.")
         return 1
 
-    seen_categories: set[str] = set()
-    total_disabled = 0
+    updated_tools = 0
 
     for tool in tools:
         tool_uuid = tool.get("uuid")
         tool_name = tool.get("name") or tool_uuid
-        if not tool_uuid or not is_tool_enabled(tool):
+        if not tool_uuid or not is_tool_enabled(tool) or normalize(tool_name) not in wanted_tools:
             continue
 
-        patterns = list_patterns(args, auth, tool_uuid)
-        targets = []
-        for pattern in patterns:
-            category = pattern_category(pattern)
-            seen_categories.add(category)
-            if normalize(category) in wanted and pattern.get("enabled"):
-                targets.append(pattern)
-
-        if not targets:
-            continue
-
-        print(f"{tool_name}: disabling {len(targets)} of {len(patterns)} patterns")
-        for pattern in targets:
-            print(f"  - {pattern_id(pattern)} [{pattern_category(pattern)}]")
-        total_disabled += len(targets)
+        print(f"{tool_name}: disabling patterns {', '.join(patterns)}")
+        updated_tools += 1
 
         if args.apply:
-            category_query = ",".join(sorted({pattern_category(pattern) for pattern in targets}))
-            query = urllib.parse.urlencode({"categories": category_query})
+            if uses_configuration_file(tool):
+                print(f"  - switching {tool_name} from repository configuration to Codacy pattern settings")
+                request(
+                    f"{repository_path(args)}/tools/{tool_uuid}",
+                    auth,
+                    method="PATCH",
+                    body={"useConfigurationFile": False, "enabled": True},
+                )
             request(
-                f"{repository_path(args)}/tools/{tool_uuid}/patterns?{query}",
+                f"{repository_path(args)}/tools/{tool_uuid}",
                 auth,
                 method="PATCH",
-                body={"enabled": False},
+                body={
+                    "enabled": True,
+                    "patterns": [{"id": pattern, "enabled": False} for pattern in patterns],
+                },
             )
 
+    if not updated_tools:
+        print(f"No enabled tool matched: {', '.join(args.tools or DEFAULT_TOOLS)}", file=sys.stderr)
+        return 1
+
     print()
-    print(f"Categories seen across this repository: {', '.join(sorted(name for name in seen_categories if name))}")
     if args.apply:
-        print(f"Disabled {total_disabled} patterns. Re-analyze the repository for the issue counts to drop.")
+        print(f"Disabled {', '.join(patterns)} on {updated_tools} tool(s).")
         if args.reanalyze_commit:
             request(
                 f"/organizations/{args.provider}/{args.organization}/repositories/{args.repository}/reanalyzeCommit",
@@ -152,7 +134,7 @@ def main() -> int:
             )
             print(f"Requested reanalysis of {args.reanalyze_commit}.")
     else:
-        print(f"Dry run. {total_disabled} patterns would be disabled. Re-run with --apply to write the change.")
+        print(f"Dry run. Re-run with --apply to write the change on {updated_tools} tool(s).")
     return 0
 
 
