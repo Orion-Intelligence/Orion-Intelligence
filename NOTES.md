@@ -308,6 +308,13 @@ which is the case that call was actually for.
 Recovering an instance in this state needs both halves: recreate `backend/workspace/logs` owned by 1000,
 and `DEL SYSTEM_LOG_FLUSHED_AT` in redis, since the marker hides everything older than the flush.
 
+`run.sh` now creates `backend/workspace/logs` and makes it group/other writable just before `compose up`,
+next to the identical `parser_files` prep, so every deploy path lands the directory. It is needed because
+`/app/workspace` is root-owned on production while the container runs as uid 1000 — the app can write
+inside `logs/` but cannot create it — so a fresh clone, a wiped volume or a new box would otherwise start
+in the same wedged state. The chmod is deliberately not `-R`: recursing would rewrite the 0644 perms
+`__write_to_file` sets on every log file and walk the whole history on each deploy.
+
 ### Left alone deliberately
 
 `total` is still `page * limit + 1` (an honest count means scanning every file on every request), deep
