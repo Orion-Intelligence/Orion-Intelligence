@@ -109,8 +109,6 @@ class social_profile_job:
                 await self.run_posting(profile, persona, session_state, cb_url)
             elif purpose == SocialProfilePurpose.AD_MONITORING:
                 await self.run_ad_monitoring(profile, persona, session_state, cb_url)
-            elif purpose == SocialProfilePurpose.HATE_SPEECH_MONITORING:
-                await self.run_hate_speech_monitoring(profile, persona, session_state, cb_url)
                 
             await self._wait_for_task(task_id, timeout_seconds=300)
 
@@ -187,6 +185,7 @@ class social_profile_job:
             log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
 
     async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
+        
         log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
         
         try:
@@ -209,25 +208,6 @@ class social_profile_job:
         except Exception as e:
             log.g().e(f"Failed to run ad monitoring for profile {profile.profile_id}: {e}")
 
-    async def run_hate_speech_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str = "http://trusted-web-main:8070/api/social/automation/callback"):
-        log.g().i(f"Running hate speech monitoring for profile {profile.profile_id} on {profile.platform}")
-        
-        try:
-            headers = social_model._social_headers(None, None)
-            payload = {
-                "session_state": session_state, 
-                "platform": profile.platform,
-                "callback_url": callback_url,
-                "gender": persona.gender.value if persona.gender else "",
-                "age_group": persona.age_group.value if persona.age_group else "",
-                "interests": persona.interests or []
-            }
-            status_code, resp_body = await social_model.getInstance().social_request(
-                payload,
-                "automation/hate-speech-monitor",
-                headers
-            )
-            log.g().i(f"run_hate_speech_monitoring API response: {status_code} {resp_body}")
-                
-        except Exception as e:
-            log.g().e(f"Failed to run hate speech monitoring for profile {profile.profile_id}: {e}")
+    async def run_hate_speech_monitoring(self, profile: ManagedSocialProfile, session_state: dict[str, Any]):
+        print("run_hate_speech_monitoring " * 100)
+        print(f"Running hate speech monitoring for profile {profile.profile_id}")
