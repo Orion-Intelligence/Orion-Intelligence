@@ -243,3 +243,73 @@ Empty scan results, clean stealer/phone lookups, stopping an in-flight section s
 gated to facebook/youtube/mastodon/bluesky/hackernews/reddit/habr/devcommunity/stackoverflow/stackexchange),
 the extension `signin` and `unsupported` states, the manage-profiles 10-session cap, and a platform load
 failure. 11 tests -> 20, all passing on two consecutive runs.
+
+## Log Manager was dropping most of what it claimed to show (2026-08-31)
+
+Audit of `/dashboard/profile/monitoring?tab=log-manager`. Six defects, all fixed.
+
+### Unhandled 500s never reached the file logger
+
+`configs/exception_handlers.py` logged to `logging.getLogger("uvicorn.error")`, which only goes to
+stdout/container logs. Nothing in the repo bridges stdlib `logging` to `workspace/logs/` (no
+`basicConfig`/`dictConfig`/`log_config` anywhere), so no 500 and no traceback had ever appeared in the
+Log Manager. Both handlers now also call `log.g().e()` / `log.g().w()` with the formatted traceback.
+`auth_manager` had the same problem via its own `logging.getLogger(__name__)`; that logger is gone and
+its two `logger.exception` calls now go through `log.g().e()`.
+
+### Multi-line entries were discarded
+
+`LOG_LINE_PATTERN` is anchored, and `_parse_log_line` returned `None` for anything that did not match, so
+every continuation line was thrown away — 196 of 778 lines (25%) in the crawler logs, which is exactly the
+stack frames and Playwright `Call log:` detail. `get()` now buffers unmatched lines and attaches them to
+their header entry. Because `_iter_log_lines_reverse` walks bottom-up, the continuation arrives before its
+header, so the buffer is flushed in `reversed()` order onto the next entry that parses.
+
+### Crawler errors were shown twice
+
+The crawler's `log.g().e()`/`c()` write to both `<date>/info/` and `<date>/error/`, and `_log_files`
+`rglob`s the whole date directory, so every crawler error appeared twice. `error/` is a strict subset of
+`info/` (only `e()` and `c()` write there, and they always write both), so it is now skipped when a
+sibling `info/` exists.
+
+### CRITICAL was written to disk and then filtered out by the reader
+
+`VISIBLE_LOG_TYPES` was `{INFO, WARNING, ERROR}` while `log_controller` also emits `SUCCESS` and
+`CRITICAL` — the most severe level was unreachable by design. Both added, plus the type dropdown and
+badge colours in the component.
+
+### The caller column was empty for ~90% of rows
+
+The old code looked for the literal `" - Function "` and so only matched callers logged from a bare
+function; for a class caller the `if` failed and the `(file:line)` suffix stayed glued to the end of the
+message. Replaced with `CALLER_PATTERN` matching the `<name> (<path>:<line>)` suffix. Measured on the
+real logs: 90/100 empty -> 0/100.
+
+### 30-day retention had not run since 2026-07-04
+
+`__cleanup_old_logs` wrapped the whole loop in one `try`, so a single failure aborted the entire pass, and
+it used `os.remove` per file — which raises `IsADirectoryError` on the crawler's nested `info/`/`error/`
+layout and `PermissionError` on root-owned directories. It also set `__last_cleanup_date` before doing the
+work, so a failed pass would not retry that day. Now: per-directory `shutil.rmtree(..., ignore_errors=True)`,
+so one undeletable directory no longer blocks the rest.
+
+### Flush deleted the log root and wedged the writer for four days
+
+Found on production after the fixes above shipped: the page was still empty because
+`SYSTEM_LOG_FLUSHED_AT` was `2026-08-27T23:58:39` and `/app/workspace/logs` did not exist at all.
+`flush()` removes every date directory and then calls `_remove_empty_dir(root)` on the log root itself,
+so pressing "Flush all logs" deletes `workspace/logs`. After that `__write_to_file`'s
+`os.makedirs(.../logs/<date>)` needs write permission on `workspace/`, not on `logs/` — the container runs
+as uid 1000 and could write inside `logs/` but could not recreate it — and `log_controller.py:93` is
+`except Exception: pass`, so every write failed silently. Nothing was logged between 2026-08-27 and
+2026-08-31. Dropped the `_remove_empty_dir(root)` call; `delete()` still prunes an emptied date directory,
+which is the case that call was actually for.
+
+Recovering an instance in this state needs both halves: recreate `backend/workspace/logs` owned by 1000,
+and `DEL SYSTEM_LOG_FLUSHED_AT` in redis, since the marker hides everything older than the flush.
+
+### Left alone deliberately
+
+`total` is still `page * limit + 1` (an honest count means scanning every file on every request), deep
+paging is still an O(page) rescan, and nginx / Mongo / Elastic / the Angular client / the sibling Orion
+services still do not feed this page at all. Those need a real log pipeline, not a patch.

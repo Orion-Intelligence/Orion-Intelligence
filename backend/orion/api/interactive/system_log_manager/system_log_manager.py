@@ -148,7 +148,6 @@ class SystemLogManager:
                     shutil.rmtree(path, onerror=self._make_writable_and_retry)
                 except OSError:
                     continue
-            self._remove_empty_dir(root)
         return {"success": True, "deleted": deleted}
 
     def _valid_log_date(self, log_date: str) -> bool:
