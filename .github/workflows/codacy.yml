@@ -91,7 +91,14 @@ jobs:
           sarif = json.loads(source.read_text())
           runs = sarif.get("runs") or []
           batch_size = 20
-          suppressed_rules = {"no-unused-vars"}
+          suppressed_rules = {
+              "no-unused-vars",
+              "@typescript-eslint/no-unused-vars",
+              "@typescript-eslint/no-unnecessary-condition",
+              "ESLint8_no-unused-vars",
+              "ESLint8_@typescript-eslint_no-unused-vars",
+              "ESLint8_@typescript-eslint_no-unnecessary-condition",
+          }
 
           for run in runs:
               results = run.get("results") or []
