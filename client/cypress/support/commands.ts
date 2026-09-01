@@ -5,6 +5,10 @@ type SlowTypeOptions = {
     settleMs?: number;
 };
 
+type CypressAutomation = typeof Cypress & {
+    automation(eventName: string, options: Record<string, unknown>): Promise<unknown>;
+};
+
 type MailSummary = {
     ID?: string;
 };
@@ -103,30 +107,66 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
 
         const safeName = String(name || "screenshot").replace(/\\/g, "/").replace(/^\/+/, "") || "screenshot";
         const taskScreenshotName = safeName.startsWith("user-manual/") ? safeName.slice("user-manual/".length) : safeName;
-        const hiddenScrollbarCss = `
-            html, body { scrollbar-width: none !important; }
-            html::-webkit-scrollbar, body::-webkit-scrollbar, *::-webkit-scrollbar {
-                width: 0 !important;
-                height: 0 !important;
-                display: none !important;
-            }
-        `;
-        let appStyle: HTMLStyleElement | undefined;
+        let screenshotClip: { x: number; y: number; width: number; height: number; scale: number } | undefined;
+        void options;
 
-        return cy.document({ log: false }).then((doc) => {
-            appStyle = doc.createElement("style");
-            appStyle.textContent = hiddenScrollbarCss;
-            (doc.head || doc.documentElement).appendChild(appStyle);
+        return cy.window({ log: false }).then((win) => {
+            const topWindow = win.top;
+            if (!topWindow) {
+                throw new Error(`Unable to resolve the Cypress runner window for docs screenshot: ${name}`);
+            }
+
+            const iframe = Array.from(topWindow.document.querySelectorAll("iframe"))
+                .find((frame) => frame.contentWindow === win);
+            if (!iframe) {
+                throw new Error(`Unable to resolve the application frame for docs screenshot: ${name}`);
+            }
+
+            const rect = iframe.getBoundingClientRect();
+            if (rect.width <= 0 || rect.height <= 0) {
+                throw new Error(`Application frame has invalid dimensions for docs screenshot: ${name}`);
+            }
+
+            const viewportWidth = Number(Cypress.config("viewportWidth")) || Math.round(win.innerWidth);
+            const viewportHeight = Number(Cypress.config("viewportHeight")) || Math.round(win.innerHeight);
+            screenshotClip = {
+                x: Math.max(0, rect.left),
+                y: Math.max(0, rect.top),
+                width: rect.width,
+                height: rect.height,
+                scale: Math.min(
+                    viewportWidth / rect.width,
+                    viewportHeight / rect.height,
+                ),
+            };
         }).then(() => cy.wait(50, { log: false })).then(() => {
-            return cy.screenshot(`user-manual/${taskScreenshotName}`, {
-                capture: "viewport",
-                overwrite: true,
-                ...options,
+            if (!screenshotClip) {
+                throw new Error(`Missing capture bounds for docs screenshot: ${name}`);
+            }
+
+            return (Cypress as unknown as CypressAutomation).automation("remote:debugger:protocol", {
+                command: "Page.captureScreenshot",
+                params: {
+                    captureBeyondViewport: false,
+                    clip: screenshotClip,
+                    format: "png",
+                    fromSurface: true,
+                },
             });
-        }).then(() => {
-            appStyle?.remove();
-            return cy.wrap<void>(undefined, { log: false });
-        });
+        }).then((result) => {
+            const data = typeof result === "string"
+                ? result
+                : (result as { data?: unknown } | null)?.data;
+            if (typeof data !== "string" || data.length === 0) {
+                throw new Error(`Browser returned no data for docs screenshot: ${name}`);
+            }
+
+            return cy.task("writeDocScreenshot", {
+                data,
+                name: taskScreenshotName,
+                specName: Cypress.spec.name,
+            }, { log: false });
+        }).then(() => cy.wrap<void>(undefined, { log: false }));
     });
 });
 

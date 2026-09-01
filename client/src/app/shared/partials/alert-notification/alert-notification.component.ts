@@ -34,6 +34,7 @@ type ScanActionMode = 'single-delete' | 'delete-all' | 'mark-seen-completed';
 })
 export class AlertNotificationComponent implements OnChanges {
   private appendTimer: ReturnType<typeof setTimeout> | null = null;
+  private relativeTimeReferenceMs = Date.now();
 
   alertNotifications: AlertNotification[] = [];
   readonly batchSize: number = 20;
@@ -75,6 +76,9 @@ export class AlertNotificationComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.isNotificationOpen) {
       const value = changes.isNotificationOpen.currentValue;
+      if (value === true) {
+        this.relativeTimeReferenceMs = Date.now();
+      }
       if (value === true && this.isAlertMode() && this.alertNotifications.length === 0) {
         this.fetchNotifications(true);
       }
@@ -188,8 +192,7 @@ export class AlertNotificationComponent implements OnChanges {
       return '';
     }
     const d = new Date(date instanceof Date ? date : `${date}Z`);
-    const now = new Date();
-    const seconds = Math.floor((now.getTime() - d.getTime()) / 1000);
+    const seconds = Math.floor((this.relativeTimeReferenceMs - d.getTime()) / 1000);
     const formatter = new Intl.RelativeTimeFormat(document.documentElement.lang || 'en', { numeric: 'always' });
     if (seconds < 60) {
       return formatter.format(-seconds, 'second');
