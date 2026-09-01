@@ -961,3 +961,44 @@ def test_sweep_removes_abandoned_rollback_directories(tmp_path):
     assert not stale.exists()
     assert fresh.exists()
     assert keep.exists()
+
+
+def test_restore_never_writes_into_the_live_log_directory(tmp_path):
+    manager = _make_manager(tmp_path, FakeMongoEngine())
+    source_dir = tmp_path / "source"
+    (source_dir / "logs" / "2026-07-04").mkdir(parents=True)
+    (source_dir / "logs" / "2026-07-04" / "log_1.log").write_text("archived", encoding="utf-8")
+
+    targets: list[Path] = []
+    manager._restore_mongo = lambda path: asyncio.sleep(0)
+    manager._restore_arango = lambda path: None
+    manager._restore_elastic = lambda path: asyncio.sleep(0)
+    manager._copy_folder = lambda source, destination: targets.append(destination)
+    manager._restore_folder = lambda source, destination: targets.append(destination)
+
+    _run(manager._run_restore_engine(source_dir))
+
+    assert all("logs" not in target.parts for target in targets), targets
+    assert targets == [CONSTANTS.BASE_DIR / "static" / "resource"]
+
+
+def test_backup_still_archives_the_logs_directory(tmp_path):
+    job_store = FakeBackupJobStore()
+    manager = _make_manager(tmp_path, FakeMongoEngine(), job_store)
+    copied: list[tuple] = []
+
+    async def fake_backup_mongo(output_dir: Path, report=None):
+        return {}
+
+    async def fake_backup_elastic(output_dir: Path):
+        return {}
+
+    manager._backup_mongo = fake_backup_mongo
+    manager._backup_elastic = fake_backup_elastic
+    manager._backup_arango = lambda output_dir: {}
+    manager._copy_folder = lambda source, destination: copied.append((source, destination))
+
+    _run(manager._perform_backup(tmp_path / "backups" / "2026_01_10_00_00_00"))
+
+    sources = [source for source, _ in copied]
+    assert CONSTANTS.BASE_DIR / "workspace" / "logs" in sources

@@ -187,7 +187,7 @@ describe('Orion Intelligence - User Management Creation Flow', () => {
     cy.scrollDashboardToBottom()
     cy.get('[data-testid="report-feedback-comment-input"]').filter(':visible').first().scrollIntoView().should('be.visible').type(commentText);
     cy.get('[data-testid="report-feedback-comment-save"]').filter(':visible').first().click();
-    cy.contains('p', commentText).should('be.visible');
+    cy.contains('p', commentText).scrollIntoView().should('be.visible');
     cy.docsScreenshot('report-feedback-comments');
 
     cy.contains('[data-testid="report-feedback-comment-user-name"]', currentUsername).first().click({ force: true });

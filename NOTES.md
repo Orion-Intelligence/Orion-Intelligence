@@ -410,10 +410,14 @@ it through `| translate`; only the number moves.
 to `workspace/logs` — and `/app/orion` is mounted read-only in production anyway. Every backup has been
 storing an empty `logs/` folder. Fixed to `BASE_DIR / "workspace" / "logs"`.
 
-On restore that folder is now merged with `_copy_folder` instead of being wiped and replaced by
-`_restore_folder`. Previously the wipe was harmless only because the source never existed; with a real
-source it would `rmtree` the live log root out from under the running logger, which is the failure mode
-"Stop log flush from deleting the log root" already dealt with once.
+Logs are archived into the backup but **never restored**. Fixing the path is what first made the log
+restore actually execute, and it failed immediately in the real container: `copytree` copies file
+metadata, so it hit `[Errno 13] Permission denied` on every existing `log_1.log` and `[Errno 1]
+Operation not permitted` on the day directories. That aborted the restore, and because the rollback
+path restores logs too it aborted the rollback as well — leaving maintenance mode held on for manual
+intervention, which is how the Cypress spec caught it. Restoring logs is wrong anyway: it fights the
+running logger's open handles, and rolling back *data* should not roll back the logs of what just
+happened. `_run_restore_engine` no longer touches the log directory at all.
 
 ### Scheduled backups
 
@@ -581,3 +585,60 @@ predicate (`upsert_alerts_bulk` and `set_scan_running` are the two confirmed ung
 generation token on every write. Mongo indexes are still not recreated after a restore beyond what
 `ensure_indexes` rebuilds at boot, and Redis, the bloom-filter volume and GridFS remain outside the
 backup entirely.
+
+## Why `run.sh -docs` is slow, and what it is not (2026-08-31)
+
+`npm test run` is fast; `./run.sh -docs` over the same specs is not. The screenshot machinery was the
+obvious suspect and it is the wrong one. Measured, not assumed:
+
+- `cy.screenshot()` costs ~300-400ms per call and leaves no residue on later commands. There are 100
+  `docsScreenshot` calls in the whole suite, so screenshots account for roughly **40 seconds** across
+  a run measured in hours.
+- A direct A/B of one spec with and without `CYPRESS_takeScreenshots=true`, against the same warm
+  stack, showed no meaningful difference in ordinary test execution.
+- The evidence was in the run output all along: the test that *takes* a screenshot
+  (`trial-subscription-banner`) finished in 2,020ms, while the three tests that take none cost
+  198,842ms, 106,072ms and 90,962ms.
+- Ruled out with evidence: `screenshotsFolder` (the only thing the flag changes in `cypress.config.ts`
+  is one assignment), `retries` (hard-disabled at 0), `screenshotOnRunFailure` (identical in both
+  modes), and `writeDocScreenshot`, which turns out to be dead code — nothing calls that task.
+
+The real costs, largest first:
+
+**`-docs` is not "the suite plus screenshots".** `run.sh:308-310` runs
+`docker compose down -v --remove-orphans`, then a full `build -t`, then `restart_ng_serve`. `-v`
+destroys every volume, so each docs run executes against an empty Mongo/Elasticsearch with cold
+indexes and a cold dev server, while `npm test run` reuses whatever warm stack is already up. That
+alone explains a large part of the gap, and it slows tests that take no screenshots — exactly the
+reported symptom.
+
+**`waitForStepStability` had no deadline.** `demo-tour.component.ts:2021` resolved only after 180ms
+elapsed with no ResizeObserver/MutationObserver event on the step subtree. For enterprise tour steps
+2-4 the observed element is `dashboard-consolidated`, which mutates continuously while search results
+stream, so every mutation restarted the settle timer and the tour sat in `aria-busy` unbounded. It is
+awaited twice per step. The same test was observed swinging 16.6s -> 94s with no code change, purely
+because scan jobs from a killed earlier run were still churning the panel. Every sibling helper takes
+a cap (`waitForStepTarget` 1500ms, `waitForSidebarRectStability` 700ms); this one now takes
+`maxWaitMs = 2000` and clears the deadline in `finish()`.
+
+**The tour runs real, cache-bypassing searches.** `demo_tour.json` sets `triggerSubmitOnNext` on step
+1 and `triggerSubmitOnShow` on steps 3 and 4, so each pass issues `/api/search/consolidated/ioc`,
+`/api/search/apt-intel` and `/api/urlscan/domain?force_new=true` — `force_new=true` defeats any
+result cache. nginx logs show 55s of that traffic in one test, and `blocks background interaction`
+pays for it twice because it repeats the set after `cy.reload()`.
+
+**Tour transitions burn fixed timeouts.** Each step chains `waitForStepTarget` (1500/2500ms),
+`waitForRenderedSelector` (1500ms), `waitForSidebarControl` / `waitForSidebarProjection` /
+`waitForProfileMenuState` (1500ms each) plus `minimumLoadingMs` 350ms. `blocks background interaction`
+performs 16 transitions; nginx logged **zero** requests across a 64-second window of that test, so
+that minute is entirely client-side tour bookkeeping at ~6-9s per transition.
+
+**`defaultCommandTimeout` is 60000**, 15x the Cypress default, and `requestTimeout`, `responseTimeout`,
+`pageLoadTimeout`, `execTimeout` and `taskTimeout` match it. The slow tests land on near-exact
+multiples of 60s, which is the signature of commands burning whole retry windows before eventually
+succeeding. Lowering it does not make anything faster by itself; it converts silent 60s stalls into
+fast, localised failures that name the offending command.
+
+Left alone deliberately: dropping `-v` from the `-docs` teardown would warm the database between runs
+but costs deterministic seeding for the screenshots, and lowering the timeouts will surface failures
+that are currently being papered over. Both are judgement calls for the operator, not mechanical wins.

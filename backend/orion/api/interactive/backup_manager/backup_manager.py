@@ -435,7 +435,6 @@ class BackupManager:
         await self._restore_mongo(source_dir / "mongo")
         await asyncio.to_thread(self._restore_arango, source_dir / "arango")
         await self._restore_elastic(source_dir / "elastic")
-        await asyncio.to_thread(self._copy_folder, source_dir / "logs", CONSTANTS.BASE_DIR / "workspace" / "logs")
         await asyncio.to_thread(self._restore_folder, source_dir / "resource", CONSTANTS.BASE_DIR / "static" / "resource")
 
     async def _validate_restore(self, manifest=None):

@@ -9,6 +9,7 @@ const isCi =
     process.env["GITHUB_ACTIONS"] === "true" ||
     process.env["GITLAB_CI"] === "true";
 const coverageEnabled = isCi || process.env["ORION_COVERAGE"] === "true";
+const commandTimeout = Number(process.env["CYPRESS_COMMAND_TIMEOUT"]) || 60000;
 
 const isUnpackedExtension = (candidate: string) =>
     fs.existsSync(path.join(candidate, "manifest.json"));
@@ -257,11 +258,15 @@ export default defineConfig({
             on("before:browser:launch", (browser, launchOptions) => {
                 if (browser.family === "chromium" && browser.name !== "electron") {
                     launchOptions.args.push("--start-maximized");
-                    launchOptions.args.push("--window-size=1920,1080");
+                    launchOptions.args.push(`--window-size=${config.viewportWidth},${config.viewportHeight}`);
                     launchOptions.args.push("--force-device-scale-factor=1");
                     if (extensionPath) {
                         launchOptions.extensions.push(extensionPath);
                     }
+                }
+                if (browser.name === "electron") {
+                    launchOptions.preferences.width = config.viewportWidth;
+                    launchOptions.preferences.height = config.viewportHeight;
                 }
                 return launchOptions;
             });
@@ -294,12 +299,12 @@ export default defineConfig({
         baseUrl: "http://127.0.0.1:4200",
         viewportWidth: 1920,
         viewportHeight: 1080,
-        defaultCommandTimeout: 60000,
-        requestTimeout: 60000,
-        responseTimeout: 60000,
+        defaultCommandTimeout: commandTimeout,
+        requestTimeout: commandTimeout,
+        responseTimeout: commandTimeout,
         pageLoadTimeout: 60000,
-        execTimeout: 60000,
-        taskTimeout: 60000,
+        execTimeout: commandTimeout,
+        taskTimeout: commandTimeout,
         waitForAnimations: true,
         animationDistanceThreshold: 5,
     },

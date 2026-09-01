@@ -161,7 +161,7 @@ export function openDirectoryFilter() {
 
 export function resetDirectoryFilters() {
   openDirectoryFilter();
-  void cy.get('[data-testid="side-filter-reset"]').scrollIntoView().click();
+  void cy.get('[data-testid="side-filter-reset"]').filter(':visible').first().should('be.visible').click();
   waitForDirectoryRequest();
   void cy.location('search').should('not.include', 'network=');
   void cy.location('search').should('not.include', 'index=');

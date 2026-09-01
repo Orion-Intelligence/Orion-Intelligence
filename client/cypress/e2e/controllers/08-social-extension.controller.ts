@@ -74,16 +74,14 @@ export function assertInstallPrompt() {
     .should('contain.text', 'Install for Firefox')
     .and('have.attr', 'href', '/ext/firefox/orion-social-firefox.xpi');
   void cy.get('[data-testid="social-extension-download-chrome"]')
-    .should('contain.text', 'Download for Chromium')
-    .and('not.have.attr', 'href');
-  void cy.get('[data-testid="social-extension-download-chrome"]').click();
-  void cy.contains('Chromium install is coming soon').should('be.visible');
-  void cy.get('[data-testid="tenant-message-dismiss"]').click();
+    .should('contain.text', 'Install for Chrome')
+    .and('have.attr', 'href', 'https://chromewebstore.google.com/detail/orion-social/ledhnhjfmgbmglkifmcnakimopejlghi')
+    .and('have.attr', 'target', '_blank');
   void cy.get(MANAGER).find('a[data-testid^="social-extension-download-"]').first()
     .should('have.attr', 'data-testid', 'social-extension-download-firefox');
   void cy.get('[data-testid="social-extension-steps-firefox"]').find('li').should('have.length', 3);
   void cy.get('[data-testid="social-extension-steps-chrome"]').find('li').should('have.length', 3);
-  void cy.get('[data-testid="social-extension-steps-chrome"]').should('contain.text', 'chrome://extensions');
+  void cy.get('[data-testid="social-extension-steps-chrome"]').should('contain.text', 'Chrome Web Store');
 }
 
 export function setupManageProfilesStubs() {

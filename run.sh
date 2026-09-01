@@ -105,7 +105,7 @@ client_build() {
     test -d build-next/browser
     mkdir -p build
     find build-next -maxdepth 1 -type f -exec mv -f {} build-next/browser/ \;
-    rsync -a build-next/browser/ build/
+    rsync -a --delete build-next/browser/ build/
     rm -rf build-next
     cd ..
     local backups_holding

@@ -92,16 +92,29 @@ def test_the_progress_and_maintenance_page_paths_stay_reachable(flag, path):
     assert _status_of(sent) == 200
 
 
-def test_public_probe_is_blocked_so_the_maintenance_page_does_not_bounce_users_back(flag):
+@pytest.mark.parametrize("path", ["/api/public", "/api/test/ready"])
+def test_readiness_probes_stay_green_during_maintenance(flag, path):
     flag.touch()
     maintenance_state.get_instance().invalidate()
     downstream = _Downstream()
     app = maintenance_middleware(downstream)
 
-    sent = _drive(app, {"type": "http", "path": "/api/public"})
+    sent = _drive(app, {"type": "http", "path": path})
 
+    assert downstream.calls == 1
+    assert _status_of(sent) == 200
+
+
+def test_the_app_shell_is_blocked_so_the_maintenance_page_probe_stays_honest(flag):
+    flag.touch()
+    maintenance_state.get_instance().invalidate()
+    downstream = _Downstream()
+    app = maintenance_middleware(downstream)
+
+    for path in ("/", "/dashboard/home"):
+        sent = _drive(app, {"type": "http", "path": path})
+        assert _status_of(sent) == 503, path
     assert downstream.calls == 0
-    assert _status_of(sent) == 503
 
 
 def test_websocket_handshakes_are_closed_during_maintenance(flag):

@@ -6,6 +6,8 @@ from orion.api.interactive.backup_manager.maintenance_state import maintenance_s
 
 class maintenance_middleware:
     EXEMPT_PATHS = frozenset({
+        "/api/public",
+        "/api/test/ready",
         "/api/admin/backups/status",
         "/robots.txt",
     })

@@ -2018,9 +2018,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     });
   }
 
-  private waitForStepStability(step: TourStep, element: HTMLElement): Promise<void> {
+  private waitForStepStability(step: TourStep, element: HTMLElement, maxWaitMs = 2000): Promise<void> {
     return new Promise(resolve => {
       let settleTimer: number | null = null;
+      let deadlineTimer: number | null = null;
       const stableAfterMs = 180;
 
       const observedElements = new Set([element]);
@@ -2041,6 +2042,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         if (settleTimer !== null) {
           window.clearTimeout(settleTimer);
           settleTimer = null;
+        }
+        if (deadlineTimer !== null) {
+          window.clearTimeout(deadlineTimer);
+          deadlineTimer = null;
         }
         resizeObserver.disconnect();
         mutationObserver.disconnect();
@@ -2071,6 +2076,10 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
         subtree: true,
         attributes: true
       });
+
+      deadlineTimer = window.setTimeout(() => {
+        finish();
+      }, maxWaitMs);
 
       scheduleSettle();
     });

@@ -293,7 +293,7 @@
 
     const isBackOnline = async () => {
         try {
-            const response = await fetch('/api/public', {cache: 'no-store'});
+            const response = await fetch('/dashboard/home', {cache: 'no-store'});
             return response.ok;
         } catch (_) {
             return false;

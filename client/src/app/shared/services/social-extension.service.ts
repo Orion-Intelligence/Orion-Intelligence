@@ -182,6 +182,6 @@ export class SocialExtensionService {
       return false;
     }
     const names = brands.map(entry => entry.brand);
-    return names.some(name => /chromium/i.test(name)) && !names.some(name => /google chrome|opera|edge|brave|vivaldi|yandex|samsung/i.test(name));
+    return names.some(name => /chromium/i.test(name)) && !names.some(name => /opera|edge|brave|vivaldi|yandex|samsung/i.test(name));
   }
 }

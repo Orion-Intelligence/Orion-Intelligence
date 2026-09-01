@@ -84,6 +84,7 @@ jobs:
       - run: |
           set -euo pipefail
           rm -f backend/static/.maintenance
+          rm -f backend/build/backups/.restore_in_progress
           chmod +x ./run.sh
 
       - run: |
@@ -344,6 +345,7 @@ jobs:
       - run: |
           set -euo pipefail
           rm -f backend/static/.maintenance
+          rm -f backend/build/backups/.restore_in_progress
           chmod +x ./run.sh
           ./run.sh build -b
           sed -i '/^TESTING_ENABLED=/d' .env
