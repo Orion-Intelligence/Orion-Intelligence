@@ -116,6 +116,7 @@ export class PhoneLookupComponent implements OnInit {
       return;
     }
 
+    this.loading = false;
     if (res.status === 'error') {
       this.errorMessage = res.message ?? res.error_message ?? 'Scan failed to retrieve data.';
       return;
