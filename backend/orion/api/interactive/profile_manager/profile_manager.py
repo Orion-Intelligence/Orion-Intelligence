@@ -14,7 +14,7 @@ from pymongo.errors import DuplicateKeyError
 
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.profile_manager.constants.constant import MAX_SESSIONS_PER_PLATFORM, PLATFORMS_RESULT_KEY
-from orion.api.interactive.profile_manager.model.models import SocialAutomationCallbackRequest, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaResponse, SocialPersonaUpdateRequest, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileCallbackRequest, SocialProfileCallbackResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResponse, SocialProfileUpdateRequest
+from orion.api.interactive.profile_manager.model.models import SocialAutomationCallbackRequest, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaResponse, SocialPersonaUpdateRequest, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileCallbackRequest, SocialProfileCallbackResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResponse, SocialProfileResultsResponse, SocialProfileUpdateRequest
 from orion.constants.constant import CONSTANTS
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.log_manager.log_controller import log
@@ -521,6 +521,23 @@ class ProfileManager:
         session.verified = False
         await self._engine.save(session)
         log.g().i(f"Social session {session.session_id} marked unverified after expired session on profile {profile_id}")
+
+    async def get_profile_results(self, current_user, profile_id: str) -> SocialProfileResultsResponse:
+        user_id = str(current_user.id)
+        record = await self._engine.find_one(db_social_profile_management_model, db_social_profile_management_model.user_id == user_id)
+        if record is None:
+            raise HTTPException(status_code=404, detail="Social profile not found")
+        self._find_profile(record, profile_id)
+
+        results = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+        if results is None:
+            return SocialProfileResultsResponse(profile_id=profile_id)
+
+        return SocialProfileResultsResponse(
+            profile_id=profile_id,
+            ad_detection_results=sorted([item for item in results.ad_detection_results if item.profile_id == profile_id], key=lambda item: item.date_time, reverse=True),
+            post_results=sorted([item for item in results.post_results if item.profile_id == profile_id], key=lambda item: item.date_time, reverse=True),
+        )
 
     async def _get_or_create_social_record(self, current_user) -> db_social_profile_management_model:
         user_id = str(current_user.id)

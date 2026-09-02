@@ -13,6 +13,7 @@ from orion.api.interactive.profile_manager.model.models import (
     SocialProfileConnectRequest,
     SocialProfileListResponse,
     SocialProfileResponse,
+    SocialProfileResultsResponse,
     SocialProfileUpdateRequest,
 )
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
@@ -103,3 +104,8 @@ async def remove_assignment(profile_id: str, current_user=Depends(get_current_us
 @manage_profiles_routes.post("/api/manage-profiles/callback", response_model=SocialProfileCallbackResponse, dependencies=route_permissions)
 async def social_profile_callback(data: SocialProfileCallbackRequest = Body(...), current_user=Depends(get_current_user)):
     return await ProfileManager.get_instance().callback(current_user, data)
+
+
+@manage_profiles_routes.get("/api/manage-profiles/results/{profile_id}", response_model=SocialProfileResultsResponse, dependencies=route_permissions)
+async def get_profile_results(profile_id: str, current_user=Depends(get_current_user)):
+    return await ProfileManager.get_instance().get_profile_results(current_user, profile_id)

@@ -3,6 +3,10 @@ from typing import Any, Dict, List
 
 from pydantic import BaseModel, Field
 
+from orion.services.mongo_manager.shared_model.db_social_automation_result_model import (
+    SocialAdDetectionResult,
+    SocialPostResult,
+)
 from orion.services.mongo_manager.shared_model.db_social_profile_management_model import (
     SocialPersonaAgeGroup,
     SocialPersonaGender,
@@ -141,3 +145,10 @@ class SocialAutomationCallbackRequest(BaseModel):
     result_type: str
     post_result: SocialAutomationPostResultRequest | None = None
     ad_detection_result: SocialAutomationAdDetectionResultRequest | None = None
+
+
+class SocialProfileResultsResponse(BaseModel):
+    profile_id: str
+    ad_detection_results: List[SocialAdDetectionResult] = Field(default_factory=list)
+    post_results: List[SocialPostResult] = Field(default_factory=list)
+    hate_speech_results: List[Dict[str, Any]] = Field(default_factory=list)

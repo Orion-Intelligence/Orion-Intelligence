@@ -92,3 +92,40 @@ export interface SocialProfileAssignmentResponse {
   message: string;
   profile: SocialProfile;
 }
+
+export interface SocialDetectedAd {
+  url: string;
+  author: string;
+  content_text: string;
+  metadata: string;
+  likes: string;
+  shares: string;
+  views: string;
+  detected_at: string;
+}
+
+export interface SocialAdDetectionResult {
+  profile_id: string;
+  date_time: string;
+  total_detected_ads: number;
+  ads: SocialDetectedAd[];
+  error: boolean;
+  error_reason: string;
+  session_expired: boolean;
+}
+
+export interface SocialPostResult {
+  profile_id: string;
+  date_time: string;
+  post_url: string;
+  error: boolean;
+  error_reason: string;
+  session_expired: boolean;
+}
+
+export interface SocialProfileResultsResponse {
+  profile_id: string;
+  ad_detection_results: SocialAdDetectionResult[];
+  post_results: SocialPostResult[];
+  hate_speech_results: unknown[];
+}

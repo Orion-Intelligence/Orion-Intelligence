@@ -271,6 +271,11 @@
           }
         </div>
       }
+
+      @if (activeTab() === 'results') {
+        <app-manage-profile-results [profiles]="profiles()" [platforms]="platforms()"></app-manage-profile-results>
+      }
+
     </div>
   </div>
 

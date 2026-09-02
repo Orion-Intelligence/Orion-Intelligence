@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, filter, map, of, switchMap, take, timer } from 'rxjs';
-import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaUpdateRequest, SocialProfile, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileUpdateRequest } from './model/manage-profiles.model';
+import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaUpdateRequest, SocialProfile, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResultsResponse, SocialProfileUpdateRequest } from './model/manage-profiles.model';
 import { SocialExtensionService } from '../../shared/services/social-extension.service';
 
 export type ManageProfilesExtensionState = 'ready' | 'signin' | 'install';
@@ -90,5 +90,9 @@ export class ManageProfilesService {
 
   removeAssignment(profileId: string): Observable<SocialProfileAssignmentResponse> {
     return this.http.delete<SocialProfileAssignmentResponse>(`/api/manage-profiles/assignments/${profileId}`, { withCredentials: true });
+  }
+
+  getProfileResults(profileId: string): Observable<SocialProfileResultsResponse> {
+    return this.http.get<SocialProfileResultsResponse>(`/api/manage-profiles/results/${profileId}`, { withCredentials: true });
   }
 }

@@ -14,8 +14,9 @@ import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-p
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 import { SocialPersona, SocialPlatform, SocialProfile } from './model/manage-profiles.model';
 import { ManageProfilePopupComponent, ManageProfilePopupSaveEvent } from './manage-profile-popup/manage-profile-popup.component';
+import { ManageProfileResultsComponent } from './manage-profile-results/manage-profile-results.component';
 
-type ManageProfilesTab = 'personas' | 'sessions' | 'profiles' | 'assignments';
+type ManageProfilesTab = 'personas' | 'sessions' | 'profiles' | 'assignments' | 'results';
 type ModalMode = 'persona' | 'profile';
 
 interface PendingSessionDelete {
@@ -26,7 +27,7 @@ interface PendingSessionDelete {
 @Component({
   selector: 'app-manage-profiles',
   standalone: true,
-  imports: [DatePipe, NgClass, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent, UiDropdownComponent, ConfirmationPopupComponent, ManageProfilePopupComponent],
+  imports: [DatePipe, NgClass, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent, UiDropdownComponent, ConfirmationPopupComponent, ManageProfilePopupComponent, ManageProfileResultsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './manage-profiles.component.html',
 })
@@ -36,7 +37,7 @@ export class ManageProfilesComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly activeTab = signal<ManageProfilesTab>('sessions');
-  readonly tabs: { key: ManageProfilesTab; label: string }[] = [ { key: 'sessions', label: 'Sessions' }, { key: 'personas', label: 'Personas' }, { key: 'profiles', label: 'Profiles' }, { key: 'assignments', label: 'Persona Assignments' }, ];
+  readonly tabs: { key: ManageProfilesTab; label: string }[] = [ { key: 'sessions', label: 'Sessions' }, { key: 'personas', label: 'Personas' }, { key: 'profiles', label: 'Profiles' }, { key: 'assignments', label: 'Persona Assignments' }, { key: 'results', label: 'Results' }, ];
   readonly state = signal<ManageProfilesExtensionState | null>(null);
   readonly loading = signal(false);
   readonly socialLoading = signal(false);
