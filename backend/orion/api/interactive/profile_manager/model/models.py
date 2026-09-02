@@ -103,3 +103,41 @@ class SocialProfileCallbackResponse(BaseModel):
     message: str
     profile_id: str
     connection_status: SocialProfileConnectionStatus
+
+
+class SocialAutomationDetectedAdModel(BaseModel):
+    url: str
+    author: str = ""
+    content_text: str = ""
+    metadata: str = ""
+    likes: str = ""
+    shares: str = ""
+    views: str = ""
+    detected_at: datetime | None = None
+
+
+class SocialAutomationPostResultRequest(BaseModel):
+    profile_id: str
+    date_time: datetime | None = None
+    post_url: str = ""
+    error: bool = False
+    error_reason: str = ""
+    session_expired: bool = False
+
+
+class SocialAutomationAdDetectionResultRequest(BaseModel):
+    profile_id: str
+    date_time: datetime | None = None
+    total_detected_ads: int = 0
+    ads: List[SocialAutomationDetectedAdModel] = Field(default_factory=list)
+    error: bool = False
+    error_reason: str = ""
+    session_expired: bool = False
+
+
+class SocialAutomationCallbackRequest(BaseModel):
+    user_id: str
+    profile_id: str
+    result_type: str
+    post_result: SocialAutomationPostResultRequest | None = None
+    ad_detection_result: SocialAutomationAdDetectionResultRequest | None = None

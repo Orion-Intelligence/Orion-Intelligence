@@ -114,6 +114,15 @@ class cronjob_manager:
 
     @staticmethod
     async def social_profile_loop():
+        while True:
+            try:
+                await social_profile_job.get_instance().run_daily_social_profiles()
+            except Exception as e:
+                log.g().e(f"Social profile job failed: {e}")
+
+            await asyncio.sleep(300)  # 5 minutes
+
+
         job_config = DailySchedulerConfig(
             job_key=cronjob_manager.SOCIAL_PROFILE_JOB_KEY,
             hour=cronjob_manager.DEFAULT_SOCIAL_PROFILE_HOUR,

@@ -102,6 +102,17 @@ async def automation_callback(task_id: str = None, payload: dict = Body(...)):
     if payload.get("error"):
         log.g().e(f"Automation Error: {payload.get('error')}")
 
+    result = payload.get("result")
+    if result:
+        from orion.api.interactive.profile_manager.model.models import SocialAutomationCallbackRequest
+        from orion.api.interactive.profile_manager.profile_manager import ProfileManager
+        try:
+            data = SocialAutomationCallbackRequest.model_validate(result)
+            log.g().i(f"Automation Result: {data.result_type} for profile {data.profile_id}")
+            await ProfileManager.get_instance().store_automation_result(data)
+        except Exception as exc:
+            log.g().e(f"Failed to store automation result for task {task_id}: {exc}")
+
     if task_id:
         from orion.management.jobs.social_profile.social_profile_job import social_profile_job
         job = social_profile_job.get_instance()

@@ -36,10 +36,10 @@ class social_profile_job:
 
     async def run_daily_social_profiles(self):
         records = await self._profile_manager.get_all_social_profile_records()
+
         processed_profile_count = 0
         skipped_profile_count = 0
         error_count = 0
-
         for record in records:
             current_user = await self._profile_manager.get_user_for_social_record(record)
             if current_user is None:
@@ -69,7 +69,7 @@ class social_profile_job:
                         skipped_profile_count += 1
                         continue
 
-                    asyncio.create_task(self._run_profile_purposes(profile, persona, session_state))
+                    asyncio.create_task(self._run_profile_purposes(profile, persona, session_state, record.user_id))
                     processed_profile_count += 1
                 except Exception as exc:
                     error_count += 1
@@ -99,9 +99,10 @@ class social_profile_job:
         finally:
             self.task_events.pop(task_id, None)
 
-    async def _run_profile_purposes(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any]):
+    async def _run_profile_purposes(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], user_id: str):
         import uuid
         for purpose in profile.purposes:
+
             task_id = str(uuid.uuid4())
             if env_handler.get_instance().env("PRODUCTION", "0") == "1":
                 base_url = env_handler.get_instance().env("ORION_WEB_INTERNAL_URL")
@@ -110,13 +111,13 @@ class social_profile_job:
             cb_url = f"{base_url}/api/social/automation/callback?task_id={task_id}"
             
             if purpose == SocialProfilePurpose.POSTING:
-                await self.run_posting(profile, persona, session_state, cb_url)
+                await self.run_posting(profile, persona, session_state, cb_url, user_id)
             elif purpose == SocialProfilePurpose.AD_MONITORING:
-                await self.run_ad_monitoring(profile, persona, session_state, cb_url)
+                await self.run_ad_monitoring(profile, persona, session_state, cb_url, user_id)
                 
             await self._wait_for_task(task_id, timeout_seconds=300)
 
-    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str ):
+    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str, user_id: str = "" ):
         log.g().i(f"Running posting for profile {profile.profile_id} on {profile.platform}")
         
         from datetime import timezone
@@ -176,7 +177,9 @@ class social_profile_job:
                 "callback_url": callback_url,
                 "gender": gender_val,
                 "age_group": age_group_val,
-                "interests": interests_list
+                "interests": interests_list,
+                "user_id": user_id,
+                "profile_id": profile.profile_id
             }
             status_code, resp_body = await social_model.getInstance().social_request(
                 payload,
@@ -188,7 +191,7 @@ class social_profile_job:
         except Exception as e:
             log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
 
-    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str ):
+    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], callback_url: str, user_id: str = "" ):
 
         log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
         
@@ -200,7 +203,9 @@ class social_profile_job:
                 "callback_url": callback_url,
                 "gender": persona.gender.value if persona.gender else "",
                 "age_group": persona.age_group.value if persona.age_group else "",
-                "interests": persona.interests or []
+                "interests": persona.interests or [],
+                "user_id": user_id,
+                "profile_id": profile.profile_id
             }
             status_code, resp_body = await social_model.getInstance().social_request(
                 payload,

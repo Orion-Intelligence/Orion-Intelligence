@@ -14,31 +14,13 @@ from pymongo.errors import DuplicateKeyError
 
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.profile_manager.constants.constant import MAX_SESSIONS_PER_PLATFORM, PLATFORMS_RESULT_KEY
-from orion.api.interactive.profile_manager.model.models import (
-    SocialPersonaCreateRequest,
-    SocialPersonaListResponse,
-    SocialPersonaResponse,
-    SocialPersonaUpdateRequest,
-    SocialProfileAssignmentRequest,
-    SocialProfileAssignmentResponse,
-    SocialProfileCallbackRequest,
-    SocialProfileCallbackResponse,
-    SocialProfileConnectRequest,
-    SocialProfileListResponse,
-    SocialProfileResponse,
-    SocialProfileUpdateRequest,
-)
+from orion.api.interactive.profile_manager.model.models import SocialAutomationCallbackRequest, SocialPersonaCreateRequest, SocialPersonaListResponse, SocialPersonaResponse, SocialPersonaUpdateRequest, SocialProfileAssignmentRequest, SocialProfileAssignmentResponse, SocialProfileCallbackRequest, SocialProfileCallbackResponse, SocialProfileConnectRequest, SocialProfileListResponse, SocialProfileResponse, SocialProfileUpdateRequest
 from orion.constants.constant import CONSTANTS
 from orion.services.encryption_manager.key_manager import KeyManager
-from orion.services.mongo_manager.shared_model.db_social_profile_management_model import (
-    ManagedSocialProfile,
-    SocialPersona,
-    SocialPersonaAgeGroup,
-    SocialProfileAssignmentStatus,
-    SocialProfileConnectionStatus,
-    db_social_profile_management_model,
-)
+from orion.services.log_manager.log_controller import log
+from orion.services.mongo_manager.shared_model.db_social_profile_management_model import ManagedSocialProfile, SocialPersona, SocialPersonaAgeGroup, SocialProfileAssignmentStatus, SocialProfileConnectionStatus, db_social_profile_management_model
 from orion.services.mongo_manager.shared_model.db_social_session_model import db_social_session_model
+from orion.services.mongo_manager.shared_model.db_social_automation_result_model import SocialAdDetectionResult, SocialDetectedAd, SocialPostResult, db_social_automation_result_model
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 
 
@@ -228,7 +210,10 @@ class ProfileManager:
         )
         if session is None:
             return None
-        return await self._read_session_state(current_user, user_key, session.platform, session.file_name)
+        state = await self._read_session_state(current_user, user_key, session.platform, session.file_name)
+        if state is None:
+            log.g().w(f"Session file unreadable: {CONSTANTS.S_SESSION_RESOURCE_DIR / user_key / session.platform / session.file_name}")
+        return state
 
     @staticmethod
     def _seed_payload(state: dict) -> dict:
@@ -457,6 +442,85 @@ class ProfileManager:
         record.updated_at = profile.updated_at
         await self._engine.save(record)
         return SocialProfileCallbackResponse(message="Social profile callback received", profile_id=profile.profile_id, connection_status=profile.connection_status)
+
+    async def store_automation_result(self, data: SocialAutomationCallbackRequest):
+        record = await self._get_or_create_automation_result_record(data.user_id)
+        now = datetime.now(UTC)
+
+        if data.result_type == "post" and data.post_result is not None:
+            result = data.post_result
+            record.post_results.append(SocialPostResult(
+                profile_id=result.profile_id,
+                date_time=result.date_time or now,
+                post_url=result.post_url,
+                error=result.error,
+                error_reason=result.error_reason,
+                session_expired=result.session_expired,
+            ))
+            session_expired = result.session_expired
+        elif data.result_type == "ad_detection" and data.ad_detection_result is not None:
+            result = data.ad_detection_result
+            record.ad_detection_results.append(SocialAdDetectionResult(
+                profile_id=result.profile_id,
+                date_time=result.date_time or now,
+                total_detected_ads=result.total_detected_ads,
+                ads=[SocialDetectedAd(
+                    url=ad.url,
+                    author=ad.author,
+                    content_text=ad.content_text,
+                    metadata=ad.metadata,
+                    likes=ad.likes,
+                    shares=ad.shares,
+                    views=ad.views,
+                    detected_at=ad.detected_at or now,
+                ) for ad in result.ads],
+                error=result.error,
+                error_reason=result.error_reason,
+                session_expired=result.session_expired,
+            ))
+            session_expired = result.session_expired
+        else:
+            log.g().e(f"Automation callback with unknown result_type: {data.result_type}")
+            return {"status": "ignored"}
+
+        record.updated_at = now
+        await self._engine.save(record)
+
+        if session_expired:
+            await self._invalidate_profile_session(data.user_id, data.profile_id)
+
+        return {"status": "success"}
+
+    async def _get_or_create_automation_result_record(self, user_id: str) -> db_social_automation_result_model:
+        record = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+        if record:
+            return record
+        record = db_social_automation_result_model(user_id=user_id)
+        try:
+            await self._engine.save(record)
+        except DuplicateKeyError:
+            record = await self._engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+            if record:
+                return record
+            raise
+        return record
+
+    async def _invalidate_profile_session(self, user_id: str, profile_id: str):
+        record = await self._engine.find_one(db_social_profile_management_model, db_social_profile_management_model.user_id == user_id)
+        if record is None:
+            return
+        profile = next((item for item in record.profiles if item.profile_id == profile_id), None)
+        if profile is None or not profile.session_id:
+            return
+        session = await self._engine.find_one(
+            db_social_session_model,
+            {"user_id": user_id, "platform": self._safe_platform(profile.platform), "session_id": profile.session_id},
+        )
+        if session is None:
+            return
+        session.verified = False
+        await self._engine.save(session)
+        log.g().i(f"Social session {session.session_id} marked unverified after expired session on profile {profile_id}")
 
     async def _get_or_create_social_record(self, current_user) -> db_social_profile_management_model:
         user_id = str(current_user.id)
