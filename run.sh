@@ -157,16 +157,40 @@ use_compose_file() {
     esac
 }
 
+report_unhealthy_web_main() {
+    echo "Last healthcheck output for trusted-web-main:" >&2
+    docker inspect -f '{{range .State.Health.Log}}{{.Start}} exit={{.ExitCode}} {{.Output}}
+{{end}}' trusted-web-main 2>/dev/null | tail -n 3 >&2 || true
+    docker logs --tail 50 trusted-web-main >&2 || true
+}
+
 wait_for_application_services() {
     local health
+    local now
     local timeout_seconds="${APPLICATION_READY_TIMEOUT:-600}"
+    local unhealthy_grace_seconds="${APPLICATION_UNHEALTHY_GRACE:-90}"
     local deadline=$(( $(date +%s) + timeout_seconds ))
+    local unhealthy_since=0
 
     echo "Waiting for application services to become ready..."
     until health="$(docker inspect -f '{{.State.Health.Status}}' trusted-web-main 2>/dev/null)" \
         && [ "$health" = "healthy" ]; do
-        if [ "$(date +%s)" -ge "$deadline" ]; then
+        now="$(date +%s)"
+        if [ "$health" = "unhealthy" ]; then
+            if [ "$unhealthy_since" -eq 0 ]; then
+                unhealthy_since="$now"
+                echo "trusted-web-main reports unhealthy; allowing ${unhealthy_grace_seconds}s for it to recover..."
+            elif [ $(( now - unhealthy_since )) -ge "$unhealthy_grace_seconds" ]; then
+                echo "ERROR: trusted-web-main stayed unhealthy for ${unhealthy_grace_seconds}s." >&2
+                report_unhealthy_web_main
+                return 1
+            fi
+        else
+            unhealthy_since=0
+        fi
+        if [ "$now" -ge "$deadline" ]; then
             echo "ERROR: trusted-web-main did not become healthy within ${timeout_seconds}s (last status: ${health:-unknown})" >&2
+            report_unhealthy_web_main
             return 1
         fi
         sleep 2

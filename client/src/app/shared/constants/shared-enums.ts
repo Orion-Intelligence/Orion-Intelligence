@@ -75,8 +75,6 @@ export const sidebarItemTooltips: Record<string, string> = {
   'Forum': 'Forum',
   'Reddit': 'Reddit',
   'Facebook': 'Facebook',
-  'Instagram': 'Instagram',
-  'TikTok': 'TikTok',
   'YouTube': 'YouTube',
   'Social': 'Social',
   'Wanted-List': 'Wanted List',

@@ -51,7 +51,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 300s
     command: >
       sh -c "python3 /app/cronjobs.py & exec gunicorn -w 4 --threads 4 -k uvicorn.workers.UvicornWorker main:app --bind 0.0.0.0:8070 --timeout 900"
 
@@ -79,7 +79,7 @@ services:
     networks:
       backend:
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability" ]
+      test: [ "CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8529/_admin/server/availability" ]
       interval: 5s
       timeout: 5s
       retries: 10

@@ -45,9 +45,6 @@ export enum SocialSubCategory {
     FORUM = 'Forum',
     REDDIT = 'Reddit',
     FACEBOOK = 'Facebook',
-    INSTAGRAM = 'Instagram',
-    LINKEDIN = 'LinkedIn',
-    TIKTOK = 'TikTok',
     YOUTUBE = 'YouTube',
 }
 export enum ExploitSubCategory {

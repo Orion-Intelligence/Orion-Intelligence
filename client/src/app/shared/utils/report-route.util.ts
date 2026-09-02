@@ -19,9 +19,6 @@ const SOCIAL_REPORT_CATEGORIES = new Set([
   'pastebin',
   'mastodon',
   'facebook',
-  'instagram',
-  'linkedin',
-  'tiktok',
   'youtube'
 ]);
 

@@ -8,36 +8,37 @@
   "blogger": {},
   "bluesky": {},
   "devto": {},
+  "douban": {},
   "facebook": {},
+  "gettr": {},
   "habr": {},
   "hackernoon": {},
   "hashnode": {},
-  "instagram": {},
+  "imgur": {},
   "mastodon": {},
   "medium": {},
   "microblog": {},
   "misskey": {},
   "nostr": {},
+  "pinterest": {},
   "pleroma": {},
+  "plurk": {},
   "primal": {},
-  "quora": {},
   "reddit": {},
   "stackoverflow": {},
   "substack": {},
   "threads": {},
-  "tiktok": {
+  "twitter": {
     "allow": [
-      "shorts"
-    ],
-    "disallow": [
-      "posts"
+      "posts",
+      "comments"
     ]
   },
-  "twitter": {
-    "allow": ["posts", "comments"]
-  },
   "x": {
-    "allow": ["posts", "comments"]
+    "allow": [
+      "posts",
+      "comments"
+    ]
   },
   "youtube": {
     "allow": [

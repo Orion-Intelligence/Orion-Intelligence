@@ -48,11 +48,11 @@ services:
       - shared_bridge
       - orion_nexus_backend
     healthcheck:
-      test: [ "CMD-SHELL", "status=$$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8070/api/token || true); [ \"$$status\" = \"422\" ] || [ \"$$status\" = \"401\" ]" ]
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8070/api/public > /dev/null" ]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 300s
     command: >
       sh -c "python3 /app/cronjobs.py & exec uvicorn main:app --host 0.0.0.0 --port 8070 --reload --reload-dir /app/configs --reload-dir /app/orion --reload-dir /app/routes"
 
@@ -109,11 +109,11 @@ services:
       shared_bridge:
       orion_nexus_backend:
     healthcheck:
-      test: [ "CMD-SHELL", "status=$$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8070/api/token || true); [ \"$$status\" = \"422\" ] || [ \"$$status\" = \"401\" ]" ]
+      test: [ "CMD-SHELL", "curl --fail --silent http://localhost:8070/api/public > /dev/null" ]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 10s
+      start_period: 300s
     command: >
       sh -c "python3 /app/cronjobs.py & exec uvicorn main:app --host 0.0.0.0 --port 8070 --reload --reload-dir /app/configs --reload-dir /app/orion --reload-dir /app/routes"
 
@@ -145,7 +145,7 @@ services:
     networks:
       backend:
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://127.0.0.1:8529/_admin/server/availability" ]
+      test: [ "CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8529/_admin/server/availability" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -202,10 +202,11 @@ services:
     networks:
       backend:
     healthcheck:
-      test: [ "CMD-SHELL", "status=$$(curl -s -o /dev/null -w '%{http_code}' -X POST http://localhost:8080/api/token || true); [ \"$$status\" = \"422\" ] || [ \"$$status\" = \"401\" ]" ]
+      test: [ "CMD-SHELL", "status=$$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8080/api/admin/backups/status || true); [ \"$$status\" = \"401\" ] || [ \"$$status\" = \"200\" ]" ]
       interval: 30s
       timeout: 5s
       retries: 3
+      start_period: 300s
     environment:
       - ENABLE_BROTLI=1
 

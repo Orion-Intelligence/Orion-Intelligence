@@ -26,8 +26,6 @@ const TYPE_CATEGORY: Record<string, ResourceCategory> = {
 };
 
 const PLATFORM_TYPE_CATEGORY: Record<string, ResourceCategory> = {
-  'instagram:posts': 'media',
-  'tiktok:posts': 'media',
   'pinterest:posts': 'media',
 };
 

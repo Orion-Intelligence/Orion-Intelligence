@@ -76,16 +76,6 @@
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?hashnode\\.com(?:/.*)?$"
   },
-  "instagram": {
-    "rule_type": "shared",
-    "path": "social/platform",
-    "value_regex": "^https?://(?:[^/]+\\.)?instagram\\.com(?:/.*)?$"
-  },
-  "linkedin": {
-    "rule_type": "shared",
-    "path": "social/platform",
-    "value_regex": "^https?://(?:[^/]+\\.)?(?:linkedin\\.com|lnkd\\.in)(?:/.*)?$"
-  },
   "mastodon": {
     "rule_type": "shared",
     "path": "social/platform",
@@ -121,11 +111,6 @@
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?primal\\.net(?:/.*)?$"
   },
-  "quora": {
-    "rule_type": "shared",
-    "path": "social/platform",
-    "value_regex": "^https?://(?:[^/]+\\.)?quora\\.com(?:/.*)?$"
-  },
   "reddit": {
     "rule_type": "shared",
     "path": "social/platform",
@@ -146,11 +131,6 @@
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?(?:threads\\.com|threads\\.net)(?:/.*)?$"
   },
-  "tiktok": {
-    "rule_type": "shared",
-    "path": "social/platform",
-    "value_regex": "^https?://(?:[^/]+\\.)?tiktok\\.com(?:/.*)?$"
-  },
   "twitter": {
     "rule_type": "shared",
     "path": "social/platform",
@@ -160,5 +140,30 @@
     "rule_type": "shared",
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?(?:youtube\\.com|youtu\\.be)(?:/.*)?$"
+  },
+  "douban": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?douban\\.com(?:/.*)?$"
+  },
+  "gettr": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?gettr\\.com(?:/.*)?$"
+  },
+  "imgur": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?imgur\\.com(?:/.*)?$"
+  },
+  "pinterest": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?pinterest\\.(?:com|[a-z]{2,3})(?:/.*)?$"
+  },
+  "plurk": {
+    "rule_type": "shared",
+    "path": "social/platform",
+    "value_regex": "^https?://(?:[^/]+\\.)?plurk\\.com(?:/.*)?$"
   }
 }
