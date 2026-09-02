@@ -1,16 +1,21 @@
-import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { HttpErrorResponse, HttpEvent, HttpEventType, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
 import { inject, Injector } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, throwError, TimeoutError, Subject } from 'rxjs';
-import { catchError, finalize, timeout, takeUntil } from 'rxjs/operators';
+import { catchError, finalize, timeout, takeUntil, tap } from 'rxjs/operators';
 import { LoadingService } from '../../shared/services/loading.service';
 import { MessageNotificationService } from '../message_notification/message-notification.service';
 import { AuthService } from '../authetication/auth.service';
+import { AppService } from './app/app.service';
 let activeRequests = 0;
 let hideTimeout: ReturnType<typeof setTimeout> | null = null;
 let maintenancePageLoading = false;
 const inFlightCancels = new Map<string, Subject<void>>();
 const GLOBAL_TIMEOUT = 150000;
+const WARMING_UP_DETAILS = new Set([
+  'Service Not Ready',
+  'Tenant service unavailable',
+]);
 const STATUS_MEANINGS: Record<number, string> = {
   400: 'Bad Request',
   401: 'Unauthorized',
@@ -50,7 +55,19 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
   if (hideTimeout) {
     clearTimeout(hideTimeout);
   }
-  return next(authReq).pipe(cancel$ ? takeUntil(cancel$) : (s) => s, timeout<HttpEvent<unknown>>(GLOBAL_TIMEOUT), finalize(() => {
+  const setWarmingUp = (warming: boolean) => {
+    const appService = injector.get(AppService, null);
+    if (appService && appService.backendWarmingUp() !== warming) {
+      appService.backendWarmingUp.set(warming);
+    }
+  };
+  return next(authReq).pipe(cancel$ ? takeUntil(cancel$) : (s) => s, timeout<HttpEvent<unknown>>(GLOBAL_TIMEOUT), tap({
+    next: (event) => {
+      if (event.type === HttpEventType.Response) {
+        setWarmingUp(false);
+      }
+    },
+  }), finalize(() => {
     if (key) {
       const current = inFlightCancels.get(key);
       if (current === cancel$) {
@@ -66,6 +83,11 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
     }
   }), catchError((error) => {
     if (error instanceof HttpErrorResponse && error.status === 503 && !authReq.url.includes('admin/backups/status')) {
+      const errorBody = error.error && typeof error.error === 'object' ? error.error as Record<string, unknown> : null;
+      if (WARMING_UP_DETAILS.has(String(errorBody?.detail ?? ''))) {
+        setWarmingUp(true);
+        return throwError(() => error);
+      }
       if (!maintenancePageLoading) {
         maintenancePageLoading = true;
         window.location.replace('/static/maintenance.html');

@@ -87,7 +87,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     };
   }
 
-  constructor(private route: ActivatedRoute, private appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService, private zone: NgZone) {
+  constructor(private route: ActivatedRoute, public appService: AppService, private apiService: ApiService, private insightCacheService: InsightCacheService, private zone: NgZone) {
   }
 
   ngOnInit(): void {

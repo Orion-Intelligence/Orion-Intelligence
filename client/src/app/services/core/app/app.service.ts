@@ -35,6 +35,7 @@ export class AppService {
   public page = signal<number>(1);
   public entities = signal<EntityOption[]>([]);
   public worldJson = signal<unknown>(null);
+  public backendWarmingUp = signal<boolean>(false);
   public demoTourConfig = signal<DemoTourConfig>({});
   public userSessionData = signal<userSessionData>(this.createEmptyUserSessionData());
   public tenantData = signal<TenantModel>({

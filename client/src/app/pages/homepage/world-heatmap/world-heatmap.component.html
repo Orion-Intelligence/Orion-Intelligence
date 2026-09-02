@@ -3,6 +3,8 @@
     <div #mapContainer class="absolute inset-0"></div>
     @if (isMapLoading()) {
       <app-map-loading-badges [items]="[('Map loading...' | translate)]"></app-map-loading-badges>
+    } @else if (appService.backendWarmingUp()) {
+      <app-map-loading-badges [items]="[('Indexing data...' | translate)]"></app-map-loading-badges>
     }
   </div>
 
