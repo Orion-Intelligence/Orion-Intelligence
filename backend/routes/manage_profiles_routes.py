@@ -21,7 +21,7 @@ from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus,
 manage_profiles_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTIVE]))])
 route_permissions = [
     Depends(role_required([user_role.ADMIN, user_role.MEMBER, user_role.ANALYST])),
-    Depends(license_required("social_mapper", bypass_licenses=["maintainer"], bypass_roles=[user_role.ADMIN])),
+    Depends(license_required("module:social_mapper", bypass_licenses=["maintainer"], bypass_roles=[user_role.ADMIN])),
 ]
 
 
