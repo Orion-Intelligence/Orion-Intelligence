@@ -60,7 +60,8 @@ export class ManageProfileResultsComponent {
       const next = new Set(current);
       if (next.has(key)) {
         next.delete(key);
-      } else {
+      }
+      else {
         next.add(key);
       }
       return next;
