@@ -84,7 +84,6 @@ def dashboard_admin_redirect():
 
 app.include_router(auth_router, include_in_schema=False)
 app.include_router(extension_routes, include_in_schema=False)
-app.include_router(manage_profiles_routes, include_in_schema=False)
 app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(alert_connector_routes, include_in_schema=False)
@@ -98,6 +97,7 @@ app.include_router(api_routes)
 app.include_router(geo_fencing_routes, include_in_schema=False)
 app.include_router(graph_routes, include_in_schema=False)
 app.include_router(social_routes, include_in_schema=False)
+app.include_router(manage_profiles_routes, include_in_schema=False)
 app.include_router(case_routes, include_in_schema=False)
 
 app.add_exception_handler(Exception, global_exception_handler)

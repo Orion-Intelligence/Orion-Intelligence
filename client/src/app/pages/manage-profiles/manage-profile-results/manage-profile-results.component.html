@@ -1,5 +1,5 @@
 <div class="mb-4 grid grid-cols-[minmax(220px,1fr)_auto] gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-820)] p-3 max-[760px]:grid-cols-1 [body.light-theme_&]:bg-[#f5f9fe]">
-  <app-ui-dropdown [options]="resultsProfileOptions()" [selected]="resultsProfileId()" placeholder="Select profile" [searchable]="true" (valueChange)="selectResultsProfile($event || '')"></app-ui-dropdown>
+  <app-ui-dropdown data-testid="manage-profiles-results-profile" [options]="resultsProfileOptions()" [selected]="resultsProfileId()" placeholder="Select profile" [searchable]="true" (valueChange)="selectResultsProfile($event || '')"></app-ui-dropdown>
   <div class="flex flex-wrap items-center gap-2">
     @for (activity of activities; track activity.key) {
       <button type="button" (click)="setActivity(activity.key)" class="h-9 shrink-0 rounded-lg border px-3 text-[12px] font-semibold transition-colors" [ngClass]="activeActivity() === activity.key ? 'border-sky-400/30 bg-sky-400/[0.12] text-[var(--color-text1)]' : 'border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text2)]'">{{ activity.label | translate }}</button>
