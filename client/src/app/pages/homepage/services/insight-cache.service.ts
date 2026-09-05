@@ -12,10 +12,7 @@ export class InsightCacheService {
   constructor(private apiService: ApiService, private appService: AppService) {}
 
   getInsight(): Observable<unknown> {
-    this.insight$ ??= this.apiService.get<unknown>('insight').pipe(
-      retry({ delay: (error) => this.appService.backendWarmingUp() ? timer(5000) : throwError(() => error) }),
-      shareReplay(1),
-    );
+    this.insight$ ??= this.apiService.get<unknown>('insight').pipe(retry({ delay: (error) => this.appService.backendWarmingUp() ? timer(5000) : throwError(() => error) }), shareReplay(1));
     return this.insight$;
   }
 
