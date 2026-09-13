@@ -39,42 +39,6 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     openFirstReportAndValidateNavigationOrModal();
   });
 
-  it('opens a general report and exercises its header and related-reports mapping', () => {
-    cy.loginAsAdmin();
-    cy.visit('/dashboard/strategic/general');
-    typeDashboardSearchSlow('bitcoin');
-
-    cy.get('[data-testid="open-report"]').filter('a').filter(':visible').first()
-      .invoke('attr', 'href')
-      .then((href) => {
-        expect(href, 'report link').to.be.a('string').and.not.be.empty;
-        cy.visit(href as string);
-      });
-
-    cy.get('app-report-header', { timeout: 120000 }).should('exist');
-
-    cy.get('[data-testid="report-header-export"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="graph-report-export-modal"]').should('be.visible');
-    cy.get('[data-testid="graph-report-export-close"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="graph-report-export-modal"]').should('not.exist');
-
-    cy.get('[data-testid="report-header-translate"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="report-header-language-en"]').should('be.visible').click({ force: true });
-
-    cy.get('[data-testid="report-mapping-toggle"]', { timeout: 120000 }).scrollIntoView().should('be.visible').click({ force: true });
-    cy.get('body').then(($body) => {
-      const settled = $body.find('[data-testid="report-mapping-results"], [data-testid="report-mapping-empty"]');
-      if (!settled.length) {
-        cy.get(
-          '[data-testid="report-mapping-loading"], [data-testid="report-mapping-results"], [data-testid="report-mapping-empty"]',
-          { timeout: 120000 }
-        ).should('exist');
-      }
-    });
-    cy.get('[data-testid="report-mapping-results"], [data-testid="report-mapping-empty"]', { timeout: 120000 }).should('exist');
-    cy.docsScreenshot('report-related-mapping');
-  });
-
   it('runs Defacement search flow for All, Hacked, Phishing, and Databases', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Defacement');

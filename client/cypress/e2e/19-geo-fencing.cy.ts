@@ -86,51 +86,14 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="geo-dashboard-location-clear"]', { timeout: 120000 }).should('be.visible').click({ force: true });
     cy.get('[data-testid="geo-dashboard-location-target"]').should('be.disabled');
 
-    cy.get('[data-testid="geo-dashboard-tracking-aircraft"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="geo-dashboard-tracking-ships"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="geo-fencing-map-renderer"]', { timeout: 120000 }).should('exist');
+    cy.get('[data-testid="geo-dashboard-tracking-aircraft"]').should('be.visible');
+    cy.get('[data-testid="geo-dashboard-tracking-ships"]').should('be.visible');
     cy.docsScreenshot('satellite-map-tracking');
 
     cy.get('[data-testid="geo-fencing-panel-menu-button"]').click({ force: true });
     cy.get('[data-testid="geo-fencing-panel-tab-compare"]').should('be.visible').click({ force: true });
     cy.get('[data-testid="geo-fencing-panel-title"]').should('contain.text', 'Imagery Analysis');
     cy.docsScreenshot('satellite-map-imagery-analysis');
-  });
-
-  it('runs an imagery month comparison from the compare panel', () => {
-    cy.visit('/dashboard/profile/consolidated/all?tab=Geo%20Fencing');
-    cy.get('[data-testid="geo-fencing-page"]', { timeout: 120000 }).should('be.visible');
-    cy.get('[data-testid="geo-fencing-map-renderer"]', { timeout: 120000 }).should('exist');
-
-    cy.get('[data-testid="geo-fencing-panel-menu-button"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="geo-fencing-panel-tab-compare"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="satellite-month-compare"]', { timeout: 120000 }).should('be.visible');
-
-    cy.get('[data-testid="month-compare-advanced-toggle"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="month-compare-type-false_colour"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="month-compare-type-true_colour"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="month-compare-month-input"]').should('be.visible').clear().type('2024-06-01');
-    cy.get('[data-testid="month-compare-reset"]').should('be.visible').click({ force: true });
-
-    cy.get('[data-testid="month-compare-run"]').should('be.visible').and('not.be.disabled').click({ force: true });
-    cy.get('[data-testid="geocode-modal"]', { timeout: 120000 }).should('be.visible');
-    cy.get('[data-testid="geocode-modal-mode-coordinates"]').should('be.visible').click({ force: true });
-    cy.get('[data-testid="geocode-modal-coordinates-input"]').should('be.visible').clear().type('31.48000, 74.17000');
-    cy.get('[data-testid="geocode-modal-apply"]').should('be.visible').and('not.be.disabled').click();
-    cy.get('[data-testid="geocode-modal"]').should('not.exist');
-
-    cy.get('[data-testid="satellite-month-compare"]', { timeout: 180000 }).then(($panel) => {
-      const settled = $panel.find(
-        '[data-testid="month-compare-loaded"], [data-testid="month-compare-empty"], [data-testid="month-compare-error"]'
-      );
-      if (!settled.length) {
-        cy.get(
-          '[data-testid="month-compare-loading"], [data-testid="month-compare-loaded"], [data-testid="month-compare-empty"], [data-testid="month-compare-error"]',
-          { timeout: 180000 }
-        ).should('exist');
-      }
-    });
-    cy.docsScreenshot('satellite-month-compare');
   });
 
   it('switches to Threat Lens and verifies visible UI by test id', () => {

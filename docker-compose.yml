@@ -11,6 +11,7 @@ services:
     environment:
       BLOOM_DIR: /app
       PYTHONPATH: /app
+      COVERAGE_PROCESS_START: "${BACKEND_COVERAGE_RC:-}"
       ELASTIC_ROOT_IP: elasticsearch
       ELASTIC_ROOT_USERNAME: elastic
     working_dir: /app
@@ -27,6 +28,7 @@ services:
         condition: service_started
     volumes:
       - ./backend/sitecustomize.py:/app/sitecustomize.py:ro
+      - ./backend/.coveragerc:/app/.coveragerc:ro
       - ./backend/main.py:/app/main.py:cached
       - ./backend/interface.py:/app/interface.py:cached
       - ./backend/configs:/app/configs:cached
@@ -68,6 +70,7 @@ services:
     environment:
       BLOOM_DIR: /app
       PYTHONPATH: /app
+      COVERAGE_PROCESS_START: "${BACKEND_COVERAGE_RC:-}"
       ELASTIC_ROOT_IP: elasticsearch
       ELASTIC_ROOT_USERNAME: elastic
     working_dir: /app
@@ -84,6 +87,7 @@ services:
         condition: service_started
     volumes:
       - ./backend/sitecustomize.py:/app/sitecustomize.py:ro
+      - ./backend/.coveragerc:/app/.coveragerc:ro
       - ./backend/main.py:/app/main.py:cached
       - ./backend/interface.py:/app/interface.py:cached
       - ./backend/configs:/app/configs:cached
