@@ -10,6 +10,7 @@ import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/r
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-coordinates-modal.component';
+import { formatElapsedClock } from './network-intel.util';
 import { DnsSectionComponent } from './dns-section/dns-section.component';
 import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
 import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerability-section.component';
@@ -97,12 +98,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return `${elapsed.toFixed(1)}s`;
     }
     if (this.isScanning() && this.vulnerabilityCreatedAtMs !== null) {
-      const elapsedSeconds = this.vulnerabilityElapsedSeconds();
-      const hours = Math.floor(elapsedSeconds / 3600);
-      const minutes = Math.floor((elapsedSeconds % 3600) / 60);
-      const seconds = elapsedSeconds % 60;
-      const clock = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      return hours ? `${String(hours).padStart(2, '0')}:${clock}` : clock;
+      return formatElapsedClock(this.vulnerabilityElapsedSeconds());
     }
     return '-';
   }
@@ -459,27 +455,49 @@ export class NetworkIntel implements OnInit, OnDestroy {
     this.currentStep  = '';
   }
 
-  startDnsScan(): void {
-    this.dnsForm.domain = this.normalizeDomainInput(this.dnsForm.domain);
-    this.validateDns();
-    if (Boolean(this.formError) || !this.dnsForm.domain.trim() || this.isScanning()) {
-      return;
+  private prepareScan(hasInput: boolean): boolean {
+    if (Boolean(this.formError) || !hasInput || this.isScanning()) {
+      return false;
     }
     this.resetActiveWork();
     this.hasSearched = true;
     this.clearAll(false);
     this.syncUrl();
+    return true;
+  }
+
+  private consumeScanDone() {
+    const done = this.scanHelper.onDone();
+    if (!done) {
+      return null;
+    }
+    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
+    return { done, payload: done.result ?? done };
+  }
+
+  private hasMeaningfulReportValues(table: { values: Record<string, unknown> }): boolean {
+    return Object.values(table.values).some((value) => {
+      const normalized = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
+      return Boolean(normalized) && normalized !== '-';
+    });
+  }
+
+  startDnsScan(): void {
+    this.dnsForm.domain = this.normalizeDomainInput(this.dnsForm.domain);
+    this.validateDns();
+    if (!this.prepareScan(Boolean(this.dnsForm.domain.trim()))) {
+      return;
+    }
     this.sub = this.scanHelper.scanResolveIp(this.dnsForm.domain.trim());
     this.watchResult(this.parseDnsResult.bind(this));
   }
 
   private parseDnsResult(): void {
-    const done = this.scanHelper.onDone();
-    if (!done) {
+    const consumed = this.consumeScanDone();
+    if (!consumed) {
       return;
     }
-    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
-    const payload = done.result ?? done;
+    const payload = consumed.payload;
     if (payload?.domain != null && Array.isArray(payload.ips)) {
       const existingRows = new Map(this.ipRows.map((row) => [row.ip, row]));
       this.dnsResult = { domain: payload.domain, ips: payload.ips, records: payload.records, email_security: payload.email_security };
@@ -510,13 +528,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
   startShodanScan(): void {
     this.shodanForm.ip = this.normalizeIpInput(this.shodanForm.ip);
     this.validateShodan();
-    if (Boolean(this.formError) || !this.shodanForm.ip.trim() || this.isScanning()) {
+    if (!this.prepareScan(Boolean(this.shodanForm.ip.trim()))) {
       return;
     }
-    this.resetActiveWork();
-    this.hasSearched = true;
-    this.clearAll(false);
-    this.syncUrl();
     this.sub = this.scanHelper.scanShodanIp(this.shodanForm.ip.trim());
     this.watchResult(this.parseShodanResult.bind(this));
   }
@@ -524,13 +538,9 @@ export class NetworkIntel implements OnInit, OnDestroy {
   startVulnerabilityScan(): void {
     this.vulnForm.ip = this.normalizeDomainInput(this.vulnForm.ip);
     this.validateVulnerability();
-    if (Boolean(this.formError) || !this.vulnForm.ip.trim() || this.isScanning()) {
+    if (!this.prepareScan(Boolean(this.vulnForm.ip.trim()))) {
       return;
     }
-    this.resetActiveWork();
-    this.hasSearched = true;
-    this.clearAll(false);
-    this.syncUrl();
     this.sub = this.scanHelper.scanSubdomains(this.vulnForm.ip.trim(), false);
     this.watchResult(this.parseVulnerabilityTargets.bind(this));
   }
@@ -709,12 +719,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private parseShodanResult(): void {
-    const done = this.scanHelper.onDone();
-    if (!done) {
+    const consumed = this.consumeScanDone();
+    if (!consumed) {
       return;
     }
-    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
-    const payload = done.result ?? done;
+    const payload = consumed.payload;
     if (payload?.ip) {
       this.shodanResult    = payload as IpDetail;
       this.lastResultCount = 1;
@@ -722,12 +731,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private parseVulnerabilityResult(): void {
-    const done = this.scanHelper.onDone();
-    if (!done) {
+    const consumed = this.consumeScanDone();
+    if (!consumed) {
       return;
     }
-    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
-    const payload = done.result ?? done;
+    const { done, payload } = consumed;
     const status = String(payload?.status ?? done?.status ?? '').toLowerCase();
     const hasRenderablePayload =
       !!payload &&
@@ -750,12 +758,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private parseVulnerabilityTargets(): void {
-    const done = this.scanHelper.onDone();
-    if (!done) {
+    const consumed = this.consumeScanDone();
+    if (!consumed) {
       return;
     }
-    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
-    const payload = done.result ?? done;
+    const { done, payload } = consumed;
     const status = String(payload?.status ?? done?.status ?? '').toLowerCase();
     if (status === 'pending' || status === 'busy') {
       return;
@@ -810,12 +817,11 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private parseGeoResult(): void {
-    const done = this.scanHelper.onDone();
-    if (!done) {
+    const consumed = this.consumeScanDone();
+    if (!consumed) {
       return;
     }
-    this.currentStep = done.step ?? done.result?.step ?? done.status ?? done.result?.status ?? '';
-    const payload = done.result ?? done;
+    const payload = consumed.payload;
 
     if (Array.isArray(payload?.ips)) {
       this.geoIpListResult = {
@@ -1190,10 +1196,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           }
         })),
         ...this.buildRawJsonTables(result, 'Vulnerability Raw Result')
-      ].filter(table => Object.values(table.values).some((value) => {
-        const normalized = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
-        return Boolean(normalized) && normalized !== '-';
-      }))
+      ].filter(table => this.hasMeaningfulReportValues(table))
     };
   }
 
@@ -1280,10 +1283,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           }, {});
           return { title: `${category.name} Findings`, values };
         })
-      ].filter(table => Object.values(table.values).some((value) => {
-        const normalized = typeof value === 'string' ? value.trim() : String(value ?? '').trim();
-        return Boolean(normalized) && normalized !== '-';
-      }))
+      ].filter(table => this.hasMeaningfulReportValues(table))
     };
   }
 
@@ -1496,7 +1496,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
           WAF: this.normalizeReportValue(detail.waf),
           'Load Balancer': this.normalizeReportValue(detail.load_balancer),
           HSTS: detail.hsts ? 'Yes' : 'No',
-          Flags: this.joinValues(this.securityItems(detail.security))
+          Flags: this.joinValues(this.scanHelper.securityItems(detail.security))
         }
       },
       {
@@ -1666,16 +1666,6 @@ export class NetworkIntel implements OnInit, OnDestroy {
       return value ? 'Yes' : 'No';
     }
     return this.normalizeReportValue(value);
-  }
-
-  private securityItems(sec: string[] | Record<string, boolean> | undefined | null): string[] {
-    if (!sec) {
-      return [];
-    }
-    if (Array.isArray(sec)) {
-      return sec;
-    }
-    return Object.entries(sec).filter(([, value]) => value).map(([key]) => key);
   }
 
   private countCameraPorts(detail: IpDetail | null | undefined): number {

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, SimpleChanges, effect, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
+import { formatElapsedClock } from '../network-intel.util';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { vulnerabilityContentMotion } from '../../../../shared/animations/vulnerability.content.motion.animation';
 import { DnsEmailSecurity, DnsResult, IpRowState } from '../../../../shared/model/network-intel/network-intel.model';
@@ -91,11 +92,7 @@ export class DnsSectionComponent implements OnDestroy {
       return '00:00';
     }
     const elapsedSeconds = Math.max(0, Math.floor((now - startedAtMs) / 1000));
-    const hours = Math.floor(elapsedSeconds / 3600);
-    const minutes = Math.floor((elapsedSeconds % 3600) / 60);
-    const seconds = elapsedSeconds % 60;
-    const clock = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    return hours ? `${String(hours).padStart(2, '0')}:${clock}` : clock;
+    return formatElapsedClock(elapsedSeconds);
   }
 
   get showLoadingSkeleton(): boolean {
