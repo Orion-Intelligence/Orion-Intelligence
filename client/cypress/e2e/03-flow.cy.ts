@@ -1,5 +1,5 @@
 import {FLOW_ADMIN_SECTIONS, FLOW_ENTITY_API_SECTIONS} from '../support/constants';
-import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, typeVisibleInputSlow, waitForDirectoryRequest} from './controllers/03-flow.controller';
+import {applyDateRange, applyDirectoryDropdown, assertDirectoryContentVisible, assertFreeModeDashboardChrome, clickSidebarSubItem, DIRECTORY_CONTENT_OPTION, DIRECTORY_INDEX_OPTION, DIRECTORY_NETWORK_OPTION, getHeatmapComponent, HOME_SEARCH_TABS, openCountryReportFromMap, openSidebarGroup, resetDirectoryFilters, typeVisibleInputSlow, waitForDirectoryRequest} from './controllers/03-flow.controller';
 import type { FlowTestData, HeatmapCountryPathElement } from './model/03-flow.model';
 
 describe('Orion Intelligence - Free Mode Flow', () => {
@@ -187,6 +187,51 @@ describe('Orion Intelligence - Full Navigation and Heatmap Flow', () => {
     });
 
     cy.get('[data-testid="world-heatmap-map"] svg').should('exist');
+  });
+
+  it('exercises homepage search tabs, clear, tools, match-type and insight panel', () => {
+    cy.loginAsAdmin();
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().should('be.visible');
+
+    HOME_SEARCH_TABS.forEach((tab) => {
+      cy.get('body').then(($body) => {
+        const el = $body.find(`[data-testid="ioc-basic-tag-${tab}"]:visible`);
+        if (el.length) {
+          cy.wrap(el.first()).click({ force: true });
+        }
+      });
+    });
+
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().click({ force: true }).type('orion intel', { force: true });
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().should('have.value', 'orion intel');
+    cy.get('button[aria-label="Clear input"]').filter(':visible').first().click({ force: true });
+    cy.get('[data-testid="homepage-search-input"]').filter(':visible').first().should('have.value', '');
+
+    cy.get('input[aria-label="Advance search"]').first().click({ force: true });
+
+    cy.get('body').then(($body) => {
+      const tools = $body.find('button:visible').filter((_index, el) => (el.textContent || '').trim().startsWith('Tools'));
+      if (tools.length) {
+        cy.wrap(tools.first()).click({ force: true });
+      }
+    });
+
+    cy.get('body').then(($body) => {
+      const drag = $body.find('button[aria-label="Drag Panel"]:visible');
+      if (drag.length) {
+        cy.wrap(drag.first()).click({ force: true });
+        cy.wrap(drag.first()).click({ force: true });
+      }
+    });
+
+    cy.get('body').then(($body) => {
+      const summary = $body.find('details summary:visible');
+      if (summary.length) {
+        cy.wrap(summary.first()).click({ force: true });
+        cy.contains('button', 'Match any term').filter(':visible').first().click({ force: true });
+        cy.location('pathname', { timeout: 30000 }).should('include', '/dashboard/profile/consolidated');
+      }
+    });
   });
 
   it('opens help and support modal, fills form, and sends message', () => {

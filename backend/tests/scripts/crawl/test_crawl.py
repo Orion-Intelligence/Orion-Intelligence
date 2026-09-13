@@ -412,7 +412,7 @@ def test_build_parser_payload_decrypts_files_and_embeds_feeders(monkeypatch, tmp
 
 def test_index_query_stealerlog_encrypts_password(monkeypatch):
     key = Fernet.generate_key().decode()
-    monkeypatch.setattr(CONSTANTS, "S_ENCRYPTION_KEY", key)
+    monkeypatch.setattr(CONSTANTS, "S_STEALER_KEY", key)
 
     result = crawl_index_generator.index_query_stealerlog(
         {

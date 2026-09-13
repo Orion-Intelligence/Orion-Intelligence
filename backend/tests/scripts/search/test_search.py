@@ -206,7 +206,7 @@ def test_search_stealer_iocs_applies_password_schema_after_real_query_build(fake
 def test_search_stealer_iocs_decrypts_password_before_return(fake_elastic, monkeypatch):
     key = Fernet.generate_key().decode()
     encrypted_password = Fernet(key.encode()).encrypt(b"Secret123!").decode()
-    monkeypatch.setattr(CONSTANTS, "S_ENCRYPTION_KEY", key)
+    monkeypatch.setattr(CONSTANTS, "S_STEALER_KEY", key)
     fake_elastic.search_query_result = (
         True,
         _search_response(

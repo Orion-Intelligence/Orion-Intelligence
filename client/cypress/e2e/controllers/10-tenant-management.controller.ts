@@ -1,6 +1,9 @@
 
 import type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
+import {TEST_DATA} from '../../support/constants';
 export type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
+export const tenantResetNewPassword = '2wsx@WSX2026';
+export const alertSlackClientId = TEST_DATA.alert_slack_client_id;
 export const ALERT_SCANNER_CATEGORIES = [
   'general',
   'defacement',
@@ -25,7 +28,23 @@ const HOME_ALERT_CARD_SELECTOR = '[data-testid="tenant-home-alert-category-card"
 
 type AlertScannerCategory = typeof ALERT_SCANNER_CATEGORIES[number];
 
+export function selectEnabledCurrentMonthDate(day: number) {
+  void cy.get(`[data-testid="side-filter-date-day-${day}"]`)
+    .filter(':visible')
+    .filter((_index, element) => {
+      const className = element.getAttribute('class') || '';
+      return !element.hasAttribute('disabled') && !className.includes('text-slate-400');
+    })
+    .should('have.length.greaterThan', 0)
+    .first()
+    .scrollIntoView()
+    .should('be.enabled')
+    .click();
+}
 
+export function enableTenantPrivilegedIocIfInputDisabled() {
+  void cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 60000}).should('be.visible').and('not.be.disabled');
+}
 
 function setConfiguredViewport() {
   void cy.viewport(

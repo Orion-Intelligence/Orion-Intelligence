@@ -56,6 +56,31 @@ describe('Scans Management - Entity Lookup Flow', () => {
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
     cy.docsScreenshot('entity-api-email-breach');
 
+    cy.get('body').then(($body) => {
+      const $toggle = $body.find('[data-testid="ioc-threat-row-toggle"]:visible');
+      if ($toggle.length) {
+        cy.wrap($toggle.first()).click({ force: true });
+        cy.wrap($toggle.first()).click({ force: true });
+      }
+    });
+    cy.get('body').then(($body) => {
+      const $download = $body.find('[data-testid="scan-download-report"]:visible');
+      if ($download.length) {
+        cy.wrap($download.first()).click({ force: true });
+        cy.get('[data-testid="dashboard-api-export-modal"]').should('be.visible');
+        cy.get('[data-testid="dashboard-api-export-json"]').filter(':visible').first().click({ force: true });
+        cy.get('[data-testid="dashboard-api-export-modal"]').should('not.exist');
+        cy.wrap($download.first()).click({ force: true });
+        cy.get('[data-testid="dashboard-api-export-modal"]').should('be.visible');
+        cy.get('[data-testid="dashboard-api-export-report"]').filter(':visible').first().click({ force: true });
+        cy.get('[data-testid="dashboard-api-export-modal"]').should('not.exist');
+        cy.wrap($download.first()).click({ force: true });
+        cy.get('[data-testid="dashboard-api-export-modal"]').should('be.visible');
+        cy.get('[data-testid="dashboard-api-export-close"]').filter(':visible').first().click({ force: true });
+        cy.get('[data-testid="dashboard-api-export-modal"]').should('not.exist');
+      }
+    });
+
     cy.visit('/dashboard/api/social-scanner');
     fillPrimaryScanInput(testData.scans_social_username);
     clickSearch();
@@ -124,6 +149,25 @@ describe('Scans Management - Entity Lookup Flow', () => {
     clickSearch();
     cy.get('[data-testid="scan-success-badge"]').filter(':visible').first().should('be.visible');
     cy.docsScreenshot('crypto-scanner-report');
+
+    cy.get('body').then(($body) => {
+      const $toggle = $body.find('[data-testid="ioc-threat-row-toggle"]:visible');
+      if ($toggle.length) {
+        cy.wrap($toggle.first()).click({ force: true });
+      }
+    });
+    cy.get('body').then(($body) => {
+      const $rows = $body.find('.ui-fade-in-dashboard-item.cursor-pointer:visible');
+      if ($rows.length) {
+        cy.wrap($rows.first()).click({ force: true });
+        cy.get('body').then(($drill) => {
+          const $back = $drill.find('button:visible').filter((_index, el) => el.querySelector('.bi-arrow-left') !== null);
+          if ($back.length) {
+            cy.wrap($back.first()).click({ force: true });
+          }
+        });
+      }
+    });
   });
 
   it('manages completed scan notifications from the top header panel', () => {

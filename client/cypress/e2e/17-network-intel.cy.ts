@@ -1,3 +1,12 @@
+import {
+  richIpDetail,
+  leanIpDetail,
+  cameraOnlyIpDetail,
+  buildSeoRepoResponse,
+  assertIpDetailTextIfPresent,
+  stubNetworkIntelApis
+} from './controllers/17-network-intel.controller';
+
 describe('Network Intel - End-to-End Flow', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
@@ -6,117 +15,6 @@ describe('Network Intel - End-to-End Flow', () => {
   after(() => {
     cy.logout();
   });
-
-  const stubNetworkIntelApis = () => {
-    cy.intercept('POST', '**/api/netintel/resolve_ip', {
-      statusCode: 200,
-      body: {
-        status: 'done',
-        result: {
-          status: 'done',
-          domain: 'example.com',
-          ips: ['93.184.216.34'],
-        },
-      },
-    }).as('resolveIp');
-
-    cy.intercept('POST', '**/api/netintel/ipscanner', (req) => {
-      const ip = req.body?.ip;
-
-      if (ip === '8.8.8.8') {
-        req.reply({
-          statusCode: 200,
-          body: {
-            status: 'done',
-            result: {
-              status: 'done',
-              ip: '8.8.8.8',
-              country: 'United States',
-              organization: 'Google',
-              hosting_type: 'public-dns',
-              open_ports: [53],
-              ports: [
-                {
-                  port: 53,
-                  protocol: 'udp',
-                  service: 'dns',
-                  state: 'open',
-                  confidence: 0.95,
-                  risk_flags: [],
-                },
-              ],
-            },
-          },
-        });
-        return;
-      }
-
-      req.reply({
-        statusCode: 200,
-        body: {
-          status: 'done',
-          result: {
-            status: 'done',
-            ip: ip || '93.184.216.34',
-            country: 'United States',
-            organization: 'Example Org',
-            hosting_type: 'hosting',
-            open_ports: [80, 443],
-            ports: [
-              {
-                port: 80,
-                protocol: 'tcp',
-                service: 'http',
-                state: 'open',
-                confidence: 0.9,
-                risk_flags: [],
-              },
-              {
-                port: 443,
-                protocol: 'tcp',
-                service: 'https',
-                state: 'open',
-                confidence: 0.95,
-                risk_flags: ['modern_tls'],
-              },
-            ],
-          },
-        },
-      });
-    }).as('ipScanner');
-
-    cy.intercept('POST', '**/api/netintel/url_vulnerability_scan', {
-      statusCode: 200,
-      body: {
-        status: 'done',
-        result: {
-          status: 'done',
-          url: 'https://bbc.com',
-          host: 'bbc.com',
-          elapsed_seconds: 2,
-          summary: {
-            total: 1,
-            critical: 0,
-            high: 1,
-            medium: 0,
-            low: 0,
-            info: 0,
-          },
-          findings: [
-            {
-              title: 'Missing Content-Security-Policy',
-              severity: 'high',
-              category: 'headers',
-              description: 'The response does not define a Content Security Policy.',
-              urls: ['https://bbc.com/', 'https://bbc.com/news'],
-              evidence: 'content-security-policy: missing',
-            },
-          ],
-        },
-      },
-    }).as('vulnerabilityScan');
-
-  };
 
   it('runs host recon, ip scan, vulnerability scan, and exports reports from all three sections', () => {
     stubNetworkIntelApis();
@@ -281,5 +179,192 @@ describe('Network Intel - End-to-End Flow', () => {
     cy.get('[data-testid="network-intel-geo-start"]').click();
     cy.get('[data-testid="network-intel-geo-modal"]').should('not.exist');
     cy.get('[data-testid="network-intel-search-input"]').should('have.value', '31.48000, 74.17000');
+  });
+
+  it('renders every IP-detail section from a rich IP scan and exports the report', () => {
+    cy.intercept('POST', '**/api/netintel/ipscanner', {
+      statusCode: 200,
+      body: { status: 'done', result: richIpDetail }
+    }).as('richIpScanner');
+
+    cy.visit('/dashboard/netint');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
+
+    cy.window().then((win) => {
+      cy.stub(win.URL, 'createObjectURL').callsFake(() => 'blob:rich-ip-export').as('richIpExport');
+    });
+
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('203.0.113.7{enter}');
+    cy.wait('@richIpScanner').its('request.body').should('deep.equal', { ip: '203.0.113.7' });
+
+    cy.get('[data-testid="network-intel-ip-result"]', { timeout: 60000 }).should('be.visible');
+    cy.get('app-ip-detail').should('be.visible');
+
+    [
+      'Acme Networks',
+      'Acme ISP',
+      'AS64500',
+      'ECDHE-RSA-AES256',
+      "Let's Encrypt",
+      'TLSv1.3',
+      'TLSv1.0',
+      'sha256WithRSA',
+      'React',
+      'Cloudflare WAF',
+      'Heroku',
+      'Directory listing enabled',
+      'CVE-2022-2222',
+      'X-Powered-By',
+      'Cache-Control',
+      'host1.acme.example',
+      'Hikvision',
+      'ip-info-extra',
+      'extra additional detail',
+    ].forEach((value) => {
+      assertIpDetailTextIfPresent(value);
+    });
+    cy.docsScreenshot('network-intel-ip-detail-rich');
+
+    cy.get('[data-testid="network-intel-download-report"]')
+      .should('be.visible')
+      .and('be.enabled')
+      .click();
+    cy.get('@richIpExport').its('callCount').should('be.gte', 1);
+  });
+
+  it('renders a lean IP scan with alternate port fields and HSTS disabled', () => {
+    cy.intercept('POST', '**/api/netintel/ipscanner', {
+      statusCode: 200,
+      body: { status: 'done', result: leanIpDetail }
+    }).as('leanIpScanner');
+
+    cy.visit('/dashboard/netint');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('198.51.100.5{enter}');
+    cy.wait('@leanIpScanner').its('request.body').should('deep.equal', { ip: '198.51.100.5' });
+
+    cy.get('[data-testid="network-intel-ip-result"]', { timeout: 60000 }).should('be.visible');
+    cy.get('app-ip-detail').should('be.visible');
+
+    [
+      'France',
+      'Fastly',
+      'http-proxy',
+      'closed',
+      'TLSv1.1',
+      '2026-12-01',
+      'CSP',
+      'HSTS',
+      'nginx',
+    ].forEach((value) => {
+      assertIpDetailTextIfPresent(value);
+    });
+    cy.docsScreenshot('network-intel-ip-detail-lean');
+
+    cy.get('[data-testid="network-intel-download-report"]').should('be.enabled').click();
+  });
+
+  it('renders IP detail signals when ports carry no renderable detail', () => {
+    cy.intercept('POST', '**/api/netintel/ipscanner', {
+      statusCode: 200,
+      body: { status: 'done', result: cameraOnlyIpDetail }
+    }).as('cameraIpScanner');
+
+    cy.visit('/dashboard/netint');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('203.0.113.99{enter}');
+    cy.wait('@cameraIpScanner').its('request.body').should('deep.equal', { ip: '203.0.113.99' });
+
+    cy.get('[data-testid="network-intel-ip-result"]', { timeout: 60000 }).should('be.visible');
+    cy.get('app-ip-detail').should('be.visible');
+
+    [
+      'No result found',
+      'Camera Detected',
+      'IoT Ports',
+      'Dahua',
+      'edge-node',
+      'APAC',
+    ].forEach((value) => {
+      assertIpDetailTextIfPresent(value);
+    });
+    cy.docsScreenshot('network-intel-ip-detail-camera-only');
+
+    cy.get('[data-testid="network-intel-download-report"]').should('be.enabled').click();
+  });
+
+  it('surfaces an error state when the IP scan backend fails', () => {
+    cy.intercept('POST', '**/api/netintel/ipscanner', {
+      statusCode: 200,
+      body: { status: 'error', message: 'IP scan backend unavailable.' }
+    }).as('failingIpScanner');
+
+    cy.visit('/dashboard/netint');
+    cy.get('[data-testid="network-intel-tab-ip-scan"]').should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('192.0.2.10{enter}');
+    cy.wait('@failingIpScanner').its('request.body').should('deep.equal', { ip: '192.0.2.10' });
+
+    cy.get('app-ip-detail').should('not.exist');
+    cy.get('[data-testid="network-intel-ip-result"]').should('not.exist');
+  });
+
+  it('runs SEO and repository scans, renders findings, and exports the reports', () => {
+    cy.intercept('POST', '**/api/urlscan/domain', (req) => {
+      const host = String(req.body?.scanType) === 'repo' ? 'github.com' : 'seo-target.example';
+      req.reply({ statusCode: 200, body: buildSeoRepoResponse(host) });
+    }).as('urlScan');
+
+    cy.visit('/dashboard/netint');
+
+    cy.window().then((win) => {
+      cy.stub(win.URL, 'createObjectURL').callsFake(() => 'blob:seo-repo-export').as('seoRepoExport');
+    });
+
+    cy.get('[data-testid="network-intel-tab-seo-scan"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://seo-target.example/{enter}');
+    cy.wait('@urlScan').its('request.body.scanType').should('eq', 'seo');
+    cy.contains('Missing Content-Security-Policy', { timeout: 60000 }).should('be.visible');
+    cy.contains('Missing sitemap.xml').should('be.visible');
+    cy.contains('content-security-policy: absent').should('be.visible');
+    cy.docsScreenshot('network-intel-seo-scan');
+
+    cy.get('[data-testid="network-intel-download-report"]').should('be.enabled').click();
+
+    cy.get('[data-testid="network-intel-tab-repository-scan"]').scrollIntoView().should('be.visible').click();
+    cy.get('[data-testid="network-intel-search-input"]').clear().type('https://github.com/juice-shop/juice-shop{enter}');
+    cy.wait('@urlScan').its('request.body.scanType').should('eq', 'repo');
+    cy.contains('Missing Content-Security-Policy', { timeout: 60000 }).should('be.visible');
+
+    cy.get('[data-testid="network-intel-download-report"]').should('be.enabled').click();
+    cy.get('@seoRepoExport').its('callCount').should('be.gte', 1);
+  });
+
+  it('runs a geo camera coordinate scan into an IP list and exports it', () => {
+    cy.intercept('POST', '**/api/netintel/iot_detect', {
+      statusCode: 200,
+      body: { status: 'done', result: { status: 'done', domain: '31.48000, 74.17000', ips: ['198.51.100.10', '198.51.100.11'], count: 2 } }
+    }).as('geoScan');
+
+    cy.visit('/dashboard/netint?section=geo-cameras&q=31.48000,%2074.17000');
+    cy.get('[data-testid="network-intel-tab-geo-fencing"]').should('be.visible');
+
+    cy.get('body').then(($b) => {
+      const dismiss = $b.find('[data-testid="network-intel-geo-close"]:visible, [data-testid="network-intel-geo-cancel"]:visible');
+      if (dismiss.length) {
+        cy.wrap(dismiss.first()).click({ force: true });
+      }
+    });
+
+    cy.window().then((win) => {
+      cy.stub(win.URL, 'createObjectURL').callsFake(() => 'blob:geo-export').as('geoExport');
+    });
+
+    cy.wait('@geoScan');
+    cy.get('[data-testid="network-intel-dns-row-198.51.100.10"]', { timeout: 60000 }).should('be.visible');
+    cy.get('[data-testid="network-intel-dns-row-198.51.100.11"]').should('be.visible');
+    cy.docsScreenshot('network-intel-geo-ip-list');
+
+    cy.get('[data-testid="network-intel-download-report"]').should('be.enabled').click();
+    cy.get('@geoExport').its('callCount').should('be.gte', 1);
   });
 });
