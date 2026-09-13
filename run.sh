@@ -324,7 +324,7 @@ if [ "$1" = "restore" ]; then
         echo "trusted-web-main is not running. Start the stack first."
         exit 1
     fi
-    docker exec trusted-web-main python3 restore_backup.py "$BACKUP_NAME"
+    docker exec trusted-web-main python3 -c 'import asyncio; from restore_backup import main; asyncio.run(main())' "$BACKUP_NAME"
     exit $?
 fi
 
@@ -457,8 +457,6 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
         exit 1
     fi
 fi
-
-compose up -d --pull missing "${up_extra_args[@]}" "${compose_up_services[@]}"
 
 up_extra_args=()
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then

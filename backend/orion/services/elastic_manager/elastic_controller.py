@@ -323,7 +323,7 @@ class elastic_controller:
         try:
             m_request_defacement = {"query": {"range": {"m_date": {"lt": "now-6M"}}}}
             await self.__m_core_connection.delete_by_query(
-                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement)
+                index=ELASTIC_INDEX.S_DEFACEMENT_INDEX, body=m_request_defacement, conflicts="proceed")
 
         except Exception as ex:
             log.g().e(f"Failed to delete old records: {str(ex)}")

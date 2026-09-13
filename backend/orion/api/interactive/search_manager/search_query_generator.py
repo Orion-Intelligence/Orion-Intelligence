@@ -373,7 +373,6 @@ class search_query_generator:
                     knn_clause = {
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
-                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
                             "num_candidates": 1000,
                             "query_vector": qvec,
                             "filter": {"bool": {"filter": must_filter_clauses}}
@@ -644,7 +643,7 @@ class search_query_generator:
             date_boost_fields=date_boost_fields)
 
         unified_query["size"] = result_size
-        unified_query["from"] = max(0, (m_page_number - 1) * result_size)
+        unified_query["from"] = max(0, min((m_page_number - 1) * result_size, 10000 - result_size))
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
@@ -700,7 +699,7 @@ class search_query_generator:
         )
 
         unified_query["size"] = 15
-        unified_query["from"] = max(0, (getattr(p_query_model, "page", 1) - 1) * 15)
+        unified_query["from"] = max(0, min((getattr(p_query_model, "page", 1) - 1) * 15, 10000 - 15))
 
         return (
             base_index,
@@ -764,7 +763,7 @@ class search_query_generator:
 
         page = getattr(p_query_model, "page", 1) or 1
         size = (getattr(p_query_model, "size", None) or (100 if is_match_all else 500))
-        frm = max((page - 1) * size, 0)
+        frm = max(0, min((page - 1) * size, 10000 - size))
 
         query_body = {
             "query": es_query,
