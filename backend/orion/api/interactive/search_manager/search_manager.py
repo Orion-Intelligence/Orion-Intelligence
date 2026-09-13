@@ -210,7 +210,7 @@ class search_manager:
                 continue
             try:
                 if cipher is None:
-                    cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+                    cipher = Fernet(CONSTANTS.S_STEALER_KEY.encode())
                 item.password = cipher.decrypt(str(password).encode()).decode()
             except Exception:
                 item.password = password

@@ -112,7 +112,7 @@ class crawl_index_generator:
                 if log[k] is not None:
                     if k == "password":
                         if cipher is None:
-                            cipher = Fernet(CONSTANTS.S_ENCRYPTION_KEY.encode())
+                            cipher = Fernet(CONSTANTS.S_STEALER_KEY.encode())
                         doc[k] = cipher.encrypt(str(log[k]).encode()).decode()
                     else:
                         doc[k] = log[k]
