@@ -22,6 +22,20 @@ export type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './mod
 
 
 
+const TAG_INVALID_MESSAGE: Record<string, string> = {
+  [StealerlogsSearchFilters.EMAIL]: 'Invalid email format',
+  [StealerlogsSearchFilters.DOMAIN]: 'Invalid domain format',
+  [StealerlogsSearchFilters.IP]: 'Invalid IP address format',
+  [StealerlogsSearchFilters.CREDITCARD]: 'Invalid credit card format'
+};
+
+const TAG_SANITIZE_REGEX: Record<string, RegExp> = {
+  [StealerlogsSearchFilters.EMAIL]: /[^a-zA-Z0-9@._&|\s-]/g,
+  [StealerlogsSearchFilters.DOMAIN]: /[^a-zA-Z0-9.&|\s-]/g,
+  [StealerlogsSearchFilters.IP]: /[^0-9.&|\s]/g,
+  [StealerlogsSearchFilters.CREDITCARD]: /[^0-9\s&|]/g
+};
+
 @Component({
   selector: 'app-ioc-search',
   imports: [KeyValuePipe, FormsModule, TooltipDirective, NgClass, NgTemplateOutlet, ChatWidgetComponent, TranslatePipe],
@@ -310,18 +324,7 @@ export class IocSearchComponent implements OnInit {
     if (this.selectedTag === this.allTag()) {
       return '';
     }
-    switch (this.selectedTag) {
-      case StealerlogsSearchFilters.EMAIL:
-        return 'Invalid email format';
-      case StealerlogsSearchFilters.DOMAIN:
-        return 'Invalid domain format';
-      case StealerlogsSearchFilters.IP:
-        return 'Invalid IP address format';
-      case StealerlogsSearchFilters.CREDITCARD:
-        return 'Invalid credit card format';
-      default:
-        return `Invalid ${displayTag.toLowerCase()} format`;
-    }
+    return getOwnProperty(TAG_INVALID_MESSAGE, this.selectedTag) ?? `Invalid ${displayTag.toLowerCase()} format`;
   }
 
   private extractValues(input: string): string[] {
@@ -350,23 +353,7 @@ export class IocSearchComponent implements OnInit {
       this.updateBasicInput(inputElement, value);
       return;
     }
-    let regex: RegExp;
-    switch (this.selectedTag) {
-      case StealerlogsSearchFilters.EMAIL:
-        regex = /[^a-zA-Z0-9@._&|\s-]/g;
-        break;
-      case StealerlogsSearchFilters.DOMAIN:
-        regex = /[^a-zA-Z0-9.&|\s-]/g;
-        break;
-      case StealerlogsSearchFilters.IP:
-        regex = /[^0-9.&|\s]/g;
-        break;
-      case StealerlogsSearchFilters.CREDITCARD:
-        regex = /[^0-9\s&|]/g;
-        break;
-      default:
-        regex = /[^a-zA-Z0-9&|@.\s]/g;
-    }
+    const regex = getOwnProperty(TAG_SANITIZE_REGEX, this.selectedTag) ?? /[^a-zA-Z0-9&|@.\s]/g;
     const sanitized = value.replace(regex, '');
     this.updateBasicInput(inputElement, sanitized);
   }

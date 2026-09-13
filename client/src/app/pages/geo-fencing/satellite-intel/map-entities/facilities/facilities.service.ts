@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteFacilitiesResponse, SatelliteFacilityFeature } from '../../model/satellite-intel-api.models';
 import { OrionSatelliteFeature, OrionSatelliteFeatureType } from '../../../models/geo-fencing.models';
+import { FACILITY_TYPE_MAP } from './facility-dot-classes.const';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 import { asUnknownRecord, getOwnProperty, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
 import type { StreamedMapEntity } from './model/facilities.model';
@@ -116,116 +117,7 @@ export class SatelliteFacilitiesService {
 
   private normalizeType(rawKind: string): OrionSatelliteFeatureType {
     const value = this.normalizeKindKey(rawKind);
-    switch (value) {
-      case 'airport':
-      case 'aerodrome':
-      case 'airfield':
-      case 'heliport':
-        return 'airport';
-      case 'port':
-      case 'ports':
-      case 'harbour':
-      case 'harbours':
-      case 'harbor':
-      case 'harbors':
-      case 'seaport':
-      case 'sea_port':
-      case 'dock':
-      case 'docks':
-      case 'marina':
-      case 'pier':
-      case 'quay':
-      case 'jetty':
-      case 'wharf':
-      case 'shipyard':
-      case 'boatyard':
-      case 'crane':
-      case 'crane_rail':
-      case 'ferry':
-      case 'ferry_terminal':
-      case 'harbour_master':
-      case 'port_terminal':
-      case 'container_terminal':
-      case 'cargo_terminal':
-      case 'breakwater':
-      case 'dolphin':
-      case 'mooring':
-      case 'anchorage':
-      case 'berth':
-        return 'port';
-      case 'warehouse':
-      case 'depot':
-      case 'storage_depot':
-        return 'warehouse';
-      case 'industrial':
-      case 'industry':
-      case 'factory':
-        return 'industrial';
-      case 'military':
-      case 'barracks':
-      case 'military_base':
-        return 'military';
-      case 'hydro':
-      case 'hydroelectric':
-      case 'hydropower':
-        return 'hydro';
-      case 'solar':
-      case 'photovoltaic':
-      case 'pv':
-        return 'solar';
-      case 'wind':
-      case 'wind_turbine':
-      case 'windfarm':
-        return 'wind';
-      case 'gas':
-      case 'natural_gas':
-      case 'lng':
-      case 'cng':
-        return 'gas';
-      case 'coal':
-      case 'lignite':
-        return 'coal';
-      case 'oil':
-      case 'diesel':
-      case 'petroleum':
-      case 'fuel_oil':
-        return 'oil';
-      case 'nuclear':
-      case 'atomic':
-        return 'nuclear';
-      case 'geothermal':
-      case 'geotherm':
-        return 'geothermal';
-      case 'biomass':
-      case 'biogas':
-      case 'wood':
-      case 'bagasse':
-        return 'biomass';
-      case 'waste':
-      case 'waste_to_energy':
-      case 'landfill_gas':
-        return 'waste';
-      case 'storage':
-      case 'battery':
-      case 'pumped_hydro':
-        return 'storage';
-      case 'cogeneration':
-      case 'chp':
-      case 'combined_heat_power':
-        return 'cogeneration';
-      case 'petcoke':
-        return 'petcoke';
-      case 'wave and tidal':
-      case 'wave_and_tidal':
-      case 'wave':
-      case 'tidal':
-      case 'tidal_stream':
-        return 'wave_and_tidal';
-      case 'other':
-        return 'other';
-      default:
-        return value ? 'other' : 'other';
-    }
+    return getOwnProperty(FACILITY_TYPE_MAP, value) ?? 'other';
   }
 
   private extractCoordinates(geometry: SatelliteFacilityFeature['geometry']): [number, number] | null {

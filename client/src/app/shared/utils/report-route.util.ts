@@ -1,3 +1,5 @@
+import { getOwnProperty } from './type-guards.util';
+
 const REPORT_ROUTE_SECTIONS = new Set([
   'breach',
   'strategic',
@@ -88,32 +90,18 @@ function getReportSearchTypeForRoute(section: string, category: string): string 
   return normalizeConsolidatedReportSearchType(normalizedCategory) || normalizedCategory;
 }
 
+const CONSOLIDATED_SEARCH_TYPE: Record<string, string> = {
+  leak: 'breach', tracking: 'breach', news: 'breach',
+  general: 'strategic', generic: 'strategic',
+  credential: 'chat',
+  'malware-bazaar': 'malware',
+  breach: 'breach', strategic: 'strategic', defacement: 'defacement', exploit: 'exploit',
+  apt: 'apt', malware: 'malware', social: 'social', chat: 'chat'
+};
+
 function normalizeConsolidatedReportSearchType(value: string | null | undefined): string {
   const type = (value ?? '').replace('_model', '').toLowerCase();
-  switch (type) {
-    case 'leak':
-    case 'tracking':
-    case 'news':
-      return 'breach';
-    case 'general':
-    case 'generic':
-      return 'strategic';
-    case 'credential':
-      return 'chat';
-    case 'malware-bazaar':
-      return 'malware';
-    case 'breach':
-    case 'strategic':
-    case 'defacement':
-    case 'exploit':
-    case 'apt':
-    case 'malware':
-    case 'social':
-    case 'chat':
-      return type;
-    default:
-      return '';
-  }
+  return getOwnProperty(CONSOLIDATED_SEARCH_TYPE, type) ?? '';
 }
 
 function normalizeAptReportSearchType(category: string): string {

@@ -42,6 +42,17 @@ import type { ChatResultItem } from '../../../shared/model/results/chat/chat.cal
 import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
 
 
+const CATEGORY_BY_KEY: Record<string, Category> = {
+  leak_model: Category.BREACH,
+  exploit_model: Category.EXPLOIT,
+  apt_model: Category.APT_INTEL,
+  malware_model: Category.APT_INTEL,
+  defacement_model: Category.DEFACEMENT,
+  chat_model: Category.SOCIAL,
+  generic_model: Category.STRATEGIC,
+  social_model: Category.SOCIAL
+};
+
 @Component({
   selector: 'app-dashboard-consolidated',
   standalone: true,
@@ -380,25 +391,7 @@ export class DashboardConsolidatedComponent implements OnInit, AfterViewInit {
   }
 
   getCategoryFromKey(key: string): Category {
-    switch (key) {
-      case 'leak_model':
-        return Category.BREACH;
-      case 'exploit_model':
-        return Category.EXPLOIT;
-      case 'apt_model':
-      case 'malware_model':
-        return Category.APT_INTEL;
-      case 'defacement_model':
-        return Category.DEFACEMENT;
-      case 'chat_model':
-        return Category.SOCIAL;
-      case 'generic_model':
-        return Category.STRATEGIC;
-      case 'social_model':
-        return Category.SOCIAL;
-      default:
-        return Category.BREACH;
-    }
+    return getOwnProperty(CATEGORY_BY_KEY, key) ?? Category.BREACH;
   }
 
   onToggleMenu(tab: string, clearQuery = false): void {
