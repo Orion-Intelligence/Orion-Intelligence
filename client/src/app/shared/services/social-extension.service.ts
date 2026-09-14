@@ -120,6 +120,23 @@ export class SocialExtensionService {
     });
   }
 
+  communicationCaptured(): Observable<{ caseId: string; communicationId: string; hasSession: boolean }> {
+    return new Observable<{ caseId: string; communicationId: string; hasSession: boolean }>(subscriber => {
+      const onMessage = (event: MessageEvent) => {
+        const data = event.data as { source?: string; type?: string; caseId?: string; communicationId?: string; hasSession?: boolean };
+        if (event.source !== window || data?.source !== 'orion-extension' || data.type !== 'comm-captured') {
+          return;
+        }
+        subscriber.next({ caseId: data.caseId ?? '', communicationId: data.communicationId ?? '', hasSession: data.hasSession === true });
+      };
+
+      window.addEventListener('message', onMessage);
+      return () => {
+        window.removeEventListener('message', onMessage);
+      };
+    });
+  }
+
   async refreshLatest(): Promise<void> {
     if (this.latestAt && Date.now() - this.latestAt < EXTENSION_LATEST_TTL_MS) {
       return;

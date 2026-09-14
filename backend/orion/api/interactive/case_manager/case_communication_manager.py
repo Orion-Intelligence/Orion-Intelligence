@@ -2,6 +2,7 @@ import base64
 from urllib.parse import urlparse
 from uuid import uuid4
 
+from bson import ObjectId
 from fastapi import HTTPException
 
 from orion.api.interactive.case_manager.case_manager import CaseManager
@@ -10,6 +11,7 @@ from orion.api.interactive.case_manager.models.case_models import CaseCommunicat
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
+from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.mongo_manager.shared_model.db_case_model import CaseCommunication
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 from orion.services.mongo_manager.shared_model.db_case_model import utc_now
@@ -35,8 +37,15 @@ class CaseCommunicationManager:
         return (urlparse(str(url or "").strip()).hostname or "").lower().removeprefix("www.")
 
     @staticmethod
-    def _result_scope(communication_id: str) -> str:
-        return f"case-communication:{communication_id}"
+    def _result_scope(case_id: str, communication_id: str) -> str:
+        return f"case-communication:{case_id}:{communication_id}"
+
+    @staticmethod
+    def parse_result_scope(scope: str) -> tuple[str, str] | None:
+        parts = str(scope or "").split(":")
+        if len(parts) == 3 and parts[0] == "case-communication":
+            return parts[1], parts[2]
+        return None
 
     @staticmethod
     def _resolve_communication(record: db_case_model, communication_id: str) -> CaseCommunication:
@@ -132,7 +141,7 @@ class CaseCommunicationManager:
 
         command = {
             "command": "session",
-            "type": self._result_scope(communication_id),
+            "type": self._result_scope(case_id, communication_id),
             "platform": communication.platform,
             "url": target_url,
         }
@@ -151,7 +160,7 @@ class CaseCommunicationManager:
 
     async def save_communication_session(self, case_id: str, communication_id: str, current_user):
         record, enc, communication, user_key, manager = await self._open_and_resolve(case_id, communication_id, current_user)
-        result_scope = self._result_scope(communication_id)
+        result_scope = self._result_scope(case_id, communication_id)
 
         reply = await manager.take_result(user_key, result_scope)
         if reply is None:
@@ -159,24 +168,43 @@ class CaseCommunicationManager:
                 return {"error": "communication_not_open"}
             return {"status": "pending"}
 
-        session_file, error = ProfileManager.extract_session_file(reply)
+        case, error = await self._store_session_file(record, enc, communication, current_user, case_id, communication_id, reply)
         if error:
             return error
+        return {"result": {"saved": True, "case": case}}
+
+    async def _store_session_file(self, record, enc, communication, current_user, case_id, communication_id, reply):
+        session_file, error = ProfileManager.extract_session_file(reply)
+        if error:
+            return None, error
 
         resource_id = communication.sessionResourceId or str(uuid4())
-
         try:
             path = CaseHelperMethods.communication_session_path(resource_id)
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_bytes(enc.encrypt(base64.b64decode(session_file["zip_base64"])))
         except Exception:
-            return {"error": "session_store_failed"}
+            return None, {"error": "session_store_failed"}
 
         communication.sessionResourceId = resource_id
-
         case = await self._save_and_respond(
             record, enc, current_user,
             f"Case communication session saved: caseId={case_id}, communicationId={communication_id}",
         )
+        return case, None
 
-        return {"result": {"saved": True, "case": case}}
+    async def persist_socket_capture(self, user_id: str, case_id: str, communication_id: str, reply: dict) -> bool:
+        if ProfileManager.extract_session_file(reply)[1]:
+            return False
+        try:
+            user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
+        except Exception:
+            user = None
+        if user is None:
+            return False
+        record = await self._load_case(case_id, user)
+        enc = await CaseHelperMethods.get_case_cipher(user)
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
+        communication = self._resolve_communication(record, communication_id)
+        _, error = await self._store_session_file(record, enc, communication, user, case_id, communication_id, reply)
+        return not error

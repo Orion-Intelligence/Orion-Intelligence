@@ -13,6 +13,7 @@ from starlette.responses import JSONResponse
 
 from orion.constants.constant import CONSTANTS
 from orion.services.encryption_manager.key_manager import KeyManager
+from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role, db_user_account, UserStatus
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model, TenantStatus
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -188,6 +189,7 @@ class session_manager:
                 session_id = existing_sid or secrets.token_urlsafe(32)
             else:
                 session_id = secrets.token_urlsafe(32)
+                log.g().w(f"[session-debug] WEB session rotate user={username} client={session_client} old={user.current_session_id} new={session_id}")
                 user.current_session_id = session_id
                 await self._engine.save(user)
             await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._client_session_ttl(session_client)])
@@ -419,13 +421,16 @@ class session_manager:
             if session_client == self.EXTENSION_SESSION_CLIENT:
                 raise HTTPException(status_code=401, detail=invalid_detail)
             if session_client == self.WEB_SESSION_CLIENT and user.current_session_id != session_id:
+                log.g().w(f"[session-debug] kick user={getattr(user,'username','?')} client={session_client} reason=redis-none token_sid={session_id} current={user.current_session_id}")
                 raise HTTPException(status_code=401, detail=invalid_detail)
             await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, session_id, self._session_ttl])
             return
 
         if redis_sid != session_id:
+            log.g().w(f"[session-debug] kick user={getattr(user,'username','?')} client={session_client} reason=redis-mismatch token_sid={session_id} redis_sid={redis_sid} current={user.current_session_id}")
             raise HTTPException(status_code=401, detail=invalid_detail)
         if session_client == self.WEB_SESSION_CLIENT and redis_sid != user.current_session_id:
+            log.g().w(f"[session-debug] kick user={getattr(user,'username','?')} client={session_client} reason=current-mismatch token_sid={session_id} redis_sid={redis_sid} current={user.current_session_id}")
             raise HTTPException(status_code=401, detail=invalid_detail)
         await self._redis.invoke_trigger(REDIS_COMMANDS.S_SET_STRING, [redis_key, redis_sid, self._client_session_ttl(session_client)])
 

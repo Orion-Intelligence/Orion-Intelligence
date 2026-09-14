@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, forwardRef, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { ChangeDetectorRef, Component, DestroyRef, forwardRef, NgZone, OnInit, ViewRef, ChangeDetectionStrategy } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { finalize } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -31,6 +32,7 @@ import { TranslationService } from '../../../../../shared/services/translation.s
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AppService } from '../../../../../services/core/app/app.service';
 import { ProxyController } from '../../../../../shared/services/proxy-controller';
+import { SocialExtensionService } from '../../../../../shared/services/social-extension.service';
 import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
 
@@ -100,7 +102,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isUnarchiveConfirmationOpen = false;
   isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService, private translationService: TranslationService, private proxyController: ProxyController) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService, private translationService: TranslationService, private proxyController: ProxyController, private zone: NgZone, private destroyRef: DestroyRef, private socialExtensionService: SocialExtensionService) {
     super();
   }
 
@@ -116,6 +118,35 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
       this.loadAnalysts();
       this.loadAccessibleCases();
     }
+
+    this.socialExtensionService.communicationCaptured()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(event => {
+        this.onCommunicationCaptured(event);
+      });
+  }
+
+  private onCommunicationCaptured(event: { caseId: string; communicationId: string; hasSession: boolean }): void {
+    const current = this.caseData;
+    if (!current || current.caseId !== event.caseId) {
+      return;
+    }
+
+    const communications = current.communications ?? [];
+    const index = communications.findIndex(item => item.communicationId === event.communicationId);
+    if (index < 0) {
+      return;
+    }
+
+    this.zone.run(() => {
+      current.communications = communications.map((item, position) => position === index ? { ...item, hasSession: event.hasSession } : item);
+      this.caseData = { ...current };
+      this.busyCommunicationIds.delete(event.communicationId);
+      this.messageNotificationService.show(this.translate('Session saved successfully'), 'success');
+      if (!(this.cdr as ViewRef).destroyed) {
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   canManageCases(): boolean {
@@ -1360,38 +1391,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     this.busyCommunicationIds.add(communication.communicationId);
 
-    this.caseService.openCommunication(this.caseData.caseId, communication.communicationId, this.proxyController.resolve(communication.url)).subscribe(result => {
-      if (result.error) {
-        this.busyCommunicationIds.delete(communication.communicationId);
-        this.messageNotificationService.show(this.getCommunicationSessionError(result.error));
-        return;
-      }
-
-      this.captureCommunicationSession(communication);
-    });
-  }
-
-  private captureCommunicationSession(communication: CaseCommunication): void {
-    if (!this.caseData) {
-      return;
-    }
-
-    this.caseService.saveCommunicationSession(this.caseData.caseId, communication.communicationId)
+    this.caseService.openCommunication(this.caseData.caseId, communication.communicationId, this.proxyController.resolve(communication.url))
       .pipe(finalize(() => this.busyCommunicationIds.delete(communication.communicationId)))
       .subscribe(result => {
-        if (result.case) {
-          this.applyCommunicationResult(result.case, 'Session saved successfully');
-          return;
-        }
-
-        if (result.error && !this.isSilentSessionOutcome(result.error)) {
+        if (result.error) {
           this.messageNotificationService.show(this.getCommunicationSessionError(result.error));
         }
       });
-  }
-
-  private isSilentSessionOutcome(error: string): boolean {
-    return error === 'extension_timeout' || error === 'no_session_data' || error === 'communication_not_open';
   }
 
   private applyCommunicationResult(updated: Case, successMessage: string): void {

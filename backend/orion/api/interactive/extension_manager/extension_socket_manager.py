@@ -165,12 +165,13 @@ class extension_socket_manager:
         await self._store.pop_request(request_id)
         await self._store.release_inflight(result_key)
 
-    async def resolve(self, request_id: str, payload: dict) -> None:
+    async def resolve(self, request_id: str, payload: dict) -> str | None:
         result_key = await self._store.pop_request(request_id)
         if result_key is None:
-            return
+            return None
         await self._store.put_result(result_key, payload)
         await self._store.release_inflight(result_key)
+        return result_key
 
     async def disconnect(self, user_key: str) -> None:
         for websocket in self._sockets.pop(user_key, set()):
