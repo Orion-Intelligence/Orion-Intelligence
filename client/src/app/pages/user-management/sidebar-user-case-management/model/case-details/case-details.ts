@@ -30,6 +30,7 @@ import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../../shared/services/translation.service';
 import { LicenseService } from '../../../../../services/licenses/licenses.service';
 import { AppService } from '../../../../../services/core/app/app.service';
+import { ProxyController } from '../../../../../shared/services/proxy-controller';
 import { ChatWidgetComponent } from '../../../../root-searches/ai-workspace/chat-widget/chat-widget.component';
 import { getOwnProperty } from '../../../../../shared/utils/type-guards.util';
 
@@ -99,7 +100,7 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
   isUnarchiveConfirmationOpen = false;
   isArchivingCase = false;
 
-  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService, private translationService: TranslationService) {
+  constructor(private route: ActivatedRoute, private router: Router, private caseService: CaseManagement, private casePdfExportService: CasePdfExportService, private messageNotificationService: MessageNotificationService, private http: HttpClient, private cdr: ChangeDetectorRef, public appService: AppService, private licenseService: LicenseService, private translationService: TranslationService, private proxyController: ProxyController) {
     super();
   }
 
@@ -1359,14 +1360,13 @@ export class CaseDetails extends CaseDetailsStore implements OnInit {
 
     this.busyCommunicationIds.add(communication.communicationId);
 
-    this.caseService.openCommunication(this.caseData.caseId, communication.communicationId).subscribe(result => {
+    this.caseService.openCommunication(this.caseData.caseId, communication.communicationId, this.proxyController.resolve(communication.url)).subscribe(result => {
       if (result.error) {
         this.busyCommunicationIds.delete(communication.communicationId);
         this.messageNotificationService.show(this.getCommunicationSessionError(result.error));
         return;
       }
 
-      this.messageNotificationService.show(this.translate('External communication opened in the browser extension'), 'success');
       this.captureCommunicationSession(communication);
     });
   }

@@ -123,16 +123,18 @@ class CaseCommunicationManager:
             f"Case communication deleted: caseId={case_id}, communicationId={communication_id}",
         )
 
-    async def open_communication(self, case_id: str, communication_id: str, current_user) -> dict:
+    async def open_communication(self, case_id: str, communication_id: str, current_user, proxied_url: str = None) -> dict:
         _, enc, communication, user_key, manager = await self._open_and_resolve(case_id, communication_id, current_user)
         if not await manager.has_live_socket(user_key):
             return {"error": "extension_required"}
+
+        target_url = proxied_url or communication.url
 
         command = {
             "command": "session",
             "type": self._result_scope(communication_id),
             "platform": communication.platform,
-            "url": communication.url,
+            "url": target_url,
         }
 
         if communication.sessionResourceId:
@@ -141,7 +143,7 @@ class CaseCommunicationManager:
                 enc,
             )
             if state is not None:
-                command["url"] = str(state.get("url") or "") or communication.url
+                command["url"] = target_url
                 command["payload"] = {"seed": ProfileManager._seed_payload(state)}
 
         await manager.fire(user_key, command)

@@ -74,8 +74,8 @@ export class CaseManagement {
     return this.api.delete<Case>(`profile/cases/${caseId}/communications/${communicationId}`);
   }
 
-  openCommunication(caseId: string, communicationId: string): Observable<{ opened?: boolean; error?: string }> {
-    return this.api.post<{ result?: { opened?: boolean }; error?: string }>(`profile/cases/${caseId}/communications/${communicationId}/open`, {}).pipe(map(response => ({ opened: response?.result?.opened, error: response?.error })),
+  openCommunication(caseId: string, communicationId: string, url?: string): Observable<{ opened?: boolean; error?: string }> {
+    return this.api.post<{ result?: { opened?: boolean }; error?: string }>(`profile/cases/${caseId}/communications/${communicationId}/open`, { url }).pipe(map(response => ({ opened: response?.result?.opened, error: response?.error })),
       catchError(() => of<{ opened?: boolean; error?: string }>({ error: 'open_failed' })));
   }
 

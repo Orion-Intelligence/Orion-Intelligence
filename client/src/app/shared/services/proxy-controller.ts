@@ -39,6 +39,10 @@ export class ProxyController {
     this.isInitialized = true;
   }
 
+  resolve(url?: string | null): string {
+    return this.resolveTargetUrl(url);
+  }
+
   open(url?: string | null): void {
     const targetUrl = this.resolveTargetUrl(url);
     if (!targetUrl || typeof window === 'undefined') {
