@@ -127,6 +127,7 @@ class SocialAutomationPostResultRequest(BaseModel):
     error: bool = False
     error_reason: str = ""
     session_expired: bool = False
+    is_manual: bool = False
 
 
 class SocialAutomationAdDetectionResultRequest(BaseModel):
@@ -137,6 +138,7 @@ class SocialAutomationAdDetectionResultRequest(BaseModel):
     error: bool = False
     error_reason: str = ""
     session_expired: bool = False
+    is_manual: bool = False
 
 
 class SocialAutomationResultRequest(BaseModel):

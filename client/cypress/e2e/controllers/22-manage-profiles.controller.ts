@@ -49,6 +49,7 @@ export function setupManageProfilesStubs() {
         {
           date_time: '2026-09-04T12:00:00Z',
           total_detected_ads: 2,
+          is_manual: true,
           ads: [
             { author: 'AdAuthor1', url: 'https://twitter.com/ad1', content_text: 'Ad text 1', likes: '10', shares: '2', views: '100', detected_at: '2026-09-04T12:00:00Z' }
           ]
@@ -58,7 +59,8 @@ export function setupManageProfilesStubs() {
         {
           date_time: '2026-09-04T12:00:00Z',
           post_url: 'https://twitter.com/post1',
-          error: false
+          error: false,
+          is_manual: true
         }
       ]
     }
@@ -168,6 +170,22 @@ export function assertAssignmentsTab() {
   
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Test Persona');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'twitter');
+
+  cy.intercept('POST', '**/api/manage-profiles/personas/p1/trigger-post-monitoring', {
+    statusCode: 200,
+    body: {}
+  }).as('manageProfilesTriggerPostMonitoring');
+
+  cy.intercept('POST', '**/api/manage-profiles/personas/p1/trigger-ad-monitoring', {
+    statusCode: 200,
+    body: {}
+  }).as('manageProfilesTriggerAdMonitoring');
+
+  cy.get('button[title="Trigger Post Monitoring"]').click();
+  cy.wait('@manageProfilesTriggerPostMonitoring');
+  
+  cy.get('button[title="Trigger Ad Monitoring"]').click();
+  cy.wait('@manageProfilesTriggerAdMonitoring');
 }
 
 export function assertResultsTab() {
@@ -179,6 +197,7 @@ export function assertResultsTab() {
   
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', '2 ads detected');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Completed');
+  cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Manual');
   
   cy.get('[data-testid="manage-profiles-page"]').contains('2 ads detected').click();
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'AdAuthor1');
@@ -186,5 +205,6 @@ export function assertResultsTab() {
   
   cy.contains('button', 'Posting').click();
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Post published');
+  cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'Manual');
   cy.get('[data-testid="manage-profiles-page"]').should('contain.text', 'https://twitter.com/post1');
 }

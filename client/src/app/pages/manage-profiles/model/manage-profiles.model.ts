@@ -112,6 +112,7 @@ export interface SocialAdDetectionResult {
   error: boolean;
   error_reason: string;
   session_expired: boolean;
+  is_manual?: boolean;
 }
 
 export interface SocialPostResult {
@@ -121,6 +122,7 @@ export interface SocialPostResult {
   error: boolean;
   error_reason: string;
   session_expired: boolean;
+  is_manual?: boolean;
 }
 
 export interface SocialProfileResultsResponse {

@@ -29,6 +29,7 @@ class SocialAdDetectionResult(EmbeddedModel):
     error: bool = False
     error_reason: str = ""
     session_expired: bool = False
+    is_manual: bool = False
 
 
 class SocialPostResult(EmbeddedModel):
@@ -38,6 +39,7 @@ class SocialPostResult(EmbeddedModel):
     error: bool = False
     error_reason: str = ""
     session_expired: bool = False
+    is_manual: bool = False
 
 
 class db_social_automation_result_model(Model):

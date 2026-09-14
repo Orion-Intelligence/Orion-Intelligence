@@ -488,6 +488,7 @@ class ProfileManager:
                 error=result.error,
                 error_reason=result.error_reason,
                 session_expired=result.session_expired,
+                is_manual=result.is_manual,
             ))
             session_expired = result.session_expired
         elif data.result_type == "ad_detection" and data.ad_detection_result is not None:
@@ -509,6 +510,7 @@ class ProfileManager:
                 error=result.error,
                 error_reason=result.error_reason,
                 session_expired=result.session_expired,
+                is_manual=result.is_manual,
             ))
             session_expired = result.session_expired
         else:
@@ -651,6 +653,7 @@ class ProfileManager:
                 if session_state:
                     run_id = str(uuid4())
                     asyncio.create_task(job.run_posting(profile, persona, session_state, run_id, record.user_id))
+
 
         return {"status": "success", "message": "Post monitoring triggered"}
 
