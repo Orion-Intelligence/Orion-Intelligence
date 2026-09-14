@@ -1,5 +1,5 @@
 <div class="overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--tenant-expand-bg)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] [body.light-theme_&]:bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0px,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)]">
-    <div class="flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex flex-col gap-3 border-b border-[var(--color-border)] bg-[var(--color-blue-820-light)] p-3 lg:flex-row lg:items-start lg:justify-between">
         <div class="min-w-0">
             <h2 class="m-0 text-[16px] font-bold leading-tight text-[var(--color-text1)]">{{ 'Case Details'
                 | translate }}</h2>
@@ -11,9 +11,9 @@
             </div>
             }
         </div>
-        <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
+        <div class="flex w-full flex-col gap-2 lg:w-[45%]">
             @if (caseData) {
-            <div class="grid w-full grid-cols-3 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/60 sm:w-[420px] xl:w-[480px]">
+            <div class="grid w-full grid-cols-3 overflow-hidden rounded-[8px] border border-[var(--tenant-line)] bg-[var(--color-blue-830)]/60">
                 <div class="min-w-0 border-r border-[var(--tenant-line)] px-3 py-2" [ngClass]="{ 'bg-blue-500/10 text-blue-300 [body.light-theme_&]:bg-blue-100 [body.light-theme_&]:text-blue-800': caseData.status === 'new' || caseData.status === 'intake_review', 'bg-yellow-500/10 text-yellow-300 [body.light-theme_&]:bg-amber-100 [body.light-theme_&]:text-amber-800': caseData.status === 'under_investigation' || caseData.status === 'evidence_collection' || caseData.status === 'verification' || caseData.status === 'regulatory_action' || caseData.status === 'legal_review', 'bg-emerald-500/10 text-emerald-300 [body.light-theme_&]:bg-emerald-100 [body.light-theme_&]:text-emerald-800': caseData.status === 'resolved', 'bg-slate-500/10 text-slate-300 [body.light-theme_&]:bg-slate-100 [body.light-theme_&]:text-slate-700': caseData.status === 'closed' }">
                     <div class="text-[10px] font-semibold uppercase text-[var(--color-text4)]">{{ 'Status' |
                         translate }}</div>
@@ -48,8 +48,9 @@
             </div>
             }
             @if (canManageCases() && !caseData.closure) {
-            <button @caseInlineMotion (click)="store.enableEditing('caseDetails')" type="button" class="inline-flex h-8 shrink-0 items-center gap-1.5 self-start rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-820-light)] px-2.5 text-sm font-medium text-[var(--color-text2)] transition hover:bg-[var(--color-blue-810)] sm:self-auto" data-testid="case-details-edit">
-                <i class="bi bi-pencil-square"></i> {{ 'Edit' | translate }}
+            <button @caseInlineMotion (click)="store.enableEditing('caseDetails')" type="button" class="group inline-flex h-8 shrink-0 items-center gap-1.5 self-end rounded-[8px] border px-2.5 text-sm font-semibold text-[var(--color-text1)] outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 border-[#2f3a48] bg-[linear-gradient(135deg,rgba(148,163,184,0.18),rgba(100,116,139,0.10))] hover:border-[#3c4a5c] hover:bg-[linear-gradient(135deg,rgba(148,163,184,0.26),rgba(100,116,139,0.16))] [body.light-theme_&]:border-[#c3ccd8] [body.light-theme_&]:bg-[#f1f4f8] [body.light-theme_&]:hover:border-[#a9b6c6] [body.light-theme_&]:hover:bg-[#e7ecf3]" data-testid="case-details-edit">
+                <span aria-hidden="true" class="inline-flex h-[18px] w-[18px] items-center justify-center text-[#c3ccd8] transition-colors group-hover:text-white [body.light-theme_&]:text-[#556274] [body.light-theme_&]:group-hover:text-[#334155]"><i class="bi bi-pencil-square text-[13px]"></i></span>
+                {{ 'Edit' | translate }}
             </button>
             }
         </div>
