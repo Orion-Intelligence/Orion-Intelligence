@@ -477,7 +477,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .should('be.visible')
       .and('have.attr', 'target', '_blank')
       .and('have.attr', 'href', '/api/alert-connectors/slack/connect');
-    cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
+    cy.get('[data-testid="tenant-settings-connect-jira"]').should('have.class', 'is-disabled');
     cy.docsScreenshot('tenant-alert-integrations-slack');
     cy.window().then((win) => {
       const slackConnectClicks: string[] = [];
