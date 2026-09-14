@@ -52,6 +52,13 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
 
+  get documentationUrl(): string {
+    if (this.appService.userSessionData()?.tenant?.isDefault) {
+      return 'https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html';
+    }
+    return '/docs';
+  }
+
   ngOnInit() {
     const hasSavedSidebarPreference = typeof window !== 'undefined' && localStorage.getItem('isSidebarOpen') !== null;
     this.sidebar_default = hasSavedSidebarPreference

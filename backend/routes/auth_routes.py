@@ -12,7 +12,6 @@ from orion.api.interactive.payment_manager.model.payment_param_model import Paym
 from orion.api.interactive.payment_manager.payment_manager import PaymentManager
 from orion.helper_manager.env_handler import env_handler
 from orion.services.session_manager.session_manager import session_manager
-from orion.services.log_manager.log_controller import log
 from orion.api.interactive.signup_manager.model.signup_request_model import SignupRequest,SupportRequest
 from orion.api.interactive.signup_manager.signup_manager import SignupManager
 from orion.api.interactive.auth_manager.models.forgot_password_request import ForgotPasswordRequest, RecoveryRequest, ResetPassword
@@ -56,7 +55,6 @@ def _finalize_token_response(result: dict, request: Request, response: Response,
 @auth_router.post("/api/token")
 async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None, cookie_only: bool = False, redis_store: redis_controller = Depends(redis_controller.getInstance)):
     client = "extension" if any(scope in {"extension", "orion_extension"} for scope in form_data.scopes) else "web"
-    log.g().w(f"[session-debug] LOGIN /api/token user={form_data.username} client={client} ip={getattr(request.client, 'host', '?')} origin={request.headers.get('origin')} referer={request.headers.get('referer')} ua={request.headers.get('user-agent','')[:80]}")
     result = await auth_rate_limit(redis_store, form_data.username, lambda: auth_manager.login(form_data.username, form_data.password, client=client, tenant_id=getattr(request.state, "tenant", None)))
 
     return _finalize_auth_response(result, request, response, cookie_only)
