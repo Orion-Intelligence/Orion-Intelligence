@@ -1,3 +1,23 @@
+import {
+  THREAT_LENS_FEED_TYPES,
+  assertThreatLensFeedEmptyOnSearch,
+  assertThreatLensFeedItemNotEmpty,
+  cycleThreatLensFeedRanges,
+  openThreatLensFeedItemIfPresent,
+  openThreatLensFilters,
+  resetThreatLensCountry,
+  resetThreatLensPosition,
+  selectThreatLensCategoryLayerIfPresent,
+  selectThreatLensTopCountryIfPresent,
+  setThreatLensArcRangeIfPresent,
+  submitThreatLensKeyword,
+  submitThreatLensTopicSearch,
+  toggleThreatLensFeedPanel,
+  toggleThreatLensSearchPanel,
+  visitThreatLens,
+  waitForThreatLensReady
+} from './controllers/19-geo-fencing.controller';
+
 describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
   beforeEach(() => {
     cy.loginAsAdmin();
@@ -167,5 +187,49 @@ describe('Geo Fencing - Satellite Intel and Threat Lens', () => {
     cy.get('[data-testid="geo-fencing-panel-menu-filter"]').should('be.visible').click({ force: true });
     cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().should('be.visible');
     cy.docsScreenshot('threat-lens-filters');
+  });
+
+  it('drives Threat Lens component logic: feeds, layers, topic search, and selection reset', () => {
+    visitThreatLens();
+    waitForThreatLensReady();
+
+    cy.window().then((win) => {
+      cy.stub(win, 'open').as('threatLensFeedOpen');
+    });
+
+    THREAT_LENS_FEED_TYPES.forEach((feedType) => {
+      cy.get(`[data-testid="threat-lens-feed-panel-${feedType}"]`).should('be.visible');
+      cycleThreatLensFeedRanges(feedType);
+      assertThreatLensFeedItemNotEmpty(feedType);
+      assertThreatLensFeedEmptyOnSearch(feedType);
+    });
+
+    openThreatLensFeedItemIfPresent('news');
+    toggleThreatLensFeedPanel('archive');
+    toggleThreatLensFeedPanel('archive');
+
+    selectThreatLensCategoryLayerIfPresent();
+    setThreatLensArcRangeIfPresent('100');
+    waitForThreatLensReady();
+
+    submitThreatLensTopicSearch('ransomware');
+    waitForThreatLensReady();
+
+    submitThreatLensKeyword('russia');
+    waitForThreatLensReady();
+
+    selectThreatLensTopCountryIfPresent();
+    waitForThreatLensReady();
+
+    toggleThreatLensSearchPanel();
+    toggleThreatLensSearchPanel();
+
+    openThreatLensFilters();
+    cy.get('[data-testid="side-filter-close"]').filter(':visible').first().click({ force: true });
+
+    resetThreatLensCountry();
+    waitForThreatLensReady();
+    resetThreatLensPosition();
+    waitForThreatLensReady();
   });
 });

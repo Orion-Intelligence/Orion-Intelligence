@@ -16,6 +16,11 @@ import {
   removeSelectedFileIfPresent,
   transferFirstVisibleScriptOwner,
   validateFixtureOperationsForAllFeederRules,
+  assertFeederLoadErrorPath,
+  assertFeederMutationErrorPaths,
+  assertFeederValueMutationErrorPaths,
+  assertFeederReplaceConfirmationCancel,
+  assertFeederSessionFileValidationAndClear,
 } from './controllers/16-feeder-management.controller';
 import type { ManagedUsers } from './model/05-user-management.model';
 
@@ -373,5 +378,30 @@ describe('Orion Intelligence - Feeder Management', () => {
         }
       });
     });
+  });
+
+  it('surfaces a toast when reloading feeder scripts fails', () => {
+    openFeederAsAdmin();
+    assertFeederLoadErrorPath();
+  });
+
+  it('surfaces toasts when script row and bulk actions fail', () => {
+    openFeederAsAdmin();
+    assertFeederMutationErrorPaths();
+  });
+
+  it('surfaces toasts when value deletions fail', () => {
+    openFeederAsAdmin();
+    assertFeederValueMutationErrorPaths();
+  });
+
+  it('cancels the replace confirmation for an existing parser upload', () => {
+    openFeederAsAdmin();
+    assertFeederReplaceConfirmationCancel();
+  });
+
+  it('rejects a non-zip session file and clears the selected parser', () => {
+    openFeederAsAdmin();
+    assertFeederSessionFileValidationAndClear();
   });
 });

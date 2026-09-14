@@ -4,18 +4,42 @@ import {
   AI_CHAT_RESPONSE,
   AI_CHAT_VIEW_CASES,
   AI_DEEP_PROMPT,
+  AI_DIRECTORY_APPROVED_MESSAGE,
+  AI_DIRECTORY_CHILD_DIR,
+  AI_DIRECTORY_CHILD_FILE,
+  AI_DIRECTORY_FAILED_MESSAGE,
+  AI_DIRECTORY_INFECTED_MESSAGE,
+  AI_DIRECTORY_PROCESSING_MESSAGE,
+  AI_DIRECTORY_READY_MESSAGE,
+  AI_DIRECTORY_ROOT_FILE,
   AI_EDITED_PROMPT,
+  AI_ERROR_MESSAGE,
+  AI_ERROR_STREAM_BODY,
   AI_HISTORY_PROMPT,
   AI_MARKDOWN_STREAM_BODY,
   AI_OVERFLOW_TEXT,
+  AI_PLAIN_STREAM_BODY,
   AI_REPO_URL,
+  AI_RETRY_PROMPT,
   AI_STOP_PROMPT,
+  AI_TRIGGER_DOWNLOAD_BODY,
+  AI_TRIGGER_DOWNLOAD_URL,
+  AI_TRIGGER_PROMPT,
+  AI_TRIGGER_RESPONSE,
+  AI_TRIGGER_STREAM_BODY,
+  AI_TRIGGER_TEXT,
   clickIfPresent,
   ensureActiveChat,
   firstByPrefix,
   openAiWorkspace,
   selector,
   sendAiPrompt,
+  stubDirectoryImport,
+  stubDirectoryStatus,
+  stubDirectoryStatusSequence,
+  stubDirectoryTreeAndFile,
+  stubNexusStream,
+  submitStubbedDirectoryImport,
 } from './controllers/21-ai-chat.controller';
 
 describe('AI Chat - Basic Flow', () => {
@@ -469,5 +493,189 @@ describe('AI Chat - Basic Flow', () => {
         cy.get('th').should('have.length.at.least', 1);
         cy.get('td').should('have.length.at.least', 1);
       });
+  });
+
+  it('surfaces a Nexus error message and resends it through retry', () => {
+    openAiWorkspace('chat');
+    ensureActiveChat();
+
+    stubNexusStream('aiRetryError', AI_ERROR_STREAM_BODY);
+
+    cy.get(selector('chat-widget-input'), { timeout: 60000 })
+      .should('be.visible')
+      .and('not.be.disabled')
+      .clear()
+      .type(AI_RETRY_PROMPT);
+    cy.get(selector('chat-widget-send'))
+      .should('not.be.disabled')
+      .click({ force: true });
+
+    cy.wait('@aiRetryError', { timeout: 120000 });
+    cy.contains(selector('ai-message-error'), AI_ERROR_MESSAGE, { timeout: 120000 }).should('be.visible');
+
+    stubNexusStream('aiRetrySuccess', AI_PLAIN_STREAM_BODY);
+
+    cy.get(selector('ai-message-error'), { timeout: 60000 })
+      .last()
+      .within(() => {
+        cy.contains('button', 'Retry').click({ force: true });
+      });
+
+    cy.wait('@aiRetrySuccess', { timeout: 120000 });
+    cy.contains(selector('ai-message-bot'), AI_CHAT_RESPONSE, { timeout: 120000 }).should('be.visible');
+  });
+
+  it('renders a download trigger on a bot message and fetches it', () => {
+    openAiWorkspace('chat');
+    ensureActiveChat();
+
+    stubNexusStream('aiTriggerSend', AI_TRIGGER_STREAM_BODY);
+    cy.intercept('GET', '**/nexus/downloads/cypress-report.txt', {
+      statusCode: 200,
+      headers: { 'content-type': 'text/plain', 'content-disposition': 'attachment; filename="cypress-report.txt"' },
+      body: AI_TRIGGER_DOWNLOAD_BODY,
+    }).as('aiTriggerDownload');
+
+    cy.get(selector('chat-widget-input'), { timeout: 60000 })
+      .should('be.visible')
+      .and('not.be.disabled')
+      .clear()
+      .type(AI_TRIGGER_PROMPT);
+    cy.get(selector('chat-widget-send'))
+      .should('not.be.disabled')
+      .click({ force: true });
+
+    cy.wait('@aiTriggerSend', { timeout: 120000 });
+    cy.contains(selector('ai-message-bot'), AI_TRIGGER_RESPONSE, { timeout: 120000 }).should('be.visible');
+
+    cy.contains(`${selector('ai-message-bot')} button`, AI_TRIGGER_TEXT, { timeout: 60000 })
+      .last()
+      .scrollIntoView()
+      .should('be.visible')
+      .click({ force: true });
+
+    cy.wait('@aiTriggerDownload', { timeout: 60000 }).then(({ request }) => {
+      expect(request.url).to.include(AI_TRIGGER_DOWNLOAD_URL);
+    });
+  });
+
+  it('imports a repository, browses the tree, previews a file and searches logs', () => {
+    stubDirectoryStatus('idle', '');
+    stubDirectoryImport('approved', AI_DIRECTORY_APPROVED_MESSAGE, { scan_output: 'scan clean' });
+    stubDirectoryTreeAndFile();
+
+    openAiWorkspace('split');
+    ensureActiveChat();
+
+    submitStubbedDirectoryImport();
+    cy.wait('@aiDirImport', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
+    cy.wait('@aiDirTree', { timeout: 60000 });
+
+    cy.contains('#ai-directory-files-panel button', AI_DIRECTORY_ROOT_FILE, { timeout: 60000 })
+      .should('be.visible')
+      .click({ force: true });
+    cy.wait('@aiDirFile', { timeout: 60000 });
+    cy.get('#ai-directory-files-panel pre', { timeout: 60000 }).should('be.visible');
+
+    cy.get('#ai-directory-files-panel pre')
+      .parent()
+      .scrollTo('bottom', { ensureScrollable: false });
+    cy.wait('@aiDirFile', { timeout: 60000 });
+
+    cy.contains('#ai-directory-files-panel button', AI_DIRECTORY_CHILD_DIR, { timeout: 60000 })
+      .should('be.visible')
+      .click({ force: true });
+    cy.wait('@aiDirTree', { timeout: 60000 });
+    cy.contains('#ai-directory-files-panel button', AI_DIRECTORY_CHILD_FILE, { timeout: 60000 })
+      .should('be.visible')
+      .click({ force: true });
+    cy.wait('@aiDirFile', { timeout: 60000 });
+
+    cy.get(selector('ai-directory-tab-logs'), { timeout: 60000 })
+      .should('be.visible')
+      .click({ force: true });
+    cy.get('#ai-directory-logs-panel', { timeout: 60000 }).should('be.visible');
+    cy.get(selector('ai-directory-log-search'), { timeout: 60000 })
+      .should('be.visible')
+      .clear()
+      .type('repository');
+    cy.get('#ai-directory-logs-panel').should('contain.text', 'imported');
+    clickIfPresent('#ai-directory-logs-panel button[aria-label="Clear log search"]');
+  });
+
+  it('reflects a processing repository that finishes through status polling', () => {
+    stubDirectoryStatusSequence('processing', AI_DIRECTORY_PROCESSING_MESSAGE, 'approved', AI_DIRECTORY_READY_MESSAGE, { scan_output: 'poll clean' });
+    stubDirectoryTreeAndFile();
+
+    openAiWorkspace('split');
+    ensureActiveChat();
+
+    cy.wait('@aiDirStatus', { timeout: 60000 });
+    cy.wait('@aiDirTree', { timeout: 60000 });
+    cy.contains('#ai-directory-files-panel button', AI_DIRECTORY_ROOT_FILE, { timeout: 60000 }).should('be.visible');
+  });
+
+  it('shows a blocked status when the repository import is infected', () => {
+    stubDirectoryStatus('infected', AI_DIRECTORY_INFECTED_MESSAGE, { scan_output: 'malware detected' });
+    stubDirectoryImport('infected', AI_DIRECTORY_INFECTED_MESSAGE, { scan_output: 'malware detected' });
+
+    openAiWorkspace('split');
+    ensureActiveChat();
+
+    submitStubbedDirectoryImport();
+    cy.wait('@aiDirImport', { timeout: 60000 });
+
+    cy.get(selector('ai-directory-tab-logs'), { timeout: 60000 })
+      .should('be.visible')
+      .click({ force: true });
+    cy.get('#ai-directory-logs-panel', { timeout: 60000 }).should('contain.text', 'BLOCKED');
+  });
+
+  it('shows a failed status when the repository import fails', () => {
+    stubDirectoryStatus('failed', AI_DIRECTORY_FAILED_MESSAGE, { error: 'clone error' });
+    stubDirectoryImport('failed', AI_DIRECTORY_FAILED_MESSAGE, { error: 'clone error' });
+
+    openAiWorkspace('split');
+    ensureActiveChat();
+
+    submitStubbedDirectoryImport();
+    cy.wait('@aiDirImport', { timeout: 60000 });
+
+    cy.get(selector('ai-directory-tab-logs'), { timeout: 60000 })
+      .should('be.visible')
+      .click({ force: true });
+    cy.get('#ai-directory-logs-panel', { timeout: 60000 }).should('contain.text', 'FAILED');
+  });
+
+  it('clears all chats and starts a fresh session', () => {
+    openAiWorkspace('chat');
+    ensureActiveChat();
+
+    cy.intercept('DELETE', '**/chats', { statusCode: 200, body: { success: true } }).as('aiClearAllChats');
+    cy.intercept('POST', '**/chats', {
+      statusCode: 201,
+      body: {
+        session_id: 'cypress-clear-all-session',
+        title: 'New Chat',
+        updated_at: new Date().toISOString(),
+        message_count: 0,
+      },
+    }).as('aiClearAllCreate');
+
+    cy.get('body').then(($body) => {
+      const clearButton = $body.find(`${selector('ai-clear-all-chats-button')}:visible`).first();
+      if (!clearButton.length || clearButton.prop('disabled')) {
+        return;
+      }
+      cy.wrap(clearButton).click({ force: true });
+      cy.get(selector('confirmation-yes-button'), { timeout: 60000 })
+        .should('be.visible')
+        .click({ force: true });
+      cy.wait('@aiClearAllChats', { timeout: 60000 });
+      cy.wait('@aiClearAllCreate', { timeout: 60000 });
+      cy.get(`${firstByPrefix('ai-chat-session-')}[data-selected="true"]`, { timeout: 60000 }).should('exist');
+    });
+
+    cy.get(selector('chat-widget-input'), { timeout: 60000 }).should('be.visible');
   });
 });

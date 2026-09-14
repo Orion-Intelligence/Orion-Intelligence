@@ -470,6 +470,146 @@ export function removeSelectedFileIfPresent() {
   });
 }
 
+function selectDefacementScriptFile() {
+  void cy.get('[data-testid="feeder-select-file-button"]').filter(':visible').first().should('be.visible');
+  void cy.get('[data-testid="feeder-file-input"]')
+    .last()
+    .selectFile('cypress/fixtures/feeder/unique/_defacement_sample.py', { force: true });
+  void cy.wait(300);
+}
+
+function confirmReplaceIfPresent() {
+  void cy.get('body').then(($body) => {
+    const yes = $body.find('[data-testid="confirmation-yes-button"]:visible').first();
+    if (yes.length) {
+      void cy.wrap(yes).click({ force: true });
+    }
+  });
+}
+
+export function uploadDefacementScriptAndOpenScriptTab() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-add');
+  selectDefacementScriptFile();
+  void cy.get('[data-testid="feeder-upload-script-button"]').filter(':visible').first().click({ force: true });
+  void cy.wait(600);
+  confirmReplaceIfPresent();
+  openTab('feeder-tab-script');
+  void cy.get('[data-testid^="feeder-script-row-"]', { timeout: DEEP_FEEDER_TIMEOUT })
+    .filter(':visible')
+    .first()
+    .should('exist');
+}
+
+export function assertFeederLoadErrorPath() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-script');
+  void cy.intercept('GET', '**/api/profile/feeder/scripts?**', { statusCode: 500, body: { detail: 'Injected feeder load failure' } }).as('feederScriptsLoadError');
+  void cy.get('[data-testid="feeder-reload-button"]', { timeout: FEEDER_QUERY_TIMEOUT }).filter(':visible').first().should('not.be.disabled').click({ force: true });
+  void cy.wait('@feederScriptsLoadError', { timeout: FEEDER_QUERY_TIMEOUT });
+  void cy.get('[data-testid="message-notification"]').should('be.visible');
+}
+
+export function assertFeederMutationErrorPaths() {
+  uploadDefacementScriptAndOpenScriptTab();
+  void cy.intercept('POST', '**/api/profile/feeder/scripts/**', { statusCode: 500, body: { detail: 'Injected feeder mutation failure' } }).as('feederMutationError');
+
+  void cy.get('[data-testid^="feeder-script-toggle-button-"]').filter(':visible').first().click({ force: true });
+  dismissConfirmation(true);
+  void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+  void cy.get('[data-testid="message-notification"]').should('be.visible');
+
+  void cy.get('body').then(($body) => {
+    const enableAll = $body.find('[data-testid="feeder-enable-all-button"]:visible:not(:disabled)').first();
+    if (enableAll.length) {
+      void cy.wrap(enableAll).click({ force: true });
+      dismissConfirmation(true);
+      void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+    }
+  });
+
+  void cy.get('body').then(($body) => {
+    const clearAll = $body.find('[data-testid="feeder-clear-all-button"]:visible:not(:disabled)').first();
+    if (clearAll.length) {
+      void cy.wrap(clearAll).click({ force: true });
+      dismissConfirmation(true);
+      void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+    }
+  });
+
+  void cy.get('[data-testid^="feeder-script-delete-button-"]').filter(':visible').first().click({ force: true });
+  dismissConfirmation(true);
+  void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+  void cy.get('[data-testid="message-notification"]').should('be.visible');
+}
+
+export function assertFeederValueMutationErrorPaths() {
+  openFeederRule('generic');
+  openTab('feeder-tab-add');
+  void cy.get('[data-testid="feeder-values-input"]')
+    .should('be.visible')
+    .clear()
+    .type('https://example.com/error-value-a\nhttps://example.com/error-value-b', { delay: 0 });
+  clickIfVisible('[data-testid="feeder-upload-values-button"]');
+  void cy.wait(600);
+
+  openTab('feeder-tab-values');
+
+  void cy.get('body').then(($body) => {
+    if (!$body.find('[data-testid^="feeder-value-row-"]:visible').length) {
+      return;
+    }
+    void cy.intercept('POST', '**/api/profile/feeder/scripts/**', { statusCode: 500, body: { detail: 'Injected feeder value failure' } }).as('feederValueError');
+
+    void cy.get('[data-testid^="feeder-value-delete-button-"]').filter(':visible').first().click({ force: true });
+    dismissConfirmation(true);
+    void cy.wait('@feederValueError', { timeout: FEEDER_QUERY_TIMEOUT });
+    void cy.get('[data-testid="message-notification"]').should('be.visible');
+
+    void cy.get('body').then(($inner) => {
+      const clearAll = $inner.find('[data-testid="feeder-clear-all-values-button"]:visible:not(:disabled)').first();
+      if (clearAll.length) {
+        void cy.wrap(clearAll).click({ force: true });
+        dismissConfirmation(true);
+        void cy.wait('@feederValueError', { timeout: FEEDER_QUERY_TIMEOUT });
+      }
+    });
+  });
+}
+
+export function assertFeederReplaceConfirmationCancel() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-add');
+  selectDefacementScriptFile();
+  void cy.get('[data-testid="feeder-upload-script-button"]').filter(':visible').first().click({ force: true });
+  void cy.wait(600);
+  confirmReplaceIfPresent();
+  void cy.wait(600);
+
+  openTab('feeder-tab-add');
+  selectDefacementScriptFile();
+  void cy.get('[data-testid="feeder-upload-script-button"]').filter(':visible').first().click({ force: true });
+  void cy.wait(600);
+  void cy.get('[data-testid="confirmation-popup"]', { timeout: DEEP_FEEDER_TIMEOUT }).should('be.visible');
+  dismissConfirmation(false);
+  void cy.get('[data-testid="confirmation-popup"]').should('not.exist');
+  removeSelectedFileIfPresent();
+}
+
+export function assertFeederSessionFileValidationAndClear() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-add');
+  void cy.get('[data-testid="feeder-select-file-button"]').filter(':visible').first().should('be.visible');
+
+  void cy.get('[data-testid="feeder-session-file-input"]')
+    .last()
+    .selectFile('cypress/fixtures/feeder/crawl_data_defacement.txt', { force: true });
+  void cy.get('[data-testid="feeder-form-error"]').should('be.visible');
+
+  selectDefacementScriptFile();
+  removeSelectedFileIfPresent();
+}
+
 export function openRuleForSharedPanel() {
   void cy.get('[data-testid="feeder-rule-select"]').should('be.visible').and('not.be.disabled').click();
   void cy.get('[data-testid^="feeder-rule-option-"]').then(($options) => {

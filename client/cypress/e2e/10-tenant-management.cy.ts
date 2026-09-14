@@ -34,7 +34,17 @@ import {
   waitForTenantAlertScanComplete,
   ensureTenantAlertReportsPresent,
   waitForTenantAlertFindings,
-  waitForBlockingOverlayToClose
+  waitForBlockingOverlayToClose,
+  CATEGORY_ALERT_REPORT_TYPE,
+  openCategoryAlertReport,
+  loadMoreCategoryAlerts,
+  searchCategoryAlerts,
+  openCategoryAlertDrawerByClick,
+  openCategoryAlertDrawerByKeyboard,
+  toggleCategoryAlertDescription,
+  closeCategoryAlertDrawer,
+  exportSelectedCategoryAlert,
+  exportCategoryAlerts
 } from './controllers/10-tenant-management.controller';
 import type { CaseAlertTenant, TenantSubUser } from './model/10-tenant-management.model';
 
@@ -619,5 +629,58 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     deleteTenant(tenant);
+  });
+});
+
+describe('Category Alert Report - Stubbed Coverage', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('paginates, searches and exports category alerts', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    cy.get('[data-testid="tenant-alert-report-card"]').filter(':visible').should('have.length.greaterThan', 0);
+
+    loadMoreCategoryAlerts();
+
+    searchCategoryAlerts('Cypress Breach Alert 1');
+
+    ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+      exportSelectedCategoryAlert(optionTestId);
+    });
+
+    ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+      exportCategoryAlerts(optionTestId);
+    });
+  });
+
+  it('opens the detail drawer via click and keyboard and toggles the description', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    openCategoryAlertDrawerByClick();
+    toggleCategoryAlertDescription();
+    closeCategoryAlertDrawer();
+
+    openCategoryAlertDrawerByKeyboard();
+    closeCategoryAlertDrawer();
+  });
+
+  it('applies alert filters through the filter sidebar', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    openFilterSidebar();
+    cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-prev-month"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
+    closeFilterSidebar();
+
+    cy.location('pathname').should('include', `/dashboard/profile/alerts/${CATEGORY_ALERT_REPORT_TYPE}`);
   });
 });
