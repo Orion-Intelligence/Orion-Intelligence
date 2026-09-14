@@ -255,9 +255,13 @@ class crawl_manager:
             return {"error": "Failed to parse chat"}
 
     @staticmethod
+    def _darknexus_base_url() -> str:
+        return (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
+
+    @staticmethod
     async def parse_summarize_ai(model: nlp_data_model, user_id: str = "system"):
         try:
-            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
+            base_url = crawl_manager._darknexus_base_url()
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(
@@ -343,7 +347,7 @@ class crawl_manager:
     @staticmethod
     async def parse_chat_ai(model, user_id: str = "system"):
         try:
-            base_url = (env_handler.get_instance().env("DARKNEXUS_API_BASE") or "http://trusted-nexus-api:8030").strip().rstrip("/")
+            base_url = crawl_manager._darknexus_base_url()
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(

@@ -1,5 +1,5 @@
 import { TrackingEntityType } from '../../models/geo-fencing.models';
-import type { Map as LeafletMap } from 'leaflet';
+import type { LatLngBounds, Map as LeafletMap } from 'leaflet';
 import { asUnknownRecord, getOwnProperty, isFiniteNumber } from '../../../../shared/utils/type-guards.util';
 
 export function normalizeEntityId(value: unknown): string | null {
@@ -36,6 +36,68 @@ export function getBearingDegrees(fromLat: number, fromLon: number, toLat: numbe
   const x = Math.cos(fromLatRad) * Math.sin(toLatRad) -
     Math.sin(fromLatRad) * Math.cos(toLatRad) * Math.cos(deltaLonRad);
   return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+}
+
+export function getMovementBearing(current: { lat: number; lng: number } | null | undefined, targetLat: number | null | undefined, targetLon: number | null | undefined): number | null {
+  if (
+    current &&
+    Number.isFinite(current.lat) &&
+    Number.isFinite(current.lng) &&
+    isFiniteNumber(targetLat) &&
+    isFiniteNumber(targetLon)
+  ) {
+    return getBearingDegrees(current.lat, current.lng, targetLat, targetLon);
+  }
+  return null;
+}
+
+export function projectDestination(lat: number, lon: number, bearing: number, distanceMeters: number): { lat: number; lon: number } {
+  const bearingRadians = (bearing * Math.PI) / 180;
+  const latRadians = (lat * Math.PI) / 180;
+  const metersPerDegreeLat = 111320;
+  const metersPerDegreeLon = Math.max(1, metersPerDegreeLat * Math.cos(latRadians));
+
+  return {
+    lat: lat + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
+    lon: lon + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
+  };
+}
+
+export function coerceFiniteNumber(value: unknown): number | null {
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value === 'string' && value.trim()) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  return null;
+}
+
+export function formatCoordinateLabel(latitude: unknown, longitude: unknown): string {
+  if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+    return `${Number(latitude).toFixed(3)}, ${Number(longitude).toFixed(3)}`;
+  }
+  return '-';
+}
+
+export function pickDefinedValue(source: Record<string, unknown> | null | undefined, keys: string[]): unknown {
+  for (const key of keys) {
+    const value = getOwnProperty(source, key);
+    if (value !== null && value !== undefined && value !== '') {
+      return value;
+    }
+  }
+  return null;
+}
+
+export function spatialRenderKeyParts(zoom: number, bounds: LatLngBounds): string[] {
+  const center = bounds.getCenter();
+  return [
+    `z:${Math.round(zoom * 2)}`,
+    `c:${center.lat.toFixed(1)},${center.lng.toFixed(1)}`,
+    `d:${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)},${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)}`,
+  ];
 }
 
 export function stableHash(key: string): number {

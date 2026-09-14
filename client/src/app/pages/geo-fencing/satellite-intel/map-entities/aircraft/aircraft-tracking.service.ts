@@ -4,6 +4,7 @@ import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteLiveAircraft, SatelliteLiveAircraftBBoxResponse } from '../../model/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 import { asUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { getResponseStatus } from '../../map-utils/renderer-utils';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteAircraftTrackingService {
@@ -95,9 +96,6 @@ export class SatelliteAircraftTrackingService {
   }
 
   private getPollStatus(res: unknown): string | undefined {
-    const response = asUnknownRecord(res);
-    const result = asUnknownRecord(response.result);
-    const status = result.status ?? response.status;
-    return typeof status === 'string' ? status : undefined;
+    return getResponseStatus(res);
   }
 }

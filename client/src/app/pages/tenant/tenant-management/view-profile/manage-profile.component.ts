@@ -17,6 +17,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { buildAlertAllowedOptions, loadAlertTenantOptions } from '../../../../shared/utils/alert-allowed-tenants.util';
+import { buildTenantBasePermissionOptions, buildTenantStatusOptions } from '../tenant-form-options.util';
 
 @Component({
   selector: 'app-view-profile',
@@ -45,12 +46,8 @@ export class ManageProfileComponent implements OnInit {
   }
 
   get permissionOptions(): UiDropdownOption[] {
-    this.translationService.version();
     const session = this.appService.userSessionData();
-    const options: UiDropdownOption[] = [
-      { key: 'case_management', label: this.translationService.translate('Case Management') },
-      { key: 'dismiss_result', label: this.translationService.translate('Dismiss Result') },
-    ];
+    const options = buildTenantBasePermissionOptions(this.translationService);
     if (session.user.role === 'admin') {
       options.push({ key: 'monitoring', label: this.translationService.translate('Monitoring') });
     }
@@ -61,11 +58,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   get statusOptions(): UiDropdownOption[] {
-    this.translationService.version();
-    return [
-      { key: 'active', label: this.translationService.translate('Active') },
-      { key: 'disable', label: this.translationService.translate('Disable') }
-    ];
+    return buildTenantStatusOptions(this.translationService);
   }
 
   get passwordResetOptions(): UiDropdownOption[] {

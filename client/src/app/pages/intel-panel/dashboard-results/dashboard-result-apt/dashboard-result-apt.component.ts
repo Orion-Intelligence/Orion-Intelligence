@@ -6,7 +6,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { RecordSidebarComponent } from '../../../../shared/partials/record-sidebar/record-sidebar.component';
 import { AptIntelGroup, AptIntelRecord, AptIntelResultItem, AptIntelSummary } from '../../../../shared/model/results/apt-intel/apt-intel.callback.model';
 import { RecordSidebarItem } from '../../../../shared/partials/record-sidebar/model/record-sidebar.model';
-import { scrollToResultCard } from '../dashboard-result.util';
+import { buildGridPlaceholders, scrollToResultCard } from '../dashboard-result.util';
 import { DashboardResultGroupBase } from '../dashboard-result-group-base';
 
 @Component({
@@ -31,14 +31,18 @@ export class DashboardResultAptComponent extends DashboardResultGroupBase implem
   constructor(private router: Router, private route: ActivatedRoute, protected scrollService: ScrollService) {
     super();
     effect(() => {
-      if (this.directResults()) {
-        const results = this.getVisibleResults();
-        this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
-        return;
-      }
-      const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
-      this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
+      this.renderCurrentView();
     });
+  }
+
+  private renderCurrentView(): void {
+    if (this.directResults()) {
+      const results = this.getVisibleResults();
+      this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
+      return;
+    }
+    const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
+    this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
   }
 
   ngOnInit(): void {
@@ -73,9 +77,7 @@ export class DashboardResultAptComponent extends DashboardResultGroupBase implem
   }
 
   getGridPlaceholders(results: unknown[]): number[] {
-    const remainder = results.length % 3;
-    const count = remainder === 0 ? 0 : 3 - remainder;
-    return this.isConsolidatedView ? [] : Array.from({ length: count }, (_, index) => index);
+    return buildGridPlaceholders(results.length, this.isConsolidatedView);
   }
 
   getAptIntelSummary(): AptIntelSummary {
@@ -127,14 +129,7 @@ export class DashboardResultAptComponent extends DashboardResultGroupBase implem
     const previousLimit = this.directResults() ? this.getDirectResultDisplayLimit() : this.getGroupDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
-    if (this.directResults()) {
-      const results = this.getVisibleResults();
-      this.startStaggeredRender(results.length, this.buildDirectRenderKey(results));
-      this.scrollToResultIndex(isExpanding ? previousLimit : 0);
-      return;
-    }
-    const groups = this.getAptIntelGroups().slice(0, this.getGroupDisplayLimit());
-    this.startStaggeredRender(groups.length, this.buildRenderKey(groups));
+    this.renderCurrentView();
     this.scrollToResultIndex(isExpanding ? previousLimit : 0);
   }
 
@@ -168,11 +163,7 @@ export class DashboardResultAptComponent extends DashboardResultGroupBase implem
   }
 
   getSidebarSubtitle(): string {
-    const selectedGroup = this.getSelectedGroup();
-    if (selectedGroup) {
-      return `${selectedGroup.records.length} records / ${selectedGroup.title}`;
-    }
-    return `${this.getSidebarRecords().length} records`;
+    return this.getSelectedGroupSubtitle(this.getSelectedGroup()) ?? `${this.getSidebarRecords().length} records`;
   }
 
   getReportLink(item: AptIntelResultItem): string[] {

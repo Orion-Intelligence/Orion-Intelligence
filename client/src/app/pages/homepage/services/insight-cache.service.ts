@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { Observable, throwError, timer } from 'rxjs';
 import { retry, shareReplay } from 'rxjs/operators';
 import { ApiService } from '../../../shared/services/api.service';
@@ -14,6 +15,15 @@ export class InsightCacheService {
   getInsight(): Observable<unknown> {
     this.insight$ ??= this.apiService.get<unknown>('insight').pipe(retry({ delay: (error) => this.appService.backendWarmingUp() ? timer(5000) : throwError(() => error) }), shareReplay(1));
     return this.insight$;
+  }
+
+  loadInsight(route: ActivatedRoute, apply: (data: unknown) => void): void {
+    const data = route.snapshot.data.insights;
+    if (data) {
+      apply(data);
+      return;
+    }
+    this.getInsight().subscribe(apply);
   }
 
   warmInsight(): void {

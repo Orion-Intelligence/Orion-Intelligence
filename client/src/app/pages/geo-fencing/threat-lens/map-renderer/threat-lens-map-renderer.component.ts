@@ -410,14 +410,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const endpointGraphic = hit.results.find((result) => this.arcRenderer?.isEndpointGraphic(result.graphic))?.graphic;
       if (endpointGraphic) {
-        const selection = this.buildArcSelection(endpointGraphic.attributes ?? {});
-        if (selection) {
-          this.tooltipRenderer.hide();
-          this.clearHoverHighlight();
-          this.ngZone.run(() => {
-            this.arcSelected.emit(selection);
-          });
-        }
+        this.emitArcSelection(endpointGraphic.attributes ?? {});
         return;
       }
 
@@ -435,14 +428,7 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
 
       const arcGraphic = hit.results.find((result) => this.arcRenderer?.isTooltipGraphic(result.graphic))?.graphic;
       if (arcGraphic) {
-        const selection = this.buildArcSelection(arcGraphic.attributes ?? {});
-        if (selection) {
-          this.tooltipRenderer.hide();
-          this.clearHoverHighlight();
-          this.ngZone.run(() => {
-            this.arcSelected.emit(selection);
-          });
-        }
+        this.emitArcSelection(arcGraphic.attributes ?? {});
         return;
       }
 
@@ -587,6 +573,17 @@ export class ThreatLensMapRendererComponent implements AfterViewInit, OnDestroy 
       key,
       ipScanRequest: includeIpScanRequest ? this.getCountryIpScanRequest(countryGraphic) : null,
     };
+  }
+
+  private emitArcSelection(attributes: Record<string, unknown>): void {
+    const selection = this.buildArcSelection(attributes);
+    if (selection) {
+      this.tooltipRenderer.hide();
+      this.clearHoverHighlight();
+      this.ngZone.run(() => {
+        this.arcSelected.emit(selection);
+      });
+    }
   }
 
   private buildArcSelection(attributes: Record<string, unknown>): ThreatLensArcSelection | null {

@@ -390,15 +390,19 @@ async def search_stealer_iocs(param: search_credential_param_model = Body(...), 
     return await search_manager.getInstance().search_stealer_iocs(param, current_user)
 
 
+def _parse_dismiss_type(value):
+    try:
+        return DismissedIocType(value)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid dismiss type")
+
+
 @api_routes.post(
     "/api/search/result/dismiss",
     include_in_schema=False,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(dismiss_result_required)])
 async def dismiss_result(payload: ResultDismissRequest = Body(...), current_user=Depends(get_current_user)):
-    try:
-        dismissed_ioc_type = DismissedIocType(payload.type)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid dismiss type")
+    dismissed_ioc_type = _parse_dismiss_type(payload.type)
     return await TenantManager.get_instance().dismiss_stealer_log(str(current_user.tenant_uuid), payload.hash, str(current_user.id), dismissed_ioc_type, all_tenants=current_user.role == user_role.ADMIN)
 
 
@@ -407,10 +411,7 @@ async def dismiss_result(payload: ResultDismissRequest = Body(...), current_user
     include_in_schema=False,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(dismiss_result_required)])
 async def restore_result(payload: ResultDismissRequest = Body(...), current_user=Depends(get_current_user)):
-    try:
-        dismissed_ioc_type = DismissedIocType(payload.type)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Invalid dismiss type")
+    dismissed_ioc_type = _parse_dismiss_type(payload.type)
     return await TenantManager.get_instance().restore_stealer_log(str(current_user.tenant_uuid), payload.hash, dismissed_ioc_type, all_tenants=current_user.role == user_role.ADMIN)
 
 
@@ -1151,23 +1152,17 @@ async def delete_scan_job(scan_id: str, current_user=Depends(get_current_user)):
     return await ScanJobManager.get_instance().delete_job(scan_id, current_user)
 
 
-@api_routes.post(
-    "/api/phone/universal_search",
-    summary="Phone and Domain OSINT Lookup",
-    tags=["Entity Scans"],
-    dependencies=SCANNING_DEPS,
-)
-async def phone_universal_search_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
+async def _forward_micros_post(scan_path, payload, current_user, service_label):
     base_url = str(env_handler.get_instance().env("TRUSTED_MICROS_API_BASE", "") or "").strip().rstrip("/")
     if not base_url:
-        raise HTTPException(status_code=500, detail="Phone lookup service is not configured")
+        raise HTTPException(status_code=500, detail=f"{service_label} service is not configured")
 
     user_id = str(current_user.id)
     if not re.fullmatch(r"[A-Fa-f0-9]{24}", user_id):
         raise HTTPException(status_code=400, detail="Invalid user")
 
     def forward_to_micros():
-        url = f"{base_url}/api/phone/universal_search/{user_id}"
+        url = f"{base_url}/{scan_path}/{user_id}"
         response = requests.post(url, json=payload, timeout=30)
 
         if response.status_code != 200:
@@ -1179,6 +1174,16 @@ async def phone_universal_search_proxy(payload: dict = Body(...), current_user=D
         return await asyncio.to_thread(forward_to_micros)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Microservice Connection Failed: {str(e)}")
+
+
+@api_routes.post(
+    "/api/phone/universal_search",
+    summary="Phone and Domain OSINT Lookup",
+    tags=["Entity Scans"],
+    dependencies=SCANNING_DEPS,
+)
+async def phone_universal_search_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
+    return await _forward_micros_post("api/phone/universal_search", payload, current_user, "Phone lookup")
 
 
 @api_routes.post(
@@ -1188,24 +1193,4 @@ async def phone_universal_search_proxy(payload: dict = Body(...), current_user=D
     dependencies=SCANNING_DEPS,
 )
 async def dkim_check_proxy(payload: dict = Body(...), current_user=Depends(get_current_user)):
-    base_url = str(env_handler.get_instance().env("TRUSTED_MICROS_API_BASE", "") or "").strip().rstrip("/")
-    if not base_url:
-        raise HTTPException(status_code=500, detail="DKIM lookup service is not configured")
-
-    user_id = str(current_user.id)
-    if not re.fullmatch(r"[A-Fa-f0-9]{24}", user_id):
-        raise HTTPException(status_code=400, detail="Invalid user")
-
-    def forward_to_micros():
-        url = f"{base_url}/dkim/check/{user_id}"
-        response = requests.post(url, json=payload, timeout=30)
-
-        if response.status_code != 200:
-            raise Exception(f"Failed with status {response.status_code}: {response.text}")
-
-        return response.json()
-
-    try:
-        return await asyncio.to_thread(forward_to_micros)
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Microservice Connection Failed: {str(e)}")
+    return await _forward_micros_post("dkim/check", payload, current_user, "DKIM lookup")

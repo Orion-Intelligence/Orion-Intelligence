@@ -16,6 +16,7 @@ import { SmtpSettingsBlockComponent } from '../../../../shared/partials/smtp-set
 import { SmtpSettingsForm } from '../../../../shared/partials/smtp-settings-block/model/smtp-settings.model';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
+import { notifyUploadImageError, uploadImageResource } from '../../settings-resource.util';
 
 @Component({
   selector: 'app-tenant-settings',
@@ -154,18 +155,15 @@ export class TenantSettingsComponent implements OnInit {
   }
 
   updateUserResource(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.apiService.put<{ image?: string }>('tenant/image', formData).subscribe({
+    return uploadImageResource(this.apiService, 'tenant/image', file).subscribe({
       next: (res) => {
         if (res?.image) {
           this.appService.userSessionData().tenant.image =
-                      `/api/s/static/tenant/${res.image}`;
+                        `/api/s/static/tenant/${res.image}`;
         }
       },
       error: (err) => {
-        const message = err?.error?.detail ?? this.translationService.translate('Failed to upload image');
-        this.messageNotificationService.show(message);
+        notifyUploadImageError(err, this.messageNotificationService, this.translationService); 
       }
     });
   }

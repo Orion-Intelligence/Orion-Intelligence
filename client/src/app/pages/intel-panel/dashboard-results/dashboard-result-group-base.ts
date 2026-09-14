@@ -82,6 +82,10 @@ export abstract class DashboardResultGroupBase {
     }
   }
 
+  protected getSelectedGroupSubtitle(group: { records: unknown[]; title: string } | null): string | null {
+    return group ? `${group.records.length} records / ${group.title}` : null;
+  }
+
   protected getLatestDate(current: string | null, next: string | null): string | null {
     if (!current) {
       return next;

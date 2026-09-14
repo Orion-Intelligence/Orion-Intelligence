@@ -5,6 +5,7 @@ import { ThreatLensDisplayFeedItem, ThreatLensFeedItem, ThreatLensFeedRange, Thr
 import { ThreatLensFeedPanelType } from '../../models/threat-lens-map.types';
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { formatFeedDate } from '../feed-date.util';
+import { toHexColor } from '../../threat-lens-format.util';
 
 @Component({
   selector: 'app-threat-lens-feed-panel',
@@ -130,7 +131,7 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
       .map((item) => ({
         ...item,
         displayDate: formatFeedDate(item.date),
-        colorHex: this.toHexColor(item.color),
+        colorHex: toHexColor(item.color),
       }))
       .filter((item) => this.feedType === 'news'
         ? item.categoryKey === 'news_model'
@@ -169,10 +170,6 @@ export class ThreatLensFeedPanelComponent implements AfterViewInit, OnChanges, O
     }
 
     return Date.now() - (dayCount * 24 * 60 * 60 * 1000);
-  }
-
-  private toHexColor(color: [number, number, number]): string {
-    return `#${color.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   }
 
   private restartAutoScroll(): void {

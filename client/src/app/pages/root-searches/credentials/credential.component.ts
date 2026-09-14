@@ -379,8 +379,7 @@ export class CredentialComponent implements OnInit {
       this.dashboardService.consolidatedParamModel.category = "";
       this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
         .pipe(finalize(() => {
-          this.isLoadingMore = false;
-          this.dashboardService.consolidatedParamModel.ioc = '';
+          this.clearIocLoadMoreState();
         })).subscribe(response => {
           const addedCount = this.appendRankedLoadMoreResults(response);
           this.hasMoreThreatResults = addedCount > 0;
@@ -394,8 +393,7 @@ export class CredentialComponent implements OnInit {
 
     this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(finalize(() => {
-        this.isLoadingMore = false;
-        this.dashboardService.consolidatedParamModel.ioc = '';
+        this.clearIocLoadMoreState();
       })).subscribe(response => {
         const addedCount = this.appendStealerLoadMoreResults(response);
         this.hasMoreStealerResults = addedCount > 0;
@@ -403,6 +401,11 @@ export class CredentialComponent implements OnInit {
           this.stealerIocPage = nextPage;
         }
       });
+  }
+
+  private clearIocLoadMoreState(): void {
+    this.isLoadingMore = false;
+    this.dashboardService.consolidatedParamModel.ioc = '';
   }
 
   selectIocResultTab(tab: IocResultTab): void {

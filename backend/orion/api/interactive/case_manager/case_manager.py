@@ -1059,13 +1059,7 @@ class CaseManager:
             lambda value: CaseHelperMethods.decrypt_value(enc, value),
         )
 
-        artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
-        if artifact is None:
-            raise HTTPException(status_code=404, detail="Artifact not found")
-
-        artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
-        if artifact_file is None:
-            raise HTTPException(status_code=404, detail="Artifact file not found")
+        _, artifact_file = self._resolve_artifact_file(record, artifact_id, file_id)
 
         is_valid = self._verify_file_integrity(artifact_file, enc)
 

@@ -147,7 +147,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           });
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to load feeder scripts'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to load feeder scripts')); 
         }
       });
   }
@@ -272,7 +272,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           this.loadScripts();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to delete'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to delete')); 
         }
       });
   }
@@ -290,7 +290,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           this.loadScripts();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to delete value'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to delete value')); 
         }
       });
   }
@@ -310,7 +310,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           this.loadScripts();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to delete value'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to delete value')); 
         }
       });
   }
@@ -338,7 +338,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           }
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to update script status'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to update script status')); 
         }
       });
   }
@@ -363,7 +363,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           this.loadScripts();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to clear selected rule entries'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to clear selected rule entries')); 
         }
       });
   }
@@ -397,7 +397,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           const errorMessage = this.translationService.translate(enabled
             ? 'Failed to enable selected rule entries'
             : 'Failed to disable selected rule entries');
-          this.messageNotificationService.show(error?.error?.detail ?? errorMessage);
+          this.notifyErrorDetail(error, errorMessage);
         }
       });
   }
@@ -676,7 +676,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           this.loadScripts();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to delete'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to delete')); 
         }
       });
   }
@@ -713,7 +713,7 @@ export class SidebarUserFeederViewComponent implements OnChanges {
           this.clearScriptSelection();
         },
         error: (error) => {
-          this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Failed to update script status'));
+          this.notifyErrorDetail(error, this.translationService.translate('Failed to update script status')); 
         }
       });
   }
@@ -925,6 +925,10 @@ export class SidebarUserFeederViewComponent implements OnChanges {
   private getDateSortValue(value?: string | null): number {
     const timestamp = value ? Date.parse(value) : NaN;
     return Number.isNaN(timestamp) ? 0 : timestamp;
+  }
+
+  private notifyErrorDetail(error: { error?: { detail?: string } }, fallback: string): void {
+    this.messageNotificationService.show(error?.error?.detail ?? fallback);
   }
 
   private deferStateUpdate(callback: () => void): void {

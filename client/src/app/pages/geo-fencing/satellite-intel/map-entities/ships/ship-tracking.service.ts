@@ -4,6 +4,7 @@ import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../model/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 import { asUnknownRecord, getOwnProperty, isFiniteNumber, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { coerceFiniteNumber } from '../../map-utils/renderer-utils';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteShipTrackingService {
@@ -174,15 +175,7 @@ export class SatelliteShipTrackingService {
   }
 
   private readNumber(item: unknown, keys: string[], paths: string[][] = []): number | null {
-    const value = this.readValue(item, keys, paths);
-    if (typeof value === 'number') {
-      return Number.isFinite(value) ? value : null;
-    }
-    if (typeof value === 'string' && value.trim()) {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : null;
-    }
-    return null;
+    return coerceFiniteNumber(this.readValue(item, keys, paths));
   }
 
   private toShipArray(candidate: unknown): unknown[] | null {

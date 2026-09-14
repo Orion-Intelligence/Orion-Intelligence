@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, SimpleChanges, effect, input, output, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Router } from '@angular/router';
-import { formatElapsedClock } from '../network-intel.util';
+import { formatElapsedClock, shouldActivateOnKeydown } from '../network-intel.util';
 import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.item.animation';
 import { vulnerabilityContentMotion } from '../../../../shared/animations/vulnerability.content.motion.animation';
 import { DnsEmailSecurity, DnsResult, IpRowState } from '../../../../shared/model/network-intel/network-intel.model';
@@ -108,11 +108,9 @@ export class DnsSectionComponent implements OnDestroy {
   }
 
   onRowKeydown(event: KeyboardEvent, row: IpRowState): void {
-    if (event.target !== event.currentTarget || (event.key !== 'Enter' && event.key !== ' ')) {
-      return;
+    if (shouldActivateOnKeydown(event)) {
+      this.toggleRow.emit(row);
     }
-    event.preventDefault();
-    this.toggleRow.emit(row);
   }
 
   ngOnDestroy(): void {

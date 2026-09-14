@@ -1,5 +1,5 @@
 import { Subscription } from 'rxjs';
-import { SatelliteLiveShip } from '../../model/satellite-intel-api.models';
+import { SatelliteLiveShip, SatelliteLiveShipsBBoxResponse } from '../../model/satellite-intel-api.models';
 import { MapEntityLoadingBridge, SatelliteTrackingViewport } from '../../../models/geo-fencing.models';
 import { SatelliteShipTrackingService } from './ship-tracking.service';
 import { isFiniteNumber } from '../../../../../shared/utils/type-guards.util';
@@ -86,18 +86,7 @@ export class SatelliteShipTrackingController {
     clearTimeout(this.timer);
     this.trackSub = this.service.pollGlobal().subscribe({
       next: (res) => {
-        if (!this.enabled) {
-          return;
-        }
-        const payload = (res?.result ?? res) as unknown;
-        const ships = this.service.extractItems(payload);
-        if (ships !== null) {
-          this.applyResult(ships, payload, 'Global ship tracking');
-        }
-        const feedIssue = this.service.getFeedIssue(payload);
-        if (ships === null && feedIssue) {
-          this.error = `Global ship tracking: ${feedIssue}`;
-        }
+        this.handleTrackingResponse(res, 'Global ship tracking', true, (ships) => ships);
       },
       error: (err) => {
         this.error = err?.error?.detail ?? err?.message ?? 'Global ship tracking failed';
@@ -133,18 +122,7 @@ export class SatelliteShipTrackingController {
     clearTimeout(this.timer);
     this.trackSub = this.service.pollInBounds(viewport.lat, viewport.lon, viewport.delta).subscribe({
       next: (res) => {
-        if (!this.enabled) {
-          return;
-        }
-        const payload = (res?.result ?? res) as unknown;
-        const ships = this.service.extractItems(payload);
-        if (ships !== null) {
-          this.applyResult(this.filterShipsToViewport(ships, viewport), payload, 'Ship tracking', !viewportChanged);
-        }
-        const feedIssue = this.service.getFeedIssue(payload);
-        if (ships === null && feedIssue) {
-          this.error = `Ship tracking: ${feedIssue}`;
-        }
+        this.handleTrackingResponse(res, 'Ship tracking', !viewportChanged, (ships) => this.filterShipsToViewport(ships, viewport));
       },
       error: (err) => {
         this.error = err?.error?.detail ?? err?.message ?? 'Ship tracking failed';
@@ -161,6 +139,21 @@ export class SatelliteShipTrackingController {
         }, this.refreshIntervalMs);
       }
     });
+  }
+
+  private handleTrackingResponse(res: SatelliteLiveShipsBBoxResponse, label: string, keepLastAllowed: boolean, mapShips: (ships: SatelliteLiveShip[]) => SatelliteLiveShip[]): void {
+    if (!this.enabled) {
+      return;
+    }
+    const payload = (res?.result ?? res) as unknown;
+    const ships = this.service.extractItems(payload);
+    if (ships !== null) {
+      this.applyResult(mapShips(ships), payload, label, keepLastAllowed);
+    }
+    const feedIssue = this.service.getFeedIssue(payload);
+    if (ships === null && feedIssue) {
+      this.error = `${label}: ${feedIssue}`;
+    }
   }
 
   private applyResult(ships: SatelliteLiveShip[], payload: unknown, label: string, keepLastAllowed = true): void {

@@ -8,6 +8,7 @@ import { RankedCallbackModel, RankedResultItem } from '../../../../shared/model/
 import { ExpandedRowComponent } from '../expanded-row/expanded-row.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 
 type IocResultTab = 'stealers' | 'threats';
 
@@ -33,7 +34,7 @@ export class CredentialListComponent {
   readonly canDismiss = input<boolean>(false);
   readonly dismissRequested = output<StealerLogResultItem>();
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private rowHelper: ResultRowHelperService) {
     effect(() => {
       this.rankedResult = this.rankedResultInput();
     });
@@ -128,16 +129,7 @@ export class CredentialListComponent {
 
   getThreatSourceIndex(result: RankedResultItem): string {
     const raw = result?.rank_index ?? result?.m_rank_index ?? result?.m_index ?? result?.index ?? result?.type ?? result?.file_type;
-    if (!raw) {
-      return '-';
-    }
-    const cleaned = String(raw)
-      .replace(/^m[_\s-]+/i, '')
-      .replace(/[_\s-]*model$/i, '')
-      .replace(/[_-]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
+    return this.rowHelper.formatIndexLabel(raw);
   }
 
   private normalizeValues(value: unknown): string[] {

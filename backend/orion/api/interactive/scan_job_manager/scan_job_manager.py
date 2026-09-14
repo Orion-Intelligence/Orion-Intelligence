@@ -198,6 +198,12 @@ class ScanJobManager:
             log.g().w(f"Scan audit logging skipped: {str(ex)}")
         return {**self._build_scan_detail(job, ScanJobStatus.QUEUED.value, target).model_dump(), "source": "new"}
 
+    async def _get_owned_job(self, scan_id, current_user):
+        job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
+        if not job:
+            raise HTTPException(status_code=404, detail="Scan job not found")
+        return job
+
     async def run_tracked_scan(self, current_user, api_reference: str, payload: Dict[str, Any], metadata: Optional[Dict[str, Any]], runner: Callable[[], Awaitable[Any]], force_new: bool = False, confirm_duplicates: bool = True) -> Dict[str, Any]:
         created = await self.create_job(current_user, api_reference, payload, metadata, force_new, confirm_duplicates,)
         if created.get("requires_confirmation"):
@@ -205,9 +211,7 @@ class ScanJobManager:
 
         scan_id = created.get("scan_id")
 
-        job = await self._engine.find_one(db_scan_job_model,(db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
-        if not job:
-            raise HTTPException(status_code=404, detail="Scan job not found")
+        job = await self._get_owned_job(scan_id, current_user)
 
         if created.get("source") in {"previous_completed", "existing_running"}:
             response = job.response or {"status": "pending", "progress": 5, "step": "queued"}
@@ -337,17 +341,13 @@ class ScanJobManager:
         if not scan_id:
             raise HTTPException(status_code=400, detail="Scan ID is required")
 
-        job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
-        if not job:
-            raise HTTPException(status_code=404, detail="Scan job not found")
+        job = await self._get_owned_job(scan_id, current_user)
         job.seen = True
         await self._engine.save(job)
         return {"message": "Scan marked as seen"}
 
     async def delete_job(self, scan_id: str, current_user) -> Dict[str, Any]:
-        job = await self._engine.find_one(db_scan_job_model, (db_scan_job_model.id == ObjectId(scan_id)) & (db_scan_job_model.user_uuid == str(current_user.id)))
-        if not job:
-            raise HTTPException(status_code=404, detail="Scan job not found")
+        job = await self._get_owned_job(scan_id, current_user)
 
         await self._engine.delete(job)
         return {"message": "Scan deleted"}

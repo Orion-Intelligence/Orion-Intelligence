@@ -158,9 +158,9 @@ export class DashboardResultDefacementComponent extends DashboardResultGroupBase
   }
 
   getSidebarSubtitle(): string {
-    const selectedGroup = this.getSelectedGroup();
-    if (selectedGroup) {
-      return `${selectedGroup.records.length} records / ${selectedGroup.title}`;
+    const groupSubtitle = this.getSelectedGroupSubtitle(this.getSelectedGroup());
+    if (groupSubtitle) {
+      return groupSubtitle;
     }
     const suffix = this.searchQueryInput() ? ` / ${this.searchQueryInput()}` : '';
     return `${this.getSidebarRecords().length} records${suffix}`;

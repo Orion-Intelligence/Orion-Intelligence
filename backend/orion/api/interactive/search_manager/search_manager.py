@@ -488,7 +488,7 @@ class search_manager:
 
         return dismissed_hashes
 
-    async def extract_ioc_from_file(self, file_content: bytes, filename: str, user_id: str = "system"):
+    async def _post_micros_scan(self, scan_path: str, file_content: bytes, filename: str, user_id: str):
 
         async with httpx.AsyncClient(timeout=120) as client:
             files = {
@@ -496,7 +496,7 @@ class search_manager:
             }
 
             response = await client.post(
-                f"http://trusted-micros-api:8010/file/scan/{user_id}",
+                f"http://trusted-micros-api:8010/{scan_path}/{user_id}",
                 files=files
             )
 
@@ -507,26 +507,12 @@ class search_manager:
             )
 
         return response.json()
+
+    async def extract_ioc_from_file(self, file_content: bytes, filename: str, user_id: str = "system"):
+        return await self._post_micros_scan("file/scan", file_content, filename, user_id)
 
     async def scan_apk(self, file_content: bytes, filename: str, user_id: str = "system"):
-
-        async with httpx.AsyncClient(timeout=120) as client:
-            files = {
-                "file": (filename, file_content)
-            }
-
-            response = await client.post(
-                f"http://trusted-micros-api:8010/apk/scan/{user_id}",
-                files=files
-            )
-
-        if response.status_code != status.HTTP_200_OK:
-            raise HTTPException(
-                status_code=response.status_code,
-                detail=f"Error from trusted-micros-api: {response.text}"
-            )
-
-        return response.json()
+        return await self._post_micros_scan("apk/scan", file_content, filename, user_id)
 
     async def onion_search(self, query, user_id: str = "system"):
         if hasattr(query, "model_dump"):

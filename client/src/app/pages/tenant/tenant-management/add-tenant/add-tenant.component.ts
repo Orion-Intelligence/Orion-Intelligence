@@ -13,6 +13,7 @@ import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { buildAlertAllowedOptions, loadAlertTenantOptions } from '../../../../shared/utils/alert-allowed-tenants.util';
+import { buildTenantBasePermissionOptions, buildTenantStatusOptions } from '../tenant-form-options.util';
 
 @Component({
   selector: 'app-add-tenant',
@@ -42,11 +43,7 @@ export class AddTenantComponent extends PasswordMeterHost implements OnInit {
   }
 
   get permissionOptions(): UiDropdownOption[] {
-    this.translationService.version();
-    const options: UiDropdownOption[] = [
-      { key: 'case_management', label: this.translationService.translate('Case Management') },
-      { key: 'dismiss_result', label: this.translationService.translate('Dismiss Result') },
-    ];
+    const options = buildTenantBasePermissionOptions(this.translationService);
     if (this.isAdmin) {
       options.push({ key: 'monitoring', label: this.translationService.translate('Monitoring') });
     }
@@ -54,11 +51,7 @@ export class AddTenantComponent extends PasswordMeterHost implements OnInit {
   }
 
   get statusOptions(): UiDropdownOption[] {
-    this.translationService.version();
-    return [
-      { key: 'active', label: this.translationService.translate('Active') },
-      { key: 'disable', label: this.translationService.translate('Disable') }
-    ];
+    return buildTenantStatusOptions(this.translationService);
   }
 
   ngOnInit(): void {

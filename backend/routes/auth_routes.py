@@ -44,6 +44,14 @@ def _finalize_auth_response(result: dict, request: Request, response: Response, 
     return cookie_only_result(result, cookie_auth)
 
 
+def _finalize_token_response(result: dict, request: Request, response: Response, cookie_only: bool) -> dict:
+    access_token = result.get("access_token")
+    cookie_auth = uses_cookie_auth(request, cookie_only)
+    if access_token and cookie_auth:
+        set_access_cookie(response, access_token)
+    return cookie_only_result(result, cookie_auth)
+
+
 @auth_router.post("/api/token")
 async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None, cookie_only: bool = False, redis_store: redis_controller = Depends(redis_controller.getInstance)):
     client = "extension" if any(scope in {"extension", "orion_extension"} for scope in form_data.scopes) else "web"
@@ -64,11 +72,7 @@ async def token_demo(request: Request, response: Response = None, cookie_only: b
 @auth_router.post("/api/token/2fa/verify")
 async def verify_2fa(request: Request, code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None, cookie_only: bool = False):
     result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code, tenant_id=getattr(request.state, "tenant", None))
-    access_token = result.get("access_token")
-    cookie_auth = uses_cookie_auth(request, cookie_only)
-    if access_token and cookie_auth:
-        set_access_cookie(response, access_token)
-    return cookie_only_result(result, cookie_auth)
+    return _finalize_token_response(result, request, response, cookie_only)
 
 
 @auth_router.post("/api/token/refresh")
@@ -77,11 +81,7 @@ async def refresh_token(request: Request, response: Response = None, cookie_only
     if not session_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
     result = await session_manager.get_instance().refresh_token(session_token,tenant_id=getattr(request.state, "tenant", None))
-    access_token = result.get("access_token")
-    cookie_auth = uses_cookie_auth(request, cookie_only)
-    if access_token and cookie_auth:
-        set_access_cookie(response, access_token)
-    return cookie_only_result(result, cookie_auth)
+    return _finalize_token_response(result, request, response, cookie_only)
 
 
 @auth_router.post("/api/logout")

@@ -6,6 +6,7 @@ import { OrionSatelliteFeature, OrionSatelliteFeatureType } from '../../../model
 import { FACILITY_TYPE_MAP } from './facility-dot-classes.const';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 import { asUnknownRecord, getOwnProperty, isUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { coerceFiniteNumber } from '../../map-utils/renderer-utils';
 import type { StreamedMapEntity } from './model/facilities.model';
 export type { StreamedMapEntity } from './model/facilities.model';
 
@@ -288,14 +289,7 @@ export class SatelliteFacilitiesService {
   }
 
   private toFiniteNumber(value: unknown): number | null {
-    if (typeof value === 'number') {
-      return Number.isFinite(value) ? value : null;
-    }
-    if (typeof value === 'string' && value.trim()) {
-      const parsed = Number(value);
-      return Number.isFinite(parsed) ? parsed : null;
-    }
-    return null;
+    return coerceFiniteNumber(value);
   }
 
   private isValidLatLon(lat: number | null, lon: number | null): boolean {

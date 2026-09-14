@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { EMPTY, lastValueFrom, Observable, timer } from 'rxjs';
-import { expand, switchMap, takeWhile } from 'rxjs/operators';
+import { lastValueFrom, Observable } from 'rxjs';
 import { SatelliteGeocodeResponse, SatelliteGeocodeResult } from '../../satellite-intel/model/satellite-intel-api.models';
 import { ApiService } from '../../../../shared/services/api.service';
+import { pollWhilePending } from '../utils/polling.util';
 
 @Injectable({ providedIn: 'root' })
 export class GeoFencingGeocodeService {
@@ -21,13 +21,7 @@ export class GeoFencingGeocodeService {
   }
 
   private createPolledRequest<T>(call: () => Observable<T>, getStatus: (value: T) => string | undefined): Observable<T> {
-    return call().pipe(expand((value: T) => {
-      if (this.isPendingOrBusy(getStatus(value))) {
-        return timer(this.pollDelayMs).pipe(switchMap(() => call()));
-      }
-      return EMPTY;
-    }),
-    takeWhile((value: T) => this.isPendingOrBusy(getStatus(value)), true),);
+    return pollWhilePending(call, (value) => this.isPendingOrBusy(getStatus(value)), this.pollDelayMs);
   }
 
   private isPendingOrBusy(status: string | undefined): boolean {

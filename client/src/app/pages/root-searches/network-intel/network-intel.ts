@@ -10,7 +10,7 @@ import { GraphReportPayload, GraphReportTableRow } from '../../../shared/model/r
 import { ReportExportService } from '../../../shared/services/report-export.service';
 import { EmptyQueryComponent } from '../../../shared/partials/empty-query/empty-query.component';
 import { GeoCoordinatesModalComponent } from './modal/geo-coordinates-modal/geo-coordinates-modal.component';
-import { formatElapsedClock } from './network-intel.util';
+import { buildScanThreatCategories, formatElapsedClock } from './network-intel.util';
 import { DnsSectionComponent } from './dns-section/dns-section.component';
 import { ShodanSectionComponent } from './shodan-section/shodan-section.component';
 import { VulnerabilitySectionComponent } from './vulnerability-section/vulnerability-section.component';
@@ -663,37 +663,7 @@ export class NetworkIntel implements OnInit, OnDestroy {
   }
 
   private buildSeoRepoScanCategories(threats: Record<string, UrlScanThreatItem[]> | undefined, proofs: Record<string, UrlScanProofItem[]> | undefined): NetworkIntelSeoRepoScanCategory[] {
-    const proofMap = new Map<string, string>();
-    Object.entries(proofs ?? {}).forEach(([category, items]) => {
-      items.forEach((item) => {
-        const key = `${category}|${String(item?.header || '').trim().toLowerCase()}`;
-        if (item?.proof && !proofMap.has(key)) {
-          proofMap.set(key, item.proof);
-        }
-      });
-    });
-
-    return Object.entries(threats ?? {})
-      .map(([name, items]) => {
-        const list = items;
-        const seen = new Set<string>();
-        const uniqueItems = list
-          .filter((item) => {
-            const key = String(item?.header || '').trim().toLowerCase();
-            if (!key || seen.has(key)) {
-              return false;
-            }
-            seen.add(key);
-            return true;
-          })
-          .map((item) => {
-            const key = String(item?.header || '').trim().toLowerCase();
-            const proof = proofMap.get(`${name}|${key}`);
-            return proof ? { ...item, proof } : item;
-          });
-        return { name, total: list.length, items: uniqueItems };
-      })
-      .filter((category) => category.items.length > 0);
+    return buildScanThreatCategories(threats, proofs);
   }
 
   private resolveSeoRepoScanTarget(input: string): string {

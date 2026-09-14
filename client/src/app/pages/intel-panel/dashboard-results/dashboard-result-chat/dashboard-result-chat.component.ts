@@ -8,7 +8,7 @@ import { NormalizeUnicodePipe } from '../../../../shared/pipes/normalize-unicode
 import { AuthService } from '../../../../services/authetication/auth.service';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
-import { scrollToResultCard } from '../dashboard-result.util';
+import { openProxiedUrl, scrollToResultCard } from '../dashboard-result.util';
 
 @Component({
   selector: 'app-dashboard-result-chat',
@@ -71,18 +71,10 @@ export class DashboardResultChatComponent implements OnInit, AfterViewInit {
     const previousLimit = this.getResultDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
-    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+    scrollToResultCard(this.elementRef.nativeElement, isExpanding ? previousLimit : 0);
   }
 
   openExternalUrl(url?: string | null) {
-    if (!this.authService.getIsMobileDemo() || !url) {
-      return;
-    }
-
-    this.proxied_resource.open(url);
-  }
-
-  private scrollToResultIndex(index: number): void {
-    scrollToResultCard(this.elementRef.nativeElement, index);
+    openProxiedUrl(this.proxied_resource, this.authService.getIsMobileDemo(), url);
   }
 }

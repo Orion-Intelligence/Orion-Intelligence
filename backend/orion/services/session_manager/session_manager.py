@@ -78,20 +78,39 @@ class session_manager:
         if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant access forbidden")
 
+    @staticmethod
+    def _strip_bearer(token: str) -> str:
+        token = token.strip()
+        if token.startswith("Bearer "):
+            token = token[len("Bearer "):].strip()
+        return token
+
+    @staticmethod
+    def _decode_token(token: str, verify_exp: bool = True) -> dict:
+        return jwt.decode(
+            token,
+            CONSTANTS.S_AUTH_SECRET_KEY,
+            algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+            options={"verify_exp": verify_exp}, )
+
+    async def _resolve_user_or_forbidden(self, token: str, tenant_id=None):
+        user = (
+            await self.get_current_user(token)
+            if tenant_id is None
+            else await self.get_current_user(token, tenant_id=tenant_id)
+        )
+        if not user or isinstance(user, JSONResponse):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        return user
+
     async def get_current_user(self, token: str, tenant_id=None):
         if not token:
             raise HTTPException(status_code=401, detail="Missing or invalid token")
 
-        token = token.strip()
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):].strip()
+        token = self._strip_bearer(token)
 
         try:
-            payload = jwt.decode(
-                token,
-                CONSTANTS.S_AUTH_SECRET_KEY,
-                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
-                options={"verify_exp": True}, )
+            payload = self._decode_token(token)
             username: str = payload.get("sub")
             if not username:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
@@ -121,13 +140,7 @@ class session_manager:
             raise HTTPException(status_code=401, detail="Invalid token")
 
     async def get_current_role(self, token: str, tenant_id=None) -> str:
-        user = (
-            await self.get_current_user(token)
-            if tenant_id is None
-            else await self.get_current_user(token, tenant_id=tenant_id)
-        )
-        if not user or isinstance(user, JSONResponse):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        user = await self._resolve_user_or_forbidden(token, tenant_id)
 
         role = user.role
         try:
@@ -137,13 +150,7 @@ class session_manager:
         return role
 
     async def get_current_status(self, token: str, tenant_id=None) -> str:
-        user = (
-            await self.get_current_user(token)
-            if tenant_id is None
-            else await self.get_current_user(token, tenant_id=tenant_id)
-        )
-        if not user or isinstance(user, JSONResponse):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        user = await self._resolve_user_or_forbidden(token, tenant_id)
 
         user_status = user.status
         try:
@@ -374,16 +381,10 @@ class session_manager:
         if not ptoken:
             return
 
-        token = ptoken.strip()
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):].strip()
+        token = self._strip_bearer(ptoken)
 
         try:
-            payload = jwt.decode(
-                token,
-                CONSTANTS.S_AUTH_SECRET_KEY,
-                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
-                options={"verify_exp": False}, )
+            payload = self._decode_token(token, verify_exp=False)
         except jwt.InvalidTokenError:
             return
 

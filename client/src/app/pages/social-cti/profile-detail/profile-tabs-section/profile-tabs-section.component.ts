@@ -26,6 +26,8 @@ import { SocialResourceFeedSectionComponent } from '../resource-feed-section/res
 import { SocialResourceMediaSectionComponent } from '../resource-media-section/resource-media-section.component';
 import { asUnknownRecord, getOwnProperty } from '../../../../shared/utils/type-guards.util';
 import { getInputValue } from '../../../../shared/utils/event-input.util';
+import { toggleKey } from '../../utils/resource-view.util';
+import { buildStealerLogExportRow, STEALER_LOG_EXPORT_COLUMNS } from '../../utils/stealer-log-export.util';
 import { ExpandedRowComponent } from '../../../root-searches/credentials/expanded-row/expanded-row.component';
 import { CredentialResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../../shared/animations/row.animations';
@@ -42,7 +44,6 @@ export class SocialProfileTabsSectionComponent {
   private readonly exportBranding = inject(ExportBrandingService);
   private readonly reportExportService = inject(ReportExportService);
   private readonly translationService = inject(TranslationService);
-  private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlDescriptions = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlProperties = signal<Set<string>>(new Set<string>());
@@ -261,21 +262,10 @@ export class SocialProfileTabsSectionComponent {
     return this.expandedCrawlProperties().has(this.crawlDescriptionKey(index, item));
   }
 
-  private toggledSet(current: Set<string>, key: string): Set<string> {
-    const next = new Set(current);
-    if (next.has(key)) {
-      next.delete(key);
-    }
-    else {
-      next.add(key);
-    }
-    return next;
-  }
-
   toggleCrawlProperties(index: number, item: unknown): void {
     const key = this.crawlDescriptionKey(index, item);
     this.expandedCrawlProperties.update(current => {
-      return this.toggledSet(current, key);
+      return toggleKey(current, key);
     });
   }
 
@@ -296,7 +286,7 @@ export class SocialProfileTabsSectionComponent {
   toggleCrawlDescription(index: number, item: unknown): void {
     const key = this.crawlDescriptionKey(index, item);
     this.expandedCrawlDescriptions.update(current => {
-      return this.toggledSet(current, key);
+      return toggleKey(current, key);
     });
   }
 
@@ -523,23 +513,8 @@ export class SocialProfileTabsSectionComponent {
   }
 
   private buildStealerLogRows(platformData: social_profile): Record<string, string>[] {
-    return this.getStealerLogs(platformData).map((item, index) => ({
-      tenant_name: this.exportBranding.getTenantName(),
-      recordType: 'stealer',
-      recordIndex: String(index + 1),
-      searchQuery: `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim(),
-      email: String(item?.email ?? item?.m_email ?? '-'),
-      username: String(item?.username ?? item?.m_username ?? '-'),
-      domain: String(item?.domain ?? item?.m_domain ?? '-'),
-      source: String(this.exportBranding.replaceSystemBrand(String(item?.channel ?? item?.filename ?? item?.file ?? item?.m_source ?? item?.m_scrap_file ?? '-'))),
-      hash: String(item?.m_hash ?? '-'),
-      title: '-',
-      url: String(item?.url ?? item?.m_url ?? '-'),
-      rank: '-',
-      date: String(item?.date ?? item?.m_date ?? '-'),
-      team: '-',
-      summary: '-'
-    }));
+    const searchQuery = `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim();
+    return this.getStealerLogs(platformData).map((item, index) => buildStealerLogExportRow(this.exportBranding, item, index, searchQuery));
   }
 
   private exportStealerLogs(platformData: social_profile, type: 'csv' | 'json' | 'report'): void {
@@ -556,7 +531,7 @@ export class SocialProfileTabsSectionComponent {
         search_query: query || '-',
         total_records: rows.length
       },
-      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...this.stealerLogExportColumns], rows }]
+      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...STEALER_LOG_EXPORT_COLUMNS], rows }]
     };
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }

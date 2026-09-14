@@ -437,6 +437,15 @@ class search_query_generator:
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
 
     @staticmethod
+    def _parse_date_range(value):
+        parts = value.split(",")
+        if len(parts) != 2:
+            return None
+        from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+        to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+        return from_date, to_date
+
+    @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
         formatted_ranges = {
             "m_date": (from_date, to_date),
@@ -512,10 +521,9 @@ class search_query_generator:
 
         if m_date_range:
             try:
-                parts = m_date_range.split(",")
-                if len(parts) == 2:
-                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
-                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+                parsed_range = search_query_generator._parse_date_range(m_date_range)
+                if parsed_range:
+                    from_date, to_date = parsed_range
                     must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
@@ -669,10 +677,9 @@ class search_query_generator:
             must_clauses.append(logic_query)
 
         if p_query_model.daterange:
-            parts = p_query_model.daterange.split(",")
-            if len(parts) == 2:
-                from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
-                to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+            parsed_range = search_query_generator._parse_date_range(p_query_model.daterange)
+            if parsed_range:
+                from_date, to_date = parsed_range
 
                 must_clauses.append({
                     "bool": {

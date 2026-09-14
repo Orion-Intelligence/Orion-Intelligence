@@ -378,6 +378,13 @@ class TenantManager:
 
         return tenant_request
 
+    async def _persist_system_settings(self, settings_record, tenant_id, system_settings):
+        if settings_record:
+            settings_record.value = json.dumps(system_settings)
+            await self._engine.save(settings_record)
+        else:
+            await self._engine.save(db_system_model(tenant_id=tenant_id, key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
+
     async def update_tenant(self, data: TenantRequest, current_user):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
 
@@ -433,11 +440,7 @@ class TenantManager:
                     "ACCOUNTS_SMTP_PORT": meta_info.get("ACCOUNTS_SMTP_PORT"),
                 })
             system_settings[AllowedKeys.META_INFO.value] = json.dumps(meta_info)
-            if settings_record:
-                settings_record.value = json.dumps(system_settings)
-                await self._engine.save(settings_record)
-            else:
-                await self._engine.save(db_system_model(tenant_id=tenant_id, key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
+            await self._persist_system_settings(settings_record, tenant_id, system_settings)
             from orion.api.server.config_manager.config_controller import config_controller
             await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
 
@@ -455,11 +458,7 @@ class TenantManager:
             settings_record = await self._engine.find_one(db_system_model,(db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
             system_settings = json.loads(settings_record.value) if settings_record and settings_record.value else {}
             system_settings[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if data.ai_endpoint_enabled else "0"
-            if settings_record:
-                settings_record.value = json.dumps(system_settings)
-                await self._engine.save(settings_record)
-            else:
-                await self._engine.save(db_system_model(tenant_id=tenant_id, key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
+            await self._persist_system_settings(settings_record, tenant_id, system_settings)
             await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
 
         tenant.name = enc.encrypt((data.name or "").encode()).decode()
@@ -737,6 +736,13 @@ class TenantManager:
             "has_more": end < total,
         }
 
+    async def _tenant_alerts_response(self, tenant_object_id, tenant_id: str, page: int, limit: int, alert_type: str | None, paginate: bool):
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
+        if not tenant or getattr(tenant, "is_default", False) or getattr(tenant, "alerts_visible_to_admin", True) is False:
+            raise HTTPException(status_code=404, detail="Tenant alerts not available")
+
+        return await self._collect_tenant_alerts(tenant_id, page, limit, alert_type, paginate)
+
     async def get_visible_tenant_alerts(self, tenant_id: str, current_user, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False):
         visible_tenant_ids = set(await self.resolve_visible_alert_tenant_ids_for_user(current_user))
         if tenant_id not in visible_tenant_ids:
@@ -747,18 +753,10 @@ class TenantManager:
         except Exception:
             raise HTTPException(status_code=404, detail="Tenant alerts not available")
 
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
-        if not tenant or getattr(tenant, "is_default", False) or getattr(tenant, "alerts_visible_to_admin", True) is False:
-            raise HTTPException(status_code=404, detail="Tenant alerts not available")
-
-        return await self._collect_tenant_alerts(tenant_id, page, limit, alert_type, paginate)
+        return await self._tenant_alerts_response(tenant_object_id, tenant_id, page, limit, alert_type, paginate)
 
     async def get_admin_tenant_alerts(self, tenant_id: str, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False):
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
-        if not tenant or getattr(tenant, "is_default", False) or getattr(tenant, "alerts_visible_to_admin", True) is False:
-            raise HTTPException(status_code=404, detail="Tenant alerts not available")
-
-        return await self._collect_tenant_alerts(tenant_id, page, limit, alert_type, paginate)
+        return await self._tenant_alerts_response(ObjectId(tenant_id), tenant_id, page, limit, alert_type, paginate)
 
     async def get_visible_tenant_alert_filter_options(self, tenant_id: str, current_user, field: str, query: str = "", limit: int = 25, alert_type: str | None = None) -> dict[str, list[str]]:
         from orion.api.interactive.alert_manager.alert_manager import AlertManager

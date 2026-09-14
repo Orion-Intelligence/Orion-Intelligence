@@ -178,13 +178,15 @@ class FeederManager:
             script=script,
         )
 
-    async def delete_script(self, script_id: str, current_user):
-        record = await self._helper.get_script_record(script_id, current_user)
+    async def _delete_record_file_and_row(self, record):
         target_path = self._helper.resolve_record_file_path(record)
         if target_path.is_file():
             target_path.unlink()
-
         await self._engine.delete(record)
+
+    async def delete_script(self, script_id: str, current_user):
+        record = await self._helper.get_script_record(script_id, current_user)
+        await self._delete_record_file_and_row(record)
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid),
             str(current_user.id),
@@ -242,10 +244,7 @@ class FeederManager:
 
         records = await self._engine.find(self._helper.model, self._helper.script_query(current_user, rule_key))
         for record in records:
-            target_path = self._helper.resolve_record_file_path(record)
-            if target_path.is_file():
-                target_path.unlink()
-            await self._engine.delete(record)
+            await self._delete_record_file_and_row(record)
 
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid),

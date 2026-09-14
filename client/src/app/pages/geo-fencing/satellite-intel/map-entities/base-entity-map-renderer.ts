@@ -2,7 +2,7 @@ import { Observable, Subscription } from 'rxjs';
 import type * as Leaflet from 'leaflet';
 import { LeafletComponentRenderer } from '../map-utils/leaflet-component-renderer';
 import { MarkerAnimator } from '../map-utils/marker-animator';
-import { distributionCell, escapeTooltipText, getResponseStatus, isPendingStatus, moderateSampleRatio, normalizeEntityId, orderDistributionCells, sampleBucketKey, stableHash, viewportSampleRatio } from '../map-utils/renderer-utils';
+import { distributionCell, escapeTooltipText, getResponseStatus, isPendingStatus, moderateSampleRatio, normalizeEntityId, orderDistributionCells, sampleBucketKey, spatialRenderKeyParts, stableHash, viewportSampleRatio } from '../map-utils/renderer-utils';
 import { TrackingEntityType, TrackingSidebarBridge } from '../../models/geo-fencing.models';
 import { getOwnProperty, isFiniteNumber, Nullable } from '../../../../shared/utils/type-guards.util';
 import { DistributionCellItems, EntityMarker, EntityRendererBaseConfig, RenderedMarkerIcon } from '../model/satellite-intel.model';
@@ -357,11 +357,8 @@ export abstract class BaseEntityMapRenderer<T extends { latitude?: number | null
     if (!bounds) {
       return `z:${Math.round(zoom * 2)}|sel:${activeEntity?.id ?? ''}|load:${loadingEntity?.id ?? ''}|count:${data.length}`;
     }
-    const center = bounds.getCenter();
     return [
-      `z:${Math.round(zoom * 2)}`,
-      `c:${center.lat.toFixed(1)},${center.lng.toFixed(1)}`,
-      `d:${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)},${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)}`,
+      ...spatialRenderKeyParts(zoom, bounds),
       `sel:${activeEntity?.id ?? ''}`,
       `load:${loadingEntity?.id ?? ''}`,
       `count:${data.length}`,

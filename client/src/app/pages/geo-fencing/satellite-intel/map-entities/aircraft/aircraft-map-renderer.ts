@@ -3,7 +3,7 @@ import type * as Leaflet from 'leaflet';
 import { SatelliteLiveAircraft } from '../../model/satellite-intel-api.models';
 import { SatelliteAircraftTrackingService } from './aircraft-tracking.service';
 import { AircraftMarkerIconComponent } from './components/aircraft-marker-icon/aircraft-marker-icon.component';
-import { getBearingDegrees, getMarkerBaseSize, normalizeEntityId } from '../../map-utils/renderer-utils';
+import { getMarkerBaseSize, getMovementBearing, normalizeEntityId, projectDestination } from '../../map-utils/renderer-utils';
 import { TrackingEntityType } from '../../../models/geo-fencing.models';
 import { asUnknownRecord, isFiniteNumber, isUnknownRecord, Nullable } from '../../../../../shared/utils/type-guards.util';
 import { EntityMarker, EntityRendererBaseConfig, RenderedMarkerIcon } from '../../model/satellite-intel.model';
@@ -80,16 +80,7 @@ export class AircraftMapRenderer extends BaseEntityMapRenderer<SatelliteLiveAirc
       return null;
     }
 
-    const distanceMeters = velocity * seconds;
-    const bearingRadians = (bearing * Math.PI) / 180;
-    const latRadians = (lat * Math.PI) / 180;
-    const metersPerDegreeLat = 111320;
-    const metersPerDegreeLon = Math.max(1, metersPerDegreeLat * Math.cos(latRadians));
-
-    return {
-      lat: lat + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
-      lon: lon + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
-    };
+    return projectDestination(lat, lon, bearing, velocity * seconds);
   }
 
   protected shouldAnimateMarker(aircraft: SatelliteLiveAircraft): boolean {
@@ -109,23 +100,8 @@ export class AircraftMapRenderer extends BaseEntityMapRenderer<SatelliteLiveAirc
       return this.toCssRotation(aircraft.true_track);
     }
 
-    const current = marker.getLatLng?.();
-    const targetLat = aircraft.latitude;
-    const targetLon = aircraft.longitude;
-    if (
-      current &&
-      Number.isFinite(current.lat) &&
-      Number.isFinite(current.lng) &&
-      isFiniteNumber(targetLat) &&
-      isFiniteNumber(targetLon)
-    ) {
-      const bearing = getBearingDegrees(current.lat, current.lng, targetLat, targetLon);
-      if (bearing !== null) {
-        return this.toCssRotation(bearing);
-      }
-    }
-
-    return this.toCssRotation(aircraft.true_track);
+    const bearing = getMovementBearing(marker.getLatLng?.(), aircraft.latitude, aircraft.longitude);
+    return this.toCssRotation(bearing ?? aircraft.true_track);
   }
 
   private toCssRotation(track: number | null | undefined): number {

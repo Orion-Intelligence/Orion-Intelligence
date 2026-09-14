@@ -224,13 +224,9 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
 
     const anchorY = this.getScrollViewportTop(this.scrollTarget) + this.scrollAnchorOffset;
     let activeMessageIndex: number | null = null;
-    for (let messageIndex = 0; messageIndex < this.messages.length; messageIndex += 1) {
-      const element = this.getMessageElement(messageIndex);
-      if (!element) {
-        continue;
-      }
+    for (const { index, element } of this.iterateMessageElements()) {
       if (element.getBoundingClientRect().top <= anchorY) {
-        activeMessageIndex = messageIndex;
+        activeMessageIndex = index;
         continue;
       }
       break;
@@ -247,14 +243,10 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
   private getFirstVisibleMessageIndex(scrollTarget: HTMLElement | Window): number | null {
     const viewportTop = this.getScrollViewportTop(scrollTarget);
     const viewportBottom = this.getScrollViewportBottom(scrollTarget);
-    for (let messageIndex = 0; messageIndex < this.messages.length; messageIndex += 1) {
-      const element = this.getMessageElement(messageIndex);
-      if (!element) {
-        continue;
-      }
+    for (const { index, element } of this.iterateMessageElements()) {
       const rect = element.getBoundingClientRect();
       if (rect.bottom >= viewportTop && rect.top <= viewportBottom) {
-        return messageIndex;
+        return index;
       }
     }
     return null;
@@ -262,6 +254,15 @@ export class MessageScrollRailComponent implements OnChanges, OnDestroy {
 
   private getMessageElement(messageIndex: number): HTMLElement | null {
     return document.querySelector<HTMLElement>(`[data-ai-message-index="${messageIndex}"]`);
+  }
+
+  private *iterateMessageElements(): Generator<{ index: number; element: HTMLElement }> {
+    for (let messageIndex = 0; messageIndex < this.messages.length; messageIndex += 1) {
+      const element = this.getMessageElement(messageIndex);
+      if (element) {
+        yield { index: messageIndex, element };
+      }
+    }
   }
 
   private getFallbackScrollTarget(): HTMLElement | Window {

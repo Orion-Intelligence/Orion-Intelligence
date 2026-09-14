@@ -134,14 +134,18 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
         }
       };
     });
+    this.persistCurrentUserPreferences(currentSession.user.username, preferences);
+    this.languageDropdownOpen.set(false);
+  }
+
+  private persistCurrentUserPreferences(username: string, preferences: unknown): void {
     this.apiService.post('update/current/user', {
-      username: currentSession.user.username,
+      username,
       preferences
     }).subscribe({
       next: () => void 0,
       error: () => void 0
     });
-    this.languageDropdownOpen.set(false);
   }
 
   canChangeTheme(): boolean {
@@ -173,13 +177,7 @@ export class ProfileComponent implements AfterViewInit, OnDestroy {
         }
       };
     });
-    this.apiService.post('update/current/user', {
-      username: currentSession.user.username,
-      preferences
-    }).subscribe({
-      next: () => void 0,
-      error: () => void 0
-    });
+    this.persistCurrentUserPreferences(currentSession.user.username, preferences);
   }
 
   auditlog() {

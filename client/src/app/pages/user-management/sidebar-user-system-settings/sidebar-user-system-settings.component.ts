@@ -18,11 +18,12 @@ import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../
 import { createWebhookForm, mapAlertConnectorSettings } from '../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings.util';
 import type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
 import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+import { notifyUploadImageError } from '../settings-resource.util';
+import { applyAppSettings, DEFAULT_APP_NAME } from './system-settings.util';
 
 export type { SystemSettingsResponse } from './model/sidebar-user-system-settings.model';
 
 
-const DEFAULT_APP_NAME = 'Orion Intelligence';
 type SystemSettingsTab = 'branding' | 'platform';
 type SystemImageKey = 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark';
 type SystemImageResponse = Partial<Pick<AppSettingsModel, SystemImageKey>>;
@@ -167,8 +168,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           }
         },
         error: (err) => {
-          const message = err?.error?.detail ?? this.translationService.translate('Failed to upload image');
-          this.messageNotificationService.show(message);
+          notifyUploadImageError(err, this.messageNotificationService, this.translationService); 
         }
       });
   }
@@ -409,12 +409,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
   }
 
   private applySettings(settings: Partial<AppSettingsModel>): void {
-    const current = this.appService.configData();
-    const appSettings = { ...current.appSettings, ...settings };
-    this.appService.configData.set(new ConfigSettings(appSettings, current.localSettings));
-    const updated = this.appService.configData().appSettings;
-    this.appService.updateFavicon(updated.logo_url);
-    document.title = updated.app_name?.trim() || DEFAULT_APP_NAME;
+    applyAppSettings(this.appService, settings);
   }
 
   get isAdmin(): boolean {

@@ -2,7 +2,7 @@ import { Observable } from 'rxjs';
 import { SatelliteLiveShip } from '../../model/satellite-intel-api.models';
 import { SatelliteShipTrackingService } from './ship-tracking.service';
 import { ShipMarkerIconComponent } from './components/ship-marker-icon/ship-marker-icon.component';
-import { getBearingDegrees, getMarkerBaseSize, normalizeEntityId } from '../../map-utils/renderer-utils';
+import { getMarkerBaseSize, getMovementBearing, normalizeEntityId, projectDestination } from '../../map-utils/renderer-utils';
 import { TrackingEntityType } from '../../../models/geo-fencing.models';
 import { asUnknownRecord, isFiniteNumber } from '../../../../../shared/utils/type-guards.util';
 import { EntityMarker, EntityRendererBaseConfig, RenderedMarkerIcon } from '../../model/satellite-intel.model';
@@ -80,16 +80,7 @@ export class ShipMapRenderer extends BaseEntityMapRenderer<SatelliteLiveShip> {
       return null;
     }
 
-    const distanceMeters = speed * 0.514444 * seconds;
-    const bearingRadians = (bearing * Math.PI) / 180;
-    const latRadians = (lat * Math.PI) / 180;
-    const metersPerDegreeLat = 111320;
-    const metersPerDegreeLon = Math.max(1, metersPerDegreeLat * Math.cos(latRadians));
-
-    return {
-      lat: lat + (Math.cos(bearingRadians) * distanceMeters) / metersPerDegreeLat,
-      lon: lon + (Math.sin(bearingRadians) * distanceMeters) / metersPerDegreeLon,
-    };
+    return projectDestination(lat, lon, bearing, speed * 0.514444 * seconds);
   }
 
   protected shouldAnimateMarker(ship: SatelliteLiveShip): boolean {
@@ -104,23 +95,8 @@ export class ShipMapRenderer extends BaseEntityMapRenderer<SatelliteLiveShip> {
       return ship.true_heading;
     }
 
-    const current = marker.getLatLng?.();
-    const targetLat = ship.latitude;
-    const targetLon = ship.longitude;
-    if (
-      current &&
-      Number.isFinite(current.lat) &&
-      Number.isFinite(current.lng) &&
-      isFiniteNumber(targetLat) &&
-      isFiniteNumber(targetLon)
-    ) {
-      const bearing = getBearingDegrees(current.lat, current.lng, targetLat, targetLon);
-      if (bearing !== null) {
-        return bearing;
-      }
-    }
-
-    return 0;
+    const bearing = getMovementBearing(marker.getLatLng?.(), ship.latitude, ship.longitude);
+    return bearing ?? 0;
   }
 
   protected renderIcon(ship: SatelliteLiveShip, isSelected: boolean, isLoading: boolean, rotationDegrees = isFiniteNumber(ship.course) ? ship.course : isFiniteNumber(ship.true_heading) ? ship.true_heading : 0): RenderedMarkerIcon {

@@ -15,6 +15,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { PasswordMeterHost } from '../../../shared/utils/password-meter-host';
 import { getTenantLocationDisplay } from './sidebar-settings.util';
+import { notifyUploadImageError, uploadImageResource } from '../settings-resource.util';
 import { UserImagePickerComponent } from "./user-image-picker/user-image-picker.component";
 
 type SensitiveAction = 'twofa' | 'password' | 'recovery';
@@ -241,17 +242,14 @@ export class AccountSettingsComponent extends PasswordMeterHost implements OnIni
   }
 
   updateUserResource(file: File) {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.apiService.put<{ image?: string }>('user/image', formData).subscribe({
+    return uploadImageResource(this.apiService, 'user/image', file).subscribe({
       next: (res) => {
         if (res?.image) {
           this.appService.userSessionData().user.image = `/api/s/static/user/${res.image}`;
         }
       },
       error: (err) => {
-        const message = err?.error?.detail ?? this.translationService.translate('Failed to upload image');
-        this.messageNotificationService.show(message);
+        notifyUploadImageError(err, this.messageNotificationService, this.translationService); 
       }
     });
   }

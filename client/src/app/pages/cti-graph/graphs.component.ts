@@ -860,31 +860,36 @@ export class GraphComponent implements OnInit, OnDestroy {
   loadGraphByNode(data_point_type: string, type: string, value: string, maxEdge: string, maxDepth: string): void {
     const requestId = this.beginGraphRequest();
     const payload = this.buildGraphPayload(data_point_type, type, value, '', maxEdge, maxDepth);
-    this.api.post<{
-      results: GraphResultItem[];
-  }>('graph', payload).subscribe({
-    next: response => {
-      if (!this.isCurrentGraphRequest(requestId)) {
-        return;
-      }
-      const { results } = response;
-      this.result = results;
-      this.renderGraph(this.result);
+    this.runGraphRequest(requestId, payload, response => response.results, () => {
       if (data_point_type === 'document') {
         this.focusGraphNode(this.pendingFocusNodeId ?? `cti_vertices/${value}`);
         this.pendingFocusNodeId = null;
       }
-      this.loading = true;
-    },
-    error: () => {
-      if (!this.isCurrentGraphRequest(requestId)) {
-        return;
-      }
+    }, () => {
       this.pendingFocusNodeId = null;
-      this.isEmpty = true;
-      this.loading = true;
-    }
-  });
+    });
+  }
+
+  private runGraphRequest(requestId: number, payload: unknown, deriveResult: (response: { results: GraphResultItem[] }) => GraphResultItem[], afterRender?: () => void, onError?: () => void): void {
+    this.api.post<{ results: GraphResultItem[]; }>('graph', payload).subscribe({
+      next: response => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
+        this.result = deriveResult(response);
+        this.renderGraph(this.result);
+        afterRender?.();
+        this.loading = true;
+      },
+      error: () => {
+        if (!this.isCurrentGraphRequest(requestId)) {
+          return;
+        }
+        onError?.();
+        this.isEmpty = true;
+        this.loading = true;
+      }
+    });
   }
 
   private beginGraphRequest(): number {
@@ -904,23 +909,9 @@ export class GraphComponent implements OnInit, OnDestroy {
 
   private loadGraphByScopedPropertySearch(queryValue: string, clusterKey: string): void {
     const requestId = this.beginGraphRequest();
-    this.api.post<{ results: GraphResultItem[]; }>('graph', this.buildGraphPayload('property', 'all', queryValue, clusterKey)).subscribe({
-      next: response => {
-        if (!this.isCurrentGraphRequest(requestId)) {
-          return;
-        }
-        const results = response.results ?? [];
-        this.result = clusterKey === 'all' ? results : this.filterGraphResultsByCluster(results, clusterKey);
-        this.renderGraph(this.result);
-        this.loading = true;
-      },
-      error: () => {
-        if (!this.isCurrentGraphRequest(requestId)) {
-          return;
-        }
-        this.isEmpty = true;
-        this.loading = true;
-      }
+    this.runGraphRequest(requestId, this.buildGraphPayload('property', 'all', queryValue, clusterKey), response => {
+      const results = response.results ?? [];
+      return clusterKey === 'all' ? results : this.filterGraphResultsByCluster(results, clusterKey);
     });
   }
 
@@ -951,23 +942,7 @@ export class GraphComponent implements OnInit, OnDestroy {
       edge: String(this.maxEdge),
       depth: String(this.maxDepth)
     };
-    this.api.post<{ results: GraphResultItem[]; }>('graph', payload).subscribe({
-      next: response => {
-        if (!this.isCurrentGraphRequest(requestId)) {
-          return;
-        }
-        this.result = response.results ?? [];
-        this.renderGraph(this.result);
-        this.loading = true;
-      },
-      error: () => {
-        if (!this.isCurrentGraphRequest(requestId)) {
-          return;
-        }
-        this.isEmpty = true;
-        this.loading = true;
-      }
-    });
+    this.runGraphRequest(requestId, payload, response => response.results ?? []);
   }
 
   private filterGraphResultsByCluster(results: GraphResultItem[], clusterKey: string): GraphResultItem[] {
@@ -1308,14 +1283,23 @@ export class GraphComponent implements OnInit, OnDestroy {
     this.updateGroupNodeVisual(nodeId, subNodes.length, false);
   }
 
-  expandGroupNode(): void {
+  private resolveContextGroup(): { nodeId: string; subNodes: string[] } | null {
     this.hideContextMenu();
     const node = this.contextMenuNode;
     if (!node) {
-      return;
+      return null;
     }
     const nodeId = node.id as string;
     const subNodes = this.getContextSubNodes(nodeId, node);
+    return { nodeId, subNodes };
+  }
+
+  expandGroupNode(): void {
+    const context = this.resolveContextGroup();
+    if (!context) {
+      return;
+    }
+    const { nodeId, subNodes } = context;
     if (!nodeId || subNodes.length === 0) {
       return;
     }
@@ -1324,13 +1308,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   collapseGroupNode(): void {
-    this.hideContextMenu();
-    const node = this.contextMenuNode;
-    if (!node) {
+    const context = this.resolveContextGroup();
+    if (!context) {
       return;
     }
-    const nodeId = node.id as string;
-    const subNodes = this.getContextSubNodes(nodeId, node);
+    const { nodeId, subNodes } = context;
     if (this.isClusterRootNode(nodeId)) {
       this.collapseClusterGroup(nodeId, subNodes);
       this.hideContextMenu();
@@ -1875,6 +1857,19 @@ export class GraphComponent implements OnInit, OnDestroy {
     return nodeId.slice(this.clusterNodePrefix.length).toLowerCase();
   }
 
+  private forEachNeighborOf(nodeId: string, visit: (neighborId: string) => void): void {
+    this.rawEdges.forEach(edge => {
+      const from = String(edge.from ?? '');
+      const to = String(edge.to ?? '');
+      if (from === nodeId) {
+        visit(to);
+      }
+      else if (to === nodeId) {
+        visit(from);
+      }
+    });
+  }
+
   private getConnectedClusterKeys(nodeId: string): Set<string> {
     const clusters = new Set<string>();
     const addCluster = (candidateId: string) => {
@@ -1883,42 +1878,15 @@ export class GraphComponent implements OnInit, OnDestroy {
         clusters.add(clusterKey);
       }
     };
-    this.rawEdges.forEach(edge => {
-      const from = String(edge.from ?? '');
-      const to = String(edge.to ?? '');
-      if (from === nodeId) {
-        addCluster(to);
-      }
-      else if (to === nodeId) {
-        addCluster(from);
-      }
-    });
+    this.forEachNeighborOf(nodeId, addCluster);
     if (clusters.size > 0) {
       return clusters;
     }
 
     const adjacent = new Set<string>();
-    this.rawEdges.forEach(edge => {
-      const from = String(edge.from ?? '');
-      const to = String(edge.to ?? '');
-      if (from === nodeId) {
-        adjacent.add(to);
-      }
-      else if (to === nodeId) {
-        adjacent.add(from);
-      }
-    });
+    this.forEachNeighborOf(nodeId, neighborId => adjacent.add(neighborId));
     adjacent.forEach(adjacentId => {
-      this.rawEdges.forEach(edge => {
-        const from = String(edge.from ?? '');
-        const to = String(edge.to ?? '');
-        if (from === adjacentId) {
-          addCluster(to);
-        }
-        else if (to === adjacentId) {
-          addCluster(from);
-        }
-      });
+      this.forEachNeighborOf(adjacentId, addCluster);
     });
     return clusters;
   }
@@ -2542,16 +2510,25 @@ export class GraphComponent implements OnInit, OnDestroy {
     return Array.from(neighbors);
   }
 
-  private handleClick(params: NetworkPointerParams): void {
+  private resolveNodeAtPointer(params: NetworkPointerParams): { nodeId: string; node: ExtendedNode | null; pointer: { x: number; y: number } } | null {
     this.hideContextMenu();
     const pointer = params.pointer.DOM;
     const nodeIdRaw = this.network.getNodeAt(pointer);
     if (!nodeIdRaw) {
-      this.hideNodeInfoPanel();
-      return;
+      return null;
     }
     const nodeId = String(nodeIdRaw);
     const node = this.nodeSet.get(nodeId) as ExtendedNode | null;
+    return { nodeId, node, pointer };
+  }
+
+  private handleClick(params: NetworkPointerParams): void {
+    const resolved = this.resolveNodeAtPointer(params);
+    if (!resolved) {
+      this.hideNodeInfoPanel();
+      return;
+    }
+    const { nodeId, node, pointer } = resolved;
     this.toggleEdgeHighlightOnClick(nodeId);
     if (node) {
       this.showNodeInfoPanel(node, pointer);
@@ -2653,14 +2630,11 @@ export class GraphComponent implements OnInit, OnDestroy {
   }
 
   private handleDoubleClick(params: NetworkPointerParams): void {
-    this.hideContextMenu();
-    const pointer = params.pointer.DOM;
-    const nodeIdRaw = this.network.getNodeAt(pointer);
-    if (!nodeIdRaw) {
+    const resolved = this.resolveNodeAtPointer(params);
+    if (!resolved) {
       return;
     }
-    const nodeId = String(nodeIdRaw);
-    const node = this.nodeSet.get(nodeId) as ExtendedNode;
+    const { nodeId, node } = resolved;
     if (!node) {
       return;
     }

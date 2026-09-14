@@ -1,6 +1,7 @@
 from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_query_generator import search_query_generator
+from orion.api.interactive.search_manager.internal.search_result_parser import parse_ranked_hits
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
@@ -80,25 +81,6 @@ class search_defacement_controller:
             return url.replace("https://", "").replace("http://", "")
 
         return "Unknown team"
-
-    @staticmethod
-    def _records(response):
-        records = []
-        if response and "hits" in response and "hits" in response["hits"]:
-            for rank, hit in enumerate(response["hits"]["hits"]):
-                source = hit.get("_source", {})
-                source["_id"] = hit.get("_id", "")
-                source.pop("m_embedding", None)
-                source["rank_index"] = hit.get("_index")
-                source["_score"] = hit.get("_score", 0)
-                source["_rank"] = rank + 1
-                records.append(source)
-
-        total = 0
-        if response and "hits" in response:
-            total_field = response["hits"].get("total", 0)
-            total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
-        return records, total
 
     @classmethod
     def _build_groups(cls, records):
@@ -195,7 +177,7 @@ class search_defacement_controller:
 
         response = await elastic_controller.get_instance().search_consolidated_ranked_query(
             indices, query, indices_boost)
-        records, total = self._records(response)
+        records, total = parse_ranked_hits(response)
         await self._add_crawl_status(records)
         result_records = [self._minimal_record(record) for record in records]
         return {

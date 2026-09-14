@@ -4,6 +4,7 @@ import { ThreatLensDisplayFeedItem, ThreatLensFeedItem } from '../../../models/g
 import { TranslatePipe } from '../../../../../shared/pipes/translate.pipe';
 import { ThreatLensArcSelection } from '../../models/threat-lens-map.types';
 import { formatFeedDate } from '../feed-date.util';
+import { toHexColor, toSafeHttpUrl } from '../../threat-lens-format.util';
 
 @Component({
   selector: 'app-threat-lens-arc-report-popup',
@@ -35,7 +36,7 @@ export class ArcReportPopupComponent implements OnChanges {
       return;
     }
 
-    const safeUrl = this.toSafeHttpUrl(item.link);
+    const safeUrl = toSafeHttpUrl(item.link);
     if (!safeUrl) {
       return;
     }
@@ -56,29 +57,8 @@ export class ArcReportPopupComponent implements OnChanges {
       .map((item) => ({
         ...item,
         displayDate: formatFeedDate(item.date),
-        colorHex: this.toHexColor(item.color),
+        colorHex: toHexColor(item.color),
       }));
   }
 
-  private toHexColor(color: [number, number, number]): string {
-    return `#${color.map((value) => value.toString(16).padStart(2, '0')).join('')}`;
-  }
-
-  private toSafeHttpUrl(value: string): string {
-    if (!value) {
-      return '';
-    }
-
-    try {
-      const url = new URL(value);
-      if (url.protocol === 'http:' || url.protocol === 'https:') {
-        return url.toString();
-      }
-    }
-    catch {
-      return '';
-    }
-
-    return '';
-  }
 }

@@ -52,6 +52,14 @@ export class SocialLiveSyncService {
     return (platformData.meta.platform ?? '').toLowerCase();
   }
 
+  private tryBeginPlatformSync(platform: string, key: string): boolean {
+    if (this.activePlatforms.has(platform) || getOwnProperty(this.crawlResults(), key)?.loading) {
+      return false;
+    }
+    this.activePlatforms.add(platform);
+    return true;
+  }
+
   isScanning(platformData: social_profile): boolean {
     return this.activePlatforms.has(this.platformKey(platformData));
   }
@@ -78,10 +86,9 @@ export class SocialLiveSyncService {
     const platform = this.platformKey(platformData);
     const cardId = getPlatformCardId(platformData);
     const key = crawlKey(platformData, 'connections');
-    if (this.activePlatforms.has(platform) || getOwnProperty(this.crawlResults(), key)?.loading) {
+    if (!this.tryBeginPlatformSync(platform, key)) {
       return;
     }
-    this.activePlatforms.add(platform);
     const stopKey = key;
     this.liveStop.delete(stopKey);
     this.stoppedPlatformIds.delete(cardId);
@@ -166,10 +173,9 @@ export class SocialLiveSyncService {
     const cardId = getPlatformCardId(platformData);
     const key = crawlKey(platformData, type);
     const platform = this.platformKey(platformData);
-    if (this.activePlatforms.has(platform) || getOwnProperty(this.crawlResults(), key)?.loading) {
+    if (!this.tryBeginPlatformSync(platform, key)) {
       return;
     }
-    this.activePlatforms.add(platform);
     const trackStatus = !urlOverride;
     const stopKey = key;
     this.liveStop.delete(stopKey);
@@ -252,7 +258,7 @@ export class SocialLiveSyncService {
     }
   }
 
-  private applyProfileUpdate(platformData: social_profile, mapPlatform: (platform: social_profile) => social_profile): void {
+  private mutateGroupProfiles(platformData: social_profile, transform: (profiles: social_profile[]) => social_profile[] | null): void {
     let updatedProfiles: social_profile[] | null = null;
     const groupKey = getProfileGroupKey(this.storageService.state.scanResults(), platformData);
     this.storageService.state.scanResults.update(results => {
@@ -260,15 +266,8 @@ export class SocialLiveSyncService {
       if (!currentProfiles) {
         return results;
       }
-      let changed = false;
-      const nextProfiles = currentProfiles.map(platform => {
-        const next = mapPlatform(platform);
-        if (next !== platform) {
-          changed = true;
-        }
-        return next;
-      });
-      if (!changed) {
+      const nextProfiles = transform(currentProfiles);
+      if (!nextProfiles) {
         return results;
       }
       updatedProfiles = nextProfiles;
@@ -277,6 +276,20 @@ export class SocialLiveSyncService {
     if (updatedProfiles) {
       this.storageService.saveProfiles(groupKey, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
+  }
+
+  private applyProfileUpdate(platformData: social_profile, mapPlatform: (platform: social_profile) => social_profile): void {
+    this.mutateGroupProfiles(platformData, currentProfiles => {
+      let changed = false;
+      const nextProfiles = currentProfiles.map(platform => {
+        const next = mapPlatform(platform);
+        if (next !== platform) {
+          changed = true;
+        }
+        return next;
+      });
+      return changed ? nextProfiles : null;
+    });
   }
 
   setSectionStatus(platformData: social_profile, section: string, status: string): void {
@@ -306,26 +319,14 @@ export class SocialLiveSyncService {
   }
 
   private updateProfileResources(platformData: social_profile, type: FetchTabKey, build: (previous: social_resource_collection | undefined) => social_resource_collection): void {
-    let updatedProfiles: social_profile[] | null = null;
-    const groupKey = getProfileGroupKey(this.storageService.state.scanResults(), platformData);
-    this.storageService.state.scanResults.update(results => {
-      const currentProfiles = results.get(groupKey);
-      if (!currentProfiles) {
-        return results;
+    this.mutateGroupProfiles(platformData, currentProfiles => currentProfiles.map(platform => {
+      if (!isSamePlatform(platform, platformData)) {
+        return platform;
       }
-      updatedProfiles = currentProfiles.map(platform => {
-        if (!isSamePlatform(platform, platformData)) {
-          return platform;
-        }
-        const others = (platform.resources ?? []).filter(entry => entry.id !== type);
-        const previous = (platform.resources ?? []).find(entry => entry.id === type);
-        return { ...platform, resources: [...others, build(previous)] };
-      });
-      return new Map(results).set(groupKey, updatedProfiles);
-    });
-    if (updatedProfiles) {
-      this.storageService.saveProfiles(groupKey, updatedProfiles, true).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-    }
+      const others = (platform.resources ?? []).filter(entry => entry.id !== type);
+      const previous = (platform.resources ?? []).find(entry => entry.id === type);
+      return { ...platform, resources: [...others, build(previous)] };
+    }));
   }
 
   private storeLive(platformData: social_profile, type: FetchTabKey, resources: social_resource[]): void {

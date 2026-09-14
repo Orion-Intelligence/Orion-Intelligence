@@ -6,6 +6,7 @@ import { MessageNotificationService } from '../../../services/message_notificati
 import { ManageProfilesService } from '../manage-profiles.service';
 import { PlatformEntry, SocialAdDetectionResult, SocialPostResult, SocialProfile } from '../model/manage-profiles.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
+import { safePlatform } from '../manage-profiles.util';
 
 export type ManageProfileResultsActivity = 'ad_detection' | 'posting' | 'hate_speech';
 
@@ -83,11 +84,7 @@ export class ManageProfileResultsComponent {
     return this.expandedResults().has(key);
   }
 
-  private safePlatform(platform: string): string {
-    return platform.toLowerCase().replace(/[^a-z0-9]/g, '');
-  }
-
   private platformLabel(platform: string): string {
-    return this.platforms().find(entry => this.safePlatform(entry.platform) === this.safePlatform(platform))?.platform ?? platform;
+    return this.platforms().find(entry => safePlatform(entry.platform) === safePlatform(platform))?.platform ?? platform;
   }
 }

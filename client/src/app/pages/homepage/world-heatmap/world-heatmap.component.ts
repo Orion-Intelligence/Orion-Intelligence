@@ -99,12 +99,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const data = this.route.snapshot.data.insights;
-    if (data) {
-      this.applyInsightData(data);
-      return;
-    }
-    this.insightCacheService.getInsight().subscribe(data => {
+    this.insightCacheService.loadInsight(this.route, data => {
       this.applyInsightData(data);
     });
   }
@@ -334,24 +329,19 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     const tickSelection = legend
       .selectAll<SVGLineElement, number>('line.legend-tick')
       .data(ticks);
-    tickSelection.join(enter => enter.append('line')
+    const animateTick = (selection: typeof tickSelection) => selection
+      .attr('stroke', legendColors.tick)
+      .attr('stroke-width', 1)
+      .transition()
+      .duration(600)
+      .attr('x1', d => (d / max) * barW)
+      .attr('x2', d => (d / max) * barW);
+    tickSelection.join(enter => animateTick(enter.append('line')
       .attr('class', 'legend-tick')
       .attr('y1', 8 + barH)
       .attr('y2', 8 + barH + 6)
       .attr('x1', 0)
-      .attr('x2', 0)
-      .attr('stroke', legendColors.tick)
-      .attr('stroke-width', 1)
-      .transition()
-      .duration(600)
-      .attr('x1', d => (d / max) * barW)
-      .attr('x2', d => (d / max) * barW), update => update
-      .attr('stroke', legendColors.tick)
-      .attr('stroke-width', 1)
-      .transition()
-      .duration(600)
-      .attr('x1', d => (d / max) * barW)
-      .attr('x2', d => (d / max) * barW), exit => exit.remove());
+      .attr('x2', 0)), update => animateTick(update), exit => exit.remove());
     legend.selectAll<SVGTextElement, number>('text.legend-tick-label')
       .data(ticks)
       .join(enter => enter.append('text')
@@ -429,17 +419,13 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
       .translate([width / 2, height / 1.55]);
     this.path = d3.geoPath(this.projection);
     const countries = topojson.feature(this.worldData, this.worldData.objects.countries) as FeatureCollection<Geometry, { name?: string }>;
-    this.mapG
+    this.applyCountryStateClasses(this.mapG
       .selectAll<SVGPathElement, CountryFeature>('path.country')
       .data(countries.features)
       .enter()
       .append('path')
       .attr('d', feature => this.path(feature))
-      .attr('class', this.countryClass)
-      .classed('can-open-reports', this.canOpenReports())
-      .classed('cursor-pointer', this.canOpenReports())
-      .classed('cursor-default', !this.canOpenReports())
-      .classed('has-data', (d) => this.getValueForFeature(d) != null)
+      .attr('class', this.countryClass))
       .on('mousemove', (event: MouseEvent, d) => {
         this.onHoverMove(event, d);
       })
@@ -473,6 +459,14 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
     this.refreshMapPresentation(false);
   }
 
+  private applyCountryStateClasses(selection: d3.Selection<SVGPathElement, CountryFeature, SVGGElement, unknown>): d3.Selection<SVGPathElement, CountryFeature, SVGGElement, unknown> {
+    return selection
+      .classed('can-open-reports', this.canOpenReports())
+      .classed('cursor-pointer', this.canOpenReports())
+      .classed('cursor-default', !this.canOpenReports())
+      .classed('has-data', (d) => this.getValueForFeature(d) != null);
+  }
+
   private getValueForFeature(d: CountryFeature): number | null {
     const name = d.properties?.name?.toLowerCase().trim();
     if (!name) {
@@ -499,11 +493,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
 
   private updateColors(): void {
     const color = this.getColorScale();
-    this.mapG.selectAll<SVGPathElement, CountryFeature>('path.country')
-      .classed('can-open-reports', this.canOpenReports())
-      .classed('cursor-pointer', this.canOpenReports())
-      .classed('cursor-default', !this.canOpenReports())
-      .classed('has-data', (d) => this.getValueForFeature(d) != null)
+    this.applyCountryStateClasses(this.mapG.selectAll<SVGPathElement, CountryFeature>('path.country'))
       .classed('is-clickable', (d) => this.canOpenReports() && this.getValueForFeature(d) != null)
       .attr('fill', (d) => {
         const v = this.getValueForFeature(d);

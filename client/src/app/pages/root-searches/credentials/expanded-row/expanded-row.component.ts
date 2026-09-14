@@ -561,12 +561,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       const cardGroups = this.creditCardFields
         .filter(field => field.value && field.value !== '-')
         .map(field => ({ key: field.key, label: field.label, values: [field.value] }));
-      const rest = Object.keys(item)
-        .filter(k => !exclude.has(k))
-        .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(getOwnProperty(item, k)) }))
-        .filter(g => g.values.length > 0)
-        .filter(g => !this.isHashOrIndexKey(g.key, g.label))
-        .sort((a, b) => a.label.localeCompare(b.label));
+      const rest = this.buildRestTelemetryGroups(item, exclude);
       return [...cardGroups, ...rest];
     }
     const core: TelemetryGroup[] = [];
@@ -582,13 +577,17 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     if (passwords.length > 1) {
       core.push({ key: 'password', label: 'Password', values: passwords });
     }
-    const rest: TelemetryGroup[] = Object.keys(item)
+    const rest = this.buildRestTelemetryGroups(item, exclude);
+    return [...core, ...rest];
+  }
+
+  private buildRestTelemetryGroups(item: CredentialResultItem, exclude: Set<string>): TelemetryGroup[] {
+    return Object.keys(item)
       .filter(k => !exclude.has(k))
       .map(k => ({ key: k, label: this.rowHelper.prettyLabel(k), values: this.rowHelper.normalizeToArray(getOwnProperty(item, k)) }))
       .filter(g => g.values.length > 0)
       .filter(g => !this.isHashOrIndexKey(g.key, g.label))
       .sort((a, b) => a.label.localeCompare(b.label));
-    return [...core, ...rest];
   }
 
   private buildThreatGroups(result: CredentialResultItem | null): TelemetryGroup[] {
@@ -665,17 +664,7 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   private formatIndexLabel(value: unknown): string {
-    const raw = this.rowHelper.normalizeToArray(value)[0];
-    if (!raw) {
-      return '-';
-    }
-    const cleaned = String(raw)
-      .replace(/^m[_\s-]+/i, '')
-      .replace(/[_\s-]*model$/i, '')
-      .replace(/[_-]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
+    return this.rowHelper.formatIndexLabel(this.rowHelper.normalizeToArray(value)[0]);
   }
 
   private extractDomain(value: unknown): string {
