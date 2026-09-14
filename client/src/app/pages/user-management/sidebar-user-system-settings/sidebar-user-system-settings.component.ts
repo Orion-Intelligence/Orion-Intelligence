@@ -25,7 +25,7 @@ export type { SystemSettingsResponse } from './model/sidebar-user-system-setting
 
 
 type SystemSettingsTab = 'branding' | 'platform';
-type SystemImageKey = 'auth_dashboard_icon' | 'logo_url' | 'logo_wide_light' | 'logo_wide_dark';
+type SystemImageKey = 'logo_url' | 'logo_wide_light' | 'logo_wide_dark';
 type SystemImageResponse = Partial<Pick<AppSettingsModel, SystemImageKey>>;
 type AppSettingsWire = Partial<Record<keyof AppSettingsModel, string | boolean>>;
 interface UpdateSettingsResponse { settings?: AppSettingsWire; appSettings?: AppSettingsWire }
@@ -160,9 +160,6 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
           if (res?.logo_wide_dark) {
             appSettings.logo_wide_dark = res.logo_wide_dark;
           }
-          if(res?.auth_dashboard_icon){
-            appSettings.auth_dashboard_icon = res.auth_dashboard_icon;
-          }
           if (appSettings.logo_url) {
             this.appService.updateFavicon(appSettings.logo_url);
           }
@@ -178,8 +175,7 @@ export class SidebarProfileSystemSettingsComponent implements OnInit {
       const fallbackMap: Record<string, string> = {
         logo_url: '/api/s/static/system/logo_url_default.png',
         logo_wide_light: '/api/s/static/system/logo_wide_light_default.png',
-        logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png',
-        auth_dashboard_icon: '/api/s/static/system/auth_dashboard_icon_default.png'
+        logo_wide_dark: '/api/s/static/system/logo_wide_dark_default.png'
       };
       const fallback = getOwnProperty(fallbackMap, key);
       setOwnProperty(this.appService.getConfig().appSettings, key, fallback);

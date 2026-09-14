@@ -53,7 +53,7 @@ export class SignupComponent extends PasswordMeterHost implements OnInit {
   }
 
   getDashboardPreviewSrc(): string {
-    return this.appService.getConfig().appSettings.auth_dashboard_icon || SignupComponent.DEFAULT_AUTH_DASHBOARD_SRC;
+    return SignupComponent.DEFAULT_AUTH_DASHBOARD_SRC;
   }
 
   validateUsername(): boolean {

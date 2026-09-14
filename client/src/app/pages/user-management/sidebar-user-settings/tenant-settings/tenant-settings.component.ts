@@ -14,13 +14,14 @@ import { AlertConnectorSettingsResponse, AlertWebhookSettingsForm } from '../../
 import { createWebhookForm, mapAlertConnectorSettings } from '../../../../shared/partials/alert-webhook-settings-block/alert-webhook-settings.util';
 import { SmtpSettingsBlockComponent } from '../../../../shared/partials/smtp-settings-block/smtp-settings-block.component';
 import { SmtpSettingsForm } from '../../../../shared/partials/smtp-settings-block/model/smtp-settings.model';
+import { TimePickerComponent } from '../../../../shared/partials/filters/time-picker/time-picker.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { notifyUploadImageError, uploadImageResource } from '../../settings-resource.util';
 
 @Component({
   selector: 'app-tenant-settings',
-  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, AlertWebhookSettingsBlockComponent, TranslatePipe],
+  imports: [FormsModule, CommonModule, UserImagePickerComponent, SmtpSettingsBlockComponent, AlertWebhookSettingsBlockComponent, TimePickerComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './tenant-settings.component.html',
   styleUrls: ['./tenant-settings.component.css']
@@ -29,6 +30,7 @@ export class TenantSettingsComponent implements OnInit {
   private contactSnapshot = '';
   private privacySnapshot = '';
   private mailSnapshot = '';
+  private webhookSnapshot = '';
 
   isAccountSectionOpen = true;
   mailErrorState = false;
@@ -77,6 +79,30 @@ export class TenantSettingsComponent implements OnInit {
     return this.mailState() !== this.mailSnapshot;
   }
 
+  isWebhookDirty(): boolean {
+    return this.webhookState() !== this.webhookSnapshot;
+  }
+
+  saveWebhookSettings(): void {
+    if (!this.isWebhookDirty()) {
+      return;
+    }
+    const payload = {
+      slack_client_id: this.webhookForm.slack_client_id,
+      slack_client_secret: this.webhookForm.slack_client_secret,
+      jira_client_id: this.webhookForm.jira_client_id,
+      jira_client_secret: this.webhookForm.jira_client_secret
+    };
+    this.apiService.post<AlertConnectorSettingsResponse>('alert-connectors/settings', payload).subscribe({
+      next: (response) => {
+        this.applyAlertConnectorSettings(response);
+      },
+      error: () => {
+        this.webhookErrorState = true;
+      }
+    });
+  }
+
   saveContactSettings(): void {
     if (this.isContactDirty()) {
       this.updateUser();
@@ -102,17 +128,6 @@ export class TenantSettingsComponent implements OnInit {
   normalizedAlertRunTime(): string | null {
     const value = (this.userSessionData.tenant.alertRunTime ?? '').trim();
     return value || null;
-  }
-
-  getAlertRunTimeDisplay(): string {
-    return this.normalizedAlertRunTime() ?? 'Use default schedule';
-  }
-
-  openAlertRunTimePicker(input: HTMLInputElement): void {
-    input.focus();
-    if (typeof input.showPicker === 'function') {
-      input.showPicker();
-    }
   }
 
   updateUser(includeMailSettings = false) {
@@ -189,6 +204,16 @@ export class TenantSettingsComponent implements OnInit {
   private applyAlertConnectorSettings(response: AlertConnectorSettingsResponse) {
     this.webhookForm = mapAlertConnectorSettings(response);
     this.webhookErrorState = false;
+    this.webhookSnapshot = this.webhookState();
+  }
+
+  private webhookState(): string {
+    return JSON.stringify([
+      this.webhookForm.slack_client_id,
+      this.webhookForm.slack_client_secret,
+      this.webhookForm.jira_client_id,
+      this.webhookForm.jira_client_secret
+    ]);
   }
 
   private captureEditableSettings(): void {

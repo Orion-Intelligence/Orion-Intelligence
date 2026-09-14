@@ -8,7 +8,7 @@
   </div>
 
   <div class="connector-list">
-    @if (isSystemContext || form.slack_configured) {
+    @if (isSystemContext || isTenantContext || form.slack_configured) {
     <details data-testid="alert-integration-slack" class="connector-row">
       <summary class="connector-summary">
         <div>
@@ -31,7 +31,7 @@
         </div>
       </summary>
 
-      @if (isSystemContext && isAdmin) {
+      @if ((isSystemContext && isAdmin) || isTenantContext) {
         <div class="connector-fields">
           <div>
             <label class="connector-label">{{ 'SLACK CLIENT ID' | translate }}</label>
@@ -58,7 +58,7 @@
     </details>
     }
 
-    @if (isSystemContext || form.jira_configured) {
+    @if (isSystemContext || isTenantContext || form.jira_configured) {
     <details data-testid="alert-integration-jira" class="connector-row">
       <summary class="connector-summary">
         <div>
@@ -81,7 +81,7 @@
         </div>
       </summary>
 
-      @if (isSystemContext && isAdmin) {
+      @if ((isSystemContext && isAdmin) || isTenantContext) {
         <div class="connector-fields">
           <div>
             <label class="connector-label">{{ 'JIRA CLIENT ID' | translate }}</label>
@@ -113,7 +113,7 @@
         {{ 'Alert integration configuration is invalid' | translate }}
       </div>
     }
-    @if (isSystemContext && isAdmin) {
+    @if ((isSystemContext && isAdmin) || isTenantContext) {
       <div class="flex justify-end">
         <button data-testid="system-settings-alert-integrations-save" type="button" class="ui-settings-save-button" [disabled]="!isDirty" (click)="save.emit()">
           {{ 'Save changes' | translate }}

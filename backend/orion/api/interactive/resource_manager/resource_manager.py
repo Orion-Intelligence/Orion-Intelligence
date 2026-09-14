@@ -20,8 +20,6 @@ class ResourceManager:
         "logo_wide_light_custom.png",
         "logo_wide_dark_default.png",
         "logo_wide_dark_custom.png",
-        "auth_dashboard_icon_default.png",
-        "auth_dashboard_icon_custom.png",
     }
 
     def __init__(self):
@@ -189,7 +187,6 @@ class ResourceManager:
             AllowedKeys.LOGO_URL.value: "logo_url_custom.png",
             AllowedKeys.LOGO_WIDE_LIGHT.value: "logo_wide_light_custom.png",
             AllowedKeys.LOGO_WIDE_DARK.value: "logo_wide_dark_custom.png",
-            AllowedKeys.AUTH_DASHBOARD_ICON.value: "auth_dashboard_icon_custom.png",
         }.get(key)
         if file_name is None:
             raise HTTPException(status_code=400, detail="Invalid system resource")

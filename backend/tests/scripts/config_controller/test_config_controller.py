@@ -288,7 +288,7 @@ async def test_get_system_info_success(monkeypatch, tmp_path):
     _install_redis(monkeypatch, FakeConfigRedis())
     resource_dir = tmp_path / "res"
     resource_dir.mkdir()
-    for name in ("logo_url_custom.png", "logo_wide_light_custom.png", "logo_wide_dark_custom.png", "auth_dashboard_icon_custom.png"):
+    for name in ("logo_url_custom.png", "logo_wide_light_custom.png", "logo_wide_dark_custom.png"):
         (resource_dir / name).write_bytes(b"x")
     _install_resource(monkeypatch, FakeResourceManager(resource_dir=resource_dir))
 
@@ -339,7 +339,7 @@ async def test_update_public_config_updates_existing_record(monkeypatch, tmp_pat
     _install_mail(monkeypatch, mail)
     resource_dir = tmp_path / "res"
     resource_dir.mkdir()
-    for name in ("logo_url_custom.png", "logo_wide_light_custom.png", "logo_wide_dark_custom.png", "auth_dashboard_icon_custom.png"):
+    for name in ("logo_url_custom.png", "logo_wide_light_custom.png", "logo_wide_dark_custom.png"):
         (resource_dir / name).write_bytes(b"x")
     _install_resource(monkeypatch, FakeResourceManager(resource_dir=resource_dir))
 
