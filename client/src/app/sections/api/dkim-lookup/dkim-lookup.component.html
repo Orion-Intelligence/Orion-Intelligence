@@ -1,58 +1,130 @@
 <div class="flex flex-col gap-4 p-6 text-white h-full overflow-y-auto">
-  <div class="text-2xl font-bold mb-2">DKIM Record Checker</div>
-  <p class="text-gray-400 mb-4">Verify DKIM public keys by entering the domain and selector.</p>
+  <div class="text-2xl font-bold mb-2">Email Forensics & DKIM Checker</div>
+  <p class="text-gray-400 mb-4">Analyze raw email headers or verify domain DKIM records.</p>
 
-  <form (submit)="analyzeText($event)" class="flex flex-col gap-4 max-w-md">
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium">Domain</label>
-      <input type="text" [(ngModel)]="domain" name="domain" placeholder="e.g. google.com" class="p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-blue-500" />
+
+  <div class="flex border-b border-gray-700 mb-4 font-medium text-sm">
+    <button (click)="switchTab('domain')" [class.border-blue-500]="activeTab === 'domain'" [class.text-blue-400]="activeTab === 'domain'" class="px-6 py-3 border-b-2 border-transparent hover:text-gray-200 transition">Domain Lookup</button>
+    <button (click)="switchTab('raw')" [class.border-blue-500]="activeTab === 'raw'" [class.text-blue-400]="activeTab === 'raw'" class="px-6 py-3 border-b-2 border-transparent hover:text-gray-200 transition">Raw Email Forensics</button>
+  </div>
+
+  <div *ngIf="activeTab === 'domain'">
+    <form (submit)="analyzeText($event)" class="flex flex-col gap-4 max-w-md">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Domain</label>
+        <input type="text" [(ngModel)]="domain" name="domain" placeholder="e.g. google.com" class="p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-blue-500" />
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Selector</label>
+        <div class="flex gap-2">
+          <input type="text" [(ngModel)]="selector" name="selector" placeholder="e.g. 20230601" class="flex-1 p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-blue-500" />
+          <button type="button" (click)="discoverSelectors()" [disabled]="discovering || !domain" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded font-medium disabled:opacity-50 transition border border-gray-600 whitespace-nowrap">{{ discovering ? 'Finding...' : 'Find Selectors' }}</button>
+        </div>
+      </div>
+
+      <button type="submit" [disabled]="loading || !domain || !selector" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded font-medium disabled:opacity-50 transition">{{ loading ? 'Checking...' : 'Check DKIM' }}</button>
+    </form>
+
+    <div *ngIf="errorMessage" class="mt-4 p-4 bg-red-900 border border-red-700 rounded text-red-200">
+      {{ errorMessage }}
     </div>
 
-    <div class="flex flex-col gap-1">
-      <label class="text-sm font-medium">Selector</label>
-      <div class="flex gap-2">
-        <input type="text" [(ngModel)]="selector" name="selector" placeholder="e.g. 20230601" class="flex-1 p-2 rounded bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-blue-500" />
-        <button type="button" (click)="discoverSelectors()" [disabled]="discovering || !domain" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded font-medium disabled:opacity-50 transition border border-gray-600 whitespace-nowrap">{{ discovering ? 'Finding...' : 'Find Selectors' }}</button>
+
+    <div *ngIf="discoveredSelectors.length > 0" class="mt-6 p-4 bg-gray-800 border border-gray-700 rounded">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="text-lg font-bold text-blue-400">Discovered Selectors</span>
+        <span class="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded border border-blue-700">via ZK Email</span>
+      </div>
+      <p class="text-sm text-gray-400 mb-4">Found {{ discoveredSelectors.length }} historical/active selectors for {{ domain }}. Click any selector to use it.</p>
+      <div class="flex flex-wrap gap-2">
+        <button *ngFor="let sel of discoveredSelectors" (click)="selectSelector(sel)" type="button" [class.bg-blue-900]="selector === sel" [class.border-blue-500]="selector === sel" class="px-3 py-1 bg-gray-900 border border-gray-600 rounded text-sm text-green-400 cursor-pointer hover:bg-gray-700 hover:text-green-300 transition">{{ sel }}</button>
       </div>
     </div>
 
-    <button type="submit" [disabled]="loading || !domain || !selector" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded font-medium disabled:opacity-50 transition">{{ loading ? 'Checking...' : 'Check DKIM' }}</button>
-  </form>
-
-  <div *ngIf="errorMessage" class="mt-4 p-4 bg-red-900 border border-red-700 rounded text-red-200">
-    {{ errorMessage }}
-  </div>
-
-  <div *ngIf="discoveredSelectors.length > 0" class="mt-6 p-4 bg-gray-800 border border-gray-700 rounded">
-    <div class="flex items-center gap-2 mb-2">
-      <span class="text-lg font-bold text-blue-400">Discovered Selectors</span>
-      <span class="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded border border-blue-700">via ZK Email</span>
-    </div>
-    <p class="text-sm text-gray-400 mb-4">Found {{ discoveredSelectors.length }} historical/active selectors for {{ domain }}. Click any selector to use it.</p>
-
-    <div class="flex flex-wrap gap-2">
-      <button *ngFor="let sel of discoveredSelectors" (click)="selectSelector(sel)" type="button" [class.bg-blue-900]="selector === sel" [class.border-blue-500]="selector === sel" class="px-3 py-1 bg-gray-900 border border-gray-600 rounded text-sm text-green-400 cursor-pointer hover:bg-gray-700 hover:text-green-300 transition">{{ sel }}</button>
-    </div>
-  </div>
-
-  <div *ngIf="result && result.status === 'success' && !result.selectors" class="mt-6 p-4 bg-gray-800 border border-gray-700 rounded">
-    <div class="text-lg font-bold mb-2 text-green-400">Valid DKIM Record Found!</div>
-
-    <div class="mt-4">
-      <div class="text-sm text-gray-400">DNS Query</div>
-      <div class="font-mono text-sm bg-gray-900 p-2 rounded mt-1 break-all">{{ result.dns_query }}</div>
-    </div>
-
-    <div class="mt-4">
-      <div class="text-sm text-gray-400">Raw Record</div>
-      <div class="font-mono text-sm bg-gray-900 p-2 rounded mt-1 break-all">{{ result.raw_record }}</div>
-    </div>
-
-    <div class="mt-4">
-      <div class="text-sm text-gray-400">Public Key (p)</div>
-      <div class="font-mono text-sm bg-gray-900 p-2 rounded mt-1 break-all text-blue-300">
-        {{ result.parsed_data?.['public_key (p)'] }}
+    <div *ngIf="result && result.status === 'success' && !result.selectors" class="mt-6 p-4 bg-gray-800 border border-gray-700 rounded">
+      <div class="text-lg font-bold mb-2 text-green-400">Valid DKIM Record Found!</div>
+      <div class="mt-4">
+        <div class="text-sm text-gray-400">DNS Query</div>
+        <div class="font-mono text-sm bg-gray-900 p-2 rounded mt-1 break-all">{{ result.dns_query }}</div>
       </div>
+      <div class="mt-4">
+        <div class="text-sm text-gray-400">Raw Record</div>
+        <div class="font-mono text-sm bg-gray-900 p-2 rounded mt-1 break-all">{{ result.raw_record }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'raw'">
+    <form (submit)="analyzeRawEmail($event)" class="flex flex-col gap-4 max-w-4xl">
+      <div class="flex flex-col gap-1">
+        <label class="text-sm font-medium">Paste Raw Email (Original Message Source)</label>
+        <textarea [(ngModel)]="rawEmailText" name="rawEmailText" rows="12" placeholder="MIME-Version: 1.0&#10;From: no-reply@company.com&#10;To: target@gmail.com&#10;Subject: Security Alert..." class="p-3 rounded bg-gray-900 border border-gray-700 text-white focus:outline-none focus:border-blue-500 font-mono text-xs whitespace-pre-wrap"></textarea>
+      </div>
+      <button type="submit" class="mt-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded font-medium transition w-max">
+        {{ rawLoading ? 'Analyzing Forensics...' : 'Run Diagnostics' }}
+      </button>
+    </form>
+
+    <div *ngIf="rawErrorMessage" class="mt-4 p-4 bg-red-900 border border-red-700 rounded text-red-200 max-w-4xl">
+      {{ rawErrorMessage }}
+    </div>
+
+
+    <div *ngIf="rawResult" class="mt-6 flex flex-col gap-4 max-w-4xl">
+
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+
+        <div class="p-4 bg-gray-800 border rounded flex flex-col gap-2" [ngClass]="{'border-green-600': rawResult.dkim?.status === 'Pass (Authentic)', 'border-red-600': rawResult.dkim?.status !== 'Pass (Authentic)' && rawResult.dkim?.status !== 'Not Found', 'border-gray-600': rawResult.dkim?.status === 'Not Found'}">
+          <div class="text-lg font-bold">DKIM Signature</div>
+          <div class="text-sm text-gray-400">Domain: <span class="text-white">{{ rawResult.dkim.domain || 'N/A' }}</span></div>
+          <div class="text-sm text-gray-400">Selector: <span class="text-white">{{ rawResult.dkim.selector || 'N/A' }}</span></div>
+          <div class="mt-auto pt-2 font-bold" [ngClass]="{'text-green-400': rawResult.dkim?.status === 'Pass (Authentic)', 'text-red-400': rawResult.dkim?.status !== 'Pass (Authentic)' && rawResult.dkim?.status !== 'Not Found'}">{{ rawResult.dkim?.status }}</div>
+        </div>
+
+
+        <div class="p-4 bg-gray-800 border rounded flex flex-col gap-2" [ngClass]="{'border-green-600': rawResult.spf.status === 'Found', 'border-red-600': rawResult.spf.status !== 'Found' && rawResult.spf.status !== 'Not Found', 'border-gray-600': rawResult.spf.status === 'Not Found'}">
+          <div class="text-lg font-bold">SPF Check</div>
+          <div class="text-sm text-gray-400">Origin IP: <span class="text-white font-mono">{{ rawResult.spf.origin_ip }}</span></div>
+          <div class="text-sm text-gray-400">Sender: <span class="text-white">{{ rawResult.spf.domain || 'N/A' }}</span></div>
+          <div class="mt-auto pt-2 font-bold" [ngClass]="{'text-green-400': rawResult.spf.status === 'Found', 'text-yellow-400': rawResult.spf.status === 'No SPF Record', 'text-red-400': rawResult.spf.status !== 'Found' && rawResult.spf.status !== 'No SPF Record'}">{{ rawResult.spf.status }}</div>
+        </div>
+
+
+        <div class="p-4 bg-gray-800 border rounded flex flex-col gap-2" [ngClass]="{'border-green-600': rawResult.dmarc.status === 'Found', 'border-gray-600': rawResult.dmarc.status !== 'Found'}">
+          <div class="text-lg font-bold">DMARC Policy</div>
+          <div class="text-sm text-gray-400">Domain: <span class="text-white">{{ rawResult.dmarc.domain || 'N/A' }}</span></div>
+          <div class="text-xs text-gray-400 break-all">Policy: <span class="text-white">{{ rawResult.dmarc.record || 'N/A' }}</span></div>
+          <div class="mt-auto pt-2 font-bold" [ngClass]="{'text-green-400': rawResult.dmarc.status === 'Found', 'text-yellow-400': rawResult.dmarc.status === 'No DMARC Record'}">{{ rawResult.dmarc.status }}</div>
+        </div>
+
+      </div>
+
+
+      <div class="p-5 bg-gray-800 border border-gray-700 rounded mt-2">
+        <div class="text-lg font-bold mb-4 flex items-center gap-2">
+          <span>Network Hops (IP Trace)</span>
+          <span class="text-xs font-normal bg-gray-700 px-2 py-1 rounded border border-gray-600 text-gray-300">Bottom = Source | Top = Destination</span>
+        </div>
+
+        <div *ngIf="rawResult.hops && rawResult.hops.length > 0; else noHops" class="flex flex-col gap-3">
+          <div *ngFor="let hop of rawResult.hops; let last = last" class="flex gap-4">
+            <div class="flex flex-col items-center">
+              <div class="w-6 h-6 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold shrink-0">{{ hop.hop }}</div>
+              <div *ngIf="!last" class="w-0.5 h-full bg-gray-600 my-1"></div>
+            </div>
+            <div class="pb-4 w-full">
+              <div class="font-mono text-xs bg-gray-900 p-2 rounded text-gray-300 break-words w-full">{{ hop.details }}</div>
+            </div>
+          </div>
+        </div>
+        <ng-template #noHops>
+          <div class="text-gray-400 text-sm">No Received headers found to trace hops.</div>
+        </ng-template>
+      </div>
+
     </div>
   </div>
 </div>
