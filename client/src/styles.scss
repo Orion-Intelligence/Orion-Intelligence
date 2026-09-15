@@ -988,3 +988,173 @@ select:not(.ui-popup-select, .ui-select)::-ms-expand {
     animation: none;
   }
 }
+
+
+/* Shared entity lookup controls: one field boundary in either theme. */
+:root {
+  --entity-field-bg: #f7faff;
+  --entity-field-border: #c7d5e4;
+  --entity-field-text: #172235;
+  --entity-field-placeholder: #667085;
+  --entity-field-hover: #9aafc7;
+  --entity-button-muted: #e5edf6;
+  --entity-button-muted-text: #61738b;
+}
+
+.dark-theme {
+  --entity-field-bg: #172235;
+  --entity-field-border: #34465d;
+  --entity-field-text: #e1e8f0;
+  --entity-field-placeholder: #9fb3c8;
+  --entity-field-hover: #56708f;
+  --entity-button-muted: #25364c;
+  --entity-button-muted-text: #9fb3c8;
+}
+
+.ui-entity-lookup-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--color-text2);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.ui-entity-lookup-clear {
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  margin-right: 4px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--entity-field-placeholder);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.ui-entity-lookup-clear:hover {
+  background: var(--entity-button-muted);
+  color: var(--entity-field-text);
+}
+
+.ui-entity-lookup-clear:focus-visible {
+  outline: 2px solid var(--color-blue-640);
+  outline-offset: -2px;
+}
+
+.ui-entity-lookup-shell {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.ui-entity-lookup-field {
+  display: flex;
+  width: 100%;
+  height: 48px;
+  min-width: 0;
+  padding: 4px;
+  align-items: center;
+  border: 1px solid var(--entity-field-border);
+  border-radius: 10px;
+  background: var(--entity-field-bg);
+  transition: border-color 150ms, box-shadow 150ms;
+}
+
+.ui-entity-lookup-field:hover:not(:focus-within) {
+  border-color: var(--entity-field-hover);
+}
+
+.ui-entity-lookup-field:focus-within {
+  border-color: var(--color-blue-640);
+  box-shadow: 0 0 0 3px rgb(87 165 235 / 18%);
+}
+
+.ui-entity-lookup-icon {
+  display: flex;
+  width: 36px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.ui-entity-lookup-image {
+  filter: brightness(0);
+  opacity: 65%;
+}
+
+.dark-theme .ui-entity-lookup-image {
+  filter: brightness(0) invert(1);
+}
+
+.ui-entity-lookup-input {
+  height: 100%;
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  padding: 0 12px 0 4px;
+  border-radius: 6px;
+  caret-color: var(--color-blue-640);
+  background: transparent;
+  color: var(--entity-field-text);
+  font-size: 15px;
+  outline: none;
+}
+
+.ui-entity-lookup-input::placeholder {
+  color: var(--entity-field-placeholder);
+  font-size: 14px;
+  opacity: 100%;
+}
+
+.ui-entity-lookup-submit {
+  display: inline-flex;
+  height: 36px;
+  min-width: 100px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 6px;
+  background: linear-gradient(92.32deg, #4ea2f1 2.58%, #2c7ac5);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  transition: background-color 150ms, box-shadow 150ms;
+}
+
+.ui-entity-lookup-submit:hover:not(:disabled) {
+  background: linear-gradient(92.32deg, #3f96e8 2.58%, #236eb7);
+  box-shadow: 0 2px 6px rgb(0 0 0 / 12%);
+}
+
+.ui-entity-lookup-submit:focus-visible {
+  outline: 2px solid var(--entity-field-text);
+  outline-offset: 2px;
+}
+
+.ui-entity-lookup-submit:disabled {
+  background: var(--entity-button-muted);
+  color: var(--entity-button-muted-text);
+  cursor: not-allowed;
+}
+
+@media (width <= 480px) {
+  .ui-entity-lookup-submit {
+    min-width: 80px;
+    padding-inline: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ui-entity-lookup-field, .ui-entity-lookup-submit {
+    transition: none;
+  }
+}

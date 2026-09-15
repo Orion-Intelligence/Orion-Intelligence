@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api.service';
 
@@ -7,9 +8,13 @@ import { ApiService } from '../../../shared/services/api.service';
   selector: 'app-dkim-lookup',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './dkim-lookup.component.html'
+  templateUrl: './dkim-lookup.component.html',
+  styleUrls: ['./dkim-lookup.component.css']
 })
-export class DkimLookupComponent implements OnInit {
+export class DkimLookupComponent {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly pollTimers = new Set<ReturnType<typeof setTimeout>>();
+
   activeTab: 'domain' | 'raw' = 'domain';
   domain: string = '';
   selector: string = '';
@@ -24,9 +29,31 @@ export class DkimLookupComponent implements OnInit {
   rawResult: any = null;
   rawErrorMessage: string = '';
 
-  constructor(private api: ApiService) {}
+  constructor(private api: ApiService) {
+    this.destroyRef.onDestroy(() => {
+      this.pollTimers.forEach(timer => {
+        clearTimeout(timer);
+      });
+    });
+  }
 
-  ngOnInit(): void {}
+  private schedulePoll(callback: () => void): void {
+    const timer = setTimeout(() => {
+      this.pollTimers.delete(timer);
+      callback();
+    }, 2000);
+    this.pollTimers.add(timer);
+  }
+
+  resetDomainResults(): void {
+    this.result = null;
+    this.discoveredSelectors = [];
+    this.errorMessage = '';
+  }
+
+  statusTone(status?: string): 'neutral' | 'negative' {
+    return status && /fail|invalid|error|no .* record/i.test(status) ? 'negative' : 'neutral';
+  }
 
   switchTab(tab: 'domain' | 'raw'): void {
 
@@ -37,13 +64,16 @@ export class DkimLookupComponent implements OnInit {
   }
 
   discoverSelectors(isPoll: boolean = false): void {
+    if (!isPoll && (this.loading || this.discovering)) {
+      return;
+    }
 
     if (!isPoll) {
 
       if (!this.domain.trim()) {
 
         this.errorMessage =
-          'Please enter a Domain to find selectors.';
+            'Please enter a Domain to find selectors.';
 
         return;
       }
@@ -67,20 +97,20 @@ export class DkimLookupComponent implements OnInit {
     };
 
     this.api.post('dkim/check',
-      payload).subscribe({
+      payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
 
       next: (res: any) => {
 
         if (
           res &&
-          res.status === 'pending'
+            res.status === 'pending'
         ) {
 
-          setTimeout(() => {
+          this.schedulePoll(() => {
 
             this.discoverSelectors(true);
 
-          }, 2000);
+          });
 
           return;
         }
@@ -88,32 +118,32 @@ export class DkimLookupComponent implements OnInit {
         this.discovering = false;
 
         const data =
-          res?.result ??
-          res;
+            res?.result ??
+            res;
 
         if (
           data &&
-          data.status === 'success' &&
-          data.selectors
+            data.status === 'success' &&
+            data.selectors
         ) {
 
           this.discoveredSelectors =
-            data.selectors;
+              data.selectors;
 
           if (
             this.discoveredSelectors.length === 0
           ) {
 
             this.errorMessage =
-              'No historical selectors found for this domain.';
+                'No historical selectors found for this domain.';
           }
 
           return;
         }
 
         this.errorMessage =
-          data?.error_message ??
-          'Failed to discover selectors.';
+            data?.error_message ??
+            'Failed to discover selectors.';
       },
 
       error: (err: any) => {
@@ -121,9 +151,9 @@ export class DkimLookupComponent implements OnInit {
         this.discovering = false;
 
         this.errorMessage =
-          err?.error?.detail ??
-          err?.error?.error_message ??
-          'An error occurred while finding selectors.';
+            err?.error?.detail ??
+            err?.error?.error_message ??
+            'An error occurred while finding selectors.';
       }
 
     });
@@ -132,9 +162,13 @@ export class DkimLookupComponent implements OnInit {
   selectSelector(sel: string): void {
 
     this.selector = sel;
+    this.result = null;
   }
 
   analyzeText( event?: Event, isPoll: boolean = false ): void {
+    if (!isPoll && (this.loading || this.discovering)) {
+      return;
+    }
 
     if (event) {
       event.preventDefault();
@@ -144,11 +178,11 @@ export class DkimLookupComponent implements OnInit {
 
       if (
         !this.domain.trim() ||
-        !this.selector.trim()
+          !this.selector.trim()
       ) {
 
         this.errorMessage =
-          'Please enter both Domain and Selector.';
+            'Please enter both Domain and Selector.';
 
         return;
       }
@@ -173,21 +207,21 @@ export class DkimLookupComponent implements OnInit {
     };
 
     this.api.post('dkim/check',
-      payload).subscribe({
+      payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
 
       next: (res: any) => {
 
         if (
           res &&
-          res.status === 'pending'
+            res.status === 'pending'
         ) {
 
-          setTimeout(() => {
+          this.schedulePoll(() => {
 
             this.analyzeText(undefined,
               true);
 
-          }, 2000);
+          });
 
           return;
         }
@@ -195,12 +229,12 @@ export class DkimLookupComponent implements OnInit {
         this.loading = false;
 
         const data =
-          res?.result ??
-          res;
+            res?.result ??
+            res;
 
         if (
           data &&
-          data.status === 'success'
+            data.status === 'success'
         ) {
 
           this.result = data;
@@ -209,8 +243,8 @@ export class DkimLookupComponent implements OnInit {
         }
 
         this.errorMessage =
-          data?.error_message ??
-          'No valid DKIM record found.';
+            data?.error_message ??
+            'No valid DKIM record found.';
       },
 
       error: (err: any) => {
@@ -218,15 +252,18 @@ export class DkimLookupComponent implements OnInit {
         this.loading = false;
 
         this.errorMessage =
-          err?.error?.detail ??
-          err?.error?.error_message ??
-          'An error occurred while fetching DKIM record.';
+            err?.error?.detail ??
+            err?.error?.error_message ??
+            'An error occurred while fetching DKIM record.';
       }
 
     });
   }
 
   analyzeRawEmail( event?: Event, isPoll: boolean = false ): void {
+    if (!isPoll && this.rawLoading) {
+      return;
+    }
 
     if (event) {
       event.preventDefault();
@@ -237,7 +274,7 @@ export class DkimLookupComponent implements OnInit {
       if (!this.rawEmailText.trim()) {
 
         this.rawErrorMessage =
-          'Please paste raw email headers/content.';
+            'Please paste raw email headers/content.';
 
         return;
       }
@@ -252,57 +289,57 @@ export class DkimLookupComponent implements OnInit {
       text: {
 
         raw_email:
-          this.rawEmailText.trim()
+            this.rawEmailText.trim()
 
       }
 
     };
 
     this.api.post('dkim/check',
-      payload).subscribe({
+      payload).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
 
       next: (res: any) => {
 
-        console.log('[DKIM] Raw email response:',
-          res);
+
 
 
 
         if (
           res &&
-          res.status === 'pending'
+            res.status === 'pending'
         ) {
 
-          setTimeout(() => {
+          this.schedulePoll(() => {
 
             this.analyzeRawEmail(undefined,
               true);
 
-          }, 2000);
+          });
 
           return;
         }
 
         const jobResult =
-          res?.result ??
-          res;
+            res?.result ??
+            res;
 
         this.rawResult =
-          jobResult?.data ??
-          jobResult?.result ??
-          jobResult;
+            jobResult?.data ??
+            jobResult?.result ??
+            jobResult;
 
         if (
           !this.rawResult ||
-          (
-            !this.rawResult.dkim &&
-            !this.rawResult.spf &&
-            !this.rawResult.dmarc
-          )
+            (
+              !this.rawResult.dkim &&
+              !this.rawResult.spf &&
+              !this.rawResult.dmarc
+            )
         ) {
 
           this.rawErrorMessage =
-            'Failed to parse raw email forensics data.';
+              this.rawResult?.error_message ?? 'Failed to parse raw email forensics data.';
+          this.rawResult = null;
 
           this.rawLoading = false;
 
@@ -314,15 +351,14 @@ export class DkimLookupComponent implements OnInit {
 
       error: (err: any) => {
 
-        console.error('[DKIM] Raw email error:',
-          err);
+
 
         this.rawLoading = false;
 
         this.rawErrorMessage =
-          err?.error?.detail ??
-          err?.error?.error_message ??
-          'An error occurred during forensics analysis.';
+            err?.error?.detail ??
+            err?.error?.error_message ??
+            'An error occurred during forensics analysis.';
       }
 
     });
