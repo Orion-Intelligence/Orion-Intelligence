@@ -18,7 +18,7 @@
             }
             <input type="hidden" value="1">
             @if (apiType === 'wanted' || apiType === 'national-identity' || apiType === 'cracked' || apiType === 'software' || apiType === 'crypto') {
-              <button data-testid="scan-search-button" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-entity-lookup-submit">
+              <button type="submit" data-testid="scan-search-button" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-entity-lookup-submit">
                 {{ 'Search' | translate }}
               </button>
             }
@@ -37,7 +37,7 @@
               <button type="button" class="ui-entity-lookup-clear" [attr.aria-label]="('Clear' | translate) + ' ' + entitySecondary.placeholder" (click)="q2 = ''; entitySecondary.focus()"><span aria-hidden="true">×</span></button>
             }
               <input type="hidden" value="1">
-              <button data-testid="scan-search-button" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-entity-lookup-submit">
+              <button type="submit" data-testid="scan-search-button" [disabled]="(apiType === 'crypto' ? !cryptoTextValid : !searchForm.valid) || (apiType === 'cracked' && !crackedValid)" class="ui-entity-lookup-submit">
                 {{ 'Search' | translate }}
               </button>
             </div>

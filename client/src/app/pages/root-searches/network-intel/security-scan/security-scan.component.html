@@ -10,7 +10,7 @@
               <button type="button" class="ui-entity-lookup-clear" [attr.aria-label]="('Clear' | translate) + ' ' + entityPrimary.placeholder" (click)="searchQuery = ''; entityPrimary.focus()"><span aria-hidden="true">×</span></button>
             }
       <input type="hidden" value="1">
-      <button data-testid="scan-search-button" class="ui-entity-lookup-submit" [disabled]="isLoading || !searchForm.valid">{{ 'Search' | translate }}</button>
+      <button type="submit" data-testid="scan-search-button" class="ui-entity-lookup-submit" [disabled]="isLoading || !searchForm.valid">{{ 'Search' | translate }}</button>
     </div>
   </form>
 

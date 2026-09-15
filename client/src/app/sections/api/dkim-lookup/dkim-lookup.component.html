@@ -10,57 +10,215 @@
 
   <div id="domain-panel" [hidden]="activeTab !== 'domain'">
     <section class="dkim-card dkim-form-card">
-      <div class="dkim-section-heading"><h2>Check a domain’s DKIM record</h2><p>Enter the sending domain and its signing selector to inspect the published record.</p></div>
-      <form (ngSubmit)="analyzeText()" class="dkim-domain-form">
+      <div class="dkim-section-heading"><h2>Check a domain’s DKIM record</h2><p>Enter a domain to discover and validate its DKIM selectors, or add a selector to check a single record.</p></div>
+      <form (ngSubmit)="searchDomain($event)" class="dkim-domain-form">
         <div class="dkim-field">
           <label for="dkim-domain">Domain</label>
           <div class="ui-entity-lookup-field">
-            <input #domainInput id="dkim-domain" class="ui-entity-lookup-input" data-testid="scan-primary-input" type="text" [(ngModel)]="domain" (ngModelChange)="resetDomainResults()" name="domain" placeholder="e.g. example.com" autocomplete="off" spellcheck="false" [disabled]="loading || discovering" aria-describedby="domain-hint">
-            @if (domain.length && !loading && !discovering) {
-              <button type="button" class="ui-entity-lookup-clear" aria-label="Clear domain" (click)="domain = ''; resetDomainResults(); domainInput.focus()"><span aria-hidden="true">×</span></button>
+            <input #domainInput id="dkim-domain" class="ui-entity-lookup-input" data-testid="scan-primary-input" type="text" [(ngModel)]="domain" name="domain" placeholder="e.g. example.com" autocomplete="off" spellcheck="false" [disabled]="loading" aria-describedby="domain-hint">
+            @if (domain.length && !loading) {
+              <button type="button" class="ui-entity-lookup-clear" aria-label="Clear domain" (click)="domain = ''; domainInput.focus()"><span aria-hidden="true">×</span></button>
             }
-            <button type="button" class="ui-entity-lookup-submit dkim-discover" (click)="discoverSelectors()" [disabled]="discovering || loading || !domain.trim()">{{ discovering ? 'Finding…' : 'Find Selectors' }}</button>
           </div>
-          <p id="domain-hint" class="dkim-hint">Enter a domain without https:// or a path. Find Selectors searches for known signing selectors.</p>
+          <p id="domain-hint" class="dkim-hint">Leave the selector blank to discover all known selectors for this domain.</p>
         </div>
         <div class="dkim-field">
-          <label for="dkim-selector">Selector</label>
+          <label for="dkim-selector">Selector <span class="dkim-optional">(optional)</span></label>
           <div class="ui-entity-lookup-field">
-            <input #selectorInput id="dkim-selector" class="ui-entity-lookup-input" data-testid="dkim-initial-selector-input" type="text" [(ngModel)]="selector" (ngModelChange)="result = null" name="selector" placeholder="e.g. default" autocomplete="off" spellcheck="false" [disabled]="loading || discovering" aria-describedby="selector-hint">
-            @if (selector.length && !loading && !discovering) {
-              <button type="button" class="ui-entity-lookup-clear" aria-label="Clear selector" (click)="selector = ''; result = null; selectorInput.focus()"><span aria-hidden="true">×</span></button>
+            <input #selectorInput id="dkim-selector" class="ui-entity-lookup-input" data-testid="dkim-initial-selector-input" type="text" [(ngModel)]="selector" name="selector" placeholder="e.g. default, google" autocomplete="off" spellcheck="false" [disabled]="loading" aria-describedby="selector-hint">
+            @if (selector.length && !loading) {
+              <button type="button" class="ui-entity-lookup-clear" aria-label="Clear selector" (click)="selector = ''; selectorInput.focus()"><span aria-hidden="true">×</span></button>
             }
-            <button data-testid="scan-search-button" type="submit" class="ui-entity-lookup-submit" [disabled]="loading || discovering || !domain.trim() || !selector.trim()">{{ loading ? 'Checking…' : 'Check DKIM' }}</button>
+            <button data-testid="scan-search-button" type="submit" class="ui-entity-lookup-submit" [disabled]="loading || !domain.trim()">{{ loading ? 'Checking…' : 'Check DKIM' }}</button>
           </div>
-          <p id="selector-hint" class="dkim-hint">Choose a discovered selector or enter the s= value from a DKIM-Signature header.</p>
+          <p id="selector-hint" class="dkim-hint">Provide the s= value from a DKIM-Signature header to check just that record.</p>
         </div>
+        @if (canExport) {
+          <button type="button" data-testid="dkim-export-button" (click)="openExportChoice()" [appTooltip]="'Download report' | translate" class="dkim-export-inline"><i class="bi bi-download"></i><span>Export</span></button>
+        }
       </form>
     </section>
 
-    @if (loading || discovering) {
-      <div class="dkim-notice" role="status"><span class="dkim-spinner" aria-hidden="true"></span>{{ discovering ? 'Searching for known selectors. This may take a moment.' : 'Checking the domain’s published authentication records…' }}</div>
+    @if (!queryTriggered && !loading && !selectors.length && !needsSelector && !discoveryError && !domainInfo) {
+      <app-empty-query></app-empty-query>
     }
-    @if (errorMessage) { <div class="dkim-notice dkim-error" role="alert">{{ errorMessage }}</div> }
-    @if (discoveredSelectors.length) {
-      <section class="dkim-card"><div class="dkim-section-heading"><h2>Discovered Selectors <span class="dkim-badge">{{ discoveredSelectors.length }}</span></h2><p>Known selectors for {{ domain }} via ZK Email. Select one to check its current DNS record.</p></div><div class="dkim-chips">@for (sel of discoveredSelectors; track sel) { <button type="button" class="dkim-secondary" [class.selected]="selector === sel" [attr.aria-pressed]="selector === sel" [disabled]="loading || discovering" (click)="selectSelector(sel)">{{ sel }}</button> }</div></section>
+
+    @if (loading) {
+      <div class="mt-[12px] ml-0 max-w-[720px]">
+        <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ currentStep || ('Scanning...' | translate) }} ({{ pct(progress) }}%)</div>
+        <div class="h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+          <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + pct(progress)"></div>
+        </div>
+      </div>
+      <div class="mt-[16px] space-y-[16px]">
+        @for (row of [1]; track row) {
+          <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white">
+            <div class="flex items-center justify-between gap-3 border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+              <div class="flex items-center gap-[8px]">
+                <div class="dkim-shimmer h-[16px] w-[16px] rounded-[4px]"></div>
+                <div class="dkim-shimmer h-[13px] w-[190px] rounded-[6px]"></div>
+              </div>
+              <div class="dkim-shimmer h-[20px] w-[68px] rounded-full"></div>
+            </div>
+            <div class="space-y-[12px] px-[16px] py-[14px]">
+              <div class="dkim-shimmer h-[13px] w-[62%] rounded-[6px]"></div>
+              <div class="dkim-shimmer h-[13px] w-[85%] rounded-[6px]"></div>
+              <div class="dkim-shimmer h-[13px] w-[48%] rounded-[6px]"></div>
+              <div class="dkim-shimmer h-[13px] w-[72%] rounded-[6px]"></div>
+            </div>
+          </div>
+        }
+      </div>
     }
-    @if (result && !result.selectors) {
-      <section class="dkim-card">
-        <div class="dkim-section-heading"><h2>DKIM Record <span class="dkim-badge" [class.dkim-negative]="result.is_valid === false">{{ result.is_valid === false ? 'Needs attention' : result.is_valid === true ? 'Valid' : 'Record found' }}</span></h2><p>{{ result.domain || domain }} · Selector: {{ result.selector || selector }}</p></div>
-        <dl class="dkim-records"><div><dt>DNS Query</dt><dd>{{ result.dns_query || 'Not available' }}</dd></div><div><dt>Raw Record</dt><dd>{{ result.raw_record || 'No record returned' }}</dd></div></dl>
-        @if (result.checks?.length) { <ul class="dkim-checks">@for (check of result.checks; track $index) { <li><div><strong>{{ check.test }}</strong><p>{{ check.response }}</p></div><span class="dkim-badge" [class.dkim-negative]="check.status === 'error' || check.status === 'fail'">{{ check.status }}</span></li> }</ul> }
-        @for (warning of result.warnings || []; track $index) { <p class="dkim-notice">{{ warning }}</p> }
+
+    @if (!loading && discoveryError) {
+      <section class="mt-[15px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center [.light-theme_&]:border-rose-200 [.light-theme_&]:bg-rose-50">
+        <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Target Intelligence Failed' | translate }}</div>
+        <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ discoveryError }}</div>
       </section>
-      @if (result.dmarc || result.spf || result.related?.length) {
-        <section class="dkim-card"><div class="dkim-section-heading"><h2>Domain Security</h2><p>Related SPF and DMARC records published by this domain.</p></div><dl class="dkim-records">@if (result.spf) { <div><dt>SPF Record</dt><dd>{{ result.spf.raw_record || 'No SPF record returned' }}</dd></div> } @if (result.dmarc) { <div><dt>DMARC Record</dt><dd>{{ result.dmarc.raw_record || 'No DMARC record returned' }}</dd></div> }</dl>@if (result.related?.length) { <ul class="dkim-checks">@for (check of result.related; track $index) { <li><div><strong>{{ check.test }}</strong><p>{{ check.response }}</p></div><span class="dkim-badge">{{ check.status }}</span></li> }</ul> }</section>
-      }
     }
+
+    @if (domainInfo) {
+      <div class="mt-[18px] w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
+        <div class="flex items-center gap-[8px] border-b border-[var(--color-divider)] px-[16px] py-[12px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#10b981]">
+          <i class="bi bi-globe2"></i> <span>{{ 'Domain Security' | translate }}</span>
+          <span class="font-mono text-[12px] normal-case tracking-normal text-[var(--color-text4)]">{{ domainInfo.domain }}</span>
+        </div>
+        <div class="px-[16px] py-[10px]">
+          @for (check of domainInfo.related; track check.test) {
+            <div class="grid grid-cols-[22px_1fr_1.2fr] items-start gap-3 border-b border-[var(--color-divider)] py-[8px] last:border-0 max-[560px]:grid-cols-[22px_1fr]">
+              <i class="bi {{ checkIcon(check.status) }} {{ checkColor(check.status) }} mt-[1px] text-[15px]"></i>
+              <div class="text-[13px] font-[600] text-[var(--color-text1)]">{{ check.test | translate }}</div>
+              <div class="text-[12px] text-[var(--color-text4)] max-[560px]:col-start-2">{{ check.response }}</div>
+            </div>
+          }
+          @if (domainInfo.dmarc?.published || domainInfo.spf?.published) {
+            <div class="mt-[10px] grid gap-[8px] md:grid-cols-2">
+              @if (domainInfo.dmarc?.raw_record) {
+                <div class="rounded-[8px] border border-[var(--color-divider)] p-[10px]">
+                  <div class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">DMARC {{ domainInfo.dmarc?.policy ? '(p=' + domainInfo.dmarc?.policy + ')' : '' }}</div>
+                  <div class="mt-[3px] break-all font-mono text-[12px] text-[var(--color-text4)]">{{ domainInfo.dmarc?.raw_record }}</div>
+                </div>
+              }
+              @if (domainInfo.spf?.raw_record) {
+                <div class="rounded-[8px] border border-[var(--color-divider)] p-[10px]">
+                  <div class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">SPF</div>
+                  <div class="mt-[3px] break-all font-mono text-[12px] text-[var(--color-text4)]">{{ domainInfo.spf?.raw_record }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    @if (selectors.length) {
+      <div class="mt-[16px] space-y-[16px]">
+        @for (entry of selectors; track entry.selector) {
+          <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+              <div class="flex min-w-0 items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#3b82f6]">
+                <i class="bi bi-shield-lock"></i> <span class="truncate font-mono normal-case tracking-normal text-[13px] text-[var(--color-text1)]">{{ entry.selector }}._domainkey</span>
+              </div>
+              <div class="flex shrink-0 items-center gap-[6px]">
+                @if (entry.validation?.found && entry.validation?.source) {
+                  <span class="rounded-full border px-[9px] py-[3px] text-[11px] font-[600]" [ngClass]="entry.validation?.source === 'archive' ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-sky-400/30 bg-sky-400/10 text-sky-300'">
+                    {{ (entry.validation?.source === 'archive' ? 'Archived' : 'Live DNS') | translate }}
+                  </span>
+                }
+                @if (keyLabel(entry.validation)) {
+                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-880)] px-[9px] py-[3px] font-mono text-[11px] font-[600] text-[var(--color-text2)]">{{ keyLabel(entry.validation) }}</span>
+                }
+                <span class="rounded-full border px-[10px] py-[3px] text-[11px] font-[700]" [ngClass]="badge(entry).classes">{{ badge(entry).label | translate }}</span>
+              </div>
+            </div>
+
+            <div class="px-[16px] py-[12px]">
+              @if (entry.loading) {
+                <div class="max-w-[520px]">
+                  <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text4)]">{{ entry.step || ('Validating...' | translate) }} ({{ pct(entry.progress) }}%)</div>
+                  <div class="h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+                    <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + pct(entry.progress)"></div>
+                  </div>
+                </div>
+                <div class="mt-[14px] space-y-[10px]">
+                  <div class="dkim-shimmer h-[16px] w-[65%] rounded-[6px]"></div>
+                  <div class="dkim-shimmer h-[16px] w-[88%] rounded-[6px]"></div>
+                  <div class="dkim-shimmer h-[16px] w-[50%] rounded-[6px]"></div>
+                  <div class="dkim-shimmer h-[16px] w-[74%] rounded-[6px]"></div>
+                </div>
+              } @else if (entry.error) {
+                <div class="text-[13px] text-rose-300 [.light-theme_&]:text-rose-500">{{ entry.error }}</div>
+              } @else if (entry.validation) {
+                @if (entry.validation.checks?.length) {
+                  <div class="mb-[10px]">
+                    @for (check of entry.validation.checks; track check.test) {
+                      <div class="grid grid-cols-[22px_1fr_1.2fr] items-start gap-3 border-b border-[var(--color-divider)] py-[7px] last:border-0 max-[560px]:grid-cols-[22px_1fr]">
+                        <i class="bi {{ checkIcon(check.status) }} {{ checkColor(check.status) }} mt-[1px] text-[15px]"></i>
+                        <div class="text-[13px] font-[600] text-[var(--color-text1)]">{{ check.test | translate }}</div>
+                        <div class="text-[12px] text-[var(--color-text4)] max-[560px]:col-start-2">{{ check.response }}</div>
+                      </div>
+                    }
+                  </div>
+                }
+                <div class="space-y-[10px] border-t border-[var(--color-divider)] pt-[10px]">
+                  @if (entry.validation.dns_query) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'DNS Query' | translate }}</span><br><span class="break-all font-mono text-[13px]">{{ entry.validation.dns_query }}</span></div>
+                  }
+                  @if (entry.validation.first_seen || entry.validation.last_seen) {
+                    <div class="flex flex-wrap gap-x-[24px] gap-y-[6px]">
+                      @if (entry.validation.first_seen) {
+                        <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'First Seen' | translate }}</span><br><span class="text-[13px] text-[var(--color-text2)]">{{ entry.validation.first_seen }}</span></div>
+                      }
+                      @if (entry.validation.last_seen) {
+                        <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Last Seen' | translate }}</span><br><span class="text-[13px] text-[var(--color-text2)]">{{ entry.validation.last_seen }}</span></div>
+                      }
+                    </div>
+                  }
+                  @for (field of parsedEntries(entry.validation); track field.key) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ field.key }}</span><br><span class="break-all font-mono text-[13px] text-[var(--color-text2)]">{{ field.value || '—' }}</span></div>
+                  }
+                  @if (entry.validation.parsed_data?.['public_key (p)']) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'public_key (p)' }}</span><br><span class="break-all font-mono text-[12px] text-[var(--color-text4)]">{{ entry.validation.parsed_data?.['public_key (p)'] }}</span></div>
+                  }
+                  @if (entry.validation.warnings?.length) {
+                    <div>
+                      <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Warnings' | translate }}</span>
+                      <ul class="mt-1 space-y-1">
+                        @for (warning of entry.validation.warnings; track warning) {
+                          <li class="flex items-start gap-2 text-[13px] text-amber-300 [.light-theme_&]:text-amber-600"><i class="bi bi-exclamation-circle mt-[2px] text-[12px]"></i><span>{{ warning }}</span></li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                  @if (entry.validation.raw_record) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Raw Record' | translate }}</span><br><span class="break-all font-mono text-[12px] text-[var(--color-text4)]">{{ entry.validation.raw_record }}</span></div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <app-export-choice-modal
+      [visible]="isExportChoiceOpen"
+      [title]="('Export Report') | translate"
+      [subtitle]="('Choose the export format.') | translate"
+      [options]="reportExportOptions"
+      overlayTestId="dkim-lookup-export-overlay"
+      modalTestId="dkim-lookup-export-modal"
+      closeTestId="dkim-lookup-export-close"
+      (closed)="closeExportChoice()"
+      (optionSelected)="selectExport($event)">
+    </app-export-choice-modal>
   </div>
 
   <div id="raw-panel" [hidden]="activeTab !== 'raw'">
     <section class="dkim-card dkim-form-card">
       <div class="dkim-section-heading"><h2>Analyze an original message</h2><p>Paste the message source to inspect DKIM, SPF, DMARC, and the delivery route.</p></div>
-      <form (ngSubmit)="analyzeRawEmail()">
+      <form (ngSubmit)="analyzeRawEmail($event)">
         <div class="dkim-field"><label for="dkim-raw">Raw email source</label><textarea id="dkim-raw" [(ngModel)]="rawEmailText" (ngModelChange)="rawResult = null; rawErrorMessage = ''" name="rawEmailText" rows="12" spellcheck="false" [disabled]="rawLoading" aria-describedby="raw-hint" placeholder="MIME-Version: 1.0&#10;From: sender@example.com&#10;To: recipient@example.com&#10;Subject: Your message&#10;DKIM-Signature: …&#10;Received: …"></textarea><p id="raw-hint" class="dkim-hint">Use “Show original” or “View message source” in your email client. Include the full message and body for signature verification.</p></div>
         <div class="dkim-form-footer"><span class="dkim-hint">{{ rawEmailText.length | number }} characters</span><button type="submit" class="dkim-primary" [disabled]="rawLoading || !rawEmailText.trim()">{{ rawLoading ? 'Analyzing…' : 'Run Diagnostics' }}</button></div>
       </form>

@@ -20,6 +20,8 @@ import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
   templateUrl: './dashboard-sidebar-collapsed.component.html',
 })
 export class SidebarSectionComponent {
+  private readonly availableSubIcons = new Set<string>([ 'account', 'all', 'apk-scan', 'archive', 'auditlog', 'basic-scan', 'basic', 'case-management', 'cloud', 'cracked', 'credential', 'cryptocurrency', 'cve', 'dashboard', 'databases', 'drugs', 'email-breach', 'email', 'event-management', 'forum', 'forums', 'full', 'general', 'hacked', 'hacking', 'homepage', 'ioc', 'leaks', 'listing', 'logs', 'marketplaces', 'mastodon', 'mitre', 'national-identity', 'news', 'pastebin', 'phishing', 'playstore-scanner', 'port-scan', 'reddit', 'repository-scan', 'seo-scan', 'settings', 'social-scanner', 'social', 'software-scanner', 'statistics', 'stolen', 'system-settings', 'telegram', 'tenant-settings', 'tenant', 'tools', 'tracking', 'twitter', 'users', 'view-profiles', 'view-tenants', 'wanted-list', 'warfare', 'zeroday', ]);
+
   protected readonly itemTooltips = sidebarItemTooltips;
 
   readonly title = input('');
@@ -70,6 +72,7 @@ export class SidebarSectionComponent {
       feeder: 'account',
     };
     const mapped = getOwnProperty(iconAliases, normalized) ?? normalized;
-    return `/assets/images/sidebar/sub_${mapped}.svg`;
+    const icon = this.availableSubIcons.has(mapped) ? mapped : 'all';
+    return `/assets/images/sidebar/sub_${icon}.svg`;
   }
 }

@@ -437,3 +437,43 @@ dd {
     transition: none;
   }
 }
+
+.dkim-shimmer {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background: var(--color-blue-720);
+}
+.dkim-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(110deg, transparent 20%, rgb(255 255 255 / 16%) 48%, transparent 76%);
+  animation: ui-shimmer-slide 1.55s linear infinite;
+}
+:host-context(.light-theme) .dkim-shimmer::after {
+  background: linear-gradient(110deg, transparent 20%, rgb(255 255 255 / 88%) 48%, transparent 76%);
+}
+.dkim-optional {
+  font-weight: 400;
+  color: var(--color-text4);
+  font-size: 0.85em;
+}
+.dkim-export-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  border: 1px solid var(--color-border);
+  background: var(--color-blue-700);
+  color: var(--color-text1);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.dkim-export-inline:hover {
+  background: var(--color-blue-880);
+}

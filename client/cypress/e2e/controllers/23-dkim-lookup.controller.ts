@@ -44,7 +44,8 @@ export function visitDkimLookup() {
 export function assertDkimValidation() {
   cy.get('[data-testid="scan-primary-input"]').clear().type('example.com');
   cy.get('[data-testid="dkim-initial-selector-input"]').clear().type('selector1');
-  cy.get('[data-testid="scan-search-button"]').should('not.be.disabled').click();
+  cy.get('[data-testid="scan-search-button"]').should('not.be.disabled');
+  cy.get('[data-testid="dkim-initial-selector-input"]').type('{enter}');
 
   cy.wait('@dkimCheck').its('request.body.text').should('deep.include', { domain: 'example.com', selector: 'selector1' });
 

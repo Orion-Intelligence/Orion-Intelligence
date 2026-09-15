@@ -24,8 +24,7 @@ describe('Orion Intelligence - DKIM Lookup', () => {
       body: { status: 'done', result: { status: 'success', selectors: ['default', 'mail'] } }
     }).as('discover');
     visitDkimLookup();
-    cy.get('#dkim-domain').type('example.com');
-    cy.contains('button', 'Find Selectors').click();
+    cy.get('#dkim-domain').should('have.css', 'cursor', 'text').type('example.com{enter}');
     cy.wait('@discover').its('request.body.text').should('deep.equal', { domain: 'example.com', selector: '' });
     cy.contains('.dkim-chips button', 'mail').click().should('have.attr', 'aria-pressed', 'true');
     cy.get('#dkim-selector').should('have.value', 'mail');
