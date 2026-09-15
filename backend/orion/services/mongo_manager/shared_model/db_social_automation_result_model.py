@@ -18,6 +18,7 @@ class SocialDetectedAd(EmbeddedModel):
     likes: str = ""
     shares: str = ""
     views: str = ""
+    topic: str = ""
     detected_at: datetime = Field(default_factory=utc_now)
 
 

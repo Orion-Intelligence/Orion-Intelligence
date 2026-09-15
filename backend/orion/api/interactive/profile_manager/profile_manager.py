@@ -505,6 +505,7 @@ class ProfileManager:
                     likes=ad.likes,
                     shares=ad.shares,
                     views=ad.views,
+                    topic=ad.topic,
                     detected_at=ad.detected_at or now,
                 ) for ad in result.ads],
                 error=result.error,
@@ -652,14 +653,13 @@ class ProfileManager:
                 session_state = await self.read_profile_session_state(current_user, profile)
                 if session_state:
                     run_id = str(uuid4())
-                    asyncio.create_task(job.run_posting(profile, persona, session_state, run_id, record.user_id))
-
+                    asyncio.create_task(job.run_posting(profile, persona, session_state, run_id, record.user_id, is_manual=True))
 
         return {"status": "success", "message": "Post monitoring triggered"}
 
     async def trigger_ad_monitoring(self, current_user, persona_id: str):
         from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
-        cron_record = await self._engine.find_one(db_cronjob_status_model, db_cronjob_status_model.job_name == CronjobName.SOCIAL_LOOP)
+        cron_record = await self._engine.find_one(db_cronjob_status_model, db_cronjob_status_model.job_name == CronjobName.SOCIAL_JOB)
         if cron_record and cron_record.status == CronjobStatus.RUNNING:
             raise HTTPException(status_code=400, detail="Daily run scheduler is currently running. Please try again 5 minutes later.")
 
@@ -674,6 +674,6 @@ class ProfileManager:
                 session_state = await self.read_profile_session_state(current_user, profile)
                 if session_state:
                     run_id = str(uuid4())
-                    asyncio.create_task(job.run_ad_monitoring(profile, persona, session_state, run_id, record.user_id))
+                    asyncio.create_task(job.run_ad_monitoring(profile, persona, session_state, run_id, record.user_id, is_manual=True))
 
         return {"status": "success", "message": "Ad monitoring triggered"}

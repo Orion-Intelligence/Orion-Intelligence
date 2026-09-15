@@ -134,7 +134,7 @@ class social_profile_job:
             elif purpose == SocialProfilePurpose.AD_MONITORING:
                 await self.run_ad_monitoring(profile, persona, session_state, run_id, user_id)
 
-    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "" ):
+    async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "", is_manual: bool = False):
         log.g().i(f"Running posting for profile {profile.profile_id} on {profile.platform}")
         
         from datetime import timezone
@@ -193,6 +193,7 @@ class social_profile_job:
                 "text": caption,
                 "image_url": image_url,
                 "session_state": session_state,
+                "is_manual": is_manual,
             }
             result = await self._run_and_wait("automation/post", payload, self.POST_TASK_TIMEOUT_SECONDS)
             await self._store_result(result)
@@ -200,7 +201,7 @@ class social_profile_job:
         except Exception as e:
             log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
 
-    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "" ):
+    async def run_ad_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "", is_manual: bool = False):
 
         log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
         
@@ -211,6 +212,7 @@ class social_profile_job:
                 "profile_id": profile.profile_id,
                 "platform": profile.platform,
                 "session_state": session_state,
+                "is_manual": is_manual,
             }
             result = await self._run_and_wait("automation/ad-monitor", payload, self.AD_DETECTION_TASK_TIMEOUT_SECONDS)
             await self._store_result(result)

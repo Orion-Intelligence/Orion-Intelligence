@@ -32,6 +32,8 @@
                 <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ result.total_detected_ads }} {{ (result.total_detected_ads === 1 ? 'ad detected' : 'ads detected') | translate }}</h2>
                 @if (result.is_manual) {
                   <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Manual' | translate }}</span>
+                } @else {
+                  <span class="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-violet-500">{{ 'Automate' | translate }}</span>
                 }
                 @if (result.error) {
                   <span class="rounded-full border border-red-400/15 bg-red-500/[0.06] px-2 py-0.5 text-[10px] font-semibold text-red-400">{{ (result.session_expired ? 'Session Expired' : 'Failed') | translate }}</span>
@@ -54,6 +56,9 @@
                 <div class="border-b border-[var(--ui-table-row-border)] py-2 last:border-b-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ ad.author || 'Unknown' }}</span>
+                    @if (ad.topic) {
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ ad.topic }}</span>
+                    }
                     <a [href]="ad.url" target="_blank" rel="noopener noreferrer" class="truncate text-[11px] font-medium text-[var(--color-blue-640)] hover:underline">{{ ad.url }}</a>
                   </div>
                   @if (ad.content_text) {
@@ -80,6 +85,8 @@
                 <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ (result.error ? 'Post failed' : 'Post published') | translate }}</h2>
                 @if (result.is_manual) {
                   <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Manual' | translate }}</span>
+                } @else {
+                  <span class="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-violet-500">{{ 'Automate' | translate }}</span>
                 }
                 @if (result.error) {
                   <span class="rounded-full border border-red-400/15 bg-red-500/[0.06] px-2 py-0.5 text-[10px] font-semibold text-red-400">{{ (result.session_expired ? 'Session Expired' : 'Failed') | translate }}</span>

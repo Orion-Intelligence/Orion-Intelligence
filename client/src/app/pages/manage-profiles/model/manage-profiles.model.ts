@@ -101,6 +101,7 @@ export interface SocialDetectedAd {
   likes: string;
   shares: string;
   views: string;
+  topic?: string;
   detected_at: string;
 }
 

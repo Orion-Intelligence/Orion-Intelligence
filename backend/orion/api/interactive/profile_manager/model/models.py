@@ -117,6 +117,7 @@ class SocialAutomationDetectedAdModel(BaseModel):
     likes: str = ""
     shares: str = ""
     views: str = ""
+    topic: str = ""
     detected_at: datetime | None = None
 
 
