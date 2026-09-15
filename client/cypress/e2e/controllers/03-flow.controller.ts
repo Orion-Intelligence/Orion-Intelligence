@@ -27,6 +27,7 @@ function getSidebarGroupTestId(title: string): string {
 export const DIRECTORY_NETWORK_OPTION = {label: 'Onion', value: 'onion'};
 export const DIRECTORY_INDEX_OPTION = {label: 'Leak', value: 'leak'};
 export const DIRECTORY_CONTENT_OPTION = {label: 'Forums', value: 'forums'};
+export const HOME_SEARCH_TABS = ['Deep Search', 'Network Intelligence', 'IOCs'];
 
 export function openSidebarGroup(title: string) {
   const groupTestId = getSidebarGroupTestId(title);

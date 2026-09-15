@@ -1,5 +1,5 @@
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
-from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_manager import search_manager
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 
 
@@ -112,6 +112,19 @@ class search_apt_controller:
             )
         return sorted(page_results, key=self._date_value, reverse=True), len(ordered_groups), len(selected_keys)
 
+    def _build_group_response(self, results, total_hits, requested_page):
+        results = sorted(results, key=self._date_value, reverse=True)
+        page_results, total_groups, selected_groups = self._group_page(results, requested_page)
+        page_count = (total_groups + self.GROUP_PAGE_SIZE - 1) // self.GROUP_PAGE_SIZE
+        if total_hits > len(results) and selected_groups >= self.GROUP_PAGE_SIZE:
+            page_count = max(page_count, requested_page + 1)
+        return {
+            "Result": page_results,
+            "Page_Count": max(1, page_count),
+            "Total_Hits": total_hits,
+            "Total_Groups": total_groups,
+        }
+
     async def search_result(self, param: search_consolidated_param_model):
         route_category = (param.category or "all").lower()
         content_category = (param.content or "all").lower()
@@ -139,39 +152,18 @@ class search_apt_controller:
         search_param.category = "all"
         threat_response = {"Result": [], "Page_Count": 1, "Total_Hits": 0}
         if base_index:
-            threat_response = await search_model.getInstance().search_consolidated_ranked_result(search_param, base_index, [], [])
+            threat_response = await search_manager.getInstance().search_consolidated_ranked_result(search_param, base_index, [], [])
         include_defacement = category in ("all", "apt", "defacement") if not content_filter_category else category == "defacement"
         if not include_defacement:
-            results = sorted(threat_response.get("Result") or [], key=self._date_value, reverse=True)
-            page_results, total_groups, selected_groups = self._group_page(results, requested_page)
-            total_hits = int(threat_response.get("Total_Hits") or 0)
-            page_count = (total_groups + self.GROUP_PAGE_SIZE - 1) // self.GROUP_PAGE_SIZE
-            if total_hits > len(results) and selected_groups >= self.GROUP_PAGE_SIZE:
-                page_count = max(page_count, requested_page + 1)
-            return {
-                "Result": page_results,
-                "Page_Count": max(1, page_count),
-                "Total_Hits": total_hits,
-                "Total_Groups": total_groups,
-            }
+            return self._build_group_response(threat_response.get("Result") or [], int(threat_response.get("Total_Hits") or 0), requested_page)
 
         defacement_param = search_param.model_copy(deep=True)
         defacement_param.content = "hacked"
-        defacement_response = await search_model.getInstance().search_consolidated_ranked_result(
+        defacement_response = await search_manager.getInstance().search_consolidated_ranked_result(
             defacement_param, [ELASTIC_INDEX.S_DEFACEMENT_INDEX], [], [], "defacement")
         results = [
             *(threat_response.get("Result") or []),
             *(defacement_response.get("Result") or []),
         ]
-        results = sorted(results, key=self._date_value, reverse=True)
-        page_results, total_groups, selected_groups = self._group_page(results, requested_page)
         total_hits = int(threat_response.get("Total_Hits") or 0) + int(defacement_response.get("Total_Hits") or 0)
-        page_count = (total_groups + self.GROUP_PAGE_SIZE - 1) // self.GROUP_PAGE_SIZE
-        if total_hits > len(results) and selected_groups >= self.GROUP_PAGE_SIZE:
-            page_count = max(page_count, requested_page + 1)
-        return {
-            "Result": page_results,
-            "Page_Count": max(1, page_count),
-            "Total_Hits": total_hits,
-            "Total_Groups": total_groups,
-        }
+        return self._build_group_response(results, total_hits, requested_page)

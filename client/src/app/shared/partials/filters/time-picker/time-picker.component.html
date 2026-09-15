@@ -1,0 +1,42 @@
+<form class="relative w-full overflow-visible">
+  <button [attr.data-testid]="toggleTestId()" type="button" (click)="togglePicker()" [disabled]="disabled()" class="flex h-10 w-full items-center justify-between rounded-lg border border-[var(--color-border)] bg-[var(--color-white)] px-3 text-left text-sm font-medium text-[var(--color-text2)] shadow-sm transition hover:brightness-[0.98] outline-none focus:outline-none focus:ring-0 disabled:cursor-not-allowed disabled:opacity-60">
+    <span class="truncate" [ngClass]="displayValue ? '' : 'text-[var(--color-text4)]'">{{ displayValue || (placeholder() | translate) }}</span>
+    @if (displayValue && !disabled()) {
+      <span role="button" tabindex="0" (click)="clearSelection($event)" [attr.aria-label]="'Clear time selection' | translate" class="mr-2 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-sm text-slate-500 transition hover:bg-slate-100 hover:text-slate-700">×</span>
+    }
+    <i class="bi bi-clock h-4 w-4 shrink-0 text-[16px] leading-4 text-slate-500"></i>
+  </button>
+
+  @if (isOpen) {
+    <div class="fixed inset-0 z-40" (click)="closePicker()"></div>
+  }
+
+  @if (isOpen) {
+    <div class="fixed inset-0 z-50 overflow-y-auto p-4 sm:absolute sm:left-0 sm:top-[46px] sm:mt-1 sm:w-auto sm:overflow-visible sm:p-0">
+      <div class="mx-auto w-44 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl sm:mx-0">
+        <div class="grid grid-cols-2 divide-x divide-slate-200">
+          <div class="flex flex-col">
+            <div class="border-b border-slate-200 bg-slate-50 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">{{ 'Hour' | translate }}</div>
+            <div class="max-h-52 overflow-y-auto py-1">
+              @for (hour of hours; track hour) {
+                <button type="button" [attr.data-testid]="'time-picker-hour-' + hour" (click)="selectHour(hour)" class="block w-full px-3 py-1.5 text-center text-sm transition-colors outline-none focus:outline-none focus:ring-0" [ngClass]="isHour(hour) ? 'bg-sky-500 font-semibold text-white' : 'text-slate-700 hover:bg-slate-100'">
+                  {{ pad(hour) }}
+                </button>
+              }
+            </div>
+          </div>
+          <div class="flex flex-col">
+            <div class="border-b border-slate-200 bg-slate-50 py-1.5 text-center text-[10px] font-semibold uppercase tracking-wide text-slate-500">{{ 'Minute' | translate }}</div>
+            <div class="max-h-52 overflow-y-auto py-1">
+              @for (minute of minutes; track minute) {
+                <button type="button" [attr.data-testid]="'time-picker-minute-' + minute" (click)="selectMinute(minute)" class="block w-full px-3 py-1.5 text-center text-sm transition-colors outline-none focus:outline-none focus:ring-0" [ngClass]="isMinute(minute) ? 'bg-sky-500 font-semibold text-white' : 'text-slate-700 hover:bg-slate-100'">
+                  {{ pad(minute) }}
+                </button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</form>

@@ -1,4 +1,4 @@
-import {clickOpenExploitReport, clickOpenReport, exerciseJsonViewerOnce, openDefacementReportAndValidate, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady} from './controllers/04-searching.controller';
+import {clickOpenExploitReport, clickOpenReport, exerciseJsonViewerOnce, openDefacementReportAndValidate, openFirstReportAndValidateNavigationOrModal, openSidebarGroup, typeDashboardSearchSlow, typeInputSlow, waitForSearchReady, CREDENTIAL_BROAD_QUERY, dismissAndRestoreFirstStealerRow, driveConsolidatedIocTabs, driveCredentialExport, driveLoadMore, driveStealerSort, drivePasswordScheme, expandAndCollapseFirstStealerRow, interceptDismissRestore, searchCredentials, toggleHideDismissedAndAssert, visitStealerlogs} from './controllers/04-searching.controller';
 import {clickSidebarSubItem} from './controllers/03-flow.controller';
 
 describe('Orion Intelligence - Search Navigation and Report Access', () => {
@@ -306,6 +306,44 @@ describe('Orion Intelligence - Search Navigation and Report Access', () => {
     cy.loginAsAdmin();
     openSidebarGroup('Entity Lookup');
     clickSidebarSubItem('Entity Lookup', 'Playstore Scanner');
+  });
+
+  it('drives Stealer logs credential rows, sort, load-more, and password scheme', () => {
+    cy.loginAsAdmin();
+    visitStealerlogs();
+    searchCredentials(CREDENTIAL_BROAD_QUERY);
+    cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
+    expandAndCollapseFirstStealerRow();
+    driveStealerSort();
+    driveLoadMore();
+    drivePasswordScheme();
+    cy.docsScreenshot('credential-stealer-flow');
+  });
+
+  it('dismisses and restores a Stealer log result with stubbed endpoints and toggles hide-dismissed', () => {
+    cy.loginAsAdmin();
+    visitStealerlogs();
+    searchCredentials(CREDENTIAL_BROAD_QUERY);
+    cy.get('[data-testid="ioc-stealer-table"]').scrollIntoView().should('be.visible');
+    interceptDismissRestore();
+    dismissAndRestoreFirstStealerRow();
+    toggleHideDismissedAndAssert();
+  });
+
+  it('exports credentials as report, JSON, and CSV', () => {
+    cy.loginAsAdmin();
+    visitStealerlogs();
+    searchCredentials(CREDENTIAL_BROAD_QUERY);
+    cy.get('[data-testid="ioc-download-results"]').scrollIntoView().should('be.visible');
+    driveCredentialExport('graph-report-export-json');
+    driveCredentialExport('graph-report-export-csv');
+    driveCredentialExport('graph-report-export-report');
+  });
+
+  it('drives the consolidated IOC view stealers and threats tabs', () => {
+    cy.loginAsAdmin();
+    driveConsolidatedIocTabs();
+    cy.docsScreenshot('consolidated-ioc-tabs');
   });
 
 });

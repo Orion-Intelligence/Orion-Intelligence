@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
-import { ArtifactReportOption, Case, CaseAnalyst, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusReason, CaseUpdateRequest } from '../model/case.model';
+import { ArtifactReportOption, Case, CaseAnalyst, CaseCommunicationRequest, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusReason, CaseUpdateRequest } from '../model/case.model';
 import { CaseStatusBoardConfig } from '../model/status-board-config.model';
 import { ArtifactFileIntegrityResult } from './model/case-management.model';
 import { ArtifactFileUploadResponse } from './model/case-management.model';
@@ -60,6 +60,23 @@ export class CaseManagement {
 
   revokeCaseShares(caseId: string): Observable<{ success: boolean; revokedCount: number }> {
     return this.api.delete<{ success: boolean; revokedCount: number }>(`profile/cases/${caseId}/shares`);
+  }
+
+  addCommunication(caseId: string, payload: CaseCommunicationRequest): Observable<Case> {
+    return this.api.post<Case>(`profile/cases/${caseId}/communications`, payload);
+  }
+
+  updateCommunication(caseId: string, communicationId: string, payload: CaseCommunicationRequest): Observable<Case> {
+    return this.api.put<Case>(`profile/cases/${caseId}/communications/${communicationId}`, payload);
+  }
+
+  deleteCommunication(caseId: string, communicationId: string): Observable<Case> {
+    return this.api.delete<Case>(`profile/cases/${caseId}/communications/${communicationId}`);
+  }
+
+  openCommunication(caseId: string, communicationId: string, url?: string): Observable<{ opened?: boolean; error?: string }> {
+    return this.api.post<{ result?: { opened?: boolean }; error?: string }>(`profile/cases/${caseId}/communications/${communicationId}/open`, { url }).pipe(map(response => ({ opened: response?.result?.opened, error: response?.error })),
+      catchError(() => of<{ opened?: boolean; error?: string }>({ error: 'open_failed' })));
   }
 
   uploadArtifactFiles(caseId: string, artifactId: string, files: File[]): Observable<ArtifactFileUploadResponse> {

@@ -4,6 +4,7 @@ import { GraphExportService } from './graph-export.service';
 import { DocumentExportService } from './document-export.service';
 import { GraphReportExportType, GraphReportPayload, UnifiedReportPayloadInput } from '../../model/report/report-export.model';
 import { getOwnProperty } from '../../utils/type-guards.util';
+import { escapeCsvValue } from './export-csv.util';
 
 
 @Injectable({ providedIn: 'root' })
@@ -103,13 +104,8 @@ export class ReportExportService extends ExportSharedService {
         return [...valueRows, ...tableRows, ...blockRows];
       })
     ];
-    const csv = rows.map(row => row.map(value => this.escapeCsvValue(value)).join(',')).join('\n');
+    const csv = rows.map(row => row.map(value => escapeCsvValue(value)).join(',')).join('\n');
     this.downloadText(csv, 'text/csv;charset=utf-8;', `${this.buildSafeFilename(payload)}.csv`);
-  }
-
-  private escapeCsvValue(value: unknown): string {
-    const text = String(value ?? '');
-    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
   }
 
   private downloadText(content: string, type: string, filename: string): void {

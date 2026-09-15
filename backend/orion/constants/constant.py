@@ -21,6 +21,9 @@ class CONSTANTS:
     S_SETTINGS_SEARCH_MAX_DYNAMIC_RESOURCE_LIMIT = 1
     S_SETTINGS_COUNTRY_DOCUMENT_SIZE = 500
 
+    ELASTIC_SEARCH_REQUEST_TIMEOUT = 120
+    ELASTIC_WRITE_REQUEST_TIMEOUT = 220
+
     S_SUPER_PASSWORD = env_handler.get_instance().env("S_SUPER_PASSWORD_V1")
     S_AUTH_SECRET_KEY = env_handler.get_instance().env("JWT_SECRET_KEY")
     S_CRAWL_SECRET_KEY = env_handler.get_instance().env("S_CRAWLER_PASSWORD")
@@ -29,6 +32,7 @@ class CONSTANTS:
     S_AUTH_OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
     S_ENCRYPTION_KEY = env_handler.get_instance().env("ENCRYPTION_KEY")
+    S_STEALER_KEY = env_handler.get_instance().env("STEALER_KEY") or S_ENCRYPTION_KEY
 
     BASE_DIR = Path(__file__).resolve().parents[2]
     IMAGE_DIR = BASE_DIR / "workspace" / "resource" / "tenant"

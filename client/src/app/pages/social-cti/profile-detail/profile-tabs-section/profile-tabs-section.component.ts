@@ -26,22 +26,29 @@ import { SocialResourceFeedSectionComponent } from '../resource-feed-section/res
 import { SocialResourceMediaSectionComponent } from '../resource-media-section/resource-media-section.component';
 import { asUnknownRecord, getOwnProperty } from '../../../../shared/utils/type-guards.util';
 import { getInputValue } from '../../../../shared/utils/event-input.util';
+import { toggleKey } from '../../utils/resource-view.util';
+import { buildStealerLogExportRow, STEALER_LOG_EXPORT_COLUMNS } from '../../utils/stealer-log-export.util';
+import { ExpandedRowComponent } from '../../../root-searches/credentials/expanded-row/expanded-row.component';
+import { CredentialResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
+import { expandFadeRow } from '../../../../shared/animations/row.animations';
 
 @Component({
   selector: 'app-social-profile-tabs-section',
   templateUrl: './profile-tabs-section.component.html',
   standalone: true,
-  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, DatePipe, TranslatePipe, NgTemplateOutlet],
+  imports: [TooltipDirective, ExportChoiceModalComponent, SectionStateComponent, SocialResourceWorkSectionComponent, SocialResourcePeopleSectionComponent, SocialResourceFeedSectionComponent, SocialResourceMediaSectionComponent, DatePipe, TranslatePipe, NgTemplateOutlet, ExpandedRowComponent],
+  animations: [expandFadeRow],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SocialProfileTabsSectionComponent {
   private readonly exportBranding = inject(ExportBrandingService);
   private readonly reportExportService = inject(ReportExportService);
   private readonly translationService = inject(TranslationService);
-  private readonly stealerLogExportColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private failedProfileImages = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlDescriptions = signal<Set<string>>(new Set<string>());
   private readonly expandedCrawlProperties = signal<Set<string>>(new Set<string>());
+  private readonly expandedStealerRows = signal<Set<number>>(new Set<number>());
+  private readonly stealerItemCache = new WeakMap<social_stealer_log, CredentialResultItem>();
   private readonly contentTabKeys: FetchTabKey[] = ['details', 'onlinePresence', 'stealerLogs'];
   private readonly displayLimit = signal(50);
   private readonly resetDisplayLimit = effect(() => {
@@ -66,6 +73,7 @@ export class SocialProfileTabsSectionComponent {
     });
   });
   private readonly darkwebEntryBlocked = new Set(['m_embedding', '_id', '_score', '_rank', '_index', 'rank_index', 'm_hash', 'm_hash_id', 'm_scrap_file', 'm_cluster_id', 'm_document_id']);
+  private readonly metaDetailKeys = ['platform', 'username', 'url', 'status', 'entity_type', 'target_type', 'description'];
 
   user = input.required<FeedUser>();
   platformData = input.required<social_profile>();
@@ -99,8 +107,32 @@ export class SocialProfileTabsSectionComponent {
   });
   readonly darkwebReport = signal<Record<string, unknown>[]>([]);
   readonly darkwebLoaded = signal(false);
-  readonly detailEntries = computed<{ key: string; value: unknown }[]>(() =>
-    getProfileDetailEntries(this.platformData()).filter(item => !['img_src', 'm_img_src'].includes(item.key.toLowerCase())));
+  readonly detailEntries = computed<{ key: string; value: unknown }[]>(() => {
+    const platform = this.platformData();
+    const meta = (platform?.meta ?? {}) as Record<string, unknown>;
+    const normalize = (value: unknown): string => String(value).trim().toLowerCase();
+    const seenValues = new Set<string>();
+    const entries: { key: string; value: unknown }[] = [];
+    for (const key of this.metaDetailKeys) {
+      const value = getOwnProperty(meta, key);
+      if (value === null || value === undefined || String(value).trim() === '') {
+        continue;
+      }
+      entries.push({ key, value });
+      seenValues.add(normalize(value));
+    }
+    for (const item of getProfileDetailEntries(platform)) {
+      if (['img_src', 'm_img_src'].includes(item.key.toLowerCase())) {
+        continue;
+      }
+      if (typeof item.value === 'string' && seenValues.has(normalize(item.value))) {
+        continue;
+      }
+      entries.push(item);
+    }
+    return entries;
+  });
+  readonly hasProfileData = computed(() => this.platformData()?.profile_details?.is_parsed === true);
   readonly darkwebSections = computed<{ title: string; date: string; entries: { key: string; value: unknown }[] }[]>(() =>
     this.darkwebReport().map((doc, index) => {
       const entries = Object.entries(doc ?? {})
@@ -233,14 +265,7 @@ export class SocialProfileTabsSectionComponent {
   toggleCrawlProperties(index: number, item: unknown): void {
     const key = this.crawlDescriptionKey(index, item);
     this.expandedCrawlProperties.update(current => {
-      const next = new Set(current);
-      if (next.has(key)) {
-        next.delete(key);
-      }
-      else {
-        next.add(key);
-      }
-      return next;
+      return toggleKey(current, key);
     });
   }
 
@@ -261,14 +286,7 @@ export class SocialProfileTabsSectionComponent {
   toggleCrawlDescription(index: number, item: unknown): void {
     const key = this.crawlDescriptionKey(index, item);
     this.expandedCrawlDescriptions.update(current => {
-      const next = new Set(current);
-      if (next.has(key)) {
-        next.delete(key);
-      }
-      else {
-        next.add(key);
-      }
-      return next;
+      return toggleKey(current, key);
     });
   }
 
@@ -416,6 +434,67 @@ export class SocialProfileTabsSectionComponent {
     return `${this.getStealerRecordHost(record)}|${this.getStealerRecordIdentity(record)}|${this.getStealerRecordDate(record)}|${index}`;
   }
 
+  getStealerSearchQuery(platformData: social_profile): string {
+    return `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim();
+  }
+
+  isStealerRowExpanded(index: number): boolean {
+    return this.expandedStealerRows().has(index);
+  }
+
+  toggleStealerRow(index: number): void {
+    this.expandedStealerRows.update(current => {
+      const next = new Set<number>();
+      if (!current.has(index)) {
+        next.add(index);
+      }
+      return next;
+    });
+  }
+
+  onStealerRowKeydown(event: KeyboardEvent, index: number): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.toggleStealerRow(index);
+    }
+  }
+
+  toStealerItem(record: social_stealer_log): CredentialResultItem {
+    const cached = this.stealerItemCache.get(record);
+    if (cached) {
+      return cached;
+    }
+    const toArray = (value: unknown): string[] => {
+      if (Array.isArray(value)) {
+        return value.map(entry => String(entry)).filter(entry => entry && entry.toLowerCase() !== 'null');
+      }
+      return value === undefined || value === null || value === '' ? [] : [String(value)];
+    };
+    const pick = (...keys: string[]): unknown => {
+      for (const key of keys) {
+        const value = getOwnProperty(record, key);
+        if (value !== undefined && value !== null && value !== '') {
+          return value;
+        }
+      }
+      return undefined;
+    };
+    const converted = {
+      ...record,
+      email: toArray(pick('email', 'm_email')),
+      username: toArray(pick('username', 'm_username', 'user', 'm_user', 'login', 'm_login')),
+      ip: toArray(pick('ip', 'm_ip')),
+      domain: pick('domain', 'm_domain'),
+      source_domain: pick('source_domain', 'm_source_domain'),
+      password: pick('password', 'm_password'),
+      channel: pick('channel', 'm_channel', 'source_channel', 'm_source_channel', 'file', 'filename'),
+      date: pick('date', 'm_date', 'timestamp', 'created_at', 'updated_at'),
+      raw: pick('raw'),
+    } as unknown as CredentialResultItem;
+    this.stealerItemCache.set(record, converted);
+    return converted;
+  }
+
   openStealerLogExportChoice(event: Event, platformData: social_profile): void {
     event.stopPropagation();
     this.selectedStealerLogPlatform.set(platformData);
@@ -434,23 +513,8 @@ export class SocialProfileTabsSectionComponent {
   }
 
   private buildStealerLogRows(platformData: social_profile): Record<string, string>[] {
-    return this.getStealerLogs(platformData).map((item, index) => ({
-      tenant_name: this.exportBranding.getTenantName(),
-      recordType: 'stealer',
-      recordIndex: String(index + 1),
-      searchQuery: `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim(),
-      email: String(item?.email ?? item?.m_email ?? '-'),
-      username: String(item?.username ?? item?.m_username ?? '-'),
-      domain: String(item?.domain ?? item?.m_domain ?? '-'),
-      source: String(this.exportBranding.replaceSystemBrand(String(item?.channel ?? item?.filename ?? item?.file ?? item?.m_source ?? item?.m_scrap_file ?? '-'))),
-      hash: String(item?.m_hash ?? '-'),
-      title: '-',
-      url: String(item?.url ?? item?.m_url ?? '-'),
-      rank: '-',
-      date: String(item?.date ?? item?.m_date ?? '-'),
-      team: '-',
-      summary: '-'
-    }));
+    const searchQuery = `${platformData.meta.username} ${this.getPlatformStealerDomain(platformData)}`.trim();
+    return this.getStealerLogs(platformData).map((item, index) => buildStealerLogExportRow(this.exportBranding, item, index, searchQuery));
   }
 
   private exportStealerLogs(platformData: social_profile, type: 'csv' | 'json' | 'report'): void {
@@ -467,7 +531,7 @@ export class SocialProfileTabsSectionComponent {
         search_query: query || '-',
         total_records: rows.length
       },
-      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...this.stealerLogExportColumns], rows }]
+      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...STEALER_LOG_EXPORT_COLUMNS], rows }]
     };
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }

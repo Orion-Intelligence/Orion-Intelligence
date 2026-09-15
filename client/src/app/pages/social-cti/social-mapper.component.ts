@@ -21,6 +21,8 @@ import { SocialBreadcrumbComponent } from './breadcrumb/social-breadcrumb.compon
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
 import { getInputValue } from '../../shared/utils/event-input.util';
 import { getOwnProperty } from '../../shared/utils/type-guards.util';
+import { handleFromUrl, normalizeHandle } from './utils/social-user-graph.util';
+import { resolveActiveResultSource, resultSourceFor } from './utils/social-profile.util';
 
 
 @Component({
@@ -78,15 +80,12 @@ export class SocialMapperComponent {
     const platforms = results.get(username) ?? Array.from(results.entries()).find(([key]) => key.toLowerCase() === username.toLowerCase())?.[1] ?? [];
     return this.getVisiblePlatforms(username, platforms);
   });
-  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().some(platform => this.getResultSource(platform) === 'darkweb'));
+  hasResultSourceTabs = computed(() => this.activeSourcePlatforms().some(platform => resultSourceFor(platform) === 'darkweb'));
   activeResultSource = computed(() => {
     const username = this.activeUsername();
     const platforms = this.activeSourcePlatforms();
     const preferred = username ? getOwnProperty(this.activeResultSources(), username) ?? 'normal' : 'normal';
-    if (platforms.some(platform => this.getResultSource(platform) === preferred)) {
-      return preferred;
-    }
-    return platforms.some(platform => this.getResultSource(platform) === 'normal') ? 'normal' : 'darkweb';
+    return resolveActiveResultSource(platforms, preferred);
   });
   imageInput = viewChild<ElementRef<HTMLInputElement>>('imageInput');
   profileListing = viewChild(SocialProfileListingComponent);
@@ -133,7 +132,7 @@ export class SocialMapperComponent {
   }
 
   getResultSourceCount(source: SocialResultSource): number {
-    return this.activeSourcePlatforms().filter(platform => this.getResultSource(platform) === source).length;
+    return this.activeSourcePlatforms().filter(platform => resultSourceFor(platform) === source).length;
   }
 
   triggerScan(): void {
@@ -176,6 +175,7 @@ export class SocialMapperComponent {
     if (usernameToDelete) {
       this.profileListing()?.cancelAllFetchesForUser(usernameToDelete);
       this.removeUserScanData(usernameToDelete);
+      this.removeGraphUser(usernameToDelete);
       this.storageService.deleteProfiles(usernameToDelete).pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
     }
     this.closeDeleteConfirmation();
@@ -226,6 +226,17 @@ export class SocialMapperComponent {
     const last = usernames[usernames.length - 1];
     if (last) {
       this.sidebarState.activeUsername.set(last);
+    }
+  }
+
+  private removeGraphUser(username: string): void {
+    const target = handleFromUrl(username) || normalizeHandle(username);
+    if (!target) {
+      return;
+    }
+    const remaining = this.graphUsernames().filter(entry => (handleFromUrl(entry) || normalizeHandle(entry)) !== target);
+    if (remaining.length !== this.graphUsernames().length) {
+      this.setGraphUsers(remaining);
     }
   }
 
@@ -369,13 +380,6 @@ export class SocialMapperComponent {
     this.notificationTimeout = setTimeout(() => {
       this.notification.set(null);
     }, 3000);
-  }
-
-  private getResultSource(platformData: social_profile): SocialResultSource {
-    const platform = String(platformData?.meta?.platform ?? '').toLowerCase();
-    const kind = `${platformData?.meta?.entity_type ?? ''} ${platformData?.meta?.target_type ?? ''}`.toLowerCase();
-    const darkweb = ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'];
-    return darkweb.some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum') ? 'darkweb' : 'normal';
   }
 
   private getVisiblePlatforms(ownerUsername: string, platforms: social_profile[]): social_profile[] {

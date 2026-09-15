@@ -10,6 +10,7 @@ import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import type { SocialThreadComment } from './model/dashboard-result-social.model';
 import { getOwnProperty } from '../../../../shared/utils/type-guards.util';
+import { openProxiedUrl, scrollToResultCard } from '../dashboard-result.util';
 
 export type { SocialThreadComment } from './model/dashboard-result-social.model';
 
@@ -122,7 +123,7 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
     const previousLimit = this.getResultDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
-    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+    scrollToResultCard(this.elementRef.nativeElement, isExpanding ? previousLimit : 0);
   }
 
   getContentWithoutEmptyLines(content: string | undefined): string {
@@ -200,21 +201,6 @@ export class DashboardResultSocialComponent implements OnInit, AfterViewInit {
   }
 
   openExternalUrl(url?: string | null) {
-    if (!this.authService.getIsMobileDemo() || !url) {
-      return;
-    }
-
-    this.proxied_resource.open(url);
-  }
-
-  private scrollToResultIndex(index: number): void {
-    if (index < 0) {
-      return;
-    }
-    setTimeout(() => {
-      this.elementRef.nativeElement
-        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
+    openProxiedUrl(this.proxied_resource, this.authService.getIsMobileDemo(), url);
   }
 }

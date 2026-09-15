@@ -4,6 +4,7 @@ import { ApiService } from '../../../../../shared/services/api.service';
 import { SatelliteLiveAircraft, SatelliteLiveAircraftBBoxResponse } from '../../model/satellite-intel-api.models';
 import { SatelliteIntelService } from '../../satellite-intel-service';
 import { asUnknownRecord } from '../../../../../shared/utils/type-guards.util';
+import { getResponseStatus } from '../../map-utils/renderer-utils';
 
 @Injectable({ providedIn: 'root' })
 export class SatelliteAircraftTrackingService {
@@ -61,14 +62,7 @@ export class SatelliteAircraftTrackingService {
     return issue ? String(issue) : null;
   }
 
-  private buildBoundsPayload(lat: number, lon: number, delta: number, openskyClientId?: string, openskyClientSecret?: string): Record<string, unknown> {
-    const payload: Record<string, unknown> = {
-      lat_min: lat - delta,
-      lat_max: lat + delta,
-      lon_min: lon - delta,
-      lon_max: lon + delta,
-    };
-
+  private withOpenskyCredentials(payload: Record<string, unknown>, openskyClientId?: string, openskyClientSecret?: string): Record<string, unknown> {
     if (openskyClientId?.trim()) {
       payload.opensky_client_id = openskyClientId.trim();
     }
@@ -77,6 +71,17 @@ export class SatelliteAircraftTrackingService {
     }
 
     return payload;
+  }
+
+  private buildBoundsPayload(lat: number, lon: number, delta: number, openskyClientId?: string, openskyClientSecret?: string): Record<string, unknown> {
+    const payload: Record<string, unknown> = {
+      lat_min: lat - delta,
+      lat_max: lat + delta,
+      lon_min: lon - delta,
+      lon_max: lon + delta,
+    };
+
+    return this.withOpenskyCredentials(payload, openskyClientId, openskyClientSecret);
   }
 
   private buildGlobalPayload(openskyClientId?: string, openskyClientSecret?: string): Record<string, unknown> {
@@ -87,20 +92,10 @@ export class SatelliteAircraftTrackingService {
       lon_max: 180,
     };
 
-    if (openskyClientId?.trim()) {
-      payload.opensky_client_id = openskyClientId.trim();
-    }
-    if (openskyClientSecret?.trim()) {
-      payload.opensky_client_secret = openskyClientSecret.trim();
-    }
-
-    return payload;
+    return this.withOpenskyCredentials(payload, openskyClientId, openskyClientSecret);
   }
 
   private getPollStatus(res: unknown): string | undefined {
-    const response = asUnknownRecord(res);
-    const result = asUnknownRecord(response.result);
-    const status = result.status ?? response.status;
-    return typeof status === 'string' ? status : undefined;
+    return getResponseStatus(res);
   }
 }

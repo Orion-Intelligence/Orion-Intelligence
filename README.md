@@ -293,11 +293,6 @@ Orion follows a clear path from source collection to analyst action:
       <td valign="top"><sub>Scheduled crawling across hidden-web and monitored sources, with distributed task execution and private-network routing.</sub></td>
       <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Celery-37814A?style=flat-square&amp;logo=celery&amp;logoColor=white" alt="Celery"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"> <img src="https://img.shields.io/badge/-Tor-7D4698?style=flat-square&amp;logo=torproject&amp;logoColor=white" alt="Tor"></td>
     </tr>
-    <tr>
-      <td valign="top"><a href="https://github.com/Orion-Intelligence/Orion-Collector"><strong>Orion Collector</strong></a><br><sub>ECOSYSTEM SERVICE</sub></td>
-      <td valign="top"><sub>Extensible source-collection framework for targeted acquisition and custom ingestion workflows.</sub></td>
-      <td valign="top"><img src="https://img.shields.io/badge/-Python-3776AB?style=flat-square&amp;logo=python&amp;logoColor=white" alt="Python"> <img src="https://img.shields.io/badge/-Playwright-2EAD33?style=flat-square&amp;logo=playwright&amp;logoColor=white" alt="Playwright"> <img src="https://img.shields.io/badge/-Beautiful_Soup-59666C?style=flat-square" alt="Beautiful Soup"> <img src="https://img.shields.io/badge/-Redis-DC382D?style=flat-square&amp;logo=redis&amp;logoColor=white" alt="Redis"></td>
-    </tr>
   </tbody>
 </table>
 

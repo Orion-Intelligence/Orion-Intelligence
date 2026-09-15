@@ -4,7 +4,7 @@ import type { CellHookData, HookData, RowInput } from 'jspdf-autotable';
 import { GraphReportMeta, GraphReportPayload, GraphReportTableRow } from '../../model/report/report-export.model';
 import { GraphExportService } from './graph-export.service';
 import { drawInstitutionalContentTitle, drawInstitutionalCover, drawInstitutionalFooter, drawInstitutionalPageHeader, PDF_EXPORT_LAYOUT } from './pdf-export-layout';
-import { PdfExportFontData, registerPdfExportFonts } from './pdf-export-fonts';
+import { PdfExportFontData } from './pdf-export-fonts';
 import { PdfExportTheme } from './pdf-export-theme';
 import { preparePdfValue } from './pdf-text.util';
 import { assertAutoTableDocument, AutoTableDocument } from './pdf-autotable.types';
@@ -25,10 +25,7 @@ export class DocumentExportService extends GraphExportService {
   }
 
   private buildDocPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null, fontData: PdfExportFontData | null = null): Uint8Array {
-    const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
-    registerPdfExportFonts(doc, fontData);
-    const meta = this.makeMeta(payload, tenantLogoDataUrl);
-    this.applyPdfDocumentProperties(doc, payload, meta);
+    const { doc, meta } = this.initPdfDocument(payload, JsPdfCtor, tenantLogoDataUrl, fontData);
     const theme = this.PDF_THEME;
     const tableTheme = this.getTableTheme(theme);
     const hooks = this.makeHeaderFooterHooks(payload, meta, theme);
@@ -334,7 +331,8 @@ export class DocumentExportService extends GraphExportService {
       sections: [
         'Executive Summary',
         tableSections[0] || 'Detailed Intelligence',
-        tableSections[1] || ((payload.edges || []).length ? 'Connection Matrix' : 'Supporting Evidence')
+        tableSections[1] || ((payload.edges || []).length ? 'Connection Matrix' : 'Supporting Evidence'),
+        ...tableSections.slice(2)
       ]
     });
     doc.addPage();

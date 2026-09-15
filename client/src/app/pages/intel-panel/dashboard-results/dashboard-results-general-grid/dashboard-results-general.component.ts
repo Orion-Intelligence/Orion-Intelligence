@@ -11,6 +11,7 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { isWithinDays as isWithinDaysUtil } from '../../../../shared/utils/intel-report.util';
 import { ProxyController } from '../../../../shared/services/proxy-controller';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { openProxiedUrl, scrollToResultCard } from '../dashboard-result.util';
 
 @Component({
   selector: 'app-dashboard-results-general-grid',
@@ -91,7 +92,7 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
     const previousLimit = this.getResultDisplayLimit();
     const isExpanding = this.isCollapsed;
     this.isCollapsed = !this.isCollapsed;
-    this.scrollToResultIndex(isExpanding ? previousLimit : 0);
+    scrollToResultCard(this.elementRef.nativeElement, isExpanding ? previousLimit : 0);
   }
 
   getDisplayTags(item: GeneralResultItem | LeakResultItem): string[] {
@@ -127,21 +128,6 @@ export class DashboardResultsGeneralComponent implements AfterViewInit, OnInit {
   }
 
   openExternalUrl(url?: string | null): void {
-    if (!this.isMobileMode() || !url) {
-      return;
-    }
-
-    this.proxied_resource.open(url);
-  }
-
-  private scrollToResultIndex(index: number): void {
-    if (index < 0) {
-      return;
-    }
-    setTimeout(() => {
-      this.elementRef.nativeElement
-        .querySelector<HTMLElement>(`[data-result-index="${index}"]`)
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 0);
+    openProxiedUrl(this.proxied_resource, this.isMobileMode(), url);
   }
 }

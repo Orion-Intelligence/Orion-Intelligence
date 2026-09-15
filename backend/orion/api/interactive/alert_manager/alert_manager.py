@@ -18,7 +18,7 @@ from orion.services.mail_manager.mail_enums import AlertMailLabel, AlertMailMess
 from orion.services.mail_manager.mail_manager import mail_manager
 from orion.services.alert_webhook_manager.alert_webhook_manager import AlertWebhookManager
 from orion.services.encryption_manager.key_manager import KeyManager
-from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, db_user_account, user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import UserStatus, db_user_account, user_role
 from orion.services.mongo_manager.shared_model.db_alert_model import AlertModel, alert_all_ioc, alert_status, db_alert_model, visible_alerts
 from orion.services.mongo_manager.shared_model.db_tenant_model import db_tenant_model
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -62,30 +62,11 @@ class AlertManager:
 
     @staticmethod
     def _display_alert_label(value: str) -> str:
-        normalized = (value or "").strip().lower()
-        if normalized == "seo scanning":
-            return "SEO scanning"
-        if normalized == "exploit":
-            return "Exploits"
-        if normalized == "stealerlogs":
-            return "Stealer logs"
-        if normalized == "email-breach":
-            return "Email breach"
-        if normalized == "social-scanner":
-            return "Social scanner"
-        if not normalized:
-            return AlertMailLabel.UNCATEGORIZED.value
-        return normalized.replace("-", " ").replace("_", " ").title()
+        return AlertMailHelper._display_alert_label(value)
 
     @staticmethod
     def _alert_action_url(category: str = "") -> str:
-        app_url = (env_handler.get_instance().env("APP_URL", "") or "").rstrip("/")
-        if not app_url:
-            return ""
-        normalized_category = (category or "").strip().lower()
-        if normalized_category:
-            return f"{app_url}/dashboard/profile/alerts/{normalized_category}"
-        return f"{app_url}/dashboard/profile/alerts"
+        return AlertMailHelper._alert_action_url(category)
 
     @staticmethod
     def _admin_alert_action_url() -> str:
@@ -95,15 +76,7 @@ class AlertManager:
         return f"{app_url}/dashboard/profile/case-management?mode=alerts"
 
     async def _get_alert_mail_recipient(self, tenant_id: str, current_user=None) -> tuple[str, str]:
-        if current_user is not None:
-            return current_user.email, current_user.username
-        maintainer_user = None
-
-        if tenant_id:
-            maintainer_user = await self._engine.find_one(db_user_account,(db_user_account.tenant_uuid == str(tenant_id)) & (db_user_account.licenses == LicenseName.MAINTAINER))
-        if maintainer_user:
-            return maintainer_user.email, maintainer_user.username
-        return "", ""
+        return await self._mail_helper._get_alert_mail_recipient(tenant_id, current_user)
 
     @staticmethod
     def _alert_ioc_rows(alert: AlertModel) -> list[dict[str, str]]:

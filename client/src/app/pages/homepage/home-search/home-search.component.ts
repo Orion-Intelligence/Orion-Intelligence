@@ -233,15 +233,18 @@ export class HomeSearchComponent implements OnInit {
     }
   }
 
+  private beginInsightPointerAction(event: PointerEvent): number {
+    event.preventDefault();
+    event.stopPropagation();
+    return this.insightMax || Math.round(window.innerHeight * 0.30);
+  }
+
   onInsightPointerMove(event: PointerEvent): void {
     if (!this.insightDragging || this.insightPointerId !== event.pointerId) {
       return;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
-
-    const max = this.insightMax || Math.round(window.innerHeight * 0.30);
+    const max = this.beginInsightPointerAction(event);
     const dy = event.clientY - this.insightStartY;
 
     if (Math.abs(dy) > 3) {
@@ -258,10 +261,7 @@ export class HomeSearchComponent implements OnInit {
       return;
     }
 
-    event.preventDefault();
-    event.stopPropagation();
-
-    const max = this.insightMax || Math.round(window.innerHeight * 0.30);
+    const max = this.beginInsightPointerAction(event);
     const mid = -max / 2;
     const y = this.insightDragY ?? (this.homeInsightExpanded ? -max : 0);
 

@@ -20,6 +20,7 @@ const FILE_RULE_KEYS = FEEDER_RULE_KEYS.filter((ruleKey) => ruleKey !== 'generic
 const FEEDER_TEST_RULE_LIMIT = 4;
 const FEEDER_SCRIPT_ROW_TIMEOUT = 60000;
 const FEEDER_QUERY_TIMEOUT = 60000;
+export const DEEP_FEEDER_TIMEOUT = 60000;
 
 function waitForFeederPanelReady(): Cypress.Chainable {
   return cy.get('[data-testid="feeder-reload-button"]', { timeout: FEEDER_QUERY_TIMEOUT })
@@ -408,5 +409,238 @@ export function validateFixtureOperationsForAllFeederRules() {
         });
       });
     });
+  });
+}
+
+export function openTab(testId: string) {
+  void cy.get('body').then(($body) => {
+    const tab = $body.find(`[data-testid="${testId}"]:visible`).first();
+    if (tab.length) {
+      void cy.wrap(tab).click({ force: true });
+      void cy.wait(300);
+    }
+  });
+}
+
+export function clickIfVisible(selector: string) {
+  void cy.get('body').then(($body) => {
+    const el = $body.find(`${selector}:visible`).first();
+    if (el.length) {
+      void cy.wrap(el).click({ force: true });
+    }
+  });
+}
+
+export function dismissConfirmation(confirm: boolean) {
+  void cy.get('body').then(($body) => {
+    const popup = $body.find('[data-testid="confirmation-popup"]:visible');
+    if (!popup.length) {
+      return;
+    }
+    if (confirm) {
+      void cy.get('[data-testid="confirmation-yes-button"]').filter(':visible').first().click({ force: true });
+      return;
+    }
+    const cancel = popup.find('button').not('[data-testid="confirmation-yes-button"]').last();
+    if (cancel.length) {
+      void cy.wrap(cancel).click({ force: true });
+    }
+    else {
+      void cy.wrap(popup.find('[data-testid="confirmation-yes-button"]').first()).click({ force: true });
+    }
+  });
+}
+
+export function openBulkConfirmAndCancel(testId: string) {
+  void cy.get('body').then(($body) => {
+    const btn = $body.find(`[data-testid="${testId}"]:visible:not(:disabled)`).first();
+    if (btn.length) {
+      void cy.wrap(btn).click({ force: true });
+      dismissConfirmation(false);
+    }
+  });
+}
+
+export function removeSelectedFileIfPresent() {
+  void cy.get('body').then(($body) => {
+    const remove = $body.find('button:visible:contains("Remove")').first();
+    if (remove.length) {
+      void cy.wrap(remove).click({ force: true });
+    }
+  });
+}
+
+function selectDefacementScriptFile() {
+  void cy.get('[data-testid="feeder-select-file-button"]').filter(':visible').first().should('be.visible');
+  void cy.get('[data-testid="feeder-file-input"]')
+    .last()
+    .selectFile('cypress/fixtures/feeder/unique/_defacement_sample.py', { force: true });
+  void cy.wait(300);
+}
+
+function confirmReplaceIfPresent() {
+  void cy.get('body').then(($body) => {
+    const yes = $body.find('[data-testid="confirmation-yes-button"]:visible').first();
+    if (yes.length) {
+      void cy.wrap(yes).click({ force: true });
+    }
+  });
+}
+
+export function uploadDefacementScriptAndOpenScriptTab() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-add');
+  selectDefacementScriptFile();
+  void cy.get('[data-testid="feeder-upload-script-button"]').filter(':visible').first().click({ force: true });
+  void cy.wait(600);
+  confirmReplaceIfPresent();
+  openTab('feeder-tab-script');
+  void cy.get('[data-testid^="feeder-script-row-"]', { timeout: DEEP_FEEDER_TIMEOUT })
+    .filter(':visible')
+    .first()
+    .should('exist');
+}
+
+export function assertFeederLoadErrorPath() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-script');
+  void cy.intercept('GET', '**/api/profile/feeder/scripts?**', { statusCode: 500, body: { detail: 'Injected feeder load failure' } }).as('feederScriptsLoadError');
+  void cy.get('[data-testid="feeder-reload-button"]', { timeout: FEEDER_QUERY_TIMEOUT }).filter(':visible').first().should('not.be.disabled').click({ force: true });
+  void cy.wait('@feederScriptsLoadError', { timeout: FEEDER_QUERY_TIMEOUT });
+  void cy.get('[data-testid="message-notification"]').should('be.visible');
+}
+
+export function assertFeederMutationErrorPaths() {
+  uploadDefacementScriptAndOpenScriptTab();
+  void cy.intercept('POST', '**/api/profile/feeder/scripts/**', { statusCode: 500, body: { detail: 'Injected feeder mutation failure' } }).as('feederMutationError');
+
+  void cy.get('[data-testid^="feeder-script-toggle-button-"]').filter(':visible').first().click({ force: true });
+  dismissConfirmation(true);
+  void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+  void cy.get('[data-testid="message-notification"]').should('be.visible');
+
+  void cy.get('body').then(($body) => {
+    const enableAll = $body.find('[data-testid="feeder-enable-all-button"]:visible:not(:disabled)').first();
+    if (enableAll.length) {
+      void cy.wrap(enableAll).click({ force: true });
+      dismissConfirmation(true);
+      void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+    }
+  });
+
+  void cy.get('body').then(($body) => {
+    const clearAll = $body.find('[data-testid="feeder-clear-all-button"]:visible:not(:disabled)').first();
+    if (clearAll.length) {
+      void cy.wrap(clearAll).click({ force: true });
+      dismissConfirmation(true);
+      void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+    }
+  });
+
+  void cy.get('[data-testid^="feeder-script-delete-button-"]').filter(':visible').first().click({ force: true });
+  dismissConfirmation(true);
+  void cy.wait('@feederMutationError', { timeout: FEEDER_QUERY_TIMEOUT });
+  void cy.get('[data-testid="message-notification"]').should('be.visible');
+}
+
+export function assertFeederValueMutationErrorPaths() {
+  openFeederRule('generic');
+  openTab('feeder-tab-add');
+  void cy.get('[data-testid="feeder-values-input"]')
+    .should('be.visible')
+    .clear()
+    .type('https://example.com/error-value-a\nhttps://example.com/error-value-b', { delay: 0 });
+  clickIfVisible('[data-testid="feeder-upload-values-button"]');
+  void cy.wait(600);
+
+  openTab('feeder-tab-values');
+
+  void cy.get('body').then(($body) => {
+    if (!$body.find('[data-testid^="feeder-value-row-"]:visible').length) {
+      return;
+    }
+    void cy.intercept('POST', '**/api/profile/feeder/scripts/**', { statusCode: 500, body: { detail: 'Injected feeder value failure' } }).as('feederValueError');
+
+    void cy.get('[data-testid^="feeder-value-delete-button-"]').filter(':visible').first().click({ force: true });
+    dismissConfirmation(true);
+    void cy.wait('@feederValueError', { timeout: FEEDER_QUERY_TIMEOUT });
+    void cy.get('[data-testid="message-notification"]').should('be.visible');
+
+    void cy.get('body').then(($inner) => {
+      const clearAll = $inner.find('[data-testid="feeder-clear-all-values-button"]:visible:not(:disabled)').first();
+      if (clearAll.length) {
+        void cy.wrap(clearAll).click({ force: true });
+        dismissConfirmation(true);
+        void cy.wait('@feederValueError', { timeout: FEEDER_QUERY_TIMEOUT });
+      }
+    });
+  });
+}
+
+export function assertFeederReplaceConfirmationCancel() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-add');
+  selectDefacementScriptFile();
+  void cy.get('[data-testid="feeder-upload-script-button"]').filter(':visible').first().click({ force: true });
+  void cy.wait(600);
+  confirmReplaceIfPresent();
+  void cy.wait(600);
+
+  openTab('feeder-tab-add');
+  selectDefacementScriptFile();
+  void cy.get('[data-testid="feeder-upload-script-button"]').filter(':visible').first().click({ force: true });
+  void cy.wait(600);
+  void cy.get('[data-testid="confirmation-popup"]', { timeout: DEEP_FEEDER_TIMEOUT }).should('be.visible');
+  dismissConfirmation(false);
+  void cy.get('[data-testid="confirmation-popup"]').should('not.exist');
+  removeSelectedFileIfPresent();
+}
+
+export function assertFeederSessionFileValidationAndClear() {
+  openFeederRule('defacement');
+  openTab('feeder-tab-add');
+  void cy.get('[data-testid="feeder-select-file-button"]').filter(':visible').first().should('be.visible');
+
+  void cy.get('[data-testid="feeder-session-file-input"]')
+    .last()
+    .selectFile('cypress/fixtures/feeder/crawl_data_defacement.txt', { force: true });
+  void cy.get('[data-testid="feeder-form-error"]').should('be.visible');
+
+  selectDefacementScriptFile();
+  removeSelectedFileIfPresent();
+}
+
+export function openRuleForSharedPanel() {
+  void cy.get('[data-testid="feeder-rule-select"]').should('be.visible').and('not.be.disabled').click();
+  void cy.get('[data-testid^="feeder-rule-option-"]').then(($options) => {
+    const availableKeys = [...$options]
+      .map((option) => (option.getAttribute('data-testid') || '').replace('feeder-rule-option-', ''))
+      .filter(Boolean);
+    const directPreference = ['pastebin', 'reddit', 'twitter', 'mastodon', 'defacement', 'exploit', 'apt', 'leak', 'malware', 'forum', 'news', 'tracking'];
+    const directKey = directPreference.find((key) => availableKeys.includes(key));
+    if (directKey) {
+      void cy.get(`[data-testid="feeder-rule-option-${directKey}"]`).first().click({ force: true });
+      void cy.wait(300);
+      return;
+    }
+
+    const socialGroupKey = availableKeys.find((key) => key.includes('social'));
+    if (socialGroupKey) {
+      void cy.get(`[data-testid="feeder-rule-option-${socialGroupKey}"]`).first().click({ force: true });
+      void cy.wait(300);
+      void cy.get('body').then(($body) => {
+        const socialSelect = $body.find('[data-testid="feeder-social-rule-select"]:visible').first();
+        if (!socialSelect.length) {
+          return;
+        }
+        void cy.wrap(socialSelect).click({ force: true });
+        void cy.get('[data-testid^="feeder-social-rule-option-"]').first().click({ force: true });
+        void cy.wait(300);
+      });
+      return;
+    }
+
+    void cy.get(`[data-testid="feeder-rule-option-${availableKeys[0]}"]`).first().click({ force: true });
+    void cy.wait(300);
   });
 }

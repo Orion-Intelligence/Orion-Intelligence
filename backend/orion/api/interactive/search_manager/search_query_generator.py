@@ -373,7 +373,6 @@ class search_query_generator:
                     knn_clause = {
                         "knn": {
                             "field": ELASTIC_SEMANTIC.S_EMBED_FIELD,
-                            "k": CONSTANTS.S_SETTINGS_FETCHED_DOCUMENT_SIZE,
                             "num_candidates": 1000,
                             "query_vector": qvec,
                             "filter": {"bool": {"filter": must_filter_clauses}}
@@ -436,6 +435,15 @@ class search_query_generator:
         }
 
         return ELASTIC_INDEX.S_STEALERLOGS_INDEX, query
+
+    @staticmethod
+    def _parse_date_range(value):
+        parts = value.split(",")
+        if len(parts) != 2:
+            return None
+        from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
+        to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+        return from_date, to_date
 
     @staticmethod
     def build_date_priority_filter(from_date, to_date, priority_field_names):
@@ -513,10 +521,9 @@ class search_query_generator:
 
         if m_date_range:
             try:
-                parts = m_date_range.split(",")
-                if len(parts) == 2:
-                    from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
-                    to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+                parsed_range = search_query_generator._parse_date_range(m_date_range)
+                if parsed_range:
+                    from_date, to_date = parsed_range
                     must_clauses.append(search_query_generator.build_date_priority_filter(from_date, to_date, date_priority_fields))
             except ValueError:
                 pass
@@ -644,7 +651,7 @@ class search_query_generator:
             date_boost_fields=date_boost_fields)
 
         unified_query["size"] = result_size
-        unified_query["from"] = max(0, (m_page_number - 1) * result_size)
+        unified_query["from"] = max(0, min((m_page_number - 1) * result_size, 10000 - result_size))
 
         if channel_q:
             qb = unified_query["query"]["function_score"]["query"].setdefault("bool", {"must": []})
@@ -670,10 +677,9 @@ class search_query_generator:
             must_clauses.append(logic_query)
 
         if p_query_model.daterange:
-            parts = p_query_model.daterange.split(",")
-            if len(parts) == 2:
-                from_date = datetime.strptime(parts[0].strip(), DATE_ONLY_FORMAT).strftime(DATE_START_UTC_FORMAT)
-                to_date = datetime.strptime(parts[1].strip(), DATE_ONLY_FORMAT).strftime(DATE_END_UTC_FORMAT)
+            parsed_range = search_query_generator._parse_date_range(p_query_model.daterange)
+            if parsed_range:
+                from_date, to_date = parsed_range
 
                 must_clauses.append({
                     "bool": {
@@ -700,7 +706,7 @@ class search_query_generator:
         )
 
         unified_query["size"] = 15
-        unified_query["from"] = max(0, (getattr(p_query_model, "page", 1) - 1) * 15)
+        unified_query["from"] = max(0, min((getattr(p_query_model, "page", 1) - 1) * 15, 10000 - 15))
 
         return (
             base_index,
@@ -764,7 +770,7 @@ class search_query_generator:
 
         page = getattr(p_query_model, "page", 1) or 1
         size = (getattr(p_query_model, "size", None) or (100 if is_match_all else 500))
-        frm = max((page - 1) * size, 0)
+        frm = max(0, min((page - 1) * size, 10000 - size))
 
         query_body = {
             "query": es_query,

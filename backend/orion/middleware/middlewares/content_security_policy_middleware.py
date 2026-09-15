@@ -92,7 +92,7 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "base-uri 'self'; "
                                                            "report-to csp-endpoint;")
         else:
-            response.headers["Content-Security-Policy"] = ("default-src 'self'; "
+            response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
                                                            "script-src 'self' 'wasm-unsafe-eval' https://js.arcgis.com; "
                                                            "script-src-elem 'self' https://js.arcgis.com; "
                                                            "script-src-attr 'none'; "
@@ -101,9 +101,10 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "style-src-attr 'unsafe-inline'; "
                                                            "img-src 'self' data: blob: https://try.orionintelligence.org https://tiles.openfreemap.org https://*.arcgis.com https://*.arcgisonline.com; "
                                                            "font-src 'self' data: https://js.arcgis.com; "
-                                                           "connect-src 'self' https://tiles.openfreemap.org https://js.arcgis.com https://*.arcgis.com https://*.arcgisonline.com; "
-                                                           "media-src 'self'; "
+                                                           "connect-src 'self' https://tiles.openfreemap.org blob: https://js.arcgis.com https://*.arcgis.com https://*.arcgisonline.com; "
+                                                           "media-src 'self' data: blob:; "
                                                            "worker-src 'self' blob:; "
+                                                           "child-src 'self' blob:; "
                                                            "frame-ancestors 'self'; "
                                                            "object-src 'none'; "
                                                            "form-action 'self'; "

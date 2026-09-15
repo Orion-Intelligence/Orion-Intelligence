@@ -148,6 +148,7 @@ class migration_1_0_3_15:
             await settings_collection.create_index(
                 [("tenant_id", 1)],
                 unique=True,
+                partialFilterExpression={"key": AllowedKeys.SYSTEM_SETTINGS.value},
                 name="unique_tenant_system_settings",
             )
 

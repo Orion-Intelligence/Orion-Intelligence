@@ -22,20 +22,19 @@ class config_controller:
     __instance = None
     CONFIG_CACHE_KEY = "system_config"
     EMAIL_META_KEYS = {"ACCOUNTS_MAIL_PASSWORD", "ACCOUNTS_MAIL", "ACCOUNTS_SMTP_SERVER", "ACCOUNTS_SMTP_PORT"}
-    TENANT_EDITABLE_SETTINGS = {AllowedKeys.APP_NAME.value}
+    TENANT_EDITABLE_META_KEYS = {"S_HOME_HEADER_DATA_SOURCES", "S_HOME_HEADER_ADVERSARIES", "S_HOME_HEADER_PRICING"}
+    TENANT_EDITABLE_SETTINGS = {AllowedKeys.APP_NAME.value, AllowedKeys.S_ONION.value, AllowedKeys.META_INFO.value}
     ADMIN_SETTING_KEYS = {
         AllowedKeys.VERSION.value,
         AllowedKeys.EXTENSION_VERSION.value,
         AllowedKeys.LANGUAGE_ALLOWED.value,
         AllowedKeys.ADMIN_ROOT_ALLOWED.value,
-        AllowedKeys.S_ONION.value,
         AllowedKeys.BACKUP_SCHEDULE.value,
     }
     SYSTEM_RESOURCE_FILENAMES = {
         AllowedKeys.LOGO_URL: "logo_url_custom.png",
         AllowedKeys.LOGO_WIDE_LIGHT: "logo_wide_light_custom.png",
         AllowedKeys.LOGO_WIDE_DARK: "logo_wide_dark_custom.png",
-        AllowedKeys.AUTH_DASHBOARD_ICON: "auth_dashboard_icon_custom.png",
     }
     LEGACY_ALERT_CONNECTOR_META_KEYS = {"ALERT_SLACK_WEBHOOK_URL", "ALERT_SLACK_CHANNEL", "ALERT_SLACK_CHANNEL_ID", "ALERT_SLACK_CONFIGURATION_URL", "ALERT_SLACK_TEAM_ID", "ALERT_SLACK_TEAM_NAME", "ALERT_JIRA_ACCESS_TOKEN", "ALERT_JIRA_REFRESH_TOKEN", "ALERT_JIRA_EXPIRES_AT", "ALERT_JIRA_CLOUD_ID", "ALERT_JIRA_SITE_URL", "ALERT_JIRA_SITE_NAME", "ALERT_JIRA_BASE_URL", "ALERT_JIRA_EMAIL", "ALERT_JIRA_API_TOKEN", "ALERT_JIRA_PROJECT_KEY", "ALERT_JIRA_ISSUE_TYPE"}
 
@@ -156,6 +155,25 @@ class config_controller:
                     config.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
                     and default_config.get(AllowedKeys.AI_ENDPOINT_ENABLED.value) == "1"
                 ) else "0"
+                if not str(config.get(AllowedKeys.APP_NAME.value) or "").strip():
+                    config[AllowedKeys.APP_NAME.value] = default_config.get(AllowedKeys.APP_NAME.value, "")
+                if not str(config.get(AllowedKeys.S_ONION.value) or "").strip():
+                    config[AllowedKeys.S_ONION.value] = default_config.get(AllowedKeys.S_ONION.value, "")
+                try:
+                    tenant_meta = json.loads(config.get(AllowedKeys.META_INFO.value) or "{}") or {}
+                except (ValueError, TypeError):
+                    tenant_meta = {}
+                try:
+                    default_meta = json.loads(default_config.get(AllowedKeys.META_INFO.value) or "{}") or {}
+                except (ValueError, TypeError):
+                    default_meta = {}
+                meta_changed = False
+                for meta_key in ("S_HOME_HEADER_DATA_SOURCES", "S_HOME_HEADER_ADVERSARIES", "S_HOME_HEADER_PRICING"):
+                    if not str(tenant_meta.get(meta_key) or "").strip() and default_meta.get(meta_key):
+                        tenant_meta[meta_key] = default_meta.get(meta_key)
+                        meta_changed = True
+                if meta_changed:
+                    config[AllowedKeys.META_INFO.value] = json.dumps(tenant_meta)
             self._configs[resolved_tenant_id] = config
             if tenant.is_default:
                 self._config = config
@@ -222,8 +240,6 @@ class config_controller:
         file_name = f"{base}_custom.png"
         resource_path = ResourceManager.get_instance().system_resource_path(file_name, tenant)
         asset_url = f"/api/s/static/system/{resource_path.name}"
-        if base != "auth_dashboard_icon":
-            return asset_url
         try:
             return f"{asset_url}?v={resource_path.stat().st_mtime_ns}"
         except OSError:
@@ -235,7 +251,6 @@ class config_controller:
         fresh_config[AllowedKeys.LOGO_URL.value] = self.asset("logo_url", tenant)
         fresh_config[AllowedKeys.LOGO_WIDE_LIGHT.value] = self.asset("logo_wide_light", tenant)
         fresh_config[AllowedKeys.LOGO_WIDE_DARK.value] = self.asset("logo_wide_dark", tenant)
-        fresh_config[AllowedKeys.AUTH_DASHBOARD_ICON.value] = self.asset("auth_dashboard_icon", tenant)
         meta_info = fresh_config.get(AllowedKeys.META_INFO.value) or json.dumps({
             "S_HOME_HEADER_DATA_SOURCES": "https://www.orionintelligence.org/sources",
             "S_HOME_HEADER_ADVERSARIES": "https://www.orionintelligence.org/adversaries",
@@ -293,6 +308,8 @@ class config_controller:
                 raise HTTPException(status_code=400, detail="meta_info must be a JSON object")
             for key in self.LEGACY_ALERT_CONNECTOR_META_KEYS:
                 submitted_meta_info.pop(key, None)
+            if current_user is not None and not self._is_admin(current_user):
+                submitted_meta_info = {k: v for k, v in submitted_meta_info.items() if k in self.TENANT_EDITABLE_META_KEYS}
             existing_meta_info = {}
             if self._configs.get(resolved_tenant_id, {}).get(AllowedKeys.META_INFO.value):
                 existing_meta_info = json.loads(self._configs[resolved_tenant_id][AllowedKeys.META_INFO.value])
@@ -409,9 +426,12 @@ class config_controller:
         )
 
         prefix = "/api/s/static/system/"
+        try:
+            asset_url = f"{prefix}{file_name}?v={(system_dir / file_name).stat().st_mtime_ns}"
+        except OSError:
+            asset_url = prefix + file_name
         return {
-            AllowedKeys.LOGO_URL: prefix + file_name if allowed_key == AllowedKeys.LOGO_URL else None,
-            AllowedKeys.LOGO_WIDE_LIGHT: prefix + file_name if allowed_key == AllowedKeys.LOGO_WIDE_LIGHT else None,
-            AllowedKeys.LOGO_WIDE_DARK: prefix + file_name if allowed_key == AllowedKeys.LOGO_WIDE_DARK else None,
-            AllowedKeys.AUTH_DASHBOARD_ICON: prefix + file_name if allowed_key == AllowedKeys.AUTH_DASHBOARD_ICON else None,
+            AllowedKeys.LOGO_URL: asset_url if allowed_key == AllowedKeys.LOGO_URL else None,
+            AllowedKeys.LOGO_WIDE_LIGHT: asset_url if allowed_key == AllowedKeys.LOGO_WIDE_LIGHT else None,
+            AllowedKeys.LOGO_WIDE_DARK: asset_url if allowed_key == AllowedKeys.LOGO_WIDE_DARK else None,
         }

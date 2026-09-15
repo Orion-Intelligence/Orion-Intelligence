@@ -272,7 +272,7 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'email-breach',
+            redirectTo: 'social-scanner',
             pathMatch: 'full'
           },
           {
@@ -338,11 +338,10 @@ export const routes: Routes = [
             loadComponent: loadDkimLookupComponent,
             data: {
               animation: 'TextAnalysisAPI',
-              title: 'DKIM Checker',
-              description: 'Analyze domains and selectors to verify DKIM public keys'
+              title: 'DKIM Lookup',
+              description: 'Discover DKIM selectors for a domain and validate each DKIM DNS record'
             }
           },
-
           {
             path: 'crypto-scanner',
             loadComponent: loadDashboardApiComponent,

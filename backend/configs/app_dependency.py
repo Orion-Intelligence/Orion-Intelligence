@@ -78,6 +78,20 @@ def role_required(required_roles: list[user_role]):
     return verify_role
 
 
+def permission_required(required_permissions: list[UserPermission]):
+    async def verify_permission(current_user=Depends(get_current_user)):
+        if _enum_value(getattr(current_user, "role", None)) == user_role.ADMIN.value:
+            return True
+
+        permissions = [_enum_value(permission) for permission in (getattr(current_user, "permissions", None) or [])]
+        if any(_enum_value(required_permission) in permissions for required_permission in required_permissions):
+            return True
+
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+
+    return verify_permission
+
+
 async def default_tenant_required(request: Request):
     if not getattr(getattr(request.state, "tenant", None), "is_default", False):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
@@ -142,6 +156,19 @@ async def case_management_required(current_user=Depends(get_current_user)):
     raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Case management permission required")
 
 
+async def dismiss_result_required(current_user=Depends(get_current_user)):
+    role = _enum_value(getattr(current_user, "role", None))
+    licenses = {_enum_value(license_name) for license_name in (current_user.licenses or [])}
+    if role == user_role.ADMIN.value or LicenseName.MAINTAINER.value in licenses:
+        return True
+
+    permissions = [_enum_value(permission) for permission in (current_user.permissions or [])]
+    if UserPermission.DISMISS_RESULT.value in permissions:
+        return True
+
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Dismiss result permission required")
+
+
 def _extract_scan_host(target: str) -> str:
     raw_target = (target or "").strip()
     if not raw_target:
@@ -184,12 +211,12 @@ async def _validate_public_scan_target(target: str) -> None:
 
 
 async def _scan_domain_with_type(payload, user_id: str, scan_type: Optional[str] = None):
-    from orion.api.server.crawl_manager.crawl_model import crawl_model
+    from orion.api.server.crawl_manager.crawl_manager import crawl_manager
 
     await _validate_public_scan_target(payload.domain)
     if scan_type:
         payload.scanType = scan_type
-    return await crawl_model.getInstance().scan_domain(payload, user_id=user_id)
+    return await crawl_manager.getInstance().scan_domain(payload, user_id=user_id)
 
 
 async def _read_scan_upload(file: UploadFile) -> bytes:

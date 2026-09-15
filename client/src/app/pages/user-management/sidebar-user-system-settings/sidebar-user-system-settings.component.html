@@ -173,16 +173,17 @@
             </label>
           </div>
         </div>
+
+        <app-alert-webhook-settings-block
+          class="mt-3 [body.light-theme_&]:[&_img]:[filter:var(--ui-icon-filter-light)]"
+          [form]="webhookForm"
+          context="system"
+          [isDirty]="isWebhookDirty()"
+          [isAdmin]="isAdmin"
+          [errorState]="webhookErrorState"
+          (save)="save('webhooks')">
+        </app-alert-webhook-settings-block>
       </div>
     }
-      <app-alert-webhook-settings-block
-        class="mt-3 [body.light-theme_&]:[&_img]:[filter:var(--ui-icon-filter-light)]"
-        [form]="webhookForm"
-        context="system"
-        [isDirty]="isWebhookDirty()"
-        [isAdmin]="isAdmin"
-        [errorState]="webhookErrorState"
-        (save)="save('webhooks')">
-      </app-alert-webhook-settings-block>
     </div>
 </div>

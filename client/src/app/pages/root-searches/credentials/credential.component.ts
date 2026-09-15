@@ -26,6 +26,10 @@ import { DomainIndexSidebarComponent } from './domain-index-sidebar/domain-index
 import { ScrollTopComponent } from '../../../shared/partials/scroll-top/scroll-top.component';
 import { AiToolRoutingService } from '../../../shared/services/ai-tool-routing.service';
 import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+import { ApiService } from '../../../shared/services/api.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
+import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
+import { TranslationService } from '../../../shared/services/translation.service';
 
 
 type IocResultTab = 'stealers' | 'threats';
@@ -89,8 +93,48 @@ export class CredentialComponent implements OnInit {
     this.isLoading = this.pendingRequests > 0;
   }
 
-  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService, private aiToolRoutingService: AiToolRoutingService) {
+  constructor(protected helperService: HelperService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef, protected dashboardService: DashboardService, private reportExportService: ReportExportService, private aiToolRoutingService: AiToolRoutingService, private apiService: ApiService, protected licensesService: LicenseService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
     this.type = this.route.snapshot.data.type;
+  }
+
+  get canDismissResults(): boolean {
+    return this.licensesService.canDismissResults();
+  }
+
+  onHideDismissedToggle(): void {
+    this.fetchSearchResults();
+  }
+
+  toggleHideDismissed(): void {
+    this.dashboardService.consolidatedParamModel.hide_dismissed = !this.dashboardService.consolidatedParamModel.hide_dismissed;
+    this.onHideDismissedToggle();
+  }
+
+  onDismissStealerLog(item: StealerLogResultItem): void {
+    const hashOf = (result: StealerLogResultItem | null | undefined): string =>
+      String(result?.dismiss_id ?? result?.hash ?? result?.m_hash ?? result?._id ?? result?.id ?? '');
+    const stealerLogHash = hashOf(item);
+    if (!stealerLogHash) {
+      this.messageNotificationService.show(this.translationService.translate('Cannot dismiss: result has no identifier'), 'fail');
+      return;
+    }
+    const restoring = !!item.dismissed;
+    const endpoint = restoring ? 'search/result/restore' : 'search/result/dismiss';
+    const matches = (result: StealerLogResultItem): boolean => hashOf(result) === stealerLogHash;
+    this.apiService.post(endpoint, { hash: stealerLogHash, type: 'stealer_log' }).subscribe({
+      next: () => {
+        const hideDismissed = this.dashboardService.consolidatedParamModel.hide_dismissed;
+        const updatedResult = (this.stealerlogCallbackModel.Result ?? [])
+          .filter(result => !(hideDismissed && !restoring && matches(result)))
+          .map(result => matches(result) ? new StealerLogResultItem({ ...result, dismissed: !restoring }) : result);
+        this.stealerlogCallbackModel = new StealerLogCallbackModel({ ...this.stealerlogCallbackModel, Result: updatedResult });
+        this.dashboardService.stealerlogCallbackModel = this.stealerlogCallbackModel;
+        this.messageNotificationService.show(this.translationService.translate(restoring ? 'Result restored' : 'Result dismissed'), 'success');
+      },
+      error: () => {
+        this.messageNotificationService.show(this.translationService.translate(restoring ? 'Failed to restore result' : 'Failed to dismiss result'), 'fail');
+      },
+    });
   }
 
   get aiToolType(): string {
@@ -335,8 +379,7 @@ export class CredentialComponent implements OnInit {
       this.dashboardService.consolidatedParamModel.category = "";
       this.dashboardService.fetchConsolidatedRankededResults('search/consolidated/ioc', this.dashboardService.consolidatedParamModel)
         .pipe(finalize(() => {
-          this.isLoadingMore = false;
-          this.dashboardService.consolidatedParamModel.ioc = '';
+          this.clearIocLoadMoreState();
         })).subscribe(response => {
           const addedCount = this.appendRankedLoadMoreResults(response);
           this.hasMoreThreatResults = addedCount > 0;
@@ -350,8 +393,7 @@ export class CredentialComponent implements OnInit {
 
     this.dashboardService.fetchSearchResults<StealerLogCallbackModel>('search/stealer/ioc', this.dashboardService.consolidatedParamModel)
       .pipe(finalize(() => {
-        this.isLoadingMore = false;
-        this.dashboardService.consolidatedParamModel.ioc = '';
+        this.clearIocLoadMoreState();
       })).subscribe(response => {
         const addedCount = this.appendStealerLoadMoreResults(response);
         this.hasMoreStealerResults = addedCount > 0;
@@ -359,6 +401,11 @@ export class CredentialComponent implements OnInit {
           this.stealerIocPage = nextPage;
         }
       });
+  }
+
+  private clearIocLoadMoreState(): void {
+    this.isLoadingMore = false;
+    this.dashboardService.consolidatedParamModel.ioc = '';
   }
 
   selectIocResultTab(tab: IocResultTab): void {

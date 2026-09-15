@@ -11,12 +11,14 @@ import { EmptyQueryComponent } from '../../../../shared/partials/empty-query/emp
 import { UrlScanMeta, UrlScanThreatItem, } from '../../../../shared/model/security-scan/security.scan.results.model';
 import { ScannerService } from './scanner-service.service';
 import { ReportExportService } from '../../../../shared/services/report-export.service';
+import { resolveRequestedUrl } from '../../../../shared/utils/request-url.util';
 import { GraphReportPayload } from '../../../../shared/model/report/report-export.model';
 import { NetworkIntelScanService } from '../../../../shared/services/network-intel/network-intel-scan.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { ExportChoiceModalComponent } from '../../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { SECURITY_SCAN_EXPORT_OPTIONS } from '../../../../shared/model/report/export-choice.model';
 import { isIpv4Address } from '../../../../shared/utils/network-validation.util';
+import { buildScanThreatCategories } from '../network-intel.util';
 
 @Component({
   selector: 'app-security-scan',
@@ -70,7 +72,7 @@ export class SecurityScanComponent implements OnInit {
     if (!rawParam) {
       return;
     }
-    const resolved = this.resolveRequestedUrl(rawParam);
+    const resolved = resolveRequestedUrl(rawParam);
     try {
       const u = new URL(resolved);
       const host = u.hostname;
@@ -140,38 +142,7 @@ export class SecurityScanComponent implements OnInit {
           };
           this.grade = result.grade ?? '';
           this.gradeCounts = result.grade_counts ?? { high: 0, medium: 0, low: 0, informational: 0 };
-          const proofMap = new Map<string, string>();
-          const proofs = result.proofs ?? {};
-          Object.entries(proofs).forEach(([cat, items]) => {
-            items.forEach((p) => {
-              const k = cat + '|' + (p.header || '').trim().toLowerCase();
-              if (p.proof && !proofMap.has(k)) {
-                proofMap.set(k, p.proof);
-              }
-            });
-          });
-          const entries = Object.entries(result.threats ?? {});
-          this.categories = entries
-            .map(([name, items]) => {
-              const list: UrlScanThreatItem[] = Array.isArray(items) ? items : [];
-              const seen = new Set<string>();
-              const uniqueItems = list
-                .filter((it) => {
-                  const key = (it.header || '').trim().toLowerCase();
-                  if (!key || seen.has(key)) {
-                    return false;
-                  }
-                  seen.add(key);
-                  return true;
-                })
-                .map((it) => {
-                  const key = (it.header || '').trim().toLowerCase();
-                  const mergedProof = proofMap.get(name + '|' + key);
-                  return mergedProof ? { ...it, proof: mergedProof } : it;
-                });
-              return { name, total: list.length, items: uniqueItems };
-            })
-            .filter((c) => c.items.length > 0);
+          this.categories = buildScanThreatCategories(result.threats, result.proofs);
         },
         error: (err) => {
           this.isFetched = true;
@@ -274,20 +245,6 @@ export class SecurityScanComponent implements OnInit {
     this.graphReportExport.exportByType(payload, type === 'report' ? 'doc_pdf' : type as 'json' | 'csv');
   }
 
-  private resolveRequestedUrl(input: string): string {
-    const v = decodeURIComponent(input || '').trim();
-    if (!v) {
-      return '';
-    }
-    try {
-      const u = new URL((/^https?:\/\//i.exec(v)) ? v : `https://${v.replace(/^\/+/, '')}`);
-      return u.toString();
-    }
-    catch {
-      return `https://${v.replace(/^https?:\/\//i, '').replace(/^\/+/, '')}`;
-    }
-  }
-
   private extractHost(url?: string): string {
     try {
       return url ? new URL(url).hostname : '';
@@ -328,7 +285,7 @@ export class SecurityScanComponent implements OnInit {
     if (!raw) {
       return;
     }
-    const domain = this.resolveRequestedUrl(raw);
+    const domain = resolveRequestedUrl(raw);
     this.router
       .navigate([], {
         relativeTo: this.route,

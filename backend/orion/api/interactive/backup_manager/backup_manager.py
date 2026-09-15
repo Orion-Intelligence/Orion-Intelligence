@@ -260,6 +260,7 @@ class BackupManager:
         await asyncio.to_thread(self._copy_folder, CONSTANTS.BASE_DIR / "workspace" / "logs", backup_dir / "logs")
         await step(4, "Copying resources")
         await asyncio.to_thread(self._copy_folder, CONSTANTS.BASE_DIR / "static" / "resource", backup_dir / "resource")
+        await asyncio.to_thread(self._copy_folder, CONSTANTS.S_SESSION_RESOURCE_DIR, backup_dir / "session_data")
         await step(5, "Finalizing")
 
         manifest["completed"] = True
@@ -269,7 +270,7 @@ class BackupManager:
     def read_manifest(self, backup_dir: Path):
         return self._read_json_file(backup_dir / CONSTANTS.BACKUP_MANIFEST_NAME)
 
-    async def delete_backup(self, backup_id: str):
+    async def _load_backup_by_id(self, backup_id: str):
         try:
             backup_object_id = ObjectId(backup_id)
         except (InvalidId, TypeError) as exc:
@@ -277,18 +278,16 @@ class BackupManager:
         backup = await self._engine.find_one(db_backup_model, db_backup_model.id == backup_object_id)
         if backup is None:
             raise HTTPException(status_code=404, detail="Backup not found")
+        return backup
+
+    async def delete_backup(self, backup_id: str):
+        backup = await self._load_backup_by_id(backup_id)
         await self._remove_tree(self.backup_root / backup.filename)
         await self._engine.delete(backup)
         return {"status": "deleted"}
 
     async def restore_backup_by_id(self, backup_id: str):
-        try:
-            backup_object_id = ObjectId(backup_id)
-        except (InvalidId, TypeError) as exc:
-            raise HTTPException(status_code=404, detail="Backup not found") from exc
-        backup = await self._engine.find_one(db_backup_model, db_backup_model.id == backup_object_id)
-        if backup is None:
-            raise HTTPException(status_code=404, detail="Backup not found")
+        backup = await self._load_backup_by_id(backup_id)
         return await self.restore_backup(backup.filename, source="ui")
 
     async def _quiesce_writers(self) -> None:
@@ -436,6 +435,7 @@ class BackupManager:
         await asyncio.to_thread(self._restore_arango, source_dir / "arango")
         await self._restore_elastic(source_dir / "elastic")
         await asyncio.to_thread(self._restore_folder, source_dir / "resource", CONSTANTS.BASE_DIR / "static" / "resource")
+        await asyncio.to_thread(self._restore_folder, source_dir / "session_data", CONSTANTS.S_SESSION_RESOURCE_DIR)
 
     async def _validate_restore(self, manifest=None):
         try:

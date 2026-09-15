@@ -41,27 +41,26 @@ class AlertConnectorManager:
         tenant_id = str(getattr(current_user, "tenant_uuid", "") or "")
         settings: dict[str, dict[str, Any]] = {"app": {}, "tenant": {}}
         for provider, handler in self._providers.items():
-            settings["app"].update(handler.app_settings(await self._connector(AlertConnectorType.APP, provider, "")))
+            settings["app"].update(handler.app_settings(await self._connector(AlertConnectorType.APP, provider, tenant_id)))
             settings["tenant"].update(handler.tenant_settings(await self._connector(AlertConnectorType.TENANT, provider, tenant_id)))
         return settings
 
     async def save_settings(self, current_user, payload: dict[str, Any]) -> dict[str, Any]:
         tenant_id = str(getattr(current_user, "tenant_uuid", "") or "")
-        role = getattr(current_user, "role", "")
-        if (getattr(role, "value", role) or "") == "admin":
-            for provider, handler in self._providers.items():
-                await self._save_app(provider, *handler.app_credentials(payload))
+        for provider, handler in self._providers.items():
+            await self._save_app(provider, tenant_id, *handler.app_credentials(payload))
         await self._save_tenant_defaults(tenant_id, payload)
         return await self.get_settings(current_user)
 
     async def connect_url(self, provider: AlertConnectorProvider, request: Request, current_user) -> str:
-        app = await self._configured_app(provider)
+        tenant_id = str(getattr(current_user, "tenant_uuid", "") or "")
+        app = await self._configured_app(provider, tenant_id)
         redirect_uri = AlertConnectorHelper.callback_url(request, provider)
-        return self._provider(provider).connect_url(app, redirect_uri, self._state(provider.value, str(getattr(current_user, "tenant_uuid", "") or "")))
+        return self._provider(provider).connect_url(app, redirect_uri, self._state(provider.value, tenant_id))
 
     async def handle_callback(self, provider: AlertConnectorProvider, request: Request, code: str, state: str) -> RedirectResponse:
         tenant_id = self._tenant_id_from_state(state, provider.value)
-        app = await self._configured_app(provider)
+        app = await self._configured_app(provider, tenant_id)
         existing = await self._connector(AlertConnectorType.TENANT, provider, tenant_id)
         existing_data = existing.data if existing else {}
         data = self._provider(provider).exchange_callback(app, AlertConnectorHelper.callback_url(request, provider), code, existing_data)
@@ -78,19 +77,19 @@ class AlertConnectorManager:
         handler = self._provider(provider)
         if not handler.should_refresh_access_token(config):
             return config
-        updated = handler.refresh_access_token(await self._configured_app(provider), config)
+        updated = handler.refresh_access_token(await self._configured_app(provider, str(tenant_id or "")), config)
         await self._upsert(AlertConnectorType.TENANT, provider, str(tenant_id or ""), True, updated)
         return updated
 
-    async def _save_app(self, provider: AlertConnectorProvider, client_id: Any, client_secret: Any) -> None:
-        existing = await self._connector(AlertConnectorType.APP, provider, "")
+    async def _save_app(self, provider: AlertConnectorProvider, tenant_id: str, client_id: Any, client_secret: Any) -> None:
+        existing = await self._connector(AlertConnectorType.APP, provider, str(tenant_id or ""))
         data = dict(existing.data) if existing else {}
         if client_id is not None:
             data["client_id"] = str(client_id or "").strip()
         if client_secret:
             data["client_secret"] = str(client_secret).strip()
         enabled = bool(data.get("client_id") and data.get("client_secret"))
-        await self._upsert(AlertConnectorType.APP, provider, "", enabled, data)
+        await self._upsert(AlertConnectorType.APP, provider, str(tenant_id or ""), enabled, data)
 
     async def _save_tenant_defaults(self, tenant_id: str, payload: dict[str, Any]) -> None:
         for provider, handler in self._providers.items():
@@ -99,8 +98,10 @@ class AlertConnectorManager:
             if data:
                 await self._upsert(AlertConnectorType.TENANT, provider, tenant_id, bool(existing.enabled) if existing else False, data)
 
-    async def _configured_app(self, provider: AlertConnectorProvider) -> dict[str, str]:
-        connector = await self._connector(AlertConnectorType.APP, provider, "")
+    async def _configured_app(self, provider: AlertConnectorProvider, tenant_id: str = "") -> dict[str, str]:
+        connector = await self._connector(AlertConnectorType.APP, provider, str(tenant_id or ""))
+        if not (connector and connector.enabled):
+            connector = await self._connector(AlertConnectorType.APP, provider, "")
         data = connector.data if connector else {}
         client_id = str(data.get("client_id") or "").strip()
         client_secret = str(data.get("client_secret") or "").strip()

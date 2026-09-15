@@ -1,4 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
+import { countMessageTokens } from './composer-metrics.util';
+import { ComposerLayoutHost } from './composer-layout-host';
 import { ChangeDetectorRef, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, signal, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -33,7 +35,7 @@ type AiWorkspaceViewMode = 'chat' | 'directory' | 'split';
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './ai-workspace.component.html',
 })
-export class AiWorkspaceComponent implements OnInit, OnDestroy {
+export class AiWorkspaceComponent extends ComposerLayoutHost implements OnInit, OnDestroy {
   private readonly pendingStreamStorageKey = 'orion.nexus.pending-stream';
   private activeChatRequest?: Subscription;
   private chatHistoryRequest?: Subscription;
@@ -64,13 +66,12 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   editingMessageId: string | null = null;
   editDraft = '';
   messages: AiWorkspaceMessage[] = [];
-  composerExpanded = false;
-  composerRows = 1;
-  composerScrollable = false;
   activeSessionId: string | null = null;
   chatSessions: AiChatSession[] = [];
 
-  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef, private readonly translationService: TranslationService) { }
+  constructor(protected readonly appService: AppService, private readonly router: Router, private readonly route: ActivatedRoute, private readonly nexusChatService: NexusChatService, private readonly resultRowHelper: ResultRowHelperService, private readonly cdr: ChangeDetectorRef, private readonly translationService: TranslationService) {
+    super(); 
+  }
 
   ngOnInit(): void {
     const requestedView = this.route.snapshot.queryParamMap.get('view');
@@ -182,7 +183,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
 
     const text = this.messageDraft.trim();
 
-    if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
+    if (!text || countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
@@ -311,15 +312,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   resizeComposer(): void {
-    const textarea = this.composerInput?.nativeElement;
-    if (!textarea) {
-      return;
-    }
-
-    const lineCount = this.getComposerLineCount(textarea);
-    this.composerRows = Math.min(5, lineCount);
-    this.composerScrollable = lineCount > 5;
-    this.composerExpanded = this.composerRows > 1;
+    this.applyComposerResize(this.composerInput?.nativeElement);
   }
 
   private navigateUserMessageHistory(direction: 'older' | 'newer'): boolean {
@@ -592,7 +585,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   saveMessageEdit(message: AiWorkspaceMessage): void {
     const text = this.editDraft.trim();
     const index = this.messages.findIndex(item => item.id === message.id);
-    if (!text || index === -1 || this.countMessageTokens(text) > this.maxComposerTokens) {
+    if (!text || index === -1 || countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
 
@@ -619,7 +612,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   protected get messageDraftTokenCount(): number {
-    return this.countMessageTokens(this.messageDraft);
+    return countMessageTokens(this.messageDraft);
   }
 
   protected get messageDraftTokenOverflow(): number {
@@ -639,7 +632,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
   }
 
   protected get editDraftTokenCount(): number {
-    return this.countMessageTokens(this.editDraft);
+    return countMessageTokens(this.editDraft);
   }
 
   protected get editDraftTokenOverflow(): number {
@@ -804,20 +797,6 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     });
   }
 
-  private getComposerLineCount(textarea: HTMLTextAreaElement): number {
-    const horizontalPadding = 24;
-    const averageCharWidth = 7;
-    const availableWidth = Math.max(averageCharWidth, textarea.clientWidth - horizontalPadding);
-    const charsPerLine = Math.max(1, Math.floor(availableWidth / averageCharWidth));
-    const lines = (textarea.value || '').split('\n');
-
-    return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
-  }
-
-  private countMessageTokens(value: string): number {
-    return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
-  }
-
   private setDirectorySplitPercent(value: number): void {
     const dividerWidth = 12;
     const minimumChatWidth = 520;
@@ -973,21 +952,25 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     this.directoryImportRequest = null;
   }
 
+  private applySelectedSessionHistory(session: AiChatSession): void {
+    this.chatHistoryRequest?.unsubscribe();
+    this.chatHistoryRequest = undefined;
+    this.activeSessionId = session.sessionId;
+    this.syncDirectorySession(session.sessionId);
+    this.messages = [...session.messages];
+    this.isLoadingHistory.set(false);
+    this.cancelMessageEdit();
+    this.queueComposerResize();
+    this.scrollToBottom();
+  }
+
   selectChat(session: AiChatSession, openChat = false): void {
     if (openChat) {
       this.setWorkspaceViewMode('chat');
     }
 
     if (this.isSending() && session.sessionId === this.activeRequestSessionId) {
-      this.chatHistoryRequest?.unsubscribe();
-      this.chatHistoryRequest = undefined;
-      this.activeSessionId = session.sessionId;
-      this.syncDirectorySession(session.sessionId);
-      this.messages = [...session.messages];
-      this.isLoadingHistory.set(false);
-      this.cancelMessageEdit();
-      this.queueComposerResize();
-      this.scrollToBottom();
+      this.applySelectedSessionHistory(session);
       return;
     }
 
@@ -1003,15 +986,7 @@ export class AiWorkspaceComponent implements OnInit, OnDestroy {
     }
 
     if (session.messages.length || session.messageCount === 0) {
-      this.chatHistoryRequest?.unsubscribe();
-      this.chatHistoryRequest = undefined;
-      this.activeSessionId = session.sessionId;
-      this.syncDirectorySession(session.sessionId);
-      this.messages = [...session.messages];
-      this.isLoadingHistory.set(false);
-      this.cancelMessageEdit();
-      this.queueComposerResize();
-      this.scrollToBottom();
+      this.applySelectedSessionHistory(session);
       return;
     }
 

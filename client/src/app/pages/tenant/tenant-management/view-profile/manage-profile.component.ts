@@ -16,6 +16,8 @@ import { LicenseService } from '../../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../../shared/services/translation.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../../shared/partials/ui-dropdown/ui-dropdown.component';
+import { buildAlertAllowedOptions, loadAlertTenantOptions } from '../../../../shared/utils/alert-allowed-tenants.util';
+import { buildTenantBasePermissionOptions, buildTenantStatusOptions } from '../tenant-form-options.util';
 
 @Component({
   selector: 'app-view-profile',
@@ -44,9 +46,11 @@ export class ManageProfileComponent implements OnInit {
   }
 
   get permissionOptions(): UiDropdownOption[] {
-    this.translationService.version();
     const session = this.appService.userSessionData();
-    const options: UiDropdownOption[] = [{ key: 'case_management', label: this.translationService.translate('Case Management') }];
+    const options = buildTenantBasePermissionOptions(this.translationService);
+    if (session.user.role === 'admin') {
+      options.push({ key: 'monitoring', label: this.translationService.translate('Monitoring') });
+    }
     if (session.user.role === 'admin' && session.tenant.isDefault) {
       options.push({ key: 'orion_mail', label: this.translationService.translate('Orion Mail') });
     }
@@ -54,11 +58,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   get statusOptions(): UiDropdownOption[] {
-    this.translationService.version();
-    return [
-      { key: 'active', label: this.translationService.translate('Active') },
-      { key: 'disable', label: this.translationService.translate('Disable') }
-    ];
+    return buildTenantStatusOptions(this.translationService);
   }
 
   get passwordResetOptions(): UiDropdownOption[] {
@@ -72,7 +72,7 @@ export class ManageProfileComponent implements OnInit {
   ngOnInit(): void {
     const headers = new HttpHeaders({});
     if (this.appService.userSessionData().user.role === 'admin') {
-      this.loadAlertTenantOptions();
+      loadAlertTenantOptions(this.apiService, options => this.alertTenantOptions = options);
     }
     this.apiService.post<User[]>('users', headers).subscribe({
       next: (data) => {
@@ -131,13 +131,7 @@ export class ManageProfileComponent implements OnInit {
 
   get alertAllowedOptions(): UiDropdownOption[] {
     this.translationService.version();
-    return [
-      { key: this.allAlertsOption, label: this.translationService.translate('All') },
-      ...this.alertTenantOptions.map(tenant => ({
-        key: tenant.id,
-        label: tenant.name || tenant.email || tenant.id
-      }))
-    ];
+    return buildAlertAllowedOptions(this.allAlertsOption, this.translationService.translate('All'), this.alertTenantOptions);
   }
 
   get filteredUsers(): User[] {
@@ -209,17 +203,6 @@ export class ManageProfileComponent implements OnInit {
     user.alerts_allowed_tenant_ids = values.filter(value => allowedTenantIds.has(value));
   }
 
-  private loadAlertTenantOptions(): void {
-    this.apiService.get<AlertAllowedTenantOption[]>('tenants/alerts/allowed-options').subscribe({
-      next: (options) => {
-        this.alertTenantOptions = options || [];
-      },
-      error: () => {
-        this.alertTenantOptions = [];
-      }
-    });
-  }
-
   private clearAlertAccess(user: User): void {
     user.alerts_allowed_all = false;
     user.alerts_allowed_tenant_ids = [];
@@ -255,8 +238,12 @@ export class ManageProfileComponent implements OnInit {
       user.licenses = user.licenses.filter((l) => l !== license);
       return;
     }
+    if (license === LicenseName.FEEDER) {
+      user.licenses.push(LicenseName.FEEDER);
+      return;
+    }
     if (license === LicenseName.FREE || license === LicenseName.ENTERPRISE) {
-      user.licenses = [license];
+      user.licenses = user.licenses.includes(LicenseName.FEEDER) ? [license, LicenseName.FEEDER] : [license];
       return;
     }
     user.licenses = user.licenses.filter((l) => l !== LicenseName.FREE && l !== LicenseName.ENTERPRISE);

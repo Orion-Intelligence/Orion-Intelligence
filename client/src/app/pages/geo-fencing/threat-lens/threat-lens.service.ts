@@ -7,6 +7,7 @@ import { DashboardService } from '../../../services/dashboard/dashboard.service'
 import { normalizeCountryLabel, splitCountryValues, toCountryKey } from '../../../shared/utils/country-normalization.util';
 import { THREAT_LENS_CATEGORY_CONFIG, ThreatCountryCount, ThreatLensCategoryMapData, ThreatLensCategoryModelKey, ThreatLensDocument, ThreatLensFeedItem, ThreatLensMapData, ThreatLensRequestPayload, } from '../models/geo-fencing.models';
 import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
+import { toSafeHttpUrl } from './threat-lens-format.util';
 
 
 const COUNTRY_FIELDS = ['m_country', 'm_country_name', 'm_location', 'country', 'location'];
@@ -353,28 +354,10 @@ export class ThreatLensService {
     ];
 
     for (const candidate of candidates) {
-      const value = this.toSafeHttpUrl(String(candidate ?? '').trim());
+      const value = toSafeHttpUrl(String(candidate ?? '').trim());
       if (value) {
         return value;
       }
-    }
-
-    return '';
-  }
-
-  private toSafeHttpUrl(value: string): string {
-    if (!value) {
-      return '';
-    }
-
-    try {
-      const url = new URL(value);
-      if (url.protocol === 'http:' || url.protocol === 'https:') {
-        return url.toString();
-      }
-    }
-    catch {
-      return '';
     }
 
     return '';

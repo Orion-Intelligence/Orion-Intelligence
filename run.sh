@@ -324,7 +324,7 @@ if [ "$1" = "restore" ]; then
         echo "trusted-web-main is not running. Start the stack first."
         exit 1
     fi
-    docker exec trusted-web-main python3 restore_backup.py "$BACKUP_NAME"
+    docker exec trusted-web-main python3 -c 'import asyncio; from restore_backup import main; asyncio.run(main())' "$BACKUP_NAME"
     exit $?
 fi
 
@@ -373,8 +373,10 @@ if [ "$COMMAND" = "build" ]; then
             docker exec trusted-web-nginx nginx -t
             docker exec trusted-web-nginx nginx -s reload
         fi
-        enable_maintenance_mode
-        trap disable_maintenance_mode EXIT
+        if [ "$FLAG" != "-d" ]; then
+            enable_maintenance_mode
+            trap disable_maintenance_mode EXIT
+        fi
     fi
 
     pull_image_if_missing python:3.11-slim
@@ -436,12 +438,15 @@ chmod -R a+rwX backend/workspace/parser/parser_files 2>/dev/null || true
 mkdir -p backend/workspace/logs
 chmod a+rwX backend/workspace/logs 2>/dev/null || true
 
+mkdir -p backend/workspace/resource
+chmod -R a+rwX backend/workspace/resource 2>/dev/null || true
+
 docker network create --driver bridge shared_bridge 2>/dev/null || true
 docker network create --driver bridge orion_nexus_backend 2>/dev/null || true
 compose_up_services=()
 
 if [ "$COMPOSE_FILE" = "docker-compose.yml" ]; then
-    compose_up_services=(web nginx)
+    compose_up_services=(web nginx documentation)
 elif [ "$COMPOSE_FILE" = "docker-compose-production.yml" ] && is_nginx_running; then
     compose_up_services=("${PRODUCTION_SERVICES[@]}")
 fi
@@ -452,8 +457,6 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
         exit 1
     fi
 fi
-
-compose pull --include-deps --ignore-buildable --policy missing "${compose_up_services[@]}"
 
 up_extra_args=()
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
@@ -466,7 +469,6 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     compose exec -T nginx nginx -t
     compose exec -T nginx nginx -s reload
     wait_for_application_services
-    sudo systemctl restart tor@default
     disable_maintenance_mode
     trap - EXIT
 fi

@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { social_profile } from '../models/social.models';
-import { formatFollowers, formatKey } from '../../../shared/utils/formatters';
+import { formatKey } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
+import { formatStatValue } from '../utils/social-profile.util';
 import type { FetchTabKey } from '../enums/social-graph.enums';
 import type { FeedUser, SocialPlatformCapabilityMap } from '../models/social-usability.models';
 import { getMetadataEntries } from '../utils/summary-view.util';
@@ -169,11 +170,7 @@ export class SocialDefaultListSectionComponent {
     const profileValue = getOwnProperty(platformData.profile_details, key);
     const metadataValue = undefined;
     const rawValue = profileValue ?? metadataValue ?? this.getFallbackStatValue(platformData, key);
-    if (rawValue === null || rawValue === undefined || rawValue === '') {
-      return this.missingStatValue;
-    }
-    const numericValue = typeof rawValue === 'number' ? rawValue : Number(String(rawValue).replace(/,/g, ''));
-    return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(rawValue);
+    return formatStatValue(rawValue, this.missingStatValue);
   }
 
   trackByKey(_index: number, item: { key: string }): string {

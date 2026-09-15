@@ -1,7 +1,7 @@
 import { ComponentRef } from '@angular/core';
 import { OrionSatelliteFeature } from '../../../models/geo-fencing.models';
 import { LeafletComponentRenderer } from '../../map-utils/leaflet-component-renderer';
-import { stableHash } from '../../map-utils/renderer-utils';
+import { spatialRenderKeyParts, stableHash } from '../../map-utils/renderer-utils';
 import { OrionFacilityMarkerIconComponent } from './components/orion-facility-marker-icon/orion-facility-marker-icon.component';
 import { OrionFacilityPopupComponent } from './components/orion-facility-popup/orion-facility-popup.component';
 import type * as Leaflet from 'leaflet';
@@ -345,11 +345,8 @@ export class OrionFacilitiesMapRenderer {
       return `z:${Math.round(zoom * 2)}|count:${data.length}|v:${this.renderVersion}|focus:${focusedId}`;
     }
 
-    const center = bounds.getCenter();
     return [
-      `z:${Math.round(zoom * 2)}`,
-      `c:${center.lat.toFixed(1)},${center.lng.toFixed(1)}`,
-      `d:${bounds.getNorth().toFixed(1)},${bounds.getEast().toFixed(1)},${bounds.getSouth().toFixed(1)},${bounds.getWest().toFixed(1)}`,
+      ...spatialRenderKeyParts(zoom, bounds),
       `count:${data.length}`,
       `v:${this.renderVersion}`,
       `focus:${focusedId}`,

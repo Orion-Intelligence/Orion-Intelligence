@@ -13,6 +13,7 @@ import { normalizePdfText, preparePdfValue } from './pdf-text.util';
 import { assertAutoTableDocument } from './pdf-autotable.types';
 import type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
 import { getOwnProperty, setOwnProperty } from '../../utils/type-guards.util';
+import { escapeCsvValue } from './export-csv.util';
 
 export type { PdfExportLibraries, PlainTableThemeConfig, PlainTableThemeOptions } from './model/graph-export.model';
 
@@ -94,20 +95,20 @@ export class GraphExportService {
       ...(payload.nodes || []).map(node => ['node', node.id, node.label, '', '']),
       ...(payload.edges || []).map(edge => ['edge', edge.id, edge.label ?? '', edge.from, edge.to])
     ];
-    const csv = rows.map(row => row.map(value => this.escapeCsvValue(value)).join(',')).join('\n');
+    const csv = rows.map(row => row.map(value => escapeCsvValue(value)).join(',')).join('\n');
     this.downloadText(csv, 'text/csv;charset=utf-8;', `${this.buildSafeFilename(payload)}-graph.csv`);
   }
 
-  private escapeCsvValue(value: unknown): string {
-    const text = String(value ?? '');
-    return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
-  }
-
-  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null = null, fontData: PdfExportFontData | null = null): Uint8Array {
+  protected initPdfDocument(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, tenantLogoDataUrl: string | null, fontData: PdfExportFontData | null): { doc: jsPDF; meta: GraphReportMeta } {
     const doc = new JsPdfCtor({ orientation: 'portrait', unit: 'pt', format: 'a4', compress: true });
     registerPdfExportFonts(doc, fontData);
     const meta = this.makeMeta(payload, tenantLogoDataUrl);
     this.applyPdfDocumentProperties(doc, payload, meta);
+    return { doc, meta };
+  }
+
+  protected buildGraphPdfBytes(payload: GraphReportPayload, JsPdfCtor: typeof import('jspdf').default, autoTable: typeof import('jspdf-autotable').default, tenantLogoDataUrl: string | null = null, fontData: PdfExportFontData | null = null): Uint8Array {
+    const { doc, meta } = this.initPdfDocument(payload, JsPdfCtor, tenantLogoDataUrl, fontData);
     const sectionsByPage: Record<number, string> = { 1: 'Cover', 2: 'Document Control and Contents' };
     this.drawGraphCover(doc, payload, meta);
     doc.addPage();

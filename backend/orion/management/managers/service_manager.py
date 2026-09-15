@@ -34,6 +34,7 @@ class service_manager:
         self._is_available = False
 
     async def init_services(self, build_dir=None, run_migrations: bool = True):
+        self.prepare_runtime_dirs()
         build_dir = build_dir or self.default_build_dir()
         while not self._is_available:
             try:
@@ -101,7 +102,14 @@ class service_manager:
 
     async def build_map_assets(self, build_dir):
         await helper_controller.init_map_entities_task(build_dir)
+        await helper_controller.init_persona_posts_task(build_dir)
+
+    @staticmethod
+    def prepare_runtime_dirs():
+        base = Path(__file__).resolve().parents[3]
+        for directory in ("workspace/parser/parser_files", "workspace/logs", "workspace/resource", "backups"):
+            (base / directory).mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def default_build_dir():
-        return Path(__file__).resolve().parents[3] / "build"
+        return Path(__file__).resolve().parents[3] / "workspace" / "build"

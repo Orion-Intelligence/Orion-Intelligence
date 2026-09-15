@@ -1,5 +1,5 @@
-import { Component, effect, input, ChangeDetectionStrategy } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, effect, input, output, ChangeDetectionStrategy } from '@angular/core';
+import { DatePipe, NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { StealerLogCallbackModel, StealerLogResultItem } from '../../../../shared/model/results/credentials/credential.callback.model';
 import { expandFadeRow } from '../../../../shared/animations/row.animations';
@@ -7,6 +7,8 @@ import { fadeInDashboardItem } from '../../../../shared/animations/dashboard.ite
 import { RankedCallbackModel, RankedResultItem } from '../../../../shared/model/results/consolidated/ranked.callback.model';
 import { ExpandedRowComponent } from '../expanded-row/expanded-row.component';
 import { TranslatePipe } from '../../../../shared/pipes/translate.pipe';
+import { ConfirmationPopupComponent } from '../../../../shared/partials/confirmation-popup/confirmation-popup.component';
+import { ResultRowHelperService } from '../../../../shared/services/result-row-helper.service';
 
 type IocResultTab = 'stealers' | 'threats';
 
@@ -16,20 +18,23 @@ type IocResultTab = 'stealers' | 'threats';
   templateUrl: './credential-list.component.html',
   animations: [fadeInDashboardItem, expandFadeRow],
   changeDetection: ChangeDetectionStrategy.Eager,
-  imports: [ExpandedRowComponent, DatePipe, TranslatePipe]
+  imports: [ExpandedRowComponent, DatePipe, TranslatePipe, NgClass, ConfirmationPopupComponent]
 })
 export class CredentialListComponent {
   readonly rankedResultInput = input(new RankedCallbackModel(), { alias: 'rankedResult' });
   thretsExpandedRows = new Set<number>();
   stealersExpandedRows = new Set<number>();
+  pendingDismissItem: StealerLogResultItem | null = null;
   readonly stealerData$ = input.required<StealerLogCallbackModel>();
   readonly type = input<string>('credential');
   readonly isLoading = input.required<boolean>();
   rankedResult: RankedCallbackModel = new RankedCallbackModel();
   readonly searchQuery = input<string>('');
   readonly activeTab = input<IocResultTab>('stealers');
+  readonly canDismiss = input<boolean>(false);
+  readonly dismissRequested = output<StealerLogResultItem>();
 
-  constructor(private router: Router) {
+  constructor(private router: Router, private rowHelper: ResultRowHelperService) {
     effect(() => {
       this.rankedResult = this.rankedResultInput();
     });
@@ -64,6 +69,23 @@ export class CredentialListComponent {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
       this.toggleRow(index, expandedSet);
+    }
+  }
+
+  onDismissClick(item: StealerLogResultItem, event: MouseEvent): void {
+    event.stopPropagation();
+    if (item.dismissed) {
+      this.dismissRequested.emit(item);
+      return;
+    }
+    this.pendingDismissItem = item;
+  }
+
+  confirmDismiss(confirmed: boolean): void {
+    const item = this.pendingDismissItem;
+    this.pendingDismissItem = null;
+    if (confirmed && item) {
+      this.dismissRequested.emit(item);
     }
   }
 
@@ -107,16 +129,7 @@ export class CredentialListComponent {
 
   getThreatSourceIndex(result: RankedResultItem): string {
     const raw = result?.rank_index ?? result?.m_rank_index ?? result?.m_index ?? result?.index ?? result?.type ?? result?.file_type;
-    if (!raw) {
-      return '-';
-    }
-    const cleaned = String(raw)
-      .replace(/^m[_\s-]+/i, '')
-      .replace(/[_\s-]*model$/i, '')
-      .replace(/[_-]+/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
+    return this.rowHelper.formatIndexLabel(raw);
   }
 
   private normalizeValues(value: unknown): string[] {

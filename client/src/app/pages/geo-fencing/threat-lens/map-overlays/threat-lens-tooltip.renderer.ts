@@ -40,14 +40,9 @@ export class ThreatLensTooltipRenderer {
     const ip = typeof attributes.ip === 'string' ? attributes.ip : this.translate('Unknown IP');
     const network = typeof attributes.network === 'string' ? attributes.network : '';
     const accuracyRadius = this.toFiniteNumber(attributes.accuracyRadius);
-    const tooltipContent = document.createElement('div');
-    tooltipContent.className = `${ThreatLensTooltipRenderer.CONTENT_CLASS} threat-lens-tooltip__content--ip min-w-[190px]`;
+    const tooltipContent = this.buildIpTooltipContent('Approximate location');
 
-    const title = document.createElement('div');
-    title.className = ThreatLensTooltipRenderer.ARC_TITLE_CLASS;
-    title.textContent = this.translate('Approximate location');
-
-    tooltipContent.append(title, this.buildTooltipRow(this.translate('IP address'), ip));
+    tooltipContent.append(this.buildTooltipRow(this.translate('IP address'), ip));
     if (network) {
       tooltipContent.append(this.buildTooltipRow(this.translate('Network'), network));
     }
@@ -68,14 +63,7 @@ export class ThreatLensTooltipRenderer {
     const accuracyMin = this.toFiniteNumber(attributes.accuracyMin);
     const accuracyMax = this.toFiniteNumber(attributes.accuracyMax);
     const records = Array.isArray(attributes.records) ? attributes.records : [];
-    const tooltipContent = document.createElement('div');
-    tooltipContent.className = `${ThreatLensTooltipRenderer.CONTENT_CLASS} threat-lens-tooltip__content--ip min-w-[190px]`;
-
-    const title = document.createElement('div');
-    title.className = ThreatLensTooltipRenderer.ARC_TITLE_CLASS;
-    title.textContent = this.translate('Stacked approximate IPs');
-
-    tooltipContent.append(title);
+    const tooltipContent = this.buildIpTooltipContent('Stacked approximate IPs');
     tooltipContent.append(this.buildTooltipRow(this.translate('Why stacked'), String(attributes.stackReason ?? this.translate('Same MaxMind coordinate'))));
     tooltipContent.append(this.buildTooltipRow(this.translate('IP records'), String(count || records.length)));
     if (networkCount > 0) {
@@ -145,6 +133,18 @@ export class ThreatLensTooltipRenderer {
       this.tooltipEl.hidden = false;
     }
     this.move(event);
+  }
+
+  private buildIpTooltipContent(titleKey: string): HTMLDivElement {
+    const tooltipContent = document.createElement('div');
+    tooltipContent.className = `${ThreatLensTooltipRenderer.CONTENT_CLASS} threat-lens-tooltip__content--ip min-w-[190px]`;
+
+    const title = document.createElement('div');
+    title.className = ThreatLensTooltipRenderer.ARC_TITLE_CLASS;
+    title.textContent = this.translate(titleKey);
+
+    tooltipContent.append(title);
+    return tooltipContent;
   }
 
   private buildTooltipRow(label: string, value: string): HTMLDivElement {

@@ -6,12 +6,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 RUN ORION_DOCS_PUBLIC=1 sphinx-build -W --keep-going -b html . /site
 
-ARG DOCUMENTATION_PROJECT_NAME=Platform
-ARG DOCUMENTATION_COMPANY_NAME="Platform Operator"
-RUN python replace_branding.py \
-    /site \
-    "$DOCUMENTATION_PROJECT_NAME" \
-    "$DOCUMENTATION_COMPANY_NAME"
-
 FROM nginx:alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752
 COPY --from=builder /site /usr/share/nginx/html

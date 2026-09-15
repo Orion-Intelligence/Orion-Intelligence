@@ -5,13 +5,12 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subject, of, timer } from 'rxjs';
 import { debounceTime, exhaustMap, map, switchMap, takeUntil } from 'rxjs/operators';
 import type { social_profile } from '../models/social.models';
-import { formatFollowers } from '../../../shared/utils/formatters';
 import { SocialIconComponent } from '../../../shared/partials/social-icon/social-icon.component';
 import { SocialFetchService } from '../services/social-fetch.service';
 import { SocialStorageService } from '../services/social-storage.service';
 import { getProfileDetailEntries } from '../utils/summary-view.util';
 import { buildSocialProfileUrl } from '../utils/profile-url.util';
-import { crawlKey, getPlatformCardId as cardId, getProfileGroupKey, isSamePlatform } from '../utils/social-profile.util';
+import { crawlKey, formatStatValue, getPlatformCardId as cardId, getProfileGroupKey, isSamePlatform, resolveActiveResultSource, resultSourceFor } from '../utils/social-profile.util';
 import { SocialLiveSyncService } from '../services/social-live-sync.service';
 import { StealerlogSectionComponent } from '../stealerlog-section/stealerlog-section.component';
 import { WantedListSectionComponent } from '../wanted-list-section/wanted-list-section.component';
@@ -750,20 +749,13 @@ export class SocialProfileListingComponent {
   }
 
   getResultSource(platformData: social_profile): SocialResultSource {
-    const platform = String(platformData?.meta?.platform ?? '').toLowerCase();
-    const kind = `${platformData?.meta?.entity_type ?? ''} ${platformData?.meta?.target_type ?? ''}`.toLowerCase();
-    const darkweb = ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'];
-    return darkweb.some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum') ? 'darkweb' : 'normal';
+    return resultSourceFor(platformData);
   }
 
   getStatValue(platformData: social_profile, key: keyof NonNullable<social_profile['profile_details']>): string {
     const profileValue = getOwnProperty(platformData.profile_details, key);
     const rawValue = profileValue ?? this.getFallbackStatValue(platformData, key);
-    if (rawValue === null || rawValue === undefined || rawValue === '') {
-      return this.missingStatValue;
-    }
-    const numericValue = typeof rawValue === 'number' ? rawValue : Number(String(rawValue).replace(/,/g, ''));
-    return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(rawValue);
+    return formatStatValue(rawValue, this.missingStatValue);
   }
 
   getProfileDetailEntries(platformData: social_profile): { key: string; value: unknown; }[] {
@@ -931,10 +923,7 @@ export class SocialProfileListingComponent {
 
   private getActiveResultSource(username: string, platforms: social_profile[]): SocialResultSource {
     const preferred = getOwnProperty(this.activeResultSources(), username) ?? 'normal';
-    if (platforms.some(platform => this.getResultSource(platform) === preferred)) {
-      return preferred;
-    }
-    return platforms.some(platform => this.getResultSource(platform) === 'normal') ? 'normal' : 'darkweb';
+    return resolveActiveResultSource(platforms, preferred);
   }
 
   private getAllowedTabKey(tabKey: FetchTabKey): FetchTabKey {

@@ -52,6 +52,13 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
   }
 
+  get documentationUrl(): string {
+    if (this.appService.userSessionData()?.tenant?.isDefault) {
+      return 'https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html';
+    }
+    return '/docs';
+  }
+
   ngOnInit() {
     const hasSavedSidebarPreference = typeof window !== 'undefined' && localStorage.getItem('isSidebarOpen') !== null;
     this.sidebar_default = hasSavedSidebarPreference
@@ -198,7 +205,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
 
   getProfileCategories(): string[] {
     const categories = Object.values(ProfileSubCategory);
-    const canAccessFeeder = this.isAdmin() && this.appService.userSessionData().tenant.isDefault && this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
+    const canAccessFeeder = this.appService.userSessionData().tenant.isDefault && this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
     const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || ((this.isAnalyst() || this.isMember()) && (this.appService.userSessionData().user.permissions ?? []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
 

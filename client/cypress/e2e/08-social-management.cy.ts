@@ -1,18 +1,30 @@
 import {
   FETCH_TIMEOUT,
+  GENERIC_CRAWL_TYPE,
   GRAPH_FIND,
   GRAPH_FIND_INPUT,
+  GRAPH_NEW_ROOT,
   GRAPH_ROOT,
+  NODE_PANEL,
   PLATFORM_CARD,
   SCAN_TIMEOUT,
   SOCIAL_DOMAIN,
   SOCIAL_PLATFORM,
   SOCIAL_USERNAME,
   assertCrawlTabs,
+  clickNodePanelText,
   clickTab,
+  copyNodeHandle,
+  expandFirstContactGroup,
   findStealerRow,
+  openFirstAccountUrl,
+  openFirstNodeAccount,
+  openSocialUserGraph,
+  revealGraphRoot,
   setupSocialStubs,
   stubBulkCrawlSection,
+  stubDarkwebReport,
+  stubGenericCrawlSection,
   stubPhoneIntelligence,
   stubSlowCrawlSection
 } from './controllers/08-social-management.controller';
@@ -101,7 +113,7 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     cy.get('[data-testid="social-dashboard-stealer-download"]').click();
     cy.get('[data-testid="social-dashboard-stealer-export-overlay"]').should('exist');
     cy.get('[data-testid="social-dashboard-stealer-export-modal"]').should('be.visible');
-    cy.get('[data-testid="social-dashboard-stealer-export-close"]').click();
+    cy.get('[data-testid="social-dashboard-stealer-export-report"]').should('be.visible').click();
     cy.get('[data-testid="social-dashboard-stealer-export-modal"]').should('not.exist');
 
     cy.get('[data-testid="social-wanted-list-section"]', { timeout: FETCH_TIMEOUT }).within(() => {
@@ -313,7 +325,7 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
     cy.get('[data-testid="social-stealerlog-download"]').click();
     cy.get('[data-testid="social-stealerlog-export-overlay"]').should('exist');
     cy.get('[data-testid="social-stealerlog-export-modal"]').should('be.visible');
-    cy.get('[data-testid="social-stealerlog-export-close"]').click();
+    cy.get('[data-testid="social-stealerlog-export-csv"]').should('be.visible').click();
     cy.get('[data-testid="social-stealerlog-export-modal"]').should('not.exist');
   });
 
@@ -359,6 +371,123 @@ describe('Orion Intelligence - Social Intel Management Flow', () => {
 
     cy.get('[data-testid="social-result-source-graph"]').click();
     cy.get('[data-testid="social-list-view"]', { timeout: FETCH_TIMEOUT }).should('be.visible');
+  });
+
+  it('explores social user graph nodes, accounts and contact groups', () => {
+    scanUsername();
+    cy.window().then((win) => {
+      cy.stub(win, 'open').as('graphOpen');
+    });
+    openSocialUserGraph();
+
+    revealGraphRoot(SOCIAL_USERNAME.slice(0, 6));
+    cy.get(NODE_PANEL).should('contain.text', SOCIAL_USERNAME);
+    cy.get(NODE_PANEL).find('button[title="Copy handle"]').should('exist');
+
+    copyNodeHandle();
+    openFirstAccountUrl('graphOpen');
+    openFirstNodeAccount();
+
+    cy.get(NODE_PANEL, { timeout: FETCH_TIMEOUT }).should('contain.text', 'Contact groups');
+    expandFirstContactGroup();
+    clickNodePanelText('Show more');
+    clickNodePanelText('Collapse');
+    cy.get(NODE_PANEL).should('be.visible');
+  });
+
+  it('adds and removes graph roots through the find control', () => {
+    scanUsername();
+    openSocialUserGraph();
+
+    cy.get(GRAPH_FIND_INPUT).clear().type(GRAPH_NEW_ROOT);
+    cy.get(GRAPH_FIND).should('contain.text', `Add @${GRAPH_NEW_ROOT}`);
+    cy.get(GRAPH_FIND_INPUT).type('{enter}');
+    cy.wait('@socialGraphSave', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
+      expect(request.body.extra.usernames).to.include(GRAPH_NEW_ROOT);
+    });
+    cy.wait('@socialGraphData', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
+      expect(request.body.usernames).to.include(GRAPH_NEW_ROOT);
+    });
+
+    cy.get(GRAPH_FIND_INPUT).clear().type('zzznomatchhere');
+    cy.get(GRAPH_FIND).find('button[aria-label="Clear"]').click();
+    cy.get(GRAPH_FIND_INPUT).should('have.value', '');
+
+    revealGraphRoot(GRAPH_NEW_ROOT.slice(0, 6));
+    cy.get(NODE_PANEL).within(() => {
+      cy.get('button[title="Remove from graph"]').click();
+    });
+    cy.wait('@socialGraphSave', { timeout: FETCH_TIMEOUT }).then(({ request }) => {
+      expect(request.body.extra.usernames).not.to.include(GRAPH_NEW_ROOT);
+    });
+  });
+
+  it('switches the open profile across sidebar platforms', () => {
+    scanUsername();
+    openProfile();
+    cy.get('[data-testid="social-header-breadcrumb-profile"]').should('contain.text', SOCIAL_USERNAME);
+
+    cy.contains('[data-testid="social-sidebar-platform-row"]', /tiktok/i, { timeout: FETCH_TIMEOUT }).scrollIntoView().click();
+    cy.contains(PLATFORM_CARD, /tiktok/i, { timeout: FETCH_TIMEOUT }).should('be.visible');
+    cy.get('[data-testid="social-header-breadcrumb-profile"]').should('contain.text', 'Tiktok');
+  });
+
+  it('opens a darkweb profile and renders its dark web report', () => {
+    cy.intercept('POST', '**/api/social/recon', {
+      statusCode: 200,
+      body: {
+        job_id: 'cypress',
+        result: [{
+          id: `telegram:${SOCIAL_USERNAME}`,
+          meta: { platform: 'Telegram', username: SOCIAL_USERNAME, url: `https://t.me/${SOCIAL_USERNAME}`, status: 'active', entity_type: 'forum' },
+          profile_details: { real_name: 'Clark Kent' },
+        }],
+      },
+    }).as('socialRecon');
+
+    scanUsername(SOCIAL_USERNAME, /telegram/i);
+    stubDarkwebReport();
+    openProfile(/telegram/i);
+
+    cy.get('[data-testid="social-tab-panel-details"]', { timeout: FETCH_TIMEOUT }).should('be.visible');
+    cy.wait('@socialDarkweb', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-tab-panel-details"]', { timeout: FETCH_TIMEOUT }).should('contain.text', 'Metropolis Underground');
+
+    cy.get('[data-testid="social-fetch-tab"]').then(($tabs) => {
+      const keys = [...$tabs].map(tab => tab.getAttribute('data-tab-key'));
+      expect(keys).to.include('details');
+      expect(keys).to.include('onlinePresence');
+      expect(keys).to.not.include('stealerLogs');
+    });
+  });
+
+  it('expands a stealer log record row from the opened profile', () => {
+    scanUsername();
+    openProfile();
+
+    clickTab('stealerLogs');
+    cy.wait('@socialStealerLogs', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-stealerlog-row"]', { timeout: FETCH_TIMEOUT }).should('have.length.greaterThan', 0).first().click();
+    cy.get('app-expanded-row', { timeout: FETCH_TIMEOUT }).should('be.visible');
+    cy.get('[data-testid="social-stealerlog-row-toggle"]').first().click({ force: true });
+    cy.get('app-expanded-row').should('not.exist');
+  });
+
+  it('renders generic crawl cards with expandable properties and descriptions', () => {
+    scanUsername();
+    stubGenericCrawlSection();
+    openProfile();
+
+    clickTab(GENERIC_CRAWL_TYPE);
+    cy.get('[data-testid="social-crawl-section-fetch"]', { timeout: FETCH_TIMEOUT }).first().click();
+    cy.wait('@socialCrawl', { timeout: FETCH_TIMEOUT });
+    cy.get('[data-testid="social-crawl-resource-card"]', { timeout: FETCH_TIMEOUT }).should('have.length.greaterThan', 0);
+
+    cy.get('[data-testid="social-crawl-resource-card"]').first().within(() => {
+      cy.contains('button', 'Show more').click();
+      cy.contains('button', 'Show less').should('be.visible');
+      cy.contains('button', 'Properties').click();
+    });
   });
 
   it('renders the empty result state when a scan returns no platforms', () => {

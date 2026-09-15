@@ -256,3 +256,116 @@ export function stubPhoneIntelligence() {
 export function clickTab(key: string) {
   void cy.get(`[data-testid="social-fetch-tab"][data-tab-key="${key}"]`, { timeout: FETCH_TIMEOUT }).scrollIntoView().click();
 }
+
+export const GRAPH_SOURCE_TOGGLE = '[data-testid="social-result-source-graph"]';
+export const NODE_PANEL = '[data-testid="social-graph-node-panel"]';
+export const GRAPH_NEW_ROOT = 'clark_recon';
+export const GENERIC_CRAWL_TYPE = 'papers';
+
+export function openSocialUserGraph() {
+  void cy.get(GRAPH_SOURCE_TOGGLE).click();
+  void cy.get(GRAPH_ROOT, { timeout: FETCH_TIMEOUT }).should('be.visible');
+  void cy.get('[data-testid="social-user-graph-canvas"]').find('canvas').should('exist');
+  void cy.wait('@socialGraphData', { timeout: FETCH_TIMEOUT });
+}
+
+export function revealGraphRoot(term: string) {
+  void cy.get(GRAPH_FIND_INPUT).clear().type(term);
+  void cy.get(GRAPH_FIND).find('ul li button', { timeout: FETCH_TIMEOUT }).first().click();
+  void cy.get(NODE_PANEL, { timeout: FETCH_TIMEOUT }).should('be.visible');
+}
+
+export function copyNodeHandle() {
+  void cy.get(NODE_PANEL).then(($panel) => {
+    const button = $panel.find('button[title="Copy handle"]');
+    if (button.length) {
+      void cy.wrap(button.first()).click({ force: true });
+    }
+  });
+}
+
+export function openFirstAccountUrl(alias: string) {
+  void cy.get(NODE_PANEL).then(($panel) => {
+    const button = $panel.find('button[title="Open profile"]');
+    if (button.length) {
+      void cy.wrap(button.first()).click({ force: true });
+      void cy.get(`@${alias}`).should('have.been.called');
+    }
+  });
+}
+
+export function openFirstNodeAccount() {
+  void cy.get(NODE_PANEL).then(($panel) => {
+    const chip = $panel.find('button[title^="@"]');
+    if (chip.length) {
+      void cy.wrap(chip.first()).click({ force: true });
+      void cy.get(NODE_PANEL, { timeout: FETCH_TIMEOUT }).should('be.visible');
+    }
+  });
+}
+
+export function expandFirstContactGroup() {
+  void cy.get(NODE_PANEL).then(($panel) => {
+    const button = $panel.find('button:has(svg[viewBox="0 0 8 8"])');
+    if (button.length) {
+      void cy.wrap(button.first()).click({ force: true });
+      void cy.get(NODE_PANEL, { timeout: FETCH_TIMEOUT }).should('be.visible');
+    }
+  });
+}
+
+export function clickNodePanelText(text: string) {
+  void cy.get(NODE_PANEL).then(($panel) => {
+    const button = [...$panel.find('button')].find(entry => (entry.textContent || '').trim().includes(text));
+    if (button) {
+      void cy.wrap(button).click({ force: true });
+      void cy.get(NODE_PANEL, { timeout: FETCH_TIMEOUT }).should('be.visible');
+    }
+  });
+}
+
+export function stubDarkwebReport(channel = 'Metropolis Underground') {
+  void cy.intercept('POST', '**/api/search/social', {
+    statusCode: 200,
+    body: {
+      Result: [
+        { m_channel_name: channel, m_message: 'Credential dump referencing the target handle.', m_date: '2026-01-02T10:00:00', m_url: 'http://darkweb.example/thread/1', m_network: 'telegram' },
+        { m_title: 'Leaked archive', m_message: 'Second indexed record for this identity.', m_creation_date: '2026-01-03T08:30:00', m_platform: 'forum' },
+      ],
+      Total_Hits: 2,
+    },
+  }).as('socialDarkweb');
+}
+
+export function stubGenericCrawlSection() {
+  const caption = Array.from({ length: 12 }, (_, index) => `Line ${index} of an unusually long recon dossier note that keeps going past the description clamp threshold.`).join('\n');
+  const items = Array.from({ length: 3 }, (_, index) => ({
+    resource_id: `paper-${index}`,
+    title: `Whitepaper ${index}`,
+    url: `https://example.com/papers/${index}`,
+    caption,
+    author: `Author ${index}`,
+    citations: 40 + index,
+    venue: 'Recon Journal',
+    thumbnail_url: 'https://example.com/thumb.png',
+    extra_field_one: 'alpha',
+    extra_field_two: 'beta',
+    extra_link: `https://example.com/ref/${index}`,
+  }));
+  void cy.intercept('POST', '**/api/social/profile', (request) => {
+    if (request.body?.command === 'cancel') {
+      request.reply({ statusCode: 200, body: { status: 'done' } });
+      return;
+    }
+    const type = String(request.body?.type ?? '');
+    if (type === 'details') {
+      request.reply({ statusCode: 200, body: { status: 'done', result: { profile: { real_name: 'Clark Kent', is_parsed: true, crawl_type: ['details', GENERIC_CRAWL_TYPE] } } } });
+      return;
+    }
+    if (type === GENERIC_CRAWL_TYPE) {
+      request.reply({ statusCode: 200, body: { status: 'done', result: { items, has_more: false } } });
+      return;
+    }
+    request.reply({ statusCode: 200, body: { status: 'idle' } });
+  }).as('socialCrawl');
+}

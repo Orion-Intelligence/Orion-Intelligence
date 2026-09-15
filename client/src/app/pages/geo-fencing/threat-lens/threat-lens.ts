@@ -147,15 +147,7 @@ export class ThreatLensComponent implements OnDestroy {
     this.selectedCountryName = '';
     this.selectedCountryIpScanRequest = null;
     this.statusMessage = 'No country detected at clicked point.';
-    this.emitDetailOverlayOpenChange(false);
-    this.cdr.detectChanges();
-
-    if (hadSelectedCountry) {
-      this.lastAutomaticIpScanKey = '';
-      if (!this.mapRenderer?.requestViewportIpScan()) {
-        this.startDefaultIpScan(true);
-      }
-    }
+    this.finalizeSelectionReset(hadSelectedCountry);
   }
 
   onArcCountChange(count: number): void {
@@ -216,17 +208,7 @@ export class ThreatLensComponent implements OnDestroy {
     const center = this.normalizeIpScanCenter(effectiveRequest.center);
     const radiusKm = Math.round(Math.max(25, Math.min(this.defaultIpScanRadiusKm, effectiveRequest.radiusKm)));
     const requestScope = this.selectedCountryIpScanRequest ? `country:${this.toCountryKey(this.selectedCountryName)}` : 'default';
-    const requestKey = this.getIpScanRequestKey(center, radiusKm, requestScope);
-    if (requestKey === this.lastAutomaticIpScanKey && (this.hasIpScanResult || this.isIpScanRunning)) {
-      return;
-    }
-
-    this.lastAutomaticIpScanKey = requestKey;
-    this.runIpScan(`${center.lat.toFixed(6)}, ${center.lon.toFixed(6)}`,
-      center,
-      radiusKm,
-      this.defaultIpScanMaxIps,
-      effectiveRequest.boundary ?? null,);
+    this.dispatchIpScan(center, radiusKm, requestScope, effectiveRequest.boundary ?? null);
   }
 
   get isIpScanRunning(): boolean {
@@ -275,6 +257,14 @@ export class ThreatLensComponent implements OnDestroy {
     }
   }
 
+  private finalizeSelectionReset(hadSelectedCountry: boolean): void {
+    this.emitDetailOverlayOpenChange(false);
+    this.cdr.detectChanges();
+    if (hadSelectedCountry) {
+      this.refreshIpScan();
+    }
+  }
+
   clearAllSelections(): void {
     const hadSelectedCountry = Boolean(this.selectedCountryName || this.selectedCountryIpScanRequest);
     this.closeArcReportPanel(false);
@@ -287,15 +277,7 @@ export class ThreatLensComponent implements OnDestroy {
     this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
     this.mapRenderer?.clearSelections();
     this.statusMessage = 'Selections cleared.';
-    this.emitDetailOverlayOpenChange(false);
-    this.cdr.detectChanges();
-
-    if (hadSelectedCountry) {
-      this.lastAutomaticIpScanKey = '';
-      if (!this.mapRenderer?.requestViewportIpScan()) {
-        this.startDefaultIpScan(true);
-      }
-    }
+    this.finalizeSelectionReset(hadSelectedCountry);
   }
 
   toggleSearchPanel(): void {
@@ -463,14 +445,7 @@ export class ThreatLensComponent implements OnDestroy {
     };
   }
 
-  private runCountryIpScan(countryName: string, request: ThreatLensIpViewportScanRequest | null): void {
-    if (!request) {
-      return;
-    }
-
-    const center = this.normalizeIpScanCenter(request.center);
-    const radiusKm = Math.round(Math.max(25, Math.min(this.defaultIpScanRadiusKm, request.radiusKm)));
-    const requestScope = `country:${this.toCountryKey(countryName)}`;
+  private dispatchIpScan(center: ThreatLensCoordinates, radiusKm: number, requestScope: string, boundary: ThreatLensCountryBoundary | null): void {
     const requestKey = this.getIpScanRequestKey(center, radiusKm, requestScope);
     if (requestKey === this.lastAutomaticIpScanKey && (this.hasIpScanResult || this.isIpScanRunning)) {
       return;
@@ -481,7 +456,18 @@ export class ThreatLensComponent implements OnDestroy {
       center,
       radiusKm,
       this.defaultIpScanMaxIps,
-      request.boundary ?? null,);
+      boundary);
+  }
+
+  private runCountryIpScan(countryName: string, request: ThreatLensIpViewportScanRequest | null): void {
+    if (!request) {
+      return;
+    }
+
+    const center = this.normalizeIpScanCenter(request.center);
+    const radiusKm = Math.round(Math.max(25, Math.min(this.defaultIpScanRadiusKm, request.radiusKm)));
+    const requestScope = `country:${this.toCountryKey(countryName)}`;
+    this.dispatchIpScan(center, radiusKm, requestScope, request.boundary ?? null);
   }
 
   private watchIpScanResult(center: ThreatLensCoordinates, radiusKm: number, boundary: ThreatLensCountryBoundary | null): void {

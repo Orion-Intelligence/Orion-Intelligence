@@ -7,6 +7,7 @@ import { AppService } from '../../services/core/app/app.service';
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 import { PublicUserActivityItem } from '../partials/report-interactions/models/public-user-data.model';
 import { ExportBrandingService } from './export/export-branding.service';
+import { RESULT_ROUTE } from './result-route.const';
 import { getOwnProperty, setOwnProperty } from '../utils/type-guards.util';
 
 type RiskClass = 'risk-high' | 'risk-medium' | 'risk-low' | 'risk-info';
@@ -272,32 +273,17 @@ export class HelperService {
       return null;
     }
 
-    switch (item.index_name) {
-      case 'generic_model':
-        return { path: ['/dashboard', 'strategic', 'all', docId], queryParams: { ci: 'strategic' } };
-      case 'leak_model':
-        return { path: ['/dashboard', 'breach', 'all', docId], queryParams: { ci: 'leak' } };
-      case 'exploit_model':
-        return { path: ['/dashboard', 'exploit', 'all', docId], queryParams: { ci: 'exploit' } };
-      case 'apt_model':
-        return { path: ['/dashboard', 'apt-intel', 'apt', docId], queryParams: { ci: 'apt' } };
-      case 'malware_model':
-        return { path: ['/dashboard', 'apt-intel', 'malware', docId], queryParams: { ci: 'malware' } };
-      case 'defacement_model':
-        return { path: ['/dashboard', 'defacement', 'all', docId], queryParams: { ci: 'defacement' } };
-      case 'social_model':
-        return { path: ['/dashboard', 'social', 'all', docId], queryParams: { ci: 'social' } };
-      case 'chat_model':
-        return { path: ['/dashboard', 'social', 'chat', 'all', docId], queryParams: { ci: 'chat' } };
-      default:
-        if (!item.route_path) {
-          return null;
-        }
-        return {
-          path: ['/', ...item.route_path.split('/').filter(Boolean)],
-          queryParams: item.route_query,
-        };
+    const mapped = getOwnProperty(RESULT_ROUTE, item.index_name);
+    if (mapped) {
+      return { path: [...mapped.seg, docId], queryParams: { ci: mapped.ci } };
     }
+    if (!item.route_path) {
+      return null;
+    }
+    return {
+      path: ['/', ...item.route_path.split('/').filter(Boolean)],
+      queryParams: item.route_query,
+    };
   }
 
   private normalizeShareUrl(url: string): string {

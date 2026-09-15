@@ -3,10 +3,13 @@ from datetime import timezone
 import hashlib
 
 from cryptography.fernet import Fernet
+from fastapi import HTTPException
 
+from orion.constants.constant import CONSTANTS
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_case_model import CaseCommunication
 from orion.services.mongo_manager.shared_model.db_case_model import CaseEntity
 from orion.services.mongo_manager.shared_model.db_case_model import db_case_model
 
@@ -15,6 +18,17 @@ class CaseHelperMethods:
     @staticmethod
     def actor_id(current_user) -> str:
         return str(current_user.id)
+
+    @staticmethod
+    async def find_case_or_404(engine, case_id: str, current_user) -> db_case_model:
+        record = await engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+        return record
 
     @staticmethod
     def is_admin(current_user) -> bool:
@@ -107,6 +121,26 @@ class CaseHelperMethods:
             return value
 
     @staticmethod
+    def communication_session_path(resource_id: str):
+        return CONSTANTS.S_SESSION_RESOURCE_DIR / "case_communications" / f"{resource_id}.enc"
+
+    @staticmethod
+    def delete_communication_session(communication: CaseCommunication) -> None:
+        if not communication.sessionResourceId:
+            return
+        CaseHelperMethods.communication_session_path(communication.sessionResourceId).unlink(missing_ok=True)
+
+    @staticmethod
+    def sanitize_communication(communication: CaseCommunication) -> dict:
+        return {
+            "communicationId": communication.communicationId,
+            "name": communication.name,
+            "url": communication.url,
+            "platform": communication.platform,
+            "hasSession": bool(communication.sessionResourceId),
+        }
+
+    @staticmethod
     def apply_sensitive_case_values(record: db_case_model, transform) -> None:
         record.title = transform(record.title)
         record.description = transform(record.description)
@@ -144,6 +178,10 @@ class CaseHelperMethods:
 
         for linked_case in record.linkedCases or []:
             linked_case.reason = transform(linked_case.reason)
+
+        for communication in record.communications or []:
+            communication.name = transform(communication.name)
+            communication.url = transform(communication.url)
 
         if record.closure:
             record.closure.summary = transform(record.closure.summary)

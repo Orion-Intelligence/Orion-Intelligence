@@ -23,7 +23,7 @@ from orion.services.mongo_manager.shared_model.db_case_model import db_case_mode
 from orion.services.mongo_manager.shared_model.db_case_model import utc_now
 from orion.api.interactive.case_manager.case_artifact_helper import CaseArtifactHelper
 from orion.api.interactive.case_manager.status_board_config import StatusBoardConfigManager
-from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_manager import search_manager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.services.elastic_manager.elastic_enums import ELASTIC_INDEX
 from orion.services.permission_manager.permission_models import UserPermission
@@ -43,6 +43,22 @@ class CaseManager:
         if CaseManager.__instance is None:
             CaseManager()
         return CaseManager.__instance
+
+    async def _find_case_record(self, case_id, current_user):
+        return await self._engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+        )
+
+    async def _persist_case(self, record: db_case_model, enc, current_user, audit_message: str) -> None:
+        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
+        await self._engine.save(record)
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid),
+            str(current_user.id),
+            audit_message,
+        )
 
     async def _to_response(self, record: db_case_model, current_user) -> CaseResponse:
         enc = await CaseHelperMethods.get_case_cipher(current_user)
@@ -78,6 +94,10 @@ class CaseManager:
             comment.updatedAt = CaseHelperMethods.as_aware_utc(comment.updatedAt)
 
         data = record.model_dump()
+        data["communications"] = [
+            CaseHelperMethods.sanitize_communication(communication)
+            for communication in (record.communications or [])
+        ]
         data["id"] = str(record.id)
         data["viewerId"] = CaseHelperMethods.actor_id(current_user)
         data["viewerRole"] = getattr(current_user.role, "value", str(current_user.role))
@@ -266,12 +286,8 @@ class CaseManager:
             closedAt=server_now if data.closure else None,
         )
         enc = await CaseHelperMethods.get_case_cipher(current_user)
-        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
-        await self._engine.save(record)
-
-        await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
-            str(current_user.id),
+        await self._persist_case(
+            record, enc, current_user,
             f"Case created: caseId={record.caseId}, title={data.title}, caseType={record.caseType}, status={record.status}, priority={record.priority}, severity={record.severity}, intakeSource={record.intakeSource}, entities_count={len(record.entities)}",
         )
 
@@ -285,6 +301,9 @@ class CaseManager:
             & (db_user_account.status == UserStatus.ACTIVE),
         )
         users = [user for user in users if self._has_case_management_permission(user)]
+        return self._serialize_case_users(users)
+    
+    def _serialize_case_users(self, users) -> list[dict]:
         return [
             {
                 "id": str(user.id),
@@ -295,7 +314,7 @@ class CaseManager:
             }
             for user in users
         ]
-    
+
     async def _get_assigned_case_analysts(self, record: db_case_model) -> list[dict]:
         assigned_ids = set(record.assignedAnalystIds or [])
 
@@ -314,23 +333,10 @@ class CaseManager:
             if str(user.id) in assigned_ids and self._has_case_management_permission(user)
         ]
 
-        return [
-            {
-                "id": str(user.id),
-                "username": user.username,
-                "email": user.email,
-                "role": user.role.value if user.role else "",
-                "status": user.status.value if user.status else "",
-            }
-            for user in users
-        ]
+        return self._serialize_case_users(users)
 
     async def get_case_by_id(self, case_id: str, current_user) -> CaseResponse:
-        record = await self._engine.find_one(
-            db_case_model,
-            (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
-        )
+        record = await self._find_case_record(case_id, current_user)
         if not record:
             await AuditLogManager.get_instance().register(
                 str(current_user.tenant_uuid),
@@ -445,11 +451,7 @@ class CaseManager:
         return old_data != new_data
 
     async def update_case(self, case_id: str, data: UpdateCaseRequest, current_user) -> CaseResponse:
-        record = await self._engine.find_one(
-            db_case_model,
-            (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
-        )
+        record = await self._find_case_record(case_id, current_user)
         if not record:
             await AuditLogManager.get_instance().register(
                 str(current_user.tenant_uuid),
@@ -643,23 +645,12 @@ class CaseManager:
             record.closedAt = None
         record.updatedAt = utc_now()
 
-        CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
-        await self._engine.save(record)
-
-        await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
-            str(current_user.id),
-            f"Case updated: caseId={case_id}",
-        )
+        await self._persist_case(record, enc, current_user, f"Case updated: caseId={case_id}")
 
         return await self._to_response(record, current_user)
 
     async def delete_case(self, case_id: str, current_user) -> dict:
-        record = await self._engine.find_one(
-            db_case_model,
-            (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
-        )
+        record = await self._find_case_record(case_id, current_user)
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
         if record.isArchived:
@@ -668,6 +659,9 @@ class CaseManager:
             raise HTTPException(status_code=403, detail="Closed cases cannot be deleted")
         if not CaseHelperMethods.is_maintainer(current_user):
             raise HTTPException(status_code=403, detail="Only maintainers can delete cases")
+
+        for communication in record.communications or []:
+            CaseHelperMethods.delete_communication_session(communication)
 
         await self._engine.delete(record)
         await AuditLogManager.get_instance().register(
@@ -748,11 +742,7 @@ class CaseManager:
         return {"files": uploaded_files}
     
     async def _load_viewable_case(self, case_id: str, current_user):
-        record = await self._engine.find_one(
-            db_case_model,
-            (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
-        )
+        record = await self._find_case_record(case_id, current_user)
 
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -905,7 +895,7 @@ class CaseManager:
         )
 
         if source == "strategic":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
+            result = await search_manager.getInstance().search_consolidated_ranked_result(
                 param,
                 [ELASTIC_INDEX.S_GENERIC_INDEX],
                 [],
@@ -913,7 +903,7 @@ class CaseManager:
             )
 
         elif source == "breach":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
+            result = await search_manager.getInstance().search_consolidated_ranked_result(
                 param,
                 [ELASTIC_INDEX.S_LEAK_INDEX],
                 ["news"],
@@ -922,7 +912,7 @@ class CaseManager:
 
         elif source == "defacement":
             param.content = "all"
-            result = await search_model.getInstance().search_consolidated_ranked_result(
+            result = await search_manager.getInstance().search_consolidated_ranked_result(
                 param,
                 [ELASTIC_INDEX.S_DEFACEMENT_INDEX],
                 [],
@@ -931,7 +921,7 @@ class CaseManager:
             )
 
         elif source == "social":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
+            result = await search_manager.getInstance().search_consolidated_ranked_result(
                 param,
                 [ELASTIC_INDEX.S_CHATS_INDEX, ELASTIC_INDEX.S_SOCIAL_INDEX],
                 [],
@@ -939,7 +929,7 @@ class CaseManager:
             )
 
         elif source == "exploit":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
+            result = await search_manager.getInstance().search_consolidated_ranked_result(
                 param,
                 [ELASTIC_INDEX.S_EXPLOIT_INDEX],
                 [],
@@ -947,7 +937,7 @@ class CaseManager:
             )
 
         elif source == "feed":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
+            result = await search_manager.getInstance().search_consolidated_ranked_result(
                 param,
                 [ELASTIC_INDEX.S_LEAK_INDEX],
                 [],
@@ -955,7 +945,7 @@ class CaseManager:
             )
 
         elif source == "stealerlogs":
-            result = await search_model.getInstance().search_consolidated_ranked_result(
+            result = await search_manager.getInstance().search_consolidated_ranked_result(
                 param,
                 [ELASTIC_INDEX.S_LEAK_INDEX],
                 [],
@@ -990,11 +980,7 @@ class CaseManager:
         return items
     
     async def archive_case(self, case_id: str, current_user) -> dict:
-        record = await self._engine.find_one(
-            db_case_model,
-            (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
-        )
+        record = await self._find_case_record(case_id, current_user)
 
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -1032,11 +1018,7 @@ class CaseManager:
         if getattr(current_user.role, "value", current_user.role) != user_role.ADMIN.value:
             raise HTTPException(status_code=403, detail="Only admins can unarchive cases")
 
-        record = await self._engine.find_one(
-            db_case_model,
-            (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
-        )
+        record = await self._find_case_record(case_id, current_user)
 
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -1077,13 +1059,7 @@ class CaseManager:
             lambda value: CaseHelperMethods.decrypt_value(enc, value),
         )
 
-        artifact = next((item for item in record.artifacts if item.artifactId == artifact_id), None)
-        if artifact is None:
-            raise HTTPException(status_code=404, detail="Artifact not found")
-
-        artifact_file = next((item for item in artifact.files if item.fileId == file_id), None)
-        if artifact_file is None:
-            raise HTTPException(status_code=404, detail="Artifact file not found")
+        _, artifact_file = self._resolve_artifact_file(record, artifact_id, file_id)
 
         is_valid = self._verify_file_integrity(artifact_file, enc)
 
@@ -1189,11 +1165,7 @@ class CaseManager:
         return await self._to_response(record, current_user)
     
     async def assign_case_analyst(self, case_id: str, data, current_user) -> CaseResponse:
-        record = await self._engine.find_one(
-            db_case_model,
-            (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
-        )
+        record = await self._find_case_record(case_id, current_user)
 
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
