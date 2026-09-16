@@ -1,17 +1,20 @@
-const NEUTRAL_NAME = "Platform";
+const NEUTRAL_NAME = "Threat Intelligence Platform";
 
-const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="pfm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="16" fill="url(#pfm-g)"/><g fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linecap="round"><path d="M32 15a17 17 0 0 1 17 17"/><path d="M32 49a17 17 0 0 1 -17 -17"/></g><circle cx="32" cy="32" r="5" fill="#ffffff"/></svg>`;
+const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><defs><linearGradient id="pfm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="16" fill="url(#pfm-g)"/><g fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linecap="round"><path d="M32 15a17 17 0 0 1 17 17"/><path d="M32 49a17 17 0 0 1 -17 -17"/></g><circle cx="32" cy="32" r="5" fill="#ffffff"/></svg>`;
 
-const WORDMARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 232 64"><defs><linearGradient id="pfw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="6" y="14" width="40" height="40" rx="12" fill="url(#pfw-g)"/><g fill="none" stroke="#ffffff" stroke-width="2.7" stroke-linecap="round"><path d="M26 24a10 10 0 0 1 10 10"/><path d="M26 44a10 10 0 0 1 -10 -10"/></g><circle cx="26" cy="34" r="3.4" fill="#ffffff"/><text x="58" y="42" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="25" font-weight="600" fill="#94a3b8">${NEUTRAL_NAME}</text></svg>`;
+function wordmarkSvg(textColor: string): string {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="520" height="64" viewBox="0 0 520 64"><defs><linearGradient id="pfw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="6" y="12" width="40" height="40" rx="12" fill="url(#pfw-g)"/><g fill="none" stroke="#ffffff" stroke-width="2.7" stroke-linecap="round"><path d="M26 22a10 10 0 0 1 10 10"/><path d="M26 42a10 10 0 0 1 -10 -10"/></g><circle cx="26" cy="32" r="3.4" fill="#ffffff"/><text x="54" y="42" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="600" fill="${textColor}">${NEUTRAL_NAME}</text></svg>`;
+}
 
 const MARK_URI = `data:image/svg+xml,${encodeURIComponent(MARK_SVG)}`;
-const WORDMARK_URI = `data:image/svg+xml,${encodeURIComponent(WORDMARK_SVG)}`;
-const NEUTRAL_URIS = new Set([MARK_URI, WORDMARK_URI]);
+const WORDMARK_LIGHT_URI = `data:image/svg+xml,${encodeURIComponent(wordmarkSvg("#1e293b"))}`;
+const WORDMARK_DARK_URI = `data:image/svg+xml,${encodeURIComponent(wordmarkSvg("#e2e8f0"))}`;
+const NEUTRAL_URIS = new Set([MARK_URI, WORDMARK_LIGHT_URI, WORDMARK_DARK_URI]);
 
-const LOGO_SRC = /logo|\/api\/s\/static\//i;
-const IS_WIDE = /wide/i;
-const ORION_FULL = /Orion Intelligence/g;
-const ORION_WORD = /\bOrion\b/g;
+const LOGO_SRC = /logo|\/api\/s\/static\/system\//i;
+const HAS_ORION = /orion/i;
+const ORION_FULL = /Orion Intelligence/gi;
+const ORION_WORD = /\bOrion\b/gi;
 const BG_TARGETS = '[class*="logo" i],[class*="brand" i],[id*="logo" i],[style*="background"]';
 
 export interface NeutralBrandState {
@@ -25,7 +28,13 @@ function neutralizeText(value: string): string {
 }
 
 function logoUriFor(source: string): string {
-    return IS_WIDE.test(source) ? WORDMARK_URI : MARK_URI;
+    if (/light/i.test(source)) {
+        return WORDMARK_LIGHT_URI;
+    }
+    if (/wide/i.test(source)) {
+        return WORDMARK_DARK_URI;
+    }
+    return MARK_URI;
 }
 
 export function applyNeutralBrand(win: Window, state?: NeutralBrandState): NeutralBrandState {
@@ -74,7 +83,7 @@ export function applyNeutralBrand(win: Window, state?: NeutralBrandState): Neutr
         let node = walker.nextNode() as Text | null;
         while (node) {
             const value = node.nodeValue || "";
-            if (value.indexOf("Orion") !== -1) {
+            if (HAS_ORION.test(value)) {
                 const replaced = neutralizeText(value);
                 if (replaced !== value) {
                     collected.texts.push([node, value]);

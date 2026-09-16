@@ -16,12 +16,12 @@ POSTPROCESS_MARKER_KEY = "orion_docs_postprocessed"
 POSTPROCESS_MARKER_VALUE = "1920x1080-v1"
 
 NEUTRAL_MODE = os.environ.get("ORION_DOCS_NEUTRAL") == "1"
-_BRAND_FULL = re.compile(r"Orion Intelligence")
-_BRAND_WORD = re.compile(r"\bOrion\b")
+_BRAND_FULL = re.compile(r"Orion Intelligence", re.IGNORECASE)
+_BRAND_WORD = re.compile(r"\bOrion\b", re.IGNORECASE)
 
 
 def _neutralize_brand(text: str) -> str:
-    return _BRAND_WORD.sub("Platform", _BRAND_FULL.sub("Platform", text))
+    return _BRAND_WORD.sub("Threat Intelligence Platform", _BRAND_FULL.sub("Threat Intelligence Platform", text))
 
 
 def load_caption_map() -> dict[str, str]:

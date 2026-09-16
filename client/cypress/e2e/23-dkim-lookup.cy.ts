@@ -65,7 +65,7 @@ describe('Orion Intelligence - DKIM Lookup', () => {
     cy.contains('button', 'Analyzing…').should('be.disabled');
     cy.wait('@rawCheck');
     cy.contains('Authentication Results').should('be.visible');
-    cy.contains('No Received headers found').should('be.visible');
+    cy.contains('No Received headers found').scrollIntoView().should('be.visible');
     cy.contains('.dkim-auth-grid section', 'SPF Check').should('contain.text', 'Not available');
     cy.intercept('POST', '**/api/dkim/check', { body: { status: 'done', result: { error_message: 'Unable to parse message' } } }).as('rawError');
     cy.contains('button', 'Run Diagnostics').click();
@@ -95,7 +95,7 @@ describe('Orion Intelligence - DKIM Lookup', () => {
     cy.contains('.dkim-auth-grid section', 'DKIM Signature').should('contain.text', 'pass').and('contain.text', 'pseb.org.pk');
     cy.contains('.dkim-auth-grid section', 'SPF Check').should('contain.text', '54.240.8.51');
     cy.contains('.dkim-auth-grid section', 'DMARC Policy').should('contain.text', 'p=QUARANTINE');
-    cy.contains('Network Hops').should('be.visible');
+    cy.contains('Network Hops').scrollIntoView().should('be.visible');
     cy.get('.dkim-hops li').should('have.length', 2);
   });
 
