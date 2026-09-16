@@ -47,7 +47,7 @@ class ProfileManager:
         return str(getattr(current_user, "id", "") or "")
 
     async def _tenant_cipher(self, current_user) -> Fernet:
-        dek = await KeyManager.get_instance().get_or_create_dek(str(getattr(current_user, "tenant_uuid", "") or ""))
+        dek = await KeyManager.get_instance().get_or_create_dek(str(getattr(current_user, "tenant_id", "") or ""))
         return Fernet(dek)
 
     async def list_platforms(self, current_user):

@@ -18,7 +18,7 @@ def make_user(**overrides):
         status=UserStatus.ACTIVE,
         twofa_enabled=False,
         twofa_secret=None,
-        tenant_uuid=VALID_OID,
+        tenant_id=VALID_OID,
         role=user_role.MEMBER,
         subscription=True,
         account_verify_at=datetime.now(timezone.utc),
@@ -70,7 +70,7 @@ class FakeSessionInstance:
         self.access_tokens.append((data, expires_delta, free))
         return "access-token", "member"
 
-    async def has_onboarding(self, tenant_uuid):
+    async def has_onboarding(self, tenant_id):
         return self.onboarding
 
 

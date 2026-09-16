@@ -263,7 +263,7 @@ class config_controller:
             return
         if not self._is_tenant_branding_editor(current_user):
             raise HTTPException(status_code=403, detail="Only tenant maintainers can update branding")
-        if not self._is_admin(current_user) and str(getattr(current_user, "tenant_uuid", "")) != tenant_id:
+        if not self._is_admin(current_user) and str(getattr(current_user, "tenant_id", "")) != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant settings cannot be updated across tenants")
         if settings is not None and not self._is_admin(current_user):
             disallowed = set(settings).difference(self.TENANT_EDITABLE_SETTINGS)
@@ -365,7 +365,7 @@ class config_controller:
         if file_name is None:
             raise HTTPException(status_code=400, detail="Invalid system resource")
 
-        requested_tenant_id = tenant_id or getattr(current_user, "tenant_uuid", None)
+        requested_tenant_id = tenant_id or getattr(current_user, "tenant_id", None)
         tenant = await self._get_tenant(requested_tenant_id)
         if tenant is None:
             raise HTTPException(status_code=404, detail="Tenant configuration is unavailable")

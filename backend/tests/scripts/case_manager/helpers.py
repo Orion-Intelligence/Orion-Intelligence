@@ -67,11 +67,11 @@ def _make_user(
     role=user_role.MEMBER,
     licenses=None,
     permissions=None,
-    tenant_uuid=TENANT,
+    tenant_id=TENANT,
 ):
     return SimpleNamespace(
         id=user_id,
-        tenant_uuid=tenant_uuid,
+        tenant_id=tenant_id,
         role=role,
         licenses=licenses if licenses is not None else [],
         permissions=permissions if permissions is not None else [],
@@ -106,7 +106,7 @@ def _make_account(
     role=user_role.ANALYST,
     status=UserStatus.ACTIVE,
     permissions=None,
-    tenant_uuid=TENANT,
+    tenant_id=TENANT,
 ):
     return SimpleNamespace(
         id=account_id,
@@ -114,7 +114,7 @@ def _make_account(
         email=email,
         role=role,
         status=status,
-        tenant_uuid=tenant_uuid,
+        tenant_id=tenant_id,
         permissions=permissions if permissions is not None else [UserPermission.CASE_MANAGEMENT],
     )
 
@@ -140,7 +140,7 @@ def _make_record(
 ) -> db_case_model:
     return db_case_model(
         caseId=case_id,
-        tenant_uuid=TENANT,
+        tenant_id=TENANT,
         title="Title",
         description="Desc",
         status=status,

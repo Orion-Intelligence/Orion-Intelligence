@@ -28,7 +28,7 @@ def test_siem_manager_can_inject_and_search_same_logs(monkeypatch):
 
     manager = SiemLogManager.get_instance()
     manager._engine = FakeMongoEngine(SimpleNamespace(event_management_enabled=True))
-    current_user = SimpleNamespace(tenant_uuid="000000000000000000000001")
+    current_user = SimpleNamespace(tenant_id="000000000000000000000001")
 
     inject_payload = InjectionBatchRequestModel(
         logs=[

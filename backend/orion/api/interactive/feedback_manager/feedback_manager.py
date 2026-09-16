@@ -41,14 +41,14 @@ class FeedbackManager:
             user = await mongo_controller.get_instance().get_engine().find_one(db_user_account, db_user_account.id == ObjectId(user_id))
         except Exception:
             return ""
-        return str(getattr(user, "tenant_uuid", "") or "") if user else ""
+        return str(getattr(user, "tenant_id", "") or "") if user else ""
 
     async def _get_public_profile(self, user_id: str, current_user) -> dict:
         user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if current_user.role != user_role.ADMIN and str(user.tenant_uuid) != str(current_user.tenant_uuid):
+        if current_user.role != user_role.ADMIN and str(user.tenant_id) != str(current_user.tenant_id):
             raise HTTPException(status_code=403, detail="You are not allowed to access this user")
 
         preferences = user.preferences if isinstance(user.preferences, dict) else {}
@@ -59,7 +59,7 @@ class FeedbackManager:
             }
 
         tenant_name = ""
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
         if tenant and str(getattr(current_user, "id", "")) != user_id and getattr(tenant, "profile_visibility_enabled", True) is False:
             return {
                 "hidden": True,

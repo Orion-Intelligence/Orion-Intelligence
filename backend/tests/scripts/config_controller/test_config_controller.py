@@ -295,14 +295,14 @@ def test_assert_tenant_editor_variants():
     assert exc.value.status_code == 403
 
     with pytest.raises(HTTPException) as exc:
-        manager._assert_tenant_editor(_maintainer_user(tenant_uuid="other"), "t-1")
+        manager._assert_tenant_editor(_maintainer_user(tenant_id="other"), "t-1")
     assert exc.value.status_code == 403
 
     with pytest.raises(HTTPException) as exc:
-        manager._assert_tenant_editor(_maintainer_user(tenant_uuid="t-1"), "t-1", {"backup_schedule": "1"})
+        manager._assert_tenant_editor(_maintainer_user(tenant_id="t-1"), "t-1", {"backup_schedule": "1"})
     assert exc.value.status_code == 403
 
-    manager._assert_tenant_editor(_maintainer_user(tenant_uuid="t-1"), "t-1", {AllowedKeys.APP_NAME.value: "n"})
+    manager._assert_tenant_editor(_maintainer_user(tenant_id="t-1"), "t-1", {AllowedKeys.APP_NAME.value: "n"})
     manager._assert_tenant_editor(_user(role="admin"), "t-1", {"anything": "goes"})
 
 

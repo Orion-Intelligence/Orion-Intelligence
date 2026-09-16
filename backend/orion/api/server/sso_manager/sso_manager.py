@@ -69,7 +69,7 @@ class sso_manager:
     def _identity_for_user(user: db_user_account) -> dict[str, str]:
         return {
             "user_id": str(user.id),
-            "tenant_id": str(user.tenant_uuid),
+            "tenant_id": str(user.tenant_id),
             "username": str(user.username),
             "email": str(user.email or "").strip().lower(),
             "full_name": str(user.username),

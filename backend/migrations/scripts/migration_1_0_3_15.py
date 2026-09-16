@@ -77,7 +77,7 @@ class migration_1_0_3_15:
             settings.update(settings_by_tenant.get(tenant_id, {}))
 
             meta_info = migration_1_0_3_15._loads(settings.get(AllowedKeys.META_INFO.value))
-            key_record = await engine.find_one(db_keys, db_keys.auth_id == tenant_id)
+            key_record = await engine.find_one(db_keys, db_keys.tenant_id == tenant_id)
             enc = Fernet(KeyManager.get_instance()._unwrap(key_record.wrapped_key))
             smtp_fields = {
                 "accounts_mail_password": "ACCOUNTS_MAIL_PASSWORD",
@@ -177,7 +177,7 @@ class migration_1_0_3_15:
                 slug = "default"
             else:
                 email = str(tenant.email or "")
-                key_record = await engine.find_one(db_keys, db_keys.auth_id == str(tenant.id))
+                key_record = await engine.find_one(db_keys, db_keys.tenant_id == str(tenant.id))
                 if email and key_record:
                     try:
                         email = Fernet(KeyManager.get_instance()._unwrap(key_record.wrapped_key)).decrypt(email.encode()).decode()

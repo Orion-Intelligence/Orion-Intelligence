@@ -37,7 +37,7 @@ def _user(role=user_role.ADMIN, permissions=None, user_id="507f1f77bcf86cd799439
         id=ObjectId(user_id) if isinstance(user_id, str) and len(user_id) == 24 else user_id,
         username=username,
         email=f"{username}@example.com",
-        tenant_uuid=tenant,
+        tenant_id=tenant,
         role=role,
         permissions=permissions if permissions is not None else [],
     )

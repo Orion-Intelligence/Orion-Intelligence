@@ -19,8 +19,8 @@ def _make_manager(engine=None, collection=None):
     return manager
 
 
-def _user(tenant_uuid="tenant-1", user_id="user-1", username="analyst", role=None):
-    return SimpleNamespace(tenant_uuid=tenant_uuid, id=user_id, username=username, role=role)
+def _user(tenant_id="tenant-1", user_id="user-1", username="analyst", role=None):
+    return SimpleNamespace(tenant_id=tenant_id, id=user_id, username=username, role=role)
 
 
 def _set_env(monkeypatch, mapping):

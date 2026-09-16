@@ -50,8 +50,8 @@ def _make_manager(engine) -> ProfileManager:
     return manager
 
 
-def _make_user(user_id="507f1f77bcf86cd799439011", tenant_uuid="507f1f77bcf86cd799439012"):
-    return SimpleNamespace(id=user_id, tenant_uuid=tenant_uuid)
+def _make_user(user_id="507f1f77bcf86cd799439011", tenant_id="507f1f77bcf86cd799439012"):
+    return SimpleNamespace(id=user_id, tenant_id=tenant_id)
 
 
 def _make_key_manager():

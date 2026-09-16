@@ -36,7 +36,7 @@ class SiemLogManager:
     async def inject_logs(self, payload, current_user):
         await self._ensure_event_management_enabled(current_user)
         logs = payload.logs
-        tenant_id = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
         enriched_logs = await self._enrich_logs_with_iocs([item.model_dump(exclude_none=True) for item in logs])
         if not enriched_logs:
             return {
@@ -156,7 +156,7 @@ class SiemLogManager:
 
     async def search_logs(self, payload, current_user):
         await self._ensure_event_management_enabled(current_user)
-        tenant_id = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
         document, data_filter = self.search_query_siem_logs(
             payload.q,
             tenant_id,
@@ -295,6 +295,6 @@ class SiemLogManager:
         return index_entries
 
     async def _ensure_event_management_enabled(self, current_user) -> None:
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(current_user.tenant_uuid)))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(current_user.tenant_id)))
         if not tenant or not getattr(tenant, "event_management_enabled", False):
             raise HTTPException(status_code=403, detail="Event management is disabled for this tenant")

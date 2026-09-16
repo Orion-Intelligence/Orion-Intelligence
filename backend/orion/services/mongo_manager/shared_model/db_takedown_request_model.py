@@ -16,8 +16,8 @@ class TakedownRequestStatus(str, Enum):
 
 
 class db_takedown_request_model(Model):
-    tenant_uuid: str = ""
-    requester_tenant_uuid: str = ""
+    operator_tenant_id: str = ""
+    tenant_id: str = ""
     user_uuid: str = ""
     username: str = ""
 

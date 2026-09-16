@@ -314,7 +314,7 @@ async def delete_system_log(log_date: str, file_name: str):
     include_in_schema=False,
     dependencies=[Depends(status_required([UserStatus.ACTIVE])), ], )
 async def get_node(current_user=Depends(get_current_user)):
-    return await AlertManager.getInstance().get_alert_summary(str(current_user.tenant_uuid))
+    return await AlertManager.getInstance().get_alert_summary(str(current_user.tenant_id))
 
 @tenant_routes.post(
     "/api/get/tenant/node",
@@ -418,7 +418,7 @@ async def run_user_ioc_alerts(current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])),
         Depends(license_required("maintainer")), ], )
 async def cancel_user_ioc_alerts(current_user=Depends(get_current_user)):
-    return await AlertManager.getInstance().set_scan_running(current_user.tenant_uuid, False,True)
+    return await AlertManager.getInstance().set_scan_running(current_user.tenant_id, False,True)
 
 
 @tenant_routes.post(

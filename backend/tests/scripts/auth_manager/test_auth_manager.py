@@ -110,7 +110,7 @@ def test_login_maintainer_not_found(monkeypatch):
 
 def test_login_no_tenant_uuid(monkeypatch):
     patch_common(monkeypatch)
-    patch_authenticate(monkeypatch, make_user(tenant_uuid=None))
+    patch_authenticate(monkeypatch, make_user(tenant_id=None))
     patch_mongo(monkeypatch, make_engine([make_user()]))
     with pytest.raises(HTTPException) as exc:
         _run(auth_manager.login("x@y.com", "pw"))

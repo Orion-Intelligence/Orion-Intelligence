@@ -63,7 +63,7 @@ class mongo_controller:
             name="unique_admin_role", )
 
         await user_collection.create_index(
-            [("tenant_uuid", 1)],
+            [("tenant_id", 1)],
             unique=True,
             partialFilterExpression={"licenses": ["maintainer"]},
             name="unique_maintainer_per_company", )
@@ -110,7 +110,7 @@ class mongo_controller:
             status=UserStatus.ACTIVE,
             subscription=True,
             licenses=[LicenseName.OSINT_BASIC],
-            tenant_uuid=str(default_tenant.id), ))
+            tenant_id=str(default_tenant.id), ))
 
     async def ensure_nexus_user(self):
         if env_handler.get_instance().env("PRODUCTION") != "0":
@@ -132,7 +132,7 @@ class mongo_controller:
             status=UserStatus.ACTIVE,
             subscription=True,
             licenses=[LicenseName.ENTERPRISE],
-            tenant_uuid=str(default_tenant.id), ))
+            tenant_id=str(default_tenant.id), ))
 
     async def initialize(self):
         await self.ensure_indexes()

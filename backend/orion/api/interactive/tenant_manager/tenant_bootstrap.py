@@ -49,7 +49,7 @@ async def create_default_users(engine, tenant_id):
             role=user_role.ADMIN,
             status=UserStatus.ACTIVE,
             licenses=[LicenseName.ENTERPRISE, LicenseName.MAINTAINER],
-            tenant_uuid=str(tenant_id), )
+            tenant_id=str(tenant_id), )
         await engine.save(admin_user)
         crawler_user = db_user_account(
             username=crawler_mock["username"],
@@ -57,7 +57,7 @@ async def create_default_users(engine, tenant_id):
             role=user_role.CRAWLER,
             status=UserStatus.ACTIVE,
             licenses=[LicenseName.ENTERPRISE],
-            tenant_uuid=str(tenant_id), )
+            tenant_id=str(tenant_id), )
         await engine.save(crawler_user)
     except DuplicateKeyError:
         log.g().ex("⚠️ Duplicate admin user detected. Skipping insert.")
@@ -71,7 +71,7 @@ async def tenant_boostrap(engine):
         return data
     except Exception:
         if data is not None:
-            await engine.remove(db_user_account, db_user_account.tenant_uuid == str(data.id))
+            await engine.remove(db_user_account, db_user_account.tenant_id == str(data.id))
             await engine.remove(db_keys, db_keys.id == str(data.id))
             await engine.delete(data)
         raise

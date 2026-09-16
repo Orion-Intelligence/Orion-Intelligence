@@ -531,7 +531,7 @@ def test_get_alert_access_licenses_with_tenant_decrypt(monkeypatch):
 def test_get_alert_access_licenses_invalid_tenant_raises():
     manager = _make_manager()
     with pytest.raises(HTTPException) as exc:
-        _run(manager.get_alert_access_licenses(_user(tenant_uuid="not-valid", licenses=[])))
+        _run(manager.get_alert_access_licenses(_user(tenant_id="not-valid", licenses=[])))
     assert exc.value.status_code == 500
 
 

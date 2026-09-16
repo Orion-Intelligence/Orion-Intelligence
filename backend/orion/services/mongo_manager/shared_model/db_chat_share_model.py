@@ -22,7 +22,7 @@ class ChatShareMessage(EmbeddedModel):
 
 class db_chat_share_model(Model):
     shareId: str = Field(index=True)
-    tenant_uuid: str = Field(index=True)
+    tenant_id: str = Field(index=True)
     userId: str = Field(index=True)
     tokenHash: str
     messages: List[ChatShareMessage] = Field(default_factory=list)

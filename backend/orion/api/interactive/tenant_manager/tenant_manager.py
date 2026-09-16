@@ -329,7 +329,7 @@ class TenantManager:
             await self._engine.save(data)
             await self.copy_default_system_settings(data)
         except Exception as _:
-            await self._engine.remove(db_user_account, db_user_account.tenant_uuid == str(data.id))
+            await self._engine.remove(db_user_account, db_user_account.tenant_id == str(data.id))
             await self._engine.remove(db_keys, db_keys.id == str(data.id))
             await self._engine.remove(db_system_model, db_system_model.tenant_id == str(data.id))
             await self._engine.delete(data)
@@ -337,10 +337,10 @@ class TenantManager:
 
     async def get_tenant(self, current_user) -> TenantRequest:
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.tenant_uuid))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(current_user.tenant_id))
         if not tenant:
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid), str(current_user.id), "failed to get tenant")
+                str(current_user.tenant_id), str(current_user.id), "failed to get tenant")
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="User role not found in get tenant")
 
         dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
@@ -352,7 +352,7 @@ class TenantManager:
             values=[enc.decrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in (tenant.iocs or [])]
 
         tenant_request = TenantRequest(
-            id=str(current_user.tenant_uuid), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models,
+            id=str(current_user.tenant_id), name=enc.decrypt(tenant.name.encode()).decode(), iocs=ioc_models,
             phone=enc.decrypt(tenant.phone.encode()).decode() if tenant.phone else "",
             country=enc.decrypt(tenant.country.encode()).decode() if tenant.country else "",
             city=enc.decrypt(tenant.city.encode()).decode() if tenant.city else "",
@@ -390,15 +390,15 @@ class TenantManager:
 
         if current_user.role in ["admin"]:
             tenant_id = data.id
-        elif current_user.licenses == ["maintainer"] and current_user.tenant_uuid == data.id:
+        elif current_user.licenses == ["maintainer"] and current_user.tenant_id == data.id:
             tenant_id = data.id
         else:
-            tenant_id = current_user.tenant_uuid
+            tenant_id = current_user.tenant_id
 
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
         if not tenant:
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid), str(current_user.id), "failed to update tenant")
+                str(current_user.tenant_id), str(current_user.id), "failed to update tenant")
             raise HTTPException(status_code=401, detail="Onboarding record not found for this user.")
 
         if tenant.is_default:
@@ -409,7 +409,7 @@ class TenantManager:
         is_admin = current_user.role in ["admin"]
 
         if data.password_reset_required is not None:
-            maintainer = await self._engine.find_one(db_user_account,(db_user_account.tenant_uuid == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
+            maintainer = await self._engine.find_one(db_user_account,(db_user_account.tenant_id == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
             maintainer.password_reset_required = data.password_reset_required
             await self._engine.save(maintainer)
 
@@ -479,7 +479,7 @@ class TenantManager:
         elif (
             data.status == TenantStatus.ACTIVE
             and tenant.status == TenantStatus.ONBOARDING
-            and str(tenant.id) == str(current_user.tenant_uuid)
+            and str(tenant.id) == str(current_user.tenant_id)
         ):
             tenant.status = TenantStatus.ACTIVE
 
@@ -531,7 +531,7 @@ class TenantManager:
             raise HTTPException(status_code=401, detail="Only admin can assign maintainer license")
 
         if is_admin:
-            users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
+            users = await self._engine.find(db_user_account, db_user_account.tenant_id == tenant_id)
             for u in users:
                 if "maintainer" in (u.licenses or []):
                     u.status = UserStatus.ACTIVE
@@ -545,20 +545,20 @@ class TenantManager:
 
         active_count = await self._engine.count(
             db_user_account,
-            (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
+            (db_user_account.tenant_id == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
 
         if tenant.user_quota and active_count > tenant.user_quota:
             excess = active_count - tenant.user_quota
             extra_users = await self._engine.find(
                 db_user_account,
-                (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value) & (
+                (db_user_account.tenant_id == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value) & (
                         db_user_account.licenses != ["maintainer"]),
                 limit=excess)
             for u in extra_users:
                 u.status = UserStatus.DISABLE.value
                 await self._engine.save(u)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid), str(current_user.id), "tenant updated successfully")
+            str(current_user.tenant_id), str(current_user.id), "tenant updated successfully")
 
         tenant_data = tenant.model_dump()
         tenant_data["id"] = str(tenant.id)
@@ -592,7 +592,7 @@ class TenantManager:
     async def get_all_tenant(self) -> List[dict]:
         tenants = await self._engine.find(db_tenant_model, db_tenant_model.is_default == False)
         maintainers = await self._engine.find(db_user_account, db_user_account.licenses == LicenseName.MAINTAINER)
-        maintainer_by_tenant_id = {str(maintainer.tenant_uuid): maintainer for maintainer in maintainers}
+        maintainer_by_tenant_id = {str(maintainer.tenant_id): maintainer for maintainer in maintainers}
         result = []
         for tenant in tenants:
             dek = await KeyManager.get_instance().get_profile_dek(ObjectId(tenant.id))
@@ -638,12 +638,12 @@ class TenantManager:
             raise HTTPException(status_code=403, detail="Default tenant cannot be deleted")
 
         users = await self._engine.find(
-            db_user_account, db_user_account.tenant_uuid == tenant_id)
+            db_user_account, db_user_account.tenant_id == tenant_id)
         for user in users:
-            await self._engine.remove(db_keys, db_keys.auth_id == str(user.id))
+            await self._engine.remove(db_keys, db_keys.tenant_id == str(user.id))
         await self._engine.remove(
-            db_user_account, db_user_account.tenant_uuid == tenant_id)
-        await self._engine.remove(db_keys, db_keys.auth_id == tenant_id)
+            db_user_account, db_user_account.tenant_id == tenant_id)
+        await self._engine.remove(db_keys, db_keys.tenant_id == tenant_id)
         await self._engine.delete(tenant)
         return {"message": "Tenant deleted successfully"}
 
@@ -800,22 +800,22 @@ class TenantManager:
 
             hashed_password = await AccountManager.get_instance().create_tenant_user(existing_user, existing_mail, password)
 
-            tenant_uuid = getattr(current_user, "tenant_uuid", None) or ""
-            if not tenant_uuid:
+            tenant_id = getattr(current_user, "tenant_id", None) or ""
+            if not tenant_id:
                 raise HTTPException(status_code=400, detail="Invalid company association")
 
-            tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_uuid))
+            tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id))
             if not tenant:
                 raise HTTPException(status_code=400, detail="Tenant not found")
 
-            users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)
+            users_count = await engine.count(db_user_account, db_user_account.tenant_id == tenant_id)
 
             if tenant.is_default == False and tenant.user_quota is not None and (users_count + 1) > tenant.user_quota:
                 raise HTTPException(status_code=400, detail="User allocated quota exceeded")
 
             if data.role in ["demo"] and current_user.role not in ["admin"]:
                 await AuditLogManager.get_instance().register(
-                    str(tenant_uuid), str(current_user.id), "User creation denied")
+                    str(tenant_id), str(current_user.id), "User creation denied")
                 raise HTTPException(status_code=401, detail="You are not allowed to manage this user")
 
             dek = await KeyManager.get_instance().get_profile_dek(str(tenant.id))
@@ -833,7 +833,7 @@ class TenantManager:
 
             alerts_allowed_all, alerts_allowed_tenant_ids = await self.validate_alert_access_assignment(data, current_user)
 
-            users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)
+            users_count = await engine.count(db_user_account, db_user_account.tenant_id == tenant_id)
             if tenant.is_default == False and tenant.user_quota and users_count >= tenant.user_quota:
                 raise HTTPException(status_code=400, detail="User quota exceeded")
 
@@ -848,13 +848,13 @@ class TenantManager:
                 permissions=data.permissions,
                 alerts_allowed_all=alerts_allowed_all,
                 alerts_allowed_tenant_ids=alerts_allowed_tenant_ids,
-                tenant_uuid=tenant_uuid,
+                tenant_id=tenant_id,
                 password_reset_required=True, )
             
-            await mail_manager.get_instance().validate_mail_configuration(tenant_id=tenant_uuid)
+            await mail_manager.get_instance().validate_mail_configuration(tenant_id=tenant_id)
             await engine.save(user)
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid), str(current_user.id), "tenant created successfully")
+                str(current_user.tenant_id), str(current_user.id), "tenant created successfully")
 
             APP_URL = env_handler.get_instance().env("APP_URL")
             login_url = TenantManager.build_tenant_url(APP_URL, tenant, "/login")
@@ -875,9 +875,9 @@ class TenantManager:
                     f"Login URL: {login_url}"
                 )
             await mail_manager.get_instance().send_verification_mail(
-                to=user.email, subject=MailSubject.ACCOUNT_CREATED.value, body=html_content, tenant_id=tenant_uuid)
+                to=user.email, subject=MailSubject.ACCOUNT_CREATED.value, body=html_content, tenant_id=tenant_id)
 
-            return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
+            return {"message": "User created successfully", "username": username, "email": email, "tenant_id": tenant_id, "allowed_licenses": list(
                 tenant_allowed), }
 
         except HTTPException as e:

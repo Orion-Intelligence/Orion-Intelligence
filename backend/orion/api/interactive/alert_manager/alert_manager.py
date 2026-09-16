@@ -207,7 +207,7 @@ class AlertManager:
             action_url=self._alert_action_url())
 
     async def send_alert_change_mail(self, action: str, alert: AlertModel, current_user):
-        tenant_id = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
         is_created = action == "created"
         display_category = self._display_alert_label(alert.type)
         title = AlertMailTitle.CUSTOM_CREATED.value if is_created else AlertMailTitle.ALERT_UPDATED.value
@@ -291,7 +291,7 @@ class AlertManager:
         return {"created": created_count, "updated": updated_count}
 
     async def add_custom_alert(self, data: AlertModel, current_user):
-        tenant_uuid = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
 
         all_ioc = data.all_ioc or []
         if not all_ioc and (data.ioc_type and data.ioc_value):
@@ -320,7 +320,7 @@ class AlertManager:
             first_seen=datetime.now(timezone.utc),
             last_seen=datetime.now(timezone.utc), )
 
-        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+        existing_doc = await self._engine.find_one(db_alert_model, db_alert_model.tenant_id == tenant_id)
 
         if existing_doc and existing_doc.alerts:
             for alert in visible_alerts(existing_doc.alerts):
@@ -336,7 +336,7 @@ class AlertManager:
                     alert.status = new_alert.status
                     alert.last_seen = datetime.now(timezone.utc)
                     await self._engine.save(existing_doc)
-                    await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+                    await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
                     await self.send_alert_change_mail("updated", alert, current_user)
                     return {"message": "Updated"}
 
@@ -344,17 +344,17 @@ class AlertManager:
             existing_doc.alerts.append(new_alert)
             save_doc = existing_doc
         else:
-            save_doc = db_alert_model(tenant_id=tenant_uuid, alerts=[new_alert])
+            save_doc = db_alert_model(tenant_id=tenant_id, alerts=[new_alert])
 
         await self._engine.save(save_doc)
-        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
         await self.send_alert_change_mail("created", new_alert, current_user)
         return {"message": "Created"}
 
     async def update_alert(self, alert_to_update: AlertModel, current_user):
-        tenant_uuid = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
         existing_doc = await self._engine.find_one(
-            db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+            db_alert_model, db_alert_model.tenant_id == tenant_id)
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=404, detail="No alerts found for this user")
         hash_to_find = alert_to_update.data_hash
@@ -376,15 +376,15 @@ class AlertManager:
         if not updated:
             raise HTTPException(status_code=404, detail="No matching alert found to update")
         await self._engine.save(existing_doc)
-        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
         if updated_alert:
             await self.send_alert_change_mail("updated", updated_alert, current_user)
         return {"message": "Alert updated successfully", "updated_hash": hash_to_find}
 
     async def set_alert_seen(self, alerts_to_update: list[AlertModel], current_user):
-        tenant_uuid = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
         existing_doc = await self._engine.find_one(
-            db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+            db_alert_model, db_alert_model.tenant_id == tenant_id)
 
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=404, detail="No alerts found for this user")
@@ -406,15 +406,15 @@ class AlertManager:
             raise HTTPException(status_code=404, detail="No matching alerts found to update")
 
         await self._engine.save(existing_doc)
-        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
 
         return {"message": "Alerts updated successfully", "updated": updated_count}
 
     async def delete_alert(self, alert_id: str, current_user):
-        tenant_uuid = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
 
         existing_doc = await self._engine.find_one(
-            db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+            db_alert_model, db_alert_model.tenant_id == tenant_id)
 
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=404, detail="No alerts found for this user")
@@ -430,7 +430,7 @@ class AlertManager:
             raise HTTPException(status_code=404, detail="Alert not found")
 
         await self._engine.save(existing_doc)
-        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
 
         return {"message": "Alert deleted successfully", "id": alert_id}
 
@@ -483,7 +483,7 @@ class AlertManager:
 
     async def get_alert_filter_options(self, current_user, field: str, query: str = "", limit: int = 25, alert_type: str | None = None) -> dict[str, list[str]]:
         alerts_data = await self._engine.find_one(
-            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
+            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_id))
         alerts = visible_alerts(alerts_data.alerts if alerts_data and alerts_data.alerts else [])
         alerts = await self.filter_alerts_by_license(alerts, current_user)
         if alert_type:
@@ -493,7 +493,7 @@ class AlertManager:
 
     async def getAllAlerts(self, current_user, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False, compact: bool = False, unseen_only: bool = False, include_counts: bool = False):
         alerts_data = await self._engine.find_one(
-            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_uuid))
+            db_alert_model, db_alert_model.tenant_id == str(current_user.tenant_id))
 
         scan_status = await self.get_scan_status(current_user)
         if scan_status.get("scan_running", False):
@@ -559,10 +559,10 @@ class AlertManager:
         return response
 
     async def delete_all_alerts(self, current_user):
-        tenant_uuid = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
 
         existing_doc = await self._engine.find_one(
-            db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+            db_alert_model, db_alert_model.tenant_id == tenant_id)
 
         if not existing_doc:
             raise HTTPException(status_code=400, detail="No alerts to delete")
@@ -574,15 +574,15 @@ class AlertManager:
         for alert in alerts_to_delete:
             alert.is_deleted = True
         await self._engine.save(existing_doc)
-        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
 
         return {"message": "All alerts deleted successfully"}
 
     async def delete_alerts_by_type(self, current_user, alert_type: str):
-        tenant_uuid = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
 
         existing_doc = await self._engine.find_one(
-            db_alert_model, db_alert_model.tenant_id == tenant_uuid)
+            db_alert_model, db_alert_model.tenant_id == tenant_id)
         if not existing_doc or not existing_doc.alerts:
             raise HTTPException(status_code=400, detail="No alerts to delete")
 
@@ -597,7 +597,7 @@ class AlertManager:
                 status_code=404, detail=f"No alerts found with type '{alert_type}'")
 
         await self._engine.save(existing_doc)
-        await self._summary_helper.invalidate_alert_summary_cache(tenant_uuid)
+        await self._summary_helper.invalidate_alert_summary_cache(tenant_id)
 
         return {"message": f"Deleted {deleted_count} alerts of type '{alert_type}'"}
 
@@ -622,7 +622,7 @@ class AlertManager:
     async def get_scan_status(self, current_user):
         alerts_data = await self._engine.find_one(
             db_alert_model,
-            db_alert_model.tenant_id == str(current_user.tenant_uuid))
+            db_alert_model.tenant_id == str(current_user.tenant_id))
 
         if alerts_data:
             return {"scan_running": alerts_data.scan_running}
@@ -668,7 +668,7 @@ class AlertManager:
     async def get_alert_access_licenses(self, user) -> set[str]:
         licenses = {license_value.value if hasattr(license_value, "value") else str(license_value) for license_value in (getattr(user, "licenses", []) or [])}
         try:
-            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(user.tenant_uuid)))
+            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(user.tenant_id)))
             if tenant:
                 dek = await KeyManager.get_instance().get_or_create_dek(str(tenant.id))
                 enc = Fernet(dek)

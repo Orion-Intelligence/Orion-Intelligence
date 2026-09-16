@@ -48,14 +48,14 @@ class CaseManager:
         return await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+            & (db_case_model.tenant_id == str(current_user.tenant_id)),
         )
 
     async def _persist_case(self, record: db_case_model, enc, current_user, audit_message: str) -> None:
         CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.encrypt_value(enc, value))
         await self._engine.save(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             audit_message,
         )
@@ -114,7 +114,7 @@ class CaseManager:
     async def _get_tenant_analyst_ids(self, current_user) -> set[str]:
         users = await self._engine.find(
             db_user_account,
-            (db_user_account.tenant_uuid == str(current_user.tenant_uuid))
+            (db_user_account.tenant_id == str(current_user.tenant_id))
             & (db_user_account.role == user_role.ANALYST)
             & (db_user_account.status == UserStatus.ACTIVE),
         )
@@ -176,7 +176,7 @@ class CaseManager:
             target_record = await self._engine.find_one(
                 db_case_model,
                 (db_case_model.caseId == target_case_id)
-                & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+                & (db_case_model.tenant_id == str(current_user.tenant_id)),
             )
             if not target_record or not CaseHelperMethods.can_view_case(target_record, current_user):
                 raise HTTPException(status_code=400, detail="Linked cases must be cases you can access")
@@ -187,7 +187,7 @@ class CaseManager:
 
         if CaseHelperMethods.is_maintainer(current_user):
             records = await self._engine.find(
-                db_case_model, (db_case_model.tenant_uuid == str(current_user.tenant_uuid)) 
+                db_case_model, (db_case_model.tenant_id == str(current_user.tenant_id)) 
                 & (db_case_model.isArchived == archived)
             )
         else:
@@ -195,7 +195,7 @@ class CaseManager:
             records = await self._engine.find(
                 db_case_model,
                 {
-                    "tenant_uuid": str(current_user.tenant_uuid),
+                    "tenant_id": str(current_user.tenant_id),
                     "isArchived": archived,
                     "$or": [
                         {"createdBy": current_actor_id},
@@ -205,7 +205,7 @@ class CaseManager:
             )
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"All cases retrieved: total_count={len(records)}",
         )
@@ -216,7 +216,7 @@ class CaseManager:
         existing = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == data.caseId)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+            & (db_case_model.tenant_id == str(current_user.tenant_id)),
         )
         if existing:
             raise HTTPException(status_code=400, detail="Case ID already exists")
@@ -240,7 +240,7 @@ class CaseManager:
         ]
         record = db_case_model(
             caseId=data.caseId,
-            tenant_uuid=str(current_user.tenant_uuid),
+            tenant_id=str(current_user.tenant_id),
             title=data.title,
             description=data.description,
             caseType=data.caseType,
@@ -296,7 +296,7 @@ class CaseManager:
     async def get_case_analysts(self, current_user) -> list[dict]:
         users = await self._engine.find(
             db_user_account,
-            (db_user_account.tenant_uuid == str(current_user.tenant_uuid))
+            (db_user_account.tenant_id == str(current_user.tenant_id))
             & (db_user_account.role == user_role.ANALYST)
             & (db_user_account.status == UserStatus.ACTIVE),
         )
@@ -323,7 +323,7 @@ class CaseManager:
 
         users = await self._engine.find(
             db_user_account,
-            (db_user_account.tenant_uuid == record.tenant_uuid)
+            (db_user_account.tenant_id == record.tenant_id)
             & (db_user_account.role == user_role.ANALYST)
             & (db_user_account.status == UserStatus.ACTIVE),
         )
@@ -339,7 +339,7 @@ class CaseManager:
         record = await self._find_case_record(case_id, current_user)
         if not record:
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid),
+                str(current_user.tenant_id),
                 str(current_user.id),
                 f"Case retrieval failed: caseId={case_id}, case_not_found",
             )
@@ -348,7 +348,7 @@ class CaseManager:
             raise HTTPException(status_code=403, detail="Access forbidden")
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"Case retrieved: caseId={case_id}",
         )
@@ -454,7 +454,7 @@ class CaseManager:
         record = await self._find_case_record(case_id, current_user)
         if not record:
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid),
+                str(current_user.tenant_id),
                 str(current_user.id),
                 f"Case update failed: caseId={case_id}, case_not_found",
             )
@@ -665,7 +665,7 @@ class CaseManager:
 
         await self._engine.delete(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"Case deleted: caseId={case_id}",
         )
@@ -673,7 +673,7 @@ class CaseManager:
 
     async def get_next_case_id(self, current_user) -> dict:
         case_count = await self._engine.count(
-            db_case_model, db_case_model.tenant_uuid == str(current_user.tenant_uuid)
+            db_case_model, db_case_model.tenant_id == str(current_user.tenant_id)
         )
         next_id = str(case_count + 1).zfill(5)
         return {"nextCaseId": next_id}
@@ -784,7 +784,7 @@ class CaseManager:
 
         if not self._verify_file_integrity(artifact_file, enc):
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid),
+                str(current_user.tenant_id),
                 str(current_user.id),
                 f"Artifact file integrity failed: caseId={case_id}, artifactId={artifact_id}, fileId={file_id}, fileName={file_name}",
             )
@@ -1007,7 +1007,7 @@ class CaseManager:
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"Case archived: caseId={case_id}",
         )
@@ -1033,7 +1033,7 @@ class CaseManager:
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"Case unarchived: caseId={case_id}",
         )
@@ -1065,7 +1065,7 @@ class CaseManager:
 
         if not is_valid:
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid),
+                str(current_user.tenant_id),
                 str(current_user.id),
                 f"Artifact file integrity failed: caseId={case_id}, artifactId={artifact_id}, fileId={file_id}, fileName={artifact_file.fileName}",
             )
@@ -1085,7 +1085,7 @@ class CaseManager:
     
     async def update_case_status(self, case_id: str, data, current_user) -> CaseResponse:
         record = await self._engine.find_one(db_case_model, (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)))
+            & (db_case_model.tenant_id == str(current_user.tenant_id)))
 
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -1157,7 +1157,7 @@ class CaseManager:
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"Case status changed: caseId={case_id}, from={current_status}, to={next_status}, reason={reason}",
         )
@@ -1186,7 +1186,7 @@ class CaseManager:
         await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"Case analyst assigned: caseId={case_id}, analystId={data.analystId}",
         )

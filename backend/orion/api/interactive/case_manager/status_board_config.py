@@ -59,14 +59,14 @@ class StatusBoardConfigManager:
 
     @staticmethod
     def _user_uses_tenant_config(current_user) -> bool:
-        tenant_uuid = getattr(current_user, "tenant_uuid", "")
-        return bool(tenant_uuid and str(tenant_uuid) not in {"", "-1", "None"})
+        tenant_id = getattr(current_user, "tenant_id", "")
+        return bool(tenant_id and str(tenant_id) not in {"", "-1", "None"})
 
     @classmethod
     async def get_effective_config(cls, current_user) -> CaseStatusBoardConfig:
         tenant = None
         if cls._user_uses_tenant_config(current_user):
-            tenant = await mongo_controller.get_instance().get_engine().find_one(db_tenant_model,db_tenant_model.id == ObjectId(str(current_user.tenant_uuid)))
+            tenant = await mongo_controller.get_instance().get_engine().find_one(db_tenant_model,db_tenant_model.id == ObjectId(str(current_user.tenant_id)))
         return StatusBoardConfigManager.normalize_status_board_config(getattr(tenant, "case_status_tracking_board", None))
 
     @staticmethod

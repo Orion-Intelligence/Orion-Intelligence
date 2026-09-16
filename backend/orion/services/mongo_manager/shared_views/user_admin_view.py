@@ -15,8 +15,8 @@ class UserAdminView(ModelView):
         self._engine = engine
 
     async def before_edit(self, request: Request, data: dict, obj: Any):
-        if obj.tenant_uuid and "tenant_uuid" in data and data["tenant_uuid"] != str(obj.tenant_uuid):
-            raise FormValidationError({"tenant_uuid": "tenant_uuid cannot be changed"})
+        if obj.tenant_id and "tenant_id" in data and data["tenant_id"] != str(obj.tenant_id):
+            raise FormValidationError({"tenant_id": "tenant_id cannot be changed"})
 
     async def delete(self, request: Request, pks: list[Any]) -> Optional[int]:
         objs = await self.find_by_pks(request, pks)
@@ -32,11 +32,11 @@ class UserAdminView(ModelView):
                     raise ActionFailed("Cannot delete the last crawler user.")
 
             if LicenseName.MAINTAINER in obj.licenses:
-                tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(obj.tenant_uuid), )
+                tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(obj.tenant_id), )
                 if tenant is not None:
-                    raise ActionFailed("Cannot delete maintainer user while a tenant exists with the same tenant_uuid.")
+                    raise ActionFailed("Cannot delete maintainer user while a tenant exists with the same tenant_id.")
 
-            await self._engine.remove(db_keys, db_keys.auth_id == str(obj.id), )
+            await self._engine.remove(db_keys, db_keys.tenant_id == str(obj.id), )
 
             image_path = CONSTANTS.IMAGE_DIR / f"{obj.id}.enc"
             if image_path.exists():

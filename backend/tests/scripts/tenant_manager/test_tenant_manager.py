@@ -400,7 +400,7 @@ def test_get_tenant_not_found(monkeypatch):
     fakes = _patch_managers(monkeypatch)
     engine = ModelEngine().set_find_one(db_tenant_model, [None])
     manager = _make_manager(engine)
-    current = SimpleNamespace(tenant_uuid="507f1f77bcf86cd799439011", id="u1")
+    current = SimpleNamespace(tenant_id="507f1f77bcf86cd799439011", id="u1")
     with pytest.raises(HTTPException) as exc:
         _run(manager.get_tenant(current))
     assert exc.value.status_code == 403
@@ -419,7 +419,7 @@ def test_get_tenant_success(monkeypatch):
     engine.set_find_one(db_tenant_model, [tenant])
     engine.set_find_one(db_system_model, [settings])
     manager = _make_manager(engine)
-    current = SimpleNamespace(tenant_uuid=str(tenant.id), id="u1")
+    current = SimpleNamespace(tenant_id=str(tenant.id), id="u1")
     result = _run(manager.get_tenant(current))
     assert result.name == "Acme"
     assert result.iocs[0].values == ["acme.com"]
@@ -431,7 +431,7 @@ def test_get_all_tenant(monkeypatch):
     _set_env(monkeypatch, APP_URL="")
     _patch_managers(monkeypatch)
     tenant = _make_tenant(iocs=[_enc_ioc("m_email", "Emails", ["user@acme.com"])])
-    maintainer = SimpleNamespace(tenant_uuid=str(tenant.id), password_reset_required=True)
+    maintainer = SimpleNamespace(tenant_id=str(tenant.id), password_reset_required=True)
     engine = ModelEngine()
     engine.set_find(db_tenant_model, [tenant])
     engine.set_find(db_user_account, [maintainer])
@@ -729,7 +729,7 @@ def _tenant_request(tenant_id, **overrides):
 def _admin_user(tenant_id):
     return SimpleNamespace(
         role="admin",
-        tenant_uuid=tenant_id,
+        tenant_id=tenant_id,
         id="u1",
         username="admin",
         licenses=["maintainer"],
@@ -762,7 +762,7 @@ def test_update_tenant_privileged_ioc_non_admin(monkeypatch):
     tenant = _make_tenant()
     engine = ModelEngine().set_find_one(db_tenant_model, [tenant])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(tenant.id), id="u1", username="bob", licenses=["free"])
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob", licenses=["free"])
     data = _tenant_request(str(tenant.id), privileged_ioc=True)
     with pytest.raises(HTTPException) as exc:
         _run(manager.update_tenant(data, current))
@@ -774,7 +774,7 @@ def test_update_tenant_iocs_non_admin_without_privilege(monkeypatch):
     tenant = _make_tenant(privileged_ioc=False)
     engine = ModelEngine().set_find_one(db_tenant_model, [tenant])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(tenant.id), id="u1", username="bob", licenses=["free"])
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob", licenses=["free"])
     data = _tenant_request(str(tenant.id), iocs=[IocCategory(ioc_id="x", name="X", values=["1"])])
     with pytest.raises(HTTPException) as exc:
         _run(manager.update_tenant(data, current))
@@ -842,7 +842,7 @@ def test_update_tenant_maintainer_license_non_admin_rejected(monkeypatch):
     engine.set_find_one(db_system_model, [None])
     engine.set_find_one(db_alert_model, [None])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(tenant.id), id="u1", username="bob", licenses=["free"])
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob", licenses=["free"])
     data = _tenant_request(str(tenant.id), licenses=["maintainer"])
     with pytest.raises(HTTPException) as exc:
         _run(manager.update_tenant(data, current))
@@ -902,7 +902,7 @@ def test_update_tenant_ai_endpoint_non_admin(monkeypatch):
     tenant = _make_tenant()
     engine = ModelEngine().set_find_one(db_tenant_model, [tenant])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(tenant.id), id="u1", username="bob", licenses=["free"])
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob", licenses=["free"])
     data = _tenant_request(str(tenant.id), ai_endpoint_enabled=True)
     with pytest.raises(HTTPException) as exc:
         _run(manager.update_tenant(data, current))
@@ -920,7 +920,7 @@ def test_update_tenant_password_reset_and_member_activate(monkeypatch):
     engine.set_find_one(db_system_model, [None])
     engine.set_find_one(db_alert_model, [None])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(tenant.id), id="u1", username="bob", licenses=["free"])
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob", licenses=["free"])
     data = _tenant_request(str(tenant.id), password_reset_required=True, status=TenantStatus.ACTIVE)
     result = _run(manager.update_tenant(data, current))
     assert maintainer.password_reset_required is True
@@ -954,10 +954,10 @@ def test_create_tenant_user_success(monkeypatch):
     engine.count_result = 0
     fakes = _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid=str(tenant.id), id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id=str(tenant.id), id="u1", username="admin")
     result = _run(manager.create_tenant_user(_new_user_model(), current))
     assert result["username"] == "newuser01"
-    assert result["tenant_uuid"] == str(tenant.id)
+    assert result["tenant_id"] == str(tenant.id)
     assert "free" in result["allowed_licenses"]
     assert fakes.mail.sent
 
@@ -966,7 +966,7 @@ def test_create_tenant_user_maintainer_denied(monkeypatch):
     engine = ModelEngine()
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid="507f1f77bcf86cd799439011", id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id="507f1f77bcf86cd799439011", id="u1", username="admin")
     data = _new_user_model(licenses=[LicenseName.MAINTAINER])
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(data, current))
@@ -978,7 +978,7 @@ def test_create_tenant_user_no_tenant_uuid(monkeypatch):
     engine.set_find_one(db_user_account, [None, None])
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid="", id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id="", id="u1", username="admin")
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(_new_user_model(), current))
     assert exc.value.status_code == 400
@@ -990,7 +990,7 @@ def test_create_tenant_user_tenant_not_found(monkeypatch):
     engine.set_find_one(db_tenant_model, [None])
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid="507f1f77bcf86cd799439011", id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id="507f1f77bcf86cd799439011", id="u1", username="admin")
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(_new_user_model(), current))
     assert exc.value.status_code == 400
@@ -1004,7 +1004,7 @@ def test_create_tenant_user_quota_exceeded(monkeypatch):
     engine.count_result = 1
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid=str(tenant.id), id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id=str(tenant.id), id="u1", username="admin")
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(_new_user_model(), current))
     assert exc.value.status_code == 400
@@ -1019,7 +1019,7 @@ def test_create_tenant_user_demo_denied_for_non_admin(monkeypatch):
     engine.count_result = 0
     fakes = _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(tenant.id), id="u1", username="bob")
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob")
     data = _new_user_model(role="demo", email="demo@acme.com")
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(data, current))
@@ -1034,7 +1034,7 @@ def test_create_tenant_user_license_not_allowed(monkeypatch):
     engine.count_result = 0
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(tenant.id), id="u1", username="bob")
+    current = SimpleNamespace(role="member", tenant_id=str(tenant.id), id="u1", username="bob")
     data = _new_user_model(licenses=[LicenseName.OSINT_BASIC])
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(data, current))
@@ -1049,7 +1049,7 @@ def test_create_tenant_user_orion_mail_denied(monkeypatch):
     engine.count_result = 0
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid=str(tenant.id), id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id=str(tenant.id), id="u1", username="admin")
     data = _new_user_model(permissions=[UserPermission.ORION_MAIL])
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(data, current))
@@ -1066,7 +1066,7 @@ def test_create_tenant_user_generic_error_wrapped(monkeypatch):
         "validate_company_email",
         staticmethod(lambda email, detail=None: (_ for _ in ()).throw(RuntimeError("boom"))),
     )
-    current = SimpleNamespace(role="admin", tenant_uuid="507f1f77bcf86cd799439011", id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id="507f1f77bcf86cd799439011", id="u1", username="admin")
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(_new_user_model(), current))
     assert exc.value.status_code == 400

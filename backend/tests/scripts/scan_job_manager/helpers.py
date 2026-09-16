@@ -20,7 +20,7 @@ def _make_manager(engine: FakeMongoEngine) -> ScanJobManager:
 def _make_user(**overrides):
     data = {
         "id": "507f1f77bcf86cd799439011",
-        "tenant_uuid": "507f1f77bcf86cd799439012",
+        "tenant_id": "507f1f77bcf86cd799439012",
     }
     data.update(overrides)
     return SimpleNamespace(**data)

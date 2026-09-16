@@ -63,13 +63,13 @@ def test_get_instance_uses_singleton(monkeypatch):
         TakedownManager._TakedownManager__instance = None
 
 
-def test_root_tenant_uuid_found_and_missing():
+def test_root_tenant_id_found_and_missing():
     manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]))
-    assert _run(manager._root_tenant_uuid()) == ROOT_ID
+    assert _run(manager._root_tenant_id()) == ROOT_ID
 
     manager_missing = _make_manager(FakeMongoEngine(find_one_results=[None]))
     with pytest.raises(HTTPException) as exc:
-        _run(manager_missing._root_tenant_uuid())
+        _run(manager_missing._root_tenant_id())
     assert exc.value.status_code == 500
 
 
@@ -247,7 +247,7 @@ def test_create_request_existing_with_abuse_email():
     existing = _record(abuse_email="known@evil.test")
     manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), existing]))
     request = TakedownCreateRequest(target_url="evil.test")
-    result = _run(manager.create_request(request, _user(tenant_uuid="tenant-x")))
+    result = _run(manager.create_request(request, _user(tenant_id="tenant-x")))
     assert result["abuse_email"] == "known@evil.test"
 
 
@@ -331,21 +331,21 @@ def test_list_requests_root_user():
     items = [_record(abuse_email="a@evil.test"), _record(abuse_email="b@evil.test")]
     collection = FakeTakedownCollection(items=items, count=2)
     manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]), collection=collection)
-    current_user = _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)
+    current_user = _user(tenant_id=ROOT_ID, role=user_role.ADMIN)
     response = _run(manager.list_requests(current_user, status="all", page=1, limit=20))
     assert response.total == 2
     assert len(response.items) == 2
-    assert "requester_tenant_uuid" not in collection.queries[0]
+    assert "tenant_id" not in collection.queries[0]
 
 
 def test_list_requests_analyst_scoped_with_filters():
     collection = FakeTakedownCollection(items=[_record()], count=1)
     manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]), collection=collection)
-    current_user = _user(tenant_uuid="tenant-2", user_id="analyst-1", role=user_role.ANALYST)
+    current_user = _user(tenant_id="tenant-2", user_id="analyst-1", role=user_role.ANALYST)
     response = _run(manager.list_requests(
         current_user, status="pending", q="evil", page=2, limit=10, daterange="2026-01-01,2026-12-31"))
     query = collection.queries[0]
-    assert query["requester_tenant_uuid"] == "tenant-2"
+    assert query["tenant_id"] == "tenant-2"
     assert query["user_uuid"] == "analyst-1"
     assert query["status"] == "pending"
     assert "$or" in query
@@ -356,27 +356,27 @@ def test_list_requests_analyst_scoped_with_filters():
 def test_get_admin_record_permission_and_lookup():
     manager_forbidden = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]))
     with pytest.raises(HTTPException) as exc:
-        _run(manager_forbidden._get_admin_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ANALYST)))
+        _run(manager_forbidden._get_admin_record(ROOT_ID, _user(tenant_id=ROOT_ID, role=user_role.ANALYST)))
     assert exc.value.status_code == 403
 
     manager_invalid = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]))
     with pytest.raises(HTTPException) as exc2:
-        _run(manager_invalid._get_admin_record("bad-id", _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
+        _run(manager_invalid._get_admin_record("bad-id", _user(tenant_id=ROOT_ID, role=user_role.ADMIN)))
     assert exc2.value.status_code == 400
 
     manager_missing = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), None]))
     with pytest.raises(HTTPException) as exc3:
-        _run(manager_missing._get_admin_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
+        _run(manager_missing._get_admin_record(ROOT_ID, _user(tenant_id=ROOT_ID, role=user_role.ADMIN)))
     assert exc3.value.status_code == 404
 
     record = _record()
     manager_ok = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), record]))
-    result = _run(manager_ok._get_admin_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
+    result = _run(manager_ok._get_admin_record(ROOT_ID, _user(tenant_id=ROOT_ID, role=user_role.ADMIN)))
     assert result is record
 
 
 def _admin_user():
-    return _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)
+    return _user(tenant_id=ROOT_ID, role=user_role.ADMIN)
 
 
 def test_accept_request_success(monkeypatch):

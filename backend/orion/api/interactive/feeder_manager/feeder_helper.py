@@ -330,7 +330,7 @@ class FeederHelper:
 
         await self._engine.save(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_script_uploaded",
         )

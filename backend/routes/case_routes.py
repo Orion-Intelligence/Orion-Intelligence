@@ -45,7 +45,7 @@ async def get_status_board_config(current_user=Depends(get_current_user)):
     dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(license_required("maintainer"))]
 )
 async def update_tenant_status_board_config(payload: CaseStatusBoardConfig = Body(...), current_user=Depends(get_current_user)):
-    return await StatusBoardConfigManager.save_tenant_config(str(current_user.tenant_uuid), payload)
+    return await StatusBoardConfigManager.save_tenant_config(str(current_user.tenant_id), payload)
 
 
 @case_routes.post(

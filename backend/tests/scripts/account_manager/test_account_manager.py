@@ -23,7 +23,7 @@ def test_get_all_users_returns_tenant_users_for_maintainer(tmp_path):
         _make_user(username="bob", email="bob@example.com"),
     ]
     manager = _make_manager(tmp_path, FakeMongoEngine(records=users))
-    current_user = SimpleNamespace(role="member", licenses=[LicenseName.MAINTAINER], tenant_uuid="tenant-1")
+    current_user = SimpleNamespace(role="member", licenses=[LicenseName.MAINTAINER], tenant_id="tenant-1")
 
     result = _run(manager.get_all_users(current_user))
 
@@ -62,7 +62,7 @@ def test_create_tenant_user_rejects_overlong_password(tmp_path):
 def test_create_user_saves_new_user_when_inputs_are_valid(tmp_path, monkeypatch):
     engine = FakeMongoEngine(find_one_results=[None, None])
     manager = _make_manager(tmp_path, engine)
-    current_user = SimpleNamespace(role=user_role.ADMIN, tenant_uuid="tenant-1")
+    current_user = SimpleNamespace(role=user_role.ADMIN, tenant_id="tenant-1")
     data = user_model(
         username="valid_user",
         email="user@example.com",
@@ -99,7 +99,7 @@ def test_create_user_saves_new_user_when_inputs_are_valid(tmp_path, monkeypatch)
 def test_create_user_rejects_invalid_username_before_save(tmp_path, monkeypatch):
     engine = FakeMongoEngine()
     manager = _make_manager(tmp_path, engine)
-    current_user = SimpleNamespace(role=user_role.ADMIN, tenant_uuid="tenant-1")
+    current_user = SimpleNamespace(role=user_role.ADMIN, tenant_id="tenant-1")
     data = user_model(
         username="bad name",
         email="user@example.com",
@@ -125,12 +125,12 @@ def test_create_user_rejects_invalid_username_before_save(tmp_path, monkeypatch)
 
 
 def test_delete_user_removes_db_records_image_and_registers_audit(tmp_path, monkeypatch):
-    user = _make_user(id="delete-me", tenant_uuid="tenant-1")
+    user = _make_user(id="delete-me", tenant_id="tenant-1")
     engine = FakeMongoEngine(find_one_results=[user])
     manager = _make_manager(tmp_path, engine)
     (manager.IMAGE_DIR / "delete-me.enc").write_text("encrypted", encoding="utf-8")
     audit = FakeAuditManager()
-    current_user = SimpleNamespace(id="admin-1", tenant_uuid="tenant-1", licenses=[LicenseName.MAINTAINER])
+    current_user = SimpleNamespace(id="admin-1", tenant_id="tenant-1", licenses=[LicenseName.MAINTAINER])
 
     monkeypatch.setattr(
         "orion.api.interactive.auditlog_manager.audit_log_manager.AuditLogManager.get_instance",
@@ -147,10 +147,10 @@ def test_delete_user_removes_db_records_image_and_registers_audit(tmp_path, monk
 
 
 def test_delete_user_rejects_maintainer_from_other_tenant(tmp_path):
-    user = _make_user(id="delete-me", tenant_uuid="tenant-1")
+    user = _make_user(id="delete-me", tenant_id="tenant-1")
     engine = FakeMongoEngine(find_one_results=[user])
     manager = _make_manager(tmp_path, engine)
-    current_user = SimpleNamespace(id="admin-1", tenant_uuid="tenant-2", licenses=[LicenseName.MAINTAINER])
+    current_user = SimpleNamespace(id="admin-1", tenant_id="tenant-2", licenses=[LicenseName.MAINTAINER])
 
     with pytest.raises(HTTPException) as exc:
         _run(manager.delete_user(SimpleNamespace(username="alice"), current_user))
@@ -160,7 +160,7 @@ def test_delete_user_rejects_maintainer_from_other_tenant(tmp_path):
 
 
 def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, monkeypatch):
-    user = _make_user(status=UserStatus.DISABLE, tenant_uuid="507f1f77bcf86cd799439012")
+    user = _make_user(status=UserStatus.DISABLE, tenant_id="507f1f77bcf86cd799439012")
     tenant_key = Fernet.generate_key()
     enc = Fernet(tenant_key)
     tenant = _make_tenant(
@@ -173,7 +173,7 @@ def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, mo
     engine.count_result = 1
     manager = _make_manager(tmp_path, engine)
     audit = FakeAuditManager()
-    current_user = SimpleNamespace(id="maint-1", tenant_uuid="507f1f77bcf86cd799439012", licenses=[LicenseName.MAINTAINER], role=user_role.MEMBER)
+    current_user = SimpleNamespace(id="maint-1", tenant_id="507f1f77bcf86cd799439012", licenses=[LicenseName.MAINTAINER], role=user_role.MEMBER)
     request = tenant_param_model(username="alice", status=UserStatus.ACTIVE, licenses=[LicenseName.OSINT_BASIC])
 
     monkeypatch.setattr(
@@ -195,12 +195,12 @@ def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, mo
 
 
 def test_update_user_rejects_when_quota_exceeded(tmp_path):
-    user = _make_user(status=UserStatus.DISABLE, tenant_uuid="507f1f77bcf86cd799439012")
+    user = _make_user(status=UserStatus.DISABLE, tenant_id="507f1f77bcf86cd799439012")
     tenant = _make_tenant(id="507f1f77bcf86cd799439012", user_quota=1, is_default=False)
     engine = FakeMongoEngine(find_one_results=[user, tenant])
     engine.count_result = 1
     manager = _make_manager(tmp_path, engine)
-    current_user = SimpleNamespace(id="maint-1", tenant_uuid="507f1f77bcf86cd799439012", licenses=[LicenseName.MAINTAINER], role=user_role.MEMBER)
+    current_user = SimpleNamespace(id="maint-1", tenant_id="507f1f77bcf86cd799439012", licenses=[LicenseName.MAINTAINER], role=user_role.MEMBER)
     request = tenant_param_model(username="alice", status=UserStatus.ACTIVE, licenses=[LicenseName.OSINT_BASIC])
 
     with pytest.raises(HTTPException) as exc:
@@ -288,7 +288,7 @@ def test_get_node_builds_response_with_decrypted_tenant_data(tmp_path, monkeypat
         licenses=[enc.encrypt(b"enterprise").decode()],
         alert_run_time="09:30",
     )
-    user = _make_user(tenant_uuid=tenant.id)
+    user = _make_user(tenant_id=tenant.id)
     engine = FakeMongoEngine(find_one_results=[tenant])
     engine.count_result = 2
     manager = _make_manager(tmp_path, engine)
@@ -324,7 +324,7 @@ def test_get_public_user_hides_profile_when_tenant_visibility_disabled(tmp_path)
     tenant = _make_tenant(profile_visibility_enabled=False)
     engine = FakeMongoEngine(find_one_results=[user, tenant])
     manager = _make_manager(tmp_path, engine)
-    current_user = SimpleNamespace(id="someone-else", role=user_role.MEMBER, tenant_uuid=user.tenant_uuid)
+    current_user = SimpleNamespace(id="someone-else", role=user_role.MEMBER, tenant_id=user.tenant_id)
 
     result = _run(manager.get_public_user("507f1f77bcf86cd799439011", current_user))
 
@@ -335,7 +335,7 @@ def test_get_public_user_hides_profile_when_user_pref_disables_visibility(tmp_pa
     user = _make_user(preferences={"profile_visible": False})
     engine = FakeMongoEngine(find_one_results=[user])
     manager = _make_manager(tmp_path, engine)
-    current_user = SimpleNamespace(id="someone-else", role=user_role.MEMBER, tenant_uuid=user.tenant_uuid)
+    current_user = SimpleNamespace(id="someone-else", role=user_role.MEMBER, tenant_id=user.tenant_id)
 
     result = _run(manager.get_public_user("507f1f77bcf86cd799439011", current_user))
 
@@ -349,7 +349,7 @@ def test_get_public_user_returns_visible_profile_payload(tmp_path, monkeypatch):
     tenant = _make_tenant(name=enc.encrypt(b"Acme").decode(), profile_visibility_enabled=True)
     engine = FakeMongoEngine(find_one_results=[user, tenant])
     manager = _make_manager(tmp_path, engine)
-    current_user = SimpleNamespace(id="admin-1", role=user_role.ADMIN, tenant_uuid=user.tenant_uuid)
+    current_user = SimpleNamespace(id="admin-1", role=user_role.ADMIN, tenant_id=user.tenant_id)
 
     monkeypatch.setattr(
         "orion.services.encryption_manager.key_manager.KeyManager.get_instance",

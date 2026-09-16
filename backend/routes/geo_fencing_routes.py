@@ -41,7 +41,7 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def stream_map_entities(param: search_map_entities_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     try:
         stream = await geo_fencing_manager.get_instance().stream_map_entities_points(chunk_size=param.size)
     except HTTPException:
@@ -83,7 +83,7 @@ async def search_threat_lens_news(param: search_consolidated_param_model = Body(
     if param.platform_result_count is None or "platform_result_count" not in param.model_fields_set:
         param.platform_result_count = 500
     param.sort_latest = True
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     return await search_manager.getInstance().search_consolidated_result(param)
 
 

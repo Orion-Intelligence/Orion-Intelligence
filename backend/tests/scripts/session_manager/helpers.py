@@ -23,7 +23,7 @@ def _make_user(**overrides):
         "role": user_role.ADMIN,
         "status": UserStatus.ACTIVE,
         "current_session_id": "sid-123",
-        "tenant_uuid": "507f1f77bcf86cd799439012",
+        "tenant_id": "507f1f77bcf86cd799439012",
         "subscription": True,
         "account_verify_at": datetime.now(timezone.utc),
         "licenses": [LicenseName.MAINTAINER],

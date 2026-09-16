@@ -96,7 +96,7 @@ class SignupManager:
             verification_token=_verification_token,
             verification_expiry=_verification_token_expire,
             licenses=[LicenseName.MAINTAINER],
-            tenant_uuid=str(tenant.id))
+            tenant_id=str(tenant.id))
         await engine.save(user)
 
         await SignupManager._send_verification_email(user, _verification_token)
@@ -113,7 +113,7 @@ class SignupManager:
             lurlHeading=MailUrlHeading.VERIFICATION.value,
             url=verify_url)
         await mail_manager.get_instance().send_verification_mail(
-            to=user.email, subject=MailSubject.VERIFICATION.value, body=html_content, tenant_id=str(user.tenant_uuid))
+            to=user.email, subject=MailSubject.VERIFICATION.value, body=html_content, tenant_id=str(user.tenant_id))
 
     @staticmethod
     async def resend_verification_email(data: SignupRequest):

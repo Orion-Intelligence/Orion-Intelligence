@@ -27,7 +27,7 @@ def _make_user(**overrides):
         "username": "alice",
         "email": "alice@example.com",
         "role": user_role.ANALYST,
-        "tenant_uuid": "507f1f77bcf86cd799439012",
+        "tenant_id": "507f1f77bcf86cd799439012",
         "preferences": {"profile_visible": True},
         "licenses": [],
     }
@@ -46,7 +46,7 @@ def _make_tenant(**overrides):
 
 
 def _current_user(**overrides):
-    data = {"id": "507f1f77bcf86cd799439011", "username": "alice", "role": user_role.ADMIN, "tenant_uuid": "507f1f77bcf86cd799439012"}
+    data = {"id": "507f1f77bcf86cd799439011", "username": "alice", "role": user_role.ADMIN, "tenant_id": "507f1f77bcf86cd799439012"}
     data.update(overrides)
     return SimpleNamespace(**data)
 

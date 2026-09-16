@@ -58,7 +58,7 @@ class AlertMailHelper:
         if tenant_id:
             maintainer_user = await self._engine.find_one(
                 db_user_account,
-                (db_user_account.tenant_uuid == str(tenant_id))
+                (db_user_account.tenant_id == str(tenant_id))
                 & (db_user_account.licenses == LicenseName.MAINTAINER),
             )
         if maintainer_user:
@@ -192,7 +192,7 @@ class AlertMailHelper:
         )
 
     async def send_alert_change_mail(self, action: str, alert: AlertModel, current_user):
-        tenant_id = str(current_user.tenant_uuid)
+        tenant_id = str(current_user.tenant_id)
         is_created = action == "created"
         display_category = self._display_alert_label(alert.type)
         title = AlertMailTitle.CUSTOM_CREATED.value if is_created else AlertMailTitle.ALERT_UPDATED.value

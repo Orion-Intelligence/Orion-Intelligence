@@ -18,7 +18,7 @@ class TenantKeyAdminView(ModelView):
 
         for key in keys:
             tenant = await self._engine.find_one(
-                db_tenant_model, db_tenant_model.id == ObjectId(key.auth_id))
+                db_tenant_model, db_tenant_model.id == ObjectId(key.tenant_id))
             if tenant:
                 raise ActionFailed("Cannot delete key as tenant exists.")
 
