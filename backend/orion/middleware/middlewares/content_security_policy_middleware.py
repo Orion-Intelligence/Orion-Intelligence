@@ -6,6 +6,8 @@ from starlette.responses import Response
 
 from orion.helper_manager.env_handler import env_handler
 
+DOCS_THEME_SCRIPT_HASH = "'sha256-ayWZ78rdLqDK6SAXgYvQWZsT8a3RoQD6OygeE+eW1YA='"
+
 
 class content_security_policy_middleware(BaseHTTPMiddleware):
     def __init__(self, app):
@@ -92,9 +94,10 @@ class content_security_policy_middleware(BaseHTTPMiddleware):
                                                            "base-uri 'self'; "
                                                            "report-to csp-endpoint;")
         else:
+            docs_script = f" {DOCS_THEME_SCRIPT_HASH}" if request.url.path.startswith("/documentation") else ""
             response.headers["Content-Security-Policy"] = ("default-src 'self' data: blob:; "
-                                                           "script-src 'self' 'wasm-unsafe-eval' https://js.arcgis.com; "
-                                                           "script-src-elem 'self' https://js.arcgis.com; "
+                                                           f"script-src 'self' 'wasm-unsafe-eval'{docs_script} https://js.arcgis.com; "
+                                                           f"script-src-elem 'self'{docs_script} https://js.arcgis.com; "
                                                            "script-src-attr 'none'; "
                                                            "style-src 'self' 'unsafe-inline' https://js.arcgis.com; "
                                                            "style-src-elem 'self' 'unsafe-inline' https://js.arcgis.com; "
