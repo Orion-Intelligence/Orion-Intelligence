@@ -3,6 +3,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Body, HTTPException, Query
 from fastapi import Depends, UploadFile
+from fastapi.responses import StreamingResponse
 
 from configs.app_dependency import license_required, permission_required, role_required, status_required, get_current_user
 from orion.api.interactive.account_manager.account_manager import AccountManager
@@ -12,6 +13,8 @@ from orion.api.interactive.account_manager.models.chat_history_model import chat
 from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
 from orion.api.interactive.account_manager.models.user_param_model import user_param_model
 from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+from orion.api.interactive.backup_manager.backup_manager import BackupManager
+from orion.api.interactive.backup_manager.backup_store_io import BackupStoreIO
 from orion.api.interactive.auditlog_manager.models.audit_log_param_model import audit_log_param_model
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.interactive.system_log_manager.system_log_manager import SystemLogManager
@@ -445,3 +448,44 @@ async def delete_typed_alerts(_type: str, current_user=Depends(get_current_user)
     dependencies=[Depends(role_required([user_role.MEMBER])), Depends(status_required([UserStatus.ACTIVE])), ], )
 async def get_alert_scan_status(current_user=Depends(get_current_user)):
     return await AlertManager.getInstance().get_scan_status(current_user)
+
+
+@tenant_routes.get(
+    "/api/tenant/backups",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+async def list_tenant_backups(current_user=Depends(get_current_user)):
+    return await BackupManager.get_instance().list_backups_for_tenant(str(getattr(current_user, "tenant_id", "") or ""))
+
+
+@tenant_routes.get(
+    "/api/tenant/backups/status",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+async def tenant_backup_status():
+    return await BackupManager.get_instance().job_status()
+
+
+@tenant_routes.post(
+    "/api/tenant/backups/{backup_id}/restore",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+async def restore_tenant_backup(backup_id: str, current_user=Depends(get_current_user)):
+    return await BackupManager.get_instance().start_tenant_restore(
+        backup_id, str(getattr(current_user, "tenant_id", "") or "")
+    )
+
+
+@tenant_routes.get(
+    "/api/tenant/backups/{backup_id}/download",
+    include_in_schema=False,
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+async def download_tenant_backup(backup_id: str, current_user=Depends(get_current_user)):
+    tenant_dir, name = await BackupManager.get_instance().resolve_tenant_download(
+        backup_id, str(getattr(current_user, "tenant_id", "") or "")
+    )
+    return StreamingResponse(
+        BackupStoreIO.iter_zip(tenant_dir, name),
+        media_type="application/zip",
+        headers={"Content-Disposition": f'attachment; filename="{name}.zip"'},
+    )

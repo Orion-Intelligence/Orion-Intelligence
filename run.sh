@@ -108,23 +108,12 @@ client_build() {
     rsync -a --delete build-next/browser/ build/
     rm -rf build-next
     cd ..
-    local backups_holding
-    backups_holding=""
-    if [ -d backend/build/backups ]; then
-        backups_holding="$(mktemp -d)/backups"
-        mv backend/build/backups "$backups_holding"
-    fi
     rm -rf backend/build
     mkdir -p backend/build
     cp -r client/build/* backend/build/
-    if [ -n "$backups_holding" ]; then
-        rm -rf backend/build/backups
-        mv "$backups_holding" backend/build/backups
-        rmdir "$(dirname "$backups_holding")" 2>/dev/null || true
-    fi
-    mkdir -p backend/build/backups
-    if [ "$(stat -c %u backend/build/backups)" != "${APP_UID:-1000}" ]; then
-        sudo chown -R "${APP_UID:-1000}:${APP_GID:-1000}" backend/build/backups
+    mkdir -p backend/backups
+    if [ "$(stat -c %u backend/backups)" != "${APP_UID:-1000}" ]; then
+        sudo chown -R "${APP_UID:-1000}:${APP_GID:-1000}" backend/backups
     fi
     rm -rf backend/workspace/build
     mkdir -p backend/workspace/build

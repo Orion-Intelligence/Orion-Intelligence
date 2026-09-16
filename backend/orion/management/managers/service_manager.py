@@ -61,6 +61,7 @@ class service_manager:
                 await asyncio.sleep(5)
 
                 await BackupManager.get_instance().resolve_interrupted_restore()
+                await BackupManager.get_instance().resolve_interrupted_tenant_restore()
 
                 await arango_controller.get_instance().link_connection()
                 await arango_controller.get_instance().initialize()
