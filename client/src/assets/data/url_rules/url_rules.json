@@ -135,5 +135,37 @@
     "rule_type": "shared",
     "path": "social/platform",
     "value_regex": "^https?://(?:[^/]+\\.)?plurk\\.com(?:/.*)?$"
+  },
+  "facebook": {
+    "rule_type": "shared",
+    "path": "social/platform"
+  },
+  "hackernoon": {
+    "rule_type": "shared",
+    "path": "social/platform"
+  },
+  "instagram": {
+    "rule_type": "shared",
+    "path": "social/platform"
+  },
+  "linkedin": {
+    "rule_type": "shared",
+    "path": "social/platform"
+  },
+  "pleroma": {
+    "rule_type": "shared",
+    "path": "social/platform"
+  },
+  "quora": {
+    "rule_type": "shared",
+    "path": "social/platform"
+  },
+  "stackoverflow": {
+    "rule_type": "shared",
+    "path": "social/platform"
+  },
+  "tiktok": {
+    "rule_type": "shared",
+    "path": "social/platform"
   }
 }

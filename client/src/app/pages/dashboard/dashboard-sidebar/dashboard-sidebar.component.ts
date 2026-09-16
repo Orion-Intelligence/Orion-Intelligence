@@ -58,7 +58,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.appService.userSessionData()?.tenant?.isDefault) {
       return 'https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html';
     }
-    return '/docs';
+    return '/documentation';
   }
 
   ngOnInit() {
