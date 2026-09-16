@@ -4,6 +4,7 @@ WORKDIR /docs
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
+RUN if [ -d screenshots-neutral ] && ls screenshots-neutral/*.png >/dev/null 2>&1; then cp -f screenshots-neutral/*.png screenshots/; fi
 RUN ORION_DOCS_PUBLIC=1 sphinx-build -W --keep-going -b html . /site
 
 FROM nginx:alpine@sha256:4a73073bd557c65b759505da037898b61f1be6cbcc3c2c3aeac22d2a470c1752

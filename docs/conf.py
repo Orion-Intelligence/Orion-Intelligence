@@ -17,6 +17,7 @@ html_theme = "shibuya"
 exclude_patterns = [
     "api_docs/**",
     "public_index.md",
+    "llm_rules.md",
 ]
 
 if public_build:

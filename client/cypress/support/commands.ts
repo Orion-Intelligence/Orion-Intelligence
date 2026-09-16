@@ -1,3 +1,5 @@
+import { applyNeutralBrand, restoreNeutralBrand, type NeutralBrandState } from "./brand-neutralize";
+
 export {};
 type SlowTypeOptions = {
     submit?: boolean;
@@ -108,9 +110,33 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
         const safeName = String(name || "screenshot").replace(/\\/g, "/").replace(/^\/+/, "") || "screenshot";
         const taskScreenshotName = safeName.startsWith("user-manual/") ? safeName.slice("user-manual/".length) : safeName;
         let screenshotClip: { x: number; y: number; width: number; height: number; scale: number } | undefined;
+        let appWindow: Window | undefined;
+        let neutralState: NeutralBrandState | undefined;
         void options;
 
+        const captureSurface = () => (Cypress as unknown as CypressAutomation).automation("remote:debugger:protocol", {
+            command: "Page.captureScreenshot",
+            params: {
+                captureBeyondViewport: false,
+                clip: screenshotClip,
+                format: "png",
+                fromSurface: true,
+            },
+        });
+
+        const extractScreenshotData = (result: unknown): string => {
+            const data = typeof result === "string" ? result : (result as { data?: unknown } | null)?.data;
+            if (typeof data !== "string" || data.length === 0) {
+                throw new Error(`Browser returned no data for docs screenshot: ${name}`);
+            }
+            return data;
+        };
+
+        const writeShot = (data: string, variant: "user-manual" | "user-manual-neutral") =>
+            cy.task("writeDocScreenshot", { data, name: taskScreenshotName, specName: Cypress.spec.name, variant }, { log: false });
+
         return cy.window({ log: false }).then((win) => {
+            appWindow = win;
             const topWindow = win.top;
             if (!topWindow) {
                 throw new Error(`Unable to resolve the Cypress runner window for docs screenshot: ${name}`);
@@ -143,30 +169,29 @@ Cypress.Commands.add("docsScreenshot", (name: string, options: Partial<Cypress.S
             if (!screenshotClip) {
                 throw new Error(`Missing capture bounds for docs screenshot: ${name}`);
             }
-
-            return (Cypress as unknown as CypressAutomation).automation("remote:debugger:protocol", {
-                command: "Page.captureScreenshot",
-                params: {
-                    captureBeyondViewport: false,
-                    clip: screenshotClip,
-                    format: "png",
-                    fromSurface: true,
-                },
-            });
-        }).then((result) => {
-            const data = typeof result === "string"
-                ? result
-                : (result as { data?: unknown } | null)?.data;
-            if (typeof data !== "string" || data.length === 0) {
-                throw new Error(`Browser returned no data for docs screenshot: ${name}`);
+            return captureSurface();
+        }).then((result) => writeShot(extractScreenshotData(result), "user-manual")).then(() => {
+            if (appWindow) {
+                neutralState = applyNeutralBrand(appWindow);
             }
-
-            return cy.task("writeDocScreenshot", {
-                data,
-                name: taskScreenshotName,
-                specName: Cypress.spec.name,
-            }, { log: false });
-        }).then(() => cy.wrap<void>(undefined, { log: false }));
+            return cy.wait(80, { log: false });
+        }).then(() => {
+            if (appWindow) {
+                applyNeutralBrand(appWindow, neutralState);
+            }
+            return cy.wait(30, { log: false });
+        }).then(() => captureSurface().then(
+            (result) => {
+                restoreNeutralBrand(neutralState);
+                neutralState = undefined;
+                return result;
+            },
+            (error) => {
+                restoreNeutralBrand(neutralState);
+                neutralState = undefined;
+                throw error;
+            },
+        )).then((result) => writeShot(extractScreenshotData(result), "user-manual-neutral")).then(() => cy.wrap<void>(undefined, { log: false }));
     });
 });
 
