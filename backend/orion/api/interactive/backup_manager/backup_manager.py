@@ -13,6 +13,7 @@ from elasticsearch import helpers as es_helpers
 from fastapi import HTTPException
 
 from orion.api.interactive.backup_manager.backup_job_store import BackupJobStore
+from orion.api.interactive.backup_manager.backup_report import REPORT_NAME, BackupReport
 from orion.api.interactive.backup_manager.backup_retention import BackupRetention
 from orion.api.interactive.backup_manager.backup_store_io import BackupStoreIO
 from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
@@ -126,6 +127,7 @@ class BackupManager:
         backup_dir = self.backup_root / backup.filename
         if not backup_dir.is_dir():
             raise HTTPException(status_code=404, detail="Backup files are no longer on disk")
+        await asyncio.to_thread(BackupReport.write, backup_dir / REPORT_NAME, self.read_manifest(backup_dir))
         return backup_dir, backup.filename
 
     async def resolve_tenant_download(self, backup_id: str, tenant_id: str):
@@ -295,6 +297,7 @@ class BackupManager:
 
         manifest["completed"] = True
         await asyncio.to_thread(self._io.write_json_file, backup_dir / CONSTANTS.BACKUP_MANIFEST_NAME, manifest)
+        await asyncio.to_thread(BackupReport.write, backup_dir / REPORT_NAME, manifest)
         return manifest
 
     def read_manifest(self, backup_dir: Path):

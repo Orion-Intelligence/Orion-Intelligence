@@ -9,6 +9,7 @@ from bson import json_util
 from elasticsearch import helpers as es_helpers
 from fastapi import HTTPException
 
+from orion.api.interactive.backup_manager.backup_report import REPORT_NAME, BackupReport
 from orion.api.interactive.backup_manager.models.tenant_partition_model import TenantScope
 from orion.api.interactive.backup_manager.tenant_partition import TenantPartitionRegistry
 from orion.services.elastic_manager.elastic_controller import elastic_controller
@@ -75,6 +76,16 @@ class TenantBackupManager:
         tenant_dir = self._owner.backup_root / backup.filename / CONSTANTS.BACKUP_TENANTS_DIR / tenant_id
         if not (tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR).is_dir():
             raise HTTPException(status_code=404, detail="Tenant not found in this backup")
+        manifest = self._owner.read_manifest(self._owner.backup_root / backup.filename) or {}
+        block = manifest.get("tenants") or {}
+        summary = (block.get("tenants") or {}).get(tenant_id) or {}
+        await asyncio.to_thread(
+            BackupReport.write,
+            tenant_dir / REPORT_NAME,
+            {"tenant_id": tenant_id, "created_at": manifest.get("created_at"),
+             "mongo": summary.get("mongo") or {}, "elastic": summary.get("elastic") or {},
+             "tenants": {"layout": block.get("layout") or {}, "tenants": {tenant_id: summary}}},
+        )
         return tenant_dir, f"{backup.filename}_{tenant_id}"
 
     async def list_backup_tenants(self, backup_id: str):
@@ -239,10 +250,10 @@ class TenantBackupManager:
         exported = {"layout": registry.describe(collections), "tenants": {}}
         for tenant_id in tenant_ids:
             scope = await self._tenant_scope(database, tenant_id)
-            exported["tenants"][tenant_id] = await self._export_tenant(output_dir / tenant_id, scope, owned)
+            exported["tenants"][tenant_id] = await self._export_tenant(output_dir / tenant_id, scope, owned, exported["layout"])
         return exported
 
-    async def _export_tenant(self, tenant_dir: Path, scope: TenantScope, owned: dict) -> dict:
+    async def _export_tenant(self, tenant_dir: Path, scope: TenantScope, owned: dict, layout: dict | None = None) -> dict:
         database = self._owner._engine.database
         counts = {}
         for collection_name, rule in owned.items():
@@ -263,12 +274,19 @@ class TenantBackupManager:
             f"BACKUP: tenant {scope.tenant_id} exported "
             f"({sum(counts.values())} documents, {file_count} files, {len(scope.user_ids)} users)"
         )
-        return {
+        summary = {
             "mongo": counts,
             "elastic": elastic_counts,
             "files": file_count,
             "users": len(scope.user_ids),
         }
+        await asyncio.to_thread(
+            BackupReport.write,
+            tenant_dir / REPORT_NAME,
+            {"tenant_id": scope.tenant_id, "mongo": counts, "elastic": elastic_counts,
+             "tenants": {"layout": layout or {}, "tenants": {scope.tenant_id: summary}}},
+        )
+        return summary
 
     async def _backup_tenant_elastic(self, output_dir: Path, tenant_id: str) -> dict:
         conn = elastic_controller.get_instance().get_connection()
