@@ -14,16 +14,16 @@ fixed string here — it is replaced for other tenants at serve time and at scre
    keep "Orion". readthedocs (the default tenant's docs) is external and also keeps "Orion".
 
 2. **Screenshots (build time, neutral).** Raster pixels cannot be rebranded per tenant, so the
-   white-label docs use a **neutral** screenshot set that says "Threat Intelligence Platform" instead of "Orion".
+   white-label docs use a **neutral** screenshot set that says "Intelligence Platform" instead of "Orion".
    `cy.docsScreenshot` (`client/cypress/support/commands.ts`) captures each shot twice in one pass:
    the real shot, then `applyNeutralBrand` (`client/cypress/support/brand-neutralize.ts`) swaps logo
    `<img>`/background-image to the generic mark (`docs/_static/brand-neutral-*.svg`) and rewrites
-   `Orion Intelligence`/`\bOrion\b` -> `Threat Intelligence Platform` in the live DOM, then the branded shot, then the
+   `Orion Intelligence`/`\bOrion\b` -> `Intelligence Platform` in the live DOM, then the branded shot, then the
    DOM is restored. `generate_docs.sh` post-processes both: real -> `docs/screenshots/`,
    neutral -> `docs/screenshots-neutral/`. Baked caption labels are neutralized in the neutral pass
    via `ORION_DOCS_NEUTRAL=1` in `postprocess_screenshots.py`. `docs/Dockerfile` copies
    `screenshots-neutral/*` over `screenshots/` before `sphinx-build` (that image is the self-hosted
-   `/documentation`), so white-label shows "Threat Intelligence Platform"; readthedocs/default keeps the real shots.
+   `/documentation`), so white-label shows "Intelligence Platform"; readthedocs/default keeps the real shots.
 
 ## Rules
 
@@ -55,11 +55,11 @@ fixed string here — it is replaced for other tenants at serve time and at scre
   already have brand pixels baked in — the neutralizer works on the live DOM before capture, not on
   finished raster images.
 - **Captions:** if a figure caption names the product, it is baked onto the neutral image as
-  "Threat Intelligence Platform" automatically. Prefer feature-descriptive captions; avoid tenant-specific names.
+  "Intelligence Platform" automatically. Prefer feature-descriptive captions; avoid tenant-specific names.
 - **Regenerate:** run `bash docs/scripts/generate_docs.sh` (from anywhere). It runs the e2e suite
   once and writes both `docs/screenshots/` and `docs/screenshots-neutral/`. Then `./run.sh build -d`
   rebuilds the `documentation` image so `/documentation` picks up the neutral set.
-- **The neutral brand is generic ("Threat Intelligence Platform" + `docs/_static/brand-neutral-*.svg`), not each
+- **The neutral brand is generic ("Intelligence Platform" + `docs/_static/brand-neutral-*.svg`), not each
   tenant's name** — that is intentional; raster screenshots cannot be per-tenant without runtime
   image editing, which is deliberately avoided.
 - This file is excluded from the Sphinx build (`conf.py` `exclude_patterns`); it is guidance, not a

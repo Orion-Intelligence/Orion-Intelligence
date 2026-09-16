@@ -21,7 +21,7 @@ _BRAND_WORD = re.compile(r"\bOrion\b", re.IGNORECASE)
 
 
 def _neutralize_brand(text: str) -> str:
-    return _BRAND_WORD.sub("Threat Intelligence Platform", _BRAND_FULL.sub("Threat Intelligence Platform", text))
+    return _BRAND_WORD.sub("Intelligence Platform", _BRAND_FULL.sub("Intelligence Platform", text))
 
 
 def load_caption_map() -> dict[str, str]:

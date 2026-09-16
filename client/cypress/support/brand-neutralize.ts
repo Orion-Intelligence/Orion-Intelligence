@@ -1,9 +1,9 @@
-const NEUTRAL_NAME = "Threat Intelligence Platform";
+const NEUTRAL_NAME = "Intelligence Platform";
 
 const MARK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64"><defs><linearGradient id="pfm-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="16" fill="url(#pfm-g)"/><g fill="none" stroke="#ffffff" stroke-width="3.6" stroke-linecap="round"><path d="M32 15a17 17 0 0 1 17 17"/><path d="M32 49a17 17 0 0 1 -17 -17"/></g><circle cx="32" cy="32" r="5" fill="#ffffff"/></svg>`;
 
 function wordmarkSvg(textColor: string): string {
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="520" height="64" viewBox="0 0 520 64"><defs><linearGradient id="pfw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="6" y="12" width="40" height="40" rx="12" fill="url(#pfw-g)"/><g fill="none" stroke="#ffffff" stroke-width="2.7" stroke-linecap="round"><path d="M26 22a10 10 0 0 1 10 10"/><path d="M26 42a10 10 0 0 1 -10 -10"/></g><circle cx="26" cy="32" r="3.4" fill="#ffffff"/><text x="54" y="42" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="600" fill="${textColor}">${NEUTRAL_NAME}</text></svg>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="410" height="64" viewBox="0 0 410 64"><defs><linearGradient id="pfw-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs><rect x="6" y="12" width="40" height="40" rx="12" fill="url(#pfw-g)"/><g fill="none" stroke="#ffffff" stroke-width="2.7" stroke-linecap="round"><path d="M26 22a10 10 0 0 1 10 10"/><path d="M26 42a10 10 0 0 1 -10 -10"/></g><circle cx="26" cy="32" r="3.4" fill="#ffffff"/><text x="54" y="42" font-family="Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="28" font-weight="600" fill="${textColor}">${NEUTRAL_NAME}</text></svg>`;
 }
 
 const MARK_URI = `data:image/svg+xml,${encodeURIComponent(MARK_SVG)}`;
