@@ -458,10 +458,10 @@ async def search_consolidated_iocs(param: search_consolidated_param_model = Body
     response_description=REPORT_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
-async def get_defacement_document(doc_id: str):
+async def get_defacement_document(doc_id: str, current_user=Depends(get_current_user)):
     report = await search_manager.getInstance().request_defacement_doc(doc_id)
     takedown_manager = TakedownManager.get_instance()
-    return await takedown_manager.enrich_report(report)
+    return await takedown_manager.enrich_report(report, str(getattr(current_user, "tenant_id", "") or ""))
 
 
 @api_routes.get(

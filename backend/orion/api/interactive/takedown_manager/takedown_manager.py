@@ -202,7 +202,7 @@ class TakedownManager:
         except Exception as exc:
             log.g().w(f"Unable to update Elasticsearch takedown status for {record.report_id}: {str(exc)}")
 
-    async def enrich_report(self, report: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    async def enrich_report(self, report: Optional[Dict[str, Any]], tenant_id: str = "") -> Optional[Dict[str, Any]]:
         if not report:
             return report
         target_url = str(report.get("m_url") or "")
@@ -211,7 +211,8 @@ class TakedownManager:
 
         record = await self._engine.find_one(
             db_takedown_request_model,
-            db_takedown_request_model.target_domain == self._target_domain(target_url),
+            (db_takedown_request_model.tenant_id == tenant_id)
+            & (db_takedown_request_model.target_domain == self._target_domain(target_url)),
         )
         if not record or not record.abuse_email:
             for key in ("m_takedown_status", "m_takedown_label", "m_takedown_disabled"):
@@ -238,7 +239,8 @@ class TakedownManager:
         target_domain = self._target_domain(target_url)
         existing = await self._engine.find_one(
             db_takedown_request_model,
-            db_takedown_request_model.target_domain == target_domain,
+            (db_takedown_request_model.tenant_id == requester_tenant_id)
+            & (db_takedown_request_model.target_domain == target_domain),
         )
         if existing:
             existing_abuse_email = existing.abuse_email or self._extract_abuse_email(existing.evidence or {})
@@ -296,7 +298,8 @@ class TakedownManager:
         except DuplicateKeyError:
             existing = await self._engine.find_one(
                 db_takedown_request_model,
-                db_takedown_request_model.target_domain == target_domain,
+                (db_takedown_request_model.tenant_id == requester_tenant_id)
+                & (db_takedown_request_model.target_domain == target_domain),
             )
             if existing:
                 existing.report_id = report_id or existing.report_id
