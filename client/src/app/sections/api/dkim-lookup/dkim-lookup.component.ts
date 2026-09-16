@@ -1,3 +1,4 @@
+import { A11yModule } from '@angular/cdk/a11y';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { ChangeDetectorRef, Component, NgZone, OnInit, ViewRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -18,8 +19,8 @@ export type { DkimLookupResponse, DkimSelectorEntry, DkimValidation } from './mo
 @Component({
   selector: 'app-dkim-lookup',
   standalone: true,
-  imports: [FormsModule, NgClass, DecimalPipe, TranslatePipe, EmptyQueryComponent, ExportChoiceModalComponent, TooltipDirective],
-  styleUrls: ['./dkim-lookup.component.css'],
+  imports: [A11yModule, FormsModule, NgClass, DecimalPipe, TranslatePipe, EmptyQueryComponent, ExportChoiceModalComponent, TooltipDirective],
+  host: { class: 'block min-w-0' },
   templateUrl: './dkim-lookup.component.html'
 })
 export class DkimLookupComponent implements OnInit {
@@ -41,6 +42,7 @@ export class DkimLookupComponent implements OnInit {
   rawLoading = false;
   rawResult: any = null;
   rawErrorMessage = '';
+  showRawHelp = false;
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private zone: NgZone, private cdr: ChangeDetectorRef) {}
 

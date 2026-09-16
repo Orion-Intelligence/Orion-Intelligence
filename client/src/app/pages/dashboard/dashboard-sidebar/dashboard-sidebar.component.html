@@ -6,8 +6,8 @@
   expandTestId="sidebar-expand-button"
   collapseTestId="sidebar-collapse-button"
   (toggleClicked)="onToggleSidebar(!sidebar_default)">
-  <nav data-sidebar-expanded class="h-full w-full animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
-    <div data-testid="dashboard-sidebar-scroll" class="ml-[-5px] h-full min-h-[500px] overflow-y-auto p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+  <nav data-sidebar-expanded class="flex h-full min-h-0 w-full flex-col animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
+    <div data-testid="dashboard-sidebar-scroll" class="ml-[-5px] min-h-0 flex-1 overflow-y-auto px-[20px] pt-[20px] pb-[20px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div id="sidebar-profile">
       <app-dashboard-sidebar-items
         (optionSelected)="onOptionSelected($event)"
@@ -217,11 +217,15 @@
           </div>
         }
       }
+      <div data-testid="sidebar-app-version" class="mt-6">
+        <div class="text-[12px] font-semibold leading-5 text-white">{{ appService.getConfig().appSettings.app_name || 'Orion Intelligence' }}</div>
+        <div class="mt-1 text-[10px] font-medium tracking-wide text-[#A0B8D1]">Version 1.0.3.8</div>
+      </div>
     </div>
   </nav>
 
   <nav data-sidebar-collapsed class="flex h-full min-h-0 w-full flex-col pt-0 animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
-    <div data-testid="dashboard-sidebar-scroll" class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div data-testid="dashboard-sidebar-scroll" class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-1 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-collapsed
         id="sidebar-profile"
         (optionSelected)="onOptionSelected($event)"
@@ -409,6 +413,10 @@
           </button>
         </li>
       }
+      <div class="mt-6 w-full shrink-0 px-1 text-center" [title]="(appService.getConfig().appSettings.app_name || 'Orion Intelligence') + ' · v1.0.3.8'">
+        <div class="break-words text-[9px] font-semibold leading-4 text-white">{{ appService.getConfig().appSettings.app_name || 'Orion Intelligence' }}</div>
+        <div class="mt-1 text-[9px] text-[#A0B8D1]">v1.0.3.8</div>
+      </div>
     </div>
   </nav>
 </app-graph-sidebar-shell>
