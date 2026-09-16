@@ -7,15 +7,34 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 
 
 class FakeConfigEngine:
-    def __init__(self, find_one_results=None, find_results=None):
+    def __init__(self, find_one_results=None, find_results=None, tenants=None):
         self.find_one_results = list(find_one_results or [])
         self.find_results = list(find_results or [])
+        self.tenants = list(tenants or [])
         self.saved: list[Any] = []
         self.find_one_calls = 0
         self.find_calls = 0
 
+    def _match_tenant(self, query):
+        terms = dict(query or {})
+        for field, candidates in (("is_default", self.tenants), ("_id", self.tenants)):
+            if field not in terms:
+                continue
+            wanted = terms[field]
+            if isinstance(wanted, dict):
+                wanted = wanted.get("$eq")
+            for tenant in candidates:
+                actual = tenant.is_default if field == "is_default" else str(tenant.id)
+                if actual == (bool(wanted) if field == "is_default" else str(wanted)):
+                    return tenant
+        return None
+
     async def find_one(self, *_args, **_kwargs):
         self.find_one_calls += 1
+        if self.tenants and len(_args) > 1 and getattr(_args[0], "__name__", "") == "db_tenant_model":
+            matched = self._match_tenant(_args[1])
+            if matched is not None:
+                return matched
         if self.find_one_results:
             return self.find_one_results.pop(0)
         return None

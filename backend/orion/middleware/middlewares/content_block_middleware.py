@@ -36,7 +36,7 @@ class content_block_middleware(BaseHTTPMiddleware):
             if token:
                 try:
                     session_mgr = session_manager.get_instance()
-                    user = await session_mgr.get_current_user(token, getattr(request.state, "tenant", None))
+                    user = await session_mgr.get_current_user(token, session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
                     if user and user.role == user_role.ADMIN.value:
                         return await call_next(request)
                 except Exception:
@@ -54,7 +54,7 @@ class content_block_middleware(BaseHTTPMiddleware):
         user = None
         if token:
             try:
-                user = await session_manager.get_instance().get_current_user(token, tenant_id=getattr(request.state, "tenant", None))
+                user = await session_manager.get_instance().get_current_user(token, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
             except Exception:
                 user = None
 

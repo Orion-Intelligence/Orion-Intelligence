@@ -15,8 +15,6 @@ def _make_manager(engine=None, base_dir: Path | None = None):
     manager._engine = engine if engine is not None else FakeConfigEngine()
     manager._config = {}
     manager._configs = {}
-    manager._tenants = {}
-    manager._default_tenant_id = None
     manager.BASE_DIR = base_dir or Path("/tmp")
     manager.SYSTEM_DIR = (base_dir or Path("/tmp")) / "system"
     return manager

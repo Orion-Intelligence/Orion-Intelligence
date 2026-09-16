@@ -114,7 +114,7 @@ class sso_manager:
         redirect_uri = self._validate_redirect_uri(redirect_uri)
         state = self._validate_state(state)
         try:
-            user = await session_manager.get_instance().get_current_user(token_from_request(request), tenant_id=getattr(request.state, "tenant", None))
+            user = await session_manager.get_instance().get_current_user(token_from_request(request), tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
             if not isinstance(user, db_user_account):
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         except HTTPException:

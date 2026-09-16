@@ -119,15 +119,11 @@ class AuditLogManager:
 
         resolved_items = []
         for item in items:
-            actor_name = users_by_id.get(item.actor_id)
-            tenant_name = tenants_by_id.get(item.tenant_id)
-            if actor_name is None or tenant_name is None:
-                continue
             resolved_items.append({
                 **item.model_dump(),
                 "id": str(item.id),
-                "actor_id": actor_name,
-                "tenant_id": tenant_name,
+                "actor_id": users_by_id.get(item.actor_id) or item.actor_id,
+                "tenant_id": tenants_by_id.get(item.tenant_id) or item.tenant_id,
             })
 
         return {"items": resolved_items, "page": page}

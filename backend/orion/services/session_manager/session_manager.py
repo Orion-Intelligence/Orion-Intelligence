@@ -47,10 +47,10 @@ class session_manager:
         return mongo_controller.get_instance().get_engine()
 
     @staticmethod
-    def tenant_identifier(tenant_or_id) -> str | None:
-        if tenant_or_id is None:
+    def tenant_identifier(tenant_id) -> str | None:
+        if tenant_id is None:
             return None
-        tenant_id = getattr(tenant_or_id, "id", tenant_or_id)
+        tenant_id = getattr(tenant_id, "id", tenant_id)
         return str(tenant_id) if tenant_id is not None else None
 
     @staticmethod
@@ -71,8 +71,8 @@ class session_manager:
         return Fernet(dek)
 
     @classmethod
-    def ensure_user_tenant_access(cls, user, tenant_or_id) -> None:
-        tenant_id = cls.tenant_identifier(tenant_or_id)
+    def ensure_user_tenant_access(cls, user, tenant_id) -> None:
+        tenant_id = cls.tenant_identifier(tenant_id)
         if tenant_id is None:
             return
         if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:

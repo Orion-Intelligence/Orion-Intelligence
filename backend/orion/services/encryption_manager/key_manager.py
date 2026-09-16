@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from bson import ObjectId
 from cryptography.fernet import Fernet
 from odmantic import AIOEngine
 
@@ -40,7 +41,7 @@ class KeyManager:
             return self._unwrap(rec.wrapped_key)
 
         existing = await self._engine.find_one(
-            db_tenant_model, db_tenant_model.id == str(tenant_id))
+            db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_id)))
         if not existing:
             raise Exception("Tenant does not exist.")
 
@@ -56,6 +57,5 @@ class KeyManager:
     async def get_profile_dek(self, tenant_id: str) -> bytes:
         rec = await self._engine.find_one(db_keys, db_keys.auth_id == str(tenant_id))
         if not rec:
-            await self._engine.remove(db_tenant_model, db_tenant_model.id == str(tenant_id))
             return b""
         return self._unwrap(rec.wrapped_key)

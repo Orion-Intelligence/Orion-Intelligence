@@ -89,13 +89,13 @@ class FakeSessionManager:
         return FakeSessionManager._instance
 
     @staticmethod
-    def ensure_user_tenant_access(user, tenant_or_id):
+    def ensure_user_tenant_access(user, tenant_id):
         if FakeSessionManager.ensure_error is not None:
             raise FakeSessionManager.ensure_error
 
     @staticmethod
-    def tenant_identifier(tenant_or_id):
-        return tenant_or_id
+    def tenant_identifier(tenant_id):
+        return tenant_id
 
     @staticmethod
     def issue_password_reset_token(user, reset_twofa=False):

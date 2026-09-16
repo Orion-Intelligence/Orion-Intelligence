@@ -37,7 +37,7 @@ def get_request_token(request: Request, token: str | None) -> str | None:
 
 
 def enforce_request_tenant_access(user, request: Request):
-    session_manager.ensure_user_tenant_access(user, getattr(request.state, "tenant", None))
+    session_manager.ensure_user_tenant_access(user, session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
     return user
 
 
