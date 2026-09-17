@@ -114,7 +114,7 @@ licenseService.getLicenses().includes('enterprise')) {
       }
 
       @if (!hideHeatmapAndAnalytics()) {
-      @defer (on idle) {
+      @defer (on immediate) {
       <div>
         <app-world-heatmap
           [canOpenReports]="app_service.userSessionData().user.role === 'admin' || licenseService.isMaintainer() || (app_service.userSessionData().user.role === 'analyst' && licenseService.getLicenses().includes('enterprise')) || licenseService.getLicenses().includes('enterprise')"></app-world-heatmap>
@@ -133,7 +133,13 @@ licenseService.getLicenses().includes('enterprise')) {
         <app-home-insight class="max-[550px]:block max-[550px]:w-full max-[550px]:min-w-0 max-[550px]:max-w-full max-[550px]:box-border"></app-home-insight>
       </div>
       } @placeholder {
-      <div class="mt-[20px] min-h-[420px] rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-800)]/45 [body.light-theme_&]:border-[#d7e2ee] [body.light-theme_&]:bg-[#f6f9fd]">
+      <div class="block w-full">
+        <div class="map-container relative aspect-[100/52] max-h-[80vh] min-h-[400px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]">
+          <div class="pointer-events-none absolute inset-0 z-[10] flex flex-col items-center justify-center gap-2.5">
+            <span class="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
+            <span class="text-[11px] font-medium tracking-[0.04em] text-[var(--color-text4)]">{{ 'Loading map...' | translate }}</span>
+          </div>
+        </div>
       </div>
       }
       }
