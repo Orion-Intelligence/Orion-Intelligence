@@ -392,6 +392,7 @@ class ProfileManager:
             platform=self._safe_platform(data.platform),
             profile_name=(data.profile_name or "").strip() or None,
             profile_username=(data.profile_username or "").strip() or None,
+            profile_url=(data.profile_url or "").strip() or None,
             session_id=data.session_id,
             purposes=data.purposes,
             connection_status=SocialProfileConnectionStatus.CONNECTED,
@@ -417,6 +418,8 @@ class ProfileManager:
             profile.profile_name = data.profile_name.strip() or None
         if data.profile_username is not None:
             profile.profile_username = data.profile_username.strip() or None
+        if data.profile_url is not None:
+            profile.profile_url = data.profile_url.strip() or None
         if data.connection_status is not None:
             profile.connection_status = data.connection_status
         if data.session_id is not None:
@@ -514,9 +517,35 @@ class ProfileManager:
                 is_manual=result.is_manual,
             ))
             session_expired = result.session_expired
+        elif data.result_type == "hate_speech" and data.hate_speech_result is not None:
+            from orion.services.mongo_manager.shared_model.db_social_automation_result_model import SocialHateSpeechResult, SocialHateSpeechDetectedPost
+            result = data.hate_speech_result
+            record.hate_speech_results.append(SocialHateSpeechResult(
+                profile_id=result.profile_id,
+                date_time=result.date_time or now,
+                total_posts=result.total_posts,
+                hate_posts_count=result.hate_posts_count,
+                posts=[SocialHateSpeechDetectedPost(
+                    url=post.url,
+                    author=post.author,
+                    content_text=post.content_text,
+                    is_hate_speech=post.is_hate_speech,
+                    label=post.label,
+                    detected_at=post.detected_at or now,
+                    likes=post.likes,
+                    shares=post.shares,
+                    views=post.views,
+                ) for post in result.posts],
+                error=result.error,
+                error_reason=result.error_reason,
+                session_expired=result.session_expired,
+                is_manual=result.is_manual,
+            ))
+            session_expired = result.session_expired
         else:
             log.g().e(f"Automation result with unknown result_type: {data.result_type}")
             return {"status": "ignored"}
+
 
         record.updated_at = now
         await self._engine.save(record)
@@ -572,6 +601,7 @@ class ProfileManager:
             profile_id=profile_id,
             ad_detection_results=sorted([item for item in results.ad_detection_results if item.profile_id == profile_id], key=lambda item: item.date_time, reverse=True),
             post_results=sorted([item for item in results.post_results if item.profile_id == profile_id], key=lambda item: item.date_time, reverse=True),
+            hate_speech_results=sorted([item for item in results.hate_speech_results if item.profile_id == profile_id], key=lambda item: item.date_time, reverse=True),
         )
 
     async def _get_or_create_social_record(self, current_user) -> db_social_profile_management_model:
@@ -677,3 +707,24 @@ class ProfileManager:
                     asyncio.create_task(job.run_ad_monitoring(profile, persona, session_state, run_id, record.user_id, is_manual=True))
 
         return {"status": "success", "message": "Ad monitoring triggered"}
+
+    async def trigger_hate_speech_monitoring(self, current_user, profile_id: str):
+        from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
+        cron_record = await self._engine.find_one(db_cronjob_status_model, db_cronjob_status_model.job_name == CronjobName.SOCIAL_JOB)
+        if cron_record and cron_record.status == CronjobStatus.RUNNING:
+            raise HTTPException(status_code=400, detail="Daily run scheduler is currently running. Please try again 5 minutes later.")
+
+        record = await self._get_or_create_social_record(current_user)
+        
+        from orion.management.jobs.social_profile.social_profile_job import social_profile_job
+        job = social_profile_job.get_instance()
+        
+        for profile in record.profiles:
+            if profile.profile_id == profile_id:
+                session_state = await self.read_profile_session_state(current_user, profile)
+                if session_state:
+                    run_id = str(uuid4())
+                    asyncio.create_task(job.run_hate_speech_monitoring(profile, None, session_state, run_id, record.user_id, is_manual=True))
+                    return {"status": "success", "message": "Hate speech monitoring triggered"}
+        
+        raise HTTPException(status_code=404, detail="Profile not found or no session state available")

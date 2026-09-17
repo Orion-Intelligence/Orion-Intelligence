@@ -43,9 +43,10 @@ async def _request_has_admin_account(request: Request) -> bool:
     dependencies=[],
 )
 async def get_public_config(request: Request):
+    tenant = getattr(request.state, "tenant", None)
     config = await config_controller.getInstance().get_system_info(
         include_email_config=await _request_has_admin_account(request),
-        tenant_id=str(request.state.tenant.id),
+        tenant_id=str(tenant.id) if tenant else None,
     )
     config.settings["app_url"] = env_handler.get_instance().env("APP_URL", "")
     config.settings["orion_mail_url"] = env_handler.get_instance().env("ORION_MAIL_PUBLIC_URL", "http://mail.localhost:4200")

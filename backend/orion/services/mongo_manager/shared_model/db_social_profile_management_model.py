@@ -80,6 +80,7 @@ class ManagedSocialProfile(EmbeddedModel):
     platform: str
     profile_name: str | None = None
     profile_username: str | None = None
+    profile_url: str | None = None
     session_id: str | None = None
     purposes: List[SocialProfilePurpose] | None = None
     assigned_persona_id: str | None = None

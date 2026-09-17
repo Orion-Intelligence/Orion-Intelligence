@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 from orion.services.mongo_manager.shared_model.db_social_automation_result_model import (
     SocialAdDetectionResult,
     SocialPostResult,
+    SocialHateSpeechResult,
 )
 from orion.services.mongo_manager.shared_model.db_social_profile_management_model import (
     SocialPersonaAgeGroup,
@@ -56,12 +57,14 @@ class SocialProfileConnectRequest(BaseModel):
     session_id: str | None = None
     profile_name: str | None = None
     profile_username: str | None = None
+    profile_url: str | None = None
     purposes: List[SocialProfilePurpose] = Field(default_factory=list)
 
 
 class SocialProfileUpdateRequest(BaseModel):
     profile_name: str | None = None
     profile_username: str | None = None
+    profile_url: str | None = None
     connection_status: SocialProfileConnectionStatus | None = None
     session_id: str | None = None
     purposes: List[SocialProfilePurpose] | None = None
@@ -72,6 +75,7 @@ class SocialProfileResponse(BaseModel):
     platform: str
     profile_name: str | None = None
     profile_username: str | None = None
+    profile_url: str | None = None
     session_id: str | None = None
     purposes: List[SocialProfilePurpose] = Field(default_factory=list)
     assigned_persona_id: str | None = None
@@ -142,16 +146,44 @@ class SocialAutomationAdDetectionResultRequest(BaseModel):
     is_manual: bool = False
 
 
+class SocialAutomationHateSpeechDetectedPostModel(BaseModel):
+    url: str
+    author: str = ""
+    content_text: str = ""
+    is_hate_speech: bool = False
+    label: str = "unknown"
+    detected_at: datetime | None = None
+    likes: str | None = None
+    shares: str | None = None
+    views: str | None = None
+
+
+class SocialAutomationHateSpeechResultRequest(BaseModel):
+    profile_id: str
+    date_time: datetime | None = None
+    total_posts: int = 0
+    hate_posts_count: int = 0
+    posts: List[SocialAutomationHateSpeechDetectedPostModel] = Field(default_factory=list)
+    error: bool = False
+    error_reason: str = ""
+    session_expired: bool = False
+    is_manual: bool = False
+
+
+
 class SocialAutomationResultRequest(BaseModel):
     user_id: str
     profile_id: str
     result_type: str
     post_result: SocialAutomationPostResultRequest | None = None
     ad_detection_result: SocialAutomationAdDetectionResultRequest | None = None
+    hate_speech_result: SocialAutomationHateSpeechResultRequest | None = None
+
 
 
 class SocialProfileResultsResponse(BaseModel):
     profile_id: str
     ad_detection_results: List[SocialAdDetectionResult] = Field(default_factory=list)
     post_results: List[SocialPostResult] = Field(default_factory=list)
-    hate_speech_results: List[Dict[str, Any]] = Field(default_factory=list)
+    hate_speech_results: List[SocialHateSpeechResult] = Field(default_factory=list)
+

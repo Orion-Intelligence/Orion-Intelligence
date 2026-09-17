@@ -133,6 +133,8 @@ class social_profile_job:
                 await self.run_posting(profile, persona, session_state, run_id, user_id)
             elif purpose == SocialProfilePurpose.AD_MONITORING:
                 await self.run_ad_monitoring(profile, persona, session_state, run_id, user_id)
+            elif purpose == SocialProfilePurpose.HATE_SPEECH_MONITORING:
+                await self.run_hate_speech_monitoring(profile, persona, session_state, run_id, user_id)
 
     async def run_posting(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "", is_manual: bool = False):
         log.g().i(f"Running posting for profile {profile.profile_id} on {profile.platform}")
@@ -220,6 +222,31 @@ class social_profile_job:
         except Exception as e:
             log.g().e(f"Failed to run ad monitoring for profile {profile.profile_id}: {e}")
 
-    async def run_hate_speech_monitoring(self, profile: ManagedSocialProfile, session_state: dict[str, Any]):
-        print("run_hate_speech_monitoring " * 100)
-        print(f"Running hate speech monitoring for profile {profile.profile_id}")
+    async def run_hate_speech_monitoring(self, profile: ManagedSocialProfile, persona: SocialPersona, session_state: dict[str, Any], run_id: str, user_id: str = "", is_manual: bool = False):
+        log.g().i(f"Running hate speech monitoring for profile {profile.profile_id} on {profile.platform}")
+        
+        try:
+            from orion.services.mongo_manager.shared_model.db_social_automation_result_model import db_social_automation_result_model
+            from orion.services.mongo_manager.mongo_controller import mongo_controller
+            engine = mongo_controller.get_instance().get_engine()
+            record = await engine.find_one(db_social_automation_result_model, db_social_automation_result_model.user_id == user_id)
+            
+            post_count = 50
+            if record and any(res.profile_id == profile.profile_id for res in record.hate_speech_results):
+                post_count = 10
+
+            payload = {
+                "run_id": run_id,
+                "user_id": user_id,
+                "profile_id": profile.profile_id,
+                "platform": profile.platform,
+                "profile_url": profile.profile_url or "",
+                "session_state": session_state,
+                "post_count": post_count,
+                "is_manual": is_manual,
+            }
+            result = await self._run_and_wait("automation/hate-speech-monitor", payload, self.AD_DETECTION_TASK_TIMEOUT_SECONDS)
+            await self._store_result(result)
+
+        except Exception as e:
+            log.g().e(f"Failed to run hate speech monitoring for profile {profile.profile_id}: {e}")

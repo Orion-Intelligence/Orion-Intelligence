@@ -37,6 +37,7 @@ export interface SocialProfile {
   platform: SocialPlatform;
   profile_name?: string | null;
   profile_username?: string | null;
+  profile_url?: string | null;
   session_id?: string | null;
   purposes: SocialProfilePurpose[];
   assigned_persona_id?: string | null;
@@ -72,12 +73,14 @@ export interface SocialProfileConnectRequest {
   session_id?: string | null;
   profile_name?: string | null;
   profile_username?: string | null;
+  profile_url?: string | null;
   purposes: SocialProfilePurpose[];
 }
 
 export interface SocialProfileUpdateRequest {
   profile_name?: string | null;
   profile_username?: string | null;
+  profile_url?: string | null;
   connection_status?: SocialConnectionStatus | null;
   session_id?: string | null;
   purposes?: SocialProfilePurpose[] | null;
@@ -126,9 +129,33 @@ export interface SocialPostResult {
   is_manual?: boolean;
 }
 
+export interface SocialHateSpeechDetectedPost {
+  url: string;
+  author: string;
+  content_text: string;
+  is_hate_speech: boolean;
+  label: string;
+  detected_at: string | Date;
+  likes?: string;
+  shares?: string;
+  views?: string;
+}
+
+export interface SocialHateSpeechResult {
+  profile_id: string;
+  date_time: string;
+  total_posts: number;
+  hate_posts_count: number;
+  posts: SocialHateSpeechDetectedPost[];
+  error: boolean;
+  error_reason: string;
+  session_expired: boolean;
+  is_manual?: boolean;
+}
+
 export interface SocialProfileResultsResponse {
   profile_id: string;
   ad_detection_results: SocialAdDetectionResult[];
   post_results: SocialPostResult[];
-  hate_speech_results: unknown[];
+  hate_speech_results: SocialHateSpeechResult[];
 }

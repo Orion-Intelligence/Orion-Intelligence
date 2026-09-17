@@ -4,7 +4,7 @@ import { finalize } from 'rxjs';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { ManageProfilesService } from '../manage-profiles.service';
-import { PlatformEntry, SocialAdDetectionResult, SocialPostResult, SocialProfile } from '../model/manage-profiles.model';
+import { PlatformEntry, SocialAdDetectionResult, SocialPostResult, SocialProfile, SocialHateSpeechResult } from '../model/manage-profiles.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 
 export type ManageProfileResultsActivity = 'ad_detection' | 'posting' | 'hate_speech';
@@ -24,6 +24,7 @@ export class ManageProfileResultsComponent {
   readonly resultsLoading = signal(false);
   readonly adDetectionResults = signal<SocialAdDetectionResult[]>([]);
   readonly postResults = signal<SocialPostResult[]>([]);
+  readonly hateSpeechResults = signal<SocialHateSpeechResult[]>([]);
   readonly expandedResults = signal<Set<string>>(new Set<string>());
   readonly shimmerRows = [1, 2, 3, 4, 5];
 
@@ -33,6 +34,7 @@ export class ManageProfileResultsComponent {
     this.resultsProfileId.set(profileId);
     this.adDetectionResults.set([]);
     this.postResults.set([]);
+    this.hateSpeechResults.set([]);
     this.expandedResults.set(new Set<string>());
     if (!profileId) {
       return;
@@ -44,6 +46,7 @@ export class ManageProfileResultsComponent {
       next: (response) => {
         this.adDetectionResults.set(response?.ad_detection_results || []);
         this.postResults.set(response?.post_results || []);
+        this.hateSpeechResults.set(response?.hate_speech_results || []);
       },
       error: (error) => {
         this.notification.show(error?.error?.detail ?? 'Failed to load results');

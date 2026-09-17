@@ -22,6 +22,19 @@ class SocialDetectedAd(EmbeddedModel):
     detected_at: datetime = Field(default_factory=utc_now)
 
 
+class SocialHateSpeechDetectedPost(EmbeddedModel):
+    url: str
+    author: str = ""
+    content_text: str = ""
+    is_hate_speech: bool = False
+    label: str = "unknown"
+    detected_at: datetime | None = None
+    likes: str | None = None
+    shares: str | None = None
+    views: str | None = None
+
+
+
 class SocialAdDetectionResult(EmbeddedModel):
     profile_id: str
     date_time: datetime = Field(default_factory=utc_now)
@@ -43,10 +56,24 @@ class SocialPostResult(EmbeddedModel):
     is_manual: bool = False
 
 
+class SocialHateSpeechResult(EmbeddedModel):
+    profile_id: str
+    date_time: datetime = Field(default_factory=utc_now)
+    total_posts: int = 0
+    hate_posts_count: int = 0
+    posts: List[SocialHateSpeechDetectedPost] = Field(default_factory=list)
+    error: bool = False
+    error_reason: str = ""
+    session_expired: bool = False
+    is_manual: bool = False
+
+
+
 class db_social_automation_result_model(Model):
     user_id: str = Field(index=True)
     ad_detection_results: List[SocialAdDetectionResult] = Field(default_factory=list)
     post_results: List[SocialPostResult] = Field(default_factory=list)
+    hate_speech_results: List[SocialHateSpeechResult] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 

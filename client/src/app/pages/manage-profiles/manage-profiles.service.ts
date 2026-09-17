@@ -97,10 +97,14 @@ export class ManageProfilesService {
   }
 
   triggerPostMonitoring(personaId: string): Observable<void> {
-    return this.http.post<void>(`/api/manage-profiles/personas/${personaId}/trigger-post-monitoring`, {}, { withCredentials: true });
+    return this.http.post<void>(`/api/manage-profiles/personas/${encodeURIComponent(personaId)}/trigger-post-monitoring`, {}, { withCredentials: true });
   }
 
   triggerAdMonitoring(personaId: string): Observable<void> {
-    return this.http.post<void>(`/api/manage-profiles/personas/${personaId}/trigger-ad-monitoring`, {}, { withCredentials: true });
+    return this.http.post<void>(`/api/manage-profiles/personas/${encodeURIComponent(personaId)}/trigger-ad-monitoring`, {}, { withCredentials: true });
+  }
+
+  triggerHateSpeechMonitoring(profileId: string): Observable<void> {
+    return this.http.post<void>(`/api/manage-profiles/profiles/${encodeURIComponent(profileId)}/trigger-hate-speech-monitoring`, {}, { withCredentials: true });
   }
 }
