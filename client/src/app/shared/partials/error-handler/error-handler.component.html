@@ -1,27 +1,36 @@
-<div class="min-h-[100dvh] h-auto bg-[url('/assets/images/shared/error-page.png')] [font-family:-apple-system,BlinkMacSystemFont,'Segoe_UI',Roboto,'Helvetica_Neue',Arial,'Noto_Sans','Liberation_Sans',sans-serif,'Apple_Color_Emoji','Segoe_UI_Emoji','Segoe_UI_Symbol','Noto_Color_Emoji'] md:-ml-[5px]">
-  <div class="mx-auto w-full px-4 py-8 sm:max-w-[540px] md:max-w-[720px] md:py-10 lg:max-w-[960px] xl:max-w-[1140px]">
-    <div class="-mx-[15px] flex flex-wrap items-center">
-      <div class="mt-6 w-full px-[15px] text-center md:mt-[100px] md:w-1/2">
-        <h2 class="text-[28px] font-medium leading-[1.2] text-[#212529] md:text-[32px]">{{ 'Oops! Server Error 404' | translate }}</h2>
-        <div class="mx-auto my-[10px] h-[5px] w-[150px] bg-orange-500"></div>
-        <h1 class="text-[34px] font-medium leading-[1.2] text-[#212529] md:text-[40px]">{{ 'Something went wrong!' | translate }}</h1>
-        <div>
-          <p class="text-[16px] leading-[1.5] text-[#212529]">{{ 'The requested URL was not found on this server' | translate }}</p>
-        </div>
-        <div class="mt-6 flex justify-center">
-          <a class="inline-flex h-[50px] w-full max-w-[300px] items-center justify-center rounded-[4.8px] border border-[#17a2b8] bg-[#17a2b8] px-4 py-2 text-[20px] font-normal leading-[1.5] text-white transition-colors hover:border-[#138496] hover:bg-[#138496]" href="https://github.com/msmannan00/Orion-Search">
-            {{ 'Explore Project' | translate }}
-          </a>
-        </div>
-        <div class="mt-4 flex justify-center">
-          <a class="inline-flex h-[50px] w-full max-w-[300px] items-center justify-center rounded-[4.8px] border border-[#17a2b8] bg-[#17a2b8] px-4 py-2 text-[20px] font-normal leading-[1.5] text-white transition-colors hover:border-[#138496] hover:bg-[#138496]" href="/">
-            {{ 'Homepage' | translate }}
-          </a>
-        </div>
+<div class="relative flex min-h-[100dvh] flex-col overflow-hidden bg-[#111315] [background-image:linear-gradient(rgba(255,255,255,0.01)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.01)_1px,transparent_1px)] [background-size:56px_56px] font-['Inter',sans-serif] text-[#f4f6f8]">
+  <header class="relative flex h-[76px] shrink-0 items-center justify-between gap-4 border-b border-[#1f2022] px-6 sm:px-12 lg:px-20">
+    <a href="/" [attr.aria-label]="'Go to Homepage' | translate" class="inline-flex rounded-[8px] p-1 outline-none focus-visible:ring-2 focus-visible:ring-[#ff8b96]">
+      <img src="/assets/images/sidebar/search_nav_logo.png" [alt]="'Orion Intelligence' | translate" class="h-[30px] w-auto max-w-[190px] object-contain" width="169" height="30">
+
+    </a>
+    <span class="font-mono text-[10px] uppercase tracking-[0.16em] text-[#a4adb5]">404 / {{ 'Page not found' | translate }}</span>
+  </header>
+
+  <main aria-labelledby="error-title" class="flex flex-1 items-center px-6 py-14 sm:px-12 sm:py-20 lg:px-20">
+    <section class="mx-auto grid w-full max-w-[1180px] items-center gap-12 md:grid-cols-[minmax(0,1.25fr)_minmax(300px,0.75fr)] md:gap-16 lg:gap-24">
+      <div class="relative border-l-2 border-[#d9858c]/60 pl-6 sm:pl-10">
+        <p aria-hidden="true" class="font-mono text-[clamp(140px,22vw,280px)] font-semibold leading-[0.74] tracking-[-0.1em] text-[#d9858c]/90">404</p>
+        <p class="mt-9 text-[11px] font-semibold uppercase tracking-[0.16em] text-[#d9858c]">
+          {{ 'Error 404' | translate }}
+        </p>
+        <h1 id="error-title" class="mt-3 max-w-[560px] text-[32px] font-semibold leading-[1.08] tracking-[-0.035em] text-[#f4f6f8] sm:text-[46px]">
+          {{ 'Page not found' | translate }}
+        </h1>
+        <p class="mt-5 max-w-[460px] text-[14px] leading-[1.7] text-[#a4adb5]">
+          {{ 'This page may have moved, or the address may be incorrect.' | translate }}
+        </p>
       </div>
-      <div class="order-first w-full px-[15px] md:order-none md:w-1/2 md:pl-0">
-        <img alt="" class="mx-auto h-[34vh] w-auto sm:h-[42vh] md:mr-auto md:ml-0 md:h-[70vh]" src="/assets/images/shared/server-icon.svg">
-      </div>
-    </div>
-  </div>
+
+      <nav aria-label="Error page navigation" class="border-t border-[#202123] pt-8 md:border-l md:border-t-0 md:pl-12 md:pt-0">
+        <p class="mb-5 flex items-center justify-between gap-4 text-[12px] font-semibold uppercase tracking-[0.12em] text-[#858b91]"><span>{{ 'Where would you like to go?' | translate }}</span><span class="font-mono text-[10px] tracking-normal text-[#555b61]">01—02</span></p>
+        <a href="/" class="group grid min-h-[76px] grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-3 border-y border-[#282a2d] px-3 py-4 text-[14px] font-semibold text-[#f4f6f8] outline-none transition-[background-color,border-color] duration-150 ease-out hover:border-b-[#9b6268] hover:bg-[#191b1d] hover:text-[#f0b1b6] focus-visible:ring-2 focus-visible:ring-[#ff8b96]">
+          <span aria-hidden="true" class="font-mono text-[11px] font-normal text-[#d9858c] group-hover:text-[#f0b1b6]">01</span><span>{{ 'Homepage' | translate }}<small class="mt-1 block text-[12px] font-normal text-[#858b91]">{{ 'Return to the main page' | translate }}</small></span><span aria-hidden="true" class="text-[20px] font-normal text-[#858b91] group-hover:text-[#f0b1b6]">→</span>
+        </a>
+        <a href="https://github.com/msmannan00/Orion-Search" target="_blank" rel="noopener noreferrer" class="group grid min-h-[76px] grid-cols-[28px_minmax(0,1fr)_20px] items-center gap-3 border-b border-[#282a2d] px-3 py-4 text-[14px] font-semibold text-[#c1c8ce] outline-none transition-[background-color,border-color] duration-150 ease-out hover:border-b-[#9b6268] hover:bg-[#191b1d] hover:text-[#f0b1b6] focus-visible:ring-2 focus-visible:ring-[#ff8b96]">
+          <span aria-hidden="true" class="font-mono text-[11px] font-normal text-[#555b61] group-hover:text-[#f0b1b6]">02</span><span>{{ 'Explore Project' | translate }}<small class="mt-1 block text-[12px] font-normal text-[#858b91]">{{ 'View on GitHub · opens in a new tab' | translate }}</small></span><span aria-hidden="true" class="text-[20px] font-normal text-[#858b91] group-hover:text-[#f0b1b6]">↗</span>
+        </a>
+      </nav>
+    </section>
+  </main>
 </div>

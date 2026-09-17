@@ -18,6 +18,11 @@
   animation: app-route-fade-b 500ms ease-out;
 }
 
+.app-route-fade-a:has(app-error-handler),
+.app-route-fade-b:has(app-error-handler) {
+  animation: none;
+}
+
 @keyframes quota-banner-enter {
   from {
     opacity: 0%;

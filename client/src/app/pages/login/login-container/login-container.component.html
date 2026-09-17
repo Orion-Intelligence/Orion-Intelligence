@@ -43,27 +43,24 @@
                 </div>
                 <span (click)="goToForgot()" class="mb-6 cursor-pointer self-end text-[14px] text-[#5a6f85] transition-colors [body.light-theme_&]:hover:text-[#1176d4]" data-testid="reset-password-link">{{ 'Recover account?' | translate }}</span>
                 @if (errorMessage || cooldownComplete) {
-                  <div class="mb-1 w-full min-w-0 rounded-lg border px-3 py-2 text-left shadow-sm" [ngClass]="retrySeconds > 0 || verificationPending ? 'border-amber-200 bg-amber-50 text-amber-900' : cooldownComplete ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-rose-200 bg-rose-50 text-rose-900'" data-testid="login-feedback">
+                  <div class="mb-1 w-full min-w-0 rounded-lg border px-3 py-2 text-left shadow-sm" [ngClass]="retrySeconds > 0 || verificationPending ? 'border-[#c8d9ea] bg-[#eef5fc] text-[#2d4b6c]' : cooldownComplete ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-[#efcbd2] bg-[#fff8f9] text-[#75414a]'" data-testid="login-feedback">
                     <div class="flex items-start gap-2">
-                      <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/80 text-[14px]" aria-hidden="true">
+                      <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-[14px]" [ngClass]="retrySeconds > 0 || verificationPending ? 'bg-[#f8fbff] text-[#1176d4]' : cooldownComplete ? 'bg-white/80 text-emerald-700' : 'bg-[#fff0f2] text-[#d9576d]'" aria-hidden="true">
                         <i class="bi" [ngClass]="retrySeconds > 0 ? 'bi-clock' : cooldownComplete ? 'bi-check-circle' : verificationPending ? 'bi-envelope' : 'bi-exclamation-circle'"></i>
                       </span>
                       <div class="min-w-0 flex-1" role="status" aria-live="polite" aria-atomic="true">
                         <p class="m-0 text-[13px] font-semibold leading-4">{{ feedbackTitle | translate }}</p>
-                        <p class="m-0 mt-0.5 break-words text-[13px] leading-4">{{ feedbackMessage | translate }}</p>
+                        <p class="m-0 mt-[3px] break-words text-[13px] leading-4">{{ feedbackMessage | translate }}</p>
                       </div>
                     </div>
                     @if (retrySeconds > 0) {
                       <div class="mt-2 flex items-center gap-3">
-                        <div class="flex shrink-0 items-center gap-2">
-                          <span class="text-[12px] font-medium">{{ 'Try again in' | translate }}</span>
-                          <span role="timer" aria-live="off" class="font-mono text-[14px] font-semibold leading-5 tabular-nums" data-testid="login-countdown">{{ retryLabel }}</span>
-                        </div>
-                        <progress class="block h-1 min-w-0 flex-1 overflow-hidden rounded-full border-0 bg-amber-100 [&::-webkit-progress-bar]:bg-amber-100 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-amber-500 [&::-moz-progress-bar]:bg-amber-500" [value]="retrySeconds" [max]="retryDuration" aria-hidden="true"></progress>
+                        <span role="timer" aria-live="off" class="shrink-0 font-mono text-[14px] font-semibold leading-5 tabular-nums text-[#1176d4]" data-testid="login-countdown">{{ retryLabel }}</span>
+                        <progress class="block h-1 min-w-0 flex-1 overflow-hidden rounded-full border-0 bg-[#dbe8f5] [&::-webkit-progress-bar]:bg-[#dbe8f5] [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-[#2b90ee] [&::-moz-progress-bar]:bg-[#2b90ee]" [value]="retrySeconds" [max]="retryDuration" aria-hidden="true"></progress>
                       </div>
                     }
                     @if (verificationPending) {
-                      <button type="button" (click)="resendMail()" class="mt-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-[13px] font-semibold hover:bg-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800">{{ 'Resend mail' | translate }}</button>
+                      <button type="button" (click)="resendMail()" class="mt-2 rounded-lg border border-[#b7cbe1] bg-[#f7fbff] px-3 py-1.5 text-[13px] font-semibold text-[#176aa8] hover:bg-[#eef5fc] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#2b90ee]">{{ 'Resend mail' | translate }}</button>
                     }
                   </div>
                 }

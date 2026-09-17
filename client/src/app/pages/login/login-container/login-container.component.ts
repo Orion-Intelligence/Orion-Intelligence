@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -21,10 +21,13 @@ import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 export class LoginContainerComponent implements OnInit, OnDestroy {
   private static readonly DEFAULT_LOGO_SRC = '/assets/images/shared/logo-wide-light.svg';
   private static readonly DEFAULT_AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_map.png';
+  private static readonly RETRY_DEADLINE_KEY = 'login_retry_deadline';
+  private static readonly RETRY_DURATION_KEY = 'login_retry_duration';
   private authSubscription!: Subscription;
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
   private retryTimer?: ReturnType<typeof setInterval>;
+  private destroyed = false;
 
   user = { mail: '', password: '' };
   errorMessage: string | null = null;
@@ -44,7 +47,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   cooldownComplete = false;
   submitting = false;
 
-  constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
+  constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute, private zone: NgZone, private cdr: ChangeDetectorRef) { }
 
   get verificationPending(): boolean {
     return this.errorMessage?.toLowerCase().replace(/\.$/, '') === 'verification pending';
@@ -96,21 +99,78 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
     if (!Number.isFinite(seconds) || seconds <= 0) {
       return;
     }
+    this.retryDuration = Math.ceil(seconds);
+    this.startRetryCountdown(Date.now() + this.retryDuration * 1000);
+  }
+
+  private storeRetryState(deadline: number): void {
+    try {
+      sessionStorage.setItem(LoginContainerComponent.RETRY_DEADLINE_KEY, String(deadline));
+      sessionStorage.setItem(LoginContainerComponent.RETRY_DURATION_KEY, String(this.retryDuration));
+    }
+    catch {
+      return;
+    }
+  }
+
+  private clearRetryState(): void {
+    try {
+      sessionStorage.removeItem(LoginContainerComponent.RETRY_DEADLINE_KEY);
+      sessionStorage.removeItem(LoginContainerComponent.RETRY_DURATION_KEY);
+    }
+    catch {
+      return;
+    }
+  }
+
+  private startRetryCountdown(deadline: number): void {
     clearInterval(this.retryTimer);
+    const remaining = Math.ceil((deadline - Date.now()) / 1000);
+    if (remaining <= 0) {
+      this.clearRetryState();
+      return;
+    }
     this.cooldownComplete = false;
-    this.retrySeconds = this.retryDuration = Math.ceil(seconds);
-    const deadline = Date.now() + this.retrySeconds * 1000;
+    this.retrySeconds = remaining;
+    this.retryDuration = Math.max(this.retryDuration, remaining);
+    this.storeRetryState(deadline);
     this.retryTimer = setInterval(() => {
-      this.retrySeconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
-      if (this.retrySeconds === 0) {
-        clearInterval(this.retryTimer);
-        this.errorMessage = null;
-        this.cooldownComplete = true;
-      }
+      this.zone.run(() => {
+        this.retrySeconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        if (this.retrySeconds === 0) {
+          clearInterval(this.retryTimer);
+          this.clearRetryState();
+          this.errorMessage = null;
+          this.cooldownComplete = true;
+        }
+        if (!this.destroyed) {
+          this.cdr.detectChanges();
+        }
+      });
     }, 1000);
   }
 
+  private restoreRetryCountdown(): void {
+    let storedDeadline = 0;
+    let storedDuration = 0;
+    try {
+      storedDeadline = Number(sessionStorage.getItem(LoginContainerComponent.RETRY_DEADLINE_KEY));
+      storedDuration = Number(sessionStorage.getItem(LoginContainerComponent.RETRY_DURATION_KEY));
+    }
+    catch {
+      return;
+    }
+    if (!Number.isFinite(storedDeadline) || storedDeadline <= Date.now()) {
+      this.clearRetryState();
+      return;
+    }
+    this.errorMessage = 'Too many login attempts';
+    this.retryDuration = Number.isFinite(storedDuration) ? storedDuration : 0;
+    this.startRetryCountdown(storedDeadline);
+  }
+
   ngOnInit() {
+    this.restoreRetryCountdown();
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
       this.showSignupLink = this.appService.getConfig().appSettings.signup_enabled;
@@ -262,6 +322,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.destroyed = true;
     clearInterval(this.retryTimer);
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
