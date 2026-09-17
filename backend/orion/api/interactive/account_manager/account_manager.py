@@ -150,6 +150,14 @@ class AccountManager:
             self._assert_monitoring_allowed(data.permissions, current_user, data.role)
             await self._assert_orion_mail_allowed(data.permissions, current_user.tenant_id, current_user)
 
+            from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+            tenant_id = str(current_user.tenant_id)
+            tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
+            if tenant is not None:
+                await TenantManager.get_instance().assert_user_quota_available(tenant)
+
+            creator_language = (getattr(current_user, "preferences", None) or {}).get("language")
+
             user = db_user_account(
                 username=username,
                 email=email,
@@ -162,6 +170,7 @@ class AccountManager:
                 permissions=data.permissions,
                 alerts_allowed_all=False,
                 alerts_allowed_tenant_ids=[],
+                preferences={"language": creator_language} if creator_language else {},
                 password_reset_required=True, )
 
             await engine.save(user)
@@ -234,13 +243,9 @@ class AccountManager:
         if request.status == UserStatus.DISABLE:
             user.status = UserStatus.DISABLE
         elif user.status == UserStatus.DISABLE:
-            active_count = await self._engine.count(
-                db_user_account,
-                (db_user_account.tenant_id == str(user.tenant_id)) & (
-                            db_user_account.status == UserStatus.ACTIVE.value))
-
-            if tenant is not None and not tenant.is_default and tenant.user_quota is not None and request.status == UserStatus.ACTIVE and user.status == UserStatus.DISABLE and active_count >= tenant.user_quota:
-                raise HTTPException(status_code=400, detail="User quota exceeded1")
+            if tenant is not None and request.status == UserStatus.ACTIVE:
+                from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+                await TenantManager.get_instance().assert_user_quota_available(tenant, active_only=True, message="User quota exceeded1")
             if request.status == UserStatus.ACTIVE:
                 user.status = UserStatus.ACTIVE
 
@@ -270,17 +275,17 @@ class AccountManager:
             or "alerts_allowed_tenant_ids" in request.model_fields_set
         )
         alert_access_requested = bool(request.alerts_allowed_all) or bool(request.alerts_allowed_tenant_ids or [])
-        if alert_fields_requested and current_user.role != user_role.ADMIN:
-            if alert_access_requested:
-                raise HTTPException(status_code=403, detail="Only admin can assign alert access")
-        elif alert_fields_requested and UserPermission.CASE_MANAGEMENT in (user.permissions or []):
+        if alert_fields_requested and UserPermission.CASE_MANAGEMENT in (user.permissions or []):
             from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
             alert_request = SimpleNamespace(
                 permissions=user.permissions,
                 alerts_allowed_all=bool(request.alerts_allowed_all),
                 alerts_allowed_tenant_ids=list(request.alerts_allowed_tenant_ids or []),
             )
-            user.alerts_allowed_all, user.alerts_allowed_tenant_ids = await TenantManager.get_instance().validate_alert_access_assignment(alert_request, current_user)
+            user_tenant = tenant or await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
+            user.alerts_allowed_all, user.alerts_allowed_tenant_ids = await TenantManager.get_instance().validate_alert_access_assignment(alert_request, current_user, user_tenant)
+        elif alert_fields_requested and alert_access_requested and current_user.role != user_role.ADMIN:
+            raise HTTPException(status_code=403, detail="Only admin can assign alert access")
         elif alert_fields_requested:
             user.alerts_allowed_all = False
             user.alerts_allowed_tenant_ids = []
@@ -362,30 +367,19 @@ class AccountManager:
             return ""
 
     async def get_node(self, current_user) -> NodeCallbackModel:
+        from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
         user = current_user
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
         tenant_id = str(user.tenant_id)
 
         assigned_quota = tenant.user_quota
-        should_count_users = bool(not tenant.is_default and assigned_quota is not None)
         dek_task = KeyManager.get_instance().get_or_create_dek(str(tenant.id))
         summary_task = AlertManager.getInstance().get_alert_summary(tenant_id)
-        count_task = (
-            self._engine.count(db_user_account, (db_user_account.tenant_id == tenant_id))
-            if should_count_users else None
-        )
-
-        if count_task is not None:
-            dek, alert_summary, total_user = await asyncio.gather(dek_task, summary_task, count_task)
-        else:
-            dek, alert_summary = await asyncio.gather(dek_task, summary_task)
-            total_user = 0
+        dek, alert_summary = await asyncio.gather(dek_task, summary_task)
 
         enc = Fernet(dek)
 
-        quota_exceeded = bool(
-            not tenant.is_default and assigned_quota is not None and assigned_quota < total_user
-        )
+        quota_exceeded_reason = await TenantManager.get_instance().quota_exceeded_reason(tenant)
 
         tenant_image_file = self.TENANT_DIR / f"{str(tenant.id)}.png"
         tenant_image_path = "/api/s/static/tenant/" + (str(tenant.id) if tenant_image_file.is_file() else "default")
@@ -413,15 +407,16 @@ class AccountManager:
                 user_license.value for user_license in
                 user.licenses], "permissions": [
                 permission.value if hasattr(permission, "value") else permission for permission in (getattr(user, "permissions", None) or [])], "image": user_image_path, "preferences": user.preferences or {}, "demo_tour": getattr(user, "demo_tour", True) }, "tenant": {"hasOnboarding": tenant.status == TenantStatus.ONBOARDING, "id": str(
-                tenant.id), "isDefault": str(tenant.is_default), "name": self.safe_decrypt(
+                tenant.id), "isDefault": str(tenant.is_default), "isPrimary": getattr(tenant, "is_primary", False), "parentTenantId": getattr(tenant, "parent_tenant_id", None), "name": self.safe_decrypt(
                 enc, tenant.name), "phone": self.safe_decrypt(enc, tenant.phone), "country": self.safe_decrypt(
                 enc, tenant.country), "city": self.safe_decrypt(enc, tenant.city), "postalCode": self.safe_decrypt(
                 enc, tenant.postal_code), "taxId": self.safe_decrypt(enc, tenant.id), "userId": "", "licenses": [
                 self.safe_decrypt(enc, l) for l in (tenant.licenses or [])], "assignedQuota": str(
-                assigned_quota), "quotaExceeded": quota_exceeded, "image": tenant_image_path,
+                assigned_quota), "quotaExceeded": quota_exceeded_reason == "user", "tenantQuotaExceeded": quota_exceeded_reason == "tenant", "image": tenant_image_path,
                 "profileVisibilityEnabled": getattr(tenant, "profile_visibility_enabled", True),
                 "eventManagementEnabled": getattr(tenant, "event_management_enabled", False),
                 "alertsVisibleToAdmin": getattr(tenant, "alerts_visible_to_admin", True),
+                "alertsVisibleToParent": getattr(tenant, "alerts_visible_to_parent", True),
                 "privilegedIoc": getattr(tenant, "privileged_ioc", False),
                 "alertRunTime": getattr(tenant, "alert_run_time", None),
                 "allowedAlertCategories": getattr(tenant, "allowed_alert_categories", None),

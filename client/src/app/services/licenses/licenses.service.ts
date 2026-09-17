@@ -238,9 +238,14 @@ export class LicenseService {
     return this.getCombinedRule().maintainer;
   }
 
+  isPrimaryMaintainer(): boolean {
+    return this.isMaintainer() && this.appService.userSessionData().tenant.isPrimary === true;
+  }
+
   canViewTenantAlerts(): boolean {
     const permissions = this.appService.userSessionData().user.permissions ?? [];
-    return this.isAdmin() || (this.isAnalyst() && permissions.includes('case_management') && this.appService.userSessionData().tenant.isDefault);
+    const tenant = this.appService.userSessionData().tenant;
+    return this.isAdmin() || this.isPrimaryMaintainer() || (this.isAnalyst() && permissions.includes('case_management') && (tenant.isDefault || tenant.isPrimary === true));
   }
 
   canUseOrionMail(): boolean {
@@ -255,8 +260,7 @@ export class LicenseService {
 
   canReviewTakedowns(): boolean {
     const tenant = this.appService.userSessionData().tenant;
-    const isRootTenant = tenant.isDefault;
-    return this.isAdmin() && isRootTenant;
+    return (this.isAdmin() && tenant.isDefault) || this.isPrimaryMaintainer();
   }
 
   getLicenseLabel(license: LicenseName | string): string {

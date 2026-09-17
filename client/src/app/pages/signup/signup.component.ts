@@ -8,7 +8,6 @@ import { buildUsernameSuggestions, buildUsernameSuggestionText } from '../../sha
 import { PasswordMeterHost } from '../../shared/utils/password-meter-host';
 import { PasswordToggleDirective } from '../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../shared/pipes/translate.pipe';
-import { isSignupHost } from '../../shared/utils/auth-host.util';
 
 @Component({
   selector: 'app-signup',
@@ -34,7 +33,7 @@ export class SignupComponent extends PasswordMeterHost implements OnInit {
 
   ngOnInit(): void {
     this.appService.loadConfig().subscribe(() => {
-      if (!isSignupHost(window.location.hostname, this.appService.getConfig().appSettings.app_url)) {
+      if (!this.appService.getConfig().appSettings.signup_enabled) {
         this.router.navigate(['/login'], { replaceUrl: true }).then();
         return;
       }

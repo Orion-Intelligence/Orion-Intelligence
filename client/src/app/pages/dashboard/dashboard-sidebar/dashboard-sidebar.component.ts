@@ -228,8 +228,8 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         (canAccessCaseManagement || c !== ProfileSubCategory.CASE_MANAGEMENT));
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
-      return categories.filter(c => c !== ProfileSubCategory.TENANT &&
-        c !== ProfileSubCategory.TAKEDOWN &&
+      return categories.filter(c => (this.licenseService.isPrimaryMaintainer() || c !== ProfileSubCategory.TENANT) &&
+        (this.licenseService.canReviewTakedowns() || c !== ProfileSubCategory.TAKEDOWN) &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&
         c !== ProfileSubCategory.AUDITLOG &&

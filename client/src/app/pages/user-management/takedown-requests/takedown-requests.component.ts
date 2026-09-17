@@ -10,6 +10,7 @@ import { takedown_filters } from '../../../shared/constants/filters';
 import { SidebarService } from '../../../shared/services/sidebar.service';
 import { DashboardService } from '../../../services/dashboard/dashboard.service';
 import { LicenseService } from '../../../services/licenses/licenses.service';
+import { AppService } from '../../../services/core/app/app.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TakedownFilter, TakedownListResponse, TakedownRequestItem } from '../../../shared/model/takedown/takedown.model';
 import { Observable } from 'rxjs';
@@ -39,7 +40,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
   error = '';
   rejectionTarget: TakedownRequestItem | null = null;
 
-  constructor(private apiService: ApiService, public sidebarService: SidebarService, private dashboardService: DashboardService, private licenseService: LicenseService, private router: Router) {
+  constructor(private apiService: ApiService, public sidebarService: SidebarService, private dashboardService: DashboardService, private licenseService: LicenseService, private appService: AppService, private router: Router) {
     this.isFilterOpen$ = this.sidebarService.sidebarState$;
   }
 
@@ -161,6 +162,10 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
         this.actionId = '';
       }
     });
+  }
+
+  canDecide(item: TakedownRequestItem): boolean {
+    return !item.operator_tenant_id || item.operator_tenant_id === this.appService.userSessionData().tenant.id;
   }
 
   statusClass(status: string): string {

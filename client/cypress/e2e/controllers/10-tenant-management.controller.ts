@@ -1,7 +1,7 @@
 
-import type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
+import type { AlertMailMessage, CaseAlertTenant, TenantSubUser } from '../model/10-tenant-management.model';
 import {TEST_DATA} from '../../support/constants';
-export type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
+export type { AlertMailMessage, CaseAlertTenant, TenantSubUser } from '../model/10-tenant-management.model';
 export const tenantResetNewPassword = '2wsx@WSX2026';
 export const alertSlackClientId = TEST_DATA.alert_slack_client_id;
 export const ALERT_SCANNER_CATEGORIES = [
@@ -101,6 +101,15 @@ function tenantLoginUrl(slug: string): string {
     ? `${slug}.localhost`
     : `${slug}.${url.hostname}`;
   url.pathname = '/login';
+  return url.toString();
+}
+
+export function tenantSignupUrl(slug: string): string {
+  const url = new URL(Cypress.config('baseUrl') || 'http://localhost:4200');
+  url.hostname = url.hostname === 'localhost' || url.hostname === '127.0.0.1'
+    ? `${slug}.localhost`
+    : `${slug}.${url.hostname}`;
+  url.pathname = '/signup';
   return url.toString();
 }
 
@@ -212,6 +221,53 @@ function runCaseAlertTenantSession(tenant: CaseAlertTenant, visible: boolean, on
     void cy.get('[data-testid="signout-btn"]').first().scrollIntoView().click({force: true});
   });
   void cy.visit(new URL('/login', Cypress.config('baseUrl') || 'http://localhost:4200').toString());
+}
+
+export function signUpUnderTenant(slug: string, account: {username: string; email: string; password: string}) {
+  void cy.clearAllEmails();
+  void cy.visit(tenantSignupUrl(slug));
+  void cy.get('[data-testid="signup-username"]').should('be.visible').clear().type(account.username);
+  void cy.get('[data-testid="signup-companymail"]').should('be.visible').clear().type(account.email);
+  void cy.get('[data-testid="signup-password"]').should('be.visible').clear().type(account.password, {log: false});
+  void cy.get('[data-testid="signup-submit"]').should('be.visible').and('not.be.disabled').click();
+}
+
+export function completeTenantOnboarding(companyName: string) {
+  void cy.get('[data-testid="tenant-company-input"]').should('be.visible').clear().type(companyName);
+  void cy.get('[data-testid="tenant-onboarding-next-step1"]').should('be.visible').click();
+  void cy.get('[data-testid="tenant-onboarding-next-step2"]').should('be.visible').click();
+  void cy.get('[data-testid="tenant-onboarding-confirm"]').should('be.visible').click();
+  void cy.get('[data-testid="dashboard-main"]').should('be.visible');
+}
+
+export function openTenantUsersPage() {
+  void cy.get('[data-testid="sidebar-subitem-profile-users"]').filter(':visible').first().scrollIntoView().click();
+  waitForBlockingOverlayToClose();
+}
+
+export function fillAndSubmitTenantAddUser(user: TenantSubUser) {
+  void cy.get('[data-testid="tenant-add-user-button"]').scrollIntoView().should('be.visible').click();
+  void cy.get('[data-testid="tenant-add-user-username"]').should('be.visible').type(user.username);
+  void cy.get('[data-testid="tenant-add-user-email"]').type(user.email);
+  void cy.get('[data-testid="tenant-add-user-password"]').type(user.password, {log: false});
+  void cy.get('[data-testid="tenant-add-user-confirm-password"]').type(user.password, {log: false});
+  void cy.get('[data-testid="tenant-add-user-submit"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+}
+
+export function addTenantUser(user: TenantSubUser) {
+  fillAndSubmitTenantAddUser(user);
+  void cy.get('[data-testid="tenant-add-user-modal"]').should('not.exist');
+}
+
+export function addTenantUserExpectQuotaBlocked(user: TenantSubUser) {
+  fillAndSubmitTenantAddUser(user);
+  void cy.get('[data-testid="tenant-add-user-modal"]').should('contain.text', 'User allocated quota exceeded');
+}
+
+export function setTenantEditorQuota(testId: string, value: string) {
+  void cy.get('@tenantEditFormPanel').within(() => {
+    cy.get(`[data-testid="${testId}"]`).first().clear({force: true}).type(value, {force: true});
+  });
 }
 
 export function deleteTenant(tenant: CaseAlertTenant) {
@@ -336,6 +392,20 @@ export function openTenantSettings() {
     .click();
   void cy.location('pathname').should('include', '/dashboard/profile/tenant-settings');
   void cy.contains('h1', 'Tenant Data').should('be.visible');
+}
+
+export function assertTenantAlertVisibilityToggle(label: string, expectedText: string) {
+  void cy.contains('label', label)
+    .scrollIntoView()
+    .closest('div.rounded-lg')
+    .should('contain.text', expectedText);
+}
+
+export function disableTenantAlertVisibilityToggle(label: string) {
+  void cy.contains('label', label)
+    .scrollIntoView()
+    .closest('div.rounded-lg')
+    .click();
 }
 
 export function fillTenantNetworkConfiguration(server: string, port: string) {
@@ -560,12 +630,7 @@ export function approveAllTenants(state: {verifiedCount: number}, tries = 0) {
 export function openTenantsPage() {
   setConfiguredViewport();
   void cy.get('[data-testid="sidebar-subitem-profile-tenant"]').filter(':visible').first().scrollIntoView().click();
-  cy.location('pathname').then((path) => {
-    if (!path.includes('/dashboard/profile/tenant')) {
-      void cy.visit('/dashboard/profile/tenant');
-    }
-  });
-  void cy.location('pathname').should('include', '/dashboard/profile/tenant');
+  void cy.location('pathname', {timeout: 30000}).should('include', '/dashboard/profile/tenant');
 }
 
 export function openAuditLogPage() {

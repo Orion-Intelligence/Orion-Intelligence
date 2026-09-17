@@ -5,6 +5,7 @@ from orion.api.interactive.case_manager.case_share_manager import CaseShareManag
 from orion.api.interactive.resource_manager.resource_manager import ResourceManager
 from orion.api.interactive.search_manager.search_data_model.dump.search_credential_param_model import search_credential_param_model
 from orion.api.interactive.search_manager.search_manager import search_manager
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.api.server.config_manager.config_controller import config_controller
 from configs.app_dependency import _enum_value
 from configs.auth_cookie import token_from_request
@@ -49,6 +50,7 @@ async def get_public_config(request: Request):
         tenant_id=str(tenant.id) if tenant else None,
     )
     config.settings["app_url"] = env_handler.get_instance().env("APP_URL", "")
+    config.settings["signup_enabled"] = "1" if await TenantManager.get_instance().is_signup_allowed(request.state.tenant) else "0"
     config.settings["orion_mail_url"] = env_handler.get_instance().env("ORION_MAIL_PUBLIC_URL", "http://mail.localhost:4200")
     return config
 

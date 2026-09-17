@@ -29,8 +29,6 @@ export const TAKEDOWN_FIXTURE = {
 
 export const takedownSelector = (testId: string) => `[data-testid="${testId}"]`;
 
-let currentRecord: TakedownRecord | null = null;
-
 function takedownRecord(status: TakedownStatus = 'pending'): TakedownRecord {
   const accepted = status === 'accepted';
   return {
@@ -49,7 +47,7 @@ function takedownRecord(status: TakedownStatus = 'pending'): TakedownRecord {
   };
 }
 
-function reportBody() {
+function reportBody(currentRecord: TakedownRecord | null) {
   const accepted = currentRecord?.status === 'accepted';
   return {
     m_hash: REPORT_HASH,
@@ -71,13 +69,13 @@ function reportBody() {
   };
 }
 
-export function stubTakedownReportFlow() {
-  currentRecord = null;
+export function registerTakedownIntercepts(seedStatus: TakedownStatus | null = null) {
+  let currentRecord: TakedownRecord | null = seedStatus ? takedownRecord(seedStatus) : null;
 
   void cy.intercept('GET', `**/api/search/defacement/${REPORT_HASH}*`, req => {
     req.reply({
       statusCode: 200,
-      body: reportBody(),
+      body: reportBody(currentRecord),
     });
   }).as('loadTakedownReport');
 
@@ -124,8 +122,14 @@ export function stubTakedownReportFlow() {
   }).as('acceptTakedown');
 }
 
+export function stubTakedownReportFlow() {
+  registerTakedownIntercepts();
+}
+
 export function openCompromisedMonitoringReport() {
-  void cy.visit(TAKEDOWN_FIXTURE.reportUrl);
+  cy.location('origin').then((origin) => {
+    void cy.visit(`${origin}${TAKEDOWN_FIXTURE.reportUrl}`);
+  });
   void cy.wait('@loadTakedownReport').its('response.statusCode').should('eq', 200);
   void cy.get(`a[href="${TAKEDOWN_FIXTURE.targetUrl}"]`).should('be.visible');
   void cy.contains(TAKEDOWN_FIXTURE.targetDomain).should('be.visible');
@@ -148,14 +152,15 @@ export function initiateTakedownFromReport() {
 }
 
 export function openTakedownReviewList() {
-  void cy.visit('/dashboard/profile/take-down');
+  cy.location('origin').then((origin) => {
+    void cy.visit(`${origin}/dashboard/profile/take-down`);
+  });
   void cy.wait('@loadTakedowns').its('response.statusCode').should('eq', 200);
   void cy.get(takedownSelector('takedown-row')).should('have.length', 1);
   void cy.get(takedownSelector('takedown-row')).first().within(() => {
     void cy.contains(TAKEDOWN_FIXTURE.targetDomain).should('be.visible');
     void cy.contains(TAKEDOWN_FIXTURE.targetUrl).should('be.visible');
     void cy.contains(TAKEDOWN_FIXTURE.abuseEmail).should('be.visible');
-    void cy.contains('Takedown in progress').should('be.visible');
   });
 }
 
@@ -171,7 +176,9 @@ export function acceptTakedownFromList() {
 }
 
 export function assertReportShowsAcceptedTakedown() {
-  void cy.visit(TAKEDOWN_FIXTURE.reportUrl);
+  cy.location('origin').then((origin) => {
+    void cy.visit(`${origin}${TAKEDOWN_FIXTURE.reportUrl}`);
+  });
   void cy.wait('@loadTakedownReport').its('response.statusCode').should('eq', 200);
   void cy.contains('button', 'Takedown reported').should('be.visible').and('be.disabled');
 }

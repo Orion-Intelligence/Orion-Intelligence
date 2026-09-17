@@ -100,9 +100,11 @@ class auth_manager:
             raise HTTPException(status_code=401, detail="account approval pending")
         if tenant and tenant.status == TenantStatus.DISABLE:
             raise HTTPException(status_code=401, detail="account blocked")
+        parent_tenant = await session_manager.get_instance().get_parent_tenant(user.tenant_id)
+        await session_manager.get_instance().ensure_quota_access(user)
 
         if (role_name == "member" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (
-                datetime.now(timezone.utc) - acct_at).days >= 30):
+                datetime.now(timezone.utc) - acct_at).days >= 30 and not await session_manager.get_instance().parent_has_subscription(parent_tenant)):
             raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue")
 
         if role_name == "member" and user.status != UserStatus.ACTIVE:

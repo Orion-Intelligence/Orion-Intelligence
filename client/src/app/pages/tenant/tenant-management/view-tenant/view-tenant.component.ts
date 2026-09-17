@@ -53,8 +53,9 @@ export class ViewTenantComponent implements OnInit {
   }
 
   get tenantLicenseOptions(): UiDropdownOption[] {
+    const primaryTenantLicenses = this.appService.userSessionData().tenant.licenses;
     return this.licenseList
-      .filter(license => this.licenseService.getLicenseLabel(license) !== 'maintainer')
+      .filter(license => this.licenseService.getLicenseLabel(license) !== 'maintainer' && (this.isAdmin() || primaryTenantLicenses.includes(license)))
       .map(license => ({ key: license, label: this.licenseService.getLicenseLabel(license) }));
   }
 
@@ -124,8 +125,20 @@ export class ViewTenantComponent implements OnInit {
     return this.licenseService.isAdmin();
   }
 
+  canEditTenant(tenant: ManagedTenant): boolean {
+    return !this.isAdmin() || !tenant.parent_tenant_id;
+  }
+
+  getParentTenantName(tenant: ManagedTenant): string {
+    return this.tenants.find(item => item.id === tenant.parent_tenant_id)?.name ?? '';
+  }
+
   canEditTenantAiEndpoint(): boolean {
-    return this.isAdmin() && this.appService.configData().appSettings.ai_endpoint_enabled;
+    return (this.isAdmin() || this.licenseService.isPrimaryMaintainer()) && this.appService.configData().appSettings.ai_endpoint_enabled;
+  }
+
+  canEditPrivilegedIoc(): boolean {
+    return this.isAdmin() || (this.licenseService.isPrimaryMaintainer() && this.appService.userSessionData().tenant.privilegedIoc === true);
   }
 
   openTenant(tenant: ManagedTenant): void {
@@ -150,6 +163,9 @@ export class ViewTenantComponent implements OnInit {
         tenant.privileged_ioc = res.tenant.privileged_ioc ?? tenant.privileged_ioc;
         tenant._saved_privileged_ioc = tenant.privileged_ioc ?? false;
         tenant.ai_endpoint_enabled = res.tenant.ai_endpoint_enabled ?? tenant.ai_endpoint_enabled ?? false;
+        tenant.user_quota = res.tenant.user_quota ?? tenant.user_quota;
+        tenant.tenant_quota = res.tenant.tenant_quota ?? tenant.tenant_quota;
+        tenant.licenses = res.tenant.licenses ?? tenant.licenses;
       }
     });
   }

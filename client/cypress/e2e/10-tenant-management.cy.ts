@@ -1,12 +1,17 @@
 import {
   addIOCForAllTabs,
+  addTenantUser,
+  addTenantUserExpectQuotaBlocked,
   alertSlackClientId,
   assertOnlyGeneralHasAlertFindings,
+  assertTenantAlertVisibilityToggle,
   applyAuditLogDateRange,
   assertAlertScanCompletedMailPresent,
   closeFilterSidebar,
   closeNotificationSidebar,
+  completeTenantOnboarding,
   deleteTenant,
+  disableTenantAlertVisibilityToggle,
   enableTenantPrivilegedIocIfInputDisabled,
   ensureGeneralAlertIoc,
   exportFromModal,
@@ -21,16 +26,20 @@ import {
   openTenantEditor,
   openTenantSettings,
   openTenantsPage,
+  openTenantUsersPage,
   resetAuditLogFilters,
   runTenantAlertScan,
   saveTenantEditor,
   selectEnabledCurrentMonthDate,
   setOnlyGeneralAlertScanner,
+  setTenantEditorQuota,
   setTenantEditorToggle,
   setTenantLicense,
   setTenantLicenses,
+  signUpUnderTenant,
   submitLogin,
   tenantResetNewPassword,
+  tenantSignupUrl,
   waitForTenantAlertScanComplete,
   ensureTenantAlertReportsPresent,
   waitForTenantAlertFindings,
@@ -46,6 +55,7 @@ import {
   exportSelectedCategoryAlert,
   exportCategoryAlerts
 } from './controllers/10-tenant-management.controller';
+import { openCaseAlertsView, selector } from './controllers/18-case-management.controller';
 import type { CaseAlertTenant, TenantSubUser } from './model/10-tenant-management.model';
 
 describe('Tenant Management - End-to-End Provisioning Flows', () => {
@@ -322,9 +332,9 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.wait('@uploadTenantIocCsv', {timeout: 60000})
       .its('response.statusCode')
       .should('be.oneOf', [200, 201]);
-    cy.contains(domainIoc).should('be.visible');
-    cy.contains(emailIoc).should('be.visible');
-    cy.contains(urlIoc).should('be.visible');
+    cy.contains(domainIoc).scrollIntoView().should('be.visible');
+    cy.contains(emailIoc).scrollIntoView().should('be.visible');
+    cy.contains(urlIoc).scrollIntoView().should('be.visible');
     cy.logout();
   });
 
@@ -629,6 +639,173 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     deleteTenant(tenant);
+  });
+});
+
+describe('Tenant Management - Primary and Sub-Tenant Provisioning', () => {
+  let primaryTenant = {} as CaseAlertTenant;
+  let primaryUsers: TenantSubUser[] = [];
+  let subTenant = {} as CaseAlertTenant;
+  let subUsers: TenantSubUser[] = [];
+
+  before(() => {
+    cy.env(['PRIMARY_TENANT_ACCOUNT', 'PRIMARY_TENANT_USERS', 'SUB_TENANT_ACCOUNT', 'SUB_TENANT_USERS']).then(
+      ({PRIMARY_TENANT_ACCOUNT, PRIMARY_TENANT_USERS, SUB_TENANT_ACCOUNT, SUB_TENANT_USERS}) => {
+        primaryTenant = PRIMARY_TENANT_ACCOUNT as CaseAlertTenant;
+        primaryUsers = (PRIMARY_TENANT_USERS || []) as TenantSubUser[];
+        subTenant = SUB_TENANT_ACCOUNT as CaseAlertTenant;
+        subUsers = (SUB_TENANT_USERS || []) as TenantSubUser[];
+        if (!primaryTenant?.slug || primaryUsers.length !== 2 || !subTenant?.slug || subUsers.length !== 2) {
+          throw new Error('Missing PRIMARY_TENANT_ACCOUNT/PRIMARY_TENANT_USERS/SUB_TENANT_ACCOUNT/SUB_TENANT_USERS in cypress.config.ts');
+        }
+      }
+    );
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('signs up the primary tenant candidate', () => {
+    cy.clearAllEmails();
+    cy.visit('/signup');
+    cy.get('[data-testid="signup-username"]').should('be.visible').clear().type(primaryTenant.username);
+    cy.get('[data-testid="signup-companymail"]').should('be.visible').clear().type(primaryTenant.email);
+    cy.get('[data-testid="signup-password"]').should('be.visible').clear().type(primaryTenant.password, {log: false});
+    cy.get('[data-testid="signup-submit"]').should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="welcome-tick"]').should('exist');
+    cy.get('[data-testid="welcome-goto-login"]').click();
+    cy.openLastMailAndGetUrl().then((url) => cy.visit(url));
+  });
+
+  it('verifies the tenant and enables its Primary Tenant toggle as admin', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(primaryTenant);
+    setTenantEditorToggle('tenant-verified-toggle', true);
+    setTenantEditorToggle('tenant-status-toggle', true);
+    setTenantEditorToggle('tenant-primary-toggle', true);
+    saveTenantEditor('savePrimaryTenantToggle');
+    cy.logout();
+  });
+
+  it('completes onboarding and creates two users as the primary tenant', () => {
+    submitLogin(primaryTenant.username, primaryTenant.password, primaryTenant);
+    completeTenantOnboarding(primaryTenant.companyName);
+    openTenantUsersPage();
+    primaryUsers.forEach((user) => addTenantUser(user));
+    cy.logout();
+  });
+
+  it('sets the primary tenant user and tenant quotas as admin', () => {
+    cy.loginAsAdmin();
+    openTenantsPage();
+    openTenantEditor(primaryTenant);
+    setTenantEditorQuota('tenant-user-quota-input', '4');
+    setTenantEditorQuota('tenant-tenant-quota-input', '1');
+    saveTenantEditor('savePrimaryTenantQuotas');
+    cy.logout();
+  });
+
+  it('signs up a sub-tenant under the primary tenant', () => {
+    signUpUnderTenant(primaryTenant.slug, subTenant);
+    cy.get('[data-testid="welcome-tick"]').should('exist');
+    cy.get('[data-testid="welcome-goto-login"]').click();
+    cy.openLastMailAndGetUrl().then((url) => cy.visit(url));
+  });
+
+  it('verifies the sub-tenant and sets its own quota as the primary tenant', () => {
+    loginTenant(primaryTenant);
+    openTenantsPage();
+    openTenantEditor(subTenant);
+    setTenantEditorToggle('tenant-verified-toggle', true);
+    setTenantEditorToggle('tenant-status-toggle', true);
+    setTenantEditorQuota('tenant-user-quota-input', '2');
+    saveTenantEditor('saveSubTenantVerify');
+    cy.logout();
+  });
+
+  it('completes onboarding and creates two users as the sub-tenant, exhausting its own quota', () => {
+    submitLogin(subTenant.username, subTenant.password, subTenant);
+    completeTenantOnboarding(subTenant.companyName);
+    openTenantUsersPage();
+    subUsers.forEach((user) => addTenantUser(user));
+  });
+
+  it('blocks another sub-tenant user once its own quota is exhausted', () => {
+    submitLogin(subTenant.username, subTenant.password, subTenant);
+    openTenantUsersPage();
+    addTenantUserExpectQuotaBlocked({username: 'sub_overflow_user', email: 'suboverflow@gmail.com', password: '1qaz!QAZ'});
+    cy.logout();
+  });
+
+  it('blocks another primary-tenant user once the primary shared quota is exhausted', () => {
+    loginTenant(primaryTenant);
+    openTenantUsersPage();
+    addTenantUserExpectQuotaBlocked({username: 'primary_overflow_usr', email: 'primaryoverflow@gmail.com', password: '1qaz!QAZ'});
+  });
+
+  it('enforces the primary tenant quota by blocking a second sub-tenant signup', () => {
+    // Once the primary tenant's tenant_quota is met, /api/public reports signup_enabled=false
+    // for its slug, and the signup page redirects to /login rather than rendering the form.
+    cy.visit(tenantSignupUrl(primaryTenant.slug));
+    cy.location('pathname', {timeout: 30000}).should('include', '/login');
+    cy.get('[data-testid="login-signup-link"]').should('not.exist');
+  });
+
+  it('shows alert visibility enabled by default for the sub-tenant', () => {
+    loginTenant(subTenant);
+    openTenantSettings();
+    cy.scrollDashboardToBottom();
+    assertTenantAlertVisibilityToggle('Allow Admin Alert Visibility', 'Tenant alerts are visible to admin');
+    assertTenantAlertVisibilityToggle('Allow Parent Tenant Alert Visibility', 'Tenant alerts are visible to parent tenant');
+    cy.logout();
+  });
+
+  it('shows the sub-tenant alerts to admin via case management', () => {
+    cy.loginAsAdmin();
+    openCaseAlertsView();
+    cy.contains(selector('case-admin-alert-tenant-email'), subTenant.email).scrollIntoView().should('be.visible');
+    cy.logout();
+  });
+
+  it('shows the sub-tenant alerts to the primary tenant via case management', () => {
+    loginTenant(primaryTenant);
+    openCaseAlertsView();
+    cy.contains(selector('case-admin-alert-tenant-email'), subTenant.email).scrollIntoView().should('be.visible');
+    cy.logout();
+  });
+
+  it('disables both alert visibility toggles as the sub-tenant', () => {
+    loginTenant(subTenant);
+    openTenantSettings();
+    cy.scrollDashboardToBottom();
+    disableTenantAlertVisibilityToggle('Allow Admin Alert Visibility');
+    disableTenantAlertVisibilityToggle('Allow Parent Tenant Alert Visibility');
+    cy.get('[data-testid="tenant-privacy-save"]').scrollIntoView().should('be.visible').and('not.be.disabled').click();
+    cy.get('[data-testid="tenant-privacy-save"]', {timeout: 60000}).should('be.disabled');
+    assertTenantAlertVisibilityToggle('Allow Admin Alert Visibility', 'Tenant alerts are hidden from admin');
+    assertTenantAlertVisibilityToggle('Allow Parent Tenant Alert Visibility', 'Tenant alerts are hidden from parent tenant');
+    cy.logout();
+  });
+
+  it('hides the sub-tenant alerts from admin after visibility is disabled', () => {
+    cy.loginAsAdmin();
+    openCaseAlertsView();
+    cy.get('body').then(($body) => {
+      const emails = $body.find(selector('case-admin-alert-tenant-email')).toArray().map((el) => (el.textContent || '').trim());
+      expect(emails).not.to.include(subTenant.email);
+    });
+    cy.logout();
+  });
+
+  it('hides the sub-tenant alerts from the primary tenant after visibility is disabled', () => {
+    loginTenant(primaryTenant);
+    openCaseAlertsView();
+    cy.get('body').then(($body) => {
+      const emails = $body.find(selector('case-admin-alert-tenant-email')).toArray().map((el) => (el.textContent || '').trim());
+      expect(emails).not.to.include(subTenant.email);
+    });
   });
 });
 

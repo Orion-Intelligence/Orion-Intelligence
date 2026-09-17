@@ -16,6 +16,7 @@ from orion.helper_manager.env_handler import env_handler
 from orion.services.mongo_manager.shared_model.db_auth_models import (
     LicenseName,
     UserStatus,
+    db_user_account,
     user_role,
 )
 from orion.services.mongo_manager.shared_model.db_tenant_model import TenantStatus
@@ -147,8 +148,12 @@ def test_delete_tenant_removes_users_and_keys():
         SimpleNamespace(id="507f1f77bcf86cd799439013"),
         SimpleNamespace(id="507f1f77bcf86cd799439014"),
     ]
+    class _Engine(FakeEngine):
+        async def find(self, model, *args, **kwargs):
+            return list(self.records) if model is db_user_account else []
+
     manager = object.__new__(TenantManager)
-    manager._engine = FakeEngine(records=users, find_one_results=[tenant])
+    manager._engine = _Engine(records=users, find_one_results=[tenant])
 
     result = _run(manager.delete_tenant(tenant_id, SimpleNamespace(role=user_role.ADMIN)))
 
@@ -383,6 +388,36 @@ def test_refresh_token_returns_new_session_payload_for_crawler(monkeypatch):
     assert result["session"]["hasOnboarding"] is False
 
 
+def test_refresh_token_rejects_child_tenant_when_parent_is_not_primary():
+    child_tenant = SimpleNamespace(parent_tenant_id="507f1f77bcf86cd799439099")
+    parent_tenant = SimpleNamespace(is_primary=False, verified=True, status=TenantStatus.ACTIVE)
+    user = _make_user(role=user_role.MEMBER)
+    manager = _make_manager(find_one_results=[user, _make_user(), child_tenant, parent_tenant])
+    manager._redis.values["session:507f1f77bcf86cd799439011"] = "sid-123"
+    token = _token({"sub": "alice", "sid": "sid-123"})
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.refresh_token(token))
+
+    assert exc.value.status_code == 401
+    assert exc.value.detail == "account blocked"
+
+
+def test_refresh_token_allows_expired_trial_when_parent_is_subscribed(monkeypatch):
+    child_tenant = SimpleNamespace(parent_tenant_id="507f1f77bcf86cd799439099")
+    parent_tenant = SimpleNamespace(id="507f1f77bcf86cd799439099", is_primary=True, verified=True, status=TenantStatus.ACTIVE)
+    maintainer = _make_user(role=user_role.MEMBER, account_verify_at=datetime.now(timezone.utc) - timedelta(days=31))
+    user = _make_user(role=user_role.MEMBER, subscription=False)
+    manager = _make_manager(find_one_results=[user, maintainer, child_tenant, parent_tenant, _make_user(subscription=True)])
+    manager._redis.values["session:507f1f77bcf86cd799439011"] = "sid-123"
+    monkeypatch.setattr(manager, "has_onboarding", lambda _company_id: asyncio.sleep(0, result=False))
+    token = _token({"sub": "alice", "sid": "sid-123"})
+
+    result = _run(manager.refresh_token(token))
+
+    assert result["token_type"] == "bearer"
+
+
 def test_has_onboarding_true_when_tenant_status_matches():
     onboarding = SimpleNamespace(status=TenantStatus.ONBOARDING)
     manager = _make_manager(find_one_results=[onboarding])
@@ -405,3 +440,24 @@ def test_generate_verification_token_returns_non_empty_string():
 
 def test_logout_user_with_empty_token_returns_none():
     assert session_manager.logout_user("") is None
+
+
+def test_ensure_quota_access_allows_maintainer():
+    manager = _make_manager()
+
+    assert _run(manager.ensure_quota_access(_make_user(licenses=[LicenseName.MAINTAINER]))) is None
+
+
+def test_ensure_quota_access_blocks_other_users_when_quota_is_exceeded(monkeypatch):
+    tenant = SimpleNamespace(id="507f1f77bcf86cd799439012")
+    manager = _make_manager(find_one_results=[tenant])
+    monkeypatch.setattr(
+        "orion.api.interactive.tenant_manager.tenant_manager.TenantManager.get_instance",
+        staticmethod(lambda: SimpleNamespace(quota_exceeded_reason=lambda _tenant: asyncio.sleep(0, result="tenant"))),
+    )
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager.ensure_quota_access(_make_user(licenses=[LicenseName.FREE])))
+
+    assert exc.value.status_code == 403
+    assert exc.value.detail == "Tenant quota exceeded. Contact your administrator."

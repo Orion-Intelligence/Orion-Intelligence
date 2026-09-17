@@ -108,7 +108,7 @@ def test_login_maintainer_not_found(monkeypatch):
     assert exc.value.detail == "Maintainer user not found"
 
 
-def test_login_no_tenant_uuid(monkeypatch):
+def test_login_no_tenant_id(monkeypatch):
     patch_common(monkeypatch)
     patch_authenticate(monkeypatch, make_user(tenant_id=None))
     patch_mongo(monkeypatch, make_engine([make_user()]))

@@ -12,9 +12,17 @@ from orion.constants.constant import CONSTANTS
 from orion.api.interactive.account_manager.models.user_meta_model import user_meta_model
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.api.interactive.tenant_manager.models.tenant_param_model import tenant_param_model
+from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, UserStatus, user_role
 from tests.model.fakes import FakeAuditManager, FakeMongoEngine
 from tests.scripts.account_manager.helpers import _make_manager, _make_tenant, _make_user, _run
+
+
+def _bind_tenant_manager(monkeypatch, engine):
+    tenant_manager = object.__new__(TenantManager)
+    tenant_manager._engine = engine
+    monkeypatch.setattr(TenantManager, "get_instance", staticmethod(lambda: tenant_manager))
+    return tenant_manager
 
 
 def test_get_all_users_returns_tenant_users_for_maintainer(tmp_path):
@@ -94,6 +102,36 @@ def test_create_user_saves_new_user_when_inputs_are_valid(tmp_path, monkeypatch)
     assert len(engine.saved) == 1
     assert engine.saved[0].username == "valid_user"
     assert engine.saved[0].password_reset_required is True
+
+
+def test_create_user_inherits_creator_language(tmp_path, monkeypatch):
+    engine = FakeMongoEngine(find_one_results=[None, None])
+    manager = _make_manager(tmp_path, engine)
+    current_user = SimpleNamespace(role=user_role.ADMIN, tenant_id="tenant-1", preferences={"language": "fr"})
+    data = user_model(
+        username="valid_user",
+        email="user@example.com",
+        password="Password1!",
+        role=user_role.ANALYST,
+        status=UserStatus.ACTIVE,
+        subscription=True,
+        licenses=[LicenseName.FREE],
+    )
+
+    monkeypatch.setattr(account_module.helper_controller, "extract_user_mail_fields", lambda payload: (payload.username, payload.email, payload.password))
+    monkeypatch.setattr(
+        manager,
+        "create_tenant_user",
+        lambda *_args: "$2b$12$abcdefghijklmnopqrstuuP0xP4KJv6pD7V9uN1M2Q3R4S5T6U7V8",
+    )
+    monkeypatch.setattr(
+        "orion.services.mongo_manager.mongo_controller.mongo_controller.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_engine=lambda: engine)),
+    )
+
+    _run(manager.create_user(data, current_user))
+
+    assert engine.saved[0].preferences == {"language": "fr"}
 
 
 def test_create_user_rejects_invalid_username_before_save(tmp_path, monkeypatch):
@@ -184,6 +222,7 @@ def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, mo
         "orion.services.encryption_manager.key_manager.KeyManager.get_instance",
         staticmethod(lambda: SimpleNamespace(get_profile_dek=lambda _tenant_id: asyncio.sleep(0, result=tenant_key))),
     )
+    _bind_tenant_manager(monkeypatch, engine)
 
     result = _run(manager.update_user(request, current_user))
 
@@ -194,7 +233,7 @@ def test_update_user_reactivates_disabled_user_and_updates_licenses(tmp_path, mo
     assert audit.calls[-1] == ("507f1f77bcf86cd799439012", "maint-1", "User updated")
 
 
-def test_update_user_rejects_when_quota_exceeded(tmp_path):
+def test_update_user_rejects_when_quota_exceeded(tmp_path, monkeypatch):
     user = _make_user(status=UserStatus.DISABLE, tenant_id="507f1f77bcf86cd799439012")
     tenant = _make_tenant(id="507f1f77bcf86cd799439012", user_quota=1, is_default=False)
     engine = FakeMongoEngine(find_one_results=[user, tenant])
@@ -202,6 +241,7 @@ def test_update_user_rejects_when_quota_exceeded(tmp_path):
     manager = _make_manager(tmp_path, engine)
     current_user = SimpleNamespace(id="maint-1", tenant_id="507f1f77bcf86cd799439012", licenses=[LicenseName.MAINTAINER], role=user_role.MEMBER)
     request = tenant_param_model(username="alice", status=UserStatus.ACTIVE, licenses=[LicenseName.OSINT_BASIC])
+    _bind_tenant_manager(monkeypatch, engine)
 
     with pytest.raises(HTTPException) as exc:
         _run(manager.update_user(request, current_user))
@@ -305,6 +345,7 @@ def test_get_node_builds_response_with_decrypted_tenant_data(tmp_path, monkeypat
         "orion.api.interactive.alert_manager.alert_manager.AlertManager.getInstance",
         staticmethod(lambda: SimpleNamespace(get_alert_summary=lambda _tenant_id: asyncio.sleep(0, result=audit_summary))),
     )
+    _bind_tenant_manager(monkeypatch, engine)
 
     node = _run(manager.get_node(user))
 
@@ -361,3 +402,26 @@ def test_get_public_user_returns_visible_profile_payload(tmp_path, monkeypatch):
     assert result["hidden"] is False
     assert result["tenant_name"] == "Acme"
     assert result["licenses"] == ["free"]
+
+
+def test_get_node_shows_the_quota_assigned_to_the_sub_tenant(tmp_path, monkeypatch):
+    tenant_key = Fernet.generate_key()
+    primary = _make_tenant(id="507f1f77bcf86cd799439013", user_quota=15, is_primary=True, parent_tenant_id=None)
+    child = _make_tenant(id="507f1f77bcf86cd799439012", user_quota=16, is_primary=False, parent_tenant_id=str(primary.id))
+    user = _make_user(tenant_id=str(child.id))
+    engine = FakeMongoEngine(find_one_results=[child, primary])
+    manager = _make_manager(tmp_path, engine)
+
+    monkeypatch.setattr(
+        "orion.services.encryption_manager.key_manager.KeyManager.get_instance",
+        staticmethod(lambda: SimpleNamespace(get_or_create_dek=lambda _tenant_id: asyncio.sleep(0, result=tenant_key))),
+    )
+    monkeypatch.setattr(
+        "orion.api.interactive.alert_manager.alert_manager.AlertManager.getInstance",
+        staticmethod(lambda: SimpleNamespace(get_alert_summary=lambda _tenant_id: asyncio.sleep(0, result={}))),
+    )
+    _bind_tenant_manager(monkeypatch, engine)
+
+    node = _run(manager.get_node(user))
+
+    assert node.tenant.assignedQuota == "16"
