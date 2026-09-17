@@ -29,7 +29,7 @@
 @if (isVisible) {
   <main id="main-content" class="relative">
     <app-loader></app-loader>
-    <div [class.app-route-fade-a]="shouldAnimate()" [class.app-route-fade-b]="!shouldAnimate()">
+    <div [class.app-route-fade-a]="shouldAnimate()" [class.app-route-fade-b]="!shouldAnimate() && !isErrorRoute()">
       <router-outlet></router-outlet>
     </div>
   </main>

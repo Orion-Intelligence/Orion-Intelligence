@@ -100,6 +100,8 @@ body {
 }
 
 .notice_layout {
+  position: relative;
+  top: -24px;
   display: grid;
   width: 100%;
   max-width: 1180px;
@@ -109,24 +111,21 @@ body {
 }
 
 .notice_error {
-  position: relative;
   min-width: 0;
-  border-left: 2px solid rgb(217 133 140 / 60%);
-  padding-left: clamp(24px, 4vw, 48px);
 }
 
 .notice_code {
   margin: 0;
   color: #d9858c;
   font-family: "Roboto Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-  font-size: clamp(140px, 22vw, 280px);
+  font-size: clamp(128px, 20vw, 248px);
   font-weight: 600;
   letter-spacing: -0.08em;
-  line-height: 0.74;
+  line-height: 0.76;
 }
 
 .notice_eyebrow {
-  margin: 36px 0 0;
+  margin: 28px 0 0;
   color: #d9858c;
   font-size: 11px;
   font-weight: 600;
@@ -142,6 +141,7 @@ body {
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.08;
+  text-wrap: balance;
 }
 
 .notice_message {
@@ -159,12 +159,26 @@ body {
 }
 
 .notice_menu-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   margin: 0 0 20px;
   color: #858b91;
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+
+.notice_menu-count {
+  flex-shrink: 0;
+  color: #555b61;
+  font-family: "Roboto Mono", "SFMono-Regular", Consolas, monospace;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: normal;
+  text-transform: none;
 }
 
 .notice_menu a {
@@ -210,6 +224,10 @@ body {
   font-weight: 400;
 }
 
+.notice_menu a > span:nth-child(2) {
+  min-width: 0;
+}
+
 .notice_menu a:first-of-type > span:first-child {
   color: #d9858c;
 }
@@ -237,6 +255,7 @@ body {
   font-size: 12px;
   font-weight: 400;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 @media (width < 768px) {
@@ -249,12 +268,9 @@ body {
   }
 
   .notice_layout {
+    top: -12px;
     grid-template-columns: 1fr;
     gap: 40px;
-  }
-
-  .notice_error {
-    padding-left: 20px;
   }
 
   .notice_menu {
@@ -265,6 +281,6 @@ body {
   }
 
   .notice_code {
-    font-size: clamp(112px, 28vw, 190px);
+    font-size: clamp(104px, 26vw, 168px);
   }
 }

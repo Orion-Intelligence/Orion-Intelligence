@@ -24,6 +24,7 @@ export class AppComponent {
   protected readonly JSON = JSON;
 
   currentRoute = signal('');
+  isErrorRoute = signal(false);
   error$: Observable<boolean>;
   isVisible = true;
 
@@ -34,6 +35,9 @@ export class AppComponent {
       this.applyTheme(theme);
     });
     this.error$ = this.errorStore.error$;
+    this.error$.subscribe((isError) => {
+      this.isErrorRoute.set(isError);
+    });
     this.router.events.pipe(filter(event => event instanceof NavigationEnd), map(() => {
       const path = this.router.parseUrl(this.router.url).root.children.primary?.segments.map(s => s.path).join('/') || '';
       return `/${path}`;
@@ -54,6 +58,9 @@ export class AppComponent {
   }
 
   shouldAnimate(): boolean {
+    if (this.isErrorRoute()) {
+      return false;
+    }
     const route = this.currentRoute();
     return ![
       '/login',
