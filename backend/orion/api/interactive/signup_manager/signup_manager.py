@@ -33,7 +33,7 @@ class SignupManager:
         default_child_user_quota = 0
         if parent_tenant_id:
             quota_tenant, quota_tenant_ids = await TenantManager.get_instance().get_quota_scope(tenant)
-            if len(quota_tenant_ids) - 1 >= tenant.tenant_quota:
+            if not TenantManager._tenant_quota_available(quota_tenant_ids, tenant.tenant_quota):
                 raise HTTPException(status_code=400, detail="Tenant quota exceeded")
             pool_user_count = await TenantManager.get_instance().count_pool_users(quota_tenant_ids)
             if pool_user_count < quota_tenant.user_quota:

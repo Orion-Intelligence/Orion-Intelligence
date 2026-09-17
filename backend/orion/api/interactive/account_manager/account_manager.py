@@ -154,13 +154,7 @@ class AccountManager:
             tenant_uuid = str(current_user.tenant_uuid)
             tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_uuid)) if ObjectId.is_valid(tenant_uuid) else None
             if tenant is not None:
-                tenant_manager = TenantManager.get_instance()
-                quota_tenant, quota_tenant_ids = await tenant_manager.get_quota_scope(tenant)
-                users_count = await tenant_manager.count_quota_tenant_usage(tenant, quota_tenant, quota_tenant_ids)
-                if quota_tenant.is_default == False and quota_tenant.user_quota is not None and (users_count + 1) > quota_tenant.user_quota:
-                    raise HTTPException(status_code=400, detail="User allocated quota exceeded")
-                if getattr(tenant, "parent_tenant_id", None) and tenant.user_quota is not None and (await tenant_manager.count_pool_users([str(tenant.id)]) + 1) > tenant.user_quota:
-                    raise HTTPException(status_code=400, detail="User allocated quota exceeded")
+                await TenantManager.get_instance().assert_user_quota_available(tenant)
 
             creator_language = (getattr(current_user, "preferences", None) or {}).get("language")
 
@@ -251,15 +245,7 @@ class AccountManager:
         elif user.status == UserStatus.DISABLE:
             if tenant is not None and request.status == UserStatus.ACTIVE:
                 from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-                tenant_manager = TenantManager.get_instance()
-                quota_tenant, quota_tenant_ids = await tenant_manager.get_quota_scope(tenant)
-                active_count = await tenant_manager.count_quota_tenant_usage(tenant, quota_tenant, quota_tenant_ids, active_only=True)
-
-                if not quota_tenant.is_default and quota_tenant.user_quota is not None and active_count >= quota_tenant.user_quota:
-                    raise HTTPException(status_code=400, detail="User quota exceeded1")
-
-                if getattr(tenant, "parent_tenant_id", None) and tenant.user_quota is not None and await tenant_manager.count_pool_users([str(user.tenant_uuid)], active_only=True) >= tenant.user_quota:
-                    raise HTTPException(status_code=400, detail="User quota exceeded1")
+                await TenantManager.get_instance().assert_user_quota_available(tenant, active_only=True, message="User quota exceeded1")
             if request.status == UserStatus.ACTIVE:
                 user.status = UserStatus.ACTIVE
 
@@ -386,7 +372,6 @@ class AccountManager:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
         tenant_id = str(user.tenant_uuid)
 
-        quota_tenant, _quota_tenant_ids = await TenantManager.get_instance().get_quota_scope(tenant)
         assigned_quota = tenant.user_quota
         dek_task = KeyManager.get_instance().get_or_create_dek(str(tenant.id))
         summary_task = AlertManager.getInstance().get_alert_summary(tenant_id)

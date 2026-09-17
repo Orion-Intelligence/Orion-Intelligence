@@ -215,6 +215,20 @@ class TenantManager:
         reserved = sum((child.user_quota or 0) for child in children)
         return own_count + reserved
 
+    async def assert_user_quota_available(self, tenant, active_only: bool = False, message: str = "User allocated quota exceeded") -> None:
+        quota_tenant, quota_tenant_ids = await self.get_quota_scope(tenant)
+        usage = await self.count_quota_tenant_usage(tenant, quota_tenant, quota_tenant_ids, active_only=active_only)
+        if quota_tenant.is_default == False and quota_tenant.user_quota is not None and (usage + 1) > quota_tenant.user_quota:
+            raise HTTPException(status_code=400, detail=message)
+        if getattr(tenant, "parent_tenant_id", None) and tenant.user_quota is not None:
+            pool_usage = await self.count_pool_users([str(tenant.id)], active_only=active_only)
+            if (pool_usage + 1) > tenant.user_quota:
+                raise HTTPException(status_code=400, detail=message)
+
+    @staticmethod
+    def _tenant_quota_available(quota_tenant_ids: List[str], tenant_quota: int) -> bool:
+        return (len(quota_tenant_ids) - 1) < tenant_quota
+
     async def quota_exceeded_reason(self, tenant) -> Optional[str]:
         if tenant is None or getattr(tenant, "is_default", False):
             return None
@@ -233,7 +247,7 @@ class TenantManager:
         if not getattr(tenant, "is_primary", False):
             return False
         _, quota_tenant_ids = await self.get_quota_scope(tenant)
-        return (len(quota_tenant_ids) - 1) < tenant.tenant_quota
+        return self._tenant_quota_available(quota_tenant_ids, tenant.tenant_quota)
 
     async def get_visible_alert_tenants(self, viewer_tenant, tenant_ids: Optional[List[str]] = None) -> List[db_tenant_model]:
         if getattr(viewer_tenant, "is_primary", False):
@@ -707,7 +721,7 @@ class TenantManager:
 
         if data.privileged_ioc is not None and bool(data.privileged_ioc) != bool(tenant.privileged_ioc):
             if not primary_tenant.privileged_ioc:
-                raise HTTPException(status_code=403, detail="Only admin can change privileged IOC")
+                raise HTTPException(status_code=403, detail="Privileged IOC is not enabled for your primary tenant")
             tenant.privileged_ioc = bool(data.privileged_ioc)
             ioc_enc = Fernet(await KeyManager.get_instance().get_profile_dek(tenant_id))
             tenant_email = ioc_enc.decrypt(tenant.email.encode()).decode() if tenant.email else ""
@@ -1009,14 +1023,7 @@ class TenantManager:
                 raise HTTPException(status_code=400, detail="Tenant not found")
             tenant_uuid = str(tenant.id)
 
-            quota_tenant, quota_tenant_ids = await self.get_quota_scope(tenant)
-            users_count = await self.count_quota_tenant_usage(tenant, quota_tenant, quota_tenant_ids)
-
-            if quota_tenant.is_default == False and quota_tenant.user_quota is not None and (users_count + 1) > quota_tenant.user_quota:
-                raise HTTPException(status_code=400, detail="User allocated quota exceeded")
-
-            if tenant.parent_tenant_id and tenant.user_quota is not None and (await self.count_pool_users([tenant_uuid]) + 1) > tenant.user_quota:
-                raise HTTPException(status_code=400, detail="User allocated quota exceeded")
+            await self.assert_user_quota_available(tenant)
 
             if data.role in ["demo"] and current_user.role not in ["admin"]:
                 await AuditLogManager.get_instance().register(

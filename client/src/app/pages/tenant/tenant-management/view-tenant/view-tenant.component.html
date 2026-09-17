@@ -516,5 +516,6 @@
   }
   @if (tenantToDelete) {
     <app-confirmation-popup [message]="'Are you sure you want to delete this tenant and its associated users and keys?' | translate" (confirmed)="confirmDeleteTenant($event)"></app-confirmation-popup>
-  }  <span id="bottom"></span>
+  }
+  <span id="bottom"></span>
 </ng-container>
