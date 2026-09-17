@@ -1,5 +1,34 @@
 .map-loading-panel {
-  animation: map-loading-appear 180ms ease-out 160ms both;
+  animation: map-loading-appear 180ms ease-out both;
+}
+
+.map-loading-indicator {
+  background: radial-gradient(circle, color-mix(in srgb, currentcolor 10%, transparent), transparent 70%);
+  box-shadow: 0 0 0 7px color-mix(in srgb, currentcolor 3%, transparent);
+}
+
+.map-loading-ring {
+  animation: map-loading-rotate 1.8s linear infinite;
+}
+
+.map-loading-arc {
+  animation: map-loading-sweep 1.8s ease-in-out infinite;
+}
+
+@keyframes map-loading-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes map-loading-sweep {
+  0%, 100% {
+    stroke-dasharray: 36 183;
+  }
+
+  50% {
+    stroke-dasharray: 112 183;
+  }
 }
 
 @keyframes map-loading-appear {
@@ -15,7 +44,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .map-loading-panel {
+  .map-loading-panel,
+  .map-loading-ring,
+  .map-loading-arc {
     animation: none;
   }
 }

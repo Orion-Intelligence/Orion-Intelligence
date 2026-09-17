@@ -38,6 +38,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   private allCategoryReports: Record<string, CountryInsightReport[]> = {};
   private rotationTimer: number | null = null;
   private worldJsonPollTimer: number | null = null;
+  private mapLoaderTimer: number | null = null;
   private resizeObserver: ResizeObserver | null = null;
   private firstRenderScheduled = false;
   private firstRenderFrame: number | null = null;
@@ -70,6 +71,7 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   public readonly isCountryReportLoadingMore = signal(false);
   public readonly hasMoreCountryReports = signal(false);
   public readonly isMapLoading = signal(true);
+  public readonly showMapLoader = signal(false);
 
   private isLightTheme(): boolean {
     if (typeof document === 'undefined') {
@@ -106,6 +108,10 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
+    this.mapLoaderTimer = window.setTimeout(() => {
+      this.mapLoaderTimer = null;
+      this.showMapLoader.set(this.isMapLoading());
+    }, 180);
     this.observeThemeChanges();
     this.appService.loadWorldJson();
     this.setupResizeObserver();
@@ -113,6 +119,9 @@ export class WorldHeatmapComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.mapLoaderTimer !== null) {
+      window.clearTimeout(this.mapLoaderTimer);
+    }
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
     if (this.firstRenderFrame !== null) {
