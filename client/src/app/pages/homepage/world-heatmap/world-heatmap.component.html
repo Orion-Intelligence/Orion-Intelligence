@@ -1,10 +1,22 @@
 <div class="block w-full">
   <div data-testid="world-heatmap-map" class="map-container relative aspect-[100/52] max-h-[80vh] min-h-[400px] w-[calc(100%+60px)] -ml-[30px] -mr-[30px] [mask-image:linear-gradient(to_bottom,transparent_0%,black_12%,black_88%,transparent_100%)] max-[768px]:w-screen max-[768px]:max-w-screen [body.light-theme_&]:[mask-image:none]">
-    <div #mapContainer class="absolute inset-0"></div>
+    <div #mapContainer class="absolute inset-0" [attr.aria-busy]="isMapLoading()"></div>
     @if (isMapLoading()) {
-      <div @mapLoaderFade class="pointer-events-none absolute inset-0 z-[10] flex flex-col items-center justify-center gap-2.5">
-        <span class="h-10 w-10 animate-spin rounded-full border-[3px] border-[var(--color-border)] border-t-[var(--color-blue-640)]"></span>
-        <span class="text-[11px] font-medium tracking-[0.04em] text-[var(--color-text4)]">{{ 'Loading map...' | translate }}</span>
+      <div @mapLoaderFade class="pointer-events-none absolute inset-0 z-[10] flex items-center justify-center px-6" role="status" aria-live="polite" aria-atomic="true" data-testid="world-heatmap-loader">
+        <div class="map-loading-panel flex max-w-full items-center gap-3.5 rounded-2xl border border-[var(--color-border)] bg-[rgba(8,16,27,0.92)] px-5 py-4 shadow-[0_12px_36px_rgba(2,6,23,0.18)] backdrop-blur-md [body.light-theme_&]:bg-white/95 [body.light-theme_&]:shadow-[0_8px_28px_rgba(15,23,42,0.08)]">
+          <span class="relative flex h-11 w-11 shrink-0 items-center justify-center text-[var(--color-blue-640)]" aria-hidden="true">
+            <svg class="absolute inset-0 h-full w-full motion-safe:animate-spin [animation-duration:1.4s]" viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="20" stroke="currentColor" stroke-opacity="0.15" stroke-width="2"></circle>
+              <path d="M22 2a20 20 0 0 1 20 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+            </svg>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9"></circle>
+              <ellipse cx="12" cy="12" rx="4" ry="9"></ellipse>
+              <path d="M3 12h18"></path>
+            </svg>
+          </span>
+          <span class="text-[13px] font-medium leading-5 text-[var(--color-text1)]">{{ 'Loading map...' | translate }}</span>
+        </div>
       </div>
     } @else if (appService.backendWarmingUp()) {
       <app-map-loading-badges [items]="[('Indexing data...' | translate)]"></app-map-loading-badges>

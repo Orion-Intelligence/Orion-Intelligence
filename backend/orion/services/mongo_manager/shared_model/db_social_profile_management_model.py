@@ -70,6 +70,7 @@ class SocialPersona(EmbeddedModel):
     interests: List[str] = Field(default_factory=list)
     interest_weights: List[float] | None = None
     adult_status: bool = True
+    last_manual_post_trigger: datetime | None = None
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)
 
@@ -79,6 +80,7 @@ class ManagedSocialProfile(EmbeddedModel):
     platform: str
     profile_name: str | None = None
     profile_username: str | None = None
+    profile_url: str | None = None
     session_id: str | None = None
     purposes: List[SocialProfilePurpose] | None = None
     assigned_persona_id: str | None = None

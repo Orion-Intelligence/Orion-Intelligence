@@ -30,6 +30,11 @@
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ result.total_detected_ads }} {{ (result.total_detected_ads === 1 ? 'ad detected' : 'ads detected') | translate }}</h2>
+                @if (result.is_manual) {
+                  <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Manual' | translate }}</span>
+                } @else {
+                  <span class="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-violet-500">{{ 'Automate' | translate }}</span>
+                }
                 @if (result.error) {
                   <span class="rounded-full border border-red-400/15 bg-red-500/[0.06] px-2 py-0.5 text-[10px] font-semibold text-red-400">{{ (result.session_expired ? 'Session Expired' : 'Failed') | translate }}</span>
                 } @else {
@@ -51,6 +56,9 @@
                 <div class="border-b border-[var(--ui-table-row-border)] py-2 last:border-b-0">
                   <div class="flex flex-wrap items-center gap-2">
                     <span class="truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ ad.author || 'Unknown' }}</span>
+                    @if (ad.topic) {
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ ad.topic }}</span>
+                    }
                     <a [href]="ad.url" target="_blank" rel="noopener noreferrer" class="truncate text-[11px] font-medium text-[var(--color-blue-640)] hover:underline">{{ ad.url }}</a>
                   </div>
                   @if (ad.content_text) {
@@ -75,6 +83,11 @@
             <div class="min-w-0 flex-1">
               <div class="flex flex-wrap items-center gap-2">
                 <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ (result.error ? 'Post failed' : 'Post published') | translate }}</h2>
+                @if (result.is_manual) {
+                  <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Manual' | translate }}</span>
+                } @else {
+                  <span class="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-violet-500">{{ 'Automate' | translate }}</span>
+                }
                 @if (result.error) {
                   <span class="rounded-full border border-red-400/15 bg-red-500/[0.06] px-2 py-0.5 text-[10px] font-semibold text-red-400">{{ (result.session_expired ? 'Session Expired' : 'Failed') | translate }}</span>
                 } @else {
@@ -97,7 +110,61 @@
     }
 
     @if (activeActivity() === 'hate_speech') {
-      <div class="p-8 text-center text-sm text-[var(--color-text3)]">{{ 'No hate speech results yet.' | translate }}</div>
+      @for (result of hateSpeechResults(); track $index) {
+        <section class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
+          <div class="pointer-events-none absolute inset-y-0 left-0 w-0 bg-[var(--color-blue-640)] transition-[width] group-hover:w-0.5"></div>
+          <div (click)="toggleResult('hate-' + $index)" (keydown.enter)="toggleResult('hate-' + $index)" (keydown.space)="toggleResult('hate-' + $index)" role="button" tabindex="0" [attr.aria-expanded]="isResultExpanded('hate-' + $index)" class="flex cursor-pointer flex-wrap items-center gap-3 px-3 py-3 hover:bg-[var(--ui-table-row-hover)] sm:px-4">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ result.hate_posts_count }} {{ (result.hate_posts_count === 1 ? 'hate speech detected' : 'hate speeches detected') | translate }} out of {{ result.total_posts }} posts</h2>
+                @if (result.is_manual) {
+                  <span class="rounded-full border border-sky-400/20 bg-sky-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-sky-500">{{ 'Manual' | translate }}</span>
+                } @else {
+                  <span class="rounded-full border border-violet-400/20 bg-violet-400/[0.08] px-2 py-0.5 text-[10px] font-semibold text-violet-500">{{ 'Automate' | translate }}</span>
+                }
+                @if (result.error) {
+                  <span class="rounded-full border border-red-400/15 bg-red-500/[0.06] px-2 py-0.5 text-[10px] font-semibold text-red-400">{{ (result.session_expired ? 'Session Expired' : 'Failed') | translate }}</span>
+                } @else {
+                  <span class="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-semibold text-emerald-300">{{ 'Completed' | translate }}</span>
+                }
+              </div>
+              <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ result.date_time | date: 'medium' }}</p>
+              @if (result.error_reason) {
+                <p class="mb-0 mt-1 line-clamp-2 text-[11px] text-[var(--color-text3)]">{{ result.error_reason }}</p>
+              }
+            </div>
+            @if (result.posts.length) {
+              <i class="bi text-[12px] text-[var(--color-text4)]" [ngClass]="isResultExpanded('hate-' + $index) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+            }
+          </div>
+          @if (isResultExpanded('hate-' + $index) && result.posts.length) {
+            <div class="border-t border-[var(--ui-table-row-border)] bg-[var(--color-blue-820)] px-3 py-2 sm:px-4 [body.light-theme_&]:bg-[#f5f9fe]">
+              @for (post of result.posts; track post.url) {
+                <div class="border-b border-[var(--ui-table-row-border)] py-2 last:border-b-0">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="truncate text-[12px] font-semibold text-[var(--color-text1)]">{{ post.author || 'Unknown' }}</span>
+                    @if (post.is_hate_speech) {
+                      <span class="rounded-full border border-red-400/20 bg-red-500/10 px-2 py-0.5 text-[10px] font-medium text-red-400 [body.light-theme_&]:bg-red-50">{{ 'Hate Speech' | translate }}</span>
+                    } @else {
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ 'Normal' | translate }}</span>
+                    }
+                    @if (post.label) {
+                      <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-820)] px-2 py-0.5 text-[10px] font-medium text-[var(--color-text3)] [body.light-theme_&]:bg-[#eef4fb]">{{ post.label }}</span>
+                    }
+                    <a [href]="post.url" target="_blank" rel="noopener noreferrer" class="truncate text-[11px] font-medium text-[var(--color-blue-640)] hover:underline">{{ post.url }}</a>
+                  </div>
+                  @if (post.content_text) {
+                    <p class="mb-0 mt-1 line-clamp-2 text-[11px] text-[var(--color-text3)]">{{ post.content_text }}</p>
+                  }
+                  <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ 'Likes' | translate }}: {{ post.likes || '-' }} · {{ 'Shares' | translate }}: {{ post.shares || '-' }} · {{ 'Views' | translate }}: {{ post.views || '-' }} · {{ post.detected_at | date: 'short' }}</p>
+                </div>
+              }
+            </div>
+          }
+        </section>
+      } @empty {
+        <div class="p-8 text-center text-sm text-[var(--color-text3)]">{{ 'No hate speech results yet.' | translate }}</div>
+      }
     }
   </div>
 }

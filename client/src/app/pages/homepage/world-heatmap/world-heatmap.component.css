@@ -1,0 +1,21 @@
+.map-loading-panel {
+  animation: map-loading-appear 180ms ease-out 160ms both;
+}
+
+@keyframes map-loading-appear {
+  from {
+    opacity: 0%;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 100%;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-loading-panel {
+    animation: none;
+  }
+}

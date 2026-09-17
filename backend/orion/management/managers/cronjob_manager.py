@@ -17,7 +17,9 @@ from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_backup_model import BackupType
 from orion.services.redis_manager.redis_enums import REDIS_KEYS
-
+from orion.services.mongo_manager.shared_model.db_cronjob_status_model import CronjobName, CronjobStatus, db_cronjob_status_model
+from orion.services.mongo_manager.mongo_controller import mongo_controller
+from datetime import UTC, datetime
 
 class cronjob_manager:
     __instance = None
@@ -41,6 +43,25 @@ class cronjob_manager:
         else:
             cronjob_manager.__instance = self
             self.build_assets()
+
+    @staticmethod
+    async def update_cronjob_status(job_name: CronjobName, status: CronjobStatus, message: str = None):
+        try:
+            engine = mongo_controller.get_instance().get_engine()
+            record = await engine.find_one(db_cronjob_status_model, db_cronjob_status_model.job_name == job_name)
+            now = datetime.now(UTC)
+            if record:
+                record.status = status
+                if message is not None:
+                    record.message = message
+                record.last_run_at = now
+                record.updated_at = now
+                await engine.save(record)
+            else:
+                record = db_cronjob_status_model(job_name=job_name, status=status, message=message, last_run_at=now, updated_at=now)
+                await engine.save(record)
+        except Exception as e:
+            log.g().e(f"Failed to update cronjob status for {job_name}: {e}")
 
     @staticmethod
     def build_assets():
@@ -98,6 +119,7 @@ class cronjob_manager:
                 continue
 
             try:
+                await cronjob_manager.update_cronjob_status(CronjobName.ALERT_JOB, CronjobStatus.RUNNING, "")
                 await SchedulerManager.get_instance().run_due_daily_job(default_job_config, reason="startup_or_schedule_check")
                 all_tenants = await alert_job.get_instance()._tenant_manager.get_all_tenant()
                 for tenant in all_tenants:
@@ -127,23 +149,15 @@ class cronjob_manager:
                         heartbeat_interval=timedelta(seconds=60),
                     )
                     await SchedulerManager.get_instance().run_due_daily_job(tenant_job_config, reason="startup_or_tenant_schedule_check")
+                await cronjob_manager.update_cronjob_status(CronjobName.ALERT_JOB, CronjobStatus.NOT_RUNNING)
             except Exception as e:
-                log.g().e(f"IOC alert loop failed: {e}")
+                log.g().e(f"IOC alert job failed: {e}")
+                await cronjob_manager.update_cronjob_status(CronjobName.ALERT_JOB, CronjobStatus.FAILED, str(e))
 
             await asyncio.sleep(600)
 
     @staticmethod
-
     async def social_profile_loop():
-        while True:
-            try:
-                await social_profile_job.get_instance().run_daily_social_profiles()
-            except Exception as e:
-                log.g().e(f"Social profile job failed: {e}")
-
-            await asyncio.sleep(300)  # 5 minutes
-
-
         job_config = DailySchedulerConfig(
             job_key=cronjob_manager.SOCIAL_PROFILE_JOB_KEY,
             hour=cronjob_manager.DEFAULT_SOCIAL_PROFILE_HOUR,
@@ -156,12 +170,16 @@ class cronjob_manager:
 
         while True:
             try:
+                await cronjob_manager.update_cronjob_status(CronjobName.SOCIAL_JOB, CronjobStatus.RUNNING, "")
                 await SchedulerManager.get_instance().run_due_daily_job(job_config, reason="startup_or_schedule_check")
+                await cronjob_manager.update_cronjob_status(CronjobName.SOCIAL_JOB, CronjobStatus.NOT_RUNNING)
             except Exception as e:
-                log.g().e(f"Social profile loop failed: {e}")
+                log.g().e(f"Social profile job failed: {e}")
+                await cronjob_manager.update_cronjob_status(CronjobName.SOCIAL_JOB, CronjobStatus.FAILED, str(e))
 
             await asyncio.sleep(600)
 
+    @staticmethod
     async def backup_loop():
         while True:
             try:
@@ -172,9 +190,12 @@ class cronjob_manager:
 
                 enabled = await config_controller.getInstance()._is_backup_schedule()
                 if enabled == "1":
+                    await cronjob_manager.update_cronjob_status(CronjobName.BACKUP_JOB, CronjobStatus.RUNNING, "")
                     await BackupManager.get_instance().run_backup_now(BackupType.AUTO)
+                    await cronjob_manager.update_cronjob_status(CronjobName.BACKUP_JOB, CronjobStatus.NOT_RUNNING)
             except Exception as e:
-                log.g().e(f"Backup loop failed: {e}")
+                log.g().e(f"Backup job failed: {e}")
+                await cronjob_manager.update_cronjob_status(CronjobName.BACKUP_JOB, CronjobStatus.FAILED, str(e))
 
             await asyncio.sleep(259200)
 

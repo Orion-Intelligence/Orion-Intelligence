@@ -36,7 +36,7 @@ export class ManageProfilePopupComponent {
   readonly ageGroups: UiDropdownOption[] = ['13-17', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'].map(value => ({ key: value, label: value }));
   readonly genders: UiDropdownOption[] = [{ key: 'male', label: 'Male' }, { key: 'female', label: 'Female' }, { key: 'unspecified', label: 'Unspecified' }];
   readonly interests: UiDropdownOption[] = ['Animals', 'Comedy', 'Travel', 'Food', 'Sports', 'Beauty & Style', 'Art', 'Gaming', 'Science & Education', 'Dance', 'DIY', 'Auto', 'Music', 'Life Hacks', 'Oddly Satisfying', 'Outdoors', 'Fandom'].map(value => ({ key: value, label: value }));
-  readonly purposes: UiDropdownOption[] = [{ key: 'posting', label: 'Posting' }, { key: 'ad_monitoring', label: 'Ad Monitoring' }, { key: 'hate_speech_monitoring', label: 'Hate Speech Monitoring' }];
+  readonly purposes: UiDropdownOption[] = [{ key: 'posting', label: 'Posting' }, { key: 'ad_monitoring', label: 'Ad Monitoring' }];
 
   constructor(private service: ManageProfilesService, private notification: MessageNotificationService) {}
 

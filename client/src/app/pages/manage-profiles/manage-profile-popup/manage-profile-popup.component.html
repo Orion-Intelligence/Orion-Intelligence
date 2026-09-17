@@ -93,6 +93,7 @@
             <input [ngModel]="profileForm().profile_username" (ngModelChange)="profileForm.update(form => ({ ...form, profile_username: $event }))" name="profileUsername" class="mt-1 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 py-2 text-[var(--color-text1)] outline-none focus:border-sky-400/40" />
           </div>
 
+
           <div>
             <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Actions / Purposes' | translate }} <span class="text-red-500 [body.light-theme_&]:text-red-700">*</span></label>
             <div class="mt-1">

@@ -637,8 +637,16 @@ async def test_manage_profiles_unassign(profile_id: str):
 
 @test_routes.get("/api/manage-profiles/results/{profile_id}", dependencies=SCAN_DEPS)
 async def test_manage_profiles_results(profile_id: str):
-    return {"ad_detection_results": [{"date_time": "2026-09-04T12:00:00Z", "total_detected_ads": 2, "ads": [{"author": "AdAuthor1", "url": "https://twitter.com/ad1", "content_text": "Ad text 1", "likes": "10", "shares": "2", "views": "100", "detected_at": "2026-09-04T12:00:00Z"}]}], "post_results": [{"date_time": "2026-09-04T12:00:00Z", "post_url": "https://twitter.com/post1", "error": False}]}
+    return {"ad_detection_results": [{"date_time": "2026-09-04T12:00:00Z", "total_detected_ads": 2, "is_manual": True, "ads": [{"author": "AdAuthor1", "url": "https://twitter.com/ad1", "content_text": "Ad text 1", "likes": "10", "shares": "2", "views": "100", "detected_at": "2026-09-04T12:00:00Z"}]}], "post_results": [{"date_time": "2026-09-04T12:00:00Z", "post_url": "https://twitter.com/post1", "error": False, "is_manual": True}]}
 
 @test_routes.get("/api/extension/session")
 async def test_extension_session():
     return {"extension_connected": True}
+
+@test_routes.post("/api/manage-profiles/personas/{persona_id}/trigger-post-monitoring", dependencies=SCAN_DEPS)
+async def test_manage_profiles_trigger_post_monitoring(persona_id: str):
+    return {"status": "triggered"}
+
+@test_routes.post("/api/manage-profiles/personas/{persona_id}/trigger-ad-monitoring", dependencies=SCAN_DEPS)
+async def test_manage_profiles_trigger_ad_monitoring(persona_id: str):
+    return {"status": "triggered"}

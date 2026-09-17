@@ -18,6 +18,9 @@
         @if (activeTab() === 'profiles') {
           <button type="button" data-testid="manage-profiles-add-profile" (click)="openProfileModal()" class="inline-flex h-8 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-[11px] font-semibold text-[var(--color-text1)] transition enabled:hover:-translate-y-px enabled:hover:border-[#28557d] enabled:hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc]">{{ 'Add Profile' | translate }}</button>
         }
+        @if (activeTab() === 'hate_monitoring') {
+          <button type="button" data-testid="manage-profiles-add-hate-profile" (click)="openHateProfileModal()" class="inline-flex h-8 items-center justify-center rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-3 text-[11px] font-semibold text-[var(--color-text1)] transition enabled:hover:-translate-y-px enabled:hover:border-[#28557d] enabled:hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc]">{{ 'Add Hate Profile' | translate }}</button>
+        }
       </div>
     </header>
 
@@ -224,7 +227,7 @@
 
       @if (activeTab() === 'profiles') {
         <div class="overflow-hidden rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
-          @for (profile of profiles(); track profile.profile_id) {
+          @for (profile of regularProfiles(); track profile.profile_id) {
             <section class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
               <div class="pointer-events-none absolute inset-y-0 left-0 w-0 bg-[var(--color-blue-640)] transition-[width] group-hover:w-0.5"></div>
               <div class="flex flex-wrap items-center gap-3 px-3 py-3 hover:bg-[var(--ui-table-row-hover)] sm:px-4">
@@ -259,7 +262,7 @@
           <button type="button" data-testid="manage-profiles-assign-btn" (click)="assignProfile()" class="h-10 rounded-lg border border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] px-4 text-[12px] font-semibold text-[var(--color-text1)] hover:border-[#28557d]">{{ 'Assign' | translate }}</button>
         </div>
         <div class="overflow-hidden rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
-          @for (profile of profiles(); track profile.profile_id) {
+          @for (profile of regularProfiles(); track profile.profile_id) {
             <section class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
               <div class="flex flex-wrap items-center gap-3 px-3 py-3 hover:bg-[var(--ui-table-row-hover)] sm:px-4">
                 <div class="min-w-0 flex-1">
@@ -269,11 +272,51 @@
                   </div>
                   <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ platformLabel(profile.platform) }} · {{ profile.profile_name || profile.profile_username || 'Profile' }} · {{ statusLabel(profile.connection_status) }}</p>
                 </div>
-                <button type="button" [disabled]="!profile.assigned_persona_id" (click)="removeAssignment(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--color-text4)] hover:bg-red-500/10 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40" title="Remove assignment"><i class="bi bi-trash3 text-sm"></i></button>
+                <div class="flex shrink-0 items-center gap-1.5">
+                  <button type="button" [disabled]="!profile.assigned_persona_id" (click)="triggerPostMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-40" title="Trigger Post Monitoring">Post</button>
+                  <button type="button" [disabled]="!profile.assigned_persona_id" (click)="triggerAdMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-40" title="Trigger Ad Monitoring">Ad</button>
+                  <!-- <button type="button" [disabled]="!profile.assigned_persona_id" (click)="triggerHateSpeechMonitoring(profile.assigned_persona_id!, personaName(profile.assigned_persona_id))" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)] disabled:cursor-not-allowed disabled:opacity-40" title="Trigger Hate Speech Monitoring">Hate</button> -->
+                  <span class="h-4 w-px bg-[var(--color-border)] mx-0.5"></span>
+                  <button type="button" [disabled]="!profile.assigned_persona_id" (click)="removeAssignment(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--color-text4)] hover:bg-red-500/10 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40" title="Remove assignment"><i class="bi bi-trash3 text-sm"></i></button>
+                </div>
               </div>
             </section>
           } @empty {
             <div class="p-8 text-center text-sm text-[var(--color-text3)]">{{ 'No profiles available for assignment.' | translate }}</div>
+          }
+        </div>
+      }
+
+      @if (activeTab() === 'hate_monitoring') {
+
+
+        <div class="overflow-hidden rounded-xl border border-[var(--ui-table-shell-border)] bg-[var(--ui-table-row-odd)] shadow-[inset_0_1px_0_rgba(255,255,255,0.02)]">
+          @for (profile of hateProfiles(); track profile.profile_id) {
+            <section class="group relative border-b border-[var(--ui-table-row-border)] odd:bg-[var(--ui-table-row-odd)] even:bg-[var(--ui-table-row-even)] last:border-b-0">
+              <div class="pointer-events-none absolute inset-y-0 left-0 w-0 bg-[var(--color-blue-640)] transition-[width] group-hover:w-0.5"></div>
+              <div class="flex flex-wrap items-center gap-3 px-3 py-3 hover:bg-[var(--ui-table-row-hover)] sm:px-4">
+                <span class="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-700)] p-1.5 text-white [body.light-theme_&]:text-[var(--color-text2)]"><app-social-icon [platformName]="platformLabel(profile.platform)"></app-social-icon></span>
+                <div class="min-w-0 flex-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <h2 class="mb-0 truncate text-[13px] font-semibold text-[var(--color-text1)]">{{ profile.profile_name || profile.profile_username || 'Profile' }}</h2>
+                    <span class="rounded-full border border-emerald-400/15 bg-emerald-400/[0.06] px-2 py-0.5 text-[10px] font-semibold capitalize text-emerald-300">{{ statusLabel(profile.connection_status) }}</span>
+                  </div>
+                  <p class="mb-0 mt-1 text-[11px] text-[var(--color-text4)]">{{ platformLabel(profile.platform) }} · Session #{{ (profile.session_id || '').slice(0, 8) || 'None' }} · {{ profile.profile_url || profile.profile_username || 'No URL' }}</p>
+                  <p class="mb-0 mt-1 line-clamp-1 text-[11px] text-[var(--color-text3)]">Hate Speech Monitoring</p>
+                </div>
+                <div class="flex shrink-0 items-center gap-1.5">
+                  <button type="button" (click)="triggerHateSpeechMonitoring(profile.profile_id, profile.profile_name || profile.profile_username || 'Profile')" class="inline-flex h-7 px-2 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[11px] font-medium text-[var(--color-text2)] transition hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)]" title="Trigger Hate Speech Monitoring">Run</button>
+                  <span class="h-4 w-px bg-[var(--color-border)] mx-0.5"></span>
+                  <button type="button" (click)="openHateProfileModal(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-[5px] border border-[var(--color-border)] bg-transparent text-[var(--color-text2)] hover:border-sky-400/25 hover:bg-sky-400/[0.07] hover:text-[var(--color-blue-640)]" title="Edit profile"><i class="bi bi-pencil-square text-[12px]"></i></button>
+                  <button type="button" (click)="deleteProfile(profile)" class="inline-flex h-7 w-7 items-center justify-center rounded-md text-[var(--color-text4)] hover:bg-red-500/10 hover:text-red-500" title="Delete profile"><i class="bi bi-trash3 text-sm"></i></button>
+                </div>
+              </div>
+            </section>
+          } @empty {
+            <div class="p-8 text-center text-sm text-[var(--color-text3)]">
+              <p class="mb-3">{{ 'No hate monitoring profiles created yet.' | translate }}</p>
+              <button type="button" (click)="openHateProfileModal()" class="h-8 rounded-lg border border-[var(--color-border)] bg-[var(--color-blue-820)] px-3 text-[12px] font-semibold text-[var(--color-text2)] hover:bg-[var(--color-blue-810)]">{{ 'Add Hate Profile' | translate }}</button>
+            </div>
           }
         </div>
       }
@@ -285,17 +328,28 @@
     </div>
   </div>
 
-  @if (modalMode()) {
+  @if (modalMode() === 'persona' || modalMode() === 'profile') {
     <app-manage-profile-popup
-      [mode]="modalMode()!"
+      [mode]="$any(modalMode())"
       [persona]="selectedPersona()"
       [profile]="selectedProfile()"
       [platforms]="platforms()"
       [sessions]="sessions()"
       [profiles]="profiles()"
       (closed)="closeModal()"
-      (saved)="onPopupSaved($event)"
+      (saved)="onModalSaved($event)"
       (sessionsRequested)="closeModal(); setTab('sessions')"></app-manage-profile-popup>
+  }
+
+  @if (modalMode() === 'hate_profile') {
+    <app-manage-hate-profile-popup
+      [profile]="selectedProfile()"
+      [platforms]="platforms()"
+      [sessions]="sessions()"
+      [profiles]="profiles()"
+      (closed)="closeModal()"
+      (saved)="onModalSaved('profile')"
+      (sessionsRequested)="closeModal(); setTab('sessions')"></app-manage-hate-profile-popup>
   }
 </div>
 

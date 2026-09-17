@@ -95,4 +95,16 @@ export class ManageProfilesService {
   getProfileResults(profileId: string): Observable<SocialProfileResultsResponse> {
     return this.http.get<SocialProfileResultsResponse>(`/api/manage-profiles/results/${profileId}`, { withCredentials: true });
   }
+
+  triggerPostMonitoring(personaId: string): Observable<void> {
+    return this.http.post<void>(`/api/manage-profiles/personas/${encodeURIComponent(personaId)}/trigger-post-monitoring`, {}, { withCredentials: true });
+  }
+
+  triggerAdMonitoring(personaId: string): Observable<void> {
+    return this.http.post<void>(`/api/manage-profiles/personas/${encodeURIComponent(personaId)}/trigger-ad-monitoring`, {}, { withCredentials: true });
+  }
+
+  triggerHateSpeechMonitoring(profileId: string): Observable<void> {
+    return this.http.post<void>(`/api/manage-profiles/profiles/${encodeURIComponent(profileId)}/trigger-hate-speech-monitoring`, {}, { withCredentials: true });
+  }
 }

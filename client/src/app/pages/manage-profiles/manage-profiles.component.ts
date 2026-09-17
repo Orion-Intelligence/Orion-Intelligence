@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { DatePipe, NgClass } from '@angular/common';
 import { finalize } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -15,10 +15,11 @@ import { ConfirmationPopupComponent } from '../../shared/partials/confirmation-p
 import { MessageNotificationService } from '../../services/message_notification/message-notification.service';
 import { SocialPersona, SocialPlatform, SocialProfile } from './model/manage-profiles.model';
 import { ManageProfilePopupComponent, ManageProfilePopupSaveEvent } from './manage-profile-popup/manage-profile-popup.component';
+import { ManageHateProfilePopupComponent } from './manage-hate-profile-popup/manage-hate-profile-popup.component';
 import { ManageProfileResultsComponent } from './manage-profile-results/manage-profile-results.component';
 
-type ManageProfilesTab = 'personas' | 'sessions' | 'profiles' | 'assignments' | 'results';
-type ModalMode = 'persona' | 'profile';
+type ManageProfilesTab = 'personas' | 'sessions' | 'profiles' | 'assignments' | 'results' | 'hate_monitoring';
+type ModalMode = 'persona' | 'profile' | 'hate_profile';
 
 import type { PendingSessionDelete } from './model/manage-profiles.interfaces.model';
 export type { PendingSessionDelete } from './model/manage-profiles.interfaces.model';
@@ -29,7 +30,7 @@ export type { PendingSessionDelete } from './model/manage-profiles.interfaces.mo
 @Component({
   selector: 'app-manage-profiles',
   standalone: true,
-  imports: [DatePipe, NgClass, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent, UiDropdownComponent, ConfirmationPopupComponent, ManageProfilePopupComponent, ManageProfileResultsComponent],
+  imports: [DatePipe, NgClass, TranslatePipe, SocialExtensionManagerComponent, SocialIconComponent, UiDropdownComponent, ConfirmationPopupComponent, ManageProfilePopupComponent, ManageHateProfilePopupComponent, ManageProfileResultsComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './manage-profiles.component.html',
   styleUrls: ['./manage-profiles.component.scss'],
@@ -41,7 +42,7 @@ export class ManageProfilesComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly activeTab = signal<ManageProfilesTab>('sessions');
-  readonly tabs: { key: ManageProfilesTab; label: string }[] = [ { key: 'sessions', label: 'Sessions' }, { key: 'personas', label: 'Personas' }, { key: 'profiles', label: 'Profiles' }, { key: 'assignments', label: 'Persona Assignments' }, { key: 'results', label: 'Results' }, ];
+  readonly tabs: { key: ManageProfilesTab; label: string }[] = [ { key: 'sessions', label: 'Sessions' }, { key: 'personas', label: 'Personas' }, { key: 'profiles', label: 'Profiles' }, { key: 'assignments', label: 'Persona Assignments' }, { key: 'hate_monitoring', label: 'Hate Monitoring Profile' }, { key: 'results', label: 'Results' }, ];
   readonly state = signal<ManageProfilesExtensionState | null>(null);
   readonly loading = signal(false);
   readonly socialLoading = signal(false);
@@ -50,6 +51,8 @@ export class ManageProfilesComponent {
   readonly platforms = signal<PlatformEntry[]>([]);
   readonly personas = signal<SocialPersona[]>([]);
   readonly profiles = signal<SocialProfile[]>([]);
+  readonly hateProfiles = computed(() => this.profiles().filter(p => (p.purposes || []).includes('hate_speech_monitoring')));
+  readonly regularProfiles = computed(() => this.profiles().filter(p => !(p.purposes || []).includes('hate_speech_monitoring')));
   readonly shimmerRows = [1, 2, 3, 4, 5];
   readonly maxSessions = 10;
   readonly sessionFetching = signal<Set<string>>(new Set<string>());
@@ -63,7 +66,7 @@ export class ManageProfilesComponent {
   readonly confirmationAction = signal<'persona' | 'profile' | 'assignment' | ''>('');
   readonly assignmentPersonaId = signal('');
   readonly assignmentProfileId = signal('');
-  readonly purposes: UiDropdownOption[] = [ { key: 'posting', label: 'Posting' }, { key: 'ad_monitoring', label: 'Ad Monitoring' }, { key: 'hate_speech_monitoring', label: 'Hate Speech Monitoring' }, ];
+  readonly purposes: UiDropdownOption[] = [ { key: 'posting', label: 'Posting' }, { key: 'ad_monitoring', label: 'Ad Monitoring' } ];
   readonly sessionPendingDelete = signal<PendingSessionDelete | null>(null);
 
   constructor() {
@@ -237,10 +240,23 @@ export class ManageProfilesComponent {
   }
 
   openProfileModal(profile?: SocialProfile): void {
-    this.formError.set('');
-    this.selectedProfile.set(profile ?? null);
-    this.selectedPersona.set(null);
+    if (profile) {
+      this.selectedProfile.set(profile);
+    }
+    else {
+      this.selectedProfile.set(null);
+    }
     this.modalMode.set('profile');
+  }
+
+  openHateProfileModal(profile?: SocialProfile): void {
+    if (profile) {
+      this.selectedProfile.set(profile);
+    }
+    else {
+      this.selectedProfile.set(null);
+    }
+    this.modalMode.set('hate_profile');
   }
 
   closeModal(): void {
@@ -250,10 +266,17 @@ export class ManageProfilesComponent {
     this.formError.set('');
   }
 
-  onPopupSaved(event: ManageProfilePopupSaveEvent): void {
-    this.notification.show(event === 'persona' ? 'Persona saved successfully' : 'Profile saved successfully', 'success');
+  onModalSaved(event: ManageProfilePopupSaveEvent | string): void {
+    this.notification.show(typeof event === 'string' ? 'Profile saved successfully' : (event === 'persona' ? 'Persona saved successfully' : 'Profile saved successfully'), 'success');
     this.closeModal();
     this.loadSocialData();
+  }
+
+  onSessionsRequested(): void {
+    const platforms = this.platforms();
+    if (platforms.length > 0) {
+      this.fetchSession(platforms[0]);
+    }
   }
 
   deletePersona(persona: SocialPersona): void {
@@ -346,12 +369,58 @@ export class ManageProfilesComponent {
     this.confirmationMessage.set('Are you sure you want to remove this assignment?');
   }
 
+  triggerPostMonitoring(personaId: string, name: string): void {
+    this.triggerMonitoring('post', personaId, name);
+  }
+
+  triggerAdMonitoring(personaId: string, name: string): void {
+    this.triggerMonitoring('ad', personaId, name);
+  }
+
+  triggerHateSpeechMonitoring(profileId: string, name: string): void {
+    this.service.triggerHateSpeechMonitoring(profileId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: () => {
+        this.notification.show(`Hate speech monitoring triggered for ${name}`, 'success'); 
+      },
+      error: (err) => {
+        this.notification.show(err?.error?.detail ?? `Failed to trigger hate speech monitoring for ${name}`, 'fail'); 
+      }
+    });
+  }
+
+  private triggerMonitoring(type: 'post' | 'ad', personaId: string, name: string): void {
+    if (type === 'post') {
+      this.service.triggerPostMonitoring(personaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.show(`Post monitoring triggered for ${name}`, 'success'); 
+        },
+        error: (err) => {
+          this.notification.show(err?.error?.detail ?? `Failed to trigger post monitoring for ${name}`, 'fail'); 
+        }
+      });
+    }
+    else if (type === 'ad') {
+      this.service.triggerAdMonitoring(personaId).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.notification.show(`Ad monitoring triggered for ${name}`, 'success'); 
+        },
+        error: (err) => {
+          this.notification.show(err?.error?.detail ?? `Failed to trigger ad monitoring for ${name}`, 'fail'); 
+        }
+      });
+    }
+  }
+
+  platformOptions(): UiDropdownOption[] {
+    return this.platforms().map(p => ({ key: p.platform, label: p.platform }));
+  }
+
   personaOptions(): UiDropdownOption[] {
     return this.personas().map(persona => ({ key: persona.persona_id, label: persona.name }));
   }
 
   assignmentProfileOptions(): UiDropdownOption[] {
-    return this.profiles().map(profile => ({ key: profile.profile_id, label: `${this.platformLabel(profile.platform)} - ${profile.profile_name ?? profile.profile_username ?? 'Profile'}` }));
+    return this.regularProfiles().map(profile => ({ key: profile.profile_id, label: `${this.platformLabel(profile.platform)} - ${profile.profile_name ?? profile.profile_username ?? 'Profile'}` }));
   }
 
   personaName(personaId?: string | null): string {

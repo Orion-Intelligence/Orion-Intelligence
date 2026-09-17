@@ -26,6 +26,7 @@ type WorldTopology = Topology<{ countries: GeometryCollection }>;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.Eager,
   templateUrl: './world-heatmap.component.html',
+  styleUrls: ['./world-heatmap.component.css'],
   animations: [
     trigger('mapLoaderFade', [
       transition(':leave', [animate('300ms ease-in', style({ opacity: 0 }))]),
