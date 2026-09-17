@@ -89,10 +89,10 @@ async def extension_login(request: Request, response: Response = None, username:
             username,
             password,
             client="extension",
-            tenant_id=getattr(request.state, "tenant", None),
+            tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)),
         )
 
-    result = await auth_rate_limit(redis_store, username, authenticate_and_login)
+    result = await auth_rate_limit(redis_store, username, authenticate_and_login, request)
     access_token = result.get("access_token")
 
     if result.get("twofa_required"):
@@ -120,7 +120,7 @@ async def extension_refresh(request: Request, response: Response = None):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
 
-    result = await session_manager.get_instance().refresh_token(token, tenant_id=getattr(request.state, "tenant", None))
+    result = await session_manager.get_instance().refresh_token(token, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
     access_token = result.get("access_token")
     if not access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="refresh_failed")

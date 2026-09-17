@@ -13,7 +13,12 @@ from elasticsearch import helpers as es_helpers
 from fastapi import HTTPException
 
 from orion.api.interactive.backup_manager.backup_job_store import BackupJobStore
+from orion.api.interactive.backup_manager.backup_report import REPORT_NAME, BackupReport
+from orion.api.interactive.backup_manager.backup_retention import BackupRetention
+from orion.api.interactive.backup_manager.backup_store_io import BackupStoreIO
 from orion.api.interactive.backup_manager.maintenance_state import maintenance_state
+from orion.api.interactive.backup_manager.tenant_backup_manager import TenantBackupManager
+from orion.api.interactive.backup_manager.tenant_partition import TenantPartitionRegistry
 from orion.services.arango_manager.arango_controller import arango_controller
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 from orion.services.log_manager.log_controller import log
@@ -57,6 +62,84 @@ class BackupManager:
         self._engine_instance = value
 
     @property
+    def _partition_registry(self) -> TenantPartitionRegistry:
+        registry = getattr(self, "_partition_registry_instance", None)
+        if registry is None:
+            registry = TenantPartitionRegistry(preserved=self._preserved_collections())
+            self._partition_registry_instance = registry
+        return registry
+
+    @_partition_registry.setter
+    def _partition_registry(self, value):
+        self._partition_registry_instance = value
+
+    @property
+    def _retention(self) -> BackupRetention:
+        instance = getattr(self, "_retention_instance", None)
+        if instance is None:
+            instance = BackupRetention(self)
+            self._retention_instance = instance
+        return instance
+
+    @_retention.setter
+    def _retention(self, value):
+        self._retention_instance = value
+
+    @property
+    def _io(self) -> BackupStoreIO:
+        instance = getattr(self, "_io_instance", None)
+        if instance is None:
+            instance = BackupStoreIO(self)
+            self._io_instance = instance
+        return instance
+
+    @_io.setter
+    def _io(self, value):
+        self._io_instance = value
+
+    @property
+    def _tenant(self) -> TenantBackupManager:
+        instance = getattr(self, "_tenant_instance", None)
+        if instance is None:
+            instance = TenantBackupManager(self)
+            self._tenant_instance = instance
+        return instance
+
+    @_tenant.setter
+    def _tenant(self, value):
+        self._tenant_instance = value
+
+    @property
+    def tenant_restore_marker(self) -> Path:
+        return self._tenant.tenant_restore_marker
+
+    async def start_tenant_restore(self, backup_id: str, tenant_id: str) -> dict:
+        return await self._tenant.start_tenant_restore(backup_id, tenant_id)
+
+    async def list_backup_tenants(self, backup_id: str):
+        return await self._tenant.list_backup_tenants(backup_id)
+
+    async def list_backups_for_tenant(self, tenant_id: str):
+        return await self._tenant.list_backups_for_tenant(tenant_id)
+
+    async def resolve_download(self, backup_id: str):
+        backup = await self._load_backup_by_id(backup_id)
+        backup_dir = self.backup_root / backup.filename
+        if not backup_dir.is_dir():
+            raise HTTPException(status_code=404, detail="Backup files are no longer on disk")
+        await asyncio.to_thread(BackupReport.write, backup_dir / REPORT_NAME, self.read_manifest(backup_dir))
+        return backup_dir, backup.filename
+
+    async def resolve_tenant_download(self, backup_id: str, tenant_id: str):
+        return await self._tenant.resolve_download(backup_id, tenant_id)
+
+    async def restore_tenant(self, filename: str, tenant_id: str, source: str = "cli"):
+        return await self._tenant.restore_tenant(filename, tenant_id, source)
+
+    async def resolve_interrupted_tenant_restore(self) -> bool:
+        return await self._tenant.resolve_interrupted_tenant_restore()
+
+    @property
     def _job_store(self) -> BackupJobStore:
         store = getattr(self, "_job_store_instance", None)
         if store is None:
@@ -71,7 +154,9 @@ class BackupManager:
     async def job_status(self) -> dict:
         status = await self._job_store.read()
         if self.restore_marker.exists():
-            status["interrupted_restore"] = self._read_json_file(self.restore_marker) or {}
+            status["interrupted_restore"] = self._io.read_json_file(self.restore_marker) or {}
+        if self.tenant_restore_marker.exists():
+            status["interrupted_tenant_restore"] = self._io.read_json_file(self.tenant_restore_marker) or {}
         return status
 
     async def _set_progress(self, progress: int, message: str) -> None:
@@ -93,17 +178,6 @@ class BackupManager:
     @staticmethod
     async def _remove_tree(path: Path) -> None:
         await asyncio.to_thread(shutil.rmtree, path, ignore_errors=True)
-
-    @staticmethod
-    def _read_json_file(path: Path):
-        try:
-            return json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            return None
-
-    @staticmethod
-    def _write_json_file(path: Path, payload) -> None:
-        path.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
 
     async def start_backup(self, backup_type: BackupType) -> dict:
         if self.restore_marker.exists():
@@ -173,8 +247,9 @@ class BackupManager:
         backup_dir = self.backup_root / folder_name
         log.g().i(f"BACKUP STARTED: {folder_name} type={backup_type.value}")
 
-        await self._sweep_stale_rollbacks()
-        await self._require_free_space(backup_dir.parent)
+        await self._retention.sweep_stale_rollbacks()
+        await self._retention.sweep_orphaned_backups()
+        await self._retention.require_free_space(backup_dir.parent)
 
         try:
             await self._perform_backup(backup_dir, window=(0, 90))
@@ -186,7 +261,7 @@ class BackupManager:
         await self._engine.save(backup)
         log.g().i(f"BACKUP SUCCESS: {folder_name}")
 
-        await self._prune_old_backups()
+        await self._retention.prune_old_backups()
         return {
             "id": str(backup.id),
             "filename": backup.filename,
@@ -194,54 +269,9 @@ class BackupManager:
             "created_at": backup.created_at,
         }
 
-    async def _prune_old_backups(self) -> None:
-        existing_backups = await self._engine.find(db_backup_model, sort=db_backup_model.created_at.asc())
-        for oldest in existing_backups[:max(0, len(existing_backups) - CONSTANTS.MAX_BACKUPS)]:
-            await self._remove_tree(self.backup_root / oldest.filename)
-            await self._engine.delete(oldest)
-            log.g().i(f"BACKUP: limit of {CONSTANTS.MAX_BACKUPS} reached, removed oldest backup {oldest.filename}")
-
-    async def _sweep_stale_rollbacks(self) -> None:
-        if not self.backup_root.is_dir() or self.restore_marker.exists():
-            return
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=CONSTANTS.RESTORE_ROLLBACK_MAX_AGE_HOURS)
-        for entry in self.backup_root.iterdir():
-            if not entry.is_dir() or not entry.name.startswith(CONSTANTS.RESTORE_ROLLBACK_PREFIX):
-                continue
-            try:
-                modified_at = datetime.fromtimestamp(entry.stat().st_mtime, tz=timezone.utc)
-            except OSError:
-                continue
-            if modified_at < cutoff:
-                await self._remove_tree(entry)
-                log.g().i(f"BACKUP: removed abandoned rollback directory {entry.name}")
-
-    async def _require_free_space(self, target: Path, reference: Path | None = None) -> None:
-        target.mkdir(parents=True, exist_ok=True)
-        usage = await asyncio.to_thread(shutil.disk_usage, target)
-        needed = 0
-        if reference is not None and reference.is_dir():
-            needed = int(await asyncio.to_thread(self._directory_size, reference) * CONSTANTS.BACKUP_DISK_HEADROOM)
-        if usage.free <= needed:
-            raise HTTPException(
-                status_code=507,
-                detail=f"Not enough disk space: {usage.free} bytes free, {needed} bytes required",
-            )
-
-    @staticmethod
-    def _directory_size(path: Path) -> int:
-        total = 0
-        for entry in path.rglob("*"):
-            try:
-                if entry.is_file():
-                    total += entry.stat().st_size
-            except OSError:
-                continue
-        return total
-
     async def _perform_backup(self, backup_dir: Path, window: tuple = (0, 90)):
         progress_base, progress_span = window
-        total_steps = 5
+        total_steps = 6
 
         async def step(done: int, message: str, fraction: float = 0.0) -> None:
             position = min(1.0, (done + fraction) / total_steps)
@@ -251,24 +281,27 @@ class BackupManager:
         manifest = {"version": CONSTANTS.BACKUP_MANIFEST_VERSION, "completed": False, "created_at": datetime.now(timezone.utc)}
 
         await step(0, "Exporting MongoDB")
-        manifest["mongo"] = await self._backup_mongo(backup_dir / "mongo", lambda fraction: step(0, "Exporting MongoDB", fraction))
+        manifest["mongo"] = await self._io.backup_mongo(backup_dir / "mongo", lambda fraction: step(0, "Exporting MongoDB", fraction))
         await step(1, "Exporting ArangoDB")
-        manifest["arango"] = await asyncio.to_thread(self._backup_arango, backup_dir / "arango")
+        manifest["arango"] = await asyncio.to_thread(self._io.backup_arango, backup_dir / "arango")
         await step(2, "Exporting Elasticsearch")
-        manifest["elastic"] = await self._backup_elastic(backup_dir / "elastic")
+        manifest["elastic"] = await self._io.backup_elastic(backup_dir / "elastic")
         await step(3, "Copying logs")
-        await asyncio.to_thread(self._copy_folder, CONSTANTS.BASE_DIR / "workspace" / "logs", backup_dir / "logs")
+        await asyncio.to_thread(self._io.copy_folder, CONSTANTS.BASE_DIR / "workspace" / "logs", backup_dir / "logs")
         await step(4, "Copying resources")
-        await asyncio.to_thread(self._copy_folder, CONSTANTS.BASE_DIR / "static" / "resource", backup_dir / "resource")
-        await asyncio.to_thread(self._copy_folder, CONSTANTS.S_SESSION_RESOURCE_DIR, backup_dir / "session_data")
-        await step(5, "Finalizing")
+        await asyncio.to_thread(self._io.copy_folder, CONSTANTS.BASE_DIR / "static" / "resource", backup_dir / "resource")
+        await asyncio.to_thread(self._io.copy_folder, CONSTANTS.S_SESSION_RESOURCE_DIR, backup_dir / "session_data")
+        await step(5, "Exporting tenants")
+        manifest["tenants"] = await self._tenant.backup_tenants(backup_dir / CONSTANTS.BACKUP_TENANTS_DIR)
+        await step(6, "Finalizing")
 
         manifest["completed"] = True
-        await asyncio.to_thread(self._write_json_file, backup_dir / CONSTANTS.BACKUP_MANIFEST_NAME, manifest)
+        await asyncio.to_thread(self._io.write_json_file, backup_dir / CONSTANTS.BACKUP_MANIFEST_NAME, manifest)
+        await asyncio.to_thread(BackupReport.write, backup_dir / REPORT_NAME, manifest)
         return manifest
 
     def read_manifest(self, backup_dir: Path):
-        return self._read_json_file(backup_dir / CONSTANTS.BACKUP_MANIFEST_NAME)
+        return self._io.read_json_file(backup_dir / CONSTANTS.BACKUP_MANIFEST_NAME)
 
     async def _load_backup_by_id(self, backup_id: str):
         try:
@@ -341,7 +374,7 @@ class BackupManager:
         rollback_name = f"{CONSTANTS.RESTORE_ROLLBACK_PREFIX}{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}"
         rollback_dir = self.backup_root / rollback_name
         try:
-            await self._require_free_space(self.backup_root, backup_dir)
+            await self._retention.require_free_space(self.backup_root, backup_dir)
             await self._perform_backup(rollback_dir, window=(5, 35))
             log.g().i(f"RESTORE: rollback point created: {rollback_name}")
         except Exception as exc:
@@ -352,7 +385,7 @@ class BackupManager:
             raise HTTPException(status_code=500, detail=f"Restore aborted, could not create rollback point: {exc}") from exc
 
         await asyncio.to_thread(
-            self._write_json_file,
+            self._io.write_json_file,
             self.restore_marker,
             {"backup": filename, "rollback": rollback_name, "source": source, "started_at": datetime.now(timezone.utc)},
         )
@@ -402,16 +435,16 @@ class BackupManager:
         log.g().i(f"RESTORE SUCCESS: {filename}. Maintenance mode disabled.")
         return {"status": "restored", "filename": filename}
 
-    async def _refresh_caches(self) -> None:
+    async def _refresh_caches(self, tenant_id: str | None = None) -> None:
         try:
             from orion.api.server.config_manager.config_controller import config_controller
-            await config_controller.getInstance().load_config(force_db=True)
+            await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
             log.g().i("RESTORE: config cache reloaded from the restored database")
         except Exception as exc:
             log.g().e(f"RESTORE: config cache reload failed: {exc}")
 
     async def resolve_interrupted_restore(self) -> bool:
-        marker = self._read_json_file(self.restore_marker)
+        marker = self._io.read_json_file(self.restore_marker)
         if not marker:
             return False
         self.maintenance_flag.parent.mkdir(parents=True, exist_ok=True)
@@ -431,11 +464,11 @@ class BackupManager:
         return True
 
     async def _run_restore_engine(self, source_dir: Path):
-        await self._restore_mongo(source_dir / "mongo")
-        await asyncio.to_thread(self._restore_arango, source_dir / "arango")
-        await self._restore_elastic(source_dir / "elastic")
-        await asyncio.to_thread(self._restore_folder, source_dir / "resource", CONSTANTS.BASE_DIR / "static" / "resource")
-        await asyncio.to_thread(self._restore_folder, source_dir / "session_data", CONSTANTS.S_SESSION_RESOURCE_DIR)
+        await self._io.restore_mongo(source_dir / "mongo")
+        await asyncio.to_thread(self._io.restore_arango, source_dir / "arango")
+        await self._io.restore_elastic(source_dir / "elastic")
+        await asyncio.to_thread(self._io.restore_folder, source_dir / "resource", CONSTANTS.BASE_DIR / "static" / "resource")
+        await asyncio.to_thread(self._io.restore_folder, source_dir / "session_data", CONSTANTS.S_SESSION_RESOURCE_DIR)
 
     async def _validate_restore(self, manifest=None):
         try:
@@ -474,295 +507,3 @@ class BackupManager:
             self._engine.get_collection(db_backup_model).name,
             self._engine.get_collection(db_backup_job_model).name,
         }
-
-    async def _backup_mongo(self, output_dir: Path, report=None) -> dict:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        database = self._engine.database
-        collections = await database.list_collection_names()
-        total = len(collections) or 1
-        counts = {}
-        for index, collection_name in enumerate(collections):
-            counts[collection_name] = await self._dump_collection(database, collection_name, output_dir / f"{collection_name}.ndjson")
-            if report is not None:
-                await report((index + 1) / total)
-        return counts
-
-    async def _dump_collection(self, database, collection_name: str, path: Path) -> int:
-        handle = await asyncio.to_thread(path.open, "w", encoding="utf-8")
-        written = 0
-        try:
-            batch = []
-            cursor = database[collection_name].find({}, batch_size=CONSTANTS.BACKUP_BATCH_SIZE)
-            async for document in cursor:
-                batch.append(document)
-                if len(batch) >= CONSTANTS.BACKUP_BATCH_SIZE:
-                    await asyncio.to_thread(self._write_json_lines, handle, batch)
-                    written += len(batch)
-                    batch = []
-            if batch:
-                await asyncio.to_thread(self._write_json_lines, handle, batch)
-                written += len(batch)
-            await asyncio.to_thread(handle.flush)
-        finally:
-            await asyncio.to_thread(handle.close)
-        return written
-
-    @staticmethod
-    def _write_json_lines(handle, documents) -> None:
-        handle.write("".join(f"{json_util.dumps(document)}\n" for document in documents))
-
-    @staticmethod
-    def _read_json_lines(handle, limit: int) -> list:
-        documents = []
-        for line in handle:
-            line = line.strip()
-            if line:
-                documents.append(json_util.loads(line))
-            if len(documents) >= limit:
-                break
-        return documents
-
-    @staticmethod
-    def _read_json_dump(path: Path):
-        return json_util.loads(path.read_text(encoding="utf-8"))
-
-    @staticmethod
-    def _collect_sources(source_dir: Path) -> dict:
-        sources = {}
-        for suffix in ("*.json", "*.ndjson"):
-            for file in sorted(source_dir.glob(suffix)):
-                if file.name == CONSTANTS.BACKUP_MANIFEST_NAME or file.name.endswith(".meta.json"):
-                    continue
-                sources[file.stem] = file
-        return sources
-
-    def _backup_arango(self, output_dir: Path) -> dict:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        db = arango_controller.get_instance().get_db()
-        if db is None:
-            return {}
-        counts = {}
-        for collection_info in db.collections():
-            collection_name = collection_info.get("name")
-            if not collection_name or collection_name.startswith("_"):
-                continue
-            is_edge = collection_info.get("type") == "edge" or bool(collection_info.get("edge"))
-            cursor = db.aql.execute(
-                f"FOR doc IN `{collection_name}` RETURN doc",
-                batch_size=CONSTANTS.BACKUP_BATCH_SIZE,
-                stream=True,
-            )
-            written = 0
-            with (output_dir / f"{collection_name}.ndjson").open("w", encoding="utf-8") as handle:
-                for document in cursor:
-                    handle.write(f"{json.dumps(document, default=str)}\n")
-                    written += 1
-            self._write_json_file(output_dir / f"{collection_name}.meta.json", {"edge": is_edge, "count": written})
-            counts[collection_name] = {"count": written, "edge": is_edge}
-        return counts
-
-    async def _backup_elastic(self, output_dir: Path) -> dict:
-        output_dir.mkdir(parents=True, exist_ok=True)
-        conn = elastic_controller.get_instance().get_connection()
-        if conn is None:
-            return {}
-        indices = await conn.indices.get(index="*", expand_wildcards="open", ignore_unavailable=True)
-        counts = {}
-        for index_name, definition in indices.items():
-            if self._is_excluded_index(index_name):
-                log.g().i(f"BACKUP: skipping excluded Elasticsearch index {index_name}")
-                continue
-            await asyncio.to_thread(
-                self._write_json_file,
-                output_dir / f"{index_name}.meta.json",
-                {
-                    "mappings": (definition or {}).get("mappings") or {},
-                    "settings": self._sanitize_index_settings((definition or {}).get("settings") or {}),
-                },
-            )
-            path = output_dir / f"{index_name}.ndjson"
-            written = 0
-            with path.open("w", encoding="utf-8") as file:
-                response = await conn.search(index=index_name, body={"query": {"match_all": {}}}, scroll="10m", size=500)
-                scroll_id = response.get("_scroll_id")
-                hits = response.get("hits", {}).get("hits", [])
-                while hits:
-                    await asyncio.to_thread(self._write_hits, file, hits)
-                    written += len(hits)
-                    response = await conn.scroll(scroll_id=scroll_id, scroll="10m")
-                    scroll_id = response.get("_scroll_id")
-                    hits = response.get("hits", {}).get("hits", [])
-                if scroll_id:
-                    await conn.clear_scroll(scroll_id=scroll_id)
-            counts[index_name] = written
-        return counts
-
-    @staticmethod
-    def _is_excluded_index(index_name: str) -> bool:
-        return index_name.startswith(".") or index_name in CONSTANTS.BACKUP_EXCLUDED_ELASTIC_INDICES
-
-    @staticmethod
-    def _sanitize_index_settings(settings: dict) -> dict:
-        index_settings = dict((settings.get("index") or {}))
-        for key in CONSTANTS.BACKUP_UNSETTABLE_INDEX_SETTINGS:
-            index_settings.pop(key, None)
-        return {"index": index_settings} if index_settings else {}
-
-    @staticmethod
-    def _write_hits(file, hits) -> None:
-        for hit in hits:
-            file.write(json.dumps(hit, default=str) + "\n")
-
-    def _copy_folder(self, source: Path, destination: Path):
-        destination.mkdir(parents=True, exist_ok=True)
-        if source.exists():
-            shutil.copytree(source, destination, dirs_exist_ok=True)
-
-    async def _read_documents(self, path: Path):
-        if path.suffix == ".json":
-            documents = await asyncio.to_thread(self._read_json_dump, path)
-            for start in range(0, len(documents), CONSTANTS.BACKUP_BATCH_SIZE):
-                yield documents[start:start + CONSTANTS.BACKUP_BATCH_SIZE]
-            return
-        handle = await asyncio.to_thread(path.open, "r", encoding="utf-8")
-        try:
-            while True:
-                batch = await asyncio.to_thread(self._read_json_lines, handle, CONSTANTS.BACKUP_BATCH_SIZE)
-                if not batch:
-                    return
-                yield batch
-        finally:
-            await asyncio.to_thread(handle.close)
-
-    async def _restore_mongo(self, source_dir: Path):
-        if not source_dir.exists():
-            return
-        database = self._engine.database
-        preserved = self._preserved_collections()
-        sources = self._collect_sources(source_dir)
-
-        for collection_name in await database.list_collection_names():
-            if collection_name in preserved or collection_name in sources:
-                continue
-            await database[collection_name].drop()
-            log.g().i(f"RESTORE: dropped MongoDB collection absent from the backup: {collection_name}")
-
-        for collection_name, file in sources.items():
-            if collection_name in preserved:
-                continue
-            await database[collection_name].delete_many({})
-            async for batch in self._read_documents(file):
-                await database[collection_name].insert_many(batch, ordered=False)
-
-    @staticmethod
-    def _iter_documents(path: Path):
-        if path.suffix == ".json":
-            documents = json.loads(path.read_text(encoding="utf-8"))
-            for start in range(0, len(documents), CONSTANTS.BACKUP_BATCH_SIZE):
-                yield documents[start:start + CONSTANTS.BACKUP_BATCH_SIZE]
-            return
-        with path.open("r", encoding="utf-8") as handle:
-            batch = []
-            for line in handle:
-                line = line.strip()
-                if not line:
-                    continue
-                batch.append(json.loads(line))
-                if len(batch) >= CONSTANTS.BACKUP_BATCH_SIZE:
-                    yield batch
-                    batch = []
-            if batch:
-                yield batch
-
-    def _restore_arango(self, source_dir: Path):
-        if not source_dir.exists():
-            return
-        db = arango_controller.get_instance().get_db()
-        if db is None:
-            return
-        sources = self._collect_sources(source_dir)
-
-        for collection_info in db.collections():
-            collection_name = collection_info.get("name")
-            if not collection_name or collection_name.startswith("_") or collection_name in sources:
-                continue
-            db.delete_collection(collection_name)
-            log.g().i(f"RESTORE: dropped ArangoDB collection absent from the backup: {collection_name}")
-
-        for collection_name, file in sources.items():
-            meta = self._read_json_file(source_dir / f"{collection_name}.meta.json") or {}
-            is_edge = bool(meta.get("edge"))
-            if db.has_collection(collection_name):
-                properties = db.collection(collection_name).properties()
-                existing_edge = properties.get("edge") or properties.get("type") == 3
-                if bool(existing_edge) != is_edge:
-                    db.delete_collection(collection_name)
-                    db.create_collection(collection_name, edge=is_edge)
-            else:
-                db.create_collection(collection_name, edge=is_edge)
-            collection = db.collection(collection_name)
-            collection.truncate()
-            for batch in self._iter_documents(file):
-                collection.import_bulk(batch, on_duplicate="replace")
-
-    async def _restore_elastic(self, source_dir: Path):
-        if not source_dir.exists():
-            return
-        conn = elastic_controller.get_instance().get_connection()
-        if conn is None:
-            return
-
-        files = {file.stem: file for file in sorted(source_dir.glob("*.ndjson")) if not self._is_excluded_index(file.stem)}
-        live = await conn.indices.get(index="*", expand_wildcards="open", ignore_unavailable=True)
-        for index_name in live.keys():
-            if self._is_excluded_index(index_name) or index_name in files:
-                continue
-            await conn.indices.delete(index=index_name, ignore_unavailable=True)
-            log.g().i(f"RESTORE: dropped Elasticsearch index absent from the backup: {index_name}")
-
-        for index_name, file in files.items():
-            meta = await asyncio.to_thread(self._read_json_file, source_dir / f"{index_name}.meta.json")
-            if await conn.indices.exists(index=index_name):
-                await conn.indices.delete(index=index_name)
-            body = {}
-            if meta:
-                if meta.get("mappings"):
-                    body["mappings"] = meta["mappings"]
-                if meta.get("settings"):
-                    body["settings"] = meta["settings"]
-            else:
-                log.g().w(f"RESTORE: no index metadata for {index_name}, recreating with dynamic mappings")
-            await conn.indices.create(index=index_name, **body)
-
-            handle = await asyncio.to_thread(file.open, "r", encoding="utf-8")
-            try:
-                while True:
-                    actions = await asyncio.to_thread(self._read_hits, handle, index_name, CONSTANTS.BACKUP_BATCH_SIZE)
-                    if not actions:
-                        break
-                    await es_helpers.async_bulk(conn, actions)
-            finally:
-                await asyncio.to_thread(handle.close)
-
-    @staticmethod
-    def _read_hits(handle, index_name: str, limit: int) -> list:
-        actions = []
-        for line in handle:
-            line = line.strip()
-            if line:
-                hit = json.loads(line)
-                actions.append({
-                    "_op_type": "index",
-                    "_index": index_name,
-                    "_id": hit.get("_id"),
-                    "_source": hit.get("_source", {}),
-                })
-            if len(actions) >= limit:
-                break
-        return actions
-
-    def _restore_folder(self, source: Path, destination: Path):
-        if not source.exists():
-            return
-        shutil.rmtree(destination, ignore_errors=True)
-        shutil.copytree(source, destination, dirs_exist_ok=True)

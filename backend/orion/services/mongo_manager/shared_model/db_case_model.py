@@ -377,7 +377,7 @@ class CaseShare(EmbeddedModel):
 
 class db_case_model(Model):
     caseId: str = Field(index=True)
-    tenant_uuid: str = Field(index=True)
+    tenant_id: str = Field(index=True)
 
     title: str
     description: str = ""

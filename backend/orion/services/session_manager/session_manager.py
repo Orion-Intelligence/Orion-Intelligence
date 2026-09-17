@@ -47,10 +47,10 @@ class session_manager:
         return mongo_controller.get_instance().get_engine()
 
     @staticmethod
-    def tenant_identifier(tenant_or_id) -> str | None:
-        if tenant_or_id is None:
+    def tenant_identifier(tenant_id) -> str | None:
+        if tenant_id is None:
             return None
-        tenant_id = getattr(tenant_or_id, "id", tenant_or_id)
+        tenant_id = getattr(tenant_id, "id", tenant_id)
         return str(tenant_id) if tenant_id is not None else None
 
     @staticmethod
@@ -67,15 +67,15 @@ class session_manager:
 
     @staticmethod
     async def _tenant_fernet(user) -> Fernet:
-        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_uuid))
+        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_id))
         return Fernet(dek)
 
     @classmethod
-    def ensure_user_tenant_access(cls, user, tenant_or_id) -> None:
-        tenant_id = cls.tenant_identifier(tenant_or_id)
+    def ensure_user_tenant_access(cls, user, tenant_id) -> None:
+        tenant_id = cls.tenant_identifier(tenant_id)
         if tenant_id is None:
             return
-        if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:
+        if not user or str(getattr(user, "tenant_id", "") or "") != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant access forbidden")
 
     async def get_parent_tenant(self, tenant_uuid) -> db_tenant_model | None:
@@ -305,7 +305,7 @@ class session_manager:
                 access_ttl = timedelta(minutes=30)
 
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
-            onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
+            onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_id))
 
             session = await self._build_session(user, onboarding_exists, reset_token)
             return {"access_token": access_token, "token_type": "bearer", "session": session}  # nosec B105
@@ -347,7 +347,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="User not found")
             self.ensure_user_tenant_access(user, tenant_id)
 
-            maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
+            maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_id == user.tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
             if not maintainer_user:
                 raise HTTPException(status_code=401, detail="Maintainer user not found")
             session_id = payload.get("sid")
@@ -367,7 +367,7 @@ class session_manager:
                     datetime.now(timezone.utc) - acct_at).days >= 30 and not await self.parent_has_subscription(parent_tenant):
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
-            onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))
+            onboarding_exists = await self.has_onboarding(str(user.tenant_id))
 
             base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
             if user.role != user_role.CRAWLER:

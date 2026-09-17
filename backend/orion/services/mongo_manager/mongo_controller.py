@@ -63,14 +63,14 @@ class mongo_controller:
             name="unique_admin_role", )
 
         await user_collection.create_index(
-            [("tenant_uuid", 1)],
+            [("tenant_id", 1)],
             unique=True,
             partialFilterExpression={"licenses": ["maintainer"]},
             name="unique_maintainer_per_company", )
 
         await self.__engine.get_collection(db_document_feedback_model).create_index("doc_id", unique=True)
         await self.__engine.get_collection(db_scan_job_model).create_index([("user_uuid", 1), ("created_at", -1)])
-        await self.__engine.get_collection(db_takedown_request_model).create_index("target_domain", unique=True)
+        await self.__engine.get_collection(db_takedown_request_model).create_index([("tenant_id", 1), ("target_domain", 1)], unique=True, name="unique_takedown_per_tenant")
         await self.__engine.get_collection(db_scheduler_model).create_index([("job_key", 1), ("scheduled_for", 1)],unique=True)
         await self.__engine.get_collection(db_backup_job_model).create_index([("job_key", 1)], unique=True, name="unique_backup_job_key")
         await self.__engine.database[SOCIAL_COLLECTION].create_index([("user_id", 1), ("profile_username", 1), ("updated_at", -1)])
@@ -110,7 +110,7 @@ class mongo_controller:
             status=UserStatus.ACTIVE,
             subscription=True,
             licenses=[LicenseName.OSINT_BASIC],
-            tenant_uuid=str(default_tenant.id), ))
+            tenant_id=str(default_tenant.id), ))
 
     async def ensure_nexus_user(self):
         if env_handler.get_instance().env("PRODUCTION") != "0":
@@ -132,7 +132,7 @@ class mongo_controller:
             status=UserStatus.ACTIVE,
             subscription=True,
             licenses=[LicenseName.ENTERPRISE],
-            tenant_uuid=str(default_tenant.id), ))
+            tenant_id=str(default_tenant.id), ))
 
     async def initialize(self):
         await self.ensure_indexes()

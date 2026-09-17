@@ -1,230 +1,264 @@
-<div class="mx-auto w-full max-w-[2400px] px-5 pb-4 lg:px-8">
-
-
-  <form (ngSubmit)="searchDomain($event)" novalidate class="mt-6 flex items-center gap-3 max-[800px]:flex-col max-[800px]:items-stretch">
-    <div class="flex w-full items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-blue-770)] p-3 max-[800px]:flex-col max-[800px]:items-stretch xl:max-w-[980px] [.light-theme_&]:!border-[#d3deea] [.light-theme_&]:!bg-[#f7faff] [.light-theme_&]:!shadow-[0_5px_18px_rgba(15,23,42,0.065)]">
-      <div class="flex w-full items-center gap-3 max-[800px]:flex-col max-[800px]:items-stretch">
-        <div class="min-w-0 flex-1">
-          <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white transition-[border-color,box-shadow] [body.light-theme_&]:border-[#c7d5e4] [body.light-theme_&]:focus-within:border-[#70aee8] [body.light-theme_&]:focus-within:shadow-[0_0_0_3px_rgba(43,144,238,0.14)]">
-            <div class="flex w-[45px] items-center justify-center bg-white">
-              <img alt="" aria-hidden="true" src="assets/images/shared/user1.svg" width="20" height="20" class="brightness-0 opacity-80">
-            </div>
-            <input data-testid="scan-primary-input" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-gray-400" [placeholder]="'Domain (e.g., example.com)' | translate" type="text" [(ngModel)]="domain" name="domain" required autocomplete="off">
-          </div>
-        </div>
-
-        <div class="min-w-0 flex-1">
-          <div class="flex h-[42px] w-full overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-white transition-[border-color,box-shadow] [body.light-theme_&]:border-[#c7d5e4] [body.light-theme_&]:focus-within:border-[#70aee8] [body.light-theme_&]:focus-within:shadow-[0_0_0_3px_rgba(43,144,238,0.14)]">
-            <div class="flex w-[45px] items-center justify-center bg-white">
-              <img alt="" aria-hidden="true" src="assets/images/shared/lock.svg" width="20" height="20" class="brightness-0 opacity-80">
-            </div>
-            <input data-testid="dkim-initial-selector-input" class="h-full min-w-0 flex-1 bg-white pr-3 text-[15px] text-[#172235] outline-none placeholder:text-[14px] placeholder:text-gray-400" [placeholder]="'Selector (optional, e.g., google, default)' | translate" type="text" [(ngModel)]="initialSelector" name="initialSelector" autocomplete="off">
-            <button data-testid="scan-search-button" class="inline-flex h-full min-w-[112px] shrink-0 items-center justify-center rounded-r-[8px] border border-l border-sky-300/20 bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] px-5 text-sm font-semibold leading-none text-white transition-[background-color,border-color,color] duration-150 hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] focus-visible:outline-none focus-visible:shadow-[0_0_0_2px_rgb(87_165_235/30%)] disabled:cursor-not-allowed disabled:opacity-40" type="submit" [disabled]="loading || !domain.trim()">
-              {{ 'Search' | translate }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    @if (canExport) {
-      <button type="button" data-testid="dkim-export-button" (click)="openExportChoice()" [appTooltip]="'Download report' | translate" class="inline-flex h-[42px] shrink-0 items-center gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-4 text-[13px] font-semibold text-[var(--color-text1)] transition-colors hover:bg-[var(--color-blue-880)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white">
-        <i class="bi bi-download text-[15px]"></i>
-        <span class="max-[520px]:hidden">{{ 'Export' | translate }}</span>
-      </button>
-    }
-  </form>
-
-
-  <div class="ml-0 mt-3">
-    <div class="w-full rounded-[10px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-5 py-3 text-[13px] text-[var(--color-text1)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_3px_12px_rgba(15,23,42,0.055)]">
-      <img alt="" aria-hidden="true" class="mr-[8px] inline-block" src="assets/images/shared/hint.svg">
-      <span>{{ 'Discovers DKIM selectors, validates each record, and runs related DMARC & SPF checks.' | translate }}</span>
-    </div>
+<section class="dkim-page [width:100%] [max-width:2400px] [margin-top:0] [margin-right:auto] [margin-bottom:0] [margin-left:auto] [padding-top:24px] [padding-right:32px] [padding-bottom:32px] [padding-left:32px] [color:var(--color-text1)] [font-size:14px] [@media(width<=700px)]:[padding-top:20px] [@media(width<=700px)]:[padding-right:20px] [@media(width<=700px)]:[padding-bottom:20px] [@media(width<=700px)]:[padding-left:20px]" aria-label="Email Forensics and DKIM Checker">
+  <div class="dkim-tabs [display:flex] [gap:24px] [margin-bottom:20px] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [@media(width<=700px)]:[gap:16px]" role="group" aria-label="Analysis mode">
+    <button type="button" (click)="switchTab('domain')" [class.active]="activeTab === 'domain'" [attr.aria-pressed]="activeTab === 'domain'" aria-controls="domain-panel" class="[transition:background-color_150ms,_border-color_150ms] [padding-top:0] [padding-right:2px] [padding-bottom:14px] [padding-left:2px] [border-bottom-width:2px] [border-bottom-style:solid] [border-bottom-color:transparent] [color:var(--color-text4)] [font-size:14px] [font-weight:600] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:45%] [@media(width<=700px)]:[font-size:13px] [&.active]:[border-bottom-color:var(--color-blue-640)] [&.active]:[color:var(--color-blue-640)]">Domain Lookup</button>
+    <button type="button" (click)="switchTab('raw')" [class.active]="activeTab === 'raw'" [attr.aria-pressed]="activeTab === 'raw'" aria-controls="raw-panel" class="[transition:background-color_150ms,_border-color_150ms] [padding-top:0] [padding-right:2px] [padding-bottom:14px] [padding-left:2px] [border-bottom-width:2px] [border-bottom-style:solid] [border-bottom-color:transparent] [color:var(--color-text4)] [font-size:14px] [font-weight:600] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:45%] [@media(width<=700px)]:[font-size:13px] [&.active]:[border-bottom-color:var(--color-blue-640)] [&.active]:[color:var(--color-blue-640)]">Raw Email Forensics</button>
   </div>
 
-
-  @if (!queryTriggered && !loading && !selectors.length && !needsSelector && !discoveryError && !domainInfo) {
-    <app-empty-query></app-empty-query>
-  }
-
-
-  @if (loading) {
-    <div class="mt-[12px] ml-0 max-w-[720px]">
-      <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ currentStep || ('Scanning...' | translate) }} ({{ pct(progress) }}%)</div>
-      <div class="h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-        <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + pct(progress)"></div>
-      </div>
-    </div>
-    <div class="mt-[16px] space-y-[16px]">
-      @for (row of [1, 2]; track row) {
-        <div class="dkim-shimmer h-[110px] w-full rounded-[12px] border border-[var(--color-border)]"></div>
-      }
-    </div>
-  }
-
-
-  @if (!loading && discoveryError) {
-    <section class="fade-in-dashboard-item mt-[15px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center [.light-theme_&]:border-rose-200 [.light-theme_&]:bg-rose-50">
-      <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Target Intelligence Failed' | translate }}</div>
-      <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ discoveryError }}</div>
-    </section>
-  }
-
-
-  @if (domainInfo) {
-    <div class="fade-in-dashboard-item mt-[18px] w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
-      <div class="flex items-center gap-[8px] border-b border-[var(--color-divider)] px-[16px] py-[12px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#10b981]">
-        <i class="bi bi-globe2"></i> <span>{{ 'Domain Security' | translate }}</span>
-        <span class="font-mono text-[12px] normal-case tracking-normal text-[var(--color-text4)]">{{ domainInfo.domain }}</span>
-      </div>
-      <div class="px-[16px] py-[10px]">
-        @for (check of domainInfo.related; track check.test) {
-          <div class="grid grid-cols-[22px_1fr_1.2fr] items-start gap-3 border-b border-[var(--color-divider)] py-[8px] last:border-0 max-[560px]:grid-cols-[22px_1fr]">
-            <i class="bi {{ checkIcon(check.status) }} {{ checkColor(check.status) }} mt-[1px] text-[15px]"></i>
-            <div class="text-[13px] font-[600] text-[var(--color-text1)]">{{ check.test | translate }}</div>
-            <div class="text-[12px] text-[var(--color-text4)] max-[560px]:col-start-2">{{ check.response }}</div>
-          </div>
-        }
-        @if (domainInfo.dmarc?.published || domainInfo.spf?.published) {
-          <div class="mt-[10px] grid gap-[8px] md:grid-cols-2">
-            @if (domainInfo.dmarc?.raw_record) {
-              <div class="rounded-[8px] border border-[var(--color-divider)] p-[10px]">
-                <div class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">DMARC {{ domainInfo.dmarc?.policy ? '(p=' + domainInfo.dmarc?.policy + ')' : '' }}</div>
-                <div class="mt-[3px] break-all font-mono text-[12px] text-[var(--color-text4)]">{{ domainInfo.dmarc?.raw_record }}</div>
-              </div>
-            }
-            @if (domainInfo.spf?.raw_record) {
-              <div class="rounded-[8px] border border-[var(--color-divider)] p-[10px]">
-                <div class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">SPF</div>
-                <div class="mt-[3px] break-all font-mono text-[12px] text-[var(--color-text4)]">{{ domainInfo.spf?.raw_record }}</div>
-              </div>
+  <div id="domain-panel" [hidden]="activeTab !== 'domain'">
+    <section class="dkim-card dkim-form-card [min-width:0] [margin-bottom:16px] [padding-top:20px] [padding-right:20px] [padding-bottom:20px] [padding-left:20px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:12px] [background:var(--color-blue-770)] [@media(width<=700px)]:[padding-top:16px] [@media(width<=700px)]:[padding-right:16px] [@media(width<=700px)]:[padding-bottom:16px] [@media(width<=700px)]:[padding-left:16px] [.light-theme_&]:[background:#f7faff] [.light-theme_&]:[border-top-color:#d3deea] [.light-theme_&]:[border-right-color:#d3deea] [.light-theme_&]:[border-bottom-color:#d3deea] [.light-theme_&]:[border-left-color:#d3deea]">
+      <div class="dkim-section-heading [margin-bottom:20px]"><h2 class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [font-size:16px] [font-weight:600]">Check a domain’s DKIM record</h2><p class="[margin-top:6px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:13px] [line-height:1.6]">Enter a domain to discover and validate its DKIM selectors, or add a selector to check a single record.</p></div>
+      <form (ngSubmit)="searchDomain($event)" class="dkim-domain-form [display:grid] [grid-template-columns:repeat(2,_minmax(0,_1fr))] [align-items:start] [gap:16px] [@media(width<=1000px)]:[grid-template-columns:1fr] [@media(width<=700px)]:[grid-template-columns:1fr]">
+        <div class="dkim-field [display:flex] [flex-direction:column] [min-width:0] [gap:7px]">
+          <label for="dkim-domain" class="[font-size:13px] [font-weight:600]">Domain</label>
+          <div class="ui-entity-lookup-field">
+            <input #domainInput id="dkim-domain" class="ui-entity-lookup-input [padding-left:10px]" data-testid="scan-primary-input" type="text" [(ngModel)]="domain" name="domain" placeholder="e.g. example.com" autocomplete="off" spellcheck="false" [disabled]="loading" aria-describedby="domain-hint">
+            @if (domain.length && !loading) {
+              <button type="button" class="ui-entity-lookup-clear [transition:background-color_150ms,_border-color_150ms] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:100%]" aria-label="Clear domain" (click)="domain = ''; domainInput.focus()"><span aria-hidden="true">×</span></button>
             }
           </div>
+          <p id="domain-hint" class="dkim-hint [margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:12px] [line-height:1.6]">Leave the selector blank to discover all known selectors for this domain.</p>
+        </div>
+        <div class="dkim-field [display:flex] [flex-direction:column] [min-width:0] [gap:7px]">
+          <label for="dkim-selector" class="[font-size:13px] [font-weight:600]">Selector <span class="dkim-optional [font-weight:400] [color:var(--color-text4)] [font-size:0.85em]">(optional)</span></label>
+          <div class="ui-entity-lookup-field">
+            <input #selectorInput id="dkim-selector" class="ui-entity-lookup-input [padding-left:10px]" data-testid="dkim-initial-selector-input" type="text" [(ngModel)]="selector" name="selector" placeholder="e.g. default, google" autocomplete="off" spellcheck="false" [disabled]="loading" aria-describedby="selector-hint">
+            @if (selector.length && !loading) {
+              <button type="button" class="ui-entity-lookup-clear [transition:background-color_150ms,_border-color_150ms] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:100%]" aria-label="Clear selector" (click)="selector = ''; selectorInput.focus()"><span aria-hidden="true">×</span></button>
+            }
+            <button data-testid="scan-search-button" type="submit" class="ui-entity-lookup-submit [transition:background-color_150ms,_border-color_150ms] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:100%]" [disabled]="loading || !domain.trim()">{{ loading ? 'Checking…' : 'Check DKIM' }}</button>
+          </div>
+          <p id="selector-hint" class="dkim-hint [margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:12px] [line-height:1.6]">Provide the s= value from a DKIM-Signature header to check just that record.</p>
+        </div>
+        @if (canExport) {
+          <button type="button" data-testid="dkim-export-button" (click)="openExportChoice()" [appTooltip]="'Download report' | translate" class="dkim-export-inline [transition:background-color_150ms,_border-color_150ms] [display:inline-flex] [align-items:center] [gap:6px] [align-self:flex-start] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [background:var(--color-blue-700)] [color:var(--color-text1)] [border-radius:8px] [padding-top:8px] [padding-right:14px] [padding-bottom:8px] [padding-left:14px] [font-size:13px] [font-weight:600] [cursor:pointer] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:100%] [&:hover]:[background:var(--color-blue-880)]"><i class="bi bi-download"></i><span>Export</span></button>
         }
-      </div>
-    </div>
-  }
-
-
-  @if (needsSelector) {
-    <div class="fade-in-dashboard-item mt-[15px] rounded-[12px] border border-amber-400/30 bg-[var(--color-blue-700)] p-[16px] xl:max-w-[760px] [.light-theme_&]:!border-amber-200 [.light-theme_&]:!bg-amber-50">
-      <div class="flex items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#f59e0b]">
-        <i class="bi bi-exclamation-triangle"></i> <span>{{ 'Selector Required' | translate }}</span>
-      </div>
-      <div class="mt-[6px] text-[13px] text-[var(--color-text4)]">{{ noSelectorMessage }}</div>
-      <form (ngSubmit)="addSelector($event)" novalidate class="mt-[12px] flex items-center gap-2 max-[640px]:flex-col max-[640px]:items-stretch">
-        <input data-testid="dkim-selector-input" class="h-[42px] min-w-0 flex-1 rounded-[8px] border border-[var(--color-border)] bg-white px-3 text-[14px] text-[#172235] outline-none placeholder:text-[13px] placeholder:text-gray-400" [placeholder]="'Selector (e.g., google, default, selector1)' | translate" type="text" [(ngModel)]="manualSelector" name="manualSelector" required autocomplete="off">
-        <button data-testid="dkim-selector-add" class="inline-flex h-[42px] min-w-[120px] shrink-0 items-center justify-center rounded-[8px] bg-[linear-gradient(92.32deg,#4ea2f1_2.58%,#2c7ac5)] px-5 text-sm font-semibold leading-none text-white transition-colors duration-150 hover:bg-[linear-gradient(92.32deg,#3f96e8_2.58%,#236eb7)] disabled:cursor-not-allowed disabled:opacity-40" type="submit" [disabled]="!manualSelector.trim()">
-          {{ 'Check Selector' | translate }}
-        </button>
       </form>
-    </div>
-  }
+    </section>
 
+    @if (!queryTriggered && !loading && !selectors.length && !needsSelector && !discoveryError && !domainInfo) {
+      <app-empty-query></app-empty-query>
+    }
 
-  @if (selectors.length) {
-    <div class="fade-in-dashboard-item mt-[16px] space-y-[16px]">
-      @for (entry of selectors; track entry.selector) {
-        <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
-          <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-divider)] px-[16px] py-[12px]">
-            <div class="flex min-w-0 items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#3b82f6]">
-              <i class="bi bi-shield-lock"></i> <span class="truncate font-mono normal-case tracking-normal text-[13px] text-[var(--color-text1)]">{{ entry.selector }}._domainkey</span>
+    @if (loading) {
+      <div class="mt-[12px] ml-0 max-w-[720px]">
+        <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text1)]">{{ currentStep || ('Scanning...' | translate) }} ({{ pct(progress) }}%)</div>
+        <div class="h-[10px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+          <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + pct(progress)"></div>
+        </div>
+      </div>
+      <div class="mt-[16px] space-y-[16px]">
+        @for (row of [1]; track row) {
+          <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white">
+            <div class="flex items-center justify-between gap-3 border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+              <div class="flex items-center gap-[8px]">
+                <div class="dkim-shimmer h-[16px] w-[16px] rounded-[4px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+                <div class="dkim-shimmer h-[13px] w-[190px] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+              </div>
+              <div class="dkim-shimmer h-[20px] w-[68px] rounded-full [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
             </div>
-            <div class="flex shrink-0 items-center gap-[6px]">
-              @if (entry.validation?.found && entry.validation?.source) {
-                <span class="rounded-full border px-[9px] py-[3px] text-[11px] font-[600]" [ngClass]="entry.validation?.source === 'archive' ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-sky-400/30 bg-sky-400/10 text-sky-300'">
-                  {{ (entry.validation?.source === 'archive' ? 'Archived' : 'Live DNS') | translate }}
-                </span>
-              }
-              @if (keyLabel(entry.validation)) {
-                <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-880)] px-[9px] py-[3px] font-mono text-[11px] font-[600] text-[var(--color-text2)]">{{ keyLabel(entry.validation) }}</span>
-              }
-              <span class="rounded-full border px-[10px] py-[3px] text-[11px] font-[700]" [ngClass]="badge(entry).classes">{{ badge(entry).label | translate }}</span>
+            <div class="space-y-[12px] px-[16px] py-[14px]">
+              <div class="dkim-shimmer h-[13px] w-[62%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+              <div class="dkim-shimmer h-[13px] w-[85%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+              <div class="dkim-shimmer h-[13px] w-[48%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+              <div class="dkim-shimmer h-[13px] w-[72%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
             </div>
           </div>
+        }
+      </div>
+    }
 
-          <div class="px-[16px] py-[12px]">
-            @if (entry.loading) {
-              <div class="max-w-[520px]">
-                <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text4)]">{{ entry.step || ('Validating...' | translate) }} ({{ pct(entry.progress) }}%)</div>
-                <div class="h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
-                  <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + pct(entry.progress)"></div>
+    @if (!loading && discoveryError) {
+      <section class="mt-[15px] rounded-[10px] border border-rose-400/30 bg-[var(--color-blue-790)] p-[20px] text-center [.light-theme_&]:border-rose-200 [.light-theme_&]:bg-rose-50">
+        <div class="text-[16px] font-semibold text-[var(--color-text1)]">{{ 'Target Intelligence Failed' | translate }}</div>
+        <div class="mt-[4px] text-[13px] text-[var(--color-text4)]">{{ discoveryError }}</div>
+      </section>
+    }
+
+    @if (domainInfo) {
+      <div class="mt-[18px] w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
+        <div class="flex items-center gap-[8px] border-b border-[var(--color-divider)] px-[16px] py-[12px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#10b981]">
+          <i class="bi bi-globe2"></i> <span>{{ 'Domain Security' | translate }}</span>
+          <span class="font-mono text-[12px] normal-case tracking-normal text-[var(--color-text4)]">{{ domainInfo.domain }}</span>
+        </div>
+        <div class="px-[16px] py-[10px]">
+          @for (check of domainInfo.related; track check.test) {
+            <div class="grid grid-cols-[22px_1fr_1.2fr] items-start gap-3 border-b border-[var(--color-divider)] py-[8px] last:border-0 max-[560px]:grid-cols-[22px_1fr]">
+              <i class="bi {{ checkIcon(check.status) }} {{ checkColor(check.status) }} mt-[1px] text-[15px]"></i>
+              <div class="text-[13px] font-[600] text-[var(--color-text1)]">{{ check.test | translate }}</div>
+              <div class="text-[12px] text-[var(--color-text4)] max-[560px]:col-start-2">{{ check.response }}</div>
+            </div>
+          }
+          @if (domainInfo.dmarc?.published || domainInfo.spf?.published) {
+            <div class="mt-[10px] grid gap-[8px] md:grid-cols-2">
+              @if (domainInfo.dmarc?.raw_record) {
+                <div class="rounded-[8px] border border-[var(--color-divider)] p-[10px]">
+                  <div class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">DMARC {{ domainInfo.dmarc?.policy ? '(p=' + domainInfo.dmarc?.policy + ')' : '' }}</div>
+                  <div class="mt-[3px] break-all font-mono text-[12px] text-[var(--color-text4)]">{{ domainInfo.dmarc?.raw_record }}</div>
                 </div>
-              </div>
-              <div class="mt-[14px] space-y-[10px]">
-                <div class="dkim-shimmer h-[16px] w-[65%] rounded-[6px]"></div>
-                <div class="dkim-shimmer h-[16px] w-[88%] rounded-[6px]"></div>
-                <div class="dkim-shimmer h-[16px] w-[50%] rounded-[6px]"></div>
-                <div class="dkim-shimmer h-[16px] w-[74%] rounded-[6px]"></div>
-              </div>
-            } @else if (entry.error) {
-              <div class="text-[13px] text-rose-300 [.light-theme_&]:text-rose-500">{{ entry.error }}</div>
-            } @else if (entry.validation) {
+              }
+              @if (domainInfo.spf?.raw_record) {
+                <div class="rounded-[8px] border border-[var(--color-divider)] p-[10px]">
+                  <div class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">SPF</div>
+                  <div class="mt-[3px] break-all font-mono text-[12px] text-[var(--color-text4)]">{{ domainInfo.spf?.raw_record }}</div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
 
-              @if (entry.validation.checks?.length) {
-                <div class="mb-[10px]">
-                  @for (check of entry.validation.checks; track check.test) {
-                    <div class="grid grid-cols-[22px_1fr_1.2fr] items-start gap-3 border-b border-[var(--color-divider)] py-[7px] last:border-0 max-[560px]:grid-cols-[22px_1fr]">
-                      <i class="bi {{ checkIcon(check.status) }} {{ checkColor(check.status) }} mt-[1px] text-[15px]"></i>
-                      <div class="text-[13px] font-[600] text-[var(--color-text1)]">{{ check.test | translate }}</div>
-                      <div class="text-[12px] text-[var(--color-text4)] max-[560px]:col-start-2">{{ check.response }}</div>
+    @if (selectors.length) {
+      <div class="mt-[16px] space-y-[16px]">
+        @for (entry of selectors; track entry.selector) {
+          <div class="w-full overflow-hidden rounded-[12px] border border-[var(--color-border)] bg-[var(--color-blue-700)] text-[var(--color-text1)] shadow-sm [.light-theme_&]:!border-[#d4dfeb] [.light-theme_&]:!bg-white [.light-theme_&]:!shadow-[0_5px_16px_rgba(15,23,42,0.065)]">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--color-divider)] px-[16px] py-[12px]">
+              <div class="flex min-w-0 items-center gap-[8px] text-[12px] font-[800] uppercase tracking-[0.06em] text-[#3b82f6]">
+                <i class="bi bi-shield-lock"></i> <span class="truncate font-mono normal-case tracking-normal text-[13px] text-[var(--color-text1)]">{{ entry.selector }}._domainkey</span>
+              </div>
+              <div class="flex shrink-0 items-center gap-[6px]">
+                @if (entry.validation?.found && entry.validation?.source) {
+                  <span class="rounded-full border px-[9px] py-[3px] text-[11px] font-[600]" [ngClass]="entry.validation?.source === 'archive' ? 'border-amber-400/30 bg-amber-400/10 text-amber-300' : 'border-sky-400/30 bg-sky-400/10 text-sky-300'">
+                    {{ (entry.validation?.source === 'archive' ? 'Archived' : 'Live DNS') | translate }}
+                  </span>
+                }
+                @if (keyLabel(entry.validation)) {
+                  <span class="rounded-full border border-[var(--color-border)] bg-[var(--color-blue-880)] px-[9px] py-[3px] font-mono text-[11px] font-[600] text-[var(--color-text2)]">{{ keyLabel(entry.validation) }}</span>
+                }
+                <span class="rounded-full border px-[10px] py-[3px] text-[11px] font-[700]" [ngClass]="badge(entry).classes">{{ badge(entry).label | translate }}</span>
+              </div>
+            </div>
+
+            <div class="px-[16px] py-[12px]">
+              @if (entry.loading) {
+                <div class="max-w-[520px]">
+                  <div class="mb-[6px] text-[12px] font-medium text-[var(--color-text4)]">{{ entry.step || ('Validating...' | translate) }} ({{ pct(entry.progress) }}%)</div>
+                  <div class="h-[8px] w-full overflow-hidden rounded-full border border-[var(--color-border)] bg-[var(--color-progress)]">
+                    <div class="h-full rounded-full bg-[var(--color-blue-640)] transition-[width] duration-300 ease-out" [ngClass]="'ui-wpct-' + pct(entry.progress)"></div>
+                  </div>
+                </div>
+                <div class="mt-[14px] space-y-[10px]">
+                  <div class="dkim-shimmer h-[16px] w-[65%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+                  <div class="dkim-shimmer h-[16px] w-[88%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+                  <div class="dkim-shimmer h-[16px] w-[50%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+                  <div class="dkim-shimmer h-[16px] w-[74%] rounded-[6px] [position:relative] [isolation:isolate] [overflow:hidden] [background:var(--color-blue-720)] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[inset:0] [&::after]:[pointer-events:none] [&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_16%)_48%,_transparent_76%)] [&::after]:[animation:ui-shimmer-slide_1.55s_linear_infinite] [.light-theme_&]:[&::after]:[background:linear-gradient(110deg,_transparent_20%,_rgb(255_255_255_/_88%)_48%,_transparent_76%)]"></div>
+                </div>
+              } @else if (entry.error) {
+                <div class="text-[13px] text-rose-300 [.light-theme_&]:text-rose-500">{{ entry.error }}</div>
+              } @else if (entry.validation) {
+                @if (entry.validation.checks?.length) {
+                  <div class="mb-[10px]">
+                    @for (check of entry.validation.checks; track check.test) {
+                      <div class="grid grid-cols-[22px_1fr_1.2fr] items-start gap-3 border-b border-[var(--color-divider)] py-[7px] last:border-0 max-[560px]:grid-cols-[22px_1fr]">
+                        <i class="bi {{ checkIcon(check.status) }} {{ checkColor(check.status) }} mt-[1px] text-[15px]"></i>
+                        <div class="text-[13px] font-[600] text-[var(--color-text1)]">{{ check.test | translate }}</div>
+                        <div class="text-[12px] text-[var(--color-text4)] max-[560px]:col-start-2">{{ check.response }}</div>
+                      </div>
+                    }
+                  </div>
+                }
+                <div class="space-y-[10px] border-t border-[var(--color-divider)] pt-[10px]">
+                  @if (entry.validation.dns_query) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'DNS Query' | translate }}</span><br><span class="break-all font-mono text-[13px]">{{ entry.validation.dns_query }}</span></div>
+                  }
+                  @if (entry.validation.first_seen || entry.validation.last_seen) {
+                    <div class="flex flex-wrap gap-x-[24px] gap-y-[6px]">
+                      @if (entry.validation.first_seen) {
+                        <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'First Seen' | translate }}</span><br><span class="text-[13px] text-[var(--color-text2)]">{{ entry.validation.first_seen }}</span></div>
+                      }
+                      @if (entry.validation.last_seen) {
+                        <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Last Seen' | translate }}</span><br><span class="text-[13px] text-[var(--color-text2)]">{{ entry.validation.last_seen }}</span></div>
+                      }
                     </div>
+                  }
+                  @for (field of parsedEntries(entry.validation); track field.key) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ field.key }}</span><br><span class="break-all font-mono text-[13px] text-[var(--color-text2)]">{{ field.value || '—' }}</span></div>
+                  }
+                  @if (entry.validation.parsed_data?.['public_key (p)']) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'public_key (p)' }}</span><br><span class="break-all font-mono text-[12px] text-[var(--color-text4)]">{{ entry.validation.parsed_data?.['public_key (p)'] }}</span></div>
+                  }
+                  @if (entry.validation.warnings?.length) {
+                    <div>
+                      <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Warnings' | translate }}</span>
+                      <ul class="mt-1 space-y-1">
+                        @for (warning of entry.validation.warnings; track warning) {
+                          <li class="flex items-start gap-2 text-[13px] text-amber-300 [.light-theme_&]:text-amber-600"><i class="bi bi-exclamation-circle mt-[2px] text-[12px]"></i><span>{{ warning }}</span></li>
+                        }
+                      </ul>
+                    </div>
+                  }
+                  @if (entry.validation.raw_record) {
+                    <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Raw Record' | translate }}</span><br><span class="break-all font-mono text-[12px] text-[var(--color-text4)]">{{ entry.validation.raw_record }}</span></div>
                   }
                 </div>
               }
-
-              <div class="space-y-[10px] border-t border-[var(--color-divider)] pt-[10px]">
-                @if (entry.validation.dns_query) {
-                  <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'DNS Query' | translate }}</span><br><span class="break-all font-mono text-[13px]">{{ entry.validation.dns_query }}</span></div>
-                }
-                @if (entry.validation.first_seen || entry.validation.last_seen) {
-                  <div class="flex flex-wrap gap-x-[24px] gap-y-[6px]">
-                    @if (entry.validation.first_seen) {
-                      <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'First Seen' | translate }}</span><br><span class="text-[13px] text-[var(--color-text2)]">{{ entry.validation.first_seen }}</span></div>
-                    }
-                    @if (entry.validation.last_seen) {
-                      <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Last Seen' | translate }}</span><br><span class="text-[13px] text-[var(--color-text2)]">{{ entry.validation.last_seen }}</span></div>
-                    }
-                  </div>
-                }
-                @for (field of parsedEntries(entry.validation); track field.key) {
-                  <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ field.key }}</span><br><span class="break-all font-mono text-[13px] text-[var(--color-text2)]">{{ field.value || '—' }}</span></div>
-                }
-                @if (entry.validation.parsed_data?.['public_key (p)']) {
-                  <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'public_key (p)' }}</span><br><span class="break-all font-mono text-[12px] text-[var(--color-text4)]">{{ entry.validation.parsed_data?.['public_key (p)'] }}</span></div>
-                }
-                @if (entry.validation.warnings?.length) {
-                  <div>
-                    <span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Warnings' | translate }}</span>
-                    <ul class="mt-1 space-y-1">
-                      @for (warning of entry.validation.warnings; track warning) {
-                        <li class="flex items-start gap-2 text-[13px] text-amber-300 [.light-theme_&]:text-amber-600"><i class="bi bi-exclamation-circle mt-[2px] text-[12px]"></i><span>{{ warning }}</span></li>
-                      }
-                    </ul>
-                  </div>
-                }
-                @if (entry.validation.raw_record) {
-                  <div><span class="text-[11px] font-[700] uppercase text-[var(--color-text6)]">{{ 'Raw Record' | translate }}</span><br><span class="break-all font-mono text-[12px] text-[var(--color-text4)]">{{ entry.validation.raw_record }}</span></div>
-                }
-              </div>
-            }
+            </div>
           </div>
-        </div>
-      }
-    </div>
-  }
+        }
+      </div>
+    }
 
+    <app-export-choice-modal
+      [visible]="isExportChoiceOpen"
+      [title]="('Export Report') | translate"
+      [subtitle]="('Choose the export format.') | translate"
+      [options]="reportExportOptions"
+      overlayTestId="dkim-lookup-export-overlay"
+      modalTestId="dkim-lookup-export-modal"
+      closeTestId="dkim-lookup-export-close"
+      (closed)="closeExportChoice()"
+      (optionSelected)="selectExport($event)">
+    </app-export-choice-modal>
+  </div>
 
-  <app-export-choice-modal
-    [visible]="isExportChoiceOpen"
-    [title]="('Export Report') | translate"
-    [subtitle]="('Choose the export format.') | translate"
-    [options]="reportExportOptions"
-    overlayTestId="dkim-lookup-export-overlay"
-    modalTestId="dkim-lookup-export-modal"
-    closeTestId="dkim-lookup-export-close"
-    (closed)="closeExportChoice()"
-    (optionSelected)="selectExport($event)">
-  </app-export-choice-modal>
-</div>
+  <div id="raw-panel" [hidden]="activeTab !== 'raw'">
+    <section class="dkim-card dkim-form-card [min-width:0] [margin-bottom:16px] [padding-top:20px] [padding-right:20px] [padding-bottom:20px] [padding-left:20px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:12px] [background:var(--color-blue-770)] [@media(width<=700px)]:[padding-top:16px] [@media(width<=700px)]:[padding-right:16px] [@media(width<=700px)]:[padding-bottom:16px] [@media(width<=700px)]:[padding-left:16px] [.light-theme_&]:[background:#f7faff] [.light-theme_&]:[border-top-color:#d3deea] [.light-theme_&]:[border-right-color:#d3deea] [.light-theme_&]:[border-bottom-color:#d3deea] [.light-theme_&]:[border-left-color:#d3deea]">
+      <div class="mb-5 flex items-start justify-between gap-3">
+        <div class="dkim-section-heading !mb-0"><h2 class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [font-size:16px] [font-weight:600]">Analyze an original message</h2><p class="[margin-top:6px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:13px] [line-height:1.6]">Paste the message source to inspect DKIM, SPF, DMARC, and the delivery route.</p></div>
+        <button type="button" (click)="showRawHelp = true" aria-label="How to get the raw email source" title="How to get the raw email source" aria-haspopup="dialog" [attr.aria-expanded]="showRawHelp" class="group inline-flex h-7 shrink-0 items-center gap-1.5 rounded-[7px] border px-1.5 pr-2 text-[10px] font-semibold outline-none transition-[background-color,border-color,color] focus-visible:ring-1 focus-visible:ring-[var(--color-blue-640)]/55 disabled:cursor-not-allowed disabled:opacity-65 border-[#213f5c] bg-[linear-gradient(135deg,rgba(87,165,235,0.22),rgba(43,144,238,0.12))] text-[var(--color-text1)] hover:border-[#28557d] hover:bg-[linear-gradient(135deg,rgba(87,165,235,0.30),rgba(43,144,238,0.18))] [.light-theme_&]:border-[#b7cbe1] [.light-theme_&]:bg-[#eef5fc] [.light-theme_&]:hover:border-[#8fb3d8] [.light-theme_&]:hover:bg-[#e4effa] [transition:background-color_150ms,_border-color_150ms] motion-reduce:[transition:none] [&:disabled]:[cursor:not-allowed]">
+          <span aria-hidden="true" class="inline-flex h-[18px] w-[18px] items-center justify-center text-[#8ec8ff] transition-colors group-hover:text-white [.light-theme_&]:text-[#2563a6] [.light-theme_&]:group-hover:text-[#1d4ed8]"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" class="h-3.5 w-3.5"><circle cx="8" cy="8" r="6"></circle><path d="M6.25 6a1.75 1.75 0 0 1 3.5 0c0 1.25-1.75 1.5-1.75 2.75M8 11h.01"></path></svg></span>
+          <span>How to get this?</span>
+        </button>
+      </div>
+      <form (ngSubmit)="analyzeRawEmail($event)">
+        <div class="dkim-field [display:flex] [flex-direction:column] [min-width:0] [gap:7px]"><label for="dkim-raw" class="[font-size:13px] [font-weight:600]">Raw email source</label><textarea id="dkim-raw" [(ngModel)]="rawEmailText" (ngModelChange)="rawResult = null; rawErrorMessage = ''" name="rawEmailText" rows="12" spellcheck="false" [disabled]="rawLoading" aria-describedby="raw-hint" placeholder="MIME-Version: 1.0&#10;From: sender@example.com&#10;To: recipient@example.com&#10;Subject: Your message&#10;DKIM-Signature: …&#10;Received: …" class="[width:100%] [min-width:0] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--entity-field-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--entity-field-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--entity-field-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--entity-field-border)] [border-radius:8px] [background:var(--entity-field-bg)] [color:var(--entity-field-text)] [padding-top:10px] [padding-right:12px] [padding-bottom:10px] [padding-left:12px] [font-size:12px] [transition:border-color_150ms,_box-shadow_150ms] [min-height:220px] [resize:vertical] [font-family:ui-monospace,_monospace] [line-height:1.8] [&::placeholder]:[color:var(--entity-field-placeholder)] [&::placeholder]:[opacity:100%] [&:focus-visible]:[outline:none] [&:focus-visible]:[border-top-color:var(--color-blue-640)] [&:focus-visible]:[border-right-color:var(--color-blue-640)] [&:focus-visible]:[border-bottom-color:var(--color-blue-640)] [&:focus-visible]:[border-left-color:var(--color-blue-640)]"></textarea><p id="raw-hint" class="dkim-hint [margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:12px] [line-height:1.6]">Use “Show original” or “View message source” in your email client. Include the full message and body for signature verification.</p></div>
+        <div class="dkim-form-footer [display:flex] [align-items:center] [justify-content:space-between] [gap:16px] [margin-top:16px]"><span class="dkim-hint [color:var(--color-text4)] [font-size:12px] [line-height:1.6]">{{ rawEmailText.length | number }} characters</span><button type="submit" class="dkim-primary [transition:background-color_150ms,_border-color_150ms] [min-height:42px] [border-radius:8px] [padding-top:10px] [padding-right:20px] [padding-bottom:10px] [padding-left:20px] [font-size:14px] [font-weight:600] [border-top-width:1px] [border-top-style:solid] [border-top-color:rgb(125_211_252_/_20%)] [border-right-width:1px] [border-right-style:solid] [border-right-color:rgb(125_211_252_/_20%)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:rgb(125_211_252_/_20%)] [border-left-width:1px] [border-left-style:solid] [border-left-color:rgb(125_211_252_/_20%)] [color:#fff] [background:linear-gradient(92.32deg,_#4ea2f1_2.58%,_#2c7ac5)] [white-space:nowrap] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:45%] [&:hover:not(:disabled)]:[background:linear-gradient(92.32deg,_#3f96e8_2.58%,_#236eb7)]" [disabled]="rawLoading || !rawEmailText.trim()">{{ rawLoading ? 'Analyzing…' : 'Run Diagnostics' }}</button></div>
+      </form>
+    </section>
+
+    @if (showRawHelp) {
+      <div class="raw-help-overlay [position:fixed] [inset:0] [z-index:2000] [display:flex] [align-items:center] [justify-content:center] [padding-top:20px] [padding-right:20px] [padding-bottom:20px] [padding-left:20px] [background:rgb(2_6_23_/_64%)] [backdrop-filter:blur(4px)] [animation:uiModalOverlayFade_200ms_ease-out_both] [@media(width<=480px)]:[padding-top:12px] [@media(width<=480px)]:[padding-right:12px] [@media(width<=480px)]:[padding-bottom:12px] [@media(width<=480px)]:[padding-left:12px] [.light-theme_&]:[background:rgb(15_23_42_/_24%)]" (click)="showRawHelp = false">
+        <section class="raw-help-dialog [display:flex] [flex-direction:column] [width:100%] [max-width:560px] [max-height:min(720px,_90dvh)] [overflow:hidden] [border-top-width:1px] [border-top-style:solid] [border-top-color:#2c3a4a] [border-right-width:1px] [border-right-style:solid] [border-right-color:#2c3a4a] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:#2c3a4a] [border-left-width:1px] [border-left-style:solid] [border-left-color:#2c3a4a] [border-radius:16px] [background:#1b2a3b] [color:var(--color-text1)] [transform-origin:top] [animation:slideUp_0.2s_ease-out_both] [.light-theme_&]:[background:#f7fbff] [.light-theme_&]:[border-top-color:#d2deec] [.light-theme_&]:[border-right-color:#d2deec] [.light-theme_&]:[border-bottom-color:#d2deec] [.light-theme_&]:[border-left-color:#d2deec]" role="dialog" aria-modal="true" aria-labelledby="raw-help-title" aria-describedby="raw-help-description" cdkTrapFocus [cdkTrapFocusAutoCapture]="true" (keydown.escape)="showRawHelp = false; $event.stopPropagation()" (click)="$event.stopPropagation()">
+          <header class="raw-help-header [display:flex] [align-items:flex-start] [justify-content:space-between] [gap:16px] [padding-top:24px] [padding-right:24px] [padding-bottom:18px] [padding-left:24px]">
+            <div>
+              <h3 id="raw-help-title" tabindex="-1" cdkFocusInitial class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [font-size:18px] [font-weight:600] [line-height:1.4] [outline:none]">Copy the message source</h3>
+              <p id="raw-help-description" class="[margin-top:6px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:13px] [line-height:1.6]">Use these steps in your email app.</p>
+            </div>
+            <button type="button" class="raw-help-close [transition:background-color_150ms,_border-color_150ms] [display:inline-flex] [width:36px] [height:36px] [flex-shrink:0] [align-items:center] [justify-content:center] [border-radius:8px] [color:var(--color-text4)] [font-size:26px] [line-height:1] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:45%] [&:hover]:[background:var(--color-blue-810)] [&:hover]:[color:var(--color-text1)]" (click)="showRawHelp = false" aria-label="Close email source guide"><span aria-hidden="true">×</span></button>
+          </header>
+          <div class="raw-help-body [min-height:0] [overflow-y:auto] [overscroll-behavior:contain] [padding-top:0] [padding-right:24px] [padding-bottom:24px] [padding-left:24px]">
+            <ol class="raw-help-steps [padding-top:4px] [padding-right:0] [padding-bottom:0] [padding-left:0] [margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [list-style:none]">
+              <li class="[position:relative] [padding-top:0] [padding-right:0] [padding-bottom:24px] [padding-left:28px] [color:var(--color-text2)] [font-size:13px] [line-height:1.7] [&::before]:[content:''] [&::before]:[position:absolute] [&::before]:[top:7px] [&::before]:[left:3px] [&::before]:[width:8px] [&::before]:[height:8px] [&::before]:[border-radius:50%] [&::before]:[background:var(--color-blue-640)] [&:last-child]:[padding-bottom:0] [&:not(:last-child)::after]:[content:''] [&:not(:last-child)::after]:[position:absolute] [&:not(:last-child)::after]:[top:19px] [&:not(:last-child)::after]:[bottom:-3px] [&:not(:last-child)::after]:[left:6px] [&:not(:last-child)::after]:[width:1px] [&:not(:last-child)::after]:[background:var(--color-border)]"><div><strong class="[color:var(--color-text1)] [font-weight:600]">Open the message</strong><p class="[margin-top:4px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)]">Open the email you want to analyze.</p></div></li>
+              <li class="[position:relative] [padding-top:0] [padding-right:0] [padding-bottom:24px] [padding-left:28px] [color:var(--color-text2)] [font-size:13px] [line-height:1.7] [&::before]:[content:''] [&::before]:[position:absolute] [&::before]:[top:7px] [&::before]:[left:3px] [&::before]:[width:8px] [&::before]:[height:8px] [&::before]:[border-radius:50%] [&::before]:[background:var(--color-blue-640)] [&:last-child]:[padding-bottom:0] [&:not(:last-child)::after]:[content:''] [&:not(:last-child)::after]:[position:absolute] [&:not(:last-child)::after]:[top:19px] [&:not(:last-child)::after]:[bottom:-3px] [&:not(:last-child)::after]:[left:6px] [&:not(:last-child)::after]:[width:1px] [&:not(:last-child)::after]:[background:var(--color-border)]"><div><strong class="[color:var(--color-text1)] [font-weight:600]">View the original source</strong><p class="[margin-top:4px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)]">In the message menu, look for “Show original”, “View source”, or “Raw source”.</p></div></li>
+              <li class="[position:relative] [padding-top:0] [padding-right:0] [padding-bottom:24px] [padding-left:28px] [color:var(--color-text2)] [font-size:13px] [line-height:1.7] [&::before]:[content:''] [&::before]:[position:absolute] [&::before]:[top:7px] [&::before]:[left:3px] [&::before]:[width:8px] [&::before]:[height:8px] [&::before]:[border-radius:50%] [&::before]:[background:var(--color-blue-640)] [&:last-child]:[padding-bottom:0] [&:not(:last-child)::after]:[content:''] [&:not(:last-child)::after]:[position:absolute] [&:not(:last-child)::after]:[top:19px] [&:not(:last-child)::after]:[bottom:-3px] [&:not(:last-child)::after]:[left:6px] [&:not(:last-child)::after]:[width:1px] [&:not(:last-child)::after]:[background:var(--color-border)]"><div><strong class="[color:var(--color-text1)] [font-weight:600]">Copy the full source</strong><p class="[margin-top:4px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)]">Select and copy all the text, including the headers and message body.</p></div></li>
+              <li class="[position:relative] [padding-top:0] [padding-right:0] [padding-bottom:24px] [padding-left:28px] [color:var(--color-text2)] [font-size:13px] [line-height:1.7] [&::before]:[content:''] [&::before]:[position:absolute] [&::before]:[top:7px] [&::before]:[left:3px] [&::before]:[width:8px] [&::before]:[height:8px] [&::before]:[border-radius:50%] [&::before]:[background:var(--color-blue-640)] [&:last-child]:[padding-bottom:0] [&:not(:last-child)::after]:[content:''] [&:not(:last-child)::after]:[position:absolute] [&:not(:last-child)::after]:[top:19px] [&:not(:last-child)::after]:[bottom:-3px] [&:not(:last-child)::after]:[left:6px] [&:not(:last-child)::after]:[width:1px] [&:not(:last-child)::after]:[background:var(--color-border)]"><div><strong class="[color:var(--color-text1)] [font-weight:600]">Paste and analyze</strong><p class="[margin-top:4px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)]">Paste the text into Raw email source, then select Run Diagnostics.</p></div></li>
+            </ol>
+          </div>
+          <footer class="raw-help-footer [display:flex] [justify-content:flex-end] [padding-top:16px] [padding-right:24px] [padding-bottom:16px] [padding-left:24px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)]"><button type="button" class="dkim-primary [transition:background-color_150ms,_border-color_150ms] [min-height:var(--ui-btn-height,_36px)] [border-radius:8px] [padding-top:0] [padding-right:16px] [padding-bottom:0] [padding-left:16px] [font-size:14px] [font-weight:600] [border-top-width:1px] [border-top-style:solid] [border-top-color:rgb(125_211_252_/_20%)] [border-right-width:1px] [border-right-style:solid] [border-right-color:rgb(125_211_252_/_20%)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:rgb(125_211_252_/_20%)] [border-left-width:1px] [border-left-style:solid] [border-left-color:rgb(125_211_252_/_20%)] [color:#fff] [background:linear-gradient(92.32deg,_#4ea2f1_2.58%,_#2c7ac5)] [white-space:nowrap] [display:inline-flex] [align-items:center] [justify-content:center] [height:var(--ui-btn-height,_36px)] [line-height:1] motion-reduce:[transition:none] [&:focus-visible]:[outline:2px_solid_var(--color-blue-640)] [&:focus-visible]:[outline-offset:3px] [&:disabled]:[cursor:not-allowed] [&:disabled]:[opacity:45%] [&:hover:not(:disabled)]:[background:linear-gradient(92.32deg,_#3f96e8_2.58%,_#236eb7)]" (click)="showRawHelp = false">Dismiss</button></footer>
+        </section>
+      </div>
+    }
+
+    @if (rawLoading) { <div class="dkim-notice [display:flex] [align-items:center] [gap:10px] [margin-top:16px] [margin-right:0] [margin-bottom:16px] [margin-left:0] [padding-top:14px] [padding-right:16px] [padding-bottom:14px] [padding-left:16px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:10px] [background:var(--color-blue-700)] [overflow-wrap:anywhere]" role="status"><span class="dkim-spinner [width:16px] [height:16px] [flex-shrink:0] [border-top-width:2px] [border-top-style:solid] [border-top-color:var(--color-blue-640)] [border-right-width:2px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:2px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:2px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:50%] animate-spin [animation-duration:0.8s] motion-reduce:[animation:none]" aria-hidden="true"></span>Analyzing authentication and tracing message delivery…</div> }
+    @if (rawErrorMessage) { <div class="dkim-notice dkim-error [display:flex] [align-items:center] [gap:10px] [margin-top:16px] [margin-right:0] [margin-bottom:16px] [margin-left:0] [padding-top:14px] [padding-right:16px] [padding-bottom:14px] [padding-left:16px] [border-top-width:1px] [border-top-style:solid] [border-right-width:1px] [border-right-style:solid] [border-bottom-width:1px] [border-bottom-style:solid] [border-left-width:1px] [border-left-style:solid] [border-radius:10px] [background:var(--color-red-100)] [overflow-wrap:anywhere] [color:var(--color-text7)] [border-top-color:var(--color-border-red)] [border-right-color:var(--color-border-red)] [border-bottom-color:var(--color-border-red)] [border-left-color:var(--color-border-red)]" role="alert">{{ rawErrorMessage }}</div> }
+    @if (rawResult) {
+      <div class="dkim-section-heading dkim-results-heading [margin-bottom:20px] [margin-top:24px]"><h2 class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [font-size:16px] [font-weight:600]">Authentication Results</h2><p class="[margin-top:6px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:13px] [line-height:1.6]">Record availability and signature findings are shown separately for each check.</p></div>
+      <div class="dkim-auth-grid [display:grid] [grid-template-columns:repeat(3,_minmax(0,_1fr))] [gap:16px] [@media(width<=700px)]:[grid-template-columns:1fr] [@media(width<=700px)]:[gap:0]">
+        <section class="dkim-card [min-width:0] [margin-bottom:16px] [padding-top:20px] [padding-right:20px] [padding-bottom:20px] [padding-left:20px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:12px] [background:var(--color-blue-700)] [@media(width<=700px)]:[padding-top:16px] [@media(width<=700px)]:[padding-right:16px] [@media(width<=700px)]:[padding-bottom:16px] [@media(width<=700px)]:[padding-left:16px] [.light-theme_&]:[background:#fff] [.light-theme_&]:[border-top-color:#d4dfeb] [.light-theme_&]:[border-right-color:#d4dfeb] [.light-theme_&]:[border-bottom-color:#d4dfeb] [.light-theme_&]:[border-left-color:#d4dfeb]"><h3 class="[margin-top:0] [margin-right:0] [margin-bottom:12px] [margin-left:0] [font-size:15px] [font-weight:600]">DKIM Signature</h3><span class="dkim-badge [display:inline-block] [padding-top:4px] [padding-right:8px] [padding-bottom:4px] [padding-left:8px] [border-radius:6px] [background:var(--color-blue-810)] [color:var(--color-text2)] [font-size:11px] [font-weight:600] [vertical-align:middle] [&.dkim-negative]:[background:var(--color-red-100)] [&.dkim-negative]:[color:var(--color-text7)]" [class.dkim-negative]="statusTone(rawResult.dkim?.status) === 'negative'">{{ rawResult.dkim?.status || 'Not available' }}</span><dl class="dkim-facts [display:grid] [gap:14px] [margin-top:20px] [margin-right:0] [margin-bottom:0] [margin-left:0]"><div><dt class="[margin-bottom:6px] [color:var(--color-text4)] [font-size:12px]">Domain</dt><dd class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [overflow-wrap:anywhere] [font-size:13px]">{{ rawResult.dkim?.domain || 'Not available' }}</dd></div><div><dt class="[margin-bottom:6px] [color:var(--color-text4)] [font-size:12px]">Selector</dt><dd class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [overflow-wrap:anywhere] [font-size:13px]">{{ rawResult.dkim?.selector || 'Not available' }}</dd></div></dl></section>
+        <section class="dkim-card [min-width:0] [margin-bottom:16px] [padding-top:20px] [padding-right:20px] [padding-bottom:20px] [padding-left:20px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:12px] [background:var(--color-blue-700)] [@media(width<=700px)]:[padding-top:16px] [@media(width<=700px)]:[padding-right:16px] [@media(width<=700px)]:[padding-bottom:16px] [@media(width<=700px)]:[padding-left:16px] [.light-theme_&]:[background:#fff] [.light-theme_&]:[border-top-color:#d4dfeb] [.light-theme_&]:[border-right-color:#d4dfeb] [.light-theme_&]:[border-bottom-color:#d4dfeb] [.light-theme_&]:[border-left-color:#d4dfeb]"><h3 class="[margin-top:0] [margin-right:0] [margin-bottom:12px] [margin-left:0] [font-size:15px] [font-weight:600]">SPF Check</h3><span class="dkim-badge [display:inline-block] [padding-top:4px] [padding-right:8px] [padding-bottom:4px] [padding-left:8px] [border-radius:6px] [background:var(--color-blue-810)] [color:var(--color-text2)] [font-size:11px] [font-weight:600] [vertical-align:middle] [&.dkim-negative]:[background:var(--color-red-100)] [&.dkim-negative]:[color:var(--color-text7)]" [class.dkim-negative]="statusTone(rawResult.spf?.status) === 'negative'">{{ rawResult.spf?.status || 'Not available' }}</span><dl class="dkim-facts [display:grid] [gap:14px] [margin-top:20px] [margin-right:0] [margin-bottom:0] [margin-left:0]"><div><dt class="[margin-bottom:6px] [color:var(--color-text4)] [font-size:12px]">Origin IP</dt><dd class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [overflow-wrap:anywhere] [font-size:13px]">{{ rawResult.spf?.origin_ip || 'Not available' }}</dd></div><div><dt class="[margin-bottom:6px] [color:var(--color-text4)] [font-size:12px]">Sender</dt><dd class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [overflow-wrap:anywhere] [font-size:13px]">{{ rawResult.spf?.domain || 'Not available' }}</dd></div></dl></section>
+        <section class="dkim-card [min-width:0] [margin-bottom:16px] [padding-top:20px] [padding-right:20px] [padding-bottom:20px] [padding-left:20px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:12px] [background:var(--color-blue-700)] [@media(width<=700px)]:[padding-top:16px] [@media(width<=700px)]:[padding-right:16px] [@media(width<=700px)]:[padding-bottom:16px] [@media(width<=700px)]:[padding-left:16px] [.light-theme_&]:[background:#fff] [.light-theme_&]:[border-top-color:#d4dfeb] [.light-theme_&]:[border-right-color:#d4dfeb] [.light-theme_&]:[border-bottom-color:#d4dfeb] [.light-theme_&]:[border-left-color:#d4dfeb]"><h3 class="[margin-top:0] [margin-right:0] [margin-bottom:12px] [margin-left:0] [font-size:15px] [font-weight:600]">DMARC Policy</h3><span class="dkim-badge [display:inline-block] [padding-top:4px] [padding-right:8px] [padding-bottom:4px] [padding-left:8px] [border-radius:6px] [background:var(--color-blue-810)] [color:var(--color-text2)] [font-size:11px] [font-weight:600] [vertical-align:middle] [&.dkim-negative]:[background:var(--color-red-100)] [&.dkim-negative]:[color:var(--color-text7)]" [class.dkim-negative]="statusTone(rawResult.dmarc?.status) === 'negative'">{{ rawResult.dmarc?.status || 'Not available' }}</span><dl class="dkim-facts [display:grid] [gap:14px] [margin-top:20px] [margin-right:0] [margin-bottom:0] [margin-left:0]"><div><dt class="[margin-bottom:6px] [color:var(--color-text4)] [font-size:12px]">Domain</dt><dd class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [overflow-wrap:anywhere] [font-size:13px]">{{ rawResult.dmarc?.domain || 'Not available' }}</dd></div><div><dt class="[margin-bottom:6px] [color:var(--color-text4)] [font-size:12px]">Policy</dt><dd class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [overflow-wrap:anywhere] [font-size:13px]">{{ rawResult.dmarc?.record || 'Not available' }}</dd></div></dl></section>
+      </div>
+      <section class="dkim-card [min-width:0] [margin-bottom:16px] [padding-top:20px] [padding-right:20px] [padding-bottom:20px] [padding-left:20px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:12px] [background:var(--color-blue-700)] [@media(width<=700px)]:[padding-top:16px] [@media(width<=700px)]:[padding-right:16px] [@media(width<=700px)]:[padding-bottom:16px] [@media(width<=700px)]:[padding-left:16px] [.light-theme_&]:[background:#fff] [.light-theme_&]:[border-top-color:#d4dfeb] [.light-theme_&]:[border-right-color:#d4dfeb] [.light-theme_&]:[border-bottom-color:#d4dfeb] [.light-theme_&]:[border-left-color:#d4dfeb]"><div class="dkim-section-heading [margin-bottom:20px]"><h2 class="[margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [font-size:16px] [font-weight:600]">Network Hops <span class="dkim-badge [display:inline-block] [padding-top:4px] [padding-right:8px] [padding-bottom:4px] [padding-left:8px] [border-radius:6px] [background:var(--color-blue-810)] [color:var(--color-text2)] [font-size:11px] [font-weight:600] [vertical-align:middle] [margin-left:6px]">{{ rawResult.hops?.length || 0 }}</span></h2><p class="[margin-top:6px] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:13px] [line-height:1.6]">Read from bottom to top: source at the bottom, destination at the top.</p></div>@if (rawResult.hops?.length) { <ol class="dkim-hops [padding-top:0] [padding-right:0] [padding-bottom:0] [padding-left:0] [margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [list-style:none] [position:relative]">@for (hop of rawResult.hops; track $index) { <li class="[position:relative] [padding-left:26px] [padding-bottom:18px] [&:last-child]:[padding-bottom:0] [&::before]:[content:''] [&::before]:[position:absolute] [&::before]:[left:3px] [&::before]:[top:6px] [&::before]:[width:11px] [&::before]:[height:11px] [&::before]:[border-radius:50%] [&::before]:[background:var(--color-blue-640)] [&::before]:[z-index:1] [&::after]:[content:''] [&::after]:[position:absolute] [&::after]:[left:8px] [&::after]:[top:18px] [&::after]:[bottom:-6px] [&::after]:[border-left-width:2px] [&::after]:[border-left-style:dotted] [&::after]:[border-left-color:var(--color-blue-640)] [&:last-child::after]:[display:none]"><code class="[display:block] [padding-top:12px] [padding-right:12px] [padding-bottom:12px] [padding-left:12px] [border-top-width:1px] [border-top-style:solid] [border-top-color:var(--color-border)] [border-right-width:1px] [border-right-style:solid] [border-right-color:var(--color-border)] [border-bottom-width:1px] [border-bottom-style:solid] [border-bottom-color:var(--color-border)] [border-left-width:1px] [border-left-style:solid] [border-left-color:var(--color-border)] [border-radius:8px] [background:var(--color-blue-770)] [font-family:ui-monospace,_monospace] [font-size:12px] [line-height:1.7] [overflow-wrap:anywhere] [white-space:pre-wrap] [min-width:0]">{{ hop.details }}</code></li> }</ol> } @else { <p class="dkim-hint [margin-top:0] [margin-right:0] [margin-bottom:0] [margin-left:0] [color:var(--color-text4)] [font-size:12px] [line-height:1.6]">No Received headers found to trace hops.</p> }</section>
+    }
+  </div>
+</section>

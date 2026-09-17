@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+from bson import ObjectId
 from cryptography.fernet import Fernet
 from odmantic import AIOEngine
 
@@ -35,12 +36,15 @@ class KeyManager:
         return self._master.decrypt(wrapped).encode()
 
     async def get_or_create_dek(self, tenant_id: str) -> bytes:
-        rec = await self._engine.find_one(db_keys, db_keys.auth_id == tenant_id)
+        rec = await self._engine.find_one(db_keys, db_keys.tenant_id == tenant_id)
         if rec:
             return self._unwrap(rec.wrapped_key)
 
+        if not tenant_id:
+            raise Exception("Tenant does not exist.")
+
         existing = await self._engine.find_one(
-            db_tenant_model, db_tenant_model.id == str(tenant_id))
+            db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_id)))
         if not existing:
             raise Exception("Tenant does not exist.")
 
@@ -50,12 +54,11 @@ class KeyManager:
         dek = self._new_dek()
         wrapped = self._wrap(dek)
         now = datetime.now(timezone.utc)
-        await self._engine.save(db_keys(auth_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
+        await self._engine.save(db_keys(tenant_id=tenant_id, wrapped_key=wrapped, created_at=now, updated_at=now))
         return dek
 
     async def get_profile_dek(self, tenant_id: str) -> bytes:
-        rec = await self._engine.find_one(db_keys, db_keys.auth_id == str(tenant_id))
+        rec = await self._engine.find_one(db_keys, db_keys.tenant_id == str(tenant_id))
         if not rec:
-            await self._engine.remove(db_tenant_model, db_tenant_model.id == str(tenant_id))
             return b""
         return self._unwrap(rec.wrapped_key)

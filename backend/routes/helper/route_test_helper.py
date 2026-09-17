@@ -235,7 +235,7 @@ class TestRouteHelper:
         await engine.save(tenant)
 
         now = datetime.now(timezone.utc)
-        tenant_uuid = str(tenant.id)
+        tenant_id = str(tenant.id)
 
         async def create_user(key: str, role: user_role, licenses: list[LicenseName]):
             username = cls.TAKEDOWN_TEST_USERS[key]
@@ -247,7 +247,7 @@ class TestRouteHelper:
                 status=UserStatus.ACTIVE,
                 subscription=True,
                 licenses=licenses,
-                tenant_uuid=tenant_uuid,
+                tenant_id=tenant_id,
                 account_verify_at=now,
                 password_reset_required=False,
             )
@@ -270,8 +270,8 @@ class TestRouteHelper:
         viewer_key = str(viewer or "").strip().lower().replace("_", " ")
 
         if viewer_key == "admin":
-            root_tenant_uuid = await takedown_manager._root_tenant_uuid()
-            return SimpleNamespace(id="", tenant_uuid=root_tenant_uuid, username="admin", role=user_role.ADMIN)
+            root_tenant_id = await takedown_manager._root_tenant_id()
+            return SimpleNamespace(id="", tenant_id=root_tenant_id, username="admin", role=user_role.ADMIN)
 
         user_keys = {
             "initiator": "initiator",
@@ -307,7 +307,7 @@ class TestRouteHelper:
         if existing:
             return takedown_manager._existing_record_response(existing)
 
-        root_tenant_uuid = await takedown_manager._root_tenant_uuid()
+        root_tenant_id = await takedown_manager._root_tenant_id()
         now = datetime.now(timezone.utc)
         current_user = await cls.takedown_fixture_user("initiator")
         evidence = {
@@ -319,8 +319,8 @@ class TestRouteHelper:
             },
         }
         record = db_takedown_request_model(
-            tenant_uuid=root_tenant_uuid,
-            requester_tenant_uuid=str(getattr(current_user, "tenant_uuid", "") or ""),
+            operator_tenant_id=root_tenant_id,
+            tenant_id=str(getattr(current_user, "tenant_id", "") or ""),
             user_uuid=str(getattr(current_user, "id", "") or ""),
             username=str(getattr(current_user, "username", "") or ""),
             report_id=request.report_id or "",

@@ -27,7 +27,7 @@ describe('Orion Intelligence - Report Related Mapping Panel', () => {
     openExploitReportForMapping();
 
     expandMappingPanel();
-    cy.get(MAPPING_LOADING_SELECTOR).should('be.visible');
+    cy.get(MAPPING_LOADING_SELECTOR).scrollIntoView().should('be.visible');
     cy.wait(`@${MAPPING_GRAPH_ALIAS}`, { timeout: 60000 });
 
     assertMappingResults();

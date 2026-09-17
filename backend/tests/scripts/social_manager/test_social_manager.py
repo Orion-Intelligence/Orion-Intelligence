@@ -151,7 +151,7 @@ def test_social_api_base_urls_reads_env(monkeypatch):
 
 def test_social_headers_includes_user_and_internal_token(monkeypatch):
     _patch_env(monkeypatch, {"ORION_SOCIAL_INTERNAL_TOKEN": "tok"})
-    user = SimpleNamespace(username="alice", id="u1", tenant_uuid="t1")
+    user = SimpleNamespace(username="alice", id="u1", tenant_id="t1")
     headers = social_manager._social_headers(user, request=None)
     assert headers["X-Orion-Internal-Token"] == "tok"
     assert headers["X-Orion-User"] == "alice"

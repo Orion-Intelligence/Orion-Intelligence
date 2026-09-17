@@ -264,7 +264,7 @@ class CaseResponse(BaseModel):
     viewerId: str = ""
     viewerRole: str = ""
     caseId: str
-    tenant_uuid: str
+    tenant_id: str
     assignedAnalysts: List[dict] = Field(default_factory=list)
     title: str
     description: str = ""

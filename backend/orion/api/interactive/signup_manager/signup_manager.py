@@ -64,7 +64,7 @@ class SignupManager:
         if domain_exists:
             raise HTTPException(status_code=400, detail="This domain tenant already exists")
 
-        source_maintainer = next((m for m in maintainers if str(getattr(m, "tenant_uuid", "")) == source_tenant_id), None)
+        source_maintainer = next((m for m in maintainers if str(getattr(m, "tenant_id", "")) == source_tenant_id), None)
         source_language = (getattr(source_maintainer, "preferences", None) or {}).get("language") if source_maintainer else None
 
         TenantManager.validate_company_email(email)
@@ -111,7 +111,7 @@ class SignupManager:
             verification_expiry=_verification_token_expire,
             licenses=[LicenseName.MAINTAINER],
             preferences={"language": source_language} if source_language else {},
-            tenant_uuid=str(tenant.id))
+            tenant_id=str(tenant.id))
         await engine.save(user)
 
         await SignupManager._send_verification_email(user, _verification_token)
@@ -121,7 +121,7 @@ class SignupManager:
     async def _send_verification_email(user, token: str):
         APP_URL = env_handler.get_instance().env("APP_URL")
         engine = mongo_controller.get_instance().get_engine()
-        tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(user.tenant_uuid)))
+        tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(user.tenant_id)))
         parent_tenant_id = getattr(tenant, "parent_tenant_id", None)
         parent_tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(parent_tenant_id)) if parent_tenant_id else None
         verify_url = TenantManager.build_tenant_url(APP_URL, parent_tenant, f"/welcome/{token}") if parent_tenant else f"{APP_URL}/welcome/{token}"
@@ -132,7 +132,7 @@ class SignupManager:
             lurlHeading=MailUrlHeading.VERIFICATION.value,
             url=verify_url)
         await mail_manager.get_instance().send_verification_mail(
-            to=user.email, subject=MailSubject.VERIFICATION.value, body=html_content, tenant_id=str(user.tenant_uuid))
+            to=user.email, subject=MailSubject.VERIFICATION.value, body=html_content, tenant_id=str(user.tenant_id))
 
     @staticmethod
     async def resend_verification_email(data: SignupRequest):

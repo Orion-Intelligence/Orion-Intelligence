@@ -55,8 +55,6 @@ class config_controller:
         config_controller.__instance = self
         self._config: dict[str, str] = {}
         self._configs: dict[str, dict[str, str]] = {}
-        self._tenants: dict[str, db_tenant_model] = {}
-        self._default_tenant_id: str | None = None
         self._engine = mongo_controller.get_instance().get_engine()
         asyncio.create_task(self.load_config())
 
@@ -73,32 +71,16 @@ class config_controller:
 
     async def _get_tenant(self, tenant_id: str | None = None) -> db_tenant_model | None:
         if tenant_id is None:
-            if self._default_tenant_id:
-                cached_default = self._tenants.get(self._default_tenant_id)
-                if cached_default is not None:
-                    return cached_default
-            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
-        else:
-            cached_tenant = self._tenants.get(tenant_id)
-            if cached_tenant is not None:
-                return cached_tenant
+            return await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
 
-            try:
-                tenant_object_id = ObjectId(tenant_id)
-            except (InvalidId, TypeError):
-                tenant_object_id = tenant_id
+        try:
+            tenant_object_id = ObjectId(tenant_id)
+        except (InvalidId, TypeError):
+            tenant_object_id = tenant_id
 
-            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
-            if tenant is None and tenant_object_id != tenant_id:
-                tenant = await self._engine.find_one(db_tenant_model,db_tenant_model.id == tenant_id)
-
-        if tenant is None:
-            return None
-
-        resolved_tenant_id = str(tenant.id)
-        self._tenants[resolved_tenant_id] = tenant
-        if tenant.is_default:
-            self._default_tenant_id = resolved_tenant_id
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
+        if tenant is None and tenant_object_id != tenant_id:
+            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_id)
         return tenant
 
     def _cache_key(self, tenant_id: str) -> str:
@@ -281,7 +263,7 @@ class config_controller:
             return
         if not self._is_tenant_branding_editor(current_user):
             raise HTTPException(status_code=403, detail="Only tenant maintainers can update branding")
-        if not self._is_admin(current_user) and str(getattr(current_user, "tenant_uuid", "")) != tenant_id:
+        if not self._is_admin(current_user) and str(getattr(current_user, "tenant_id", "")) != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant settings cannot be updated across tenants")
         if settings is not None and not self._is_admin(current_user):
             disallowed = set(settings).difference(self.TENANT_EDITABLE_SETTINGS)
@@ -383,7 +365,7 @@ class config_controller:
         if file_name is None:
             raise HTTPException(status_code=400, detail="Invalid system resource")
 
-        requested_tenant_id = tenant_id or getattr(current_user, "tenant_uuid", None)
+        requested_tenant_id = tenant_id or getattr(current_user, "tenant_id", None)
         tenant = await self._get_tenant(requested_tenant_id)
         if tenant is None:
             raise HTTPException(status_code=404, detail="Tenant configuration is unavailable")

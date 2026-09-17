@@ -171,7 +171,7 @@ class social_manager:
         if current_user is not None:
             headers["X-Orion-User"] = str(getattr(current_user, "username", "") or "")
             headers["X-Orion-User-Id"] = str(getattr(current_user, "id", "") or "")
-            headers["X-Orion-Tenant-Id"] = str(getattr(current_user, "tenant_uuid", "") or "")
+            headers["X-Orion-Tenant-Id"] = str(getattr(current_user, "tenant_id", "") or "")
 
         token = token_from_request(request) if request is not None else ""
         if token:

@@ -79,7 +79,7 @@ def test_get_user_reaction_found_and_not_found():
 
 def test_serialize_comment_decrypts_when_tenant_present(monkeypatch):
     key = Fernet.generate_key()
-    user = _make_user(tenant_uuid="507f1f77bcf86cd799439012")
+    user = _make_user(tenant_id="507f1f77bcf86cd799439012")
     _patch_tenant_lookup(monkeypatch, FakeMongoEngine(find_one_results=[user]))
     _patch_key_manager(monkeypatch, key)
     now = datetime.now(UTC)
@@ -111,7 +111,7 @@ def test_get_tenant_id_for_user_id_variants(monkeypatch):
     _patch_tenant_lookup(monkeypatch, FakeMongoEngine(find_one_results=[None]))
     assert _run(FeedbackManager._get_tenant_id_for_user_id("507f1f77bcf86cd799439011")) == ""
 
-    user = _make_user(tenant_uuid="tenant-x")
+    user = _make_user(tenant_id="tenant-x")
     _patch_tenant_lookup(monkeypatch, FakeMongoEngine(find_one_results=[user]))
     assert _run(FeedbackManager._get_tenant_id_for_user_id("507f1f77bcf86cd799439011")) == "tenant-x"
 
@@ -385,9 +385,9 @@ def test_get_public_profile_missing_user_raises_404():
 
 
 def test_get_public_profile_forbidden_cross_tenant():
-    user = _make_user(tenant_uuid="507f1f77bcf86cd799439099")
+    user = _make_user(tenant_id="507f1f77bcf86cd799439099")
     manager = _make_manager(FakeMongoEngine(find_one_results=[user]))
-    viewer = _current_user(role=user_role.MEMBER, tenant_uuid="507f1f77bcf86cd799439012")
+    viewer = _current_user(role=user_role.MEMBER, tenant_id="507f1f77bcf86cd799439012")
 
     with pytest.raises(HTTPException) as exc:
         _run(manager._get_public_profile("507f1f77bcf86cd799439011", viewer))

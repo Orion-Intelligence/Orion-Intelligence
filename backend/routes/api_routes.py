@@ -122,7 +122,7 @@ async def get_country_insight(category: str = Query(...), country: str = Query(.
     status_code=200,
     dependencies=GENERAL_MODULE_DEPS, )
 async def search_general(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user), role: user_role = Depends(get_current_role), is_free: bool = Depends(get_is_free_token)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user, is_free)
     if role == user_role.DEMO or is_free:
         param.network = "onion"
@@ -151,7 +151,7 @@ async def search_general(param: search_consolidated_param_model = Body(...), cur
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:breach"))])
 async def search_leak(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     category = (param.category or "all").strip().lower()
     base_index = [ELASTIC_INDEX.S_LEAK_INDEX]
@@ -173,7 +173,7 @@ async def search_leak(param: search_consolidated_param_model = Body(...), curren
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:social", bypass_licenses=["maintainer"]))], )
 async def search_social(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     category = (param.category or "all").strip().lower()
     if category == "all":
@@ -208,7 +208,7 @@ async def search_social(param: search_consolidated_param_model = Body(...), curr
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:exploit", bypass_licenses=["maintainer"]))], )
 async def search_exploit(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_EXPLOIT_INDEX]
     return await search_exploit_controller.getInstance().search_result(param, base_index)
@@ -234,7 +234,7 @@ async def get_exploit_filter_suggestions(field: str = Query(...), q: str = Query
     status_code=200,
     dependencies=APT_INTEL_DEPS, )
 async def search_apt_intel(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     return await search_apt_controller.getInstance().search_result(param)
 
@@ -259,7 +259,7 @@ async def get_malware_filter_options():
     status_code=200,
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
 async def search_defacement(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     base_index = [ELASTIC_INDEX.S_DEFACEMENT_INDEX]
     return await search_defacement_controller.getInstance().search_grouped_result(param, base_index)
@@ -386,7 +386,7 @@ async def get_insight():
     status_code=200,
     dependencies=STEALER_LOG_DEPS)
 async def search_stealer_iocs(param: search_credential_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     return await search_manager.getInstance().search_stealer_iocs(param, current_user)
 
 
@@ -403,7 +403,7 @@ def _parse_dismiss_type(value):
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(dismiss_result_required)])
 async def dismiss_result(payload: ResultDismissRequest = Body(...), current_user=Depends(get_current_user)):
     dismissed_ioc_type = _parse_dismiss_type(payload.type)
-    return await TenantManager.get_instance().dismiss_stealer_log(str(current_user.tenant_uuid), payload.hash, str(current_user.id), dismissed_ioc_type, all_tenants=current_user.role == user_role.ADMIN)
+    return await TenantManager.get_instance().dismiss_stealer_log(str(current_user.tenant_id), payload.hash, str(current_user.id), dismissed_ioc_type, all_tenants=current_user.role == user_role.ADMIN)
 
 
 @api_routes.post(
@@ -412,7 +412,7 @@ async def dismiss_result(payload: ResultDismissRequest = Body(...), current_user
     dependencies=[Depends(role_required(SCAN_ROLE_DEPS)), Depends(dismiss_result_required)])
 async def restore_result(payload: ResultDismissRequest = Body(...), current_user=Depends(get_current_user)):
     dismissed_ioc_type = _parse_dismiss_type(payload.type)
-    return await TenantManager.get_instance().restore_stealer_log(str(current_user.tenant_uuid), payload.hash, dismissed_ioc_type, all_tenants=current_user.role == user_role.ADMIN)
+    return await TenantManager.get_instance().restore_stealer_log(str(current_user.tenant_id), payload.hash, dismissed_ioc_type, all_tenants=current_user.role == user_role.ADMIN)
 
 
 @api_routes.post(
@@ -425,7 +425,7 @@ async def restore_result(payload: ResultDismissRequest = Body(...), current_user
     status_code=200,
     dependencies=[Depends(admin_or_enterprise_required)], )
 async def search_consolidated(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     _enforce_demo_safe_search(param, current_user)
     return await search_manager.getInstance().search_consolidated_result(param)
 
@@ -436,7 +436,7 @@ async def search_consolidated(param: search_consolidated_param_model = Body(...)
     dependencies=[Depends(admin_or_enterprise_required)],
 )
 async def search_consolidated_iocs(param: search_consolidated_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     base_index = [
         ELASTIC_INDEX.S_LEAK_INDEX,
         ELASTIC_INDEX.S_GENERIC_INDEX,
@@ -458,10 +458,10 @@ async def search_consolidated_iocs(param: search_consolidated_param_model = Body
     response_description=REPORT_DOCS["defacement"]["response_description"],
     status_code=200,
     dependencies=[Depends(role_required([user_role.ADMIN, user_role.DEMO, user_role.MEMBER, user_role.ANALYST])), Depends(license_required("module:defacement", bypass_licenses=["maintainer"]))], )
-async def get_defacement_document(doc_id: str):
+async def get_defacement_document(doc_id: str, current_user=Depends(get_current_user)):
     report = await search_manager.getInstance().request_defacement_doc(doc_id)
     takedown_manager = TakedownManager.get_instance()
-    return await takedown_manager.enrich_report(report)
+    return await takedown_manager.enrich_report(report, str(getattr(current_user, "tenant_id", "") or ""))
 
 
 @api_routes.get(

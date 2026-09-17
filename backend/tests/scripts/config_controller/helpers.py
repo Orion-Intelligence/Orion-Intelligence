@@ -15,8 +15,6 @@ def _make_manager(engine=None, base_dir: Path | None = None):
     manager._engine = engine if engine is not None else FakeConfigEngine()
     manager._config = {}
     manager._configs = {}
-    manager._tenants = {}
-    manager._default_tenant_id = None
     manager.BASE_DIR = base_dir or Path("/tmp")
     manager.SYSTEM_DIR = (base_dir or Path("/tmp")) / "system"
     return manager
@@ -26,12 +24,12 @@ def _tenant(tenant_id="tenant-1", is_default=True):
     return SimpleNamespace(id=tenant_id, is_default=is_default)
 
 
-def _user(role="admin", licenses=None, tenant_uuid="tenant-1", user_id="user-1"):
-    return SimpleNamespace(id=user_id, role=role, licenses=licenses or [], tenant_uuid=tenant_uuid)
+def _user(role="admin", licenses=None, tenant_id="tenant-1", user_id="user-1"):
+    return SimpleNamespace(id=user_id, role=role, licenses=licenses or [], tenant_id=tenant_id)
 
 
-def _maintainer_user(tenant_uuid="tenant-1"):
-    return _user(role="analyst", licenses=[LicenseName.MAINTAINER], tenant_uuid=tenant_uuid)
+def _maintainer_user(tenant_id="tenant-1"):
+    return _user(role="analyst", licenses=[LicenseName.MAINTAINER], tenant_id=tenant_id)
 
 
 def _install_redis(monkeypatch, redis):

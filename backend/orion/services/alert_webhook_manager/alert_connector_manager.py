@@ -38,7 +38,7 @@ class AlertConnectorManager:
         AlertConnectorManager.__instance = self
 
     async def get_settings(self, current_user) -> dict[str, Any]:
-        tenant_id = str(getattr(current_user, "tenant_uuid", "") or "")
+        tenant_id = str(getattr(current_user, "tenant_id", "") or "")
         settings: dict[str, dict[str, Any]] = {"app": {}, "tenant": {}}
         for provider, handler in self._providers.items():
             settings["app"].update(handler.app_settings(await self._connector(AlertConnectorType.APP, provider, tenant_id)))
@@ -46,14 +46,14 @@ class AlertConnectorManager:
         return settings
 
     async def save_settings(self, current_user, payload: dict[str, Any]) -> dict[str, Any]:
-        tenant_id = str(getattr(current_user, "tenant_uuid", "") or "")
+        tenant_id = str(getattr(current_user, "tenant_id", "") or "")
         for provider, handler in self._providers.items():
             await self._save_app(provider, tenant_id, *handler.app_credentials(payload))
         await self._save_tenant_defaults(tenant_id, payload)
         return await self.get_settings(current_user)
 
     async def connect_url(self, provider: AlertConnectorProvider, request: Request, current_user) -> str:
-        tenant_id = str(getattr(current_user, "tenant_uuid", "") or "")
+        tenant_id = str(getattr(current_user, "tenant_id", "") or "")
         app = await self._configured_app(provider, tenant_id)
         redirect_uri = AlertConnectorHelper.callback_url(request, provider)
         return self._provider(provider).connect_url(app, redirect_uri, self._state(provider.value, tenant_id))

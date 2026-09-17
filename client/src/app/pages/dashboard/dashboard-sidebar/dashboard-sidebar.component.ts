@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, output, ChangeDetectionStrategy } from '@angular/core';
 import { AsyncPipe, NgClass, NgOptimizedImage } from '@angular/common';
-import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
+import { ApiSubCategory, BreachSubCategory, Category, DefacementSubCategory, ExploitSubCategory, FeedSubCategory, SocialSubCategory, SocialIntelSubCategory, TenantSubCategory, ProfileSubCategory } from '../../../shared/constants/pages';
 import { NavigationEnd, Router, RouterLink } from '@angular/router';
 import { filter } from 'rxjs';
 import { DashboardSidebarItemsComponent } from './dashboard-sidebar-items/dashboard-sidebar-items.component';
@@ -45,8 +45,10 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
   leakCategories = Object.values(BreachSubCategory);
   defacementCategories = Object.values(DefacementSubCategory);
   socialCategories = Object.values(SocialSubCategory);
+  socialIntelCategories = Object.values(SocialIntelSubCategory);
   tenantCategories = Object.values(TenantSubCategory);
   category = Category;
+  socialIntelSubCategory = SocialIntelSubCategory;
   readonly menuToggle = output<undefined>();
 
   constructor(protected scrollService: ScrollService, protected dashboardService: DashboardService, protected selectionStore: SelectionStoreService, protected appService: AppService, private router: Router, protected authService: AuthService, protected licenseService: LicenseService) {
@@ -56,7 +58,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     if (this.appService.userSessionData()?.tenant?.isDefault) {
       return 'https://orion-search.readthedocs.io/en/latest/app_docs/introduction_to_platform.html';
     }
-    return '/docs';
+    return '/documentation';
   }
 
   ngOnInit() {
@@ -141,6 +143,9 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
         case Category.FEED:
           firstSubcategory = this.newsCategories[0];
           break;
+        case Category.SOCIAL_INTEL:
+          firstSubcategory = this.socialIntelCategories[0];
+          break;
         case Category.TENANT:
           firstSubcategory = this.tenantCategories[0];
           break;
@@ -224,7 +229,6 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => (this.licenseService.isPrimaryMaintainer() || c !== ProfileSubCategory.TENANT) &&
-        c !== ProfileSubCategory.BACKUP_RESTORE &&
         (this.licenseService.canReviewTakedowns() || c !== ProfileSubCategory.TAKEDOWN) &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&

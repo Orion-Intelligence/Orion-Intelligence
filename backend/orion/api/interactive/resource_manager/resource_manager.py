@@ -62,18 +62,18 @@ class ResourceManager:
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type")
 
-        file_name = f"{current_user.tenant_uuid}.png"
+        file_name = f"{current_user.tenant_id}.png"
         file_path = self.TENANT_DIR / file_name
         with open(file_path, "wb") as f:
             f.write(contents)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "upload_tenant_image"
         )
 
-        return {"image": str(current_user.tenant_uuid)}
+        return {"image": str(current_user.tenant_id)}
 
     async def get_user_image(self, user_id: str):
         default_path = self.USER_DIR / "default.png"
@@ -84,7 +84,7 @@ class ResourceManager:
     def _tenant_id(tenant) -> str | None:
         if tenant is None:
             return None
-        tenant_id = getattr(tenant, "id", None) or getattr(tenant, "tenant_uuid", tenant)
+        tenant_id = getattr(tenant, "id", None) or getattr(tenant, "tenant_id", tenant)
         return str(tenant_id) if tenant_id else None
 
     def get_tenant_system_dir(self, tenant) -> Path | None:
@@ -174,7 +174,7 @@ class ResourceManager:
         return {"user_image": "deleted"}
 
     async def deleteTenantImage(self, current_user):
-        file_name = f"{current_user.tenant_uuid}"
+        file_name = f"{current_user.tenant_id}"
         image_path = self.TENANT_DIR / f"{file_name}.png"
 
         if image_path.is_file():

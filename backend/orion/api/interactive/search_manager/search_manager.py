@@ -446,7 +446,7 @@ class search_manager:
             response.Result = filtered_results
 
         if current_user is not None and response and getattr(response, "Result", None):
-            dismissed_hashes = await self._mark_dismissed_stealer_logs(response.Result, str(current_user.tenant_uuid), DismissedIocType.STEALER_LOG)
+            dismissed_hashes = await self._mark_dismissed_stealer_logs(response.Result, str(current_user.tenant_id), DismissedIocType.STEALER_LOG)
             if getattr(param, "hide_dismissed", True) and dismissed_hashes:
                 response.Result = [item for item in response.Result if not getattr(item, "dismissed", False)]
 

@@ -95,6 +95,84 @@ class _FakeStreamingEngine:
         return SimpleNamespace(name=self.COLLECTION_NAMES[model])
 
 
+def _matches(document, query):
+    for key, expected in (query or {}).items():
+        value = document.get(key)
+        if isinstance(expected, dict):
+            if "$in" in expected and value not in expected["$in"]:
+                return False
+            if "$ne" in expected and value == expected["$ne"]:
+                return False
+        elif value != expected:
+            return False
+    return True
+
+
+class _FakeTenantCollection:
+    def __init__(self, documents=None):
+        self.documents = [dict(document) for document in (documents or [])]
+
+    def find(self, query=None, projection=None, batch_size=None):
+        matched = [dict(document) for document in self.documents if _matches(document, query)]
+        if projection:
+            keys = set(projection) | {"_id"}
+            matched = [{key: value for key, value in document.items() if key in keys} for document in matched]
+        return _FakeCursor(matched)
+
+    async def find_one(self, query=None, projection=None):
+        async for document in self.find(query, projection):
+            return document
+        return None
+
+    async def count_documents(self, query=None):
+        return sum(1 for document in self.documents if _matches(document, query))
+
+    async def delete_many(self, query):
+        kept = [document for document in self.documents if not _matches(document, query)]
+        removed = len(self.documents) - len(kept)
+        self.documents = kept
+        return SimpleNamespace(deleted_count=removed)
+
+    async def insert_many(self, documents, ordered=True):
+        for document in documents:
+            if any(existing.get("_id") == document.get("_id") for existing in self.documents):
+                raise RuntimeError(f"duplicate key error on _id {document.get('_id')}")
+            self.documents.append(dict(document))
+
+    async def replace_one(self, query, replacement, upsert=False):
+        for index, document in enumerate(self.documents):
+            if _matches(document, query):
+                self.documents[index] = dict(replacement)
+                return SimpleNamespace(modified_count=1)
+        if upsert:
+            self.documents.append(dict(replacement))
+        return SimpleNamespace(modified_count=0)
+
+    async def drop(self):
+        self.documents = []
+
+
+class _FakeTenantDatabase:
+    def __init__(self, collections):
+        self.collections = collections
+
+    def __getitem__(self, name):
+        return self.collections.setdefault(name, _FakeTenantCollection())
+
+    async def list_collection_names(self):
+        return list(self.collections.keys())
+
+
+class _FakeTenantEngine:
+    COLLECTION_NAMES = {db_backup_model: "db_backup_model", db_backup_job_model: "backup_jobs"}
+
+    def __init__(self, collections):
+        self.database = _FakeTenantDatabase(collections)
+
+    def get_collection(self, model):
+        return SimpleNamespace(name=self.COLLECTION_NAMES[model])
+
+
 class _FakeIndices:
     def __init__(self, definitions):
         self.definitions = dict(definitions)

@@ -108,7 +108,6 @@ export class TenantComponent implements OnInit {
               country: res.tenant.country ?? state.tenant.country,
               city: res.tenant.city ?? state.tenant.city,
               postalCode: res.tenant.postal_code ?? state.tenant.postalCode,
-              quotaExceeded: res.tenant.quotaExceeded ?? state.tenant.quotaExceeded,
               profileVisibilityEnabled: res.tenant.profile_visibility_enabled ?? state.tenant.profileVisibilityEnabled,
               eventManagementEnabled: res.tenant.event_management_enabled ?? state.tenant.eventManagementEnabled,
               alertsVisibleToAdmin: res.tenant.alerts_visible_to_admin ?? state.tenant.alertsVisibleToAdmin,

@@ -1,4 +1,5 @@
-import { NgClass } from '@angular/common';
+import { A11yModule } from '@angular/cdk/a11y';
+import { DecimalPipe, NgClass } from '@angular/common';
 import { ChangeDetectorRef, Component, NgZone, OnInit, ViewRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -18,14 +19,14 @@ export type { DkimLookupResponse, DkimSelectorEntry, DkimValidation } from './mo
 @Component({
   selector: 'app-dkim-lookup',
   standalone: true,
-  imports: [FormsModule, NgClass, TranslatePipe, EmptyQueryComponent, ExportChoiceModalComponent, TooltipDirective],
-  styleUrls: ['./dkim-lookup.component.css'],
+  imports: [A11yModule, FormsModule, NgClass, DecimalPipe, TranslatePipe, EmptyQueryComponent, ExportChoiceModalComponent, TooltipDirective],
+  host: { class: 'block min-w-0' },
   templateUrl: './dkim-lookup.component.html'
 })
 export class DkimLookupComponent implements OnInit {
+  activeTab: 'domain' | 'raw' = 'domain';
   domain = '';
-  manualSelector = '';
-  initialSelector = '';
+  selector = '';
   loading = false;
   queryTriggered = false;
   discoveryError = '';
@@ -37,6 +38,11 @@ export class DkimLookupComponent implements OnInit {
   domainInfo: DkimDomainInfo | null = null;
   isExportChoiceOpen = false;
   readonly reportExportOptions = DASHBOARD_API_EXPORT_OPTIONS;
+  rawEmailText = '';
+  rawLoading = false;
+  rawResult: any = null;
+  rawErrorMessage = '';
+  showRawHelp = false;
 
   constructor(private api: ApiService, private route: ActivatedRoute, private router: Router, private reportExport: ReportExportService, private zone: NgZone, private cdr: ChangeDetectorRef) {}
 
@@ -44,12 +50,22 @@ export class DkimLookupComponent implements OnInit {
     const q = this.route.snapshot.queryParamMap.get('q')?.trim();
     const s = this.route.snapshot.queryParamMap.get('s')?.trim();
     if (s) {
-      this.initialSelector = s;
+      this.selector = s;
     }
     if (q) {
       this.domain = q;
       this.searchDomain(null);
     }
+  }
+
+  switchTab(tab: 'domain' | 'raw'): void {
+    this.activeTab = tab;
+    this.discoveryError = '';
+    this.rawErrorMessage = '';
+  }
+
+  statusTone(status?: string): 'neutral' | 'negative' {
+    return status && /fail|invalid|error|no .* record/i.test(status) ? 'negative' : 'neutral';
   }
 
   pct(value: number): number {
@@ -119,7 +135,7 @@ export class DkimLookupComponent implements OnInit {
     if (!value) {
       return;
     }
-    const selector = this.initialSelector.trim();
+    const selector = this.selector.trim();
 
     this.router.navigate([], {
       relativeTo: this.route,
@@ -132,7 +148,6 @@ export class DkimLookupComponent implements OnInit {
     this.discoveryError = '';
     this.needsSelector = false;
     this.noSelectorMessage = '';
-    this.manualSelector = '';
     this.domainInfo = null;
     this.progress = 5;
     this.currentStep = 'Discovering selectors...';
@@ -159,24 +174,6 @@ export class DkimLookupComponent implements OnInit {
     });
   }
 
-  addSelector(event: Event | null): void {
-    if (event) {
-      event.preventDefault();
-    }
-    const selector = this.manualSelector.trim();
-    const domain = this.domain.trim();
-    if (!selector || !domain) {
-      return;
-    }
-    if (this.selectors.some(entry => entry.selector.toLowerCase() === selector.toLowerCase())) {
-      this.manualSelector = '';
-      return;
-    }
-    this.selectors = [...this.selectors, this.newEntry(selector)];
-    this.manualSelector = '';
-    this.validateSelector(domain, selector);
-  }
-
   openExportChoice(): void {
     this.isExportChoiceOpen = true;
   }
@@ -196,24 +193,81 @@ export class DkimLookupComponent implements OnInit {
     return !!this.domainInfo || this.selectors.some(entry => !!entry.validation);
   }
 
+  analyzeRawEmail(event: Event | null): void {
+    if (event) {
+      event.preventDefault();
+    }
+    if (this.rawLoading) {
+      return;
+    }
+    const raw = this.rawEmailText.trim();
+    if (!raw) {
+      this.rawErrorMessage = 'Please paste raw email headers/content.';
+      return;
+    }
+    this.rawLoading = true;
+    this.rawResult = null;
+    this.rawErrorMessage = '';
+    this.runRawJob(raw).pipe(finalize(() => {
+      this.rawLoading = false;
+    })).subscribe({
+      next: res => {
+        if (this.isPending(res)) {
+          return;
+        }
+        const data = res?.result ?? res;
+        this.rawResult = data?.data ?? data?.result ?? data;
+        if (!this.rawResult || (!this.rawResult.dkim && !this.rawResult.spf && !this.rawResult.dmarc)) {
+          this.rawErrorMessage = this.rawResult?.error_message ?? 'Failed to parse raw email forensics data.';
+          this.rawResult = null;
+        }
+      },
+      error: err => {
+        this.rawErrorMessage = this.readError(err);
+      }
+    });
+  }
+
+  private runRawJob(rawEmail: string): Observable<any> {
+    const payload = { text: { raw_email: rawEmail } };
+    const scanReq = () => this.api.post<any>('dkim/check', payload);
+    return scanReq().pipe(expand(res => (this.isPending(res) ? timer(3000).pipe(switchMap(() => scanReq())) : EMPTY)), takeWhile(res => this.isPending(res), true), source => new Observable<any>(subscriber => source.subscribe({
+      next: value => {
+        this.zone.run(() => {
+          subscriber.next(value); this.render();
+        });
+      },
+      error: err => {
+        this.zone.run(() => {
+          subscriber.error(err); this.render();
+        });
+      },
+      complete: () => {
+        this.zone.run(() => {
+          subscriber.complete(); this.render();
+        });
+      }
+    })));
+  }
+
   private runJob(domain: string, selector: string): Observable<DkimLookupResponse> {
     const payload = { text: { domain, selector } };
     const scanReq = () => this.api.post<DkimLookupResponse>('dkim/check', payload);
     return scanReq().pipe(expand(res => (this.isPending(res) ? timer(3000).pipe(switchMap(() => scanReq())) : EMPTY)), takeWhile(res => this.isPending(res), true), source => new Observable<DkimLookupResponse>(subscriber => source.subscribe({
       next: value => {
         this.zone.run(() => {
-          subscriber.next(value); this.render(); 
-        }); 
+          subscriber.next(value); this.render();
+        });
       },
       error: err => {
         this.zone.run(() => {
-          subscriber.error(err); this.render(); 
-        }); 
+          subscriber.error(err); this.render();
+        });
       },
       complete: () => {
         this.zone.run(() => {
-          subscriber.complete(); this.render(); 
-        }); 
+          subscriber.complete(); this.render();
+        });
       }
     })));
   }

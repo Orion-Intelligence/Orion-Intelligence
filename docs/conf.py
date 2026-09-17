@@ -17,6 +17,7 @@ html_theme = "shibuya"
 exclude_patterns = [
     "api_docs/**",
     "public_index.md",
+    "llm_rules.md",
 ]
 
 if public_build:
@@ -36,6 +37,8 @@ myst_enable_extensions = [
 myst_heading_anchors = 3
 
 html_static_path = ["_static"]
+html_copy_source = False
+html_show_sourcelink = False
 
 html_theme_options = {
     "color_mode": "dark",

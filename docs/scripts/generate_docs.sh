@@ -7,6 +7,7 @@ DOCS_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 REPO_ROOT="$(cd "$DOCS_DIR/.." && pwd)"
 CLIENT_DIR="$REPO_ROOT/client"
 TARGET_DIR="$DOCS_DIR/screenshots"
+NEUTRAL_TARGET_DIR="$DOCS_DIR/screenshots-neutral"
 STAGING_DIR=""
 clear_requested=false
 
@@ -90,6 +91,13 @@ if [ "$copied" -eq 0 ]; then
     exit 1
 fi
 
+NEUTRAL_STAGING_DIR="$(mktemp -d /tmp/orion-docs-neutral.XXXXXX)"
+neutral_copied=0
+while IFS= read -r -d '' screenshot_path; do
+    cp "$screenshot_path" "$NEUTRAL_STAGING_DIR"/
+    neutral_copied=$((neutral_copied + 1))
+done < <(find "$TARGET_DIR" -path "*/user-manual-neutral/*" -type f \( -name '*.png' -o -name '*.jpg' -o -name '*.jpeg' -o -name '*.webp' \) -print0)
+
 (
     cd "$STAGING_DIR" || exit 1
     for f in *.png; do
@@ -107,5 +115,25 @@ else
     find "$TARGET_DIR" -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
 fi
 cp "$STAGING_DIR"/*-20260326.png "$TARGET_DIR"/
+
+if [ "$neutral_copied" -gt 0 ]; then
+    (
+        cd "$NEUTRAL_STAGING_DIR" || exit 1
+        for f in *.png; do
+            [ -e "$f" ] || continue
+            cp "$f" "${f%.png}-20260326.png"
+        done
+        ORION_DOCS_NEUTRAL=1 "$postprocess_python" "$SCRIPT_DIR/postprocess_screenshots.py" ./*-20260326.png
+        find . -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
+    )
+    mkdir -p "$NEUTRAL_TARGET_DIR"
+    rm -f "$NEUTRAL_TARGET_DIR"/*-20260326.png
+    find "$NEUTRAL_TARGET_DIR" -maxdepth 1 -type f -name '*.png' ! -name '*-20260326.png' -delete
+    cp "$NEUTRAL_STAGING_DIR"/*-20260326.png "$NEUTRAL_TARGET_DIR"/
+else
+    echo "No neutral docs screenshots were produced."
+fi
+rm -rf "$NEUTRAL_STAGING_DIR"
+
 trap - EXIT
 cleanup

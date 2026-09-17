@@ -113,7 +113,7 @@ class FeederManager:
                 self._helper.validate_rule_value(url, rule)
             await self._helper.replace_rule_values(rule_key, urls, current_user)
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid),
+                str(current_user.tenant_id),
                 str(current_user.id),
                 "feeder_rule_values_updated",
             )
@@ -188,7 +188,7 @@ class FeederManager:
         record = await self._helper.get_script_record(script_id, current_user)
         await self._delete_record_file_and_row(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_script_deleted",
         )
@@ -214,7 +214,7 @@ class FeederManager:
             await self._engine.delete(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_rule_value_deleted",
         )
@@ -232,7 +232,7 @@ class FeederManager:
             await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_rule_value_deleted",
         )
@@ -247,7 +247,7 @@ class FeederManager:
             await self._delete_record_file_and_row(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_rule_cleared",
         )
@@ -269,7 +269,7 @@ class FeederManager:
             await self._engine.save(record)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_rule_status_changed",
         )
@@ -285,7 +285,7 @@ class FeederManager:
         record.feeder.index_status = not bool(record.feeder.index_status)
         await self._engine.save(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_script_status_changed",
         )
@@ -358,7 +358,7 @@ class FeederManager:
         record.feeder.author_name = user.username
         await self._engine.save(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "feeder_script_owner_changed",
         )

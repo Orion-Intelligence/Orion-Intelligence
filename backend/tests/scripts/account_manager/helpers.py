@@ -33,7 +33,7 @@ def _make_user(**overrides):
         "password": "hashed-password",
         "role": user_role.ANALYST,
         "status": UserStatus.ACTIVE,
-        "tenant_uuid": "507f1f77bcf86cd799439012",
+        "tenant_id": "507f1f77bcf86cd799439012",
         "subscription": True,
         "licenses": [LicenseName.FREE],
         "preferences": {"theme": "light-theme", "profile_visible": True},

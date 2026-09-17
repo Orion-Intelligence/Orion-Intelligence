@@ -24,7 +24,7 @@ class CaseHelperMethods:
         record = await engine.find_one(
             db_case_model,
             (db_case_model.caseId == case_id)
-            & (db_case_model.tenant_uuid == str(current_user.tenant_uuid)),
+            & (db_case_model.tenant_id == str(current_user.tenant_id)),
         )
         if not record:
             raise HTTPException(status_code=404, detail="Case not found")
@@ -103,7 +103,7 @@ class CaseHelperMethods:
 
     @staticmethod
     async def get_case_cipher(current_user) -> Fernet:
-        return await CaseHelperMethods.get_case_cipher_by_tenant_id(str(current_user.tenant_uuid))
+        return await CaseHelperMethods.get_case_cipher_by_tenant_id(str(current_user.tenant_id))
 
     @staticmethod
     def encrypt_value(enc: Fernet, value: str) -> str:
@@ -225,7 +225,7 @@ class CaseHelperMethods:
         if isinstance(value, dict):
             ignored_keys = {
                 "id",
-                "tenant_uuid",
+                "tenant_id",
                 "caseId",
                 "statusReasons",
                 "comments",

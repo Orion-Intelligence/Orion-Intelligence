@@ -18,7 +18,7 @@ def make_user(**overrides):
         status=UserStatus.ACTIVE,
         twofa_enabled=False,
         twofa_secret=None,
-        tenant_uuid=VALID_OID,
+        tenant_id=VALID_OID,
         role=user_role.MEMBER,
         subscription=True,
         account_verify_at=datetime.now(timezone.utc),
@@ -70,7 +70,7 @@ class FakeSessionInstance:
         self.access_tokens.append((data, expires_delta, free))
         return "access-token", "member"
 
-    async def has_onboarding(self, tenant_uuid):
+    async def has_onboarding(self, tenant_id):
         return self.onboarding
 
     async def get_parent_tenant(self, tenant_uuid):
@@ -98,13 +98,13 @@ class FakeSessionManager:
         return FakeSessionManager._instance
 
     @staticmethod
-    def ensure_user_tenant_access(user, tenant_or_id):
+    def ensure_user_tenant_access(user, tenant_id):
         if FakeSessionManager.ensure_error is not None:
             raise FakeSessionManager.ensure_error
 
     @staticmethod
-    def tenant_identifier(tenant_or_id):
-        return tenant_or_id
+    def tenant_identifier(tenant_id):
+        return tenant_id
 
     @staticmethod
     def issue_password_reset_token(user, reset_twofa=False):

@@ -85,15 +85,12 @@ export const httpInterceptor: HttpInterceptorFn = (req: HttpRequest<unknown>, ne
     if (error instanceof HttpErrorResponse && error.status === 503 && !authReq.url.includes('admin/backups/status')) {
       const errorBody = error.error && typeof error.error === 'object' ? error.error as Record<string, unknown> : null;
       const detail = String(errorBody?.detail ?? '');
-      if (WARMING_UP_DETAILS.has(detail)) {
-        setWarmingUp(true);
-        return throwError(() => error);
-      }
       const isGatewayMaintenance = !detail || (error.headers?.get('content-type') ?? '').includes('text/html');
-      if (isGatewayMaintenance) {
+      if (isGatewayMaintenance || WARMING_UP_DETAILS.has(detail)) {
+        setWarmingUp(WARMING_UP_DETAILS.has(detail));
         if (!maintenancePageLoading) {
           maintenancePageLoading = true;
-          window.location.reload();
+          window.location.assign('/static/maintenance.html');
         }
         return throwError(() => error);
       }

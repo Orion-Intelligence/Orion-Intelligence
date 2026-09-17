@@ -10,7 +10,6 @@ import { supportsFileUploadForRuleType, supportsValueUploadForRuleType } from '.
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
-import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../social-cti/constants/social-platform.constants';
 
 @Component({
   selector: 'app-sidebar-user-feeder',
@@ -22,7 +21,6 @@ import { VERIFIED_SOCIAL_PLATFORM_KEYS } from '../../social-cti/constants/social
 })
 export class SidebarUserFeederComponent implements OnInit {
   private readonly socialRuleGroupKey = '__social_media__';
-  private readonly supportedSocialRuleKeys = new Set<string>(VERIFIED_SOCIAL_PLATFORM_KEYS);
 
   activeTab: 'add' | 'view' | 'values' = 'add';
   highlightedScript: FeederScriptItem | null = null;
@@ -56,7 +54,7 @@ export class SidebarUserFeederComponent implements OnInit {
   }
 
   get socialRules(): FeederRuleOption[] {
-    return this.rules.filter(rule => this.isSupportedSocialRule(rule));
+    return this.rules.filter(rule => this.isSocialRule(rule));
   }
 
   get ruleDropdownOptions(): UiDropdownOption[] {
@@ -192,16 +190,12 @@ export class SidebarUserFeederComponent implements OnInit {
     return (rule.path ?? '').toLowerCase() === 'social/platform';
   }
 
-  private isSupportedSocialRule(rule: FeederRuleOption): boolean {
-    return this.isSocialRule(rule) && this.supportedSocialRuleKeys.has((rule.key || '').toLowerCase());
-  }
-
   private syncSocialRuleSelectionFromSelectedRule(): void {
     const selectedSocialRule = this.rules.find(rule => rule.key === this.selectedRuleKey && this.isSocialRule(rule));
     if (!selectedSocialRule) {
       return;
     }
-    this.selectedSocialRuleKey = this.isSupportedSocialRule(selectedSocialRule) ? selectedSocialRule.key : (this.socialRules[0]?.key || '');
+    this.selectedSocialRuleKey = selectedSocialRule.key;
     this.selectedRuleKey = this.socialRuleGroupKey;
   }
 

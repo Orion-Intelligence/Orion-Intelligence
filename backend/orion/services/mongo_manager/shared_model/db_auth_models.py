@@ -47,7 +47,7 @@ class db_user_account(Model):
     role: user_role = Field(default=user_role.MEMBER)
     status: Optional[UserStatus] = Field(default=None)
 
-    tenant_uuid: str = Field(default="")
+    tenant_id: str = Field(default="")
     verification_token: Optional[str] = Field(default=None)
     verification_expiry: Optional[datetime] = Field(default=None)
     password_reset_token: Optional[str] = Field(default=None)

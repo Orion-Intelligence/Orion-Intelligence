@@ -314,13 +314,14 @@ export default defineConfig({
                 table(_) {
                     return null;
                 },
-                writeDocScreenshot({ data, name, specName }) {
+                writeDocScreenshot({ data, name, specName, variant }) {
                     const screenshotsFolder =
                         typeof config.screenshotsFolder === "string" ? config.screenshotsFolder : "cypress/error";
                     const screenshotRoot = path.resolve(config.projectRoot, screenshotsFolder);
                     const safeSpecName = String(specName || "unknown-spec").replace(/[\\/]/g, "_");
                     const safeName = String(name || "screenshot").replace(/\\/g, "/").replace(/^\/+/, "");
-                    const targetPath = path.resolve(screenshotRoot, safeSpecName, "user-manual", `${safeName}.png`);
+                    const safeVariant = variant === "user-manual-neutral" ? "user-manual-neutral" : "user-manual";
+                    const targetPath = path.resolve(screenshotRoot, safeSpecName, safeVariant, `${safeName}.png`);
 
                     if (!targetPath.startsWith(`${screenshotRoot}${path.sep}`)) {
                         throw new Error(`Refusing to write docs screenshot outside screenshots folder: ${targetPath}`);

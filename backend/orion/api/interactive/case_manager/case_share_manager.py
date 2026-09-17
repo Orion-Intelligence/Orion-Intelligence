@@ -44,7 +44,7 @@ class CaseShareManager:
                 "shareId": share_id,
                 "jti": token_id,
                 "caseId": record.caseId,
-                "tenant_uuid": record.tenant_uuid,
+                "tenant_id": record.tenant_id,
                 "exp": expires_at.timestamp(),
             },
             CONSTANTS.S_AUTH_SECRET_KEY,
@@ -59,7 +59,7 @@ class CaseShareManager:
         ))
         await self._engine.save(record)
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             f"Case share created: caseId={case_id}, shareId={share_id}",
         )
@@ -104,7 +104,7 @@ class CaseShareManager:
         record = await self._engine.find_one(
             db_case_model,
             (db_case_model.caseId == payload.get("caseId"))
-            & (db_case_model.tenant_uuid == payload.get("tenant_uuid")),
+            & (db_case_model.tenant_id == payload.get("tenant_id")),
         )
         if not record:
             raise HTTPException(status_code=404, detail="Share link not found")
@@ -113,14 +113,14 @@ class CaseShareManager:
             raise HTTPException(status_code=404, detail="Share link not found")
         if share.tokenHash != CaseHelperMethods.hash_share_token(token):
             raise HTTPException(status_code=404, detail="Share link not found")
-        if payload.get("caseId") != record.caseId or payload.get("tenant_uuid") != record.tenant_uuid:
+        if payload.get("caseId") != record.caseId or payload.get("tenant_id") != record.tenant_id:
             raise HTTPException(status_code=401, detail="Invalid share token")
         if share.revokedAt is not None:
             raise HTTPException(status_code=403, detail="Share link has been revoked")
         if CaseHelperMethods.as_aware_utc(share.expiresAt) < utc_now():
             raise HTTPException(status_code=401, detail="Share link has expired")
 
-        enc = await CaseHelperMethods.get_case_cipher_by_tenant_id(record.tenant_uuid)
+        enc = await CaseHelperMethods.get_case_cipher_by_tenant_id(record.tenant_id)
         CaseHelperMethods.apply_sensitive_case_values(record, lambda value: CaseHelperMethods.decrypt_value(enc, value))
 
         artifacts = record.artifacts or []

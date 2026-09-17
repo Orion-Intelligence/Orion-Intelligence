@@ -45,9 +45,9 @@ async def test_logout_disconnects_extension_sockets_before_invalidating_session(
     response = await auth_routes.logout(_logout_request("web-token", tenant))
 
     assert events == [
-        ("resolve", "web-token", tenant),
+        ("resolve", "web-token", str(tenant.id)),
         ("disconnect", "user-42"),
-        ("invalidate", "web-token", tenant),
+        ("invalidate", "web-token", str(tenant.id)),
     ]
     assert response.status_code == 200
     assert response.body == b'{"detail":"Logged out"}'

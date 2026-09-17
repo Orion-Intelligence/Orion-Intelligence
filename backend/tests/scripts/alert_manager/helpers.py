@@ -26,8 +26,8 @@ def _make_manager(engine=None, redis=None):
     return manager
 
 
-def _user(tenant_uuid="507f1f77bcf86cd799439011", email="user@example.com", username="user", **extra):
-    return SimpleNamespace(tenant_uuid=tenant_uuid, email=email, username=username, **extra)
+def _user(tenant_id="507f1f77bcf86cd799439011", email="user@example.com", username="user", **extra):
+    return SimpleNamespace(tenant_id=tenant_id, email=email, username=username, **extra)
 
 
 def _set_env(monkeypatch, mapping):

@@ -57,10 +57,10 @@ class AccountManager:
 
     async def get_all_users(self, current_user) -> List[user_param_model]:
         if current_user.role == "admin" or LicenseName.MAINTAINER in (current_user.licenses or []):
-            tenant_uuid = current_user.tenant_uuid
+            tenant_id = current_user.tenant_id
             users = await self._engine.find(
                 db_user_account,
-                (db_user_account.tenant_uuid == tenant_uuid) & (db_user_account.role != user_role.CRAWLER))
+                (db_user_account.tenant_id == tenant_id) & (db_user_account.role != user_role.CRAWLER))
             return [user_param_model(**u.dict()) for u in users]
         return []
 
@@ -87,12 +87,12 @@ class AccountManager:
         if target_role not in (user_role.ADMIN, user_role.ANALYST):
             raise HTTPException(status_code=403, detail="Monitoring permission is limited to analyst users")
 
-    async def _assert_orion_mail_allowed(self, permissions, tenant_uuid, current_user):
+    async def _assert_orion_mail_allowed(self, permissions, tenant_id, current_user):
         if UserPermission.ORION_MAIL not in (permissions or []):
             return
         if current_user.role != user_role.ADMIN:
             raise HTTPException(status_code=403, detail="Only a root tenant admin can assign the Orion Mail permission")
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_uuid)))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(str(tenant_id)))
         if tenant is None or not tenant.is_default:
             raise HTTPException(status_code=403, detail="Orion Mail permission is limited to root tenant users")
 
@@ -148,11 +148,11 @@ class AccountManager:
             hashed_password = self.create_tenant_user(existing_user, existing_mail, password)
 
             self._assert_monitoring_allowed(data.permissions, current_user, data.role)
-            await self._assert_orion_mail_allowed(data.permissions, current_user.tenant_uuid, current_user)
+            await self._assert_orion_mail_allowed(data.permissions, current_user.tenant_id, current_user)
 
             from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
-            tenant_uuid = str(current_user.tenant_uuid)
-            tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_uuid)) if ObjectId.is_valid(tenant_uuid) else None
+            tenant_id = str(current_user.tenant_id)
+            tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
             if tenant is not None:
                 await TenantManager.get_instance().assert_user_quota_available(tenant)
 
@@ -162,7 +162,7 @@ class AccountManager:
                 username=username,
                 email=email,
                 password=hashed_password,
-                tenant_uuid=current_user.tenant_uuid,
+                tenant_id=current_user.tenant_id,
                 role=data.role,
                 status=data.status,
                 subscription=data.subscription,
@@ -190,7 +190,7 @@ class AccountManager:
             raise HTTPException(status_code=401, detail="This user type cannot be deleted")
 
         if current_user.licenses.__contains__(LicenseName.MAINTAINER):
-            if user.tenant_uuid != current_user.tenant_uuid:
+            if user.tenant_id != current_user.tenant_id:
                 raise HTTPException(
                     status_code=401, detail="Maintainer can only delete non-maintainer users from the same tenant")
         else:
@@ -198,7 +198,7 @@ class AccountManager:
 
         await self._delete_orion_mail_account(user)
 
-        await self._engine.remove(db_keys, db_keys.auth_id == str(user.id))
+        await self._engine.remove(db_keys, db_keys.tenant_id == str(user.id))
 
         image_path = self.IMAGE_DIR / f"{user.id}.enc"
         if image_path.exists():
@@ -206,7 +206,7 @@ class AccountManager:
 
         await self._engine.delete(user)
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(current_user.id), "User deleted")
+            str(user.tenant_id), str(current_user.id), "User deleted")
 
         return {"message": "User deleted successfully"}
 
@@ -215,30 +215,30 @@ class AccountManager:
         user = await self._engine.find_one(db_user_account, db_user_account.username == request.username)
         if not user:
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid), str(current_user.id), "User update failed")
+                str(current_user.tenant_id), str(current_user.id), "User update failed")
             raise HTTPException(status_code=401, detail="User not found")
 
-        if current_user.licenses.__contains__(LicenseName.MAINTAINER) and str(user.tenant_uuid) == str(
-                current_user.tenant_uuid):
+        if current_user.licenses.__contains__(LicenseName.MAINTAINER) and str(user.tenant_id) == str(
+                current_user.tenant_id):
             pass
         else:
             await AuditLogManager.get_instance().register(
-                str(current_user.tenant_uuid), str(current_user.id), "User update denied")
+                str(current_user.tenant_id), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="You are not allowed to update this user")
 
         if user.role in ["demo"] and current_user.role not in ["admin"]:
             await AuditLogManager.get_instance().register(
-                str(user.tenant_uuid), str(current_user.id), "User update denied")
+                str(user.tenant_id), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="You are not allowed to manage this user")
 
         if user.role in ["admin", "crawl"]:
             await AuditLogManager.get_instance().register(
-                str(user.tenant_uuid), str(current_user.id), "User update denied")
+                str(user.tenant_id), str(current_user.id), "User update denied")
             raise HTTPException(status_code=401, detail="This user type cannot be updated")
 
         tenant: db_tenant_model | None = None
         if request.licenses is not None or (user.status == UserStatus.DISABLE and request.status == UserStatus.ACTIVE):
-            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+            tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
 
         if request.status == UserStatus.DISABLE:
             user.status = UserStatus.DISABLE
@@ -264,7 +264,7 @@ class AccountManager:
             user.licenses = request.licenses
         if request.permissions is not None:
             self._assert_monitoring_allowed(request.permissions, current_user, user.role)
-            await self._assert_orion_mail_allowed(request.permissions, user.tenant_uuid, current_user)
+            await self._assert_orion_mail_allowed(request.permissions, user.tenant_id, current_user)
             user.permissions = request.permissions
             if UserPermission.CASE_MANAGEMENT not in (user.permissions or []):
                 user.alerts_allowed_all = False
@@ -282,7 +282,7 @@ class AccountManager:
                 alerts_allowed_all=bool(request.alerts_allowed_all),
                 alerts_allowed_tenant_ids=list(request.alerts_allowed_tenant_ids or []),
             )
-            user_tenant = tenant or await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+            user_tenant = tenant or await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
             user.alerts_allowed_all, user.alerts_allowed_tenant_ids = await TenantManager.get_instance().validate_alert_access_assignment(alert_request, current_user, user_tenant)
         elif alert_fields_requested and alert_access_requested and current_user.role != user_role.ADMIN:
             raise HTTPException(status_code=403, detail="Only admin can assign alert access")
@@ -295,7 +295,7 @@ class AccountManager:
         await self._engine.save(user)
 
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(current_user.id), "User updated")
+            str(user.tenant_id), str(current_user.id), "User updated")
 
         return {"message": "User updated successfully", "id": str(user.id)}
 
@@ -331,7 +331,7 @@ class AccountManager:
 
         await self._engine.save(user)
         await AuditLogManager.get_instance().register(
-            str(user.tenant_uuid), str(user.id), "Password updated" if request.password is not None else "Self profile updated")
+            str(user.tenant_id), str(user.id), "Password updated" if request.password is not None else "Self profile updated")
 
         return {"message": "User updated successfully"}
 
@@ -369,8 +369,8 @@ class AccountManager:
     async def get_node(self, current_user) -> NodeCallbackModel:
         from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
         user = current_user
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
-        tenant_id = str(user.tenant_uuid)
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
+        tenant_id = str(user.tenant_id)
 
         assigned_quota = tenant.user_quota
         dek_task = KeyManager.get_instance().get_or_create_dek(str(tenant.id))
@@ -432,7 +432,7 @@ class AccountManager:
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if current_user.role != user_role.ADMIN and str(user.tenant_uuid) != str(current_user.tenant_uuid):
+        if current_user.role != user_role.ADMIN and str(user.tenant_id) != str(current_user.tenant_id):
             raise HTTPException(status_code=403, detail="You are not allowed to access this user")
 
         preferences = user.preferences if isinstance(user.preferences, dict) else {}
@@ -443,7 +443,7 @@ class AccountManager:
             }
 
         tenant_name = ""
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
         if tenant and str(getattr(current_user, "id", "")) != user_id and getattr(tenant, "profile_visibility_enabled", True) is False:
             return {
                 "hidden": True,

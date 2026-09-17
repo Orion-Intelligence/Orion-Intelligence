@@ -73,7 +73,7 @@ def test_get_current_user_allows_crawler_without_session_checks():
 
 
 def test_get_current_user_rejects_token_for_other_tenant():
-    user = _make_user(tenant_uuid="tenant-a")
+    user = _make_user(tenant_id="tenant-a")
     manager = _make_manager(user=user)
 
     with pytest.raises(HTTPException) as exc:
@@ -84,7 +84,7 @@ def test_get_current_user_rejects_token_for_other_tenant():
 
 
 def test_auth_login_rejects_user_on_wrong_tenant_url(monkeypatch):
-    user = _make_user(tenant_uuid="tenant-a")
+    user = _make_user(tenant_id="tenant-a")
 
     class _FakeAuthManager:
         @staticmethod
@@ -164,7 +164,7 @@ def test_delete_tenant_removes_users_and_keys():
 
 @pytest.mark.parametrize("action", ["forgot", "update"])
 def test_password_recovery_handles_the_wrong_tenant(monkeypatch, action):
-    user = _make_user(tenant_uuid="tenant-a", email="alice@example.com")
+    user = _make_user(tenant_id="tenant-a", email="alice@example.com")
     engine = FakeEngine(user)
     monkeypatch.setattr(
         "orion.api.interactive.auth_manager.auth_manager.mongo_controller.get_instance",
