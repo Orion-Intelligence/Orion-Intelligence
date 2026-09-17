@@ -92,7 +92,7 @@ async def extension_login(request: Request, response: Response = None, username:
             tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)),
         )
 
-    result = await auth_rate_limit(redis_store, username, authenticate_and_login)
+    result = await auth_rate_limit(redis_store, username, authenticate_and_login, request)
     access_token = result.get("access_token")
 
     if result.get("twofa_required"):
