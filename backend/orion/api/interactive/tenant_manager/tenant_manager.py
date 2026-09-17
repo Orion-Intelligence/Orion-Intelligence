@@ -16,7 +16,9 @@ from odmantic.query import in_
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.models.user_model import user_model
 from orion.helper_manager.helper_controller import helper_controller
+from orion.services.mongo_manager.shared_model.db_alert_connector_model import db_alert_connector_model
 from orion.services.mongo_manager.shared_model.db_alert_model import db_alert_model, visible_alerts
+from orion.services.mongo_manager.shared_model.db_chat_share_model import db_chat_share_model
 from orion.services.mongo_manager.shared_model.db_keys import db_keys
 from orion.services.mongo_manager.shared_model.db_system_settings import AllowedKeys, db_system_model
 from orion.services.mongo_manager.shared_model.db_tenant_model import (IocCategory, TenantRequest, TenantStatus, DismissedIocType, db_tenant_model, normalize_tenant_slug)
@@ -35,6 +37,7 @@ class TenantManager:
     SIGNUP_USERNAME_PATTERN = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
     TENANT_USERNAME_PATTERN = r"^[A-Za-z0-9_-]{4,20}$"
     EMAIL_PATTERN = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    TENANT_SCOPED_MODELS = (db_user_account, db_keys, db_system_model, db_alert_connector_model, db_chat_share_model)
     PRIMARY_USER_QUOTA = 15
     PRIMARY_TENANT_QUOTA = 5
 
@@ -854,9 +857,8 @@ class TenantManager:
             db_user_account, db_user_account.tenant_id == tenant_id)
         for user in users:
             await self._engine.remove(db_keys, db_keys.tenant_id == str(user.id))
-        await self._engine.remove(
-            db_user_account, db_user_account.tenant_id == tenant_id)
-        await self._engine.remove(db_keys, db_keys.tenant_id == tenant_id)
+        for model in self.TENANT_SCOPED_MODELS:
+            await self._engine.remove(model, model.tenant_id == tenant_id)
         await self._engine.delete(tenant)
 
     async def dismiss_stealer_log(self, tenant_id: str, stealer_log_hash: str, user_id: str, dismissed_ioc_type: DismissedIocType = DismissedIocType.STEALER_LOG, all_tenants: bool = False) -> dict:

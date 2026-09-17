@@ -567,7 +567,8 @@ def test_delete_tenant_success():
     manager = _make_manager(engine)
     result = _run(manager.delete_tenant(str(tenant.id), SimpleNamespace(role=user_role.ADMIN)))
     assert result == {"message": "Tenant deleted successfully"}
-    assert len(engine.removed) == 4
+    assert len(engine.removed) == len(users) + len(TenantManager.TENANT_SCOPED_MODELS)
+    assert {model for (model, _), _ in engine.removed} >= set(TenantManager.TENANT_SCOPED_MODELS)
     assert engine.deleted == [tenant]
 
 

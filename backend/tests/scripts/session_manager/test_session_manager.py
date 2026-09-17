@@ -158,7 +158,7 @@ def test_delete_tenant_removes_users_and_keys():
     result = _run(manager.delete_tenant(tenant_id, SimpleNamespace(role=user_role.ADMIN)))
 
     assert result == {"message": "Tenant deleted successfully"}
-    assert len(manager._engine.removed) == 4
+    assert len(manager._engine.removed) == len(users) + len(TenantManager.TENANT_SCOPED_MODELS)
     assert manager._engine.deleted == [tenant]
 
 
