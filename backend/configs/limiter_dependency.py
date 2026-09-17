@@ -28,14 +28,24 @@ async def limiter_dependency():
         queue.task_done()
 
 
-async def auth_rate_limit(redis_store: redis_controller, subject: str, login_call):
-    subject_hash = hashlib.sha256(subject.lower().encode()).hexdigest()
+def client_ip(request) -> str:
+    forwarded_for = (request.headers.get("x-forwarded-for", "") if request is not None else "")
+    if forwarded_for:
+        return forwarded_for.split(",", 1)[0].strip()
+    client = getattr(request, "client", None) if request is not None else None
+    return client.host if client is not None else "unknown"
+
+
+async def auth_rate_limit(redis_store: redis_controller, subject: str, login_call, request=None):
+    address = client_ip(request)
+    subject_hash = hashlib.sha256(f"{address}|{subject.lower()}".encode()).hexdigest()
+    address_hash = hashlib.sha256(address.encode()).hexdigest()
     failures_key = f"auth:login:failures:{subject_hash}"
     retry_key = f"auth:login:retry:{subject_hash}"
-    retry_at = int(
-        await redis_store.invoke_trigger(
-            REDIS_COMMANDS.S_GET_STRING, [retry_key, None, None]
-        ) or 0
+    address_retry_key = f"auth:login:retry:address:{address_hash}"
+    retry_at = max(
+        int(await redis_store.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [retry_key, None, None]) or 0),
+        int(await redis_store.invoke_trigger(REDIS_COMMANDS.S_GET_STRING, [address_retry_key, None, None]) or 0),
     )
     if retry_at > time.time():
         retry_after = math.ceil(retry_at - time.time())
@@ -61,9 +71,14 @@ async def auth_rate_limit(redis_store: redis_controller, subject: str, login_cal
             )
             if failures >= 5:
                 delay = (60, 10 * 60, 30 * 60)[min(failures - 5, 2)]
+                locked_until = str(int(time.time() + delay))
                 await redis_store.invoke_trigger(
                     REDIS_COMMANDS.S_SET_STRING,
-                    [retry_key, str(int(time.time() + delay)), delay],
+                    [retry_key, locked_until, delay],
+                )
+                await redis_store.invoke_trigger(
+                    REDIS_COMMANDS.S_SET_STRING,
+                    [address_retry_key, locked_until, delay],
                 )
                 raise HTTPException(
                     status_code=429,

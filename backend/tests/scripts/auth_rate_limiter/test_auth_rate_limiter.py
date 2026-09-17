@@ -13,7 +13,7 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 @pytest.mark.parametrize("failures, delay", [(4, 60), (5, 600), (6, 1800)])
 def test_auth_rate_limit_escalates_cooldown(monkeypatch, failures, delay):
     monkeypatch.setattr("configs.limiter_dependency.time.time", lambda: 1_000)
-    invoke_trigger = AsyncMock(side_effect=[None, failures, None, None])
+    invoke_trigger = AsyncMock(side_effect=[None, None, failures, None, None, None])
     redis_store = SimpleNamespace(invoke_trigger=invoke_trigger)
 
     async def failed_login():
@@ -26,7 +26,13 @@ def test_auth_rate_limit_escalates_cooldown(monkeypatch, failures, delay):
     retry_headers = error.value.headers or {}
     assert retry_headers["Retry-After"] == str(delay)
     retry_key = invoke_trigger.await_args_list[0].args[1][0]
-    assert invoke_trigger.await_args_list[-1] == call(
+    address_retry_key = invoke_trigger.await_args_list[1].args[1][0]
+    assert address_retry_key.startswith("auth:login:retry:address:")
+    assert invoke_trigger.await_args_list[-2] == call(
         REDIS_COMMANDS.S_SET_STRING,
         [retry_key, str(1_000 + delay), delay],
+    )
+    assert invoke_trigger.await_args_list[-1] == call(
+        REDIS_COMMANDS.S_SET_STRING,
+        [address_retry_key, str(1_000 + delay), delay],
     )

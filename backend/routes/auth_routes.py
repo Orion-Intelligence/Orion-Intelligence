@@ -55,7 +55,7 @@ def _finalize_token_response(result: dict, request: Request, response: Response,
 @auth_router.post("/api/token")
 async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None, cookie_only: bool = False, redis_store: redis_controller = Depends(redis_controller.getInstance)):
     client = "extension" if any(scope in {"extension", "orion_extension"} for scope in form_data.scopes) else "web"
-    result = await auth_rate_limit(redis_store, form_data.username, lambda: auth_manager.login(form_data.username, form_data.password, client=client, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None))))
+    result = await auth_rate_limit(redis_store, form_data.username, lambda: auth_manager.login(form_data.username, form_data.password, client=client, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None))), request)
 
     return _finalize_auth_response(result, request, response, cookie_only)
 
