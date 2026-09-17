@@ -11,6 +11,7 @@ from bson import ObjectId
 from fastapi import HTTPException
 from starlette import status
 from cryptography.fernet import Fernet
+from odmantic.query import in_
 
 from orion.api.interactive.account_manager.account_manager import AccountManager
 from orion.api.interactive.account_manager.models.user_model import user_model
@@ -34,6 +35,8 @@ class TenantManager:
     SIGNUP_USERNAME_PATTERN = r"^[A-Za-z][A-Za-z0-9_-]{7,19}$"
     TENANT_USERNAME_PATTERN = r"^[A-Za-z0-9_-]{4,20}$"
     EMAIL_PATTERN = r"^[\w\.-]+@[\w\.-]+\.\w+$"
+    PRIMARY_USER_QUOTA = 15
+    PRIMARY_TENANT_QUOTA = 5
 
     @staticmethod
     def get_instance():
@@ -172,16 +175,81 @@ class TenantManager:
             for permission in (permissions or [])
         }
 
-    async def get_admin_visible_alert_tenants(self, tenant_ids: Optional[List[str]] = None) -> List[db_tenant_model]:
-        query = (db_tenant_model.is_default == False) & (db_tenant_model.alerts_visible_to_admin == True)
+    async def get_managed_tenant(self, current_user, tenant_id: Optional[str] = None) -> Optional[db_tenant_model]:
+        own_tenant_id = str(getattr(current_user, "tenant_uuid", "") or "")
+        target_tenant_id = str(tenant_id or own_tenant_id)
+        if not ObjectId.is_valid(target_tenant_id):
+            return None
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(target_tenant_id))
+        if tenant is None or target_tenant_id == own_tenant_id:
+            return tenant
+        if tenant.parent_tenant_id != own_tenant_id or LicenseName.MAINTAINER not in (getattr(current_user, "licenses", None) or []):
+            return None
+        primary_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(own_tenant_id))
+        return tenant if primary_tenant is not None and primary_tenant.is_primary else None
+
+    async def get_quota_scope(self, tenant) -> tuple[db_tenant_model, List[str]]:
+        quota_tenant = tenant
+        parent_tenant_id = str(getattr(tenant, "parent_tenant_id", None) or "")
+        if ObjectId.is_valid(parent_tenant_id):
+            quota_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(parent_tenant_id)) or tenant
+        tenant_ids = [str(quota_tenant.id)]
+        if getattr(quota_tenant, "is_primary", False):
+            child_tenants = await self._engine.find(db_tenant_model, db_tenant_model.parent_tenant_id == str(quota_tenant.id))
+            tenant_ids.extend(str(child_tenant.id) for child_tenant in child_tenants)
+        return quota_tenant, tenant_ids
+
+    async def count_pool_users(self, tenant_ids: List[str], active_only: bool = False) -> int:
+        query = in_(db_user_account.tenant_uuid, tenant_ids) & (db_user_account.licenses != LicenseName.MAINTAINER)
+        if active_only:
+            query = query & (db_user_account.status == UserStatus.ACTIVE.value)
+        return await self._engine.count(db_user_account, query)
+
+    async def count_quota_tenant_usage(self, tenant, quota_tenant, quota_tenant_ids: List[str], active_only: bool = False) -> int:
+        if getattr(tenant, "parent_tenant_id", None):
+            return await self.count_pool_users(quota_tenant_ids, active_only=active_only)
+        own_count = await self.count_pool_users([str(quota_tenant.id)], active_only=active_only)
+        if not getattr(quota_tenant, "is_primary", False):
+            return own_count
+        children = await self._engine.find(db_tenant_model, db_tenant_model.parent_tenant_id == str(quota_tenant.id))
+        reserved = sum((child.user_quota or 0) for child in children)
+        return own_count + reserved
+
+    async def quota_exceeded_reason(self, tenant) -> Optional[str]:
+        if tenant is None or getattr(tenant, "is_default", False):
+            return None
+        quota_tenant, quota_tenant_ids = await self.get_quota_scope(tenant)
+        if quota_tenant.user_quota is not None and await self.count_quota_tenant_usage(tenant, quota_tenant, quota_tenant_ids) > quota_tenant.user_quota:
+            return "user"
+        if getattr(tenant, "parent_tenant_id", None) and tenant.user_quota is not None and await self.count_pool_users([str(tenant.id)]) > tenant.user_quota:
+            return "user"
+        if getattr(tenant, "is_primary", False) and tenant.tenant_quota and (len(quota_tenant_ids) - 1) > tenant.tenant_quota:
+            return "tenant"
+        return None
+
+    async def is_signup_allowed(self, tenant) -> bool:
+        if getattr(tenant, "is_default", False):
+            return True
+        if not getattr(tenant, "is_primary", False):
+            return False
+        _, quota_tenant_ids = await self.get_quota_scope(tenant)
+        return (len(quota_tenant_ids) - 1) < tenant.tenant_quota
+
+    async def get_visible_alert_tenants(self, viewer_tenant, tenant_ids: Optional[List[str]] = None) -> List[db_tenant_model]:
+        if getattr(viewer_tenant, "is_primary", False):
+            query = (db_tenant_model.parent_tenant_id == str(viewer_tenant.id)) & (db_tenant_model.alerts_visible_to_parent == True)
+        elif getattr(viewer_tenant, "is_default", False):
+            query = (db_tenant_model.is_default == False) & (db_tenant_model.alerts_visible_to_admin == True)
+        else:
+            return []
         tenants = await self._engine.find(db_tenant_model, query)
         if tenant_ids is None:
             return tenants
         allowed_ids = set(tenant_ids)
         return [tenant for tenant in tenants if str(tenant.id) in allowed_ids]
 
-    async def get_alert_allowed_tenant_options(self) -> List[dict]:
-        tenants = await self.get_admin_visible_alert_tenants()
+    async def get_alert_allowed_tenant_options(self, current_user) -> List[dict]:
+        tenants = await self.get_visible_alert_tenants(await self.get_managed_tenant(current_user))
         result = []
         for tenant in tenants:
             tenant_id = str(tenant.id)
@@ -194,12 +262,14 @@ class TenantManager:
             })
         return result
 
-    async def validate_alert_access_assignment(self, data, current_user) -> tuple[bool, List[str]]:
+    async def validate_alert_access_assignment(self, data, current_user, tenant) -> tuple[bool, List[str]]:
         requested_all = data.alerts_allowed_all or False #bool(getattr(data, "alerts_allowed_all", False))
         requested_ids = data.alerts_allowed_tenant_ids or [] #list(getattr(data, "alerts_allowed_tenant_ids", None) or [])
         has_requested_access = requested_all or bool(requested_ids)
+        can_assign_access = current_user.role == "admin" or (
+            getattr(tenant, "is_primary", False) and str(getattr(tenant, "id", "")) == str(getattr(current_user, "tenant_uuid", "")))
 
-        if has_requested_access and current_user.role != "admin":
+        if has_requested_access and not can_assign_access:
             raise HTTPException(status_code=403, detail="Only admin can assign alert access")
 
         if not self.has_case_management_permission(getattr(data, "permissions", None)):
@@ -208,7 +278,7 @@ class TenantManager:
         if requested_all:
             return True, []
 
-        visible_tenants = await self.get_admin_visible_alert_tenants(requested_ids)
+        visible_tenants = await self.get_visible_alert_tenants(tenant, requested_ids)
         visible_ids = {str(tenant.id) for tenant in visible_tenants}
         filtered_ids = []
         seen_ids = set()
@@ -219,8 +289,10 @@ class TenantManager:
         return False, filtered_ids
 
     async def resolve_visible_alert_tenant_ids_for_user(self, current_user) -> List[str]:
-        if current_user.role == "admin":
-            return [str(tenant.id) for tenant in await self.get_admin_visible_alert_tenants()]
+        viewer_tenant = await self.get_managed_tenant(current_user)
+        is_primary_maintainer = getattr(viewer_tenant, "is_primary", False) and LicenseName.MAINTAINER in (getattr(current_user, "licenses", None) or [])
+        if current_user.role == "admin" or is_primary_maintainer:
+            return [str(tenant.id) for tenant in await self.get_visible_alert_tenants(viewer_tenant)]
 
         user = await self._engine.find_one(db_user_account, db_user_account.id == current_user.id)
         if not user:
@@ -229,16 +301,19 @@ class TenantManager:
             return []
 
         if getattr(user, "alerts_allowed_all", False):
-            return [str(tenant.id) for tenant in await self.get_admin_visible_alert_tenants()]
+            return [str(tenant.id) for tenant in await self.get_visible_alert_tenants(viewer_tenant)]
 
         assigned_ids = list(getattr(user, "alerts_allowed_tenant_ids", None) or [])
         if not assigned_ids:
             return []
 
-        return [str(tenant.id) for tenant in await self.get_admin_visible_alert_tenants(assigned_ids)]
+        return [str(tenant.id) for tenant in await self.get_visible_alert_tenants(viewer_tenant, assigned_ids)]
 
-    async def remove_tenant_from_user_alert_access(self, tenant_id: str):
-        users = await self._engine.find(db_user_account, db_user_account.alerts_allowed_tenant_ids == tenant_id)
+    async def remove_tenant_from_user_alert_access(self, tenant_id: str, holder_query=None):
+        query = db_user_account.alerts_allowed_tenant_ids == tenant_id
+        if holder_query is not None:
+            query = query & holder_query
+        users = await self._engine.find(db_user_account, query)
         for user in users:
             user.alerts_allowed_tenant_ids = [
                 assigned_id for assigned_id in (getattr(user, "alerts_allowed_tenant_ids", None) or [])
@@ -288,13 +363,16 @@ class TenantManager:
         return enc
 
     async def copy_default_system_settings(self, tenant: db_tenant_model):
-        default_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
-        if not default_tenant or str(default_tenant.id) == str(tenant.id):
+        if tenant.parent_tenant_id:
+            source_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant.parent_tenant_id))
+        else:
+            source_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
+        if not source_tenant or str(source_tenant.id) == str(tenant.id):
             return
 
-        default_settings = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(default_tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
-        if default_settings:
-            system_settings = json.loads(default_settings.value or "{}")
+        source_settings = await self._engine.find_one(db_system_model, (db_system_model.tenant_id == str(source_tenant.id)) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        if source_settings:
+            system_settings = json.loads(source_settings.value or "{}")
             for key in (
                 AllowedKeys.VERSION.value,
                 AllowedKeys.LANGUAGE_ALLOWED.value,
@@ -314,7 +392,7 @@ class TenantManager:
         for file_name in resources.SYSTEM_RESOURCE_FILES:
             if not file_name.endswith("_custom.png"):
                 continue
-            source_path = resources.system_resource_path(file_name, default_tenant)
+            source_path = resources.system_resource_path(file_name, source_tenant)
             if source_path.name == file_name and source_path.is_file():
                 shutil.copy2(source_path, target_dir / file_name)
 
@@ -385,8 +463,22 @@ class TenantManager:
         else:
             await self._engine.save(db_system_model(tenant_id=tenant_id, key=AllowedKeys.SYSTEM_SETTINGS, value=json.dumps(system_settings)))
 
+    async def _set_tenant_ai_endpoint(self, tenant_id: str, enabled: bool):
+        from orion.api.server.config_manager.config_controller import config_controller
+
+        settings_record = await self._engine.find_one(db_system_model,(db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
+        system_settings = json.loads(settings_record.value) if settings_record and settings_record.value else {}
+        system_settings[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if enabled else "0"
+        await self._persist_system_settings(settings_record, tenant_id, system_settings)
+        await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
+
     async def update_tenant(self, data: TenantRequest, current_user):
         from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+
+        if current_user.role not in ["admin"] and data.id not in ("", "-1", str(current_user.tenant_uuid)):
+            child_tenant = await self.get_managed_tenant(current_user, data.id)
+            if child_tenant is not None:
+                return await self.update_child_tenant(child_tenant, data, current_user)
 
         if current_user.role in ["admin"]:
             tenant_id = data.id
@@ -404,9 +496,14 @@ class TenantManager:
         if tenant.is_default:
             raise HTTPException(status_code=401, detail="Default account cant be updated")
 
-        previous_alerts_visible_to_admin = getattr(tenant, "alerts_visible_to_admin", True)
-        previous_privileged_ioc = getattr(tenant, "privileged_ioc", False)
         is_admin = current_user.role in ["admin"]
+        if is_admin and tenant.parent_tenant_id:
+            raise HTTPException(status_code=403, detail="Sub tenants are managed by their primary tenant")
+
+        previous_alerts_visible_to_admin = getattr(tenant, "alerts_visible_to_admin", True)
+        previous_alerts_visible_to_parent = tenant.alerts_visible_to_parent
+        previous_privileged_ioc = getattr(tenant, "privileged_ioc", False)
+        previous_is_primary = tenant.is_primary
 
         if data.password_reset_required is not None:
             maintainer = await self._engine.find_one(db_user_account,(db_user_account.tenant_uuid == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
@@ -455,11 +552,7 @@ class TenantManager:
                 ) != "1":
                     raise HTTPException(status_code=403, detail="Admin AI endpoint must be enabled first")
 
-            settings_record = await self._engine.find_one(db_system_model,(db_system_model.tenant_id == tenant_id) & (db_system_model.key == AllowedKeys.SYSTEM_SETTINGS))
-            system_settings = json.loads(settings_record.value) if settings_record and settings_record.value else {}
-            system_settings[AllowedKeys.AI_ENDPOINT_ENABLED.value] = "1" if data.ai_endpoint_enabled else "0"
-            await self._persist_system_settings(settings_record, tenant_id, system_settings)
-            await config_controller.getInstance().load_config(force_db=True, tenant_id=tenant_id)
+            await self._set_tenant_ai_endpoint(tenant_id, data.ai_endpoint_enabled)
 
         tenant.name = enc.encrypt((data.name or "").encode()).decode()
         tenant.phone = enc.encrypt((data.phone or "").encode()).decode()
@@ -474,6 +567,16 @@ class TenantManager:
                 data.user_quota = 0
             tenant.user_quota = data.user_quota
 
+        if is_admin and data.tenant_quota is not None:
+            tenant.tenant_quota = max(data.tenant_quota, 0)
+
+        if is_admin and data.is_primary is not None:
+            tenant.is_primary = data.is_primary
+        primary_changed = tenant.is_primary != previous_is_primary
+        if primary_changed and tenant.is_primary:
+            tenant.user_quota = max(tenant.user_quota, self.PRIMARY_USER_QUOTA)
+            tenant.tenant_quota = max(tenant.tenant_quota, self.PRIMARY_TENANT_QUOTA)
+
         if is_admin and data.status is not None:
             tenant.status = data.status
         elif (
@@ -483,8 +586,9 @@ class TenantManager:
         ):
             tenant.status = TenantStatus.ACTIVE
 
-        if is_admin and data.licenses is not None and len(data.licenses) > 0:
-            tenant.licenses = [enc.encrypt(l.encode()).decode() for l in (data.licenses or [])]
+        allowed_licenses = list(dict.fromkeys(data.licenses or []))
+        if is_admin and len(allowed_licenses) > 0:
+            tenant.licenses = [enc.encrypt(l.encode()).decode() for l in allowed_licenses]
 
         if data.profile_visibility_enabled is not None:
             tenant.profile_visibility_enabled = data.profile_visibility_enabled
@@ -494,6 +598,9 @@ class TenantManager:
 
         if data.alerts_visible_to_admin is not None:
             tenant.alerts_visible_to_admin = data.alerts_visible_to_admin
+
+        if data.alerts_visible_to_parent is not None and tenant.parent_tenant_id:
+            tenant.alerts_visible_to_parent = data.alerts_visible_to_parent
 
         if data.privileged_ioc is not None and not is_admin:
             raise HTTPException(status_code=403, detail="Only admin can change privileged IOC")
@@ -524,39 +631,19 @@ class TenantManager:
         await self._engine.save(tenant)
 
         if previous_alerts_visible_to_admin is not False and getattr(tenant, "alerts_visible_to_admin", True) is False:
-            await self.remove_tenant_from_user_alert_access(str(tenant.id))
+            holder_query = (db_user_account.tenant_uuid != tenant.parent_tenant_id) if tenant.parent_tenant_id else None
+            await self.remove_tenant_from_user_alert_access(str(tenant.id), holder_query)
 
-        allowed_licenses = set(data.licenses or [])
+        if previous_alerts_visible_to_parent and not tenant.alerts_visible_to_parent:
+            await self.remove_tenant_from_user_alert_access(str(tenant.id), db_user_account.tenant_uuid == tenant.parent_tenant_id)
+
         if "maintainer" in allowed_licenses and not is_admin:
             raise HTTPException(status_code=401, detail="Only admin can assign maintainer license")
 
         if is_admin:
-            users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
-            for u in users:
-                if "maintainer" in (u.licenses or []):
-                    u.status = UserStatus.ACTIVE
-                    if set(allowed_licenses) == {"free"}:
-                        u.licenses = ["maintainer"]
-                    await self._engine.save(u)
-                elif not set(u.licenses or []).issubset(allowed_licenses):
-                    u.status = UserStatus.DISABLE
-                    u.licenses = ["free"]
-                    await self._engine.save(u)
+            await self._apply_tenant_licenses_to_users(tenant_id, set(allowed_licenses))
+            await self._apply_primary_tenant_to_children(tenant, set(allowed_licenses), primary_changed)
 
-        active_count = await self._engine.count(
-            db_user_account,
-            (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value))
-
-        if tenant.user_quota and active_count > tenant.user_quota:
-            excess = active_count - tenant.user_quota
-            extra_users = await self._engine.find(
-                db_user_account,
-                (db_user_account.tenant_uuid == tenant_id) & (db_user_account.status == UserStatus.ACTIVE.value) & (
-                        db_user_account.licenses != ["maintainer"]),
-                limit=excess)
-            for u in extra_users:
-                u.status = UserStatus.DISABLE.value
-                await self._engine.save(u)
         await AuditLogManager.get_instance().register(
             str(current_user.tenant_uuid), str(current_user.id), "tenant updated successfully")
 
@@ -589,8 +676,105 @@ class TenantManager:
         return {"message": "Tenant updated", "user": current_user.username, "company": tenant_data[
             "name"], "tenant": tenant_data, "alerts": alerts_data}
 
-    async def get_all_tenant(self) -> List[dict]:
-        tenants = await self._engine.find(db_tenant_model, db_tenant_model.is_default == False)
+    async def update_child_tenant(self, tenant: db_tenant_model, data: TenantRequest, current_user):
+        from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogManager
+
+        tenant_id = str(tenant.id)
+        primary_tenant = await self.get_managed_tenant(current_user)
+        if data.licenses:
+            primary_enc = Fernet(await KeyManager.get_instance().get_profile_dek(str(primary_tenant.id)))
+            primary_licenses = {primary_enc.decrypt(l.encode()).decode() for l in (primary_tenant.licenses or [])}
+            child_licenses = list(dict.fromkeys([LicenseName.MAINTAINER.value, *data.licenses]))
+            if not set(child_licenses).issubset(primary_licenses | {LicenseName.MAINTAINER.value}):
+                raise HTTPException(status_code=400, detail="Tenant assigned license not allowed for this tenant")
+            enc = Fernet(await KeyManager.get_instance().get_profile_dek(tenant_id))
+            tenant.licenses = [enc.encrypt(l.encode()).decode() for l in child_licenses]
+            await self._apply_tenant_licenses_to_users(tenant_id, set(child_licenses))
+
+        if data.status is not None:
+            tenant.status = data.status
+
+        if data.verified is not None:
+            tenant.verified = data.verified
+
+        if data.user_quota is not None:
+            requested_user_quota = max(data.user_quota, 0)
+            _, pool_tenant_ids = await self.get_quota_scope(primary_tenant)
+            available_quota = primary_tenant.user_quota - (await self.count_pool_users(pool_tenant_ids) - await self.count_pool_users([tenant_id]))
+            if requested_user_quota > available_quota:
+                raise HTTPException(status_code=400, detail="User allocated quota exceeded")
+            tenant.user_quota = requested_user_quota
+
+        if data.privileged_ioc is not None and bool(data.privileged_ioc) != bool(tenant.privileged_ioc):
+            if not primary_tenant.privileged_ioc:
+                raise HTTPException(status_code=403, detail="Only admin can change privileged IOC")
+            tenant.privileged_ioc = bool(data.privileged_ioc)
+            ioc_enc = Fernet(await KeyManager.get_instance().get_profile_dek(tenant_id))
+            tenant_email = ioc_enc.decrypt(tenant.email.encode()).decode() if tenant.email else ""
+            tenant.iocs = [IocCategory(
+                ioc_id=ioc_enc.encrypt(ioc.ioc_id.encode()).decode(),
+                name=ioc_enc.encrypt((ioc.name or "").encode()).decode(),
+                values=[ioc_enc.encrypt(v.encode()).decode() for v in (ioc.values or [])]) for ioc in self.build_privileged_iocs(tenant_email)]
+
+        if "ai_endpoint_enabled" in data.model_fields_set and data.ai_endpoint_enabled is not None:
+            from orion.api.server.config_manager.config_controller import config_controller
+
+            if data.ai_endpoint_enabled and await config_controller.getInstance().get_cached(
+                AllowedKeys.AI_ENDPOINT_ENABLED.value, "0", tenant_id=str(primary_tenant.id)
+            ) != "1":
+                raise HTTPException(status_code=403, detail="Primary tenant AI endpoint must be enabled first")
+            await self._set_tenant_ai_endpoint(tenant_id, data.ai_endpoint_enabled)
+
+        if data.password_reset_required is not None:
+            maintainer = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
+            if maintainer:
+                maintainer.password_reset_required = data.password_reset_required
+                await self._engine.save(maintainer)
+
+        await self._engine.save(tenant)
+        await AuditLogManager.get_instance().register(
+            str(current_user.tenant_uuid), str(current_user.id), "tenant updated successfully")
+        return {"message": "Tenant updated", "tenant": {"id": tenant_id}}
+
+    async def _apply_tenant_licenses_to_users(self, tenant_id: str, allowed_licenses: set):
+        users = await self._engine.find(db_user_account, db_user_account.tenant_uuid == tenant_id)
+        for u in users:
+            if "maintainer" in (u.licenses or []):
+                u.status = UserStatus.ACTIVE
+                if set(allowed_licenses) == {"free"}:
+                    u.licenses = ["maintainer"]
+                await self._engine.save(u)
+            elif not set(u.licenses or []).issubset(allowed_licenses):
+                u.status = UserStatus.DISABLE
+                u.licenses = ["free"]
+                await self._engine.save(u)
+
+    async def _apply_primary_tenant_to_children(self, tenant: db_tenant_model, allowed_licenses: set, primary_changed: bool):
+        if not tenant.is_primary and not primary_changed:
+            return
+        for child_tenant in await self._engine.find(db_tenant_model, db_tenant_model.parent_tenant_id == str(tenant.id)):
+            if tenant.is_primary:
+                enc = Fernet(await KeyManager.get_instance().get_profile_dek(str(child_tenant.id)))
+                child_licenses = [name for name in (enc.decrypt(l.encode()).decode() for l in (child_tenant.licenses or [])) if name in allowed_licenses or name == LicenseName.MAINTAINER.value]
+                child_tenant.licenses = [enc.encrypt(name.encode()).decode() for name in child_licenses]
+                await self._apply_tenant_licenses_to_users(str(child_tenant.id), set(child_licenses))
+            else:
+                child_tenant.status = TenantStatus.DISABLE
+            await self._engine.save(child_tenant)
+
+    async def get_tenants(self, current_user) -> List[dict]:
+        if current_user.role == user_role.ADMIN:
+            return await self.get_all_tenant()
+        tenant = await self.get_managed_tenant(current_user)
+        if not tenant or not tenant.is_primary:
+            raise HTTPException(status_code=403, detail="Access forbidden")
+        return await self.get_all_tenant(str(tenant.id))
+
+    async def get_all_tenant(self, parent_tenant_id: Optional[str] = None) -> List[dict]:
+        query = db_tenant_model.is_default == False
+        if parent_tenant_id:
+            query = query & (db_tenant_model.parent_tenant_id == parent_tenant_id)
+        tenants = await self._engine.find(db_tenant_model, query)
         maintainers = await self._engine.find(db_user_account, db_user_account.licenses == LicenseName.MAINTAINER)
         maintainer_by_tenant_id = {str(maintainer.tenant_uuid): maintainer for maintainer in maintainers}
         result = []
@@ -624,19 +808,34 @@ class TenantManager:
         return result
 
     async def delete_tenant(self, tenant_id: str, current_user):
-        if current_user.role != user_role.ADMIN:
+        is_admin = current_user.role == user_role.ADMIN
+        if not is_admin and LicenseName.MAINTAINER not in (getattr(current_user, "licenses", None) or []):
             raise HTTPException(status_code=403, detail="Only admins can delete tenants")
-        try:
-            tenant_object_id = ObjectId(tenant_id)
-        except Exception:
-            raise HTTPException(status_code=404, detail="Tenant not found")
-        tenant = await self._engine.find_one(
-            db_tenant_model, db_tenant_model.id == tenant_object_id)
-        if not tenant:
-            raise HTTPException(status_code=404, detail="Tenant not found")
-        if tenant.is_default:
-            raise HTTPException(status_code=403, detail="Default tenant cannot be deleted")
+        if is_admin:
+            try:
+                tenant_object_id = ObjectId(tenant_id)
+            except Exception:
+                raise HTTPException(status_code=404, detail="Tenant not found")
+            tenant = await self._engine.find_one(
+                db_tenant_model, db_tenant_model.id == tenant_object_id)
+            if not tenant:
+                raise HTTPException(status_code=404, detail="Tenant not found")
+            if tenant.is_default:
+                raise HTTPException(status_code=403, detail="Default tenant cannot be deleted")
+            if getattr(tenant, "parent_tenant_id", None):
+                raise HTTPException(status_code=403, detail="Sub tenants are managed by their primary tenant")
+        else:
+            tenant = await self.get_managed_tenant(current_user, tenant_id)
+            if not tenant or str(tenant.id) == str(current_user.tenant_uuid):
+                raise HTTPException(status_code=404, detail="Tenant not found")
 
+        child_tenants = await self._engine.find(db_tenant_model, db_tenant_model.parent_tenant_id == str(tenant.id))
+        for record in [*child_tenants, tenant]:
+            await self._delete_tenant_records(record)
+        return {"message": "Tenant deleted successfully"}
+
+    async def _delete_tenant_records(self, tenant: db_tenant_model):
+        tenant_id = str(tenant.id)
         users = await self._engine.find(
             db_user_account, db_user_account.tenant_uuid == tenant_id)
         for user in users:
@@ -645,7 +844,6 @@ class TenantManager:
             db_user_account, db_user_account.tenant_uuid == tenant_id)
         await self._engine.remove(db_keys, db_keys.auth_id == tenant_id)
         await self._engine.delete(tenant)
-        return {"message": "Tenant deleted successfully"}
 
     async def dismiss_stealer_log(self, tenant_id: str, stealer_log_hash: str, user_id: str, dismissed_ioc_type: DismissedIocType = DismissedIocType.STEALER_LOG, all_tenants: bool = False) -> dict:
         collection = self._engine.get_collection(db_tenant_model)
@@ -682,7 +880,7 @@ class TenantManager:
         tenant_ids = await self.resolve_visible_alert_tenant_ids_for_user(current_user)
         if not tenant_ids:
             return []
-        tenants = await self.get_admin_visible_alert_tenants(tenant_ids)
+        tenants = await self._engine.find(db_tenant_model, in_(db_tenant_model.id, [ObjectId(tenant_id) for tenant_id in tenant_ids]))
         return await self.build_tenant_alert_summary(tenants)
 
     async def _apply_tenant_system_settings(self, tenant_data: dict, tenant_id: str) -> None:
@@ -736,9 +934,9 @@ class TenantManager:
             "has_more": end < total,
         }
 
-    async def _tenant_alerts_response(self, tenant_object_id, tenant_id: str, page: int, limit: int, alert_type: str | None, paginate: bool):
+    async def _tenant_alerts_response(self, tenant_object_id, tenant_id: str, page: int, limit: int, alert_type: str | None, paginate: bool, admin_view: bool = False):
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == tenant_object_id)
-        if not tenant or getattr(tenant, "is_default", False) or getattr(tenant, "alerts_visible_to_admin", True) is False:
+        if not tenant or getattr(tenant, "is_default", False) or (admin_view and getattr(tenant, "alerts_visible_to_admin", True) is False):
             raise HTTPException(status_code=404, detail="Tenant alerts not available")
 
         return await self._collect_tenant_alerts(tenant_id, page, limit, alert_type, paginate)
@@ -756,7 +954,7 @@ class TenantManager:
         return await self._tenant_alerts_response(tenant_object_id, tenant_id, page, limit, alert_type, paginate)
 
     async def get_admin_tenant_alerts(self, tenant_id: str, page: int = 1, limit: int = 20, alert_type: str | None = None, paginate: bool = False):
-        return await self._tenant_alerts_response(ObjectId(tenant_id), tenant_id, page, limit, alert_type, paginate)
+        return await self._tenant_alerts_response(ObjectId(tenant_id), tenant_id, page, limit, alert_type, paginate, admin_view=True)
 
     async def get_visible_tenant_alert_filter_options(self, tenant_id: str, current_user, field: str, query: str = "", limit: int = 25, alert_type: str | None = None) -> dict[str, list[str]]:
         from orion.api.interactive.alert_manager.alert_manager import AlertManager
@@ -786,6 +984,9 @@ class TenantManager:
             if LicenseName.MAINTAINER in (data.licenses or []):
                 raise HTTPException(status_code=403, detail="Role denied")
 
+            if data.role not in (user_role.MEMBER, user_role.ANALYST, user_role.DEMO):
+                raise HTTPException(status_code=403, detail="Role denied")
+
             username, email, password = helper_controller.extract_user_mail_fields(data)
 
             TenantManager.validate_tenant_username(username)
@@ -800,17 +1001,21 @@ class TenantManager:
 
             hashed_password = await AccountManager.get_instance().create_tenant_user(existing_user, existing_mail, password)
 
-            tenant_uuid = getattr(current_user, "tenant_uuid", None) or ""
-            if not tenant_uuid:
+            if not getattr(current_user, "tenant_uuid", None):
                 raise HTTPException(status_code=400, detail="Invalid company association")
 
-            tenant = await engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_uuid))
+            tenant = await self.get_managed_tenant(current_user)
             if not tenant:
                 raise HTTPException(status_code=400, detail="Tenant not found")
+            tenant_uuid = str(tenant.id)
 
-            users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)
+            quota_tenant, quota_tenant_ids = await self.get_quota_scope(tenant)
+            users_count = await self.count_quota_tenant_usage(tenant, quota_tenant, quota_tenant_ids)
 
-            if tenant.is_default == False and tenant.user_quota is not None and (users_count + 1) > tenant.user_quota:
+            if quota_tenant.is_default == False and quota_tenant.user_quota is not None and (users_count + 1) > quota_tenant.user_quota:
+                raise HTTPException(status_code=400, detail="User allocated quota exceeded")
+
+            if tenant.parent_tenant_id and tenant.user_quota is not None and (await self.count_pool_users([tenant_uuid]) + 1) > tenant.user_quota:
                 raise HTTPException(status_code=400, detail="User allocated quota exceeded")
 
             if data.role in ["demo"] and current_user.role not in ["admin"]:
@@ -831,11 +1036,9 @@ class TenantManager:
             if UserPermission.ORION_MAIL in (data.permissions or []):
                 raise HTTPException(status_code=403, detail="Orion Mail permission is limited to root tenant users")
 
-            alerts_allowed_all, alerts_allowed_tenant_ids = await self.validate_alert_access_assignment(data, current_user)
+            alerts_allowed_all, alerts_allowed_tenant_ids = await self.validate_alert_access_assignment(data, current_user, tenant)
 
-            users_count = await engine.count(db_user_account, db_user_account.tenant_uuid == tenant_uuid)
-            if tenant.is_default == False and tenant.user_quota and users_count >= tenant.user_quota:
-                raise HTTPException(status_code=400, detail="User quota exceeded")
+            creator_language = (getattr(current_user, "preferences", None) or {}).get("language")
 
             user = db_user_account(
                 username=username,
@@ -843,12 +1046,13 @@ class TenantManager:
                 password=hashed_password,
                 role=data.role,
                 status=data.status,
-                subscription=data.subscription,
+                subscription=data.subscription and current_user.role in ["admin"],
                 licenses=data.licenses,
                 permissions=data.permissions,
                 alerts_allowed_all=alerts_allowed_all,
                 alerts_allowed_tenant_ids=alerts_allowed_tenant_ids,
                 tenant_uuid=tenant_uuid,
+                preferences={"language": creator_language} if creator_language else {},
                 password_reset_required=True, )
             
             await mail_manager.get_instance().validate_mail_configuration(tenant_id=tenant_uuid)
@@ -856,26 +1060,7 @@ class TenantManager:
             await AuditLogManager.get_instance().register(
                 str(current_user.tenant_uuid), str(current_user.id), "tenant created successfully")
 
-            APP_URL = env_handler.get_instance().env("APP_URL")
-            login_url = TenantManager.build_tenant_url(APP_URL, tenant, "/login")
-            if constant.mail_template is not None:
-                html_content = constant.mail_template.render(
-                    username=user.username,
-                    email=user.email,
-                    password=password,
-                    subject=MailSubject.ACCOUNT_CREATED.value,
-                    lurlHeading=MailUrlHeading.ACCOUNT_CREATED.value,
-                    url=login_url)
-            else:
-                html_content = (
-                    f"{MailSubject.ACCOUNT_CREATED.value}\n\n"
-                    f"Username: {user.username}\n"
-                    f"Email: {user.email}\n"
-                    f"Password: {password}\n"
-                    f"Login URL: {login_url}"
-                )
-            await mail_manager.get_instance().send_verification_mail(
-                to=user.email, subject=MailSubject.ACCOUNT_CREATED.value, body=html_content, tenant_id=tenant_uuid)
+            await self._send_account_created_mail(user.username, user.email, password, tenant)
 
             return {"message": "User created successfully", "username": username, "email": email, "tenant_uuid": tenant_uuid, "allowed_licenses": list(
                 tenant_allowed), }
@@ -884,3 +1069,25 @@ class TenantManager:
             raise e
         except Exception as e:
             raise HTTPException(status_code=400, detail=f"Error creating user {str(e)}")
+
+    @staticmethod
+    async def _send_account_created_mail(username: str, email: str, password: str, tenant: db_tenant_model):
+        login_url = TenantManager.build_tenant_url(env_handler.get_instance().env("APP_URL"), tenant, "/login")
+        if constant.mail_template is not None:
+            html_content = constant.mail_template.render(
+                username=username,
+                email=email,
+                password=password,
+                subject=MailSubject.ACCOUNT_CREATED.value,
+                lurlHeading=MailUrlHeading.ACCOUNT_CREATED.value,
+                url=login_url)
+        else:
+            html_content = (
+                f"{MailSubject.ACCOUNT_CREATED.value}\n\n"
+                f"Username: {username}\n"
+                f"Email: {email}\n"
+                f"Password: {password}\n"
+                f"Login URL: {login_url}"
+            )
+        await mail_manager.get_instance().send_verification_mail(
+            to=email, subject=MailSubject.ACCOUNT_CREATED.value, body=html_content, tenant_id=str(tenant.id))

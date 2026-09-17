@@ -70,11 +70,15 @@ export class ManageProfileComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const headers = new HttpHeaders({});
-    if (this.appService.userSessionData().user.role === 'admin') {
+    if (this.canAssignAlertAccess()) {
       loadAlertTenantOptions(this.apiService, options => this.alertTenantOptions = options);
     }
-    this.apiService.post<User[]>('users', headers).subscribe({
+    this.loadUsers();
+  }
+
+  loadUsers(): void {
+    this.isLoading = true;
+    this.apiService.post<User[]>('users', new HttpHeaders({})).subscribe({
       next: (data) => {
         this.users = data;
         this.isLoading = false;
@@ -83,6 +87,10 @@ export class ManageProfileComponent implements OnInit {
         this.isLoading = false;
       },
     });
+  }
+
+  canAssignAlertAccess(): boolean {
+    return this.appService.userSessionData().user.role === 'admin' || this.licenseService.isPrimaryMaintainer();
   }
 
   toggleExpandedUser(index: number): void {
@@ -120,7 +128,7 @@ export class ManageProfileComponent implements OnInit {
     if (this.appService.userSessionData().user.role === 'admin') {
       return true;
     }
-    return (this.appService.userSessionData().tenant.licenses || []).includes(license);
+    return this.appService.userSessionData().tenant.licenses.includes(license);
   }
 
   get licenseDropdownOptions(): UiDropdownOption[] {
@@ -175,7 +183,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   showAlertsAllowed(user: User): boolean {
-    return this.appService.userSessionData().user.role === 'admin' && (user.permissions ?? []).includes('case_management');
+    return this.canAssignAlertAccess() && (user.permissions ?? []).includes('case_management');
   }
 
   selectedAlertAllowedValues(user: User): string[] {
@@ -222,7 +230,7 @@ export class ManageProfileComponent implements OnInit {
   }
 
   private buildUserUpdatePayload(user: User): User {
-    if (this.appService.userSessionData().user.role !== 'admin') {
+    if (!this.canAssignAlertAccess()) {
       const payload = { ...user };
       delete payload.alerts_allowed_all;
       delete payload.alerts_allowed_tenant_ids;

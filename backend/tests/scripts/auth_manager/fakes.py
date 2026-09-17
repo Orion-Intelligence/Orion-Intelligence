@@ -73,6 +73,15 @@ class FakeSessionInstance:
     async def has_onboarding(self, tenant_uuid):
         return self.onboarding
 
+    async def get_parent_tenant(self, tenant_uuid):
+        return None
+
+    async def ensure_quota_access(self, user):
+        return None
+
+    async def parent_has_subscription(self, parent_tenant):
+        return False
+
 
 class FakeSessionManager:
     EXTENSION_SESSION_CLIENT = "extension"

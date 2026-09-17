@@ -15,7 +15,8 @@
       </div>
 
       <div class="my-5 hidden h-px w-full bg-[var(--color-divider)] md:block"></div>
-      <div class="mb-3 flex justify-end">
+      <!-- <div class="mb-3 flex justify-end"></div> -->
+      <div class="mb-3 flex flex-col gap-3 sm:flex-row sm:justify-end">
         <input data-testid="tenant-user-search-input" type="text" [(ngModel)]="userSearch" [placeholder]="'Search' | translate" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-sky-400/20 sm:max-w-[320px]">
       </div>
 
@@ -437,7 +438,7 @@
   <span id="bottom"></span>
 </ng-container>
 @if (showAddTenantPopup) {
-  <app-add-tenant (closs)="clossAddTenant()" (accountAdded)="ngOnInit()"></app-add-tenant>
+  <app-add-tenant (closs)="clossAddTenant()" (accountAdded)="loadUsers()"></app-add-tenant>
 }
 @if (isDeleteConfirmationOpen()) {
   <app-confirmation-popup (confirmed)="confirmDeleteUser($event)"></app-confirmation-popup>

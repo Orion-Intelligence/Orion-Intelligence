@@ -9,7 +9,6 @@ import QRCode from 'qrcode';
 import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
 import { PasswordToggleDirective } from '../../../shared/directive/password-toggle.directive';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
-import { isSignupHost } from '../../../shared/utils/auth-host.util';
 
 @Component({
   selector: 'app-login-container',
@@ -44,8 +43,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.appService.loadConfig().subscribe(() => {
       this.brandingResolved = true;
-      this.showSignupLink = isSignupHost(window.location.hostname,
-        this.appService.getConfig().appSettings.app_url);
+      this.showSignupLink = this.appService.getConfig().appSettings.signup_enabled;
     });
     this.authSubscription = this.authService.authState$.subscribe(authState => {
       if (authState.isAuthenticated) {

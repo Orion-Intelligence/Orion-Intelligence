@@ -78,6 +78,36 @@ class session_manager:
         if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant access forbidden")
 
+    async def get_parent_tenant(self, tenant_uuid) -> db_tenant_model | None:
+        tenant_id = str(tenant_uuid or "")
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
+        parent_tenant_id = str(getattr(tenant, "parent_tenant_id", None) or "")
+        if not parent_tenant_id:
+            return None
+        parent_tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(parent_tenant_id)) if ObjectId.is_valid(parent_tenant_id) else None
+        if not parent_tenant or not parent_tenant.is_primary or not parent_tenant.verified or parent_tenant.status == TenantStatus.DISABLE:
+            raise HTTPException(status_code=401, detail="account blocked")
+        return parent_tenant
+
+    async def ensure_quota_access(self, user) -> None:
+        if LicenseName.MAINTAINER in (getattr(user, "licenses", None) or []):
+            return
+        from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
+
+        tenant_id = str(getattr(user, "tenant_uuid", "") or "")
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
+        reason = await TenantManager.get_instance().quota_exceeded_reason(tenant)
+        if reason == "tenant":
+            raise HTTPException(status_code=403, detail="Tenant quota exceeded. Contact your administrator.")
+        if reason == "user":
+            raise HTTPException(status_code=403, detail="User quota exceeded. Contact your administrator.")
+
+    async def parent_has_subscription(self, parent_tenant) -> bool:
+        if parent_tenant is None:
+            return False
+        maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == str(parent_tenant.id)) & (db_user_account.licenses == LicenseName.MAINTAINER))
+        return bool(getattr(maintainer_user, "subscription", False))
+
     @staticmethod
     def _strip_bearer(token: str) -> str:
         token = token.strip()
@@ -235,6 +265,8 @@ class session_manager:
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
             self.ensure_user_tenant_access(user, tenant_id)
+            await self.get_parent_tenant(user.tenant_uuid)
+            await self.ensure_quota_access(user)
 
             stored_secret = user.twofa_secret
             secret = payload.get("tfa_secret")
@@ -325,12 +357,14 @@ class session_manager:
 
                 await self._ensure_active_session(user, session_id, self._session_client(payload), "Invalid token")
 
+            parent_tenant = await self.get_parent_tenant(user.tenant_uuid)
+            await self.ensure_quota_access(user)
             role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
             acct_at = maintainer_user.account_verify_at
             if isinstance(acct_at, datetime):
                 acct_at = acct_at if acct_at.tzinfo else acct_at.replace(tzinfo=timezone.utc)
             if role_name == "member" and not bool(getattr(user, "subscription", False)) and acct_at is not None and (
-                    datetime.now(timezone.utc) - acct_at).days >= 30:
+                    datetime.now(timezone.utc) - acct_at).days >= 30 and not await self.parent_has_subscription(parent_tenant):
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
             onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))

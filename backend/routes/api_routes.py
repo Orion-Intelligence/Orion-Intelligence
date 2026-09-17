@@ -1051,7 +1051,7 @@ async def list_takedown_requests(status: Optional[str] = Query(None), q: str = Q
 @api_routes.post(
     "/api/takedowns/{request_id}/accept",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN]))],
 )
 async def accept_takedown_request(request_id: str, current_user=Depends(get_current_user)):
     takedown_manager = TakedownManager.get_instance()
@@ -1061,7 +1061,7 @@ async def accept_takedown_request(request_id: str, current_user=Depends(get_curr
 @api_routes.post(
     "/api/takedowns/{request_id}/reject",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.ADMIN]))],
+    dependencies=[Depends(role_required([user_role.ADMIN, user_role.MEMBER])), Depends(license_required("maintainer", bypass_roles=[user_role.ADMIN]))],
 )
 async def reject_takedown_request(request_id: str, decision: Optional[TakedownDecisionRequest] = Body(None), current_user=Depends(get_current_user)):
     takedown_manager = TakedownManager.get_instance()

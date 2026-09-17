@@ -17,6 +17,7 @@ export class AppSettingsModel {
   backup_schedule = false;
   admin_root_allowed = false;
   smtp_configured = false;
+  signup_enabled = false;
   s_onion = '';
 
   constructor(data?: Partial<Record<keyof AppSettingsModel, string | boolean>>) {
@@ -33,6 +34,7 @@ export class AppSettingsModel {
       this.logo_wide_light = (data.logo_wide_light as string) || this.logo_wide_light;
       this.logo_wide_dark = (data.logo_wide_dark as string) || this.logo_wide_dark;
       this.smtp_configured = data.smtp_configured === true || data.smtp_configured === '1';
+      this.signup_enabled = data.signup_enabled === true || data.signup_enabled === '1';
       this.app_name = (data.app_name as string) || this.app_name;
       this.meta_info = (data.meta_info as string) || this.meta_info;
       this.s_onion = (data.s_onion as string) || this.s_onion;

@@ -57,7 +57,7 @@ export class AddTenantComponent extends PasswordMeterHost implements OnInit {
   ngOnInit(): void {
     this.isAdmin = this.appService.userSessionData().user.role === 'admin';
     this.model.role = this.isAdmin ? 'analyst' : 'member';
-    if (this.isAdmin) {
+    if (this.canAssignAlertAccess) {
       loadAlertTenantOptions(this.apiService, options => this.alertTenantOptions = options);
     }
     setTimeout(() => {
@@ -92,8 +92,7 @@ export class AddTenantComponent extends PasswordMeterHost implements OnInit {
       this.model.licenses = [LicenseName.FREE];
     }
     this.applyAlertAccessPayload();
-    const endpoint = this.isAdmin ? 'tenant/create/user' : 'tenant/create/user';
-    this.apiService.post(endpoint, this.model).subscribe({
+    this.apiService.post('tenant/create/user', this.model).subscribe({
       next: () => {
 
         this.accountAdded.emit(undefined);
@@ -135,6 +134,10 @@ export class AddTenantComponent extends PasswordMeterHost implements OnInit {
     return this.appService.userSessionData()?.tenant?.licenses ?? [];
   }
 
+  get canAssignAlertAccess(): boolean {
+    return this.isAdmin || this.licenseService.isPrimaryMaintainer();
+  }
+
   get visibleTenantLicensesCount(): number {
     if (this.hasFullLicenseAccess) {
       return this.licenseList.filter(license => this.licenseService.getLicenseLabel(license) !== 'maintainer').length;
@@ -169,7 +172,7 @@ export class AddTenantComponent extends PasswordMeterHost implements OnInit {
   }
 
   get showAlertsAllowed(): boolean {
-    return this.isAdmin && (this.model.permissions ?? []).includes('case_management');
+    return this.canAssignAlertAccess &&(this.model.permissions ?? []).includes('case_management');
   }
 
   get alertAllowedOptions(): UiDropdownOption[] {

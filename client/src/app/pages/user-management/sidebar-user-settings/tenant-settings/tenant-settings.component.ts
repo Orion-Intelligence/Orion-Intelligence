@@ -145,6 +145,7 @@ export class TenantSettingsComponent implements OnInit {
       profile_visibility_enabled: this.userSessionData.tenant.profileVisibilityEnabled,
       event_management_enabled: this.userSessionData.tenant.eventManagementEnabled === true,
       alerts_visible_to_admin: this.userSessionData.tenant.alertsVisibleToAdmin !== false,
+      alerts_visible_to_parent: this.userSessionData.tenant.alertsVisibleToParent !== false,
       alert_run_time: this.normalizedAlertRunTime(),
     } as TenantModel;
     if (includeMailSettings) {
@@ -235,7 +236,8 @@ export class TenantSettingsComponent implements OnInit {
       this.normalizedAlertRunTime(),
       this.userSessionData.tenant.profileVisibilityEnabled !== false,
       this.userSessionData.tenant.eventManagementEnabled === true,
-      this.userSessionData.tenant.alertsVisibleToAdmin !== false
+      this.userSessionData.tenant.alertsVisibleToAdmin !== false,
+      this.userSessionData.tenant.alertsVisibleToParent !== false
     ]);
   }
 

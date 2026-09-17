@@ -9,7 +9,7 @@ from fastapi import HTTPException
 from pymongo.errors import DuplicateKeyError
 
 from orion.api.interactive.takedown_manager.takedown_manager import TakedownManager
-from orion.services.mongo_manager.shared_model.db_auth_models import user_role
+from orion.services.mongo_manager.shared_model.db_auth_models import LicenseName, user_role
 from orion.services.mongo_manager.shared_model.db_takedown_request_model import (
     TakedownCreateRequest,
     TakedownDecisionRequest,
@@ -353,25 +353,25 @@ def test_list_requests_analyst_scoped_with_filters():
     assert response.page == 2
 
 
-def test_get_admin_record_permission_and_lookup():
+def test_get_reviewable_record_permission_and_lookup():
     manager_forbidden = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]))
     with pytest.raises(HTTPException) as exc:
-        _run(manager_forbidden._get_admin_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ANALYST)))
+        _run(manager_forbidden._get_reviewable_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ANALYST)))
     assert exc.value.status_code == 403
 
     manager_invalid = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]))
     with pytest.raises(HTTPException) as exc2:
-        _run(manager_invalid._get_admin_record("bad-id", _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
+        _run(manager_invalid._get_reviewable_record("bad-id", _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
     assert exc2.value.status_code == 400
 
     manager_missing = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), None]))
     with pytest.raises(HTTPException) as exc3:
-        _run(manager_missing._get_admin_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
+        _run(manager_missing._get_reviewable_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
     assert exc3.value.status_code == 404
 
     record = _record()
     manager_ok = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), record]))
-    result = _run(manager_ok._get_admin_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
+    result = _run(manager_ok._get_reviewable_record(ROOT_ID, _user(tenant_uuid=ROOT_ID, role=user_role.ADMIN)))
     assert result is record
 
 
@@ -433,3 +433,86 @@ def test_deny_request_accepted_conflict():
     with pytest.raises(HTTPException) as exc:
         _run(manager.deny_request(ROOT_ID, TakedownDecisionRequest(reason=""), _admin_user()))
     assert exc.value.status_code == 409
+
+
+def _primary_tenant(tenant_id="507f1f77bcf86cd799439021"):
+    return SimpleNamespace(id=ObjectId(tenant_id), is_default=False, is_primary=True, parent_tenant_id=None)
+
+
+def _child_tenant(parent_id, tenant_id="507f1f77bcf86cd799439022"):
+    return SimpleNamespace(id=ObjectId(tenant_id), is_default=False, is_primary=False, parent_tenant_id=parent_id)
+
+
+def _maintainer_user(tenant_uuid):
+    user = _user(tenant_uuid=tenant_uuid, role=user_role.MEMBER)
+    user.licenses = [LicenseName.MAINTAINER]
+    return user
+
+
+def test_owner_tenant_uuid_routes_requests_to_the_primary_tenant():
+    primary = _primary_tenant()
+    child = _child_tenant(str(primary.id))
+
+    manager = _make_manager(FakeMongoEngine(find_one_results=[child]))
+    assert _run(manager._owner_tenant_uuid(str(child.id), ROOT_ID)) == str(primary.id)
+
+    manager = _make_manager(FakeMongoEngine(find_one_results=[primary]))
+    assert _run(manager._owner_tenant_uuid(str(primary.id), ROOT_ID)) == str(primary.id)
+
+    standalone = _tenant(is_default=False, tenant_id="507f1f77bcf86cd799439023")
+    manager = _make_manager(FakeMongoEngine(find_one_results=[standalone]))
+    assert _run(manager._owner_tenant_uuid(str(standalone.id), ROOT_ID)) == ROOT_ID
+
+
+def test_list_requests_primary_maintainer_sees_own_and_child_requests():
+    collection = FakeTakedownCollection(items=[_record()], count=1)
+    primary = _primary_tenant()
+    manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), primary]), collection=collection)
+
+    _run(manager.list_requests(_maintainer_user(str(primary.id)), status="all", page=1, limit=20))
+
+    query = collection.queries[0]
+    assert query["tenant_uuid"] == str(primary.id)
+    assert "requester_tenant_uuid" not in query
+
+
+def test_list_requests_admin_sees_every_owner():
+    collection = FakeTakedownCollection(items=[_record()], count=1)
+    manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant()]), collection=collection)
+
+    _run(manager.list_requests(_user(tenant_uuid=ROOT_ID, role=user_role.ADMIN), status="all"))
+
+    assert "tenant_uuid" not in collection.queries[0]
+
+
+def test_list_requests_child_tenant_user_is_scoped_to_its_primary_owner():
+    collection = FakeTakedownCollection(items=[_record()], count=1)
+    primary = _primary_tenant()
+    child = _child_tenant(str(primary.id))
+    manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), child]), collection=collection)
+
+    _run(manager.list_requests(_user(tenant_uuid=str(child.id), role=user_role.MEMBER), status="all"))
+
+    query = collection.queries[0]
+    assert query["tenant_uuid"] == str(primary.id)
+    assert query["requester_tenant_uuid"] == str(child.id)
+
+
+def test_get_reviewable_record_allows_primary_maintainer():
+    primary = _primary_tenant()
+    record = _record()
+    manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), primary, record]))
+
+    result = _run(manager._get_reviewable_record(ROOT_ID, _maintainer_user(str(primary.id))))
+
+    assert result is record
+
+
+def test_get_reviewable_record_rejects_plain_tenant_maintainer():
+    standalone = _tenant(is_default=False, tenant_id="507f1f77bcf86cd799439023")
+    manager = _make_manager(FakeMongoEngine(find_one_results=[_tenant(), standalone]))
+
+    with pytest.raises(HTTPException) as exc:
+        _run(manager._get_reviewable_record(ROOT_ID, _maintainer_user(str(standalone.id))))
+
+    assert exc.value.status_code == 403

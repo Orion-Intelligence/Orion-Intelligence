@@ -36,6 +36,8 @@ class TenantDataModel(BaseModel):
     taxId: str
     hasOnboarding: bool
     isDefault: bool
+    isPrimary: bool = False
+    parentTenantId: Optional[str] = None
     userId: str
     licenses: list[str]
     assignedQuota: str
@@ -44,6 +46,7 @@ class TenantDataModel(BaseModel):
     profileVisibilityEnabled: bool = True
     eventManagementEnabled: bool = False
     alertsVisibleToAdmin: bool = True
+    alertsVisibleToParent: bool = True
     privilegedIoc: bool = False
     alertRunTime: Optional[str] = None
     allowedAlertCategories: Optional[List[str]] = None
