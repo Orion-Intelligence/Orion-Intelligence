@@ -3,7 +3,6 @@ import time
 from datetime import datetime
 from typing import Any
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
-from orion.api.interactive.social_manager.social_model import social_model
 from orion.api.interactive.profile_manager.model.models import SocialAutomationResultRequest
 from orion.api.interactive.social_manager.social_manager import social_manager
 from orion.services.log_manager.log_controller import log
@@ -91,11 +90,11 @@ class social_profile_job:
             self.is_running = False
 
     async def _run_and_wait(self, key: str, payload: dict, timeout_seconds: int):
-        headers = social_model._social_headers(None, None)
+        headers = social_manager._social_headers(None, None)
         deadline = time.monotonic() + timeout_seconds
 
         while time.monotonic() < deadline:
-            status_code, body = await social_model.getInstance().social_request(payload, key, headers)
+            status_code, body = await social_manager.getInstance().social_request(payload, key, headers)
 
             if status_code != 200 or not isinstance(body, dict):
                 log.g().e(f"Social automation request failed for {key}: {status_code} {body}")

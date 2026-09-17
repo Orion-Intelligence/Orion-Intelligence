@@ -15,7 +15,7 @@ import orion.api.interactive.profile_manager.profile_manager as pm_module
 from orion.constants.constant import CONSTANTS
 from orion.api.interactive.profile_manager.model.models import (
     SocialAutomationAdDetectionResultRequest,
-    SocialAutomationCallbackRequest,
+    SocialAutomationResultRequest,
     SocialAutomationDetectedAdModel,
     SocialAutomationPostResultRequest,
     SocialPersonaCreateRequest,
@@ -748,7 +748,7 @@ def test_store_automation_result_post(monkeypatch):
     engine = FakeMongoEngine(find_one_results=[record])
     manager = _make_manager(engine)
     post = SocialAutomationPostResultRequest(profile_id="prof-1", post_url="http://p", session_expired=False)
-    data = SocialAutomationCallbackRequest(user_id="u1", profile_id="prof-1", result_type="post", post_result=post)
+    data = SocialAutomationResultRequest(user_id="u1", profile_id="prof-1", result_type="post", post_result=post)
     result = _run(manager.store_automation_result(data))
     assert result == {"status": "success"}
     assert len(record.post_results) == 1
@@ -764,7 +764,7 @@ def test_store_automation_result_ad_detection_expires_session(monkeypatch):
     manager = _make_manager(engine)
     ad = SocialAutomationDetectedAdModel(url="http://ad")
     ad_result = SocialAutomationAdDetectionResultRequest(profile_id="prof-1", total_detected_ads=1, ads=[ad], session_expired=True)
-    data = SocialAutomationCallbackRequest(user_id="u1", profile_id="prof-1", result_type="ad_detection", ad_detection_result=ad_result)
+    data = SocialAutomationResultRequest(user_id="u1", profile_id="prof-1", result_type="ad_detection", ad_detection_result=ad_result)
     result = _run(manager.store_automation_result(data))
     assert result == {"status": "success"}
     assert len(result_record.ad_detection_results) == 1
@@ -776,7 +776,7 @@ def test_store_automation_result_unknown_type(monkeypatch):
     record = db_social_automation_result_model(user_id="u1")
     engine = FakeMongoEngine(find_one_results=[record])
     manager = _make_manager(engine)
-    data = SocialAutomationCallbackRequest(user_id="u1", profile_id="prof-1", result_type="mystery")
+    data = SocialAutomationResultRequest(user_id="u1", profile_id="prof-1", result_type="mystery")
     result = _run(manager.store_automation_result(data))
     assert result == {"status": "ignored"}
 
