@@ -294,7 +294,9 @@ export function createCase(title: string, description: string, entityValue: stri
 }
 
 export function openCaseManagement() {
-  void cy.visit('/dashboard/profile/homepage');
+  cy.location('origin').then((origin) => {
+    void cy.visit(`${origin}/dashboard/profile/homepage`);
+  });
   void cy.get('[data-testid="sidebar-group-profile"]').filter(':visible').first().scrollIntoView().should('be.visible').click({ force: true });
   void cy.get('[data-testid="sidebar-subitem-profile-case-management"]').filter(':visible').first().scrollIntoView().should('exist').click({ force: true });
   void cy.get(selector('case-management-page')).should('be.visible');

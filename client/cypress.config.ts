@@ -124,6 +124,35 @@ export default defineConfig({
             email: "tenant1@gmail.com",
             password: "1qaz!QAZ",
         },
+        PRIMARY_TENANT_ACCOUNT: {
+            username: "primary_tenant1",
+            email: "primary1@primaryorionintelligence.org",
+            password: "1qaz!QAZ",
+            companyName: "orion intelligence primary",
+            slug: "primaryorionintelligence",
+        },
+        PRIMARY_TENANT_USERS: [
+            { username: "primary_t_user1", email: "primaryuser1@gmail.com", password: "1qaz!QAZ" },
+            { username: "primary_t_user2", email: "primaryuser2@gmail.com", password: "1qaz!QAZ" },
+        ],
+        SUB_TENANT_ACCOUNT: {
+            username: "sub_tenant_owner1",
+            email: "sub1@suborionintelligence.org",
+            password: "1qaz!QAZ",
+            companyName: "orion intelligence sub",
+            slug: "suborionintelligence",
+        },
+        SUB_TENANT_USERS: [
+            { username: "sub_tenant_user1", email: "subuser1@gmail.com", password: "1qaz!QAZ" },
+            { username: "sub_tenant_user2", email: "subuser2@gmail.com", password: "1qaz!QAZ" },
+        ],
+        SUB_TENANT_TAKEDOWN_USER: {
+            username: "sub_takedown_user1",
+            email: "sub.takedown.user1@samplemail.test",
+            password: "1qaz!QAZ",
+            role: "Analyst",
+            licenses: ["Enterprise"],
+        },
         CASE_ALERT_TENANTS: [
             {
                 username: "dcasealert1",

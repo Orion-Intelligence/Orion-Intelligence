@@ -62,7 +62,7 @@
               </form>
               @if (showSignupLink) {
                 <p class="text-[#373637] font-['Roboto',sans-serif] font-normal text-[14px] mt-[-16px]">
-                  {{ 'Don\'t have an account?' | translate }} <span (click)="goToSignUp()" class="text-[#373637] font-bold no-underline cursor-pointer transition-colors [body.light-theme_&]:text-[#1176d4] [body.light-theme_&]:hover:text-[#0f5fa8]">{{ 'Sign Up' | translate }}</span>
+                  {{ 'Don\'t have an account?' | translate }} <span (click)="goToSignUp()" data-testid="login-signup-link" class="text-[#373637] font-bold no-underline cursor-pointer transition-colors [body.light-theme_&]:text-[#1176d4] [body.light-theme_&]:hover:text-[#0f5fa8]">{{ 'Sign Up' | translate }}</span>
                 </p>
               }
             </div>
