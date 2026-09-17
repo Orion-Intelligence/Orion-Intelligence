@@ -539,6 +539,10 @@ Users is the tenant user-management page. It is used to add, review, update, and
 
 Tenants is the higher-privilege administration surface for multi-tenant oversight across the platform. It is used to manage tenant state, licensing, verification, quotas, tenant alert visibility, allowed alert access, alert run time, scheduled alert scans, allowed alert scanner categories, Privileged IOC handling, user permissions, and tenant-specific alert access scopes.
 
+Tenants can be nested one level deep. An administrator marks a tenant as a primary tenant and gives it a tenant quota, after which that tenant holds sub-tenants that sign up through its own subdomain. The maintainer of a primary tenant sees only its own sub-tenants on this page and administers their verification, status, quota, and licenses within the limits of the primary tenant, while administrators manage sub-tenants through the primary tenant rather than directly. User quotas are pooled across a primary tenant and its sub-tenants, and an exceeded user or tenant quota blocks the affected sign-ins until it is resolved.
+
+Alert visibility is expressed separately toward administrators and toward the primary tenant, so a sub-tenant can share alerts with its primary tenant while staying hidden from platform administrators, or the reverse. Takedown requests from a primary tenant and its sub-tenants are reviewed by that primary tenant instead of the root administrator.
+
 ### Audit Logs
 
 Audit Logs provides a trace of platform activity across user and tenant actions. It is the main administrative history view for reviewing who performed what action and when.
@@ -547,7 +551,9 @@ Audit Logs provides a trace of platform activity across user and tenant actions.
 
 System Settings is the platform-wide configuration page. It is used for branding, feature visibility, application identity, SMTP mail delivery settings, public URL settings, external data-source/adversary/pricing links, admin panel visibility, and selected runtime status indicators.
 
-This is the administrative module that affects the product globally rather than one user or one tenant.
+This is the administrative module that affects the product globally when it is opened on the root platform domain.
+
+Opened on a tenant subdomain, the same module is the white-label surface for that tenant. Branding is resolved from the request host, so the application name, favicon, wide light and dark logos, and public header links belong to the tenant that owns the subdomain. Administrators can edit every setting of the tenant they are working in, a `maintainer` can edit only its own tenant and only the application name, onion address, and public links, and a new tenant inherits the settings and logos of its source tenant, which is the parent tenant for a sub-tenant and the root tenant otherwise.
 
 ## How Modules Work Together
 

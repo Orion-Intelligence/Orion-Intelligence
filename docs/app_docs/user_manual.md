@@ -37,6 +37,8 @@ The username must start with a letter and use the supported username pattern. If
 
 After a successful signup, the user is sent to the welcome flow. The account may still require administrator review, email verification, or tenant onboarding before full dashboard access.
 
+Signup is served only on the root platform domain and on the subdomain of a tenant that an administrator has marked as a primary tenant. A signup completed on a primary tenant subdomain creates a sub-tenant beneath that primary tenant, and its verification email points back at the primary tenant URL. When the primary tenant has consumed its full tenant quota, the `Sign Up` link is hidden on that login page and the signup URL redirects to `/login`.
+
 ### Login
 
 The standard entry point is the login screen. Depending on deployment settings, users may also encounter:
@@ -2512,8 +2514,11 @@ Depending on permissions, users can:
 - edit country
 - edit city or state
 - review alert visibility and scanner-category settings where the tenant role allows it
+- control whether tenant alerts are visible to the parent tenant, on sub-tenants only
 
 Some fields remain read-only depending on role. The page also acts as a tenant overview by summarizing the tenant name, status-style badges, location, assigned quota, and current license list.
+
+A sub-tenant sees an extra `Allow Parent Tenant Alert Visibility` toggle next to the admin visibility toggle. The two are independent: hiding alerts from administrators does not hide them from the primary tenant, and hiding them from the primary tenant does not hide them from administrators. Disabling either toggle also withdraws that tenant from the alert-access lists of the users on the side that lost visibility.
 
 #### Tenant Alert Webhook Integrations
 
@@ -2589,6 +2594,8 @@ It supports:
 - expanding a tenant for detail and editing
 - changing verification state
 - changing quota
+- marking a tenant as a primary tenant and setting the tenant quota that limits how many sub-tenants it may hold
+- reviewing and editing sub-tenants as the maintainer of a primary tenant
 - changing status
 - updating tenant licenses
 - setting tenant alert run time in `HH:mm` 24-hour format
@@ -2605,6 +2612,8 @@ Displayed fields include:
 - subscription
 - verification state
 - user quota
+- primary tenant state and tenant quota
+- the owning primary tenant on sub-tenant records
 - status
 - license assignments
 - alert visibility and alert run-time settings where enabled
@@ -2612,20 +2621,74 @@ Displayed fields include:
 
 Admin tenant-alert views can summarize alerts across visible tenants, filter or search tenants from a multi-select dropdown, open category-specific alert drilldowns, review risk summary cards, and export a tenant's alerts as a PDF report.
 
-Tenant deletion is available only to administrators. The root/default tenant cannot be deleted.
+Administrators delete top-level tenants, and the maintainer of a primary tenant deletes its own sub-tenants. The root/default tenant cannot be deleted, and an administrator cannot delete or edit a sub-tenant directly; those records are managed through their primary tenant.
 
 To delete a tenant:
 
-1. Sign in as an administrator and open `Tenants`.
+1. Sign in as an administrator, or as the maintainer of the primary tenant that owns the sub-tenant, and open `Tenants`.
 2. Find the tenant and select its red delete button.
 3. Review the confirmation message and select `Yes, Confirm`.
 4. Confirm that the tenant disappears from the list.
 
-This permanently removes the tenant and its associated users and keys.
+This permanently removes the tenant and its associated users and keys. Deleting a primary tenant also removes every sub-tenant beneath it, together with their users and keys.
+
+#### Primary Tenants and Sub-Tenants
+
+A tenant can be promoted to a primary tenant, which lets it hold its own sub-tenants and administer them without administrator involvement. Sub-tenants are ordinary tenants that carry a parent reference; they sign up through the primary tenant's subdomain and inherit its branding and licensing boundaries.
+
+To promote a tenant:
+
+1. Sign in as an administrator and open `Tenants`.
+2. Expand the tenant and enable the `Primary Tenant` toggle.
+3. Set `Tenant Quota` to the number of sub-tenants the primary tenant may hold.
+4. Save the tenant.
+
+Promotion raises the tenant's own quotas to the primary defaults when they are lower: a user quota of `15` and a tenant quota of `5`. Non-primary tenants accept a user quota of up to `8` from this page.
+
+Quotas are pooled. The primary tenant's user quota covers its own users plus every user of its sub-tenants, and each sub-tenant's user quota reserves a slice of that pool. Users holding the `maintainer` license are not counted. A sub-tenant created through signup starts with a user quota of `1` when the pool still has room, and `0` when it does not.
+
+The maintainer of a primary tenant can:
+
+- open `Tenants` and see only the sub-tenants beneath its own tenant
+- verify a sub-tenant, change its status, and set its user quota within the remaining pool
+- assign sub-tenant licenses from the set the primary tenant itself holds
+- enable Privileged IOC or the AI endpoint for a sub-tenant only when the primary tenant already has that capability
+- require a password reset for a sub-tenant maintainer
+- create users for its own tenant with the `Member`, `Analyst`, or `Demo` role and assign tenant-alert access to them
+- review the tenant alerts of sub-tenants that allow parent visibility
+- accept or reject takedown requests raised by its own tenant and its sub-tenants
+
+Sub-tenant users are blocked at login when the primary tenant is unverified, disabled, or no longer marked as primary. A sub-tenant member also inherits the primary tenant's subscription state, so an active subscription on the primary tenant prevents trial-expiry lockout in its sub-tenants.
+
+When a quota is exceeded, the affected users are stopped at login with an explanatory message, and signed-in sessions display a banner until the tenant reduces usage or the quota is raised. Exceeding the user quota and exceeding the tenant quota are reported separately.
+
+Turning off the `Primary Tenant` toggle disables every sub-tenant beneath the tenant. Reducing the licenses of a primary tenant also trims its sub-tenants to the remaining license set and re-levels the affected users.
 
 #### Dedicated Tenant Subdomains and White-Labeling
 
-Each tenant uses a dedicated subdomain, such as `<tenant-slug>.<platform-domain>` (`<tenant-slug>.localhost` in local environments). Tenant accounts sign in through that tenant URL, keeping authentication isolated from the main platform domain. Branding is also tenant-scoped, so the application name, favicon, light and dark logos, and login image can be customized without changing other tenants.
+Each tenant uses a dedicated subdomain, such as `<tenant-slug>.<platform-domain>` (`<tenant-slug>.localhost` in local environments). Tenant accounts sign in through that tenant URL, keeping authentication isolated from the main platform domain. The platform resolves the tenant from the request host on every call, so the branding, public configuration, signup availability, and login screen a visitor sees are the ones belonging to that subdomain. A host that matches no tenant is rejected.
+
+Branding is tenant-scoped, so the application name, favicon, light and dark logos, and public header links can be customized without changing other tenants.
+
+Who can change branding:
+
+- an administrator can change every platform setting for the tenant being edited
+- a user holding the `maintainer` license can change the branding of its own tenant only, limited to the application name, the onion address, and the public data-source, adversary, and pricing links
+- settings such as version, allowed language, admin-panel visibility, backup schedule, and platform mail credentials stay administrator-only
+- a maintainer cannot edit another tenant's settings, including the settings of its own sub-tenants
+
+Brand assets:
+
+- three images are white-labeled per tenant: the primary logo used as the favicon, the wide light logo, and the wide dark logo
+- uploads are limited to image files of at most 100 KB
+- each tenant's uploads are stored against that tenant, so one tenant's logo never appears on another
+- removing a custom asset restores the stock image shipped with the platform
+- a tenant that has not uploaded an asset automatically falls back to the stock image
+- replacing an asset takes effect immediately, because asset URLs are versioned
+
+New tenants start from an inherited brand. When a tenant is created, its settings and uploaded logos are copied from a source tenant: the parent tenant for a sub-tenant, and the root tenant for a top-level tenant. A sub-tenant therefore opens already wearing the white-label identity of its primary tenant, and can then diverge from it. Version, language, admin-panel, and onion values are not inherited, and the AI endpoint starts disabled until it is enabled for that tenant.
+
+The tenant image shown on the tenant overview is separate from these brand assets and is uploaded from `Tenant Settings`.
 
 ```{figure} ../screenshots/system-settings-20260326.png
 :alt: Tenant white-label branding settings
@@ -2684,6 +2747,8 @@ Administrators can manage brand and UI images such as:
 - wide light logo
 - wide dark logo
 - authentication dashboard icon
+
+On a tenant subdomain the same page manages that tenant's own assets, so a maintainer uses it to white-label its tenant. See `Dedicated Tenant Subdomains and White-Labeling` under [Tenant Administration](#tenant-administration) for the editing rules, size limits, and inheritance behavior.
 
 #### Configuration
 

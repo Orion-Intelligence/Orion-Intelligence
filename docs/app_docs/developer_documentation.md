@@ -525,6 +525,52 @@ Current access patterns worth preserving:
 - `maintainer` can bypass several module-specific gates and can manage selected tenant alert workflows
 - case-management access depends on role and the `case_management` permission for analyst-style access
 - alert visibility combines user licenses, tenant licenses, alert type, and configured scanner categories
+- a primary tenant maintainer administers its own sub-tenants and is treated as an operator for those tenants
+
+### Primary and Sub-Tenant Hierarchy
+
+Tenancy used to be a flat list: the root/default tenant plus independent tenants, all administered by root administrators. Tenants can now form one level of hierarchy, and a primary tenant administers the tenants beneath it.
+
+Tenant record fields added:
+
+- `is_primary` marks a tenant as able to hold sub-tenants
+- `parent_tenant_id` links a sub-tenant to its primary tenant
+- `tenant_quota` caps how many sub-tenants a primary tenant may hold
+- `alerts_visible_to_parent` controls alert visibility toward the primary tenant, independently of `alerts_visible_to_admin`
+
+The same fields are accepted on the tenant update request, and `isPrimary`, `parentTenantId`, `alertsVisibleToParent`, and `tenantQuotaExceeded` are returned on the session payload the client reads after login.
+
+Behavior that changed:
+
+- promoting a tenant raises its quotas to the primary defaults when they are lower, currently a user quota of `15` and a tenant quota of `5`
+- signup is accepted on the root tenant host and on primary tenant hosts; on a primary host it creates a sub-tenant, refuses once the tenant quota is reached, gives the new tenant a user quota of `1` when the pool has room, and sends the verification link to the primary tenant URL
+- the public config exposes `signup_enabled` per host, and the client uses that flag instead of comparing the browser host with the configured application URL; the former client-side host check was removed
+- quotas are pooled across a primary tenant and its sub-tenants: the primary tenant's user quota covers its own users plus the quota reserved by each sub-tenant, each sub-tenant is additionally capped by its own quota, and users holding the `maintainer` license are excluded from the counts
+- quota state is evaluated as a reason (`user`, `tenant`, or none) and enforced on login and on token refresh, so an over-quota tenant is stopped with a `403` instead of silently continuing; maintainers are exempt so a tenant can always sign in to correct the overage
+- a sub-tenant's users are rejected with `account blocked` when the parent tenant is missing, unverified, disabled, or no longer primary
+- a sub-tenant member inherits the primary tenant's subscription state for trial-expiry checks
+- tenant listing is scoped: administrators still receive all tenants, and a primary maintainer receives only its own sub-tenants
+- tenant updates from a maintainer are routed to a separate child-tenant update path that allows status, verification, user quota inside the remaining pool, licenses that are a subset of the primary tenant's, privileged IOC only when the primary tenant has it, the AI endpoint only when the primary tenant's endpoint is enabled, and the maintainer password-reset flag
+- administrators are refused on sub-tenant updates and deletions, which are managed through the primary tenant
+- tenant deletion cascades to sub-tenants, and maintainers may delete their own sub-tenants
+- clearing `is_primary` disables the sub-tenants beneath the tenant, and reducing a primary tenant's licenses trims its sub-tenants and re-levels their users
+- alert visibility is resolved per viewer: the root tenant sees non-default tenants that allow admin visibility, a primary tenant sees sub-tenants that allow parent visibility, and the admin-visibility rule is applied only to the administrator view
+- withdrawing visibility prunes alert-access assignments on the side that lost it, leaving the other side intact
+- tenant alert routes accept the member role, and alert-access assignment is allowed for a primary maintainer as well as administrators
+- takedown requests raised by a primary tenant or its sub-tenants are owned by the primary tenant, and accepting or rejecting a request is allowed for administrators and for maintainers of the owning primary tenant
+- sub-tenant user creation is limited to the member, analyst, and demo roles, the subscription flag is settable only by administrators, and new users inherit the creating user's language preference
+
+### Tenant Branding Resolution
+
+White-labeling is resolved per request rather than per deployment.
+
+- a middleware maps the request host to a tenant, using the configured tenant base domain or production domain, and `*.localhost` for local environments; an unmatched host returns `404`
+- the public configuration endpoint answers with that tenant's settings, including application name, metadata, logo URLs, SMTP state, and signup availability
+- brand assets are `logo_url`, `logo_wide_light`, and `logo_wide_dark`, uploaded and deleted through the system image endpoint, stored per tenant, capped at 100 KB, and restricted to image content types
+- asset URLs carry a version derived from the file timestamp, so a replaced logo is picked up immediately, while stock assets are served with long-lived cache headers
+- a tenant without its own asset falls back to the stock asset; custom files stored in the shared system directory by older deployments are honored only for the default tenant
+- editing is gated by a branding-editor rule: administrators may change any setting for the tenant being edited, and maintainers may change only their own tenant, and only the application name, onion address, and the tenant-editable public links
+- tenant creation copies the source tenant's settings and custom assets: the parent tenant for a sub-tenant, otherwise the default tenant; version, language, admin-root, and onion values are dropped and the AI endpoint flag is reset
 
 ## Operational Notes
 

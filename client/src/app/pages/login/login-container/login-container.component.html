@@ -42,22 +42,33 @@
                   <input [(ngModel)]="user.password" [placeholder]="'Enter password' | translate" class="!pr-16 w-full h-[44px] text-[14px] font-normal font-['Inter',sans-serif] bg-white border border-[#a0b8d1] rounded-[8px] pl-[42px] box-border focus:outline-none focus:ring-1 focus:ring-[#57A5EB] autofill:shadow-[inset_0_0_0_1000px_#fff] autofill:text-black [body.light-theme_&]:border-[#c7d5e6] [body.light-theme_&]:bg-[#f8fbff] [body.light-theme_&]:focus:border-[#2b90ee] [body.light-theme_&]:focus:bg-white [body.light-theme_&]:focus:ring-2 [body.light-theme_&]:focus:ring-[#2b90ee]/20" name="password" data-testid="login-pass" required type="password" appPasswordToggle />
                 </div>
                 <span (click)="goToForgot()" class="mb-6 cursor-pointer self-end text-[14px] text-[#5a6f85] transition-colors [body.light-theme_&]:hover:text-[#1176d4]" data-testid="reset-password-link">{{ 'Recover account?' | translate }}</span>
-                @if (errorMessage == 'verification pending') {
-                  <div class="flex items-center justify-between mt-2 px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm [body.light-theme_&]:!bg-[#b42318] [body.light-theme_&]:!bg-opacity-100">
-                    <span class="text-left"><b>{{ errorMessage | translate }}</b></span>
-                    <button (click)="resendMail()" class="ml-3 bg-[var(--color-blue-700)] text-[var(--color-text1)] text-[12px] font-medium px-3 py-1 rounded">
-                      {{ 'Resend mail' | translate }}
-                    </button>
-                  </div>
-                }
-                @if (errorMessage && errorMessage != 'verification pending') {
-                  <div class="mt-2 w-full max-w-full box-border break-words px-3 py-2 rounded-lg bg-[#dc3545] bg-opacity-75 text-white shadow-sm text-center [body.light-theme_&]:!bg-[#b42318] [body.light-theme_&]:!bg-opacity-100">
-                    <i class="bi bi-exclamation-diamond-fill mr-2"></i>
-                    {{ errorMessage | translate }}
+                @if (errorMessage || cooldownComplete) {
+                  <div class="mb-1 w-full min-w-0 rounded-lg border px-3 py-2 text-left shadow-sm" [ngClass]="retrySeconds > 0 || verificationPending ? 'border-amber-200 bg-amber-50 text-amber-900' : cooldownComplete ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-rose-200 bg-rose-50 text-rose-900'" data-testid="login-feedback">
+                    <div class="flex items-start gap-2">
+                      <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-white/80 text-[14px]" aria-hidden="true">
+                        <i class="bi" [ngClass]="retrySeconds > 0 ? 'bi-clock' : cooldownComplete ? 'bi-check-circle' : verificationPending ? 'bi-envelope' : 'bi-exclamation-circle'"></i>
+                      </span>
+                      <div class="min-w-0 flex-1" role="status" aria-live="polite" aria-atomic="true">
+                        <p class="m-0 text-[13px] font-semibold leading-4">{{ feedbackTitle | translate }}</p>
+                        <p class="m-0 mt-0.5 break-words text-[13px] leading-4">{{ feedbackMessage | translate }}</p>
+                      </div>
+                    </div>
+                    @if (retrySeconds > 0) {
+                      <div class="mt-2 flex items-center gap-3">
+                        <div class="flex shrink-0 items-center gap-2">
+                          <span class="text-[12px] font-medium">{{ 'Try again in' | translate }}</span>
+                          <span role="timer" aria-live="off" class="font-mono text-[14px] font-semibold leading-5 tabular-nums" data-testid="login-countdown">{{ retryLabel }}</span>
+                        </div>
+                        <progress class="block h-1 min-w-0 flex-1 overflow-hidden rounded-full border-0 bg-amber-100 [&::-webkit-progress-bar]:bg-amber-100 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-amber-500 [&::-moz-progress-bar]:bg-amber-500" [value]="retrySeconds" [max]="retryDuration" aria-hidden="true"></progress>
+                      </div>
+                    }
+                    @if (verificationPending) {
+                      <button type="button" (click)="resendMail()" class="mt-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-[13px] font-semibold hover:bg-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-800">{{ 'Resend mail' | translate }}</button>
+                    }
                   </div>
                 }
                 <div>
-                  <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8 transition-colors [body.light-theme_&]:bg-[var(--color-blue-640)] [body.light-theme_&]:hover:bg-[var(--color-blue-630)] [body.light-theme_&]:disabled:bg-[#c8d6e8] [body.light-theme_&]:disabled:text-[#667085]" [class.cursor-not-allowed]="!loginForm.valid" data-testid="login-button" type="submit" [value]="'Sign In' | translate" />
+                  <input class="w-full h-[44px] bg-[#172235] text-white rounded-[8px] font-['Roboto',sans-serif] font-medium text-[14px] cursor-pointer mb-8 transition-colors disabled:cursor-not-allowed disabled:opacity-50 [body.light-theme_&]:bg-[var(--color-blue-640)] [body.light-theme_&]:hover:bg-[var(--color-blue-630)] [body.light-theme_&]:disabled:bg-[#c8d6e8] [body.light-theme_&]:disabled:text-[#667085]" [disabled]="retrySeconds > 0 || submitting" [class.cursor-not-allowed]="!loginForm.valid || retrySeconds > 0 || submitting" data-testid="login-button" type="submit" [value]="(submitting ? 'Signing in…' : retrySeconds > 0 ? 'Please wait…' : 'Sign In') | translate" />
                 </div>
               </form>
               @if (showSignupLink) {

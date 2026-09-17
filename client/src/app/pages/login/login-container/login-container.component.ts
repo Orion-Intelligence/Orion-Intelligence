@@ -3,7 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../../services/authetication/auth.service';
-import { Subscription } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { finalize, Subscription } from 'rxjs';
 import { AppService } from '../../../services/core/app/app.service';
 import QRCode from 'qrcode';
 import { HeaderComponent } from '../../../shared/partials/header/login-header/header.component';
@@ -23,6 +24,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   private authSubscription!: Subscription;
   private tempToken: string | null = null;
   private pendingUsername: string | null = null;
+  private retryTimer?: ReturnType<typeof setInterval>;
 
   user = { mail: '', password: '' };
   errorMessage: string | null = null;
@@ -37,8 +39,76 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   autoDemoLogin = false;
   brandingResolved = false;
   showSignupLink = false;
+  retrySeconds = 0;
+  retryDuration = 0;
+  cooldownComplete = false;
+  submitting = false;
 
   constructor(public authService: AuthService, private router: Router, protected appService: AppService, private route: ActivatedRoute) { }
+
+  get verificationPending(): boolean {
+    return this.errorMessage?.toLowerCase().replace(/\.$/, '') === 'verification pending';
+  }
+
+  get retryLabel(): string {
+    return `${Math.floor(this.retrySeconds / 60)}:${String(this.retrySeconds % 60).padStart(2, '0')}`;
+  }
+
+  get feedbackTitle(): string {
+    if (this.retrySeconds > 0) {
+      return 'Sign-in temporarily paused';
+    }
+    if (this.cooldownComplete) {
+      return 'Ready to try again';
+    }
+    if (this.verificationPending) {
+      return 'Verify your email';
+    }
+    return 'Unable to sign in';
+  }
+
+  get feedbackMessage(): string {
+    if (this.retrySeconds > 0) {
+      return 'Too many attempts. Please wait for the timer to finish.';
+    }
+    if (this.cooldownComplete) {
+      return 'You can now sign in with your email and password.';
+    }
+    if (this.verificationPending) {
+      return 'Open the verification link in your inbox to continue.';
+    }
+    if (this.errorMessage === 'Invalid user or password') {
+      return 'Your email or password is incorrect. Check your details and try again.';
+    }
+    return this.errorMessage ?? '';
+  }
+
+  private handleLoginError(err: HttpErrorResponse): void {
+    const detail = err.error?.detail;
+    this.errorMessage = typeof detail === 'string' ? detail : 'Something went wrong. Please try again.';
+    if (err.status !== 429) {
+      return;
+    }
+    const header = err.headers?.get('Retry-After')?.trim();
+    const fallback = Number(this.errorMessage.match(/try again in (\d+) seconds/i)?.[1]);
+    const headerSeconds = header ? (/^\d+$/.test(header) ? Number(header) : Math.ceil((Date.parse(header) - Date.now()) / 1000)) : NaN;
+    const seconds = Number.isFinite(headerSeconds) ? headerSeconds : fallback;
+    if (!Number.isFinite(seconds) || seconds <= 0) {
+      return;
+    }
+    clearInterval(this.retryTimer);
+    this.cooldownComplete = false;
+    this.retrySeconds = this.retryDuration = Math.ceil(seconds);
+    const deadline = Date.now() + this.retrySeconds * 1000;
+    this.retryTimer = setInterval(() => {
+      this.retrySeconds = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      if (this.retrySeconds === 0) {
+        clearInterval(this.retryTimer);
+        this.errorMessage = null;
+        this.cooldownComplete = true;
+      }
+    }, 1000);
+  }
 
   ngOnInit() {
     this.appService.loadConfig().subscribe(() => {
@@ -126,11 +196,18 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   onSubmit(form: NgForm) {
+    if (this.retrySeconds > 0 || this.submitting) {
+      return;
+    }
+    this.cooldownComplete = false;
     this.errorMessage = null;
     if (!form.valid) {
       return;
     }
-    this.authService.login(this.user.mail, this.user.password).subscribe({
+    this.submitting = true;
+    this.authService.login(this.user.mail, this.user.password).pipe(finalize(() => {
+      this.submitting = false;
+    })).subscribe({
       next: (res) => {
         if (res?.twofa_required) {
           this.twofaRequired = true;
@@ -149,7 +226,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
         }
       },
       error: err => {
-        this.errorMessage = err?.error?.detail ?? err?.message ?? 'Login failed';
+        this.handleLoginError(err);
       }
     });
   }
@@ -185,6 +262,7 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    clearInterval(this.retryTimer);
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
