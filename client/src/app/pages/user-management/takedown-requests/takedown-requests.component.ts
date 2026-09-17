@@ -165,7 +165,7 @@ export class TakedownRequestsComponent implements OnInit, AfterViewInit {
   }
 
   canDecide(item: TakedownRequestItem): boolean {
-    return !item.tenant_uuid || item.tenant_uuid === this.appService.userSessionData().tenant.id;
+    return !item.operator_tenant_id || item.operator_tenant_id === this.appService.userSessionData().tenant.id;
   }
 
   statusClass(status: string): string {

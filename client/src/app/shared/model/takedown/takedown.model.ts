@@ -13,7 +13,7 @@ export interface TakedownRequestItem {
   public_status?: string;
   status_label?: string;
   report_id: string;
-  tenant_uuid?: string;
+  operator_tenant_id?: string;
 }
 
 export interface TakedownListResponse {

@@ -78,8 +78,8 @@ class session_manager:
         if not user or str(getattr(user, "tenant_id", "") or "") != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant access forbidden")
 
-    async def get_parent_tenant(self, tenant_uuid) -> db_tenant_model | None:
-        tenant_id = str(tenant_uuid or "")
+    async def get_parent_tenant(self, tenant_id) -> db_tenant_model | None:
+        tenant_id = str(tenant_id or "")
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
         parent_tenant_id = str(getattr(tenant, "parent_tenant_id", None) or "")
         if not parent_tenant_id:
@@ -94,7 +94,7 @@ class session_manager:
             return
         from orion.api.interactive.tenant_manager.tenant_manager import TenantManager
 
-        tenant_id = str(getattr(user, "tenant_uuid", "") or "")
+        tenant_id = str(getattr(user, "tenant_id", "") or "")
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(tenant_id)) if ObjectId.is_valid(tenant_id) else None
         reason = await TenantManager.get_instance().quota_exceeded_reason(tenant)
         if reason == "tenant":
@@ -105,7 +105,7 @@ class session_manager:
     async def parent_has_subscription(self, parent_tenant) -> bool:
         if parent_tenant is None:
             return False
-        maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == str(parent_tenant.id)) & (db_user_account.licenses == LicenseName.MAINTAINER))
+        maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_id == str(parent_tenant.id)) & (db_user_account.licenses == LicenseName.MAINTAINER))
         return bool(getattr(maintainer_user, "subscription", False))
 
     @staticmethod
@@ -265,7 +265,7 @@ class session_manager:
             if not user:
                 raise HTTPException(status_code=401, detail="User not found")
             self.ensure_user_tenant_access(user, tenant_id)
-            await self.get_parent_tenant(user.tenant_uuid)
+            await self.get_parent_tenant(user.tenant_id)
             await self.ensure_quota_access(user)
 
             stored_secret = user.twofa_secret
@@ -357,7 +357,7 @@ class session_manager:
 
                 await self._ensure_active_session(user, session_id, self._session_client(payload), "Invalid token")
 
-            parent_tenant = await self.get_parent_tenant(user.tenant_uuid)
+            parent_tenant = await self.get_parent_tenant(user.tenant_id)
             await self.ensure_quota_access(user)
             role_name = (getattr(user.role, "value", str(user.role))).split(".")[-1].lower()
             acct_at = maintainer_user.account_verify_at

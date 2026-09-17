@@ -194,7 +194,7 @@ def test_get_visible_alert_tenants_by_viewer(monkeypatch):
 def test_get_managed_tenant_returns_own_and_primary_children():
     primary = _make_tenant(is_primary=True)
     child = _make_tenant(parent_tenant_id=str(primary.id))
-    maintainer = SimpleNamespace(tenant_uuid=str(primary.id), licenses=[LicenseName.MAINTAINER, LicenseName.ENTERPRISE])
+    maintainer = SimpleNamespace(tenant_id=str(primary.id), licenses=[LicenseName.MAINTAINER, LicenseName.ENTERPRISE])
 
     manager = _make_manager(ModelEngine().set_find_one(db_tenant_model, [primary]))
     assert _run(manager.get_managed_tenant(maintainer)) is primary
@@ -207,8 +207,8 @@ def test_get_managed_tenant_rejects_tenants_outside_primary_scope():
     primary = _make_tenant(is_primary=True)
     child = _make_tenant(parent_tenant_id=str(primary.id))
     other_child = _make_tenant(parent_tenant_id="507f1f77bcf86cd799439099")
-    maintainer = SimpleNamespace(tenant_uuid=str(primary.id), licenses=[LicenseName.MAINTAINER])
-    member = SimpleNamespace(tenant_uuid=str(primary.id), licenses=[LicenseName.FREE])
+    maintainer = SimpleNamespace(tenant_id=str(primary.id), licenses=[LicenseName.MAINTAINER])
+    member = SimpleNamespace(tenant_id=str(primary.id), licenses=[LicenseName.FREE])
 
     assert _run(_make_manager(ModelEngine().set_find_one(db_tenant_model, [other_child])).get_managed_tenant(maintainer, str(other_child.id))) is None
     assert _run(_make_manager(ModelEngine().set_find_one(db_tenant_model, [child])).get_managed_tenant(member, str(child.id))) is None
@@ -297,7 +297,7 @@ def test_validate_alert_access_assignment_primary_tenant_children(monkeypatch):
         alerts_allowed_tenant_ids=[str(child.id)],
         permissions=[UserPermission.CASE_MANAGEMENT],
     )
-    maintainer = SimpleNamespace(role="member", tenant_uuid=str(primary.id))
+    maintainer = SimpleNamespace(role="member", tenant_id=str(primary.id))
 
     assert _run(manager.validate_alert_access_assignment(data, maintainer, primary)) == (False, [str(child.id)])
     with pytest.raises(HTTPException) as exc:
@@ -331,7 +331,7 @@ def test_resolve_visible_alert_tenant_ids_user_all(monkeypatch):
     user = SimpleNamespace(permissions=[UserPermission.CASE_MANAGEMENT], alerts_allowed_all=True)
     engine = ModelEngine().set_find_one(db_user_account, [user]).set_find_one(db_tenant_model, [default_tenant]).set_find(db_tenant_model, [tenant])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="analyst", tenant_uuid=str(default_tenant.id), id="507f1f77bcf86cd799439011", username="alice")
+    current = SimpleNamespace(role="analyst", tenant_id=str(default_tenant.id), id="507f1f77bcf86cd799439011", username="alice")
     assert _run(manager.resolve_visible_alert_tenant_ids_for_user(current)) == [str(tenant.id)]
 
 
@@ -359,7 +359,7 @@ def test_resolve_visible_alert_tenant_ids_user_assigned(monkeypatch):
     default_tenant = _make_tenant(is_default=True)
     engine = ModelEngine().set_find_one(db_user_account, [user]).set_find_one(db_tenant_model, [default_tenant]).set_find(db_tenant_model, [tenant])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="analyst", tenant_uuid=str(default_tenant.id), id="507f1f77bcf86cd799439011", username="alice")
+    current = SimpleNamespace(role="analyst", tenant_id=str(default_tenant.id), id="507f1f77bcf86cd799439011", username="alice")
     assert _run(manager.resolve_visible_alert_tenant_ids_for_user(current)) == [str(tenant.id)]
 
 
@@ -369,7 +369,7 @@ def test_resolve_visible_alert_tenant_ids_primary_maintainer(monkeypatch):
     child = _make_tenant(parent_tenant_id=str(primary.id))
     engine = ModelEngine().set_find_one(db_tenant_model, [primary]).set_find(db_tenant_model, [child])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(primary.id), licenses=[LicenseName.MAINTAINER, LicenseName.ENTERPRISE])
+    current = SimpleNamespace(role="member", tenant_id=str(primary.id), licenses=[LicenseName.MAINTAINER, LicenseName.ENTERPRISE])
     assert _run(manager.resolve_visible_alert_tenant_ids_for_user(current)) == [str(child.id)]
 
 
@@ -379,7 +379,7 @@ def test_resolve_visible_alert_tenant_ids_standalone_tenant_user(monkeypatch):
     user = SimpleNamespace(permissions=[UserPermission.CASE_MANAGEMENT], alerts_allowed_all=True)
     engine = ModelEngine().set_find_one(db_tenant_model, [tenant]).set_find_one(db_user_account, [user]).set_find(db_tenant_model, [_make_tenant()])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="analyst", tenant_uuid=str(tenant.id), id="507f1f77bcf86cd799439011", username="alice")
+    current = SimpleNamespace(role="analyst", tenant_id=str(tenant.id), id="507f1f77bcf86cd799439011", username="alice")
     assert _run(manager.resolve_visible_alert_tenant_ids_for_user(current)) == []
 
 
@@ -591,7 +591,7 @@ def test_delete_tenant_admin_cascades_primary_children():
 def test_delete_tenant_primary_maintainer_deletes_own_child_only():
     primary = _make_tenant(is_primary=True)
     child = _make_tenant(parent_tenant_id=str(primary.id))
-    maintainer = SimpleNamespace(role=user_role.MEMBER, tenant_uuid=str(primary.id), licenses=[LicenseName.MAINTAINER])
+    maintainer = SimpleNamespace(role=user_role.MEMBER, tenant_id=str(primary.id), licenses=[LicenseName.MAINTAINER])
     engine = ModelEngine().set_find_one(db_tenant_model, [child, primary])
     _run(_make_manager(engine).delete_tenant(str(child.id), maintainer))
     assert engine.deleted == [child]
@@ -764,7 +764,7 @@ def test_get_visible_tenant_alerts_parent_ignores_admin_flag(monkeypatch):
     engine.set_find_one(db_tenant_model, [primary, child])
     engine.set_find_one(db_alert_model, [doc])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(primary.id), licenses=[LicenseName.MAINTAINER])
+    current = SimpleNamespace(role="member", tenant_id=str(primary.id), licenses=[LicenseName.MAINTAINER])
     assert len(_run(manager.get_visible_tenant_alerts(str(child.id), current))) == 1
 
 
@@ -1135,7 +1135,7 @@ def test_update_tenant_primary_maintainer_updates_child(monkeypatch):
     engine.set_find_one(db_tenant_model, [child, primary, primary])
     engine.set_find(db_user_account, [child_user])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(primary.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER, LicenseName.ENTERPRISE])
+    current = SimpleNamespace(role="member", tenant_id=str(primary.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER, LicenseName.ENTERPRISE])
 
     result = _run(manager.update_tenant(_tenant_request(str(child.id), licenses=["free"], status=TenantStatus.DISABLE, verified=True), current))
 
@@ -1152,7 +1152,7 @@ def test_update_tenant_primary_maintainer_cannot_exceed_primary_licenses(monkeyp
     primary = _make_tenant(is_primary=True, licenses=[_e("maintainer"), _e("free")])
     child = _make_tenant(parent_tenant_id=str(primary.id))
     manager = _make_manager(ModelEngine().set_find_one(db_tenant_model, [child, primary, primary]))
-    current = SimpleNamespace(role="member", tenant_uuid=str(primary.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
+    current = SimpleNamespace(role="member", tenant_id=str(primary.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
     with pytest.raises(HTTPException) as exc:
         _run(manager.update_tenant(_tenant_request(str(child.id), licenses=["enterprise"]), current))
     assert exc.value.status_code == 400
@@ -1169,7 +1169,7 @@ def test_update_tenant_child_hides_alerts_from_parent(monkeypatch):
     engine.set_find_one(db_system_model, [None])
     engine.set_find_one(db_alert_model, [None])
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(child.id), id="u1", username="bob", licenses=["maintainer"])
+    current = SimpleNamespace(role="member", tenant_id=str(child.id), id="u1", username="bob", licenses=["maintainer"])
 
     _run(manager.update_tenant(_tenant_request(str(child.id), alerts_visible_to_parent=False), current))
 
@@ -1220,7 +1220,7 @@ def test_create_tenant_user_inherits_creator_language(monkeypatch):
     engine.count_result = 0
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid=str(tenant.id), id="u1", username="admin", preferences={"language": "de"})
+    current = SimpleNamespace(role="admin", tenant_id=str(tenant.id), id="u1", username="admin", preferences={"language": "de"})
 
     _run(manager.create_tenant_user(_new_user_model(), current))
 
@@ -1239,7 +1239,7 @@ def test_create_tenant_user_maintainer_denied(monkeypatch):
     assert exc.value.status_code == 403
 
 
-def test_create_tenant_user_no_tenant_uuid(monkeypatch):
+def test_create_tenant_user_no_tenant_id(monkeypatch):
     engine = ModelEngine()
     engine.set_find_one(db_user_account, [None, None])
     _patch_managers(monkeypatch, engine=engine)
@@ -1286,7 +1286,7 @@ def test_create_tenant_user_blocked_when_child_allocation_reserves_primary_capac
     engine.count_result = 1
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="admin", tenant_uuid=str(primary.id), id="u1", username="admin")
+    current = SimpleNamespace(role="admin", tenant_id=str(primary.id), id="u1", username="admin")
 
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(_new_user_model(), current))
@@ -1362,7 +1362,7 @@ def test_create_tenant_user_rejects_privileged_roles(monkeypatch):
     engine = ModelEngine()
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid="507f1f77bcf86cd799439011", id="u1", username="bob")
+    current = SimpleNamespace(role="member", tenant_id="507f1f77bcf86cd799439011", id="u1", username="bob")
     for role in (user_role.CRAWLER, user_role.ADMIN):
         with pytest.raises(HTTPException) as exc:
             _run(manager.create_tenant_user(_new_user_model(role=role), current))
@@ -1379,13 +1379,13 @@ def test_create_tenant_user_in_sub_tenant_uses_primary_quota_pool(monkeypatch):
     engine.count_result = 3
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(child.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
+    current = SimpleNamespace(role="member", tenant_id=str(child.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
 
     result = _run(manager.create_tenant_user(_new_user_model(subscription=True), current))
 
     saved_user = next(item for item in engine.saved if isinstance(item, db_user_account))
-    assert result["tenant_uuid"] == str(child.id)
-    assert saved_user.tenant_uuid == str(child.id)
+    assert result["tenant_id"] == str(child.id)
+    assert saved_user.tenant_id == str(child.id)
     assert saved_user.subscription is False
 
 
@@ -1399,7 +1399,7 @@ def test_create_tenant_user_blocked_when_sub_tenant_quota_is_zero(monkeypatch):
     engine.count_result = 2
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(child.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
+    current = SimpleNamespace(role="member", tenant_id=str(child.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
 
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(_new_user_model(), current))
@@ -1470,7 +1470,7 @@ def test_is_signup_allowed_follows_tenant_quota():
 
 
 def _primary_maintainer_user(primary):
-    return SimpleNamespace(role="member", tenant_uuid=str(primary.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
+    return SimpleNamespace(role="member", tenant_id=str(primary.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
 
 
 def test_update_child_tenant_sets_user_quota(monkeypatch):
@@ -1604,7 +1604,7 @@ def test_create_tenant_user_respects_sub_tenant_cap(monkeypatch):
     engine.count_results = [3, 2]
     _patch_managers(monkeypatch, engine=engine)
     manager = _make_manager(engine)
-    current = SimpleNamespace(role="member", tenant_uuid=str(child.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
+    current = SimpleNamespace(role="member", tenant_id=str(child.id), id="u1", username="bob", licenses=[LicenseName.MAINTAINER])
 
     with pytest.raises(HTTPException) as exc:
         _run(manager.create_tenant_user(_new_user_model(), current))
@@ -1626,7 +1626,7 @@ class _ScenarioEngine(ModelEngine):
         skip_maintainers = False
         active_only = False
         for clause in clauses:
-            tenant_clause = clause.get("tenant_uuid")
+            tenant_clause = clause.get("tenant_id")
             if isinstance(tenant_clause, dict) and "$in" in tenant_clause:
                 tenant_ids = list(tenant_clause["$in"])
             elif tenant_clause is not None:

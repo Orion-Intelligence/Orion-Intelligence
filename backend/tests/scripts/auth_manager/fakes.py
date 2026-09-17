@@ -73,7 +73,7 @@ class FakeSessionInstance:
     async def has_onboarding(self, tenant_id):
         return self.onboarding
 
-    async def get_parent_tenant(self, tenant_uuid):
+    async def get_parent_tenant(self, tenant_id):
         return None
 
     async def ensure_quota_access(self, user):

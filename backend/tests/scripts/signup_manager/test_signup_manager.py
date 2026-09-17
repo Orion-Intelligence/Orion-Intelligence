@@ -96,7 +96,7 @@ def test_signup_from_primary_tenant_url_respects_tenant_quota(monkeypatch):
 
 def test_sub_tenant_signup_inherits_primary_maintainer_language(monkeypatch):
     primary = _make_tenant(is_primary=True, user_quota=15, tenant_quota=5, slug="acme")
-    primary_maintainer = SimpleNamespace(tenant_uuid=str(primary.id), email="owner@acme.com", preferences={"language": "es"})
+    primary_maintainer = SimpleNamespace(tenant_id=str(primary.id), email="owner@acme.com", preferences={"language": "es"})
     engine = ModelEngine()
     engine.set_find_one(db_tenant_model, [primary, SimpleNamespace(parent_tenant_id=str(primary.id)), primary])
     engine.set_find_one(db_user_account, [None, None])
