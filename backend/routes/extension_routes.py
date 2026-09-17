@@ -10,6 +10,7 @@ from configs.app_dependency import get_extension_user
 from configs.auth_cookie import clear_extension_cookie, extension_token_from_request, set_extension_cookie
 from configs.limiter_dependency import auth_rate_limit
 from orion.api.interactive.auth_manager.auth_manager import auth_manager
+from orion.api.interactive.case_manager.case_communication_manager import CaseCommunicationManager
 from orion.api.interactive.extension_manager.extension_socket_manager import extension_socket_manager
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account
 from orion.services.redis_manager.redis_controller import redis_controller
@@ -17,6 +18,21 @@ from orion.services.redis_manager.redis_enums import REDIS_COMMANDS
 from orion.services.session_manager.session_manager import session_manager
 
 extension_routes = APIRouter()
+
+
+async def _persist_communication_capture(user_key: str, result_key: str | None, payload: dict) -> tuple[str, str] | None:
+    if not isinstance(result_key, str) or ":" not in result_key:
+        return None
+    parsed = CaseCommunicationManager.parse_result_scope(result_key.split(":", 1)[1])
+    if parsed is None:
+        return None
+    case_id, communication_id = parsed
+    try:
+        saved = await CaseCommunicationManager.get_instance().persist_socket_capture(user_key, case_id, communication_id, payload)
+    except Exception:
+        return None
+    return (case_id, communication_id) if saved else None
+
 
 WS_TICKET_TTL_SECONDS = 30
 EXTENSION_DIR = Path(__file__).resolve().parents[1] / "workspace" / "extension"
@@ -73,7 +89,7 @@ async def extension_login(request: Request, response: Response = None, username:
             username,
             password,
             client="extension",
-            tenant_id=getattr(request.state, "tenant", None),
+            tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)),
         )
 
     result = await auth_rate_limit(redis_store, username, authenticate_and_login)
@@ -104,7 +120,7 @@ async def extension_refresh(request: Request, response: Response = None):
     if not token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
 
-    result = await session_manager.get_instance().refresh_token(token, tenant_id=getattr(request.state, "tenant", None))
+    result = await session_manager.get_instance().refresh_token(token, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
     access_token = result.get("access_token")
     if not access_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="refresh_failed")
@@ -176,7 +192,14 @@ async def extension_socket(websocket: WebSocket):
                 if payload.get("ack"):
                     await socket_manager.acknowledge(payload["request_id"])
                 else:
-                    await socket_manager.resolve(payload["request_id"], payload)
+                    result_key = await socket_manager.resolve(payload["request_id"], payload)
+                    captured = await _persist_communication_capture(user_key, result_key, payload)
+                    if captured:
+                        case_id, communication_id = captured
+                        try:
+                            await websocket.send_json({"type": "comm-captured", "caseId": case_id, "communicationId": communication_id, "hasSession": True})
+                        except Exception:
+                            pass
     except WebSocketDisconnect:
         return
     finally:

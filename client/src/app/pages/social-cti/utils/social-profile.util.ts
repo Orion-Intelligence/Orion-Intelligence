@@ -1,7 +1,8 @@
 import type { social_profile, social_resource } from '../models/social.models';
-import type { FetchTabKey } from '../enums/social-graph.enums';
+import type { FetchTabKey, SocialResultSource } from '../enums/social-graph.enums';
 import { CONTENT_DATE_KEYS } from '../constants/social-graph.constants';
 import { isDecimalString } from '../../../shared/utils/network-validation.util';
+import { formatFollowers } from '../../../shared/utils/formatters';
 import { getOwnProperty, setOwnProperty } from '../../../shared/utils/type-guards.util';
 
 
@@ -78,4 +79,26 @@ export function getProfileGroupKey(results: Map<string, social_profile[]>, platf
     }
   }
   return platform.meta.username;
+}
+
+export function resultSourceFor(platformData: social_profile): SocialResultSource {
+  const platform = String(platformData?.meta?.platform ?? '').toLowerCase();
+  const kind = `${platformData?.meta?.entity_type ?? ''} ${platformData?.meta?.target_type ?? ''}`.toLowerCase();
+  const darkweb = ['forum', 'telegram', 'discord', 'chat', 'darkweb', 'dark_web', 'onion', 'paste', 'leak'];
+  return darkweb.some(key => platform.includes(key)) || kind.includes('dark') || kind.includes('forum') ? 'darkweb' : 'normal';
+}
+
+export function resolveActiveResultSource(platforms: social_profile[], preferred: SocialResultSource): SocialResultSource {
+  if (platforms.some(platform => resultSourceFor(platform) === preferred)) {
+    return preferred;
+  }
+  return platforms.some(platform => resultSourceFor(platform) === 'normal') ? 'normal' : 'darkweb';
+}
+
+export function formatStatValue(rawValue: unknown, missingValue: string): string {
+  if (rawValue === null || rawValue === undefined || rawValue === '') {
+    return missingValue;
+  }
+  const numericValue = typeof rawValue === 'number' ? rawValue : Number(String(rawValue).replace(/,/g, ''));
+  return Number.isFinite(numericValue) ? formatFollowers(numericValue) : String(rawValue);
 }

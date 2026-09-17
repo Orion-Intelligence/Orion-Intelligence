@@ -11,6 +11,7 @@ import { ReportExportService } from '../../../shared/services/report-export.serv
 import { GraphReportPayload } from '../../../shared/model/report/report-export.model';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { buildStealerLogExportRow, STEALER_LOG_EXPORT_COLUMNS } from '../utils/stealer-log-export.util';
 
 @Component({
   selector: 'app-social-stealerlog-section',
@@ -20,7 +21,6 @@ import { TranslationService } from '../../../shared/services/translation.service
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class StealerlogSectionComponent implements OnDestroy {
-  private readonly exportCsvColumns = [ 'tenant_name', 'recordType', 'recordIndex', 'searchQuery', 'email', 'username', 'domain', 'source', 'hash', 'title', 'url', 'rank', 'date', 'team', 'summary' ] as const;
   private readonly fetchService = inject(SocialFetchService);
   private readonly storageService = inject(SocialStorageService);
   private readonly destroyRef = inject(DestroyRef);
@@ -124,23 +124,8 @@ export class StealerlogSectionComponent implements OnDestroy {
   }
 
   private buildExportRows(): Record<string, string>[] {
-    return this.records().map((item, index) => ({
-      tenant_name: this.exportBranding.getTenantName(),
-      recordType: 'stealer',
-      recordIndex: String(index + 1),
-      searchQuery: this.searchIdentity() || '-',
-      email: String(item?.email ?? item?.m_email ?? '-'),
-      username: String(item?.username ?? item?.m_username ?? '-'),
-      domain: String(item?.domain ?? item?.m_domain ?? '-'),
-      source: String(this.exportBranding.replaceSystemBrand(String(item?.channel ?? item?.filename ?? item?.file ?? item?.m_source ?? item?.m_scrap_file ?? '-'))),
-      hash: String(item?.m_hash ?? '-'),
-      title: '-',
-      url: String(item?.url ?? item?.m_url ?? '-'),
-      rank: '-',
-      date: String(item?.date ?? item?.m_date ?? '-'),
-      team: '-',
-      summary: '-'
-    }));
+    const searchQuery = this.searchIdentity() || '-';
+    return this.records().map((item, index) => buildStealerLogExportRow(this.exportBranding, item, index, searchQuery));
   }
 
   private exportRecords(type: 'csv' | 'json' | 'report'): void {
@@ -156,7 +141,7 @@ export class StealerlogSectionComponent implements OnDestroy {
         search_query: this.searchIdentity() || '-',
         total_records: rows.length
       },
-      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...this.exportCsvColumns], rows }]
+      tables: [{ title: this.translationService.translate('Stealer Logs'), values: {}, columns: [...STEALER_LOG_EXPORT_COLUMNS], rows }]
     };
     this.reportExportService.exportByType(payload, type === 'report' ? 'doc_pdf' : type);
   }

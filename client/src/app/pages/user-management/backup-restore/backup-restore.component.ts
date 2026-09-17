@@ -1,11 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, Input, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
 
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { fadeInDashboardItem } from '../../../shared/animations/dashboard.item.animation';
 import { ConfirmationPopupComponent } from '../../../shared/partials/confirmation-popup/confirmation-popup.component';
 import { ApiService } from '../../../shared/services/api.service';
+import { LicenseService } from '../../../services/licenses/licenses.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
 import type { BackupJob, BackupRecord } from './model/backup-restore.model';
@@ -34,11 +37,29 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
   job: BackupJob | null = null;
   readonly MAX_BACKUPS = 2;
   instantConfirmationMessage = 'Start instant backup now?';
+  downloadingId: string | null = null;
 
-  constructor(private apiService: ApiService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService) {
+  @Input() scope: 'admin' | 'tenant' = 'admin';
+
+  get isTenantScope(): boolean {
+    return this.scope === 'tenant';
+  }
+
+  private get basePath(): string {
+    return this.isTenantScope ? 'tenant/backups' : 'admin/backups';
+  }
+
+  constructor(private apiService: ApiService, private messageNotificationService: MessageNotificationService, private translationService: TranslationService, private route: ActivatedRoute, private licenseService: LicenseService, private http: HttpClient) {
   }
 
   ngOnInit(): void {
+    const routeScope = this.route.snapshot.data.scope;
+    if (routeScope === 'tenant' || routeScope === 'admin') {
+      this.scope = routeScope;
+    }
+    else if (!this.licenseService.isAdmin()) {
+      this.scope = 'tenant';
+    }
     this.loadBackups();
     this.pollJob();
   }
@@ -69,7 +90,7 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
   }
 
   private pollJob(): void {
-    this.apiService.get<BackupJob>('admin/backups/status').subscribe({
+    this.apiService.get<BackupJob>(`${this.basePath}/status`).subscribe({
       next: (job) => {
         this.applyJob(job);
         if (job.status === 'running') {
@@ -91,7 +112,7 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
 
   loadBackups(): void {
     this.isLoading = true;
-    this.apiService.get<BackupRecord[]>('admin/backups')
+    this.apiService.get<BackupRecord[]>(this.basePath)
       .pipe(finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (backups) => this.backups = backups || [],
@@ -114,7 +135,7 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
       return;
     }
     this.isCreating = true;
-    this.apiService.post<BackupJob>('admin/backups/instant', {}).subscribe({
+    this.apiService.post<BackupJob>(`${this.basePath}/instant`, {}).subscribe({
       next: (job) => {
         this.applyJob(job);
         this.schedulePoll(1000);
@@ -139,7 +160,7 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     }
     const backup = this.backupToDelete;
     this.isLoading = true;
-    this.apiService.delete(`admin/backups/${backup.id}`)
+    this.apiService.delete(`${this.basePath}/${backup.id}`)
       .pipe(finalize(() => {
         this.isLoading = false;
         this.backupToDelete = null;
@@ -168,7 +189,7 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
     }
     const backup = this.backupToRestore;
     this.isRestoring = true;
-    this.apiService.post<BackupJob>(`admin/backups/${backup.id}/restore`, {}).subscribe({
+    this.apiService.post<BackupJob>(`${this.basePath}/${backup.id}/restore`, {}).subscribe({
       next: (job) => {
         this.applyJob(job);
         this.schedulePoll(1000);
@@ -179,6 +200,25 @@ export class BackupRestoreComponent implements OnInit, OnDestroy {
         this.messageNotificationService.show(this.translationService.translate('Failed to restore backup'));
       }
     });
+  }
+
+  downloadBackup(backup: BackupRecord): void {
+    this.downloadingId = backup.id;
+    this.http.get(`/api/${this.basePath}/${backup.id}/download`, { responseType: 'blob' })
+      .pipe(finalize(() => (this.downloadingId = null)))
+      .subscribe({
+        next: (blob) => {
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = `${backup.filename}.zip`;
+          link.click();
+          window.URL.revokeObjectURL(url);
+        },
+        error: () => {
+          this.messageNotificationService.show(this.translationService.translate('Failed to download backup'));
+        }
+      });
   }
 
   formatDate(value: string): string {

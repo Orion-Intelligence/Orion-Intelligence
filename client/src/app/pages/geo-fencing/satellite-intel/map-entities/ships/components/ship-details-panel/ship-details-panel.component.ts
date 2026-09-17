@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
 import { ShipDetailField } from '../../../../model/satellite-intel.model';
-import { getOwnProperty } from '../../../../../../../shared/utils/type-guards.util';
+import { formatCoordinateLabel, pickDefinedValue } from '../../../../map-utils/renderer-utils';
 
 
 
@@ -84,22 +84,11 @@ export class ShipDetailsPanelComponent {
   }
 
   get coordinates(): string {
-    const latitude = this.ship?.latitude;
-    const longitude = this.ship?.longitude;
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      return `${Number(latitude).toFixed(3)}, ${Number(longitude).toFixed(3)}`;
-    }
-    return '-';
+    return formatCoordinateLabel(this.ship?.latitude, this.ship?.longitude);
   }
 
   private pick(...keys: string[]): unknown {
-    for (const key of keys) {
-      const value = getOwnProperty(this.ship, key);
-      if (value !== null && value !== undefined && value !== '') {
-        return value;
-      }
-    }
-    return null;
+    return pickDefinedValue(this.ship, keys);
   }
 
   private toExtraFields(key: string, value: unknown): ShipDetailField[] {

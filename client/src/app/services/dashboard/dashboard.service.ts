@@ -206,13 +206,17 @@ export class DashboardService {
     }
     handlers?.setError?.('');
     handlers?.setSaving?.(true);
-    this.apiService.post<ReportFeedbackModel>(`feedback/comment/${docId}`, { comment }).subscribe({
+    this.subscribeReportFeedbackRequest(this.apiService.post<ReportFeedbackModel>(`feedback/comment/${docId}`, { comment }), feedbackModel, handlers, 'Unable to save comment.');
+  }
+
+  private subscribeReportFeedbackRequest(request: Observable<ReportFeedbackModel>, feedbackModel: ReportFeedbackModel, handlers: { setSaving?: (value: boolean) => void; setError?: (value: string) => void } | undefined, errorMessage: string): void {
+    request.subscribe({
       next: (response) => {
         this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
         handlers?.setSaving?.(false);
       },
       error: (error) => {
-        handlers?.setError?.(error?.error?.detail ?? error?.error?.message ?? 'Unable to save comment.');
+        handlers?.setError?.(error?.error?.detail ?? error?.error?.message ?? errorMessage);
         handlers?.setSaving?.(false);
       },
     });
@@ -224,16 +228,7 @@ export class DashboardService {
     }
     handlers?.setError?.('');
     handlers?.setSaving?.(true);
-    this.apiService.delete<ReportFeedbackModel>(`feedback/comment/${docId}/${encodeURIComponent(commentCreatedAt)}`).subscribe({
-      next: (response) => {
-        this.patchReportFeedbackModel(feedbackModel, new ReportFeedbackModel(response));
-        handlers?.setSaving?.(false);
-      },
-      error: (error) => {
-        handlers?.setError?.(error?.error?.detail ?? error?.error?.message ?? 'Unable to delete comment.');
-        handlers?.setSaving?.(false);
-      },
-    });
+    this.subscribeReportFeedbackRequest(this.apiService.delete<ReportFeedbackModel>(`feedback/comment/${docId}/${encodeURIComponent(commentCreatedAt)}`), feedbackModel, handlers, 'Unable to delete comment.');
   }
 
   private initializeSideFilters() {

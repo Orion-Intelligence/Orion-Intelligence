@@ -110,12 +110,11 @@ export class LoginContainerComponent implements OnInit, OnDestroy {
   }
 
   getDashboardPreviewSrc(): string {
-    return this.appService.getConfig().appSettings.auth_dashboard_icon || LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
+    return LoginContainerComponent.DEFAULT_AUTH_DASHBOARD_SRC;
   }
 
   isDefaultDashboardPreview(): boolean {
-    const configuredPreview = this.appService.getConfig().appSettings.auth_dashboard_icon;
-    return !configuredPreview || configuredPreview.includes('auth_dashboard_icon_default.png');
+    return true;
   }
 
   isLightTheme(): boolean {

@@ -751,10 +751,15 @@ Entity Lookup interface for live lookup workflows.
 - text analysis for spam or malicious URL detection
 - crypto-address context
 - email-authentication (DKIM/DMARC/SPF) posture checks
+- email forensics and delivery tracing for a received message
 
 ### DKIM Lookup
 
-DKIM Lookup is part of Entity Lookup. It inspects a domain's email-authentication posture: it discovers DKIM selectors, validates each DKIM DNS record, and runs the related DMARC and SPF checks.
+DKIM Lookup is part of Entity Lookup. It inspects email-authentication posture (DKIM, SPF, and DMARC) and can trace how a message was delivered. The page has two tabs: **Domain Lookup** and **Raw Email Forensics**.
+
+#### Domain Lookup
+
+Discovers DKIM selectors for a domain, validates each DKIM DNS record, and runs the related DMARC and SPF checks.
 
 Inputs:
 
@@ -765,11 +770,30 @@ If a selector is provided, only that selector is checked. If the selector field 
 
 For each selector the result shows whether the record was found, the syntax and public-key checks, the key type and size, the source (live DNS or archive), any warnings (such as a weak 1024-bit key or a record seen only in archives), and the raw record. A `Domain Security` panel summarizes the domain's DMARC policy and SPF record. Completed lookups can be exported as a report.
 
-Use DKIM Lookup for:
+Use Domain Lookup for:
 
 - confirming a domain's DKIM selectors and record validity
 - reviewing DMARC policy and SPF publication for a domain
 - spotting weak keys or selectors no longer published in live DNS
+
+#### Raw Email Forensics (Email Trace)
+
+Analyzes a single received message from its raw source instead of from a domain. In your email client, open the message, view its original source, and paste the full message — headers **and** body — into the box. A **How to get this?** button at the top-right of the panel shows step-by-step instructions for Gmail, Outlook / Microsoft 365, Apple Mail, Yahoo, and Thunderbird.
+
+For that specific message the result reports:
+
+- **DKIM Signature** — the signing domain and selector, and whether the receiving server recorded a `dkim=pass`.
+- **SPF Check** — the SPF result, the sending server's originating IP, and the envelope sender.
+- **DMARC Policy** — the DMARC result, the `From` domain, and the published policy (for example `p=quarantine`).
+- **Network Hops** — the delivery route rebuilt from the `Received` headers, shown as a timeline (source at the bottom, destination at the top).
+
+Use Raw Email Forensics for:
+
+- checking whether a specific message was authenticated (spoofing and phishing triage)
+- tracing where a message actually originated and which servers it passed through
+- confirming the SPF, DKIM, and DMARC results for a message you received
+
+The results reflect the authentication verdicts recorded in the message headers and the routing they describe; they are a fast forensic read of the message rather than an independent re-verification of the DKIM signature.
 
 ### Text Analysis
 

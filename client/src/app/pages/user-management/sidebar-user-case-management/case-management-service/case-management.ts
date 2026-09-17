@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable, catchError, filter, map, of, switchMap, take, timer } from 'rxjs';
+import { Observable, catchError, map, of } from 'rxjs';
 import { ApiService } from '../../../../shared/services/api.service';
 import { ArtifactReportOption, Case, CaseAnalyst, CaseCommunicationRequest, CaseRequest, CaseShareRequest, CaseShareResponse, CaseStatusReason, CaseUpdateRequest } from '../model/case.model';
 import { CaseStatusBoardConfig } from '../model/status-board-config.model';
@@ -74,18 +74,9 @@ export class CaseManagement {
     return this.api.delete<Case>(`profile/cases/${caseId}/communications/${communicationId}`);
   }
 
-  openCommunication(caseId: string, communicationId: string): Observable<{ opened?: boolean; error?: string }> {
-    return this.api.post<{ result?: { opened?: boolean }; error?: string }>(`profile/cases/${caseId}/communications/${communicationId}/open`, {}).pipe(map(response => ({ opened: response?.result?.opened, error: response?.error })),
+  openCommunication(caseId: string, communicationId: string, url?: string): Observable<{ opened?: boolean; error?: string }> {
+    return this.api.post<{ result?: { opened?: boolean }; error?: string }>(`profile/cases/${caseId}/communications/${communicationId}/open`, { url }).pipe(map(response => ({ opened: response?.result?.opened, error: response?.error })),
       catchError(() => of<{ opened?: boolean; error?: string }>({ error: 'open_failed' })));
-  }
-
-  saveCommunicationSession(caseId: string, communicationId: string): Observable<{ case?: Case; error?: string }> {
-    return timer(0, 2500).pipe(switchMap(() => this.api.post<{ result?: { saved?: boolean; case?: Case }; error?: string; status?: string }>(`profile/cases/${caseId}/communications/${communicationId}/session`, {})),
-      map(response => ({ pending: response?.status === 'pending', case: response?.result?.case, error: response?.error })),
-      filter(result => !result.pending),
-      take(1),
-      map(result => ({ case: result.case, error: result.error })),
-      catchError(() => of<{ case?: Case; error?: string }>({ error: 'session_failed' })));
   }
 
   uploadArtifactFiles(caseId: string, artifactId: string, files: File[]): Observable<ArtifactFileUploadResponse> {

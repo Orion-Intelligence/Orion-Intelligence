@@ -24,6 +24,7 @@ import { AlertExportService } from '../../../shared/partials/alert-notification/
 import { SidebarHomepageService } from '../../../services/dashboard/sidebar.service';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { TranslationService } from '../../../shared/services/translation.service';
+import { isTenantIocPrivileged } from '../ioc-privilege.util';
 
 @Component({
   selector: 'app-sidebar-user-homepage',
@@ -145,10 +146,7 @@ export class SidebarUserHomepageComponent implements OnInit, OnDestroy {
   }
 
   isPrivilegedIoc(): boolean {
-    const tenantPrivileged = this.appService.tenantData().privileged_ioc;
-    return tenantPrivileged === undefined
-      ? this.appService.userSessionData().tenant.privilegedIoc !== true
-      : !tenantPrivileged;
+    return isTenantIocPrivileged(this.appService);
   }
 
   editIocs() {

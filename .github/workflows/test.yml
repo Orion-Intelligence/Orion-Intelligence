@@ -7,6 +7,10 @@ on:
 
 permissions: read-all
 
+concurrency:
+  group: test-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   client-tests:
     runs-on: ubuntu-latest
@@ -84,7 +88,7 @@ jobs:
       - run: |
           set -euo pipefail
           rm -f backend/static/.maintenance
-          rm -f backend/build/backups/.restore_in_progress
+          rm -f backend/backups/.restore_in_progress
           chmod +x ./run.sh
 
       - run: |
@@ -101,6 +105,7 @@ jobs:
       - name: Start the same testing stack used by run.sh -docs
         run: |
           set -euo pipefail
+          export BACKEND_COVERAGE_RC=/app/.coveragerc
           SKIP_BACKEND_TESTS=1 ./run.sh build -t
           docker compose -p trusted-search -f docker-compose-testing.yml exec -T web sh -lc '
             for path in \
@@ -168,13 +173,63 @@ jobs:
           ORION_COVERAGE=true CI=false GITHUB_ACTIONS=false npx cypress run --browser electron --config baseUrl=https://127.0.0.1:8443
           test -s coverage/lcov.info
 
+      - name: Generate backend e2e coverage report
+        if: always()
+        run: |
+          set -euo pipefail
+          docker stop trusted-web-main || true
+          rm -rf /tmp/ecov && mkdir -p /tmp/ecov
+          docker cp trusted-web-main:/tmp/. /tmp/ecov/ 2>/dev/null || true
+          if ! ls /tmp/ecov/.coverage.e2e* >/dev/null 2>&1; then
+            echo "no backend e2e coverage data captured"; exit 0
+          fi
+          docker compose -p trusted-search -f docker-compose-testing.yml run --rm --no-deps \
+            -v /tmp/ecov:/ecov --entrypoint sh web -c '
+              cp /ecov/.coverage.e2e* /tmp/ 2>/dev/null || true
+              cd /app
+              COVERAGE_FILE=/tmp/.coverage.e2e.all coverage combine /tmp/.coverage.e2e* || true
+              COVERAGE_FILE=/tmp/.coverage.e2e.all coverage xml -o /ecov/backend-e2e-coverage.xml || true
+            '
+          if [ ! -s /tmp/ecov/backend-e2e-coverage.xml ]; then echo "no e2e xml produced"; exit 0; fi
+          cp /tmp/ecov/backend-e2e-coverage.xml backend/coverage-e2e.xml
+          python3 - <<'PY'
+          import pathlib, xml.etree.ElementTree as ET
+          report = pathlib.Path("backend/coverage-e2e.xml")
+          tree = ET.parse(report); root = tree.getroot()
+          for sources in root.findall("sources"):
+              for s in list(sources):
+                  sources.remove(s)
+              ET.SubElement(sources, "source").text = "."
+          rewritten = 0
+          for element in root.iter("class"):
+              filename = element.get("filename")
+              if filename and not filename.startswith("backend/orion/"):
+                  element.set("filename", f"backend/orion/{filename}")
+                  rewritten += 1
+          tree.write(report, encoding="utf-8", xml_declaration=True)
+          print(f"Rewrote {rewritten} source paths")
+          PY
+
+      - if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: backend-e2e-coverage
+          path: backend/coverage-e2e.xml
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Make client coverage paths repository relative
+        if: always()
         run: |
           set -euo pipefail
           python3 - <<'PY'
           import pathlib
+          import sys
 
           report = pathlib.Path("client/coverage/lcov.info")
+          if not report.exists() or report.stat().st_size == 0:
+              print("client coverage report missing; nothing to rewrite")
+              sys.exit(0)
           lines = report.read_text(encoding="utf-8", errors="ignore").splitlines()
           rewritten = []
 
@@ -345,7 +400,7 @@ jobs:
       - run: |
           set -euo pipefail
           rm -f backend/static/.maintenance
-          rm -f backend/build/backups/.restore_in_progress
+          rm -f backend/backups/.restore_in_progress
           chmod +x ./run.sh
           ./run.sh build -b
           sed -i '/^TESTING_ENABLED=/d' .env
@@ -399,11 +454,12 @@ jobs:
             set -e
             cd /app
             COVERAGE_FILE=/tmp/.coverage TESTING_ENABLED=1 PYTHONPATH=/app python -m pytest -q tests \
-              --cov=orion --maxfail=1 --disable-warnings \
+              --cov=orion --disable-warnings \
               --cov-report=xml:/tmp/backend-coverage.xml
           '
 
       - name: Generate backend coverage report
+        if: always()
         run: |
           set -euo pipefail
           docker cp trusted-web-main:/tmp/backend-coverage.xml backend/coverage.xml
@@ -471,24 +527,33 @@ jobs:
           name: backend-coverage
           path: backend
 
+      - name: Download backend e2e coverage
+        continue-on-error: true
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          name: backend-e2e-coverage
+          path: backend
+
       - name: Detect coverage reports
         id: codacy_reports
         run: |
           set -euo pipefail
           reports=""
+          append() { if [ -n "$reports" ]; then reports="${reports},$1"; else reports="$1"; fi; }
           if [ -s client/coverage/lcov.info ]; then
-            reports="client/coverage/lcov.info"
+            append "client/coverage/lcov.info"
           else
             echo "client coverage report missing"
           fi
           if [ -s backend/coverage.xml ]; then
-            if [ -n "$reports" ]; then
-              reports="${reports},backend/coverage.xml"
-            else
-              reports="backend/coverage.xml"
-            fi
+            append "backend/coverage.xml"
           else
             echo "backend coverage report missing"
+          fi
+          if [ -s backend/coverage-e2e.xml ]; then
+            append "backend/coverage-e2e.xml"
+          else
+            echo "backend e2e coverage report missing"
           fi
           echo "reports=${reports}" >> "$GITHUB_OUTPUT"
 

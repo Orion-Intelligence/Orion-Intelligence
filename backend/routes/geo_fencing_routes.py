@@ -7,7 +7,7 @@ from orion.api.interactive.auditlog_manager.audit_log_manager import AuditLogMan
 from orion.api.interactive.scan_job_manager.scan_job_manager import ScanJobManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_data_model.map_entities.search_map_entities_param_model import search_map_entities_param_model
-from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_manager import search_manager
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest
 from orion.api.server.geo_fencing_manager.class_model.satellite_request_models import (
     SatelliteAnomalyRequest,
@@ -41,7 +41,7 @@ def _enforce_demo_safe_search(param: search_consolidated_param_model, current_us
     dependencies=SATELLITE_INTEL_DEPS,
 )
 async def stream_map_entities(param: search_map_entities_param_model = Body(...), current_user=Depends(get_current_user)):
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
     try:
         stream = await geo_fencing_manager.get_instance().stream_map_entities_points(chunk_size=param.size)
     except HTTPException:
@@ -83,8 +83,8 @@ async def search_threat_lens_news(param: search_consolidated_param_model = Body(
     if param.platform_result_count is None or "platform_result_count" not in param.model_fields_set:
         param.platform_result_count = 500
     param.sort_latest = True
-    await AuditLogManager.get_instance().register(str(current_user.tenant_uuid), str(current_user.id), param.model_dump_json())
-    return await search_model.getInstance().search_consolidated_result(param)
+    await AuditLogManager.get_instance().register(str(current_user.tenant_id), str(current_user.id), param.model_dump_json())
+    return await search_manager.getInstance().search_consolidated_result(param)
 
 
 @geo_fencing_routes.post(
@@ -99,7 +99,7 @@ async def geo_camera_detect(param: GeoCameraDetectRequest = Body(...), force_new
         api_reference="netintel/iot_detect",
         payload=param.model_dump(),
         metadata={"title": "Geo Camera Scan", "target": param.coordinates},
-        runner=lambda: search_model.getInstance().network_intel(param, "iot_detect", user_id=str(current_user.id)),
+        runner=lambda: search_manager.getInstance().network_intel(param, "iot_detect", user_id=str(current_user.id)),
         force_new=force_new,
     )
 
@@ -116,7 +116,7 @@ async def geo_camera_detect_ranges(param: GeoCameraDetectRangesRequest = Body(..
         api_reference="netintel/camera_detect_ranges",
         payload=param.model_dump(),
         metadata={"title": "Geo Camera Range Scan", "target": ", ".join(param.ip_ranges[:3])},
-        runner=lambda: search_model.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id)),
+        runner=lambda: search_manager.getInstance().network_intel(param, "camera_detect_ranges", user_id=str(current_user.id)),
         force_new=force_new,
     )
 

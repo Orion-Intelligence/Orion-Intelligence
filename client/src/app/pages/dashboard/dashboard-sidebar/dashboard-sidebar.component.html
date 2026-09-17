@@ -6,8 +6,8 @@
   expandTestId="sidebar-expand-button"
   collapseTestId="sidebar-collapse-button"
   (toggleClicked)="onToggleSidebar(!sidebar_default)">
-  <nav data-sidebar-expanded class="h-full w-full animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
-    <div data-testid="dashboard-sidebar-scroll" class="ml-[-5px] h-full min-h-[500px] overflow-y-auto p-[20px] pb-[100px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+  <nav data-sidebar-expanded class="flex h-full min-h-0 w-full flex-col animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
+    <div data-testid="dashboard-sidebar-scroll" class="ml-[-5px] min-h-0 flex-1 overflow-y-auto px-[20px] pt-[20px] pb-[20px] [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div id="sidebar-profile">
       <app-dashboard-sidebar-items
         (optionSelected)="onOptionSelected($event)"
@@ -113,6 +113,31 @@
         <div class="mt-[20px] text-[13px] font-bold text-white">{{ 'Data Collection API\'s' | translate }}</div>
         <div class="my-[10px] h-px bg-[linear-gradient(90deg,#ffffff15_0%,#ffffff15_70%,transparent_100%)]"></div>
       }
+      @if (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) || isDemo()) {
+        <div id="sidebar-social-intel" class="mt-[6px] rounded-[8px] select-none">
+          <div (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))); (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) && onSectionSelected(category.SOCIAL_INTEL)" [routerLink]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/manage-profiles' : null" [queryParams]="{ page: 1 }" queryParamsHandling="merge" [ngClass]="{ 'bg-[var(--color-blue-880)] text-white border border-[rgba(255,255,255,0.06)]': (selectionStore.selectedSection$ | async) === category.SOCIAL_INTEL, 'opacity-20': isDemo() && !(isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) }" data-testid="sidebar-group-social-intel" tabindex="0" class="relative flex w-full items-center gap-[8px] px-[10px] py-[13px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white">
+            <img alt="" [ngClass]="{ 'opacity-100': (selectionStore.selectedSection$ | async) === category.SOCIAL_INTEL, 'opacity-60': (selectionStore.selectedSection$ | async) !== category.SOCIAL_INTEL }" class="mr-[8px] h-[20px] w-[20px] shrink-0" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
+            {{ 'Social Intel' | translate }}
+            <img alt="" data-testid="sidebar-group-social-intel-toggle" [ngClass]="{ 'rotate-[360deg]': (selectionStore.selectedSection$ | async) === category.SOCIAL_INTEL, 'rotate-[270deg]': (selectionStore.selectedSection$ | async) !== category.SOCIAL_INTEL }" class="ml-auto transition-transform duration-300" height="20" ngSrc="assets/images/shared/search_side_dropdown_icon.svg" width="20">
+          </div>
+          <ul [ngClass]="{ 'opacity-100 max-h-[500px] translate-y-0 mt-[15px] pointer-events-auto': (selectionStore.selectedSection$ | async) === category.SOCIAL_INTEL, 'transition-none': (selectionStore.selectedSection$ | async) !== category.SOCIAL_INTEL }" class="list-none ml-[15px] pl-0 border-l border-[rgba(252,252,252,0.08)] opacity-0 max-h-0 -translate-y-2 overflow-hidden overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden transition-[opacity,max-height,transform,margin-top] duration-200 ease-out pointer-events-none">
+            <li>
+              <a (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))); (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) && onOptionSelected(socialIntelSubCategory.MONITORING)" [routerLink]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/manage-profiles' : null" [queryParams]="{ page: 1 }" queryParamsHandling="merge" data-testid="sidebar-subitem-social-intel-social-monitoring" [ngClass]="{ 'border-l-2 border-white text-white font-medium h-[43px]': (selectionStore.selectedOption$ | async) === socialIntelSubCategory.MONITORING }" class="mt-[5px] block text-[#C7D7E6] font-[Roboto] cursor-pointer">
+                <div [ngClass]="{ 'bg-[var(--color-blue-880)] before:text-white': (selectionStore.selectedOption$ | async) === socialIntelSubCategory.MONITORING }" class="py-[12px] pr-[12px] pl-0 text-[13px] font-medium ml-[20px] rounded-[6px] font-[Inter] hover:bg-[var(--color-blue-880)] before:content-['●'] before:text-[8px] before:mr-[10px] before:ml-[18px] before:inline-block before:align-middle before:leading-none before:text-[#C7D7E6]">
+                  {{ 'Social Monitoring' | translate }}
+                </div>
+              </a>
+            </li>
+            <li>
+              <a (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')))" [attr.href]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/social-intel' : null" target="_blank" data-testid="sidebar-subitem-social-intel-profile-intelligence" class="mt-[5px] block text-[#C7D7E6] font-[Roboto] cursor-pointer">
+                <div class="py-[12px] pr-[12px] pl-0 text-[13px] font-medium ml-[20px] rounded-[6px] font-[Inter] hover:bg-[var(--color-blue-880)] before:content-['●'] before:text-[8px] before:mr-[10px] before:ml-[18px] before:inline-block before:align-middle before:leading-none before:text-[#C7D7E6]">
+                  {{ 'Profile Intelligence' | translate }}
+                </div>
+              </a>
+            </li>
+          </ul>
+        </div>
+      }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
         <div id="sidebar-stealer-logs">
         <app-dashboard-sidebar-items
@@ -149,14 +174,6 @@
           </a>
         </div>
       }
-      @if (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) || isDemo()) {
-        <div id="sidebar-social-intel" class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')))" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) }" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/social-intel' : null" target="_blank">
-            <img alt="" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
-            {{ 'Social Intel' | translate }}
-          </a>
-        </div>
-      }
       @if (appService.getConfig().appSettings.home_header_whistle_blowing_allowed) {
         <div class="my-[6px] rounded-[8px] select-none">
           <a (click)="requestStandaloneSubscription($event, isAdmin() || !authService.getIsMobileDemo())" class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white" [attr.href]="isAdmin() || !authService.getIsMobileDemo() ? 'https://orionleaks.com/#/' : null" target="_blank">
@@ -185,7 +202,7 @@
         </div>
       </div>
       @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
-        <a id="sidebar-documentation" data-testid="sidebar-documentation" class="block select-none p-0" href="/documentation/" target="_blank">
+        <a id="sidebar-documentation" data-testid="sidebar-documentation" class="block select-none p-0" [href]="documentationUrl" target="_blank" rel="noopener">
           <div class="my-[6px] rounded-[8px] select-none">
             <div class="flex h-[46px] items-center gap-[8px] px-[10px] text-[14px] font-medium font-[Inter] text-[#A0B8D1] rounded-[8px] border border-transparent transition-colors duration-300 cursor-pointer hover:bg-[#31669b35] hover:text-white">
               <img alt="" class="mr-[8px] h-[20px] w-[20px] shrink-0 opacity-60" height="20" ngSrc="assets/images/sidebar/documentation.svg" width="20">{{ 'Documentation' | translate }}
@@ -200,11 +217,15 @@
           </div>
         }
       }
+      <div data-testid="sidebar-app-version" class="mt-6">
+        <div class="text-[12px] font-semibold leading-5 text-white">{{ appService.getConfig().appSettings.app_name || 'Orion Intelligence' }}</div>
+        <div class="mt-1 text-[10px] font-medium tracking-wide text-[#A0B8D1]">Version 1.0.3.8</div>
+      </div>
     </div>
   </nav>
 
   <nav data-sidebar-collapsed class="flex h-full min-h-0 w-full flex-col pt-0 animate-[sidebar-mode-enter_260ms_cubic-bezier(0.16,1,0.3,1)] max-[600px]:animate-none">
-    <div data-testid="dashboard-sidebar-scroll" class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-[200px] pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+    <div data-testid="dashboard-sidebar-scroll" class="flex-1 min-h-0 w-full flex flex-col items-center overflow-y-auto px-0 pb-1 pt-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <app-dashboard-sidebar-collapsed
         id="sidebar-profile"
         (optionSelected)="onOptionSelected($event)"
@@ -313,6 +334,14 @@
           [selectionStore]="selectionStore"
         [title]="('Entity Lookup') | translate"></app-dashboard-sidebar-collapsed>
       }
+      @if (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) || isDemo()) {
+        <li class="my-[6px] rounded-[8px] select-none">
+          <a (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')))" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) }" [appTooltip]="'Social Intel' | translate" [attr.aria-label]="'Open Social Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/social-intel' : null" target="_blank">
+            <img alt="" class="opacity-100" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
+            <span class="sr-only">{{ 'Open Social Intel' | translate }}</span>
+          </a>
+        </li>
+      }
       @if (isAdmin() || licenseService.canUseModule('stealer_logs')) {
         <app-dashboard-sidebar-collapsed
           id="sidebar-stealer-logs"
@@ -347,14 +376,6 @@
           </a>
         </li>
       }
-      @if (isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) || isDemo()) {
-        <li class="my-[6px] rounded-[8px] select-none">
-          <a (click)="requestStandaloneSubscription($event, isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')))" [ngClass]="{ 'opacity-20': isDemo() && !(isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper'))) }" [appTooltip]="'Social Intel' | translate" [attr.aria-label]="'Open Social Intel' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || (!isDemo() && licenseService.canUseModule('social_mapper')) ? '/dashboard/social-intel' : null" target="_blank">
-            <img alt="" class="opacity-100" height="20" ngSrc="assets/images/sidebar/social.svg" width="20">
-            <span class="sr-only">{{ 'Open Social Intel' | translate }}</span>
-          </a>
-        </li>
-      }
       @if (appService.getConfig().appSettings.home_header_whistle_blowing_allowed) {
         <li class="my-[6px] rounded-[8px] select-none">
           <a (click)="requestStandaloneSubscription($event, isAdmin() || !authService.getIsMobileDemo())" [appTooltip]="'Whistle Blowing' | translate" [attr.aria-label]="'Open Whistle Blowing' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white" [attr.href]="isAdmin() || !authService.getIsMobileDemo() ? 'https://orionleaks.com/#/' : null" target="_blank">
@@ -379,7 +400,7 @@
       </li>
       <li class="my-[6px] rounded-[8px] select-none">
         @if (appService.getConfig().appSettings.home_header_pricing_allowed) {
-          <a id="sidebar-documentation" data-testid="sidebar-documentation" [appTooltip]="'Documentation' | translate" [attr.aria-label]="'Open documentation' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" href="/documentation/" target="_blank">
+          <a id="sidebar-documentation" data-testid="sidebar-documentation" [appTooltip]="'Documentation' | translate" [attr.aria-label]="'Open documentation' | translate" class="flex h-[46px] w-[54px] shrink-0 items-center justify-center overflow-hidden rounded-[8px] border border-transparent p-0 text-[14px] font-medium font-[Inter] text-[#A0B8D1] transition-colors duration-300 cursor-pointer hover:bg-[var(--color-blue-870)] hover:text-white select-none" [href]="documentationUrl" target="_blank" rel="noopener">
             <img alt="" class="opacity-100" height="20" ngSrc="assets/images/sidebar/documentation.svg" width="20">
             <span class="sr-only">{{ 'Open documentation' | translate }}</span>
           </a>
@@ -392,6 +413,10 @@
           </button>
         </li>
       }
+      <div class="mt-6 w-full shrink-0 px-1 text-center" [title]="(appService.getConfig().appSettings.app_name || 'Orion Intelligence') + ' · v1.0.3.8'">
+        <div class="break-words text-[9px] font-semibold leading-4 text-white">{{ appService.getConfig().appSettings.app_name || 'Orion Intelligence' }}</div>
+        <div class="mt-1 text-[9px] text-[#A0B8D1]">v1.0.3.8</div>
+      </div>
     </div>
   </nav>
 </app-graph-sidebar-shell>

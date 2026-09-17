@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { TranslatePipe } from '../../../../../../../shared/pipes/translate.pipe';
-import { getOwnProperty } from '../../../../../../../shared/utils/type-guards.util';
+import { formatCoordinateLabel, pickDefinedValue } from '../../../../map-utils/renderer-utils';
 
 
 @Component({
@@ -51,22 +51,11 @@ export class AircraftDetailsPanelComponent {
   }
 
   get coordinates(): string {
-    const latitude = this.aircraft?.latitude;
-    const longitude = this.aircraft?.longitude;
-    if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
-      return `${Number(latitude).toFixed(3)}, ${Number(longitude).toFixed(3)}`;
-    }
-    return '-';
+    return formatCoordinateLabel(this.aircraft?.latitude, this.aircraft?.longitude);
   }
 
   private pick(...keys: string[]): unknown {
-    for (const key of keys) {
-      const value = getOwnProperty(this.aircraft, key);
-      if (value !== null && value !== undefined && value !== '') {
-        return value;
-      }
-    }
-    return null;
+    return pickDefinedValue(this.aircraft, keys);
   }
 
   private display(value: unknown): string {

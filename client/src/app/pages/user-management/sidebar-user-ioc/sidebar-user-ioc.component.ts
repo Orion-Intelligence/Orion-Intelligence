@@ -7,6 +7,7 @@ import { search_filter_labels } from '../../../shared/constants/shared-enums';
 import { TenantModel } from '../../../shared/model/tenant/tenant.model';
 import { TenantIocSelectorComponent } from '../../../shared/partials/tenant-ioc-selector/tenant-ioc-selector.component';
 import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+import { isTenantIocPrivileged } from '../ioc-privilege.util';
 
 
 @Component({
@@ -54,10 +55,7 @@ export class SidebarUserIocComponent implements OnInit {
   }
 
   isPrivilegedIoc(): boolean {
-    const tenantPrivileged = this.appService.tenantData().privileged_ioc;
-    return tenantPrivileged === undefined
-      ? this.appService.userSessionData().tenant.privilegedIoc !== true
-      : !tenantPrivileged;
+    return isTenantIocPrivileged(this.appService);
   }
 
   update(): void {

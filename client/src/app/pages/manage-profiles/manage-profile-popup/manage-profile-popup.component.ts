@@ -1,6 +1,6 @@
 import { Component, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 import { UiDropdownComponent, UiDropdownOption } from '../../../shared/partials/ui-dropdown/ui-dropdown.component';
 import { MessageNotificationService } from '../../../services/message_notification/message-notification.service';
 import { ManageProfilesService } from '../manage-profiles.service';
@@ -8,6 +8,7 @@ import { PlatformEntry, SessionEntry, SocialPersona, SocialPersonaCreateRequest,
 import { CaseEditDrawerComponent } from '../../user-management/sidebar-user-case-management/model/case-details/case-edit-drawer/case-edit-drawer';
 import { TranslatePipe } from '../../../shared/pipes/translate.pipe';
 import { getOwnProperty } from '../../../shared/utils/type-guards.util';
+import { safePlatform } from '../manage-profiles.util';
 
 export type ManageProfilePopupMode = 'persona' | 'profile';
 export type ManageProfilePopupSaveEvent = 'persona' | 'profile';
@@ -89,7 +90,7 @@ export class ManageProfilePopupComponent {
   }
 
   onProfilePlatform(value: string | null): void {
-    this.profileForm.update(form => ({ ...form, platform: this.safePlatform(value ?? '') as SocialPlatform, session_id: '' }));
+    this.profileForm.update(form => ({ ...form, platform: safePlatform(value ?? '') as SocialPlatform, session_id: '' }));
   }
 
   onProfileSession(value: string | null): void {
@@ -102,7 +103,7 @@ export class ManageProfilePopupComponent {
 
   platformOptions(): UiDropdownOption[] {
     return this.platforms()
-      .map(entry => ({ key: this.safePlatform(entry.platform), label: entry.platform }))
+      .map(entry => ({ key: safePlatform(entry.platform), label: entry.platform }))
       .filter((option, index, values) => !!option.key && values.findIndex(item => item.key === option.key) === index);
   }
 
@@ -140,14 +141,18 @@ export class ManageProfilePopupComponent {
     this.saving.set(true);
     const personaId = this.persona()?.persona_id ?? '';
     const request = personaId ? this.service.updatePersona(personaId, form) : this.service.createPersona(form);
+    this.submitSaveRequest(request, 'persona', 'Failed to save persona');
+  }
+
+  private submitSaveRequest(request: Observable<unknown>, savedKind: ManageProfilePopupSaveEvent, errorMessage: string): void {
     request.pipe(finalize(() => {
-      this.saving.set(false); 
+      this.saving.set(false);
     })).subscribe({
       next: () => {
-        this.saved.emit('persona'); 
+        this.saved.emit(savedKind);
       },
       error: (error) => {
-        this.formError.set(error?.error?.detail ?? 'Failed to save persona');
+        this.formError.set(error?.error?.detail ?? errorMessage);
       },
     });
   }
@@ -165,23 +170,10 @@ export class ManageProfilePopupComponent {
     this.saving.set(true);
     const profileId = this.profile()?.profile_id ?? '';
     const request = profileId ? this.service.updateProfile(profileId, form) : this.service.connectProfile(form);
-    request.pipe(finalize(() => {
-      this.saving.set(false); 
-    })).subscribe({
-      next: () => {
-        this.saved.emit('profile'); 
-      },
-      error: (error) => {
-        this.formError.set(error?.error?.detail ?? 'Failed to save profile');
-      },
-    });
-  }
-
-  private safePlatform(platform: string): string {
-    return platform.toLowerCase().replace(/[^a-z0-9]/g, '');
+    this.submitSaveRequest(request, 'profile', 'Failed to save profile');
   }
 
   private platformLabel(platform: string): string {
-    return this.platforms().find(entry => this.safePlatform(entry.platform) === platform)?.platform ?? platform;
+    return this.platforms().find(entry => safePlatform(entry.platform) === platform)?.platform ?? platform;
   }
 }

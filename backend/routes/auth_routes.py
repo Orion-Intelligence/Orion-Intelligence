@@ -44,10 +44,18 @@ def _finalize_auth_response(result: dict, request: Request, response: Response, 
     return cookie_only_result(result, cookie_auth)
 
 
+def _finalize_token_response(result: dict, request: Request, response: Response, cookie_only: bool) -> dict:
+    access_token = result.get("access_token")
+    cookie_auth = uses_cookie_auth(request, cookie_only)
+    if access_token and cookie_auth:
+        set_access_cookie(response, access_token)
+    return cookie_only_result(result, cookie_auth)
+
+
 @auth_router.post("/api/token")
 async def token(request: Request, form_data: OAuth2PasswordRequestForm = Depends(), response: Response = None, cookie_only: bool = False, redis_store: redis_controller = Depends(redis_controller.getInstance)):
     client = "extension" if any(scope in {"extension", "orion_extension"} for scope in form_data.scopes) else "web"
-    result = await auth_rate_limit(redis_store, form_data.username, lambda: auth_manager.login(form_data.username, form_data.password, client=client, tenant_id=getattr(request.state, "tenant", None)))
+    result = await auth_rate_limit(redis_store, form_data.username, lambda: auth_manager.login(form_data.username, form_data.password, client=client, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None))))
 
     return _finalize_auth_response(result, request, response, cookie_only)
 
@@ -57,18 +65,14 @@ async def token_demo(request: Request, response: Response = None, cookie_only: b
     DEMO_USERNAME = env_handler.get_instance().env("DEMO_USERNAME")
     DEMO_PASSWORD = env_handler.get_instance().env("DEMO_PASSWORD")
 
-    result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD, True, tenant_id=getattr(request.state, "tenant", None))
+    result = await auth_manager.login(DEMO_USERNAME, DEMO_PASSWORD, True, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
     return _finalize_auth_response(result, request, response, cookie_only)
 
 
 @auth_router.post("/api/token/2fa/verify")
 async def verify_2fa(request: Request, code: str = Body(..., embed=True), ptoken: str = Depends(oauth2_scheme), response: Response = None, cookie_only: bool = False):
-    result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code, tenant_id=getattr(request.state, "tenant", None))
-    access_token = result.get("access_token")
-    cookie_auth = uses_cookie_auth(request, cookie_only)
-    if access_token and cookie_auth:
-        set_access_cookie(response, access_token)
-    return cookie_only_result(result, cookie_auth)
+    result = await session_manager.get_instance().verify_2fa_and_issue(ptoken, code, tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
+    return _finalize_token_response(result, request, response, cookie_only)
 
 
 @auth_router.post("/api/token/refresh")
@@ -76,18 +80,14 @@ async def refresh_token(request: Request, response: Response = None, cookie_only
     session_token = token_from_request(request)
     if not session_token:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Missing token")
-    result = await session_manager.get_instance().refresh_token(session_token,tenant_id=getattr(request.state, "tenant", None))
-    access_token = result.get("access_token")
-    cookie_auth = uses_cookie_auth(request, cookie_only)
-    if access_token and cookie_auth:
-        set_access_cookie(response, access_token)
-    return cookie_only_result(result, cookie_auth)
+    result = await session_manager.get_instance().refresh_token(session_token,tenant_id=session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
+    return _finalize_token_response(result, request, response, cookie_only)
 
 
 @auth_router.post("/api/logout")
 async def logout(request: Request):
     session_token = token_from_request(request)
-    tenant_id = getattr(request.state, "tenant", None)
+    tenant_id = session_manager.tenant_identifier(getattr(request.state, "tenant", None))
     session_mgr = session_manager.get_instance()
     try:
         current_user = await session_mgr.get_current_user(session_token, tenant_id=tenant_id)
@@ -121,12 +121,12 @@ async def verifyUser(verification_token: str):
 
 @auth_router.post("/api/forgot")
 async def forgotPassword(data: ForgotPasswordRequest, request: Request):
-    return await auth_manager.forgot_password(data.email, getattr(request.state, "tenant", None))
+    return await auth_manager.forgot_password(data.email, session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
 
 
 @auth_router.post("/api/recover")
 async def recover_account(data: RecoveryRequest, request: Request):
-    return await auth_manager.recover_account(data.recovery_key, getattr(request.state, "tenant", None))
+    return await auth_manager.recover_account(data.recovery_key, session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
 
 
 @auth_router.post("/api/subscription/request")
@@ -136,7 +136,7 @@ async def subscriptionRequest(request: PaymentParamModel):
 
 @auth_router.post("/api/updatePassword")
 async def updatePassword(data: ResetPassword, request: Request):
-    return await auth_manager.update_password(data.token, data.password, getattr(request.state, "tenant", None))
+    return await auth_manager.update_password(data.token, data.password, session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
 
 @auth_router.post("/api/support")
 async def support(data: SupportRequest):

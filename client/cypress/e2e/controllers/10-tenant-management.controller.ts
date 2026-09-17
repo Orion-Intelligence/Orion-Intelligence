@@ -1,6 +1,9 @@
 
 import type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
+import {TEST_DATA} from '../../support/constants';
 export type { AlertMailMessage, CaseAlertTenant } from '../model/10-tenant-management.model';
+export const tenantResetNewPassword = '2wsx@WSX2026';
+export const alertSlackClientId = TEST_DATA.alert_slack_client_id;
 export const ALERT_SCANNER_CATEGORIES = [
   'general',
   'defacement',
@@ -25,7 +28,23 @@ const HOME_ALERT_CARD_SELECTOR = '[data-testid="tenant-home-alert-category-card"
 
 type AlertScannerCategory = typeof ALERT_SCANNER_CATEGORIES[number];
 
+export function selectEnabledCurrentMonthDate(day: number) {
+  void cy.get(`[data-testid="side-filter-date-day-${day}"]`)
+    .filter(':visible')
+    .filter((_index, element) => {
+      const className = element.getAttribute('class') || '';
+      return !element.hasAttribute('disabled') && !className.includes('text-slate-400');
+    })
+    .should('have.length.greaterThan', 0)
+    .first()
+    .scrollIntoView()
+    .should('be.enabled')
+    .click();
+}
 
+export function enableTenantPrivilegedIocIfInputDisabled() {
+  void cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 60000}).should('be.visible').and('not.be.disabled');
+}
 
 function setConfiguredViewport() {
   void cy.viewport(
@@ -868,4 +887,135 @@ export function waitForBlockingOverlayToClose() {
       void cy.wrap($overlay.first()).should('not.be.visible');
     }
   });
+}
+
+export const CATEGORY_ALERT_REPORT_TYPE = 'breach';
+const CATEGORY_ALERT_LONG_DESCRIPTION = 'Cypress synthetic breach description line for the category alert detail drawer. '.repeat(6);
+const CATEGORY_ALERT_CARD_SELECTOR = '[data-testid="tenant-alert-report-card"]';
+const CATEGORY_ALERT_DRAWER_SELECTOR = '[data-testid="tenant-alert-detail-drawer"]';
+const CATEGORY_ALERT_SEARCH_INPUT = '.category_report_searchbar-input input[type="text"]';
+
+function categoryAlertItem(index: number): Record<string, unknown> {
+  return {
+    alert_id: `cypress-breach-alert-${index}`,
+    report_seen: false,
+    custom_alert: false,
+    type: CATEGORY_ALERT_REPORT_TYPE,
+    ioc_type: 'domain',
+    ioc_value: `cypress-breach-${index}.example.com`,
+    data_hash: `cypress-breach-hash-${index}`,
+    title: `Cypress Breach Alert ${index}`,
+    description: `${CATEGORY_ALERT_LONG_DESCRIPTION} (record ${index})`,
+    url: `https://cypress-breach-${index}.example.com/leak`,
+    source: index % 2 === 0 ? 'Combolist' : 'Forum',
+    risk: 'High',
+    all_ioc: [
+      { name: 'm_email', values: [`victim-${index}@example.com`] },
+      { name: 'm_date', values: ['2024-05-01'] },
+    ],
+    content_types: ['Paste', 'Forum'],
+    raw_findings: {
+      leak: {
+        source: 'combolist',
+        records: [`victim-${index}@example.com`, `victim-${index}-alt@example.com`],
+      },
+    },
+    first_seen: '2024-05-01T00:00:00.000Z',
+    last_seen: '2024-05-02T00:00:00.000Z',
+  };
+}
+
+function categoryAlertsForPage(page: number): Record<string, unknown>[] {
+  if (page >= 2) {
+    return [categoryAlertItem(3)];
+  }
+  return [categoryAlertItem(1), categoryAlertItem(2)];
+}
+
+function allCategoryStubAlerts(): Record<string, unknown>[] {
+  return [categoryAlertItem(1), categoryAlertItem(2), categoryAlertItem(3)];
+}
+
+export function stubCategoryAlertEndpoints(): void {
+  void cy.intercept('GET', '**/profile/alerts/filter-options*', {
+    statusCode: 200,
+    body: { content_type: ['Paste', 'Forum'] },
+  }).as('categoryAlertFilterOptions');
+  void cy.intercept('GET', '**/profile/alerts*', (req) => {
+    const params = new URL(req.url).searchParams;
+    if (params.get('paginate') === 'true') {
+      const page = Number(params.get('page') || '1');
+      req.reply({ statusCode: 200, body: { items: categoryAlertsForPage(page), page, has_more: page < 2 } });
+      return;
+    }
+    req.reply({ statusCode: 200, body: { items: allCategoryStubAlerts(), page: 1, has_more: false } });
+  }).as('categoryAlerts');
+  void cy.intercept('POST', '**/alert/seen', { statusCode: 200, body: { success: true } }).as('categoryAlertSeen');
+}
+
+export function openCategoryAlertReport(category: string = CATEGORY_ALERT_REPORT_TYPE): void {
+  stubCategoryAlertEndpoints();
+  void cy.visit(`/dashboard/profile/alerts/${category}`);
+  void cy.location('pathname').should('include', `/dashboard/profile/alerts/${category}`);
+  void cy.wait('@categoryAlerts', { timeout: 60000 }).its('response.statusCode').should('eq', 200);
+  void cy.get(CATEGORY_ALERT_CARD_SELECTOR, { timeout: 60000 })
+    .filter(':visible')
+    .should('have.length.greaterThan', 0);
+}
+
+export function loadMoreCategoryAlerts(): void {
+  cy.get('body').then(($body) => {
+    const loadMore = $body.find('button:contains("Load more"), button:contains("Load More")').filter(':visible');
+    if (!loadMore.length) {
+      return;
+    }
+    void cy.wrap(loadMore.first()).scrollIntoView().click({ force: true });
+    void cy.wait('@categoryAlerts', { timeout: 60000 });
+  });
+}
+
+export function searchCategoryAlerts(query: string): void {
+  void cy.get(CATEGORY_ALERT_SEARCH_INPUT).filter(':visible').first().scrollIntoView().clear({ force: true }).type(query, { force: true });
+  void cy.get(CATEGORY_ALERT_SEARCH_INPUT).filter(':visible').first().clear({ force: true });
+}
+
+export function openCategoryAlertDrawerByClick(): void {
+  void cy.get(CATEGORY_ALERT_CARD_SELECTOR).filter(':visible').first().scrollIntoView().click({ force: true });
+  void cy.get(CATEGORY_ALERT_DRAWER_SELECTOR, { timeout: 60000 }).should('be.visible');
+}
+
+export function openCategoryAlertDrawerByKeyboard(): void {
+  void cy.get(CATEGORY_ALERT_CARD_SELECTOR).filter(':visible').first().scrollIntoView().trigger('keydown', { key: 'Enter' });
+  void cy.get(CATEGORY_ALERT_DRAWER_SELECTOR, { timeout: 60000 }).should('be.visible');
+}
+
+export function toggleCategoryAlertDescription(): void {
+  cy.get(CATEGORY_ALERT_DRAWER_SELECTOR).then(($drawer) => {
+    const toggle = $drawer.find('button:contains("Load more"), button:contains("Show less")').filter(':visible');
+    if (!toggle.length) {
+      return;
+    }
+    void cy.wrap(toggle.first()).click({ force: true });
+    cy.get(CATEGORY_ALERT_DRAWER_SELECTOR).then(($again) => {
+      const revert = $again.find('button:contains("Load more"), button:contains("Show less")').filter(':visible');
+      if (revert.length) {
+        void cy.wrap(revert.first()).click({ force: true });
+      }
+    });
+  });
+}
+
+export function closeCategoryAlertDrawer(): void {
+  void cy.get(`${CATEGORY_ALERT_DRAWER_SELECTOR} aside button`).filter(':visible').last().click({ force: true });
+  void cy.get(CATEGORY_ALERT_DRAWER_SELECTOR).should('not.exist');
+}
+
+export function exportSelectedCategoryAlert(optionTestId: string): void {
+  void cy.get('[data-testid="tenant-alert-report-see-details"]').filter(':visible').first().scrollIntoView().click({ force: true });
+  exportFromModal('category-alert-export-modal', optionTestId);
+}
+
+export function exportCategoryAlerts(optionTestId: string): void {
+  void cy.get('[data-testid="tenant-alert-print-alerts"]').filter(':visible').first().scrollIntoView().click({ force: true });
+  exportFromModal('category-alert-export-modal', optionTestId);
 }

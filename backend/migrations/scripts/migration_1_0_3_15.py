@@ -24,6 +24,12 @@ class migration_1_0_3_15:
         await migration_1_0_3_15.update_version(engine, version)
 
     @staticmethod
+    async def _find_tenant_key(engine, tenant_id):
+        return await engine.get_collection(db_keys).find_one(
+            {"$or": [{"tenant_id": tenant_id}, {"auth_id": tenant_id}]}
+        )
+
+    @staticmethod
     def _loads(value):
         try:
             parsed = json.loads(value or "{}")
@@ -77,8 +83,8 @@ class migration_1_0_3_15:
             settings.update(settings_by_tenant.get(tenant_id, {}))
 
             meta_info = migration_1_0_3_15._loads(settings.get(AllowedKeys.META_INFO.value))
-            key_record = await engine.find_one(db_keys, db_keys.auth_id == tenant_id)
-            enc = Fernet(KeyManager.get_instance()._unwrap(key_record.wrapped_key))
+            key_record = await migration_1_0_3_15._find_tenant_key(engine, tenant_id)
+            enc = Fernet(KeyManager.get_instance()._unwrap(key_record["wrapped_key"])) if key_record else None
             smtp_fields = {
                 "accounts_mail_password": "ACCOUNTS_MAIL_PASSWORD",
                 "accounts_mail": "ACCOUNTS_MAIL",
@@ -87,7 +93,7 @@ class migration_1_0_3_15:
             }
             for tenant_field, meta_key in smtp_fields.items():
                 value = tenant_doc.get(tenant_field)
-                if value:
+                if value and enc is not None:
                     meta_info[meta_key] =  enc.decrypt(value.encode()).decode()
 
             settings[AllowedKeys.META_INFO.value] = json.dumps(meta_info)
@@ -148,6 +154,7 @@ class migration_1_0_3_15:
             await settings_collection.create_index(
                 [("tenant_id", 1)],
                 unique=True,
+                partialFilterExpression={"key": AllowedKeys.SYSTEM_SETTINGS.value},
                 name="unique_tenant_system_settings",
             )
 
@@ -176,10 +183,10 @@ class migration_1_0_3_15:
                 slug = "default"
             else:
                 email = str(tenant.email or "")
-                key_record = await engine.find_one(db_keys, db_keys.auth_id == str(tenant.id))
+                key_record = await migration_1_0_3_15._find_tenant_key(engine, str(tenant.id))
                 if email and key_record:
                     try:
-                        email = Fernet(KeyManager.get_instance()._unwrap(key_record.wrapped_key)).decrypt(email.encode()).decode()
+                        email = Fernet(KeyManager.get_instance()._unwrap(key_record["wrapped_key"])).decrypt(email.encode()).decode()
                     except Exception:
                         pass
                 domain = email.split("@", 1)[1] if "@" in email else ""

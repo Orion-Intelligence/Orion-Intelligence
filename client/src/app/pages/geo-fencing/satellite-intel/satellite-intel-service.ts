@@ -1,7 +1,8 @@
 import { Injectable, signal } from '@angular/core';
-import { defer, EMPTY, Observable, throwError, timer } from 'rxjs';
-import { catchError, expand, switchMap, takeWhile, tap } from 'rxjs/operators';
+import { defer, Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
 import { asUnknownRecord } from '../../../shared/utils/type-guards.util';
+import { pollWhilePending } from '../shared/utils/polling.util';
 import type { SatelliteResponseRecord } from './model/satellite-intel-service.model';
 import { SatellitePollingOptions } from './model/satellite-intel-service.model';
 export type { SatelliteResponseRecord } from './model/satellite-intel-service.model';
@@ -25,14 +26,7 @@ export class SatelliteIntelService {
         this.onError.set(null);
       }
 
-      return call().pipe(expand((value: T) => {
-        if (this.isPendingOrBusy(getStatus(value))) {
-          return timer(delayMs).pipe(switchMap(() => call()));
-        }
-        return EMPTY;
-      }),
-      takeWhile((value: T) => this.isPendingOrBusy(getStatus(value)), true),
-      tap((value) => {
+      return pollWhilePending(call, (value) => this.isPendingOrBusy(getStatus(value)), delayMs).pipe(tap((value) => {
         const responseError = this.getResponseError(value);
         if (trackState && responseError) {
           this.onError.set(responseError);

@@ -45,18 +45,6 @@
         </app-user-image-picker>
       </div>
 
-      <div class="rounded-[8px] border border-[var(--color-divider)] bg-[var(--color-blue-700)] p-3">
-        <div class="text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Login Image' | translate }}</div>
-        <div class="mt-0.5 min-h-8 text-xs text-[var(--color-text4)]">{{ 'Used on the login and sign-up pages.' | translate }}</div>
-        <app-user-image-picker
-          class="mt-2 block h-20 w-full rounded-xl p-2 pl-0"
-          [wide]="true"
-          [imageUrl]="appService.getConfig().appSettings.auth_dashboard_icon || '/api/s/static/system/auth_dashboard_icon_default.png'"
-          [defaultImage]="'/api/s/static/system/auth_dashboard_icon_default.png'"
-          (onImageSelected)="updateUserResource($event, 'auth_dashboard_icon')"
-          (onClear)="deleteUserResource('auth_dashboard_icon')">
-        </app-user-image-picker>
-      </div>
     </div>
   </div>
 
@@ -67,19 +55,44 @@
         <div class="mt-1 text-[12px] font-normal text-[var(--color-text6)]">{{ 'Set the name shown in page titles, login screens, and shared views.' | translate }}</div>
       </div>
     </div>
-    <div class="mt-3 max-w-[720px]">
-      <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'App Name' | translate }}</label>
-      <input data-testid="tenant-branding-app-name" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.app_name" />
-    </div>
-    @if (brandingError) {
-      <div class="mt-3 max-w-[720px] rounded-[8px] border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
-        {{ brandingError }}
+
+    <div class="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-2">
+      <div class="lg:col-span-2">
+        <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'App Name' | translate }}</label>
+        <input data-testid="tenant-branding-app-name" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.app_name" />
       </div>
-    }
-    <div class="mt-3 flex justify-end">
-      <button data-testid="tenant-branding-save" type="button" class="ui-settings-save-button" [disabled]="!isBrandingDirty()" (click)="save()">
-        {{ 'Save changes' | translate }}
-      </button>
+
+      <div class="lg:col-span-2">
+        <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Onion Address' | translate }}</label>
+        <input data-testid="tenant-branding-onion-address" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.s_onion" placeholder="{{ 'Inherit from root tenant' | translate }}" />
+      </div>
+
+      <div>
+        <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Data Sources URL' | translate }}</label>
+        <input data-testid="tenant-branding-data-sources-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.data_sources_url" placeholder="{{ 'Inherit from root tenant' | translate }}" />
+      </div>
+
+      <div>
+        <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Adversaries URL' | translate }}</label>
+        <input data-testid="tenant-branding-adversaries-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.adversaries_url" placeholder="{{ 'Inherit from root tenant' | translate }}" />
+      </div>
+
+      <div class="lg:col-span-2">
+        <label class="mb-1 flex items-center gap-1 text-xs font-semibold uppercase tracking-wide text-[var(--color-text6)]">{{ 'Pricing URL' | translate }}</label>
+        <input data-testid="tenant-branding-pricing-url" class="h-10 w-full rounded-[8px] border border-[var(--color-border)] bg-[var(--color-blue-700)] px-3 text-sm font-medium text-[var(--color-text1)] outline-none placeholder:text-[var(--color-text4)] focus:border-sky-400/35 focus:ring-2 focus:ring-sky-400/20" type="text" [(ngModel)]="form.pricing_url" placeholder="{{ 'Inherit from root tenant' | translate }}" />
+      </div>
+
+      @if (brandingError) {
+        <div class="lg:col-span-2 rounded-[8px] border border-rose-400/30 bg-rose-400/10 px-3 py-2 text-sm text-rose-300 [body.light-theme_&]:border-red-600/30 [body.light-theme_&]:bg-red-100 [body.light-theme_&]:text-red-800">
+          {{ brandingError }}
+        </div>
+      }
+
+      <div class="flex justify-end lg:col-span-2">
+        <button data-testid="tenant-branding-save" type="button" class="ui-settings-save-button" [disabled]="!isBrandingDirty()" (click)="save()">
+          {{ 'Save changes' | translate }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

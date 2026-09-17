@@ -42,7 +42,7 @@ class TakedownManager:
         self._collection = self._engine.get_collection(db_takedown_request_model)
         TakedownManager.__instance = self
 
-    async def _root_tenant_uuid(self) -> str:
+    async def _root_tenant_id(self) -> str:
         tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
         if not tenant:
             raise HTTPException(status_code=500, detail="Root tenant not found")
@@ -202,7 +202,7 @@ class TakedownManager:
         except Exception as exc:
             log.g().w(f"Unable to update Elasticsearch takedown status for {record.report_id}: {str(exc)}")
 
-    async def enrich_report(self, report: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:
+    async def enrich_report(self, report: Optional[Dict[str, Any]], tenant_id: str = "") -> Optional[Dict[str, Any]]:
         if not report:
             return report
         target_url = str(report.get("m_url") or "")
@@ -211,7 +211,8 @@ class TakedownManager:
 
         record = await self._engine.find_one(
             db_takedown_request_model,
-            db_takedown_request_model.target_domain == self._target_domain(target_url),
+            (db_takedown_request_model.tenant_id == tenant_id)
+            & (db_takedown_request_model.target_domain == self._target_domain(target_url)),
         )
         if not record or not record.abuse_email:
             for key in ("m_takedown_status", "m_takedown_label", "m_takedown_disabled"):
@@ -232,13 +233,14 @@ class TakedownManager:
             raise HTTPException(status_code=400, detail="Target URL is required")
         target_url = self._normalize_target_url(raw_target_url)
 
-        root_tenant_uuid = await self._root_tenant_uuid()
-        requester_tenant_uuid = str(getattr(current_user, "tenant_uuid", "") or "")
+        root_tenant_id = await self._root_tenant_id()
+        requester_tenant_id = str(getattr(current_user, "tenant_id", "") or "")
         user_uuid = str(getattr(current_user, "id", "") or "")
         target_domain = self._target_domain(target_url)
         existing = await self._engine.find_one(
             db_takedown_request_model,
-            db_takedown_request_model.target_domain == target_domain,
+            (db_takedown_request_model.tenant_id == requester_tenant_id)
+            & (db_takedown_request_model.target_domain == target_domain),
         )
         if existing:
             existing_abuse_email = existing.abuse_email or self._extract_abuse_email(existing.evidence or {})
@@ -262,8 +264,8 @@ class TakedownManager:
             raise HTTPException(status_code=424, detail="No public abuse contact was found for this site.")
 
         if existing:
-            existing.tenant_uuid = root_tenant_uuid
-            existing.requester_tenant_uuid = requester_tenant_uuid
+            existing.operator_tenant_id = root_tenant_id
+            existing.tenant_id = requester_tenant_id
             existing.user_uuid = user_uuid
             existing.username = str(getattr(current_user, "username", "") or "")
             existing.report_id = report_id or existing.report_id
@@ -278,8 +280,8 @@ class TakedownManager:
             return self._serialize_record(existing)
 
         record = db_takedown_request_model(
-            tenant_uuid=root_tenant_uuid,
-            requester_tenant_uuid=requester_tenant_uuid,
+            operator_tenant_id=root_tenant_id,
+            tenant_id=requester_tenant_id,
             user_uuid=user_uuid,
             username=str(getattr(current_user, "username", "") or ""),
             report_id=report_id,
@@ -296,7 +298,8 @@ class TakedownManager:
         except DuplicateKeyError:
             existing = await self._engine.find_one(
                 db_takedown_request_model,
-                db_takedown_request_model.target_domain == target_domain,
+                (db_takedown_request_model.tenant_id == requester_tenant_id)
+                & (db_takedown_request_model.target_domain == target_domain),
             )
             if existing:
                 existing.report_id = report_id or existing.report_id
@@ -313,12 +316,12 @@ class TakedownManager:
     async def list_requests(self, current_user, status: Optional[str] = None, q: str = "", page: int = 1, limit: int = 20, daterange: str = "") -> TakedownListResponse:
         page = max(page, 1)
         limit = min(max(limit, 1), 100)
-        root_tenant_uuid = await self._root_tenant_uuid()
-        tenant_uuid = str(getattr(current_user, "tenant_uuid", "") or "")
+        root_tenant_id = await self._root_tenant_id()
+        tenant_id = str(getattr(current_user, "tenant_id", "") or "")
         user_uuid = str(getattr(current_user, "id", "") or "")
-        query: Dict[str, Any] = {"tenant_uuid": root_tenant_uuid, "abuse_email": {"$nin": ["", None]}}
-        if tenant_uuid != root_tenant_uuid:
-            query["requester_tenant_uuid"] = tenant_uuid
+        query: Dict[str, Any] = {"operator_tenant_id": root_tenant_id, "abuse_email": {"$nin": ["", None]}}
+        if tenant_id != root_tenant_id:
+            query["tenant_id"] = tenant_id
             if getattr(current_user, "role", None) == user_role.ANALYST:
                 query["user_uuid"] = user_uuid
         status_text = (status or "").strip().lower()
@@ -351,9 +354,9 @@ class TakedownManager:
         return TakedownListResponse(items=items, page=page, limit=limit, total=total)
 
     async def _get_admin_record(self, request_id: str, current_user) -> db_takedown_request_model:
-        root_tenant_uuid = await self._root_tenant_uuid()
-        tenant_uuid = str(getattr(current_user, "tenant_uuid", "") or "")
-        if getattr(current_user, "role", None) != user_role.ADMIN or tenant_uuid != root_tenant_uuid:
+        root_tenant_id = await self._root_tenant_id()
+        tenant_id = str(getattr(current_user, "tenant_id", "") or "")
+        if getattr(current_user, "role", None) != user_role.ADMIN or tenant_id != root_tenant_id:
             raise HTTPException(status_code=403, detail="Root admin access is required")
 
         if not ObjectId.is_valid(str(request_id)):
@@ -361,7 +364,7 @@ class TakedownManager:
         record = await self._engine.find_one(
             db_takedown_request_model,
             (db_takedown_request_model.id == ObjectId(str(request_id)))
-            & (db_takedown_request_model.tenant_uuid == root_tenant_uuid),
+            & (db_takedown_request_model.operator_tenant_id == root_tenant_id),
         )
         if not record:
             raise HTTPException(status_code=404, detail="Takedown request not found")
@@ -384,7 +387,7 @@ class TakedownManager:
             target_domain=record.target_domain,
             screenshot_filename=str(evidence.get("screenshot_path") or ""),
             html_filename=str(evidence.get("html_path") or ""),
-            tenant_id=record.tenant_uuid,
+            tenant_id=record.operator_tenant_id,
             screenshot_base64=str(evidence.get("screenshot_base64") or ""),
             html_content=str(evidence.get("html_content") or ""),
             screenshot_mime_type=str(evidence.get("screenshot_mime_type") or "image/png"),

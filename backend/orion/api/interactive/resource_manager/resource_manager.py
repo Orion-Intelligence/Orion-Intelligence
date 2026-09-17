@@ -20,8 +20,6 @@ class ResourceManager:
         "logo_wide_light_custom.png",
         "logo_wide_dark_default.png",
         "logo_wide_dark_custom.png",
-        "auth_dashboard_icon_default.png",
-        "auth_dashboard_icon_custom.png",
     }
 
     def __init__(self):
@@ -64,18 +62,18 @@ class ResourceManager:
         if not file.content_type or not file.content_type.startswith("image/"):
             raise HTTPException(status_code=415, detail="Invalid file type")
 
-        file_name = f"{current_user.tenant_uuid}.png"
+        file_name = f"{current_user.tenant_id}.png"
         file_path = self.TENANT_DIR / file_name
         with open(file_path, "wb") as f:
             f.write(contents)
 
         await AuditLogManager.get_instance().register(
-            str(current_user.tenant_uuid),
+            str(current_user.tenant_id),
             str(current_user.id),
             "upload_tenant_image"
         )
 
-        return {"image": str(current_user.tenant_uuid)}
+        return {"image": str(current_user.tenant_id)}
 
     async def get_user_image(self, user_id: str):
         default_path = self.USER_DIR / "default.png"
@@ -86,7 +84,7 @@ class ResourceManager:
     def _tenant_id(tenant) -> str | None:
         if tenant is None:
             return None
-        tenant_id = getattr(tenant, "id", None) or getattr(tenant, "tenant_uuid", tenant)
+        tenant_id = getattr(tenant, "id", None) or getattr(tenant, "tenant_id", tenant)
         return str(tenant_id) if tenant_id else None
 
     def get_tenant_system_dir(self, tenant) -> Path | None:
@@ -176,7 +174,7 @@ class ResourceManager:
         return {"user_image": "deleted"}
 
     async def deleteTenantImage(self, current_user):
-        file_name = f"{current_user.tenant_uuid}"
+        file_name = f"{current_user.tenant_id}"
         image_path = self.TENANT_DIR / f"{file_name}.png"
 
         if image_path.is_file():
@@ -189,7 +187,6 @@ class ResourceManager:
             AllowedKeys.LOGO_URL.value: "logo_url_custom.png",
             AllowedKeys.LOGO_WIDE_LIGHT.value: "logo_wide_light_custom.png",
             AllowedKeys.LOGO_WIDE_DARK.value: "logo_wide_dark_custom.png",
-            AllowedKeys.AUTH_DASHBOARD_ICON.value: "auth_dashboard_icon_custom.png",
         }.get(key)
         if file_name is None:
             raise HTTPException(status_code=400, detail="Invalid system resource")

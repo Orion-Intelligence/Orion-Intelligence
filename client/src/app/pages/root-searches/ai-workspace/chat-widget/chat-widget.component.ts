@@ -1,4 +1,6 @@
 import { CommonModule } from '@angular/common';
+import { countMessageTokens } from '../composer-metrics.util';
+import { ComposerLayoutHost } from '../composer-layout-host';
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, ChangeDetectorRef, NgZone, input, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NavigationEnd, Router } from '@angular/router';
@@ -23,7 +25,7 @@ import { TranslationService } from '../../../../shared/services/translation.serv
   changeDetection: ChangeDetectionStrategy.Eager,
   animations: [chatBotAnimation, overlayFadeAnimation]
 })
-export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ChatWidgetComponent extends ComposerLayoutHost implements OnInit, AfterViewInit, OnDestroy {
   private activeChatRequest?: Subscription;
   private chatRequestId = 0;
   private stoppedRequestIds = new Set<number>();
@@ -42,9 +44,6 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   newMessage = '';
   chatOpen = false;
   isFullScreen = false;
-  composerExpanded = false;
-  composerRows = 1;
-  composerScrollable = false;
   readonly maxComposerTokens = 300;
   readonly reportText = input<string>();
   readonly report = input<string>();
@@ -53,7 +52,9 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly type = input('default');
   readonly welcomeMessage = input('Hi there! How can I help you today?');
 
-  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService, private router: Router, private readonly translationService: TranslationService) { }
+  constructor(public appService: AppService, private dashboardService: DashboardService, private cdr: ChangeDetectorRef, private zone: NgZone, private subscriptionService: SubscriptionService, private nexusChatService: NexusChatService, private router: Router, private readonly translationService: TranslationService) {
+    super(); 
+  }
 
   ngOnInit(): void {
     this.activeTempSessionId = this.temporarySessionId();
@@ -105,7 +106,7 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
     const text = this.newMessage.trim();
-    if (!text || this.countMessageTokens(text) > this.maxComposerTokens) {
+    if (!text || countMessageTokens(text) > this.maxComposerTokens) {
       return;
     }
     this.chatMessages.push({ id: crypto.randomUUID(), sender: 'user', text, time: new Date() });
@@ -332,19 +333,11 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   resizeComposer(): void {
-    const textarea = this.composerInput?.nativeElement;
-    if (!textarea) {
-      return;
-    }
-
-    const lineCount = this.getComposerLineCount(textarea);
-    this.composerRows = Math.min(5, lineCount);
-    this.composerScrollable = lineCount > 5;
-    this.composerExpanded = this.composerRows > 1;
+    this.applyComposerResize(this.composerInput?.nativeElement);
   }
 
   get newMessageTokenCount(): number {
-    return this.countMessageTokens(this.newMessage);
+    return countMessageTokens(this.newMessage);
   }
 
   get newMessageTokenOverflow(): number {
@@ -395,20 +388,6 @@ export class ChatWidgetComponent implements OnInit, AfterViewInit, OnDestroy {
     this.composerScrollable = false;
     this.queueComposerResize();
     this.scrollToBottom(true);
-  }
-
-  private getComposerLineCount(textarea: HTMLTextAreaElement): number {
-    const horizontalPadding = 24;
-    const averageCharWidth = 7;
-    const availableWidth = Math.max(averageCharWidth, textarea.clientWidth - horizontalPadding);
-    const charsPerLine = Math.max(1, Math.floor(availableWidth / averageCharWidth));
-    const lines = (textarea.value || '').split('\n');
-
-    return Math.max(1, lines.reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0));
-  }
-
-  private countMessageTokens(value: string): number {
-    return value.trim().match(/[A-Za-z0-9_]+|[^\sA-Za-z0-9_]/g)?.length ?? 0;
   }
 
   private defaultWelcomeMessage(): string {

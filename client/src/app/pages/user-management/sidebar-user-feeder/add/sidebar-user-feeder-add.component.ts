@@ -347,14 +347,18 @@ export class SidebarUserFeederAddComponent implements OnChanges {
           fileInput.value = '';
         },
         error: (error) => {
-          if (error?.status === 409) {
-            this.formError = '';
-            this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Script owner already exists'));
-            return;
-          }
-          this.formError = error?.error?.detail ?? this.translationService.translate('Failed to upload feeder script');
+          this.handleUploadError(error); 
         }
       });
+  }
+
+  private handleUploadError(error: { status?: number; error?: { detail?: string } }): void {
+    if (error?.status === 409) {
+      this.formError = '';
+      this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Script owner already exists'));
+      return;
+    }
+    this.formError = error?.error?.detail ?? this.translationService.translate('Failed to upload feeder script');
   }
 
   private submitSessionUpload(fileInput: HTMLInputElement): void {
@@ -425,12 +429,7 @@ export class SidebarUserFeederAddComponent implements OnChanges {
         error: (error) => {
           this.isSubmitting = false;
           this.resetUploadProgress();
-          if (error?.status === 409) {
-            this.formError = '';
-            this.messageNotificationService.show(error?.error?.detail ?? this.translationService.translate('Script owner already exists'));
-            return;
-          }
-          this.formError = error?.error?.detail ?? this.translationService.translate('Failed to upload feeder script');
+          this.handleUploadError(error);
         }
       });
   }

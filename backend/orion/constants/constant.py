@@ -32,6 +32,7 @@ class CONSTANTS:
     S_AUTH_OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
     S_AUTH_PWD_CONTEXT = CryptContext(schemes=["bcrypt"], deprecated="auto")
     S_ENCRYPTION_KEY = env_handler.get_instance().env("ENCRYPTION_KEY")
+    S_STEALER_KEY = env_handler.get_instance().env("STEALER_KEY") or S_ENCRYPTION_KEY
 
     BASE_DIR = Path(__file__).resolve().parents[2]
     IMAGE_DIR = BASE_DIR / "workspace" / "resource" / "tenant"
@@ -59,7 +60,18 @@ class CONSTANTS:
     MAX_BACKUPS = 2
     BACKUP_BATCH_SIZE = 1000
     BACKUP_MANIFEST_NAME = "manifest.json"
-    BACKUP_MANIFEST_VERSION = 1
+    BACKUP_MANIFEST_VERSION = 2
+    BACKUP_TENANTS_DIR = "tenants"
+    BACKUP_TENANT_COLLECTION = "db_tenant_model"
+    BACKUP_TENANT_USER_COLLECTION = "db_user_account"
+    BACKUP_TENANT_USER_FIELD = "tenant_id"
+    BACKUP_TENANT_ELASTIC_INDICES = {ELASTIC_INDEX.S_SIEM_INDEX}
+    BACKUP_TENANT_ELASTIC_FIELD = "tenant_id"
+    BACKUP_TENANT_MONGO_DIR = "mongo"
+    BACKUP_TENANT_ELASTIC_DIR = "elastic"
+    BACKUP_TENANT_FILES_DIR = "files"
+    RESTORE_TENANT_MARKER_NAME = ".restore_tenant_in_progress"
+    RESTORE_TENANT_ROLLBACK_PREFIX = "rollback_tenant_"
     BACKUP_DISK_HEADROOM = 1.5
     BACKUP_EXCLUDED_ELASTIC_INDICES = {ELASTIC_INDEX.S_STEALERLOGS_INDEX}
     BACKUP_UNSETTABLE_INDEX_SETTINGS = {"creation_date", "uuid", "version", "provided_name", "resize", "routing"}

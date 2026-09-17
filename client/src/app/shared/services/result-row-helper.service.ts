@@ -17,6 +17,19 @@ export class ResultRowHelperService {
     return [String(value)].filter(Boolean);
   }
 
+  formatIndexLabel(raw: unknown): string {
+    if (!raw) {
+      return '-';
+    }
+    const cleaned = String(raw)
+      .replace(/^m[_\s-]+/i, '')
+      .replace(/[_\s-]*model$/i, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return cleaned ? cleaned.replace(/\b\w/g, c => c.toUpperCase()) : '-';
+  }
+
   prettyLabel(key: string): string {
     const cleaned = String(key).replace(/^m_/, '').replace(/[_-]+/g, ' ').replace(/[^a-zA-Z0-9 ]/g, ' ').trim();
     if (!cleaned) {

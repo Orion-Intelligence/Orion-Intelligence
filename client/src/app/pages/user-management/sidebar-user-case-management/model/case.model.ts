@@ -562,7 +562,7 @@ export interface Case {
     caseId: string;
     caseTypeOtherValue?: string;
     intakeSourceOtherValue?: string;
-    tenant_uuid?: string;
+    tenant_id?: string;
     title: string;
     description: string;
     caseType: CaseType;

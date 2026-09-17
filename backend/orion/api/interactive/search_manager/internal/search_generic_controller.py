@@ -1,6 +1,7 @@
 from orion.api.interactive.feeder_manager.feeder_manager import FeederManager
 from orion.api.interactive.search_manager.search_data_model.consolidated.search_consolidated_param_model import search_consolidated_param_model
 from orion.api.interactive.search_manager.search_query_generator import search_query_generator
+from orion.api.interactive.search_manager.internal.search_result_parser import parse_ranked_hits
 from orion.services.elastic_manager.elastic_controller import elastic_controller
 
 
@@ -108,26 +109,6 @@ class search_generic_controller:
         ranked.sort(reverse=True)
         return [row[-1] for row in ranked]
 
-    @staticmethod
-    def _records(response):
-        records = []
-        if response and "hits" in response and "hits" in response["hits"]:
-            for rank, hit in enumerate(response["hits"]["hits"]):
-                source = hit.get("_source", {})
-                source["_id"] = hit.get("_id", "")
-                source.pop("m_embedding", None)
-                source["rank_index"] = hit.get("_index")
-                source["_score"] = hit.get("_score", 0)
-                source["_rank"] = rank + 1
-                records.append(source)
-
-        total = 0
-        if response and "hits" in response:
-            total_field = response["hits"].get("total", 0)
-            total = total_field.get("value", 0) if isinstance(total_field, dict) else int(total or 0)
-
-        return records, total
-
     async def search_ranked_result(self, param: search_consolidated_param_model, base_index, blocked_categories, allowed_categories):
         filter_dict = param.entity_filter if param.entity_filter else {}
         page = self._positive_int(param.page, 1)
@@ -149,7 +130,7 @@ class search_generic_controller:
             indices_boost
         )
 
-        results, total = self._records(response)
+        results, total = parse_ranked_hits(response)
         results = self._rerank_results(results)
 
         start = (page - 1) * result_size

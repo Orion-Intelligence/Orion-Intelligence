@@ -5,6 +5,7 @@ from typing import Any
 from orion.api.interactive.profile_manager.profile_manager import ProfileManager
 from orion.api.interactive.social_manager.social_model import social_model
 from orion.api.interactive.profile_manager.model.models import SocialAutomationResultRequest
+from orion.api.interactive.social_manager.social_manager import social_manager
 from orion.services.log_manager.log_controller import log
 from orion.services.mongo_manager.shared_model.db_social_profile_management_model import (ManagedSocialProfile, SocialPersona, SocialProfilePurpose)
 
@@ -187,6 +188,8 @@ class social_profile_job:
         caption = post_data.get("caption")
         
         try:
+            headers = social_manager._social_headers(None, None)
+
             payload = {
                 "run_id": run_id,
                 "user_id": user_id,
@@ -197,8 +200,16 @@ class social_profile_job:
                 "session_state": session_state,
                 "is_manual": is_manual,
             }
+
             result = await self._run_and_wait("automation/post", payload, self.POST_TASK_TIMEOUT_SECONDS)
             await self._store_result(result)
+
+            status_code, resp_body = await social_manager.getInstance().social_request(
+                payload,
+                "automation/post",
+                headers
+            )
+            log.g().i(f"run_posting API response: {status_code} {resp_body}")
 
         except Exception as e:
             log.g().e(f"Failed to run posting for profile {profile.profile_id}: {e}")
@@ -208,6 +219,8 @@ class social_profile_job:
         log.g().i(f"Running ad monitoring for profile {profile.profile_id} on {profile.platform}")
         
         try:
+
+            headers = social_manager._social_headers(None, None)
             payload = {
                 "run_id": run_id,
                 "user_id": user_id,
@@ -219,6 +232,13 @@ class social_profile_job:
             result = await self._run_and_wait("automation/ad-monitor", payload, self.AD_DETECTION_TASK_TIMEOUT_SECONDS)
             await self._store_result(result)
 
+            status_code, resp_body = await social_manager.getInstance().social_request(
+                payload,
+                "automation/ad-monitor",
+                headers
+            )
+            log.g().i(f"run_ad_monitoring API response: {status_code} {resp_body}")
+                
         except Exception as e:
             log.g().e(f"Failed to run ad monitoring for profile {profile.profile_id}: {e}")
 

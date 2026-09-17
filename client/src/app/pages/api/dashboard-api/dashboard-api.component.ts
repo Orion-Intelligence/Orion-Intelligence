@@ -181,15 +181,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       this.apiType = d?.type ? String(d.type) : this.apiType;
     });
     this.route.queryParams.subscribe(params => {
-      if (this.apiType === 'user') {
-        if (params.username) {
-          this.q1 = params.username;
-        }
-        if (params.email) {
-          this.q2 = params.email;
-        }
-      }
-      else if (this.apiType === 'social') {
+      if (this.apiType === 'user' || this.apiType === 'social') {
         if (params.username) {
           this.q1 = params.username;
         }
@@ -510,6 +502,16 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
     this.closeExportChoice();
   }
 
+  private buildRequestContextValues(apiLabel: string, query: string, now: string, extra?: Record<string, string>): Record<string, string> {
+    return {
+      'API Type': this.displayFieldLabel(apiLabel),
+      'Query': query || 'not available',
+      'Query 2': this.displayQ2 || this.q2 || 'not available',
+      ...(extra ?? {}),
+      'Exported At': new Date(now).toLocaleString()
+    };
+  }
+
   private exportPdfReport(type = 'report'): void {
     if (!this.hasResults) {
       return;
@@ -549,12 +551,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
         tables: [
           {
             title: 'Request Context',
-            values: {
-              'API Type': this.displayFieldLabel(apiLabel),
-              'Query': query || 'not available',
-              'Query 2': this.displayQ2 || this.q2 || 'not available',
-              'Exported At': new Date(now).toLocaleString()
-            }
+            values: this.buildRequestContextValues(apiLabel, query, now)
           },
           { title: 'Crypto Result', values }
         ]
@@ -598,13 +595,7 @@ export class DashboardApiComponent extends ValuePresentationBase implements OnIn
       tables: [
         {
           title: 'Request Context',
-          values: {
-            'API Type': this.displayFieldLabel(apiLabel),
-            'Query': query || 'not available',
-            'Query 2': this.displayQ2 || this.q2 || 'not available',
-            'Result Count': String(items.length),
-            'Exported At': new Date(now).toLocaleString()
-          }
+          values: this.buildRequestContextValues(apiLabel, query, now, { 'Result Count': String(items.length) })
         },
         ...tables
       ]

@@ -1,5 +1,8 @@
 ---
 exclude_paths:
+  - "backend/venv/**"
+  - "**/venv/**"
+  - "**/.venv/**"
   - "client/build/**"
   - "client/coverage/**"
   - "client/.angular/**"
@@ -73,3 +76,12 @@ engines:
       - "backend/orion/services/__init__.py"
       - "backend/orion/services/log_manager/log_controller.py"
       - "backend/orion/services/elastic_manager/elastic_request_generator.py"
+      - "client/src/**/model/**"
+      - "client/src/**/models/**"
+      - "client/src/**/*.model.ts"
+      - "client/src/**/*.models.ts"
+      - "backend/**/*model/**"
+      - "backend/**/*models/**"
+      - "backend/**/*_callback_model.py"
+      - "backend/**/*_param_model.py"
+      - "backend/**/*_models.py"

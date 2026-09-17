@@ -27,10 +27,6 @@ MONGO_DATABASE='your_mongo_database'
 # REDIS KEYS
 REDIS_PASSWORD='your_redis_password'
 
-# TRAEFIK KEYS
-TRAEFIK_USERNAME='your_traefik_username'
-TRAEFIK_PASSWORD='your_traefik_password'
-
 # DEMO KEYS
 DEMO_USERNAME='your_demo_username'
 DEMO_PASSWORD='your_demo_password'

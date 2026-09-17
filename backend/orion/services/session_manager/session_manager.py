@@ -47,10 +47,10 @@ class session_manager:
         return mongo_controller.get_instance().get_engine()
 
     @staticmethod
-    def tenant_identifier(tenant_or_id) -> str | None:
-        if tenant_or_id is None:
+    def tenant_identifier(tenant_id) -> str | None:
+        if tenant_id is None:
             return None
-        tenant_id = getattr(tenant_or_id, "id", tenant_or_id)
+        tenant_id = getattr(tenant_id, "id", tenant_id)
         return str(tenant_id) if tenant_id is not None else None
 
     @staticmethod
@@ -67,31 +67,50 @@ class session_manager:
 
     @staticmethod
     async def _tenant_fernet(user) -> Fernet:
-        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_uuid))
+        dek = await KeyManager.get_instance().get_or_create_dek(str(user.tenant_id))
         return Fernet(dek)
 
     @classmethod
-    def ensure_user_tenant_access(cls, user, tenant_or_id) -> None:
-        tenant_id = cls.tenant_identifier(tenant_or_id)
+    def ensure_user_tenant_access(cls, user, tenant_id) -> None:
+        tenant_id = cls.tenant_identifier(tenant_id)
         if tenant_id is None:
             return
-        if not user or str(getattr(user, "tenant_uuid", "") or "") != tenant_id:
+        if not user or str(getattr(user, "tenant_id", "") or "") != tenant_id:
             raise HTTPException(status_code=403, detail="Tenant access forbidden")
+
+    @staticmethod
+    def _strip_bearer(token: str) -> str:
+        token = token.strip()
+        if token.startswith("Bearer "):
+            token = token[len("Bearer "):].strip()
+        return token
+
+    @staticmethod
+    def _decode_token(token: str, verify_exp: bool = True) -> dict:
+        return jwt.decode(
+            token,
+            CONSTANTS.S_AUTH_SECRET_KEY,
+            algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
+            options={"verify_exp": verify_exp}, )
+
+    async def _resolve_user_or_forbidden(self, token: str, tenant_id=None):
+        user = (
+            await self.get_current_user(token)
+            if tenant_id is None
+            else await self.get_current_user(token, tenant_id=tenant_id)
+        )
+        if not user or isinstance(user, JSONResponse):
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        return user
 
     async def get_current_user(self, token: str, tenant_id=None):
         if not token:
             raise HTTPException(status_code=401, detail="Missing or invalid token")
 
-        token = token.strip()
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):].strip()
+        token = self._strip_bearer(token)
 
         try:
-            payload = jwt.decode(
-                token,
-                CONSTANTS.S_AUTH_SECRET_KEY,
-                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
-                options={"verify_exp": True}, )
+            payload = self._decode_token(token)
             username: str = payload.get("sub")
             if not username:
                 raise HTTPException(status_code=401, detail="Missing or invalid token")
@@ -121,13 +140,7 @@ class session_manager:
             raise HTTPException(status_code=401, detail="Invalid token")
 
     async def get_current_role(self, token: str, tenant_id=None) -> str:
-        user = (
-            await self.get_current_user(token)
-            if tenant_id is None
-            else await self.get_current_user(token, tenant_id=tenant_id)
-        )
-        if not user or isinstance(user, JSONResponse):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        user = await self._resolve_user_or_forbidden(token, tenant_id)
 
         role = user.role
         try:
@@ -137,13 +150,7 @@ class session_manager:
         return role
 
     async def get_current_status(self, token: str, tenant_id=None) -> str:
-        user = (
-            await self.get_current_user(token)
-            if tenant_id is None
-            else await self.get_current_user(token, tenant_id=tenant_id)
-        )
-        if not user or isinstance(user, JSONResponse):
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden")
+        user = await self._resolve_user_or_forbidden(token, tenant_id)
 
         user_status = user.status
         try:
@@ -266,7 +273,7 @@ class session_manager:
                 access_ttl = timedelta(minutes=30)
 
             access_token, _role = await self.create_access_token({"sub": username}, access_ttl)
-            onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_uuid))
+            onboarding_exists = await self.get_instance().has_onboarding(str(user.tenant_id))
 
             session = await self._build_session(user, onboarding_exists, reset_token)
             return {"access_token": access_token, "token_type": "bearer", "session": session}  # nosec B105
@@ -308,7 +315,7 @@ class session_manager:
                 raise HTTPException(status_code=401, detail="User not found")
             self.ensure_user_tenant_access(user, tenant_id)
 
-            maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_uuid == user.tenant_uuid) & (db_user_account.licenses == LicenseName.MAINTAINER))
+            maintainer_user = await self._engine.find_one(db_user_account, (db_user_account.tenant_id == user.tenant_id) & (db_user_account.licenses == LicenseName.MAINTAINER))
             if not maintainer_user:
                 raise HTTPException(status_code=401, detail="Maintainer user not found")
             session_id = payload.get("sid")
@@ -326,7 +333,7 @@ class session_manager:
                     datetime.now(timezone.utc) - acct_at).days >= 30:
                 raise HTTPException(status_code=402, detail="Trial expired. Please subscribe to continue.")
 
-            onboarding_exists = await self.has_onboarding(str(user.tenant_uuid))
+            onboarding_exists = await self.has_onboarding(str(user.tenant_id))
 
             base_expiry = time.time() + CONSTANTS.S_AUTH_ACCESS_TOKEN_EXPIRE_MINUTES * 60 * 60 * 24
             if user.role != user_role.CRAWLER:
@@ -374,16 +381,10 @@ class session_manager:
         if not ptoken:
             return
 
-        token = ptoken.strip()
-        if token.startswith("Bearer "):
-            token = token[len("Bearer "):].strip()
+        token = self._strip_bearer(ptoken)
 
         try:
-            payload = jwt.decode(
-                token,
-                CONSTANTS.S_AUTH_SECRET_KEY,
-                algorithms=[CONSTANTS.S_AUTH_ALGORITHM],
-                options={"verify_exp": False}, )
+            payload = self._decode_token(token, verify_exp=False)
         except jwt.InvalidTokenError:
             return
 

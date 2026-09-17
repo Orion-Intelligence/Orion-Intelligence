@@ -153,21 +153,21 @@ export class MonthCompareService {
     return /^\d{4}-\d{2}$/.test(monthKey.trim()) ? monthKey.trim() : '';
   }
 
-  private shiftMonthKey(monthKey: string, offset: number): string {
+  private parseMonthDate(monthKey: string, offset = 0): Date | null {
     const match = /^(\d{4})-(\d{2})$/.exec(monthKey);
     if (!match) {
-      return monthKey;
+      return null;
     }
-    const date = new Date(Number(match[1]), Number(match[2]) - 1 + offset, 1);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+    return new Date(Number(match[1]), Number(match[2]) - 1 + offset, 1);
+  }
+
+  private shiftMonthKey(monthKey: string, offset: number): string {
+    const date = this.parseMonthDate(monthKey, offset);
+    return date ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}` : monthKey;
   }
 
   private formatMonthLabel(monthKey: string): string {
-    const match = /^(\d{4})-(\d{2})$/.exec(monthKey);
-    if (!match) {
-      return monthKey;
-    }
-    const date = new Date(Number(match[1]), Number(match[2]) - 1, 1);
-    return date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const date = this.parseMonthDate(monthKey);
+    return date ? date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : monthKey;
   }
 }

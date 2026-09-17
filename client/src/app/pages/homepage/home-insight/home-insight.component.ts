@@ -32,12 +32,7 @@ export class HomeInsightComponent implements OnInit {
   }
 
   ngOnInit() {
-    const data = this.route.snapshot.data.insights;
-    if (data) {
-      this.applyInsightData(data);
-      return;
-    }
-    this.insightCacheService.getInsight().subscribe(data => {
+    this.insightCacheService.loadInsight(this.route, data => {
       this.applyInsightData(data);
     });
   }

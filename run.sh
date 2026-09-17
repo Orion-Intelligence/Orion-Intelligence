@@ -108,23 +108,12 @@ client_build() {
     rsync -a --delete build-next/browser/ build/
     rm -rf build-next
     cd ..
-    local backups_holding
-    backups_holding=""
-    if [ -d backend/build/backups ]; then
-        backups_holding="$(mktemp -d)/backups"
-        mv backend/build/backups "$backups_holding"
-    fi
     rm -rf backend/build
     mkdir -p backend/build
     cp -r client/build/* backend/build/
-    if [ -n "$backups_holding" ]; then
-        rm -rf backend/build/backups
-        mv "$backups_holding" backend/build/backups
-        rmdir "$(dirname "$backups_holding")" 2>/dev/null || true
-    fi
-    mkdir -p backend/build/backups
-    if [ "$(stat -c %u backend/build/backups)" != "${APP_UID:-1000}" ]; then
-        sudo chown -R "${APP_UID:-1000}:${APP_GID:-1000}" backend/build/backups
+    mkdir -p backend/backups
+    if [ "$(stat -c %u backend/backups)" != "${APP_UID:-1000}" ]; then
+        sudo chown -R "${APP_UID:-1000}:${APP_GID:-1000}" backend/backups
     fi
     rm -rf backend/workspace/build
     mkdir -p backend/workspace/build
@@ -324,7 +313,7 @@ if [ "$1" = "restore" ]; then
         echo "trusted-web-main is not running. Start the stack first."
         exit 1
     fi
-    docker exec trusted-web-main python3 restore_backup.py "$BACKUP_NAME"
+    docker exec trusted-web-main python3 -c 'import asyncio; from restore_backup import main; asyncio.run(main())' "$BACKUP_NAME"
     exit $?
 fi
 
@@ -438,6 +427,9 @@ chmod -R a+rwX backend/workspace/parser/parser_files 2>/dev/null || true
 mkdir -p backend/workspace/logs
 chmod a+rwX backend/workspace/logs 2>/dev/null || true
 
+mkdir -p backend/workspace/resource
+chmod -R a+rwX backend/workspace/resource 2>/dev/null || true
+
 docker network create --driver bridge shared_bridge 2>/dev/null || true
 docker network create --driver bridge orion_nexus_backend 2>/dev/null || true
 compose_up_services=()
@@ -455,8 +447,6 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     fi
 fi
 
-compose up -d --pull missing "${up_extra_args[@]}" "${compose_up_services[@]}"
-
 up_extra_args=()
 if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ] && [ "$EXTRA_FLAG" = "-full" ]; then
     up_extra_args=(--force-recreate)
@@ -468,7 +458,6 @@ if [ "$COMMAND" = "build" ] && [ "$FLAG" = "-p" ]; then
     compose exec -T nginx nginx -t
     compose exec -T nginx nginx -s reload
     wait_for_application_services
-    sudo systemctl restart tor@default
     disable_maintenance_mode
     trap - EXIT
 fi

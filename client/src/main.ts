@@ -4,6 +4,14 @@ import { AppComponent } from './app/pages/app/app.component';
 import { bootstrapIconRegistry, BootstrapIconName } from './app/shared/icons/bootstrap-icon-registry';
 import { getOwnProperty } from './app/shared/utils/type-guards.util';
 
+window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason as { name?: string; message?: string; stack?: string } | null;
+    const signature = `${reason?.name ?? ''} ${reason?.message ?? ''} ${reason?.stack ?? ''}`;
+    if (/NoMatch|expandSegmentAgainstRoute|applyRedirects|apply_redirects/i.test(signature)) {
+        event.preventDefault();
+    }
+});
+
 const PLACEHOLDER_SRC = '/assets/images/shared/placeholder.svg';
 const AUTH_FRAME_SRC = '/assets/images/shared/auth_dashboard_frame_base.svg';
 const AUTH_DASHBOARD_SRC = '/assets/images/shared/auth_dashboard_map.png';

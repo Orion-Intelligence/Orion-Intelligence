@@ -147,15 +147,7 @@ export class ThreatLensComponent implements OnDestroy {
     this.selectedCountryName = '';
     this.selectedCountryIpScanRequest = null;
     this.statusMessage = 'No country detected at clicked point.';
-    this.emitDetailOverlayOpenChange(false);
-    this.cdr.detectChanges();
-
-    if (hadSelectedCountry) {
-      this.lastAutomaticIpScanKey = '';
-      if (!this.mapRenderer?.requestViewportIpScan()) {
-        this.startDefaultIpScan(true);
-      }
-    }
+    this.finalizeSelectionReset(hadSelectedCountry);
   }
 
   onArcCountChange(count: number): void {
@@ -265,6 +257,14 @@ export class ThreatLensComponent implements OnDestroy {
     }
   }
 
+  private finalizeSelectionReset(hadSelectedCountry: boolean): void {
+    this.emitDetailOverlayOpenChange(false);
+    this.cdr.detectChanges();
+    if (hadSelectedCountry) {
+      this.refreshIpScan();
+    }
+  }
+
   clearAllSelections(): void {
     const hadSelectedCountry = Boolean(this.selectedCountryName || this.selectedCountryIpScanRequest);
     this.closeArcReportPanel(false);
@@ -277,15 +277,7 @@ export class ThreatLensComponent implements OnDestroy {
     this.mapRenderer?.setArcRangeIndex(this.selectedArcRangeIndex);
     this.mapRenderer?.clearSelections();
     this.statusMessage = 'Selections cleared.';
-    this.emitDetailOverlayOpenChange(false);
-    this.cdr.detectChanges();
-
-    if (hadSelectedCountry) {
-      this.lastAutomaticIpScanKey = '';
-      if (!this.mapRenderer?.requestViewportIpScan()) {
-        this.startDefaultIpScan(true);
-      }
-    }
+    this.finalizeSelectionReset(hadSelectedCountry);
   }
 
   toggleSearchPanel(): void {

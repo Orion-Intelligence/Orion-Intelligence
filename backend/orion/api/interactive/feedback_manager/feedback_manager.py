@@ -5,7 +5,7 @@ from bson import ObjectId
 from fastapi import HTTPException
 from cryptography.fernet import Fernet
 
-from orion.api.interactive.search_manager.search_model import search_model
+from orion.api.interactive.search_manager.search_manager import search_manager
 from orion.services.encryption_manager.key_manager import KeyManager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import db_user_account, user_role
@@ -41,14 +41,14 @@ class FeedbackManager:
             user = await mongo_controller.get_instance().get_engine().find_one(db_user_account, db_user_account.id == ObjectId(user_id))
         except Exception:
             return ""
-        return str(getattr(user, "tenant_uuid", "") or "") if user else ""
+        return str(getattr(user, "tenant_id", "") or "") if user else ""
 
     async def _get_public_profile(self, user_id: str, current_user) -> dict:
         user = await self._engine.find_one(db_user_account, db_user_account.id == ObjectId(user_id))
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
 
-        if current_user.role != user_role.ADMIN and str(user.tenant_uuid) != str(current_user.tenant_uuid):
+        if current_user.role != user_role.ADMIN and str(user.tenant_id) != str(current_user.tenant_id):
             raise HTTPException(status_code=403, detail="You are not allowed to access this user")
 
         preferences = user.preferences if isinstance(user.preferences, dict) else {}
@@ -59,7 +59,7 @@ class FeedbackManager:
             }
 
         tenant_name = ""
-        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_uuid))
+        tenant = await self._engine.find_one(db_tenant_model, db_tenant_model.id == ObjectId(user.tenant_id))
         if tenant and str(getattr(current_user, "id", "")) != user_id and getattr(tenant, "profile_visibility_enabled", True) is False:
             return {
                 "hidden": True,
@@ -154,14 +154,14 @@ class FeedbackManager:
 
     async def _resolve_doc_summary(self, doc_id: str) -> dict:
         candidates = [
-            ("leak_model", "leak", lambda: search_model.getInstance().request_leak_doc(doc_id, None)),
-            ("generic_model", "general", lambda: search_model.getInstance().request_general_doc(doc_id, None)),
-            ("exploit_model", "exploit", lambda: search_model.getInstance().request_exploit_doc(doc_id, None)),
-            ("apt_model", "apt", lambda: search_model.getInstance().request_apt_doc(doc_id, None)),
-            ("malware_model", "malware", lambda: search_model.getInstance().request_malware_doc(doc_id, None)),
-            ("chat_model", "chat", lambda: search_model.getInstance().request_chat_doc(doc_id, None)),
-            ("social_model", "social", lambda: search_model.getInstance().request_social_doc(doc_id, None)),
-            ("defacement_model", "defacement", lambda: search_model.getInstance().request_defacement_doc(doc_id)),
+            ("leak_model", "leak", lambda: search_manager.getInstance().request_leak_doc(doc_id, None)),
+            ("generic_model", "general", lambda: search_manager.getInstance().request_general_doc(doc_id, None)),
+            ("exploit_model", "exploit", lambda: search_manager.getInstance().request_exploit_doc(doc_id, None)),
+            ("apt_model", "apt", lambda: search_manager.getInstance().request_apt_doc(doc_id, None)),
+            ("malware_model", "malware", lambda: search_manager.getInstance().request_malware_doc(doc_id, None)),
+            ("chat_model", "chat", lambda: search_manager.getInstance().request_chat_doc(doc_id, None)),
+            ("social_model", "social", lambda: search_manager.getInstance().request_social_doc(doc_id, None)),
+            ("defacement_model", "defacement", lambda: search_manager.getInstance().request_defacement_doc(doc_id)),
         ]
 
         for index_name, route_segment, loader in candidates:

@@ -338,8 +338,8 @@ export const routes: Routes = [
             loadComponent: loadDkimLookupComponent,
             data: {
               animation: 'TextAnalysisAPI',
-              title: 'DKIM Lookup',
-              description: 'Discover DKIM selectors for a domain and validate each DKIM DNS record'
+              title: 'DKIM Checker',
+              description: 'Analyze domains and selectors to verify DKIM public keys'
             }
           },
           {

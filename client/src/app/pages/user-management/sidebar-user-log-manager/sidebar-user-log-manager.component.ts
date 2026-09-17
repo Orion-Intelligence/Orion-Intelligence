@@ -30,6 +30,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
   limit = 100;
   loading = false;
   errorMessage = '';
+  expandedLogId: string | null = null;
   isFlushAllConfirmationOpen = false;
   response: SystemLogResponse = { entries: [], total: 0, page: 1, limit: 100, page_count: 0, available_dates: [], files: [] };
 
@@ -50,6 +51,7 @@ export class SidebarUserLogManagerComponent implements OnInit {
   }
 
   loadLogs(): void {
+    this.expandedLogId = null;
     let params = new HttpParams().set('page', this.page).set('limit', this.limit).set('_ts', String(Date.now()));
     if (this.logType) {
       params = params.set('log_type', this.logType);
@@ -72,6 +74,10 @@ export class SidebarUserLogManagerComponent implements OnInit {
           this.errorMessage = error?.error?.detail ?? this.translationService.translate('Failed to load logs');
         }
       });
+  }
+
+  toggleLog(id: string): void {
+    this.expandedLogId = this.expandedLogId === id ? null : id;
   }
 
   applyFilters(): void {

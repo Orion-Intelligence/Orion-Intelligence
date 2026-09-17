@@ -3,6 +3,7 @@ from datetime import timezone
 import hashlib
 
 from cryptography.fernet import Fernet
+from fastapi import HTTPException
 
 from orion.constants.constant import CONSTANTS
 from orion.services.encryption_manager.key_manager import KeyManager
@@ -17,6 +18,17 @@ class CaseHelperMethods:
     @staticmethod
     def actor_id(current_user) -> str:
         return str(current_user.id)
+
+    @staticmethod
+    async def find_case_or_404(engine, case_id: str, current_user) -> db_case_model:
+        record = await engine.find_one(
+            db_case_model,
+            (db_case_model.caseId == case_id)
+            & (db_case_model.tenant_id == str(current_user.tenant_id)),
+        )
+        if not record:
+            raise HTTPException(status_code=404, detail="Case not found")
+        return record
 
     @staticmethod
     def is_admin(current_user) -> bool:
@@ -91,7 +103,7 @@ class CaseHelperMethods:
 
     @staticmethod
     async def get_case_cipher(current_user) -> Fernet:
-        return await CaseHelperMethods.get_case_cipher_by_tenant_id(str(current_user.tenant_uuid))
+        return await CaseHelperMethods.get_case_cipher_by_tenant_id(str(current_user.tenant_id))
 
     @staticmethod
     def encrypt_value(enc: Fernet, value: str) -> str:
@@ -213,7 +225,7 @@ class CaseHelperMethods:
         if isinstance(value, dict):
             ignored_keys = {
                 "id",
-                "tenant_uuid",
+                "tenant_id",
                 "caseId",
                 "statusReasons",
                 "comments",

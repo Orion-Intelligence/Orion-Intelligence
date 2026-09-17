@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { LicenseName } from '../../shared/model/licenses/license.rules';
+import { getOwnProperty } from '../../shared/utils/type-guards.util';
+import { LICENSE_LABEL } from './license.const';
 import { license_rules } from '../../shared/constants/shared-enums';
 import { Observable, of } from 'rxjs';
 import { SubscriptionService } from '../dashboard/subscription.service';
@@ -258,25 +260,6 @@ export class LicenseService {
   }
 
   getLicenseLabel(license: LicenseName | string): string {
-    switch (license) {
-      case LicenseName.MAINTAINER:
-        return 'Maintainer';
-      case LicenseName.FREE:
-        return 'Free';
-      case LicenseName.FEEDER:
-        return 'Feeder';
-      case LicenseName.OSINT_BASIC:
-        return 'OSINT Basic';
-      case LicenseName.OSINT_ADVANCED:
-        return 'OSINT Advanced';
-      case LicenseName.SOCIAL_MAPPER:
-        return 'Social Mapper';
-      case LicenseName.PENTESTER:
-        return 'Pentester';
-      case LicenseName.ENTERPRISE:
-        return 'Enterprise';
-      default:
-        return license;
-    }
+    return getOwnProperty(LICENSE_LABEL, license as LicenseName) ?? license;
   }
 }

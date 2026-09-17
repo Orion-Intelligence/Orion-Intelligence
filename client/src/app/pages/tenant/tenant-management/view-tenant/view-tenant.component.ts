@@ -144,19 +144,24 @@ export class ViewTenantComponent implements OnInit {
     if (!tenant.licenses || tenant.licenses.length === 0) {
       tenant.licenses = [LicenseName.FREE];
     }
-    const payload = { ...tenant };
+    this.postTenantUpdate({ ...tenant }, (res) => {
+      if (res?.tenant) {
+        tenant.iocs = res.tenant.iocs ?? tenant.iocs;
+        tenant.privileged_ioc = res.tenant.privileged_ioc ?? tenant.privileged_ioc;
+        tenant._saved_privileged_ioc = tenant.privileged_ioc ?? false;
+        tenant.ai_endpoint_enabled = res.tenant.ai_endpoint_enabled ?? tenant.ai_endpoint_enabled ?? false;
+      }
+    });
+  }
+
+  private postTenantUpdate(payload: ManagedTenant, onSuccess: (res: TenantUpdateResponse) => void): void {
     if (!this.canEditTenantAiEndpoint()) {
       delete payload.ai_endpoint_enabled;
     }
     this.isLoading = true;
     this.apiService.post<TenantUpdateResponse>('update/tenants', payload).subscribe({
       next: (res) => {
-        if (res?.tenant) {
-          tenant.iocs = res.tenant.iocs ?? tenant.iocs;
-          tenant.privileged_ioc = res.tenant.privileged_ioc ?? tenant.privileged_ioc;
-          tenant._saved_privileged_ioc = tenant.privileged_ioc ?? false;
-          tenant.ai_endpoint_enabled = res.tenant.ai_endpoint_enabled ?? tenant.ai_endpoint_enabled ?? false;
-        }
+        onSuccess(res);
         this.isLoading = false;
       },
       error: () => {
@@ -290,25 +295,11 @@ export class ViewTenantComponent implements OnInit {
     }
     const activeTenant = this.activeIocTenant;
     const selectedIocs = this.iocDraft.filter(ioc => ioc.values?.length > 0);
-    const payload = {
-      ...activeTenant,
-      iocs: selectedIocs
-    };
-    if (!this.canEditTenantAiEndpoint()) {
-      delete payload.ai_endpoint_enabled;
-    }
-    this.isLoading = true;
-    this.apiService.post<TenantUpdateResponse>('update/tenants', payload).subscribe({
-      next: (res) => {
-        activeTenant.iocs = res?.tenant?.iocs ?? selectedIocs;
-        activeTenant.privileged_ioc = res?.tenant?.privileged_ioc ?? activeTenant.privileged_ioc;
-        activeTenant._saved_privileged_ioc = activeTenant.privileged_ioc ?? false;
-        this.isLoading = false;
-        this.closeIocSelector();
-      },
-      error: () => {
-        this.isLoading = false;
-      },
+    this.postTenantUpdate({ ...activeTenant, iocs: selectedIocs }, (res) => {
+      activeTenant.iocs = res?.tenant?.iocs ?? selectedIocs;
+      activeTenant.privileged_ioc = res?.tenant?.privileged_ioc ?? activeTenant.privileged_ioc;
+      activeTenant._saved_privileged_ioc = activeTenant.privileged_ioc ?? false;
+      this.closeIocSelector();
     });
   }
 

@@ -13,7 +13,8 @@ export enum Category {
     TENANT = 'Tenant',
     PROFILE = 'Profile',
     NETINT = 'NETINT',
-    SATELLITE_INTEL = 'SATELLITE_INTEL'
+    SATELLITE_INTEL = 'SATELLITE_INTEL',
+    SOCIAL_INTEL = 'SocialIntel'
 }
 export enum BreachSubCategory {
     DATABASES = 'Databases'
@@ -35,7 +36,7 @@ export enum ApiSubCategory {
     TEXT_ANALYSIS = 'Text-Analysis',
     CRYPTO = 'Crypto-Scanner',
     PHONE_LOOKUP = 'Phone-Lookup',
-    DKIM_LOOKUP = 'DKIM-Lookup'
+    DKIM_LOOKUP = 'dkim-lookup'
 }
 export enum SocialSubCategory {
     ALL = 'All',
@@ -63,6 +64,10 @@ export enum AptIntelSubCategory {
 export enum FeedSubCategory {
     NEWS = 'News',
     TRACKING = 'Tracking'
+}
+export enum SocialIntelSubCategory {
+    MONITORING = 'Social Monitoring',
+    PROFILE_INTELLIGENCE = 'Profile Intelligence'
 }
 export enum TenantSubCategory {
     VIEW_PROFILE = 'View-Profiles',

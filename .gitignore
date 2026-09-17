@@ -8,6 +8,7 @@ backend/workspace/ssl/
 **/package-lock.json
 !client/package-lock.json
 backend/build/backups/*
+backend/backups/
 backend/workspace/parser/parser_files/*
 backend/static/.maintenance
 backend/backend_cov_app/*
@@ -77,3 +78,12 @@ backend/workspace/resource/**
 
 nginx/nginx.conf
 .pytest_cache/
+
+# cypress run artifacts
+client/cypress/screenshots/
+client/cypress/videos/
+client/cypress/downloads/
+client/cypress/error/
+
+# generated audit report
+duplication-audit.txt

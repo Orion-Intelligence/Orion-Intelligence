@@ -3,8 +3,16 @@ import { AlertAllIoc, AlertModel } from '../../../model/company-profile/node.mod
 import { GraphReportPayload, GraphReportRecordBlock, GraphReportTableRow } from '../../../model/report/report-export.model';
 import { ExportBrandingService } from '../../../services/export/export-branding.service';
 import { ReportExportService } from '../../../services/export/report-export.service';
-import { setOwnProperty } from '../../../utils/type-guards.util';
+import { getOwnProperty, setOwnProperty } from '../../../utils/type-guards.util';
 
+
+const ALERT_SEVERITY_BY_TYPE: Record<string, string> = {
+  breach: 'Critical', exploit: 'Critical', malware: 'Critical', feed: 'Critical', 'playstore-scanning': 'Critical',
+  'social-scanner': 'Critical', 'email-breach': 'Critical', stealerlogs: 'Critical', 'software-scanning': 'Critical',
+  defacement: 'High', 'advanced scanning': 'High', 'repo scanning': 'High',
+  social: 'Medium', discussion: 'Medium',
+  general: 'Low', 'seo scanning': 'Low'
+};
 
 @Injectable({ providedIn: 'root' })
 export class AlertExportService {
@@ -312,30 +320,7 @@ export class AlertExportService {
     if (normalized === 'vulnerability-scanning') {
       return 'Not Found';
     }
-    switch (normalized) {
-      case 'breach':
-      case 'exploit':
-      case 'malware':
-      case 'feed':
-      case 'playstore-scanning':
-      case 'social-scanner':
-      case 'email-breach':
-      case 'stealerlogs':
-      case 'software-scanning':
-        return 'Critical';
-      case 'defacement':
-      case 'advanced scanning':
-      case 'repo scanning':
-        return 'High';
-      case 'social':
-      case 'discussion':
-        return 'Medium';
-      case 'general':
-      case 'seo scanning':
-        return 'Low';
-      default:
-        return 'Unknown';
-    }
+    return getOwnProperty(ALERT_SEVERITY_BY_TYPE, normalized) ?? 'Unknown';
   }
 
   private formatRisk(value?: string): string {

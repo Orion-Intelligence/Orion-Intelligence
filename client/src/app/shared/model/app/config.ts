@@ -6,7 +6,6 @@ export class AppSettingsModel {
   logo_url = '';
   logo_wide_light = '';
   logo_wide_dark = '';
-  auth_dashboard_icon='';
   app_name = '';
   meta_info = '';
   home_header_data_sources = '';
@@ -33,7 +32,6 @@ export class AppSettingsModel {
       this.logo_url = (data.logo_url as string) || this.logo_url;
       this.logo_wide_light = (data.logo_wide_light as string) || this.logo_wide_light;
       this.logo_wide_dark = (data.logo_wide_dark as string) || this.logo_wide_dark;
-      this.auth_dashboard_icon=(data.auth_dashboard_icon as string) || this.auth_dashboard_icon;
       this.smtp_configured = data.smtp_configured === true || data.smtp_configured === '1';
       this.app_name = (data.app_name as string) || this.app_name;
       this.meta_info = (data.meta_info as string) || this.meta_info;

@@ -48,7 +48,7 @@ class ProfileManager:
         return str(getattr(current_user, "id", "") or "")
 
     async def _tenant_cipher(self, current_user) -> Fernet:
-        dek = await KeyManager.get_instance().get_or_create_dek(str(getattr(current_user, "tenant_uuid", "") or ""))
+        dek = await KeyManager.get_instance().get_or_create_dek(str(getattr(current_user, "tenant_id", "") or ""))
         return Fernet(dek)
 
     async def list_platforms(self, current_user):
@@ -66,6 +66,16 @@ class ProfileManager:
             return {"error": reply.get("error")}
         items = (reply.get("items") if reply.get("implemented") else []) or []
         return {"result": {"items": items}}
+
+    @staticmethod
+    def extract_session_file(reply: dict):
+        if reply.get("error"):
+            return None, {"error": reply.get("error")}
+        items = (reply.get("items") if reply.get("implemented") else []) or []
+        session_file = items[0] if items else None
+        if not isinstance(session_file, dict) or not session_file.get("zip_base64"):
+            return None, {"error": "no_session_data"}
+        return session_file, None
 
     async def capture_session(self, current_user, platform: str, url: str, session_id: str = ""):
         user_key = self._user_key(current_user)
@@ -98,12 +108,9 @@ class ProfileManager:
             await manager.fire(user_key, command)
             return {"status": "pending"}
 
-        if reply.get("error"):
-            return {"error": reply.get("error")}
-        items = (reply.get("items") if reply.get("implemented") else []) or []
-        session_file = items[0] if items else None
-        if not isinstance(session_file, dict) or not session_file.get("zip_base64"):
-            return {"error": "no_session_data"}
+        session_file, error = self.extract_session_file(reply)
+        if error:
+            return error
 
         try:
             raw = base64.b64decode(session_file["zip_base64"])
@@ -143,17 +150,21 @@ class ProfileManager:
 
         return {"result": {"platform": safe_platform, "session_id": session_id, "saved": True}}
 
-    async def verify_session(self, current_user, platform: str, url: str, session_id: str):
-        user_key = self._user_key(current_user)
-        if not user_key:
-            return {"error": "no_session_data"}
-
+    async def _find_session_record(self, user_key, platform: str, session_id: str):
         safe_platform = re.sub(r"[^a-z0-9]", "", str(platform or "").lower())
         safe_session = re.sub(r"[^a-zA-Z0-9-]", "", str(session_id or ""))
         record = await self._engine.find_one(
             db_social_session_model,
             {"user_id": user_key, "platform": safe_platform, "session_id": safe_session},
         )
+        return safe_platform, safe_session, record
+
+    async def verify_session(self, current_user, platform: str, url: str, session_id: str):
+        user_key = self._user_key(current_user)
+        if not user_key:
+            return {"error": "no_session_data"}
+
+        safe_platform, safe_session, record = await self._find_session_record(user_key, platform, session_id)
         if record is None:
             return {"error": "no_session_data"}
 
@@ -289,13 +300,7 @@ class ProfileManager:
 
     async def delete_session(self, current_user, platform: str, session_id: str):
         user_key = self._user_key(current_user)
-        safe_platform = re.sub(r"[^a-z0-9]", "", str(platform or "").lower())
-        safe_session = re.sub(r"[^a-zA-Z0-9-]", "", str(session_id or ""))
-
-        record = await self._engine.find_one(
-            db_social_session_model,
-            {"user_id": user_key, "platform": safe_platform, "session_id": safe_session},
-        )
+        safe_platform, safe_session, record = await self._find_session_record(user_key, platform, session_id)
         if record is not None:
             path = CONSTANTS.S_SESSION_RESOURCE_DIR / user_key / safe_platform / record.file_name
             if path.exists():

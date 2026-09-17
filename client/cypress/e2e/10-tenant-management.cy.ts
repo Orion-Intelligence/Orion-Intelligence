@@ -1,11 +1,13 @@
 import {
   addIOCForAllTabs,
+  alertSlackClientId,
   assertOnlyGeneralHasAlertFindings,
   applyAuditLogDateRange,
   assertAlertScanCompletedMailPresent,
   closeFilterSidebar,
   closeNotificationSidebar,
   deleteTenant,
+  enableTenantPrivilegedIocIfInputDisabled,
   ensureGeneralAlertIoc,
   exportFromModal,
   fillTenantNetworkConfiguration,
@@ -22,42 +24,33 @@ import {
   resetAuditLogFilters,
   runTenantAlertScan,
   saveTenantEditor,
+  selectEnabledCurrentMonthDate,
   setOnlyGeneralAlertScanner,
   setTenantEditorToggle,
   setTenantLicense,
   setTenantLicenses,
   submitLogin,
+  tenantResetNewPassword,
   waitForTenantAlertScanComplete,
   ensureTenantAlertReportsPresent,
   waitForTenantAlertFindings,
-  waitForBlockingOverlayToClose
+  waitForBlockingOverlayToClose,
+  CATEGORY_ALERT_REPORT_TYPE,
+  openCategoryAlertReport,
+  loadMoreCategoryAlerts,
+  searchCategoryAlerts,
+  openCategoryAlertDrawerByClick,
+  openCategoryAlertDrawerByKeyboard,
+  toggleCategoryAlertDescription,
+  closeCategoryAlertDrawer,
+  exportSelectedCategoryAlert,
+  exportCategoryAlerts
 } from './controllers/10-tenant-management.controller';
-import {TEST_DATA} from '../support/constants';
 import type { CaseAlertTenant, TenantSubUser } from './model/10-tenant-management.model';
 
 describe('Tenant Management - End-to-End Provisioning Flows', () => {
   let tenant = {} as CaseAlertTenant;
   let tenantSubUser = {} as TenantSubUser;
-  const tenantResetNewPassword = '2wsx@WSX2026';
-  const alertSlackClientId = TEST_DATA.alert_slack_client_id;
-
-  const selectEnabledCurrentMonthDate = (day: number) => {
-    cy.get(`[data-testid="side-filter-date-day-${day}"]`)
-      .filter(':visible')
-      .filter((_index, element) => {
-        const className = element.getAttribute('class') || '';
-        return !element.hasAttribute('disabled') && !className.includes('text-slate-400');
-      })
-      .should('have.length.greaterThan', 0)
-      .first()
-      .scrollIntoView()
-      .should('be.enabled')
-      .click();
-  };
-
-  const enableTenantPrivilegedIocIfInputDisabled = () => {
-    cy.get('[data-testid="tenant-ioc-value-input"]', {timeout: 60000}).should('be.visible').and('not.be.disabled');
-  };
 
   before(() => {
     cy.env(['TENANT_ACCOUNT', 'TENANT_SUB_USER']).then(({TENANT_ACCOUNT, TENANT_SUB_USER}) => {
@@ -484,7 +477,7 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
       .should('be.visible')
       .and('have.attr', 'target', '_blank')
       .and('have.attr', 'href', '/api/alert-connectors/slack/connect');
-    cy.get('[data-testid="tenant-settings-connect-jira"]').should('not.exist');
+    cy.get('[data-testid="tenant-settings-connect-jira"]').should('have.class', 'is-disabled');
     cy.docsScreenshot('tenant-alert-integrations-slack');
     cy.window().then((win) => {
       const slackConnectClicks: string[] = [];
@@ -515,6 +508,10 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     ensureTenantAlertReportsPresent();
     cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
     exportFromModal('home-alert-export-modal', 'home-alert-export-option-report');
+    cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
+    exportFromModal('home-alert-export-modal', 'home-alert-export-option-json');
+    cy.get('[data-testid="tenant-home-print-alerts"]').scrollIntoView().should('be.visible').click();
+    exportFromModal('home-alert-export-modal', 'home-alert-export-option-csv');
 
     cy.get('[data-testid="profile-notification-bell"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-notification-sidebar"]').should('be.visible');
@@ -526,10 +523,78 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     closeNotificationSidebar();
 
     cy.get('[data-testid="tenant-home-alert-category-card"]').first().scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="tenant-alert-report-see-details"]').first().scrollIntoView().should('be.visible').click();
-    cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
-    cy.docsScreenshot('tenant-alert-detail');
-    exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
+    cy.get('[data-testid="tenant-alert-report-card"], app-empty-result', { timeout: 60000 }).should('exist');
+
+    cy.get('body').then(($report) => {
+      const seeDetails = $report.find('[data-testid="tenant-alert-report-see-details"]:visible').first();
+      if (!seeDetails.length) {
+        return;
+      }
+      cy.wrap(seeDetails).scrollIntoView().should('be.visible').click({ force: true });
+      cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
+      cy.docsScreenshot('tenant-alert-detail');
+      exportFromModal('category-alert-export-modal', 'category-alert-export-option-report');
+    });
+
+    cy.get('body').then(($report) => {
+      const search = $report.find('.category_report_searchbar-input input[type="text"]:visible').first();
+      if (!search.length) {
+        return;
+      }
+      cy.wrap(search).scrollIntoView().click({ force: true }).type('report', { force: true });
+      cy.wait(400);
+      cy.get('.category_report_searchbar-input input[type="text"]').filter(':visible').first().clear({ force: true });
+      cy.wait(400);
+    });
+
+    cy.get('body').then(($report) => {
+      const card = $report.find('[data-testid="tenant-alert-report-card"]:visible').first();
+      if (!card.length) {
+        return;
+      }
+      cy.wrap(card).scrollIntoView().click({ force: true });
+      cy.get('[data-testid="tenant-alert-detail-drawer"]').should('be.visible');
+      cy.docsScreenshot('tenant-alert-detail-drawer');
+      cy.get('body').then(($drawerBody) => {
+        const $toggle = $drawerBody
+          .find('[data-testid="tenant-alert-detail-drawer"] button:contains("Load more"), [data-testid="tenant-alert-detail-drawer"] button:contains("Show less")')
+          .filter(':visible');
+        if ($toggle.length) {
+          cy.wrap($toggle.first()).click({ force: true });
+          cy.wait(200);
+          cy.get('body').then(($again) => {
+            const $revert = $again
+              .find('[data-testid="tenant-alert-detail-drawer"] button:contains("Load more"), [data-testid="tenant-alert-detail-drawer"] button:contains("Show less")')
+              .filter(':visible');
+            if ($revert.length) {
+              cy.wrap($revert.first()).click({ force: true });
+            }
+          });
+        }
+      });
+      cy.get('[data-testid="tenant-alert-detail-drawer"] aside button').filter(':visible').last().click({ force: true });
+      cy.get('[data-testid="tenant-alert-detail-drawer"]').should('not.exist');
+
+      cy.wrap(card).scrollIntoView().trigger('keydown', { key: 'Enter' });
+      cy.get('body').then(($drawer) => {
+        if ($drawer.find('[data-testid="tenant-alert-detail-drawer"]:visible').length) {
+          cy.get('[data-testid="tenant-alert-detail-drawer"] aside button').filter(':visible').last().click({ force: true });
+          cy.get('[data-testid="tenant-alert-detail-drawer"]').should('not.exist');
+        }
+      });
+    });
+
+    cy.get('body').then(($report) => {
+      const print = $report.find('[data-testid="tenant-alert-print-alerts"]:visible').first();
+      if (!print.length) {
+        return;
+      }
+      ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+        cy.get('[data-testid="tenant-alert-print-alerts"]').filter(':visible').first().scrollIntoView().click({ force: true });
+        cy.get('[data-testid="category-alert-export-modal"]').should('be.visible');
+        exportFromModal('category-alert-export-modal', optionTestId);
+      });
+    });
 
     cy.get('[data-testid="tenant-alert-add-button"]').scrollIntoView().should('be.visible').click();
     cy.get('[data-testid="tenant-alert-modal"]').should('be.visible');
@@ -564,5 +629,58 @@ describe('Tenant Management - End-to-End Provisioning Flows', () => {
     cy.loginAsAdmin();
     openTenantsPage();
     deleteTenant(tenant);
+  });
+});
+
+describe('Category Alert Report - Stubbed Coverage', () => {
+  beforeEach(() => {
+    cy.loginAsAdmin();
+  });
+
+  after(() => {
+    cy.logout();
+  });
+
+  it('paginates, searches and exports category alerts', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    cy.get('[data-testid="tenant-alert-report-card"]').filter(':visible').should('have.length.greaterThan', 0);
+
+    loadMoreCategoryAlerts();
+
+    searchCategoryAlerts('Cypress Breach Alert 1');
+
+    ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+      exportSelectedCategoryAlert(optionTestId);
+    });
+
+    ['category-alert-export-option-report', 'category-alert-export-option-json', 'category-alert-export-option-csv'].forEach((optionTestId) => {
+      exportCategoryAlerts(optionTestId);
+    });
+  });
+
+  it('opens the detail drawer via click and keyboard and toggles the description', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    openCategoryAlertDrawerByClick();
+    toggleCategoryAlertDescription();
+    closeCategoryAlertDrawer();
+
+    openCategoryAlertDrawerByKeyboard();
+    closeCategoryAlertDrawer();
+  });
+
+  it('applies alert filters through the filter sidebar', () => {
+    openCategoryAlertReport(CATEGORY_ALERT_REPORT_TYPE);
+
+    openFilterSidebar();
+    cy.get('[data-testid="side-filter-date-toggle"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-prev-month"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-1"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-date-day-25"]').filter(':visible').first().scrollIntoView().click();
+    cy.get('[data-testid="side-filter-apply"]').filter(':visible').first().scrollIntoView().click();
+    closeFilterSidebar();
+
+    cy.location('pathname').should('include', `/dashboard/profile/alerts/${CATEGORY_ALERT_REPORT_TYPE}`);
   });
 });

@@ -69,7 +69,7 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
                 token = token_from_request(request)
                 if token:
                     user = await session_manager.get_instance().get_current_user(token)
-                    tenant = await engine.find_one(db_tenant_model,db_tenant_model.id == ObjectId(str(user.tenant_uuid)),)
+                    tenant = await engine.find_one(db_tenant_model,db_tenant_model.id == ObjectId(str(user.tenant_id)),)
                 else:
                     tenant = await engine.find_one(db_tenant_model, db_tenant_model.is_default == True)
             elif is_default_tenant:
@@ -80,7 +80,7 @@ class tenant_resolution_middleware(BaseHTTPMiddleware):
                     for item in await engine.find(db_tenant_model):
                         name = str(getattr(item, "name", "") or "")
                         if name.startswith("gAAAA"):
-                            key = await engine.find_one(db_keys, db_keys.auth_id == str(item.id))
+                            key = await engine.find_one(db_keys, db_keys.tenant_id == str(item.id))
                             if key:
                                 name = Fernet(KeyManager.get_instance()._unwrap(key.wrapped_key)).decrypt(name.encode()).decode()
                         if not getattr(item, "slug", None) and name.strip().lower() == tenant_slug:

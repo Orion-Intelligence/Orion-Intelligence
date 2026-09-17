@@ -688,12 +688,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     if (effectivePreferredPosition === 'right' && this.step?.elementId.startsWith('sidebar-') && spotlightBounds) {
-      const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, this.tooltipGap);
-      if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
-        return sidebarAlignedTooltip;
-      }
-
-      return this.clampTooltipToViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+      return this.sidebarTooltipOrClamp(spotlightBounds, tooltipWidth, tooltipHeight, margin);
     }
 
     if (effectivePreferredPosition === 'left' && this.step?.elementId === 'dashboard-consolidated') {
@@ -709,20 +704,14 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       const sidebarElement = document.getElementById('sidebar-general');
       if (sidebarElement) {
         const sidebarRect = sidebarElement.getBoundingClientRect();
-        const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition({
+        return this.sidebarTooltipOrClamp({
           top: sidebarRect.top,
           left: sidebarRect.left,
           right: sidebarRect.right,
           bottom: sidebarRect.bottom,
           width: sidebarRect.width,
           height: sidebarRect.height
-        }, tooltipWidth, tooltipHeight, this.tooltipGap);
-
-        if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
-          return sidebarAlignedTooltip;
-        }
-
-        return this.clampTooltipToViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin);
+        }, tooltipWidth, tooltipHeight, margin);
       }
     }
 
@@ -779,6 +768,15 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   private getSidebarAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
     const centeredTop = spotlightBounds.top + (spotlightBounds.height / 2) - (tooltipHeight / 2);
     return this.clampTooltipToViewport({ top: `${centeredTop}px`, left: `${spotlightBounds.right + gap}px` }, tooltipWidth, tooltipHeight, 12);
+  }
+
+  private sidebarTooltipOrClamp(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, margin: number): Record<string, string> {
+    const sidebarAlignedTooltip = this.getSidebarAlignedTooltipPosition(spotlightBounds, tooltipWidth, tooltipHeight, this.tooltipGap);
+    if (this.fitsInViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin)) {
+      return sidebarAlignedTooltip;
+    }
+
+    return this.clampTooltipToViewport(sidebarAlignedTooltip, tooltipWidth, tooltipHeight, margin);
   }
 
   private getBelowLeftAlignedTooltipPosition(spotlightBounds: { top: number; left: number; right: number; bottom: number; width: number; height: number; }, tooltipWidth: number, tooltipHeight: number, gap: number): Record<string, string> {
@@ -1079,26 +1077,8 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     this.initialSidebarScrollTop = scroller?.scrollTop ?? null;
   }
 
-  private waitForCompactSidebarState(expanded: boolean): Promise<void> {
+  private waitForCondition(isReady: () => boolean, timeoutMs = 1500): Promise<void> {
     return new Promise(resolve => {
-      const isReady = () => {
-        const shell = document.querySelector('[data-testid="dashboard-shell"]');
-        const collapseButton = document.querySelector('[data-testid="sidebar-collapse-button"]');
-        const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
-
-        if (!shell) {
-          return false;
-        }
-
-        const shellVisible = 'offsetParent' in shell && shell.offsetParent !== null;
-
-        if (expanded) {
-          return collapseButton !== null && !shellVisible;
-        }
-
-        return expandButton !== null && shellVisible;
-      };
-
       if (isReady()) {
         resolve();
         return;
@@ -1122,8 +1102,30 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       window.setTimeout(() => {
         observer.disconnect();
         resolve();
-      }, 1500);
+      }, timeoutMs);
     });
+  }
+
+  private waitForCompactSidebarState(expanded: boolean): Promise<void> {
+    const isReady = () => {
+      const shell = document.querySelector('[data-testid="dashboard-shell"]');
+      const collapseButton = document.querySelector('[data-testid="sidebar-collapse-button"]');
+      const expandButton = document.querySelector('[data-testid="sidebar-expand-button"]');
+
+      if (!shell) {
+        return false;
+      }
+
+      const shellVisible = 'offsetParent' in shell && shell.offsetParent !== null;
+
+      if (expanded) {
+        return collapseButton !== null && !shellVisible;
+      }
+
+      return expandButton !== null && shellVisible;
+    };
+
+    return this.waitForCondition(isReady);
   }
 
   private getAdditionalSpotlightStyles(step: TourStep): Record<string, string>[] {
@@ -1173,11 +1175,9 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getStepValue(element: HTMLElement, step: TourStep): string {
-    const input = step.inputSelector
-      ? element.querySelector(step.inputSelector)
-      : element.querySelector('input, textarea, select');
+    const input = this.getStepInput(element, step);
 
-    if (input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement || input instanceof HTMLSelectElement) {
+    if (input) {
       return input.value.trim();
     }
 
@@ -1663,32 +1663,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private waitForStepTarget(step: TourStep, timeoutMs = 1500): Promise<void> {
-    return new Promise(resolve => {
-      if (this.hasStepTarget(step)) {
-        resolve();
-        return;
-      }
-
-      const observer = new MutationObserver(() => {
-        if (!this.hasStepTarget(step)) {
-          return;
-        }
-
-        observer.disconnect();
-        resolve();
-      });
-
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true
-      });
-
-      window.setTimeout(() => {
-        observer.disconnect();
-        resolve();
-      }, timeoutMs);
-    });
+    return this.waitForCondition(() => this.hasStepTarget(step), timeoutMs);
   }
 
   private waitForRenderedSelector(selector: string, timeoutMs = 1500): Promise<HTMLElement | null> {
@@ -1851,11 +1826,16 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    const alignTarget = () => {
+    const computeVisibleBounds = () => {
       const scrollerRect = sidebarScroller.getBoundingClientRect();
       const targetRect = target.getBoundingClientRect();
       const visibleTop = Math.max(scrollerRect.top + 12, 12);
       const visibleBottom = Math.min(scrollerRect.bottom - 12, window.innerHeight - 12);
+      return { targetRect, visibleTop, visibleBottom };
+    };
+
+    const alignTarget = () => {
+      const { targetRect, visibleTop, visibleBottom } = computeVisibleBounds();
       const visibleHeight = Math.max(visibleBottom - visibleTop, 0);
       const desiredTop = visibleTop + Math.max((visibleHeight - targetRect.height) / 2, 0);
       const maximumScrollTop = Math.max(sidebarScroller.scrollHeight - sidebarScroller.clientHeight, 0);
@@ -1865,10 +1845,7 @@ export class DemoTourComponent implements OnInit, AfterViewInit, OnDestroy {
     };
 
     const isWithinVisibleBounds = () => {
-      const scrollerRect = sidebarScroller.getBoundingClientRect();
-      const targetRect = target.getBoundingClientRect();
-      const visibleTop = Math.max(scrollerRect.top + 12, 12);
-      const visibleBottom = Math.min(scrollerRect.bottom - 12, window.innerHeight - 12);
+      const { targetRect, visibleTop, visibleBottom } = computeVisibleBounds();
       return targetRect.top >= visibleTop && targetRect.bottom <= visibleBottom;
     };
 

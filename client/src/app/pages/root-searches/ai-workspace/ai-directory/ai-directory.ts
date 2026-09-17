@@ -362,6 +362,12 @@ export class AiDirectory implements OnChanges, OnDestroy {
     });
   }
 
+  private markWorkspaceInfected(result: NexusWorkspaceImportResponse): void {
+    this.updateWorkspaceStatus('infected',
+      result.message || this.translate('Repository blocked because a threat was detected.'),
+      result.scan_output ?? result.error,);
+  }
+
   private handleWorkspaceImportResult(response: NexusWorkspaceImportResponse): void {
     const result = response.result ?? response;
 
@@ -376,9 +382,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
     }
 
     if (result.status === 'infected') {
-      this.updateWorkspaceStatus('infected',
-        result.message || this.translate('Repository blocked because a threat was detected.'),
-        result.scan_output ?? result.error,);
+      this.markWorkspaceInfected(result);
       return;
     }
 
@@ -499,9 +503,7 @@ export class AiDirectory implements OnChanges, OnDestroy {
         }
 
         if (result.status === 'infected') {
-          this.updateWorkspaceStatus('infected',
-            result.message || this.translate('Repository blocked because a threat was detected.'),
-            result.scan_output ?? result.error,);
+          this.markWorkspaceInfected(result);
           return;
         }
 

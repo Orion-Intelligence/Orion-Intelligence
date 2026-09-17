@@ -24,6 +24,7 @@ from routes.api_routes import api_routes
 from routes.auth_routes import auth_router
 from routes.mail_sso_routes import mail_sso_routes
 from routes.crawl_routes import crawl_routes
+from routes.documentation_routes import documentation_routes
 from routes.extension_routes import extension_routes
 from routes.manage_profiles_routes import manage_profiles_routes
 from routes.geo_fencing_routes import geo_fencing_routes
@@ -94,6 +95,7 @@ app.include_router(crawl_routes, include_in_schema=False)
 app.include_router(admin_routes, include_in_schema=False)
 app.include_router(alert_connector_routes, include_in_schema=False)
 app.include_router(public_routes, include_in_schema=False)
+app.include_router(documentation_routes, include_in_schema=False)
 if env_handler.get_instance().env("TESTING_ENABLED", "0") == "1":
     app.include_router(test_routes, include_in_schema=False)
 app.include_router(micro_routes, include_in_schema=False)

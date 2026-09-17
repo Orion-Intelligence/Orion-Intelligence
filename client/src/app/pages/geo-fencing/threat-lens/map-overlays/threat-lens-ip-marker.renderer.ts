@@ -163,22 +163,7 @@ export class ThreatLensIpMarkerRenderer {
 
   private buildPointGraphic(group: ThreatLensIpPointGroup): ThreatLensMapGraphic {
     if (group.records.length > 1) {
-      const stats = this.getGroupStats(group.records);
-      return {
-        geometry: this.buildPointGeometry(group.point),
-        attributes: {
-          role: 'ip-scan-cluster',
-          count: group.records.length,
-          networkCount: stats.networkCount,
-          ip: `${group.records.length} IPs`,
-          records: group.records,
-          stackReason: 'Same MaxMind coordinate',
-          accuracyRadius: stats.accuracyMax,
-          accuracyMin: stats.accuracyMin,
-          accuracyMax: stats.accuracyMax,
-        },
-        symbol: this.buildClusterSymbol(group.records.length),
-      };
+      return this.buildClusterGraphic(group.point, group.records, 'Same MaxMind coordinate');
     }
 
     const record = group.records[0];
@@ -332,21 +317,25 @@ export class ThreatLensIpMarkerRenderer {
   }
 
   private buildScreenClusterGraphic(group: ThreatLensIpScreenGroup): ThreatLensMapGraphic {
-    const stats = this.getGroupStats(group.records);
+    return this.buildClusterGraphic(group.point, group.records, 'Same map area at this zoom');
+  }
+
+  private buildClusterGraphic(point: ThreatLensCoordinates, records: ThreatLensIpRecord[], stackReason: string): ThreatLensMapGraphic {
+    const stats = this.getGroupStats(records);
     return {
-      geometry: this.buildPointGeometry(group.point),
+      geometry: this.buildPointGeometry(point),
       attributes: {
         role: 'ip-scan-cluster',
-        count: group.records.length,
+        count: records.length,
         networkCount: stats.networkCount,
-        ip: `${group.records.length} IPs`,
-        records: group.records,
-        stackReason: 'Same map area at this zoom',
+        ip: `${records.length} IPs`,
+        records,
+        stackReason,
         accuracyRadius: stats.accuracyMax,
         accuracyMin: stats.accuracyMin,
         accuracyMax: stats.accuracyMax,
       },
-      symbol: this.buildClusterSymbol(group.records.length),
+      symbol: this.buildClusterSymbol(records.length),
     };
   }
 

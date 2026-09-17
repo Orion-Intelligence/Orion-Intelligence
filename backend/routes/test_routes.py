@@ -10,6 +10,7 @@ from orion.api.interactive.search_manager.search_data_model.dynamic.search_dynam
 from orion.api.server.crawl_manager.class_model.domain_scan_request_model import DomainScanRequest, UrlVulnerabilityScanRequest
 from orion.api.server.crawl_manager.class_model.ip_scan_request_model import GeoCameraDetectRangesRequest, GeoCameraDetectRequest, NetIntelDeepScanRequest, ResolveIPRequest
 from orion.management.managers.service_manager import service_manager
+from orion.services.session_manager.session_manager import session_manager
 from orion.services.mongo_manager.mongo_controller import mongo_controller
 from orion.services.mongo_manager.shared_model.db_auth_models import user_role
 from orion.services.mongo_manager.shared_model.db_backup_model import BackupType, db_backup_model
@@ -156,7 +157,7 @@ async def test_search_dynamic_cracked(_param: search_dynamic_crack_model = Body(
 
 @test_routes.post("/api/forgot")
 async def forgotPassword(data: ForgotPasswordRequest, request: Request):
-    return await auth_manager.forgot_password(data.email, getattr(request.state, "tenant", None))
+    return await auth_manager.forgot_password(data.email, session_manager.tenant_identifier(getattr(request.state, "tenant", None)))
 
 
 @test_routes.post(

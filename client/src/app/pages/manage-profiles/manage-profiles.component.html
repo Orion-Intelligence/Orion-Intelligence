@@ -6,7 +6,7 @@
   <div data-testid="manage-profiles-page" class="relative overflow-hidden rounded-[14px] border border-[var(--color-border)] bg-[var(--color-blue-700)] bg-[repeating-linear-gradient(135deg,rgba(255,255,255,0.014)_0px,rgba(255,255,255,0.014)_1px,transparent_1px,transparent_12px)] p-4 shadow-[0_10px_28px_var(--color-shadow-light)] sm:p-5 [body.light-theme_&&]:!border-[#d7e2ee] [body.light-theme_&&]:!bg-white [body.light-theme_&&]:!bg-[repeating-linear-gradient(135deg,rgba(15,23,42,0.022)_0,rgba(15,23,42,0.022)_1px,transparent_1px,transparent_12px)] [body.light-theme_&&]:!shadow-[0_8px_24px_rgba(15,23,42,0.07)]">
     <div class="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-sky-400/45 to-transparent"></div>
 
-    <header class="mb-5 flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-border)] pb-5">
+    <header class="mb-3 flex flex-wrap items-center justify-between gap-4 pb-1">
       <div class="min-w-0">
         <h1 class="mb-0 text-xl font-semibold leading-tight text-[var(--color-text1)]">{{ 'Manage Profiles' | translate }}</h1>
         <p class="mb-0 mt-1 max-w-2xl text-xs leading-5 text-[var(--color-text4)]">{{ 'Manage personas, browser sessions, profiles, and assignments.' | translate }}</p>
@@ -24,12 +24,14 @@
       </div>
     </header>
 
-    <div class="mb-5 flex max-w-full gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-      @for (tab of tabs; track tab.key) {
-        <button type="button" [attr.data-testid]="'manage-profiles-tab-' + tab.key" (click)="setTab(tab.key)" [disabled]="!canOpenTab(tab.key)" class="h-9 shrink-0 rounded-lg border px-3 text-[12px] font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-45" [ngClass]="activeTab() === tab.key ? 'border-sky-400/30 bg-sky-400/[0.12] text-[var(--color-text1)]' : 'border-[var(--color-border)] bg-[var(--color-blue-820)] text-[var(--color-text4)] hover:bg-[var(--color-blue-810)] hover:text-[var(--color-text2)]'">
-          {{ tab.label | translate }}
-        </button>
-      }
+    <div class="ui-result-tabs-strip mb-5 flex items-end overflow-x-auto border-b pb-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden !border-b-[var(--color-divider)] [.light-theme_&]:!border-b-[#0f172a26] [.dark-theme_&]:!border-b-[#ffffff20]">
+      <div class="inline-flex flex-nowrap items-center gap-[2px] bg-transparent p-0">
+        @for (tab of tabs; track tab.key) {
+          <button type="button" [attr.data-testid]="'manage-profiles-tab-' + tab.key" (click)="setTab(tab.key)" [disabled]="!canOpenTab(tab.key)" class="inline-flex h-[46px] shrink-0 cursor-pointer items-center whitespace-nowrap border-b-2 border-transparent px-[20px] text-[14px] font-[Inter] font-semibold tracking-[0.02em] transition-[color,border-color] disabled:cursor-not-allowed disabled:opacity-45" [ngClass]="activeTab() === tab.key ? 'border-b-[var(--color-blue-640)] text-[var(--color-text1)]' : 'text-[var(--color-text4)] hover:text-[var(--color-text1)]'">
+            {{ tab.label | translate }}
+          </button>
+        }
+      </div>
     </div>
 
     @if (formError()) {
