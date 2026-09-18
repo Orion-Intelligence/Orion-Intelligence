@@ -6,7 +6,8 @@ export enum StealerlogsSearchFilters {
     CHANNEL = 'm_channel',
     FILE = 'm_file',
     EMAIL = 'm_email',
-    CREDITCARD = 'm_creditcard'
+    CREDITCARD = 'm_creditcard',
+    PHONE = 'm_phone'
 }
 export const StealerlogsSearchFilterLabels: Record<StealerlogsSearchFilters, string> = {
   [StealerlogsSearchFilters.ALL]: 'All',
@@ -16,7 +17,8 @@ export const StealerlogsSearchFilterLabels: Record<StealerlogsSearchFilters, str
   [StealerlogsSearchFilters.CHANNEL]: 'Channel',
   [StealerlogsSearchFilters.FILE]: 'File Name',
   [StealerlogsSearchFilters.EMAIL]: 'Email',
-  [StealerlogsSearchFilters.CREDITCARD]: 'Credit Card'
+  [StealerlogsSearchFilters.CREDITCARD]: 'Credit Card',
+  [StealerlogsSearchFilters.PHONE]: 'Phone Number'
 };
 export interface PasswordSchemaFilter {
     minLength: number | null;

@@ -22,18 +22,22 @@ export type { SharedSearchAdvancedChip, SharedSearchAdvancedFilter } from './mod
 
 
 
+const PHONE_NUMBER_PATTERN = /^\+?\d{7,15}$/;
+
 const TAG_INVALID_MESSAGE: Record<string, string> = {
   [StealerlogsSearchFilters.EMAIL]: 'Invalid email format',
   [StealerlogsSearchFilters.DOMAIN]: 'Invalid domain format',
   [StealerlogsSearchFilters.IP]: 'Invalid IP address format',
-  [StealerlogsSearchFilters.CREDITCARD]: 'Invalid credit card format'
+  [StealerlogsSearchFilters.CREDITCARD]: 'Invalid credit card format',
+  [StealerlogsSearchFilters.PHONE]: 'Invalid phone number format'
 };
 
 const TAG_SANITIZE_REGEX: Record<string, RegExp> = {
   [StealerlogsSearchFilters.EMAIL]: /[^a-zA-Z0-9@._&|\s-]/g,
   [StealerlogsSearchFilters.DOMAIN]: /[^a-zA-Z0-9.&|\s-]/g,
   [StealerlogsSearchFilters.IP]: /[^0-9.&|\s]/g,
-  [StealerlogsSearchFilters.CREDITCARD]: /[^0-9\s&|]/g
+  [StealerlogsSearchFilters.CREDITCARD]: /[^0-9\s&|]/g,
+  [StealerlogsSearchFilters.PHONE]: /[^0-9+\s&|]/g
 };
 
 @Component({
@@ -44,10 +48,10 @@ const TAG_SANITIZE_REGEX: Record<string, RegExp> = {
   animations: [fadeInDashboardItem, advancedRowMotionAnimation, popupAnimation],
 })
 export class IocSearchComponent implements OnInit {
-  private readonly DEFAULT_VALUE_VALIDATORS: RegExp[] = [EMAIL_ADDRESS_PATTERN, DOMAIN_NAME_PATTERN, IPV4_ADDRESS_PATTERN, /^(?:\d{6}|\d{13,19})$/];
-  private readonly DEFAULT_TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: EMAIL_ADDRESS_PATTERN, [StealerlogsSearchFilters.DOMAIN]: DOMAIN_NAME_PATTERN, [StealerlogsSearchFilters.IP]: IPV4_ADDRESS_PATTERN, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
+  private readonly DEFAULT_VALUE_VALIDATORS: RegExp[] = [EMAIL_ADDRESS_PATTERN, DOMAIN_NAME_PATTERN, IPV4_ADDRESS_PATTERN, /^(?:\d{6}|\d{13,19})$/, PHONE_NUMBER_PATTERN];
+  private readonly DEFAULT_TAG_VALIDATORS: Record<string, RegExp> = { [StealerlogsSearchFilters.EMAIL]: EMAIL_ADDRESS_PATTERN, [StealerlogsSearchFilters.DOMAIN]: DOMAIN_NAME_PATTERN, [StealerlogsSearchFilters.IP]: IPV4_ADDRESS_PATTERN, [StealerlogsSearchFilters.CREDITCARD]: /^(?:\d{6}|\d{13,19})$/, [StealerlogsSearchFilters.PHONE]: PHONE_NUMBER_PATTERN, [StealerlogsSearchFilters.CHANNEL]: /^.*$/ };
 
-  readonly basicTags = input<string[]>([StealerlogsSearchFilters.ALL, StealerlogsSearchFilters.DOMAIN, StealerlogsSearchFilters.EMAIL, StealerlogsSearchFilters.CREDITCARD, StealerlogsSearchFilters.IP]);
+  readonly basicTags = input<string[]>([StealerlogsSearchFilters.ALL, StealerlogsSearchFilters.DOMAIN, StealerlogsSearchFilters.EMAIL, StealerlogsSearchFilters.CREDITCARD, StealerlogsSearchFilters.PHONE, StealerlogsSearchFilters.IP]);
   readonly filterLabels = input<Record<string, string>>(StealerlogsSearchFilterLabels);
   readonly allTag = input<string>(StealerlogsSearchFilters.ALL);
   readonly defaultBasicTag = input<string>(StealerlogsSearchFilters.ALL);

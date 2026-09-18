@@ -99,7 +99,21 @@ export class CredentialListComponent {
     if (mergedDomains.length) {
       return mergedDomains;
     }
-    return this.normalizeValues(item.ip);
+    const ips = this.normalizeValues(item.ip);
+    if (ips.length) {
+      return ips;
+    }
+    return this.normalizeValues(item.channel);
+  }
+
+  getStealerIdentityValue(item: StealerLogResultItem): string {
+    if (!item || item.type === 'bin') {
+      return '';
+    }
+    return this.normalizeValues(item.email)[0]
+      ?? this.normalizeValues(item.username)[0]
+      ?? this.normalizeValues(item.phone)[0]
+      ?? '';
   }
 
   getStealerDomainTitle(item: StealerLogResultItem): string {

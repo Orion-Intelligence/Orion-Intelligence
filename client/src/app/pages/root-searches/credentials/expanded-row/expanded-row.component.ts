@@ -30,6 +30,9 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private readonly passwordRevealConfirmKey = 'orion.passwordRevealConfirmed';
   private passwordRevealConfirmed = false;
   private pendingPasswordRevealKey: string | null = null;
+  private readonly fallbackPriorityKeys = ['email', 'username', 'user', 'phone', 'phone_number', 'bin', 'card_type', 'name', 'address', 'extra'];
+  private readonly fallbackExcludedKeys = new Set(['_id', 'raw', 'type', 'file_type', 'fileType', 'date', 'channel', 'm_channel', 'source_channel', 'm_source_channel', 'mapping', 'delimiter', 'file', 'file_name', 'filename', 'dismissed', 'dismiss_id', 'm_sub_host']);
+  private readonly fallbackFieldLimit = 4;
 
   activeTelemetryKey: string | null = null;
   matchedValues: string[] = [];
@@ -230,6 +233,44 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       { key: 'Luhn', label: 'Luhn', icon: 'bi-check2-circle', value: this.formatBooleanValue(item?.Luhn ?? item?.luhn) },
       { key: 'Website', label: 'Website', icon: 'bi-link-45deg', value: this.firstValue(item?.Website ?? item?.website) },
     ];
+  }
+
+  get hasIdentityValues(): boolean {
+    const item = this.item();
+    return this.firstValue(item?.email ?? item?.username) !== '-'
+      || this.domainValues.length > 0
+      || this.firstValue(item?.ip) !== '-'
+      || this.passwordValue !== '-';
+  }
+
+  get fallbackFields(): CreditCardField[] {
+    const item = this.item();
+    if (!item) {
+      return [];
+    }
+    const rank = (key: string): number => {
+      const index = this.fallbackPriorityKeys.indexOf(key.toLowerCase());
+      return index === -1 ? this.fallbackPriorityKeys.length : index;
+    };
+    return Object.keys(item)
+      .filter(key => !this.fallbackExcludedKeys.has(key) && !this.isHashOrIndexKey(key))
+      .map(key => ({
+        key,
+        label: this.rowHelper.prettyLabel(key),
+        icon: this.telemetryIcon(key),
+        value: this.rowHelper.normalizeToArray(getOwnProperty(item, key)).map(value => String(value ?? '').trim()).filter(Boolean).join(', '),
+      }))
+      .filter(field => field.value)
+      .sort((first, second) => rank(first.key) - rank(second.key) || first.label.localeCompare(second.label))
+      .slice(0, this.fallbackFieldLimit);
+  }
+
+  get detailFields(): CreditCardField[] {
+    return this.isCreditCardRecord ? this.creditCardFields : this.fallbackFields;
+  }
+
+  get showDetailFields(): boolean {
+    return this.isCreditCardRecord || (!this.hasIdentityValues && this.fallbackFields.length > 0);
   }
 
   get sourceDomainValues(): string[] {
