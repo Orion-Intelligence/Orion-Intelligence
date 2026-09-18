@@ -390,7 +390,7 @@ class ProfileManager:
 
     async def connect_profile(self, current_user, data: SocialProfileConnectRequest) -> SocialProfileResponse:
         record = await self._get_or_create_social_record(current_user)
-        await self._validate_profile_session(current_user, record, data.platform, data.session_id)
+        await self._validate_profile_session(current_user, record, data.platform, data.session_id, incoming_purposes=data.purposes)
         now = datetime.now(UTC)
         profile = ManagedSocialProfile(
             profile_id=str(uuid4()),
@@ -428,7 +428,8 @@ class ProfileManager:
         if data.connection_status is not None:
             profile.connection_status = data.connection_status
         if data.session_id is not None:
-            await self._validate_profile_session(current_user, record, profile.platform, data.session_id, profile.profile_id)
+            purposes_to_use = data.purposes if data.purposes is not None else profile.purposes
+            await self._validate_profile_session(current_user, record, profile.platform, data.session_id, profile.profile_id, incoming_purposes=purposes_to_use)
             profile.session_id = data.session_id
             profile.connection_status = SocialProfileConnectionStatus.CONNECTED
         if data.purposes is not None:
@@ -624,13 +625,19 @@ class ProfileManager:
             raise
         return record
 
-    async def _validate_profile_session(self, current_user, record: db_social_profile_management_model, platform: str, session_id: str | None, ignored_profile_id: str = "") -> None:
+    async def _validate_profile_session(self, current_user, record: db_social_profile_management_model, platform: str, session_id: str | None, ignored_profile_id: str = "", incoming_purposes: list[str] | None = None) -> None:
         if not session_id:
             raise HTTPException(status_code=400, detail="Session is required")
         safe_platform = self._safe_platform(platform)
+        
+        incoming = incoming_purposes or []
+        is_incoming_hate_speech = "hate_speech_monitoring" in incoming
+        
         for profile in record.profiles:
             if profile.profile_id != ignored_profile_id and profile.session_id == session_id:
-                raise HTTPException(status_code=400, detail="This session is already assigned to another profile")
+                is_existing_hate_speech = "hate_speech_monitoring" in (profile.purposes or [])
+                if is_incoming_hate_speech == is_existing_hate_speech:
+                    raise HTTPException(status_code=400, detail="This session is already assigned to another profile")
         session = await self._engine.find_one(db_social_session_model, {"user_id": str(current_user.id), "platform": safe_platform, "session_id": session_id})
         if not session:
             raise HTTPException(status_code=404, detail="Session not found for selected platform")

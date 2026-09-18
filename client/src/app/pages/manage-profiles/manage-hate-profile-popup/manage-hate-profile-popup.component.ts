@@ -90,7 +90,9 @@ export class ManageHateProfilePopupComponent {
       return [];
     }
     const currentProfileId = this.profile()?.profile_id ?? '';
-    const used = new Set(this.profiles().filter(profile => profile.profile_id !== currentProfileId).map(profile => profile.session_id).filter(Boolean));
+    const hateProfiles = this.profiles().filter(p => (p.purposes || []).includes('hate_speech_monitoring'));
+    const used = new Set(hateProfiles.filter(profile => profile.profile_id !== currentProfileId).map(profile => profile.session_id).filter(Boolean));
+
     return (getOwnProperty(this.sessions(), platform) ?? [])
       .filter(session => !used.has(session.id))
       .map(session => ({ key: session.id, label: `Session #${session.id.slice(0, 8)} - ${new Date(session.capturedAt).toLocaleString()}` }));
