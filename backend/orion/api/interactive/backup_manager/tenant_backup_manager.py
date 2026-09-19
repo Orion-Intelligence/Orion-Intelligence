@@ -55,7 +55,7 @@ class TenantBackupManager:
         entries = []
         for backup in backups:
             backup_dir = self._owner.backup_root / backup.filename
-            tenant_dir = backup_dir / CONSTANTS.BACKUP_TENANTS_DIR / tenant_id
+            tenant_dir = self._tenant_backup_dir(backup_dir / CONSTANTS.BACKUP_TENANTS_DIR, tenant_id)
             if not (tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR).is_dir():
                 continue
             manifest = self._owner.read_manifest(backup_dir) or {}
@@ -73,7 +73,7 @@ class TenantBackupManager:
 
     async def resolve_download(self, backup_id: str, tenant_id: str):
         backup = await self._owner._load_backup_by_id(backup_id)
-        tenant_dir = self._owner.backup_root / backup.filename / CONSTANTS.BACKUP_TENANTS_DIR / tenant_id
+        tenant_dir = self._tenant_backup_dir(self._owner.backup_root / backup.filename / CONSTANTS.BACKUP_TENANTS_DIR, tenant_id)
         if not (tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR).is_dir():
             raise HTTPException(status_code=404, detail="Tenant not found in this backup")
         manifest = self._owner.read_manifest(self._owner.backup_root / backup.filename) or {}
@@ -96,22 +96,23 @@ class TenantBackupManager:
         manifest = self._owner.read_manifest(self._owner.backup_root / backup.filename) or {}
         recorded = ((manifest.get("tenants") or {}).get("tenants") or {})
         entries = []
-        for tenant_dir in sorted(tenants_dir.iterdir()):
-            if not tenant_dir.is_dir():
+        for parent_dir in sorted(tenants_dir.iterdir()):
+            if not parent_dir.is_dir():
                 continue
-            summary = recorded.get(tenant_dir.name) or {}
-            document = await asyncio.to_thread(
-                self._read_first_document,
-                tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
-            )
-            entries.append({
-                "tenant_id": tenant_dir.name,
-                "name": (document or {}).get("name", ""),
-                "slug": (document or {}).get("slug", ""),
-                "users": summary.get("users", 0),
-                "documents": sum((summary.get("mongo") or {}).values()),
-                "files": summary.get("files", 0),
-            })
+            for tenant_dir in [parent_dir, *self._child_tenant_dirs(parent_dir)]:
+                summary = recorded.get(tenant_dir.name) or {}
+                document = await asyncio.to_thread(
+                    self._read_first_document,
+                    tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR / f"{CONSTANTS.BACKUP_TENANT_COLLECTION}.ndjson",
+                )
+                entries.append({
+                    "tenant_id": tenant_dir.name,
+                    "name": (document or {}).get("name", ""),
+                    "slug": (document or {}).get("slug", ""),
+                    "users": summary.get("users", 0),
+                    "documents": sum((summary.get("mongo") or {}).values()),
+                    "files": summary.get("files", 0),
+                })
         return entries
 
     async def restore_tenant_by_id(self, backup_id: str, tenant_id: str):
@@ -120,7 +121,7 @@ class TenantBackupManager:
 
     async def restore_tenant(self, filename: str, tenant_id: str, source: str = "cli"):
         backup_dir = self._owner.backup_root / filename
-        tenant_dir = backup_dir / CONSTANTS.BACKUP_TENANTS_DIR / tenant_id
+        tenant_dir = self._tenant_backup_dir(backup_dir / CONSTANTS.BACKUP_TENANTS_DIR, tenant_id)
         log.g().i(f"TENANT RESTORE STARTED: backup={filename} tenant={tenant_id} source={source}")
 
         if not tenant_dir.is_dir() or not (tenant_dir / CONSTANTS.BACKUP_TENANT_MONGO_DIR).is_dir():
@@ -138,11 +139,15 @@ class TenantBackupManager:
             raise HTTPException(status_code=422, detail="Tenant identifier in the backup is not a valid object id")
 
         owned = self._owner._partition_registry.tenant_owned(await database.list_collection_names())
+        targets = [(tenant_dir, scope)]
+        for child_dir in self._child_tenant_dirs(tenant_dir):
+            targets.append((child_dir, await self._tenant_restore_scope(database, child_dir.name, child_dir)))
         rollback_name = f"{CONSTANTS.RESTORE_TENANT_ROLLBACK_PREFIX}{tenant_id}_{datetime.now(timezone.utc).strftime('%Y_%m_%d_%H_%M_%S')}"
         rollback_dir = self._owner.backup_root / rollback_name
         try:
             await self._owner._set_progress(10, "Creating tenant rollback point")
-            await self._export_tenant(rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR / tenant_id, scope, owned)
+            for _, target_scope in targets:
+                await self._export_tenant(rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR / target_scope.tenant_id, target_scope, owned)
             log.g().i(f"TENANT RESTORE: rollback point created: {rollback_name}")
         except Exception as exc:
             await self._owner._remove_tree(rollback_dir)
@@ -164,18 +169,22 @@ class TenantBackupManager:
         try:
             await self._owner._set_progress(45, "Restoring tenant data")
             report = await self._run_tenant_restore_engine(tenant_dir, scope)
+            for child_dir, child_scope in targets[1:]:
+                await self._run_tenant_restore_engine(child_dir, child_scope)
             await self._owner._set_progress(90, "Validating tenant restore")
-            valid, details = await self._validate_tenant_restore(scope)
-            if not valid:
-                raise RuntimeError(f"validation failed: {details}")
+            for _, target_scope in targets:
+                valid, details = await self._validate_tenant_restore(target_scope)
+                if not valid:
+                    raise RuntimeError(f"validation failed: {details}")
             log.g().i(f"TENANT RESTORE: validation passed for {tenant_id}")
         except Exception as exc:
             log.g().e(f"TENANT RESTORE FAILED: {exc}. Rolling back tenant {tenant_id} from {rollback_name}")
             try:
-                await self._run_tenant_restore_engine(rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR / tenant_id, scope)
-                valid, details = await self._validate_tenant_restore(scope)
-                if not valid:
-                    raise RuntimeError(f"rollback validation failed: {details}")
+                for _, target_scope in targets:
+                    await self._run_tenant_restore_engine(rollback_dir / CONSTANTS.BACKUP_TENANTS_DIR / target_scope.tenant_id, target_scope)
+                    valid, details = await self._validate_tenant_restore(target_scope)
+                    if not valid:
+                        raise RuntimeError(f"rollback validation failed: {details}")
                 log.g().i(f"TENANT RESTORE: rollback succeeded, tenant {tenant_id} restored from {rollback_name}")
             except Exception as rollback_exc:
                 log.g().c(
@@ -190,14 +199,17 @@ class TenantBackupManager:
 
             self.tenant_restore_marker.unlink(missing_ok=True)
             await self._owner._remove_tree(rollback_dir)
-            await self._owner._refresh_caches(tenant_id)
+            for _, target_scope in targets:
+                await self._owner._refresh_caches(target_scope.tenant_id)
             raise HTTPException(status_code=500, detail=f"Tenant restore failed and was rolled back: {exc}") from exc
 
         self.tenant_restore_marker.unlink(missing_ok=True)
         await self._owner._remove_tree(rollback_dir)
-        await self._owner._refresh_caches(tenant_id)
-        log.g().i(f"TENANT RESTORE SUCCESS: backup={filename} tenant={tenant_id} {report}")
-        return {"status": "restored", "filename": filename, "tenant_id": tenant_id, **report}
+        for _, target_scope in targets:
+            await self._owner._refresh_caches(target_scope.tenant_id)
+        sub_tenants = [target_scope.tenant_id for _, target_scope in targets[1:]]
+        log.g().i(f"TENANT RESTORE SUCCESS: backup={filename} tenant={tenant_id} sub_tenants={sub_tenants} {report}")
+        return {"status": "restored", "filename": filename, "tenant_id": tenant_id, "sub_tenants": sub_tenants, **report}
 
     async def resolve_interrupted_tenant_restore(self) -> bool:
         marker = self._owner._io.read_json_file(self.tenant_restore_marker)
@@ -225,6 +237,41 @@ class TenantBackupManager:
                 ids.append(str(identifier))
         return ids
 
+    @staticmethod
+    def _is_tenant_dir(path: Path) -> bool:
+        return (path / CONSTANTS.BACKUP_TENANT_MONGO_DIR).is_dir()
+
+    @classmethod
+    def _child_tenant_dirs(cls, tenant_dir: Path) -> list[Path]:
+        children_dir = tenant_dir / CONSTANTS.BACKUP_TENANTS_DIR
+        if not children_dir.is_dir():
+            return []
+        return [child for child in sorted(children_dir.iterdir()) if cls._is_tenant_dir(child)]
+
+    @classmethod
+    def _tenant_backup_dir(cls, tenants_dir: Path, tenant_id: str) -> Path:
+        direct = tenants_dir / tenant_id
+        if cls._is_tenant_dir(direct) or not tenants_dir.is_dir():
+            return direct
+        for parent_dir in sorted(tenants_dir.iterdir()):
+            if not parent_dir.is_dir():
+                continue
+            nested = parent_dir / CONSTANTS.BACKUP_TENANTS_DIR / tenant_id
+            if cls._is_tenant_dir(nested):
+                return nested
+        return direct
+
+    async def _tenant_parents(self, database) -> dict:
+        parents = {}
+        cursor = database[CONSTANTS.BACKUP_TENANT_COLLECTION].find(
+            {},
+            {"_id": 1, CONSTANTS.BACKUP_TENANT_PARENT_FIELD: 1},
+            batch_size=CONSTANTS.BACKUP_BATCH_SIZE,
+        )
+        async for document in cursor:
+            parents[str(document.get("_id"))] = str(document.get(CONSTANTS.BACKUP_TENANT_PARENT_FIELD) or "")
+        return parents
+
     async def _tenant_scope(self, database, tenant_id: str) -> TenantScope:
         user_ids = await self._collect_ids(
             database,
@@ -247,10 +294,14 @@ class TenantBackupManager:
         owned = registry.tenant_owned(collections)
         tenant_ids = await self._collect_ids(database, CONSTANTS.BACKUP_TENANT_COLLECTION, {})
 
+        parents = await self._tenant_parents(database)
+
         exported = {"layout": registry.describe(collections), "tenants": {}}
         for tenant_id in tenant_ids:
             scope = await self._tenant_scope(database, tenant_id)
-            exported["tenants"][tenant_id] = await self._export_tenant(output_dir / tenant_id, scope, owned, exported["layout"])
+            parent_id = parents.get(tenant_id) or ""
+            base_dir = output_dir / parent_id / CONSTANTS.BACKUP_TENANTS_DIR if parent_id in parents else output_dir
+            exported["tenants"][tenant_id] = await self._export_tenant(base_dir / tenant_id, scope, owned, exported["layout"])
         return exported
 
     async def _export_tenant(self, tenant_dir: Path, scope: TenantScope, owned: dict, layout: dict | None = None) -> dict:

@@ -19,7 +19,7 @@
   "stealerlog": {
     "rule_type": "generic",
     "path": null,
-    "value_regex": "^https?://(?:[^/]+\\.)?(?:t\\.me|telegram\\.me)(?:/.*)?$"
+    "value_regex": "^https?://(?:[^/]+\\.)?(?:t\\.me|telegram\\.me|telegram\\.org)(?:/.*)?$"
   },
   "leak": {
     "rule_type": "unique",

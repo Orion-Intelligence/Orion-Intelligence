@@ -15,7 +15,7 @@ import { RankedCallbackModel, RankedResultItem } from '../../../shared/model/res
 import { IocSearchComponent } from "../../../shared/partials/ioc-search/ioc-search.component";
 import { finalize } from 'rxjs/operators';
 import { PasswordSchemaComponent } from './password-schema/password-schema.component';
-import { PasswordSchemaFilter } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
+import { PasswordSchemaFilter, StealerlogsSearchFilters } from '../../../shared/model/stealerlogs-filter/stealerlogs-filters';
 import { ScanHelperMethods } from '../../../shared/partials/scan-helper-methods/scan-helper-methods.component';
 import { ExportChoiceModalComponent } from '../../../shared/partials/export-choice-modal/export-choice-modal.component';
 import { CREDENTIAL_REPORT_EXPORT_OPTIONS } from '../../../shared/model/report/export-choice.model';
@@ -33,6 +33,13 @@ import { TranslationService } from '../../../shared/services/translation.service
 
 
 type IocResultTab = 'stealers' | 'threats';
+
+const CARD_TAG_MATCH = /m_(?:creditcard|fullbin):/;
+const CARD_TAG_REPLACE = /m_(?:creditcard|fullbin):/g;
+const PASSWORD_TAG_MATCH = /m_(?:search_all|domain|email):/;
+const PASSWORD_TERM = 'm_password:*';
+const PASSWORD_TERM_REPLACE = /\s*&&\s*m_password:\*/g;
+const TAGGED_TERM_MATCH = /^m_[a-z_]+:/;
 
 @Component({
   selector: 'app-credential',
@@ -59,11 +66,15 @@ export class CredentialComponent implements OnInit {
   private searchRequestId = 0;
   private rankedRequestId = 0;
   private stealerIocPage = 1;
+  private lastSearchSection = '';
   private threatIocPage = 1;
 
   protected readonly filters = stealer_filters;
 
   readonly reportExportOptions = CREDENTIAL_REPORT_EXPORT_OPTIONS;
+  readonly cardClassifiers: { value: string; label: string }[] = [{ value: StealerlogsSearchFilters.CREDITCARD, label: 'All' }, { value: StealerlogsSearchFilters.FULLBIN, label: 'Full BIN' }];
+  cardClassifier: string = StealerlogsSearchFilters.CREDITCARD;
+  passwordOnly = false;
   searchQuery = '';
   isLoading = false;
   firstTrigger = true;
@@ -233,10 +244,65 @@ export class CredentialComponent implements OnInit {
   }
 
   triggerSearch(searchQuery: string): void {
-    this.searchQuery = searchQuery;
+    this.resetSectionFilters(searchQuery);
+    this.searchQuery = this.applyPasswordFilter(searchQuery.replace(CARD_TAG_REPLACE, `${this.cardClassifier}:`));
     this.dashboardService.consolidatedParamModel.page = 1;
     this.fetchSearchResults();
     this.fetchRanked();
+  }
+
+  get isCardSearch(): boolean {
+    return CARD_TAG_MATCH.test(this.searchQuery);
+  }
+
+  selectCardClassifier(classifier: string): void {
+    if (this.cardClassifier === classifier) {
+      return;
+    }
+    this.cardClassifier = classifier;
+    this.searchQuery = this.searchQuery.replace(CARD_TAG_REPLACE, `${classifier}:`);
+    this.dashboardService.consolidatedParamModel.page = 1;
+    this.fetchSearchResults();
+  }
+
+  get isPasswordFilterable(): boolean {
+    const base = this.stripPasswordFilter(this.searchQuery);
+    return !base || PASSWORD_TAG_MATCH.test(base);
+  }
+
+  selectPasswordFilter(passwordOnly: boolean): void {
+    if (this.passwordOnly === passwordOnly) {
+      return;
+    }
+    this.passwordOnly = passwordOnly;
+    this.searchQuery = this.applyPasswordFilter(this.searchQuery);
+    this.dashboardService.consolidatedParamModel.page = 1;
+    this.fetchSearchResults();
+  }
+
+  private resetSectionFilters(searchQuery: string): void {
+    const base = this.stripPasswordFilter(searchQuery);
+    const section = CARD_TAG_MATCH.test(base) ? 'card' : (!base || PASSWORD_TAG_MATCH.test(base) ? 'identity' : 'other');
+    if (section !== this.lastSearchSection) {
+      this.cardClassifier = StealerlogsSearchFilters.CREDITCARD;
+      this.passwordOnly = false;
+    }
+    this.lastSearchSection = section;
+  }
+
+  private stripPasswordFilter(query: string): string {
+    return query.replace(PASSWORD_TERM_REPLACE, '').replace(PASSWORD_TERM, '').trim();
+  }
+
+  private applyPasswordFilter(query: string): string {
+    const base = this.stripPasswordFilter(query);
+    if (!this.passwordOnly) {
+      return base;
+    }
+    if (!base) {
+      return PASSWORD_TERM;
+    }
+    return base.split(/\s+/).map(token => TAGGED_TERM_MATCH.test(token) ? `${token} && ${PASSWORD_TERM}` : token).join(' ');
   }
 
   fetchSearchResults(reset = true): void {
@@ -731,7 +797,7 @@ export class CredentialComponent implements OnInit {
   }
 
   private shouldSkipExportField(key: string, value: unknown): boolean {
-    if (key === 'delimiter') {
+    if (key === 'delimiter' || key === 'dismissed' || key === 'dismiss_id') {
       return true;
     }
     return key === 'm_sub_host' && this.toExportValue(value) === '/';

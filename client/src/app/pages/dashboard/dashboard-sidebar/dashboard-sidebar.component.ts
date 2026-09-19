@@ -213,6 +213,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     const canAccessFeeder = this.appService.userSessionData().tenant.isDefault && this.licenseService.getLicenses().some(license => ['feeder', 'enterprise'].includes(license));
     const canAccessCaseManagement = this.isAdmin() || this.licenseService.isMaintainer() || ((this.isAnalyst() || this.isMember()) && (this.appService.userSessionData().user.permissions ?? []).includes('case_management'));
     const isMobileDemo = this.appService.isMobileMode();
+    const canAccessBackup = !this.appService.userSessionData().tenant.parentTenantId;
 
     if (this.isAdmin()) {
       return categories.filter(c => c !== ProfileSubCategory.IOC &&
@@ -229,6 +230,7 @@ export class DashboardSidebarComponent implements OnInit, OnDestroy {
     }
     if (this.isMember() && this.licenseService.getLicenses().includes('maintainer')) {
       return categories.filter(c => (this.licenseService.isPrimaryMaintainer() || c !== ProfileSubCategory.TENANT) &&
+        (canAccessBackup || c !== ProfileSubCategory.BACKUP_RESTORE) &&
         (this.licenseService.canReviewTakedowns() || c !== ProfileSubCategory.TAKEDOWN) &&
         c !== ProfileSubCategory.EVENT_MANAGEMENT &&
         c !== ProfileSubCategory.LOG_MANAGER &&

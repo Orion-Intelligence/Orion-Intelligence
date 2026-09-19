@@ -35,6 +35,13 @@ tenant_routes = APIRouter(dependencies=[Depends(status_required([UserStatus.ACTI
 SYSTEM_LOG_FLUSHED_AT_KEY = "SYSTEM_LOG_FLUSHED_AT"
 
 
+async def tenant_backup_allowed(current_user=Depends(get_current_user)):
+    tenant = await TenantManager.get_instance().get_managed_tenant(current_user)
+    if tenant is not None and getattr(tenant, "parent_tenant_id", None):
+        raise HTTPException(status_code=403, detail="Sub tenant backups are part of the primary tenant backup")
+    return current_user
+
+
 @tenant_routes.post(
     "/api/get/tenant",
     status_code=200,
@@ -453,7 +460,7 @@ async def get_alert_scan_status(current_user=Depends(get_current_user)):
 @tenant_routes.get(
     "/api/tenant/backups",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
 async def list_tenant_backups(current_user=Depends(get_current_user)):
     return await BackupManager.get_instance().list_backups_for_tenant(str(getattr(current_user, "tenant_id", "") or ""))
 
@@ -461,7 +468,7 @@ async def list_tenant_backups(current_user=Depends(get_current_user)):
 @tenant_routes.get(
     "/api/tenant/backups/status",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
 async def tenant_backup_status():
     return await BackupManager.get_instance().job_status()
 
@@ -469,7 +476,7 @@ async def tenant_backup_status():
 @tenant_routes.post(
     "/api/tenant/backups/{backup_id}/restore",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
 async def restore_tenant_backup(backup_id: str, current_user=Depends(get_current_user)):
     return await BackupManager.get_instance().start_tenant_restore(
         backup_id, str(getattr(current_user, "tenant_id", "") or "")
@@ -479,7 +486,7 @@ async def restore_tenant_backup(backup_id: str, current_user=Depends(get_current
 @tenant_routes.get(
     "/api/tenant/backups/{backup_id}/download",
     include_in_schema=False,
-    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), ], )
+    dependencies=[Depends(role_required([user_role.MEMBER, user_role.ADMIN])), Depends(status_required([UserStatus.ACTIVE])), Depends(license_required("maintainer")), Depends(tenant_backup_allowed), ], )
 async def download_tenant_backup(backup_id: str, current_user=Depends(get_current_user)):
     tenant_dir, name = await BackupManager.get_instance().resolve_tenant_download(
         backup_id, str(getattr(current_user, "tenant_id", "") or "")

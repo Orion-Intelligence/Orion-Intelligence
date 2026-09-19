@@ -30,8 +30,8 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   private readonly passwordRevealConfirmKey = 'orion.passwordRevealConfirmed';
   private passwordRevealConfirmed = false;
   private pendingPasswordRevealKey: string | null = null;
-  private readonly fallbackPriorityKeys = ['email', 'username', 'user', 'phone', 'phone_number', 'bin', 'card_type', 'name', 'address', 'extra'];
-  private readonly fallbackExcludedKeys = new Set(['_id', 'raw', 'type', 'file_type', 'fileType', 'date', 'channel', 'm_channel', 'source_channel', 'm_source_channel', 'mapping', 'delimiter', 'file', 'file_name', 'filename', 'dismissed', 'dismiss_id', 'm_sub_host']);
+  private readonly fallbackPriorityKeys = ['platform', 'service_domain', 'identifier', 'auth_cookie_names', 'email', 'username', 'user', 'phone', 'phone_number', 'bin', 'card_type', 'name', 'address', 'extra'];
+  private readonly fallbackExcludedKeys = new Set(['_id', 'raw', 'type', 'file_type', 'fileType', 'date', 'channel', 'm_channel', 'source_channel', 'm_source_channel', 'mapping', 'delimiter', 'file', 'file_name', 'filename', 'dismissed', 'dismiss_id', 'm_sub_host', 'artifact_fp', 'slot_fp', 'victim_id_fp']);
   private readonly fallbackFieldLimit = 4;
 
   activeTelemetryKey: string | null = null;
@@ -206,33 +206,93 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get isCreditCardRecord(): boolean {
-    return String(this.item()?.type ?? '').toLowerCase() === 'bin';
+    return ['bin', 'fullbin'].includes(String(this.item()?.type ?? '').toLowerCase()) || this.hasFullBin;
+  }
+
+  get cardNumbers(): string[] {
+    return this.rowHelper.normalizeToArray(this.item()?.credit_card ?? this.item()?.pan)
+      .map(value => String(value ?? '').trim())
+      .filter(Boolean);
+  }
+
+  get fullBinValue(): string {
+    return this.cardNumbers[0] ?? '-';
+  }
+
+  get binValue(): string {
+    const stored = this.firstValue(this.item()?.bin);
+    if (stored !== '-') {
+      return stored;
+    }
+    const digits = this.fullBinValue.replace(/\D/g, '').slice(0, 6);
+    return digits.length === 6 ? digits : '-';
+  }
+
+  get hasFullBin(): boolean {
+    return this.fullBinValue !== '-';
+  }
+
+  get cardValue(): string {
+    return this.hasFullBin ? this.fullBinValue : this.binValue;
+  }
+
+  get isSessionRecord(): boolean {
+    return String(this.item()?.type ?? '').toLowerCase() === 'session_compromise';
+  }
+
+  get sessionFields(): CreditCardField[] {
+    const item = this.item();
+    return [
+      { key: 'platform', label: 'Platform', icon: 'bi-broadcast-pin', value: this.firstValue(item?.platform) },
+      { key: 'service_domain', label: 'Service Domain', icon: 'bi-globe2', value: this.firstValue(item?.service_domain) },
+      { key: 'identifier', label: 'Identifier', icon: 'bi-person-badge-fill', value: this.firstValue(item?.identifier ?? item?.handle ?? item?.account_id) },
+      { key: 'id_type', label: 'Identifier Type', icon: 'bi-card-text', value: this.firstValue(item?.id_type) },
+      { key: 'auth_cookie_names', label: 'Auth Cookies', icon: 'bi-key-fill', value: this.joinedValue(item?.auth_cookie_names) },
+      { key: 'cookie_count', label: 'Cookies', icon: 'bi-collection-fill', value: this.firstValue(item?.cookie_count) },
+      { key: 'live', label: 'Live Session', icon: 'bi-check2-circle', value: this.formatYesNoValue(item?.live) },
+      { key: 'expires_at', label: 'Expires', icon: 'bi-clock', value: this.firstValue(item?.expires_at) },
+      { key: 'country', label: 'Country', icon: 'bi-flag-fill', value: this.firstValue(item?.country) },
+    ].filter(field => field.value !== '-');
   }
 
   get recordSubtitle(): string {
+    if (this.hasFullBin) {
+      return 'Full card record';
+    }
+    if (this.isSessionRecord) {
+      return 'Session compromise record';
+    }
     return this.isCreditCardRecord ? 'Credit card BIN record' : 'Recovered credential record';
   }
 
   get identityPanelTitle(): string {
+    if (this.isSessionRecord) {
+      return 'Session Intelligence';
+    }
     return this.isCreditCardRecord ? 'Credit Card Intelligence' : 'Identity Intelligence';
   }
 
   get identityPanelIcon(): string {
+    if (this.isSessionRecord) {
+      return 'bi-fingerprint';
+    }
     return this.isCreditCardRecord ? 'bi-credit-card-2-front-fill' : 'bi-person-badge-fill';
   }
 
   get creditCardFields(): CreditCardField[] {
     const item = this.item();
-    return [
-      { key: 'bin', label: 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.firstValue(item?.bin) },
+    const fields: CreditCardField[] = [
+      { key: 'bin', label: this.hasFullBin ? 'Card Number' : 'BIN', icon: 'bi-credit-card-2-front-fill', value: this.cardValue },
+      { key: 'Cards', label: 'Cards', icon: 'bi-collection-fill', value: this.cardNumbers.length > 1 ? String(this.cardNumbers.length) : '-' },
       { key: 'Scheme', label: 'Scheme', icon: 'bi-wallet2', value: this.firstValue(item?.Scheme ?? item?.scheme) },
-      { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.Type ?? item?.card_type ?? item?.type) },
+      { key: 'Type', label: 'Type', icon: 'bi-card-text', value: this.firstValue(item?.Type ?? item?.card_type) },
       { key: 'Tier', label: 'Tier', icon: 'bi-tag-fill', value: this.firstValue(item?.Tier ?? item?.tier) },
       { key: 'Issuer', label: 'Issuer', icon: 'bi-building', value: this.firstValue(item?.Issuer ?? item?.issuer) },
       { key: 'Country', label: 'Country', icon: 'bi-flag-fill', value: this.firstValue(item?.Country ?? item?.country) },
       { key: 'Luhn', label: 'Luhn', icon: 'bi-check2-circle', value: this.formatBooleanValue(item?.Luhn ?? item?.luhn) },
       { key: 'Website', label: 'Website', icon: 'bi-link-45deg', value: this.firstValue(item?.Website ?? item?.website) },
     ];
+    return this.hasFullBin ? fields.filter(field => field.value !== '-') : fields.filter(field => field.key !== 'Cards');
   }
 
   get hasIdentityValues(): boolean {
@@ -266,11 +326,17 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get detailFields(): CreditCardField[] {
-    return this.isCreditCardRecord ? this.creditCardFields : this.fallbackFields;
+    if (this.isCreditCardRecord) {
+      return this.creditCardFields;
+    }
+    if (this.isSessionRecord) {
+      return this.sessionFields;
+    }
+    return this.fallbackFields;
   }
 
   get showDetailFields(): boolean {
-    return this.isCreditCardRecord || (!this.hasIdentityValues && this.fallbackFields.length > 0);
+    return this.isCreditCardRecord || this.isSessionRecord || (!this.hasIdentityValues && this.fallbackFields.length > 0);
   }
 
   get sourceDomainValues(): string[] {
@@ -278,7 +344,13 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
   }
 
   get sourceDomainValueText(): string {
-    return this.sourceDomainValues.length ? this.sourceDomainValues.join(', ') : '-';
+    if (this.sourceDomainValues.length) {
+      return this.sourceDomainValues.join(', ');
+    }
+    if (this.isSessionRecord) {
+      return this.firstValue(this.item()?.service_domain);
+    }
+    return this.isCreditCardRecord ? this.cardValue : '-';
   }
 
   get domainValues(): string[] {
@@ -594,7 +666,9 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
       'mapping',
       'delimiter',
       'domain',
-      'source_domain'
+      'source_domain',
+      'dismissed',
+      'dismiss_id'
     ]);
     if (this.isCreditCardRecord) {
       ['bin', 'Scheme', 'scheme', 'Type', 'card_type', 'Tier', 'tier', 'Issuer', 'issuer', 'Country', 'country', 'Luhn', 'luhn', 'Website', 'website']
@@ -604,6 +678,12 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
         .map(field => ({ key: field.key, label: field.label, values: [field.value] }));
       const rest = this.buildRestTelemetryGroups(item, exclude);
       return [...cardGroups, ...rest];
+    }
+    if (this.isSessionRecord) {
+      this.sessionFields.forEach(field => exclude.add(field.key));
+      const sessionGroups = this.sessionFields.map(field => ({ key: field.key, label: field.label, values: [field.value] }));
+      const rest = this.buildRestTelemetryGroups(item, exclude);
+      return [...sessionGroups, ...rest];
     }
     const core: TelemetryGroup[] = [];
     if (emails.length > 1) {
@@ -692,6 +772,21 @@ export class ExpandedRowComponent implements OnChanges, OnDestroy {
     return this.rowHelper.normalizeToArray(value)
       .map(v => String(v ?? '').trim())
       .find(Boolean) ?? '-';
+  }
+
+  private joinedValue(value: unknown): string {
+    const values = this.rowHelper.normalizeToArray(value).map(entry => String(entry ?? '').trim()).filter(Boolean);
+    return values.length ? values.join(', ') : '-';
+  }
+
+  private formatYesNoValue(value: unknown): string {
+    if (value === true) {
+      return 'Yes';
+    }
+    if (value === false) {
+      return 'No';
+    }
+    return this.firstValue(value);
   }
 
   private formatBooleanValue(value: unknown): string {

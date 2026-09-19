@@ -12,6 +12,8 @@ import { ResultRowHelperService } from '../../../../shared/services/result-row-h
 
 type IocResultTab = 'stealers' | 'threats';
 
+const PHONE_TAG_MATCH = /m_phone:/;
+
 @Component({
   selector: 'app-credential-list',
   standalone: true,
@@ -93,8 +95,8 @@ export class CredentialListComponent {
     if (!item || item.type === 'bin') {
       return [];
     }
-    const domains = this.normalizeValues(item.domain);
-    const sourceDomains = this.normalizeValues(item.source_domain);
+    const domains = this.mergeUniqueValues(this.normalizeValues(item.service_domain), this.normalizeValues(item.domain));
+    const sourceDomains = this.mergeUniqueValues(this.normalizeValues(item.source_domain), this.normalizeValues(item.domains));
     const mergedDomains = this.mergeUniqueValues(domains, sourceDomains);
     if (mergedDomains.length) {
       return mergedDomains;
@@ -110,9 +112,18 @@ export class CredentialListComponent {
     if (!item || item.type === 'bin') {
       return '';
     }
+    const phone = this.normalizeValues(item.phone)[0];
+    if (phone && PHONE_TAG_MATCH.test(this.searchQuery())) {
+      return phone;
+    }
+    const shownDomains = this.getStealerDomainValues(item);
+    const ip = this.mergeUniqueValues(this.normalizeValues(item.ipv4), this.normalizeValues(item.ip))
+      .find(value => !shownDomains.includes(value));
     return this.normalizeValues(item.email)[0]
       ?? this.normalizeValues(item.username)[0]
-      ?? this.normalizeValues(item.phone)[0]
+      ?? phone
+      ?? this.normalizeValues(item.identifier)[0]
+      ?? ip
       ?? '';
   }
 
