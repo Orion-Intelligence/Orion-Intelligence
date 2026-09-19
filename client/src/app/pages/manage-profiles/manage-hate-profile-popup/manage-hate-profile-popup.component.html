@@ -24,7 +24,7 @@
         </div>
 
         <div>
-          <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Session (Optional)' | translate }}</label>
+          <label class="block text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--color-text4)]">{{ 'Session ' | translate }}</label>
           <div class="mt-1">
             @if (availableSessionOptions().length > 0) {
               <app-ui-dropdown [options]="availableSessionOptions()" [selected]="profileForm().session_id || ''" [searchable]="true" placeholder="Select session" (valueChange)="onProfileSession($event)"></app-ui-dropdown>
